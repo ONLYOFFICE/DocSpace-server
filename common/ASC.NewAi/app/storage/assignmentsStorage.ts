@@ -36,6 +36,12 @@ import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject } from "../narrow.js";
 import logger from "../log.js";
 import type { AssignmentsStorage, ActionType } from "@onlyoffice/ai-chat/core";
+import {
+  chatContextScope,
+  invalidateChatContext,
+  readChatContext,
+  reportChatContextMiss,
+} from "./chatContextSnapshot.js";
 
 const PATH = "/assignments";
 
@@ -43,12 +49,47 @@ function entityIdQuery(entityId: string | undefined): Record<string, QueryValue>
   return entityId ? { entityId } : undefined;
 }
 
+// Case-insensitive `ActionType` lookup: the aggregate serializes the C# enum
+// names (`Chat`, `ImageGeneration`, …), which match the library's values, but
+// a dictionary key policy on the server would only change their casing.
+function lookupAssignment(
+  assignments: Record<string, string>,
+  actionType: ActionType,
+): string | null {
+  const direct = assignments[actionType];
+  if (typeof direct === "string") {
+    return direct;
+  }
+  const wanted = actionType.toLowerCase();
+  for (const [key, value] of Object.entries(assignments)) {
+    if (key.toLowerCase() === wanted) {
+      return value;
+    }
+  }
+  return null;
+}
+
 export class HttpAssignmentsStorage implements AssignmentsStorage {
   async create(actionType: ActionType, profileId: string, entityId?: string): Promise<void> {
     await aiService.post(PATH, { actionType, profileId, entityId });
+    invalidateChatContext("assignments");
   }
 
   async readByType(actionType: ActionType, entityId?: string): Promise<string | null> {
+    // The aggregate's per-scope map went through the same resolver as the
+    // per-type endpoint (`Default` substitution for the global scope only),
+    // so a key lookup is equivalent to `GET assignments/{type}`.
+    const snapshot = readChatContext("assignments");
+    const scope = snapshot ? chatContextScope(snapshot, entityId) : undefined;
+    if (scope) {
+      const profileId = lookupAssignment(scope.assignments, actionType);
+      logger.info(
+        `HttpAssignmentsStorage.readByType(${actionType}) entityId=${entityId ?? "-"}` +
+          `${scope.entityId ? ` scoped=${scope.entityId}` : ""} via chat-context -> profileId=${profileId ?? "NONE"}`,
+      );
+      return profileId;
+    }
+    reportChatContextMiss(`assignments.readByType(${actionType}, ${entityId ?? "-"})`);
     try {
       const scopedEntityId = await resolveAgentEntityId(entityId);
       const raw = await aiService.get(
@@ -77,6 +118,12 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
   }
 
   async readAll(entityId?: string): Promise<Partial<Record<ActionType, string>>> {
+    const snapshot = readChatContext("assignments");
+    const scope = snapshot ? chatContextScope(snapshot, entityId) : undefined;
+    if (scope) {
+      return { ...scope.assignments } as Partial<Record<ActionType, string>>;
+    }
+    reportChatContextMiss(`assignments.readAll(${entityId ?? "-"})`);
     const scopedEntityId = await resolveAgentEntityId(entityId);
     const raw = await aiService.get(
       PATH,
@@ -96,6 +143,7 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
 
   async update(actionType: ActionType, profileId: string, entityId?: string): Promise<void> {
     await aiService.put(`${PATH}/${encodeURIComponent(actionType)}`, { profileId, entityId });
+    invalidateChatContext("assignments");
   }
 
   async upsertMany(
@@ -109,9 +157,11 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
       }
     }
     await aiService.put(PATH, { assignments: payload, entityId });
+    invalidateChatContext("assignments");
   }
 
   async delete(actionType: ActionType, entityId?: string): Promise<void> {
+    invalidateChatContext("assignments");
     try {
       await aiService.delete(`${PATH}/${encodeURIComponent(actionType)}`, {
         query: entityIdQuery(entityId),
@@ -132,5 +182,6 @@ export class HttpAssignmentsStorage implements AssignmentsStorage {
       body: { actionTypes },
       query: entityIdQuery(entityId),
     });
+    invalidateChatContext("assignments");
   }
 }

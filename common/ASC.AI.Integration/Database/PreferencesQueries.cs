@@ -48,6 +48,12 @@ public partial class AiIntegrationContext
     }
 
     [PreCompileQuery]
+    public IAsyncEnumerable<DbPreference> GetPreferencesByScopesAsync(int tenantId, Guid userId, int? firstEntryId, int? secondEntryId)
+    {
+        return PreferencesQueriesContainer.GetPreferencesByScopesAsync(this, tenantId, userId, firstEntryId, secondEntryId);
+    }
+
+    [PreCompileQuery]
     public Task<int> DeletePreferencesAsync(int tenantId, Guid userId)
     {
         return PreferencesQueriesContainer.DeletePreferencesAsync(this, tenantId, userId);
@@ -73,6 +79,12 @@ static file class PreferencesQueriesContainer
             (AiIntegrationContext ctx, int tenantId, Guid userId, int entryId) =>
                 ctx.Preferences
                     .FirstOrDefault(x => x.TenantId == tenantId && x.CreatedBy == userId && x.EntryId == entryId));
+
+    public static readonly Func<AiIntegrationContext, int, Guid, int?, int?, IAsyncEnumerable<DbPreference>> GetPreferencesByScopesAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, Guid userId, int? firstEntryId, int? secondEntryId) =>
+                ctx.Preferences
+                    .Where(x => x.TenantId == tenantId && x.CreatedBy == userId && (x.EntryId == null || x.EntryId == firstEntryId || x.EntryId == secondEntryId)));
 
     public static readonly Func<AiIntegrationContext, int, Guid, Task<int>> DeletePreferencesAsync =
         EF.CompileAsyncQuery(

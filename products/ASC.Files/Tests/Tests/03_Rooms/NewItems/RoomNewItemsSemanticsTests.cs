@@ -73,8 +73,8 @@ public class RoomNewItemsSemanticsTests(
     }
 
     /// <remarks>
-    /// BUG 81712: a file created before the member ever opened the room is still reported as new
-    /// to them. Marked <c>test.fail</c> in the TypeScript suite.
+    /// BUG 81712: a file created before the member ever opened the room was still reported as new
+    /// to them. Fixed by the synchronous mark clearing in <c>FileStorageService.GetRoomInfoAsync</c>.
     /// </remarks>
     [Fact]
     [Trait("Bug", "81712")]
@@ -101,8 +101,8 @@ public class RoomNewItemsSemanticsTests(
     }
 
     /// <remarks>
-    /// BUG 81712: re-opening the room does not clear the new items. Marked <c>test.fail</c> in the
-    /// TypeScript suite.
+    /// BUG 81712: re-opening the room did not clear the new items. Fixed by the synchronous mark
+    /// clearing in <c>FileStorageService.GetRoomInfoAsync</c>.
     /// </remarks>
     [Fact]
     [Trait("Bug", "81712")]

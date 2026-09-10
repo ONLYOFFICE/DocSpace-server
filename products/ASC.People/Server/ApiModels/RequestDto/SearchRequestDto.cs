@@ -39,30 +39,34 @@ namespace ASC.People.ApiModels.RequestDto;
 public class AdvancedSearchDto
 {
     /// <summary>
-    /// The user status.
+    /// The account state to search in, taken from the route: `Active` for working accounts, `Terminated` for
+    /// disabled ones, `Pending` for open invitations, or `All` for every state.
     /// </summary>
-    /// <example>1</example>
+    /// <example>Active</example>
     [FromRoute(Name = "status")]
     public required EmployeeStatus Status { get; set; }
 
     /// <summary>
-    /// The advanced search query.
+    /// The term to look for, matched as a case-insensitive substring of the first name, the last name, the user
+    /// name, the email and the contacts. It is required in practice, because the search cannot run without it.
     /// </summary>
     /// <example>John</example>
     [FromQuery(Name = "query")]
     public string Query { get; set; }
 
     /// <summary>
-    /// Specifies the criteria used to filter search results in advanced queries.
+    /// The only recognised value is `group`, which turns `filterValue` into a group ID and keeps only the members of
+    /// that group. Any other value, and omitting the field, applies no group filter.
     /// </summary>
-    /// <example>displayName</example>
+    /// <example>group</example>
     [FromQuery(Name = "filterBy")]
     public string FilterBy { get; set; }
 
     /// <summary>
-    /// The value used to filter the search query.
+    /// The group ID to keep the members of, used only when `filterBy` is `group`. It has to be a valid identifier -
+    /// a group name is not accepted.
     /// </summary>
-    /// <example>John</example>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }

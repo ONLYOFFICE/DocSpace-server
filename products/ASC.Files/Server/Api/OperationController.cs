@@ -120,7 +120,7 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/deleteversion</path>
     /// <collection>list</collection>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "List of file operations", typeof(FileOperationDto))]
+    [SwaggerResponse(200, "List of file operations", typeof(IAsyncEnumerable<FileOperationDto>))]
     [HttpPut("deleteversion")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFileVersions(DeleteVersionBatchRequestDto inDto)
     {
@@ -284,6 +284,11 @@ public class OperationController(
     public async Task<CheckDestFolderDto> CheckMoveOrCopyDestFolder([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
     {
         List<object> checkedFiles;
+
+        if (inDto.DestFolderId.ValueKind == JsonValueKind.Undefined)
+        {
+            throw new ArgumentException();
+        }
 
         if (inDto.DestFolderId.ValueKind == JsonValueKind.Number)
         {

@@ -318,37 +318,10 @@ public class RoomsApiTests(
     //     securityInfo.Should().Contain(s => s.SubjectId == Initializer.User2.Id);
     // }
 
-    [Fact]
-    public async Task IsPublic_ChecksRoomStatus()
-    {
-        // Arrange
-        await _filesClient.Authenticate(Owner);
-
-        // Create a room
-        var roomTitle = "Visibility Room " + Guid.NewGuid().ToString()[..8];
-        var room = (await _roomsApi.CreateRoomAsync(
-            new CreateRoomRequestDto(roomTitle, indexing: true, roomType: RoomType.CustomRoom),
-            TestContext.Current.CancellationToken)).Response;
-
-        // Act - Check if the room is public
-        var isPublicResult = (await _roomsApi.GetPublicSettingsAsync(room.Id, TestContext.Current.CancellationToken)).Response;
-
-        // Assert
-        isPublicResult.Should().BeFalse();
-
-        // Make room public
-        var setPublicRequest = new SetPublicDto
-        {
-            Id = room.Id,
-            Public = true
-        };
-
-        await _roomsApi.SetPublicSettingsAsync(setPublicRequest, TestContext.Current.CancellationToken);
-
-        // Verify room is now public
-        var isPublicAfter = (await _roomsApi.GetPublicSettingsAsync(room.Id, TestContext.Current.CancellationToken)).Response;
-        isPublicAfter.Should().BeTrue();
-    }
+    // IsPublic_ChecksRoomStatus used to live here, pointing GET/PUT /files/roomtemplate/public at an
+    // ordinary room. That endpoint addresses room templates - the client only calls it behind an
+    // `isTemplate` guard, and it now answers 404 for anything that is not a template (bugs 81726 and
+    // 81939). Its coverage lives in Templates/RoomTemplateShareTests, against a real template.
 
     [Fact]
     public async Task GetRoomsNewItems_ReturnsData()

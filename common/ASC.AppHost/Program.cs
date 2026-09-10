@@ -75,7 +75,13 @@ switch (launchProfile)
             .AddProject<ASC_Web_Api>(Constants.WebApiPort)
             .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
             .AddProject<ASC_AI>(Constants.AiPort)
-            .AddSocketIO();
+            // Audit events reach the bus from every service, but the only subscriber to
+            // EventDataIntegrationEvent is registered in Web.Studio (WebStudioServiceExtensions).
+            // Without it nothing persists them and every history endpoint - GET /files/file/{id}/log
+            // and GET /files/folder/{id}/log - answers with an empty list whatever the test did.
+            .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
+            .AddSocketIO()
+            .AddIdentity();
 
         break;
     case "notify-test":

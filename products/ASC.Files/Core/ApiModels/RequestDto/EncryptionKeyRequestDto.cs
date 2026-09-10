@@ -33,11 +33,29 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
+/// <summary>
+/// The request parameters for storing the encryption key pair of a user.
+/// </summary>
 public class EncryptionKeyRequestDto
 {
     //public EncryptionKeyType Type { get; set; }
     //public string Version { get; set; }
+
+    /// <summary>
+    /// The identifier of the key pair.
+    /// </summary>
+    /// <example>9924256B-447C-4F19-9dbd-8ad8c39e8ff5</example>
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// The public key of the pair, used to encrypt the file keys.
+    /// </summary>
+    /// <example>MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A...</example>
     public string PublicKey { get; set; }
+
+    /// <summary>
+    /// The private key of the pair, encrypted with the user password.
+    /// </summary>
+    /// <example>U2FsdGVkX1+Lm3s...</example>
     public string PrivateKeyEnc { get; set; }
 }

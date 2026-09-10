@@ -34,8 +34,10 @@
 namespace ASC.AI.Tests.ApiFactories;
 
 /// <summary>
-/// The AI suite's per-portal clients. The AI endpoints are internal (<c>[ApiExplorerSettings(IgnoreApi = true)]</c>)
-/// and therefore absent from the generated SDK, so every service is driven through <see cref="RawApiClient"/>.
+/// The AI suite's per-portal clients. Only the AI service is driven through <see cref="RawApiClient"/>:
+/// its endpoints are internal (<c>[ApiExplorerSettings(IgnoreApi = true)]</c>) and therefore absent from
+/// the OpenAPI document and the generated SDK. Files and People are public APIs, so the entities an AI
+/// test needs from them (a room to scope preferences to, a member to act as) go through the typed SDK.
 /// </summary>
 public sealed class PortalClients : PortalClientsBase
 {
@@ -44,8 +46,13 @@ public sealed class PortalClients : PortalClientsBase
     public HttpClient PeopleHttpClient { get; }
 
     public RawApiClient Ai { get; }
-    public RawApiClient FilesApi { get; }
-    public RawApiClient PeopleApi { get; }
+
+    // Files service
+    public FoldersApi FoldersApi { get; }
+    public RoomsApi RoomsApi { get; }
+
+    // People service
+    public ProfilesApi ProfilesApi { get; }
 
     public PortalClients(PortalContext context) : base(context)
     {
@@ -54,7 +61,11 @@ public sealed class PortalClients : PortalClientsBase
         PeopleHttpClient = CreateClient(ResourceNames.People);
 
         Ai = new RawApiClient(AiHttpClient);
-        FilesApi = new RawApiClient(FilesHttpClient);
-        PeopleApi = new RawApiClient(PeopleHttpClient);
+
+        var filesConfig = new Configuration { BasePath = BasePathOf(ResourceNames.Files) };
+        FoldersApi = new FoldersApi(FilesHttpClient, filesConfig);
+        RoomsApi = new RoomsApi(FilesHttpClient, filesConfig);
+
+        ProfilesApi = new ProfilesApi(PeopleHttpClient, new Configuration { BasePath = BasePathOf(ResourceNames.People) });
     }
 }

@@ -33,15 +33,6 @@
 
 package com.asc.registration.container;
 
-import io.swagger.v3.oas.annotations.OpenAPIDefinition;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
-import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
-import io.swagger.v3.oas.annotations.info.Contact;
-import io.swagger.v3.oas.annotations.info.Info;
-import io.swagger.v3.oas.annotations.info.License;
-import io.swagger.v3.oas.annotations.security.SecurityScheme;
-import io.swagger.v3.oas.annotations.security.SecuritySchemes;
-import io.swagger.v3.oas.annotations.servers.Server;
 import net.devh.boot.grpc.client.autoconfigure.GrpcClientMetricAutoConfiguration;
 import net.devh.boot.grpc.server.autoconfigure.GrpcServerMetricAutoConfiguration;
 import net.devh.boot.grpc.server.autoconfigure.GrpcServerSecurityAutoConfiguration;
@@ -57,7 +48,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * Entry point for the ASC Identity Registration Service application.
  *
  * <p>This application provides APIs for managing registered clients in the ASC Identity ecosystem.
- * It includes features like caching, transaction management, and OpenAPI documentation.
+ * It includes features like caching and transaction management. The OpenAPI metadata lives in
+ * {@code OpenApiDefinitionConfiguration} inside registration-application.
  */
 @EnableCaching
 @EnableTransactionManagement
@@ -71,35 +63,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
       GrpcServerMetricAutoConfiguration.class,
       GrpcClientMetricAutoConfiguration.class
     })
-@OpenAPIDefinition(
-    info =
-        @Info(
-            title = "ASC.Identity.Registration",
-            version = "1.2.0",
-            description = "API for managing oauth2 clients",
-            termsOfService = "",
-            contact =
-                @Contact(
-                    name = "ONLYOFFICE Support",
-                    email = "support@onlyoffice.com",
-                    url = "https://onlyoffice.com"),
-            license =
-                @License(
-                    name = "Apache 2.0",
-                    url = "https://www.apache.org/licenses/LICENSE-2.0.html")),
-    servers = {
-      @Server(
-          url = "http://localhost:8080",
-          description = "Local ASC.Identity.Registration API Server")
-    })
-@SecuritySchemes({
-  @SecurityScheme(
-      name = "x-signature",
-      paramName = "x-signature",
-      description = "ASC JWT Signature",
-      type = SecuritySchemeType.APIKEY,
-      in = SecuritySchemeIn.COOKIE)
-})
 public class RegistrationServiceApplication {
 
   /**

@@ -46,11 +46,15 @@ import { agentAssignedProfileId } from "./agentProfile.js";
 import {
   markForwardHeadersToProvider,
   getCustomServerNames,
+  getChatContextSnapshot,
 } from "../requestContext.js";
+import { primeChatContext, describeChatContextUsage } from "../storage/chatContext.js";
 import { customToolsSource, primeCustomServers } from "../tools/customTools.js";
 import { storage } from "../storage/index.js";
 import { aiService } from "../storage/httpClient.js";
 import { asyncHandler, streamNdjson, streamOpenAiSse, attachmentLimitError } from "./_helpers.js";
+import { observeChatStream } from "../telemetry/chatStream.js";
+import type { StreamDialect } from "../telemetry/chatStream.js";
 import { assertThreadCreatable } from "./threadsController.js";
 import { isObject } from "../narrow.js";
 import {
@@ -60,7 +64,7 @@ import {
   DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
 } from "../tools/httpToolsAdapter.js";
 import { systemToolsSource } from "../tools/systemTools.js";
-import { safeGetAgentEntity, safeGetAgentInstruction } from "../storage/docspaceFilesApi.js";
+import { primeSourceMeta, safeGetAgentInstruction } from "../storage/docspaceFilesApi.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
 // cancel an in-flight stream. Going through JSON the signal collapses
@@ -138,6 +142,37 @@ function contextScopeOf(body: unknown): string | undefined {
   return typeof body["entityId"] === "string" ? body["entityId"] : undefined;
 }
 
+// Attachment refs from the thread's persisted history, newest message first
+// so the most recently attached form wins. Best-effort — a failed read carries
+// no prior context rather than erroring the round.
+async function historyAttachmentRefIds(threadId: unknown): Promise<string[]> {
+  if (typeof threadId !== "string" || threadId.length === 0) {
+    return [];
+  }
+  let history: unknown[];
+  try {
+    history = await storage.messages.readByThread(threadId);
+  } catch (err) {
+    logger.warn(
+      `withToolsPrompt: thread ${threadId} history read failed, form context not carried over: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+    return [];
+  }
+  const ids: string[] = [];
+  const seen = new Set<string>();
+  for (let i = history.length - 1; i >= 0; i--) {
+    for (const ref of extractAttachmentRefIds(history[i])) {
+      if (!seen.has(ref)) {
+        seen.add(ref);
+        ids.push(ref);
+      }
+    }
+  }
+  return ids;
+}
+
 async function withToolsPrompt<T>(body: T): Promise<T> {
   if (!isObject(body)) {
     return body;
@@ -146,7 +181,13 @@ async function withToolsPrompt<T>(body: T): Promise<T> {
   // for the round, so it follows the round's context scope (the agent when
   // one is picked), unlike the location fragment below.
   const contextScope = contextScopeOf(body);
-  const attachmentId = extractAttachmentRefIds(body["userMessage"]);
+  // Keep form-data tools active for the whole conversation: when the current
+  // message has no attachment of its own, fall back to the form(s) already in
+  // the thread history so follow-up questions still resolve it.
+  let attachmentId = extractAttachmentRefIds(body["userMessage"]);
+  if (attachmentId.length === 0) {
+    attachmentId = await historyAttachmentRefIds(body["threadId"]);
+  }
   const fragment = await safeGetToolsPrompt(toolsAdapter, contextScope, attachmentId);
   return fragment ? appendActionPrompt(body, fragment) : body;
 }
@@ -158,7 +199,7 @@ function buildContextFragment(entityId: string | undefined): string {
   const today = new Date().toISOString().slice(0, 10);
   const lines = [
     "Context:",
-    "- You are an AI agent operating inside a DocSpace workspace, not a generic standalone assistant.",
+    "- You are an AI agent operating inside an ONLYOFFICE Apps workspace, not a generic standalone assistant.",
   ];
   if (entityId) {
     lines.push(
@@ -219,39 +260,32 @@ async function withAgentInstruction<T>(body: T): Promise<T> {
   return instruction ? appendActionPrompt(body, instruction) : body;
 }
 
-// Describe the host entity the round runs for — the agent whose chat this
-// is — in `actionArgs`. `@onlyoffice/ai-chat` (>= 0.5.50) turns the pair into
-// the ONLYOFFICE request's `metadata` object (`agent_id` / `agent_title`),
-// including on tool-call resume rounds, so the backend can attribute usage to
-// the agent. Server-resolved on purpose: the title comes from the Files API
-// under the caller's credentials, so a client cannot claim someone else's
-// agent. A plain chat (no agent room in scope) contributes nothing and the
-// field stays absent.
+// Attribute the round to the DocSpace entry it runs for — the agent whose
+// chat this is, or else the folder the user is in. The resolved source lands
+// on the request context, and the ONLYOFFICE provider override
+// (`app/providers/onlyofficeSourceProvider.ts`) turns it into the request's
+// `metadata` object (`source_id` / `source_type` / `source_title`) on every
+// request of the round, tool-call resume rounds included, so the backend can
+// attribute usage. Server-resolved on purpose: type and title come from the
+// Files API under the caller's credentials, so a client cannot claim someone
+// else's entry. A round with no resolvable scope leaves the context empty and
+// the field stays absent.
 //
-// `scope` overrides where the agent is read from, for the one input shape that
+// `scope` overrides where the entry is read from, for the one input shape that
 // carries no top-level scope of its own (see {@link customScopeOf}). It is only
-// ever a hint: the pair itself is always re-resolved here.
-async function withEntityMetadata<T>(body: T, scope?: string): Promise<T> {
-  if (!isObject(body)) {
-    return body;
-  }
-  const entity = await safeGetAgentEntity(scope ?? contextScopeOf(body));
-  if (!entity.entityId) {
-    return body;
-  }
-  const actionArgs = isObject(body["actionArgs"]) ? body["actionArgs"] : {};
-  return {
-    ...body,
-    actionArgs: { ...actionArgs, ...entity },
-  } as T;
+// ever a hint: the source itself is always re-resolved here.
+async function withSourceMetadata<T>(body: T, scope?: string): Promise<T> {
+  await primeSourceMeta(scope ?? contextScopeOf(body));
+  return body;
 }
 
 // Scope of a `sendCustom` round. `SendCustomInput` is `isStream` /
 // `systemPrompt` / `userMessage` / `actionArgs` / `profileId` — it has no
 // `entityId` of its own, so the only place a caller can name the agent is
-// `actionArgs.entityId`, the same field the metadata pair lives in. Treated as
-// a hint and re-resolved server-side by `withEntityMetadata`, so a client still
-// cannot claim someone else's agent (mirrors threads/regenerate-title).
+// `actionArgs.entityId` (the field the library once carried the metadata pair
+// in). Treated as a hint and re-resolved server-side by `withSourceMetadata`,
+// so a client still cannot claim someone else's entry (mirrors
+// threads/regenerate-title).
 //
 // `contextScopeOf` still wins when present: a host that sends the round with an
 // explicit top-level scope keeps describing it that way.
@@ -463,7 +497,8 @@ async function* logStreamErrors<T>(
             .join(", ")
         : "<none>";
     logger.info(
-      `${route}: stream completed after ${eventCount} event(s); toolCalls=${toolSummary}`,
+      `${route}: stream completed after ${eventCount} event(s); toolCalls=${toolSummary}; ` +
+        describeChatContextUsage(),
     );
   } catch (err) {
     logger.error(
@@ -473,6 +508,15 @@ async function* logStreamErrors<T>(
     );
     throw err;
   }
+}
+
+// Telemetry (span + metrics) outside, error logging inside.
+function tapStream<T>(
+  route: string,
+  iter: AsyncIterable<T>,
+  dialect?: StreamDialect,
+): AsyncIterable<T> {
+  return observeChatStream(route, logStreamErrors(route, iter), dialect);
 }
 
 // A user message must carry some non-whitespace text before a stream is
@@ -550,6 +594,11 @@ async function aiToolsUnpaidError(
   if (providerType !== "onlyoffice") {
     return null;
   }
+  // The round's aggregate already carries the portal's AI settings.
+  const primed = getChatContextSnapshot()?.aiReady;
+  if (primed !== undefined) {
+    return primed ? null : AI_TOOLS_UNPAID_ERROR;
+  }
   const config = await aiService.get("/config").catch(() => undefined);
   if (isObject(config) && config["aiReady"] === false) {
     return AI_TOOLS_UNPAID_ERROR;
@@ -565,11 +614,15 @@ export const aiController = {
     // Mirrors sendWithStream. (No profile pinning here: SendInput carries no
     // profileId, so there is nothing for a caller to override.)
     markForwardHeadersToProvider();
+    await primeChatContext({
+      entityId: req.body.entityId,
+      contextEntityId: req.body.contextEntityId,
+    });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers(contextScopeOf(req.body));
-    const result = await engine.send(await withEntityMetadata(req.body));
+    const result = await engine.send(await withSourceMetadata(req.body));
     res.json(result);
   }),
 
@@ -577,31 +630,30 @@ export const aiController = {
     // As with `send`, the forwarded headers must be marked before the
     // provider call or a correct request fails with a 500 (Bug 82836).
     markForwardHeadersToProvider();
+    await primeChatContext({ entityId: customScopeOf(req.body) });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers(contextScopeOf(req.body));
-    // Attribute the round to the agent for the backend's usage accounting, as
-    // every other model-bound route does. The library carries the pair from
-    // `actionArgs` into the provider credentials on this path too — `sendCustom`
-    // builds its action args with `{...actionArgs}` and the provider factory
-    // reads `entityId`/`entityTitle` from them, for both the streaming
-    // (`sendMessage`) and one-shot (`sendMessageSync`) branches.
-    const body = await withEntityMetadata(
+    // Attribute the round to its source for the backend's usage accounting, as
+    // every other model-bound route does. The provider override reads it from
+    // the request context, so both the streaming (`sendMessage`) and one-shot
+    // (`sendMessageSync`) branches carry it.
+    const body = await withSourceMetadata(
       withRequestSignal(res, req.body),
       customScopeOf(req.body),
     );
     const result = engine.sendCustom(body);
     if (body.isStream) {
       if (isAsyncIterable(result)) {
-        await streamNdjson(res, logStreamErrors("ai/send-custom", result));
+        await streamNdjson(res, tapStream("ai/send-custom", result));
       } else {
         res.json(await result);
       }
       return;
     }
     if (isAsyncIterable(result)) {
-      await streamNdjson(res, logStreamErrors("ai/send-custom", result));
+      await streamNdjson(res, tapStream("ai/send-custom", result));
       return;
     }
     res.json(await result);
@@ -609,6 +661,14 @@ export const aiController = {
 
   sendWithStream: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    // One aggregate read for the whole round — every storage read below
+    // (profiles, assignments, prefs, MCP servers, thread, history, folder
+    // metadata) is served from it. See storage/chatContext.ts.
+    await primeChatContext({
+      threadId: req.body.threadId,
+      entityId: req.body.entityId,
+      contextEntityId: req.body.contextEntityId,
+    });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -651,6 +711,20 @@ export const aiController = {
         req.body.profileId = thread.profileId;
       }
     }
+    // The caller's explicit profileId must reference an existing profile
+    // even when an agent's assignment overrides it for the round below —
+    // otherwise a bogus id is silently swapped for the agent's model and
+    // the request looks honored (Bug 83160 reopen: the regular-room 400
+    // never fired in agent scope because the substitution ran first).
+    // Billing is not checked here: it applies to the effective profile,
+    // which the post-substitution pre-flight still validates.
+    {
+      const callerError = await unknownProfileIdError(req.body.profileId);
+      if (callerError && callerError !== AI_TOOLS_UNPAID_ERROR) {
+        res.status(400).json({ error: callerError });
+        return;
+      }
+    }
     // The agent's assigned profile is authoritative for rounds in its scope:
     // substitute it over whatever the caller (or the thread prefill above)
     // put in profileId, so an agent's chat cannot be re-run on a different
@@ -679,7 +753,7 @@ export const aiController = {
     }
     const body = withContextPrompt(
       await withToolsPrompt(
-        await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
+        await withAgentInstruction(await withSourceMetadata(withRequestSignal(res, req.body))),
       ),
     );
     // The round's scope as the client sent it. `entityId` is what an
@@ -693,7 +767,7 @@ export const aiController = {
     );
     await streamNdjson(
       res,
-      logStreamErrors("ai/send-with-stream", engine.sendWithStream(body)),
+      tapStream("ai/send-with-stream", engine.sendWithStream(body)),
     );
   }),
 
@@ -702,10 +776,24 @@ export const aiController = {
   // OpenAI error envelope on provider failure), which we frame as SSE.
   sendWithStreamOpenAI: asyncHandler<SendStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    await primeChatContext({
+      threadId: req.body.threadId,
+      entityId: req.body.entityId,
+      contextEntityId: req.body.contextEntityId,
+    });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers(contextScopeOf(req.body));
+    // Reject a caller-supplied unknown profileId before the agent
+    // substitution masks it — see sendWithStream (Bug 83160 reopen).
+    {
+      const callerError = await unknownProfileIdError(req.body.profileId);
+      if (callerError && callerError !== AI_TOOLS_UNPAID_ERROR) {
+        res.status(400).json({ error: callerError });
+        return;
+      }
+    }
     // Agent scope pins the model — see sendWithStream (Bug 82914).
     {
       const agentProfileId = await agentAssignedProfileId(contextScopeOf(req.body));
@@ -725,17 +813,22 @@ export const aiController = {
     }
     const body = withContextPrompt(
       await withToolsPrompt(
-        await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
+        await withAgentInstruction(await withSourceMetadata(withRequestSignal(res, req.body))),
       ),
     );
     await streamOpenAiSse(
       res,
-      logStreamErrors("ai/send-with-stream-openai", engine.sendWithStreamOpenAI(body)),
+      tapStream("ai/send-with-stream-openai", engine.sendWithStreamOpenAI(body), "openai"),
     );
   }),
 
   regenerateStream: asyncHandler<RegenerateStreamInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    await primeChatContext({
+      threadId: req.body.threadId,
+      entityId: req.body.entityId,
+      contextEntityId: req.body.contextEntityId,
+    });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
@@ -744,38 +837,48 @@ export const aiController = {
     // see the identical workspace-context fragment the original reply had.
     const body = withContextPrompt(
       await withToolsPrompt(
-        await withAgentInstruction(await withEntityMetadata(withRequestSignal(res, req.body))),
+        await withAgentInstruction(await withSourceMetadata(withRequestSignal(res, req.body))),
       ),
     );
     await streamNdjson(
       res,
-      logStreamErrors("ai/regenerate-stream", engine.regenerateStream(body)),
+      tapStream("ai/regenerate-stream", engine.regenerateStream(body)),
     );
   }),
 
   approveToolCall: asyncHandler<ApproveToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    await primeChatContext({
+      threadId: req.body.threadId,
+      entityId: req.body.entityId,
+      contextEntityId: req.body.contextEntityId,
+    });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers(contextScopeOf(req.body));
-    const body = await withEntityMetadata(withRequestSignal(res, req.body));
+    const body = await withSourceMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
-      logStreamErrors("ai/approve-tool-call", engine.approveToolCall(body)),
+      tapStream("ai/approve-tool-call", engine.approveToolCall(body)),
     );
   }),
 
   denyToolCall: asyncHandler<DenyToolCallInput>(async (req, res) => {
     markForwardHeadersToProvider();
+    await primeChatContext({
+      threadId: req.body.threadId,
+      entityId: req.body.entityId,
+      contextEntityId: req.body.contextEntityId,
+    });
     // Resolve the round's custom MCP servers into the request context so
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers(contextScopeOf(req.body));
-    const body = await withEntityMetadata(withRequestSignal(res, req.body));
+    const body = await withSourceMetadata(withRequestSignal(res, req.body));
     await streamNdjson(
       res,
-      logStreamErrors("ai/deny-tool-call", engine.denyToolCall(body)),
+      tapStream("ai/deny-tool-call", engine.denyToolCall(body)),
     );
   }),
 };

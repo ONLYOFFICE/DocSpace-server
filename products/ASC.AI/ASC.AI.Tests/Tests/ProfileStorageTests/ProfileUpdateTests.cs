@@ -51,7 +51,7 @@ public class ProfileUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
         updated.ProviderType.Should().Be(update.ProviderType);
         updated.BaseUrl.Should().Be(update.BaseUrl);
         updated.ModelId.Should().Be(update.ModelId);
-        updated.Reasoning.Should().Be(update.Reasoning);
+        updated.Reasoning.Should().BeEquivalentTo(update.Reasoning);
         updated.Capabilities.Should().Be(update.Capabilities);
         updated.UseResponsesApi.Should().Be(update.UseResponsesApi);
         updated.CanUseTool.Should().Be(update.CanUseTool);

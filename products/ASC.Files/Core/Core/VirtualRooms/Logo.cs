@@ -98,6 +98,9 @@ public class LogoCover
     public required string Data { get; set; }
 }
 
+/// <summary>
+/// The logo cover information, with the cover data in every available size.
+/// </summary>
 public class MultiSizeLogoCover
 {
     /// <summary>

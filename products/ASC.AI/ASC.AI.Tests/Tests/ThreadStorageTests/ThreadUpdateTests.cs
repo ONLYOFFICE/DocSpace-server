@@ -52,6 +52,22 @@ public class ThreadUpdateTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
+    public async Task Update_Existing_MovesLastEditDate()
+    {
+        var created = await CreateThreadAsync("original");
+
+        await Task.Delay(1100, TestContext.Current.CancellationToken);
+
+        using var response = await _ai.PutAsync(
+            $"{ThreadsPath}/{created.Id}",
+            new { title = "renamed" },
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        (await ReadThreadAsync(created.Id)).LastEditDate.Should().BeGreaterThan(created.LastEditDate);
+    }
+
+    [Fact]
     public async Task Update_NonExisting_Returns404()
     {
         using var response = await _ai.PutAsync(

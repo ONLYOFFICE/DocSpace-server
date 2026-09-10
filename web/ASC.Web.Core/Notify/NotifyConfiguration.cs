@@ -113,37 +113,6 @@ public class NotifyConfiguration(NotifyEngine notifyEngine, WorkContext workCont
         client.AddInterceptor(securityAndCulture);
 
         #endregion
-
-        #region white label correction
-
-        var whiteLabel = new SendInterceptorSkeleton(
-            "WhiteLabelInterceptor",
-             InterceptorPlace.MessageSend,
-             InterceptorLifetime.Global,
-             (r, _, scope) =>
-             {
-                 try
-                 {
-                     var tags = r.Arguments;
-
-                     var logoTextTag = tags.Find(a => a.Tag == CommonTags.LetterLogoText);
-                     var logoText = logoTextTag != null ? (string)logoTextTag.Value : string.Empty;
-
-                     if (!string.IsNullOrEmpty(logoText))
-                     {
-                         r.CurrentMessage.Body = r.CurrentMessage.Body
-                             .Replace("${" + CommonTags.LetterLogoText + "}", logoText);
-                     }
-                 }
-                 catch (Exception error)
-                 {
-                     scope.ServiceProvider.GetService<ILogger<ProductSecurityInterceptor>>().ErrorNotifyClientRegisterCallback(error);
-                 }
-                 return false;
-             });
-        client.AddInterceptor(whiteLabel);
-
-        #endregion
     }
 }
 
@@ -225,6 +194,8 @@ public class NotifyTransferRequest(TenantManager tenantManager,
 
         var logoText = await tenantLogoManager.GetLogoTextAsync();
 
+        ResolveLogoText(request.Arguments, logoText);
+
         var rootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
         request.Arguments.AddRange(new List<TagValue>
@@ -255,6 +226,34 @@ public class NotifyTransferRequest(TenantManager tenantManager,
     public void AfterTransferRequest(NotifyRequest request)
     {
 
+    }
+
+    /// <summary>
+    /// The branding a letter shows is written into its text as <c>${LetterLogoText}</c>, and a tag
+    /// value may be written the same way — the signature is "Truly Yours, ${LetterLogoText} Team",
+    /// a button caption "Go to your ${LetterLogoText}". The formatter renders a pattern once and
+    /// never the values it inserted into it, so those references have to be resolved here, before
+    /// the pattern is rendered: after it, only the email styler still leaves them intact, while
+    /// <c>MarkDownStyler</c> escapes the braces for Telegram's markdown and nothing can recognise
+    /// them any more — which is how the wallet letter came to be signed
+    /// "Truly Yours, ${LetterLogoText} Team".
+    /// </summary>
+    private static void ResolveLogoText(List<ITagValue> arguments, string logoText)
+    {
+        if (string.IsNullOrEmpty(logoText))
+        {
+            return;
+        }
+
+        var reference = "${" + CommonTags.LetterLogoText + "}";
+
+        for (var i = 0; i < arguments.Count; i++)
+        {
+            if (arguments[i].Value is string value && value.Contains(reference))
+            {
+                arguments[i] = new TagValue(arguments[i].Tag, value.Replace(reference, logoText));
+            }
+        }
     }
 
     private async Task AddLetterLogoAsync(NotifyRequest request)

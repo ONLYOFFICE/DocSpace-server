@@ -36,6 +36,11 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// The request parameters for updating a room.
 /// </summary>
+/// <remarks>
+/// An undocumented field in the payload is a caller mistake, not something to ignore: a typo'd
+/// property name would otherwise be reported as a successful update that changed nothing.
+/// </remarks>
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public class UpdateRoomRequest
 {
     /// <summary>
@@ -88,10 +93,10 @@ public class UpdateRoomRequest
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
-    /// The room color.
+    /// The room color, as a six-digit hexadecimal value without a leading '#'.
     /// </summary>
-    /// <example>#FF5733</example>
-    [StringLength(6)]
+    /// <example>FF5733</example>
+    [RegularExpression("^[0-9a-fA-F]{6}$")]
     public string Color { get; set; }
 
     /// <summary>

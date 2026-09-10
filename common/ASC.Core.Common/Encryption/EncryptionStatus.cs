@@ -32,6 +32,10 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Core.Encryption;
+
+/// <summary>
+/// The storage encryption status.
+/// </summary>
 public enum EncryprtionStatus
 {
     [Description("Decrypted")]

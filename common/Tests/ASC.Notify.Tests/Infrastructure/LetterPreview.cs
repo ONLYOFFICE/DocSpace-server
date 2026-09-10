@@ -65,10 +65,12 @@ public sealed record RenderedLetter(
 /// (<see cref="TextileStyler"/>) which wraps the body into the <c>HtmlMaster</c> template and builds
 /// the top logo and the footer.
 ///
-/// This is the same order as <c>NotifyEngine.CreateNoticeMessageAsync</c> plus the
-/// <c>${LetterLogoText}</c> pass that <c>NotifyConfiguration</c>'s WhiteLabelInterceptor applies to
-/// the finished body. What it does NOT reproduce is where the tag VALUES come from — in production
-/// they are built by the action's <c>Init</c> from live tenant data; here the test supplies them.
+/// This is the same order as <c>NotifyEngine.CreateNoticeMessageAsync</c>, and nothing is added on
+/// top of it: a tag value written against the branding — "Truly Yours, <c>${LetterLogoText}</c> Team"
+/// — arrives here already resolved, because <c>NotifyTransferRequest.BeforeTransferRequestAsync</c>
+/// resolves it on the way out and the harness runs that step. What this does NOT reproduce is where
+/// the tag VALUES come from — in production they are built by the action's <c>Init</c> from live
+/// tenant data; here the test supplies them.
 /// </summary>
 internal static class LetterPreview
 {
@@ -101,11 +103,9 @@ internal static class LetterPreview
 
             await CreateStyler().ApplyFormatingAsync(message);
 
-            var logoText = tags.FirstOrDefault(t => t.Tag == CommonTags.LetterLogoText)?.Value as string ?? string.Empty;
-
             return new RenderedLetter(
-                ReplaceLogoText(message.Subject, logoText),
-                ReplaceLogoText(message.Body, logoText),
+                message.Subject,
+                message.Body,
                 subjectPattern,
                 bodyPattern,
                 referencedTags);
@@ -115,17 +115,6 @@ internal static class LetterPreview
             CultureInfo.CurrentCulture = previousCulture;
             CultureInfo.CurrentUICulture = previousUiCulture;
         }
-    }
-
-    /// <summary>
-    /// Mirrors the WhiteLabelInterceptor: <c>${LetterLogoText}</c> is replaced on the finished body,
-    /// which is why it also works inside tag values (the orange button caption, the signature).
-    /// </summary>
-    private static string ReplaceLogoText(string text, string logoText)
-    {
-        return string.IsNullOrEmpty(text) || string.IsNullOrEmpty(logoText)
-            ? text
-            : text.Replace("${" + CommonTags.LetterLogoText + "}", logoText);
     }
 
     /// <summary>

@@ -73,7 +73,10 @@ public enum TagType
     FromRoom = 1024,
 
     [Description("Custom filter")]
-    CustomFilter = 2048
+    CustomFilter = 2048,
+
+    [Description("Primary link revoked")]
+    PrimaryLinkRevoked = 4096
 }
 
 /// <summary>
@@ -194,6 +197,15 @@ public sealed class Tag
     public static Tag RecentByLink<T>(Guid owner, Guid linkId, FileEntry<T> file)
     {
         return new Tag(linkId.ToString(), TagType.RecentByLink, owner).AddEntry(file);
+    }
+
+    /// <summary>
+    /// Entity-level marker (no meaningful owner) distinguishing "the primary link was explicitly
+    /// revoked" from "no primary link was ever created", so a read does not resurrect the link.
+    /// </summary>
+    public static Tag PrimaryLinkRevoked<T>(FileEntry<T> entry)
+    {
+        return new Tag("primarylinkrevoked", TagType.PrimaryLinkRevoked, Guid.Empty).AddEntry(entry);
     }
 
     public override bool Equals(object obj)

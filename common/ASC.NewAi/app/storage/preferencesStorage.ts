@@ -33,8 +33,20 @@
 
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { resolveAgentEntityId } from "./docspaceFilesApi.js";
-import { isObject, getBoolean } from "../narrow.js";
+import { isObject } from "../narrow.js";
 import type { PreferencesStorage } from "@onlyoffice/ai-chat/core";
+import {
+  chatContextScope,
+  invalidateChatContext,
+  readChatContext,
+  reportChatContextMiss,
+} from "./chatContextSnapshot.js";
+import {
+  DEFAULT_REASONING_LEVEL,
+  depthToLevel,
+  levelToDepth,
+  type ReasoningLevel,
+} from "./reasoningDepth.js";
 
 const PATH = "/preferences";
 
@@ -55,22 +67,41 @@ async function scopedEntityId(
   return (await resolveAgentEntityId(entityId)) ?? null;
 }
 
+// The C# storage keeps ONE value per scope: `depth`, its `ReasoningDepth`
+// enum (`none | low | medium | high | xhigh | max`, see `reasoningDepth.ts`).
+// The library's two preferences are both views of it:
+//
+// - the reasoning level IS the depth (`none` ↔ `off`);
+// - deep mode is "the depth is above `none`". Writing `false` stores `none`;
+//   writing `true` keeps whatever depth is stored and only falls back to the
+//   default depth when nothing (or `none`) is there — the engine's
+//   `setReasoningLevel` writes the toggle first and the depth right after,
+//   so the fallback is overwritten within the same call, and a bare toggle
+//   (an older client, the widget's fallback path) lands on `medium`, which
+//   is exactly what the legacy boolean has always meant.
+//
+// `null` from a read means "nothing persisted in scope" for both views.
 export class HttpPreferencesStorage implements PreferencesStorage {
-  async createDeepMode(value: boolean, entityId?: string): Promise<void> {
-    await aiService.put(PATH, {
-      deepMode: value,
-      entityId: await scopedEntityId(entityId),
-    });
+  // -- reasoning level -----------------------------------------------------
+
+  async createReasoningLevel(value: ReasoningLevel, entityId?: string): Promise<void> {
+    await this.writeDepth(value, entityId);
   }
 
-  async readDeepMode(entityId?: string): Promise<boolean | null> {
+  async readReasoningLevel(entityId?: string): Promise<ReasoningLevel | null> {
+    const snapshot = readChatContext("preferences");
+    const scope = snapshot ? chatContextScope(snapshot, entityId) : undefined;
+    if (scope) {
+      return scope.reasoningLevel;
+    }
+    reportChatContextMiss(`preferences.readReasoningLevel(${entityId ?? "-"})`);
     try {
       const query = entityIdQuery(await resolveAgentEntityId(entityId));
       const raw = await aiService.get(PATH, query ? { query } : undefined);
       if (!isObject(raw)) {
         return null;
       }
-      return getBoolean(raw, "deepMode") ?? null;
+      return depthToLevel(raw["depth"]);
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return null;
@@ -79,21 +110,65 @@ export class HttpPreferencesStorage implements PreferencesStorage {
     }
   }
 
+  async updateReasoningLevel(value: ReasoningLevel, entityId?: string): Promise<void> {
+    await this.writeDepth(value, entityId);
+  }
+
+  async upsertReasoningLevel(value: ReasoningLevel, entityId?: string): Promise<void> {
+    await this.writeDepth(value, entityId);
+  }
+
+  async deleteReasoningLevel(entityId?: string): Promise<void> {
+    await this.deleteScope(entityId);
+  }
+
+  // -- deep mode (derived) -------------------------------------------------
+
+  async createDeepMode(value: boolean, entityId?: string): Promise<void> {
+    await this.writeDeepMode(value, entityId);
+  }
+
+  async readDeepMode(entityId?: string): Promise<boolean | null> {
+    const level = await this.readReasoningLevel(entityId);
+    return level === null ? null : level !== "off";
+  }
+
   async updateDeepMode(value: boolean, entityId?: string): Promise<void> {
-    await aiService.put(PATH, {
-      deepMode: value,
-      entityId: await scopedEntityId(entityId),
-    });
+    await this.writeDeepMode(value, entityId);
   }
 
   async upsertDeepMode(value: boolean, entityId?: string): Promise<void> {
-    await aiService.put(PATH, {
-      deepMode: value,
-      entityId: await scopedEntityId(entityId),
-    });
+    await this.writeDeepMode(value, entityId);
   }
 
   async deleteDeepMode(entityId?: string): Promise<void> {
+    await this.deleteScope(entityId);
+  }
+
+  // -- shared --------------------------------------------------------------
+
+  private async writeDeepMode(value: boolean, entityId?: string): Promise<void> {
+    if (!value) {
+      await this.writeDepth("off", entityId);
+      return;
+    }
+    const current = await this.readReasoningLevel(entityId);
+    if (current !== null && current !== "off") {
+      return;
+    }
+    await this.writeDepth(DEFAULT_REASONING_LEVEL, entityId);
+  }
+
+  private async writeDepth(level: ReasoningLevel, entityId?: string): Promise<void> {
+    await aiService.put(PATH, {
+      depth: levelToDepth(level),
+      entityId: await scopedEntityId(entityId),
+    });
+    invalidateChatContext("preferences");
+  }
+
+  private async deleteScope(entityId?: string): Promise<void> {
+    invalidateChatContext("preferences");
     try {
       const query = entityIdQuery(await resolveAgentEntityId(entityId));
       await aiService.delete(PATH, query ? { query } : undefined);

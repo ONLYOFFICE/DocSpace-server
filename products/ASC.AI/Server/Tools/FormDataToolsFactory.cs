@@ -38,6 +38,7 @@ public class FormDataToolsFactory(
     ExternalDatabaseClient externalDatabaseClient,
     IDaoFactory daoFactory,
     FormFillingReportCreator formFillingReportCreator,
+    FileSecurity fileSecurity,
     ILogger<FormDataToolsFactory> logger) : IAiToolFactory
 {
     private const string QueryName = "query_form_data";
@@ -201,7 +202,9 @@ public class FormDataToolsFactory(
 
     public async Task<ToolBundle> BuildAsync(ResolvedToolContext context)
     {
-        if (context.Form is not File<int> form || !externalDatabaseClient.IsEnabled())
+        if (context.Form is not File<int> form
+            || !externalDatabaseClient.IsEnabled()
+            || !await fileSecurity.CanUpdateXlsxAsync(form))
         {
             return ToolBundle.Empty;
         }

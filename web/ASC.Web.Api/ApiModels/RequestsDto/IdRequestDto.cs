@@ -34,12 +34,14 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for handling the ID-based requests.
+/// The identifier of the object an operation addresses, taken from the route.
 /// </summary>
 public class IdRequestDto<T>
 {
     /// <summary>
-    /// The ID extracted from the route parameters.
+    /// The identifier of the object the operation acts on, as the listing operation of that kind of object reports
+    /// it. It has to match the shape the route declares - a GUID where the route is typed as one - since a value of
+    /// another shape does not match the route at all and is answered as not found.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "id")]
@@ -47,12 +49,14 @@ public class IdRequestDto<T>
 }
 
 /// <summary>
-/// The parameters for handling the login event-related requests.
+/// Which recorded sign-in an operation addresses.
 /// </summary>
 public class LoginEvenrIdRequestDto
 {
     /// <summary>
-    /// The ID of the specific login event.
+    /// The sign-in to act on, by login event ID. Take it from the `id` of an item of
+    /// `GET api/2.0/security/activeconnections`, which also marks the connection the caller is using, so a client
+    /// can avoid picking its own.
     /// </summary>
     /// <example>12345</example>
     [FromRoute(Name = "loginEventId")]
@@ -60,12 +64,13 @@ public class LoginEvenrIdRequestDto
 }
 
 /// <summary>
-/// The parameters for handling the user-related requests using a GUID identifier.
+/// Which portal account an operation addresses, by the `userId` route placeholder.
 /// </summary>
 public class UserIdRequestDto
 {
     /// <summary>
-    /// The user ID extracted from the route parameters.
+    /// The portal account the operation acts on, by user ID as `GET api/2.0/people` reports it. Acting on an account
+    /// other than the caller's own generally needs administrator rights.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "userId")]
@@ -73,12 +78,13 @@ public class UserIdRequestDto
 }
 
 /// <summary>
-/// The parameters for handling the user-related requests using a GUID identifier.
+/// Which portal account an operation addresses, by the `userID` route placeholder.
 /// </summary>
 public class UserIDRequestDto
 {
     /// <summary>
-    /// The user ID extracted from the route parameters.
+    /// The portal account the operation acts on, by user ID as `GET api/2.0/people` reports it. An ID belonging to
+    /// no account of this portal and an ID of an internal system account are both answered as not found.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "userID")]
@@ -86,12 +92,14 @@ public class UserIDRequestDto
 }
 
 /// <summary>
-/// The requests for handling the product-related requests.
+/// Which portal module an operation addresses.
 /// </summary>
 public class ProductIdRequestDto
 {
     /// <summary>
-    /// The ID of the product extracted from the route parameters.
+    /// The module the operation acts on, by module GUID. The all-zero GUID stands for the portal itself rather than
+    /// for a single module, and a GUID that names no module group is answered with an empty result instead of a
+    /// failure.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "productid")]
@@ -99,19 +107,21 @@ public class ProductIdRequestDto
 }
 
 /// <summary>
-/// The parameters for handling requests that require both user and product identifiers.
+/// The module and the account an operation is asked about together.
 /// </summary>
 public class UserProductIdsRequestDto
 {
     /// <summary>
-    /// The ID of the product extracted from the query parameters.
+    /// The module being asked about, by module GUID. The all-zero GUID asks about the portal itself rather than a
+    /// single module.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "productid")]
     public required Guid ProductId { get; set; }
 
     /// <summary>
-    /// The user ID extracted from the query parameters.
+    /// The account being asked about, by portal user ID. An ID that names no account is answered as a plain negative
+    /// rather than a failure, so a negative answer does not prove the account exists.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "userid")]
@@ -119,12 +129,13 @@ public class UserProductIdsRequestDto
 }
 
 /// <summary>
-/// The request parameters for handling the migrator-related requests using a string identifier.
+/// Which import source the migration job reads its backup with.
 /// </summary>
 public class MigratorNameRequestDto
 {
     /// <summary>
-    /// The migrator name extracted from the route parameters.
+    /// The migrator that knows the format of the uploaded backup. It has to be one of the names
+    /// `GET api/2.0/migration/list` reports for this installation, spelled exactly as listed.
     /// </summary>
     /// <example>GoogleWorkspace</example>
     [FromRoute(Name = "migratorName")]

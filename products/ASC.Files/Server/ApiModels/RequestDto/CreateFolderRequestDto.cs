@@ -36,7 +36,7 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The parameters for creating a folder.
 /// </summary>
-public class CreateFolder
+public class CreateFolder : IValidatableObject
 {
     /// <summary>
     /// The folder title to create.
@@ -44,6 +44,16 @@ public class CreateFolder
     /// <example>New Folder</example>
     [StringLength(165)]
     public required string Title { get; set; }
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        // `required` does not reject "": a blank title is enforced here so that rename gets the
+        // same rule create already enforces in the service layer.
+        if (string.IsNullOrWhiteSpace(Title))
+        {
+            yield return new ValidationResult("A folder title cannot be empty or consist of whitespace only.", [nameof(Title)]);
+        }
+    }
 }
 
 /// <summary>

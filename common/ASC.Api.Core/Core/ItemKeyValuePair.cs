@@ -33,8 +33,18 @@
 
 namespace ASC.Api.Collections;
 
+/// <summary>
+/// A key-value pair of a list item.
+/// </summary>
 public class ItemKeyValuePair<TKey, TValue>
 {
+    /// <summary>
+    /// The key that identifies the item within the list.
+    /// </summary>
     public TKey Key { get; init; }
+
+    /// <summary>
+    /// The value associated with the key.
+    /// </summary>
     public TValue Value { get; init; }
 }

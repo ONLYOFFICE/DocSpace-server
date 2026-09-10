@@ -36,12 +36,14 @@ global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
 global using System.Globalization;
 global using System.Security;
+global using System.Security.Authentication;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
 
 global using ASC.AI.Integration.Extensions;
+global using ASC.Api.Collections;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;

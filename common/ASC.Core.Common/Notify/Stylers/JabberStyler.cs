@@ -58,6 +58,16 @@ public class JabberStyler : IPatternStyler
             RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace
             | RegexOptions.Compiled | RegexOptions.Singleline);
 
+    /// <summary>
+    /// A conditional comment is markup for one mail client, never text for the reader — and the one
+    /// <c>TagValues.OrangeButton</c> carries repeats the button caption inside a VML fallback for
+    /// Outlook. Dropping the comment whole has to happen before <see cref="_tagReplacer"/> runs, or
+    /// that copy stays behind and the caption is printed twice.
+    /// </summary>
+    private static readonly Regex _htmlCommentReplacer
+        = new(@"<!--.*?-->",
+            RegexOptions.CultureInvariant | RegexOptions.Compiled | RegexOptions.Singleline);
+
     private static readonly Regex _tagReplacer
         = new(@"<(.|\n)*?>",
             RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.IgnorePatternWhitespace
@@ -99,6 +109,7 @@ public class JabberStyler : IPatternStyler
         lastLine = _velocityArguments.Replace(lastLine, ArgMatchReplace);
         sb.Append(_linkReplacer.Replace(lastLine, EvalLink));
         var body = sb.ToString();
+        body = _htmlCommentReplacer.Replace(body, "");
         body = _textileReplacer.Replace(HttpUtility.HtmlDecode(body), ""); //Kill textile markup
         body = _brReplacer.Replace(body, Environment.NewLine);
         body = _closedTagsReplacer.Replace(body, Environment.NewLine);

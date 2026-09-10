@@ -45,8 +45,11 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected const string PromptFoldersPath = "/internal/ai/prompt-folders";
     protected const string PreferencesPath = "/internal/ai/preferences";
     protected const string ToolPrefsPath = "/internal/ai/tool-prefs";
+    protected const string ChatContextPath = "/internal/ai/chat-context";
 
     protected const string SystemToolsServerType = "00000000-0000-0000-0000-000000000001";
+
+    protected const int DefaultPageCount = 100;
 
     private static readonly JsonSerializerOptions _readJsonOptions = new()
     {
@@ -88,34 +91,9 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     /// <summary>
     /// Creates and registers a new member of the given type in the current test's portal.
     /// </summary>
-    protected async Task<User> InviteContact(EmployeeType employeeType, CancellationToken cancellationToken)
+    protected Task<User> InviteContact(EmployeeType employeeType, CancellationToken cancellationToken)
     {
-        await _clients.PeopleHttpClient.Authenticate(Owner);
-
-        var email = Initializer.Faker.Person.Email;
-        var firstName = Initializer.Faker.Person.FirstName;
-        var lastName = Initializer.Faker.Person.LastName;
-        var password = Initializer.Faker.Internet.Password(10, false);
-
-        var memberSw = Stopwatch.StartNew();
-        using var createResponse = await _clients.PeopleApi.PostAsync(
-            "/api/2.0/people",
-            new
-            {
-                cultureName = "en-US",
-                spam = false,
-                email,
-                password,
-                firstName,
-                lastName,
-                type = (int)employeeType
-            },
-            cancellationToken);
-
-        var created = await _clients.PeopleApi.ReadAsync<CreatedUserDto>(createResponse, cancellationToken);
-        Timing.Write($"invite.addMember({employeeType})", memberSw.ElapsedMilliseconds);
-
-        return new User(email, password) { Id = created.Id };
+        return Invitations.InviteContactAsync(_clients.ProfilesApi, _clients.PeopleHttpClient, employeeType, Owner, cancellationToken);
     }
 
     protected static CreateProfileRequestDto BuildCreateDto(string? name = null) =>
@@ -126,7 +104,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             BaseUrl = "https://api.openai.com/v1",
             Key = "sk-test-key-" + Guid.NewGuid().ToString("N"),
             ModelId = "gpt-4o-mini",
-            Reasoning = false,
+            Reasoning = new ReasoningConfig { Thinks = false, CanDisable = true, Depths = [ReasoningDepth.None], DefaultDepth = ReasoningDepth.None },
             Capabilities = Capabilities.Chat,
             UseResponsesApi = false,
             CanUseTool = true
@@ -140,7 +118,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             BaseUrl = "https://api.anthropic.com/v1",
             Key = "sk-ant-" + Guid.NewGuid().ToString("N"),
             ModelId = "claude-sonnet-4-6",
-            Reasoning = true,
+            Reasoning = new ReasoningConfig { Thinks = true, CanDisable = false, Depths = [ReasoningDepth.Low, ReasoningDepth.Medium, ReasoningDepth.High], DefaultDepth = ReasoningDepth.Medium },
             Capabilities = Capabilities.Chat | Capabilities.Vision,
             UseResponsesApi = true,
             CanUseTool = false
@@ -201,12 +179,40 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
 
     protected async Task<List<ThreadDto>> ReadAllThreadsAsync(string? entityId = null)
     {
-        var path = entityId is null
-            ? ThreadsPath
-            : $"{ThreadsPath}?entityId={entityId}";
+        var page = await ReadThreadsPageAsync(DefaultPageCount, entityId);
+        return page.Items;
+    }
 
-        using var response = await _ai.GetAsync(path, TestContext.Current.CancellationToken);
-        return await _ai.ReadAsync<List<ThreadDto>>(response, TestContext.Current.CancellationToken);
+    protected async Task<ThreadsPageDto> ReadThreadsPageAsync(
+        int count,
+        string? entityId = null,
+        long? cursorLastEditDate = null,
+        Guid? cursorId = null,
+        string? query = null)
+    {
+        var queryParams = new List<string> { $"count={count}" };
+
+        if (entityId is not null)
+        {
+            queryParams.Add($"entityId={entityId}");
+        }
+        if (query is not null)
+        {
+            queryParams.Add($"query={Uri.EscapeDataString(query)}");
+        }
+        if (cursorLastEditDate is not null)
+        {
+            queryParams.Add($"cursor.lastEditDate={cursorLastEditDate}");
+        }
+        if (cursorId is not null)
+        {
+            queryParams.Add($"cursor.id={cursorId}");
+        }
+
+        using var response = await _ai.GetAsync(
+            $"{ThreadsPath}?{string.Join("&", queryParams)}",
+            TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<ThreadsPageDto>(response, TestContext.Current.CancellationToken);
     }
 
     protected static string BuildMessageContents(string? text = null) =>
@@ -239,43 +245,42 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return await _ai.ReadAsync<MessageDto>(response, TestContext.Current.CancellationToken);
     }
 
-    protected async Task<List<MessageDto>> ReadMessagesByThreadAsync(Guid threadId, int? limit = null, int? startIndex = null)
+    protected async Task<List<MessageDto>> ReadMessagesByThreadAsync(Guid threadId, int count = DefaultPageCount)
     {
-        var query = new List<string>();
-        if (limit is not null)
+        var page = await ReadMessagesPageAsync(threadId, count);
+        return page.Items;
+    }
+
+    protected async Task<MessagesPageDto> ReadMessagesPageAsync(
+        Guid threadId,
+        int count,
+        DateTimeOffset? cursorCreatedAt = null,
+        Guid? cursorId = null)
+    {
+        var query = new List<string> { $"count={count}" };
+
+        if (cursorCreatedAt is not null)
         {
-            query.Add($"limit={limit}");
+            query.Add($"cursor.createdAt={Uri.EscapeDataString(cursorCreatedAt.Value.ToString("O"))}");
         }
-        if (startIndex is not null)
+        if (cursorId is not null)
         {
-            query.Add($"startIndex={startIndex}");
+            query.Add($"cursor.id={cursorId}");
         }
 
-        var path = $"{ThreadsPath}/{threadId}/messages";
-        if (query.Count > 0)
-        {
-            path += "?" + string.Join("&", query);
-        }
-
-        using var response = await _ai.GetAsync(path, TestContext.Current.CancellationToken);
-        return await _ai.ReadAsync<List<MessageDto>>(response, TestContext.Current.CancellationToken);
+        using var response = await _ai.GetAsync(
+            $"{ThreadsPath}/{threadId}/messages?{string.Join("&", query)}",
+            TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<MessagesPageDto>(response, TestContext.Current.CancellationToken);
     }
 
     protected async Task<int> CreateRoomAsync(string? title = null)
     {
         await _clients.FilesHttpClient.Authenticate(Owner);
 
-        var body = new
-        {
-            title = title ?? $"room-{Guid.NewGuid():N}",
-            roomType = "AiRoom"
-        };
+        var request = new CreateRoomRequestDto(title ?? $"room-{Guid.NewGuid():N}", roomType: RoomType.AiRoom);
+        var room = (await _clients.RoomsApi.CreateRoomAsync(request, TestContext.Current.CancellationToken)).Response;
 
-        using var response = await _clients.FilesApi.PostAsync(
-            "/api/2.0/files/rooms",
-            body,
-            TestContext.Current.CancellationToken);
-        var room = await _clients.FilesApi.ReadAsync<RoomFolderDto>(response, TestContext.Current.CancellationToken);
         return room.Id;
     }
 
@@ -286,8 +291,8 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     {
         await _clients.FilesHttpClient.Authenticate(Owner);
 
-        using var response = await _clients.FilesApi.GetAsync("/api/2.0/files/@my", TestContext.Current.CancellationToken);
-        var content = await _clients.FilesApi.ReadAsync<FolderContentDto>(response, TestContext.Current.CancellationToken);
+        var content = (await _clients.FoldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+
         return content.Current.Id;
     }
 
@@ -306,11 +311,11 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return wrapper?.Response;
     }
 
-    protected async Task UpsertPreferencesAsync(bool? deepMode, string? entityId = null)
+    protected async Task UpsertPreferencesAsync(ReasoningDepth? depth, string? entityId = null)
     {
         using var response = await _ai.PutAsync(
             PreferencesPath,
-            new { deepMode, entityId },
+            new { depth, entityId },
             TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
     }
@@ -345,6 +350,44 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             new { allowAlways, entityId },
             TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
+    }
+
+    protected static string BuildChatContextPath(
+        Guid? threadId = null,
+        string? entityId = null,
+        string? contextEntityId = null,
+        bool? includeMessages = null)
+    {
+        var query = new List<string>();
+        if (threadId is not null)
+        {
+            query.Add($"threadId={threadId}");
+        }
+        if (entityId is not null)
+        {
+            query.Add($"entityId={entityId}");
+        }
+        if (contextEntityId is not null)
+        {
+            query.Add($"contextEntityId={contextEntityId}");
+        }
+        if (includeMessages is not null)
+        {
+            query.Add($"includeMessages={includeMessages.Value.ToString().ToLowerInvariant()}");
+        }
+
+        return query.Count > 0 ? $"{ChatContextPath}?{string.Join("&", query)}" : ChatContextPath;
+    }
+
+    protected async Task<ChatContextDto> ReadChatContextAsync(
+        Guid? threadId = null,
+        string? entityId = null,
+        string? contextEntityId = null,
+        bool? includeMessages = null)
+    {
+        var path = BuildChatContextPath(threadId, entityId, contextEntityId, includeMessages);
+        using var response = await _ai.GetAsync(path, TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<ChatContextDto>(response, TestContext.Current.CancellationToken);
     }
 
     private static string BuildScopedAssignmentPath(string actionType, string? entityId) =>
@@ -413,10 +456,4 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         using var response = await _ai.GetAsync($"{PromptsPath}/{id}", TestContext.Current.CancellationToken);
         return await _ai.ReadAsync<PromptDto>(response, TestContext.Current.CancellationToken);
     }
-
-    private sealed record RoomFolderDto(int Id);
-
-    private sealed record FolderContentDto(RoomFolderDto Current);
-
-    private sealed record CreatedUserDto(Guid Id);
 }

@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -430,7 +430,12 @@ public class FileEntryDtoHelper(
         Guid? ownedBy = null;
         if (entry.ShareRecord != null)
         {
-            ownedBy = entry.ParentRoomCreatedBy ?? entry.RootCreateBy;
+            // A room is its own owner: CreateBy is what room reassignment updates. RootCreateBy
+            // points at the creator's virtualrooms bunch root, which no reassignment touches, so
+            // falling back to it here reported the previous owner forever (bug 80714).
+            ownedBy = entry is Folder<TId> { IsRoom: true }
+                ? entry.CreateBy
+                : entry.ParentRoomCreatedBy ?? entry.RootCreateBy;
         }
 
         return new T
@@ -482,7 +487,9 @@ public class FileEntryDtoHelper(
             }
         }
 
-        if (entry.ModifiedOn.Equals(default) || !Equals(entry.FolderIdDisplay, await _globalFolderHelper.FolderTrashAsync))
+        // The RootFolderType check must come first: FolderTrashAsync creates the user's trash root
+        // when it does not exist yet, and only entries already in the trash can match it anyway.
+        if (entry.ModifiedOn.Equals(default) || entry.RootFolderType != FolderType.TRASH || !Equals(entry.FolderIdDisplay, await _globalFolderHelper.FolderTrashAsync))
         {
             return default;
         }

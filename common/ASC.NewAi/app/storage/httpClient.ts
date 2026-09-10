@@ -32,7 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import nconf from "../../config/index.js";
-import { getForwardedHeaders } from "../requestContext.js";
+import { countUpstreamCall, countUpstreamRead, getForwardedHeaders } from "../requestContext.js";
 import { isObject, parseInt10 } from "../narrow.js";
 import type { AppConfig } from "../types.js";
 
@@ -195,6 +195,10 @@ export async function aiServiceRequest(
   path: string,
   options: RequestOptions = {},
 ): Promise<unknown> {
+  if (method === "GET") {
+    countUpstreamRead();
+  }
+  countUpstreamCall(method);
   return jsonRequest(`${AI_BASE_URL}${API_PREFIX}`, method, path, options);
 }
 

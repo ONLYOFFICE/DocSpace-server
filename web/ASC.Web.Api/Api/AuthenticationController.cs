@@ -31,13 +31,17 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using AuthenticationException = System.Security.Authentication.AuthenticationException;
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Api.Controllers;
 
 /// <remarks>
-/// Authorization API.
+/// Portal sign-in: exchanging an email and password, a confirmation link or a third-party account for the
+/// authentication token that every other operation of this API expects in the `Authorization` header, passing the
+/// second factor the portal may require of a user (an SMS code or an authenticator app), and ending the session
+/// again. Every operation here is open to unauthenticated callers and keeps working while the portal's payment has
+/// lapsed, except `POST api/2.0/authentication/setphone`, which is reached with the confirmation link the portal
+/// issues for phone activation.
 /// </remarks>
 /// <name>authentication</name>
 [Scope]
@@ -79,13 +83,19 @@ public class AuthenticationController(
     : ControllerBase
 {
     /// <remarks>
-    /// Checks if the current user is authenticated or not.
+    /// Reports whether the credentials that came with this very request identify a signed-in user of the current
+    /// portal - the authentication cookie, or the token in the `Authorization` header. Nothing has to be called
+    /// first: the operation is open to unauthenticated callers, who simply get `false`, it is read-only and
+    /// idempotent, and it answers even while the portal's payment has lapsed. The result is a bare boolean that
+    /// carries no reason, so `false` covers a missing, malformed, expired and revoked token alike; the way to recover
+    /// from it is to sign in again with `POST api/2.0/authentication`. It says nothing about who the caller is or how
+    /// long the session still lasts - read `GET api/2.0/people/@self` for the profile behind the token.
     /// </remarks>
     /// <summary>Check authentication</summary>
     /// <path>api/2.0/authentication</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
-    [SwaggerResponse(200, "Boolean value: true if the current user is authenticated", typeof(bool))]
+    [SwaggerResponse(200, "`true` when the request carries a valid token or cookie of an active portal user, `false` in every other case", typeof(bool))]
     [AllowNotPayment, AllowAnonymous]
     [HttpGet]
     public bool GetIsAuthentificated()
@@ -94,7 +104,16 @@ public class AuthenticationController(
     }
 
     /// <remarks>
-    /// Authenticates the current user by SMS or two-factor authentication code.
+    /// Finishes a two-factor sign-in: checks the one-time code and, when it matches, issues the authentication token.
+    /// Call it only after `POST api/2.0/authentication` answered with `sms` or `tfa` set, and repeat the same
+    /// credentials in the body next to `code` - the code alone does not identify the user. The code comes from the
+    /// SMS the portal sent, which `POST api/2.0/authentication/sendsms` resends, or from the authenticator app;
+    /// whichever second factor the portal has enabled for this user is the one checked here. Open to unauthenticated
+    /// callers, mutating and not idempotent: a code is single-use, the sign-in is written to the login history, and
+    /// the first code accepted from an authenticator app also connects that app to the user. The answer carries
+    /// `token` for the `Authorization` header, `expires` unless `session=true` tied the token to the browser session,
+    /// and either `sms` with the masked phone number or `tfa`. A wrong, empty or expired code fails with 401 and
+    /// counts against the brute-force limit, which then refuses further attempts with 403.
     /// </remarks>
     /// <summary>
     /// Authenticate a user by code
@@ -102,12 +121,16 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication/{code}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
-    [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
-    [SwaggerResponse(400, "userName, password or passworHash is empty")]
-    [SwaggerResponse(401, "User authentication failed")]
-    [SwaggerResponse(403, "Auth code is not available")]
-    [SwaggerResponse(429, "Too many login attempts. Please try again later")]
+    [SwaggerResponse(200, "The authentication token to send in the `Authorization` header, together with the second factor that was accepted", typeof(AuthenticationTokenDto))]
+    [SwaggerResponse(400, "The request body could not be validated, for example `confirmData.email` is not an email address")]
+    [SwaggerResponse(401, "The credentials were rejected, or the two-factor code is wrong, empty or expired")]
+    [SwaggerResponse(403, "The user is disabled, or too many failed attempts have blocked further sign-ins for these credentials")]
+    [SwaggerResponse(404, "No user of this portal matches the credentials in the request body")]
+    [SwaggerResponse(429, "The portal rate limiter rejected the call - retry after the interval in the `Retry-After` header")]
     [AllowNotPayment, AllowAnonymous]
+    // AuthWithCodeRequestsDto carries `code` in the body, so the route placeholder is unbound; the
+    // client (loginWithTfaCode) puts the same code in both.
+    [SwaggerPathParameter("code", "The two-factor authentication code. Send the same value as the `code` of the request body, which is the one the handler reads.")]
     [HttpPost("{code}", Order = 1)]
     public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthWithCodeRequestsDto inDto)
     {
@@ -199,7 +222,18 @@ public class AuthenticationController(
     }
 
     /// <remarks>
-    /// Authenticates the current user by SMS, authenticator app, or without two-factor authentication.
+    /// Signs a user in to the current portal and either issues the authentication token or reports which second
+    /// factor is still missing. Credentials go in the body as `userName` with `password` or `passwordHash`, as the
+    /// key of a confirmation link in `confirmData`, or as a third-party account (`provider` with `accessToken`, or
+    /// `serializedProfile`), which only a standalone installation or a tariff with third-party sign-in allows. Open
+    /// to unauthenticated callers, mutating and not
+    /// idempotent: it writes a login event, sets the portal cookies and counts every failure against the brute-force
+    /// limit. When a second factor is required for this user the answer carries no `token` but `sms` with the masked
+    /// phone number - or a `confirmUrl` pointing at `POST api/2.0/authentication/setphone` while no number is
+    /// activated yet - or `tfa` with the setup key while the authenticator app is not connected; submit the code to
+    /// `POST api/2.0/authentication/{code}` to finish such a sign-in. Otherwise the answer carries `token` for the
+    /// `Authorization` header and `expires`, which is omitted when `session=true` ties the token to the browser
+    /// session. An unknown user fails with 404, rejected credentials with 401, a disabled or blocked user with 403.
     /// </remarks>
     /// <summary>
     /// Authenticate a user
@@ -207,11 +241,12 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
-    [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
-    [SwaggerResponse(400, "userName, password or passworHash is empty")]
-    [SwaggerResponse(401, "User authentication failed")]
-    [SwaggerResponse(404, "The user could not be found")]
-    [SwaggerResponse(429, "Too many login attempts. Please try again later")]
+    [SwaggerResponse(200, "The authentication token, or the second factor that has to be passed before a token is issued", typeof(AuthenticationTokenDto))]
+    [SwaggerResponse(400, "The request body could not be validated, for example `confirmData.email` is not an email address")]
+    [SwaggerResponse(401, "The password, the confirmation key or the third-party profile was rejected, or third-party sign-in is not allowed for this portal")]
+    [SwaggerResponse(403, "The user is disabled, or too many failed attempts and CAPTCHA failures have blocked further sign-ins for these credentials")]
+    [SwaggerResponse(404, "No user of this portal matches the credentials in the request body")]
+    [SwaggerResponse(429, "The portal rate limiter rejected the call - retry after the interval in the `Retry-After` header")]
     [AllowNotPayment, AllowAnonymous]
     [HttpPost]
     public async Task<AuthenticationTokenDto> AuthenticateMe(AuthRequestsDto inDto)
@@ -358,7 +393,15 @@ public class AuthenticationController(
     }
 
     /// <remarks>
-    /// Logs out of the current user account.
+    /// Ends the session the request itself was made with: the login event behind the authentication cookie is closed,
+    /// the sockets opened for it are disconnected, the portal cookies are cleared and a logout event is written to
+    /// the login history. Send it with the cookie or token of the session that is to be closed; an anonymous call is
+    /// accepted and closes nothing. The operation is mutating and idempotent - the same session cannot be closed
+    /// twice - and it touches only that one session: the other sessions of the same user stay alive and are ended by
+    /// `PUT api/2.0/security/activeconnections/logoutallexceptthis` or
+    /// `PUT api/2.0/security/activeconnections/logout/{loginEventId}`. The answer is a single logout URL when the
+    /// user signed in through SSO and the portal has an SLO endpoint configured, and the client has to open that URL
+    /// to end the session on the identity provider as well; for everyone else it is empty and nothing more is needed.
     /// </remarks>
     /// <summary>
     /// Log out
@@ -366,7 +409,7 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication/logout</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
-    [SwaggerResponse(200, "Ok", typeof(string))]
+    [SwaggerResponse(200, "The single logout URL to open when the user signed in through SSO, or an empty result when no further action is needed", typeof(string))]
     [AllowNotPayment, AllowAnonymous]
     [HttpPost("logout")]
     public async Task<string> Logout()
@@ -407,15 +450,25 @@ public class AuthenticationController(
     }
 
     /// <remarks>
-    /// Opens a confirmation email URL to validate a certain action (employee invitation, portal removal, phone activation, etc.).
+    /// Checks the key of a confirmation link that the portal sent by email and reports whether the action behind that
+    /// link can still be carried out - an employee invitation, phone activation, a password change, portal removal
+    /// and so on. Take `key` and `type` from the query string of the link; when `key` is left empty, the key saved in
+    /// the confirmation cookie of the same `type` is used instead. Open to unauthenticated callers and read-only: it
+    /// neither accepts the invitation nor signs anyone in. `result` is `Ok` when the link may be used, `Invalid` when
+    /// the key does not match the type or the email, `Expired` when it is too old, and `TariffLimit`, `UserExisted`,
+    /// `UserExcluded` or `QuotaFailed` when the key is sound but the invitation behind it cannot be accepted. Only
+    /// `Ok` should be followed by the operation that performs the action - `POST api/2.0/people` with
+    /// `fromInviteLink` for an invitation, `POST api/2.0/authentication` with `confirmData` for a sign-in link - and
+    /// for an invitation to a room the answer also carries the identifier and the title of that room.
     /// </remarks>
     /// <summary>
-    /// Open confirmation email URL
+    /// Check a confirmation link
     /// </summary>
     /// <path>api/2.0/authentication/confirm</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
-    [SwaggerResponse(200, "Validation result: Ok, Invalid, or Expired", typeof(ConfirmDto))]
+    [SwaggerResponse(200, "Whether the confirmation link may be used, with the room and the email it was issued for when it is an invitation", typeof(ConfirmDto))]
+    [SwaggerResponse(403, "The portal's IP restrictions do not allow this address to check an invitation link")]
     [AllowNotPayment, AllowSuspended, AllowAnonymous]
     [HttpPost("confirm")]
     public async Task<ConfirmDto> CheckConfirm(EmailValidationKeyModel inDto)
@@ -441,15 +494,22 @@ public class AuthenticationController(
     }
 
     /// <remarks>
-    /// Sets a mobile phone for the current user.
+    /// Stores the mobile phone number of a user who is going through phone activation and sends the first SMS
+    /// authentication code to it. It is reachable only with the phone-activation confirmation link that
+    /// `POST api/2.0/authentication` returns in `confirmUrl` when SMS two-factor is required and the user has no
+    /// activated number yet: that link authorizes the call in place of an authentication token, and no token is
+    /// issued here. The operation is mutating and not idempotent - it saves the number as not activated, writes an
+    /// audit event and sends a message - and an already activated number is not replaced this way, the stored number
+    /// has to be erased first. The answer carries `sms`, the masked number and `expires`, the moment the code stops
+    /// being accepted. Submit that code to `POST api/2.0/authentication/{code}`, which signs the user in and marks
+    /// the number activated, or ask for another one with `POST api/2.0/authentication/sendsms`.
     /// </remarks>
     /// <summary>
     /// Set a mobile phone
     /// </summary>
     /// <path>api/2.0/authentication/setphone</path>
-    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
-    [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
+    [SwaggerResponse(200, "The masked phone number the code was sent to and the moment that code expires - no authentication token yet", typeof(AuthenticationTokenDto))]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PhoneActivation")]
     [HttpPost("setphone")]
@@ -469,7 +529,15 @@ public class AuthenticationController(
     }
 
     /// <remarks>
-    /// Sends SMS with an authentication code.
+    /// Sends a new SMS authentication code to the phone number stored for the user and reports when that code
+    /// expires. The credentials in the body are checked exactly as by `POST api/2.0/authentication`, so use this
+    /// operation to resend the code after that call answered with `sms`; the user needs SMS two-factor enabled and a
+    /// phone number already stored, which `POST api/2.0/authentication/setphone` registers. Open to unauthenticated
+    /// callers, mutating and not idempotent: every call sends a message, is counted in the portal's SMS usage and
+    /// spends one of the few codes a number is allowed within the code lifetime (ten minutes by default), after which
+    /// the call fails until those codes expire. Codes sent earlier stay valid, so a resent code does not invalidate
+    /// them, and the first one to be accepted invalidates all of them. The answer carries `sms`, the masked number
+    /// and `expires`, and no token - submit the code to `POST api/2.0/authentication/{code}`.
     /// </remarks>
     /// <summary>
     /// Send SMS code
@@ -477,9 +545,12 @@ public class AuthenticationController(
     /// <path>api/2.0/authentication/sendsms</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
-    [SwaggerResponse(200, "Authentication data", typeof(AuthenticationTokenDto))]
-    [SwaggerResponse(400, "userName, password or passworHash is empty")]
-    [SwaggerResponse(429, "Too many login attempts. Please try again later")]
+    [SwaggerResponse(200, "The masked phone number the code was sent to and the moment that code expires - no authentication token yet", typeof(AuthenticationTokenDto))]
+    [SwaggerResponse(400, "The request body could not be validated, for example `confirmData.email` is not an email address")]
+    [SwaggerResponse(401, "The password, the confirmation key or the third-party profile was rejected")]
+    [SwaggerResponse(403, "The user is disabled, or too many failed attempts have blocked further sign-ins for these credentials")]
+    [SwaggerResponse(404, "No user of this portal matches the credentials in the request body")]
+    [SwaggerResponse(429, "The portal rate limiter rejected the call - retry after the interval in the `Retry-After` header")]
     [AllowNotPayment, AllowAnonymous]
     [HttpPost("sendsms")]
     public async Task<AuthenticationTokenDto> SendSmsCode(AuthRequestsDto inDto)

@@ -343,8 +343,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("TenantId", "Id")
                         .HasName("PRIMARY");
 
-                    b.HasIndex("TenantId", "ThreadId", "Timestamp")
-                        .HasDatabaseName("IX_tenant_id_thread_id_timestamp");
+                    b.HasIndex("TenantId", "ThreadId", "Timestamp", "Id")
+                        .HasDatabaseName("IX_tenant_id_thread_id_timestamp_id");
 
                     b.ToTable("ai_integration_messages", (string)null);
 
@@ -366,9 +366,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
-                    b.Property<bool?>("DeepMode")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("deep_mode");
+                    b.Property<int?>("Depth")
+                        .HasColumnType("int")
+                        .HasColumnName("depth");
 
                     b.Property<int?>("EntryId")
                         .HasColumnType("int")
@@ -447,9 +447,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
-                    b.Property<bool?>("Reasoning")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("reasoning");
+                    b.Property<string>("Reasoning")
+                        .HasColumnType("json")
+                        .HasColumnName("reasoning")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<int>("TenantId")
                         .HasColumnType("int")
@@ -627,14 +629,14 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("TenantId", "Id")
                         .HasName("PRIMARY");
 
-                    b.HasIndex("TenantId", "CreatedBy")
-                        .HasDatabaseName("IX_tenant_id_created_by");
-
                     b.HasIndex("TenantId", "LastEditDate")
                         .HasDatabaseName("IX_tenant_id_last_edit_date");
 
                     b.HasIndex("TenantId", "ProfileId")
                         .HasDatabaseName("IX_tenant_id_profile_id");
+
+                    b.HasIndex("TenantId", "CreatedBy", "EntryId", "LastEditDate", "Id")
+                        .HasDatabaseName("IX_tenant_id_created_by_entry_id_last_edit_date_id");
 
                     b.ToTable("ai_integration_threads", (string)null);
 

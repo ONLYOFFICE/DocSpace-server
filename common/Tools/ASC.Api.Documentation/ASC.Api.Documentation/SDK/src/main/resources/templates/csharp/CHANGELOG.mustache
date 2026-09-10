@@ -1,5 +1,23 @@
 # Change Log
 
+## 4.0.0
+
+### Added
+
+- Added the reworked AI API surface in `src/DocSpace.API.SDK/Api/AI/`: `AIApi`, `AssignmentsApi`, `AttachmentsApi`, `EditorToolsApi`, `ExportApi`, `OpenAIPassthroughApi`, `PreferencesApi`, `ProfilesApi`, `PromptsApi`, `ThreadsApi`, `ToolsApi`, `WebSearchApi`
+- Added per-user AI settings endpoints and the matching models `AiAiUserSettingsDto`, `AiAiUserSettingsWrapper`, `AiAiSettingsDto`, `AiAiSettingsWrapper`
+- Added the `AppsApi` (`Api/Apps/`), `PrivacyRoomApi` (`Api/Rooms/`) and `DocsCloudApi` (`Api/Settings/`) APIs
+
+### Changed
+
+- Renamed the AI operations after their tag: `CreateAgent` → `AiAgentsCreate`, `GetAiSettings` → `AiSettingsGet`, `GetAiUserSettings` → `AiSettingsGetUser`, `SetAiUserSettings` → `AiSettingsSetUser`
+- The AI operations now use their own `Ai`-prefixed models (for example `AiFolderIntegerWrapper` instead of `FolderIntegerWrapper`), so they no longer share the models of the Files and Portal APIs
+
+### Removed
+
+- Removed the superseded AI API classes `ChatApi`, `MCPApi`, `MessagesApi` and `ProvidersApi` from `src/DocSpace.API.SDK/Api/AI/`
+- Removed the superseded AI settings models `AiSettingsDto`, `AiSettingsWrapper`, `AiUserSettingsDto`, `AiUserSettingsWrapper` and `SetAiUserSettingsRequestDto`, replaced by `AiAiSettingsDto`, `AiAiSettingsWrapper`, `AiAiUserSettingsDto` and `AiAiUserSettingsWrapper`
+
 ## 3.7.0
 
 ### Added

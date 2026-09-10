@@ -159,7 +159,7 @@ public class RoomGroupReadTests(
     public async Task GetList_NoGroups_ReturnsEmptyList()
     {
         // Act
-        var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
         list.Should().BeEmpty();
@@ -173,7 +173,7 @@ public class RoomGroupReadTests(
         await CreateRoomGroup("Only Group", [roomId]);
 
         // Act
-        var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(true, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
         list.Should().HaveCount(1);
@@ -190,7 +190,7 @@ public class RoomGroupReadTests(
         await CreateRoomGroup("LG2", [ids[1], ids[2]]);
 
         // Act
-        var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
         list.Single(g => g.Name == "LG1").TotalRooms.Should().Be(1);
@@ -206,7 +206,7 @@ public class RoomGroupReadTests(
         await _roomGroupsApi.DeleteRoomGroupAsync(created.Id, cancellationToken: TestContext.Current.CancellationToken);
 
         // Act
-        var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
         list.Select(g => g.Id).Should().NotContain(created.Id);
@@ -223,7 +223,7 @@ public class RoomGroupReadTests(
         await _roomGroupsApi.ChangeRoomGroupIconAsync(created.Id, new IconRequest("heart"), TestContext.Current.CancellationToken);
 
         // Act
-        var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
         var g = list.Single(x => x.Id == created.Id);
@@ -244,25 +244,10 @@ public class RoomGroupReadTests(
             TestContext.Current.CancellationToken);
 
         // Act
-        var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
         list.Single(x => x.Id == created.Id).TotalRooms.Should().Be(2);
-    }
-
-    [Fact]
-    public async Task GetList_IdParameterIsRudimentary_123BehavesLike0()
-    {
-        // Arrange
-        var roomId = await CreateGroupRoomId("Rudiment Room");
-        await CreateRoomGroup("Rudiment", [roomId]);
-
-        // Act
-        var zero = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        var oneTwoThree = (await _roomGroupsApi.GetRoomGroupsAsync(123, cancellationToken: TestContext.Current.CancellationToken)).Response;
-
-        // Assert
-        oneTwoThree.Select(g => g.Name).Order().Should().Equal(zero.Select(g => g.Name).Order());
     }
 
     // `id` is a required parameter on the typed method (GetRoomGroupsAsync(int id, ...)), so there

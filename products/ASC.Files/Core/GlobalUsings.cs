@@ -31,14 +31,14 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-global using System.Data.Common;
+global using System.ClientModel;
+global using System.ClientModel.Primitives;
 global using System.Collections.Concurrent;
 global using System.Collections.Frozen;
 global using System.Collections.Immutable;
-global using System.ClientModel;
-global using System.ClientModel.Primitives;
 global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
+global using System.Data.Common;
 global using System.Diagnostics;
 global using System.Extensions;
 global using System.Globalization;
@@ -50,6 +50,7 @@ global using System.Net.Sockets;
 global using System.Reflection;
 global using System.Runtime.Serialization;
 global using System.Security;
+global using System.Security.Authentication;
 global using System.Security.Cryptography;
 global using System.Security.Principal;
 global using System.Text;
@@ -90,7 +91,6 @@ global using ASC.Core.ChunkedUploader;
 global using ASC.Core.Common;
 global using ASC.Core.Common.AI;
 global using ASC.Core.Common.Configuration;
-global using ASC.Core.Common.EF.Model.Ai;
 global using ASC.Core.Common.Core;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
@@ -117,9 +117,9 @@ global using ASC.ElasticSearch.VectorData;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Events;
 global using ASC.FederatedLogin;
+global using ASC.FederatedLogin.DatabaseProviders;
 global using ASC.FederatedLogin.Helpers;
 global using ASC.FederatedLogin.LoginProviders;
-global using ASC.FederatedLogin.DatabaseProviders;
 global using ASC.Files.Core;
 global using ASC.Files.Core.ApiModels;
 global using ASC.Files.Core.ApiModels.RequestDto;
@@ -149,12 +149,12 @@ global using ASC.Files.Core.Services.OFormService;
 global using ASC.Files.Core.Services.WCFService.Wrappers;
 global using ASC.Files.Core.Text;
 global using ASC.Files.Core.Thirdparty;
+global using ASC.Files.Core.Utils;
 global using ASC.Files.Core.Vectorization;
-global using ASC.Files.Core.Vectorization.Events;
 global using ASC.Files.Core.Vectorization.Embedding;
+global using ASC.Files.Core.Vectorization.Events;
 global using ASC.Files.Core.Vectorization.Settings;
 global using ASC.Files.Core.VirtualRooms;
-global using ASC.Files.Core.Utils;
 global using ASC.Files.Thirdparty;
 global using ASC.Files.Thirdparty.Box;
 global using ASC.Files.Thirdparty.Dropbox;
@@ -249,9 +249,9 @@ global using NetEscapades.EnumGenerators;
 
 global using Newtonsoft.Json.Linq;
 
-global using OpenSearch.Client;
-
 global using OpenAI;
+
+global using OpenSearch.Client;
 
 global using Polly;
 global using Polly.Contrib.WaitAndRetry;
@@ -273,12 +273,15 @@ global using static ASC.Files.Core.Helpers.DocumentService.CommandResponse;
 global using static ASC.Web.Files.Services.DocumentService.DocumentServiceTracker;
 global using static ASC.Web.Files.Utils.FileTracker;
 
+global using AuditReportFormat = ASC.Files.Core.Services.DocumentBuilderService.AuditReportFormat;
+global using AuditReportKind = ASC.Files.Core.Services.DocumentBuilderService.AuditReportKind;
 global using CommandMethod = ASC.Files.Core.Helpers.DocumentService.CommandMethod;
 global using Constants = ASC.Core.Users.Constants;
 global using EnumMemberAttribute = System.Runtime.Serialization.EnumMemberAttribute;
 global using FilesDbContext = ASC.Files.Core.EF.FilesDbContext;
 global using FileShare = ASC.Files.Core.Security.FileShare;
 global using FileType = ASC.Web.Core.Files.FileType;
+global using FormFillingReportTask = ASC.Files.Core.Services.DocumentBuilderService.FormFillingReportTask;
 global using HttpException = ASC.Common.Web.HttpException;
 global using JsonConverterAttribute = System.Text.Json.Serialization.JsonConverterAttribute;
 global using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
@@ -287,11 +290,8 @@ global using JsonTokenType = System.Text.Json.JsonTokenType;
 global using License = ASC.Core.Billing.License;
 global using Location = ASC.Files.Core.Core.Entries.Location;
 global using LogLevel = Microsoft.Extensions.Logging.LogLevel;
-global using SecurityContext = ASC.Core.SecurityContext;
-global using FormFillingReportTask = ASC.Files.Core.Services.DocumentBuilderService.FormFillingReportTask;
 global using ReportType = ASC.Files.Core.Services.DocumentBuilderService.ReportType;
-global using AuditReportKind = ASC.Files.Core.Services.DocumentBuilderService.AuditReportKind;
-global using AuditReportFormat = ASC.Files.Core.Services.DocumentBuilderService.AuditReportFormat;
+global using SecurityContext = ASC.Core.SecurityContext;
 global using SocketManager = ASC.Web.Files.Utils.SocketManager;
 global using SortOrder = ASC.Api.Core.Core.SortOrder;
 global using Tag = ASC.Files.Core.Tag;

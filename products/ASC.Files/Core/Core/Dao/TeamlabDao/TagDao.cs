@@ -268,7 +268,7 @@ internal abstract class BaseTagDao<T>(
                         continue;
                     }
 
-                    var id = await internalFilesDbContext.TagIdAsync(t.Owner, t.Name, t.Type, tenantId);
+                    var id = await internalFilesDbContext.FirstTagIdAsync(tenantId, t.Owner, t.Name, t.Type);
 
                     var toAdd = new DbFilesTag
                     {
@@ -375,7 +375,7 @@ internal abstract class BaseTagDao<T>(
 
         if (!cacheTagId.TryGetValue(cacheTagIdKey, out var id))
         {
-            id = await filesDbContext.TagIdAsync(t.Owner, t.Name, t.Type, tenantId);
+            id = await filesDbContext.FirstTagIdAsync(tenantId, t.Owner, t.Name, t.Type);
 
             if (id == 0)
             {
@@ -570,6 +570,92 @@ internal abstract class BaseTagDao<T>(
                 foreach (var t in tags)
                 {
                     await RemoveTagInDbAsync(t);
+                }
+
+                await tx.CommitAsync();
+            });
+        }
+    }
+
+    public async Task RemoveTagLinksAsync(IEnumerable<Tag> tags)
+    {
+        if (tags == null)
+        {
+            return;
+        }
+
+        var toDetach = tags.Where(t => t.EntryId != null).ToList();
+
+        if (toDetach.Count == 0)
+        {
+            return;
+        }
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using (await _distributedLockProvider.TryAcquireLockAsync(GetLockKey(tenantId), TimeSpan.FromMinutes(5)))
+        {
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+            // The tag id is often absent: several of these are built in memory (Tag.New(...)) rather
+            // than read back, so resolve it the same way RemoveTagInDbAsync does - by owner, name and
+            // type - and then delete only these entries' links to it.
+            var resolved = new Dictionary<(Guid Owner, string Name, TagType Type), int>();
+            var batches = new Dictionary<(int TagId, FileEntryType EntryType), HashSet<string>>();
+
+            foreach (var tag in toDetach)
+            {
+                var key = (tag.Owner, tag.Name, tag.Type);
+
+                if (!resolved.TryGetValue(key, out var tagId))
+                {
+                    tagId = tag.Id != 0
+                        ? tag.Id
+                        : await filesDbContext.FirstTagIdAsync(tenantId, tag.Owner, tag.Name, tag.Type);
+
+                    resolved[key] = tagId;
+                }
+
+                if (tagId == 0)
+                {
+                    continue;
+                }
+
+                // files_tag_link holds the mapped id, not the provider's own - UpdateNewTagsInDbAsync
+                // maps on the way in. For T = int the two are the same string, but a third-party entry
+                // stored under its mapped id would never match a raw one, and the delete would report
+                // success while removing nothing.
+                var mappedId = (await MappingIdAsync(filesDbContext, tenantId, tag.EntryId)).ToString();
+
+                if (!batches.TryGetValue((tagId, tag.EntryType), out var entryIds))
+                {
+                    entryIds = [];
+                    batches[(tagId, tag.EntryType)] = entryIds;
+                }
+
+                entryIds.Add(mappedId);
+            }
+
+            if (batches.Count == 0)
+            {
+                return;
+            }
+
+            // One statement per (tag, entry type) rather than one per entry. Marking a section as read
+            // detaches many entries from a single "new" tag row, so this is the difference between one
+            // round-trip and one per file - all of it under a held distributed lock. Transaction and
+            // execution strategy as in RemoveTagsAsync: several batches must not half-apply, and a
+            // transient database failure should be retried rather than surface as a partial unmark.
+            var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+            await strategy.ExecuteAsync(async () =>
+            {
+                await using var ctx = await _dbContextFactory.CreateDbContextAsync();
+                await using var tx = await ctx.Database.BeginTransactionAsync();
+
+                foreach (var ((tagId, entryType), entryIds) in batches)
+                {
+                    await ctx.DeleteTagLinksForEntriesAsync(tenantId, tagId, entryIds, entryType);
                 }
 
                 await tx.CommitAsync();

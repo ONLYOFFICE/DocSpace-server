@@ -48,19 +48,6 @@ public class RawApiResponse<T>
     public int StatusCode { get; init; }
 }
 
-public class WizardSettingsResponse
-{
-    public string? WizardToken { get; init; }
-    public PasswordHasherSettings? PasswordHash { get; init; }
-}
-
-public class PasswordHasherSettings
-{
-    public int Size { get; init; }
-    public int Iterations { get; init; }
-    public string Salt { get; init; } = "";
-}
-
 public class AuthTokenResponse
 {
     public string Token { get; init; } = "";

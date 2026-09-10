@@ -36,63 +36,73 @@ using ASC.Data.Backup.Services;
 namespace ASC.Data.Backup.ApiModels;
 
 /// <summary>
-/// The backup schedule parameters.
+/// The request parameters for setting the backup schedule.
 /// </summary>
 public class BackupScheduleDto
 {
     /// <summary>
-    /// The backup storage type.
+    /// The storage the scheduled archives are written to. It defaults to `Documents`, and it decides which
+    /// keys `storageParams` has to carry.
     /// </summary>
     /// <example>Documents</example>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public BackupStorageType? StorageType { get; set; }
 
     /// <summary>
-    /// The backup storage parameters.
+    /// The settings of the chosen storage, as an array of key and value pairs. `Documents` and
+    /// `ThridpartyDocuments` need `folderId`, `Local` needs `filePath`, `ThirdPartyConsumer` needs `module`
+    /// plus the settings of that consumer, and `DataStore` needs none.
     /// </summary>
-    /// <example>[{"key": "path", "value": "/backup"}]</example>
+    /// <example>[{"key": "folderId", "value": "1234"}]</example>
     public IEnumerable<ItemKeyValuePair<object, object>> StorageParams { get; set; }
 
     /// <summary>
-    /// The maximum number of the stored backup copies.
+    /// The number of scheduled copies to keep, from 1 to 30. It defaults to 1, and only the copies this
+    /// schedule creates are counted and removed - archives started by hand are left alone.
     /// </summary>
     /// <example>5</example>
     public int? BackupsStored { get; set; }
 
     /// <summary>
-    /// The backup cron parameters.
+    /// When the backup runs. It is required: a request without it fails rather than falling back to a
+    /// default.
     /// </summary>
-    /// <example>{"period": "EveryDay", "hour": 2, "day": 0}</example>
+    /// <example>{"period": "EveryDay", "hour": 2}</example>
     public Cron CronParams { get; set; }
 
     /// <summary>
-    /// Specifies if a dump will be created or not.
+    /// Schedules a backup of the whole server rather than of this one portal. It requires the space access
+    /// permission and works on a standalone installation only.
     /// </summary>
     /// <example>false</example>
     public bool Dump { get; set; }
 }
 
 /// <summary>
-/// The backup cron parameters.
+/// The request parameters for the time the scheduled backup runs.
 /// </summary>
 public class Cron
 {
     /// <summary>
-    /// The backup period type.
+    /// How often the backup runs: `EveryDay`, `EveryWeek` or `EveryMonth`. It defaults to `EveryDay`.
     /// </summary>
     /// <example>EveryDay</example>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public BackupPeriod? Period { get; set; }
 
     /// <summary>
-    /// The time of the day to start the backup process.
+    /// The hour of the day the backup starts at, from 0 to 23. Minutes cannot be chosen - it always starts
+    /// on the hour.
     /// </summary>
-    /// <example>0</example>
+    /// <example>2</example>
     public int Hour { get; set; }
 
     /// <summary>
-    /// The day of the week to start the backup process.
+    /// The day the backup runs on: the day of the week from 1 to 7, Sunday being 1, for `EveryWeek`, and the
+    /// day of the month from 1 to 31 for `EveryMonth`. Leave it out for `EveryDay` only - an omitted value is
+    /// stored as 0, which neither of the other two periods accepts, so a weekly or monthly schedule sent
+    /// without it fails.
     /// </summary>
-    /// <example>0</example>
+    /// <example>1</example>
     public int? Day { get; set; }
 }

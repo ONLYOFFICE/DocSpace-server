@@ -52,3 +52,16 @@ public class RoomGroupIdRequestDto
     [FromQuery(Name = "includeMembers")]
     public bool IncludeMembers { get; set; } = true;
 }
+
+/// <summary>
+/// The request parameters for listing room groups.
+/// </summary>
+public class RoomGroupsRequestDto
+{
+    /// <summary>
+    /// Whether to include group members.
+    /// </summary>
+    /// <example>true</example>
+    [FromQuery(Name = "includeMembers")]
+    public bool IncludeMembers { get; set; } = true;
+}

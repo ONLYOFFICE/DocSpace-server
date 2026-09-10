@@ -53,6 +53,7 @@ public class ProfileStorageService(
 
     private const string ImageModality = "image";
     private const string ToolsCapability = "tools";
+    private const string ReasoningCapability = "reasoning";
 
     public async Task<Profile> CreateAsync(ProfileData profile)
     {
@@ -100,13 +101,7 @@ public class ProfileStorageService(
     {
         await AssertUserHasAccessAsync(_readTypes);
 
-        if (!_aiGateway.Configured)
-        {
-            return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId());
-        }
-
-        var profiles = await GetGatewayProfilesAsync();
-        return profiles.ToList();
+        return await ReadAllVerifiedAsync();
     }
 
     public async Task<Profile> UpdateAsync(Profile profile)
@@ -141,11 +136,27 @@ public class ProfileStorageService(
         }
     }
 
+    internal async Task<List<Profile>> ReadAllVerifiedAsync(IEnumerable<Model>? models = null)
+    {
+        if (!_aiGateway.Configured)
+        {
+            return await storage.ReadAllAsync(tenantManager.GetCurrentTenantId());
+        }
+
+        var profiles = models is null ? await GetGatewayProfilesAsync() : MapGatewayProfiles(models);
+        return [.. profiles];
+    }
+
     private async Task<IEnumerable<Profile>> GetGatewayProfilesAsync()
     {
         var response = await _aiGateway.GetModelsAsync();
 
-        return response.Data
+        return MapGatewayProfiles(response.Data);
+    }
+
+    private IEnumerable<Profile> MapGatewayProfiles(IEnumerable<Model> models)
+    {
+        return models
             .Where(m => !string.Equals(m.Type, "embedding", StringComparison.OrdinalIgnoreCase))
             .Select(m => new Profile
             {
@@ -154,12 +165,32 @@ public class ProfileStorageService(
                 ProviderType = "onlyoffice",
                 BaseUrl = linkUtility.GetFullAbsolutePath(string.Empty),
                 ModelId = m.Id,
-                Reasoning = HasCapability(m, "reasoning"),
+                Reasoning = MapReasoning(m),
                 CanUseTool = HasCapability(m, ToolsCapability),
                 Capabilities = MapCapabilities(m),
                 UseResponsesApi = false,
                 Key = "onlyoffice"
             });
+    }
+
+    private static ReasoningConfig MapReasoning(Model model)
+    {
+        var reasoning = model.Reasoning;
+
+        return new ReasoningConfig
+        {
+            Thinks = reasoning is not null || HasCapability(model, ReasoningCapability),
+            CanDisable = reasoning is null || !reasoning.Mandatory,
+            Depths = reasoning?.SupportedEfforts?.Select(ParseDepth).OfType<ReasoningDepth>().ToArray() ?? [],
+            DefaultDepth = reasoning is null
+                ? null
+                : reasoning.DefaultEnabled ? ParseDepth(reasoning.DefaultEffort) : ReasoningDepth.None
+        };
+    }
+
+    private static ReasoningDepth? ParseDepth(string? value)
+    {
+        return ReasoningDepthExtensions.TryParse(value, true, out var depth) ? depth : null;
     }
 
     private static Capabilities MapCapabilities(Model model)

@@ -84,6 +84,7 @@ import {{invokerPackage}}.auth.ApiKeyAuth;
 {{#hasOAuthMethods}}
 import {{invokerPackage}}.auth.OAuth;
 {{/hasOAuthMethods}}
+import {{invokerPackage}}.auth.OpenIdAuth;
 
 public class ApiClient{{#jsr310}} extends JavaTimeFormatter{{/jsr310}} {
   protected Map<String, String> defaultHeaderMap = new HashMap<String, String>();
