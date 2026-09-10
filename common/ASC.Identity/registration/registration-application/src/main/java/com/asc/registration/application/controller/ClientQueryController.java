@@ -43,6 +43,8 @@ import com.asc.registration.service.transfer.request.fetch.TenantClientQuery;
 import com.asc.registration.service.transfer.request.fetch.TenantClientsPaginationQuery;
 import com.asc.registration.service.transfer.response.ClientInfoResponse;
 import com.asc.registration.service.transfer.response.ConsentResponse;
+import com.asc.registration.service.transfer.response.PageableClientInfoResponse;
+import com.asc.registration.service.transfer.response.PageableClientResponse;
 import com.asc.registration.service.transfer.response.PageableModificationResponse;
 import com.asc.registration.service.transfer.response.PageableResponse;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
@@ -238,7 +240,7 @@ public class ClientQueryController {
             content =
                 @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = PageableResponse.class),
+                    schema = @Schema(implementation = PageableClientResponse.class),
                     examples =
                         @ExampleObject(
                             value =
@@ -546,7 +548,7 @@ public class ClientQueryController {
             content =
                 @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = PageableResponse.class),
+                    schema = @Schema(implementation = PageableClientInfoResponse.class),
                     examples =
                         @ExampleObject(
                             value =

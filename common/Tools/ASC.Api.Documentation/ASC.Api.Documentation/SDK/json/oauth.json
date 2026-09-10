@@ -637,7 +637,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageableResponse"
+                  "$ref": "#/components/schemas/PageableClientResponse"
                 },
                 "example": {
                   "data": [
@@ -1494,7 +1494,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageableResponse"
+                  "$ref": "#/components/schemas/PageableClientInfoResponse"
                 },
                 "example": {
                   "data": [
@@ -2466,6 +2466,66 @@
             "items": {
               "$ref": "#/components/schemas/FieldError"
             }
+          }
+        }
+      },
+      "PageableClientInfoResponse": {
+        "type": "object",
+        "description": "One page of consent-facing client info together with the next-page cursor.",
+        "properties": {
+          "data": {
+            "type": "array",
+            "description": "The items on this page, at most as many as the requested limit. An empty array means there is nothing further to read.",
+            "items": {
+              "$ref": "#/components/schemas/ClientInfoResponse"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The page size that was applied to this request, between 1 and 50.",
+            "example": 50
+          },
+          "last_client_id": {
+            "type": "string",
+            "description": "The cursor to send back as last_client_id to ask for the next page, together with last_created_on. It is null when the page is empty.",
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+          },
+          "last_created_on": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The cursor to send back as last_created_on to ask for the next page, together with last_client_id. It is null when the page is empty.",
+            "example": "2024-04-04T12:00:00Z"
+          }
+        }
+      },
+      "PageableClientResponse": {
+        "type": "object",
+        "description": "One page of full client records together with the next-page cursor.",
+        "properties": {
+          "data": {
+            "type": "array",
+            "description": "The items on this page, at most as many as the requested limit. An empty array means there is nothing further to read.",
+            "items": {
+              "$ref": "#/components/schemas/ClientResponse"
+            }
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The page size that was applied to this request, between 1 and 50.",
+            "example": 50
+          },
+          "last_client_id": {
+            "type": "string",
+            "description": "The cursor to send back as last_client_id to ask for the next page, together with last_created_on. It is null when the page is empty.",
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+          },
+          "last_created_on": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The cursor to send back as last_created_on to ask for the next page, together with last_client_id. It is null when the page is empty.",
+            "example": "2024-04-04T12:00:00Z"
           }
         }
       }
