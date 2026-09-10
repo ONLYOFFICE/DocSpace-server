@@ -35,6 +35,7 @@ package com.asc.registration.application.transfer;
 
 import com.asc.common.utilities.validation.URLCollection;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -99,7 +100,9 @@ public class UpdateClientRequest implements Serializable {
       max = 256,
       message = "client name length is expected to be between 3 and 256 characters")
   @Schema(
-      description = "The name of the client",
+      description =
+          "The display name shown to the user on the consent screen. It has to be between 3 and "
+              + "256 characters long.",
       example = "Updated Client",
       minLength = 3,
       maxLength = 256)
@@ -108,7 +111,9 @@ public class UpdateClientRequest implements Serializable {
   /** The description of the client. */
   @Size(max = 255, message = "client description length is expected to be less than 256 characters")
   @Schema(
-      description = "The description of the client",
+      description =
+          "The free-text description shown next to the name on the consent screen, at most 255 "
+              + "characters.",
       example = "Updated description of the client",
       maxLength = 255)
   private String description;
@@ -122,19 +127,29 @@ public class UpdateClientRequest implements Serializable {
       regexp = "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
       message = "client logo is expected to be passed as base64")
   @Schema(
-      description = "The logo of the client in base64 format",
-      example = "data:image/png;base64,...")
+      description =
+          "The client logo as a data URI carrying base64 image data, shown on the consent screen. "
+              + "Only png, jpeg, jpg and svg+xml are accepted.",
+      example =
+          "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==")
   private String logo;
 
   /** Indicates whether PKCE is allowed for the client. */
   @JsonProperty("allow_pkce")
-  @Schema(description = "Indicates whether PKCE is allowed for the client", example = "true")
+  @Schema(
+      description =
+          "Whether the client may use PKCE. Turning it on lets the client authenticate with the "
+              + "none method and prove itself with a code verifier instead of sending a secret, "
+              + "which is what a client that cannot keep a secret needs.",
+      example = "true")
   private boolean allowPkce;
 
   /** Indicates whether client is accessibly by third-party tenants * */
   @JsonProperty("is_public")
   @Schema(
-      description = "Indicates whether client is accessible by third-party tenants",
+      description =
+          "Whether the client is offered to third-party tenants rather than only to the tenant "
+              + "that registers it.",
       example = "false")
   private boolean isPublic;
 
@@ -146,9 +161,14 @@ public class UpdateClientRequest implements Serializable {
       min = 1,
       max = 12,
       message = "allowed origins must contain at least 1 and at most 12 addresses")
-  @Schema(
-      description = "The allowed origins for the client",
-      example = "[\"http://allowed.origin\"]")
+  @ArraySchema(
+      arraySchema =
+          @Schema(
+              description =
+                  "The web origins allowed to call the portal on behalf of this client, used for "
+                      + "the CORS check. The set holds between 1 and 12 addresses.",
+              example = "[\"http://example.com\"]"),
+      schema = @Schema(type = "string", example = "http://example.com"))
   private Set<String> allowedOrigins;
 
   /** The redirect URIs for the client. */
@@ -159,13 +179,27 @@ public class UpdateClientRequest implements Serializable {
       min = 1,
       max = 12,
       message = "redirect uris must contain at least 1 and at most 12 addresses")
-  @Schema(
-      description = "The redirect URIs for the client",
-      example = "[\"https://example.com/callback\"]")
+  @ArraySchema(
+      arraySchema =
+          @Schema(
+              description =
+                  "The URIs an authorization code may be delivered to. An authorization request "
+                      + "naming any other URI is refused, and the set holds between 1 and 12 "
+                      + "addresses.",
+              example = "[\"https://example.com/callback\"]"),
+      schema = @Schema(type = "string", example = "https://example.com/callback"))
   private Set<String> redirectUris;
 
   /** The scopes for the client. This field cannot be empty. */
   @NotEmpty(message = "scopes field can not be empty")
-  @Schema(description = "The scopes for the client", example = "[\"files:read\", \"files:write\"]")
+  @ArraySchema(
+      arraySchema =
+          @Schema(
+              description =
+                  "The permissions the client may ask for, named as they appear in the tenant "
+                      + "scope catalogue - for example files:read, rooms:write or openid. A client "
+                      + "cannot request a scope that is not listed here.",
+              example = "[\"files:read\", \"files:write\"]"),
+      schema = @Schema(type = "string", example = "files:read"))
   private Set<String> scopes;
 }

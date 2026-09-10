@@ -109,9 +109,14 @@ public class ScopeQueryController {
                                 """
                     [
                       {
-                        "name": "scope_name",
-                        "type": "scope_type",
-                        "group": "scope_group"
+                        "name": "files:read",
+                        "type": "read",
+                        "group": "files"
+                      },
+                      {
+                        "name": "openid",
+                        "type": "openid",
+                        "group": "openid"
                       }
                     ]
                     """))),

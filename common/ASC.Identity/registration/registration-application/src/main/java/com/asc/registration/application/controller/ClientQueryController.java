@@ -148,7 +148,7 @@ public class ClientQueryController {
                       "website_url": "http://example.com",
                       "terms_url": "http://example.com",
                       "policy_url": "http://example.com",
-                      "logo": "data:image/png;base64,ivBOR",
+                      "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                       "authentication_methods": ["client_secret_post"],
                       "redirect_uris": ["https://example.com"],
                       "allowed_origins": ["https://example.com"],
@@ -257,7 +257,7 @@ public class ClientQueryController {
                           "website_url": "http://example.com",
                           "terms_url": "http://example.com",
                           "policy_url": "http://example.com",
-                          "logo": "data:image/png;base64,ivBOR",
+                          "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                           "authentication_methods": ["client_secret_post"],
                           "redirect_uris": ["https://example.com"],
                           "allowed_origins": ["https://example.com"],
@@ -294,7 +294,10 @@ public class ClientQueryController {
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<PageableResponse<ClientResponse>> getClients(
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
-      @Parameter(description = "Pagination limit", required = true, example = "1")
+      @Parameter(
+              description =
+                  "How many entries to return, between 1 and 50. Defaults to 30 " + "when omitted.",
+              example = "30")
           @RequestParam(value = "limit", defaultValue = "30")
           @Min(value = 1, message = "limit must be at least 1")
           @Max(value = 50, message = "limit must be at most 50")
@@ -367,7 +370,7 @@ public class ClientQueryController {
                                   "website_url": "http://example.com",
                                   "terms_url": "http://example.com",
                                   "policy_url": "http://example.com",
-                                  "logo": "data:image/png;base64,ivBOR",
+                                  "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                                   "authentication_methods": ["client_secret_post"],
                                   "scopes": ["files:read", "files:write"],
                                   "is_public": true,
@@ -465,7 +468,7 @@ public class ClientQueryController {
                                   "website_url": "http://example.com",
                                   "terms_url": "http://example.com",
                                   "policy_url": "http://example.com",
-                                  "logo": "data:image/png;base64,ivBOR",
+                                  "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                                   "authentication_methods": ["client_secret_post"],
                                   "scopes": ["files:read", "files:write"],
                                   "is_public": true,
@@ -544,7 +547,7 @@ public class ClientQueryController {
                             value =
                                 """
                                               {
-                                                  data: [
+                                                  "data": [
                                                     {
                                                         "name": "Example Name",
                                                         "client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
@@ -552,10 +555,10 @@ public class ClientQueryController {
                                                         "website_url": "http://example.com",
                                                         "terms_url": "http://example.com",
                                                         "policy_url": "http://example.com",
-                                                        "logo": "data:image/png;base64,ivBOR",
+                                                        "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                                                         "authentication_methods": ["client_secret_post"],
                                                         "scopes": ["files:read", "files:write"],
-                                                        "is_public": true
+                                                        "is_public": true,
                                                         "created_on": "2024-04-04T12:00:00Z",
                                                         "created_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
                                                         "modified_on": "2024-04-04T12:00:00Z",
@@ -587,7 +590,12 @@ public class ClientQueryController {
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<PageableResponse<ClientInfoResponse>> getClientsInfo(
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
-      @Parameter(description = "Pagination limit", required = true, example = "1")
+      @Parameter(
+              description =
+                  "How many entries to return, between 1 and 50. It has no default "
+                      + "and has to be sent on every call.",
+              required = true,
+              example = "30")
           @RequestParam(value = "limit")
           @Min(value = 1, message = "limit must be at least 1")
           @Max(value = 50, message = "limit must be at most 50")
@@ -660,10 +668,7 @@ public class ClientQueryController {
                                         "data": [
                                             {
                                                 "registered_client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
-                                                "scopes": [
-                                                    "files:read",
-                                                    "files:write"
-                                                ],
+                                                "scopes": "files:read files:write",
                                                 "modified_at": "2024-04-04T12:00:00Z",
                                                 "client": {
                                                     "name": "Example Name",
@@ -672,7 +677,7 @@ public class ClientQueryController {
                                                     "website_url": "http://example.com",
                                                     "terms_url": "http://example.com",
                                                     "policy_url": "http://example.com",
-                                                    "logo": "data:image/png;base64,ivBOR",
+                                                    "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                                                     "authentication_methods": [
                                                         "client_secret_post"
                                                     ],
@@ -715,7 +720,12 @@ public class ClientQueryController {
       })
   public ResponseEntity<PageableModificationResponse<ConsentResponse>> getConsents(
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
-      @Parameter(description = "Pagination limit", required = true, example = "1")
+      @Parameter(
+              description =
+                  "How many entries to return, between 1 and 50. It has no default "
+                      + "and has to be sent on every call.",
+              required = true,
+              example = "30")
           @RequestParam(value = "limit")
           @Min(value = 1, message = "limit must be at least 1")
           @Max(value = 50, message = "limit must be at most 50")

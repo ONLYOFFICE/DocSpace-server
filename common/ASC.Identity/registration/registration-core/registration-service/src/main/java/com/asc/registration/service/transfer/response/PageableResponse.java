@@ -34,6 +34,7 @@
 package com.asc.registration.service.transfer.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.ZonedDateTime;
 import lombok.*;
 
@@ -50,15 +51,32 @@ import lombok.*;
 public class PageableResponse<D> {
 
   /** The data contained in the paginated response. */
+  @Schema(
+      description =
+          "The items on this page, at most as many as the requested limit. An empty array means "
+              + "there is nothing further to read.")
   private Iterable<D> data;
 
   /** The current cursor. */
   @JsonProperty("last_client_id")
+  @Schema(
+      description =
+          "The cursor to send back as last_client_id to ask for the next page, together with "
+              + "last_created_on. It is null when the page is empty.",
+      example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
   private String lastClientId;
 
   @JsonProperty("last_created_on")
+  @Schema(
+      description =
+          "The cursor to send back as last_created_on to ask for the next page, together with "
+              + "last_client_id. It is null when the page is empty.",
+      example = "2024-04-04T12:00:00Z")
   private ZonedDateTime lastCreatedOn;
 
   /** The maximum number of items per page. */
+  @Schema(
+      description = "The page size that was applied to this request, between 1 and 50.",
+      example = "50")
   private int limit;
 }

@@ -34,6 +34,8 @@
 package com.asc.registration.service.transfer.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Set;
@@ -51,55 +53,124 @@ import lombok.*;
 public class ClientInfoResponse implements Serializable {
 
   /** The name of the client. */
+  @Schema(
+      description =
+          "The display name shown to the user on the consent screen, between 3 and 256 "
+              + "characters.",
+      example = "Example Name")
   private String name;
 
   /** The unique identifier of the client. */
   @JsonProperty("client_id")
+  @Schema(
+      description =
+          "The generated identifier of the client, sent as client_id in every OAuth2 request. It "
+              + "is assigned when the client is registered and never changes afterwards.",
+      example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
   private String clientId;
 
   /** The description of the client. */
+  @Schema(
+      description =
+          "The free-text description shown next to the name on the consent screen, at most 255 "
+              + "characters.",
+      example = "Example Description")
   private String description;
 
   /** The website URL of the client. */
   @JsonProperty("website_url")
+  @Schema(
+      description = "The URL of the client home page, offered to the user before they consent.",
+      example = "http://example.com")
   private String websiteUrl;
 
   /** The terms of service URL of the client. */
   @JsonProperty("terms_url")
+  @Schema(
+      description = "The URL of the client terms of service, linked from the consent screen.",
+      example = "http://example.com")
   private String termsUrl;
 
   /** The privacy policy URL of the client. */
   @JsonProperty("policy_url")
+  @Schema(
+      description = "The URL of the client privacy policy, linked from the consent screen.",
+      example = "http://example.com")
   private String policyUrl;
 
   /** The logo of the client. */
   @JsonProperty("logo")
+  @Schema(
+      description =
+          "The client logo as a data URI carrying base64 image data, shown on the consent screen. "
+              + "Only png, jpeg, jpg and svg+xml are accepted, the whole string may not exceed "
+              + "2000000 characters and the decoded image may not exceed 256000 bytes.",
+      example =
+          "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==")
   private String logo;
 
   /** The authentication methods supported by the client. */
   @JsonProperty("authentication_methods")
+  @ArraySchema(
+      arraySchema =
+          @Schema(
+              description =
+                  "How the client authenticates itself at the token endpoint: client_secret_post "
+                      + "for a confidential client that sends its secret, none for a public client "
+                      + "that proves itself with PKCE instead.",
+              example = "[\"client_secret_post\"]"),
+      schema = @Schema(type = "string", example = "client_secret_post"))
   private Set<String> authenticationMethods;
 
   /** The scopes assigned to the client. */
+  @ArraySchema(
+      arraySchema =
+          @Schema(
+              description =
+                  "The permissions the client may ask for, named as they appear in the tenant "
+                      + "scope catalogue - for example files:read, rooms:write or openid. A client "
+                      + "cannot request a scope that is not listed here.",
+              example = "[\"files:read\", \"files:write\"]"),
+      schema = @Schema(type = "string", example = "files:read"))
   private Set<String> scopes;
 
   /** Indicates if the client is public. */
   @JsonProperty("is_public")
+  @Schema(
+      description =
+          "Whether the client is offered to third-party tenants rather than only to the tenant "
+              + "that registered it.",
+      example = "false")
   private boolean isPublic;
 
   /** The date and time when the client was created. */
   @JsonProperty("created_on")
+  @Schema(
+      description = "When the client was registered, as an ISO-8601 timestamp with a zone offset.",
+      example = "2024-04-04T12:00:00Z")
   private ZonedDateTime createdOn;
 
   /** The user who created the client. */
   @JsonProperty("created_by")
+  @Schema(
+      description =
+          "The identifier of the user who registered the client. A plain user may read and change "
+              + "only the clients where this is their own identifier.",
+      example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
   private String createdBy;
 
   /** The date and time when the client was last modified. */
   @JsonProperty("modified_on")
+  @Schema(
+      description =
+          "When the client was last changed, as an ISO-8601 timestamp with a zone offset.",
+      example = "2024-04-04T12:00:00Z")
   private ZonedDateTime modifiedOn;
 
   /** The user who last modified the client. */
   @JsonProperty("modified_by")
+  @Schema(
+      description = "The identifier of the user who last changed the client.",
+      example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
   private String modifiedBy;
 }

@@ -34,6 +34,7 @@
 package com.asc.registration.service.transfer.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.ZonedDateTime;
 import lombok.*;
 
@@ -45,15 +46,33 @@ import lombok.*;
 public class ConsentResponse {
   /** The ID of the registered client. */
   @JsonProperty("registered_client_id")
+  @Schema(
+      description = "The identifier of the client the user granted the consent to.",
+      example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
   private String registeredClientId;
 
   /** The scopes associated with the consent. */
+  @Schema(
+      description =
+          "The scopes covered by this consent, as a single space-separated string rather than a "
+              + "list.",
+      example = "files:read files:write")
   private String scopes;
 
   /** The date and time when the consent was last modified. */
   @JsonProperty("modified_at")
+  @Schema(
+      description =
+          "When the consent was last granted or changed. This is the value to carry into the next "
+              + "page as last_modified_on.",
+      example = "2024-04-04T12:00:00Z")
   private ZonedDateTime modifiedOn;
 
   /** Detailed information about the client associated with the consent. */
+  @Schema(
+      description =
+          "The consent-facing details of the client, embedded so that a list of consents can be "
+              + "rendered without a further call per client. It is null when the client behind the "
+              + "consent no longer exists.")
   private ClientInfoResponse client;
 }

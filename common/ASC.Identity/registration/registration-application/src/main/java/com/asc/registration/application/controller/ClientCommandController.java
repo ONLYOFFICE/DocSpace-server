@@ -171,7 +171,7 @@ public class ClientCommandController {
                       "website_url": "http://example.com",
                       "terms_url": "http://example.com",
                       "policy_url": "http://example.com",
-                      "logo": "data:image/png;base64,ivBOR",
+                      "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                       "authentication_methods": ["client_secret_post"],
                       "redirect_uris": ["https://example.com"],
                       "allowed_origins": ["https://example.com"],
@@ -227,7 +227,7 @@ public class ClientCommandController {
                                   """
                   {
                     "name": "Example Name",
-                    "logo": "data:image/png;base64,iVBOR",
+                    "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                     "website_url": "https://example.com",
                     "description": "Example Description",
                     "redirect_uris": ["https://example.com"],
@@ -350,7 +350,7 @@ public class ClientCommandController {
                   {
                     "name": "Example Name",
                     "description": "Example Description",
-                    "logo": "data:image/png;base64,iVBOR",
+                    "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                     "allow_pkce": false,
                     "is_public": true,
                     "allowed_origins": ["https://example.com"],

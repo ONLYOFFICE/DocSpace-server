@@ -75,6 +75,11 @@ public class ChangeClientActivationRequest implements Serializable {
   /** Indicates whether the client's activation status is enabled or disabled. */
   @NotNull
   @JsonProperty("status")
-  @Schema(description = "The activation status of the client", example = "true")
+  @Schema(
+      description =
+          "Whether the client may obtain tokens from now on. Sending false leaves the "
+              + "registration and the already issued tokens in place but refuses new authorization "
+              + "requests; sending true allows them again.",
+      example = "true")
   private boolean enabled;
 }

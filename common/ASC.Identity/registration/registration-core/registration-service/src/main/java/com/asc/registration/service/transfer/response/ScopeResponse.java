@@ -33,6 +33,7 @@
 
 package com.asc.registration.service.transfer.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 @Getter
@@ -42,11 +43,26 @@ import lombok.*;
 @AllArgsConstructor
 public class ScopeResponse {
   /** The name of the scope. */
+  @Schema(
+      description =
+          "The scope exactly as it is written in an authorization request, for example files:read "
+              + "or openid.",
+      example = "files:read")
   private String name;
 
   /** The group of the scope. */
+  @Schema(
+      description =
+          "The area of the portal the scope belongs to, which is what groups the scopes on the "
+              + "consent screen: files, rooms, contacts, profiles or openid.",
+      example = "files")
   private String group;
 
   /** The type of the scope. */
+  @Schema(
+      description =
+          "What the scope allows inside its group: read for read-only access, write for changes, "
+              + "and openid for the identity scope itself.",
+      example = "read")
   private String type;
 }
