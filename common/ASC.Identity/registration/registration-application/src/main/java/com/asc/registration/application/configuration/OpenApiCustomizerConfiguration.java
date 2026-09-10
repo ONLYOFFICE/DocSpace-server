@@ -49,6 +49,15 @@ public class OpenApiCustomizerConfiguration {
   @Value("${spring.application.web.api}")
   private String webApi;
 
+  @SuppressWarnings("rawtypes")
+  private static void describeProperty(Schema<?> schema, String name, String description) {
+    if (schema.getProperties() == null) return;
+    var property = schema.getProperties().get(name);
+    if (property != null) {
+      property.setDescription(description);
+    }
+  }
+
   /** Removes legacy client and scope paths from the generated OpenAPI spec. */
   @Bean
   public OpenApiCustomizer excludeLegacyPathsCustomizer() {
@@ -70,9 +79,9 @@ public class OpenApiCustomizerConfiguration {
   }
 
   /**
-   * Registers {@link ValidationErrorResponse} (and its nested {@code FieldError}) and documents the
-   * {@code errors} extension that validation and invalid-scope handlers attach to {@code
-   * ProblemDetail}.
+   * Documents Spring's {@code ProblemDetail} schema (RFC 7807), registers {@link
+   * ValidationErrorResponse} / {@code FieldError}, and attaches the {@code errors} extension used
+   * by validation and invalid-scope handlers.
    */
   @Bean
   public OpenApiCustomizer validationErrorSchemasCustomizer() {
@@ -85,6 +94,34 @@ public class OpenApiCustomizerConfiguration {
 
       var problemDetail = components.getSchemas().get("ProblemDetail");
       if (problemDetail == null) return;
+
+      problemDetail.setDescription(
+          "RFC 7807 problem details returned by the registration API for failed requests.");
+      describeProperty(
+          problemDetail,
+          "type",
+          "A URI reference that identifies the problem type. This service sets it to the "
+              + "DocSpace API getting-started page.");
+      describeProperty(
+          problemDetail,
+          "title",
+          "A short, human-readable summary of the problem type, typically the HTTP status "
+              + "reason phrase.");
+      describeProperty(
+          problemDetail, "status", "The HTTP status code for this occurrence of the problem.");
+      describeProperty(
+          problemDetail,
+          "detail",
+          "A human-readable explanation specific to this occurrence of the problem.");
+      describeProperty(
+          problemDetail,
+          "instance",
+          "A URI reference that identifies the specific occurrence, set to the request path.");
+      describeProperty(
+          problemDetail,
+          "properties",
+          "Extension members carried on the problem. Usually empty; validation failures also "
+              + "surface as the top-level errors array.");
 
       var fieldErrorSchemaName =
           validationSchemas.keySet().stream()
