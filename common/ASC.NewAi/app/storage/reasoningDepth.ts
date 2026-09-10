@@ -104,6 +104,29 @@ export function depthToLevel(raw: unknown): ReasoningLevel | null {
   }
 }
 
+/**
+ * The C# `ReasoningDepth` member a string names, the way the C# side parses
+ * catalogue efforts (`ReasoningDepthExtensions.TryParse(value, ignoreCase:
+ * true)`): the enum's names, any casing, nothing else — `minimal` and any
+ * other unknown effort come back as `undefined`.
+ */
+export function parseCsharpReasoningDepth(value: unknown): CsharpReasoningDepth | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+  switch (value.toLowerCase()) {
+    case "none":
+    case "low":
+    case "medium":
+    case "high":
+    case "xhigh":
+    case "max":
+      return value.toLowerCase() as CsharpReasoningDepth;
+    default:
+      return undefined;
+  }
+}
+
 /** A library level as the C# depth the storage accepts. */
 export function levelToDepth(level: ReasoningLevel): CsharpReasoningDepth {
   return level === "off" ? "none" : level;
@@ -135,10 +158,10 @@ export const FULL_REASONING_SUPPORT: ReasoningSupport = {
   depths: REASONING_DEPTH_LEVELS,
 };
 
-/** `ReasoningSupport` for a model with no extended thinking at all. */
+/** `ReasoningSupport` for a model with no extended thinking at all (the library's `NO_REASONING_SUPPORT`). */
 export const NO_REASONING_SUPPORT: ReasoningSupport = {
   thinks: false,
-  canDisable: true,
+  canDisable: false,
   depths: [],
 };
 
