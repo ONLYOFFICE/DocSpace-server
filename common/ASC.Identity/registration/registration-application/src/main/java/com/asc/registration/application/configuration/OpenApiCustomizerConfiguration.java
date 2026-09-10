@@ -55,14 +55,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiCustomizerConfiguration {
   private static final String PROBLEM_DETAIL_REF = "#/components/schemas/ProblemDetail";
-  private static final String PATH_NOT_FOUND = "PathNotFound";
   private static final String METHOD_NOT_ALLOWED = "MethodNotAllowed";
   private static final String UNSUPPORTED_MEDIA_TYPE = "UnsupportedMediaType";
   private static final String NOT_ACCEPTABLE = "NotAcceptable";
 
-  private static final String PATH_NOT_FOUND_DESCRIPTION =
-      "No route matches this path. Distinct from a 404 returned by an operation when a client ID "
-          + "is unknown or not visible to the caller.";
   private static final String METHOD_NOT_ALLOWED_DESCRIPTION =
       "The HTTP method is not allowed for this path";
   private static final String UNSUPPORTED_MEDIA_TYPE_DESCRIPTION =
@@ -213,13 +209,13 @@ public class OpenApiCustomizerConfiguration {
   }
 
   /**
-   * Declares framework-level statuses that Spring raises before an operation runs: unmatched paths
-   * (404), wrong method (405), unsupported Content-Type on JSON bodies (415), and unacceptable
-   * Accept (406).
+   * Declares framework-level statuses that Spring raises before an operation runs: wrong method
+   * (405), unsupported Content-Type on JSON bodies (415), and unacceptable Accept (406).
    *
-   * <p>Route-level 404 is registered under {@code components.responses} only, so it is not confused
-   * with operation 404s that mean an unknown or invisible client ID. 405 and 406 are attached to
-   * every operation. 415 is attached only where the operation declares a request body.
+   * <p>Unmatched-path 404 ({@code NoResourceFoundException}) is not registered here: OpenAPI has no
+   * operation to attach it to without colliding with per-operation 404s that mean an unknown or
+   * invisible client ID. 405 and 406 are attached to every operation. 415 is attached only where
+   * the operation declares a request body.
    */
   @Bean
   public OpenApiCustomizer frameworkErrorResponsesCustomizer() {
@@ -230,7 +226,6 @@ public class OpenApiCustomizerConfiguration {
         openApi.setComponents(components);
       }
 
-      components.addResponses(PATH_NOT_FOUND, problemDetailResponse(PATH_NOT_FOUND_DESCRIPTION));
       components.addResponses(
           METHOD_NOT_ALLOWED, problemDetailResponse(METHOD_NOT_ALLOWED_DESCRIPTION));
       components.addResponses(

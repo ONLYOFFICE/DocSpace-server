@@ -2491,16 +2491,6 @@
           }
         }
       },
-      "PathNotFound": {
-        "description": "No route matches this path. Distinct from a 404 returned by an operation when a client ID is unknown or not visible to the caller.",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/ProblemDetail"
-            }
-          }
-        }
-      },
       "UnsupportedMediaType": {
         "description": "The Content-Type header is not application/json",
         "content": {
