@@ -165,7 +165,7 @@ const OPTIONAL_QUERY_PARAMS = new Set([
   "folderId",
   "query",
 ]);
-const INTEGER_QUERY_PARAMS = new Set(["limit", "startIndex"]);
+const INTEGER_QUERY_PARAMS = new Set(["limit", "startIndex", "count"]);
 
 // One-line description per parameter name. Engine routes declare their inputs
 // as a positional `RouteSpec.params` list of bare names with no prose attached,
@@ -219,7 +219,7 @@ const OPERATION_PARAM_DOCS: Readonly<Record<string, Readonly<Record<string, stri
 // JSON-encoded sort key the previous page ended on rather than an opaque token.
 const PARAM_EXAMPLES: Readonly<Record<string, Json>> = {
   actionType: "Chat",
-  count: "20",
+  count: 20,
   cursor: `{"id":"${EXAMPLE_IDS.thread}","lastEditDate":${EXAMPLE_AT_MS}}`,
   direction: "desc",
   entityId: EXAMPLE_IDS.room,
@@ -923,8 +923,10 @@ interface RequestBodyDoc {
 const REQUEST_BODY_DOCS: Readonly<Record<string, RequestBodyDoc>> = {
   // Single-argument routes: the body is the value itself.
   aiAssignmentsCascadeProfileDelete: {
-    description: "The ID of the profile to detach from every assignment, as a bare JSON string.",
-    example: EXAMPLE_IDS.profile,
+    description:
+      "The profile to detach from every assignment. May be sent as the `profileId` " +
+      "query parameter instead of in the body.",
+    example: { profileId: EXAMPLE_IDS.profile },
   },
   aiAttachmentsDelete: {
     description: "The ID of the attachment to delete, as a bare JSON string.",
@@ -1398,6 +1400,33 @@ const OPERATION_RESPONSE_SCHEMAS: Readonly<Record<string, Json>> = {
     additionalProperties: false,
   },
 
+  // The controller resolves the agent's profile assignment and writes `profileId`
+  // onto the room before answering. It is absent when the agent has no assignment
+  // or the lookup failed, so it is documented as an addition, not a promise.
+  aiAgentsGet: {
+    allOf: [
+      { $ref: "#/components/schemas/AiFolderIntegerWrapper" },
+      {
+        type: "object",
+        properties: {
+          response: {
+            type: "object",
+            properties: {
+              profileId: {
+                type: "string",
+                description:
+                  "The AI profile bound to this agent, added by this service on top of " +
+                  "what the internal service returns. Absent when the agent has no " +
+                  "profile assigned.",
+                examples: [EXAMPLE_IDS.profile],
+              },
+            },
+          },
+        },
+      },
+    ],
+  },
+
   // Relayed from the .NET service with `raw: true`, so the DocSpace envelope is passed
   // through untouched. The method behind it returns no value, which is why the envelope
   // carries no `response`.
@@ -1644,6 +1673,95 @@ function engineOperation(
   return operation;
 }
 
+// Query parameters of a custom route. Engine routes get theirs from
+// `RouteSpec.params`, but a custom route has no such list, so a route that reads
+// the query says so here. These carry their own types and prose because they are
+// richer than the bare-name mechanism above: the agents listing forwards every
+// string query parameter it receives straight to the internal service, and these
+// are the ones that service reads (GetAgentListRequestDto).
+const OPERATION_QUERY_PARAMS: Readonly<Record<string, readonly Json[]>> = {
+  aiAgentsList: [
+    {
+      name: "subjectId",
+      in: "query",
+      description: "Show only the agent rooms this user takes part in.",
+      required: false,
+      schema: { type: "string", examples: [EXAMPLE_IDS.profile] },
+    },
+    {
+      name: "subjectOwnerId",
+      in: "query",
+      description: "Show only the agent rooms owned by this user.",
+      required: false,
+      schema: { type: "string", examples: [EXAMPLE_IDS.profile] },
+    },
+    {
+      name: "excludeSubject",
+      in: "query",
+      description:
+        "Invert the user filter: leave out what `subjectId` selects instead of " + "keeping it.",
+      required: false,
+      schema: { type: "boolean", examples: [false] },
+    },
+    {
+      name: "tags",
+      in: "query",
+      description: "Show only the agent rooms carrying these tags, comma-separated.",
+      required: false,
+      schema: { type: "string", examples: ["ai,assistant"] },
+    },
+    {
+      name: "withoutTags",
+      in: "query",
+      description: "Show only the agent rooms that carry no tags at all.",
+      required: false,
+      schema: { type: "boolean", examples: [false] },
+    },
+    {
+      name: "quotaFilter",
+      in: "query",
+      description: "Filter by quota kind: 0 for all, 1 for the default quota, 2 for a custom one.",
+      required: false,
+      schema: { type: "integer", examples: [0] },
+    },
+    {
+      name: "filterValue",
+      in: "query",
+      description: "Show only the agent rooms whose title matches this text.",
+      required: false,
+      schema: { type: "string", examples: ["assistant"] },
+    },
+    {
+      name: "sortBy",
+      in: "query",
+      description: "Field to sort by, for example `DateAndTime`.",
+      required: false,
+      schema: { type: "string", examples: ["DateAndTime"] },
+    },
+    {
+      name: "sortOrder",
+      in: "query",
+      description: "Sort direction, `ascending` or `descending`.",
+      required: false,
+      schema: { type: "string", examples: ["descending"] },
+    },
+    {
+      name: "startIndex",
+      in: "query",
+      description: "Index of the first entry to return; 0 starts at the beginning.",
+      required: false,
+      schema: { type: "integer", examples: [0] },
+    },
+    {
+      name: "count",
+      in: "query",
+      description: "How many entries to return. The internal service applies its own default.",
+      required: false,
+      schema: { type: "integer", examples: [25] },
+    },
+  ],
+};
+
 function customOperation(route: CustomRouteDoc, operations: OperationSchemaLookup): Json {
   const operation: Record<string, Json> = {
     tags: [tag(route.tag)],
@@ -1662,6 +1780,10 @@ function customOperation(route: CustomRouteDoc, operations: OperationSchemaLooku
   const params: Json[] = [];
   if (route.pathParams && route.pathParams.length > 0) {
     params.push(...pathParameters(route.pathParams, route.operationId));
+  }
+  const query = OPERATION_QUERY_PARAMS[route.operationId];
+  if (query) {
+    params.push(...query);
   }
   if (params.length > 0) {
     operation["parameters"] = params;
