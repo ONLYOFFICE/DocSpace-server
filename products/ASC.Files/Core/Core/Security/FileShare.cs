@@ -34,7 +34,9 @@
 namespace ASC.Files.Core.Security;
 
 /// <summary>
-/// The access rights type.
+/// The level of access a subject has to a file, a folder or a room. The same scale is used by the sharing
+/// operations, by the default sharing rights and by the access records of a room, and not every level is
+/// meaningful everywhere - a room accepts the role-shaped levels, a single file the editing ones.
 /// </summary>
 [EnumExtensions]
 [JsonConverter(typeof(FileShareConverter))]

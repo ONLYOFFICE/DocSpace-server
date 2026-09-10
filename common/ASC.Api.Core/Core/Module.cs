@@ -34,60 +34,63 @@
 namespace ASC.Api.Core;
 
 /// <summary>
-/// The module information.
+/// The descriptor of a portal module: what it is called, where it starts and how it is pictured.
 /// </summary>
 public class Module(Product product)
 {
     /// <summary>
-    /// The module ID.
+    /// The identifier of the module. It is the same in every portal and in every language, so use it rather than the
+    /// title to tell modules apart.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
+    /// <example>e67be73d-f9ae-4ce1-8fec-1880cb518cb4</example>
     public Guid Id { get; set; } = product.ProductID;
 
     /// <summary>
-    /// The module product class name.
+    /// The short system name of the module, the one that appears in its addresses and in the portal configuration.
+    /// Unlike the title it is not translated.
     /// </summary>
     /// <example>files</example>
     public string AppName { get; set; } = product.ProductClassName;
 
     /// <summary>
-    /// The module product class name.
+    /// The display name of the module, already translated for the calling account, so it changes with the language
+    /// and must not be compared against a fixed string.
     /// </summary>
     /// <example>Documents</example>
     public string Title { get; set; } = product.Name;
 
     /// <summary>
-    /// The URL to the module start page.
+    /// The address of the start page of the module, to be opened in a browser rather than called as an API.
     /// </summary>
     /// <example>https://example.com</example>
     public string Link { get; set; } = product.StartURL;
 
     /// <summary>
-    /// The module icon URL.
+    /// The address of the small icon of the module, meant for a menu entry.
     /// </summary>
     /// <example>https://example.com/icon.svg</example>
     public string IconUrl { get; set; } = product.Context.IconFileName;
 
     /// <summary>
-    /// The module large image URL.
+    /// The address of the large image of the module, meant for a tile or a start screen.
     /// </summary>
     /// <example>https://example.com/image.png</example>
     public string ImageUrl { get; set; } = product.Context.LargeIconFileName;
 
     /// <summary>
-    /// The module help URL.
+    /// The address of the help section of the module. It is empty when the portal publishes no help for it.
     /// </summary>
     /// <example>https://example.com/help</example>
     public string HelpUrl { get; set; } = product.HelpURL;
 
     /// <summary>
-    /// The module description.
+    /// The one-line description of the module shown next to its title, translated for the calling account.
     /// </summary>
     /// <example>File management</example>
     public string Description { get; set; } = product.Description;
 
     /// <summary>
-    /// Specifies if the module is primary or not.
+    /// Whether the portal opens this module first when no other destination is given.
     /// </summary>
     /// <example>true</example>
     public bool IsPrimary { get; set; } = product.IsPrimary;

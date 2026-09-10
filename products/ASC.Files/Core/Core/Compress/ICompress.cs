@@ -33,9 +33,10 @@
 
 namespace ASC.Web.Files.Core.Compress;
 
-///<summary>
-/// The archiving class unification interface.
-///</summary>
+/// <summary>
+/// The archive writer that packs a multi-item download. It is published as an object without fields: the selected
+/// format is read from the file settings, not from this object.
+/// </summary>
 public interface ICompress : IDisposable
 {
     /// <summary>

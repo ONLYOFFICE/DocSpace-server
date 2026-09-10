@@ -34,12 +34,15 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for changing the default access rights.
+/// The default sharing rights to store for the calling account, sent as a bare array.
 /// </summary>
 public class DefaultAccessRightsrequestDto : IValidatableObject
 {
     /// <summary>
-    /// Sharing rights (None, ReadWrite, Read, Restrict, Varies, Review, Comment, FillForms, CustomFilter, RoomAdmin, Editing, Collaborator).
+    /// The access rights the sharing dialog should offer by default. The array is the whole request body rather than
+    /// a field of an object, and the portal stores a normalised subset of it instead of the array as sent, so read
+    /// the answer to learn what was kept. An empty array clears the setting, after which the portal reports read
+    /// access alone. A value outside the published list is rejected as an invalid request.
     /// </summary>
     /// <example>[1]</example>
     [FromBody]
