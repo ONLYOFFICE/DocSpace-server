@@ -58,7 +58,7 @@ public class DeleteFolderContentCommand : AsyncCommand<DeleteFolderContentComman
         public required string Password { get; set; }
     }
 
-    public override ValidationResult Validate(CommandContext context, Settings settings)
+    protected override ValidationResult Validate(CommandContext context, Settings settings)
     {
         if (string.IsNullOrEmpty(settings.Email))
         {
@@ -73,7 +73,7 @@ public class DeleteFolderContentCommand : AsyncCommand<DeleteFolderContentComman
         return ValidationResult.Success();
     }
 
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
+    protected override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         var configuration = await ApiHelper.GetConfigurationAsync(settings.Email, settings.Password);
 

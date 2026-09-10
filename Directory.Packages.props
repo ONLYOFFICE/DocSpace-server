@@ -121,7 +121,7 @@
     <PackageVersion Include="Microsoft.Extensions.Resilience" Version="10.10.0" />
     <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.22.0" />
     <PackageVersion Include="Microsoft.ML.Tokenizers.Data.Cl100kBase" Version="2.0.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.8.1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.0" />
     <PackageVersion Include="Microsoft.OneDriveSDK" Version="2.1.0" />
     <PackageVersion Include="Microsoft.ML.Tokenizers" Version="2.0.0" />
     <PackageVersion Include="Microsoft.SemanticKernel.Core" Version="1.80.1" />
@@ -175,8 +175,8 @@
     <PackageVersion Include="SkiaSharp" Version="4.152.0" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="4.152.0" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="4.152.0" />
-    <PackageVersion Include="Spectre.Console" Version="0.54.0" />
-    <PackageVersion Include="Spectre.Console.Cli" Version="0.53.1" />
+    <PackageVersion Include="Spectre.Console" Version="0.57.2" />
+    <PackageVersion Include="Spectre.Console.Cli" Version="0.55.0" />
     <!-- Transitive pin: Microsoft.Data.Sqlite pulls SQLitePCLRaw.lib.e_sqlite3 2.1.11, which has a known high-severity vulnerability (GHSA-2m69-gcr7-jv3q). Pin the patched native lib until EF/Microsoft.Data.Sqlite 10.0.11 ships the fix. -->
     <PackageVersion Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.50.3" />
     <PackageVersion Include="StackExchange.Redis" Version="2.13.17" />
@@ -188,15 +188,15 @@
     <PackageVersion Include="Swashbuckle.AspNetCore.Annotations" Version="10.2.3" />
     <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerGen" Version="10.2.3" />
     <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.22.0" />
-    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.4.6" />
+    <PackageVersion Include="Aspire.Hosting.Testing" Version="13.5.3" />
     <PackageVersion Include="Telegram.Bot" Version="22.7.6" />
     <PackageVersion Include="TweetinviAPI" Version="5.0.4" />
     <PackageVersion Include="Twilio" Version="7.13.5" />
     <PackageVersion Include="UAParser" Version="3.1.47" />
     <PackageVersion Include="WebDav.Client" Version="2.9.0" />
     <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
-    <PackageVersion Include="xunit.v3" Version="3.2.1" />
-    <PackageVersion Include="xunit.v3.extensibility.core" Version="3.2.1" />
+    <PackageVersion Include="xunit.v3" Version="3.2.2" />
+    <PackageVersion Include="xunit.v3.extensibility.core" Version="3.2.2" />
     <PackageVersion Include="YamlDotNet" Version="16.3.0" />
     <PackageVersion Include="ZiggyCreatures.FusionCache" Version="2.7.2" />
     <PackageVersion Include="ZiggyCreatures.FusionCache.Backplane.StackExchangeRedis" Version="2.7.2" />
