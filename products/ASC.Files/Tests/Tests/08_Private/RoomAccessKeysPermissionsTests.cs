@@ -66,7 +66,14 @@ public class RoomAccessKeysPermissionsTests(AspireAppFixture fixture) : PrivacyR
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <remarks>
+    /// Bug 82540: end-to-end encryption means even an admin who is not a member of the room is
+    /// denied (403), exactly like a regular non-member. The admin used to get 200 back with the
+    /// room creator's public key in the body. Fixed — this now asserts the clean 403 and that the
+    /// owner's key never leaks to the non-member admin.
+    /// </remarks>
     [Fact]
+    [Trait("Bug", "82540")]
     public async Task GetUserKeysForRoom_DocSpaceAdminNotAMember_CannotReadTheRoomsE2EKeys()
     {
         // End-to-end encryption means even an admin who is not a member of the room is denied

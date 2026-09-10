@@ -148,4 +148,32 @@ public class AddFileToRecentTests(
         exception.ErrorCode.Should().Be(404);
         exception.ErrorContent?.ToString().Should().Contain("The required file was not found");
     }
+
+    /// <remarks>
+    /// Bug 82069: a file created directly in a third-party (Nextcloud/WebDAV) room did not appear
+    /// in Recent after being opened/added, because Recent's lookup assumed an internally-stored
+    /// file. Kept as a regression guard; needs <c>NEXTCLOUD_URL</c>/<c>NEXTCLOUD_LOGIN</c>/
+    /// <c>NEXTCLOUD_PASSWORD</c> in the environment and skips otherwise.
+    /// </remarks>
+    [Trait("Bug", "82069")]
+    [Fact]
+    public async Task AddFileToRecent_FileInThirdPartyRoom_AppearsInRecent()
+    {
+        // Arrange
+        RequireNextcloud();
+        await _filesClient.Authenticate(Owner);
+
+        var suffix = Guid.NewGuid().ToString("N")[..6];
+        var roomId = await CreateThirdPartyRoomAsync(
+            $"Autotest Recent TP {suffix}", $"Autotest Recent TP Room {suffix}");
+        var file = await CreateFile($"Autotest Recent TP File {suffix}.docx", roomId);
+
+        // Act
+        await _filesApi.AddFileToRecentAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert - FolderContentDtoInteger.Files is typed FileEntryBaseDto, which carries Title but
+        // not Id, so the file is matched by its (unique) title.
+        var recent = await PollRecentUntil(r => r.Files.Any(f => f.Title == file.Title));
+        recent.Files.Should().Contain(f => f.Title == file.Title);
+    }
 }

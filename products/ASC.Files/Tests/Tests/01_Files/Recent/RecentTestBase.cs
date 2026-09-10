@@ -76,4 +76,48 @@ public abstract class RecentTestBase(AspireAppFixture fixture) : RoomsPermission
             await Task.Delay(500, TestContext.Current.CancellationToken);
         }
     }
+
+    // The equivalent helpers on ThirdPartyTestBase (ASC.Files.Tests.Tests._03_Rooms.ThirdParty)
+    // are not reusable here: that class lives outside 01_Files, which this suite does not own,
+    // and RecentTestBase already derives from RoomsPermissionsTestBase, so C# single inheritance
+    // rules out pulling in a second base. The credential/skip logic is duplicated deliberately -
+    // it is a handful of lines reading the same three environment variables.
+    private static string NextcloudUrl => Environment.GetEnvironmentVariable("NEXTCLOUD_URL") ?? "";
+    private static string NextcloudLogin => Environment.GetEnvironmentVariable("NEXTCLOUD_LOGIN") ?? "";
+    private static string NextcloudPassword => Environment.GetEnvironmentVariable("NEXTCLOUD_PASSWORD") ?? "";
+
+    /// <summary>
+    /// Skips the current test unless a reachable Nextcloud is configured in the environment.
+    /// </summary>
+    protected static void RequireNextcloud()
+    {
+        Assert.SkipWhen(
+            string.IsNullOrEmpty(NextcloudUrl) || string.IsNullOrEmpty(NextcloudLogin) || string.IsNullOrEmpty(NextcloudPassword),
+            "Nextcloud is not configured: set NEXTCLOUD_URL, NEXTCLOUD_LOGIN and NEXTCLOUD_PASSWORD.");
+    }
+
+    /// <summary>
+    /// Connects the configured Nextcloud account and creates a room backed by it, returning the
+    /// room's id. The generated model types the id as <c>string</c>, but the value on the wire is
+    /// the room's ordinary integer folder id, so it is parsed back for use with the rest of the
+    /// (integer-keyed) Files API - the same cast the TypeScript suite makes explicitly.
+    /// </summary>
+    protected async Task<int> CreateThirdPartyRoomAsync(string customerTitle, string roomTitle)
+    {
+        var connection = await _thirdPartyApi.SaveThirdPartyAsync(
+            new ThirdPartyRequestDto(
+                url: NextcloudUrl,
+                login: NextcloudLogin,
+                password: NextcloudPassword,
+                customerTitle: customerTitle,
+                providerKey: "Nextcloud"),
+            TestContext.Current.CancellationToken);
+
+        var room = await _roomsApi.CreateRoomThirdPartyAsync(
+            connection.Response.Id,
+            new CreateThirdPartyRoom(title: roomTitle, roomType: RoomType.CustomRoom),
+            TestContext.Current.CancellationToken);
+
+        return int.Parse(room.Response.Id);
+    }
 }
