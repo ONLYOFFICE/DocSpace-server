@@ -113,10 +113,6 @@ public class ScopeQueryController {
                     ]
                     """))),
         @ApiResponse(
-            responseCode = "400",
-            description = "Invalid request parameters",
-            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-        @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to list scopes",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),

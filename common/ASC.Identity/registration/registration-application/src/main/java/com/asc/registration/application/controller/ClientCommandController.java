@@ -179,7 +179,9 @@ public class ClientCommandController {
                     """))),
         @ApiResponse(
             responseCode = "400",
-            description = "Invalid request - missing required fields or validation failed",
+            description =
+                "Missing required fields, validation failed, an unknown scope was requested, or "
+                    + "the client limit for this tenant has been reached",
             content =
                 @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -283,7 +285,9 @@ public class ClientCommandController {
         @ApiResponse(responseCode = "200", description = "Client successfully updated"),
         @ApiResponse(
             responseCode = "400",
-            description = "Invalid request - missing required fields or validation failed",
+            description =
+                "Missing required fields, validation failed, or the client could not be updated "
+                    + "because of concurrent modification",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
@@ -291,7 +295,9 @@ public class ClientCommandController {
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "404",
-            description = "Client not found",
+            description =
+                "No client with this ID is visible to the caller, or the ID cannot be parsed as a "
+                    + "client ID",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "415",
@@ -400,7 +406,7 @@ public class ClientCommandController {
                     """))),
         @ApiResponse(
             responseCode = "400",
-            description = "Invalid client ID format",
+            description = "The client ID is blank or contains only whitespace",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
@@ -408,7 +414,9 @@ public class ClientCommandController {
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "404",
-            description = "Client not found",
+            description =
+                "No client with this ID is visible to the caller, or the ID cannot be parsed as a "
+                    + "client ID",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
@@ -466,15 +474,13 @@ public class ClientCommandController {
         @ApiResponse(responseCode = "200", description = "Client consent successfully revoked"),
         @ApiResponse(
             responseCode = "400",
-            description = "Invalid client ID format",
+            description =
+                "The client ID is blank, or the authorization service reported that the consent "
+                    + "was not revoked",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to revoke consent",
-            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Client not found",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
@@ -555,7 +561,7 @@ public class ClientCommandController {
         @ApiResponse(responseCode = "200", description = "Client successfully deleted"),
         @ApiResponse(
             responseCode = "400",
-            description = "Invalid client ID format",
+            description = "The client ID is blank, or the client could not be deleted",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
@@ -563,7 +569,9 @@ public class ClientCommandController {
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "404",
-            description = "Client not found",
+            description =
+                "No client with this ID is visible to the caller, or the ID cannot be parsed as a "
+                    + "client ID",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
@@ -623,6 +631,10 @@ public class ClientCommandController {
       responses = {
         @ApiResponse(responseCode = "200", description = "Client successfully deleted"),
         @ApiResponse(
+            responseCode = "400",
+            description = "The clients could not be deleted because of concurrent modification",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to delete user clients",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
@@ -669,6 +681,10 @@ public class ClientCommandController {
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(responseCode = "200", description = "Client successfully deleted"),
+        @ApiResponse(
+            responseCode = "400",
+            description = "The clients could not be deleted because of concurrent modification",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to delete tenant clients",
@@ -722,7 +738,7 @@ public class ClientCommandController {
             description = "Client activation status successfully changed"),
         @ApiResponse(
             responseCode = "400",
-            description = "Invalid client ID format or activation status",
+            description = "The client ID is blank, or the activation status is missing",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
@@ -730,7 +746,9 @@ public class ClientCommandController {
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "404",
-            description = "Client not found",
+            description =
+                "No client with this ID is visible to the caller, or the ID cannot be parsed as a "
+                    + "client ID",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "415",

@@ -33,6 +33,8 @@
 
 package com.asc.authorization.application.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -54,6 +56,21 @@ public class WellKnownController {
    *
    * @return a {@link ResponseEntity} with HTTP 200 OK and no content.
    */
+  @Operation(
+      summary = "Probe the discovery endpoint",
+      description =
+          "Answers the CORS preflight for the OAuth 2.0 Authorization Server metadata endpoint. "
+              + "The endpoint needs no authentication and reads nothing from the request: it "
+              + "always answers 200 with an empty body, and the CORS headers are added by the "
+              + "surrounding filter chain rather than by this handler. It changes no state, and "
+              + "it does not return the authorization server metadata document - issue a GET "
+              + "against the same path for that.",
+      tags = {"Discovery"},
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Preflight accepted; the response carries no body")
+      })
   @RequestMapping(value = "/.well-known/oauth-authorization-server", method = RequestMethod.OPTIONS)
   public ResponseEntity<?> handleOptions() {
     return ResponseEntity.ok().build();

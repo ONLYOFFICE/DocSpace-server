@@ -157,7 +157,7 @@ public class ClientQueryController {
                     """))),
         @ApiResponse(
             responseCode = "400",
-            description = "Invalid client ID format",
+            description = "The client ID is blank or contains only whitespace",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
@@ -165,7 +165,9 @@ public class ClientQueryController {
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "404",
-            description = "Client not found",
+            description =
+                "No client with this ID is visible to the caller, or the ID cannot be parsed as a "
+                    + "client ID",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
@@ -357,16 +359,26 @@ public class ClientQueryController {
                                 """))),
         @ApiResponse(
             responseCode = "400",
-            description = "Bad request",
-            content = {@Content}),
+            description = "The client ID is blank or contains only whitespace",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Insufficient permissions to view client information",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description =
+                "No client with this ID is visible to the caller, or the ID cannot be parsed as a "
+                    + "client ID",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
-            description = "Too many requests",
+            description = "Too many requests - rate limit exceeded",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
-            description = "Internal server error",
-            content = @Content)
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<ClientInfoResponse> getClientInfo(
@@ -435,16 +447,21 @@ public class ClientQueryController {
                                 """))),
         @ApiResponse(
             responseCode = "400",
-            description = "Bad request",
-            content = {@Content}),
+            description = "The client ID is blank or contains only whitespace",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description =
+                "No client with this ID exists, or the ID cannot be parsed as a client ID",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
-            description = "Too many requests",
+            description = "Too many requests - rate limit exceeded",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
-            description = "Internal server error",
-            content = @Content)
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   public ResponseEntity<ClientInfoResponse> getPublicClientInfo(
       @Parameter(
@@ -512,19 +529,22 @@ public class ClientQueryController {
                                                   "last_created_on": "2024-04-04T12:00:00Z"
                                               }
                                               """))),
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved clients info"),
         @ApiResponse(
             responseCode = "400",
-            description = "Bad request",
-            content = {@Content}),
+            description = "The limit parameter is missing, or is outside the range 1-50",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Insufficient permissions to list client information",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
-            description = "Too many requests",
+            description = "Too many requests - rate limit exceeded",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
-            description = "Internal server error",
-            content = @Content)
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<PageableResponse<ClientInfoResponse>> getClientsInfo(
@@ -623,7 +643,27 @@ public class ClientQueryController {
                                         "limit": 50,
                                         "last_modified_on": "2024-04-04T12:00:00Z"
                                     }
-                                    """)))
+                                    """))),
+        @ApiResponse(
+            responseCode = "400",
+            description = "The limit parameter is missing, or is outside the range 1-50",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "The request carries no valid portal signature",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests - rate limit exceeded",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "503",
+            description = "Authorization service unavailable",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   public ResponseEntity<PageableModificationResponse<ConsentResponse>> getConsents(
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,

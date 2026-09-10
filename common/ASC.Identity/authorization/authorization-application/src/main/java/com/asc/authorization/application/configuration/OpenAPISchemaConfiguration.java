@@ -109,9 +109,20 @@ public class OpenAPISchemaConfiguration {
                     .responses(
                         new io.swagger.v3.oas.models.responses.ApiResponses()
                             .addApiResponse(
+                                "302",
+                                new io.swagger.v3.oas.models.responses.ApiResponse()
+                                    .description(
+                                        "Redirect to the login page, to the consent page, or back "
+                                            + "to the client's redirect URI with an authorization "
+                                            + "code"))
+                            .addApiResponse(
                                 "200",
                                 new io.swagger.v3.oas.models.responses.ApiResponse()
-                                    .description("Authorization page"))
+                                    .description(
+                                        "Returned instead of the redirect when the request carries "
+                                            + "the X-Disable-Redirect header: the target URL is "
+                                            + "sent in the X-Redirect-URI response header and the "
+                                            + "body is empty"))
                             .addApiResponse(
                                 "400",
                                 new io.swagger.v3.oas.models.responses.ApiResponse()
@@ -159,6 +170,14 @@ public class OpenAPISchemaConfiguration {
                                 new io.swagger.v3.oas.models.responses.ApiResponse()
                                     .description(
                                         "Redirect to the client's redirect URI with authorization code"))
+                            .addApiResponse(
+                                "200",
+                                new io.swagger.v3.oas.models.responses.ApiResponse()
+                                    .description(
+                                        "Returned instead of the redirect when the request carries "
+                                            + "the X-Disable-Redirect header: the target URL is "
+                                            + "sent in the X-Redirect-URI response header and the "
+                                            + "body is empty"))
                             .addApiResponse(
                                 "400",
                                 new io.swagger.v3.oas.models.responses.ApiResponse()
@@ -237,7 +256,13 @@ public class OpenAPISchemaConfiguration {
                             .addApiResponse(
                                 "400",
                                 new io.swagger.v3.oas.models.responses.ApiResponse()
-                                    .description("Invalid request parameters")))
+                                    .description("Invalid request parameters"))
+                            .addApiResponse(
+                                "401",
+                                new io.swagger.v3.oas.models.responses.ApiResponse()
+                                    .description(
+                                        "Client authentication failed: the client ID is unknown or "
+                                            + "the client secret does not match")))
                     .requestBody(
                         new RequestBody()
                             .content(
