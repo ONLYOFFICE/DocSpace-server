@@ -294,7 +294,10 @@ public class ClientCommandController {
       tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(responseCode = "200", description = "Client successfully updated"),
+        @ApiResponse(
+            responseCode = "200",
+            description = "Client successfully updated",
+            content = @Content),
         @ApiResponse(
             responseCode = "400",
             description =
@@ -492,7 +495,10 @@ public class ClientCommandController {
       tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(responseCode = "200", description = "Client consent successfully revoked"),
+        @ApiResponse(
+            responseCode = "200",
+            description = "Client consent successfully revoked",
+            content = @Content),
         @ApiResponse(
             responseCode = "400",
             description =
@@ -583,7 +589,10 @@ public class ClientCommandController {
       tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(responseCode = "200", description = "Client successfully deleted"),
+        @ApiResponse(
+            responseCode = "200",
+            description = "Client successfully deleted",
+            content = @Content),
         @ApiResponse(
             responseCode = "400",
             description = "The client ID is blank, or the client could not be deleted",
@@ -659,7 +668,10 @@ public class ClientCommandController {
       tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(responseCode = "200", description = "Client successfully deleted"),
+        @ApiResponse(
+            responseCode = "200",
+            description = "Client successfully deleted",
+            content = @Content),
         @ApiResponse(
             responseCode = "400",
             description = "The clients could not be deleted because of concurrent modification",
@@ -715,7 +727,10 @@ public class ClientCommandController {
       tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(responseCode = "200", description = "Client successfully deleted"),
+        @ApiResponse(
+            responseCode = "200",
+            description = "Client successfully deleted",
+            content = @Content),
         @ApiResponse(
             responseCode = "400",
             description = "The clients could not be deleted because of concurrent modification",
@@ -774,7 +789,8 @@ public class ClientCommandController {
       responses = {
         @ApiResponse(
             responseCode = "200",
-            description = "Client activation status successfully changed"),
+            description = "Client activation status successfully changed",
+            content = @Content),
         @ApiResponse(
             responseCode = "400",
             description = "The client ID is blank, or the activation status is missing",

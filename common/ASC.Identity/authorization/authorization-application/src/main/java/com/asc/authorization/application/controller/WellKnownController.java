@@ -34,6 +34,7 @@
 package com.asc.authorization.application.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -69,7 +70,8 @@ public class WellKnownController {
       responses = {
         @ApiResponse(
             responseCode = "200",
-            description = "Preflight accepted; the response carries no body")
+            description = "Preflight accepted; the response carries no body",
+            content = @Content)
       })
   @RequestMapping(value = "/.well-known/oauth-authorization-server", method = RequestMethod.OPTIONS)
   public ResponseEntity<?> handleOptions() {

@@ -239,14 +239,7 @@
         "operationId": "handleOptions",
         "responses": {
           "200": {
-            "description": "Preflight accepted; the response carries no body",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Preflight accepted; the response carries no body"
           }
         }
       }
@@ -416,14 +409,7 @@
         },
         "responses": {
           "200": {
-            "description": "Client successfully updated",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Client successfully updated"
           },
           "400": {
             "description": "Missing required fields, validation failed, or the client could not be updated because of concurrent modification",
@@ -520,14 +506,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Client successfully deleted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Client successfully deleted"
           },
           "400": {
             "description": "The client ID is blank, or the client could not be deleted",
@@ -887,14 +866,7 @@
         "operationId": "deleteUserClients",
         "responses": {
           "200": {
-            "description": "Client successfully deleted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Client successfully deleted"
           },
           "400": {
             "description": "The clients could not be deleted because of concurrent modification",
@@ -1087,14 +1059,7 @@
         },
         "responses": {
           "200": {
-            "description": "Client activation status successfully changed",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Client activation status successfully changed"
           },
           "400": {
             "description": "The client ID is blank, or the activation status is missing",
@@ -1791,14 +1756,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Client consent successfully revoked",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Client consent successfully revoked"
           },
           "400": {
             "description": "The client ID is blank, or the authorization service reported that the consent was not revoked",
@@ -1874,14 +1832,7 @@
         "operationId": "deleteTenantClients",
         "responses": {
           "200": {
-            "description": "Client successfully deleted",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Client successfully deleted"
           },
           "400": {
             "description": "The clients could not be deleted because of concurrent modification",
