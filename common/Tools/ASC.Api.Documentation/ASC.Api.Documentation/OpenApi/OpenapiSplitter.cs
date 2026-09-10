@@ -225,6 +225,18 @@ internal static class OpenapiSplitter
             return components;
         }
 
+        // The sections carried over whole may themselves point at schemas - a reusable response
+        // names the error model it returns - and those refs reach no operation, so nothing has
+        // collected them yet. Walk them before pruning, or the pruned `schemas` section ends up
+        // missing what the copied sections reference and the document no longer resolves.
+        foreach (var section in joinedComponents)
+        {
+            if (section.Key != "schemas")
+            {
+                CollectSchemaRefs(section.Value, joinedSchemas, usedSchemas);
+            }
+        }
+
         foreach (var section in joinedComponents)
         {
             // Security schemes and the like are small and referenced by name from the root
