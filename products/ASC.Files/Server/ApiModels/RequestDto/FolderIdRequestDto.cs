@@ -49,21 +49,21 @@ public class FolderIdRequestDto<T>
 }
 
 /// <summary>
-/// The request that names one folder whose primary external link is read.
+/// The request that names one folder or room, and how much of a list to answer with.
 /// </summary>
 public class FolderPrimaryIdRequestDto<T>
 {
     /// <summary>
-    /// The folder or room whose primary external link is read. A folder stored in the portal is numbered, while a
-    /// folder in a connected third-party account is named by an opaque string.
+    /// The folder or room the operation addresses. A folder stored on the portal is numbered, while a folder in a
+    /// connected third-party account is named by an opaque string.
     /// </summary>
     /// <example>10</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// Accepted for symmetry with the paged link listings; the single primary link answered here does not depend on
-    /// it.
+    /// How many entries at most to answer with, in the operations of this folder that return a list; an operation
+    /// that answers with a single object is not affected by it.
     /// </summary>
     /// <example>25</example>
     [FromQuery(Name = "count")]
@@ -71,8 +71,8 @@ public class FolderPrimaryIdRequestDto<T>
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
-    /// Accepted for symmetry with the paged link listings; the single primary link answered here does not depend on
-    /// it.
+    /// How many entries of such a list to skip before answering, used together with `count` to walk through it page
+    /// by page.
     /// </summary>
     /// <example>0</example>
     [FromQuery(Name = "startIndex")]

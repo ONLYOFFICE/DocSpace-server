@@ -82,44 +82,48 @@ public class MentionWrapper
 }
 
 /// <summary>
-/// The mention message parameters.
+/// The mention notification to send: what to say, whom to tell and where in the document the mention sits.
 /// </summary>
 public class MentionMessageWrapper
 {
     /// <summary>
-    /// The config parameter which contains the information about the action in the document that will be scrolled to.
+    /// The place in the document the notification link should open at, as the editor reports it when the mention is
+    /// made. Left out, the link opens the file at its beginning.
     /// </summary>
-    /// <example>{"action": {"data": "section-42", "type": "scroll"}}</example>
+    /// <example>{"action": {"data": "section-42", "type": "comment"}}</example>
     public ActionLinkConfig ActionLink { get; set; }
 
     /// <summary>
-    /// A list of emails that will receive the mention message.
+    /// The addresses to notify. Only an address that belongs to a portal account receives a mail; an unknown address
+    /// is skipped, and the answer then carries the access list of the file so that the client can invite its owner.
     /// </summary>
     /// <example>["user1@example.com", "user2@example.com"]</example>
     public List<string> Emails { get; set; }
 
     /// <summary>
-    /// The mention message.
+    /// The note shown next to the link in the mail. Only its first 200 characters are sent, and a value longer than
+    /// the field allows is refused.
     /// </summary>
-    /// <example>Hello</example>
+    /// <example>Please take a look at the second paragraph</example>
     [StringLength(255)]
     public string Message { get; set; }
 }
 
 /// <summary>
-/// The request parameters for sending the mention message.
+/// The request that names the file a mention was made in, and the notification to send.
 /// </summary>
 public class MentionMessageWrapperRequestDto<T>
 {
     /// <summary>
-    /// The file ID with the mention message.
+    /// The file the mention was made in. A file stored on the portal is numbered, while a file in a connected
+    /// third-party account is named by an opaque string.
     /// </summary>
-    /// <example>file-id</example>
+    /// <example>10</example>
     [FromRoute(Name = "fileId")]
     public T FileId { get; set; }
 
     /// <summary>
-    /// The mention message.
+    /// The notification to send.
     /// </summary>
     [FromBody]
     public MentionMessageWrapper MentionMessage { get; set; }

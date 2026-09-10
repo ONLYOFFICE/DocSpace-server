@@ -50,14 +50,15 @@ public enum EditorType
 }
 
 /// <summary>
-/// The config parameter which contains the information about the action in the document that will be scrolled to.
+/// The place inside a document that a link should open at.
 /// </summary>
 public class ActionLinkConfig
 {
     /// <summary>
-    /// The information about the action in the document that will be scrolled to.
+    /// The anchor itself. It is passed on to the editor unchanged, so it has to be the value the editor produced for
+    /// the comment or the mention it points at.
     /// </summary>
-    /// <example>{"data": "section", "type": "scroll"}</example>
+    /// <example>{"data": "section-42", "type": "comment"}</example>
     [JsonPropertyName("action")]
     public ActionConfig Action { get; set; }
 
@@ -67,22 +68,23 @@ public class ActionLinkConfig
     }
 
     /// <summary>
-    /// The information about the action in the document that will be scrolled to.
+    /// An anchor inside a document, as the editor writes it.
     /// </summary>
     public class ActionConfig
     {
         /// <summary>
-        /// The action data that will be scrolled to.
+        /// The anchor value produced by the editor, opaque to the portal: it names the comment, the mention or the
+        /// place the document is scrolled to.
         /// </summary>
-        /// <example>section</example>
+        /// <example>section-42</example>
         [JsonPropertyName("data")]
         [StringLength(256)]
         public string Data { get; set; }
 
         /// <summary>
-        /// The action type.
+        /// What the anchor points at, as the editor names it - a comment thread, for instance.
         /// </summary>
-        /// <example>scroll</example>
+        /// <example>comment</example>
         [JsonPropertyName("type")]
         [StringLength(128)]
         public string Type { get; set; }

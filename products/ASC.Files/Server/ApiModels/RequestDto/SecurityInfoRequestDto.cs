@@ -34,37 +34,43 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The security information request parameters.
+/// The entries whose sharing rights are being changed, and the rights to apply to them.
 /// </summary>
 public class SecurityInfoRequestDto
 {
     /// <summary>
-    /// The list of the shared folder IDs.
+    /// The folders and rooms whose rights are being changed, identified as a listing operation returns them - a
+    /// number on the portal, a string on a connected third-party account.
     /// </summary>
     /// <example>[1, 2, 3]</example>
     public List<JsonElement> FolderIds { get; set; } = [];
 
     /// <summary>
-    /// The list of the shared file IDs.
+    /// The files whose rights are being changed, identified as a listing operation returns them - a number on the
+    /// portal, a string on a connected third-party account.
     /// </summary>
-    /// <example>[1, 2, 3]</example>
+    /// <example>[7, 8]</example>
     public List<JsonElement> FileIds { get; set; } = [];
 
     /// <summary>
-    /// The collection of sharing parameters.
+    /// One record per account or group whose rights are being set, each naming the subject and the level it gets on
+    /// all of the listed entries; a level of `None` takes the access away. An empty collection makes the call change
+    /// nothing.
     /// </summary>
-    /// <example>[{"access": 1, "shareTo": "00000000-0000-0000-0000-000000000000"}]</example>
+    /// <example>[{"access": 2, "shareTo": "9924256a-739c-462b-af15-e652a3b1b6eb"}]</example>
     [MaxEmailInvitations]
     public List<FileShareParams> Share { get; set; }
 
     /// <summary>
-    /// Specifies whether to notify users about the shared file or not.
+    /// Set to true to have every account named in `share` emailed about the access it just received; false changes
+    /// the rights without telling anyone.
     /// </summary>
     /// <example>true</example>
     public bool Notify { get; set; }
 
     /// <summary>
-    /// The message to send when notifying about the shared file.
+    /// The text put into that email, ignored while `notify` is false. Markup is stripped before sending, so only the
+    /// plain text of the value survives.
     /// </summary>
     /// <example>You have been granted access to the file</example>
     [StringLength(255)]
@@ -72,25 +78,28 @@ public class SecurityInfoRequestDto
 }
 
 /// <summary>
-/// The parameters of the security information request.
+/// The rights to apply to a single file or folder, and how to announce them.
 /// </summary>
 public class SecurityInfoSimpleRequestDto
 {
     /// <summary>
-    /// The collection of sharing parameters.
+    /// One record per account or group whose rights are being set, each naming the subject and the level it gets; a
+    /// level of `None` takes the access away. An empty collection makes the call change nothing.
     /// </summary>
-    /// <example>[{"access": 1, "shareTo": "00000000-0000-0000-0000-000000000000"}]</example>
+    /// <example>[{"access": 2, "shareTo": "9924256a-739c-462b-af15-e652a3b1b6eb"}]</example>
     [MaxEmailInvitations]
     public List<FileShareParams> Share { get; set; }
 
     /// <summary>
-    /// Specifies whether to notify users about the shared file or not.
+    /// Set to true to have every account named in `share` emailed about the access it just received; false changes
+    /// the rights without telling anyone.
     /// </summary>
     /// <example>true</example>
     public bool Notify { get; set; }
 
     /// <summary>
-    /// The message to send when notifying about the shared file.
+    /// The text put into that email, ignored while `notify` is false. Markup is stripped before sending, so only the
+    /// plain text of the value survives.
     /// </summary>
     /// <example>You have been granted access to the file</example>
     [StringLength(255)]
@@ -98,38 +107,40 @@ public class SecurityInfoSimpleRequestDto
 }
 
 /// <summary>
-/// The parameters of the security information request for the specified file.
+/// The request that names the file whose sharing is being changed, and the change.
 /// </summary>
 public class FileSecurityInfoSimpleRequestDto<T>
 {
     /// <summary>
-    /// The file ID.
+    /// The file whose sharing is being changed. A file stored on the portal is numbered, while a file in a connected
+    /// third-party account is named by an opaque string.
     /// </summary>
-    /// <example>1</example>
+    /// <example>10</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// The parameters of the security information simple request.
+    /// The rights to apply to the file, and whether to announce them by mail.
     /// </summary>
     [FromBody]
     public required SecurityInfoSimpleRequestDto SecurityInfoSimple { get; set; }
 }
 
 /// <summary>
-/// The security information request parameters for the specified folder.
+/// The request that names the folder whose sharing is being changed, and the change.
 /// </summary>
 public class FolderSecurityInfoSimpleRequestDto<T>
 {
     /// <summary>
-    /// The folder ID.
+    /// The folder whose sharing is being changed. A folder stored on the portal is numbered, while a folder in a
+    /// connected third-party account is named by an opaque string.
     /// </summary>
-    /// <example>1</example>
+    /// <example>10</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// The parameters of the security information simple request.
+    /// The rights to apply to the folder, and whether to announce them by mail.
     /// </summary>
     [FromBody]
     public required SecurityInfoSimpleRequestDto SecurityInfoSimple { get; set; }

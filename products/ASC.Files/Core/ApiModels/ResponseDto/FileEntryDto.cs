@@ -43,7 +43,8 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 public partial class FileEntryDtoContext : JsonSerializerContext;
 
 /// <summary>
-/// The file entry information.
+/// What every file and folder in an answer has in common; the concrete shape is a file or a folder, told apart by the
+/// entry type.
 /// </summary>
 [JsonDerivedType(typeof(FileDto<int>))]
 [JsonDerivedType(typeof(FileDto<string>))]
@@ -52,76 +53,90 @@ public partial class FileEntryDtoContext : JsonSerializerContext;
 public abstract class FileEntryBaseDto
 {
     /// <summary>
-    /// The file entry title.
+    /// The name shown for the entry. For a file it carries the extension, which is how the format is recognised, and
+    /// for a room it is the room name.
     /// </summary>
     /// <example>Some title.txt</example>
     public string Title { get; set; }
 
     /// <summary>
-    /// The access rights to the file entry.
+    /// The level the calling account holds on this entry, resolved from its own rights, the groups it belongs to and
+    /// any link it came in through. It is the level itself, not what the account may do with it - the action flags
+    /// below answer that.
     /// </summary>
     /// <example>1</example>
     public FileShare Access { get; set; }
 
     /// <summary>
-    /// Provides information about the employee who shared the file or folder.
+    /// Who gave the calling account the access it is using. It is filled in only while the entry is being read
+    /// through a share, and never for a caller without an account.
     /// </summary>
     /// <example>{"displayName": "John Doe"}</example>
     public EmployeeDto SharedBy { get; set; }
 
     /// <summary>
-    /// The information about the employee who owns the file entry.
+    /// Who owns the place the entry is shared from - the creator of the room it lies in, or of the personal section
+    /// that holds it. It is filled in only while the entry is being read through a share, and never for a caller
+    /// without an account.
     /// </summary>
     /// <example>{"displayName": "John Doe"}</example>
     public EmployeeDto OwnedBy { get; set; }
 
     /// <summary>
-    /// Specifies if the file entry is shared via link or not.
+    /// Whether at least one external link exists for the entry, whichever kind. It says nothing about accounts and
+    /// groups - those are counted by the flag for members below.
     /// </summary>
     /// <example>false</example>
     public bool Shared { get; set; }
 
     /// <summary>
-    /// Specifies if the file entry is shared for user or not.
+    /// Whether at least one account or group has been given rights on the entry directly, as opposed to reaching it
+    /// through a link or through the room around it.
     /// </summary>
     /// <example>false</example>
     public bool SharedForUser { get; set; }
 
     /// <summary>
-    /// Specifies if the file entry is shared via a public (non-internal) external link.
+    /// Whether one of the entry's links is open to people outside the portal, as opposed to a link that only its own
+    /// members can follow. This is the flag to watch when the concern is who can reach the content from outside.
     /// </summary>
     /// <example>false</example>
     public bool SharedExternal { get; set; }
 
     /// <summary>
-    /// Indicates whether the parent entity is shared.
+    /// Whether the entry is reachable because the room or folder around it is shared, rather than through rights of
+    /// its own. A copy or a move takes the entry out of that scope.
     /// </summary>
     /// <example>false</example>
     public bool ParentShared { get; set; }
 
     /// <summary>
-    /// The short Web URL.
+    /// A shortened address that opens the entry through the link it is being read with. It is an empty string
+    /// whenever no link applies, which is the usual case for a member browsing their own rooms.
     /// </summary>
     /// <example>http://localhost/s/abc123</example>
     [Url]
     public string ShortWebUrl { get; set; }
 
     /// <summary>
-    /// The creation date and time of the file entry.
+    /// When the entry was created, written with the offset of the portal's time zone. For a file restored from an
+    /// older version this is still the moment the file first appeared.
     /// </summary>
-    /// <example>2021-01-01T00:00:00Z</example>
+    /// <example>2026-04-15T13:20:41.0000000+03:00</example>
     public ApiDateTime Created { get; set; }
 
     /// <summary>
-    /// The file entry author.
+    /// Who created the entry. It is null for a caller without an account, who is told nothing about the portal's
+    /// members.
     /// </summary>
     /// <example>{"displayName": "John Doe"}</example>
     public EmployeeDto CreatedBy { get; set; }
 
     /// <summary>
-    /// The last date and time when the file entry was updated.
+    /// When the entry last changed, written with the offset of the portal's time zone. It is never reported as
+    /// earlier than the creation moment, so the two can be compared safely.
     /// </summary>
-    /// <example>2021-01-01T00:00:00Z</example>
+    /// <example>2026-04-15T13:20:41.0000000+03:00</example>
     public ApiDateTime Updated
     {
         get => field < Created ? Created : field;
@@ -129,63 +144,76 @@ public abstract class FileEntryBaseDto
     }
 
     /// <summary>
-    /// The date and time when the file entry will be automatically deleted.
+    /// When the entry will disappear on its own, written with the offset of the portal's time zone. It is filled in
+    /// only where a removal is actually scheduled - something in the trash while the portal cleans it up
+    /// automatically, or a guest's own documents - so a null means nothing is scheduled rather than that the entry is
+    /// permanent.
     /// </summary>
-    /// <example>2021-01-01T00:00:00Z</example>
+    /// <example>2026-04-15T13:20:41.0000000+03:00</example>
     public ApiDateTime AutoDelete { get; set; }
 
     /// <summary>
-    /// The root folder type of the file entry.
+    /// The section the entry ultimately belongs to, which is what tells a personal document from one inside a room,
+    /// from a template and from something in the trash or the archive.
     /// </summary>
-    /// <example>0</example>
+    /// <example>14</example>
     public FolderType RootFolderType { get; set; }
 
     /// <summary>
-    /// The parent room type of the file entry.
+    /// The kind of room the entry lies in, which decides what the room allows - filling forms, public links,
+    /// indexing. It is null for an entry that is not inside a room at all.
     /// </summary>
-    /// <example>0</example>
+    /// <example>19</example>
     public FolderType? ParentRoomType { get; set; }
 
     /// <summary>
-    /// The user who updated the file entry.
+    /// Who changed the entry last. It is null for a caller without an account.
     /// </summary>
     /// <example>{"displayName": "John Doe"}</example>
     public EmployeeDto UpdatedBy { get; set; }
 
     /// <summary>
-    /// Specifies if the file entry provider is specified or not.
+    /// Set when the entry is stored on a connected third-party account rather than on the portal, and null when it is
+    /// stored on the portal. Such an entry is identified by a string rather than a number, and some operations skip
+    /// it.
     /// </summary>
-    /// <example>false</example>
+    /// <example>true</example>
     public bool? ProviderItem { get; set; }
 
     /// <summary>
-    /// The provider key of the file entry.
+    /// Which third-party service holds the entry, matching the keys accepted by the third-party operations. It is
+    /// null for an entry stored on the portal.
     /// </summary>
     /// <example>google-drive</example>
     public string ProviderKey { get; set; }
 
     /// <summary>
-    /// The provider ID of the file entry.
+    /// The connected account the entry comes from, for telling apart two connections to the same service. It is null
+    /// for an entry stored on the portal.
     /// </summary>
     /// <example>1</example>
     public int? ProviderId { get; set; }
 
     /// <summary>
-    /// The order of the file entry.
+    /// The place of the entry in a room where the members arrange the content themselves, given as the position of
+    /// the entry preceded by the positions of the folders leading to it, separated by dots. It is empty when nothing
+    /// has been arranged.
     /// </summary>
-    /// <example>1</example>
+    /// <example>1.3.2</example>
     public string Order { get; set; }
 
     /// <summary>
-    /// Specifies if the file is a favorite or not.
+    /// Set when the calling account has marked the entry as a favorite, which is what puts it into the favorites
+    /// listing. For a file that is not marked it is null rather than false.
     /// </summary>
-    /// <example>false</example>
+    /// <example>true</example>
     public bool? IsFavorite { get; set; }
 
     /// <summary>
-    /// The file entry type.
+    /// Tells a folder from a file, and so which of the two shapes the rest of the object has. A room is reported as a
+    /// folder here.
     /// </summary>
-    /// <example>0</example>
+    /// <example>2</example>
     public abstract FileEntryType FileEntryType { get; }
 
     protected FileEntryBaseDto(FileEntry entry)
@@ -207,93 +235,112 @@ public abstract class FileEntryBaseDto
 }
 
 /// <summary>
-/// The generic file entry information.
+/// The part of a file or folder that depends on how the entry is identified: by a number on the portal, or by a
+/// string on a connected third-party account.
 /// </summary>
 [DebuggerDisplay("{Title} ({Id})")]
 public abstract class FileEntryDto<T> : FileEntryBaseDto
 {
     /// <summary>
-    /// The file entry ID.
+    /// The identifier to pass back to the other operations of this entry. It is a number for storage on the portal
+    /// and a string for a connected third-party account, and it is unique only within its own kind, so files and
+    /// folders may carry the same value.
     /// </summary>
     /// <example>10</example>
     public T Id { get; set; }
 
     /// <summary>
-    /// The root folder ID of the file entry.
+    /// The section the entry ultimately lies in, as an identifier that can be listed like any other folder. For an
+    /// entry inside a room this is the rooms section, not the room.
     /// </summary>
     /// <example>1</example>
     public T RootFolderId { get; set; }
 
     /// <summary>
-    /// The origin ID of the file entry.
+    /// The folder the entry was deleted from, which is where restoring it puts it back. It is left out of the answer
+    /// unless the entry is in the trash.
     /// </summary>
     /// <example>12</example>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginId { get; set; }
 
     /// <summary>
-    /// The origin room ID of the file entry.
+    /// The room the entry was deleted from, left out of the answer for anything that was not deleted out of a room.
     /// </summary>
     /// <example>22</example>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public T OriginRoomId { get; set; }
 
     /// <summary>
-    /// The origin title of the file entry.
+    /// The name of the folder the entry was deleted from, for showing where it would be restored to. It is null for
+    /// an entry that is not in the trash.
     /// </summary>
-    /// <example>Original Title</example>
+    /// <example>Contracts</example>
     public string OriginTitle { get; set; }
 
     /// <summary>
-    /// The origin room title of the file entry.
+    /// The name of the room the entry was deleted from, null for anything that was not deleted out of a room.
     /// </summary>
-    /// <example>Original Room</example>
+    /// <example>Legal team</example>
     public string OriginRoomTitle { get; set; }
 
     /// <summary>
-    /// Specifies if the file entry can be shared or not.
+    /// Whether the calling account may change who has access to the entry, and so whether offering a sharing dialog
+    /// for it makes sense. It is false in rooms whose access is fixed by the room itself, such as a private one, even
+    /// for its manager.
     /// </summary>
     /// <example>true</example>
     public bool CanShare { get; set; }
 
     /// <summary>
-    /// A dictionary representing the sharing settings for the file entry.
+    /// How many links of each kind currently exist for the entry, counted separately for the primary link and the
+    /// additional ones. Kinds with no links are left out, and the whole field is null when the caller may not change
+    /// the access or no link exists at all.
     /// </summary>
-    /// <example>{"ExternalLink": 1, "InvitationLink": 2}</example>
+    /// <example>{"PrimaryExternalLink": 1, "ExternalLink": 2}</example>
     public IDictionary<SubjectType, int> ShareSettings { get; set; }
 
     /// <summary>
-    /// The actions that can be performed with the file entry.
+    /// What the calling account may do with this entry, one flag per action, and the cheapest way to decide which
+    /// operations to offer without trying them. The flags already take the room's settings and the account's role
+    /// into account.
     /// </summary>
     /// <example>{"Read": true, "Edit": false, "Delete": false}</example>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
     /// <summary>
-    /// The available external rights of the file entry.
+    /// Which access levels may be handed out on this entry, listed per kind of recipient, so that a client offers
+    /// only levels the entry actually supports - a room for filling forms and a plain folder do not accept the same
+    /// ones.
     /// </summary>
-    /// <example>{"ExternalLink": ["Read", "Edit"]}</example>
+    /// <example>{"ExternalLink": ["Read", "Editing"]}</example>
     public IDictionary<SubjectType, IEnumerable<string>> AvailableShareRights { get; set; }
 
     /// <summary>
-    /// The request token of the file entry.
+    /// The token of the link the entry is being read through, which is the value the external-share operations expect
+    /// and which also has to be carried by the download and preview addresses. It is null whenever the entry is not
+    /// being read through a link.
     /// </summary>
-    /// <example>token-abc-123</example>
+    /// <example>q7Ry8cQ1lZ0dP3sK2mXfA9tBnV6hJ4uE8wCz5oLg</example>
     public string RequestToken { get; set; }
 
     /// <summary>
-    /// Specifies if the folder can be accessed via an external link or not.
+    /// Set when the link being used was made for this very entry, and false when the entry is reached through a link
+    /// to the room around it. It is null when no link is involved.
     /// </summary>
     /// <example>false</example>
     public bool? External { get; set; }
 
     /// <summary>
-    /// Represents the expiration date of the file entry.
+    /// When the link being used stops working, written with the offset of the portal's time zone. It is null for a
+    /// link that never expires and whenever no link is involved.
     /// </summary>
-    /// <example>2021-01-01T00:00:00Z</example>
+    /// <example>2026-04-15T13:20:41.0000000+03:00</example>
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
-    /// Indicates whether the shareable link associated with the file or folder has expired.
+    /// Set when the link being used has already passed its expiration date, which is why the entry cannot be opened
+    /// even though it is described here. It is null when no link is involved.
     /// </summary>
     /// <example>false</example>
     public bool? IsLinkExpired { get; set; }
