@@ -336,7 +336,7 @@ public class ClientQueryController {
   @RateLimiter(name = "globalRateLimiter")
   @GetMapping("/{clientId}/info")
   @Operation(
-      summary = "Retrieves detailed information for a specific client",
+      summary = "Get client info",
       description =
           "Retrieves the detailed information for a client with the ID specified in the request. "
               + "It returns the consent-facing subset of the client - name, description, logo, the "
@@ -434,7 +434,7 @@ public class ClientQueryController {
   @RateLimiter(name = "publicRateLimiter")
   @GetMapping("/{clientId}/public/info")
   @Operation(
-      summary = "Handles the GET request for public client information",
+      summary = "Get public client info",
       description =
           "Returns the same consent-facing client information as the signed read, but without "
               + "requiring a portal signature. It is meant for a login or consent page that has to "
@@ -520,7 +520,7 @@ public class ClientQueryController {
   @RateLimiter(name = "globalRateLimiter")
   @GetMapping("/info")
   @Operation(
-      summary = "Retrieves a pageable list of client information",
+      summary = "List client info",
       description =
           "Retrieves a paginated list of information for all clients, each in the same "
               + "consent-facing form as the single-client info read. An administrator sees every "
@@ -631,7 +631,7 @@ public class ClientQueryController {
   @RateLimiter(name = "globalRateLimiter")
   @GetMapping("/consents")
   @Operation(
-      summary = "Retrieves a pageable list of consents",
+      summary = "List user consents",
       description =
           "Retrieves a paginated list of user consents: the clients the calling user has "
               + "authorized, each with the scopes granted, the moment the consent was last changed "
