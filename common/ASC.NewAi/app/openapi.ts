@@ -656,11 +656,13 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   // OpenAI passthrough - the provider's answer is relayed as it stands, so any
   // status it returns can reach the caller, 429 included.
   aiOpenaiChatCompletions: {
+    "404": "No profile with this identifier exists for the caller.",
     "413": "The request body is larger than this route accepts.",
     "429": true,
     "502": true,
   },
   aiOpenaiImagesGenerations: {
+    "404": "No profile with this identifier exists for the caller.",
     "413": "The request body is larger than this route accepts.",
     "429": true,
     "502": true,
@@ -797,7 +799,10 @@ function errorResponses(operationId: string, hasBody: boolean): Record<string, J
   for (const code of [...codes].sort()) {
     const override = spec[code];
     const description = typeof override === "string" ? override : ERROR_DESCRIPTIONS[code];
-    responses[code] = jsonResponse(description as string, ERROR_RESPONSE_REF);
+    responses[code] = jsonResponse(
+      description as string,
+      OPERATION_ERROR_SCHEMAS[operationId] ?? ERROR_RESPONSE_REF,
+    );
   }
   return responses;
 }
@@ -1257,8 +1262,213 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
     "The provider's own response, relayed verbatim with its status and content type.",
 };
 
+// The four proxy operations answer with the provider's body, byte for byte. Nothing
+// here reshapes it, so the document says what it is rather than inventing a schema.
+const PROVIDER_RELAY_SCHEMA: Json = {
+  type: "object",
+  description:
+    "Relayed from the provider unchanged. The shape is the provider's, not this " +
+    "service's, and it varies by provider and model.",
+  additionalProperties: true,
+};
+
+// The success schema normally comes from the engine method's return type. These
+// operations do not return what their engine method returns - the controller wraps
+// it, replaces it, or relays somebody else's body - so the shape is declared here
+// and wins over the generated one. Every entry was read off the controller.
+const OPERATION_RESPONSE_SCHEMAS: Readonly<Record<string, Json>> = {
+  // `res.json({ messageId })` - the identifier only, not the stored message.
+  aiThreadsAppendUserMessage: {
+    type: "object",
+    properties: {
+      messageId: {
+        type: "string",
+        description: "Identifier of the message that was appended to the thread.",
+        examples: [EXAMPLE_IDS.message],
+      },
+    },
+    required: ["messageId"],
+    additionalProperties: false,
+  },
+
+  // `res.json({ title })` - the engine returns the bare string, the controller wraps it.
+  aiThreadsRegenerateTitle: {
+    type: "object",
+    properties: {
+      title: {
+        type: "string",
+        description: "The regenerated thread title.",
+        examples: ["Quarterly report review"],
+      },
+    },
+    required: ["title"],
+    additionalProperties: false,
+  },
+
+  // `res.json({ groups, errors, system })`: the engine's plain tool map is merged with
+  // the registered custom servers, and the system server names are listed separately
+  // so a client can tell the two apart.
+  aiToolsListSystemTools: {
+    type: "object",
+    properties: {
+      groups: {
+        type: "object",
+        description:
+          "Tools by server name, covering both the host-configured system servers and " +
+          "the custom MCP servers registered for this scope.",
+        additionalProperties: {
+          type: "array",
+          items: { $ref: "#/components/schemas/AiTMCPItem" },
+        },
+      },
+      errors: {
+        type: "object",
+        description:
+          "Why a registered custom server could not be reached, keyed by server name. " +
+          "A server that answered is absent from this map.",
+        additionalProperties: { type: "string" },
+      },
+      system: {
+        type: "array",
+        description:
+          "Names of the host-configured system servers among the keys of `groups`; " +
+          "everything else there was registered as a custom server.",
+        items: { type: "string" },
+      },
+    },
+    required: ["groups", "errors", "system"],
+    additionalProperties: false,
+  },
+
+  // `res.json({ tools })` - flattened across servers, with the excluded ones dropped.
+  aiEditorToolsList: {
+    type: "object",
+    properties: {
+      tools: {
+        type: "array",
+        description: "The tools the editor may offer, flattened across every server.",
+        items: {
+          type: "object",
+          properties: {
+            name: {
+              type: "string",
+              description: "Tool name, as it is passed back to the call endpoint.",
+              examples: ["docspace_search_files"],
+            },
+            description: {
+              type: "string",
+              description: "What the tool does, empty when the server declares nothing.",
+            },
+            inputSchema: {
+              type: "object",
+              description: "JSON Schema of the tool arguments.",
+              additionalProperties: true,
+            },
+            requireApproval: {
+              type: "boolean",
+              description:
+                "Whether the editor has to ask the user before running the tool. Read-only " +
+                "operations arrive with this off.",
+              examples: [true],
+            },
+          },
+          required: ["name", "description", "inputSchema", "requireApproval"],
+          additionalProperties: false,
+        },
+      },
+    },
+    required: ["tools"],
+    additionalProperties: false,
+  },
+
+  // `res.json({ result })` - always a string: a non-string tool result is JSON-encoded
+  // before it is sent, because the editor plugin relays it to the model verbatim.
+  aiEditorToolsCall: {
+    type: "object",
+    properties: {
+      result: {
+        type: "string",
+        description:
+          "What the tool produced, as text. A structured result is JSON-encoded, and a " +
+          "tool that failed reports its error here rather than through a status code.",
+      },
+    },
+    required: ["result"],
+    additionalProperties: false,
+  },
+
+  // Relayed from the .NET service with `raw: true`, so the DocSpace envelope is passed
+  // through untouched. The method behind it returns no value, which is why the envelope
+  // carries no `response`.
+  aiVectorizationStartTask: {
+    type: "object",
+    properties: {
+      count: {
+        type: "integer",
+        description: "Envelope field from the internal service; 0 for this operation.",
+        examples: [0],
+      },
+      status: {
+        type: "integer",
+        description: "Envelope status flag from the internal service.",
+        examples: [0],
+      },
+      statusCode: {
+        type: "integer",
+        description: "HTTP status the internal service answered with.",
+        examples: [200],
+      },
+    },
+    required: ["count", "status", "statusCode"],
+    additionalProperties: true,
+  },
+
+  aiOpenaiChatCompletions: PROVIDER_RELAY_SCHEMA,
+  aiOpenaiImagesGenerations: PROVIDER_RELAY_SCHEMA,
+  aiWebSearchPassthroughSearch: PROVIDER_RELAY_SCHEMA,
+  aiWebSearchPassthroughContents: PROVIDER_RELAY_SCHEMA,
+};
+
+// The OpenAI proxies report failures in OpenAI's own error envelope - including the
+// ones this service raises itself, so that a client written against the OpenAI SDK
+// can read them. Every other operation answers with `AiErrorResponse`.
+const OPENAI_ERROR_SCHEMA: Json = {
+  type: "object",
+  properties: {
+    error: {
+      type: "object",
+      properties: {
+        message: { type: "string", description: "Human-readable description of the failure." },
+        type: {
+          type: "string",
+          description: "OpenAI error class, for example `invalid_request_error`.",
+          examples: ["invalid_request_error"],
+        },
+        code: {
+          type: ["string", "null"],
+          description: "Machine-readable code, when the provider supplies one.",
+        },
+        param: {
+          type: ["string", "null"],
+          description: "The request parameter at fault, when the failure names one.",
+        },
+      },
+      required: ["message", "type"],
+      additionalProperties: true,
+    },
+  },
+  required: ["error"],
+  additionalProperties: false,
+};
+
+const OPERATION_ERROR_SCHEMAS: Readonly<Record<string, Json>> = {
+  aiOpenaiChatCompletions: OPENAI_ERROR_SCHEMA,
+  aiOpenaiImagesGenerations: OPENAI_ERROR_SCHEMA,
+};
+
 function responseFor(operations: OperationSchemaLookup, operationId: string): Json {
-  const schema = operations[operationId]?.response;
+  const declared = OPERATION_RESPONSE_SCHEMAS[operationId];
+  const schema = declared ?? operations[operationId]?.response;
   const streaming = STREAMING_RESPONSES[operationId];
   if (streaming && schema !== undefined) {
     // The schema types a single streamed item; the media type frames the
