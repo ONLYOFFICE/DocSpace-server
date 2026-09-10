@@ -55,6 +55,7 @@ import io.swagger.v3.oas.models.parameters.RequestBody;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -163,7 +164,7 @@ public class OpenAPISchemaConfiguration {
                             .description(
                                 "The OAuth 2.0 response type. Only code is supported: this server "
                                     + "issues an authorization code, never a token, from this endpoint.")
-                            .schema(new Schema<String>().type("string").example("code")))
+                            .schema(new Schema<String>().types(Set.of("string")).example("code")))
                     .addParametersItem(
                         new Parameter()
                             .name("client_id")
@@ -175,7 +176,7 @@ public class OpenAPISchemaConfiguration {
                                     + "redirect URIs the request is checked against.")
                             .schema(
                                 new Schema<String>()
-                                    .type("string")
+                                    .types(Set.of("string"))
                                     .example("6c7cf17b-1bd3-47d5-94c6-be2d3570e168")))
                     .addParametersItem(
                         new Parameter()
@@ -187,7 +188,9 @@ public class OpenAPISchemaConfiguration {
                                     + "one of the redirect URIs registered for the client, otherwise the "
                                     + "request is refused.")
                             .schema(
-                                new Schema<String>().type("string").example("https://example.com")))
+                                new Schema<String>()
+                                    .types(Set.of("string"))
+                                    .example("https://example.com")))
                     .addParametersItem(
                         new Parameter()
                             .name("scope")
@@ -197,7 +200,10 @@ public class OpenAPISchemaConfiguration {
                                 "The permissions being asked for, as a space-separated list. Every "
                                     + "scope has to be one the client is registered for, and the consent "
                                     + "screen lists exactly these.")
-                            .schema(new Schema<String>().type("string").example("files:read"))))
+                            .schema(
+                                new Schema<String>()
+                                    .types(Set.of("string"))
+                                    .example("files:read"))))
             .post(
                 new Operation()
                     .operationId("submitConsent")
@@ -245,11 +251,11 @@ public class OpenAPISchemaConfiguration {
                                         new MediaType()
                                             .schema(
                                                 new Schema<>()
-                                                    .type("object")
+                                                    .types(Set.of("object"))
                                                     .addProperty(
                                                         "client_id",
                                                         new Schema<String>()
-                                                            .type("string")
+                                                            .types(Set.of("string"))
                                                             .description(
                                                                 "The client the consent is being "
                                                                     + "given to. It has to be the same "
@@ -260,7 +266,7 @@ public class OpenAPISchemaConfiguration {
                                                     .addProperty(
                                                         "state",
                                                         new Schema<String>()
-                                                            .type("string")
+                                                            .types(Set.of("string"))
                                                             .description(
                                                                 "The opaque value carried through "
                                                                     + "from the authorization request, "
@@ -271,7 +277,7 @@ public class OpenAPISchemaConfiguration {
                                                     .addProperty(
                                                         "scope",
                                                         new Schema<String>()
-                                                            .type("string")
+                                                            .types(Set.of("string"))
                                                             .description(
                                                                 "The scopes the user agreed to, as a "
                                                                     + "space-separated list. Anything the "
@@ -313,11 +319,11 @@ public class OpenAPISchemaConfiguration {
                                                 new MediaType()
                                                     .schema(
                                                         new Schema<>()
-                                                            .type("object")
+                                                            .types(Set.of("object"))
                                                             .addProperty(
                                                                 "access_token",
                                                                 new Schema<String>()
-                                                                    .type("string")
+                                                                    .types(Set.of("string"))
                                                                     .description(
                                                                         "The token to send as a "
                                                                             + "Bearer credential when "
@@ -328,7 +334,7 @@ public class OpenAPISchemaConfiguration {
                                                             .addProperty(
                                                                 "token_type",
                                                                 new Schema<String>()
-                                                                    .type("string")
+                                                                    .types(Set.of("string"))
                                                                     .description(
                                                                         "How the access token is to "
                                                                             + "be presented. It is always "
@@ -337,7 +343,7 @@ public class OpenAPISchemaConfiguration {
                                                             .addProperty(
                                                                 "expires_in",
                                                                 new Schema<Integer>()
-                                                                    .type("integer")
+                                                                    .types(Set.of("integer"))
                                                                     .description(
                                                                         "How many seconds the access "
                                                                             + "token stays valid, counted "
@@ -347,7 +353,7 @@ public class OpenAPISchemaConfiguration {
                                                             .addProperty(
                                                                 "refresh_token",
                                                                 new Schema<String>()
-                                                                    .type("string")
+                                                                    .types(Set.of("string"))
                                                                     .description(
                                                                         "The token that buys a new "
                                                                             + "access token once the "
@@ -375,11 +381,11 @@ public class OpenAPISchemaConfiguration {
                                         new MediaType()
                                             .schema(
                                                 new Schema<>()
-                                                    .type("object")
+                                                    .types(Set.of("object"))
                                                     .addProperty(
                                                         "grant_type",
                                                         new Schema<String>()
-                                                            .type("string")
+                                                            .types(Set.of("string"))
                                                             .description(
                                                                 "Which exchange is being performed: "
                                                                     + "authorization_code to redeem a code, "
@@ -389,7 +395,7 @@ public class OpenAPISchemaConfiguration {
                                                     .addProperty(
                                                         "code",
                                                         new Schema<String>()
-                                                            .type("string")
+                                                            .types(Set.of("string"))
                                                             .description(
                                                                 "The authorization code returned by "
                                                                     + "the authorization endpoint. It may "
@@ -398,7 +404,7 @@ public class OpenAPISchemaConfiguration {
                                                     .addProperty(
                                                         "redirect_uri",
                                                         new Schema<String>()
-                                                            .type("string")
+                                                            .types(Set.of("string"))
                                                             .description(
                                                                 "The same redirect URI that was used "
                                                                     + "to obtain the code. The exchange "
@@ -407,7 +413,7 @@ public class OpenAPISchemaConfiguration {
                                                     .addProperty(
                                                         "client_id",
                                                         new Schema<String>()
-                                                            .type("string")
+                                                            .types(Set.of("string"))
                                                             .description(
                                                                 "The identifier of the client "
                                                                     + "redeeming the code.")
@@ -416,7 +422,7 @@ public class OpenAPISchemaConfiguration {
                                                     .addProperty(
                                                         "client_secret",
                                                         new Schema<String>()
-                                                            .type("string")
+                                                            .types(Set.of("string"))
                                                             .description(
                                                                 "The secret of the client redeeming "
                                                                     + "the code. It is omitted by a public "
