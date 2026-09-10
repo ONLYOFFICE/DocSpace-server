@@ -33,6 +33,7 @@
 
 package com.asc.registration.service.transfer.response;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -139,12 +140,15 @@ public class ClientInfoResponse implements Serializable {
   private Set<String> scopes;
 
   /** Indicates if the client is public. */
-  @JsonProperty("is_public")
-  @Schema(
-      description =
-          "Whether the client is offered to third-party tenants rather than only to the tenant "
-              + "that registered it.",
-      example = "false")
+  @Getter(
+      onMethod_ = {
+        @JsonGetter("is_public"),
+        @Schema(
+            description =
+                "Whether the client is offered to third-party tenants rather than only to the "
+                    + "tenant that registered it.",
+            example = "false")
+      })
   private boolean isPublic;
 
   /** The date and time when the client was created. */

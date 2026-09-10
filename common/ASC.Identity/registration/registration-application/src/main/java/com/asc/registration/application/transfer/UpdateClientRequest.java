@@ -35,6 +35,7 @@ package com.asc.registration.application.transfer;
 
 import com.asc.common.utilities.validation.LogoSize;
 import com.asc.common.utilities.validation.URLCollection;
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -147,12 +148,16 @@ public class UpdateClientRequest implements Serializable {
   private boolean allowPkce;
 
   /** Indicates whether client is accessibly by third-party tenants * */
-  @JsonProperty("is_public")
-  @Schema(
-      description =
-          "Whether the client is offered to third-party tenants rather than only to the tenant "
-              + "that registers it.",
-      example = "false")
+  @Getter(
+      onMethod_ = {
+        @JsonGetter("is_public"),
+        @Schema(
+            description =
+                "Whether the client is offered to third-party tenants rather than only to the "
+                    + "tenant that registers it.",
+            example = "false")
+      })
+  @Setter(onMethod_ = @JsonProperty("is_public"))
   private boolean isPublic;
 
   /** The allowed origins for the client. */
