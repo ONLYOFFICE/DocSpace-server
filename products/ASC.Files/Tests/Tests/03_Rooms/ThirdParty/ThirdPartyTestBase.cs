@@ -105,4 +105,23 @@ public abstract class ThirdPartyTestBase(AspireAppFixture fixture) : BaseTest(fi
 
         return accounts.Response.Select(a => a.CustomerTitle).ToList();
     }
+
+    /// <summary>
+    /// Connects a fresh Nextcloud account and immediately turns it into a room. A single
+    /// third-party connection can only ever back one room (a second attempt is rejected with
+    /// "This provider is already connected to the room"), so every room needs its own connection —
+    /// mirrors the TypeScript suite's <c>createNextcloudRoom</c> helper.
+    /// </summary>
+    protected async Task<(int ProviderId, string FolderId, int RoomId)> CreateNextcloudRoom(
+        string title, RoomType roomType = RoomType.CustomRoom)
+    {
+        var connection = await ConnectNextcloud($"{title} (storage)");
+
+        var room = await _roomsApi.CreateRoomThirdPartyAsync(
+            connection.Id,
+            new CreateThirdPartyRoom(title: title, roomType: roomType),
+            TestContext.Current.CancellationToken);
+
+        return (connection.ProviderId!.Value, connection.Id, int.Parse(room.Response.Id));
+    }
 }

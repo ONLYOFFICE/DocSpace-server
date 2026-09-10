@@ -68,10 +68,14 @@ public record HistoryDto
     public required ApiDateTime Date { get; init; }
 
     /// <summary>
-    /// The history data.
+    /// The history data. Absent for actions that carry no payload of their own - changing a room's
+    /// logo, icon colour or cover, whose interpreter returns no data (see
+    /// <c>RoomLogoChangedInterpreter</c>). It used to be declared required, which put it in the
+    /// OpenAPI document's required list while the null-dropping serializer left it out of the
+    /// response, so a generated client threw on any history page holding one of those entries.
     /// </summary>
     /// <example>{"fileId": 123, "title": "document.docx"}</example>
-    public required HistoryData Data { get; init; }
+    public HistoryData Data { get; init; }
 
     /// <summary>
     /// The list of related history.
