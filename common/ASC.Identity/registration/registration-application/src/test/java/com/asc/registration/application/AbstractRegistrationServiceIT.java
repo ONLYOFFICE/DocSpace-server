@@ -364,7 +364,7 @@ public abstract class AbstractRegistrationServiceIT {
 
   protected ResponseEntity<String> changeActivation(
       String clientId, boolean enabled, String cookie) {
-    var request = ChangeClientActivationRequest.builder().enabled(enabled).build();
+    var request = ChangeClientActivationRequest.builder().status(enabled).build();
     return restClient()
         .method(HttpMethod.PATCH)
         .uri(WEB_API + "/clients/" + clientId + "/activation")

@@ -52,6 +52,10 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -73,7 +77,18 @@ import org.springframework.context.annotation.Configuration;
                 @License(
                     name = "Apache 2.0",
                     url = "https://www.apache.org/licenses/LICENSE-2.0.html")),
-    tags = {@Tag(name = "Authorization")},
+    tags = {
+      @Tag(
+          name = "OAuth 2.0 / Authorization",
+          description =
+              "The OAuth2 authorization flow: the authorization request, the consent submission "
+                  + "and the exchange of an authorization code for tokens."),
+      @Tag(
+          name = "OAuth 2.0 / Discovery",
+          description =
+              "The OAuth 2.0 Authorization Server metadata endpoint a client probes before it "
+                  + "starts a flow.")
+    },
     servers = {
       @Server(
           url = "http://localhost:9090",
@@ -100,18 +115,43 @@ public class OpenAPISchemaConfiguration {
         new PathItem()
             .get(
                 new Operation()
-                    .summary("OAuth2 Authorization Endpoint")
-                    .description("Initiates the OAuth2 authorization flow")
-                    .addTagsItem("Authorization")
+                    .operationId("authorizeOAuth")
+                    .summary("Start the authorization flow")
+                    .description(
+                        "Starts the OAuth2 authorization code flow for the client named by "
+                            + "client_id. The caller has to present the portal signature cookie, "
+                            + "and a request without a valid one is not refused with 401 or 403 but "
+                            + "redirected to the portal login page, carrying the client ID so the "
+                            + "flow can resume after signing in. When the user has not yet "
+                            + "consented to the requested scopes the browser is redirected to the "
+                            + "consent page; once the consent exists the browser is redirected to "
+                            + "the client's redirect URI with the authorization code and, when one "
+                            + "was sent, the original state. A caller that cannot follow redirects "
+                            + "may send the X-Disable-Redirect header, and then the response is 200 "
+                            + "with an empty body and the target URL in the X-Redirect-URI header. "
+                            + "The code returned here is exchanged for tokens at the token "
+                            + "endpoint.")
+                    .addTagsItem("OAuth 2.0 / Authorization")
                     .addSecurityItem(
                         new io.swagger.v3.oas.models.security.SecurityRequirement()
                             .addList("x-signature"))
                     .responses(
                         new io.swagger.v3.oas.models.responses.ApiResponses()
                             .addApiResponse(
+                                "302",
+                                new io.swagger.v3.oas.models.responses.ApiResponse()
+                                    .description(
+                                        "Redirect to the login page, to the consent page, or back "
+                                            + "to the client's redirect URI with an authorization "
+                                            + "code"))
+                            .addApiResponse(
                                 "200",
                                 new io.swagger.v3.oas.models.responses.ApiResponse()
-                                    .description("Authorization page"))
+                                    .description(
+                                        "Returned instead of the redirect when the request carries "
+                                            + "the X-Disable-Redirect header: the target URL is "
+                                            + "sent in the X-Redirect-URI response header and the "
+                                            + "body is empty"))
                             .addApiResponse(
                                 "400",
                                 new io.swagger.v3.oas.models.responses.ApiResponse()
@@ -121,34 +161,65 @@ public class OpenAPISchemaConfiguration {
                             .name("response_type")
                             .in("query")
                             .required(true)
-                            .schema(new Schema<String>().type("string").example("code")))
+                            .description(
+                                "The OAuth 2.0 response type. Only code is supported: this server "
+                                    + "issues an authorization code, never a token, from this endpoint.")
+                            .schema(new Schema<String>().types(Set.of("string")).example("code")))
                     .addParametersItem(
                         new Parameter()
                             .name("client_id")
                             .in("query")
                             .required(true)
+                            .description(
+                                "The identifier the client was given when it was registered. It "
+                                    + "selects both the client shown on the consent screen and the set of "
+                                    + "redirect URIs the request is checked against.")
                             .schema(
                                 new Schema<String>()
-                                    .type("string")
+                                    .types(Set.of("string"))
                                     .example("6c7cf17b-1bd3-47d5-94c6-be2d3570e168")))
                     .addParametersItem(
                         new Parameter()
                             .name("redirect_uri")
                             .in("query")
                             .required(true)
+                            .description(
+                                "Where to send the user once authorization is complete. It has to be "
+                                    + "one of the redirect URIs registered for the client, otherwise the "
+                                    + "request is refused.")
                             .schema(
-                                new Schema<String>().type("string").example("https://example.com")))
+                                new Schema<String>()
+                                    .types(Set.of("string"))
+                                    .example("https://example.com")))
                     .addParametersItem(
                         new Parameter()
                             .name("scope")
                             .in("query")
                             .required(true)
-                            .schema(new Schema<String>().type("string").example("files:read"))))
+                            .description(
+                                "The permissions being asked for, as a space-separated list. Every "
+                                    + "scope has to be one the client is registered for, and the consent "
+                                    + "screen lists exactly these.")
+                            .schema(
+                                new Schema<String>()
+                                    .types(Set.of("string"))
+                                    .example("files:read"))))
             .post(
                 new Operation()
-                    .summary("OAuth2 Consent Endpoint")
-                    .description("Sends consent approval")
-                    .addTagsItem("Authorization")
+                    .operationId("submitConsent")
+                    .summary("Submit the consent decision")
+                    .description(
+                        "Submits the user's consent decision for the scopes an authorization "
+                            + "request asked for. It is the form post the consent page makes, so it "
+                            + "carries the client ID, the state and the agreed scopes as multipart "
+                            + "form data, along with the same portal signature cookie the "
+                            + "authorization request needed. On success the browser is redirected "
+                            + "to the client's redirect URI with an authorization code, or, when "
+                            + "the request carries the X-Disable-Redirect header, answered 200 with "
+                            + "that URL in the X-Redirect-URI header. The consent is stored per "
+                            + "user and client, so a later authorization request for the same "
+                            + "scopes no longer stops at the consent page.")
+                    .addTagsItem("OAuth 2.0 / Authorization")
                     .addSecurityItem(
                         new io.swagger.v3.oas.models.security.SecurityRequirement()
                             .addList("x-signature"))
@@ -159,6 +230,14 @@ public class OpenAPISchemaConfiguration {
                                 new io.swagger.v3.oas.models.responses.ApiResponse()
                                     .description(
                                         "Redirect to the client's redirect URI with authorization code"))
+                            .addApiResponse(
+                                "200",
+                                new io.swagger.v3.oas.models.responses.ApiResponse()
+                                    .description(
+                                        "Returned instead of the redirect when the request carries "
+                                            + "the X-Disable-Redirect header: the target URL is "
+                                            + "sent in the X-Redirect-URI response header and the "
+                                            + "body is empty"))
                             .addApiResponse(
                                 "400",
                                 new io.swagger.v3.oas.models.responses.ApiResponse()
@@ -172,22 +251,39 @@ public class OpenAPISchemaConfiguration {
                                         new MediaType()
                                             .schema(
                                                 new Schema<>()
-                                                    .type("object")
+                                                    .types(Set.of("object"))
                                                     .addProperty(
                                                         "client_id",
                                                         new Schema<String>()
-                                                            .type("string")
+                                                            .types(Set.of("string"))
+                                                            .description(
+                                                                "The client the consent is being "
+                                                                    + "given to. It has to be the same "
+                                                                    + "client the authorization request "
+                                                                    + "named.")
                                                             .example(
                                                                 "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"))
                                                     .addProperty(
                                                         "state",
                                                         new Schema<String>()
-                                                            .type("string")
+                                                            .types(Set.of("string"))
+                                                            .description(
+                                                                "The opaque value carried through "
+                                                                    + "from the authorization request, "
+                                                                    + "returned unchanged on the redirect "
+                                                                    + "so the client can match the answer "
+                                                                    + "to its request.")
                                                             .example("abcde"))
                                                     .addProperty(
                                                         "scope",
                                                         new Schema<String>()
-                                                            .type("string")
+                                                            .types(Set.of("string"))
+                                                            .description(
+                                                                "The scopes the user agreed to, as a "
+                                                                    + "space-separated list. Anything the "
+                                                                    + "user declined is left out, so this "
+                                                                    + "may be narrower than what was "
+                                                                    + "requested.")
                                                             .example("files:read")))))));
     paths.addPathItem("/oauth2/authorize", authorizePathItem);
     paths.addPathItem(
@@ -195,9 +291,20 @@ public class OpenAPISchemaConfiguration {
         new PathItem()
             .post(
                 new Operation()
-                    .summary("OAuth2 Token Endpoint")
-                    .description("Exchange authorization code for access token")
-                    .addTagsItem("Authorization")
+                    .operationId("exchangeToken")
+                    .summary("Exchange the authorization code")
+                    .description(
+                        "Exchanges an authorization code for an access token. The request is "
+                            + "form-encoded and has to carry the grant type, the code, the same "
+                            + "redirect URI that was used to obtain the code, and the client "
+                            + "credentials: the client authenticates itself here rather than "
+                            + "through the portal signature cookie the authorization endpoint uses. "
+                            + "The response carries the access token, its type and its lifetime in "
+                            + "seconds, plus a refresh token when the client is configured for the "
+                            + "refresh token grant. Client authentication that fails is answered "
+                            + "with 401, while a malformed, unknown or expired code is answered "
+                            + "with 400. The code is single use, so replaying it fails.")
+                    .addTagsItem("OAuth 2.0 / Authorization")
                     .responses(
                         new io.swagger.v3.oas.models.responses.ApiResponses()
                             .addApiResponse(
@@ -212,32 +319,59 @@ public class OpenAPISchemaConfiguration {
                                                 new MediaType()
                                                     .schema(
                                                         new Schema<>()
-                                                            .type("object")
+                                                            .types(Set.of("object"))
                                                             .addProperty(
                                                                 "access_token",
                                                                 new Schema<String>()
-                                                                    .type("string")
+                                                                    .types(Set.of("string"))
+                                                                    .description(
+                                                                        "The token to send as a "
+                                                                            + "Bearer credential when "
+                                                                            + "calling the portal on the "
+                                                                            + "user behalf.")
                                                                     .example(
                                                                         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."))
                                                             .addProperty(
                                                                 "token_type",
                                                                 new Schema<String>()
-                                                                    .type("string")
+                                                                    .types(Set.of("string"))
+                                                                    .description(
+                                                                        "How the access token is to "
+                                                                            + "be presented. It is always "
+                                                                            + "Bearer.")
                                                                     .example("Bearer"))
                                                             .addProperty(
                                                                 "expires_in",
                                                                 new Schema<Integer>()
-                                                                    .type("integer")
+                                                                    .types(Set.of("integer"))
+                                                                    .description(
+                                                                        "How many seconds the access "
+                                                                            + "token stays valid, counted "
+                                                                            + "from the moment it was "
+                                                                            + "issued.")
                                                                     .example(3600))
                                                             .addProperty(
                                                                 "refresh_token",
                                                                 new Schema<String>()
-                                                                    .type("string")
+                                                                    .types(Set.of("string"))
+                                                                    .description(
+                                                                        "The token that buys a new "
+                                                                            + "access token once the "
+                                                                            + "current one expires. It is "
+                                                                            + "present only when the client "
+                                                                            + "is registered for the "
+                                                                            + "refresh token grant.")
                                                                     .example("def502..."))))))
                             .addApiResponse(
                                 "400",
                                 new io.swagger.v3.oas.models.responses.ApiResponse()
-                                    .description("Invalid request parameters")))
+                                    .description("Invalid request parameters"))
+                            .addApiResponse(
+                                "401",
+                                new io.swagger.v3.oas.models.responses.ApiResponse()
+                                    .description(
+                                        "Client authentication failed: the client ID is unknown or "
+                                            + "the client secret does not match")))
                     .requestBody(
                         new RequestBody()
                             .content(
@@ -247,32 +381,53 @@ public class OpenAPISchemaConfiguration {
                                         new MediaType()
                                             .schema(
                                                 new Schema<>()
-                                                    .type("object")
+                                                    .types(Set.of("object"))
                                                     .addProperty(
                                                         "grant_type",
                                                         new Schema<String>()
-                                                            .type("string")
+                                                            .types(Set.of("string"))
+                                                            .description(
+                                                                "Which exchange is being performed: "
+                                                                    + "authorization_code to redeem a code, "
+                                                                    + "refresh_token to renew an access "
+                                                                    + "token.")
                                                             .example("authorization_code"))
                                                     .addProperty(
                                                         "code",
                                                         new Schema<String>()
-                                                            .type("string")
+                                                            .types(Set.of("string"))
+                                                            .description(
+                                                                "The authorization code returned by "
+                                                                    + "the authorization endpoint. It may "
+                                                                    + "be redeemed once.")
                                                             .example("abcde"))
                                                     .addProperty(
                                                         "redirect_uri",
                                                         new Schema<String>()
-                                                            .type("string")
+                                                            .types(Set.of("string"))
+                                                            .description(
+                                                                "The same redirect URI that was used "
+                                                                    + "to obtain the code. The exchange "
+                                                                    + "fails when it differs.")
                                                             .example("https://example.com"))
                                                     .addProperty(
                                                         "client_id",
                                                         new Schema<String>()
-                                                            .type("string")
+                                                            .types(Set.of("string"))
+                                                            .description(
+                                                                "The identifier of the client "
+                                                                    + "redeeming the code.")
                                                             .example(
                                                                 "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"))
                                                     .addProperty(
                                                         "client_secret",
                                                         new Schema<String>()
-                                                            .type("string")
+                                                            .types(Set.of("string"))
+                                                            .description(
+                                                                "The secret of the client redeeming "
+                                                                    + "the code. It is omitted by a public "
+                                                                    + "client, which proves itself with a "
+                                                                    + "PKCE code verifier instead.")
                                                             .example(
                                                                 "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"))))))));
     return new OpenAPI().paths(paths);
@@ -282,5 +437,31 @@ public class OpenAPISchemaConfiguration {
   @Bean
   public OpenApiCustomizer removeServersCustomizer() {
     return openApi -> openApi.setServers(null);
+  }
+
+  /**
+   * Adds Redoc {@code x-tagGroups} / {@code x-displayName} so the published oauth document can join
+   * this service's tags under the shared "OAuth 2.0" group without a manual post-pass.
+   */
+  @Bean
+  public OpenApiCustomizer oauthTagGroupsCustomizer() {
+    return openApi -> {
+      var displayNames =
+          Map.of(
+              "OAuth 2.0 / Authorization", "Authorization",
+              "OAuth 2.0 / Discovery", "Discovery");
+
+      if (openApi.getTags() != null) {
+        for (var tag : openApi.getTags()) {
+          var displayName = displayNames.get(tag.getName());
+          if (displayName != null) tag.addExtension("x-displayName", displayName);
+        }
+      }
+
+      var group = new LinkedHashMap<String, Object>();
+      group.put("name", "OAuth 2.0");
+      group.put("tags", List.of("OAuth 2.0 / Authorization", "OAuth 2.0 / Discovery"));
+      openApi.addExtension("x-tagGroups", List.of(group));
+    };
   }
 }

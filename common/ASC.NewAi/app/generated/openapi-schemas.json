@@ -5,7 +5,10 @@
       "properties": {
         "success": {
           "type": "boolean",
-          "description": "Always true — the mutation completed."
+          "description": "Always true — the mutation completed.",
+          "examples": [
+            true
+          ]
         }
       },
       "required": [
@@ -19,7 +22,10 @@
       "properties": {
         "error": {
           "type": "string",
-          "description": "The error message, ready to be shown to the caller."
+          "description": "The error message, ready to be shown to the caller.",
+          "examples": [
+            "threadId required"
+          ]
         }
       },
       "required": [
@@ -27,17 +33,6 @@
       ],
       "additionalProperties": false,
       "description": "Error body — a single human-readable message."
-    },
-    "AiAiReasoningLevel": {
-      "type": "string",
-      "enum": [
-        "off",
-        "low",
-        "medium",
-        "high",
-        "max"
-      ],
-      "description": "Provider-neutral extended-thinking depth. `off` disables thinking where the model allows it."
     },
     "AiAiActionArgs": {
       "type": "object",
@@ -47,15 +42,17 @@
           "items": {
             "$ref": "#/components/schemas/AiTMCPItem"
           },
-          "description": "Extra tools offered to the model for this request."
+          "description": "Extra tools offered to the model for this request.",
+          "examples": [
+            []
+          ]
         },
         "isReasoning": {
           "type": "boolean",
-          "description": "Legacy extended-thinking switch; stands for `medium`. `reasoningLevel` wins when both are set."
-        },
-        "reasoningLevel": {
-          "$ref": "#/components/schemas/AiAiReasoningLevel",
-          "description": "Depth of extended thinking for the round; providers clamp it to what the model accepts."
+          "description": "Enable extended thinking / reasoning for this request.",
+          "examples": [
+            false
+          ]
         },
         "prompt": {
           "type": "object",
@@ -76,37 +73,72 @@
             "text"
           ],
           "additionalProperties": false,
-          "description": "Override the action's baked-in system prompt (replace or append)."
+          "description": "Override the action's baked-in system prompt (replace or append).",
+          "examples": [
+            {
+              "mode": "append",
+              "text": "Answer in British English."
+            }
+          ]
         }
       },
-      "additionalProperties": false
+      "additionalProperties": false,
+      "description": "Wire-serializable subset of the engine's `ActionArgs` — drops the engine-injected `signal`/`fetch`; `profile`/`messages` are owned by the engine and never sent by the caller."
     },
     "AiTMCPItem": {
       "type": "object",
       "properties": {
         "name": {
           "type": "string",
-          "description": "Tool name as registered on the MCP server (e.g. `\"web_search\"`, `\"insert_text\"`)."
+          "description": "Tool name as registered on the MCP server (e.g. `\"web_search\"`, `\"insert_text\"`).",
+          "examples": [
+            "docspace_get_folder"
+          ]
         },
         "description": {
           "type": "string",
-          "description": "Human-readable description shown to the AI model and in the tools list UI."
+          "description": "Human-readable description shown to the AI model and in the tools list UI.",
+          "examples": [
+            "Read the contents of a DocSpace folder."
+          ]
         },
         "inputSchema": {
           "type": "object",
-          "description": "JSON Schema describing the tool's input parameters."
+          "description": "JSON Schema describing the tool's input parameters.",
+          "examples": [
+            {
+              "type": "object",
+              "properties": {
+                "folderId": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "folderId"
+              ]
+            }
+          ]
         },
         "enabled": {
           "type": "boolean",
-          "description": "Whether this tool is currently enabled. Disabled tools are hidden from the AI model."
+          "description": "Whether this tool is currently enabled. Disabled tools are hidden from the AI model.",
+          "examples": [
+            true
+          ]
         },
         "serverType": {
           "type": "string",
-          "description": "Server type (MCP server name / host tool group id) this tool belongs to — the key the persisted disabled map is stored under. Set by the source that enumerated the tool, so a caller-supplied tool can still be attributed to its group after being flattened into a single list: that is what lets the engine apply the disabled map to `actionArgs.tools` instead of trusting the caller to pre-filter. Wire-serializable, so it survives a remote (server-side) engine."
+          "description": "Server type (MCP server name / host tool group id) this tool belongs to — the key the persisted disabled map is stored under. Set by the source that enumerated the tool, so a caller-supplied tool can still be attributed to its group after being flattened into a single list: that is what lets the engine apply the disabled map to `actionArgs.tools` instead of trusting the caller to pre-filter. Wire-serializable, so it survives a remote (server-side) engine.",
+          "examples": [
+            "docspace"
+          ]
         },
         "requireApproval": {
           "type": "boolean",
-          "description": "Whether the consumer must show an approval dialog before this tool runs. The engine reads it when deciding the `autoAllow` flag on a `tool-call-pending` event: `requireApproval === false` auto-allows the call (no dialog), `true` always prompts. `undefined` leaves the decision to the persisted \"always-allow\" list alone — so MCP / custom-server tools (which never set it) keep prompting as before, while host tools opt into auto-allow by default. Wire-serializable, so it survives a remote (server-side) engine."
+          "description": "Whether the consumer must show an approval dialog before this tool runs. The engine reads it when deciding the `autoAllow` flag on a `tool-call-pending` event: `requireApproval === false` auto-allows the call (no dialog), `true` always prompts. `undefined` leaves the decision to the persisted \"always-allow\" list alone — so MCP / custom-server tools (which never set it) keep prompting as before, while host tools opt into auto-allow by default. Wire-serializable, so it survives a remote (server-side) engine.",
+          "examples": [
+            false
+          ]
         }
       },
       "required": [
@@ -137,7 +169,10 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Storage-assigned message id (absent on inbound drafts)."
+          "description": "Storage-assigned message id (absent on inbound drafts).",
+          "examples": [
+            "22222222-2222-2222-2222-222222222222"
+          ]
         },
         "role": {
           "type": "string",
@@ -146,7 +181,10 @@
             "assistant",
             "system"
           ],
-          "description": "Message author role."
+          "description": "Message author role.",
+          "examples": [
+            "user"
+          ]
         },
         "content": {
           "anyOf": [
@@ -171,11 +209,17 @@
               }
             }
           ],
-          "description": "Message content: either plain text or a list of typed content parts (text, image, tool-call, …). Parts are open-ended by content type."
+          "description": "Message content: either plain text or a list of typed content parts (text, image, tool-call, …). Parts are open-ended by content type.",
+          "examples": [
+            "Summarise the attached contract."
+          ]
         },
         "createdAt": {
           "type": "string",
-          "description": "Creation timestamp, ISO-8601 on the wire."
+          "description": "Creation timestamp, ISO-8601 on the wire.",
+          "examples": [
+            "2026-01-01T00:00:00.000Z"
+          ]
         },
         "status": {
           "type": "object",
@@ -187,18 +231,31 @@
           "required": [
             "type"
           ],
-          "description": "Delivery/generation status of the message."
+          "description": "Delivery/generation status of the message.",
+          "examples": [
+            {
+              "type": "complete"
+            }
+          ]
         },
         "metadata": {
           "type": "object",
-          "description": "Arbitrary per-message metadata."
+          "description": "Arbitrary per-message metadata.",
+          "examples": [
+            {}
+          ]
         },
         "attachments": {
           "type": "array",
           "items": {
             "type": "object"
           },
-          "description": "Attachments linked to the message."
+          "description": "Attachments linked to the message.",
+          "examples": [
+            [
+              "55555555-5555-5555-5555-555555555555"
+            ]
+          ]
         }
       },
       "required": [
@@ -213,23 +270,43 @@
       "properties": {
         "threadId": {
           "type": "string",
-          "description": "Target thread; a new one is created (with an auto title) when omitted."
+          "description": "Target thread; a new one is created (with an auto title) when omitted.",
+          "examples": [
+            "11111111-1111-1111-1111-111111111111"
+          ]
         },
         "userMessage": {
           "$ref": "#/components/schemas/AiThreadMessageLike",
-          "description": "The user turn to send."
+          "description": "The user turn to send.",
+          "examples": [
+            {
+              "role": "user",
+              "content": "Summarise the attached contract."
+            }
+          ]
         },
         "actionArgs": {
           "$ref": "#/components/schemas/AiAiActionArgs",
-          "description": "Per-request engine options: extra tools, reasoning, prompt override."
+          "description": "Per-request engine options: extra tools, reasoning, prompt override.",
+          "examples": [
+            {
+              "isReasoning": false
+            }
+          ]
         },
         "entityId": {
           "type": "string",
-          "description": "Optional entity (room) scope for profile resolution."
+          "description": "Optional entity (room) scope for profile resolution.",
+          "examples": [
+            "1234"
+          ]
         },
         "profileId": {
           "type": "string",
-          "description": "Session-level profile override for this request only."
+          "description": "Session-level profile override for this request only.",
+          "examples": [
+            "00000000-0000-0000-0000-000000000000"
+          ]
         }
       },
       "required": [
@@ -253,7 +330,10 @@
             "thread-title"
           ],
           "type": "string",
-          "description": "Emitted once per `sendWithStream` call, immediately after the user message has been persisted by storage and before the assistant stream starts. Carries the storage-assigned `id` and `createdAt`. The UI uses it to render the user bubble — no client-side optimistic placeholder is needed, which keeps the runtime tree free of phantom nodes from index-fallback ids."
+          "description": "Emitted once per `sendWithStream` call, immediately after the user message has been persisted by storage and before the assistant stream starts. Carries the storage-assigned `id` and `createdAt`. The UI uses it to render the user bubble — no client-side optimistic placeholder is needed, which keeps the runtime tree free of phantom nodes from index-fallback ids.",
+          "examples": [
+            "message-delta"
+          ]
         },
         "message": {
           "$ref": "#/components/schemas/AiThreadMessageLike",
@@ -261,7 +341,10 @@
         },
         "messageId": {
           "type": "string",
-          "description": "The storage identifier of that message."
+          "description": "The storage identifier of that message.",
+          "examples": [
+            "22222222-2222-2222-2222-222222222222"
+          ]
         },
         "idx": {
           "type": "number",
@@ -269,7 +352,10 @@
         },
         "threadId": {
           "type": "string",
-          "description": "The thread the event belongs to."
+          "description": "The thread the event belongs to.",
+          "examples": [
+            "11111111-1111-1111-1111-111111111111"
+          ]
         },
         "autoAllow": {
           "type": "boolean",
@@ -487,31 +573,57 @@
       "properties": {
         "threadId": {
           "type": "string",
-          "description": "Thread the assistant message belongs to."
+          "description": "Thread the assistant message belongs to.",
+          "examples": [
+            "11111111-1111-1111-1111-111111111111"
+          ]
         },
         "messageId": {
           "type": "string",
-          "description": "Storage id of the assistant message holding the tool call."
+          "description": "Storage id of the assistant message holding the tool call.",
+          "examples": [
+            "22222222-2222-2222-2222-222222222222"
+          ]
         },
         "idx": {
           "type": "number",
-          "description": "Index of the tool-call content part inside `message.content`."
+          "description": "Index of the tool-call content part inside `message.content`.",
+          "examples": [
+            0
+          ]
         },
         "message": {
           "$ref": "#/components/schemas/AiThreadMessageLike",
-          "description": "Snapshot of the assistant message at the time the tool call surfaced."
+          "description": "Snapshot of the assistant message at the time the tool call surfaced.",
+          "examples": [
+            {
+              "role": "assistant",
+              "content": ""
+            }
+          ]
         },
         "actionArgs": {
           "$ref": "#/components/schemas/AiAiActionArgs",
-          "description": "Per-request engine options: extra tools, reasoning, prompt override."
+          "description": "Per-request engine options: extra tools, reasoning, prompt override.",
+          "examples": [
+            {
+              "isReasoning": false
+            }
+          ]
         },
         "entityId": {
           "type": "string",
-          "description": "Optional entity (room) scope for profile resolution."
+          "description": "Optional entity (room) scope for profile resolution.",
+          "examples": [
+            "1234"
+          ]
         },
         "profileId": {
           "type": "string",
-          "description": "Session-level profile override for this request only."
+          "description": "Session-level profile override for this request only.",
+          "examples": [
+            "00000000-0000-0000-0000-000000000000"
+          ]
         }
       },
       "required": [
@@ -547,70 +659,113 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique profile identifier (UUID)."
+          "description": "Unique profile identifier (UUID).",
+          "examples": [
+            "00000000-0000-0000-0000-000000000000"
+          ]
         },
         "name": {
           "type": "string",
-          "description": "User-defined profile display name."
+          "description": "User-defined profile display name.",
+          "examples": [
+            "OpenAI GPT-4o"
+          ]
         },
         "providerType": {
           "$ref": "#/components/schemas/AiProviderType",
-          "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector."
+          "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector.",
+          "examples": [
+            "openai"
+          ]
         },
         "basedOn": {
           "$ref": "#/components/schemas/AiBuiltinProviderType",
-          "description": "Selects the response-format parser used by the `\"external\"` provider. Ignored for any other `providerType`.\n\nSupported values are `\"openai\"`, `\"anthropic\"`, `\"mistral\"` and `\"openrouter\"`. Remaining values (`\"genai\"`, `\"stabilityai\"`, …) are accepted by the type but not yet implemented; passing one raises an error at request time."
+          "description": "Selects the response-format parser used by the `\"external\"` provider. Ignored for any other `providerType`.\n\nSupported values are `\"openai\"`, `\"anthropic\"`, `\"mistral\"` and `\"openrouter\"`. Remaining values (`\"genai\"`, `\"stabilityai\"`, …) are accepted by the type but not yet implemented; passing one raises an error at request time.",
+          "examples": [
+            "openai"
+          ]
         },
         "baseUrl": {
           "type": "string",
-          "description": "Base URL of the provider API."
+          "description": "Base URL of the provider API.",
+          "examples": [
+            "https://api.openai.com/v1"
+          ]
         },
         "key": {
           "type": "string",
-          "description": "API key or token. Optional for local providers."
+          "description": "API key or token. Optional for local providers.",
+          "examples": [
+            "sk-your-provider-api-key"
+          ]
         },
         "headers": {
           "type": "object",
           "additionalProperties": {
             "type": "string"
           },
-          "description": "Extra HTTP headers sent with every request to this provider. Merged into the SDK client's default headers; an explicit `Authorization` here wins over the one derived from `key`. Honoured by the OpenAI-family providers."
+          "description": "Extra HTTP headers sent with every request to this provider. Merged into the SDK client's default headers; an explicit `Authorization` here wins over the one derived from `key`. Honoured by the OpenAI-family providers.",
+          "examples": [
+            {
+              "X-Organization": "acme"
+            }
+          ]
         },
         "modelId": {
           "type": "string",
-          "description": "Selected model ID within this provider."
+          "description": "Selected model ID within this provider.",
+          "examples": [
+            "gpt-4o"
+          ]
         },
         "reasoning": {
           "type": "boolean",
-          "description": "Whether extended thinking is enabled for this profile's model."
-        },
-        "reasoningSupport": {
-          "$ref": "#/components/schemas/AiReasoningSupport",
-          "description": "Extended-thinking capabilities of the selected model as reported by the provider's catalogue at save time (see `Model.reasoningSupport`). When present the composer's Effort row follows it exactly; when absent the provider's id-based table answers. Hosts persist it with the rest of the profile."
+          "description": "Whether extended thinking is enabled for this profile's model.",
+          "examples": [
+            false
+          ]
         },
         "capabilities": {
           "type": "number",
-          "description": "Bitmask of capabilities supported by the selected model."
+          "description": "Bitmask of capabilities supported by the selected model.",
+          "examples": [
+            7
+          ]
         },
         "canUseTool": {
           "type": "boolean",
-          "description": "Result of the live tool-capability probe performed at create time and on changes to `modelId` / `providerType` / `baseUrl`. `undefined` means the probe has never run for this profile (legacy record)."
+          "description": "Result of the live tool-capability probe performed at create time and on changes to `modelId` / `providerType` / `baseUrl`. `undefined` means the probe has never run for this profile (legacy record).",
+          "examples": [
+            true
+          ]
         },
         "useResponsesApi": {
           "type": "boolean",
-          "description": "Result of the live Responses-API probe (parallel to `canUseTool`). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
+          "description": "Result of the live Responses-API probe (parallel to `canUseTool`). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`.",
+          "examples": [
+            false
+          ]
         },
         "isCloudProvider": {
           "type": "boolean",
-          "description": "Whether this profile uses a cloud-hosted provider (e.g. ONLYOFFICE DocSpace)."
+          "description": "Whether this profile uses a cloud-hosted provider (e.g. ONLYOFFICE DocSpace).",
+          "examples": [
+            true
+          ]
         },
         "useProxy": {
           "type": "boolean",
-          "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured."
+          "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured.",
+          "examples": [
+            false
+          ]
         },
         "createdAt": {
           "type": "number",
-          "description": "Creation timestamp (ms since epoch). Used to sort the AI models list newest-first."
+          "description": "Creation timestamp (ms since epoch). Used to sort the AI models list newest-first.",
+          "examples": [
+            1767225600000
+          ]
         }
       },
       "required": [
@@ -657,54 +812,16 @@
       ],
       "description": "Union of all 17 built-in AI provider type identifiers.\n\nThe `\"external\"` provider has no built-in transport — it delegates every HTTP request to `PlatformAdapter.externalFetch` and parses the response with the inner provider selected by `Profile.basedOn`."
     },
-    "AiReasoningSupport": {
-      "type": "object",
-      "properties": {
-        "thinks": {
-          "type": "boolean",
-          "description": "Whether the model can think at all. False hides the whole control."
-        },
-        "canDisable": {
-          "type": "boolean",
-          "description": "Whether `\"off\"` really turns thinking off. False means the model thinks always and off only drops to its lowest depth (or leaves the default depth, where there is no knob)."
-        },
-        "depths": {
-          "type": "array",
-          "items": {
-            "$ref": "#/components/schemas/AiReasoningDepth"
-          },
-          "description": "Depths the model distinguishes, lowest first. Empty when thinking is an on/off switch with no depth (or the model doesn't think). A level not listed is clamped to the nearest one — see `clampReasoningLevel`."
-        },
-        "defaultDepth": {
-          "$ref": "#/components/schemas/AiReasoningDepth",
-          "description": "The depth the model runs at when nothing asks for one — what a stored `\"off\"` means on a model that cannot be switched off. Known only where a catalogue reports it (OpenRouter's `default_effort`); otherwise `DEFAULT_REASONING_LEVEL` clamped to `depths` is assumed."
-        }
-      },
-      "required": [
-        "thinks",
-        "canDisable",
-        "depths"
-      ],
-      "additionalProperties": false,
-      "description": "What one model can do with extended thinking. Providers describe each model through this shape so the UI offers only the choices that change the request, and the request builders clamp to the same table."
-    },
-    "AiReasoningDepth": {
-      "type": "string",
-      "enum": [
-        "low",
-        "medium",
-        "high",
-        "max"
-      ],
-      "description": "A `ReasoningLevel` above off — a depth the model can think at."
-    },
     "AiAssignmentMutationResult": {
       "description": "Outcome of `AssignmentsEngine.assign` / `AssignmentsEngine.unassign`. Either a success or a field-scoped error suitable for displaying in the profile editor.",
       "type": "object",
       "properties": {
         "success": {
           "type": "boolean",
-          "description": "True when the assignment was persisted."
+          "description": "True when the assignment was persisted.",
+          "examples": [
+            true
+          ]
         },
         "error": {
           "$ref": "#/components/schemas/AiTErrorData",
@@ -745,7 +862,10 @@
       "properties": {
         "success": {
           "type": "boolean",
-          "description": "True when every entry was persisted."
+          "description": "True when every entry was persisted.",
+          "examples": [
+            true
+          ]
         },
         "errors": {
           "type": "array",
@@ -765,7 +885,10 @@
             ],
             "additionalProperties": false
           },
-          "description": "What was rejected, per action. Present on failure - and then no entry was persisted."
+          "description": "What was rejected, per action. Present on failure - and then no entry was persisted.",
+          "examples": [
+            []
+          ]
         }
       },
       "required": [
@@ -777,7 +900,10 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Storage-assigned UUID."
+          "description": "Storage-assigned UUID.",
+          "examples": [
+            "55555555-5555-5555-5555-555555555555"
+          ]
         },
         "kind": {
           "type": "string",
@@ -785,7 +911,10 @@
             "file",
             "image"
           ],
-          "description": "\"file\" | \"image\"."
+          "description": "\"file\" | \"image\".",
+          "examples": [
+            "file"
+          ]
         },
         "source": {
           "type": "string",
@@ -793,15 +922,24 @@
             "user",
             "tool"
           ],
-          "description": "Origin of the attachment. `\"user\"` — uploaded by the user in the composer (the default when unset, for backward compatibility). `\"tool\"` — produced by a tool call (e.g. `generate_image`). Lets the integrator's adapter route or apply policies (separate bucket, quotas, TTL, CDN) per source."
+          "description": "Origin of the attachment. `\"user\"` — uploaded by the user in the composer (the default when unset, for backward compatibility). `\"tool\"` — produced by a tool call (e.g. `generate_image`). Lets the integrator's adapter route or apply policies (separate bucket, quotas, TTL, CDN) per source.",
+          "examples": [
+            "user"
+          ]
         },
         "title": {
           "type": "string",
-          "description": "Display label (filename or user-visible title)."
+          "description": "Display label (filename or user-visible title).",
+          "examples": [
+            "contract.docx"
+          ]
         },
         "content": {
           "type": "string",
-          "description": "Extracted text for files."
+          "description": "Extracted text for files.",
+          "examples": [
+            "This agreement is made on 1 January 2026 between …"
+          ]
         },
         "base64": {
           "type": "string",
@@ -809,31 +947,52 @@
         },
         "path": {
           "type": "string",
-          "description": "Original host file path (for files)."
+          "description": "Original host file path (for files).",
+          "examples": [
+            "file_1234"
+          ]
         },
         "type": {
           "type": "number",
-          "description": "ONLYOFFICE file type code (for files)."
+          "description": "ONLYOFFICE file type code (for files).",
+          "examples": [
+            7
+          ]
         },
         "messageId": {
           "type": "string",
-          "description": "Owning message id once linked. Unset while the attachment is a draft."
+          "description": "Owning message id once linked. Unset while the attachment is a draft.",
+          "examples": [
+            "22222222-2222-2222-2222-222222222222"
+          ]
         },
         "threadId": {
           "type": "string",
-          "description": "Owning thread id once linked. Unset while the attachment is a draft."
+          "description": "Owning thread id once linked. Unset while the attachment is a draft.",
+          "examples": [
+            "11111111-1111-1111-1111-111111111111"
+          ]
         },
         "entityId": {
           "type": "string",
-          "description": "Opaque scope token (entity / \"room\") the attachment was created in. Drafts carry it so an entity switch keeps in-flight composer state isolated; once linked to a message the field is redundant with the thread's own entity binding."
+          "description": "Opaque scope token (entity / \"room\") the attachment was created in. Drafts carry it so an entity switch keeps in-flight composer state isolated; once linked to a message the field is redundant with the thread's own entity binding.",
+          "examples": [
+            "1234"
+          ]
         },
         "createdAt": {
           "type": "number",
-          "description": "Storage-assigned creation timestamp."
+          "description": "Storage-assigned creation timestamp.",
+          "examples": [
+            1767225600000
+          ]
         },
         "canAnalyze": {
           "type": "boolean",
-          "description": "Whether the attached form can be analyzed."
+          "description": "Whether the attached form can be analyzed.",
+          "examples": [
+            false
+          ]
         },
         "formKeys": {
           "type": "array",
@@ -853,7 +1012,10 @@
             ],
             "additionalProperties": false
           },
-          "description": "Keys of the fields inside the form. `key` is the field identifier, `text` its human-readable label."
+          "description": "Keys of the fields inside the form. `key` is the field identifier, `text` its human-readable label.",
+          "examples": [
+            []
+          ]
         }
       },
       "required": [
@@ -870,62 +1032,99 @@
       "properties": {
         "name": {
           "type": "string",
-          "description": "User-defined profile display name."
+          "description": "User-defined profile display name.",
+          "examples": [
+            "OpenAI GPT-4o"
+          ]
         },
         "providerType": {
           "$ref": "#/components/schemas/AiProviderType",
-          "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector."
+          "description": "Provider type for this profile. Use `\"external\"` to delegate all HTTP transport to `PlatformAdapter.externalFetch` while reusing an existing provider's response parser — see `Profile.basedOn` for the format selector.",
+          "examples": [
+            "openai"
+          ]
         },
         "basedOn": {
           "$ref": "#/components/schemas/AiBuiltinProviderType",
-          "description": "Selects the response-format parser used by the `\"external\"` provider. Ignored for any other `providerType`.\n\nSupported values are `\"openai\"`, `\"anthropic\"`, `\"mistral\"` and `\"openrouter\"`. Remaining values (`\"genai\"`, `\"stabilityai\"`, …) are accepted by the type but not yet implemented; passing one raises an error at request time."
+          "description": "Selects the response-format parser used by the `\"external\"` provider. Ignored for any other `providerType`.\n\nSupported values are `\"openai\"`, `\"anthropic\"`, `\"mistral\"` and `\"openrouter\"`. Remaining values (`\"genai\"`, `\"stabilityai\"`, …) are accepted by the type but not yet implemented; passing one raises an error at request time.",
+          "examples": [
+            "openai"
+          ]
         },
         "baseUrl": {
           "type": "string",
-          "description": "Base URL of the provider API."
+          "description": "Base URL of the provider API.",
+          "examples": [
+            "https://api.openai.com/v1"
+          ]
         },
         "key": {
           "type": "string",
-          "description": "API key or token. Optional for local providers."
+          "description": "API key or token. Optional for local providers.",
+          "examples": [
+            "sk-your-provider-api-key"
+          ]
         },
         "headers": {
           "type": "object",
           "additionalProperties": {
             "type": "string"
           },
-          "description": "Extra HTTP headers sent with every request to this provider. Merged into the SDK client's default headers; an explicit `Authorization` here wins over the one derived from `key`. Honoured by the OpenAI-family providers."
+          "description": "Extra HTTP headers sent with every request to this provider. Merged into the SDK client's default headers; an explicit `Authorization` here wins over the one derived from `key`. Honoured by the OpenAI-family providers.",
+          "examples": [
+            {
+              "X-Organization": "acme"
+            }
+          ]
         },
         "modelId": {
           "type": "string",
-          "description": "Selected model ID within this provider."
+          "description": "Selected model ID within this provider.",
+          "examples": [
+            "gpt-4o"
+          ]
         },
         "reasoning": {
           "type": "boolean",
-          "description": "Whether extended thinking is enabled for this profile's model."
-        },
-        "reasoningSupport": {
-          "$ref": "#/components/schemas/AiReasoningSupport",
-          "description": "Extended-thinking capabilities of the selected model as reported by the provider's catalogue at save time (see `Model.reasoningSupport`). When present the composer's Effort row follows it exactly; when absent the provider's id-based table answers. Hosts persist it with the rest of the profile."
+          "description": "Whether extended thinking is enabled for this profile's model.",
+          "examples": [
+            false
+          ]
         },
         "capabilities": {
           "type": "number",
-          "description": "Bitmask of capabilities supported by the selected model."
+          "description": "Bitmask of capabilities supported by the selected model.",
+          "examples": [
+            7
+          ]
         },
         "canUseTool": {
           "type": "boolean",
-          "description": "Result of the live tool-capability probe performed at create time and on changes to `modelId` / `providerType` / `baseUrl`. `undefined` means the probe has never run for this profile (legacy record)."
+          "description": "Result of the live tool-capability probe performed at create time and on changes to `modelId` / `providerType` / `baseUrl`. `undefined` means the probe has never run for this profile (legacy record).",
+          "examples": [
+            true
+          ]
         },
         "useResponsesApi": {
           "type": "boolean",
-          "description": "Result of the live Responses-API probe (parallel to `canUseTool`). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`."
+          "description": "Result of the live Responses-API probe (parallel to `canUseTool`). `true` means the model speaks `/v1/responses` and the OpenAI provider must route through `client.responses.create` — required for gpt-5+ reasoning models that reject `reasoning_effort` together with `tools` on `/v1/chat/completions`. Probed at create time and whenever `modelId` / `providerType` / `baseUrl` change. `undefined` means the probe never ran (legacy record) — readers treat that as `false`.",
+          "examples": [
+            false
+          ]
         },
         "isCloudProvider": {
           "type": "boolean",
-          "description": "Whether this profile uses a cloud-hosted provider (e.g. ONLYOFFICE DocSpace)."
+          "description": "Whether this profile uses a cloud-hosted provider (e.g. ONLYOFFICE DocSpace).",
+          "examples": [
+            true
+          ]
         },
         "useProxy": {
           "type": "boolean",
-          "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured."
+          "description": "Route every provider request through the host's `fetchProxy` instead of the global `fetch`. Useful when the host runs the widget in a sandbox without direct network access (CORS, custom auth, etc.). Has no effect when the `PlatformAdapter.fetchProxy` is not configured.",
+          "examples": [
+            false
+          ]
         }
       },
       "required": [
@@ -943,7 +1142,10 @@
       "properties": {
         "success": {
           "type": "boolean",
-          "description": "True when the profile was persisted."
+          "description": "True when the profile was persisted.",
+          "examples": [
+            true
+          ]
         },
         "profile": {
           "$ref": "#/components/schemas/AiProfile",
@@ -963,27 +1165,38 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Model identifier as used by the provider API (e.g. `\"gpt-4o\"`, `\"claude-sonnet-4-20250514\"`)."
+          "description": "Model identifier as used by the provider API (e.g. `\"gpt-4o\"`, `\"claude-sonnet-4-20250514\"`).",
+          "examples": [
+            "gpt-4o"
+          ]
         },
         "name": {
           "type": "string",
-          "description": "Human-readable model name for display in the UI."
+          "description": "Human-readable model name for display in the UI.",
+          "examples": [
+            "GPT-4o"
+          ]
         },
         "provider": {
           "$ref": "#/components/schemas/AiProviderType",
-          "description": "Provider that offers this model."
+          "description": "Provider that offers this model.",
+          "examples": [
+            "openai"
+          ]
         },
         "reasoning": {
           "type": "boolean",
-          "description": "Whether this model supports extended thinking / chain-of-thought reasoning."
-        },
-        "reasoningSupport": {
-          "$ref": "#/components/schemas/AiReasoningSupport",
-          "description": "What the model can do with extended thinking, when the provider's catalogue says so (OpenRouter and the ONLYOFFICE route report a per-model `reasoning` object). Copied onto the profile at save time; absent, the widget falls back to the provider's id-based table."
+          "description": "Whether this model supports extended thinking / chain-of-thought reasoning.",
+          "examples": [
+            false
+          ]
         },
         "capabilities": {
           "type": "number",
-          "description": "Bitmask of model capabilities (Chat, Image, Vision, Tools, etc.). Used to filter models per `ActionType`."
+          "description": "Bitmask of model capabilities (Chat, Image, Vision, Tools, etc.). Used to filter models per `ActionType`.",
+          "examples": [
+            7
+          ]
         }
       },
       "required": [
@@ -999,18 +1212,27 @@
       "properties": {
         "name": {
           "type": "string",
-          "description": "The prompt name."
+          "description": "The prompt name.",
+          "examples": [
+            "Contract summary"
+          ]
         },
         "text": {
           "type": "string",
-          "description": "The prompt body."
+          "description": "The prompt body.",
+          "examples": [
+            "Summarise the key obligations and dates in the attached contract."
+          ]
         },
         "folderId": {
           "type": [
             "string",
             "null"
           ],
-          "description": "The folder to file the prompt under. Omit or send null to leave it outside any folder."
+          "description": "The folder to file the prompt under. Omit or send null to leave it outside any folder.",
+          "examples": [
+            "44444444-4444-4444-4444-444444444444"
+          ]
         }
       },
       "required": [
@@ -1026,7 +1248,10 @@
       "properties": {
         "success": {
           "type": "boolean",
-          "description": "True when the prompt was persisted."
+          "description": "True when the prompt was persisted.",
+          "examples": [
+            true
+          ]
         },
         "prompt": {
           "$ref": "#/components/schemas/AiPrompt",
@@ -1046,27 +1271,45 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique prompt identifier (UUID)."
+          "description": "Unique prompt identifier (UUID).",
+          "examples": [
+            "33333333-3333-3333-3333-333333333333"
+          ]
         },
         "name": {
           "type": "string",
-          "description": "Prompt display name shown in the prompt picker."
+          "description": "Prompt display name shown in the prompt picker.",
+          "examples": [
+            "Contract summary"
+          ]
         },
         "text": {
           "type": "string",
-          "description": "Prompt template text. May contain placeholder tokens."
+          "description": "Prompt template text. May contain placeholder tokens.",
+          "examples": [
+            "Summarise the key obligations and dates in the attached contract."
+          ]
         },
         "folderId": {
           "type": "string",
-          "description": "Optional parent folder ID. `undefined` means the prompt is at the root level."
+          "description": "Optional parent folder ID. `undefined` means the prompt is at the root level.",
+          "examples": [
+            "44444444-4444-4444-4444-444444444444"
+          ]
         },
         "createdAt": {
           "type": "number",
-          "description": "Timestamp (ms since epoch) when the prompt was created."
+          "description": "Timestamp (ms since epoch) when the prompt was created.",
+          "examples": [
+            1767225600000
+          ]
         },
         "updatedAt": {
           "type": "number",
-          "description": "Timestamp (ms since epoch) of the last prompt modification."
+          "description": "Timestamp (ms since epoch) of the last prompt modification.",
+          "examples": [
+            1767225600000
+          ]
         }
       },
       "required": [
@@ -1085,7 +1328,10 @@
       "properties": {
         "success": {
           "type": "boolean",
-          "description": "True when the folder was persisted."
+          "description": "True when the folder was persisted.",
+          "examples": [
+            true
+          ]
         },
         "folder": {
           "$ref": "#/components/schemas/AiPromptFolder",
@@ -1105,19 +1351,31 @@
       "properties": {
         "id": {
           "type": "string",
-          "description": "Unique folder identifier (UUID)."
+          "description": "Unique folder identifier (UUID).",
+          "examples": [
+            "44444444-4444-4444-4444-444444444444"
+          ]
         },
         "name": {
           "type": "string",
-          "description": "Folder display name."
+          "description": "Folder display name.",
+          "examples": [
+            "Contract review"
+          ]
         },
         "createdAt": {
           "type": "number",
-          "description": "Timestamp (ms since epoch) when the folder was created."
+          "description": "Timestamp (ms since epoch) when the folder was created.",
+          "examples": [
+            1767225600000
+          ]
         },
         "updatedAt": {
           "type": "number",
-          "description": "Timestamp (ms since epoch) of the last folder modification."
+          "description": "Timestamp (ms since epoch) of the last folder modification.",
+          "examples": [
+            1767225600000
+          ]
         }
       },
       "required": [
@@ -1135,21 +1393,30 @@
         "version": {
           "type": "number",
           "const": 1,
-          "description": "The bundle format version, so an import can migrate an older export."
+          "description": "The bundle format version, so an import can migrate an older export.",
+          "examples": [
+            1
+          ]
         },
         "folders": {
           "type": "array",
           "items": {
             "$ref": "#/components/schemas/AiPromptFolder"
           },
-          "description": "Every exported prompt folder."
+          "description": "Every exported prompt folder.",
+          "examples": [
+            []
+          ]
         },
         "prompts": {
           "type": "array",
           "items": {
             "$ref": "#/components/schemas/AiPrompt"
           },
-          "description": "Every exported prompt."
+          "description": "Every exported prompt.",
+          "examples": [
+            []
+          ]
         }
       },
       "required": [
@@ -1174,7 +1441,10 @@
       "properties": {
         "success": {
           "type": "boolean",
-          "description": "True when the whole bundle was imported."
+          "description": "True when the whole bundle was imported.",
+          "examples": [
+            true
+          ]
         },
         "imported": {
           "type": "object",
@@ -1191,14 +1461,23 @@
             "prompts"
           ],
           "additionalProperties": false,
-          "description": "How many folders and prompts were created. Present on success."
+          "description": "How many folders and prompts were created. Present on success.",
+          "examples": [
+            {
+              "folders": 2,
+              "prompts": 12
+            }
+          ]
         },
         "errors": {
           "type": "array",
           "items": {
             "$ref": "#/components/schemas/AiImportError"
           },
-          "description": "What was rejected, per entry. Present on failure - and then nothing was imported."
+          "description": "What was rejected, per entry. Present on failure - and then nothing was imported.",
+          "examples": [
+            []
+          ]
         }
       },
       "required": [
@@ -1214,15 +1493,24 @@
             "folder",
             "prompt"
           ],
-          "description": "`\"folder\"` or `\"prompt\"`, plus the offending name or id."
+          "description": "`\"folder\"` or `\"prompt\"`, plus the offending name or id.",
+          "examples": [
+            "prompt"
+          ]
         },
         "ref": {
           "type": "string",
-          "description": "The offending entry - its name or its id."
+          "description": "The offending entry - its name or its id.",
+          "examples": [
+            "33333333-3333-3333-3333-333333333333"
+          ]
         },
         "error": {
           "$ref": "#/components/schemas/AiTErrorData",
-          "description": "Why the entry was rejected."
+          "description": "Why the entry was rejected.",
+          "examples": [
+            "a prompt of that name already exists"
+          ]
         }
       },
       "required": [
@@ -1238,15 +1526,24 @@
       "properties": {
         "threadId": {
           "type": "string",
-          "description": "Unique thread identifier (UUID)."
+          "description": "Unique thread identifier (UUID).",
+          "examples": [
+            "11111111-1111-1111-1111-111111111111"
+          ]
         },
         "title": {
           "type": "string",
-          "description": "Optional thread title. Auto-generated from the first message if not set."
+          "description": "Optional thread title. Auto-generated from the first message if not set.",
+          "examples": [
+            "Contract review"
+          ]
         },
         "lastEditDate": {
           "type": "number",
-          "description": "Timestamp (ms since epoch) of the last message in this thread. Used for sorting."
+          "description": "Timestamp (ms since epoch) of the last message in this thread. Used for sorting.",
+          "examples": [
+            1767225600000
+          ]
         },
         "provider": {
           "$ref": "#/components/schemas/AiTProvider",
@@ -1258,7 +1555,10 @@
         },
         "profileId": {
           "type": "string",
-          "description": "ID of the profile used for this thread. Links to `Profile.id`."
+          "description": "ID of the profile used for this thread. Links to `Profile.id`.",
+          "examples": [
+            "00000000-0000-0000-0000-000000000000"
+          ]
         }
       },
       "required": [
@@ -1272,19 +1572,31 @@
       "properties": {
         "type": {
           "$ref": "#/components/schemas/AiProviderType",
-          "description": "Provider type identifier."
+          "description": "Provider type identifier.",
+          "examples": [
+            "openai"
+          ]
         },
         "name": {
           "type": "string",
-          "description": "User-defined display name for this provider connection."
+          "description": "User-defined display name for this provider connection.",
+          "examples": [
+            "OpenAI GPT-4o"
+          ]
         },
         "key": {
           "type": "string",
-          "description": "API key or token. Optional for local providers (Ollama, LM Studio)."
+          "description": "API key or token. Optional for local providers (Ollama, LM Studio).",
+          "examples": [
+            "sk-your-provider-api-key"
+          ]
         },
         "baseUrl": {
           "type": "string",
-          "description": "Base URL of the provider API."
+          "description": "Base URL of the provider API.",
+          "examples": [
+            "https://api.openai.com/v1"
+          ]
         }
       },
       "required": [
@@ -1332,7 +1644,10 @@
       "properties": {
         "success": {
           "type": "boolean",
-          "description": "True when the MCP server was persisted."
+          "description": "True when the MCP server was persisted.",
+          "examples": [
+            true
+          ]
         },
         "error": {
           "$ref": "#/components/schemas/AiTErrorData",
@@ -1349,7 +1664,10 @@
       "properties": {
         "success": {
           "type": "boolean",
-          "description": "True when every custom MCP server was persisted."
+          "description": "True when every custom MCP server was persisted.",
+          "examples": [
+            true
+          ]
         },
         "errors": {
           "type": "array",
@@ -1369,7 +1687,10 @@
             ],
             "additionalProperties": false
           },
-          "description": "What was rejected, per server. Present on failure - and then no server was persisted."
+          "description": "What was rejected, per server. Present on failure - and then no server was persisted.",
+          "examples": [
+            []
+          ]
         }
       },
       "required": [
@@ -1381,26 +1702,41 @@
       "properties": {
         "provider": {
           "type": "string",
-          "description": "Provider identifier (e.g. `\"exa\"`)."
+          "description": "Provider identifier (e.g. `\"exa\"`).",
+          "examples": [
+            "exa"
+          ]
         },
         "key": {
           "type": "string",
-          "description": "API key for the provider. Optional for self-hosted or keyless setups."
+          "description": "API key for the provider. Optional for self-hosted or keyless setups.",
+          "examples": [
+            "your-web-search-api-key"
+          ]
         },
         "baseUrl": {
           "type": "string",
-          "description": "Optional override for the provider's base URL."
+          "description": "Optional override for the provider's base URL.",
+          "examples": [
+            "https://api.exa.ai"
+          ]
         },
         "isCloudProvider": {
           "type": "boolean",
-          "description": "Whether this provider is cloud-hosted (vs. self-hosted)."
+          "description": "Whether this provider is cloud-hosted (vs. self-hosted).",
+          "examples": [
+            true
+          ]
         },
         "headers": {
           "type": "object",
           "additionalProperties": {
             "type": "string"
           },
-          "description": "Extra HTTP headers sent with each request to the ONLYOFFICE / cloud backend (e.g. `X-Tenant`). Merged after the derived `Authorization` header, so a custom header of the same name wins."
+          "description": "Extra HTTP headers sent with each request to the ONLYOFFICE / cloud backend (e.g. `X-Tenant`). Merged after the derived `Authorization` header, so a custom header of the same name wins.",
+          "examples": [
+            {}
+          ]
         }
       },
       "required": [
@@ -1415,7 +1751,10 @@
       "properties": {
         "success": {
           "type": "boolean",
-          "description": "True when the configuration was persisted."
+          "description": "True when the configuration was persisted.",
+          "examples": [
+            true
+          ]
         },
         "config": {
           "$ref": "#/components/schemas/AiWebSearchConfig",
@@ -4190,29 +4529,6 @@
         "type": "boolean"
       }
     },
-    "aiPreferencesGetReasoningLevel": {
-      "response": {
-        "$ref": "#/components/schemas/AiAiReasoningLevel"
-      }
-    },
-    "aiPreferencesSetReasoningLevel": {
-      "request": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "$ref": "#/components/schemas/AiAiReasoningLevel",
-            "description": "New extended-thinking depth; `off` turns deep mode off."
-          },
-          "entityId": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "value"
-        ],
-        "additionalProperties": false
-      }
-    },
     "aiProfilesCreate": {
       "request": {
         "$ref": "#/components/schemas/AiCreateProfileInput"
@@ -4326,10 +4642,6 @@
           "reasoning": {
             "type": "boolean",
             "description": "Whether extended thinking is enabled for this profile's model."
-          },
-          "reasoningSupport": {
-            "$ref": "#/components/schemas/AiReasoningSupport",
-            "description": "Extended-thinking capabilities of the selected model as reported by the provider's catalogue at save time (see `Model.reasoningSupport`). When present the composer's Effort row follows it exactly; when absent the provider's id-based table answers. Hosts persist it with the rest of the profile."
           },
           "capabilities": {
             "type": "number",

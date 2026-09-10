@@ -31,7 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.People.Tests.PeopleController;
+namespace ASC.People.Tests.Tests._00_Regressions;
 
 public class UserTest(AspireAppFixture fixture) : BaseTest(fixture)
 {
@@ -40,7 +40,7 @@ public class UserTest(AspireAppFixture fixture) : BaseTest(fixture)
     [Trait("Bug", "79334")]
     public async Task CreateUser_AsRoomAdmin_ShouldCreateUserSuccessfully()
     {
-        await _apiClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
         var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
         await _peopleClient.Authenticate(roomAdmin);
 
