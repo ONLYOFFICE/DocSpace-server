@@ -5734,8 +5734,17 @@ public class FileStorageService //: IFileStorageService
             case FormFillingManageAction.Edit:
                 if (room.FolderType == FolderType.FillingFormsRoom)
                 {
+                    var wasFilling = properties.FormFilling.StartFilling;
+
                     properties.FormFilling.StartFilling = false;
                     properties.FormFilling.OriginalFormVersion = form.Version;
+
+                    if (wasFilling)
+                    {
+                        var editor = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+                        await webhookManager.PublishAsync(WebhookTrigger.FormStopped, form);
+                        await filesMessageService.SendAsync(MessageAction.FormStopped, form, MessageInitiator.DocsService, editor?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
+                    }
                 }
 
                 break;
