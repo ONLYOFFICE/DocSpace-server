@@ -799,9 +799,10 @@ function errorResponses(operationId: string, hasBody: boolean): Record<string, J
   for (const code of [...codes].sort()) {
     const override = spec[code];
     const description = typeof override === "string" ? override : ERROR_DESCRIPTIONS[code];
+    const envelopes = OPERATION_ERROR_SCHEMAS[operationId];
     responses[code] = jsonResponse(
       description as string,
-      OPERATION_ERROR_SCHEMAS[operationId] ?? ERROR_RESPONSE_REF,
+      envelopes?.[code] ?? envelopes?.["*"] ?? ERROR_RESPONSE_REF,
     );
   }
   return responses;
@@ -1461,9 +1462,33 @@ const OPENAI_ERROR_SCHEMA: Json = {
   additionalProperties: false,
 };
 
-const OPERATION_ERROR_SCHEMAS: Readonly<Record<string, Json>> = {
-  aiOpenaiChatCompletions: OPENAI_ERROR_SCHEMA,
-  aiOpenaiImagesGenerations: OPENAI_ERROR_SCHEMA,
+// `listProviderModels` names the input at fault so the client can highlight it
+// (Bug 83116). `AiErrorResponse` closes itself to extra properties, so that body needs
+// a schema of its own.
+const FIELD_ERROR_SCHEMA: Json = {
+  type: "object",
+  properties: {
+    error: {
+      type: "string",
+      description: "The error message, ready to be shown to the caller.",
+      examples: ["providerType required"],
+    },
+    field: {
+      type: "string",
+      description: "Name of the request field that was missing or rejected.",
+      examples: ["providerType"],
+    },
+  },
+  required: ["error", "field"],
+  additionalProperties: false,
+};
+
+// operationId -> status code -> schema, with `*` standing for every code of that
+// operation. Anything not listed answers with `AiErrorResponse`.
+const OPERATION_ERROR_SCHEMAS: Readonly<Record<string, Readonly<Record<string, Json>>>> = {
+  aiOpenaiChatCompletions: { "*": OPENAI_ERROR_SCHEMA },
+  aiOpenaiImagesGenerations: { "*": OPENAI_ERROR_SCHEMA },
+  aiProfilesListProviderModels: { "400": FIELD_ERROR_SCHEMA },
 };
 
 function responseFor(operations: OperationSchemaLookup, operationId: string): Json {
@@ -1486,8 +1511,100 @@ function responseFor(operations: OperationSchemaLookup, operationId: string): Js
     : jsonResponse(description, schema as Json);
 }
 
+// The request schema normally comes from the engine method's parameters. These
+// operations read the request themselves and expect a different shape, so what the
+// controller actually parses is declared here and wins over the generated schema.
+const OPERATION_REQUEST_SCHEMAS: Readonly<Record<string, Json>> = {
+  // `req.body?.profileId ?? req.query.profileId` - a bare string body leaves both
+  // undefined and is rejected with 400.
+  aiAssignmentsCascadeProfileDelete: {
+    type: "object",
+    properties: {
+      profileId: {
+        type: "string",
+        description:
+          "The profile whose assignments are removed. May be sent as the `profileId` " +
+          "query parameter instead of in the body.",
+        examples: [EXAMPLE_IDS.profile],
+      },
+    },
+    required: ["profileId"],
+    additionalProperties: false,
+  },
+
+  // The controller reads exactly these three keys and ignores anything else.
+  aiEditorToolsCall: {
+    type: "object",
+    properties: {
+      name: {
+        type: "string",
+        description:
+          "Name of the tool to run, as listed by the tools endpoint. A name that is " +
+          "unknown or excluded from the editor is rejected with 400.",
+        examples: ["docspace_get_folder"],
+      },
+      arguments: {
+        type: "object",
+        description:
+          "Arguments for the tool, shaped by that tool's own input schema. Treated as " +
+          "empty when it is not an object.",
+        additionalProperties: true,
+        examples: [{ folderId: "1234" }],
+      },
+      entityId: {
+        type: "string",
+        description: "Room the call is scoped to. Left out for a portal-wide call.",
+        examples: [EXAMPLE_IDS.room],
+      },
+    },
+    required: ["name"],
+    additionalProperties: false,
+  },
+
+  // The engine method takes the key as a required parameter, but the controller passes
+  // an empty string when it is absent, so a caller may leave it out - a provider that
+  // needs no key, or one whose key is already stored.
+  aiProfilesListProviderModels: {
+    type: "object",
+    properties: {
+      providerType: {
+        $ref: "#/components/schemas/AiProviderType",
+        description: "Provider whose catalog to list.",
+      },
+      baseUrl: {
+        type: "string",
+        description: "Provider API base URL.",
+        examples: ["https://api.openai.com/v1"],
+      },
+      apiKey: {
+        type: "string",
+        description:
+          "Provider API key. Omit it for a provider that needs none; the request is " +
+          "then made without one.",
+      },
+    },
+    required: ["providerType", "baseUrl"],
+    additionalProperties: false,
+  },
+
+  // Relayed to the internal service as-is; that service expects the file identifiers.
+  aiVectorizationStartTask: {
+    type: "object",
+    properties: {
+      files: {
+        type: "array",
+        description: "Identifiers of the files to vectorize.",
+        items: { type: "integer" },
+        examples: [[1234, 1235]],
+      },
+    },
+    required: ["files"],
+    additionalProperties: false,
+  },
+};
+
 function requestBodyFor(operations: OperationSchemaLookup, operationId: string): Json {
-  const schema = operations[operationId]?.request;
+  const schema = OPERATION_REQUEST_SCHEMAS[operationId] ?? operations[operationId]?.request;
   return schema === undefined
     ? jsonBody(JSON_OBJECT_SCHEMA, operationId)
     : jsonBody(schema as Json, operationId);
