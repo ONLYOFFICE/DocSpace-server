@@ -75,14 +75,16 @@ public class FilePrimaryIdRequestDto<T>
 }
 
 /// <summary>
-/// The request parameters for accessing an operation by its ID.
+/// The operation to cancel.
 /// </summary>
 public class OperationIdRequestDto
 {
     /// <summary>
-    /// The operation unique identifier.
+    /// The operation to cancel, as returned in `id` when it was started. A call that leaves the route segment out
+    /// cancels every operation of the caller, and an id that is not among their operations cancels nothing without
+    /// being an error.
     /// </summary>
-    /// <example>some-operation-id</example>
+    /// <example>b2f3e9a4-7c15-4d8e-9f60-3a1c5e7d0b42</example>
     [FromRoute(Name = "id")]
     public required string Id { get; set; } = null;
 }

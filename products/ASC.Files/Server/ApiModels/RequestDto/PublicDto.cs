@@ -34,33 +34,38 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The public settings of the room template.
+/// The address of the room template whose public access is read.
 /// </summary>
 public class PublicDto
 {
     /// <summary>
-    /// The room template ID.
+    /// The identifier of the room template. Take it from `templateId` of `GET api/2.0/files/roomtemplate/status`, or
+    /// from the folder list of `GET api/2.0/files/rooms` called with `searchArea` set to 4; an identifier of an
+    /// ordinary room is not accepted.
     /// </summary>
-    /// <example>1</example>
+    /// <example>1234</example>
     [FromRoute(Name = "id")]
     [Range(1, int.MaxValue)]
     public required int Id { get; set; }
 }
 
 /// <summary>
-/// The public settings of the room template to set.
+/// The public access to set on a room template.
 /// </summary>
 public class SetPublicDto
 {
     /// <summary>
-    /// The room template ID.
+    /// The identifier of the room template. Take it from `templateId` of `GET api/2.0/files/roomtemplate/status`, or
+    /// from the folder list of `GET api/2.0/files/rooms` called with `searchArea` set to 4; an identifier of an
+    /// ordinary room is not accepted.
     /// </summary>
-    /// <example>1</example>
+    /// <example>1234</example>
     [Range(1, int.MaxValue)]
     public required int Id { get; set; }
 
     /// <summary>
-    /// Specifies whether the room template is public or not.
+    /// Whether the Everyone group keeps read access to the template. True shares it with every member allowed to
+    /// create rooms; false leaves it reachable only for its owner.
     /// </summary>
     /// <example>true</example>
     public bool Public { get; set; }

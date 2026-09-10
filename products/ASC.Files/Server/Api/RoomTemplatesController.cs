@@ -44,9 +44,20 @@ public class RoomTemplatesController(IEventBus eventBus,
 {
 
     /// <remarks>
-    /// Starts creating the room template.
+    /// Queues a background job that turns an existing room into a reusable room template, and returns the state of
+    /// that job right away. The template lands in the portal's Templates section, inherits the source room's type,
+    /// privacy, indexing, storage limit, lifetime, download and watermark settings, and receives copies of the room's
+    /// files together with its ordinary subfolders and everything inside them; the service subfolders a room keeps
+    /// for its own workflows are left out. The caller needs room-manager rights on the source room, and the room must
+    /// not be archived: a room that cannot be found under Rooms is answered as missing, and every other refusal comes
+    /// back as a rejection. The template is not ready when the response arrives, so poll
+    /// `GET api/2.0/files/roomtemplate/status` until `isCompleted` is true, then read `templateId`; a non-empty
+    /// `error` there means the job failed and the half-built template was removed. Only one template creation is
+    /// tracked per caller, and starting another replaces the previous record. Setting `public` to true discards
+    /// `share` and `groups` and shares the finished template with everyone instead, while `copyLogo` reuses the
+    /// source room's own picture and makes `logo` irrelevant.
     /// </remarks>
-    /// <summary>Start creating room template</summary>
+    /// <summary>Create a room template</summary>
     /// <path>api/2.0/files/roomtemplate</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
@@ -107,9 +118,17 @@ public class RoomTemplatesController(IEventBus eventBus,
     }
 
     /// <remarks>
-    /// Returns the progress status of the room template creation process.
+    /// Reports the state of the room template creation the caller started with `POST api/2.0/files/roomtemplate`. The
+    /// record is private to the account that started the job: work started by another member is never reported, and a
+    /// caller who has started none gets an empty response instead of an object. Poll until `isCompleted` turns true,
+    /// then take the identifier of the finished template from `templateId`; a non-empty `error` means the job failed
+    /// and no template was kept. Treat `isCompleted` as the completion signal rather than `progress`, which the
+    /// background job only sets to 100 once the work is over. The record outlives the job, so a finished operation
+    /// can be read again and keeps returning the same identifier until the caller starts another template creation,
+    /// which replaces it. The call only reads state and needs no access to the source room or to the template, but it
+    /// does require an authenticated caller.
     /// </remarks>
-    /// <summary>Get status of room template creation</summary>
+    /// <summary>Get room template creation status</summary>
     /// <path>api/2.0/files/roomtemplate/status</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
@@ -140,9 +159,17 @@ public class RoomTemplatesController(IEventBus eventBus,
 
 
     /// <remarks>
-    /// Returns the public settings of the room template with the ID specified in the request.
+    /// Reports whether the room template addressed by `id` is shared with everyone or is reachable only by the
+    /// accounts it was explicitly shared with. True means the Everyone group holds read access, so any member allowed
+    /// to create rooms can build one from the template with `POST api/2.0/files/rooms/fromtemplate`; false means only
+    /// the owner and the named recipients can. The identifier has to belong to a room template — take it from
+    /// `templateId` of `GET api/2.0/files/roomtemplate/status`, or from the folder list of `GET api/2.0/files/rooms`
+    /// called with `searchArea` set to 4 — while an ordinary room, a deleted template or an unknown value is answered
+    /// as missing. The caller needs read access to the template, so somebody else's private template is refused even
+    /// for a portal administrator, and members who cannot reach the Templates section at all are refused whatever the
+    /// template's state. The call only reads state; use `PUT api/2.0/files/roomtemplate/public` to change it.
     /// </remarks>
-    /// <summary>Get public settings</summary>
+    /// <summary>Get room template public access</summary>
     /// <path>api/2.0/files/roomtemplate/{id}/public</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Ok", typeof(bool))]
@@ -156,9 +183,18 @@ public class RoomTemplatesController(IEventBus eventBus,
 
 
     /// <remarks>
-    /// Sets the public settings for the room template with the ID specified in the request.
+    /// Switches the room template named by `id` between shared with everyone and private, rewriting its whole
+    /// recipient list in the process. With `public` true the Everyone group is granted read access, so every member
+    /// allowed to create rooms can build one from the template with `POST api/2.0/files/rooms/fromtemplate`; with
+    /// false that access is taken away. In both cases every other account and group the template was shared with —
+    /// including the addresses passed as `share` when it was created — loses access, so this is not a way to add a
+    /// single recipient to an existing list. Only the account that owns the template may call it: a portal
+    /// administrator who does not own it is refused, and so is a member invited to the source room. The identifier
+    /// has to resolve to a room template; an ordinary room or an unknown value is answered as missing, and an
+    /// identifier below 1 is rejected as an invalid request. Repeating the call with the same value changes nothing,
+    /// and nothing is returned; read the current state with `GET api/2.0/files/roomtemplate/{id}/public`.
     /// </remarks>
-    /// <summary>Set public settings</summary>
+    /// <summary>Set room template public access</summary>
     /// <path>api/2.0/files/roomtemplate/public</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Ok")]

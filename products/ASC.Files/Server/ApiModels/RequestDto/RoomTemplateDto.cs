@@ -34,76 +34,84 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The room template parameters.
+/// The parameters of a room template built from an existing room.
 /// </summary>
 public class RoomTemplateDto
 {
     /// <summary>
-    /// The room template ID.
+    /// The identifier of the room the template is built from. Take it from the room listing of
+    /// `GET api/2.0/files/rooms`; a folder identifier is not accepted.
     /// </summary>
-    /// <example>1</example>
+    /// <example>1234</example>
     public required int RoomId { get; set; }
 
     /// <summary>
-    /// The room template title.
+    /// The title the template is saved under in the Templates section. Characters that a folder name cannot contain
+    /// are replaced with an underscore on save, and two templates may share a title.
     /// </summary>
-    /// <example>My Document</example>
+    /// <example>Sales agreement room</example>
     [Required]
     [StringLength(400)]
     public string Title { get; set; }
 
     /// <summary>
-    /// The room template logo.
+    /// A picture of the caller's own for the template, cropped out of an image already placed in the temporary
+    /// storage.
     /// </summary>
     /// <example>{"tmpFile": "temp_logo.png", "x": 0, "y": 0, "width": 100, "height": 100}</example>
     public LogoRequest Logo { get; set; }
 
     /// <summary>
-    /// Specifies whether to copy room logo or not.
+    /// Whether the template takes over the picture already set on the source room. When false the template gets no
+    /// picture from that room.
     /// </summary>
     /// <example>true</example>
     public bool CopyLogo { get; set; }
 
     /// <summary>
-    /// The collection of email addresses of users with whom to share a room.
+    /// The email addresses of the portal members who are granted read access to the finished template.
     /// </summary>
     /// <example>["user1@example.com", "user2@example.com"]</example>
     public List<string> Share { get; set; }
 
     /// <summary>
-    /// The collection of groups with whom to share a room.
+    /// The identifiers of the portal groups whose members are granted read access to the finished template.
     /// </summary>
-    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
+    /// <example>["9924256a-739c-462b-af15-e652a3b1b6eb"]</example>
     public List<Guid> Groups { get; set; }
 
     /// <summary>
-    /// Specifies whether the room template is public or not.
+    /// Whether the finished template is shared with everyone allowed to create rooms. When false it stays reachable
+    /// only for the recipients named for it.
     /// </summary>
     /// <example>true</example>
     public bool Public { get; set; }
 
     /// <summary>
-    /// The collection of tags.
+    /// The labels attached to the template and shown next to it in listings.
     /// </summary>
-    /// <example>["tag1", "tag2"]</example>
+    /// <example>["Contracts", "Sales"]</example>
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
-    /// The color of the room template.
+    /// The accent colour of the generated cover, written as six hexadecimal digits with no leading hash sign. When it
+    /// is left empty a colour is picked at random.
     /// </summary>
-    /// <example>#FF0000</example>
+    /// <example>FF5733</example>
     [StringLength(6)]
     public string Color { get; set; }
 
     /// <summary>
-    /// The cover of the room template.
+    /// The identifier of a built-in cover picture, as listed by `GET api/2.0/files/rooms/covers`. When it is left
+    /// empty the template gets no cover.
     /// </summary>
-    /// <example>cover1</example>
+    /// <example>bookmark</example>
     [StringLength(50)]
     public string Cover { get; set; }
 
     /// <summary>
-    /// Room quota
+    /// The storage limit assigned to the template, in bytes. When it is not set the template keeps the limit of the
+    /// source room.
     /// </summary>
     /// <example>10485760</example>
     public long? Quota { get; set; }

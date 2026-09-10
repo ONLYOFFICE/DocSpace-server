@@ -34,132 +34,154 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The base operation request parameters.
+/// The parameter shared by every request that starts a background file operation.
 /// </summary>
 public abstract class FileOperationRequestBaseDto
 {
     /// <summary>
-    /// Specifies whether to return only the current operation
+    /// Which operations the answer carries: `true` returns the operation this call started and nothing else, `false`
+    /// returns every operation of the same kind that the caller has running or unread. When nothing was queued, which
+    /// happens for an empty selection, `true` falls back to the full list.
     /// </summary>
     /// <example>false</example>
     public bool ReturnSingleOperation { get; set; }
 }
 
 /// <summary>
-/// The base batch request parameters.
+/// The files and folders a background operation is applied to.
 /// </summary>
 public class BaseBatchRequestDto : FileOperationRequestBaseDto
 {
     /// <summary>
-    /// The list of folder IDs of the base batch request.
+    /// The folders to act on, by id, as reported by a folder listing such as `GET api/2.0/files/{folderId}`. A number
+    /// addresses a folder stored in the portal itself, a string addresses a folder on a connected third-party
+    /// account, and both kinds may be sent in one list.
     /// </summary>
     /// <example>[1, 2, 3]</example>
     public List<JsonElement> FolderIds { get; set; } = [];
 
     /// <summary>
-    /// The list of file IDs of the base batch request.
+    /// The files to act on, by id, as reported by a folder listing such as `GET api/2.0/files/{folderId}`. A number
+    /// addresses a file stored in the portal itself, a string addresses a file on a connected third-party account,
+    /// and both kinds may be sent in one list.
     /// </summary>
     /// <example>[1, 2, 3]</example>
     public List<JsonElement> FileIds { get; set; } = [];
 }
 
 /// <summary>
-/// The request parameters for downloading files.
+/// The files and folders to pack into one archive, together with the formats they are converted to.
 /// </summary>
 public class DownloadRequestDto : FileOperationRequestBaseDto
 {
     /// <summary>
-    /// The list of folder IDs to be downloaded.
+    /// The folders to pack, by id; everything inside them that the caller may read goes into the archive. A number
+    /// addresses a folder stored in the portal itself, a string addresses a folder on a connected third-party
+    /// account, and both kinds may be sent in one list.
     /// </summary>
     /// <example>[1, 2, 3]</example>
     public List<JsonElement> FolderIds { get; set; } = [];
 
     /// <summary>
-    /// The list of file IDs to be downloaded.
+    /// The files to pack as they are, by id, without conversion. A number addresses a file stored in the portal
+    /// itself, a string addresses a file on a connected third-party account, and both kinds may be sent in one list.
     /// </summary>
     /// <example>[1, 2, 3]</example>
     public List<JsonElement> FileIds { get; set; } = [];
 
     /// <summary>
-    /// The list of file IDs which will be converted.
+    /// The files to convert before they are packed, each named together with the format it is converted to. A file
+    /// listed here does not have to be repeated in `fileIds`.
     /// </summary>
     /// <example>[{"key": "1", "value": "pdf", "password": "password123"}]</example>
     public List<DownloadRequestItemDto> FileConvertIds { get; set; } = [];
 }
 
 /// <summary>
-/// The download request item with conversion parameters and security settings.
+/// One file of a bulk download, together with the format it is converted to.
 /// </summary>
 public class DownloadRequestItemDto
 {
     /// <summary>
-    /// The unique identifier or reference key for the file to be downloaded.
+    /// The file to convert and pack, by id — a number for a file stored in the portal itself, a string for a file on
+    /// a connected third-party account.
     /// </summary>
     /// <example>1</example>
     public required JsonElement Key { get; init; }
 
     /// <summary>
-    /// The target format or conversion type for the file download.
+    /// The format the file is converted to before it is packed, as a file extension without a leading dot.
     /// </summary>
     /// <example>pdf</example>
     public required string Value { get; init; }
 
     /// <summary>
-    /// The optional password for accessing protected files.
+    /// The password that opens the source file, for a file protected with one; a protected file cannot be converted
+    /// without it.
     /// </summary>
     /// <example>password123</example>
     public string Password { get; init; }
 }
 
 /// <summary>
-/// The request parameters for deleting files.
+/// The files and folders to delete, and how final the deletion is.
 /// </summary>
 public class DeleteBatchRequestDto : FileOperationRequestBaseDto
 {
     /// <summary>
-    /// The list of folder IDs to be deleted.
+    /// The folders to delete, by id, each with everything it contains. A number addresses a folder stored in the
+    /// portal itself, a string addresses a folder on a connected third-party account, and both kinds may be sent in
+    /// one list.
     /// </summary>
     /// <example>[1, 2, 3]</example>
     public List<JsonElement> FolderIds { get; set; } = [];
 
     /// <summary>
-    /// The list of file IDs to be deleted.
+    /// The files to delete, by id. A number addresses a file stored in the portal itself, a string addresses a file
+    /// on a connected third-party account, and both kinds may be sent in one list.
     /// </summary>
     /// <example>[1, 2, 3]</example>
     public List<JsonElement> FileIds { get; set; } = [];
 
     /// <summary>
-    /// Specifies whether to delete a file after the editing session is finished or not
+    /// Whether the finished operation is still reported: `false` keeps its final record readable through
+    /// `GET api/2.0/files/fileops` until it has been read once, `true` drops the record as soon as the work is done.
+    /// It does not postpone the deletion and does not delete anything of its own.
     /// </summary>
     /// <example>false</example>
     public bool DeleteAfter { get; set; }
 
     /// <summary>
-    /// Specifies whether to move a file to the \"Trash\" folder or delete it immediately.
+    /// Where the deleted items go: `false` moves them to the Trash of the caller, from which they can be restored,
+    /// `true` removes them at once and for good.
     /// </summary>
     /// <example>false</example>
     public bool Immediately { get; set; }
 }
 
 /// <summary>
-/// The request parameters for deleting file versions.
+/// The file whose versions are deleted, and the versions to delete.
 /// </summary>
 public class DeleteVersionBatchRequestDto : FileOperationRequestBaseDto
 {
     /// <summary>
-    /// Specifies whether to delete a file after the editing session is finished or not.
+    /// Whether the finished operation is still reported: `false` keeps its final record readable through
+    /// `GET api/2.0/files/fileops` until it has been read once, `true` drops the record as soon as the work is done.
+    /// It does not postpone the deletion and does not delete anything of its own.
     /// </summary>
     /// <example>false</example>
     public bool DeleteAfter { get; set; }
 
     /// <summary>
-    /// The file ID to delete.
+    /// The file whose history the versions are taken from; only files stored in the portal itself are addressed here.
     /// </summary>
     /// <example>1</example>
     public required int FileId { get; set; }
 
     /// <summary>
-    /// The collection of file versions to be deleted.
+    /// The version numbers to remove, as reported by `GET api/2.0/files/file/{fileId}/history`. At least one number
+    /// has to be sent: an empty list removes the file itself instead of one of its versions. The number of the
+    /// current version is refused outright, while a number that no longer exists is passed over without a complaint.
     /// </summary>
     /// <example>[1, 2, 3]</example>
     public required List<int> Versions { get; set; } = [];
@@ -206,95 +228,111 @@ public class DeleteRequestDto<T> : FileOperationRequestBaseDto
 }
 
 /// <summary>
-/// The request parameters for copying/moving files.
+/// The files and folders to move or copy, the folder they go to, and the way name clashes are settled.
 /// </summary>
 public class BatchRequestDto : FileOperationRequestBaseDto
 {
     /// <summary>
-    /// The list of folder IDs to be copied/moved.
+    /// The folders to move or copy, by id. A number addresses a folder stored in the portal itself, a string
+    /// addresses a folder on a connected third-party account, and both kinds may be sent in one list.
     /// </summary>
     /// <example>[1, 2, 3]</example>
     public List<JsonElement> FolderIds { get; set; } = [];
 
     /// <summary>
-    /// The list of file IDs to be copied/moved.
+    /// The files to move or copy, by id. A number addresses a file stored in the portal itself, a string addresses a
+    /// file on a connected third-party account, and both kinds may be sent in one list.
     /// </summary>
     /// <example>[1, 2, 3]</example>
     public List<JsonElement> FileIds { get; set; } = [];
 
     /// <summary>
-    /// The destination folder ID.
+    /// The folder the items go to, by id — a number for a folder stored in the portal itself, a string for a folder
+    /// on a connected third-party account. Take it from a folder listing such as `GET api/2.0/files/@root`; the
+    /// caller has to be allowed to create items in it, and the id of a room addresses the root of that room.
     /// </summary>
     /// <example>1</example>
     public JsonElement DestFolderId { get; set; }
 
     /// <summary>
-    /// The overwriting behavior of the file copying or moving.
+    /// What happens to an item whose name is already taken in the destination folder: `skip` leaves it where it is,
+    /// `overwrite` replaces the entry at the destination, and `duplicate` places it beside that entry under a name
+    /// with a numeric suffix. `GET api/2.0/files/fileops/move` reports which items would clash.
     /// </summary>
     /// <example>0</example>
     public FileConflictResolveType ConflictResolveType { get; set; }
 
     /// <summary>
-    /// Specifies whether to delete the source files/folders after they are moved or copied to the destination folder.
+    /// Whether the finished operation is still reported: `false` keeps its final record readable through
+    /// `GET api/2.0/files/fileops` until it has been read once, `true` drops the record as soon as the work is done.
+    /// It deletes nothing: a move takes the sources away in any case, and a copy always leaves them.
     /// </summary>
     /// <example>false</example>
     public bool DeleteAfter { get; set; }
 
     /// <summary>
-    ///  Specifies whether to copy or move the folder content or not.
+    /// What is taken from a listed folder: `false` moves or copies the folder itself, `true` takes only what it
+    /// contains, so its files and subfolders land in the destination and the folder is not recreated there.
     /// </summary>
     /// <example>false</example>
     public bool Content { get; set; }
 
     /// <summary>
-    /// Specifies whether the file is copied for filling out
+    /// Marks every copied PDF form as a draft prepared for filling, which is how such a copy reports its filling
+    /// status in a virtual data room. Files that are not forms are left unaffected.
     /// </summary>
     /// <example>false</example>
     public bool ToFillOut { get; set; }
 }
 
 /// <summary>
-/// The request parameters for emptying the trash.
+/// The part of the caller's Trash to empty.
 /// </summary>
 public class EmptyTrashRequestDto
 {
     /// <summary>
-    /// Specifies whether to return only the current operation
+    /// Which operations the answer carries: `true` returns the operation this call started and nothing else, `false`
+    /// returns every delete operation that the caller has running or unread.
     /// </summary>
     /// <example>false</example>
     [FromQuery]
     public bool Single { get; set; }
 
     /// <summary>
-    /// The parent folder types used to empty the trash only from the items originally located in the sections of the specified types.
+    /// Limits the sweep to the items whose original location was inside a section or a room of one of the named
+    /// types, leaving the rest of the Trash untouched; without the parameter the whole Trash is emptied. `5` covers
+    /// what was deleted from personal documents, `14` what was deleted from rooms.
     /// </summary>
-    /// <example>[2]</example>
+    /// <example>[5]</example>
     [FromQuery(Name = "folderType")]
     public List<FolderType> FolderType { get; set; }
 }
 
 /// <summary>
-/// The request parameters for retrieving the status of a file operation.
+/// The operation to report on.
 /// </summary>
 public class FileOperationResultRequestBaseDto
 {
     /// <summary>
-    /// The ID of the file operation.
+    /// The operation to report on, as returned in `id` when it was started; without it every operation of the caller
+    /// is reported. An id that is not among the caller's operations gives an empty answer rather than an error.
     /// </summary>
-    /// <example>operation-123-abc</example>
+    /// <example>b2f3e9a4-7c15-4d8e-9f60-3a1c5e7d0b42</example>
     [FromQuery(Name = "id")]
     public string Id { get; set; }
 }
 
 /// <summary>
-/// The data transfer object containing the operation type for which statuses are retrieved.
+/// The kind of operation to report on.
 /// </summary>
 public class FileOperationResultRequestDto : FileOperationResultRequestBaseDto
 {
     /// <summary>
-    /// Specifies the type of file operation to be retrieved.
+    /// The kind of operation the answer is limited to. Only the kinds that have a queue of their own ever carry
+    /// records — a copy, a deletion, a download, a mark-as-read and a duplication — and moves cannot be read through
+    /// this route at all, because its address belongs to another operation.
     /// </summary>
-    /// <example>0</example>
+    /// <example>2</example>
     [FromRoute(Name = "operationType")]
     public required FileOperationType OperationType { get; set; }
 }
