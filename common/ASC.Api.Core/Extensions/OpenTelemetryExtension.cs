@@ -82,6 +82,7 @@ public static class OpenTelemetryExtension
                     metrics.AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
                         .AddRuntimeInstrumentation()
+                        .AddProcessInstrumentation()
                         .AddFusionCacheInstrumentation();
 
                     if (telemetrySettings?.InfluxDB != null)

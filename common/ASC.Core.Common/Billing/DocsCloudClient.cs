@@ -712,7 +712,7 @@ public static class DocsCloudHttpClientExtension
 
     // Maps non-success responses to the domain exceptions the callers expect (resource not found / authorization
     // failed), and wraps any other failure into DocsCloudException with the status code and response body.
-    private static async Task<Exception> CreateExceptionAsync(HttpResponseMessage response)
+    private static async ValueTask<Exception> CreateExceptionAsync(HttpResponseMessage response)
     {
         if (response.IsSuccessStatusCode)
         {

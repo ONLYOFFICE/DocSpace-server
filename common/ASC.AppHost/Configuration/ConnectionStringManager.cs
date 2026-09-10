@@ -322,7 +322,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             displayName: "Run UI",
             executeCommand: async context =>
             {
-                var commandService = context.ServiceProvider
+                var commandService = context.Services
                     .GetRequiredService<ResourceCommandService>();
 
                 ApiTestResource
@@ -349,10 +349,8 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             displayName: "Run with BUG ID",
             executeCommand: async context =>
             {
-                var interactionService = context.ServiceProvider
-                    .GetRequiredService<IInteractionService>();
-                var commandService = context.ServiceProvider
-                    .GetRequiredService<ResourceCommandService>();
+                var interactionService = context.Services.GetRequiredService<IInteractionService>();
+                var commandService = context.Services.GetRequiredService<ResourceCommandService>();
 
                 var result = await interactionService.PromptInputAsync(
                     title: "Enter BUG ID",
@@ -652,7 +650,7 @@ internal static class RedisResourceBuilderExtensions
     private static ResourceCommandState OnUpdateResourceState(
         UpdateCommandStateContext context)
     {
-        var logger = context.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        var logger = context.Services.GetRequiredService<ILogger<Program>>();
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(

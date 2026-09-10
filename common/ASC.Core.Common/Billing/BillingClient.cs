@@ -489,7 +489,7 @@ public static class BillingHttpClientExtension
 
     // The billing service reports errors as 200 OK with a '{"Message":"error...' body, so the content is inspected
     // for every response, not only for non-success status codes.
-    private static async Task<Exception> CreateExceptionAsync(HttpResponseMessage response)
+    private static async ValueTask<Exception> CreateExceptionAsync(HttpResponseMessage response)
     {
         var content = await response.Content.ReadAsStringAsync();
 
