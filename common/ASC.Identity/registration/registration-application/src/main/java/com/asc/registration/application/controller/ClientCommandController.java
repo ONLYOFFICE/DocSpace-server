@@ -82,7 +82,7 @@ import org.springframework.web.bind.annotation.*;
  * integrates with various services to perform these operations securely.
  */
 @Tag(
-    name = "Client Management",
+    name = "OAuth 2.0 / Client Management",
     description =
         "APIs for managing OAuth2 clients including creation, updates, deletion and activation")
 @Slf4j
@@ -146,7 +146,7 @@ public class ClientCommandController {
               + "secret, and it is the first place either value can be read. Some deployments cap "
               + "how many clients one tenant may hold, and reaching that cap is reported as 400 "
               + "together with the validation failures.",
-      tags = {"Client Management"},
+      tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(
@@ -291,7 +291,7 @@ public class ClientCommandController {
               + "loses the race is rejected with 400 instead of silently overwriting a concurrent "
               + "change. Nothing is returned in the body - read the client back to see the stored "
               + "result.",
-      tags = {"Client Management"},
+      tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(responseCode = "200", description = "Client successfully updated"),
@@ -402,7 +402,7 @@ public class ClientCommandController {
               + "for the clients they created. Tokens already issued to the client keep working; "
               + "only future client authentication is affected. The response carries the new secret "
               + "and nothing else.",
-      tags = {"Client Management"},
+      tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(
@@ -489,7 +489,7 @@ public class ClientCommandController {
               + "nothing was revoked produces 400 and a service that cannot be reached produces "
               + "503. Once it succeeds the user has to authorize the client again before it can act "
               + "on their behalf.",
-      tags = {"Client Management"},
+      tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(responseCode = "200", description = "Client consent successfully revoked"),
@@ -580,7 +580,7 @@ public class ClientCommandController {
               + "removed too, but that cleanup is driven by a message and completes on the "
               + "authorization service after this call has already returned. A delete that removes "
               + "no row answers 400. The operation cannot be undone.",
-      tags = {"Client Management"},
+      tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(responseCode = "200", description = "Client successfully deleted"),
@@ -656,7 +656,7 @@ public class ClientCommandController {
               + "the call. Concurrent modification that survives the retries is reported as 400. "
               + "The operation cannot be undone, and the response does not say how many clients "
               + "were removed.",
-      tags = {"Client Management"},
+      tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(responseCode = "200", description = "Client successfully deleted"),
@@ -712,7 +712,7 @@ public class ClientCommandController {
               + "cache is dropped as part of the call. Concurrent modification that survives the "
               + "retries is reported as 400. The operation cannot be undone, and the response does "
               + "not say how many clients were removed.",
-      tags = {"Client Management"},
+      tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(responseCode = "200", description = "Client successfully deleted"),
@@ -769,7 +769,7 @@ public class ClientCommandController {
               + "any client of the tenant, a plain user only the clients they created. The body "
               + "carries the single activation flag, and a client the caller may not see is "
               + "reported as not found rather than as forbidden.",
-      tags = {"Client Management"},
+      tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(

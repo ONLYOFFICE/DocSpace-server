@@ -59,7 +59,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Controller class for managing OAuth2 scopes. */
 @Tag(
-    name = "Scope Management",
+    name = "OAuth 2.0 / Scope Management",
     description = "APIs for retrieving OAuth2 scopes and their permissions")
 @Slf4j
 @RestController
@@ -89,7 +89,7 @@ public class ScopeQueryController {
               + "read-only catalogue that does not depend on which clients exist: a valid portal "
               + "signature is the only requirement, with no role restriction, and every caller of "
               + "the portal sees the same list.",
-      tags = {"Scope Management"},
+      tags = {"OAuth 2.0 / Scope Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(

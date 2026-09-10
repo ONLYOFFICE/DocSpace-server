@@ -75,12 +75,12 @@ import org.springframework.context.annotation.Configuration;
                     url = "https://www.apache.org/licenses/LICENSE-2.0.html")),
     tags = {
       @Tag(
-          name = "Authorization",
+          name = "OAuth 2.0 / Authorization",
           description =
               "The OAuth2 authorization flow: the authorization request, the consent submission "
                   + "and the exchange of an authorization code for tokens."),
       @Tag(
-          name = "Discovery",
+          name = "OAuth 2.0 / Discovery",
           description =
               "The OAuth 2.0 Authorization Server metadata endpoint a client probes before it "
                   + "starts a flow.")
@@ -126,7 +126,7 @@ public class OpenAPISchemaConfiguration {
                             + "with an empty body and the target URL in the X-Redirect-URI header. "
                             + "The code returned here is exchanged for tokens at the token "
                             + "endpoint.")
-                    .addTagsItem("Authorization")
+                    .addTagsItem("OAuth 2.0 / Authorization")
                     .addSecurityItem(
                         new io.swagger.v3.oas.models.security.SecurityRequirement()
                             .addList("x-signature"))
@@ -208,7 +208,7 @@ public class OpenAPISchemaConfiguration {
                             + "that URL in the X-Redirect-URI header. The consent is stored per "
                             + "user and client, so a later authorization request for the same "
                             + "scopes no longer stops at the consent page.")
-                    .addTagsItem("Authorization")
+                    .addTagsItem("OAuth 2.0 / Authorization")
                     .addSecurityItem(
                         new io.swagger.v3.oas.models.security.SecurityRequirement()
                             .addList("x-signature"))
@@ -292,7 +292,7 @@ public class OpenAPISchemaConfiguration {
                             + "refresh token grant. Client authentication that fails is answered "
                             + "with 401, while a malformed, unknown or expired code is answered "
                             + "with 400. The code is single use, so replaying it fails.")
-                    .addTagsItem("Authorization")
+                    .addTagsItem("OAuth 2.0 / Authorization")
                     .responses(
                         new io.swagger.v3.oas.models.responses.ApiResponses()
                             .addApiResponse(

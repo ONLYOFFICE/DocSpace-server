@@ -65,7 +65,7 @@ public class WellKnownController {
               + "surrounding filter chain rather than by this handler. It changes no state, and "
               + "it does not return the authorization server metadata document - issue a GET "
               + "against the same path for that.",
-      tags = {"Discovery"},
+      tags = {"OAuth 2.0 / Discovery"},
       responses = {
         @ApiResponse(
             responseCode = "200",

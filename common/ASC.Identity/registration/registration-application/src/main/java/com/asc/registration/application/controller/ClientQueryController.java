@@ -76,7 +76,7 @@ import org.springframework.web.bind.annotation.*;
  * process and respond to client-related queries.
  */
 @Tag(
-    name = "Client Querying",
+    name = "OAuth 2.0 / Client Querying",
     description = "APIs for retrieving OAuth2 client information and user consents")
 @Slf4j
 @RestController
@@ -123,7 +123,7 @@ public class ClientQueryController {
               + "404 rather than 403, so absence and lack of access are deliberately "
               + "indistinguishable, and an identifier that is not a valid client ID is reported the "
               + "same way. The response is a single object, not a collection.",
-      tags = {"Client Querying"},
+      tags = {"OAuth 2.0 / Client Querying"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(
@@ -230,7 +230,7 @@ public class ClientQueryController {
               + "30 and has to lie between 1 and 50; a value outside that range is rejected with "
               + "400, but a last_created_on that cannot be parsed as a date surfaces as 500 rather "
               + "than 400.",
-      tags = {"Client Querying"},
+      tags = {"OAuth 2.0 / Client Querying"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(
@@ -349,7 +349,7 @@ public class ClientQueryController {
               + "of the tenant, a plain user only the clients they created, and a guest none of "
               + "them. A client the caller may not see is reported as 404, exactly like an unknown "
               + "one.",
-      tags = {"Client Querying"},
+      tags = {"OAuth 2.0 / Client Querying"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(
@@ -448,7 +448,7 @@ public class ClientQueryController {
               + "rate-limited on a separate, tighter budget than the signed endpoints. An unknown "
               + "client ID, and an identifier that is not a client ID at all, are both reported as "
               + "404.",
-      tags = {"Client Querying"},
+      tags = {"OAuth 2.0 / Client Querying"},
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -532,7 +532,7 @@ public class ClientQueryController {
               + "carried over from the previous page. Unlike the full client listing, limit has no "
               + "default here - it has to be supplied on every call and has to lie between 1 and "
               + "50, and a missing or out-of-range value is rejected with 400.",
-      tags = {"Client Querying"},
+      tags = {"OAuth 2.0 / Client Querying"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(
@@ -650,7 +650,7 @@ public class ClientQueryController {
               + "be reached surfaces as 503. Paging is keyset-based on last_modified_on, and limit "
               + "has no default: it has to be supplied on every call and has to lie between 1 and "
               + "50.",
-      tags = {"Client Querying"},
+      tags = {"OAuth 2.0 / Client Querying"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(
