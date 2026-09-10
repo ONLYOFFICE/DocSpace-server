@@ -83,9 +83,12 @@ public class ScopeQueryController {
   @Operation(
       summary = "List available OAuth2 scopes",
       description =
-          "Retrieves a list of all available OAuth2 scopes for the specified tenant. "
-              + "The scopes define the permissions that can be requested by OAuth2 clients. "
-              + "The list is ordered alphabetically, with the 'openid' scope always appearing first.",
+          "Retrieves a list of all available OAuth2 scopes for the specified tenant. The scopes "
+              + "define the permissions that can be requested by OAuth2 clients. The list is "
+              + "ordered alphabetically, with the 'openid' scope always appearing first. It is a "
+              + "read-only catalogue that does not depend on which clients exist: a valid portal "
+              + "signature is the only requirement, with no role restriction, and every caller of "
+              + "the portal sees the same list.",
       tags = {"Scope Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {

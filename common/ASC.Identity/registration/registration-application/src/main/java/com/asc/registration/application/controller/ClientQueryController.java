@@ -116,8 +116,13 @@ public class ClientQueryController {
   @Operation(
       summary = "Get client details",
       description =
-          "Retrieves detailed information about a specific OAuth2 client "
-              + "including its name, description, redirect URIs, and scopes.",
+          "Returns the whole stored record of one client: its name and description, its secret, "
+              + "scopes, redirect URIs, allowed origins, logout redirect URIs and audit fields. An "
+              + "administrator sees any client of the tenant, a plain user only the clients they "
+              + "created, and a guest none of them. Whatever the caller may not see is reported as "
+              + "404 rather than 403, so absence and lack of access are deliberately "
+              + "indistinguishable, and an identifier that is not a valid client ID is reported the "
+              + "same way. The response is a single object, not a collection.",
       tags = {"Client Querying"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
@@ -217,8 +222,14 @@ public class ClientQueryController {
   @Operation(
       summary = "List clients",
       description =
-          "Retrieves a paginated list of OAuth2 clients. "
-              + "The results can be paginated using the limit parameter and last seen client ID/creation date.",
+          "Returns one page of the tenant's clients, newest first, each in the same full form as "
+              + "the single-client read. An administrator sees every client of the tenant, a plain "
+              + "user only the clients they created. Paging is keyset-based rather than "
+              + "offset-based: limit sets the page size, and last_client_id and last_created_on are "
+              + "carried over from the previous page to ask for the next one. The limit defaults to "
+              + "30 and has to lie between 1 and 50; a value outside that range is rejected with "
+              + "400, but a last_created_on that cannot be parsed as a date surfaces as 500 rather "
+              + "than 400.",
       tags = {"Client Querying"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
@@ -326,6 +337,15 @@ public class ClientQueryController {
   @GetMapping("/{clientId}/info")
   @Operation(
       summary = "Retrieves detailed information for a specific client",
+      description =
+          "Retrieves the detailed information for a client with the ID specified in the request. "
+              + "It returns the consent-facing subset of the client - name, description, logo, the "
+              + "website, terms and policy URLs, authentication methods and scopes - and "
+              + "deliberately omits the secret, the redirect URIs and the allowed origins, which is "
+              + "what makes it safe to render on a consent screen. An administrator sees any client "
+              + "of the tenant, a plain user only the clients they created, and a guest none of "
+              + "them. A client the caller may not see is reported as 404, exactly like an unknown "
+              + "one.",
       tags = {"Client Querying"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
@@ -415,6 +435,16 @@ public class ClientQueryController {
   @GetMapping("/{clientId}/public/info")
   @Operation(
       summary = "Handles the GET request for public client information",
+      description =
+          "Returns the same consent-facing client information as the signed read, but without "
+              + "requiring a portal signature. It is meant for a login or consent page that has to "
+              + "render the client before the user is known, so it resolves the client by ID alone: "
+              + "there is no authentication, no tenant scoping and no creator check, and any caller "
+              + "who knows a client ID can read that client's public details. It still exposes no "
+              + "secret, no redirect URIs and no allowed origins. Being unauthenticated it is "
+              + "rate-limited on a separate, tighter budget than the signed endpoints. An unknown "
+              + "client ID, and an identifier that is not a client ID at all, are both reported as "
+              + "404.",
       tags = {"Client Querying"},
       responses = {
         @ApiResponse(
@@ -491,6 +521,14 @@ public class ClientQueryController {
   @GetMapping("/info")
   @Operation(
       summary = "Retrieves a pageable list of client information",
+      description =
+          "Retrieves a paginated list of information for all clients, each in the same "
+              + "consent-facing form as the single-client info read. An administrator sees every "
+              + "client of the tenant, a plain user only the clients they created. Paging is "
+              + "keyset-based: limit sets the page size, and last_client_id and last_created_on are "
+              + "carried over from the previous page. Unlike the full client listing, limit has no "
+              + "default here - it has to be supplied on every call and has to lie between 1 and "
+              + "50, and a missing or out-of-range value is rejected with 400.",
       tags = {"Client Querying"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
@@ -594,6 +632,16 @@ public class ClientQueryController {
   @GetMapping("/consents")
   @Operation(
       summary = "Retrieves a pageable list of consents",
+      description =
+          "Retrieves a paginated list of user consents: the clients the calling user has "
+              + "authorized, each with the scopes granted, the moment the consent was last changed "
+              + "and the client's consent-facing details. It always reports the caller's own "
+              + "consents and nothing else - there is no role check on this endpoint, so guests may "
+              + "call it too, and no parameter widens it to another user. The consents are read "
+              + "from the authorization service over gRPC, so an authorization service that cannot "
+              + "be reached surfaces as 503. Paging is keyset-based on last_modified_on, and limit "
+              + "has no default: it has to be supplied on every call and has to lie between 1 and "
+              + "50.",
       tags = {"Client Querying"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {

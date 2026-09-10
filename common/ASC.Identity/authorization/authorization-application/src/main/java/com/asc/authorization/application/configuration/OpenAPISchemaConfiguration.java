@@ -101,7 +101,20 @@ public class OpenAPISchemaConfiguration {
             .get(
                 new Operation()
                     .summary("OAuth2 Authorization Endpoint")
-                    .description("Initiates the OAuth2 authorization flow")
+                    .description(
+                        "Starts the OAuth2 authorization code flow for the client named by "
+                            + "client_id. The caller has to present the portal signature cookie, "
+                            + "and a request without a valid one is not refused with 401 or 403 but "
+                            + "redirected to the portal login page, carrying the client ID so the "
+                            + "flow can resume after signing in. When the user has not yet "
+                            + "consented to the requested scopes the browser is redirected to the "
+                            + "consent page; once the consent exists the browser is redirected to "
+                            + "the client's redirect URI with the authorization code and, when one "
+                            + "was sent, the original state. A caller that cannot follow redirects "
+                            + "may send the X-Disable-Redirect header, and then the response is 200 "
+                            + "with an empty body and the target URL in the X-Redirect-URI header. "
+                            + "The code returned here is exchanged for tokens at the token "
+                            + "endpoint.")
                     .addTagsItem("Authorization")
                     .addSecurityItem(
                         new io.swagger.v3.oas.models.security.SecurityRequirement()
@@ -158,7 +171,17 @@ public class OpenAPISchemaConfiguration {
             .post(
                 new Operation()
                     .summary("OAuth2 Consent Endpoint")
-                    .description("Sends consent approval")
+                    .description(
+                        "Submits the user's consent decision for the scopes an authorization "
+                            + "request asked for. It is the form post the consent page makes, so it "
+                            + "carries the client ID, the state and the agreed scopes as multipart "
+                            + "form data, along with the same portal signature cookie the "
+                            + "authorization request needed. On success the browser is redirected "
+                            + "to the client's redirect URI with an authorization code, or, when "
+                            + "the request carries the X-Disable-Redirect header, answered 200 with "
+                            + "that URL in the X-Redirect-URI header. The consent is stored per "
+                            + "user and client, so a later authorization request for the same "
+                            + "scopes no longer stops at the consent page.")
                     .addTagsItem("Authorization")
                     .addSecurityItem(
                         new io.swagger.v3.oas.models.security.SecurityRequirement()
@@ -215,7 +238,17 @@ public class OpenAPISchemaConfiguration {
             .post(
                 new Operation()
                     .summary("OAuth2 Token Endpoint")
-                    .description("Exchange authorization code for access token")
+                    .description(
+                        "Exchanges an authorization code for an access token. The request is "
+                            + "form-encoded and has to carry the grant type, the code, the same "
+                            + "redirect URI that was used to obtain the code, and the client "
+                            + "credentials: the client authenticates itself here rather than "
+                            + "through the portal signature cookie the authorization endpoint uses. "
+                            + "The response carries the access token, its type and its lifetime in "
+                            + "seconds, plus a refresh token when the client is configured for the "
+                            + "refresh token grant. Client authentication that fails is answered "
+                            + "with 401, while a malformed, unknown or expired code is answered "
+                            + "with 400. The code is single use, so replaying it fails.")
                     .addTagsItem("Authorization")
                     .responses(
                         new io.swagger.v3.oas.models.responses.ApiResponses()
