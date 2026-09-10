@@ -1185,8 +1185,11 @@
               "application/json": {
                 "schema": {
                   "type": "array",
-                  "$ref": "#/components/schemas/ScopeResponse",
-                  "description": "List of OAuth2 scopes"
+                  "description": "List of OAuth2 scopes",
+                  "items": {
+                    "$ref": "#/components/schemas/ScopeResponse",
+                    "description": "List of OAuth2 scopes"
+                  }
                 },
                 "example": [
                   {
