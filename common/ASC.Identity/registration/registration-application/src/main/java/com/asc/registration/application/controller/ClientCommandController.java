@@ -198,7 +198,7 @@ public class ClientCommandController {
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "415",
-            description = "Unsupported media type",
+            description = "The Content-Type header is not application/json",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
@@ -313,7 +313,7 @@ public class ClientCommandController {
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "415",
-            description = "Unsupported media type",
+            description = "The Content-Type header is not application/json",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
@@ -791,7 +791,7 @@ public class ClientCommandController {
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "415",
-            description = "Unsupported media type",
+            description = "The Content-Type header is not application/json",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",

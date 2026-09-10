@@ -35,17 +35,38 @@ package com.asc.registration.application.configuration;
 
 import com.asc.registration.application.transfer.ValidationErrorResponse;
 import io.swagger.v3.core.converter.ModelConverters;
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Content;
+import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import java.util.List;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/** Customizes the OpenAPI spec to exclude legacy backward-compatible paths from documentation. */
+/** Customizes the OpenAPI spec for path filtering and shared error documentation. */
 @Configuration
 public class OpenApiCustomizerConfiguration {
+  private static final String PROBLEM_DETAIL_REF = "#/components/schemas/ProblemDetail";
+  private static final String PATH_NOT_FOUND = "PathNotFound";
+  private static final String METHOD_NOT_ALLOWED = "MethodNotAllowed";
+  private static final String UNSUPPORTED_MEDIA_TYPE = "UnsupportedMediaType";
+  private static final String NOT_ACCEPTABLE = "NotAcceptable";
+
+  private static final String PATH_NOT_FOUND_DESCRIPTION =
+      "No route matches this path. Distinct from a 404 returned by an operation when a client ID "
+          + "is unknown or not visible to the caller.";
+  private static final String METHOD_NOT_ALLOWED_DESCRIPTION =
+      "The HTTP method is not allowed for this path";
+  private static final String UNSUPPORTED_MEDIA_TYPE_DESCRIPTION =
+      "The Content-Type header is not application/json";
+  private static final String NOT_ACCEPTABLE_DESCRIPTION =
+      "The Accept header does not allow application/json";
+
   @Value("${spring.application.web.api}")
   private String webApi;
 
@@ -56,6 +77,23 @@ public class OpenApiCustomizerConfiguration {
     if (property != null) {
       property.setDescription(description);
     }
+  }
+
+  private static Content problemDetailContent() {
+    return new Content()
+        .addMediaType(
+            org.springframework.http.MediaType.APPLICATION_JSON_VALUE,
+            new MediaType().schema(new Schema<>().$ref(PROBLEM_DETAIL_REF)));
+  }
+
+  private static ApiResponse problemDetailResponse(String description) {
+    return new ApiResponse().description(description).content(problemDetailContent());
+  }
+
+  private static void putIfAbsent(ApiResponses responses, String code, String componentName) {
+    if (!responses.containsKey(code))
+      responses.addApiResponse(
+          code, new ApiResponse().$ref("#/components/responses/" + componentName));
   }
 
   /** Removes legacy client and scope paths from the generated OpenAPI spec. */
@@ -137,6 +175,69 @@ public class OpenApiCustomizerConfiguration {
               + "failed validation, or when a named scope is not in the tenant catalogue.");
       errorsSchema.setItems(fieldErrorRef);
       problemDetail.addProperty("errors", errorsSchema);
+    };
+  }
+
+  /**
+   * Declares framework-level statuses that Spring raises before an operation runs: unmatched paths
+   * (404), wrong method (405), unsupported Content-Type on JSON bodies (415), and unacceptable
+   * Accept (406).
+   *
+   * <p>Route-level 404 is registered under {@code components.responses} only, so it is not confused
+   * with operation 404s that mean an unknown or invisible client ID. 405 and 406 are attached to
+   * every operation. 415 is attached only where the operation declares a request body.
+   */
+  @Bean
+  public OpenApiCustomizer frameworkErrorResponsesCustomizer() {
+    return openApi -> {
+      var components = openApi.getComponents();
+      if (components == null) {
+        components = new Components();
+        openApi.setComponents(components);
+      }
+
+      components.addResponses(PATH_NOT_FOUND, problemDetailResponse(PATH_NOT_FOUND_DESCRIPTION));
+      components.addResponses(
+          METHOD_NOT_ALLOWED, problemDetailResponse(METHOD_NOT_ALLOWED_DESCRIPTION));
+      components.addResponses(
+          UNSUPPORTED_MEDIA_TYPE, problemDetailResponse(UNSUPPORTED_MEDIA_TYPE_DESCRIPTION));
+      components.addResponses(NOT_ACCEPTABLE, problemDetailResponse(NOT_ACCEPTABLE_DESCRIPTION));
+
+      if (openApi.getPaths() == null) return;
+
+      openApi
+          .getPaths()
+          .values()
+          .forEach(
+              pathItem ->
+                  pathItem
+                      .readOperations()
+                      .forEach(
+                          operation -> {
+                            var responses = operation.getResponses();
+                            if (responses == null) {
+                              responses = new ApiResponses();
+                              operation.setResponses(responses);
+                            }
+
+                            putIfAbsent(responses, "405", METHOD_NOT_ALLOWED);
+                            putIfAbsent(responses, "406", NOT_ACCEPTABLE);
+
+                            if (operation.getRequestBody() != null) {
+                              putIfAbsent(responses, "415", UNSUPPORTED_MEDIA_TYPE);
+                              var existing415 = responses.get("415");
+                              if (existing415 != null
+                                  && existing415.get$ref() == null
+                                  && ("Unsupported media type".equals(existing415.getDescription())
+                                      || existing415.getDescription() == null
+                                      || existing415.getDescription().isBlank())) {
+                                existing415.setDescription(UNSUPPORTED_MEDIA_TYPE_DESCRIPTION);
+                                if (existing415.getContent() == null) {
+                                  existing415.setContent(problemDetailContent());
+                                }
+                              }
+                            }
+                          }));
     };
   }
 }
