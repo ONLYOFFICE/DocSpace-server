@@ -110,13 +110,6 @@
             <version>${resilience4j.version}</version>
         </dependency>
 
-        <!-- OpenAPI Documentation -->
-        <dependency>
-            <groupId>org.springdoc</groupId>
-            <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
-            <version>${springdoc.version}</version>
-        </dependency>
-
         <!-- Misc Dependencies -->
         <dependency>
           <groupId>org.apache.commons</groupId>

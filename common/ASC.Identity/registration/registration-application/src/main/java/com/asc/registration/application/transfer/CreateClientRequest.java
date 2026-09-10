@@ -35,7 +35,9 @@ package com.asc.registration.application.transfer;
 
 import com.asc.common.utilities.validation.LogoSize;
 import com.asc.common.utilities.validation.URLCollection;
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import java.io.Serializable;
@@ -104,7 +106,9 @@ public class CreateClientRequest implements Serializable {
       max = 256,
       message = "client name length is expected to be between 3 and 256 characters")
   @Schema(
-      description = "The name of the client",
+      description =
+          "The display name shown to the user on the consent screen. It has to be between 3 and "
+              + "256 characters long.",
       example = "Example Client",
       minLength = 3,
       maxLength = 256)
@@ -113,7 +117,9 @@ public class CreateClientRequest implements Serializable {
   /** The description of the client. */
   @Size(max = 255, message = "client description length is expected to be less than 256 characters")
   @Schema(
-      description = "The description of the client",
+      description =
+          "The free-text description shown next to the name on the consent screen, at most 255 "
+              + "characters.",
       example = "Description of the client",
       maxLength = 255)
   private String description;
@@ -127,18 +133,35 @@ public class CreateClientRequest implements Serializable {
       message = "client logo is expected to be passed as base64")
   @LogoSize(maxBytes = 256000, maxLength = 2000000)
   @Schema(
-      description = "The logo of the client in base64 format",
-      example = "data:image/png;base64,...")
+      description =
+          "The client logo as a data URI carrying base64 image data, shown on the consent screen. "
+              + "Only png, jpeg, jpg and svg+xml are accepted, the whole string may not exceed "
+              + "2000000 characters and the decoded image may not exceed 256000 bytes.",
+      example =
+          "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==")
   private String logo;
 
   /** Indicates whether PKCE is allowed for the client. */
   @JsonProperty("allow_pkce")
-  @Schema(description = "Indicates whether PKCE is allowed for the client", example = "true")
+  @Schema(
+      description =
+          "Whether the client may use PKCE. Turning it on lets the client authenticate with the "
+              + "none method and prove itself with a code verifier instead of sending a secret, "
+              + "which is what a client that cannot keep a secret needs.",
+      example = "true")
   private boolean allowPkce;
 
   /** Indicates if the client is public. */
-  @JsonProperty("is_public")
-  @Schema(description = "Indicates if the client is public", example = "false")
+  @Getter(
+      onMethod_ = {
+        @JsonGetter("is_public"),
+        @Schema(
+            description =
+                "Whether the client is offered to third-party tenants rather than only to the "
+                    + "tenant that registers it.",
+            example = "false")
+      })
+  @Setter(onMethod_ = @JsonProperty("is_public"))
   private boolean isPublic;
 
   /** The website URL of the client. The website URL is expected to be passed as a URL. */
@@ -148,7 +171,11 @@ public class CreateClientRequest implements Serializable {
       regexp =
           "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
       message = "website url is expected to be passed as url")
-  @Schema(description = "The website URL of the client", example = "http://example.com")
+  @Schema(
+      description =
+          "The URL of the client home page, offered to the user before they consent. The value "
+              + "has to be an http or https URL.",
+      example = "http://example.com")
   private String websiteUrl;
 
   /** The terms URL of the client. The terms URL is expected to be passed as a URL. */
@@ -158,7 +185,11 @@ public class CreateClientRequest implements Serializable {
       regexp =
           "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
       message = "terms url is expected to be passed as url")
-  @Schema(description = "The terms URL of the client", example = "http://example.com/terms")
+  @Schema(
+      description =
+          "The URL of the client terms of service, linked from the consent screen. The value has "
+              + "to be an http or https URL.",
+      example = "http://example.com/terms")
   private String termsUrl;
 
   /** The policy URL of the client. The policy URL is expected to be passed as a URL. */
@@ -168,7 +199,11 @@ public class CreateClientRequest implements Serializable {
       regexp =
           "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
       message = "policy url is expected to be passed as url")
-  @Schema(description = "The policy URL of the client", example = "http://example.com/policy")
+  @Schema(
+      description =
+          "The URL of the client privacy policy, linked from the consent screen. The value has to "
+              + "be an http or https URL.",
+      example = "http://example.com/policy")
   private String policyUrl;
 
   /** The redirect URIs for the client. */
@@ -179,9 +214,15 @@ public class CreateClientRequest implements Serializable {
       min = 1,
       max = 12,
       message = "redirect uris must contain at least 1 and at most 12 addresses")
-  @Schema(
-      description = "The redirect URIs for the client",
-      example = "[\"http://example.com/redirect\"]")
+  @ArraySchema(
+      arraySchema =
+          @Schema(
+              description =
+                  "The URIs an authorization code may be delivered to. An authorization request "
+                      + "naming any other URI is refused, and the set holds between 1 and 12 "
+                      + "addresses.",
+              example = "[\"http://example.com/redirect\"]"),
+      schema = @Schema(type = "string", example = "http://example.com/redirect"))
   private Set<String> redirectUris;
 
   /** The allowed origins for the client. */
@@ -192,7 +233,14 @@ public class CreateClientRequest implements Serializable {
       min = 1,
       max = 12,
       message = "allowed origins must contain at least 1 and at most 12 addresses")
-  @Schema(description = "The allowed origins for the client", example = "[\"http://example.com\"]")
+  @ArraySchema(
+      arraySchema =
+          @Schema(
+              description =
+                  "The web origins allowed to call the portal on behalf of this client, used for "
+                      + "the CORS check. The set holds between 1 and 12 addresses.",
+              example = "[\"http://example.com\"]"),
+      schema = @Schema(type = "string", example = "http://example.com"))
   private Set<String> allowedOrigins;
 
   /**
@@ -206,12 +254,22 @@ public class CreateClientRequest implements Serializable {
           "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
       message = "logout redirect uri is expected to be passed as url")
   @Schema(
-      description = "The logout redirect URI for the client",
+      description =
+          "The single URI the user may be sent back to once they have logged out. The value has "
+              + "to be an http or https URL.",
       example = "http://example.com/logout")
   private String logoutRedirectUri;
 
   /** The scopes for the client. This field cannot be empty. */
   @NotEmpty(message = "scopes field can not be empty")
-  @Schema(description = "The scopes for the client", example = "[\"read\", \"write\"]")
+  @ArraySchema(
+      arraySchema =
+          @Schema(
+              description =
+                  "The permissions the client may ask for, named as they appear in the tenant "
+                      + "scope catalogue - for example files:read, rooms:write or openid. A client "
+                      + "cannot request a scope that is not listed here.",
+              example = "[\"files:read\", \"files:write\"]"),
+      schema = @Schema(type = "string", example = "files:read"))
   private Set<String> scopes;
 }

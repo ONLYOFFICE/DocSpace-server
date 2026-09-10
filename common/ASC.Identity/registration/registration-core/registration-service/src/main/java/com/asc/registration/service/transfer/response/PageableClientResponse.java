@@ -33,16 +33,18 @@
 
 package com.asc.registration.service.transfer.response;
 
+import com.asc.common.service.transfer.response.ClientResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.ZonedDateTime;
+import java.util.List;
 import lombok.*;
 
 /**
- * PageableModificationResponse is a Data Transfer Object (DTO) used to encapsulate paginated data
- * responses.
- *
- * @param <D> The type of data contained in the paginated response.
+ * OpenAPI companion for {@link PageableResponse}{@code <ClientResponse>}. Declares {@code data} as
+ * an array of {@link ClientResponse} so generators are not left with an untyped page payload after
+ * generic erasure.
  */
 @Getter
 @Setter
@@ -50,26 +52,34 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(
-    description =
-        "One page of results ordered by modification time, together with the cursor that asks "
-            + "for the next page.")
-public class PageableModificationResponse<D> {
-  /** The data contained in the paginated response. */
-  @Schema(
-      description =
-          "The items on this page, at most as many as the requested limit. An empty array means "
-              + "there is nothing further to read.")
-  private Iterable<D> data;
+    name = "PageableClientResponse",
+    description = "One page of full client records together with the next-page cursor.")
+public class PageableClientResponse {
+  @ArraySchema(
+      schema = @Schema(implementation = ClientResponse.class),
+      arraySchema =
+          @Schema(
+              description =
+                  "The items on this page, at most as many as the requested limit. An empty array "
+                      + "means there is nothing further to read."))
+  private List<ClientResponse> data;
 
-  @JsonProperty("last_modified_on")
+  @JsonProperty("last_client_id")
   @Schema(
       description =
-          "The cursor to send back as last_modified_on to ask for the next page. It is null when "
-              + "the page is empty.",
+          "The cursor to send back as last_client_id to ask for the next page, together with "
+              + "last_created_on. It is null when the page is empty.",
+      example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
+  private String lastClientId;
+
+  @JsonProperty("last_created_on")
+  @Schema(
+      description =
+          "The cursor to send back as last_created_on to ask for the next page, together with "
+              + "last_client_id. It is null when the page is empty.",
       example = "2024-04-04T12:00:00Z")
-  private ZonedDateTime lastModifiedOn;
+  private ZonedDateTime lastCreatedOn;
 
-  /** The maximum number of items per page. */
   @Schema(
       description = "The page size that was applied to this request, between 1 and 50.",
       example = "50")
