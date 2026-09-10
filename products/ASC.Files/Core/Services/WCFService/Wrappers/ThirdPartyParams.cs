@@ -33,48 +33,51 @@
 
 namespace ASC.Web.Files.Services.WCFService;
 
-/// <summary>
-/// The third-party account parameters.
-/// </summary>
+/// <summary>A third-party storage account connected to the portal.</summary>
 public class ThirdPartyParams
 {
     /// <summary>
-    /// The authentication data.
+    /// The stored credentials of the account. They are not filled in here: the portal does not give back credentials
+    /// once an account is saved.
     /// </summary>
-    /// <example>{"url": "https://storage.example.com", "login": "user", "password": "pass", "token": "token123"}</example>
+    /// <example>{"login":"admin","url":"https://cloud.example.com"}</example>
     [JsonPropertyName("auth_data")]
     public AuthData AuthData { get; init; }
 
     /// <summary>
-    /// Specifies if this is a corporate account or not.
+    /// Whether the account is attached to the legacy Common section, which is the case only for accounts inherited
+    /// from an older portal.
     /// </summary>
     /// <example>false</example>
     public bool Corporate { get; init; }
 
     /// <summary>
-    /// Specifies if this is a room storage or not.
+    /// Whether the account is attached to the Rooms section, room templates and the archive counted in. This is where
+    /// `POST api/2.0/files/thirdparty` puts every account it connects.
     /// </summary>
-    /// <example>false</example>
+    /// <example>true</example>
     public bool RoomsStorage { get; init; }
 
     /// <summary>
-    /// The customer title.
+    /// The name the account is shown under in the portal, as it was saved when the account was connected.
     /// </summary>
-    /// <example>My Storage</example>
+    /// <example>Nextcloud storage</example>
     [JsonPropertyName("customer_title")]
     public string CustomerTitle { get; set; }
 
     /// <summary>
-    /// The provider ID.
+    /// The account ID to send to `DELETE api/2.0/files/thirdparty/{providerId}`, or as `providerId` to
+    /// re-authenticate the account.
     /// </summary>
-    /// <example>1</example>
+    /// <example>12</example>
     [JsonPropertyName("provider_id")]
     public int? ProviderId { get; init; }
 
     /// <summary>
-    /// The provider key.
+    /// The storage service behind the account. `WebDav` stands for every WebDAV preset, so it does not tell which of
+    /// them was chosen when the account was connected.
     /// </summary>
-    /// <example>GoogleDrive</example>
+    /// <example>WebDav</example>
     [JsonPropertyName("provider_key")]
     public string ProviderKey { get; init; }
 }

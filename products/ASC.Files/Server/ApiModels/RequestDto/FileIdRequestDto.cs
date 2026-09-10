@@ -39,9 +39,11 @@ namespace ASC.Files.ApiModels.RequestDto;
 public class FileIdRequestDto<T>
 {
     /// <summary>
-    /// The file unique identifier.
+    /// The file the operation addresses. Take the identifier from a listing such as `GET api/2.0/files/{folderId}`: a
+    /// file stored on the portal is numbered, while a file in a connected third-party account is named by an opaque
+    /// string.
     /// </summary>
-    /// <example>1</example>
+    /// <example>10</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 }

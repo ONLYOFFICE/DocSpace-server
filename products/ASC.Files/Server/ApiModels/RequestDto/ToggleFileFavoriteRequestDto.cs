@@ -39,14 +39,17 @@ namespace ASC.Files.ApiModels.RequestDto;
 public class ToggleFileFavoriteRequestDto<T>
 {
     /// <summary>
-    /// The file ID.
+    /// The file the operation addresses. Take the identifier from a listing such as `GET api/2.0/files/{folderId}`: a
+    /// file stored on the portal is numbered, while a file in a connected third-party account is named by an opaque
+    /// string.
     /// </summary>
-    /// <example>1</example>
+    /// <example>10</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// Specifies if the file is marked as favorite or not.
+    /// Which state to put the mark in: `true` adds the file to the favorites of the calling account, `false` removes
+    /// it from them. Leaving the field out of the request removes the mark rather than setting it.
     /// </summary>
     /// <example>true</example>
     [FromQuery(Name = "favorite")]
