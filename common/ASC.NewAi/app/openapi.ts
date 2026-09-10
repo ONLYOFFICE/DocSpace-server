@@ -326,7 +326,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiPreferencesGetReasoningLevel:
     "Returns the effective extended-thinking depth of the scope: `off` while deep mode is off, otherwise the persisted depth (`low`, `medium`, `high`, `max`), falling back to the default depth (`medium`) when none has been stored. Providers clamp the depth to what the model accepts.",
   aiPreferencesSetReasoningLevel:
-    "Persists the extended-thinking depth of the scope. `off` turns deep mode off and leaves the previously chosen depth in place so switching back on restores it; any other level turns deep mode on and stores that depth. Idempotent.",
+    "Persists the extended-thinking depth of the scope as its single stored value: a depth turns deep mode on at that depth, `off` turns it off and replaces the stored depth (a later deep-mode `true` without a depth lands on `medium`). Idempotent.",
 
   // Profiles - AI provider credentials and model discovery.
   aiProfilesCreate:

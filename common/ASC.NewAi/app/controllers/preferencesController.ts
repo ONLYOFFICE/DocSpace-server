@@ -74,12 +74,18 @@ export const preferencesController = {
     res.json(value);
   }),
 
-  // Extended-thinking depth. Deep mode above stays the master switch and the
-  // widget's fallback when these two are unavailable; both are views of the
-  // one `depth` value the C# storage keeps (see `storage/preferencesStorage.ts`).
+  // Extended-thinking depth. Deep mode above stays the widget's fallback when
+  // these two are unavailable; both are views of the ONE `depth` value the C#
+  // storage keeps (see `storage/preferencesStorage.ts`). The engine's
+  // reasoning-level methods are built for a host with two values — its
+  // `setReasoningLevel` writes the toggle first (a read plus a write here)
+  // and the depth after, so a concurrent round could observe the interim
+  // `medium`, and its `getReasoningLevel` reads twice. With a single value
+  // the storage answers both in one call with identical semantics: a
+  // missing row is `off` (the configured deep-mode default is off).
   getReasoningLevel: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
-    const value = await engine.getReasoningLevel(entityId);
+    const value = (await storage.preferences.readReasoningLevel?.(entityId)) ?? "off";
     res.json(value);
   }),
 
@@ -94,7 +100,7 @@ export const preferencesController = {
       return;
     }
     const entityId = typeof args.entityId === "string" ? args.entityId : undefined;
-    await engine.setReasoningLevel(args.value, entityId);
+    await storage.preferences.upsertReasoningLevel?.(args.value, entityId);
     res.json({ success: true });
   }),
 };

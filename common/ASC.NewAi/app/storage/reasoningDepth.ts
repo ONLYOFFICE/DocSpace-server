@@ -135,10 +135,10 @@ export const FULL_REASONING_SUPPORT: ReasoningSupport = {
   depths: REASONING_DEPTH_LEVELS,
 };
 
-/** `ReasoningSupport` for a model with no extended thinking at all. */
+/** `ReasoningSupport` for a model with no extended thinking at all (the library's `NO_REASONING_SUPPORT`). */
 export const NO_REASONING_SUPPORT: ReasoningSupport = {
   thinks: false,
-  canDisable: true,
+  canDisable: false,
   depths: [],
 };
 

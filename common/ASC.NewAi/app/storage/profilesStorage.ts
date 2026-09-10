@@ -40,7 +40,11 @@ import {
   getForwardedHeaders,
   shouldForwardHeadersToProvider,
 } from "../requestContext.js";
-import { CapabilitiesUI, reasoningSupportFromCatalog } from "@onlyoffice/ai-chat/core";
+import {
+  CapabilitiesUI,
+  getReasoningSupport,
+  reasoningSupportFromCatalog,
+} from "@onlyoffice/ai-chat/core";
 import type {
   Model,
   OpenRouterReasoningMeta,
@@ -48,7 +52,6 @@ import type {
   Profile,
 } from "@onlyoffice/ai-chat/core";
 import {
-  FULL_REASONING_SUPPORT,
   NO_REASONING_SUPPORT,
   reasoningConfigToSupport,
   supportToReasoningConfig,
@@ -144,12 +147,19 @@ export function dtoToProfile(raw: unknown): Profile | undefined {
 }
 
 // The C# storage takes a `ReasoningConfig` object where it used to take a
-// boolean. The widget copies the catalogue's `reasoningSupport` onto the
-// profile at save time; when only the legacy boolean is set (an older
-// client, a profile created through the API) it is widened to the support
-// the boolean has always implied — every depth with an off switch, or none.
+// boolean. Only the OpenRouter / ONLYOFFICE catalogues carry a per-model
+// `reasoningSupport` for the widget to copy onto the profile; every other
+// provider's listing sets the legacy boolean alone, and the composer then
+// follows the library's id-based table. Whatever is persisted here comes
+// back as `Profile.reasoningSupport`, which the composer prefers over that
+// table — so the boolean must be widened to the SAME answer the table
+// gives, never to "every depth with an off switch": that would offer Off
+// for Claude Fable or Grok 4.5, which cannot stop, and show depths the
+// model does not distinguish. An `external` profile is answered for the
+// provider it is based on; the shadowed `onlyoffice` type answers through
+// its static (see `providers/onlyofficeSourceProvider.ts`).
 function toReasoningConfig(
-  input: Pick<Profile, "reasoning" | "reasoningSupport">,
+  input: Pick<Profile, "reasoning" | "reasoningSupport" | "providerType" | "modelId" | "basedOn">,
 ): Record<string, unknown> | null {
   if (input.reasoningSupport) {
     return supportToReasoningConfig(input.reasoningSupport);
@@ -157,7 +167,12 @@ function toReasoningConfig(
   if (input.reasoning === undefined) {
     return null;
   }
-  return supportToReasoningConfig(input.reasoning ? FULL_REASONING_SUPPORT : NO_REASONING_SUPPORT);
+  if (!input.reasoning) {
+    return supportToReasoningConfig(NO_REASONING_SUPPORT);
+  }
+  const tableType =
+    input.providerType === "external" ? (input.basedOn ?? input.providerType) : input.providerType;
+  return supportToReasoningConfig(getReasoningSupport(tableType, input.modelId));
 }
 
 function toCreateBody(input: Omit<Profile, "id" | "createdAt"> | Profile): Record<string, unknown> {
