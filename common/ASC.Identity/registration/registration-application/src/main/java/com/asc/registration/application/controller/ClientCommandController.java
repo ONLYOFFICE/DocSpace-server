@@ -214,7 +214,7 @@ public class ClientCommandController {
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
       @RequestBody
           @Valid
-          @Parameter(
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Client creation request containing client details",
               required = true,
               content =
@@ -339,7 +339,7 @@ public class ClientCommandController {
           String clientId,
       @RequestBody
           @Valid
-          @Parameter(
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Client update request containing modified client details",
               required = true,
               content =
@@ -830,7 +830,7 @@ public class ClientCommandController {
           String clientId,
       @RequestBody
           @Valid
-          @Parameter(
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Client activation change request",
               required = true,
               content =

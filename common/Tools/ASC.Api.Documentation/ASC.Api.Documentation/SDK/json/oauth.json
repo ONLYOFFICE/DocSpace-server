@@ -416,11 +416,6 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateClientRequest"
-              },
-              "encoding": {
-                "command": {
-                  "contentType": "application/json"
-                }
               }
             }
           },
@@ -759,11 +754,6 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateClientRequest"
-              },
-              "encoding": {
-                "command": {
-                  "contentType": "application/json"
-                }
               }
             }
           },
@@ -1066,11 +1056,6 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ChangeClientActivationRequest"
-              },
-              "encoding": {
-                "command": {
-                  "contentType": "application/json"
-                }
               }
             }
           },
