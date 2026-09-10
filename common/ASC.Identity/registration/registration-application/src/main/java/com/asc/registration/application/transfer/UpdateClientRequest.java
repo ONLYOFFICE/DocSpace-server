@@ -33,6 +33,7 @@
 
 package com.asc.registration.application.transfer;
 
+import com.asc.common.utilities.validation.LogoSize;
 import com.asc.common.utilities.validation.URLCollection;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -126,6 +127,7 @@ public class UpdateClientRequest implements Serializable {
   @Pattern(
       regexp = "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
       message = "client logo is expected to be passed as base64")
+  @LogoSize(maxBytes = 256000, maxLength = 2000000)
   @Schema(
       description =
           "The client logo as a data URI carrying base64 image data, shown on the consent screen. "
