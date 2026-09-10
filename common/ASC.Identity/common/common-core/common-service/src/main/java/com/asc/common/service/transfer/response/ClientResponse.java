@@ -227,12 +227,17 @@ public class ClientResponse implements Serializable {
   private String modifiedBy;
 
   /** Indicates if the client is public. */
-  @Getter(onMethod_ = @JsonGetter("is_public"))
-  @Schema(
-      description =
-          "Whether the client is offered to third-party tenants rather than only to the tenant "
-              + "that registered it.",
-      example = "false")
+  // The property is published by the renamed getter, so the schema has to sit on the getter:
+  // an annotation on the field is not picked up for it.
+  @Getter(
+      onMethod_ = {
+        @JsonGetter("is_public"),
+        @Schema(
+            description =
+                "Whether the client is offered to third-party tenants rather than only to the "
+                    + "tenant that registered it.",
+            example = "false")
+      })
   private boolean isPublic;
 
   /** Indicates if the client is enabled. */
