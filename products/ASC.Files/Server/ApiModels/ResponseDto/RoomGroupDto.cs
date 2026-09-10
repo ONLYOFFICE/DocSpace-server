@@ -34,42 +34,52 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The room security parameters.
+/// A personal collection of rooms: the name and icon it was given, the account that owns it, and the rooms it gathers
+/// at the moment it was read.
 /// </summary>
 public class RoomGroupDto
 {
     /// <summary>
-    /// The group ID.
+    /// The identifier of the group, which addresses it in every other group operation and is kept for as long as the
+    /// group exists.
     /// </summary>
-    /// <example>1</example>
+    /// <example>42</example>
     public int Id { get; set; }
 
     /// <summary>
-    /// Group name
+    /// The name its owner gave the group, stored trimmed of surrounding spaces. Names are not unique, so two groups
+    /// of the same account can be told apart only by their identifier.
     /// </summary>
-    /// <example>My Group</example>
+    /// <example>Client projects</example>
     public string Name { get; set; }
 
     /// <summary>
-    /// Group icon
+    /// The built-in cover chosen for the group, carrying the cover identifier and its rendering in each available
+    /// size. Null when the group has no icon, either because it was never given one or because the icon was cleared
+    /// by setting it to an empty value.
     /// </summary>
-    /// <example>{"id":"1","data":{"url":"/temp/logo.png","width":100,"height":100}}</example>
+    /// <example>{"id": "star", "data": {"default": "svg markup", "small": "svg markup"}}</example>
     public MultiSizeLogoCover Icon { get; set; }
 
     /// <summary>
-    /// The user ID.
+    /// The account that created the group and the only one able to read, change or delete it; for any other member of
+    /// the portal the group does not exist.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
+    /// <example>9a1b2c3d-4e5f-6071-8293-a4b5c6d7e8f9</example>
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// The list of rooms in the group. 
+    /// The rooms the group gathers, those stored in the portal first and those on connected third-party accounts
+    /// after them. Null when the group was asked for without its members, and an empty array when the group holds no
+    /// room the caller can still see. A room moved to the archive is left out until it is taken out of the archive.
     /// </summary>
-    /// <example>[{"id":1,"title":"Room 1"},{"id":2,"title":"Room 2"}]</example>
+    /// <example>[{"title": "Client onboarding", "fileEntryType": 1}]</example>
     public List<FileEntryBaseDto> Rooms { get; set; }
 
     /// <summary>
-    /// Total number of rooms in the group.
+    /// How many rooms the group shows: the same rooms `rooms` lists, so archived ones are not counted either. It is
+    /// filled even when the rooms themselves were not asked for, which makes it the cheap way to tell an empty group
+    /// from a populated one.
     /// </summary>
     /// <example>2</example>
     public int TotalRooms { get; set; }

@@ -34,21 +34,22 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The icon request parameters.
+/// The room group to re-icon and the icon to give it.
 /// </summary>
 public class RoomGroupIconRequestDto
 {
     /// <summary>
-    /// Group id
+    /// The room group to re-icon, identified by the value `GET api/2.0/files/group` reports for it. A group of
+    /// another account cannot be addressed and reads as missing.
     /// </summary>
-    /// <example>1</example>
+    /// <example>42</example>
     [FromRoute(Name = "id")]
     public required int Id { get; set; }
 
     /// <summary>
-    /// Icon update data.
+    /// The icon to give the group. A body that leaves the icon out is accepted and changes nothing.
     /// </summary>
-    /// <example>{"icon": "https://example.com/image.png"}</example>
+    /// <example>{"icon": "star"}</example>
     [FromBody]
     public IconRequest Update { get; set; }
 }
@@ -59,8 +60,9 @@ public class RoomGroupIconRequestDto
 public class IconRequest
 {
     /// <summary>
-    /// Group icon
+    /// The identifier of one of the built-in covers listed by `GET api/2.0/files/rooms/covers`. An empty string
+    /// clears the icon of the group, null or a missing member keeps the current one, and anything else is refused.
     /// </summary>
-    /// <example>https://example.com/image.png</example>
+    /// <example>heart</example>
     public string Icon { get; set; }
 }
