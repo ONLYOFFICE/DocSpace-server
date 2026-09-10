@@ -99,6 +99,20 @@ public class OpenApiCustomizerConfiguration {
     }
   }
 
+  @SuppressWarnings("rawtypes")
+  private static void clearDuplicatedArrayItemDescription(Schema<?> schema) {
+    if (schema == null) return;
+
+    var items = schema.getItems();
+    if (items == null || items.get$ref() == null) return;
+
+    var arrayDescription = schema.getDescription();
+    var itemsDescription = items.getDescription();
+    if (arrayDescription != null && arrayDescription.equals(itemsDescription)) {
+      items.setDescription(null);
+    }
+  }
+
   private static Content problemDetailContent() {
     return new Content()
         .addMediaType(
@@ -279,6 +293,46 @@ public class OpenApiCustomizerConfiguration {
       group.put("name", OAUTH_TAG_GROUP);
       group.put("tags", TAG_GROUP_TAGS);
       openApi.addExtension(X_TAG_GROUPS, List.of(group));
+    };
+  }
+
+  /**
+   * Under OpenAPI 3.1, swagger-core can copy an {@code @ArraySchema(arraySchema=...)} description
+   * onto {@code items} as a {@code $ref} sibling. That wrongly documents each element as the whole
+   * list (for example getScopes). Drop the item copy when it matches the array description and the
+   * item is a ref; the component schema keeps the per-item docs.
+   */
+  @Bean
+  public OpenApiCustomizer clearDuplicatedArrayItemDescriptionsCustomizer() {
+    return openApi -> {
+      if (openApi.getPaths() == null) return;
+
+      openApi
+          .getPaths()
+          .values()
+          .forEach(
+              pathItem ->
+                  pathItem
+                      .readOperations()
+                      .forEach(
+                          operation -> {
+                            var responses = operation.getResponses();
+                            if (responses == null) return;
+
+                            responses
+                                .values()
+                                .forEach(
+                                    response -> {
+                                      if (response.getContent() == null) return;
+                                      response
+                                          .getContent()
+                                          .values()
+                                          .forEach(
+                                              mediaType ->
+                                                  clearDuplicatedArrayItemDescription(
+                                                      mediaType.getSchema()));
+                                    });
+                          }));
     };
   }
 }

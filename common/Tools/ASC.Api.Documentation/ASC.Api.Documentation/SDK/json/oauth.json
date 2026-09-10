@@ -1152,8 +1152,7 @@
                   "type": "array",
                   "description": "List of OAuth2 scopes",
                   "items": {
-                    "$ref": "#/components/schemas/ScopeResponse",
-                    "description": "List of OAuth2 scopes"
+                    "$ref": "#/components/schemas/ScopeResponse"
                   }
                 },
                 "example": [
