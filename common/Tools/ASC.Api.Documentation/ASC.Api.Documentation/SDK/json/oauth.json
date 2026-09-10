@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.4",
+  "openapi": "3.1.0",
   "info": {
     "title": "ASC.Identity.Authorization",
     "version": "3.2.0"
@@ -19,11 +19,12 @@
   "tags": [
     {
       "name": "OAuth 2.0 / Authorization",
-      "description": "APIs for managing OAuth2 authorization, including authorization and consent.",
+      "description": "The OAuth2 authorization flow: the authorization request, the consent submission and the exchange of an authorization code for tokens.",
       "x-displayName": "Authorization"
     },
     {
       "name": "OAuth 2.0 / Discovery",
+      "description": "The OAuth 2.0 Authorization Server metadata endpoint a client probes before it starts a flow.",
       "x-displayName": "Discovery"
     },
     {
@@ -32,14 +33,14 @@
       "x-displayName": "Client Management"
     },
     {
-      "name": "OAuth 2.0 / Scope Management",
-      "description": "APIs for retrieving OAuth2 scopes and their permissions.",
-      "x-displayName": "Scope Management"
+      "name": "OAuth 2.0 / Client Querying",
+      "description": "APIs for retrieving OAuth2 client information and user consents",
+      "x-displayName": "Client Querying"
     },
     {
-      "name": "OAuth 2.0 / Client Querying",
-      "description": "APIs for retrieving OAuth2 client information and user consents.",
-      "x-displayName": "Client Querying"
+      "name": "OAuth 2.0 / Scope Management",
+      "description": "APIs for retrieving OAuth2 scopes and their permissions",
+      "x-displayName": "Scope Management"
     }
   ],
   "paths": {
@@ -48,54 +49,52 @@
         "tags": [
           "OAuth 2.0 / Authorization"
         ],
-        "summary": "OAuth2 Authorization Endpoint",
-        "description": "Initiates the OAuth2 authorization flow.",
-        "operationId": "authorizeOAuth",
+        "summary": "Start the authorization flow",
+        "description": "Starts the OAuth2 authorization code flow for the client named by client_id. The caller has to present the portal signature cookie, and a request without a valid one is not refused with 401 or 403 but redirected to the portal login page, carrying the client ID so the flow can resume after signing in. When the user has not yet consented to the requested scopes the browser is redirected to the consent page; once the consent exists the browser is redirected to the client's redirect URI with the authorization code and, when one was sent, the original state. A caller that cannot follow redirects may send the X-Disable-Redirect header, and then the response is 200 with an empty body and the target URL in the X-Redirect-URI header. The code returned here is exchanged for tokens at the token endpoint.",
         "parameters": [
           {
             "name": "response_type",
             "in": "query",
-            "description": "The OAuth 2.0 response type, must be 'code' for authorization code flow.",
+            "description": "The OAuth 2.0 response type. Only code is supported: this server issues an authorization code, never a token, from this endpoint.",
             "required": true,
             "schema": {
-              "type": "string",
               "example": "code"
             }
           },
           {
             "name": "client_id",
             "in": "query",
-            "description": "The client identifier issued to the client during registration.",
+            "description": "The identifier the client was given when it was registered. It selects both the client shown on the consent screen and the set of redirect URIs the request is checked against.",
             "required": true,
             "schema": {
-              "type": "string",
               "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
             }
           },
           {
             "name": "redirect_uri",
             "in": "query",
-            "description": "The URL to redirect to after authorization is complete.",
+            "description": "Where to send the user once authorization is complete. It has to be one of the redirect URIs registered for the client, otherwise the request is refused.",
             "required": true,
             "schema": {
-              "type": "string",
               "example": "https://example.com"
             }
           },
           {
             "name": "scope",
             "in": "query",
-            "description": "The space-separated list of requested scope permissions.",
+            "description": "The permissions being asked for, as a space-separated list. Every scope has to be one the client is registered for, and the consent screen lists exactly these.",
             "required": true,
             "schema": {
-              "type": "string",
               "example": "files:read"
             }
           }
         ],
         "responses": {
+          "302": {
+            "description": "Redirect to the login page, to the consent page, or back to the client's redirect URI with an authorization code"
+          },
           "200": {
-            "description": "Authorization page"
+            "description": "Returned instead of the redirect when the request carries the X-Disable-Redirect header: the target URL is sent in the X-Redirect-URI response header and the body is empty"
           },
           "400": {
             "description": "Invalid request parameters"
@@ -111,28 +110,23 @@
         "tags": [
           "OAuth 2.0 / Authorization"
         ],
-        "summary": "OAuth2 consent endpoint",
-        "description": "Sends consent approval",
-        "operationId": "submitConsent",
+        "summary": "Submit the consent decision",
+        "description": "Submits the user's consent decision for the scopes an authorization request asked for. It is the form post the consent page makes, so it carries the client ID, the state and the agreed scopes as multipart form data, along with the same portal signature cookie the authorization request needed. On success the browser is redirected to the client's redirect URI with an authorization code, or, when the request carries the X-Disable-Redirect header, answered 200 with that URL in the X-Redirect-URI header. The consent is stored per user and client, so a later authorization request for the same scopes no longer stops at the consent page.",
         "requestBody": {
           "content": {
             "multipart/form-data": {
               "schema": {
-                "type": "object",
                 "properties": {
                   "client_id": {
-                    "type": "string",
-                    "description": "The client identifier issued to the client during registration.",
+                    "description": "The client the consent is being given to. It has to be the same client the authorization request named.",
                     "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
                   },
                   "state": {
-                    "type": "string",
-                    "description": "The random string used to solve the CSRF vulnerability problem.",
+                    "description": "The opaque value carried through from the authorization request, returned unchanged on the redirect so the client can match the answer to its request.",
                     "example": "abcde"
                   },
                   "scope": {
-                    "type": "string",
-                    "description": "The space-separated list of requested scope permissions.",
+                    "description": "The scopes the user agreed to, as a space-separated list. Anything the user declined is left out, so this may be narrower than what was requested.",
                     "example": "files:read"
                   }
                 }
@@ -143,6 +137,9 @@
         "responses": {
           "302": {
             "description": "Redirect to the client's redirect URI with authorization code"
+          },
+          "200": {
+            "description": "Returned instead of the redirect when the request carries the X-Disable-Redirect header: the target URL is sent in the X-Redirect-URI response header and the body is empty"
           },
           "400": {
             "description": "Invalid request parameters"
@@ -160,38 +157,31 @@
         "tags": [
           "OAuth 2.0 / Authorization"
         ],
-        "summary": "OAuth2 Token Endpoint",
-        "description": "Exchange authorization code for access token",
-        "operationId": "exchangeToken",
+        "summary": "Exchange the authorization code",
+        "description": "Exchanges an authorization code for an access token. The request is form-encoded and has to carry the grant type, the code, the same redirect URI that was used to obtain the code, and the client credentials: the client authenticates itself here rather than through the portal signature cookie the authorization endpoint uses. The response carries the access token, its type and its lifetime in seconds, plus a refresh token when the client is configured for the refresh token grant. Client authentication that fails is answered with 401, while a malformed, unknown or expired code is answered with 400. The code is single use, so replaying it fails.",
         "requestBody": {
           "content": {
             "application/x-www-form-urlencoded": {
               "schema": {
-                "type": "object",
                 "properties": {
                   "grant_type": {
-                    "type": "string",
-                    "description": "The OAuth2 grant type, must be 'authorization_code' for the authorization code flow.",
+                    "description": "Which exchange is being performed: authorization_code to redeem a code, refresh_token to renew an access token.",
                     "example": "authorization_code"
                   },
                   "code": {
-                    "type": "string",
-                    "description": "A temporary authorization code that is sent to the client to be exchanged for a token.",
+                    "description": "The authorization code returned by the authorization endpoint. It may be redeemed once.",
                     "example": "abcde"
                   },
                   "redirect_uri": {
-                    "type": "string",
-                    "description": "The URL where the user will be redirected after successful or unsuccessful authentication.",
+                    "description": "The same redirect URI that was used to obtain the code. The exchange fails when it differs.",
                     "example": "https://example.com"
                   },
                   "client_id": {
-                    "type": "string",
-                    "description": "The client identifier issued to the client during registration.",
+                    "description": "The identifier of the client redeeming the code.",
                     "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
                   },
                   "client_secret": {
-                    "type": "string",
-                    "description": "The client secret issued to the client during registration.",
+                    "description": "The secret of the client redeeming the code. It is omitted by a public client, which proves itself with a PKCE code verifier instead.",
                     "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
                   }
                 }
@@ -205,26 +195,21 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
                   "properties": {
                     "access_token": {
-                      "type": "string",
-                      "description": "The access token issued by the authorization server.",
+                      "description": "The token to send as a Bearer credential when calling the portal on the user behalf.",
                       "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                     },
                     "token_type": {
-                      "type": "string",
-                      "description": "The type of token issued, typically 'Bearer'.",
+                      "description": "How the access token is to be presented. It is always Bearer.",
                       "example": "Bearer"
                     },
                     "expires_in": {
-                      "type": "integer",
-                      "description": "The number of seconds until the access token expires.",
+                      "description": "How many seconds the access token stays valid, counted from the moment it was issued.",
                       "example": 3600
                     },
                     "refresh_token": {
-                      "type": "string",
-                      "description": "The token used to obtain a new access token when the current one expires.",
+                      "description": "The token that buys a new access token once the current one expires. It is present only when the client is registered for the refresh token grant.",
                       "example": "def502..."
                     }
                   }
@@ -234,6 +219,9 @@
           },
           "400": {
             "description": "Invalid request parameters"
+          },
+          "401": {
+            "description": "Client authentication failed: the client ID is unknown or the client secret does not match"
           }
         }
       }
@@ -243,10 +231,12 @@
         "tags": [
           "OAuth 2.0 / Discovery"
         ],
+        "summary": "Probe the discovery endpoint",
+        "description": "Answers the CORS preflight for the OAuth 2.0 Authorization Server metadata endpoint. The endpoint needs no authentication and reads nothing from the request: it always answers 200 with an empty body, and the CORS headers are added by the surrounding filter chain rather than by this handler. It changes no state, and it does not return the authorization server metadata document - issue a GET against the same path for that.",
         "operationId": "handleOptions",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Preflight accepted; the response carries no body",
             "content": {
               "*/*": {
                 "schema": {
@@ -258,13 +248,13 @@
         }
       }
     },
-    "/api/2.0/clients/{clientId}": {
+    "/api/2.0/oauth2/clients/{clientId}": {
       "get": {
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
         "summary": "Get client details",
-        "description": "Retrieves detailed information about a specific OAuth2 client including its name, description, redirect URIs, and scopes.",
+        "description": "Returns the whole stored record of one client: its name and description, its secret, scopes, redirect URIs, allowed origins, logout redirect URIs and audit fields. An administrator sees any client of the tenant, a plain user only the clients they created, and a guest none of them. Whatever the caller may not see is reported as 404 rather than 403, so absence and lack of access are deliberately indistinguishable, and an identifier that is not a valid client ID is reported the same way. The response is a single object, not a collection.",
         "operationId": "getClient",
         "parameters": [
           {
@@ -273,8 +263,8 @@
             "description": "ID of the client to retrieve",
             "required": true,
             "schema": {
-              "minLength": 1,
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             },
             "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
           }
@@ -301,7 +291,7 @@
                   "website_url": "http://example.com",
                   "terms_url": "http://example.com",
                   "policy_url": "http://example.com",
-                  "logo": "data:image/png;base64,ivBOR",
+                  "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                   "authentication_methods": [
                     "client_secret_post"
                   ],
@@ -324,7 +314,7 @@
             }
           },
           "400": {
-            "description": "Invalid client ID format",
+            "description": "The client ID is blank or contains only whitespace",
             "content": {
               "application/json": {
                 "schema": {
@@ -344,7 +334,7 @@
             }
           },
           "404": {
-            "description": "Client not found",
+            "description": "No client with this ID is visible to the caller, or the ID cannot be parsed as a client ID",
             "content": {
               "application/json": {
                 "schema": {
@@ -372,6 +362,12 @@
                 }
               }
             }
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
           }
         },
         "security": [
@@ -385,7 +381,7 @@
           "OAuth 2.0 / Client Management"
         ],
         "summary": "Update an existing OAuth2 client",
-        "description": "Updates the configuration of an existing OAuth2 client. Allows modification of client name, description, redirect URIs, and other settings. The client ID cannot be modified.",
+        "description": "Updates the mutable settings of an existing client and answers 200 with an empty body. Only the fields carried in the request body change; the client ID, the secret, the tenant and the creator cannot be changed this way. An administrator may update any client of the tenant, a plain user only the clients they created, and a client the caller may not see is reported as not found rather than as forbidden. The write runs under optimistic locking and is retried a few times, so a request that still loses the race is rejected with 400 instead of silently overwriting a concurrent change. Nothing is returned in the body - read the client back to see the stored result.",
         "operationId": "updateClient",
         "parameters": [
           {
@@ -394,8 +390,8 @@
             "description": "ID of the client to update",
             "required": true,
             "schema": {
-              "minLength": 1,
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             },
             "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
           }
@@ -405,6 +401,11 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpdateClientRequest"
+              },
+              "encoding": {
+                "command": {
+                  "contentType": "application/json"
+                }
               }
             }
           },
@@ -422,7 +423,7 @@
             }
           },
           "400": {
-            "description": "Invalid request - missing required fields or validation failed",
+            "description": "Missing required fields, validation failed, or the client could not be updated because of concurrent modification",
             "content": {
               "application/json": {
                 "schema": {
@@ -442,7 +443,7 @@
             }
           },
           "404": {
-            "description": "Client not found",
+            "description": "No client with this ID is visible to the caller, or the ID cannot be parsed as a client ID",
             "content": {
               "application/json": {
                 "schema": {
@@ -452,7 +453,7 @@
             }
           },
           "415": {
-            "description": "Unsupported media type",
+            "description": "The Content-Type header is not application/json",
             "content": {
               "application/json": {
                 "schema": {
@@ -480,6 +481,12 @@
                 }
               }
             }
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
           }
         },
         "security": [
@@ -493,7 +500,7 @@
           "OAuth 2.0 / Client Management"
         ],
         "summary": "Delete an OAuth2 client",
-        "description": "Permanently deletes an OAuth2 client and all associated data. This will invalidate all access tokens and refresh tokens issued to this client. This operation cannot be undone.",
+        "description": "Deletes one client from the tenant permanently and answers 200 with an empty body. An administrator may delete any client of the tenant, a plain user only the clients they created, and a client the caller may not see is reported as not found rather than as forbidden. The authorizations and consents issued for the client are removed too, but that cleanup is driven by a message and completes on the authorization service after this call has already returned. A delete that removes no row answers 400. The operation cannot be undone.",
         "operationId": "deleteClient",
         "parameters": [
           {
@@ -502,8 +509,8 @@
             "description": "ID of the client to delete",
             "required": true,
             "schema": {
-              "minLength": 1,
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             },
             "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
           }
@@ -520,7 +527,7 @@
             }
           },
           "400": {
-            "description": "Invalid client ID format",
+            "description": "The client ID is blank, or the client could not be deleted",
             "content": {
               "application/json": {
                 "schema": {
@@ -540,7 +547,7 @@
             }
           },
           "404": {
-            "description": "Client not found",
+            "description": "No client with this ID is visible to the caller, or the ID cannot be parsed as a client ID",
             "content": {
               "application/json": {
                 "schema": {
@@ -568,6 +575,12 @@
                 }
               }
             }
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
           }
         },
         "security": [
@@ -577,28 +590,28 @@
         ]
       }
     },
-    "/api/2.0/clients": {
+    "/api/2.0/oauth2/clients": {
       "get": {
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
         "summary": "List clients",
-        "description": "Retrieves a paginated list of OAuth2 clients. The results can be paginated using the limit parameter and last seen client ID/creation date.",
+        "description": "Returns one page of the tenant's clients, newest first, each in the same full form as the single-client read. An administrator sees every client of the tenant, a plain user only the clients they created. Paging is keyset-based rather than offset-based: limit sets the page size, and last_client_id and last_created_on are carried over from the previous page to ask for the next one. The limit defaults to 30 and has to lie between 1 and 50; a value outside that range, or a last_created_on that cannot be parsed as a date, is rejected with 400.",
         "operationId": "getClients",
         "parameters": [
           {
             "name": "limit",
             "in": "query",
-            "description": "Pagination limit",
-            "required": true,
+            "description": "How many entries to return, between 1 and 50. Defaults to 30 when omitted.",
+            "required": false,
             "schema": {
-              "maximum": 50,
-              "minimum": 1,
               "type": "integer",
               "format": "int32",
-              "default": 30
+              "default": 30,
+              "maximum": 50,
+              "minimum": 1
             },
-            "example": 1
+            "example": 30
           },
           {
             "name": "last_client_id",
@@ -646,7 +659,7 @@
                       "website_url": "http://example.com",
                       "terms_url": "http://example.com",
                       "policy_url": "http://example.com",
-                      "logo": "data:image/png;base64,ivBOR",
+                      "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                       "authentication_methods": [
                         "client_secret_post"
                       ],
@@ -674,7 +687,7 @@
             }
           },
           "400": {
-            "description": "Invalid pagination parameters",
+            "description": "Invalid pagination parameters, including a last_created_on that cannot be parsed as a date-time",
             "content": {
               "application/json": {
                 "schema": {
@@ -685,6 +698,16 @@
           },
           "403": {
             "description": "Insufficient permissions to list clients",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "The Accept header does not allow application/json",
             "content": {
               "application/json": {
                 "schema": {
@@ -712,6 +735,9 @@
                 }
               }
             }
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
           }
         },
         "security": [
@@ -725,13 +751,18 @@
           "OAuth 2.0 / Client Management"
         ],
         "summary": "Create a new OAuth2 client",
-        "description": "Creates a new OAuth2 client with the specified configuration. The client will be created with the provided scopes, redirect URIs, and other settings. Returns the created client details including the generated client ID.",
+        "description": "Registers a new OAuth2 client in the caller's tenant and returns it. The body must carry a name, a description, a logo and at least one redirect URI, allowed origin and scope, and every scope named must already exist in the tenant's scope catalogue. Administrators and users may both register clients; the caller is recorded as the creator, which is what later restricts a plain user to the clients they created. The response is the stored client with its generated client ID and secret, and it is the first place either value can be read. Some deployments cap how many clients one tenant may hold, and reaching that cap is reported as 400 together with the validation failures.",
         "operationId": "createClient",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateClientRequest"
+              },
+              "encoding": {
+                "command": {
+                  "contentType": "application/json"
+                }
               }
             }
           },
@@ -759,7 +790,7 @@
                   "website_url": "http://example.com",
                   "terms_url": "http://example.com",
                   "policy_url": "http://example.com",
-                  "logo": "data:image/png;base64,ivBOR",
+                  "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                   "authentication_methods": [
                     "client_secret_post"
                   ],
@@ -782,7 +813,7 @@
             }
           },
           "400": {
-            "description": "Invalid request - missing required fields or validation failed",
+            "description": "Missing required fields, validation failed, an unknown scope was requested, or the client limit for this tenant has been reached",
             "content": {
               "application/json": {
                 "schema": {
@@ -802,7 +833,7 @@
             }
           },
           "415": {
-            "description": "Unsupported media type",
+            "description": "The Content-Type header is not application/json",
             "content": {
               "application/json": {
                 "schema": {
@@ -830,6 +861,12 @@
                 }
               }
             }
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
           }
         },
         "security": [
@@ -843,7 +880,7 @@
           "OAuth 2.0 / Client Management"
         ],
         "summary": "Delete all user OAuth2 clients",
-        "description": "Permanently deletes user OAuth2 clients and all associated data. This will invalidate all access tokens and refresh tokens issued to this client. This operation cannot be undone.",
+        "description": "Deletes every client the calling user created in the current tenant and answers 200 with an empty body. The caller's own identity always selects the set, so this never reaches clients created by somebody else, not even for an administrator. The authorizations and consents of the deleted clients are cleaned up asynchronously on the authorization service, and the tenant's client cache is dropped as part of the call. Concurrent modification that survives the retries is reported as 400. The operation cannot be undone, and the response does not say how many clients were removed.",
         "operationId": "deleteUserClients",
         "responses": {
           "200": {
@@ -852,6 +889,16 @@
               "application/json": {
                 "schema": {
                   "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The clients could not be deleted because of concurrent modification",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -885,6 +932,12 @@
                 }
               }
             }
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
           }
         },
         "security": [
@@ -894,13 +947,13 @@
         ]
       }
     },
-    "/api/2.0/clients/{clientId}/regenerate": {
+    "/api/2.0/oauth2/clients/{clientId}/regenerate": {
       "patch": {
         "tags": [
           "OAuth 2.0 / Client Management"
         ],
         "summary": "Regenerate client secret",
-        "description": "Generates a new client secret for the specified OAuth2 client. The old secret will be immediately invalidated. This operation should be used with caution as it requires updating the secret in all client applications.",
+        "description": "Issues a new secret for the client and returns it. The previous secret stops working as soon as this call succeeds, there is no grace period and no way to recover it, so every deployed copy of the client has to be updated with the value returned here. An administrator may do this for any client of the tenant, a plain user only for the clients they created. Tokens already issued to the client keep working; only future client authentication is affected. The response carries the new secret and nothing else.",
         "operationId": "regenerateSecret",
         "parameters": [
           {
@@ -909,8 +962,8 @@
             "description": "ID of the client to regenerate secret for",
             "required": true,
             "schema": {
-              "minLength": 1,
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             },
             "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
           }
@@ -930,7 +983,7 @@
             }
           },
           "400": {
-            "description": "Invalid client ID format",
+            "description": "The client ID is blank or contains only whitespace",
             "content": {
               "application/json": {
                 "schema": {
@@ -950,7 +1003,7 @@
             }
           },
           "404": {
-            "description": "Client not found",
+            "description": "No client with this ID is visible to the caller, or the ID cannot be parsed as a client ID",
             "content": {
               "application/json": {
                 "schema": {
@@ -978,6 +1031,12 @@
                 }
               }
             }
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
           }
         },
         "security": [
@@ -987,13 +1046,13 @@
         ]
       }
     },
-    "/api/2.0/clients/{clientId}/activation": {
+    "/api/2.0/oauth2/clients/{clientId}/activation": {
       "patch": {
         "tags": [
           "OAuth 2.0 / Client Management"
         ],
         "summary": "Change client activation status",
-        "description": "Activates or deactivates an OAuth2 client. When deactivated, the client cannot request new access tokens, but existing tokens will remain valid until they expire.",
+        "description": "Enables or disables an existing client and answers 200 with an empty body. A disabled client can no longer obtain new tokens, but the tokens and consents it already holds stay valid until they expire on their own: disable a client to stop new authorizations, delete it to end the existing ones. An administrator may change any client of the tenant, a plain user only the clients they created. The body carries the single activation flag, and a client the caller may not see is reported as not found rather than as forbidden.",
         "operationId": "changeActivation",
         "parameters": [
           {
@@ -1002,8 +1061,8 @@
             "description": "ID of the client to change activation for",
             "required": true,
             "schema": {
-              "minLength": 1,
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             },
             "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
           }
@@ -1013,6 +1072,11 @@
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ChangeClientActivationRequest"
+              },
+              "encoding": {
+                "command": {
+                  "contentType": "application/json"
+                }
               }
             }
           },
@@ -1030,7 +1094,7 @@
             }
           },
           "400": {
-            "description": "Invalid client ID format or activation status",
+            "description": "The client ID is blank, or the activation status is missing",
             "content": {
               "application/json": {
                 "schema": {
@@ -1050,7 +1114,7 @@
             }
           },
           "404": {
-            "description": "Client not found",
+            "description": "No client with this ID is visible to the caller, or the ID cannot be parsed as a client ID",
             "content": {
               "application/json": {
                 "schema": {
@@ -1060,7 +1124,7 @@
             }
           },
           "415": {
-            "description": "Unsupported media type",
+            "description": "The Content-Type header is not application/json",
             "content": {
               "application/json": {
                 "schema": {
@@ -1088,6 +1152,12 @@
                 }
               }
             }
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
           }
         },
         "security": [
@@ -1097,13 +1167,13 @@
         ]
       }
     },
-    "/api/2.0/scopes": {
+    "/api/2.0/oauth2/scopes": {
       "get": {
         "tags": [
           "OAuth 2.0 / Scope Management"
         ],
         "summary": "List available OAuth2 scopes",
-        "description": "Retrieves a list of all available OAuth2 scopes for the specified tenant. The scopes define the permissions that can be requested by OAuth2 clients. The list is ordered alphabetically, with the 'openid' scope always appearing first.",
+        "description": "Retrieves a list of all available OAuth2 scopes for the specified tenant. The scopes define the permissions that can be requested by OAuth2 clients. The list is ordered alphabetically, with the 'openid' scope always appearing first. It is a read-only catalogue that does not depend on which clients exist: a valid portal signature is the only requirement, with no role restriction, and every caller of the portal sees the same list.",
         "operationId": "getScopes",
         "responses": {
           "200": {
@@ -1111,25 +1181,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ScopeResponse"
+                  "type": "array",
+                  "$ref": "#/components/schemas/ScopeResponse",
+                  "description": "List of OAuth2 scopes"
                 },
                 "example": [
                   {
-                    "name": "scope_name",
-                    "type": "scope_type",
-                    "group": "scope_group"
+                    "name": "files:read",
+                    "type": "read",
+                    "group": "files"
+                  },
+                  {
+                    "name": "openid",
+                    "type": "openid",
+                    "group": "openid"
                   }
                 ]
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid request parameters",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetail"
-                }
               }
             }
           },
@@ -1143,6 +1210,16 @@
               }
             }
           },
+          "406": {
+            "description": "The Accept header does not allow application/json",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
           "429": {
             "description": "Too many requests - rate limit exceeded",
             "content": {
@@ -1162,6 +1239,9 @@
                 }
               }
             }
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
           }
         },
         "security": [
@@ -1171,12 +1251,13 @@
         ]
       }
     },
-    "/api/2.0/clients/{clientId}/public/info": {
+    "/api/2.0/oauth2/clients/{clientId}/public/info": {
       "get": {
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
-        "summary": "Handles the GET request for public client information",
+        "summary": "Get public client info",
+        "description": "Returns the same consent-facing client information as the signed read, but without requiring a portal signature. It is meant for a login or consent page that has to render the client before the user is known, so it resolves the client by ID alone: there is no authentication, no tenant scoping and no creator check, and any caller who knows a client ID can read that client's public details. It still exposes no secret, no redirect URIs and no allowed origins. Being unauthenticated it is rate-limited on a separate, tighter budget than the signed endpoints. An unknown client ID, and an identifier that is not a client ID at all, are both reported as 404.",
         "operationId": "getPublicClientInfo",
         "parameters": [
           {
@@ -1185,8 +1266,8 @@
             "description": "ID of the client to retrieve",
             "required": true,
             "schema": {
-              "minLength": 1,
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             },
             "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
           }
@@ -1206,7 +1287,7 @@
                   "website_url": "http://example.com",
                   "terms_url": "http://example.com",
                   "policy_url": "http://example.com",
-                  "logo": "data:image/png;base64,ivBOR",
+                  "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                   "authentication_methods": [
                     "client_secret_post"
                   ],
@@ -1224,10 +1305,27 @@
             }
           },
           "400": {
-            "description": "Bad request"
+            "description": "The client ID is blank or contains only whitespace",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No client with this ID exists, or the ID cannot be parsed as a client ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
           },
           "429": {
-            "description": "Too many requests",
+            "description": "Too many requests - rate limit exceeded",
             "content": {
               "application/json": {
                 "schema": {
@@ -1237,19 +1335,32 @@
             }
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
           }
         }
       }
     },
-    "/api/2.0/clients/{clientId}/info": {
+    "/api/2.0/oauth2/clients/{clientId}/info": {
       "get": {
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
-        "summary": "Retrieves detailed information for a specific client",
+        "summary": "Get client info",
+        "description": "Retrieves the detailed information for a client with the ID specified in the request. It returns the consent-facing subset of the client - name, description, logo, the website, terms and policy URLs, authentication methods and scopes - and deliberately omits the secret, the redirect URIs and the allowed origins, which is what makes it safe to render on a consent screen. An administrator sees any client of the tenant, a plain user only the clients they created, and a guest none of them. A client the caller may not see is reported as 404, exactly like an unknown one.",
         "operationId": "getClientInfo",
-        "description": "Retrieves the detailed information for a client with the ID specified in the request.",
         "parameters": [
           {
             "name": "clientId",
@@ -1257,8 +1368,8 @@
             "description": "ID of the client to retrieve",
             "required": true,
             "schema": {
-              "minLength": 1,
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             },
             "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
           }
@@ -1278,7 +1389,7 @@
                   "website_url": "http://example.com",
                   "terms_url": "http://example.com",
                   "policy_url": "http://example.com",
-                  "logo": "data:image/png;base64,ivBOR",
+                  "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                   "authentication_methods": [
                     "client_secret_post"
                   ],
@@ -1296,10 +1407,37 @@
             }
           },
           "400": {
-            "description": "Bad request"
+            "description": "The client ID is blank or contains only whitespace",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions to view client information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No client with this ID is visible to the caller, or the ID cannot be parsed as a client ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
           },
           "429": {
-            "description": "Too many requests",
+            "description": "Too many requests - rate limit exceeded",
             "content": {
               "application/json": {
                 "schema": {
@@ -1309,7 +1447,20 @@
             }
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
           }
         },
         "security": [
@@ -1319,27 +1470,27 @@
         ]
       }
     },
-    "/api/2.0/clients/info": {
+    "/api/2.0/oauth2/clients/info": {
       "get": {
         "tags": [
           "OAuth 2.0 / Client Querying"
         ],
-        "summary": "Retrieves a pageable list of client information",
-        "description": "Retrieves a paginated list of information for all clients.",
+        "summary": "List client info",
+        "description": "Retrieves a paginated list of information for all clients, each in the same consent-facing form as the single-client info read. An administrator sees every client of the tenant, a plain user only the clients they created. Paging is keyset-based: limit sets the page size, and last_client_id and last_created_on are carried over from the previous page. Unlike the full client listing, limit has no default here - it has to be supplied on every call and has to lie between 1 and 50, and a missing or out-of-range value is rejected with 400.",
         "operationId": "getClientsInfo",
         "parameters": [
           {
             "name": "limit",
             "in": "query",
-            "description": "Pagination limit",
+            "description": "How many entries to return, between 1 and 50. It has no default and has to be sent on every call.",
             "required": true,
             "schema": {
-              "maximum": 50,
-              "minimum": 1,
               "type": "integer",
-              "format": "int32"
+              "format": "int32",
+              "maximum": 50,
+              "minimum": 1
             },
-            "example": 1
+            "example": 30
           },
           {
             "name": "last_client_id",
@@ -1369,157 +1520,41 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PageableResponseClientInfoResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "429": {
-            "description": "Too many requests",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetail"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "security": [
-          {
-            "x-signature": []
-          }
-        ]
-      }
-    },
-    "/api/2.0/clients/consents": {
-      "get": {
-        "tags": [
-          "OAuth 2.0 / Client Querying"
-        ],
-        "summary": "Retrieves a pageable list of consents",
-        "description": "Retrieves a paginated list of user consents.",
-        "operationId": "getConsents",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "Pagination limit",
-            "required": true,
-            "schema": {
-              "maximum": 50,
-              "minimum": 1,
-              "type": "integer",
-              "format": "int32"
-            },
-            "example": 1
-          },
-          {
-            "name": "last_modified_on",
-            "in": "query",
-            "description": "Date of the last retrieved consent",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            },
-            "example": "2024-04-04T12:00:00Z"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved user consents",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PageableModificationResponse"
+                  "$ref": "#/components/schemas/PageableResponse"
                 },
                 "example": {
                   "data": [
                     {
-                      "registered_client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                      "name": "Example Name",
+                      "client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                      "description": "Example Description",
+                      "website_url": "http://example.com",
+                      "terms_url": "http://example.com",
+                      "policy_url": "http://example.com",
+                      "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+                      "authentication_methods": [
+                        "client_secret_post"
+                      ],
                       "scopes": [
                         "files:read",
                         "files:write"
                       ],
-                      "modified_at": "2024-04-04T12:00:00Z",
-                      "client": {
-                        "name": "Example Name",
-                        "client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
-                        "description": "Example Description",
-                        "website_url": "http://example.com",
-                        "terms_url": "http://example.com",
-                        "policy_url": "http://example.com",
-                        "logo": "data:image/png;base64,ivBOR",
-                        "authentication_methods": [
-                          "client_secret_post"
-                        ],
-                        "scopes": [
-                          "files:read",
-                          "files:write"
-                        ],
-                        "is_public": true,
-                        "created_on": "2024-04-04T12:00:00Z",
-                        "created_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
-                        "modified_on": "2024-04-04T12:00:00Z",
-                        "modified_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
-                      }
+                      "is_public": true,
+                      "created_on": "2024-04-04T12:00:00Z",
+                      "created_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                      "modified_on": "2024-04-04T12:00:00Z",
+                      "modified_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
                     }
                   ],
                   "limit": 50,
-                  "last_modified_on": "2024-04-04T12:00:00Z"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "x-signature": []
-          }
-        ]
-      }
-    },
-    "/api/2.0/clients/{clientId}/revoke": {
-      "delete": {
-        "tags": [
-          "OAuth 2.0 / Client Management"
-        ],
-        "summary": "Revoke client consent",
-        "description": "Revokes all user consents for the specified OAuth2 client. This will invalidate all access tokens and refresh tokens issued to this client for the current user. The user will need to re-authorize the client to access their resources.",
-        "operationId": "revokeUserClient",
-        "parameters": [
-          {
-            "name": "clientId",
-            "in": "path",
-            "description": "ID of the client to revoke consent for",
-            "required": true,
-            "schema": {
-              "minLength": 1,
-              "type": "string"
-            },
-            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Client consent successfully revoked",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
+                  "last_client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                  "last_created_on": "2024-04-04T12:00:00Z"
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid client ID format",
+            "description": "The limit parameter is missing, is outside the range 1-50, or last_created_on cannot be parsed as a date-time",
             "content": {
               "application/json": {
                 "schema": {
@@ -1529,7 +1564,7 @@
             }
           },
           "403": {
-            "description": "Insufficient permissions to revoke consent",
+            "description": "Insufficient permissions to list client information",
             "content": {
               "application/json": {
                 "schema": {
@@ -1538,8 +1573,8 @@
               }
             }
           },
-          "404": {
-            "description": "Client not found",
+          "406": {
+            "description": "The Accept header does not allow application/json",
             "content": {
               "application/json": {
                 "schema": {
@@ -1568,15 +1603,8 @@
               }
             }
           },
-          "503": {
-            "description": "Authorization service unavailable",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ProblemDetail"
-                }
-              }
-            }
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
           }
         },
         "security": [
@@ -1586,13 +1614,257 @@
         ]
       }
     },
-    "/api/2.0/clients/tenant": {
+    "/api/2.0/oauth2/clients/consents": {
+      "get": {
+        "tags": [
+          "OAuth 2.0 / Client Querying"
+        ],
+        "summary": "List user consents",
+        "description": "Retrieves a paginated list of user consents: the clients the calling user has authorized, each with the scopes granted, the moment the consent was last changed and the client's consent-facing details. It always reports the caller's own consents and nothing else - there is no role check on this endpoint, so guests may call it too, and no parameter widens it to another user. The consents are read from the authorization service over gRPC, so an authorization service that cannot be reached surfaces as 503. Paging is keyset-based on last_modified_on, and limit has no default: it has to be supplied on every call and has to lie between 1 and 50.",
+        "operationId": "getConsents",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "How many entries to return, between 1 and 50. It has no default and has to be sent on every call.",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "maximum": 50,
+              "minimum": 1
+            },
+            "example": 30
+          },
+          {
+            "name": "last_modified_on",
+            "in": "query",
+            "description": "Date of the last retrieved consent",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "example": "2024-04-04T12:00:00Z"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved user consents",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageableModificationResponse"
+                },
+                "example": {
+                  "data": [
+                    {
+                      "registered_client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                      "scopes": "files:read files:write",
+                      "modified_at": "2024-04-04T12:00:00Z",
+                      "client": {
+                        "name": "Example Name",
+                        "client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                        "description": "Example Description",
+                        "website_url": "http://example.com",
+                        "terms_url": "http://example.com",
+                        "policy_url": "http://example.com",
+                        "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+                        "authentication_methods": [
+                          "client_secret_post"
+                        ],
+                        "scopes": [
+                          "files:read",
+                          "files:write"
+                        ],
+                        "is_public": true,
+                        "created_on": "2024-04-04T12:00:00Z",
+                        "created_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
+                        "modified_on": "2024-04-04T12:00:00Z",
+                        "modified_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+                      }
+                    }
+                  ],
+                  "limit": 50,
+                  "last_modified_on": "2024-04-04T12:00:00Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The limit parameter is missing, is outside the range 1-50, or last_modified_on cannot be parsed as a date-time",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "The request carries no valid portal signature",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "406": {
+            "description": "The Accept header does not allow application/json",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Authorization service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          }
+        },
+        "security": [
+          {
+            "x-signature": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/oauth2/clients/{clientId}/revoke": {
+      "delete": {
+        "tags": [
+          "OAuth 2.0 / Client Management"
+        ],
+        "summary": "Revoke client consent",
+        "description": "Revokes the calling user's own consent for one client and answers 200 with an empty body. It touches only the caller's grant: other users keep their consents and the client itself stays registered. Guests may call it as well as users and administrators, because it can never reach anyone else's data. The revocation is carried out by the authorization service over gRPC, so a service that reports nothing was revoked produces 400 and a service that cannot be reached produces 503. Once it succeeds the user has to authorize the client again before it can act on their behalf.",
+        "operationId": "revokeUserClient",
+        "parameters": [
+          {
+            "name": "clientId",
+            "in": "path",
+            "description": "ID of the client to revoke consent for",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            },
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Client consent successfully revoked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The client ID is blank, or the authorization service reported that the consent was not revoked",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions to revoke consent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too many requests - rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Authorization service unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
+                }
+              }
+            }
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
+          }
+        },
+        "security": [
+          {
+            "x-signature": []
+          }
+        ]
+      }
+    },
+    "/api/2.0/oauth2/clients/tenant": {
       "delete": {
         "tags": [
           "OAuth 2.0 / Client Management"
         ],
         "summary": "Delete all tenant OAuth2 clients",
-        "description": "Permanently deletes tenant OAuth2 clients and all associated data. This will invalidate all access tokens and refresh tokens issued to this client. This operation cannot be undone.",
+        "description": "Deletes every client registered in the current tenant and answers 200 with an empty body. Only an administrator may call it - for a plain user or a guest it is refused with 403 - and it removes the clients of all users of the tenant, not only those of the caller. The authorizations and consents of the deleted clients are cleaned up asynchronously on the authorization service, and the tenant's client cache is dropped as part of the call. Concurrent modification that survives the retries is reported as 400. The operation cannot be undone, and the response does not say how many clients were removed.",
         "operationId": "deleteTenantClients",
         "responses": {
           "200": {
@@ -1601,6 +1873,16 @@
               "application/json": {
                 "schema": {
                   "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The clients could not be deleted because of concurrent modification",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetail"
                 }
               }
             }
@@ -1634,6 +1916,12 @@
                 }
               }
             }
+          },
+          "405": {
+            "$ref": "#/components/responses/MethodNotAllowed"
+          },
+          "406": {
+            "$ref": "#/components/responses/NotAcceptable"
           }
         },
         "security": [
@@ -1646,496 +1934,620 @@
   },
   "components": {
     "schemas": {
-      "ProblemDetail": {
+      "ChangeClientActivationRequest": {
         "type": "object",
+        "description": "Client activation change request",
         "properties": {
-          "type": {
-            "type": "string",
-            "format": "uri"
-          },
-          "title": {
-            "type": "string"
-          },
           "status": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "detail": {
-            "type": "string"
-          },
-          "instance": {
-            "type": "string",
-            "format": "uri"
-          },
-          "properties": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
+            "type": "boolean",
+            "description": "Whether the client may obtain tokens from now on. Sending false leaves the registration and the already issued tokens in place but refuses new authorization requests; sending true allows them again.",
+            "example": true
           }
-        }
+        },
+        "required": [
+          "status"
+        ]
       },
-      "UpdateClientRequest": {
+      "ClientInfoResponse": {
         "type": "object",
+        "description": "The consent-facing subset of a client: everything needed to render a consent screen, and nothing that would let a caller act as the client.",
         "properties": {
           "name": {
-            "minLength": 1,
             "type": "string",
-            "description": "The name of the client",
-            "example": "Updated Client"
+            "description": "The display name shown to the user on the consent screen, between 3 and 256 characters.",
+            "example": "Example Name"
           },
           "description": {
-            "maxLength": 255,
-            "minLength": 0,
             "type": "string",
-            "description": "The description of the client",
-            "example": "Updated description of the client"
+            "description": "The free-text description shown next to the name on the consent screen, at most 255 characters.",
+            "example": "Example Description"
+          },
+          "scopes": {
+            "type": "array",
+            "description": "The permissions the client may ask for, named as they appear in the tenant scope catalogue - for example files:read, rooms:write or openid. A client cannot request a scope that is not listed here.",
+            "items": {
+              "type": "string",
+              "example": "files:read"
+            },
+            "uniqueItems": true
+          },
+          "client_id": {
+            "type": "string",
+            "description": "The generated identifier of the client, sent as client_id in every OAuth2 request. It is assigned when the client is registered and never changes afterwards.",
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+          },
+          "website_url": {
+            "type": "string",
+            "description": "The URL of the client home page, offered to the user before they consent.",
+            "example": "http://example.com"
+          },
+          "terms_url": {
+            "type": "string",
+            "description": "The URL of the client terms of service, linked from the consent screen.",
+            "example": "http://example.com"
+          },
+          "policy_url": {
+            "type": "string",
+            "description": "The URL of the client privacy policy, linked from the consent screen.",
+            "example": "http://example.com"
           },
           "logo": {
-            "minLength": 1,
-            "pattern": "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
             "type": "string",
-            "description": "The logo of the client in base64 format",
-            "example": "data:image/png;base64,..."
+            "description": "The client logo as a data URI carrying base64 image data, shown on the consent screen. Only png, jpeg, jpg and svg+xml are accepted, the whole string may not exceed 2000000 characters and the decoded image may not exceed 256000 bytes.",
+            "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
           },
-          "public": {
-            "type": "boolean"
+          "authentication_methods": {
+            "type": "array",
+            "description": "How the client authenticates itself at the token endpoint: client_secret_post for a confidential client that sends its secret, none for a public client that proves itself with PKCE instead.",
+            "items": {
+              "type": "string",
+              "example": "client_secret_post"
+            },
+            "uniqueItems": true
           },
-          "allow_pkce": {
-            "type": "boolean",
-            "description": "Indicates whether PKCE is allowed for the client",
-            "example": true
+          "created_on": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the client was registered, as an ISO-8601 timestamp with a zone offset.",
+            "example": "2024-04-04T12:00:00Z"
+          },
+          "created_by": {
+            "type": "string",
+            "description": "The identifier of the user who registered the client. A plain user may read and change only the clients where this is their own identifier.",
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+          },
+          "modified_on": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the client was last changed, as an ISO-8601 timestamp with a zone offset.",
+            "example": "2024-04-04T12:00:00Z"
+          },
+          "modified_by": {
+            "type": "string",
+            "description": "The identifier of the user who last changed the client.",
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
           },
           "is_public": {
             "type": "boolean",
-            "description": "Indicates whether client is accessible by third-party tenants",
+            "description": "Whether the client is offered to third-party tenants rather than only to the tenant that registered it.",
             "example": false
-          },
-          "allowed_origins": {
-            "maxItems": 12,
-            "minItems": 1,
-            "uniqueItems": true,
-            "type": "array",
-            "description": "The allowed origins for the client",
-            "example": [
-              "http://allowed.origin"
-            ],
-            "items": {
-              "type": "string",
-              "description": "The allowed origins for the client",
-              "example": "[\"http://allowed.origin\"]"
-            }
           }
-        },
-        "description": "Client update request containing modified client details"
+        }
       },
       "ClientResponse": {
         "type": "object",
+        "description": "The whole stored record of an OAuth2 client, including the secret and every address the client is allowed to use.",
         "properties": {
           "name": {
             "type": "string",
-            "description": "The client name."
+            "description": "The display name shown to the user on the consent screen, between 3 and 256 characters.",
+            "example": "Example Name"
           },
           "description": {
             "type": "string",
-            "description": "The client description."
+            "description": "The free-text description shown next to the name on the consent screen, at most 255 characters.",
+            "example": "Example Description"
           },
           "tenant": {
             "type": "integer",
             "format": "int64",
-            "description": "The tenant ID associated with the client."
+            "description": "The identifier of the portal the client belongs to. A client is visible only inside its own tenant, apart from the unauthenticated public info read.",
+            "example": 1
           },
           "scopes": {
-            "uniqueItems": true,
             "type": "array",
-            "description": "The client scopes.",
+            "description": "The permissions the client may ask for, named as they appear in the tenant scope catalogue - for example files:read, rooms:write or openid. A client cannot request a scope that is not listed here.",
             "items": {
-              "type": "string"
-            }
+              "type": "string",
+              "example": "files:read"
+            },
+            "uniqueItems": true
           },
           "enabled": {
             "type": "boolean",
-            "description": "Specifies if the client is currently enabled or not."
+            "description": "Whether the client may currently obtain tokens. A disabled client keeps its registration and the tokens already issued to it, but new authorization requests for it are refused.",
+            "example": true
           },
           "client_id": {
             "type": "string",
-            "description": "The client identifier issued to the client during registration."
+            "description": "The generated identifier of the client, sent as client_id in every OAuth2 request. It is assigned when the client is registered and never changes afterwards.",
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
           },
           "client_secret": {
             "type": "string",
-            "description": "The client secret issued to the client during registration."
+            "description": "The client secret, which the client presents at the token endpoint when it authenticates with client_secret_post. It is omitted from the response rather than sent as null when the client has none.",
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
           },
           "website_url": {
             "type": "string",
-            "description": "The URL to the client's website."
+            "description": "The URL of the client home page, offered to the user before they consent.",
+            "example": "http://example.com"
           },
           "terms_url": {
             "type": "string",
-            "description": "The URL to the client's terms of service."
+            "description": "The URL of the client terms of service, linked from the consent screen.",
+            "example": "http://example.com"
           },
           "policy_url": {
             "type": "string",
-            "description": "The URL to the client's privacy policy."
+            "description": "The URL of the client privacy policy, linked from the consent screen.",
+            "example": "http://example.com"
           },
           "logo": {
             "type": "string",
-            "description": "The URL to the client's logo."
+            "description": "The client logo as a data URI carrying base64 image data, shown on the consent screen. Only png, jpeg, jpg and svg+xml are accepted, the whole string may not exceed 2000000 characters and the decoded image may not exceed 256000 bytes.",
+            "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
           },
           "authentication_methods": {
-            "uniqueItems": true,
             "type": "array",
-            "description": "The authentication methods supported by the client.",
+            "description": "How the client authenticates itself at the token endpoint: client_secret_post for a confidential client that sends its secret, none for a public client that proves itself with PKCE instead.",
             "items": {
-              "type": "string"
-            }
+              "type": "string",
+              "example": "client_secret_post"
+            },
+            "uniqueItems": true
           },
           "redirect_uris": {
-            "uniqueItems": true,
             "type": "array",
-            "description": "The list of allowed redirect URIs.",
+            "description": "The URIs an authorization code may be delivered to. An authorization request naming any other URI is refused, and the set holds between 1 and 12 addresses.",
             "items": {
-              "type": "string"
-            }
+              "type": "string",
+              "example": "https://example.com"
+            },
+            "uniqueItems": true
           },
           "allowed_origins": {
-            "uniqueItems": true,
             "type": "array",
-            "description": "The list of allowed CORS origins.",
+            "description": "The web origins allowed to call the portal on behalf of this client, used for the CORS check. The set holds between 1 and 12 addresses.",
             "items": {
-              "type": "string"
-            }
+              "type": "string",
+              "example": "https://example.com"
+            },
+            "uniqueItems": true
           },
           "logout_redirect_uris": {
-            "uniqueItems": true,
             "type": "array",
-            "description": "The list of allowed logout redirect URIs.",
+            "description": "The URIs the user may be sent back to once they have logged out.",
             "items": {
-              "type": "string"
-            }
+              "type": "string",
+              "example": "https://example.com"
+            },
+            "uniqueItems": true
           },
           "created_on": {
             "type": "string",
-            "description": "The date and time when the client was created.",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the client was registered, as an ISO-8601 timestamp with a zone offset.",
+            "example": "2024-04-04T12:00:00Z"
           },
           "created_by": {
             "type": "string",
-            "description": "The user who created the client."
+            "description": "The identifier of the user who registered the client. A plain user may read and change only the clients where this is their own identifier.",
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
           },
           "modified_on": {
             "type": "string",
-            "description": "The date and time when the client was last modified.",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the client was last changed, as an ISO-8601 timestamp with a zone offset.",
+            "example": "2024-04-04T12:00:00Z"
           },
           "modified_by": {
             "type": "string",
-            "description": "The user who last modified the client."
+            "description": "The identifier of the user who last changed the client.",
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
           },
           "is_public": {
             "type": "boolean",
-            "description": "Indicates whether the client is accessible by third-party tenants."
+            "description": "Whether the client is offered to third-party tenants rather than only to the tenant that registered it.",
+            "example": false
+          }
+        }
+      },
+      "ClientSecretResponse": {
+        "type": "object",
+        "description": "The response carrying a regenerated client secret.",
+        "properties": {
+          "client_secret": {
+            "type": "string",
+            "description": "The newly generated client secret. It replaces the previous one immediately, so every deployed copy of the client has to be updated with this value.",
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
           }
         }
       },
       "CreateClientRequest": {
-        "required": [
-          "allowed_origins",
-          "redirect_uris"
-        ],
         "type": "object",
+        "description": "Client creation request containing client details",
         "properties": {
           "name": {
-            "maxLength": 256,
-            "minLength": 3,
             "type": "string",
-            "description": "The client name.",
-            "example": "Example Client"
+            "description": "The display name shown to the user on the consent screen. It has to be between 3 and 256 characters long.",
+            "example": "Example Client",
+            "maxLength": 256,
+            "minLength": 3
           },
           "description": {
-            "maxLength": 255,
-            "minLength": 0,
             "type": "string",
-            "description": "The description of the client",
-            "example": "Description of the client"
+            "description": "The free-text description shown next to the name on the consent screen, at most 255 characters.",
+            "example": "Description of the client",
+            "maxLength": 255,
+            "minLength": 0
           },
           "logo": {
-            "minLength": 1,
-            "pattern": "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}",
             "type": "string",
-            "description": "The logo of the client in base64 format",
-            "example": "data:image/png;base64,..."
+            "description": "The client logo as a data URI carrying base64 image data, shown on the consent screen. Only png, jpeg, jpg and svg+xml are accepted, the whole string may not exceed 2000000 characters and the decoded image may not exceed 256000 bytes.",
+            "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+            "minLength": 1,
+            "pattern": "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}"
           },
           "scopes": {
-            "minItems": 1,
-            "uniqueItems": true,
             "type": "array",
-            "description": "The scopes for the client",
-            "example": [
-              "read",
-              "write"
-            ],
+            "description": "The permissions the client may ask for, named as they appear in the tenant scope catalogue - for example files:read, rooms:write or openid. A client cannot request a scope that is not listed here.",
             "items": {
               "type": "string",
-              "description": "The scopes for the client",
-              "example": "[\"read\",\"write\"]"
-            }
-          },
-          "public": {
-            "type": "boolean"
+              "example": "files:read"
+            },
+            "minItems": 1,
+            "uniqueItems": true
           },
           "allow_pkce": {
             "type": "boolean",
-            "description": "Indicates whether PKCE is allowed for the client",
+            "description": "Whether the client may use PKCE. Turning it on lets the client authenticate with the none method and prove itself with a code verifier instead of sending a secret, which is what a client that cannot keep a secret needs.",
             "example": true
           },
-          "is_public": {
-            "type": "boolean",
-            "description": "Indicates if the client is public",
-            "example": false
-          },
           "website_url": {
-            "minLength": 1,
-            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
             "type": "string",
-            "description": "The website URL of the client",
-            "example": "http://example.com"
+            "description": "The URL of the client home page, offered to the user before they consent. The value has to be an http or https URL.",
+            "example": "http://example.com",
+            "minLength": 1,
+            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$"
           },
           "terms_url": {
-            "minLength": 1,
-            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
             "type": "string",
-            "description": "The terms URL of the client",
-            "example": "http://example.com/terms"
+            "description": "The URL of the client terms of service, linked from the consent screen. The value has to be an http or https URL.",
+            "example": "http://example.com/terms",
+            "minLength": 1,
+            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$"
           },
           "policy_url": {
-            "minLength": 1,
-            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
             "type": "string",
-            "description": "The policy URL of the client",
-            "example": "http://example.com/policy"
+            "description": "The URL of the client privacy policy, linked from the consent screen. The value has to be an http or https URL.",
+            "example": "http://example.com/policy",
+            "minLength": 1,
+            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$"
           },
           "redirect_uris": {
-            "maxItems": 12,
-            "minItems": 1,
-            "uniqueItems": true,
             "type": "array",
-            "description": "The redirect URIs for the client",
-            "example": [
-              "http://example.com/redirect"
-            ],
+            "description": "The URIs an authorization code may be delivered to. An authorization request naming any other URI is refused, and the set holds between 1 and 12 addresses.",
             "items": {
               "type": "string",
-              "description": "The redirect URIs for the client",
-              "example": "[\"http://example.com/redirect\"]"
-            }
+              "example": "http://example.com/redirect"
+            },
+            "maxItems": 12,
+            "minItems": 1,
+            "uniqueItems": true
           },
           "allowed_origins": {
-            "maxItems": 12,
-            "minItems": 1,
-            "uniqueItems": true,
             "type": "array",
-            "description": "The allowed origins for the client",
-            "example": [
-              "http://example.com"
-            ],
+            "description": "The web origins allowed to call the portal on behalf of this client, used for the CORS check. The set holds between 1 and 12 addresses.",
             "items": {
               "type": "string",
-              "description": "The allowed origins for the client",
-              "example": "[\"http://example.com\"]"
-            }
+              "example": "http://example.com"
+            },
+            "maxItems": 12,
+            "minItems": 1,
+            "uniqueItems": true
           },
           "logout_redirect_uri": {
+            "type": "string",
+            "description": "The single URI the user may be sent back to once they have logged out. The value has to be an http or https URL.",
+            "example": "http://example.com/logout",
             "minLength": 1,
-            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$",
-            "type": "string",
-            "description": "The logout redirect URI for the client",
-            "example": "http://example.com/logout"
-          }
-        },
-        "description": "Client creation request containing client details"
-      },
-      "ClientSecretResponse": {
-        "type": "object",
-        "description": "The response containing the regenerated client secret.",
-        "properties": {
-          "client_secret": {
-            "type": "string",
-            "description": "The newly generated client secret."
-          }
-        }
-      },
-      "ChangeClientActivationRequest": {
-        "required": [
-          "status"
-        ],
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "boolean",
-            "description": "The activation status of the client",
-            "example": true
-          }
-        },
-        "description": "Client activation change request"
-      },
-      "ScopeResponse": {
-        "type": "object",
-        "description": "The response containing the scope information.",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "The scope name."
-          },
-          "group": {
-            "type": "string",
-            "description": "The group the scope belongs to."
-          },
-          "type": {
-            "type": "string",
-            "description": "The scope type."
-          }
-        }
-      },
-      "PageableResponse": {
-        "type": "object",
-        "description": "The response containing paginated data.",
-        "properties": {
-          "data": {
-            "type": "object",
-            "description": "The paginated data."
-          },
-          "limit": {
-            "type": "integer",
-            "description": "The maximum number of results returned per page.",
-            "format": "int32"
-          },
-          "last_client_id": {
-            "type": "string",
-            "description": "The identifier of the last retrieved client."
-          },
-          "last_created_on": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The creation date of the last retrieved client."
-          }
-        }
-      },
-      "ClientInfoResponse": {
-        "type": "object",
-        "description": "The response containing public client information.",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "The client name."
-          },
-          "description": {
-            "type": "string",
-            "description": "The client description."
-          },
-          "scopes": {
-            "uniqueItems": true,
-            "type": "array",
-            "description": "The client scopes.",
-            "items": {
-              "type": "string"
-            }
-          },
-          "public": {
-            "type": "boolean"
-          },
-          "client_id": {
-            "type": "string",
-            "description": "The client ID."
-          },
-          "website_url": {
-            "type": "string",
-            "description": "The URL to the client's website"
-          },
-          "terms_url": {
-            "type": "string",
-            "description": "The URL to the client's terms of service."
-          },
-          "policy_url": {
-            "type": "string",
-            "description": "The URL to the client's privacy policy."
-          },
-          "logo": {
-            "type": "string",
-            "description": "The client logo in base64 format."
-          },
-          "authentication_methods": {
-            "uniqueItems": true,
-            "type": "array",
-            "description": "The authentication methods supported by the client.",
-            "items": {
-              "type": "string"
-            }
+            "pattern": "^(https?://)?([a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$|^https?://(\\d{1,3}\\.){3}\\d{1,3}(:\\d+)?(/[a-zA-Z0-9-._~:/?#\\[\\]@!$&'()*+,;=]*)?$"
           },
           "is_public": {
             "type": "boolean",
-            "description": "Indicates whether the client is accessible by third-party tenants."
-          },
-          "created_on": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The date and time when the client was created."
-          },
-          "created_by": {
-            "type": "string",
-            "description": "The user who created the client."
-          },
-          "modified_on": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The date and time when the client was last modified."
-          },
-          "modified_by": {
-            "type": "string",
-            "description": "The user who last modified the client."
+            "description": "Whether the client is offered to third-party tenants rather than only to the tenant that registers it.",
+            "example": false
           }
-        }
+        },
+        "required": [
+          "allowed_origins",
+          "logo",
+          "logout_redirect_uri",
+          "name",
+          "policy_url",
+          "redirect_uris",
+          "scopes",
+          "terms_url",
+          "website_url"
+        ]
       },
-      "PageableResponseClientInfoResponse": {
-        "type": "object",
-        "description": "The response containing paginated client information.",
+      "FieldError": {
+        "description": "Field specific validation error",
         "properties": {
-          "data": {
-            "type": "object",
-            "description": "The paginated client data."
-          },
-          "limit": {
-            "type": "integer",
-            "format": "int32",
-            "description": "The maximum number of results returned per page."
-          },
-          "last_client_id": {
+          "field": {
             "type": "string",
-            "description": "The identifier of the last retrieved client."
+            "description": "The name of the field that failed validation",
+            "example": "policy_url"
           },
-          "last_created_on": {
+          "code": {
             "type": "string",
-            "format": "date-time",
-            "description": "The creation date of the last retrieved client."
+            "description": "Error code for localization purposes",
+            "example": "InvalidPolicyUrl"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human readable error message",
+            "example": "policy url is expected to be passed as url"
           }
         }
       },
       "PageableModificationResponse": {
         "type": "object",
-        "description": "The response containing paginated modification information.",
+        "description": "One page of results ordered by modification time, together with the cursor that asks for the next page.",
         "properties": {
           "data": {
-            "type": "object",
-            "description": "The paginated modification data."
+            "description": "The items on this page, at most as many as the requested limit. An empty array means there is nothing further to read."
           },
           "limit": {
             "type": "integer",
             "format": "int32",
-            "description": "The maximum number of results returned per page."
+            "description": "The page size that was applied to this request, between 1 and 50.",
+            "example": 50
           },
           "last_modified_on": {
             "type": "string",
             "format": "date-time",
-            "description": "The date when the user consent was last modified."
+            "description": "The cursor to send back as last_modified_on to ask for the next page. It is null when the page is empty.",
+            "example": "2024-04-04T12:00:00Z"
+          }
+        }
+      },
+      "PageableResponse": {
+        "type": "object",
+        "description": "One page of results together with the cursor that asks for the next page.",
+        "properties": {
+          "data": {
+            "description": "The items on this page, at most as many as the requested limit. An empty array means there is nothing further to read."
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The page size that was applied to this request, between 1 and 50.",
+            "example": 50
+          },
+          "last_client_id": {
+            "type": "string",
+            "description": "The cursor to send back as last_client_id to ask for the next page, together with last_created_on. It is null when the page is empty.",
+            "example": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"
+          },
+          "last_created_on": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The cursor to send back as last_created_on to ask for the next page, together with last_client_id. It is null when the page is empty.",
+            "example": "2024-04-04T12:00:00Z"
+          }
+        }
+      },
+      "ProblemDetail": {
+        "type": "object",
+        "description": "RFC 7807 problem details returned by the registration API for failed requests.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "description": "A URI reference that identifies the problem type. This service sets it to the DocSpace API getting-started page."
+          },
+          "title": {
+            "type": "string",
+            "description": "A short, human-readable summary of the problem type, typically the HTTP status reason phrase."
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The HTTP status code for this occurrence of the problem."
+          },
+          "detail": {
+            "type": "string",
+            "description": "A human-readable explanation specific to this occurrence of the problem."
+          },
+          "instance": {
+            "type": "string",
+            "format": "uri",
+            "description": "A URI reference that identifies the specific occurrence, set to the request path."
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Extension members carried on the problem. Usually empty; validation failures also surface as the top-level errors array."
+          },
+          "errors": {
+            "type": "array",
+            "description": "Field-specific validation errors. Present when the request body or parameters failed validation, or when a named scope is not in the tenant catalogue.",
+            "items": {
+              "$ref": "#/components/schemas/FieldError"
+            }
+          }
+        }
+      },
+      "ScopeResponse": {
+        "type": "object",
+        "description": "One scope from the tenant scope catalogue, as it may be requested by a client.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The scope exactly as it is written in an authorization request, for example files:read or openid.",
+            "example": "files:read"
+          },
+          "group": {
+            "type": "string",
+            "description": "The area of the portal the scope belongs to, which is what groups the scopes on the consent screen: files, rooms, contacts, profiles or openid.",
+            "example": "files"
+          },
+          "type": {
+            "type": "string",
+            "description": "What the scope allows inside its group: read for read-only access, write for changes, and openid for the identity scope itself.",
+            "example": "read"
+          }
+        }
+      },
+      "UpdateClientRequest": {
+        "type": "object",
+        "description": "Client update request containing modified client details",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The display name shown to the user on the consent screen. It has to be between 3 and 256 characters long.",
+            "example": "Updated Client",
+            "maxLength": 256,
+            "minLength": 3
+          },
+          "description": {
+            "type": "string",
+            "description": "The free-text description shown next to the name on the consent screen, at most 255 characters.",
+            "example": "Updated description of the client",
+            "maxLength": 255,
+            "minLength": 0
+          },
+          "logo": {
+            "type": "string",
+            "description": "The client logo as a data URI carrying base64 image data, shown on the consent screen. Only png, jpeg, jpg and svg+xml are accepted.",
+            "example": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+            "minLength": 1,
+            "pattern": "^data:image\\/(?:png|jpeg|jpg|svg\\+xml);base64,.*.{1,}"
+          },
+          "scopes": {
+            "type": "array",
+            "description": "The permissions the client may ask for, named as they appear in the tenant scope catalogue - for example files:read, rooms:write or openid. A client cannot request a scope that is not listed here.",
+            "items": {
+              "type": "string",
+              "example": "files:read"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "allow_pkce": {
+            "type": "boolean",
+            "description": "Whether the client may use PKCE. Turning it on lets the client authenticate with the none method and prove itself with a code verifier instead of sending a secret, which is what a client that cannot keep a secret needs.",
+            "example": true
+          },
+          "allowed_origins": {
+            "type": "array",
+            "description": "The web origins allowed to call the portal on behalf of this client, used for the CORS check. The set holds between 1 and 12 addresses.",
+            "items": {
+              "type": "string",
+              "example": "http://example.com"
+            },
+            "maxItems": 12,
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "redirect_uris": {
+            "type": "array",
+            "description": "The URIs an authorization code may be delivered to. An authorization request naming any other URI is refused, and the set holds between 1 and 12 addresses.",
+            "items": {
+              "type": "string",
+              "example": "https://example.com/callback"
+            },
+            "maxItems": 12,
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "is_public": {
+            "type": "boolean",
+            "description": "Whether the client is offered to third-party tenants rather than only to the tenant that registers it.",
+            "example": false
+          }
+        },
+        "required": [
+          "allowed_origins",
+          "logo",
+          "name",
+          "redirect_uris",
+          "scopes"
+        ]
+      },
+      "ValidationErrorResponse": {
+        "description": "Response containing validation errors",
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error type identifier",
+            "example": "ValidationError"
+          },
+          "message": {
+            "type": "string",
+            "description": "General error message",
+            "example": "Validation failed"
+          },
+          "errors": {
+            "type": "array",
+            "description": "List of field specific validation errors",
+            "items": {
+              "$ref": "#/components/schemas/FieldError"
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "MethodNotAllowed": {
+        "description": "The HTTP method is not allowed for this path",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
+            }
+          }
+        }
+      },
+      "NotAcceptable": {
+        "description": "The Accept header does not allow application/json",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
+            }
+          }
+        }
+      },
+      "PathNotFound": {
+        "description": "No route matches this path. Distinct from a 404 returned by an operation when a client ID is unknown or not visible to the caller.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
+            }
+          }
+        }
+      },
+      "UnsupportedMediaType": {
+        "description": "The Content-Type header is not application/json",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ProblemDetail"
+            }
           }
         }
       }
@@ -2154,10 +2566,10 @@
       "name": "OAuth 2.0",
       "tags": [
         "OAuth 2.0 / Authorization",
+        "OAuth 2.0 / Discovery",
         "OAuth 2.0 / Client Management",
         "OAuth 2.0 / Client Querying",
-        "OAuth 2.0 / Scope Management",
-        "OAuth 2.0 / Discovery"
+        "OAuth 2.0 / Scope Management"
       ]
     }
   ]
