@@ -40,8 +40,20 @@ import {
   getForwardedHeaders,
   shouldForwardHeadersToProvider,
 } from "../requestContext.js";
-import { CapabilitiesUI } from "@onlyoffice/ai-chat/core";
-import type { Model, ProfilesStorage, Profile } from "@onlyoffice/ai-chat/core";
+import { CapabilitiesUI, reasoningSupportFromCatalog } from "@onlyoffice/ai-chat/core";
+import type {
+  Model,
+  OpenRouterReasoningMeta,
+  ProfilesStorage,
+  Profile,
+} from "@onlyoffice/ai-chat/core";
+import {
+  FULL_REASONING_SUPPORT,
+  NO_REASONING_SUPPORT,
+  reasoningConfigToSupport,
+  supportToReasoningConfig,
+  type ReasoningSupport,
+} from "./reasoningDepth.js";
 import {
   invalidateChatContext,
   readChatContext,
@@ -99,9 +111,14 @@ export function dtoToProfile(raw: unknown): Profile | undefined {
   if (key !== undefined) {
     profile.key = key;
   }
-  const reasoning = getBoolean(raw, "reasoning");
-  if (reasoning !== undefined) {
-    profile.reasoning = reasoning;
+  // The C# `reasoning` column is a `ReasoningConfig` object (a bare boolean
+  // before the depth migration). The widget still reads the legacy boolean
+  // as "does this model think at all" and the composer's Effort row follows
+  // `reasoningSupport`, so both are derived from the one object.
+  const reasoningSupport = reasoningConfigToSupport(raw["reasoning"]);
+  if (reasoningSupport !== undefined) {
+    profile.reasoning = reasoningSupport.thinks;
+    profile.reasoningSupport = reasoningSupport;
   }
   const capabilities = getNumber(raw, "capabilities");
   if (capabilities !== undefined) {
@@ -126,6 +143,23 @@ export function dtoToProfile(raw: unknown): Profile | undefined {
   return profile;
 }
 
+// The C# storage takes a `ReasoningConfig` object where it used to take a
+// boolean. The widget copies the catalogue's `reasoningSupport` onto the
+// profile at save time; when only the legacy boolean is set (an older
+// client, a profile created through the API) it is widened to the support
+// the boolean has always implied — every depth with an off switch, or none.
+function toReasoningConfig(
+  input: Pick<Profile, "reasoning" | "reasoningSupport">,
+): Record<string, unknown> | null {
+  if (input.reasoningSupport) {
+    return supportToReasoningConfig(input.reasoningSupport);
+  }
+  if (input.reasoning === undefined) {
+    return null;
+  }
+  return supportToReasoningConfig(input.reasoning ? FULL_REASONING_SUPPORT : NO_REASONING_SUPPORT);
+}
+
 function toCreateBody(input: Omit<Profile, "id" | "createdAt"> | Profile): Record<string, unknown> {
   return {
     name: input.name,
@@ -133,7 +167,7 @@ function toCreateBody(input: Omit<Profile, "id" | "createdAt"> | Profile): Recor
     baseUrl: input.baseUrl,
     key: input.key ?? null,
     modelId: input.modelId,
-    reasoning: input.reasoning ?? null,
+    reasoning: toReasoningConfig(input),
     capabilities: input.capabilities ?? null,
     canUseTool: input.canUseTool ?? null,
     useResponsesApi: input.useResponsesApi ?? null,
@@ -151,6 +185,15 @@ function toCreateBody(input: Omit<Profile, "id" | "createdAt"> | Profile): Recor
 // process; HTTP responses use `readByIdRaw` instead (Bug 82821). `key` is
 // only reported as present/absent; never logged. `source` is the raw DTO
 // (HTTP path) or the literal "chat-context" (served from the round snapshot).
+function describeReasoningSupport(profile: Profile): string {
+  const support = profile.reasoningSupport;
+  if (!support) {
+    return profile.reasoning === undefined ? "-" : String(profile.reasoning);
+  }
+  return `${support.thinks ? "thinks" : "no"}/${support.canDisable ? "off" : "always"}/` +
+    `[${support.depths.join(",")}]`;
+}
+
 function logResolvedProfile(id: string, profile: Profile | undefined, source: unknown): void {
   const via = source === "chat-context" ? " via chat-context" : "";
   logger.info(
@@ -158,6 +201,7 @@ function logResolvedProfile(id: string, profile: Profile | undefined, source: un
       ? `HttpProfilesStorage.readById(${id})${via} -> providerType=${profile.providerType} ` +
           `model=${profile.modelId} baseUrl=${profile.baseUrl} hasKey=${profile.key !== undefined} ` +
           `capabilities=${profile.capabilities ?? "-"} canUseTool=${profile.canUseTool ?? "-"} ` +
+          `reasoning=${describeReasoningSupport(profile)} ` +
           `useProxy=${profile.useProxy ?? "-"} isCloud=${profile.isCloudProvider ?? "-"} ` +
           `headers=[${Object.keys(profile.headers ?? {}).sort().join(",")}]`
       : source === "chat-context"
@@ -291,8 +335,11 @@ const lowered = (values: unknown[] | undefined): string[] =>
 // Mirror of the C# ProfileStorageService.MapCapabilities/HasCapability
 // mapping (products/ASC.AI), which builds GET /ai/profiles/list from this
 // same catalog: type chat/image -> Chat/Image, an "image" input modality ->
-// Vision, an "image" output modality -> Image, "tools" -> Tools, "reasoning"
-// -> the reasoning flag. Embedding models are skipped there too.
+// Vision, an "image" output modality -> Image, "tools" -> Tools, and the
+// entry's `reasoning` object (OpenRouter's shape: `mandatory`,
+// `supported_efforts`, `default_effort`) -> the profile's `ReasoningConfig`,
+// with the "reasoning" capability as the thinks flag where the object is
+// null or absent. Embedding models are skipped there too.
 function mapGatewayModel(raw: unknown): Model | undefined {
   if (!isObject(raw)) {
     return undefined;
@@ -321,13 +368,57 @@ function mapGatewayModel(raw: unknown): Model | undefined {
   if (capabilityNames.includes("tools")) {
     capabilities |= CapabilitiesUI.Tools;
   }
-  return {
+  const hasReasoningCapability = capabilityNames.includes("reasoning");
+  const model: Model = {
     id,
     name: getString(raw, "alias") ?? id,
     provider: "onlyoffice",
-    reasoning: capabilityNames.includes("reasoning"),
+    reasoning: hasReasoningCapability,
     capabilities,
   };
+  // The catalogue's verdict on extended thinking, when it gives one. The
+  // ONLYOFFICE route proxies OpenRouter's catalogue one-to-one, so the
+  // library's converter reads the object as-is; a missing field leaves the
+  // id-based table to answer. A `null` object means "does not think" to the
+  // converter, but the C# mapping still trusts the "reasoning" capability
+  // there (thinks, switchable, no depth) — mirrored so both listings agree.
+  const reasoningMeta = parseReasoningMeta(raw["reasoning"]);
+  let reasoningSupport = reasoningSupportFromCatalog(reasoningMeta, id);
+  if (reasoningMeta === null && hasReasoningCapability) {
+    reasoningSupport = { thinks: true, canDisable: true, depths: [] } satisfies ReasoningSupport;
+  }
+  if (reasoningSupport !== undefined) {
+    model.reasoningSupport = reasoningSupport;
+    model.reasoning = reasoningSupport.thinks;
+  }
+  return model;
+}
+
+function parseReasoningMeta(raw: unknown): OpenRouterReasoningMeta | null | undefined {
+  if (raw === null) {
+    return null;
+  }
+  if (!isObject(raw)) {
+    return undefined;
+  }
+  const meta: OpenRouterReasoningMeta = {};
+  const mandatory = getBoolean(raw, "mandatory");
+  if (mandatory !== undefined) {
+    meta.mandatory = mandatory;
+  }
+  const defaultEnabled = getBoolean(raw, "default_enabled");
+  if (defaultEnabled !== undefined) {
+    meta.default_enabled = defaultEnabled;
+  }
+  const efforts = getArray(raw, "supported_efforts");
+  if (efforts !== undefined) {
+    meta.supported_efforts = efforts.filter((v): v is string => typeof v === "string");
+  }
+  const defaultEffort = getString(raw, "default_effort");
+  if (defaultEffort !== undefined) {
+    meta.default_effort = defaultEffort;
+  }
+  return meta;
 }
 
 /**

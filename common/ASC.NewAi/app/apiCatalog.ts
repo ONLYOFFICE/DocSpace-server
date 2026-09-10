@@ -71,7 +71,7 @@ export const ENGINE_DOCS: ReadonlyArray<EngineDoc> = [
   { name: "ai", tag: "AI", description: "Chat completions and tool-call approval.", routes: DEFAULT_AI_ROUTES },
   { name: "assignments", tag: "Assignments", description: "Profile-to-entity assignment resolution.", routes: DEFAULT_ASSIGNMENTS_ROUTES },
   { name: "attachments", tag: "Attachments", description: "Message file and image attachments.", routes: ATTACHMENTS_ROUTES },
-  { name: "preferences", tag: "Preferences", description: "Per-entity chat preferences (e.g. deep mode).", routes: DEFAULT_PREFERENCES_ROUTES },
+  { name: "preferences", tag: "Preferences", description: "Per-entity chat preferences: the extended-thinking depth and its deep-mode toggle.", routes: DEFAULT_PREFERENCES_ROUTES },
   { name: "profiles", tag: "Profiles", description: "AI provider profiles and model discovery.", routes: DEFAULT_PROFILES_ROUTES },
   { name: "prompts", tag: "Prompts", description: "Saved prompts and prompt folders.", routes: DEFAULT_PROMPTS_ROUTES },
   { name: "threads", tag: "Threads", description: "Chat threads and their messages.", routes: DEFAULT_THREADS_ROUTES },

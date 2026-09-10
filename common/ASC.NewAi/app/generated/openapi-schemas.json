@@ -28,6 +28,17 @@
       "additionalProperties": false,
       "description": "Error body — a single human-readable message."
     },
+    "AiAiReasoningLevel": {
+      "type": "string",
+      "enum": [
+        "off",
+        "low",
+        "medium",
+        "high",
+        "max"
+      ],
+      "description": "Provider-neutral extended-thinking depth. `off` disables thinking where the model allows it."
+    },
     "AiAiActionArgs": {
       "type": "object",
       "properties": {
@@ -40,7 +51,11 @@
         },
         "isReasoning": {
           "type": "boolean",
-          "description": "Enable extended thinking / reasoning for this request."
+          "description": "Legacy extended-thinking switch; stands for `medium`. `reasoningLevel` wins when both are set."
+        },
+        "reasoningLevel": {
+          "$ref": "#/components/schemas/AiAiReasoningLevel",
+          "description": "Depth of extended thinking for the round; providers clamp it to what the model accepts."
         },
         "prompt": {
           "type": "object",
@@ -64,8 +79,7 @@
           "description": "Override the action's baked-in system prompt (replace or append)."
         }
       },
-      "additionalProperties": false,
-      "description": "Wire-serializable subset of the engine's `ActionArgs` — drops the engine-injected `signal`/`fetch`; `profile`/`messages` are owned by the engine and never sent by the caller."
+      "additionalProperties": false
     },
     "AiTMCPItem": {
       "type": "object",
@@ -570,6 +584,10 @@
           "type": "boolean",
           "description": "Whether extended thinking is enabled for this profile's model."
         },
+        "reasoningSupport": {
+          "$ref": "#/components/schemas/AiReasoningSupport",
+          "description": "Extended-thinking capabilities of the selected model as reported by the provider's catalogue at save time (see `Model.reasoningSupport`). When present the composer's Effort row follows it exactly; when absent the provider's id-based table answers. Hosts persist it with the rest of the profile."
+        },
         "capabilities": {
           "type": "number",
           "description": "Bitmask of capabilities supported by the selected model."
@@ -638,6 +656,47 @@
         "external"
       ],
       "description": "Union of all 17 built-in AI provider type identifiers.\n\nThe `\"external\"` provider has no built-in transport — it delegates every HTTP request to `PlatformAdapter.externalFetch` and parses the response with the inner provider selected by `Profile.basedOn`."
+    },
+    "AiReasoningSupport": {
+      "type": "object",
+      "properties": {
+        "thinks": {
+          "type": "boolean",
+          "description": "Whether the model can think at all. False hides the whole control."
+        },
+        "canDisable": {
+          "type": "boolean",
+          "description": "Whether `\"off\"` really turns thinking off. False means the model thinks always and off only drops to its lowest depth (or leaves the default depth, where there is no knob)."
+        },
+        "depths": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AiReasoningDepth"
+          },
+          "description": "Depths the model distinguishes, lowest first. Empty when thinking is an on/off switch with no depth (or the model doesn't think). A level not listed is clamped to the nearest one — see `clampReasoningLevel`."
+        },
+        "defaultDepth": {
+          "$ref": "#/components/schemas/AiReasoningDepth",
+          "description": "The depth the model runs at when nothing asks for one — what a stored `\"off\"` means on a model that cannot be switched off. Known only where a catalogue reports it (OpenRouter's `default_effort`); otherwise `DEFAULT_REASONING_LEVEL` clamped to `depths` is assumed."
+        }
+      },
+      "required": [
+        "thinks",
+        "canDisable",
+        "depths"
+      ],
+      "additionalProperties": false,
+      "description": "What one model can do with extended thinking. Providers describe each model through this shape so the UI offers only the choices that change the request, and the request builders clamp to the same table."
+    },
+    "AiReasoningDepth": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "max"
+      ],
+      "description": "A `ReasoningLevel` above off — a depth the model can think at."
     },
     "AiAssignmentMutationResult": {
       "description": "Outcome of `AssignmentsEngine.assign` / `AssignmentsEngine.unassign`. Either a success or a field-scoped error suitable for displaying in the profile editor.",
@@ -844,6 +903,10 @@
           "type": "boolean",
           "description": "Whether extended thinking is enabled for this profile's model."
         },
+        "reasoningSupport": {
+          "$ref": "#/components/schemas/AiReasoningSupport",
+          "description": "Extended-thinking capabilities of the selected model as reported by the provider's catalogue at save time (see `Model.reasoningSupport`). When present the composer's Effort row follows it exactly; when absent the provider's id-based table answers. Hosts persist it with the rest of the profile."
+        },
         "capabilities": {
           "type": "number",
           "description": "Bitmask of capabilities supported by the selected model."
@@ -913,6 +976,10 @@
         "reasoning": {
           "type": "boolean",
           "description": "Whether this model supports extended thinking / chain-of-thought reasoning."
+        },
+        "reasoningSupport": {
+          "$ref": "#/components/schemas/AiReasoningSupport",
+          "description": "What the model can do with extended thinking, when the provider's catalogue says so (OpenRouter and the ONLYOFFICE route report a per-model `reasoning` object). Copied onto the profile at save time; absent, the widget falls back to the provider's id-based table."
         },
         "capabilities": {
           "type": "number",
@@ -4123,6 +4190,29 @@
         "type": "boolean"
       }
     },
+    "aiPreferencesGetReasoningLevel": {
+      "response": {
+        "$ref": "#/components/schemas/AiAiReasoningLevel"
+      }
+    },
+    "aiPreferencesSetReasoningLevel": {
+      "request": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/AiAiReasoningLevel",
+            "description": "New extended-thinking depth; `off` turns deep mode off."
+          },
+          "entityId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "additionalProperties": false
+      }
+    },
     "aiProfilesCreate": {
       "request": {
         "$ref": "#/components/schemas/AiCreateProfileInput"
@@ -4236,6 +4326,10 @@
           "reasoning": {
             "type": "boolean",
             "description": "Whether extended thinking is enabled for this profile's model."
+          },
+          "reasoningSupport": {
+            "$ref": "#/components/schemas/AiReasoningSupport",
+            "description": "Extended-thinking capabilities of the selected model as reported by the provider's catalogue at save time (see `Model.reasoningSupport`). When present the composer's Effort row follows it exactly; when absent the provider's id-based table answers. Hosts persist it with the rest of the profile."
           },
           "capabilities": {
             "type": "number",

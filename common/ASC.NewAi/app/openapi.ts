@@ -313,15 +313,20 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiOpenaiImagesGenerations:
     "OpenAI-compatible image generation for the document editor's AI plugin. As with the chat-completions passthrough, the profile's credentials are attached server-side and the body reaches the provider unchanged.",
 
-  // Preferences - per-scope chat toggles.
+  // Preferences - per-scope extended-thinking settings. One value is stored
+  // per scope (the depth); deep mode is its on/off view.
   aiPreferencesGetDeepMode:
-    "Returns the deep-mode toggle of the scope, falling back to the configured default when nothing has been persisted.",
+    "Returns the deep-mode toggle of the scope - whether the stored extended-thinking depth is above `off` - falling back to the configured default when nothing has been persisted.",
   aiPreferencesSetDeepMode:
-    "Persists the deep-mode toggle of the scope. Idempotent - there is no need to check whether a value already exists.",
+    "Persists the deep-mode toggle of the scope. `false` stores the `off` depth; `true` keeps the depth already stored and falls back to the default depth (`medium`) when none is. Idempotent - there is no need to check whether a value already exists.",
   aiPreferencesClearDeepMode:
-    "Drops the persisted deep-mode toggle of the scope, so later reads fall back to the configured default.",
+    "Drops the persisted extended-thinking setting of the scope (the depth and, with it, the deep-mode toggle), so later reads fall back to the configured default.",
   aiPreferencesIsDeepModeSet:
-    "Tells whether the scope has an explicitly persisted deep-mode value, whichever way that value is set.",
+    "Tells whether the scope has an explicitly persisted extended-thinking setting, whichever way it is set.",
+  aiPreferencesGetReasoningLevel:
+    "Returns the effective extended-thinking depth of the scope: `off` while deep mode is off, otherwise the persisted depth (`low`, `medium`, `high`, `max`), falling back to the default depth (`medium`) when none has been stored. Providers clamp the depth to what the model accepts.",
+  aiPreferencesSetReasoningLevel:
+    "Persists the extended-thinking depth of the scope. `off` turns deep mode off and leaves the previously chosen depth in place so switching back on restores it; any other level turns deep mode on and stores that depth. Idempotent.",
 
   // Profiles - AI provider credentials and model discovery.
   aiProfilesCreate:

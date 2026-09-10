@@ -35,6 +35,7 @@ import { PreferencesEngine } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString } from "../narrow.js";
+import { isReasoningLevel, REASONING_LEVELS } from "../storage/reasoningDepth.js";
 
 const engine = new PreferencesEngine({ storage });
 
@@ -71,5 +72,29 @@ export const preferencesController = {
     const entityId = asString(req.query["entityId"]);
     const value = await engine.isDeepModeSet(entityId);
     res.json(value);
+  }),
+
+  // Extended-thinking depth. Deep mode above stays the master switch and the
+  // widget's fallback when these two are unavailable; both are views of the
+  // one `depth` value the C# storage keeps (see `storage/preferencesStorage.ts`).
+  getReasoningLevel: asyncHandler(async (req, res) => {
+    const entityId = asString(req.query["entityId"]);
+    const value = await engine.getReasoningLevel(entityId);
+    res.json(value);
+  }),
+
+  setReasoningLevel: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["value", "entityId"] as const);
+    // Same discipline as `setDeepMode`: only a real level is accepted, so an
+    // absent or mistyped value can never overwrite the stored depth.
+    if (!isReasoningLevel(args.value)) {
+      res.status(400).json({
+        error: `value is required and must be one of: ${REASONING_LEVELS.join(", ")}`,
+      });
+      return;
+    }
+    const entityId = typeof args.entityId === "string" ? args.entityId : undefined;
+    await engine.setReasoningLevel(args.value, entityId);
+    res.json({ success: true });
   }),
 };
