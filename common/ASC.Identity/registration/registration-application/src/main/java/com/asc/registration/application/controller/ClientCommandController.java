@@ -838,7 +838,7 @@ public class ClientCommandController {
           ChangeTenantClientActivationCommand.builder()
               .clientId(clientId)
               .tenantId(principal.getTenantId())
-              .enabled(command.isEnabled())
+              .enabled(command.getStatus())
               .build());
       return ResponseEntity.status(HttpStatus.OK).build();
     } finally {
