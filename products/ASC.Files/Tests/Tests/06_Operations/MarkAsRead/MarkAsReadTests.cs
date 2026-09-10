@@ -213,4 +213,60 @@ public class MarkAsReadTests(
         var titles = await PollRoomNewsTitles(room.Id, t => !t.Contains("Autotest MarkAsRead Folder File.docx"));
         titles.Should().NotContain("Autotest MarkAsRead Folder File.docx");
     }
+
+    /// <remarks>
+    /// BUG 83509: <c>markasread</c> has no root-type/section parameter, so it clears the unified
+    /// "new" flag regardless of which section's root folder id was passed. Marking only the Files
+    /// section root as read also clears the news of an unrelated room the same user owns, even
+    /// though each root section is supposed to track new items independently (the same root cause
+    /// as BUG 82588 for emptytrash).
+    /// </remarks>
+    [Fact]
+    [Trait("Bug", "83509")]
+    public async Task MarkAsRead_FilesSectionRoot_LeavesUnrelatedRoomNewsAlone()
+    {
+        // Arrange - a file in the owner's My Documents shared with an invited user, plus a room
+        // file created by that user, so the owner has independent "new" items in both sections.
+        await _filesClient.Authenticate(Owner);
+        var myDocsFolderId = await GetUserFolderIdAsync(Owner);
+
+        var member = await InviteMember(EmployeeType.User);
+
+        var sharedFile = await CreateFile("Autotest MarkAsRead Cross Files " + Guid.NewGuid().ToString("N")[..8] + ".docx", myDocsFolderId);
+        await _sharingApi.SetFileSecurityInfoAsync(
+            sharedFile.Id,
+            new SecurityInfoSimpleRequestDto { Share = [new() { ShareTo = member.Id, Access = FileShare.ReadWrite }], Notify = false },
+            TestContext.Current.CancellationToken);
+
+        var room = await CreateCustomRoom("Autotest MarkAsRead Cross Room " + Guid.NewGuid().ToString("N")[..6]);
+        await InviteToRoom(room.Id, member, FileShare.ContentCreator);
+
+        await _filesClient.Authenticate(member);
+
+        var filesTitle = "Autotest MarkAsRead Cross Files Edited " + Guid.NewGuid().ToString("N")[..8] + ".docx";
+        await _filesApi.UpdateFileAsync(sharedFile.Id, new UpdateFile(filesTitle), TestContext.Current.CancellationToken);
+
+        var roomsTitle = "Autotest MarkAsRead Cross Rooms " + Guid.NewGuid().ToString("N")[..8] + ".docx";
+        await CreateFile(roomsTitle, room.Id);
+
+        await _filesClient.Authenticate(Owner);
+
+        // Precondition - both files are new for the owner, each in its own section.
+        var filesNewsBefore = await PollFolderNewsTitles(myDocsFolderId, t => t.Contains(filesTitle));
+        filesNewsBefore.Should().Contain(filesTitle);
+
+        var roomsNewsBefore = await PollRoomNewsTitles(room.Id, t => t.Contains(roomsTitle));
+        roomsNewsBefore.Should().Contain(roomsTitle);
+
+        // Act - mark only the Files section root as read.
+        await _filesOperationsApi.MarkAsReadAsync(MarkAsReadFolders(myDocsFolderId), TestContext.Current.CancellationToken);
+
+        // Assert - the Files section news is cleared...
+        var filesNewsAfter = await PollFolderNewsTitles(myDocsFolderId, t => !t.Contains(filesTitle));
+        filesNewsAfter.Should().NotContain(filesTitle);
+
+        // ...and the unrelated room's news is left untouched.
+        var roomsNewsAfter = await PollRoomNewsTitles(room.Id, t => t.Contains(roomsTitle));
+        roomsNewsAfter.Should().Contain(roomsTitle, "markasread clears only the section whose root was passed");
+    }
 }

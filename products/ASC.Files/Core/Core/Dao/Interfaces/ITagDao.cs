@@ -54,6 +54,14 @@ public interface ITagDao<T>
     Task RemoveTagsAsync(FileEntry<T> entry, IEnumerable<int> tagsIds);
     Task RemoveTagsAsync(IEnumerable<Tag> tag);
     Task RemoveTagsAsync(Tag tag);
+
+    /// <summary>
+    /// Detaches the given tags from the entries they name, leaving the tag rows themselves alone.
+    /// Use this for per-entry marks such as <see cref="TagType.New"/>, where one tag row is shared by
+    /// every entry a user has marked: <see cref="RemoveTagsAsync(IEnumerable{Tag})"/> would delete
+    /// that row and, with it, every other entry's mark.
+    /// </summary>
+    Task RemoveTagLinksAsync(IEnumerable<Tag> tags);
     Task IncrementNewTagsAsync(IEnumerable<Tag> tags, Guid createdBy = default);
     Task<int> RemoveTagLinksAsync(T entryId, FileEntryType entryType, TagType tagType);
 }
