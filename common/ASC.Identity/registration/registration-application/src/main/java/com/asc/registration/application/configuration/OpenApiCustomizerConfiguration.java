@@ -42,7 +42,10 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.responses.ApiResponses;
+import io.swagger.v3.oas.models.tags.Tag;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -66,6 +69,23 @@ public class OpenApiCustomizerConfiguration {
       "The Content-Type header is not application/json";
   private static final String NOT_ACCEPTABLE_DESCRIPTION =
       "The Accept header does not allow application/json";
+
+  private static final String OAUTH_TAG_GROUP = "OAuth 2.0";
+  private static final String X_TAG_GROUPS = "x-tagGroups";
+  private static final String X_DISPLAY_NAME = "x-displayName";
+
+  /** Redoc short labels for registration tags (prefix stripped for the sidebar). */
+  private static final Map<String, String> TAG_DISPLAY_NAMES =
+      Map.of(
+          "OAuth 2.0 / Client Management", "Client Management",
+          "OAuth 2.0 / Client Querying", "Client Querying",
+          "OAuth 2.0 / Scope Management", "Scope Management");
+
+  private static final List<String> TAG_GROUP_TAGS =
+      List.of(
+          "OAuth 2.0 / Client Management",
+          "OAuth 2.0 / Client Querying",
+          "OAuth 2.0 / Scope Management");
 
   @Value("${spring.application.web.api}")
   private String webApi;
@@ -238,6 +258,27 @@ public class OpenApiCustomizerConfiguration {
                               }
                             }
                           }));
+    };
+  }
+
+  /**
+   * Adds Redoc {@code x-tagGroups} / {@code x-displayName} so the published oauth document can join
+   * this service's tags under the shared "OAuth 2.0" group without a manual post-pass.
+   */
+  @Bean
+  public OpenApiCustomizer oauthTagGroupsCustomizer() {
+    return openApi -> {
+      if (openApi.getTags() != null) {
+        for (Tag tag : openApi.getTags()) {
+          var displayName = TAG_DISPLAY_NAMES.get(tag.getName());
+          if (displayName != null) tag.addExtension(X_DISPLAY_NAME, displayName);
+        }
+      }
+
+      var group = new LinkedHashMap<String, Object>();
+      group.put("name", OAUTH_TAG_GROUP);
+      group.put("tags", TAG_GROUP_TAGS);
+      openApi.addExtension(X_TAG_GROUPS, List.of(group));
     };
   }
 }

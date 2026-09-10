@@ -52,6 +52,9 @@ import io.swagger.v3.oas.models.media.MediaType;
 import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.parameters.Parameter;
 import io.swagger.v3.oas.models.parameters.RequestBody;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -425,5 +428,31 @@ public class OpenAPISchemaConfiguration {
   @Bean
   public OpenApiCustomizer removeServersCustomizer() {
     return openApi -> openApi.setServers(null);
+  }
+
+  /**
+   * Adds Redoc {@code x-tagGroups} / {@code x-displayName} so the published oauth document can join
+   * this service's tags under the shared "OAuth 2.0" group without a manual post-pass.
+   */
+  @Bean
+  public OpenApiCustomizer oauthTagGroupsCustomizer() {
+    return openApi -> {
+      var displayNames =
+          Map.of(
+              "OAuth 2.0 / Authorization", "Authorization",
+              "OAuth 2.0 / Discovery", "Discovery");
+
+      if (openApi.getTags() != null) {
+        for (var tag : openApi.getTags()) {
+          var displayName = displayNames.get(tag.getName());
+          if (displayName != null) tag.addExtension("x-displayName", displayName);
+        }
+      }
+
+      var group = new LinkedHashMap<String, Object>();
+      group.put("name", "OAuth 2.0");
+      group.put("tags", List.of("OAuth 2.0 / Authorization", "OAuth 2.0 / Discovery"));
+      openApi.addExtension("x-tagGroups", List.of(group));
+    };
   }
 }
