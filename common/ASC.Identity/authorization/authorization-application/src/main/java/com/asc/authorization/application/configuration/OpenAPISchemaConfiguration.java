@@ -114,6 +114,7 @@ public class OpenAPISchemaConfiguration {
         new PathItem()
             .get(
                 new Operation()
+                    .operationId("authorizeOAuth")
                     .summary("Start the authorization flow")
                     .description(
                         "Starts the OAuth2 authorization code flow for the client named by "
@@ -199,6 +200,7 @@ public class OpenAPISchemaConfiguration {
                             .schema(new Schema<String>().type("string").example("files:read"))))
             .post(
                 new Operation()
+                    .operationId("submitConsent")
                     .summary("Submit the consent decision")
                     .description(
                         "Submits the user's consent decision for the scopes an authorization "
@@ -283,6 +285,7 @@ public class OpenAPISchemaConfiguration {
         new PathItem()
             .post(
                 new Operation()
+                    .operationId("exchangeToken")
                     .summary("Exchange the authorization code")
                     .description(
                         "Exchanges an authorization code for an access token. The request is "
