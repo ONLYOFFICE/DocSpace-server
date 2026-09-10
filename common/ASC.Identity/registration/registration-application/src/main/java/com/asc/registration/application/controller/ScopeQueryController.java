@@ -125,6 +125,10 @@ public class ScopeQueryController {
             description = "Insufficient permissions to list scopes",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
+            responseCode = "406",
+            description = "The Accept header does not allow application/json",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
             responseCode = "429",
             description = "Too many requests - rate limit exceeded",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),

@@ -227,9 +227,8 @@ public class ClientQueryController {
               + "user only the clients they created. Paging is keyset-based rather than "
               + "offset-based: limit sets the page size, and last_client_id and last_created_on are "
               + "carried over from the previous page to ask for the next one. The limit defaults to "
-              + "30 and has to lie between 1 and 50; a value outside that range is rejected with "
-              + "400, but a last_created_on that cannot be parsed as a date surfaces as 500 rather "
-              + "than 400.",
+              + "30 and has to lie between 1 and 50; a value outside that range, or a "
+              + "last_created_on that cannot be parsed as a date, is rejected with 400.",
       tags = {"OAuth 2.0 / Client Querying"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
@@ -276,11 +275,17 @@ public class ClientQueryController {
                     """))),
         @ApiResponse(
             responseCode = "400",
-            description = "Invalid pagination parameters",
+            description =
+                "Invalid pagination parameters, including a last_created_on that cannot be parsed "
+                    + "as a date-time",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to list clients",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "406",
+            description = "The Accept header does not allow application/json",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
@@ -572,11 +577,17 @@ public class ClientQueryController {
                                               """))),
         @ApiResponse(
             responseCode = "400",
-            description = "The limit parameter is missing, or is outside the range 1-50",
+            description =
+                "The limit parameter is missing, is outside the range 1-50, or last_created_on "
+                    + "cannot be parsed as a date-time",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to list client information",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "406",
+            description = "The Accept header does not allow application/json",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
@@ -699,11 +710,17 @@ public class ClientQueryController {
                                     """))),
         @ApiResponse(
             responseCode = "400",
-            description = "The limit parameter is missing, or is outside the range 1-50",
+            description =
+                "The limit parameter is missing, is outside the range 1-50, or last_modified_on "
+                    + "cannot be parsed as a date-time",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
             description = "The request carries no valid portal signature",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "406",
+            description = "The Accept header does not allow application/json",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
