@@ -40,8 +40,14 @@ import {
   getForwardedHeaders,
   shouldForwardHeadersToProvider,
 } from "../requestContext.js";
-import { CapabilitiesUI } from "@onlyoffice/ai-chat/core";
+import { CapabilitiesUI, getReasoningSupport } from "@onlyoffice/ai-chat/core";
 import type { Model, ProfilesStorage, Profile } from "@onlyoffice/ai-chat/core";
+import {
+  NO_REASONING_SUPPORT,
+  parseCsharpReasoningDepth,
+  reasoningConfigToSupport,
+  supportToReasoningConfig,
+} from "./reasoningDepth.js";
 import {
   invalidateChatContext,
   readChatContext,
@@ -99,9 +105,14 @@ export function dtoToProfile(raw: unknown): Profile | undefined {
   if (key !== undefined) {
     profile.key = key;
   }
-  const reasoning = getBoolean(raw, "reasoning");
-  if (reasoning !== undefined) {
-    profile.reasoning = reasoning;
+  // The C# `reasoning` column is a `ReasoningConfig` object (a bare boolean
+  // before the depth migration). The widget still reads the legacy boolean
+  // as "does this model think at all" and the composer's Effort row follows
+  // `reasoningSupport`, so both are derived from the one object.
+  const reasoningSupport = reasoningConfigToSupport(raw["reasoning"]);
+  if (reasoningSupport !== undefined) {
+    profile.reasoning = reasoningSupport.thinks;
+    profile.reasoningSupport = reasoningSupport;
   }
   const capabilities = getNumber(raw, "capabilities");
   if (capabilities !== undefined) {
@@ -126,6 +137,35 @@ export function dtoToProfile(raw: unknown): Profile | undefined {
   return profile;
 }
 
+// The C# storage takes a `ReasoningConfig` object where it used to take a
+// boolean. Only the OpenRouter / ONLYOFFICE catalogues carry a per-model
+// `reasoningSupport` for the widget to copy onto the profile; every other
+// provider's listing sets the legacy boolean alone, and the composer then
+// follows the library's id-based table. Whatever is persisted here comes
+// back as `Profile.reasoningSupport`, which the composer prefers over that
+// table — so the boolean must be widened to the SAME answer the table
+// gives, never to "every depth with an off switch": that would offer Off
+// for Claude Fable or Grok 4.5, which cannot stop, and show depths the
+// model does not distinguish. An `external` profile is answered for the
+// provider it is based on; the shadowed `onlyoffice` type answers through
+// its static (see `providers/onlyofficeSourceProvider.ts`).
+function toReasoningConfig(
+  input: Pick<Profile, "reasoning" | "reasoningSupport" | "providerType" | "modelId" | "basedOn">,
+): Record<string, unknown> | null {
+  if (input.reasoningSupport) {
+    return supportToReasoningConfig(input.reasoningSupport);
+  }
+  if (input.reasoning === undefined) {
+    return null;
+  }
+  if (!input.reasoning) {
+    return supportToReasoningConfig(NO_REASONING_SUPPORT);
+  }
+  const tableType =
+    input.providerType === "external" ? (input.basedOn ?? input.providerType) : input.providerType;
+  return supportToReasoningConfig(getReasoningSupport(tableType, input.modelId));
+}
+
 function toCreateBody(input: Omit<Profile, "id" | "createdAt"> | Profile): Record<string, unknown> {
   return {
     name: input.name,
@@ -133,7 +173,7 @@ function toCreateBody(input: Omit<Profile, "id" | "createdAt"> | Profile): Recor
     baseUrl: input.baseUrl,
     key: input.key ?? null,
     modelId: input.modelId,
-    reasoning: input.reasoning ?? null,
+    reasoning: toReasoningConfig(input),
     capabilities: input.capabilities ?? null,
     canUseTool: input.canUseTool ?? null,
     useResponsesApi: input.useResponsesApi ?? null,
@@ -151,6 +191,15 @@ function toCreateBody(input: Omit<Profile, "id" | "createdAt"> | Profile): Recor
 // process; HTTP responses use `readByIdRaw` instead (Bug 82821). `key` is
 // only reported as present/absent; never logged. `source` is the raw DTO
 // (HTTP path) or the literal "chat-context" (served from the round snapshot).
+function describeReasoningSupport(profile: Profile): string {
+  const support = profile.reasoningSupport;
+  if (!support) {
+    return profile.reasoning === undefined ? "-" : String(profile.reasoning);
+  }
+  return `${support.thinks ? "thinks" : "no"}/${support.canDisable ? "off" : "always"}/` +
+    `[${support.depths.join(",")}]`;
+}
+
 function logResolvedProfile(id: string, profile: Profile | undefined, source: unknown): void {
   const via = source === "chat-context" ? " via chat-context" : "";
   logger.info(
@@ -158,6 +207,7 @@ function logResolvedProfile(id: string, profile: Profile | undefined, source: un
       ? `HttpProfilesStorage.readById(${id})${via} -> providerType=${profile.providerType} ` +
           `model=${profile.modelId} baseUrl=${profile.baseUrl} hasKey=${profile.key !== undefined} ` +
           `capabilities=${profile.capabilities ?? "-"} canUseTool=${profile.canUseTool ?? "-"} ` +
+          `reasoning=${describeReasoningSupport(profile)} ` +
           `useProxy=${profile.useProxy ?? "-"} isCloud=${profile.isCloudProvider ?? "-"} ` +
           `headers=[${Object.keys(profile.headers ?? {}).sort().join(",")}]`
       : source === "chat-context"
@@ -291,8 +341,9 @@ const lowered = (values: unknown[] | undefined): string[] =>
 // Mirror of the C# ProfileStorageService.MapCapabilities/HasCapability
 // mapping (products/ASC.AI), which builds GET /ai/profiles/list from this
 // same catalog: type chat/image -> Chat/Image, an "image" input modality ->
-// Vision, an "image" output modality -> Image, "tools" -> Tools, "reasoning"
-// -> the reasoning flag. Embedding models are skipped there too.
+// Vision, an "image" output modality -> Image, "tools" -> Tools, and the
+// entry's `reasoning` object -> the profile's `ReasoningConfig` through
+// `mapGatewayReasoning` below. Embedding models are skipped there too.
 function mapGatewayModel(raw: unknown): Model | undefined {
   if (!isObject(raw)) {
     return undefined;
@@ -321,12 +372,64 @@ function mapGatewayModel(raw: unknown): Model | undefined {
   if (capabilityNames.includes("tools")) {
     capabilities |= CapabilitiesUI.Tools;
   }
-  return {
+  const hasReasoningCapability = capabilityNames.includes("reasoning");
+  const model: Model = {
     id,
     name: getString(raw, "alias") ?? id,
     provider: "onlyoffice",
-    reasoning: capabilityNames.includes("reasoning"),
+    reasoning: hasReasoningCapability,
     capabilities,
+  };
+  // The same `ReasoningConfig` the C# side builds for this entry, read the
+  // same way a C# profile's `reasoning` is read — so the model picker and
+  // `GET /ai/profiles/list` cannot disagree about one model.
+  const reasoningSupport = reasoningConfigToSupport(
+    mapGatewayReasoning(raw["reasoning"], hasReasoningCapability),
+  );
+  if (reasoningSupport !== undefined) {
+    model.reasoningSupport = reasoningSupport;
+    model.reasoning = reasoningSupport.thinks;
+  }
+  return model;
+}
+
+// Line-for-line mirror of the C# `ProfileStorageService.MapReasoning`, which
+// is the authority on how a gateway entry's `reasoning` object (`mandatory`,
+// `default_enabled`, `supported_efforts`, `default_effort`) becomes a
+// profile's `ReasoningConfig`. An absent object counts as `null` there:
+//
+// - `thinks`     — an object is present, or the entry lists the "reasoning"
+//                  capability;
+// - `canDisable` — no object, or it is not `mandatory`;
+// - `depths`     — the `supported_efforts` that name a C# `ReasoningDepth`
+//                  (case-insensitive); anything else, `minimal` included, is
+//                  dropped, and no object means no depths;
+// - `defaultDepth` — `null` without an object; otherwise `default_effort`
+//                  when `default_enabled` (which defaults to true), else `none`.
+//
+// The result is the C# wire shape, so it goes through the same
+// `reasoningConfigToSupport` as a profile read from the C# storage.
+function mapGatewayReasoning(raw: unknown, hasReasoningCapability: boolean): Record<string, unknown> {
+  const reasoning = isObject(raw) ? raw : null;
+  const depths: string[] = [];
+  for (const effort of getArray(reasoning ?? {}, "supported_efforts") ?? []) {
+    const depth = parseCsharpReasoningDepth(effort);
+    if (depth !== undefined) {
+      depths.push(depth);
+    }
+  }
+  let defaultDepth: string | null = null;
+  if (reasoning !== null) {
+    const defaultEnabled = getBoolean(reasoning, "default_enabled") ?? true;
+    defaultDepth = defaultEnabled
+      ? (parseCsharpReasoningDepth(getString(reasoning, "default_effort")) ?? null)
+      : "none";
+  }
+  return {
+    thinks: reasoning !== null || hasReasoningCapability,
+    canDisable: reasoning === null || !(getBoolean(reasoning, "mandatory") ?? false),
+    depths,
+    defaultDepth,
   };
 }
 

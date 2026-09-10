@@ -35,6 +35,6 @@ namespace ASC.AI.Models.RequestDto.Preferences;
 
 public class UpsertPreferencesRequestDto
 {
-    public bool? DeepMode { get; init; }
+    public ReasoningDepth? Depth { get; init; }
     public string? EntityId { get; init; }
 }
