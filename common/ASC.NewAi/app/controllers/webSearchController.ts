@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { WebSearchEngine } from "@onlyoffice/ai-chat/core";
@@ -39,9 +39,7 @@ import { asString } from "../narrow.js";
 import { assertSafeBaseUrl } from "../security.js";
 import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
 
-async function checkConfigUrl(
-  config: WebSearchConfig | undefined,
-): Promise<void> {
+async function checkConfigUrl(config: WebSearchConfig | undefined): Promise<void> {
   await assertSafeBaseUrl(config?.baseUrl);
 }
 
@@ -54,6 +52,21 @@ const engine = new WebSearchEngine({ storage });
 // their 403 before any outbound connection is made (Bugs 83234 / 83235).
 async function assertWebSearchAccess(): Promise<void> {
   await storage.webSearch.read();
+}
+
+/**
+ * Reads the config argument of `configure` / `setActiveConfig`.
+ *
+ * `ApiProvider` and the widget send a positional array, so `unpackPositional` names the
+ * first element `body`. A named object is passed through untouched, and the documented
+ * name for that key is `config` - accept both rather than silently reading `undefined`.
+ */
+function unpackConfig(body: unknown): { body: unknown; entityId: unknown } {
+  const args = unpackPositional(body, ["body", "entityId"] as const);
+  return {
+    body: args.body ?? (args as { config?: unknown }).config,
+    entityId: args.entityId,
+  };
 }
 
 export const webSearchController = {
@@ -82,7 +95,7 @@ export const webSearchController = {
   }),
 
   configure: asyncHandler(async (req, res) => {
-    const args = unpackPositional(req.body, ["body", "entityId"] as const);
+    const args = unpackConfig(req.body);
     await assertEntityAccessible(args.entityId as string | undefined);
     await checkConfigUrl(args.body as WebSearchConfig);
     const result = await engine.configure(
@@ -93,13 +106,10 @@ export const webSearchController = {
   }),
 
   setActiveConfig: asyncHandler(async (req, res) => {
-    const args = unpackPositional(req.body, ["body", "entityId"] as const);
+    const args = unpackConfig(req.body);
     await assertEntityAccessible(args.entityId as string | undefined);
     await checkConfigUrl(args.body as WebSearchConfig);
-    await engine.setActiveConfig(
-      args.body as WebSearchConfig,
-      args.entityId as string | undefined,
-    );
+    await engine.setActiveConfig(args.body as WebSearchConfig, args.entityId as string | undefined);
     res.json({ success: true });
   }),
 
