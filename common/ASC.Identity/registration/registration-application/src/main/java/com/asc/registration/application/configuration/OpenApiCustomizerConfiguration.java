@@ -33,6 +33,10 @@
 
 package com.asc.registration.application.configuration;
 
+import com.asc.registration.application.transfer.ValidationErrorResponse;
+import io.swagger.v3.core.converter.ModelConverters;
+import io.swagger.v3.oas.models.media.ArraySchema;
+import io.swagger.v3.oas.models.media.Schema;
 import java.util.List;
 import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,6 +66,40 @@ public class OpenApiCustomizerConfiguration {
               .toList();
 
       toRemove.forEach(openApi.getPaths()::remove);
+    };
+  }
+
+  /**
+   * Registers {@link ValidationErrorResponse} (and its nested {@code FieldError}) and documents the
+   * {@code errors} extension that validation and invalid-scope handlers attach to {@code
+   * ProblemDetail}.
+   */
+  @Bean
+  public OpenApiCustomizer validationErrorSchemasCustomizer() {
+    return openApi -> {
+      var components = openApi.getComponents();
+      if (components == null) return;
+
+      var validationSchemas = ModelConverters.getInstance().readAll(ValidationErrorResponse.class);
+      validationSchemas.forEach(components::addSchemas);
+
+      var problemDetail = components.getSchemas().get("ProblemDetail");
+      if (problemDetail == null) return;
+
+      var fieldErrorSchemaName =
+          validationSchemas.keySet().stream()
+              .filter(name -> name.endsWith("FieldError"))
+              .findFirst()
+              .orElse(null);
+      if (fieldErrorSchemaName == null) return;
+
+      var fieldErrorRef = new Schema<>().$ref("#/components/schemas/" + fieldErrorSchemaName);
+      var errorsSchema = new ArraySchema();
+      errorsSchema.setDescription(
+          "Field-specific validation errors. Present when the request body or parameters "
+              + "failed validation, or when a named scope is not in the tenant catalogue.");
+      errorsSchema.setItems(fieldErrorRef);
+      problemDetail.addProperty("errors", errorsSchema);
     };
   }
 }
