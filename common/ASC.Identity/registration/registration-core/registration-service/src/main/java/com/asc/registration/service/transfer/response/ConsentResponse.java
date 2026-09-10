@@ -43,6 +43,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "One consent a user has granted to a client, with the scopes it covers.")
 public class ConsentResponse {
   /** The ID of the registered client. */
   @JsonProperty("registered_client_id")

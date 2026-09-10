@@ -73,7 +73,18 @@ import org.springframework.context.annotation.Configuration;
                 @License(
                     name = "Apache 2.0",
                     url = "https://www.apache.org/licenses/LICENSE-2.0.html")),
-    tags = {@Tag(name = "Authorization")},
+    tags = {
+      @Tag(
+          name = "Authorization",
+          description =
+              "The OAuth2 authorization flow: the authorization request, the consent submission "
+                  + "and the exchange of an authorization code for tokens."),
+      @Tag(
+          name = "Discovery",
+          description =
+              "The OAuth 2.0 Authorization Server metadata endpoint a client probes before it "
+                  + "starts a flow.")
+    },
     servers = {
       @Server(
           url = "http://localhost:9090",
@@ -145,12 +156,19 @@ public class OpenAPISchemaConfiguration {
                             .name("response_type")
                             .in("query")
                             .required(true)
+                            .description(
+                                "The OAuth 2.0 response type. Only code is supported: this server "
+                                    + "issues an authorization code, never a token, from this endpoint.")
                             .schema(new Schema<String>().type("string").example("code")))
                     .addParametersItem(
                         new Parameter()
                             .name("client_id")
                             .in("query")
                             .required(true)
+                            .description(
+                                "The identifier the client was given when it was registered. It "
+                                    + "selects both the client shown on the consent screen and the set of "
+                                    + "redirect URIs the request is checked against.")
                             .schema(
                                 new Schema<String>()
                                     .type("string")
@@ -160,6 +178,10 @@ public class OpenAPISchemaConfiguration {
                             .name("redirect_uri")
                             .in("query")
                             .required(true)
+                            .description(
+                                "Where to send the user once authorization is complete. It has to be "
+                                    + "one of the redirect URIs registered for the client, otherwise the "
+                                    + "request is refused.")
                             .schema(
                                 new Schema<String>().type("string").example("https://example.com")))
                     .addParametersItem(
@@ -167,6 +189,10 @@ public class OpenAPISchemaConfiguration {
                             .name("scope")
                             .in("query")
                             .required(true)
+                            .description(
+                                "The permissions being asked for, as a space-separated list. Every "
+                                    + "scope has to be one the client is registered for, and the consent "
+                                    + "screen lists exactly these.")
                             .schema(new Schema<String>().type("string").example("files:read"))))
             .post(
                 new Operation()
@@ -219,17 +245,34 @@ public class OpenAPISchemaConfiguration {
                                                         "client_id",
                                                         new Schema<String>()
                                                             .type("string")
+                                                            .description(
+                                                                "The client the consent is being "
+                                                                    + "given to. It has to be the same "
+                                                                    + "client the authorization request "
+                                                                    + "named.")
                                                             .example(
                                                                 "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"))
                                                     .addProperty(
                                                         "state",
                                                         new Schema<String>()
                                                             .type("string")
+                                                            .description(
+                                                                "The opaque value carried through "
+                                                                    + "from the authorization request, "
+                                                                    + "returned unchanged on the redirect "
+                                                                    + "so the client can match the answer "
+                                                                    + "to its request.")
                                                             .example("abcde"))
                                                     .addProperty(
                                                         "scope",
                                                         new Schema<String>()
                                                             .type("string")
+                                                            .description(
+                                                                "The scopes the user agreed to, as a "
+                                                                    + "space-separated list. Anything the "
+                                                                    + "user declined is left out, so this "
+                                                                    + "may be narrower than what was "
+                                                                    + "requested.")
                                                             .example("files:read")))))));
     paths.addPathItem("/oauth2/authorize", authorizePathItem);
     paths.addPathItem(
@@ -269,22 +312,43 @@ public class OpenAPISchemaConfiguration {
                                                                 "access_token",
                                                                 new Schema<String>()
                                                                     .type("string")
+                                                                    .description(
+                                                                        "The token to send as a "
+                                                                            + "Bearer credential when "
+                                                                            + "calling the portal on the "
+                                                                            + "user behalf.")
                                                                     .example(
                                                                         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."))
                                                             .addProperty(
                                                                 "token_type",
                                                                 new Schema<String>()
                                                                     .type("string")
+                                                                    .description(
+                                                                        "How the access token is to "
+                                                                            + "be presented. It is always "
+                                                                            + "Bearer.")
                                                                     .example("Bearer"))
                                                             .addProperty(
                                                                 "expires_in",
                                                                 new Schema<Integer>()
                                                                     .type("integer")
+                                                                    .description(
+                                                                        "How many seconds the access "
+                                                                            + "token stays valid, counted "
+                                                                            + "from the moment it was "
+                                                                            + "issued.")
                                                                     .example(3600))
                                                             .addProperty(
                                                                 "refresh_token",
                                                                 new Schema<String>()
                                                                     .type("string")
+                                                                    .description(
+                                                                        "The token that buys a new "
+                                                                            + "access token once the "
+                                                                            + "current one expires. It is "
+                                                                            + "present only when the client "
+                                                                            + "is registered for the "
+                                                                            + "refresh token grant.")
                                                                     .example("def502..."))))))
                             .addApiResponse(
                                 "400",
@@ -310,27 +374,48 @@ public class OpenAPISchemaConfiguration {
                                                         "grant_type",
                                                         new Schema<String>()
                                                             .type("string")
+                                                            .description(
+                                                                "Which exchange is being performed: "
+                                                                    + "authorization_code to redeem a code, "
+                                                                    + "refresh_token to renew an access "
+                                                                    + "token.")
                                                             .example("authorization_code"))
                                                     .addProperty(
                                                         "code",
                                                         new Schema<String>()
                                                             .type("string")
+                                                            .description(
+                                                                "The authorization code returned by "
+                                                                    + "the authorization endpoint. It may "
+                                                                    + "be redeemed once.")
                                                             .example("abcde"))
                                                     .addProperty(
                                                         "redirect_uri",
                                                         new Schema<String>()
                                                             .type("string")
+                                                            .description(
+                                                                "The same redirect URI that was used "
+                                                                    + "to obtain the code. The exchange "
+                                                                    + "fails when it differs.")
                                                             .example("https://example.com"))
                                                     .addProperty(
                                                         "client_id",
                                                         new Schema<String>()
                                                             .type("string")
+                                                            .description(
+                                                                "The identifier of the client "
+                                                                    + "redeeming the code.")
                                                             .example(
                                                                 "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"))
                                                     .addProperty(
                                                         "client_secret",
                                                         new Schema<String>()
                                                             .type("string")
+                                                            .description(
+                                                                "The secret of the client redeeming "
+                                                                    + "the code. It is omitted by a public "
+                                                                    + "client, which proves itself with a "
+                                                                    + "PKCE code verifier instead.")
                                                             .example(
                                                                 "6c7cf17b-1bd3-47d5-94c6-be2d3570e168"))))))));
     return new OpenAPI().paths(paths);

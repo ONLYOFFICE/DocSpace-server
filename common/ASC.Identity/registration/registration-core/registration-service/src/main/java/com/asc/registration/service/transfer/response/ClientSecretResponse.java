@@ -47,6 +47,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "The response carrying a regenerated client secret.")
 public class ClientSecretResponse implements Serializable {
 
   /** The client secret. */

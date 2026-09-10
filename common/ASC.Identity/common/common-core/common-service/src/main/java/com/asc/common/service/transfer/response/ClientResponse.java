@@ -53,6 +53,10 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(
+    description =
+        "The whole stored record of an OAuth2 client, including the secret and every address "
+            + "the client is allowed to use.")
 public class ClientResponse implements Serializable {
 
   /** The name of the client. */

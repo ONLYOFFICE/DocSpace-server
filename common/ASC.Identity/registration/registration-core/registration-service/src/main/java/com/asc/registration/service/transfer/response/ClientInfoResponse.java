@@ -50,6 +50,10 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(
+    description =
+        "The consent-facing subset of a client: everything needed to render a consent screen, "
+            + "and nothing that would let a caller act as the client.")
 public class ClientInfoResponse implements Serializable {
 
   /** The name of the client. */

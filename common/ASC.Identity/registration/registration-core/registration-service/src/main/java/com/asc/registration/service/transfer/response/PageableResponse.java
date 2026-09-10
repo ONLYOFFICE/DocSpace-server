@@ -48,6 +48,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "One page of results together with the cursor that asks for the next page.")
 public class PageableResponse<D> {
 
   /** The data contained in the paginated response. */

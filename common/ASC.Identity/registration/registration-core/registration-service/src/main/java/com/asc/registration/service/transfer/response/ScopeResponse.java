@@ -41,6 +41,8 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(
+    description = "One scope from the tenant scope catalogue, as it may be requested by a client.")
 public class ScopeResponse {
   /** The name of the scope. */
   @Schema(
