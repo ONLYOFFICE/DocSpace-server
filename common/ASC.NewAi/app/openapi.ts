@@ -1492,7 +1492,8 @@ const OPENAI_ERROR_SCHEMA: Json = {
 };
 
 // `listProviderModels` names the input at fault so the client can highlight it
-// (Bug 83116). `AiErrorResponse` closes itself to extra properties, so that body needs
+// (Bug 83116), but only when it is the one rejecting a missing `providerType` or
+// `baseUrl`. `AiErrorResponse` closes itself to extra properties, so that body needs
 // a schema of its own.
 const FIELD_ERROR_SCHEMA: Json = {
   type: "object",
@@ -1512,12 +1513,19 @@ const FIELD_ERROR_SCHEMA: Json = {
   additionalProperties: false,
 };
 
+// Only the two missing-input checks name the field. The private-network rejection
+// and a key the provider refused both answer with the plain error body, so the 400
+// has to admit either shape.
+const FIELD_OR_PLAIN_ERROR_SCHEMA: Json = {
+  anyOf: [FIELD_ERROR_SCHEMA, ERROR_RESPONSE_REF],
+};
+
 // operationId -> status code -> schema, with `*` standing for every code of that
 // operation. Anything not listed answers with `AiErrorResponse`.
 const OPERATION_ERROR_SCHEMAS: Readonly<Record<string, Readonly<Record<string, Json>>>> = {
   aiOpenaiChatCompletions: { "*": OPENAI_ERROR_SCHEMA },
   aiOpenaiImagesGenerations: { "*": OPENAI_ERROR_SCHEMA },
-  aiProfilesListProviderModels: { "400": FIELD_ERROR_SCHEMA },
+  aiProfilesListProviderModels: { "400": FIELD_OR_PLAIN_ERROR_SCHEMA },
 };
 
 function responseFor(operations: OperationSchemaLookup, operationId: string): Json {
