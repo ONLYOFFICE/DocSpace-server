@@ -61,6 +61,7 @@ public class DefaultTemplateTests(AspireAppFixture fixture) : SharingDefaultsTes
     /// expected to demand sharing access to the selected file before accepting it.
     /// </summary>
     [Fact]
+    [Trait("Bug", "81953")]
     public async Task SetDefaultTemplate_DocSpaceAdminCannotUseOwnersFile_ReturnsForbidden()
     {
         // Arrange
@@ -127,5 +128,66 @@ public class DefaultTemplateTests(AspireAppFixture fixture) : SharingDefaultsTes
 
         exception.ErrorCode.Should().Be(400);
         exception.ErrorContent?.ToString().Should().NotBeNullOrEmpty();
+    }
+
+    /// <summary>
+    /// BUG 79975: uploading a <c>.pdf</c> file while declaring it as a <c>.docx</c> template used to
+    /// be accepted. It is refused now, so what is left of the bug is the status code: the mismatch
+    /// is reported as 403 with "Sorry, this file format isn't supported", because
+    /// <c>DefaultTemplateSettings.SetTemplateAsync</c> raises an
+    /// <see cref="InvalidOperationException"/> for it and the handler maps that to 403. A rejected
+    /// payload is a bad request, not an access decision, so 400 is what this asserts.
+    /// </summary>
+    [Fact]
+    [Trait("Bug", "79975")]
+    public async Task UploadDefaultTemplate_PdfFileDeclaredAsDocx_ReturnsBadRequest()
+    {
+        // Arrange
+        using var stream = new MemoryStream(new byte[100]);
+        var file = new FileParameter("template.pdf", "application/pdf", stream);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesSettingsApi.UploadDefaultTemplateAsync(".docx", file, TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
+    }
+
+    /// <summary>
+    /// BUG 79975: same mismatch, refused with 403 instead of 400, for a <c>.docx</c> file declared
+    /// as <c>.xlsx</c>. See the <c>.pdf</c> case above for the mapping that produces the status.
+    /// </summary>
+    [Fact]
+    [Trait("Bug", "79975")]
+    public async Task UploadDefaultTemplate_DocxFileDeclaredAsXlsx_ReturnsBadRequest()
+    {
+        // Arrange
+        using var stream = new MemoryStream(new byte[100]);
+        var file = new FileParameter("template.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", stream);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesSettingsApi.UploadDefaultTemplateAsync(".xlsx", file, TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
+    }
+
+    /// <summary>
+    /// BUG 79975: same mismatch, refused with 403 instead of 400, for a <c>.xlsx</c> file declared
+    /// as <c>.pptx</c>. See the <c>.pdf</c> case above for the mapping that produces the status.
+    /// </summary>
+    [Fact]
+    [Trait("Bug", "79975")]
+    public async Task UploadDefaultTemplate_XlsxFileDeclaredAsPptx_ReturnsBadRequest()
+    {
+        // Arrange
+        using var stream = new MemoryStream(new byte[100]);
+        var file = new FileParameter("template.xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", stream);
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesSettingsApi.UploadDefaultTemplateAsync(".pptx", file, TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(400);
     }
 }

@@ -171,10 +171,19 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
         var dbDao = daoFactory.ProviderDao;
         try
         {
-            return dbDao.GetProviderInfoAsync(linkId).Result as IProviderInfo<TFile, TFolder, TItem>;
+            // GetAwaiter().GetResult(), not .Result: the latter wraps whatever the task threw in an
+            // AggregateException, so the catch below never matched and the original exception went
+            // out to the caller as a 500.
+            return dbDao.GetProviderInfoAsync(linkId).GetAwaiter().GetResult() as IProviderInfo<TFile, TFolder, TItem>;
         }
-        catch (InvalidOperationException)
+        catch (Exception e) when (e is InvalidOperationException or ItemNotFoundException)
         {
+            // Both types mean the same thing here: the link id names no provider. It used to arrive
+            // only as InvalidOperationException, from Single() on an empty sequence; ProviderAccountDao
+            // now reports the missing row as ItemNotFoundException, which derives from HttpException
+            // and so does not match the older clause. Callers depend on this translation - the backup
+            // cleaner treats ProviderInfoArgumentException as "provider is gone" and drops records
+            // older than six months on the strength of it, and would otherwise keep them forever.
             throw new ProviderInfoArgumentException("Provider id not found or you have no access");
         }
     }

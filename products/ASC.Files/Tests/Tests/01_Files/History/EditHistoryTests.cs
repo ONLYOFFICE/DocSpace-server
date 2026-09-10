@@ -93,6 +93,11 @@ public class EditHistoryTests(
         response.Should().NotBeNull();
     }
 
+    /// <remarks>
+    /// Bug 80962: a non-existent file used to return 403 instead of 404 from this endpoint. Fixed;
+    /// the trait stays as a regression guard.
+    /// </remarks>
+    [Trait("Bug", "80962")]
     [Fact]
     public async Task GetEditHistory_NonExistentFile_Returns404()
     {
@@ -104,6 +109,7 @@ public class EditHistoryTests(
             async () => await _filesApi.GetEditHistoryAsync(999999999, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(404);
+        exception.ErrorContent?.ToString().Should().Contain("The required file was not found");
     }
 
     [Fact]

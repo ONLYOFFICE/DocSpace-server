@@ -103,8 +103,11 @@ public abstract class FavoritesTestBase(
     /// written to that index asynchronously. Polls the endpoint on a deadline instead of reading once,
     /// so a slow index write does not turn into an intermittent failure, and returns the last observed
     /// state so a failing assertion still shows what was actually there.
+    ///
+    /// 30s was not enough under the load of a full run: the suite passes in isolation and failed only
+    /// alongside the other ~3800 tests, where the index write competes for the same machine.
     /// </summary>
-    protected async Task<FolderContentDtoInteger> PollFavorites(Func<FolderContentDtoInteger, bool> until, FilterType? filterType = null, int timeoutSeconds = 30, string? filterValue = null)
+    protected async Task<FolderContentDtoInteger> PollFavorites(Func<FolderContentDtoInteger, bool> until, FilterType? filterType = null, int timeoutSeconds = 60, string? filterValue = null)
     {
         var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
 
