@@ -35,6 +35,8 @@ extern alias ASCPeople;
 
 global using System.Diagnostics;
 global using System.Net;
+global using System.Text;
+global using System.Text.Json;
 
 global using ASC.People.Tests.ApiFactories;
 global using ASC.Tests.Common.ApiFactories;
@@ -51,7 +53,19 @@ global using DocSpace.API.SDK.Model;
 global using FluentAssertions;
 
 global using Xunit;
-
+// Files-service clients the People tests need for room-scoped scenarios. Imported one by one
+// instead of the whole namespace: DocSpace.API.SDK.Api.Files also carries QuotaApi and SettingsApi,
+// which would clash with the People and Settings ones already in scope here.
+global using FilesApi = DocSpace.API.SDK.Api.Files.FilesApi;
 global using FileShare = DocSpace.API.SDK.Model.FileShare;
+global using FoldersApi = DocSpace.API.SDK.Api.Files.FoldersApi;
+// Both the People and the Group areas publish a SearchApi, so neither can be used unqualified.
+global using GroupSearchApi = DocSpace.API.SDK.Api.Group.SearchApi;
+// QuotaApi and GuestsApi each exist in more than one of the namespaces above, so the People ones
+// are reached through an alias rather than unqualified.
+global using PeopleGuestsApi = DocSpace.API.SDK.Api.People.GuestsApi;
+global using PeopleQuotaApi = DocSpace.API.SDK.Api.People.QuotaApi;
+global using PeopleSearchApi = DocSpace.API.SDK.Api.People.SearchApi;
 global using RoomType = DocSpace.API.SDK.Model.RoomType;
+global using SharingApi = DocSpace.API.SDK.Api.Files.SharingApi;
 global using User = ASC.Tests.Common.Data.User;

@@ -349,6 +349,13 @@ public class GroupController(
         var fromGroup = await GetGroupInfoAsync(inDto.FromId);
         var toGroup = await GetGroupInfoAsync(inDto.ToId);
 
+        // Moving a group onto itself is a no-op. Without this guard the loop below adds each member
+        // back into the same group and then removes them from it, leaving the group empty.
+        if (fromGroup.ID == toGroup.ID)
+        {
+            return await GetGroup(new DetailedInformationRequestDto { Id = inDto.ToId });
+        }
+
         var users = await userManager.GetUsersByGroupAsync(fromGroup.ID);
 
         foreach (var userInfo in users)

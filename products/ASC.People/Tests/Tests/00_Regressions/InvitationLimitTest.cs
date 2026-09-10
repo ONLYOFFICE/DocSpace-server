@@ -31,7 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.People.Tests.PeopleController;
+namespace ASC.People.Tests.Tests._00_Regressions;
 
 public class InvitationLimitTest(
     AspireAppFixture fixture)
@@ -41,7 +41,7 @@ public class InvitationLimitTest(
     [Fact]
     public async Task InviteUsers_ShouldChangeInvitationLimit()
     {
-        await _apiClient.Authenticate(Owner);
+        await _webApiClient.Authenticate(Owner);
         await _peopleClient.Authenticate(Owner);
 
         var settings = (await _commonSettingsApi.GetPortalSettingsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
