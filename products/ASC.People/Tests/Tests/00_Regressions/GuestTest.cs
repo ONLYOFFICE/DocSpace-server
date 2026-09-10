@@ -31,7 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.People.Tests.PeopleController;
+namespace ASC.People.Tests.Tests._00_Regressions;
 
 public class GuestTest(AspireAppFixture fixture) : BaseTest(fixture)
 {
@@ -57,7 +57,7 @@ public class GuestTest(AspireAppFixture fixture) : BaseTest(fixture)
     // [Trait("Bug", "79419")]
     // public async Task CreateUser_AsRoomAdmin_ShouldCreateUserSuccessfully()
     // {
-    //     await _apiClient.Authenticate(Owner);
+    //     await _webApiClient.Authenticate(Owner);
     //     var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
     //     var guestFromOwner = await InviteContact(EmployeeType.Guest, roomAdmin);
     //     

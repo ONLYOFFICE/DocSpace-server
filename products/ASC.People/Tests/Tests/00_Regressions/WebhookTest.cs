@@ -33,11 +33,11 @@
 
 using ASC.Webhooks.Core;
 
-using InternalWebhookTrigger = ASC.Webhooks.Core.WebhookTrigger;
 using InternalEmployeeType = ASC.Core.Users.EmployeeType;
+using InternalWebhookTrigger = ASC.Webhooks.Core.WebhookTrigger;
 using WebhookTrigger = DocSpace.API.SDK.Model.WebhookTrigger;
 
-namespace ASC.People.Tests.PeopleController;
+namespace ASC.People.Tests.Tests._00_Regressions;
 
 public class WebhookTest(AspireAppFixture fixture) : BaseTest(fixture)
 {

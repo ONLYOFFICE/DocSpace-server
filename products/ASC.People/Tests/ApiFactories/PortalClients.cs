@@ -41,17 +41,35 @@ public sealed class PortalClients : PortalClientsBase
     public HttpClient FilesHttpClient { get; }
     public HttpClient PeopleHttpClient { get; }
 
-    // Files service — only what the People tests need to invite a guest into a room
+    // Files service — the room-scoped scenarios the People tests set up (sharing a room with a
+    // user or a group, checking who a room is shared with, personal-folder clean-up).
     public RoomsApi RoomsApi { get; }
+    public FilesApi FilesApi { get; }
+    public FoldersApi FoldersApi { get; }
+    public SharingApi SharingApi { get; }
 
     // People service
     public ProfilesApi ProfilesApi { get; }
-    public GroupApi GroupApi { get; }
+    public PeopleSearchApi PeopleSearchApi { get; }
     public UserTypeApi UserTypeApi { get; }
+    public UserStatusApi UserStatusApi { get; }
+    public UserDataApi UserDataApi { get; }
+    public EmailApi EmailApi { get; }
+    public PasswordApi PasswordApi { get; }
+    public PhotosApi PhotosApi { get; }
+    public PeopleQuotaApi PeopleQuotaApi { get; }
+    public ThemeApi ThemeApi { get; }
+    public PeopleGuestsApi GuestsApi { get; }
+    public ThirdPartyAccountsApi ThirdPartyAccountsApi { get; }
+
+    // Group area — also served by the People service
+    public GroupApi GroupApi { get; }
+    public GroupSearchApi GroupSearchApi { get; }
 
     // WebApi service
     public UsersApi PortalUsersApi { get; }
     public CommonSettingsApi CommonSettingsApi { get; }
+    public DocSpace.API.SDK.Api.Settings.QuotaApi SettingsQuotaApi { get; }
     public WebhooksApi WebhooksApi { get; }
 
     public PortalClients(PortalContext context) : base(context)
@@ -61,15 +79,31 @@ public sealed class PortalClients : PortalClientsBase
 
         var filesConfig = new Configuration { BasePath = BasePathOf(ResourceNames.Files) };
         RoomsApi = new RoomsApi(FilesHttpClient, filesConfig);
+        FilesApi = new FilesApi(FilesHttpClient, filesConfig);
+        FoldersApi = new FoldersApi(FilesHttpClient, filesConfig);
+        SharingApi = new SharingApi(FilesHttpClient, filesConfig);
 
         var peopleConfig = new Configuration { BasePath = BasePathOf(ResourceNames.People) };
         ProfilesApi = new ProfilesApi(PeopleHttpClient, peopleConfig);
-        GroupApi = new GroupApi(PeopleHttpClient, peopleConfig);
+        PeopleSearchApi = new PeopleSearchApi(PeopleHttpClient, peopleConfig);
         UserTypeApi = new UserTypeApi(PeopleHttpClient, peopleConfig);
+        UserStatusApi = new UserStatusApi(PeopleHttpClient, peopleConfig);
+        UserDataApi = new UserDataApi(PeopleHttpClient, peopleConfig);
+        EmailApi = new EmailApi(PeopleHttpClient, peopleConfig);
+        PasswordApi = new PasswordApi(PeopleHttpClient, peopleConfig);
+        PhotosApi = new PhotosApi(PeopleHttpClient, peopleConfig);
+        PeopleQuotaApi = new PeopleQuotaApi(PeopleHttpClient, peopleConfig);
+        ThemeApi = new ThemeApi(PeopleHttpClient, peopleConfig);
+        GuestsApi = new PeopleGuestsApi(PeopleHttpClient, peopleConfig);
+        ThirdPartyAccountsApi = new ThirdPartyAccountsApi(PeopleHttpClient, peopleConfig);
+
+        GroupApi = new GroupApi(PeopleHttpClient, peopleConfig);
+        GroupSearchApi = new GroupSearchApi(PeopleHttpClient, peopleConfig);
 
         var webApiConfig = new Configuration { BasePath = BasePathOf(ResourceNames.WebApi) };
         PortalUsersApi = new UsersApi(WebApiHttpClient, webApiConfig);
         CommonSettingsApi = new CommonSettingsApi(WebApiHttpClient, webApiConfig);
+        SettingsQuotaApi = new DocSpace.API.SDK.Api.Settings.QuotaApi(WebApiHttpClient, webApiConfig);
 
         // Webhooks live in ASC.Web.Api (hence webApiConfig, which is what decides the request URI),
         // but the tests drive them with the People client's token — keep it on that client.
