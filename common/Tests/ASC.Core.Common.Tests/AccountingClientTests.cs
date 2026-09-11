@@ -270,7 +270,7 @@ public class AccountingClientTests
 
         services.AddAccountingHttpClient(configuration);
 
-        // Replace the real network handler with our capturing one. AddRefitClient sets a primary
+        // Replace the real network handler with our capturing one. AddRefitGeneratedClient sets a primary
         // handler on its own named client, which overrides ConfigureHttpClientDefaults - so the
         // override has to target that exact client by name.
         services.AddHttpClient(Refit.UniqueName.ForType<IAccountingApi>())
