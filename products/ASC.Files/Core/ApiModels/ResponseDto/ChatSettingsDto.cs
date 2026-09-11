@@ -33,15 +33,14 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// The chat settings parameters.
-/// </summary>
+/// <summary>The chat configuration of an AI room.</summary>
 public class ChatSettingsDto
 {
     /// <summary>
-    /// The system prompt for the chat.
+    /// The instruction put in front of every conversation held in the room, which sets the role the assistant takes
+    /// and the way it answers. Empty when the room was left on the behaviour the portal provides by default.
     /// </summary>
-    /// <example>You are a helpful assistant.</example>
+    /// <example>You are a helpful assistant for project documentation.</example>
     public string Prompt { get; init; }
 }
 

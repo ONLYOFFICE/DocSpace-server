@@ -34,34 +34,36 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The new item parameters.
+/// One day of the entries the caller has not opened yet, the groups running from the most recent day backwards.
 /// </summary>
 public class NewItemsDto<TItem>
 {
     /// <summary>
-    /// The date and time when the new item was created.
+    /// The day the grouped entries were last changed, written with the offset of the portal time zone. The time part
+    /// is the moment of the newest entry of the group.
     /// </summary>
-    /// <example>2025-01-01T00:00:00Z</example>
+    /// <example>2025-01-01T12:30:00.000+03:00</example>
     public required ApiDateTime Date { get; init; }
 
     /// <summary>
-    /// The list of items.
+    /// What changed on that day, the most recent first. Folders are left out of it, so an entry here is always a file
+    /// or a room that holds them.
     /// </summary>
     public required IEnumerable<TItem> Items { get; init; }
 }
 
-/// <summary>
-/// The room new items information.
-/// </summary>
+/// <summary>The unseen entries of one room inside a day group.</summary>
 public class RoomNewItemsDto
 {
     /// <summary>
-    /// The room file entry.
+    /// The room the entries were found in, in its short form: only the identifier, the title, the room type and the
+    /// logo are filled in.
     /// </summary>
     public FileEntryBaseDto Room { get; init; }
 
     /// <summary>
-    /// The list of file entry items.
+    /// The files of that room the caller has not opened yet, the most recently changed first. Reading them here does
+    /// not clear the badges; opening the room itself does.
     /// </summary>
     public IEnumerable<FileEntryBaseDto> Items { get; init; }
 }

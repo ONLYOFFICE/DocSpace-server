@@ -34,12 +34,13 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for deleting a room.
+/// The body of a room deletion request.
 /// </summary>
 public class DeleteRoomRequest
 {
     /// <summary>
-    /// Specifies whether to delete a room after the editing session is finished or not.
+    /// Carried by the contract but not acted upon: the deletion behaves the same either way, and the record of the
+    /// finished job is kept until it is read once.
     /// </summary>
     /// <example>false</example>
     public bool DeleteAfter { get; set; }
@@ -51,14 +52,14 @@ public class DeleteRoomRequest
 public class DeleteRoomRequestDto<T>
 {
     /// <summary>
-    /// The room ID.
+    /// The room to delete, named by the identifier that `GET api/2.0/files/rooms` reports for it.
     /// </summary>
     /// <example>10</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// The parameters for deleting a room.
+    /// The body of the request. It is required even though the deletion does not depend on what it holds.
     /// </summary>
     [FromBody]
     public required DeleteRoomRequest DeleteRoom { get; set; }

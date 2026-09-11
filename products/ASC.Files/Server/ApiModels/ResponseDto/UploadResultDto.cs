@@ -34,25 +34,28 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The upload result parameters.
+/// The outcome of storing an image in temporary storage before it is used as a room logo.
 /// </summary>
 public class UploadResultDto
 {
     /// <summary>
-    /// Specifies if the upload operation is successful or not.
+    /// True when the image was stored and its path is in the data field. A rejected image is reported with an error
+    /// response rather than with a false here, so this field is true in every answer that carries a body.
     /// </summary>
     /// <example>true</example>
     public bool Success { get; set; }
 
     /// <summary>
-    /// The uploaded data.
+    /// The path of the stored image, which is the value to send as the temporary file when the logo of a room is set.
+    /// It is opaque: do not build or parse it, and expect a different path from every upload.
     /// </summary>
-    /// <example>{"id": 10, "title": "document.docx"}</example>
+    /// <example>/storage/logos_temp/0f2e4b6a-8c1d-4e3f-9a5b-7c8d9e0f1a2b_...png</example>
     public object Data { get; set; }
 
     /// <summary>
-    /// The message sent after the successful upload operation.
+    /// Left empty by this operation: nothing is reported here, and a refused image comes back as an error response
+    /// instead.
     /// </summary>
-    /// <example>File uploaded successfully</example>
+    /// <example></example>
     public string Message { get; set; }
 }

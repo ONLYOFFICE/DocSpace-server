@@ -36,56 +36,65 @@ using ASC.Files.Core.Services.DocumentBuilderService;
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The Document Builder task parameters.
+/// The state of a background document building task: how far it has got, how it ended, and the file it produced.
 /// </summary>
 public class DocumentBuilderTaskDto
 {
     /// <summary>
-    /// The Document Builder task ID.
+    /// The identifier of the task. It is derived from the portal, the account and the kind of report, so starting the
+    /// same report again while it runs returns this same value, which is how a resumed poll is told from a newly
+    /// queued build.
     /// </summary>
-    /// <example>task-123-456</example>
+    /// <example>DocumentBuilderTask_1_c2b0e3a4-1f6c-4c2e-9c4f-3a5d8b7e1c22</example>
     public required string Id { get; set; }
 
     /// <summary>
-    /// The error message occurred during the document building process.
+    /// The message of the failure that stopped the build. It is filled in only for a task that ended in the failed
+    /// state, and stays empty while the task runs and after it succeeds.
     /// </summary>
-    /// <example>Build failed</example>
+    /// <example>The document service is unavailable</example>
     public required string Error { get; set; }
 
     /// <summary>
-    /// The progress percentage of the document building process.
+    /// How far the build has got, from 0 to 100. It advances in a few coarse steps rather than smoothly, so it is a
+    /// progress hint and not a measure of the time left; wait on the completion flag instead.
     /// </summary>
-    /// <example>75</example>
+    /// <example>60</example>
     public required int Percentage { get; set; }
 
     /// <summary>
-    /// Specifies whether the document building process is completed or not.
+    /// True once the task has stopped for any reason, a failure and a cancellation included. It is the field to poll
+    /// on, and the status tells those outcomes apart.
     /// </summary>
     /// <example>false</example>
     public required bool IsCompleted { get; set; }
 
     /// <summary>
-    /// The status of the document building process.
+    /// How the task ended, or that it has not started yet. Read it together with the completion flag: a stopped task
+    /// can be a finished build, a cancelled one or a failure, and only this field separates them.
     /// </summary>
-    /// <example>0</example>
+    /// <example>2</example>
     public required DistributedTaskStatus Status { get; set; }
 
     /// <summary>
-    /// The result file ID.
+    /// The identifier of the produced file, set only after the build succeeds. Pass it to the file operations to
+    /// download, move or delete the report, which is saved as an ordinary file in the portal.
     /// </summary>
-    /// <example>123</example>
+    /// <example>1234</example>
     public required object ResultFileId { get; set; }
 
     /// <summary>
-    /// The result file name.
+    /// The name the produced file was saved with, extension included. The name is built from the subject of the
+    /// report and is not unique: a second build adds another file instead of replacing the first.
     /// </summary>
-    /// <example>result.docx</example>
+    /// <example>usage_report.xlsx</example>
     public required string ResultFileName { get; set; }
 
     /// <summary>
-    /// The result file URL.
+    /// The address of the produced file in the document editor, relative to the portal root, so prefix it with the
+    /// portal address to open it. It stays empty until the build succeeds.
     /// </summary>
-    /// <example>http://localhost/files/result.docx</example>
+    /// <example>/doceditor?fileid=1234</example>
     public required string ResultFileUrl { get; set; }
 
     public static DocumentBuilderTaskDto Get<TId, TData>(DocumentBuilderTask<TId, TData> task)

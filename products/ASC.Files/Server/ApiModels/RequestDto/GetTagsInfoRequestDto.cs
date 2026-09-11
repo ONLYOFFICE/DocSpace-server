@@ -39,8 +39,8 @@ namespace ASC.Files.ApiModels.RequestDto;
 public class GetTagsInfoRequestDto
 {
     /// <summary>
-    /// Gets or sets the number of tag results to retrieve.
-    /// This property specifies the maximum amount of tag data to be included in the result set.
+    /// How many tag names one page may carry. The answer reports no total, so a page shorter than this is the sign
+    /// that the list is exhausted.
     /// </summary>
     /// <example>25</example>
     [FromQuery(Name = "count")]
@@ -48,9 +48,8 @@ public class GetTagsInfoRequestDto
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
-    /// Represents the starting index from which the tags' information will be retrieved.
-    /// This property is used to define the offset for pagination when retrieving a list of tags. It determines
-    /// the point in the data set from which the retrieval begins.
+    /// How many tag names to skip before the page begins. Raise it by the number of names already received to read
+    /// the next page.
     /// </summary>
     /// <example>0</example>
     [FromQuery(Name = "startIndex")]
@@ -58,10 +57,10 @@ public class GetTagsInfoRequestDto
     public int StartIndex { get; set; }
 
     /// <summary>
-    /// Gets or sets the text value used for searching tags.
-    /// This property is typically used as a filter value when retrieving tag information.
+    /// Keeps only the tag names that contain this text, ignoring case. It is a substring match, so a fragment from
+    /// the middle of a name is enough.
     /// </summary>
-    /// <example>My Document</example>
+    /// <example>conf</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }

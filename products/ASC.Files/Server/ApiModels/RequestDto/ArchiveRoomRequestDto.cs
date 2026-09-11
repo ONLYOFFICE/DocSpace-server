@@ -34,12 +34,13 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for archiving a room.
+/// The body of a room archiving request.
 /// </summary>
 public class ArchiveRoomRequest
 {
     /// <summary>
-    /// Specifies whether to archive a room after the editing session is finished or not.
+    /// Whether the record of the finished job may be dropped without being read. With it off the record waits for the
+    /// first poll, which is what lets the caller learn how the move ended; it has no effect on the room itself.
     /// </summary>
     /// <example>false</example>
     public bool DeleteAfter { get; set; }
@@ -51,14 +52,15 @@ public class ArchiveRoomRequest
 public class ArchiveRoomRequestDto<T>
 {
     /// <summary>
-    /// The room ID.
+    /// The room to move, named by the identifier that `GET api/2.0/files/rooms` reports for it.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// The parameters for archiving a room.
+    /// The body of the request. It carries only the lifetime of the job record, so an empty object is a normal
+    /// request.
     /// </summary>
     /// <example>{"deleteAfter": false}</example>
     [FromBody]

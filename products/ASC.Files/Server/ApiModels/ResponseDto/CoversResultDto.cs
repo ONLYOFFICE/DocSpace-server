@@ -33,20 +33,20 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// The result of the cover request containing the cover image data.
-/// </summary>
+/// <summary>One drawing of the built-in gallery of room covers.</summary>
 public class CoversResultDto
 {
     /// <summary>
-    /// The cover unique identifier.
+    /// The name of the cover, and the value to send as `cover` when a room is created or changed. The names are the
+    /// same on every portal and do not change with the language of the request.
     /// </summary>
-    /// <example>cover-123</example>
+    /// <example>bookmark</example>
     public required string Id { get; set; }
 
     /// <summary>
-    /// The cover image data.
+    /// The drawing itself, as inline vector markup ready to be rendered as it is. It is the default size of the
+    /// cover, and it may change between product versions while the name stays.
     /// </summary>
-    /// <example>base64EncodedImageData</example>
+    /// <example>&lt;svg viewBox="0 0 32 32"&gt;&lt;path d="M8 4h16v24l-8-6-8 6z"/&gt;&lt;/svg&gt;</example>
     public required string Data { get; set; }
 }

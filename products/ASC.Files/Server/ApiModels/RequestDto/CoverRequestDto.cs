@@ -34,21 +34,24 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters to change the room cover.
+/// The picture and the colour a room is drawn with while it has no logo.
 /// </summary>
 public class CoverRequestDto
 {
     /// <summary>
-    /// The cover color.
+    /// The background colour the room is drawn with while it has no logo, as six hexadecimal digits with no leading
+    /// number sign. An empty value restores the default colour of the room type.
     /// </summary>
-    /// <example>FF0000</example>
+    /// <example>FF5733</example>
     [RegularExpression(@"^[A-Fa-f0-9]{6}$", ErrorMessage = "Color must be a valid hex color (e.g., FF0000)")]
     public string Color { get; set; }
 
     /// <summary>
-    /// The cover name.
+    /// The picture drawn on the room while it has no logo, named by an identifier from
+    /// `GET api/2.0/files/rooms/covers`. Any other value is rejected, and an empty value leaves the room without a
+    /// cover.
     /// </summary>
-    /// <example>cover1.jpg</example>
+    /// <example>bookmark</example>
     public string Cover { get; set; }
 }
 
@@ -58,16 +61,17 @@ public class CoverRequestDto
 public class CoverRequestDto<T>
 {
     /// <summary>
-    /// The room ID.
+    /// The room to change, named by the identifier that `GET api/2.0/files/rooms` reports for it.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// The request parameters to change the room cover.
+    /// The cover and the colour to apply. Either half may be sent on its own, and an empty object leaves the room as
+    /// it is.
     /// </summary>
-    /// <example>{"color": "#FF0000", "cover": "cover1.jpg"}</example>
+    /// <example>{"color": "FF5733", "cover": "bookmark"}</example>
     [FromBody]
     public required CoverRequestDto Cover { get; set; } = null;
 }

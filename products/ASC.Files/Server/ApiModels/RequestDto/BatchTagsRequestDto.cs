@@ -34,14 +34,16 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for managing room tags.
+/// The tag names a request attaches to a room or detaches from it.
 /// </summary>
 public class BatchTagsRequestDto : IValidatableObject
 {
     /// <summary>
-    /// The list of tag names.
+    /// The tags, by name: a tag has no identifier of its own, and the name is what links a room to it.
+    /// `GET api/2.0/files/tags` lists the names already in the portal catalogue. An empty list is accepted and does
+    /// nothing, while a blank or overlong entry makes the whole request invalid.
     /// </summary>
-    /// <example>["tag1", "tag2", "tag3"]</example>
+    /// <example>["Finance", "2026"]</example>
     [Required]
     public List<string> Names { get; set; }
 
@@ -77,16 +79,16 @@ public class BatchTagsRequestDto : IValidatableObject
 public class BatchTagsRequestDto<T>
 {
     /// <summary>
-    /// The room Id.
+    /// The room whose tags are changed, named by the identifier that `GET api/2.0/files/rooms` reports for it.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// The parameters for managing tags.
+    /// The names to attach or to detach.
     /// </summary>
-    /// <example>{"names": ["tag1", "tag2", "tag3"]}</example>
+    /// <example>{"names": ["Finance", "2026"]}</example>
     [FromBody]
     public BatchTagsRequestDto BatchTags { get; set; }
 }

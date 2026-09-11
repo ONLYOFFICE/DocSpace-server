@@ -33,67 +33,77 @@
 
 namespace ASC.Files.ApiModels.RequestDto;
 
-/// <summary>
-/// The parameters for creating a third-party room.
-/// </summary>
+/// <summary>The room to be created out of a folder of a connected third-party storage account.</summary>
 public class CreateThirdPartyRoom
 {
     /// <summary>
-    /// Specifies whether to create a third-party room as a new folder or not.
+    /// Creates a new folder named after `title` inside the folder named in the path and turns that subfolder into the
+    /// room, leaving the named folder itself untouched. When omitted, the named folder becomes the room and keeps
+    /// everything it already holds.
     /// </summary>
     /// <example>false</example>
     public bool CreateAsNewFolder { get; set; }
 
     /// <summary>
-    /// The third-party room name to be created.
+    /// The name the room is shown under. It is stored on the connected account, so it does not have to match the name
+    /// of the folder in the storage; with `createAsNewFolder` it is also the name given to the created subfolder.
     /// </summary>
-    /// <example>My Third-Party Room</example>
+    /// <example>Third-party project room</example>
     public required string Title { get; set; }
 
     /// <summary>
-    /// The third-party room type to be created.
+    /// The kind of room the folder becomes, which decides the default access rules of its members and cannot be
+    /// changed afterwards.
     /// </summary>
     /// <example>2</example>
     public required RoomType RoomType { get; set; }
 
     /// <summary>
-    /// Specifies whether to create the private third-party room or not.
+    /// Restricts the room to the members explicitly invited into it. The flag is kept on the connected storage
+    /// account rather than on the folder, so every folder read through that account reports the same value.
     /// </summary>
     /// <example>false</example>
     public bool Private { get; set; }
 
     /// <summary>
-    /// Specifies whether to create the third-party room with indexing.
+    /// Keeps the contents of the room in an explicit numbered order, the one reported as `order` on every entry,
+    /// instead of leaving the order to the reader.
     /// </summary>
     /// <example>true</example>
     public bool Indexing { get; set; }
 
     /// <summary>
-    /// Specifies whether to deny downloads from the third-party room.
+    /// Forbids downloading and printing the contents of the room, which leaves the members with viewing and editing
+    /// in the editor only.
     /// </summary>
     /// <example>false</example>
     public bool DenyDownload { get; set; }
 
     /// <summary>
-    /// The color of the third-party room.
+    /// The background colour drawn behind the cover of the room, as six hexadecimal digits without a leading number
+    /// sign. An empty value restores the colour the portal picks by default.
     /// </summary>
-    /// <example>#FF0000</example>
+    /// <example>FF5733</example>
     public string Color { get; set; }
 
     /// <summary>
-    /// The cover of the third-party room.
+    /// The drawing shown on the room tile, named by one of the built-in cover identifiers returned by
+    /// `GET api/2.0/files/rooms/covers`. An empty value leaves the room without a cover, and any other unknown value
+    /// is rejected as an invalid request.
     /// </summary>
-    /// <example>cover1.jpg</example>
+    /// <example>bookmark</example>
     public string Cover { get; set; }
 
     /// <summary>
-    /// The list of tags of the third-party room.
+    /// The tags to attach to the room, named by their text. A name that is not in the portal tag catalogue yet is
+    /// added to it, and `GET api/2.0/files/tags` lists the names already there.
     /// </summary>
-    /// <example>["tag1", "tag2", "tag3"]</example>
+    /// <example>["Marketing", "Q3"]</example>
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
-    /// The logo request parameters of the third-party room.
+    /// The picture to use as the room logo, which has to be uploaded with `POST api/2.0/files/logos` first; leaving
+    /// it out keeps the room on its cover and colour.
     /// </summary>
     /// <example>{"tmpFile": "/temp/logo.png", "x": 0, "y": 0, "width": 100, "height": 100}</example>
     public LogoRequest Logo { get; set; }
@@ -106,16 +116,19 @@ public class CreateThirdPartyRoom
 public class CreateThirdPartyRoomRequestDto
 {
     /// <summary>
-    /// The ID of the folder in the third-party storage in which the contents of the room will be stored.
+    /// The identifier of the folder in the connected third-party storage that becomes the room, or receives it as a
+    /// subfolder. Folder identifiers of a connected account are strings and are returned by the folder listings of
+    /// that account.
     /// </summary>
-    /// <example>folder-123-abc</example>
+    /// <example>box-12-|280143035119</example>
     [FromRoute(Name = "id")]
     public required string Id { get; set; }
 
-    /// <summary>
-    /// The third-party room information.
-    /// </summary>
-    /// <example>{"createAsNewFolder": false, "title": "My Third-Party Room", "roomType": 2, "private": false, "indexing": true, "denyDownload": false, "color": "FF0000", "cover": "cover1.jpg", "tags": ["tag1", "tag2", "tag3"]}</example>
+    /// <summary>The settings of the room to be created out of the folder.</summary>
+    /// <example>
+    /// {"createAsNewFolder": false, "title": "Third-party project room", "roomType": 2, "indexing": true, "color":
+    /// "FF5733", "cover": "bookmark", "tags": ["Marketing"]}
+    /// </example>
     [FromBody]
     public required CreateThirdPartyRoom Room { get; set; }
 }

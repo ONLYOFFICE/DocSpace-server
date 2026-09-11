@@ -34,7 +34,7 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for creating a tag.
+/// The parameters for adding a custom tag to the portal catalog of room tags.
 /// </summary>
 public class CreateTagRequestDto : IValidatableObject
 {
@@ -42,7 +42,9 @@ public class CreateTagRequestDto : IValidatableObject
     public const int MaxNameLength = 255;
 
     /// <summary>
-    /// The tag name.
+    /// The name of the tag to create, which is also its identity: tags are addressed by name everywhere, there is no
+    /// separate identifier. It is stored exactly as sent, spacing and case included, and a name that is already in
+    /// the catalog gives back that tag instead of a second one.
     /// </summary>
     /// <example>Important</example>
     [StringLength(MaxNameLength)]

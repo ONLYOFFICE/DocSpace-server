@@ -33,43 +33,44 @@
 
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
-/// <summary>
-/// The logo request parameters.
-/// </summary>
+/// <summary>The part of an uploaded picture to use as the logo.</summary>
 public class LogoRequest
 {
     /// <summary>
-    /// The path to the temporary image file.
+    /// The picture to cut the logo out of, named by the path that `POST api/2.0/files/logos` returned for it. The
+    /// path may be used once and only by the account that uploaded it.
     /// </summary>
-    /// <example>/tmp/logo.png</example>
+    /// <example>/temp/logo_a1b2c3.png</example>
     [Required]
     public string TmpFile { get; set; }
 
     /// <summary>
-    /// The X coordinate of the rectangle starting point.
+    /// The left edge of the rectangle cut out of the uploaded picture, counted in pixels from its left side. The
+    /// picture itself was already scaled down to fit 1280 by 1280 pixels when it was uploaded.
     /// </summary>
     /// <example>0</example>
     [Range(0, 1280)]
     public int X { get; set; }
 
     /// <summary>
-    /// The Y coordinate of the rectangle starting point.
+    /// The top edge of the rectangle cut out of the uploaded picture, counted in pixels from its top.
     /// </summary>
     /// <example>0</example>
     [Range(0, 1280)]
     public int Y { get; set; }
 
     /// <summary>
-    /// The rectangle width.
+    /// How wide a piece of the uploaded picture to cut out, in pixels. It has to be sent together with the height,
+    /// and the portal builds the four logo sizes out of the piece.
     /// </summary>
-    /// <example>100</example>
+    /// <example>300</example>
     [Range(1, 1280)]
     public uint Width { get; set; }
 
     /// <summary>
-    /// The rectangle height.
+    /// How tall a piece of the uploaded picture to cut out, in pixels. It has to be sent together with the width.
     /// </summary>
-    /// <example>100</example>
+    /// <example>300</example>
     [Range(1, 1280)]
     public uint Height { get; set; }
 }
@@ -79,16 +80,13 @@ public class LogoRequest
 /// </summary>
 public class LogoRequest<T>
 {
-    /// <summary>
-    /// The room ID.
-    /// </summary>
+    /// <summary>The room the logo is set on.</summary>
     /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
-    /// <summary>
-    /// The logo request parameters.
-    /// </summary>
+    /// <summary>The uploaded picture and the piece of it to use.</summary>
+    /// <example>{"tmpFile": "/temp/logo_a1b2c3.png", "x": 0, "y": 0, "width": 300, "height": 300}</example>
     [FromBody]
     public required LogoRequest Logo { get; set; }
 }

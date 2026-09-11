@@ -36,9 +36,10 @@ namespace ASC.Files.ApiModels.RequestDto;
 public class HasTagLinksRequestDto
 {
     /// <summary>
-    /// Represents the name of a tag
+    /// The tag to check, spelled exactly as it is stored in the catalog. This query value is the one the handler
+    /// reads, so the path segment of the same name has to repeat it.
     /// </summary>
-    /// <example>tag1</example>
+    /// <example>Important</example>
     [FromQuery(Name = "tagName")]
     public string TagName { get; set; }
 }
