@@ -102,19 +102,20 @@ public class UploadControllerHelper(
 }
 
 /// <summary>
-/// Represents a wrapper for the response of a chunked upload session operation.
+/// The reserved chunked upload wrapped in the envelope the two older session operations answer with.
 /// </summary>
 public class ChunkedUploadSessionResponseWrapper<T>
 {
     /// <summary>
-    /// Gets or sets a value indicating whether the operation was successful.
+    /// Always true in a body that reaches the caller, because a call that does not succeed answers with an error
+    /// status and no body at all. It cannot be used to tell a refusal from a success.
     /// </summary>
     /// <example>true</example>
     public bool Success { get; set; }
 
     /// <summary>
-    /// Gets or sets the data of the chunked upload session response.
+    /// The reserved upload itself, in the same shape the newer session operations answer with directly.
     /// </summary>
-    /// <example>{"id": "00000000-0000-0000-0000-000000000000", "location": "https://example.com/upload"}</example>
+    /// <example>{"id": "1b6a2ee1f2a04c6f9bd2cbf0e0f23a54", "bytes_total": 10485760}</example>
     public ChunkedUploadSessionResponse<T> Data { get; set; }
 }

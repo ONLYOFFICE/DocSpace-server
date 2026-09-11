@@ -39,14 +39,15 @@ namespace ASC.Files.ApiModels.RequestDto;
 public class CreateEditSessionRequestDto<T>
 {
     /// <summary>
-    /// The file ID.
+    /// The file whose content the session will replace; take the id from a folder listing or from the file itself.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The file size in bytes.
+    /// The number of bytes the new content will take. It is checked against the portal limit for chunked uploads
+    /// before the session opens, and a session left at 0 takes the whole content in a single part.
     /// </summary>
     /// <example>1024</example>
     [FromQuery(Name = "fileSize")]

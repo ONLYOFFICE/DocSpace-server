@@ -39,45 +39,26 @@ namespace ASC.Files.ApiModels.RequestDto;
 public class UploadSessionRequestDto<T>
 {
     /// <summary>
-    /// The folder ID.
+    /// The folder the session was opened against. It is part of the route only and is not matched against the
+    /// session, which is found by its own id.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The upload session ID.
+    /// The session this part belongs to, as returned in `id` when it was created; the parts of one session must be
+    /// sent one after another, not in parallel.
     /// </summary>
-    /// <example>session_abc123</example>
+    /// <example>9f1c7a2b4d3e4f5a8b6c0d1e2f3a4b5c</example>
     [FromRoute(Name = "sessionId")]
     public string SessionId { get; set; }
 
     /// <summary>
-    /// The file to be uploaded as part of the multipart/form-data request.
-    /// This property represents the uploaded file content from the HTTP request form.
-    /// The file is accessed via the IFormFile interface which provides access to the file name, content type, length, and stream.
+    /// The next part of the file, sent as the multipart field of the same name. Parts are appended in the order they
+    /// arrive, and a part larger than the portal chunk size is refused.
     /// </summary>
-    /// <remarks>
-    /// When making a request, the file should be sent as form data with the content type set to multipart/form-data.
-    /// The file stream can be accessed using the OpenReadStream() method.
-    /// </remarks>
-    /// <example>
-    /// Example of sending a file using curl:
-    /// <code>
-    /// curl -X POST "https://api.example.com/api/2.0/files/folder/1/upload/session_abc123" \
-    ///   -H "Authorization: Bearer your_token" \
-    ///   -F "file=@/path/to/document.pdf"
-    /// </code>
-    ///
-    /// Example of sending a file using C# HttpClient:
-    /// <code>
-    /// using var content = new MultipartFormDataContent();
-    /// using var fileStream = File.OpenRead("document.pdf");
-    /// content.Add(new StreamContent(fileStream), "file", "document.pdf");
-    ///
-    /// var response = await httpClient.PostAsync(url, content);
-    /// </code>
-    /// </example>
+    /// <example>binary file data</example>
     public IFormFile File { get; set; }
 }
 
@@ -87,52 +68,34 @@ public class UploadSessionRequestDto<T>
 public class UploadSessionAsyncRequestDto<T>
 {
     /// <summary>
-    /// The folder ID.
+    /// The folder the session was opened against. It is part of the route only and is not matched against the
+    /// session, which is found by its own id.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The upload session ID.
+    /// The session this part belongs to, as returned in `id` when it was created; a 32-character hexadecimal string.
     /// </summary>
-    /// <example>session_abc123</example>
+    /// <example>9f1c7a2b4d3e4f5a8b6c0d1e2f3a4b5c</example>
     [FromRoute(Name = "sessionId")]
     public string SessionId { get; set; }
 
     /// <summary>
-    /// The chunk number.
+    /// The position of this part in the file, counted from 1. Sending the same number again replaces that part
+    /// instead of adding one, which is how a failed part is retried; leaving the number out makes the server count
+    /// the parts itself.
     /// </summary>
     /// <example>1</example>
     [FromQuery]
     public int? ChunkNumber { get; set; }
 
     /// <summary>
-    /// The file chunk to be uploaded as part of the multipart/form-data request.
-    /// This property represents the uploaded file chunk content from the HTTP request form for chunked upload operations.
-    /// The file chunk is accessed via the IFormFile interface which provides access to the chunk content and length.
+    /// The part of the file to store, sent as the multipart field of the same name. It is kept under the number given
+    /// beside it, and a part larger than the portal chunk size is refused.
     /// </summary>
-    /// <remarks>
-    /// When making a request, the file chunk should be sent as form data with the content type set to multipart/form-data.
-    /// For large files, the upload can be split into multiple chunks, each sent in a separate request with a corresponding ChunkNumber.
-    /// </remarks>
-    /// <example>
-    /// Example of sending a file chunk using curl:
-    /// <code>
-    /// curl -X POST "https://api.example.com/api/2.0/files/folder/1/upload/session_abc123?chunkNumber=1" \
-    ///   -H "Authorization: Bearer your_token" \
-    ///   -F "file=@/path/to/chunk1.part"
-    /// </code>
-    ///
-    /// Example of sending a file chunk using C# HttpClient:
-    /// <code>
-    /// using var content = new MultipartFormDataContent();
-    /// var chunkStream = new MemoryStream(chunkBytes);
-    /// content.Add(new StreamContent(chunkStream), "file", "document.pdf");
-    ///
-    /// var response = await httpClient.PostAsync($"{url}?chunkNumber=1", content);
-    /// </code>
-    /// </example>
+    /// <example>binary file data</example>
     [FromForm]
     public IFormFile File { get; set; }
 }

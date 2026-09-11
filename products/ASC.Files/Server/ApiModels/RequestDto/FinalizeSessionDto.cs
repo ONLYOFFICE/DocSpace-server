@@ -36,16 +36,18 @@ namespace ASC.Files.ApiModels.RequestDto;
 public class FinalizeSessionDto<T>
 {
     /// <summary>
-    /// The folder ID.
+    /// The folder the session was opened against. It is part of the route only and is not matched against the
+    /// session, which is found by its own id.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The session ID.
+    /// The session to assemble, as returned in `id` when it was created: a 32-character hexadecimal string that
+    /// identifies the session on its own.
     /// </summary>
-    /// <example>doc_key_123</example>
+    /// <example>9f1c7a2b4d3e4f5a8b6c0d1e2f3a4b5c</example>
     [FromRoute(Name = "sessionId")]
     public string SessionId { get; set; }
 }
