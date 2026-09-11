@@ -153,7 +153,11 @@ public class SocketService(
                     try
                     {
                         var httpClient = clientFactory.CreateClient(SocketServiceClient.HttpClientName);
-                        await httpClient.SendAsync(socketData.RequestMessage, HttpCompletionOption.ResponseHeadersRead, stoppingToken);
+
+                        // ResponseHeadersRead: the body is never needed. But an undisposed response keeps the pooled
+                        // connection checked out, so every call opened a new TCP connection (with a DNS lookup) and the
+                        // socket was closed by the finalizer - one connection per notification, hundreds open at peak.
+                        using var response = await httpClient.SendAsync(socketData.RequestMessage, HttpCompletionOption.ResponseHeadersRead, stoppingToken);
                     }
                     catch (Exception e)
                     {
