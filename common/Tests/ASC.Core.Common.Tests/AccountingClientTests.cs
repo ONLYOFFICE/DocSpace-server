@@ -114,6 +114,19 @@ public class AccountingClientTests
     }
 
     [Fact]
+    public async Task TransportFailure_IsMappedToAccountingException()
+    {
+        // A transport failure never reaches ExceptionFactory, which only sees HTTP responses; the
+        // TransportExceptionFactory keeps it inside the AccountingException hierarchy instead of leaking
+        // Refit.ApiRequestException to the callers.
+        var (client, _) = CreateClient(_ => throw new HttpRequestException("connection refused"));
+
+        var act = async () => await client.GetServiceInfoAsync("backup");
+
+        (await act.Should().ThrowExactlyAsync<AccountingException>())
+            .WithInnerException<HttpRequestException>();
+    }
+    [Fact]
     public async Task Requests_IncludeValidHmacAuthorizationHeader()
     {
         var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "{}"));

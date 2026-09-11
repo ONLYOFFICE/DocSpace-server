@@ -1022,19 +1022,26 @@ public static class AccountingHttpClientExtension
 
         services.AddTransient<AccountingAuthHandler>();
 
-        services
-            .AddRefitClient<IAccountingApi>(new RefitSettings
+        var refitSettings = new RefitSettings
+        {
+            ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
             {
-                ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-                }),
-                UrlParameterFormatter = new AccountingUrlParameterFormatter(),
-                UrlParameterKeyFormatter = new CamelCaseUrlParameterKeyFormatter(),
-                ExceptionFactory = CreateExceptionAsync
-            })
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            }),
+            UrlParameterKeyFormatter = new CamelCaseUrlParameterKeyFormatter(),
+            ExceptionFactory = CreateExceptionAsync,
+            TransportExceptionFactory = CreateTransportException,
+            UrlParameterFormatterMap = {
+                // The accounting service expects lowercase boolean query values ("true"/"false"); Refit's default
+                // formatter renders them as "True"/"False". Everything else keeps the default formatting.
+                [typeof(bool)] = new LowerCaseBooleanFormatter()
+            }
+        };
+
+        services
+            .AddRefitGeneratedClient<IAccountingApi>(refitSettings)
             .ConfigureHttpClient((sp, client) =>
             {
                 var url = accountingSettings?.Url;
@@ -1090,6 +1097,18 @@ public static class AccountingHttpClientExtension
         });
     }
 
+    // ExceptionFactory only sees HTTP responses. A transport failure (DNS, connect, TLS, timeout) would otherwise
+    // surface as Refit.ApiRequestException and escape the AccountingException hierarchy the callers catch.
+    private static Exception CreateTransportException(HttpRequestMessage request, Exception exception, CancellationToken cancellationToken)
+    {
+        // A caller-requested cancellation is not a service failure - let it propagate unchanged.
+        if (exception is OperationCanceledException && cancellationToken.IsCancellationRequested)
+        {
+            return exception;
+        }
+
+        return new AccountingException($"Accounting request to {request.RequestUri} failed: {exception.Message}", exception);
+    }
     // Maps non-success responses to the domain exceptions the callers expect (payment required / customer not found),
     // and wraps any other failure into AccountingException with the status code and response body.
     private static async ValueTask<Exception> CreateExceptionAsync(HttpResponseMessage response)
@@ -1119,18 +1138,13 @@ public static class AccountingHttpClientExtension
                content.Contains("not found", StringComparison.OrdinalIgnoreCase);
     }
 
-    // The accounting service expects lowercase boolean query values ("true"/"false"); Refit's default formatter
-    // renders them as "True"/"False". Everything else falls through to the default behaviour.
-    private sealed class AccountingUrlParameterFormatter : DefaultUrlParameterFormatter
+    // Registered in UrlParameterFormatterMap for bool only, so nullable and non-nullable booleans in both
+    // scalar parameters and flattened query objects render as "true"/"false".
+    private sealed class LowerCaseBooleanFormatter : IUrlParameterFormatter
     {
-        public override string Format(object parameterValue, ICustomAttributeProvider attributeProvider, Type type)
+        public string Format(object parameterValue, ICustomAttributeProvider attributeProvider, Type type)
         {
-            if (parameterValue is bool boolValue)
-            {
-                return boolValue ? "true" : "false";
-            }
-
-            return base.Format(parameterValue, attributeProvider, type);
+            return parameterValue is bool boolValue ? (boolValue ? "true" : "false") : parameterValue?.ToString();
         }
     }
 }

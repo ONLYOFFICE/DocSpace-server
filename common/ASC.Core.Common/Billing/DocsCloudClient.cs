@@ -661,7 +661,7 @@ public static class DocsCloudHttpClientExtension
         services.AddTransient<DocsCloudAuthHandler>();
 
         services
-            .AddRefitClient<IDocsCloudApi>(new RefitSettings
+            .AddRefitGeneratedClient<IDocsCloudApi>(new RefitSettings
             {
                 ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
                 {
@@ -669,7 +669,8 @@ public static class DocsCloudHttpClientExtension
                     PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
                 }),
-                ExceptionFactory = CreateExceptionAsync
+                ExceptionFactory = CreateExceptionAsync,
+                TransportExceptionFactory = CreateTransportException
             })
             .ConfigureHttpClient((sp, client) =>
             {
@@ -710,6 +711,18 @@ public static class DocsCloudHttpClientExtension
             });
     }
 
+    // ExceptionFactory only sees HTTP responses. A transport failure (DNS, connect, TLS, timeout) would otherwise
+    // surface as Refit.ApiRequestException and escape the DocsCloudException hierarchy the callers catch.
+    private static Exception CreateTransportException(HttpRequestMessage request, Exception exception, CancellationToken cancellationToken)
+    {
+        // A caller-requested cancellation is not a service failure - let it propagate unchanged.
+        if (exception is OperationCanceledException && cancellationToken.IsCancellationRequested)
+        {
+            return exception;
+        }
+
+        return new DocsCloudException($"DocsCloud request to {request.RequestUri} failed: {exception.Message}", exception);
+    }
     // Maps non-success responses to the domain exceptions the callers expect (resource not found / authorization
     // failed), and wraps any other failure into DocsCloudException with the status code and response body.
     private static async ValueTask<Exception> CreateExceptionAsync(HttpResponseMessage response)

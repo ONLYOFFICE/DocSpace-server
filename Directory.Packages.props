@@ -166,7 +166,6 @@
     <PackageVersion Include="RedisRateLimiting.AspNetCore" Version="1.2.1" />
     <PackageVersion Include="Refit" Version="15.2.0" />
     <PackageVersion Include="Refit.HttpClientFactory" Version="15.2.0" />
-    <PackageVersion Include="Refit.Reflection" Version="15.2.0" />
     <PackageVersion Include="ResXResourceReader.NetStandard" Version="1.1.0" />
     <PackageVersion Include="Riok.Mapperly" Version="4.3.1" />
     <PackageVersion Include="Scalar.AspNetCore" Version="2.17.3" />

@@ -436,7 +436,7 @@ public static class BillingHttpClientExtension
         services.AddTransient<BillingAuthHandler>();
 
         services
-            .AddRefitClient<IBillingApi>(new RefitSettings
+            .AddRefitGeneratedClient<IBillingApi>(new RefitSettings
             {
                 ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
                 {
@@ -445,7 +445,8 @@ public static class BillingHttpClientExtension
                     // body when null so the wire format matches the original "add the key only when it has a value".
                     DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
                 }),
-                ExceptionFactory = CreateExceptionAsync
+                ExceptionFactory = CreateExceptionAsync,
+                TransportExceptionFactory = CreateTransportException
             })
             .ConfigureHttpClient((_, client) =>
             {
@@ -487,6 +488,18 @@ public static class BillingHttpClientExtension
             });
     }
 
+    // ExceptionFactory only sees HTTP responses. A transport failure (DNS, connect, TLS, timeout) would otherwise
+    // surface as Refit.ApiRequestException and escape the BillingException hierarchy the callers catch.
+    private static Exception CreateTransportException(HttpRequestMessage request, Exception exception, CancellationToken cancellationToken)
+    {
+        // A caller-requested cancellation is not a service failure - let it propagate unchanged.
+        if (exception is OperationCanceledException && cancellationToken.IsCancellationRequested)
+        {
+            return exception;
+        }
+
+        return new BillingException($"Billing request to {request.RequestUri} failed: {exception.Message}", exception);
+    }
     // The billing service reports errors as 200 OK with a '{"Message":"error...' body, so the content is inspected
     // for every response, not only for non-success status codes.
     private static async ValueTask<Exception> CreateExceptionAsync(HttpResponseMessage response)
