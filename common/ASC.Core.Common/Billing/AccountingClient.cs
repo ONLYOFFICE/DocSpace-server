@@ -428,6 +428,17 @@ public class CustomerInfo
     public PaymentMethodStatus PaymentMethodStatus { get; init; }
 
     /// <summary>
+    /// The payment method type, e.g. "card".
+    /// </summary>
+    public string PaymentMethodType { get; init; }
+
+    /// <summary>
+    /// Indicates whether the payment method is delayed, i.e. a deposit is accepted immediately but the money
+    /// reaches the wallet only once the transfer settles. Such a wallet cannot be topped up automatically.
+    /// </summary>
+    public bool IsDelayedPaymentMethod { get; init; }
+
+    /// <summary>
     /// The email address of the customer.
     /// </summary>
     public string Email { get; init; }
@@ -952,16 +963,22 @@ public class Operation
     public string ParticipantDisplayName { get; set; }
 
     /// <summary>
-    /// AI Agent id.
+    /// Id of the entity the AI operation was performed on.
     /// </summary>
     /// <example>123</example>
-    public string AgentId { get; set; }
+    public string SourceId { get; set; }
 
     /// <summary>
-    /// AI Agent name.
+    /// Type of the entity the AI operation was performed on: Agent, File, Folder, Room or Form.
+    /// </summary>
+    /// <example>Agent</example>
+    public string SourceType { get; set; }
+
+    /// <summary>
+    /// Name of the entity the AI operation was performed on.
     /// </summary>
     /// <example>My AI Agent</example>
-    public string AgentTitle { get; set; }
+    public string SourceTitle { get; set; }
 
     /// <summary>
     /// Metadata of the operation.

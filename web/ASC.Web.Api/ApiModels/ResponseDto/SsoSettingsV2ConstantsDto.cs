@@ -44,32 +44,38 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class SsoSettingsV2ConstantsDto
 {
     /// <summary>
-    /// The SAML name ID formats the SSO settings accept.
+    /// The values the `nameIdFormat` of the identity provider settings accepts. The built-in configuration uses
+    /// the SAML 2.0 transient format.
     /// </summary>
     public SsoNameIdFormatTypeDto SsoNameIdFormatType { get; set; } = new();
 
     /// <summary>
-    /// The SAML bindings the SSO settings accept.
+    /// The values the `ssoBinding` and `sloBinding` of the identity provider settings accept - how the portal
+    /// sends its sign-in and sign-out requests. The built-in configuration uses HTTP POST for both.
     /// </summary>
     public SsoBindingTypeDto SsoBindingType { get; set; } = new();
 
     /// <summary>
-    /// The signing algorithms the SSO settings accept.
+    /// The values the `signingAlgorithm` of the service provider certificate and the `verifyAlgorithm` of the
+    /// identity provider certificate accept. The built-in configuration uses RSA-SHA1 for both.
     /// </summary>
     public SsoSigningAlgorithmTypeDto SsoSigningAlgorithmType { get; set; } = new();
 
     /// <summary>
-    /// The encryption algorithms the SSO settings accept.
+    /// The values the `encryptAlgorithm` and `decryptAlgorithm` of the certificate settings accept. The built-in
+    /// configuration uses AES-128 everywhere.
     /// </summary>
     public SsoEncryptAlgorithmTypeDto SsoEncryptAlgorithmType { get; set; } = new();
 
     /// <summary>
-    /// What an SP certificate can be used for.
+    /// The values the `action` of a service provider certificate accepts, which is what the portal's own key
+    /// pair may be used for.
     /// </summary>
     public SsoSpCertificateActionTypeDto SsoSpCertificateActionType { get; set; } = new();
 
     /// <summary>
-    /// What an IDP certificate can be used for.
+    /// The values the `action` of an identity provider certificate accepts, which is what the provider's
+    /// certificate may be used for - the mirror image of the service provider actions.
     /// </summary>
     public SsoIdpCertificateActionTypeDto SsoIdpCertificateActionType { get; set; } = new();
 }
@@ -98,13 +104,14 @@ public class SsoNameIdFormatTypeDto
     public string Saml20Entity => SsoNameIdFormatType.Saml20Entity;
 
     /// <summary>
-    /// The SAML 2.0 transient name ID format.
+    /// The SAML 2.0 transient name ID format, whose identifier differs from one session to the next. It is what
+    /// the built-in configuration uses.
     /// </summary>
     /// <example>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</example>
     public string Saml20Transient => SsoNameIdFormatType.Saml20Transient;
 
     /// <summary>
-    /// The SAML 2.0 persistent name ID format.
+    /// The SAML 2.0 persistent name ID format, whose identifier stays the same for one person across sessions.
     /// </summary>
     /// <example>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</example>
     public string Saml20Persistent => SsoNameIdFormatType.Saml20Persistent;
@@ -146,13 +153,15 @@ public class SsoNameIdFormatTypeDto
 public class SsoBindingTypeDto
 {
     /// <summary>
-    /// The SAML 2.0 HTTP POST binding.
+    /// The SAML 2.0 HTTP POST binding, which carries the request in a self-submitting form. It is what the
+    /// built-in configuration uses and the one to pick when requests are signed, since it has no length limit.
     /// </summary>
     /// <example>urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST</example>
     public string Saml20HttpPost => SsoBindingType.Saml20HttpPost;
 
     /// <summary>
-    /// The SAML 2.0 HTTP redirect binding.
+    /// The SAML 2.0 HTTP redirect binding, which carries the request in the query string and is therefore bound
+    /// by the length a URL may have.
     /// </summary>
     /// <example>urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect</example>
     public string Saml20HttpRedirect => SsoBindingType.Saml20HttpRedirect;
@@ -164,7 +173,8 @@ public class SsoBindingTypeDto
 public class SsoSigningAlgorithmTypeDto
 {
     /// <summary>
-    /// The RSA-SHA1 signing algorithm.
+    /// The RSA-SHA1 signing algorithm, which the built-in configuration uses. SHA-1 is the weakest of the three
+    /// and some identity providers no longer accept it.
     /// </summary>
     /// <example>http://www.w3.org/2000/09/xmldsig#rsa-sha1</example>
     public string RsaSha1 => SsoSigningAlgorithmType.RSA_SHA1;
@@ -188,67 +198,68 @@ public class SsoSigningAlgorithmTypeDto
 public class SsoEncryptAlgorithmTypeDto
 {
     /// <summary>
-    /// The AES-128-CBC encryption algorithm.
+    /// The AES-128-CBC encryption algorithm, which the built-in configuration uses.
     /// </summary>
     /// <example>http://www.w3.org/2001/04/xmlenc#aes128-cbc</example>
     public string Aes128 => SsoEncryptAlgorithmType.AES_128;
 
     /// <summary>
-    /// The AES-256-CBC encryption algorithm.
+    /// The AES-256-CBC encryption algorithm, the strongest of the three.
     /// </summary>
     /// <example>http://www.w3.org/2001/04/xmlenc#aes256-cbc</example>
     public string Aes256 => SsoEncryptAlgorithmType.AES_256;
 
     /// <summary>
-    /// The Triple DES CBC encryption algorithm.
+    /// The Triple DES CBC encryption algorithm, kept for identity providers that support nothing newer.
     /// </summary>
     /// <example>http://www.w3.org/2001/04/xmlenc#tripledes-cbc</example>
     public string TriDec => SsoEncryptAlgorithmType.TRI_DEC;
 }
 
 /// <summary>
-/// What an SP certificate can be used for.
+/// What the portal's own key pair may be used for, as the `action` of a service provider certificate.
 /// </summary>
 public class SsoSpCertificateActionTypeDto
 {
     /// <summary>
-    /// Signing only.
+    /// The key pair signs the requests the portal sends and nothing else.
     /// </summary>
     /// <example>signing</example>
     public string Signing => SsoSpCertificateActionType.Signing;
 
     /// <summary>
-    /// Encryption only.
+    /// The key pair encrypts what the portal sends and decrypts what comes back, but signs nothing.
     /// </summary>
     /// <example>encrypt</example>
     public string Encrypt => SsoSpCertificateActionType.Encrypt;
 
     /// <summary>
-    /// Both signing and encryption.
+    /// The key pair does both, which is what one pair configured on its own has to be set to.
     /// </summary>
     /// <example>signing and encrypt</example>
     public string SigningAndEncrypt => SsoSpCertificateActionType.SigningAndEncrypt;
 }
 
 /// <summary>
-/// What an IDP certificate can be used for.
+/// What the identity provider's certificate may be used for, as the `action` of an identity provider certificate.
 /// </summary>
 public class SsoIdpCertificateActionTypeDto
 {
     /// <summary>
-    /// Verification only.
+    /// The certificate verifies the signatures on what the provider sends, and nothing else - the counterpart of
+    /// the service provider's signing action.
     /// </summary>
     /// <example>verification</example>
     public string Verification => SsoIdpCertificateActionType.Verification;
 
     /// <summary>
-    /// Decryption only.
+    /// The certificate is used to decrypt what the provider sends, but verifies no signature.
     /// </summary>
     /// <example>decrypt</example>
     public string Decrypt => SsoIdpCertificateActionType.Decrypt;
 
     /// <summary>
-    /// Both verification and decryption.
+    /// The certificate does both, which is what a single provider certificate has to be set to.
     /// </summary>
     /// <example>verification and decrypt</example>
     public string VerificationAndDecrypt => SsoIdpCertificateActionType.VerificationAndDecrypt;

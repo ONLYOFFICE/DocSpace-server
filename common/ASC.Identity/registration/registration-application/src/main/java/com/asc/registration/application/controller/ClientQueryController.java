@@ -43,6 +43,8 @@ import com.asc.registration.service.transfer.request.fetch.TenantClientQuery;
 import com.asc.registration.service.transfer.request.fetch.TenantClientsPaginationQuery;
 import com.asc.registration.service.transfer.response.ClientInfoResponse;
 import com.asc.registration.service.transfer.response.ConsentResponse;
+import com.asc.registration.service.transfer.response.PageableClientInfoResponse;
+import com.asc.registration.service.transfer.response.PageableClientResponse;
 import com.asc.registration.service.transfer.response.PageableModificationResponse;
 import com.asc.registration.service.transfer.response.PageableResponse;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
@@ -76,7 +78,7 @@ import org.springframework.web.bind.annotation.*;
  * process and respond to client-related queries.
  */
 @Tag(
-    name = "Client Querying",
+    name = "OAuth 2.0 / Client Querying",
     description = "APIs for retrieving OAuth2 client information and user consents")
 @Slf4j
 @RestController
@@ -116,9 +118,14 @@ public class ClientQueryController {
   @Operation(
       summary = "Get client details",
       description =
-          "Retrieves detailed information about a specific OAuth2 client "
-              + "including its name, description, redirect URIs, and scopes.",
-      tags = {"Client Querying"},
+          "Returns the whole stored record of one client: its name and description, its secret, "
+              + "scopes, redirect URIs, allowed origins, logout redirect URIs and audit fields. An "
+              + "administrator sees any client of the tenant, a plain user only the clients they "
+              + "created, and a guest none of them. Whatever the caller may not see is reported as "
+              + "404 rather than 403, so absence and lack of access are deliberately "
+              + "indistinguishable, and an identifier that is not a valid client ID is reported the "
+              + "same way. The response is a single object, not a collection.",
+      tags = {"OAuth 2.0 / Client Querying"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(
@@ -143,7 +150,7 @@ public class ClientQueryController {
                       "website_url": "http://example.com",
                       "terms_url": "http://example.com",
                       "policy_url": "http://example.com",
-                      "logo": "data:image/png;base64,ivBOR",
+                      "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                       "authentication_methods": ["client_secret_post"],
                       "redirect_uris": ["https://example.com"],
                       "allowed_origins": ["https://example.com"],
@@ -157,7 +164,7 @@ public class ClientQueryController {
                     """))),
         @ApiResponse(
             responseCode = "400",
-            description = "Invalid client ID format",
+            description = "The client ID is blank or contains only whitespace",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
@@ -165,7 +172,9 @@ public class ClientQueryController {
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "404",
-            description = "Client not found",
+            description =
+                "No client with this ID is visible to the caller, or the ID cannot be parsed as a "
+                    + "client ID",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
@@ -215,9 +224,14 @@ public class ClientQueryController {
   @Operation(
       summary = "List clients",
       description =
-          "Retrieves a paginated list of OAuth2 clients. "
-              + "The results can be paginated using the limit parameter and last seen client ID/creation date.",
-      tags = {"Client Querying"},
+          "Returns one page of the tenant's clients, newest first, each in the same full form as "
+              + "the single-client read. An administrator sees every client of the tenant, a plain "
+              + "user only the clients they created. Paging is keyset-based rather than "
+              + "offset-based: limit sets the page size, and last_client_id and last_created_on are "
+              + "carried over from the previous page to ask for the next one. The limit defaults to "
+              + "30 and has to lie between 1 and 50; a value outside that range, or a "
+              + "last_created_on that cannot be parsed as a date, is rejected with 400.",
+      tags = {"OAuth 2.0 / Client Querying"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(
@@ -226,7 +240,7 @@ public class ClientQueryController {
             content =
                 @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = PageableResponse.class),
+                    schema = @Schema(implementation = PageableClientResponse.class),
                     examples =
                         @ExampleObject(
                             value =
@@ -244,7 +258,7 @@ public class ClientQueryController {
                           "website_url": "http://example.com",
                           "terms_url": "http://example.com",
                           "policy_url": "http://example.com",
-                          "logo": "data:image/png;base64,ivBOR",
+                          "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                           "authentication_methods": ["client_secret_post"],
                           "redirect_uris": ["https://example.com"],
                           "allowed_origins": ["https://example.com"],
@@ -263,11 +277,17 @@ public class ClientQueryController {
                     """))),
         @ApiResponse(
             responseCode = "400",
-            description = "Invalid pagination parameters",
+            description =
+                "Invalid pagination parameters, including a last_created_on that cannot be parsed "
+                    + "as a date-time",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to list clients",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "406",
+            description = "The Accept header does not allow application/json",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
@@ -281,7 +301,10 @@ public class ClientQueryController {
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<PageableResponse<ClientResponse>> getClients(
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
-      @Parameter(description = "Pagination limit", required = true, example = "1")
+      @Parameter(
+              description =
+                  "How many entries to return, between 1 and 50. Defaults to 30 " + "when omitted.",
+              example = "30")
           @RequestParam(value = "limit", defaultValue = "30")
           @Min(value = 1, message = "limit must be at least 1")
           @Max(value = 50, message = "limit must be at most 50")
@@ -323,8 +346,17 @@ public class ClientQueryController {
   @RateLimiter(name = "globalRateLimiter")
   @GetMapping("/{clientId}/info")
   @Operation(
-      summary = "Retrieves detailed information for a specific client",
-      tags = {"Client Querying"},
+      summary = "Get client info",
+      description =
+          "Retrieves the detailed information for a client with the ID specified in the request. "
+              + "It returns the consent-facing subset of the client - name, description, logo, the "
+              + "website, terms and policy URLs, authentication methods and scopes - and "
+              + "deliberately omits the secret, the redirect URIs and the allowed origins, which is "
+              + "what makes it safe to render on a consent screen. An administrator sees any client "
+              + "of the tenant, a plain user only the clients they created, and a guest none of "
+              + "them. A client the caller may not see is reported as 404, exactly like an unknown "
+              + "one.",
+      tags = {"OAuth 2.0 / Client Querying"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(
@@ -345,7 +377,7 @@ public class ClientQueryController {
                                   "website_url": "http://example.com",
                                   "terms_url": "http://example.com",
                                   "policy_url": "http://example.com",
-                                  "logo": "data:image/png;base64,ivBOR",
+                                  "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                                   "authentication_methods": ["client_secret_post"],
                                   "scopes": ["files:read", "files:write"],
                                   "is_public": true,
@@ -357,16 +389,26 @@ public class ClientQueryController {
                                 """))),
         @ApiResponse(
             responseCode = "400",
-            description = "Bad request",
-            content = {@Content}),
+            description = "The client ID is blank or contains only whitespace",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Insufficient permissions to view client information",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description =
+                "No client with this ID is visible to the caller, or the ID cannot be parsed as a "
+                    + "client ID",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
-            description = "Too many requests",
+            description = "Too many requests - rate limit exceeded",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
-            description = "Internal server error",
-            content = @Content)
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<ClientInfoResponse> getClientInfo(
@@ -402,8 +444,18 @@ public class ClientQueryController {
   @RateLimiter(name = "publicRateLimiter")
   @GetMapping("/{clientId}/public/info")
   @Operation(
-      summary = "Handles the GET request for public client information",
-      tags = {"Client Querying"},
+      summary = "Get public client info",
+      description =
+          "Returns the same consent-facing client information as the signed read, but without "
+              + "requiring a portal signature. It is meant for a login or consent page that has to "
+              + "render the client before the user is known, so it resolves the client by ID alone: "
+              + "there is no authentication, no tenant scoping and no creator check, and any caller "
+              + "who knows a client ID can read that client's public details. It still exposes no "
+              + "secret, no redirect URIs and no allowed origins. Being unauthenticated it is "
+              + "rate-limited on a separate, tighter budget than the signed endpoints. An unknown "
+              + "client ID, and an identifier that is not a client ID at all, are both reported as "
+              + "404.",
+      tags = {"OAuth 2.0 / Client Querying"},
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -423,7 +475,7 @@ public class ClientQueryController {
                                   "website_url": "http://example.com",
                                   "terms_url": "http://example.com",
                                   "policy_url": "http://example.com",
-                                  "logo": "data:image/png;base64,ivBOR",
+                                  "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                                   "authentication_methods": ["client_secret_post"],
                                   "scopes": ["files:read", "files:write"],
                                   "is_public": true,
@@ -435,16 +487,21 @@ public class ClientQueryController {
                                 """))),
         @ApiResponse(
             responseCode = "400",
-            description = "Bad request",
-            content = {@Content}),
+            description = "The client ID is blank or contains only whitespace",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "404",
+            description =
+                "No client with this ID exists, or the ID cannot be parsed as a client ID",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
-            description = "Too many requests",
+            description = "Too many requests - rate limit exceeded",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
-            description = "Internal server error",
-            content = @Content)
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   public ResponseEntity<ClientInfoResponse> getPublicClientInfo(
       @Parameter(
@@ -473,8 +530,16 @@ public class ClientQueryController {
   @RateLimiter(name = "globalRateLimiter")
   @GetMapping("/info")
   @Operation(
-      summary = "Retrieves a pageable list of client information",
-      tags = {"Client Querying"},
+      summary = "List client info",
+      description =
+          "Retrieves a paginated list of information for all clients, each in the same "
+              + "consent-facing form as the single-client info read. An administrator sees every "
+              + "client of the tenant, a plain user only the clients they created. Paging is "
+              + "keyset-based: limit sets the page size, and last_client_id and last_created_on are "
+              + "carried over from the previous page. Unlike the full client listing, limit has no "
+              + "default here - it has to be supplied on every call and has to lie between 1 and "
+              + "50, and a missing or out-of-range value is rejected with 400.",
+      tags = {"OAuth 2.0 / Client Querying"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(
@@ -483,13 +548,13 @@ public class ClientQueryController {
             content =
                 @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema = @Schema(implementation = PageableResponse.class),
+                    schema = @Schema(implementation = PageableClientInfoResponse.class),
                     examples =
                         @ExampleObject(
                             value =
                                 """
                                               {
-                                                  data: [
+                                                  "data": [
                                                     {
                                                         "name": "Example Name",
                                                         "client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
@@ -497,10 +562,10 @@ public class ClientQueryController {
                                                         "website_url": "http://example.com",
                                                         "terms_url": "http://example.com",
                                                         "policy_url": "http://example.com",
-                                                        "logo": "data:image/png;base64,ivBOR",
+                                                        "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                                                         "authentication_methods": ["client_secret_post"],
                                                         "scopes": ["files:read", "files:write"],
-                                                        "is_public": true
+                                                        "is_public": true,
                                                         "created_on": "2024-04-04T12:00:00Z",
                                                         "created_by": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
                                                         "modified_on": "2024-04-04T12:00:00Z",
@@ -512,24 +577,38 @@ public class ClientQueryController {
                                                   "last_created_on": "2024-04-04T12:00:00Z"
                                               }
                                               """))),
-        @ApiResponse(responseCode = "200", description = "Successfully retrieved clients info"),
         @ApiResponse(
             responseCode = "400",
-            description = "Bad request",
-            content = {@Content}),
+            description =
+                "The limit parameter is missing, is outside the range 1-50, or last_created_on "
+                    + "cannot be parsed as a date-time",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "Insufficient permissions to list client information",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "406",
+            description = "The Accept header does not allow application/json",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
-            description = "Too many requests",
+            description = "Too many requests - rate limit exceeded",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "500",
-            description = "Internal server error",
-            content = @Content)
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
   public ResponseEntity<PageableResponse<ClientInfoResponse>> getClientsInfo(
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
-      @Parameter(description = "Pagination limit", required = true, example = "1")
+      @Parameter(
+              description =
+                  "How many entries to return, between 1 and 50. It has no default "
+                      + "and has to be sent on every call.",
+              required = true,
+              example = "30")
           @RequestParam(value = "limit")
           @Min(value = 1, message = "limit must be at least 1")
           @Max(value = 50, message = "limit must be at most 50")
@@ -573,8 +652,18 @@ public class ClientQueryController {
   @RateLimiter(name = "globalRateLimiter")
   @GetMapping("/consents")
   @Operation(
-      summary = "Retrieves a pageable list of consents",
-      tags = {"Client Querying"},
+      summary = "List user consents",
+      description =
+          "Retrieves a paginated list of user consents: the clients the calling user has "
+              + "authorized, each with the scopes granted, the moment the consent was last changed "
+              + "and the client's consent-facing details. It always reports the caller's own "
+              + "consents and nothing else - there is no role check on this endpoint, so guests may "
+              + "call it too, and no parameter widens it to another user. The consents are read "
+              + "from the authorization service over gRPC, so an authorization service that cannot "
+              + "be reached surfaces as 503. Paging is keyset-based on last_modified_on, and limit "
+              + "has no default: it has to be supplied on every call and has to lie between 1 and "
+              + "50.",
+      tags = {"OAuth 2.0 / Client Querying"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(
@@ -592,10 +681,7 @@ public class ClientQueryController {
                                         "data": [
                                             {
                                                 "registered_client_id": "6c7cf17b-1bd3-47d5-94c6-be2d3570e168",
-                                                "scopes": [
-                                                    "files:read",
-                                                    "files:write"
-                                                ],
+                                                "scopes": "files:read files:write",
                                                 "modified_at": "2024-04-04T12:00:00Z",
                                                 "client": {
                                                     "name": "Example Name",
@@ -604,7 +690,7 @@ public class ClientQueryController {
                                                     "website_url": "http://example.com",
                                                     "terms_url": "http://example.com",
                                                     "policy_url": "http://example.com",
-                                                    "logo": "data:image/png;base64,ivBOR",
+                                                    "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                                                     "authentication_methods": [
                                                         "client_secret_post"
                                                     ],
@@ -623,11 +709,42 @@ public class ClientQueryController {
                                         "limit": 50,
                                         "last_modified_on": "2024-04-04T12:00:00Z"
                                     }
-                                    """)))
+                                    """))),
+        @ApiResponse(
+            responseCode = "400",
+            description =
+                "The limit parameter is missing, is outside the range 1-50, or last_modified_on "
+                    + "cannot be parsed as a date-time",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "403",
+            description = "The request carries no valid portal signature",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "406",
+            description = "The Accept header does not allow application/json",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "429",
+            description = "Too many requests - rate limit exceeded",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "503",
+            description = "Authorization service unavailable",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "500",
+            description = "Internal server error occurred",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class)))
       })
   public ResponseEntity<PageableModificationResponse<ConsentResponse>> getConsents(
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
-      @Parameter(description = "Pagination limit", required = true, example = "1")
+      @Parameter(
+              description =
+                  "How many entries to return, between 1 and 50. It has no default "
+                      + "and has to be sent on every call.",
+              required = true,
+              example = "30")
           @RequestParam(value = "limit")
           @Min(value = 1, message = "limit must be at least 1")
           @Max(value = 50, message = "limit must be at most 50")

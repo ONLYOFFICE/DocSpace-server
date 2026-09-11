@@ -34,17 +34,17 @@
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
-/// The login event parameters.
+/// One entry of the portal login history: a sign-in, a sign-out or a failed attempt, and where it came from.
 /// </summary>
 /// <example>
 /// {
 ///   "id": 1,
 ///   "date": "2024-01-15T10:30:00Z",
 ///   "user": "John Doe",
-///   "userId": {},
+///   "userId": "00000000-0000-0000-0000-000000000001",
 ///   "login": "user@example.com",
 ///   "action": "User logged in",
-///   "actionId": "EnumValue",
+///   "actionId": "LoginSuccess",
 ///   "iP": "192.0.2.1",
 ///   "country": "United States",
 ///   "city": "New York",
@@ -56,79 +56,90 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 public class LoginEventDto(LoginEvent loginEvent, ApiDateTimeHelper apiDateTimeHelper)
 {
     /// <summary>
-    /// The login event ID.
+    /// The ID of the recorded sign-in. When the entry is a successful sign-in that is still open, this is also
+    /// the value `GET api/2.0/security/activeconnections` reports as the connection's `id`.
     /// </summary>
     /// <example>1</example>
     public int Id { get; set; } = loginEvent.Id;
 
     /// <summary>
-    /// The login event date.
+    /// When the attempt was made, in the portal time zone. The `from` and `to` filters are read as UTC instants,
+    /// so the two do not line up on a portal that is not on UTC.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     public ApiDateTime Date { get; set; } = apiDateTimeHelper.Get(loginEvent.Date);
 
     /// <summary>
-    /// The user name of the login event.
+    /// The display name of the account the attempt was made against, taken from the account as it stands now
+    /// rather than as it stood at the time. A localised placeholder stands in when there is no account to read,
+    /// which is the usual case for a failed attempt on an address nobody owns.
     /// </summary>
     /// <example>John Doe</example>
     public string User { get; set; } = loginEvent.UserName;
 
     /// <summary>
-    /// The user ID of the login event.
+    /// The ID of that account, which is what the `userId` filter of this operation matches on. It is the empty
+    /// GUID when the attempt could not be tied to an account.
     /// </summary>
-    /// <example>{}</example>
+    /// <example>00000000-0000-0000-0000-000000000001</example>
     public Guid UserId { get; set; } = loginEvent.UserId;
 
     /// <summary>
-    /// The user login of the login event.
+    /// The login string as it was typed - normally the email address. It is the only field that survives a failed
+    /// attempt against an unknown account, which makes it the one to read when `user` is a placeholder.
     /// </summary>
     /// <example>user@example.com</example>
     public string Login { get; set; } = loginEvent.Login;
 
     /// <summary>
-    /// The login event action.
+    /// The event as a readable sentence in the portal language. On `GET api/2.0/security/audit/login/last` each
+    /// substituted value is cut to 50 characters; the filtered operation substitutes them in full.
     /// </summary>
     /// <example>User logged in</example>
     public string Action { get; set; } = loginEvent.ActionText;
 
     /// <summary>
-    /// The login-related action to filter events by.
+    /// What happened, as the `action` filter of this operation spells it: a successful sign-in, a failed one, a
+    /// sign-out. Use this rather than parsing `action`, which is prose and changes with the portal language.
     /// </summary>
-    /// <example>EnumValue</example>
+    /// <example>LoginSuccess</example>
     public MessageAction ActionId { get; set; } = (MessageAction)loginEvent.Action;
 
     /// <summary>
-    /// The login event IP.
+    /// The IP address the attempt came from, with the port stripped off.
     /// </summary>
     /// <example>192.0.2.1</example>
     public string IP { get; set; } = loginEvent.IP;
 
     /// <summary>
-    /// The login event country.
+    /// The English name of the country the IP address is located in, empty when the address cannot be located -
+    /// the normal outcome for private and loopback addresses.
     /// </summary>
     /// <example>United States</example>
     public string Country { get; set; } = loginEvent.Country;
 
     /// <summary>
-    /// The login event city.
+    /// The city the IP address is located in, empty under the same conditions as `country`.
     /// </summary>
     /// <example>New York</example>
     public string City { get; set; } = loginEvent.City;
 
     /// <summary>
-    /// The login event browser.
+    /// The browser and its version as parsed from the user agent of the attempt, empty when the client sent none
+    /// that could be parsed.
     /// </summary>
     /// <example>Chrome 120.0</example>
     public string Browser { get; set; } = loginEvent.Browser;
 
     /// <summary>
-    /// The login event platform.
+    /// The operating system as parsed from the same user agent, empty under the same conditions as `browser`.
     /// </summary>
     /// <example>Windows</example>
     public string Platform { get; set; } = loginEvent.Platform;
 
     /// <summary>
-    /// The login event page.
+    /// Where in the portal the attempt was made from: the referrer of the request, or that request's own path
+    /// when it carried no referrer. Long values are cut off at 512 characters.
     /// </summary>
     /// <example>/login</example>
     public string Page { get; set; } = loginEvent.Page;

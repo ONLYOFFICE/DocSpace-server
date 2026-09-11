@@ -82,7 +82,7 @@ import org.springframework.web.bind.annotation.*;
  * integrates with various services to perform these operations securely.
  */
 @Tag(
-    name = "Client Management",
+    name = "OAuth 2.0 / Client Management",
     description =
         "APIs for managing OAuth2 clients including creation, updates, deletion and activation")
 @Slf4j
@@ -137,10 +137,16 @@ public class ClientCommandController {
   @Operation(
       summary = "Create a new OAuth2 client",
       description =
-          "Creates a new OAuth2 client with the specified configuration. "
-              + "The client will be created with the provided scopes, redirect URIs, and other settings. "
-              + "Returns the created client details including the generated client ID.",
-      tags = {"Client Management"},
+          "Registers a new OAuth2 client in the caller's tenant and returns it. The body must "
+              + "carry a name, a description, a logo and at least one redirect URI, allowed origin "
+              + "and scope, and every scope named must already exist in the tenant's scope "
+              + "catalogue. Administrators and users may both register clients; the caller is "
+              + "recorded as the creator, which is what later restricts a plain user to the clients "
+              + "they created. The response is the stored client with its generated client ID and "
+              + "secret, and it is the first place either value can be read. Some deployments cap "
+              + "how many clients one tenant may hold, and reaching that cap is reported as 400 "
+              + "together with the validation failures.",
+      tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(
@@ -165,7 +171,7 @@ public class ClientCommandController {
                       "website_url": "http://example.com",
                       "terms_url": "http://example.com",
                       "policy_url": "http://example.com",
-                      "logo": "data:image/png;base64,ivBOR",
+                      "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                       "authentication_methods": ["client_secret_post"],
                       "redirect_uris": ["https://example.com"],
                       "allowed_origins": ["https://example.com"],
@@ -179,7 +185,9 @@ public class ClientCommandController {
                     """))),
         @ApiResponse(
             responseCode = "400",
-            description = "Invalid request - missing required fields or validation failed",
+            description =
+                "Missing required fields, validation failed, an unknown scope was requested, or "
+                    + "the client limit for this tenant has been reached",
             content =
                 @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
@@ -190,7 +198,7 @@ public class ClientCommandController {
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "415",
-            description = "Unsupported media type",
+            description = "The Content-Type header is not application/json",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
@@ -206,7 +214,7 @@ public class ClientCommandController {
       @AuthenticationPrincipal BasicSignatureTokenPrincipal principal,
       @RequestBody
           @Valid
-          @Parameter(
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Client creation request containing client details",
               required = true,
               content =
@@ -219,7 +227,7 @@ public class ClientCommandController {
                                   """
                   {
                     "name": "Example Name",
-                    "logo": "data:image/png;base64,iVBOR",
+                    "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                     "website_url": "https://example.com",
                     "description": "Example Description",
                     "redirect_uris": ["https://example.com"],
@@ -274,16 +282,27 @@ public class ClientCommandController {
   @Operation(
       summary = "Update an existing OAuth2 client",
       description =
-          "Updates the configuration of an existing OAuth2 client. "
-              + "Allows modification of client name, description, redirect URIs, and other settings. "
-              + "The client ID cannot be modified.",
-      tags = {"Client Management"},
+          "Updates the mutable settings of an existing client and answers 200 with an empty body. "
+              + "Only the fields carried in the request body change; the client ID, the secret, the "
+              + "tenant and the creator cannot be changed this way. An administrator may update any "
+              + "client of the tenant, a plain user only the clients they created, and a client the "
+              + "caller may not see is reported as not found rather than as forbidden. The write "
+              + "runs under optimistic locking and is retried a few times, so a request that still "
+              + "loses the race is rejected with 400 instead of silently overwriting a concurrent "
+              + "change. Nothing is returned in the body - read the client back to see the stored "
+              + "result.",
+      tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(responseCode = "200", description = "Client successfully updated"),
+        @ApiResponse(
+            responseCode = "200",
+            description = "Client successfully updated",
+            content = @Content),
         @ApiResponse(
             responseCode = "400",
-            description = "Invalid request - missing required fields or validation failed",
+            description =
+                "Missing required fields, validation failed, or the client could not be updated "
+                    + "because of concurrent modification",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
@@ -291,11 +310,13 @@ public class ClientCommandController {
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "404",
-            description = "Client not found",
+            description =
+                "No client with this ID is visible to the caller, or the ID cannot be parsed as a "
+                    + "client ID",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "415",
-            description = "Unsupported media type",
+            description = "The Content-Type header is not application/json",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
@@ -318,7 +339,7 @@ public class ClientCommandController {
           String clientId,
       @RequestBody
           @Valid
-          @Parameter(
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Client update request containing modified client details",
               required = true,
               content =
@@ -332,7 +353,7 @@ public class ClientCommandController {
                   {
                     "name": "Example Name",
                     "description": "Example Description",
-                    "logo": "data:image/png;base64,iVBOR",
+                    "logo": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
                     "allow_pkce": false,
                     "is_public": true,
                     "allowed_origins": ["https://example.com"],
@@ -377,10 +398,14 @@ public class ClientCommandController {
   @Operation(
       summary = "Regenerate client secret",
       description =
-          "Generates a new client secret for the specified OAuth2 client. "
-              + "The old secret will be immediately invalidated. "
-              + "This operation should be used with caution as it requires updating the secret in all client applications.",
-      tags = {"Client Management"},
+          "Issues a new secret for the client and returns it. The previous secret stops working "
+              + "as soon as this call succeeds, there is no grace period and no way to recover it, "
+              + "so every deployed copy of the client has to be updated with the value returned "
+              + "here. An administrator may do this for any client of the tenant, a plain user only "
+              + "for the clients they created. Tokens already issued to the client keep working; "
+              + "only future client authentication is affected. The response carries the new secret "
+              + "and nothing else.",
+      tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(
@@ -400,7 +425,7 @@ public class ClientCommandController {
                     """))),
         @ApiResponse(
             responseCode = "400",
-            description = "Invalid client ID format",
+            description = "The client ID is blank or contains only whitespace",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
@@ -408,7 +433,9 @@ public class ClientCommandController {
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "404",
-            description = "Client not found",
+            description =
+                "No client with this ID is visible to the caller, or the ID cannot be parsed as a "
+                    + "client ID",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
@@ -457,24 +484,30 @@ public class ClientCommandController {
   @Operation(
       summary = "Revoke client consent",
       description =
-          "Revokes all user consents for the specified OAuth2 client. "
-              + "This will invalidate all access tokens and refresh tokens issued to this client for the current user. "
-              + "The user will need to re-authorize the client to access their resources.",
-      tags = {"Client Management"},
+          "Revokes the calling user's own consent for one client and answers 200 with an empty "
+              + "body. It touches only the caller's grant: other users keep their consents and the "
+              + "client itself stays registered. Guests may call it as well as users and "
+              + "administrators, because it can never reach anyone else's data. The revocation is "
+              + "carried out by the authorization service over gRPC, so a service that reports "
+              + "nothing was revoked produces 400 and a service that cannot be reached produces "
+              + "503. Once it succeeds the user has to authorize the client again before it can act "
+              + "on their behalf.",
+      tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(responseCode = "200", description = "Client consent successfully revoked"),
+        @ApiResponse(
+            responseCode = "200",
+            description = "Client consent successfully revoked",
+            content = @Content),
         @ApiResponse(
             responseCode = "400",
-            description = "Invalid client ID format",
+            description =
+                "The client ID is blank, or the authorization service reported that the consent "
+                    + "was not revoked",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to revoke consent",
-            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-        @ApiResponse(
-            responseCode = "404",
-            description = "Client not found",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
@@ -546,16 +579,23 @@ public class ClientCommandController {
   @Operation(
       summary = "Delete an OAuth2 client",
       description =
-          "Permanently deletes an OAuth2 client and all associated data. "
-              + "This will invalidate all access tokens and refresh tokens issued to this client. "
-              + "This operation cannot be undone.",
-      tags = {"Client Management"},
+          "Deletes one client from the tenant permanently and answers 200 with an empty body. An "
+              + "administrator may delete any client of the tenant, a plain user only the clients "
+              + "they created, and a client the caller may not see is reported as not found rather "
+              + "than as forbidden. The authorizations and consents issued for the client are "
+              + "removed too, but that cleanup is driven by a message and completes on the "
+              + "authorization service after this call has already returned. A delete that removes "
+              + "no row answers 400. The operation cannot be undone.",
+      tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(responseCode = "200", description = "Client successfully deleted"),
+        @ApiResponse(
+            responseCode = "200",
+            description = "Client successfully deleted",
+            content = @Content),
         @ApiResponse(
             responseCode = "400",
-            description = "Invalid client ID format",
+            description = "The client ID is blank, or the client could not be deleted",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
@@ -563,7 +603,9 @@ public class ClientCommandController {
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "404",
-            description = "Client not found",
+            description =
+                "No client with this ID is visible to the caller, or the ID cannot be parsed as a "
+                    + "client ID",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
@@ -615,13 +657,25 @@ public class ClientCommandController {
   @Operation(
       summary = "Delete all user OAuth2 clients",
       description =
-          "Permanently deletes user OAuth2 clients and all associated data. "
-              + "This will invalidate all access tokens and refresh tokens issued to this client. "
-              + "This operation cannot be undone.",
-      tags = {"Client Management"},
+          "Deletes every client the calling user created in the current tenant and answers 200 "
+              + "with an empty body. The caller's own identity always selects the set, so this "
+              + "never reaches clients created by somebody else, not even for an administrator. The "
+              + "authorizations and consents of the deleted clients are cleaned up asynchronously "
+              + "on the authorization service, and the tenant's client cache is dropped as part of "
+              + "the call. Concurrent modification that survives the retries is reported as 400. "
+              + "The operation cannot be undone, and the response does not say how many clients "
+              + "were removed.",
+      tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(responseCode = "200", description = "Client successfully deleted"),
+        @ApiResponse(
+            responseCode = "200",
+            description = "Client successfully deleted",
+            content = @Content),
+        @ApiResponse(
+            responseCode = "400",
+            description = "The clients could not be deleted because of concurrent modification",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to delete user clients",
@@ -662,13 +716,25 @@ public class ClientCommandController {
   @Operation(
       summary = "Delete all tenant OAuth2 clients",
       description =
-          "Permanently deletes tenant OAuth2 clients and all associated data. "
-              + "This will invalidate all access tokens and refresh tokens issued to this client. "
-              + "This operation cannot be undone.",
-      tags = {"Client Management"},
+          "Deletes every client registered in the current tenant and answers 200 with an empty "
+              + "body. Only an administrator may call it - for a plain user or a guest it is "
+              + "refused with 403 - and it removes the clients of all users of the tenant, not only "
+              + "those of the caller. The authorizations and consents of the deleted clients are "
+              + "cleaned up asynchronously on the authorization service, and the tenant's client "
+              + "cache is dropped as part of the call. Concurrent modification that survives the "
+              + "retries is reported as 400. The operation cannot be undone, and the response does "
+              + "not say how many clients were removed.",
+      tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
-        @ApiResponse(responseCode = "200", description = "Client successfully deleted"),
+        @ApiResponse(
+            responseCode = "200",
+            description = "Client successfully deleted",
+            content = @Content),
+        @ApiResponse(
+            responseCode = "400",
+            description = "The clients could not be deleted because of concurrent modification",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to delete tenant clients",
@@ -711,18 +777,23 @@ public class ClientCommandController {
   @Operation(
       summary = "Change client activation status",
       description =
-          "Activates or deactivates an OAuth2 client. "
-              + "When deactivated, the client cannot request new access tokens, "
-              + "but existing tokens will remain valid until they expire.",
-      tags = {"Client Management"},
+          "Enables or disables an existing client and answers 200 with an empty body. A disabled "
+              + "client can no longer obtain new tokens, but the tokens and consents it already "
+              + "holds stay valid until they expire on their own: disable a client to stop new "
+              + "authorizations, delete it to end the existing ones. An administrator may change "
+              + "any client of the tenant, a plain user only the clients they created. The body "
+              + "carries the single activation flag, and a client the caller may not see is "
+              + "reported as not found rather than as forbidden.",
+      tags = {"OAuth 2.0 / Client Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(
             responseCode = "200",
-            description = "Client activation status successfully changed"),
+            description = "Client activation status successfully changed",
+            content = @Content),
         @ApiResponse(
             responseCode = "400",
-            description = "Invalid client ID format or activation status",
+            description = "The client ID is blank, or the activation status is missing",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "403",
@@ -730,11 +801,13 @@ public class ClientCommandController {
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "404",
-            description = "Client not found",
+            description =
+                "No client with this ID is visible to the caller, or the ID cannot be parsed as a "
+                    + "client ID",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "415",
-            description = "Unsupported media type",
+            description = "The Content-Type header is not application/json",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",
@@ -757,7 +830,7 @@ public class ClientCommandController {
           String clientId,
       @RequestBody
           @Valid
-          @Parameter(
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
               description = "Client activation change request",
               required = true,
               content =
@@ -781,7 +854,7 @@ public class ClientCommandController {
           ChangeTenantClientActivationCommand.builder()
               .clientId(clientId)
               .tenantId(principal.getTenantId())
-              .enabled(command.isEnabled())
+              .enabled(command.getStatus())
               .build());
       return ResponseEntity.status(HttpStatus.OK).build();
     } finally {

@@ -100,4 +100,28 @@ public abstract class MarkAsReadTestBase(
     {
         return new BaseBatchRequestDto(folderIds: [.. folderIds.Select(id => new BaseBatchRequestDtoAllOfFolderIds(id))]);
     }
+
+    /// <summary>
+    /// Waits until the Files-section news of the currently authenticated user (<c>GET
+    /// /files/{folderId}/news</c>) satisfy <paramref name="until"/>. Kept local to this feature
+    /// rather than reused from <c>FolderNewItemsTestBase</c> (02_Folders/News), which sits on a
+    /// sibling branch of the room-permissions base and is not reachable from here without a
+    /// cross-feature dependency.
+    /// </summary>
+    protected async Task<List<string>> PollFolderNewsTitles(int folderId, Func<List<string>, bool> until)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(10);
+
+        while (true)
+        {
+            var titles = (await _foldersApi.GetNewFolderItemsAsync(folderId, TestContext.Current.CancellationToken)).Response.ConvertAll(e => e.Title);
+
+            if (until(titles) || DateTime.UtcNow >= deadline)
+            {
+                return titles;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+    }
 }

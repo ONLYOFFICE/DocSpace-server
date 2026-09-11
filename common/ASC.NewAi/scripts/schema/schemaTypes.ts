@@ -122,11 +122,16 @@ export type ErrorResponse = {
  * engine-injected `signal`/`fetch`; `profile`/`messages` are owned by the
  * engine and never sent by the caller.
  */
+/** Provider-neutral extended-thinking depth. `off` disables thinking where the model allows it. */
+export type AiReasoningLevel = "off" | "low" | "medium" | "high" | "max";
+
 export type AiActionArgs = {
   /** Extra tools offered to the model for this request. */
   tools?: TMCPItem[];
-  /** Enable extended thinking / reasoning for this request. */
+  /** Legacy extended-thinking switch; stands for `medium`. `reasoningLevel` wins when both are set. */
   isReasoning?: boolean;
+  /** Depth of extended thinking for the round; providers clamp it to what the model accepts. */
+  reasoningLevel?: AiReasoningLevel;
   /** Override the action's baked-in system prompt (replace or append). */
   prompt?: { mode: "replace" | "append"; text: string };
 };
@@ -313,6 +318,12 @@ export type Req_aiPreferencesSetDeepMode = {
 };
 export type Req_aiPreferencesClearDeepMode = string;
 export type Res_aiPreferencesIsDeepModeSet = boolean;
+export type Res_aiPreferencesGetReasoningLevel = AiReasoningLevel;
+export type Req_aiPreferencesSetReasoningLevel = {
+  /** New extended-thinking depth; `off` turns deep mode off. */
+  value: AiReasoningLevel;
+  entityId?: string;
+};
 
 /* ------------------------------ Profiles ------------------------------- */
 
@@ -409,8 +420,9 @@ export type Req_aiThreadsOpenOrCreate = {
   /** Opaque scope token persisted on a freshly created thread. */
   entityId?: string;
   /**
-   * Optional entity hint (lib 0.5.64): only `entityId` is read; the pair is
-   * re-resolved server-side before reaching the provider as metadata.
+   * Optional entity hint (lib 0.5.64): only `entityId` is read; the source
+   * (`source_id` / `source_type` / `source_title`) is re-resolved server-side
+   * before reaching the provider as metadata.
    */
   entityMeta?: { entityId?: string; entityTitle?: string };
 };
@@ -438,8 +450,9 @@ export type Req_aiThreadsRegenerateTitle = {
   /** Profile used to regenerate the title. */
   profile: Profile;
   /**
-   * Optional entity hint (lib 0.5.64): only `entityId` is read; the pair is
-   * re-resolved server-side before reaching the provider as metadata.
+   * Optional entity hint (lib 0.5.64): only `entityId` is read; the source
+   * (`source_id` / `source_type` / `source_title`) is re-resolved server-side
+   * before reaching the provider as metadata.
    */
   entityMeta?: { entityId?: string; entityTitle?: string };
 };

@@ -34,137 +34,146 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// Data transfer object that encapsulates comprehensive pricing information for various AI services.
-/// Provides organized collections of pricing details for chat models, embedding services, and web search functionality,
-/// along with the currency in which prices are denominated.
+/// What the AI features cost out of the portal wallet, grouped by the kind of model, in one currency.
 /// </summary>
 public class AiPricesDto
 {
     /// <summary>
-    /// Gets the list of pricing entries for AI chat models.
+    /// The chat models on offer, each priced per million prompt and completion tokens. A model listed here is one
+    /// the installation can bill for, not necessarily one this portal may use -
+    /// `GET api/2.0/portal/payment/ai-model/restrictions` says which are allowed.
     /// </summary>
     /// <example>[{"id":"gpt-4o","alias":"GPT-4o","provider":"openai","image":"https://cdn.example.com/providers/openai.png","price":{"prompt":5.0,"completion":15.0}}]</example>
     public required List<AiEntryPricingDto<AiChatPriceDto>> Chat { get; init; }
 
     /// <summary>
-    /// Gets the list of pricing entries for AI embedding models.
+    /// The embedding models on offer, priced per million tokens of input; an embedding model has no completion
+    /// side, so its price object carries `prompt` alone.
     /// </summary>
     /// <example>[{"id":"text-embedding-3-large","alias":"Text Embedding 3 Large","provider":"openai","image":"https://cdn.example.com/providers/openai.png","price":{"prompt":0.13}}]</example>
     public required List<AiEntryPricingDto<AiEmbeddingPriceDto>> Embedding { get; init; }
 
     /// <summary>
-    /// Gets the list of pricing entries for AI image models.
+    /// The image models on offer, priced per million prompt and completion tokens plus a price for each image
+    /// produced.
     /// </summary>
     /// <example>[{"id":"gpt-5.4-image-2","alias":"GPT 5.4 Image 2","provider":"OpenRouter","image":"https://cdn.example.com/providers/openai.png","price":{"prompt":8.0,"completion":15.0,"image":30.0}}]</example>
     public required List<AiEntryPricingDto<AiImagePriceDto>> Image { get; init; }
 
     /// <summary>
-    /// Gets the list of pricing entries for AI web search operations.
+    /// The web search providers on offer. Their `price` is a bare number - the cost of one search - rather than
+    /// an object, because there are no tokens to distinguish.
     /// </summary>
     /// <example>[{"id":"web-search","alias":"Web Search","provider":"tavily","image":"https://cdn.example.com/providers/tavily.png","price":0.01}]</example>
     public required List<AiEntryPricingDto<decimal>> WebSearch { get; init; }
 
     /// <summary>
-    /// Gets the currency information for the AI pricing data.
+    /// The currency every price above is expressed in, with its ISO code and symbol. One answer never mixes
+    /// currencies, so this is the only place to read it.
     /// </summary>
     /// <example>{"code":"USD","symbol":"$"}</example>
     public required CurrencyInfo Currency { get; init; }
 }
 
 /// <summary>
-/// Data transfer object that represents pricing information for a specific AI service entry.
-/// Contains identification details, provider information, and associated pricing data of generic type T.
+/// One AI model or service on the price list: how to name it, who provides it, and what it costs.
 /// </summary>
-/// <typeparam name="T">The type of pricing information, which can be a chat price, embedding price, or a simple decimal value.</typeparam>
+/// <typeparam name="T">The shape of the price: a token-priced object for a model, a bare amount for a search
+/// provider.</typeparam>
 public class AiEntryPricingDto<T>
 {
     /// <summary>
-    /// Gets the unique identifier for the AI pricing entry.
+    /// The model identifier to send to the AI operations. It is the value to branch on, while `alias` is for display
+    /// only.
     /// </summary>
     /// <example>gpt-4o</example>
     public required string Id { get; init; }
 
     /// <summary>
-    /// Gets the display name (alias) for the AI model or service entry.
+    /// The model name as the vendor writes it, meant to be shown to a person rather than matched on.
     /// </summary>
     /// <example>GPT-4o</example>
     public required string Alias { get; init; }
 
     /// <summary>
-    /// Gets the provider name for the AI service or model.
+    /// Who runs the model. Two entries can share a provider, and one provider's models can be priced quite
+    /// differently, so the price always belongs to the entry and never to the provider.
     /// </summary>
     /// <example>openai</example>
     public required string Provider { get; init; }
 
     /// <summary>
-    /// Gets the image URL or identifier associated with the AI model entry.
+    /// The absolute URL of the provider's icon, for rendering next to the entry.
     /// </summary>
     /// <example>https://cdn.example.com/providers/openai.png</example>
     public required string Image { get; init; }
 
     /// <summary>
-    /// Gets the pricing information for the AI entry.
+    /// What the entry costs, in the currency the answer names. Amounts per token are normalised per million
+    /// tokens, so they are not the price of a single call.
     /// </summary>
     /// <example>{"prompt":5.0,"completion":15.0}</example>
     public required T Price { get; init; }
 
     /// <summary>
-    /// Gets the URL link to the AI model or service entry.
+    /// The provider's own page for the model, for a person to read the model's terms. It is empty when the
+    /// provider publishes none.
     /// </summary>
     /// <example>https://openai.com/pricing</example>
     public required string Link { get; init; }
 }
 
 /// <summary>
-/// Data transfer object that represents the pricing information for an AI chat interaction.
+/// What a chat model charges, split by the direction the tokens flow in.
 /// </summary>
 public class AiChatPriceDto
 {
     /// <summary>
-    /// Gets the price per one million prompt tokens.
+    /// The cost of one million tokens sent to the model, which includes the conversation history resent with
+    /// every turn and not just the newest message.
     /// </summary>
     /// <example>5.0</example>
     public decimal Prompt { get; init; }
 
     /// <summary>
-    /// Gets the price per one million completion tokens.
+    /// The cost of one million tokens the model writes back. It is normally the dearer of the two directions.
     /// </summary>
     /// <example>15.0</example>
     public decimal Completion { get; init; }
 }
 
 /// <summary>
-/// Represents a data transfer object that encapsulates pricing information for AI embedding operations.
-/// This DTO is used to transport cost-related details associated with generating embeddings through AI models.
+/// What an embedding model charges, which has one direction only.
 /// </summary>
 public class AiEmbeddingPriceDto
 {
     /// <summary>
-    /// Gets the price per one million tokens for embedding generation.
+    /// The cost of one million tokens turned into vectors. Embedding produces no completion, so this single
+    /// figure is the whole price.
     /// </summary>
     /// <example>0.13</example>
     public decimal Prompt { get; init; }
 }
 
 /// <summary>
-/// Data transfer object that represents the pricing information for an AI image generation.
+/// What an image model charges: the tokens of the request and the images that come out of it.
 /// </summary>
 public class AiImagePriceDto
 {
     /// <summary>
-    /// Gets the price per one million prompt tokens.
+    /// The cost of one million tokens sent to the image model, which is the prompt describing the picture.
     /// </summary>
     /// <example>8.0</example>
     public decimal Prompt { get; init; }
 
     /// <summary>
-    /// Gets the price per one million completion tokens.
+    /// The cost of one million tokens the image model writes back alongside the picture.
     /// </summary>
     /// <example>15.0</example>
     public decimal Completion { get; init; }
 
     /// <summary>
-    /// Gets the price per generated image.
+    /// The cost of one produced image, charged on top of the token amounts above.
     /// </summary>
     /// <example>30.0</example>
     public decimal Image { get; init; }

@@ -34,84 +34,97 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for the team template identification.
+/// Which team template the portal is switched to.
 /// </summary>
 public class SchemaBaseRequestsDto
 {
     /// <summary>
-    /// The team template ID.
+    /// The template to apply, by the `id` that `GET api/2.0/settings/customschemas` reports. The reserved id
+    /// `custom` selects the template the portal wrote itself, which is edited with
+    /// `PUT api/2.0/settings/customschemas`.
     /// </summary>
     /// <example>sales-team-template</example>
     public required string Id { get; init; }
 }
 
 /// <summary>
-/// The request parameters for the comprehensive team template configuration.
+/// A team template: the wording the portal uses for its people, groups and their attributes.
 /// </summary>
 public class SchemaRequestsDto
 {
     /// <summary>
-    /// The team template ID.
+    /// The template this wording belongs to, by the `id` that `GET api/2.0/settings/customschemas` reports. It is
+    /// filled in on the way out; the operation that stores a template ignores it and always writes the portal own
+    /// `custom` template, so a built-in template cannot be overwritten by naming it here.
     /// </summary>
     /// <example>sales-team-template</example>
     public required string Id { get; init; }
 
     /// <summary>
-    /// The display name for the team template.
+    /// The template name shown when the templates are offered for choosing. It is filled in by the portal and is not
+    /// stored when a custom template is written.
     /// </summary>
     /// <example>Sales Team</example>
     public string Name { get; set; }
 
     /// <summary>
-    /// The label for the single user references.
+    /// What one member of the portal is called. When a template is stored every caption has to be non-empty once
+    /// its surrounding whitespace is trimmed, or the whole call is refused with 400, and each is silently cut to 30
+    /// characters.
     /// </summary>
     /// <example>User</example>
     public string UserCaption { get; init; }
 
     /// <summary>
-    /// The label for the multiple user references.
+    /// What several members of the portal are called - the plural of `userCaption`, which the interface uses for
+    /// lists and counts. It must not be empty and is silently cut to 30 characters.
     /// </summary>
     /// <example>Users</example>
     public string UsersCaption { get; init; }
 
     /// <summary>
-    /// The label for the single group references.
+    /// What one group of members is called. It must not be empty and is silently cut to 30 characters.
     /// </summary>
     /// <example>Group</example>
     public string GroupCaption { get; init; }
 
     /// <summary>
-    /// The label for the multiple group references.
+    /// What several groups are called - the plural of `groupCaption`. It must not be empty and is silently cut to
+    /// 30 characters.
     /// </summary>
     /// <example>Groups</example>
     public string GroupsCaption { get; init; }
 
     /// <summary>
-    /// The label for the user position or status.
+    /// What a member job title is called on their profile. It must not be empty and is silently cut to 30
+    /// characters.
     /// </summary>
     /// <example>Position</example>
     public string UserPostCaption { get; init; }
 
     /// <summary>
-    /// The label for the member registration date.
+    /// What the date a member joined the portal is called on their profile. It must not be empty and is silently
+    /// cut to 30 characters.
     /// </summary>
     /// <example>Registration Date</example>
     public string RegDateCaption { get; init; }
 
     /// <summary>
-    /// The label for the group leader position.
+    /// What the member who leads a group is called. It must not be empty and is silently cut to 30 characters.
     /// </summary>
     /// <example>Head</example>
     public string GroupHeadCaption { get; init; }
 
     /// <summary>
-    /// The label for the single guest/external user references.
+    /// What one person from outside the portal is called. It must not be empty and is silently cut to 30
+    /// characters.
     /// </summary>
     /// <example>Guest</example>
     public string GuestCaption { get; init; }
 
     /// <summary>
-    /// The label for the multiple guest/external user references.
+    /// What several people from outside the portal are called - the plural of `guestCaption`. It must not be empty
+    /// and is silently cut to 30 characters.
     /// </summary>
     /// <example>Guests</example>
     public string GuestsCaption { get; init; }

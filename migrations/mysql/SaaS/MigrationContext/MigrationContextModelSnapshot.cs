@@ -366,9 +366,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
-                    b.Property<bool?>("DeepMode")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("deep_mode");
+                    b.Property<int?>("Depth")
+                        .HasColumnType("int")
+                        .HasColumnName("depth");
 
                     b.Property<int?>("EntryId")
                         .HasColumnType("int")
@@ -447,9 +447,11 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .UseCollation("utf8_general_ci")
                         .HasAnnotation("MySql:CharSet", "utf8");
 
-                    b.Property<bool?>("Reasoning")
-                        .HasColumnType("tinyint(1)")
-                        .HasColumnName("reasoning");
+                    b.Property<string>("Reasoning")
+                        .HasColumnType("json")
+                        .HasColumnName("reasoning")
+                        .UseCollation("utf8_general_ci")
+                        .HasAnnotation("MySql:CharSet", "utf8");
 
                     b.Property<int>("TenantId")
                         .HasColumnType("int")

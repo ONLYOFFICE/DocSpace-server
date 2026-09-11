@@ -40,7 +40,7 @@ public class DbPreference : BaseEntity
     public Guid CreatedBy { get; init; }
     public int? EntryId { get; init; }
 
-    public bool? DeepMode { get; init; }
+    public ReasoningDepth? Depth { get; init; }
 
     public DbTenant Tenant { get; init; } = null!;
 
@@ -92,9 +92,9 @@ public static class DbPreferencesExtension
                 .HasColumnName("entry_id")
                 .HasColumnType("int");
 
-            entity.Property(e => e.DeepMode)
-                .HasColumnName("deep_mode")
-                .HasColumnType("tinyint(1)");
+            entity.Property(e => e.Depth)
+                .HasColumnName("depth")
+                .HasColumnType("int");
 
             entity.HasIndex(e => new { e.TenantId, e.CreatedBy, e.EntryId })
                 .HasDatabaseName("IX_tenant_id_created_by_entry_id");
@@ -126,9 +126,9 @@ public static class DbPreferencesExtension
                 .HasColumnName("entry_id")
                 .HasColumnType("integer");
 
-            entity.Property(e => e.DeepMode)
-                .HasColumnName("deep_mode")
-                .HasColumnType("boolean");
+            entity.Property(e => e.Depth)
+                .HasColumnName("depth")
+                .HasColumnType("integer");
 
             entity.HasIndex(e => new { e.TenantId, e.CreatedBy, e.EntryId })
                 .HasDatabaseName("ix_ai_integration_preferences_tenant_id_created_by_entry_id");

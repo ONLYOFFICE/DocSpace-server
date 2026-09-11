@@ -101,7 +101,7 @@ public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
             {
                 JsonValueKind.String => await CheckAndCopyFile(fileThirdPartyDao, fileId.Value.GetString(), extension),
                 JsonValueKind.Number => await CheckAndCopyFile(fileDao, fileId.Value.GetInt32(), extension),
-                _ => throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound)
+                _ => throw new ArgumentException(FilesCommonResource.ErrorMessage_FileNotFound)
             };
             setting.SelectedFile = template.Id;
         }
@@ -128,7 +128,9 @@ public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
         {
             if (Path.GetExtension(title) != extension)
             {
-                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
+                // A payload whose extension contradicts the declared one is a malformed request, not
+                // an access decision - InvalidOperationException would answer 403 here.
+                throw new ArgumentException(FilesCommonResource.ErrorMessage_NotSupportedFormat, nameof(title));
             }
 
             var settings = await GetSettingsAsync();
@@ -206,7 +208,7 @@ public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
     private async Task<File<int>> CheckAndCopyFile<T>(IFileDao<T> dao, T fileId, string extension)
     {
         FileEntry<T> file = await dao.GetFileAsync(fileId)
-            ?? throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
+            ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
 
         if (!await fileSecurity.CanCopyAsync(file))
         {

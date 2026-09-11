@@ -34,17 +34,17 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The status parameters of the synchronization with LDAP server.
+/// How far the portal has got with the directory operation that is running, and what it ran into.
 /// </summary>
 /// <example>
 /// {
-///   "completed": true,
+///   "completed": false,
 ///   "id": "00000000-0000-0000-0000-000000000001",
-///   "status": "InProgress",
+///   "status": "Getting users from LDAP",
 ///   "error": "Connection timeout",
 ///   "warning": "Certificate not verified",
-///   "percents": 1,
-///   "certificateConfirmRequest": "Please verify certificate",
+///   "percents": 40,
+///   "certificateConfirmRequest": "{\"approved\":false}",
 ///   "source": "ldap.example.com",
 ///   "operationType": "Sync"
 /// }
@@ -52,55 +52,63 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class LdapStatusDto
 {
     /// <summary>
-    /// Specifies if the LDAP synchronization is completed or not.
+    /// Whether the operation has finished, successfully or not. Poll the same operation until it is `true`, then
+    /// read `error` to learn which of the two it was.
     /// </summary>
-    /// <example>true</example>
+    /// <example>false</example>
     public bool Completed { get; set; }
 
     /// <summary>
-    /// The LDAP ID.
+    /// The identifier of the running operation, so a client can tell a fresh operation from the one it was
+    /// already following. It is empty when no operation is running at all.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000001</example>
     public string Id { get; set; }
 
     /// <summary>
-    /// The LDAP status.
+    /// What the operation is doing at the moment, as a sentence in the portal language rather than a code - do
+    /// not branch on it; `completed`, `error` and `percents` are the fields to read.
     /// </summary>
-    /// <example>InProgress</example>
+    /// <example>Getting users from LDAP</example>
     public string Status { get; set; }
 
     /// <summary>
-    /// The LDAP error message.
+    /// Why the operation failed, in the portal language. It is empty while the operation is still running and on
+    /// one that finished cleanly, so it is what distinguishes success from failure once `completed` is `true`.
     /// </summary>
     /// <example>Connection timeout</example>
     public string Error { get; set; }
 
     /// <summary>
-    /// The LDAP warning message.
+    /// Something the operation went past but wants reported - a skipped account, a certificate it did not
+    /// verify. Unlike `error` it does not mean the operation failed.
     /// </summary>
     /// <example>Certificate not verified</example>
     public string Warning { get; set; }
 
     /// <summary>
-    /// The percentage of the LDAP operation completion.
+    /// How far along the operation is, from 0 to 100. It does not advance smoothly, since the stages differ
+    /// wildly in length, so use `completed` and not this number to decide when to stop polling.
     /// </summary>
-    /// <example>1</example>
+    /// <example>40</example>
     public int Percents { get; set; }
 
     /// <summary>
-    /// The LDAP certificate confirmation request.
+    /// The certificate the server offered, serialised, present only when the operation stopped to ask whether to
+    /// trust it. Accept it by saving the settings again with the accept-certificate flag set.
     /// </summary>
-    /// <example>Please verify certificate</example>
+    /// <example>{"approved":false}</example>
     public string CertificateConfirmRequest { get; set; }
 
     /// <summary>
-    /// The LDAP source.
+    /// The directory server the operation is talking to, which is the stored server setting.
     /// </summary>
     /// <example>ldap.example.com</example>
     public string Source { get; set; }
 
     /// <summary>
-    /// The LDAP operation type.
+    /// Which operation this is - a synchronisation, a dry run of one, a save with import, or a dry run of that -
+    /// so a client polling one endpoint can tell whether the operation it is watching is its own.
     /// </summary>
     /// <example>Sync</example>
     public string OperationType { get; set; }

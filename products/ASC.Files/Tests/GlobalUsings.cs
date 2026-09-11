@@ -49,6 +49,7 @@ global using ASC.Files.Core.Text;
 global using ASC.Files.Tests.ApiFactories;
 global using ASC.Files.Tests.Data;
 global using ASC.Files.Tests.Tests._03_Rooms;
+global using ASC.Files.Tests.Tests._06_Operations.Statuses;
 global using ASC.Tests.Common.ApiFactories;
 global using ASC.Tests.Common.Data;
 

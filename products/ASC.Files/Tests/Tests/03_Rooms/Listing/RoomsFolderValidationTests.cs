@@ -143,10 +143,15 @@ public class RoomsFolderValidationTests(
     /// order it did not get had no way to know. <c>sortBy</c> now has to name a <c>SortedByType</c>
     /// member (sorting by name is <c>AZ</c>) and anything else is a bad request, in line with
     /// <see cref="GetRoomsFolder_InvalidSortOrder_IsRejected"/> right above.
+    ///
+    /// <c>"title"</c> is covered explicitly because that is the value the TypeScript suite sends,
+    /// and its silent no-op is what the bug was reported against.
     /// </remarks>
-    [Fact]
+    [Theory]
+    [InlineData("thisFieldDoesNotExist")]
+    [InlineData("title")]
     [Trait("Bug", "81809")]
-    public async Task GetRoomsFolder_InvalidSortBy_ReturnsBadRequest()
+    public async Task GetRoomsFolder_InvalidSortBy_ReturnsBadRequest(string sortBy)
     {
         // Arrange
         await _filesClient.Authenticate(Owner);
@@ -155,7 +160,7 @@ public class RoomsFolderValidationTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _roomsApi.GetRoomsFolderAsync(
-                sortBy: "thisFieldDoesNotExist", cancellationToken: TestContext.Current.CancellationToken));
+                sortBy: sortBy, cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(400);
