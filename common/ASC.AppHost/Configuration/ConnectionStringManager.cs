@@ -44,6 +44,10 @@ public record RedisConfig(string Host, string Port, string? Password = null);
 
 public class ConnectionStringManager(IDistributedApplicationBuilder builder, string basePath)
 {
+    // The pool options production runs with (buildtools/config/appsettings.json), minus the character set: the
+    // test databases are created by the migration runner and keep the server default.
+    private const string MySqlPoolOptions = "Pooling=true;AutoEnlist=false;SSL Mode=none;AllowPublicKeyRetrieval=True;Connection Timeout=30;Maximum Pool Size=300;ConnectionReset=false";
+
     private MySqlConnectionStringBuilder? MySqlConnectionStringBuilder { get; set; }
     public Uri? RabbitMqUri { get; private set; }
     public RedisConfig? Redis { get; private set; }
@@ -522,8 +526,13 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
         if (MySqlDatabaseResource != null)
         {
-            resourceBuilder
-                .WithReference(MySqlDatabaseResource, "default:connectionString");
+            // Aspire hands out the bare container connection string (server, port, user, password, database), so
+            // MySqlConnector ran with its defaults here while production (buildtools/config/appsettings.json) runs
+            // with explicit pool options. The default that matters is ConnectionReset=true: a COM_RESET_CONNECTION
+            // round trip on every pool checkout - measured at 1.7 ms x ~21 queries per Files request (2026-09-11).
+            // Same env var WithReference would set, so the services read it from the same config key.
+            resourceBuilder.WithEnvironment("ConnectionStrings__default:connectionString",
+                ReferenceExpression.Create($"{MySqlDatabaseResource.Resource};{MySqlPoolOptions}"));
         }
 
         if (MailResource != null)
