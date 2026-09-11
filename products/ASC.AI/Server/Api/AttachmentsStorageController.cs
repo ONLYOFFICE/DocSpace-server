@@ -54,6 +54,17 @@ public class AttachmentsStorageController(AttachmentsStorageService attachmentsS
         return AttachmentMapper.MapToDto(attachment);
     }
 
+    [HttpGet("attachments/{id}/suggested-questions")]
+    public async Task<SuggestedQuestionsDto> GetSuggestedQuestionsAsync(SuggestedQuestionsRequestDto inDto)
+    {
+        var result = await attachmentsStorageService.GetSuggestedQuestionsAsync(inDto.Id);
+        return new SuggestedQuestionsDto
+        {
+            Status = result.Status,
+            Questions = result.Questions.Select(q => new FormQuestionDto { Question = q.Question, Prompt = q.Prompt }).ToList()
+        };
+    }
+
     [HttpPost("attachments/read")]
     public async Task<List<AttachmentDto>> ReadManyByIdsAsync(ReadAttachmentsRequestDto inDto)
     {

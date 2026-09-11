@@ -46,14 +46,6 @@ public class AttachmentDto
     public string? EntryId { get; init; }
     public long CreatedAt { get; init; }
     public bool CanAnalyze { get; init; }
-
-    /// <summary>
-    /// Starter questions about the attached form's submissions, in the current user's language. Empty
-    /// unless <see cref="CanAnalyze"/> is set. On attach they are usually still being generated, so the
-    /// array arrives empty and the client re-reads the attachment to pick them up; batch reads never
-    /// carry them.
-    /// </summary>
-    public IReadOnlyList<FormQuestionDto> SuggestedQuestions { get; init; } = [];
 }
 
 /// <summary>A starter question about a form's submissions, and the request the chat gets when it is picked.</summary>
@@ -64,6 +56,16 @@ public class FormQuestionDto
 
     /// <summary>The expanded request sent to the chat.</summary>
     public required string Prompt { get; init; }
+}
+
+/// <summary>
+/// One long-poll answer for a form's starter questions. <see cref="Status"/> is "ready" (questions
+/// present), "pending" (still generating — poll again), or "unavailable" (not an analysable form — stop).
+/// </summary>
+public class SuggestedQuestionsDto
+{
+    public required string Status { get; init; }
+    public IReadOnlyList<FormQuestionDto> Questions { get; init; } = [];
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,

@@ -198,6 +198,18 @@ export const attachmentsController = {
     res.json(result);
   }),
 
+  // Long-poll for a form's starter questions by entry id. The C# side holds the request open until the
+  // model answers or its poll wait elapses; the client polls on `status` ("ready" | "pending" | "unavailable").
+  getSuggestedQuestions: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["id"] as const);
+    if (typeof args.id !== "string" || args.id.length === 0) {
+      res.status(400).json({ error: "id is required" });
+      return;
+    }
+    const result = await storage.attachments.getSuggestedQuestions(args.id);
+    res.json(result);
+  }),
+
   delete: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["id"] as const);
     await engine.delete(args.id as string);

@@ -320,36 +320,33 @@ function dtoToAttachment(raw: unknown): Attachment | null {
   if (canAnalyze !== undefined) {
     result.canAnalyze = canAnalyze;
   }
-  // Starter questions C# pre-generated from the form's column schema, in the user's language.
-  const suggestedQuestions = readSuggestedQuestions(raw);
-  if (suggestedQuestions.length > 0) {
-    // `Attachment` does not declare this field yet; drop the cast once the package ships it.
-    (result as AttachmentWithSuggestions).suggestedQuestions = suggestedQuestions;
-  }
   return result;
 }
 
-interface SuggestedQuestion {
+export interface SuggestedQuestion {
   question: string;
   prompt: string;
 }
 
-type AttachmentWithSuggestions = Attachment & { suggestedQuestions?: SuggestedQuestion[] };
+// One long-poll answer from the C# `attachments/{id}/suggested-questions` endpoint: a status plus, when
+// ready, the questions. `status` is "ready" | "pending" (poll again) | "unavailable" (not analysable, stop).
+export interface SuggestedQuestionsResult {
+  status: string;
+  questions: SuggestedQuestion[];
+}
 
-function readSuggestedQuestions(raw: JsonObject): SuggestedQuestion[] {
-  const entries = getObjectArray(raw, "suggestedQuestions");
-  if (entries === undefined) {
-    return [];
-  }
-  const result: SuggestedQuestion[] = [];
-  for (const entry of entries) {
+function parseSuggestedQuestions(raw: unknown): SuggestedQuestionsResult {
+  const obj = isObject(raw) ? raw : {};
+  const status = getString(obj, "status") ?? "unavailable";
+  const questions: SuggestedQuestion[] = [];
+  for (const entry of getObjectArray(obj, "questions") ?? []) {
     const question = getString(entry, "question");
     const prompt = getString(entry, "prompt");
     if (question !== undefined && prompt !== undefined) {
-      result.push({ question, prompt });
+      questions.push({ question, prompt });
     }
   }
-  return result;
+  return { status, questions };
 }
 
 export class HttpAttachmentsStorage implements AttachmentsStorage {
@@ -692,6 +689,13 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       }
       throw err;
     }
+  }
+
+  // Long-poll the C# side for a form's starter questions by its entry id. The upstream holds the request
+  // open until the model answers or its poll wait elapses, then returns a status the client polls on.
+  async getSuggestedQuestions(entryId: string): Promise<SuggestedQuestionsResult> {
+    const raw = await aiService.get(`${PATH}/${encodeURIComponent(entryId)}/suggested-questions`);
+    return parseSuggestedQuestions(raw);
   }
 
   async readManyByIds(ids: string[]): Promise<(Attachment | null)[]> {

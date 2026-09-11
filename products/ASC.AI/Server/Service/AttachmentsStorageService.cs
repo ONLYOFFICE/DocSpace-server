@@ -44,7 +44,6 @@ public class AttachmentResult
     public string? ThirdpartyEntryId { get; init; }
     public DateTime CreatedAt { get; init; }
     public bool CanAnalyze { get; init; }
-    public IReadOnlyList<FormQuestionSuggestion> SuggestedQuestions { get; init; } = [];
 }
 
 [Scope]
@@ -67,9 +66,12 @@ public class AttachmentsStorageService(
     private static readonly TimeSpan _downloadUrlExpiration = TimeSpan.FromHours(1);
 
     // The attach never waits for the model — only long enough to start the call, which then finishes
-    // in the background and fills the cache. The client picks the questions up by re-reading the
-    // attachment; a form whose answer is already cached still gets it here, immediately.
+    // in the background and fills the cache. The client fetches the questions from the long-poll endpoint.
     private static readonly TimeSpan _preAnalysisStartWait = TimeSpan.FromMilliseconds(200);
+
+    // The long-poll: held open until the model answers or this elapses, then the client polls again.
+    // Kept under the proxy's request ceiling; a slow model simply spans a few polls.
+    private static readonly TimeSpan _preAnalysisLongPollWait = TimeSpan.FromSeconds(25);
 
     private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
@@ -208,7 +210,9 @@ public class AttachmentsStorageService(
                 return FormAnalysis.None;
             }
 
-            return new FormAnalysis(true, await formPreAnalysisService.GenerateAsync(file, _preAnalysisStartWait));
+            // Warm the cache so the questions are already generating by the time the client long-polls.
+            _ = await formPreAnalysisService.GenerateAsync(file, _preAnalysisStartWait);
+            return new FormAnalysis(true);
         }
         catch (Exception e)
         {
@@ -218,10 +222,43 @@ public class AttachmentsStorageService(
     }
 
     /// <summary>
-    /// The flag plus the questions, restarting a generation when nothing is cached — so a poll that
-    /// arrives after a failed or not-ready attempt expired picks the work back up instead of reporting
-    /// an empty list forever. Batch reads skip it: they hydrate whole threads, and a file lookup per
-    /// attachment would not pay for itself.
+    /// Long-poll for a form's starter questions by its entry id: held open until the model answers or the
+    /// poll wait elapses. Returns "unavailable" for anything that is not an analysable started form, "ready"
+    /// with the questions once generated, or "pending" while the model is still working (poll again).
+    /// </summary>
+    public async Task<SuggestedQuestionsResult> GetSuggestedQuestionsAsync(string entryId)
+    {
+        await AssertUserHasAccessAsync(_allowedTypes);
+
+        if (!int.TryParse(entryId, out var fileId) || !externalDatabaseClient.IsEnabled())
+        {
+            return SuggestedQuestionsResult.Unavailable;
+        }
+
+        try
+        {
+            var file = await DaoFactory.GetFileDao<int>().GetFileAsync(fileId);
+            if (file is not { IsForm: true }
+                || !await FileSecurity.CanReadAsync(file)
+                || await formSchemaProvider.TryGetTableNameAsync(file) is null)
+            {
+                return SuggestedQuestionsResult.Unavailable;
+            }
+
+            var questions = await formPreAnalysisService.GenerateAsync(file, _preAnalysisLongPollWait);
+            return questions.Count > 0 ? SuggestedQuestionsResult.Ready(questions) : SuggestedQuestionsResult.Pending;
+        }
+        catch (Exception e)
+        {
+            logger.WarnFormAnalysisFailed(e, fileId);
+            return SuggestedQuestionsResult.Unavailable;
+        }
+    }
+
+    /// <summary>
+    /// The analysable flag for a single read, from whether the form has a submission table. Batch reads
+    /// skip it: they hydrate whole threads, and a file lookup per attachment would not pay for itself.
+    /// The starter questions are fetched separately from the long-poll endpoint.
     /// </summary>
     private async Task<FormAnalysis?> ReadFormAnalysisAsync(Attachment attachment)
     {
@@ -238,15 +275,7 @@ public class AttachmentsStorageService(
                 return null;
             }
 
-            // Questions exist only for analysable forms, so having them settles the flag without
-            // touching the external database.
-            var questions = await formPreAnalysisService.GenerateAsync(file, _preAnalysisStartWait);
-            if (questions.Count > 0)
-            {
-                return new FormAnalysis(true, questions);
-            }
-
-            return await formSchemaProvider.TryGetTableNameAsync(file) is null ? null : new FormAnalysis(true, questions);
+            return await formSchemaProvider.TryGetTableNameAsync(file) is null ? null : new FormAnalysis(true);
         }
         catch (Exception e)
         {
@@ -382,8 +411,7 @@ public class AttachmentsStorageService(
             EntryId = attachment.EntryId,
             ThirdpartyEntryId = thirdpartyEntryId,
             CreatedAt = attachment.CreatedAt,
-            CanAnalyze = analysis.CanAnalyze,
-            SuggestedQuestions = analysis.SuggestedQuestions
+            CanAnalyze = analysis.CanAnalyze
         };
     }
 
@@ -406,10 +434,19 @@ public class AttachmentsStorageService(
         return null;
     }
 
-    private sealed record FormAnalysis(bool CanAnalyze, IReadOnlyList<FormQuestionSuggestion> SuggestedQuestions)
+    private sealed record FormAnalysis(bool CanAnalyze)
     {
-        public static readonly FormAnalysis None = new(false, []);
+        public static readonly FormAnalysis None = new(false);
     }
+}
+
+/// <summary>The result of a long-poll for a form's starter questions: a status and, when ready, the questions.</summary>
+public sealed record SuggestedQuestionsResult(string Status, IReadOnlyList<FormQuestionSuggestion> Questions)
+{
+    public static readonly SuggestedQuestionsResult Pending = new("pending", []);
+    public static readonly SuggestedQuestionsResult Unavailable = new("unavailable", []);
+
+    public static SuggestedQuestionsResult Ready(IReadOnlyList<FormQuestionSuggestion> questions) => new("ready", questions);
 }
 
 internal static partial class AttachmentsStorageServiceLogger
