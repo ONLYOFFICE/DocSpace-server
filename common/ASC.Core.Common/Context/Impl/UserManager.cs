@@ -367,12 +367,8 @@ public class UserManager(
 
         await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(u.Id, type), Constants.Action_AddRemoveUser);
 
-        var oldUserData = await userService.GetUserByUserName(tenantManager.GetCurrentTenantId(), u.UserName);
-
-        if (oldUserData != null && !Equals(oldUserData, Constants.LostUser))
-        {
-            throw new InvalidOperationException("User already exist.");
-        }
+        // No username pre-check here: EFUserService.SaveUserAsync rejects a duplicate username (and email) with an
+        // ArgumentException right before the INSERT, so the read only cost one more query on every user creation.
 
         IDistributedLockHandle lockHandle = null;
 
@@ -394,12 +390,12 @@ public class UserManager(
             var newUser = await userService.SaveUserAsync(tenantManager.GetCurrentTenantId(), u);
             if (syncCardDav)
             {
-                await SyncCardDavAsync(u, oldUserData, newUser);
+                await SyncCardDavAsync(u, null, newUser);
             }
 
             if (u.CreatedBy.HasValue)
             {
-                await AddUserRelationAsync(u.CreatedBy.Value, newUser.Id);
+                await AddUserRelationAsync(u.CreatedBy.Value, newUser);
             }
 
             return newUser;
@@ -773,25 +769,43 @@ public class UserManager(
         }
 
         var sourceUser = await GetUsersAsync(sourceUserId);
-        if (!IsValidUser(sourceUser))
+        if (!IsValidRelationUser(sourceUser))
         {
             return;
         }
 
         var targetUser = await GetUsersAsync(targetUserId);
-        if (!IsValidUser(targetUser))
+        if (!IsValidRelationUser(targetUser))
         {
             return;
         }
 
         await userService.SaveUsersRelationAsync(Tenant.Id, sourceUserId, targetUserId);
+    }
 
-        return;
-
-        bool IsValidUser(UserInfo userInfo)
+    /// <summary>
+    /// Same as <see cref="AddUserRelationAsync(Guid, Guid)"/> for a target the caller already holds, e.g. the user
+    /// it has just created: saves the read of the target, which is a cache miss for a new user.
+    /// </summary>
+    public async Task AddUserRelationAsync(Guid sourceUserId, UserInfo targetUser)
+    {
+        if (sourceUserId == targetUser.Id || !IsValidRelationUser(targetUser))
         {
-            return !userInfo.Equals(Constants.LostUser) && userInfo.Status != EmployeeStatus.Terminated;
+            return;
         }
+
+        var sourceUser = await GetUsersAsync(sourceUserId);
+        if (!IsValidRelationUser(sourceUser))
+        {
+            return;
+        }
+
+        await userService.SaveUsersRelationAsync(Tenant.Id, sourceUserId, targetUser.Id);
+    }
+
+    private static bool IsValidRelationUser(UserInfo userInfo)
+    {
+        return !userInfo.Equals(Constants.LostUser) && userInfo.Status != EmployeeStatus.Terminated;
     }
 
     public Task<Dictionary<Guid, UserRelation>> GetUserRelationsAsync(Guid sourceUserId)

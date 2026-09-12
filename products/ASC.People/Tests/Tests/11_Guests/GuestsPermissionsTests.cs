@@ -146,4 +146,42 @@ public class GuestsPermissionsTests(AspireAppFixture fixture) : BaseTest(fixture
 
         exception.ErrorCode.Should().Be(401);
     }
+
+    /// <summary>
+    /// A member invited by email (<c>POST /people/invite</c>) is related to the room admin who invited
+    /// them, and that relation is what decides whose guest list they land on once their type is changed
+    /// to Guest: the inviter may remove them, another room admin is refused.
+    /// </summary>
+    [Fact]
+    public async Task DeleteGuests_MemberInvitedByEmailThenMadeGuest_OnlyTheInviterOwnsIt()
+    {
+        var inviter = await InviteContact(EmployeeType.RoomAdmin);
+        var anotherRoomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        var email = Initializer.Faker.Internet.Email();
+
+        await _peopleClient.Authenticate(inviter);
+        var invited = (await _profilesApi.InviteUsersAsync(
+            new InviteUsersRequestDto([new UserInvitationRequestDto { Type = EmployeeType.User, Email = email }]),
+            TestContext.Current.CancellationToken)).Response.Single(u => u.DisplayName == email);
+
+        // The conversion is a background task that only the owner or a DocSpace admin may start.
+        await _peopleClient.Authenticate(Owner);
+        await _userTypeApi.StartUserTypeUpdateAsync(
+            new StartUpdateUserTypeDto(EmployeeType.Guest, invited.Id),
+            TestContext.Current.CancellationToken);
+
+        var progress = await _02_UserType.UserTypeUpdatePolling.WaitForCompletionAsync(_userTypeApi, invited.Id);
+        progress.IsCompleted.Should().BeTrue();
+        progress.Error.Should().BeEmpty();
+
+        await _peopleClient.Authenticate(anotherRoomAdmin);
+        var exception = await Assert.ThrowsAsync<ApiException>(async () =>
+            await _guestsApi.DeleteGuestsAsync(new UpdateMembersRequestDto([invited.Id]), TestContext.Current.CancellationToken));
+
+        exception.ErrorCode.Should().Be(403);
+        exception.ErrorContent?.ToString().Should().Contain("Access denied");
+
+        await _peopleClient.Authenticate(inviter);
+        await _guestsApi.DeleteGuestsAsync(new UpdateMembersRequestDto([invited.Id]), TestContext.Current.CancellationToken);
+    }
 }
