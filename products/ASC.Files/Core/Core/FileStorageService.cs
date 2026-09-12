@@ -388,7 +388,10 @@ public class FileStorageService //: IFileStorageService
             orderBy = await filesSettingsHelper.GetDefaultOrder();
         }
 
-        if (Equals(parent.Id, await globalFolderHelper.FolderShareAsync) && orderBy.SortedBy == SortedByType.DateAndTime)
+        // The share root is the only folder of type SHARE, so the type check is the same test as comparing ids,
+        // minus the side effect: the FolderShareAsync getter creates the root when it is missing, which made every
+        // first listing in a tenant pay for a folder insert under a distributed lock.
+        if (parent.FolderType == FolderType.SHARE && orderBy.SortedBy == SortedByType.DateAndTime)
         {
             orderBy.SortedBy = SortedByType.New;
         }
