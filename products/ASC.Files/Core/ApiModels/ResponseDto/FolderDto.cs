@@ -263,8 +263,9 @@ public class FolderDtoHelper(
     IUrlShortener urlShortener,
     FileSharing fileSharing,
     EntryStatusManager entryStatusManager,
-    ExternalDatabaseClient externalDatabaseClient)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient)
+    ExternalDatabaseClient externalDatabaseClient,
+    IFusionCache fusionCache)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, fusionCache, tenantManager)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
 

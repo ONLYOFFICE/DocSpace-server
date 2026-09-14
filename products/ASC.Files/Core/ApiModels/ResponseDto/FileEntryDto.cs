@@ -323,7 +323,9 @@ public class FileEntryDtoHelper(
     ExternalShare externalShare,
     FileSharing fileSharing,
     IUrlShortener urlShortener,
-    ExternalDatabaseClient externalDatabaseClient)
+    ExternalDatabaseClient externalDatabaseClient,
+    IFusionCache fusionCache,
+    TenantManager tenantManager)
 {
     protected readonly FileSecurity _fileSecurity = fileSecurity;
     protected readonly GlobalFolderHelper _globalFolderHelper = globalFolderHelper;
@@ -331,6 +333,8 @@ public class FileEntryDtoHelper(
     protected readonly ExternalShare _externalShare = externalShare;
     protected readonly IUrlShortener _urlShortener = urlShortener;
     protected readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
+
+    private static readonly TimeSpan _formTableCacheDuration = TimeSpan.FromMinutes(1);
 
     // Live check that a form's submissions table really exists in the external database: FormFilling.ExternalDbTableName
     // is stored on export but never cleared, so it can outlive a reset/dropped/disabled external DB. A transient
@@ -344,7 +348,19 @@ public class FileEntryDtoHelper(
 
         try
         {
-            return await externalDatabaseClient.TableExistsAsync(tableName);
+
+            var cacheKey = $"files:form:table:{tenantManager.GetCurrentTenantId()}:{tableName}";
+
+            var cached = await fusionCache.TryGetAsync<bool>(cacheKey);
+            if (cached.HasValue)
+            {
+                return cached.Value;
+            }
+
+            var exists = await externalDatabaseClient.TableExistsAsync(tableName);
+            await fusionCache.SetAsync(cacheKey, exists, opt => opt.SetDuration(_formTableCacheDuration));
+
+            return exists;
         }
         catch (Exception)
         {
