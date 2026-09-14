@@ -367,8 +367,9 @@ public class UserManager(
 
         await permissionContext.DemandPermissionsAsync(new UserSecurityProvider(u.Id, type), Constants.Action_AddRemoveUser);
 
-        // No username pre-check here: EFUserService.SaveUserAsync rejects a duplicate username (and email) with an
-        // ArgumentException right before the INSERT, so the read only cost one more query on every user creation.
+        // No username pre-check here: the store rejects a duplicate username right before the INSERT, so the read only
+        // cost one more query on every user creation. The store's exception is translated below so that this method
+        // keeps reporting a taken username the way it always has.
 
         IDistributedLockHandle lockHandle = null;
 
@@ -387,7 +388,17 @@ public class UserManager(
                 await countPaidUserChecker.CheckAppend();
             }
 
-            var newUser = await userService.SaveUserAsync(tenantManager.GetCurrentTenantId(), u);
+            UserInfo newUser;
+
+            try
+            {
+                newUser = await userService.SaveUserAsync(tenantManager.GetCurrentTenantId(), u);
+            }
+            catch (DuplicateUserNameException)
+            {
+                throw new InvalidOperationException("User already exist.");
+            }
+
             if (syncCardDav)
             {
                 await SyncCardDavAsync(u, null, newUser);
