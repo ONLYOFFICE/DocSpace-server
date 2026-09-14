@@ -246,7 +246,14 @@ public class AttachmentsStorageService(
             }
 
             var questions = await formPreAnalysisService.GenerateAsync(file, _preAnalysisLongPollWait);
-            return questions.Count > 0 ? SuggestedQuestionsResult.Ready(questions) : SuggestedQuestionsResult.Pending;
+            if (questions.Count > 0)
+            {
+                return SuggestedQuestionsResult.Ready(questions);
+            }
+
+            return await formPreAnalysisService.IsAvailableAsync()
+                ? SuggestedQuestionsResult.Pending
+                : SuggestedQuestionsResult.Unavailable;
         }
         catch (Exception e)
         {

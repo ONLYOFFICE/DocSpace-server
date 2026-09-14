@@ -139,6 +139,16 @@ public class FormPreAnalysisService(
         }
     }
 
+    /// <summary>
+    /// Whether a model is configured to answer form questions for the current portal. Lets a caller tell a
+    /// permanent "no model configured" (stop) from questions merely not being ready yet (retry), since
+    /// <see cref="GenerateAsync"/> returns an empty list for both.
+    /// </summary>
+    public async Task<bool> IsAvailableAsync()
+    {
+        return await ResolveEndpointAsync() is not null;
+    }
+
     private async Task<(ChatEndpoint Endpoint, ChatCompletionMessage[] Messages)?> PrepareRequestAsync(File<int> file, CultureInfo culture)
     {
         var endpoint = await ResolveEndpointAsync();
