@@ -288,10 +288,10 @@ public class FormPreAnalysisService(
                 {{columnList}}
 
                 Write {{MaxQuestions}} starter questions an analyst would ask about these submissions.
-                - Every question must be answerable from the columns above and must name at least one real column label.
+                - Every question must be answerable from the columns above.
                 - Prefer distributions, counts, comparisons and time trends over single-record lookups.
                 - Never invent a column or a value, and never repeat a question.
-                - "question": at most 60 characters, phrased as a button label, no trailing period.
+                - "question": at most 60 characters, phrased as a plain button label a non-technical person understands. Refer to fields in everyday words; never put a raw field key or identifier (a "col_..." name, or a run-together/camelCase key) in it — rephrase it into readable words.
                 - "prompt": one sentence, the full request sent to the analysis assistant, naming the exact columns it needs.
                 - Write both fields in {{culture.EnglishName}} ({{culture.Name}}).
                 Reply with exactly this shape: [{"question":"...","prompt":"..."}]
