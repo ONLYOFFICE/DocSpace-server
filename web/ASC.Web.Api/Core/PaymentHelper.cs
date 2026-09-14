@@ -237,6 +237,7 @@ public class PaymentHelper(
         var tariff = await tariffService.GetTariffAsync(tenantId);
         var quotaDefinitions = (await quotaService.GetTenantQuotasAsync()).ToDictionary(q => q.TenantId);
         var enabledServices = (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices ?? [];
+        var aiAccessEnabled = await aiGateway.IsAiAccessEnabledAsync();
 
         var result = new List<ActiveServiceDto>();
         var addedIds = new HashSet<int>();
@@ -259,6 +260,11 @@ public class PaymentHelper(
 
         foreach (var service in enabledServices)
         {
+            if (!aiAccessEnabled && IsAiService(service))
+            {
+                continue;
+            }
+
             var id = (int)service;
 
             if (!addedIds.Add(id) || !quotaDefinitions.TryGetValue(id, out var definition))
@@ -389,6 +395,11 @@ public class PaymentHelper(
     }
 
 
+    private static bool IsAiService(TenantWalletService service)
+    {
+        return service is TenantWalletService.AITools or TenantWalletService.AISearch;
+    }
+
     public async Task<TenantWalletServiceSettings> ChangeWalletServiceStateAsync(TenantWalletService service, bool enabled)
     {
         var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>();
@@ -397,6 +408,11 @@ public class PaymentHelper(
 
         if (enabled && !settings.EnabledServices.Contains(service))
         {
+            if (IsAiService(service) && !await aiGateway.IsAiAccessEnabledAsync())
+            {
+                throw new InvalidOperationException("AI is disabled for the portal");
+            }
+
             if (service == TenantWalletService.AISearch && !settings.EnabledServices.Contains(TenantWalletService.AITools))
             {
                 throw new InvalidOperationException("AI Tools service must be enabled before Search");
