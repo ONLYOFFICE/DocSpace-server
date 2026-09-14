@@ -33,15 +33,27 @@
 
 namespace ASC.AI.Integration.Profiles;
 
-public class ProfileData
+[EnumExtensions]
+[JsonConverter(typeof(ReasoningDepthJsonConverter))]
+public enum ReasoningDepth
 {
-    public required string Name { get; init; }
-    public required string ProviderType { get; init; }
-    public required string BaseUrl { get; init; }
-    public string? Key { get; init; }
-    public required string ModelId { get; init; }
-    public ReasoningConfig? Reasoning { get; init; }
-    public Capabilities? Capabilities { get; init; }
-    public bool? UseResponsesApi { get; init; }
-    public bool? CanUseTool { get; init; }
+    None = 0,
+    Low = 1,
+    Medium = 2,
+    High = 3,
+
+    [JsonStringEnumMemberName("xhigh")]
+    XHigh = 4,
+
+    Max = 5
+}
+
+public sealed class ReasoningDepthJsonConverter() : JsonStringEnumConverter<ReasoningDepth>(JsonNamingPolicy.CamelCase);
+
+public class ReasoningConfig
+{
+    public bool Thinks { get; init; }
+    public bool CanDisable { get; init; }
+    public ReasoningDepth[] Depths { get; init; } = [];
+    public ReasoningDepth? DefaultDepth { get; init; }
 }

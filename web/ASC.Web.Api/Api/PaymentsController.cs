@@ -503,9 +503,11 @@ public class PaymentController(
         await paymentHelper.SubscriptionBalanceToWalletAsync(tenant.Id, productId);
 
         // Make sure the wallet balance covers the cost, topping it up for the missing amount if necessary.
+        // A delayed payment method cannot be topped up on the fly, so its wallet has to cover the cost already.
         var siteName = tenant.GetTenantDomain(coreSettings);
+        var allowTopUp = !customerInfo.IsDelayedPaymentMethod;
 
-        if (!await tariffService.EnsureWalletBalanceAsync(tenant.Id, requiredAmount, defaultCurrency, participant, siteName, false))
+        if (!await tariffService.EnsureWalletBalanceAsync(tenant.Id, requiredAmount, defaultCurrency, participant, siteName, false, null, allowTopUp))
         {
             throw new BillingException("Insufficient balance");
         }
@@ -700,7 +702,7 @@ public class PaymentController(
 
         var quotaList = await quotaService.GetTenantQuotasAsync();
         var quota = quotaList.FirstOrDefault(q => q.Wallet && q.TenantId == (int)inDto.Service);
-        if (quota == null)
+        if (quota == null || ((quota.AITools || quota.AISearch) && !await aiGateway.IsAiAccessEnabledAsync()))
         {
             throw new ItemNotFoundException("Service could not be found");
         }
@@ -924,8 +926,9 @@ public class PaymentController(
         }
 
         var siteName = tenant.GetTenantDomain(coreSettings);
+        var waitForChanges = !customerInfo.IsDelayedPaymentMethod;
 
-        return await paymentHelper.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, securityContext.CurrentAccount.ID.ToString(), siteName);
+        return await paymentHelper.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, securityContext.CurrentAccount.ID.ToString(), siteName, waitForChanges);
     }
 
     /// <remarks>

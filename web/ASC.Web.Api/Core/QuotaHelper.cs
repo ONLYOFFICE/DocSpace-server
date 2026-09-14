@@ -86,7 +86,7 @@ public class QuotaHelper(
 
         foreach (var quota in quotas.OrderByDescending(q => q.Visible))
         {
-            if (quota.AITools && !aiEnabled)
+            if ((quota.AITools || quota.AISearch) && !aiEnabled)
             {
                 continue;
             }

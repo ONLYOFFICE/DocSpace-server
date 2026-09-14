@@ -41,6 +41,7 @@ import { parseMcpServerConfig } from "./mcpServersStorage.js";
 import { parseWebSearchConfig } from "./webSearchStorage.js";
 import type { DocspaceFolderInfo } from "./docspaceFilesApi.js";
 import type { ChatContextScope, ChatContextSnapshot } from "./chatContextSnapshot.js";
+import { depthToLevel } from "./reasoningDepth.js";
 import {
   getChatContextMisses,
   getFilesApiReadCount,
@@ -154,7 +155,7 @@ function parseScope(raw: unknown, entityId: string | undefined): ChatContextScop
     entityId,
     folder: parseFolder(raw["folder"]),
     assignments: parseAssignments(raw["assignments"]),
-    deepMode: preferences ? (getBoolean(preferences, "deepMode") ?? null) : null,
+    reasoningLevel: preferences ? depthToLevel(preferences["depth"]) : null,
     toolPrefs: toolPrefs ?? ({} as JsonObject),
     mcpServers: parseMcpServers(raw["mcpServers"]),
   };
