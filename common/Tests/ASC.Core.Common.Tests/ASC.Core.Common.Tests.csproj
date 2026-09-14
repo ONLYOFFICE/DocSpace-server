@@ -3,6 +3,9 @@
   <PropertyGroup>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <OutputType>exe</OutputType>
+
+    <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
   </PropertyGroup>
 
   <ItemGroup>

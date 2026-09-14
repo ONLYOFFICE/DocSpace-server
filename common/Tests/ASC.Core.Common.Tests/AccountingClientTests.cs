@@ -114,6 +114,19 @@ public class AccountingClientTests
     }
 
     [Fact]
+    public async Task TransportFailure_IsMappedToAccountingException()
+    {
+        // A transport failure never reaches ExceptionFactory, which only sees HTTP responses; the
+        // TransportExceptionFactory keeps it inside the AccountingException hierarchy instead of leaking
+        // Refit.ApiRequestException to the callers.
+        var (client, _) = CreateClient(_ => throw new HttpRequestException("connection refused"));
+
+        var act = async () => await client.GetServiceInfoAsync("backup");
+
+        (await act.Should().ThrowExactlyAsync<AccountingException>())
+            .WithInnerException<HttpRequestException>();
+    }
+    [Fact]
     public async Task Requests_IncludeValidHmacAuthorizationHeader()
     {
         var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "{}"));
@@ -257,8 +270,11 @@ public class AccountingClientTests
 
         services.AddAccountingHttpClient(configuration);
 
-        // Replace the real network handler with our capturing one for every named client (including "accountingHttpClient").
-        services.ConfigureHttpClientDefaults(b => b.ConfigurePrimaryHttpMessageHandler(() => handler));
+        // Replace the real network handler with our capturing one. AddRefitGeneratedClient sets a primary
+        // handler on its own named client, which overrides ConfigureHttpClientDefaults - so the
+        // override has to target that exact client by name.
+        services.AddHttpClient(Refit.UniqueName.ForType<IAccountingApi>())
+                .ConfigurePrimaryHttpMessageHandler(() => handler);
 
         var provider = services.BuildServiceProvider();
         return (provider.GetRequiredService<AccountingClient>(), handler);
