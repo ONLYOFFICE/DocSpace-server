@@ -56,7 +56,7 @@ import { asyncHandler, streamNdjson, streamOpenAiSse, attachmentLimitError } fro
 import { observeChatStream } from "../telemetry/chatStream.js";
 import type { StreamDialect } from "../telemetry/chatStream.js";
 import { assertThreadCreatable } from "./threadsController.js";
-import { isObject } from "../narrow.js";
+import { isObject, parseInt10 } from "../narrow.js";
 import {
   HttpToolsAdapter,
   safeGetToolsPrompt,
@@ -305,9 +305,25 @@ function customScopeOf(body: unknown): string | undefined {
   return typeof entityId === "string" ? entityId : undefined;
 }
 
+// How often a streaming assistant message is flushed to the C# service
+// (`PUT /internal/ai/messages/{id}`) while the round is in progress. The
+// library default (150 ms) is tuned for a local adapter; here every write
+// is an HTTP hop, so pace them to a few seconds. The first create and the
+// terminal write are unconditional; this only paces the intermediate ones,
+// and the library salvages the staged text if the stream dies early.
+// Override with `AI_CHAT_PERSIST_INTERVAL_MS`; anything that is not a
+// positive integer keeps the default here rather than falling through to
+// the library's 150 ms fallback.
+const DEFAULT_PERSIST_INTERVAL_MS = 10_000;
+const PERSIST_INTERVAL_MS = ((): number => {
+  const configured = parseInt10(process.env["AI_CHAT_PERSIST_INTERVAL_MS"]);
+  return configured !== undefined && configured > 0 ? configured : DEFAULT_PERSIST_INTERVAL_MS;
+})();
+
 const toolsAdapter = new HttpToolsAdapter();
 const engine = new AIEngine({
   storage,
+  persistIntervalMs: PERSIST_INTERVAL_MS,
   // System (host-configured MCP) tools and registered custom MCP servers
   // run server-side and pause for UI approval; most DocSpace integration
   // tools run silently. Compose all three — before customToolsSource was
