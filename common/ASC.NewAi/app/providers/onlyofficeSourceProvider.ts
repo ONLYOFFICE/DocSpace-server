@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { loadProvider, registerProvider } from "@onlyoffice/ai-chat/providers";
+import { getReasoningSupport, loadProvider, registerProvider } from "@onlyoffice/ai-chat/providers";
 import type { AbstractBaseProvider, ProviderConstructor } from "@onlyoffice/ai-chat/providers";
 import { getSourceMeta } from "../requestContext.js";
 import type { SourceMeta } from "../storage/docspaceFilesApi.js";
@@ -98,7 +98,21 @@ type ProviderWithExtraBody = { [K in keyof AbstractBaseProvider]: AbstractBasePr
 };
 type ProviderWithExtraBodyConstructor = {
   new (creds: ProviderCredentials): ProviderWithExtraBody;
-} & Pick<ProviderConstructor, "checkProvider" | "getProviderModels" | "getName" | "getBaseUrl">;
+} & Pick<
+  ProviderConstructor,
+  "checkProvider" | "getProviderModels" | "getName" | "getBaseUrl" | "getReasoningSupport"
+>;
+
+// The registry answers `getReasoningSupport(type, model)` from its own
+// per-type tables for the BUILT-IN providers and from the static
+// `getReasoningSupport` for a custom one — and a type shadowed through
+// `registerProvider` is custom. The library class carries no such static
+// (the table lives in the registry), so without one of our own the shadowed
+// `onlyoffice` type would fall back to "thinks at every depth, can be
+// switched off" — offering Off for Grok and Claude Fable, which cannot stop.
+// The ONLYOFFICE route is a one-to-one proxy in front of OpenRouter and
+// spells thinking exactly as OpenRouter does, so its table is the answer.
+const REASONING_TABLE_PROVIDER_TYPE = "openrouter";
 
 /**
  * Shadow the built-in ONLYOFFICE provider with one whose request `metadata`
@@ -124,6 +138,10 @@ export async function registerOnlyofficeSourceProvider(): Promise<void> {
   }
 
   class OnlyofficeSourceProvider extends Base {
+    static override getReasoningSupport(model: string) {
+      return getReasoningSupport(REASONING_TABLE_PROVIDER_TYPE, model);
+    }
+
     override extraBody(): Record<string, unknown> {
       const metadata = sourceMetadata(getSourceMeta());
       return metadata ? { metadata } : {};
