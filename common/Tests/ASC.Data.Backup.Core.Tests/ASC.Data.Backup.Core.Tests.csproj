@@ -4,7 +4,6 @@
         <Nullable>enable</Nullable>
         <OutputType>exe</OutputType>
 
-        <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
         <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
     </PropertyGroup>
 
