@@ -325,7 +325,8 @@ public class FileEntryDtoHelper(
     IUrlShortener urlShortener,
     ExternalDatabaseClient externalDatabaseClient,
     IFusionCache fusionCache,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    ILogger<FileEntryDtoHelper> logger)
 {
     protected readonly FileSecurity _fileSecurity = fileSecurity;
     protected readonly GlobalFolderHelper _globalFolderHelper = globalFolderHelper;
@@ -362,8 +363,9 @@ public class FileEntryDtoHelper(
 
             return exists;
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            logger.WarnFormTableCheckFailed(e, tableName);
             return false;
         }
     }
@@ -539,4 +541,10 @@ public class FileEntryDtoHelper(
 
         return default;
     }
+}
+
+internal static partial class FileEntryDtoHelperLogger
+{
+    [LoggerMessage(LogLevel.Warning, "Failed to check the form submission table {tableName} in the external database")]
+    public static partial void WarnFormTableCheckFailed(this ILogger<FileEntryDtoHelper> logger, Exception exception, string tableName);
 }
