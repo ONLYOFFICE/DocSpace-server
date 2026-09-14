@@ -349,19 +349,12 @@ public class FileEntryDtoHelper(
 
         try
         {
-
             var cacheKey = $"files:form:table:{tenantManager.GetCurrentTenantId()}:{tableName}";
 
-            var cached = await fusionCache.TryGetAsync<bool>(cacheKey);
-            if (cached.HasValue)
-            {
-                return cached.Value;
-            }
-
-            var exists = await externalDatabaseClient.TableExistsAsync(tableName);
-            await fusionCache.SetAsync(cacheKey, exists, opt => opt.SetDuration(_formTableCacheDuration));
-
-            return exists;
+            return await fusionCache.GetOrSetAsync(
+                cacheKey,
+                async _ => await externalDatabaseClient.TableExistsAsync(tableName),
+                opt => opt.SetDuration(_formTableCacheDuration));
         }
         catch (Exception e)
         {
