@@ -37,7 +37,7 @@ namespace ASC.AI.Models.ResponseDto;
 
 public class PreferencesDto
 {
-    public bool? DeepMode { get; init; }
+    public ReasoningDepth? Depth { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,

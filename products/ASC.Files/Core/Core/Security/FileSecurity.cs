@@ -1616,7 +1616,14 @@ public class FileSecurity(
             case FolderType.VirtualRooms:
             case FolderType.AiAgents:
             case FolderType.Forms:
-                if (isDocSpaceAdmin && folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge))
+                // The administrator bypass below does not extend to end-to-end encrypted rooms.
+                // Membership there means holding a key, so an administrator who was never invited
+                // cannot read anything in one and must not be handed access to it by role alone. This
+                // skips the bypass rather than denying outright: an administrator who *was* invited
+                // falls through to the ordinary share-based checks and keeps their access.
+                var inPrivateRoom = isRoom ? folder is { SettingsPrivate: true } : room is { SettingsPrivate: true };
+
+                if (isDocSpaceAdmin && !inPrivateRoom && folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge))
                 {
                     if (action == FilesSecurityActions.Download)
                     {
@@ -2848,11 +2855,18 @@ public class FileSecurity(
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
         };
 
+        var currentUserId = authContext.CurrentAccount.ID;
+
         var roomsEntries = storageFilter == StorageFilter.ThirdParty ?
             [] :
             await folderDao.GetRoomsAsync(rootFoldersIds, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectOwnerId, subjectEntries, quotaFilter, groupId, privacyFilter)
                 .Where(r => withSubfolders || r.IsRoom)
                 .Where(r => MatchesFormsSplit(r, searchArea))
+                // This is the administrator's view, which otherwise lists every room in the portal.
+                // That bypass does not extend to end-to-end encrypted rooms: membership there means
+                // holding a key, so an administrator who was never invited cannot read anything in one
+                // and has no business seeing it listed either.
+                .Where(r => !r.SettingsPrivate || r.CreateBy == currentUserId || internalRecords.ContainsKey(r.Id))
                 .ToListAsync();
 
         var thirdPartyRoomsEntries = storageFilter == StorageFilter.Internal || privacyFilter == RoomPrivacyFilter.Private ?

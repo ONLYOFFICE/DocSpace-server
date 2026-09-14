@@ -35,6 +35,7 @@ import { PreferencesEngine } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString } from "../narrow.js";
+import { isReasoningLevel, REASONING_LEVELS } from "../storage/reasoningDepth.js";
 
 const engine = new PreferencesEngine({ storage });
 
@@ -71,5 +72,35 @@ export const preferencesController = {
     const entityId = asString(req.query["entityId"]);
     const value = await engine.isDeepModeSet(entityId);
     res.json(value);
+  }),
+
+  // Extended-thinking depth. Deep mode above stays the widget's fallback when
+  // these two are unavailable; both are views of the ONE `depth` value the C#
+  // storage keeps (see `storage/preferencesStorage.ts`). The engine's
+  // reasoning-level methods are built for a host with two values — its
+  // `setReasoningLevel` writes the toggle first (a read plus a write here)
+  // and the depth after, so a concurrent round could observe the interim
+  // `medium`, and its `getReasoningLevel` reads twice. With a single value
+  // the storage answers both in one call with identical semantics: a
+  // missing row is `off` (the configured deep-mode default is off).
+  getReasoningLevel: asyncHandler(async (req, res) => {
+    const entityId = asString(req.query["entityId"]);
+    const value = (await storage.preferences.readReasoningLevel?.(entityId)) ?? "off";
+    res.json(value);
+  }),
+
+  setReasoningLevel: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["value", "entityId"] as const);
+    // Same discipline as `setDeepMode`: only a real level is accepted, so an
+    // absent or mistyped value can never overwrite the stored depth.
+    if (!isReasoningLevel(args.value)) {
+      res.status(400).json({
+        error: `value is required and must be one of: ${REASONING_LEVELS.join(", ")}`,
+      });
+      return;
+    }
+    const entityId = typeof args.entityId === "string" ? args.entityId : undefined;
+    await storage.preferences.upsertReasoningLevel?.(args.value, entityId);
+    res.json({ success: true });
   }),
 };

@@ -503,9 +503,11 @@ public class PaymentController(
         await paymentHelper.SubscriptionBalanceToWalletAsync(tenant.Id, productId);
 
         // Make sure the wallet balance covers the cost, topping it up for the missing amount if necessary.
+        // A delayed payment method cannot be topped up on the fly, so its wallet has to cover the cost already.
         var siteName = tenant.GetTenantDomain(coreSettings);
+        var allowTopUp = !customerInfo.IsDelayedPaymentMethod;
 
-        if (!await tariffService.EnsureWalletBalanceAsync(tenant.Id, requiredAmount, defaultCurrency, participant, siteName, false))
+        if (!await tariffService.EnsureWalletBalanceAsync(tenant.Id, requiredAmount, defaultCurrency, participant, siteName, false, null, allowTopUp))
         {
             throw new BillingException("Insufficient balance");
         }
@@ -700,7 +702,7 @@ public class PaymentController(
 
         var quotaList = await quotaService.GetTenantQuotasAsync();
         var quota = quotaList.FirstOrDefault(q => q.Wallet && q.TenantId == (int)inDto.Service);
-        if (quota == null)
+        if (quota == null || ((quota.AITools || quota.AISearch) && !await aiGateway.IsAiAccessEnabledAsync()))
         {
             throw new ItemNotFoundException("Service could not be found");
         }
@@ -924,8 +926,9 @@ public class PaymentController(
         }
 
         var siteName = tenant.GetTenantDomain(coreSettings);
+        var waitForChanges = !customerInfo.IsDelayedPaymentMethod;
 
-        return await paymentHelper.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, securityContext.CurrentAccount.ID.ToString(), siteName);
+        return await paymentHelper.TopUpDepositAsync(tenant.Id, inDto.Amount, inDto.Currency, securityContext.CurrentAccount.ID.ToString(), siteName, waitForChanges);
     }
 
     /// <remarks>
@@ -1592,6 +1595,20 @@ public class PaymentController(
         return await tariffService.GetAccountingServicePricesAsync(inDto.ServiceName, inDto.Active);
     }
 
+    /// <remarks>
+    /// Returns the portal's automatic wallet top-up settings - whether it is on, the balance that triggers a
+    /// charge, the balance it is topped up to, and the currency both are expressed in. Any DocSpace
+    /// administrator may read them, and unlike the operation that changes them this one needs neither a
+    /// billing customer nor a configured billing service, so it answers on a portal that has never paid for
+    /// anything. It is read-only and changes nothing.
+    /// A portal that has never configured top-up gets the defaults rather than an empty result: `enabled` is
+    /// false, `currency` is null, and `minBalance` and `upToBalance` are 0. Those two zeros are outside the
+    /// ranges `POST api/2.0/portal/payment/topupsettings` accepts - 5 to 1000 and 6 to 5000 - so the answer
+    /// cannot be sent straight back to it; supply real values instead. `lastModified` is
+    /// `0001-01-01T00:00:00` until the settings are stored for the first time.
+    /// `lowBalanceThreshold` and `lowBalanceNotified` are maintained by the portal itself: they are reported
+    /// here, but ignored when the settings are written.
+    /// </remarks>
     /// <summary>
     /// Get the auto top-up settings
     /// </summary>

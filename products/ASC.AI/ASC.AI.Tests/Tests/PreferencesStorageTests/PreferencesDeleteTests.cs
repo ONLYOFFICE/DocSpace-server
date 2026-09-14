@@ -40,7 +40,7 @@ public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
     [Fact]
     public async Task Delete_Global_RemovesValue()
     {
-        await UpsertPreferencesAsync(deepMode: true);
+        await UpsertPreferencesAsync(depth: ReasoningDepth.High);
 
         using var response = await _ai.DeleteAsync(
             PreferencesPath,
@@ -55,7 +55,7 @@ public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
     public async Task Delete_WithEntityId_RemovesScopedValue()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(deepMode: true, entityId: roomId.ToString());
+        await UpsertPreferencesAsync(depth: ReasoningDepth.High, entityId: roomId.ToString());
 
         using var response = await _ai.DeleteAsync(
             $"{PreferencesPath}?entityId={roomId}",
@@ -92,8 +92,8 @@ public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
     public async Task Delete_WithEntityId_DoesNotAffectGlobal()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(deepMode: true);
-        await UpsertPreferencesAsync(deepMode: false, entityId: roomId.ToString());
+        await UpsertPreferencesAsync(depth: ReasoningDepth.High);
+        await UpsertPreferencesAsync(depth: ReasoningDepth.None, entityId: roomId.ToString());
 
         using var response = await _ai.DeleteAsync(
             $"{PreferencesPath}?entityId={roomId}",
@@ -102,7 +102,7 @@ public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
 
         var global = await ReadPreferencesAsync();
         global.Should().NotBeNull();
-        global!.DeepMode.Should().BeTrue();
+        global!.Depth.Should().Be(ReasoningDepth.High);
 
         var scoped = await ReadPreferencesAsync(roomId.ToString());
         scoped.Should().BeNull();
@@ -112,8 +112,8 @@ public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
     public async Task Delete_Global_DoesNotAffectScoped()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(deepMode: true);
-        await UpsertPreferencesAsync(deepMode: false, entityId: roomId.ToString());
+        await UpsertPreferencesAsync(depth: ReasoningDepth.High);
+        await UpsertPreferencesAsync(depth: ReasoningDepth.None, entityId: roomId.ToString());
 
         using var response = await _ai.DeleteAsync(
             PreferencesPath,
@@ -125,7 +125,7 @@ public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
 
         var scoped = await ReadPreferencesAsync(roomId.ToString());
         scoped.Should().NotBeNull();
-        scoped!.DeepMode.Should().BeFalse();
+        scoped!.Depth.Should().Be(ReasoningDepth.None);
     }
 
     [Fact]
@@ -133,8 +133,8 @@ public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
     {
         var firstRoomId = await CreateRoomAsync();
         var secondRoomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(deepMode: true, entityId: firstRoomId.ToString());
-        await UpsertPreferencesAsync(deepMode: false, entityId: secondRoomId.ToString());
+        await UpsertPreferencesAsync(depth: ReasoningDepth.High, entityId: firstRoomId.ToString());
+        await UpsertPreferencesAsync(depth: ReasoningDepth.None, entityId: secondRoomId.ToString());
 
         using var response = await _ai.DeleteAsync(
             $"{PreferencesPath}?entityId={firstRoomId}",
@@ -145,7 +145,7 @@ public class PreferencesDeleteTests(AspireAppFixture fixture) : BaseTest(fixture
 
         var second = await ReadPreferencesAsync(secondRoomId.ToString());
         second.Should().NotBeNull();
-        second!.DeepMode.Should().BeFalse();
+        second!.Depth.Should().Be(ReasoningDepth.None);
     }
 
     [Fact]
