@@ -86,7 +86,7 @@ public class ProjectConfigurator(
         ConfigureForwardedHeadersNetworks(project);
 
         // Map the dev HTTPS host to the default standalone tenant.
-        project.WithEnvironment("CORE__LOCAL_ADDRESSES", Constants.AppHostHttpsHost);
+        project.WithEnvironment("CORE__LOCAL_ADDRESSES", $"{Constants.AppHostHttpsHost},{Constants.HostDockerInternal}");
 
         // Every launch profile points $STORAGE_ROOT/log__dir at <root>/Data and <root>/Logs, and the
         // integration tests reuse those very profiles. Redirect them into a `test` subfolder so a test
@@ -182,7 +182,7 @@ public class ProjectConfigurator(
 
         ConfigureForwardedHeadersNetworks(resourceBuilder);
 
-        resourceBuilder.WithEnvironment("CORE__LOCAL_ADDRESSES", Constants.AppHostHttpsHost);
+        resourceBuilder.WithEnvironment("CORE__LOCAL_ADDRESSES", $"{Constants.AppHostHttpsHost},{Constants.HostDockerInternal}");
 
         AddBaseBind(resourceBuilder);
 
