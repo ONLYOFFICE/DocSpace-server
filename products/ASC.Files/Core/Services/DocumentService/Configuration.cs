@@ -1102,6 +1102,15 @@ public class CustomizationConfig<T>(
         };
     }
 
+    public async Task<AIConfig> GetAIConfigAsync()
+    {
+        var settings = await settingsManager.LoadAsync<TenantAiAccessSettings>();
+        return new AIConfig
+        {
+            Disabled = !settings.Enabled
+        };
+    }
+
     private async Task<(FileShare, string)> CheckLinkAsync(File<T> file)
     {
         var linkRight = FileShare.Restrict;
@@ -1408,4 +1417,15 @@ public class UserConfig
     /// </summary>
     /// <example>cust_001</example>
     public string CustomerId { get; set; }
+}
+
+public class AIConfig
+{
+    /// <summary>
+    /// Indicates whether the AI feature is disabled.
+    /// </summary>
+    /// <example>
+    /// true
+    /// </example>
+    public bool Disabled { get; set; }
 }

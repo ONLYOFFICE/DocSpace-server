@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for managing the deep link configuration.
+/// How the portal opens its links on a mobile device.
 /// </summary>
 /// <example>
 /// {
@@ -44,7 +44,9 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 public class DeepLinkConfigurationRequestsDto
 {
     /// <summary>
-    /// The deep link settings for the specified tenant.
+    /// The deep link configuration to store. Only its `handlingMode` is read - whether a link always opens in the
+    /// browser, always in the native application, or asks the user each time - and a mode outside the defined set is
+    /// refused with 400 before anything is stored.
     /// </summary>
     /// <example>{ "handlingMode": "ProvideChoice" }</example>
     public TenantDeepLinkSettings DeepLinkSettings { get; set; }

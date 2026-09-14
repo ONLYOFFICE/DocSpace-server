@@ -34,54 +34,62 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The password settings parameters.
+/// The password policy of the portal, with the expressions a client can check a password against.
 /// </summary>
 public class PasswordSettingsDto
 {
     /// <summary>
-    /// The minimum number of characters required for valid passwords.
+    /// The shortest password the portal accepts, 8 characters on a portal nobody has configured. Whatever the
+    /// policy says, a password longer than 30 characters is refused as well, and that ceiling is not reported
+    /// here.
     /// </summary>
     /// <example>8</example>
     public required int MinLength { get; set; }
 
     /// <summary>
-    /// Specifies whether the password should contain the uppercase letters or not.
+    /// Whether at least one uppercase letter is demanded. While it is `false` an uppercase letter is still
+    /// allowed - the flag adds a requirement rather than permission.
     /// </summary>
     /// <example>true</example>
     public required bool UpperCase { get; set; }
 
     /// <summary>
-    /// Specifies whether the password should contain the digits or not.
+    /// Whether at least one digit is demanded, read the same way as `upperCase`.
     /// </summary>
     /// <example>true</example>
     public required bool Digits { get; set; }
 
     /// <summary>
-    /// Specifies whether the password should contain the special symbols or not.
+    /// Whether at least one special symbol is demanded, read the same way as `upperCase`. Which symbols count is
+    /// spelled out by `specSymbolsRegexStr`.
     /// </summary>
     /// <example>false</example>
     public required bool SpecSymbols { get; set; }
 
     /// <summary>
-    /// The allowed password characters in the regex string format.
+    /// The expression the whole password has to match, which is what defines the alphabet the portal accepts at
+    /// all. It comes from the installation's configuration rather than from the portal policy, so it is the same
+    /// for every portal of an installation and unaffected by the flags above.
     /// </summary>
     /// <example>^[a-zA-Z0-9!@#$%^&amp;*()]+$</example>
     public required string AllowedCharactersRegexStr { get; set; }
 
     /// <summary>
-    /// The password digits in the regex string format.
+    /// The look-ahead expression that tests the digit requirement, meant to be applied only while `digits` is
+    /// `true`. It is always filled in, so its presence is not itself a requirement.
     /// </summary>
     /// <example>(?=.*\\d)</example>
     public required string DigitsRegexStr { get; set; }
 
     /// <summary>
-    /// The password uppercase letters in the regex string format.
+    /// The look-ahead expression that tests the uppercase requirement, to be applied while `upperCase` is `true`.
     /// </summary>
     /// <example>(?=.*[A-Z])</example>
     public required string UpperCaseRegexStr { get; set; }
 
     /// <summary>
-    /// The passaword special symbols in the regex string format.
+    /// The look-ahead expression that tests the special-symbol requirement, to be applied while `specSymbols` is
+    /// `true`. It also enumerates the symbols the portal treats as special.
     /// </summary>
     /// <example>(?=.*[!@#$%^&amp;*()])</example>
     public required string SpecSymbolsRegexStr { get; set; }

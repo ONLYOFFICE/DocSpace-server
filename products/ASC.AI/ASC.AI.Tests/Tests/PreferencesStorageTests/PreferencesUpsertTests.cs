@@ -42,14 +42,14 @@ public class PreferencesUpsertTests(AspireAppFixture fixture) : BaseTest(fixture
     {
         using var response = await _ai.PutAsync(
             PreferencesPath,
-            new { deepMode = true },
+            new { depth = ReasoningDepth.High },
             TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var stored = await ReadPreferencesAsync();
         stored.Should().NotBeNull();
-        stored!.DeepMode.Should().BeTrue();
+        stored!.Depth.Should().Be(ReasoningDepth.High);
     }
 
     [Fact]
@@ -59,25 +59,25 @@ public class PreferencesUpsertTests(AspireAppFixture fixture) : BaseTest(fixture
 
         using var response = await _ai.PutAsync(
             PreferencesPath,
-            new { deepMode = true, entityId = roomId.ToString() },
+            new { depth = ReasoningDepth.High, entityId = roomId.ToString() },
             TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var stored = await ReadPreferencesAsync(roomId.ToString());
         stored.Should().NotBeNull();
-        stored!.DeepMode.Should().BeTrue();
+        stored!.Depth.Should().Be(ReasoningDepth.High);
     }
 
     [Fact]
     public async Task Upsert_Global_TwiceUpdatesValue()
     {
-        await UpsertPreferencesAsync(deepMode: true);
-        await UpsertPreferencesAsync(deepMode: false);
+        await UpsertPreferencesAsync(depth: ReasoningDepth.High);
+        await UpsertPreferencesAsync(depth: ReasoningDepth.None);
 
         var stored = await ReadPreferencesAsync();
         stored.Should().NotBeNull();
-        stored!.DeepMode.Should().BeFalse();
+        stored!.Depth.Should().Be(ReasoningDepth.None);
     }
 
     [Fact]
@@ -85,38 +85,38 @@ public class PreferencesUpsertTests(AspireAppFixture fixture) : BaseTest(fixture
     {
         var roomId = await CreateRoomAsync();
 
-        await UpsertPreferencesAsync(deepMode: true, entityId: roomId.ToString());
-        await UpsertPreferencesAsync(deepMode: false, entityId: roomId.ToString());
+        await UpsertPreferencesAsync(depth: ReasoningDepth.High, entityId: roomId.ToString());
+        await UpsertPreferencesAsync(depth: ReasoningDepth.None, entityId: roomId.ToString());
 
         var stored = await ReadPreferencesAsync(roomId.ToString());
         stored.Should().NotBeNull();
-        stored!.DeepMode.Should().BeFalse();
+        stored!.Depth.Should().Be(ReasoningDepth.None);
     }
 
     [Fact]
     public async Task Upsert_WithEntityId_DoesNotAffectGlobal()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(deepMode: true);
+        await UpsertPreferencesAsync(depth: ReasoningDepth.High);
 
-        await UpsertPreferencesAsync(deepMode: false, entityId: roomId.ToString());
+        await UpsertPreferencesAsync(depth: ReasoningDepth.None, entityId: roomId.ToString());
 
         var global = await ReadPreferencesAsync();
         global.Should().NotBeNull();
-        global!.DeepMode.Should().BeTrue();
+        global!.Depth.Should().Be(ReasoningDepth.High);
     }
 
     [Fact]
     public async Task Upsert_Global_DoesNotAffectScoped()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(deepMode: true, entityId: roomId.ToString());
+        await UpsertPreferencesAsync(depth: ReasoningDepth.High, entityId: roomId.ToString());
 
-        await UpsertPreferencesAsync(deepMode: false);
+        await UpsertPreferencesAsync(depth: ReasoningDepth.None);
 
         var scoped = await ReadPreferencesAsync(roomId.ToString());
         scoped.Should().NotBeNull();
-        scoped!.DeepMode.Should().BeTrue();
+        scoped!.Depth.Should().Be(ReasoningDepth.High);
     }
 
     [Fact]
@@ -125,33 +125,44 @@ public class PreferencesUpsertTests(AspireAppFixture fixture) : BaseTest(fixture
         var firstRoomId = await CreateRoomAsync();
         var secondRoomId = await CreateRoomAsync();
 
-        await UpsertPreferencesAsync(deepMode: true, entityId: firstRoomId.ToString());
-        await UpsertPreferencesAsync(deepMode: false, entityId: secondRoomId.ToString());
+        await UpsertPreferencesAsync(depth: ReasoningDepth.High, entityId: firstRoomId.ToString());
+        await UpsertPreferencesAsync(depth: ReasoningDepth.None, entityId: secondRoomId.ToString());
 
         var first = await ReadPreferencesAsync(firstRoomId.ToString());
         var second = await ReadPreferencesAsync(secondRoomId.ToString());
 
         first.Should().NotBeNull();
-        first!.DeepMode.Should().BeTrue();
+        first!.Depth.Should().Be(ReasoningDepth.High);
 
         second.Should().NotBeNull();
-        second!.DeepMode.Should().BeFalse();
+        second!.Depth.Should().Be(ReasoningDepth.None);
     }
 
     [Fact]
-    public async Task Upsert_NullDeepMode_Persisted()
+    public async Task Upsert_NullDepth_Persisted()
     {
-        await UpsertPreferencesAsync(deepMode: true);
+        await UpsertPreferencesAsync(depth: ReasoningDepth.High);
 
         using var response = await _ai.PutAsync(
             PreferencesPath,
-            new { deepMode = (bool?)null },
+            new { depth = (ReasoningDepth?)null },
             TestContext.Current.CancellationToken);
         response.StatusCode.Should().Be(HttpStatusCode.NoContent);
 
         var stored = await ReadPreferencesAsync();
         stored.Should().NotBeNull();
-        stored!.DeepMode.Should().BeNull();
+        stored!.Depth.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Upsert_UnknownDepth_Returns400()
+    {
+        using var response = await _ai.PutAsync(
+            PreferencesPath,
+            new { depth = "ultra" },
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
     [Fact]
@@ -159,7 +170,7 @@ public class PreferencesUpsertTests(AspireAppFixture fixture) : BaseTest(fixture
     {
         using var response = await _ai.PutAsync(
             PreferencesPath,
-            new { deepMode = true, entityId = "999999999" },
+            new { depth = ReasoningDepth.High, entityId = "999999999" },
             TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);

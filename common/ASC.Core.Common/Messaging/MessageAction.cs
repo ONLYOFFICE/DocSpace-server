@@ -435,6 +435,9 @@ public enum MessageAction
     [Description("Documents display file extension updated")]
     DocumentsDisplayFileExtensionUpdated = 5101,
 
+    [Description("Documents show quick actions updated")]
+    DocumentsShowQuickActionsUpdated = 5207,
+
     [Description("File converted")]
     FileConverted = 5035,
 

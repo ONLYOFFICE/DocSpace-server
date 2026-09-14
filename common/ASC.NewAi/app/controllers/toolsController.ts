@@ -234,6 +234,11 @@ export const toolsController = {
     res.json({
       groups: { ...systemGroups, ...custom.groups },
       errors: custom.errors,
+      // `groups` mixes system and registered custom servers, so name the
+      // system ones explicitly — the agent dialog pre-selects and labels
+      // servers by this list; without it every registered custom server got
+      // the portal branding and a default pre-selection (Bug 83705).
+      system: Object.keys(systemGroups),
     });
   }),
 

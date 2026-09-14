@@ -34,7 +34,10 @@
 namespace ASC.Web.Api.Controllers;
 
 /// <remarks>
-/// Portal capabilities API.
+/// The sign-in capabilities a portal advertises before anyone has signed in: LDAP authentication, the external
+/// identity providers the login page should offer, SAML single sign-on and the built-in identity server. The single
+/// operation here is anonymous and is normally the first call a login client makes; the settings behind each
+/// capability are read and changed by portal administrators under `api/2.0/settings`.
 /// </remarks>
 /// <name>capabilities</name>
 [ApiEndpoint("capabilities")]
@@ -52,15 +55,27 @@ public class CapabilitiesController(CoreBaseSettings coreBaseSettings,
     private readonly ILogger _log = logger;
 
 
-    ///<remarks>
-    /// Returns the information about portal capabilities.
-    ///</remarks>
-    ///<summary>
+    /// <remarks>
+    /// Returns the sign-in methods this portal offers, which a login client needs before anyone has signed in: LDAP
+    /// authentication and its domain, the external identity providers to show, the SAML single sign-on URL and its
+    /// label, and whether the built-in identity server is available. No token is needed and nothing has to be called
+    /// first - the operation is open to unauthenticated callers, answers even while the portal's payment has lapsed,
+    /// and is read-only and idempotent. `providers` holds provider keys such as `google` or `facebook`, ordered for
+    /// the country detected from the caller's IP address and reduced to the ones this installation has configured;
+    /// pass one of them as `provider` to `POST api/2.0/authentication`. An empty `providers` means external sign-in
+    /// is off and an empty `ssoUrl` means single sign-on is off; a capability whose settings cannot be read is
+    /// reported as disabled rather than failing the call, so a false flag means the method is not offered, not that
+    /// it is unknown. The answer describes the portal and never a user, and carries none of the configuration behind
+    /// these methods: an administrator reads that from `GET api/2.0/settings/ssov2` and
+    /// `GET api/2.0/settings/authservice`.
+    /// </remarks>
+    /// <summary>
     /// Get portal capabilities
-    ///</summary>
-    ///<path>api/2.0/capabilities</path>
+    /// </summary>
+    /// <path>api/2.0/capabilities</path>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Capabilities")]
-    [SwaggerResponse(200, "Portal capabilities", typeof(CapabilitiesDto))]
+    [SwaggerResponse(200, "The sign-in methods the portal offers: LDAP, the external identity providers, single sign-on and the identity server, each with the state it has for this portal", typeof(CapabilitiesDto))]
     [HttpGet] //NOTE: this method doesn't requires auth!!!  //NOTE: this method doesn't check payment!!!
     [AllowNotPayment]
     public async Task<CapabilitiesDto> GetPortalCapabilities()

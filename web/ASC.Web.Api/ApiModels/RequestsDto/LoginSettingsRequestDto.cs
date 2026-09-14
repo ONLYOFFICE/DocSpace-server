@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for configuring login security and performance settings.
+/// The brute-force protection of the sign-in form: how many failures, over how long, cost how long a block.
 /// </summary>
 /// <example>
 /// {
@@ -46,21 +46,25 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 public class LoginSettingsRequestDto
 {
     /// <summary>
-    /// The maximum number of consecutive failed login attempts allowed before triggering account suspension.
+    /// How many failed sign-in attempts inside one window are tolerated before the offender is blocked. Attempts are
+    /// counted per user name and client address together, so one member being blocked leaves the rest of the portal
+    /// signing in normally.
     /// </summary>
     /// <example>1</example>
     [Range(1, 9999)]
     public int AttemptCount { get; set; }
 
     /// <summary>
-    /// The duration (in minutes) for which an account remains suspended after exceeding maximum login attempts.
+    /// How long, in seconds, a blocked user name and address pair stays refused. While the block lasts the sign-in
+    /// is refused even when the password is finally correct.
     /// </summary>
     /// <example>1</example>
     [Range(1, 9999)]
     public int BlockTime { get; set; }
 
     /// <summary>
-    /// The maximum time (in seconds) allowed for server to process and respond to login requests.
+    /// The length, in seconds, of the rolling window the failed attempts are counted over. A wider window makes the
+    /// same `attemptCount` stricter, because failures further apart still add up.
     /// </summary>
     /// <example>1</example>
     [Range(1, 9999)]

@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.Models;
 
 /// <summary>
-/// The request parameters for managing the DNS (Domain Name System) settings.
+/// The custom domain the portal answers on, and whether that mapping is in force.
 /// </summary>
 /// <example>
 /// {
@@ -45,13 +45,17 @@ namespace ASC.Web.Api.Models;
 public class DnsSettingsRequestsDto
 {
     /// <summary>
-    /// The DNS (Domain Name System) configuration name.
+    /// The domain the portal is to be reachable under, as a bare hostname without a scheme. It must not collide with
+    /// the reserved base domain of the installation, and a name that fails validation is refused without disturbing
+    /// the mapping in force. It is read only while `enable` is true.
     /// </summary>
     /// <example>example.com</example>
     public string DnsName { get; set; }
 
     /// <summary>
-    /// Specifies whether the DNS settings are enabled.
+    /// Whether the custom domain is put in force. Setting it false clears the mapping and ignores `dnsName`; setting
+    /// it true also stops the previous domain from answering and rewrites any Content Security Policy entry that
+    /// named it.
     /// </summary>
     /// <example>true</example>
     public bool Enable { get; set; }

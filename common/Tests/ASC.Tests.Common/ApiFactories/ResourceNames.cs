@@ -49,6 +49,13 @@ public static class ResourceNames
     public const string People = "onlyoffice-people";
     public const string Ai = "onlyoffice-ai";
 
+    /// <summary>
+    /// Audit-event persistence: Web.Studio hosts the only subscriber to
+    /// <c>EventDataIntegrationEvent</c>, so a suite that reads any <c>/log</c> endpoint has to start
+    /// it or the history it asserts on is never written.
+    /// </summary>
+    public const string WebStudio = "onlyoffice-web-studio";
+
     /// <summary>The identity (OAuth2) containers — Spring services built from common/ASC.Identity.</summary>
     public const string IdentityRegistration = "onlyoffice-identity-registration";
     public const string IdentityAuthorization = "onlyoffice-identity-authorization";

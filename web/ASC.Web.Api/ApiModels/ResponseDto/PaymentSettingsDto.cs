@@ -34,65 +34,76 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The payment settings parameters.
+/// Where to buy or extend the portal's subscription, and what the subscription in force looks like.
 /// </summary>
 /// <example>
 /// {
-///   "feedbackAndSupportUrl": "example value"
+///   "salesEmail": "sales@example.com",
+///   "buyUrl": "https://example.com/buy",
+///   "standalone": false,
+///   "currentLicense": {"trial": false, "dueDate": "2025-06-15T10:30:00.0000000Z"},
+///   "max": 999
 /// }
 /// </example>
 public class PaymentSettingsDto
 {
     /// <summary>
-    /// The email address for sales inquiries and support.
+    /// The vendor mailbox to write to about buying, extending or changing the subscription, picked for the portal
+    /// language. It is not the portal's own support address.
     /// </summary>
     /// <example>sales@example.com</example>
     public required string SalesEmail { get; set; }
 
     /// <summary>
-    /// The URL for accessing the feedback and support resources.
+    /// Not populated: nothing fills this field in, so it always comes back empty. The help and support addresses
+    /// live in `externalResources` of `GET api/2.0/settings` instead.
     /// </summary>
     /// <example>https://example.com</example>
     public string FeedbackAndSupportUrl { get; set; }
 
     /// <summary>
-    /// The URL for purchasing or upgrading the product.
+    /// The vendor page for buying or extending the subscription, chosen for the licence kind the installation was
+    /// built for and for the portal language. It is a page for a person to open, not an API to call.
     /// </summary>
     /// <example>https://example.com/buy</example>
     public required string BuyUrl { get; set; }
 
     /// <summary>
-    /// Indicates whether the system is running in standalone mode.
+    /// Whether this is a server installation someone administers themselves rather than a portal in the cloud,
+    /// which decides whether payment means uploading a licence file or a subscription in the vendor's store.
     /// </summary>
     /// <example>false</example>
     public required bool Standalone { get; set; }
 
     /// <summary>
-    /// The current license information.
+    /// The subscription in force, reduced to the two facts a payment page needs.
     /// </summary>
     /// <example>{"trial": false, "dueDate": "2025-06-15T10:30:00.0000000Z"}</example>
     public required CurrentLicenseInfo CurrentLicense { get; set; }
 
     /// <summary>
-    /// The maximum quota quantity.
+    /// The largest quantity of a paid item - members, storage - that may be bought in one go, `999` unless the
+    /// installation configures another cap. It bounds a single purchase, not the total a portal may hold.
     /// </summary>
-    /// <example>1</example>
+    /// <example>999</example>
     public required int Max { get; set; }
 }
 
 /// <summary>
-/// The current license information.
+/// The two facts about the subscription in force that a payment page needs.
 /// </summary>
 public class CurrentLicenseInfo
 {
     /// <summary>
-    /// Specifies whether the license is trial or not.
+    /// Whether the portal is on a trial rather than a paid subscription. A trial expires at `dueDate` and is not
+    /// extended by paying - a plan has to be bought instead.
     /// </summary>
     /// <example>false</example>
     public required bool Trial { get; set; }
 
     /// <summary>
-    /// The date when the license expires.
+    /// The day the subscription runs out, with the time of day cut off. The largest value a date can hold means
+    /// it never runs out, which is how a free or unlimited plan is expressed.
     /// </summary>
     /// <example>2025-06-15T10:30:00.0000000Z</example>
     public required DateTime DueDate { get; set; }

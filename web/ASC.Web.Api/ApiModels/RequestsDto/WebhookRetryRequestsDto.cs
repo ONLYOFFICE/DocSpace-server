@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The parameters for requesting the webhook delivery retries.
+/// Which past webhook deliveries are sent again.
 /// </summary>
 /// <example>
 /// {
@@ -44,7 +44,10 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 public class WebhookRetryRequestsDto
 {
     /// <summary>
-    /// The list of webhook delivery IDs to retry.
+    /// The delivery records to send again, by the identifiers `GET api/2.0/settings/webhooks/log` reports. An
+    /// identifier that exists nowhere, and one belonging to another member subscription when the caller is not a
+    /// DocSpace administrator, is skipped in silence rather than failing the call, so compare the number of records
+    /// that come back against the number sent. An empty list is accepted and queues nothing.
     /// </summary>
     /// <example>[1, 2, 3]</example>
     public List<int> Ids { get; set; }

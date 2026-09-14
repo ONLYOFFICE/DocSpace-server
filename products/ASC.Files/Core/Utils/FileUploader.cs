@@ -407,6 +407,14 @@ public class FileUploader(
     {
         var uploadSession = await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId);
 
+        // The endpoint used to check nothing at all: any authenticated caller who knew a session id
+        // could abort somebody else's upload, whatever access they had to the room it was going into.
+        // A session belongs to whoever opened it (set in CreateUploadSessionAsync).
+        if (uploadSession.UserId != authContext.CurrentAccount.ID)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
         await daoFactory.GetFileDao<T>().AbortUploadSessionAsync(uploadSession);
 
         await chunkedUploadSessionHolder.RemoveSessionAsync(uploadSession);

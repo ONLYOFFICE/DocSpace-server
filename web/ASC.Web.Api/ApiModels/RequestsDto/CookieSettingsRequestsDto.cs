@@ -34,18 +34,22 @@
 namespace ASC.Web.Api.Models;
 
 /// <summary>
-/// The request parameters for managing cookie settings.
+/// How long an authentication session of the portal stays valid, and whether that limit is applied.
 /// </summary>
 public class CookieSettingsRequestsDto
 {
     /// <summary>
-    /// The cookie lifetime in minutes.
+    /// How long, in minutes, a session issued from now on remains valid. A value above 9999 is clamped to 9999
+    /// rather than refused, and 0 or less clears the number, which together with `enabled` leaves sessions that
+    /// never expire on their own. Any positive value invalidates every session issued before this call, the
+    /// caller's included, so the client has to keep the fresh cookie the response carries.
     /// </summary>
     /// <example>525600</example>
     public int LifeTime { get; set; }
 
     /// <summary>
-    /// Specifies whether the cookie settings are enabled or disabled.
+    /// Whether the stored lifetime is applied at all. While it is false the number is ignored and an issued session
+    /// is honoured for a year; while it is true the connections behind expired sessions are dropped as well.
     /// </summary>
     /// <example>true</example>
     public bool Enabled { get; set; }

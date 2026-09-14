@@ -54,7 +54,7 @@ public class UpdateProfileBody
     public string? Key { get; init; }
 
     public required string ModelId { get; init; }
-    public bool? Reasoning { get; init; }
+    public ReasoningConfig? Reasoning { get; init; }
     public Capabilities? Capabilities { get; init; }
     public bool? UseResponsesApi { get; init; }
     public bool? CanUseTool { get; init; }

@@ -94,11 +94,11 @@ public class PreferencesStorage(
                         TenantId = tenantId,
                         CreatedBy = userId,
                         EntryId = entryId,
-                        DeepMode = preferences.DeepMode
+                        Depth = preferences.Depth
                     };
 
                     context.Preferences.Attach(entity);
-                    context.Entry(entity).Property(x => x.DeepMode).IsModified = true;
+                    context.Entry(entity).Property(x => x.Depth).IsModified = true;
                 }
                 else
                 {
@@ -108,7 +108,7 @@ public class PreferencesStorage(
                         TenantId = tenantId,
                         CreatedBy = userId,
                         EntryId = entryId,
-                        DeepMode = preferences.DeepMode
+                        Depth = preferences.Depth
                     });
                 }
 
@@ -133,7 +133,7 @@ public class PreferencesStorage(
 
     private static Preferences ToDomain(DbPreference entity) => new()
     {
-        DeepMode = entity.DeepMode
+        Depth = entity.Depth
     };
 
     private static string GetLockKey(int tenantId, Guid userId, int? entryId)

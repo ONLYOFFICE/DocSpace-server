@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for managing user security and access permissions.
+/// Which member is granted or denied the administrator role of which portal module.
 /// </summary>
 /// <example>
 /// {
@@ -44,31 +44,37 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 public class SecurityRequestsDto
 {
     /// <summary>
-    /// The product ID for which permissions are being set.
+    /// The module the role applies to, given by its GUID. The all-zero GUID stands for the portal itself and grants
+    /// or revokes the DocSpace administrator role, which covers every module at once; a GUID that names no module
+    /// group is stored without effect rather than refused.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid ProductId { get; set; }
 
     /// <summary>
-    /// The ID of the user whose permissions are being configured.
+    /// The portal member the role is given to or taken from, by user ID. The member has to exist already - nobody is
+    /// created here - and promoting a guest or a plain member turns them into a paid one.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid UserId { get; set; }
 
     /// <summary>
-    /// Specifies whether the user has administrative privileges.
+    /// Which way the role goes: `true` adds the member to the module administrator group, `false` removes them from
+    /// it. Taking away the portal-wide role also drops the member from every product group.
     /// </summary>
     /// <example>true</example>
     public bool Administrator { get; set; }
 }
 
 /// <summary>
-/// The request parameters for retrieving the security settings across the multiple modules.
+/// Which portal modules the access configuration is read for.
 /// </summary>
 public class SecuritySettingsRequestDto : IValidatableObject
 {
     /// <summary>
-    /// The list of module identifiers for which to retrieve the security settings.
+    /// The modules to report on, each given as a GUID and sent as a repeated query value. An entry that is not a
+    /// GUID fails the whole request as invalid. Leaving the list out asks about every module registered in the
+    /// portal, which on a DocSpace installation is none, so the answer is then empty rather than complete.
     /// </summary>
     /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     [FromQuery(Name = "ids")]

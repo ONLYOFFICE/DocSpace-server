@@ -296,17 +296,23 @@ public class PaymentHelper(
         return updated;
     }
 
-    public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName)
+    public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, bool waitForChanges)
     {
-        var result = await tariffService.TopUpDepositAsync(tenantId, amount, currency, customerParticipantName, siteName, null, true);
+        var result = await tariffService.TopUpDepositAsync(tenantId, amount, currency, customerParticipantName, siteName, null, waitForChanges);
 
         if (result)
         {
             messageService.Send(MessageAction.CustomerWalletToppedUp, $"{amount} {currency}");
 
-            await quotaSocketManager.TopUpWallet(false);
+            // waitForChanges doubles as "the balance already reflects this deposit". With a delayed payment
+            // method it does not: the deposit is accepted but the money is credited only once the
+            // transfer settles, so pushing a refresh would just show the old value.
+            if (waitForChanges)
+            {
+                await quotaSocketManager.TopUpWallet(false);
+            }
 
-            await EnsureLowBalanceThresholdAsync();
+            await EnsureLowBalanceThresholdAsync(waitForChanges);
         }
 
         return result;
@@ -322,7 +328,7 @@ public class PaymentHelper(
 
     // stamps a non-default TenantWalletSettings row for tenants without auto top-up configured, so the low-balance
     // poller (which only scans persisted wallet-settings rows) can discover them without scanning every active tenant
-    private async Task EnsureLowBalanceThresholdAsync()
+    private async Task EnsureLowBalanceThresholdAsync(bool balanceUpdated)
     {
         var settings = await settingsManager.LoadAsync<TenantWalletSettings>();
         if (settings.Enabled)
@@ -331,7 +337,14 @@ public class PaymentHelper(
         }
 
         settings.LowBalanceThreshold = GetDefaultLowBalanceThreshold();
-        settings.LowBalanceNotified = false;
+
+        // Re-arm the notification only once the balance has actually risen; for a delayed payment method it
+        // has not moved yet, so clearing the flag would re-send the low-balance email minutes after a
+        // successful top-up. The threshold itself is stamped either way so the poller keeps watching.
+        if (balanceUpdated)
+        {
+            settings.LowBalanceNotified = false;
+        }
 
         await settingsManager.SaveAsync(settings);
     }

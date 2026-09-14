@@ -30,6 +30,8 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+import { EXAMPLE_AT_ISO, EXAMPLE_AT_MS, EXAMPLE_IDS } from "../../app/exampleIds.js";
+
 // Prose for the schemas derived from `@onlyoffice/ai-chat`, plus the cleanup
 // of the TSDoc syntax that survives the derivation.
 //
@@ -58,12 +60,208 @@ interface SchemaDoc {
   description?: string;
   /** Prose per property name (`schema-property-description`). */
   properties?: Readonly<Record<string, string>>;
+  /**
+   * One realistic value per property name, emitted as the property's
+   * `examples`. The library declares none, and a generated SDK's own docs plus
+   * any assistant reading this document take their sample payloads from here,
+   * so a placeholder (`"string"`, `0`) actively misleads. Same two rules as
+   * `properties`: fill-in only, and a dead entry is reported.
+   */
+  examples?: Readonly<Record<string, unknown>>;
 }
 
 const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   AiActionType: {
     description:
       "The AI action a request or an assignment applies to. Each action has its own assignment slot; `Default` is the profile used when an action's own slot is empty.",
+  },
+
+  /* --- Request-side types: what a caller has to construct --------------- */
+
+  AiProfile: {
+    examples: {
+      id: EXAMPLE_IDS.profile,
+      name: "OpenAI GPT-4o",
+      providerType: "openai",
+      basedOn: "openai",
+      baseUrl: "https://api.openai.com/v1",
+      key: "sk-your-provider-api-key",
+      headers: { "X-Organization": "acme" },
+      modelId: "gpt-4o",
+      reasoning: false,
+      capabilities: 7,
+      canUseTool: true,
+      useResponsesApi: false,
+      isCloudProvider: true,
+      useProxy: false,
+      createdAt: EXAMPLE_AT_MS,
+    },
+  },
+
+  AiCreateProfileInput: {
+    examples: {
+      name: "OpenAI GPT-4o",
+      providerType: "openai",
+      basedOn: "openai",
+      baseUrl: "https://api.openai.com/v1",
+      key: "sk-your-provider-api-key",
+      headers: { "X-Organization": "acme" },
+      modelId: "gpt-4o",
+      reasoning: false,
+      capabilities: 7,
+      canUseTool: true,
+      useResponsesApi: false,
+      isCloudProvider: true,
+      useProxy: false,
+    },
+  },
+
+  AiThreadMessageLike: {
+    examples: {
+      id: EXAMPLE_IDS.message,
+      role: "user",
+      content: "Summarise the attached contract.",
+      createdAt: EXAMPLE_AT_ISO,
+      status: { type: "complete" },
+      metadata: {},
+      attachments: [EXAMPLE_IDS.attachment],
+    },
+  },
+
+  AiAiSendStreamBody: {
+    examples: {
+      threadId: EXAMPLE_IDS.thread,
+      userMessage: { role: "user", content: "Summarise the attached contract." },
+      actionArgs: { isReasoning: false },
+      entityId: EXAMPLE_IDS.room,
+      profileId: EXAMPLE_IDS.profile,
+    },
+  },
+
+  AiAiActionArgs: {
+    examples: {
+      tools: [],
+      isReasoning: false,
+      prompt: { mode: "append", text: "Answer in British English." },
+    },
+  },
+
+  AiAiToolCallData: {
+    examples: {
+      threadId: EXAMPLE_IDS.thread,
+      messageId: EXAMPLE_IDS.message,
+      idx: 0,
+      message: { role: "assistant", content: "" },
+      actionArgs: { isReasoning: false },
+      entityId: EXAMPLE_IDS.room,
+      profileId: EXAMPLE_IDS.profile,
+    },
+  },
+
+  AiPrompt: {
+    examples: {
+      id: EXAMPLE_IDS.prompt,
+      name: "Contract summary",
+      text: "Summarise the key obligations and dates in the attached contract.",
+      folderId: EXAMPLE_IDS.promptFolder,
+      createdAt: EXAMPLE_AT_MS,
+      updatedAt: EXAMPLE_AT_MS,
+    },
+  },
+
+  AiPromptFolder: {
+    examples: {
+      id: EXAMPLE_IDS.promptFolder,
+      name: "Contract review",
+      createdAt: EXAMPLE_AT_MS,
+      updatedAt: EXAMPLE_AT_MS,
+    },
+  },
+
+  AiTMCPItem: {
+    examples: {
+      name: "docspace_get_folder",
+      description: "Read the contents of a DocSpace folder.",
+      inputSchema: {
+        type: "object",
+        properties: { folderId: { type: "string" } },
+        required: ["folderId"],
+      },
+      enabled: true,
+      serverType: "docspace",
+      requireApproval: false,
+    },
+  },
+
+  AiWebSearchConfig: {
+    examples: {
+      provider: "exa",
+      key: "your-web-search-api-key",
+      baseUrl: "https://api.exa.ai",
+      isCloudProvider: true,
+      headers: {},
+    },
+  },
+
+  /* --- Response-side types: what a caller has to parse ------------------ */
+
+  AiErrorResponse: { examples: { error: "threadId required" } },
+  AiSuccessResponse: { examples: { success: true } },
+
+  AiThread: {
+    examples: {
+      threadId: EXAMPLE_IDS.thread,
+      title: "Contract review",
+      lastEditDate: EXAMPLE_AT_MS,
+      profileId: EXAMPLE_IDS.profile,
+    },
+  },
+
+  AiModel: {
+    examples: {
+      id: "gpt-4o",
+      name: "GPT-4o",
+      provider: "openai",
+      reasoning: false,
+      capabilities: 7,
+    },
+  },
+
+  AiTProvider: {
+    examples: {
+      type: "openai",
+      name: "OpenAI GPT-4o",
+      key: "sk-your-provider-api-key",
+      baseUrl: "https://api.openai.com/v1",
+    },
+  },
+
+  // `kind` decides which half of this shape is populated: `content`, `path` and
+  // `type` belong to a file, `base64` to an image. Every renderer builds its
+  // sample payload by taking one example per property, so giving both halves an
+  // example would describe an attachment that cannot exist. This example is a
+  // file, so `base64` deliberately has none.
+  //
+  // The rule for any type whose fields are mutually exclusive: give an example
+  // only to the fields the illustrated variant actually carries, and leave the
+  // rest without one rather than filling the gap. `AiChatEvent` below is the
+  // other such type here.
+  AiAttachment: {
+    examples: {
+      id: EXAMPLE_IDS.attachment,
+      kind: "file",
+      source: "user",
+      title: "contract.docx",
+      content: "This agreement is made on 1 January 2026 between …",
+      path: "file_1234",
+      type: 7,
+      messageId: EXAMPLE_IDS.message,
+      threadId: EXAMPLE_IDS.thread,
+      entityId: EXAMPLE_IDS.room,
+      createdAt: EXAMPLE_AT_MS,
+      canAnalyze: false,
+      formKeys: [],
+    },
   },
 
   AiTErrorData: {
@@ -128,6 +326,16 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   /* --- Chat stream ------------------------------------------------------ */
 
   AiChatEvent: {
+    // A union over seven `type` values, and most fields belong to one variant
+    // only: `idx`, `autoAllow` and `serverExecuted` to `tool-call-pending`,
+    // `title` and `profileId` to `thread-title`. Only the fields every event
+    // carries get an example, so an assembled sample stays a payload that can
+    // actually occur.
+    examples: {
+      type: "message-delta",
+      messageId: EXAMPLE_IDS.message,
+      threadId: EXAMPLE_IDS.thread,
+    },
     properties: {
       message: "The message the event is about, in the state it has reached.",
       messageId: "The storage identifier of that message.",
@@ -141,6 +349,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   /* --- Mutation outcomes ------------------------------------------------ */
 
   AiProfileMutationResult: {
+    examples: { success: true },
     properties: {
       success: "True when the profile was persisted.",
       profile: "The persisted profile. Present on success.",
@@ -150,6 +359,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiPromptMutationResult: {
+    examples: { success: true },
     properties: {
       success: "True when the prompt was persisted.",
       prompt: "The persisted prompt. Present on success.",
@@ -158,6 +368,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiFolderMutationResult: {
+    examples: { success: true },
     properties: {
       success: "True when the folder was persisted.",
       folder: "The persisted folder. Present on success.",
@@ -166,6 +377,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiAssignmentMutationResult: {
+    examples: { success: true },
     properties: {
       success: "True when the assignment was persisted.",
       error: "Why the assignment was rejected. Present on failure.",
@@ -173,6 +385,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiToolsMutationResult: {
+    examples: { success: true },
     properties: {
       success: "True when the MCP server was persisted.",
       error: "Why the MCP server was rejected. Present on failure.",
@@ -180,6 +393,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiWebSearchMutationResult: {
+    examples: { success: true },
     properties: {
       success: "True when the configuration was persisted.",
       config: "The persisted web-search configuration. Present on success.",
@@ -190,6 +404,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   /* --- Bulk outcomes: on failure nothing at all was persisted ------------ */
 
   AiBulkAssignmentResult: {
+    examples: { success: true, errors: [] },
     properties: {
       success: "True when every entry was persisted.",
       errors:
@@ -198,6 +413,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiToolsBulkResult: {
+    examples: { success: true, errors: [] },
     properties: {
       success: "True when every custom MCP server was persisted.",
       errors:
@@ -206,6 +422,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiImportResult: {
+    examples: { success: true, imported: { folders: 2, prompts: 12 }, errors: [] },
     properties: {
       success: "True when the whole bundle was imported.",
       imported: "How many folders and prompts were created. Present on success.",
@@ -214,6 +431,11 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiImportError: {
+    examples: {
+      kind: "prompt",
+      ref: EXAMPLE_IDS.prompt,
+      error: "a prompt of that name already exists",
+    },
     properties: {
       ref: "The offending entry - its name or its id.",
       error: "Why the entry was rejected.",
@@ -223,6 +445,11 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   /* --- Prompts and threads ---------------------------------------------- */
 
   AiCreatePromptInput: {
+    examples: {
+      name: "Contract summary",
+      text: "Summarise the key obligations and dates in the attached contract.",
+      folderId: EXAMPLE_IDS.promptFolder,
+    },
     properties: {
       name: "The prompt name.",
       text: "The prompt body.",
@@ -232,6 +459,7 @@ const SCHEMA_DOCS: Readonly<Record<string, SchemaDoc>> = {
   },
 
   AiPromptBundle: {
+    examples: { version: 1, folders: [], prompts: [] },
     properties: {
       version: "The bundle format version, so an import can migrate an older export.",
       folders: "Every exported prompt folder.",
@@ -343,6 +571,19 @@ export function applySchemaDocs(components: Record<string, unknown>): {
       }
       if (target["description"] === undefined) {
         target["description"] = description;
+      } else {
+        unused.push({ schema: name, property, reason: "already described" });
+      }
+    }
+
+    for (const [property, example] of Object.entries(doc.examples ?? {})) {
+      const target = isObject(properties) ? properties[property] : undefined;
+      if (!isObject(target)) {
+        unused.push({ schema: name, property, reason: "no such property" });
+        continue;
+      }
+      if (target["examples"] === undefined && target["example"] === undefined) {
+        target["examples"] = [example];
       } else {
         unused.push({ schema: name, property, reason: "already described" });
       }

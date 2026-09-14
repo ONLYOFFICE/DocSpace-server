@@ -322,6 +322,19 @@ public class SettingsController(
     }
 
     /// <remarks>
+    /// Specifies whether to display quick action buttons or not.
+    /// </remarks>
+    /// <summary>Display quick actions</summary>
+    /// <path>api/2.0/files/showquickactions</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
+    [HttpPut("showquickactions")]
+    public async Task<bool> ShowQuickActions(SettingsRequestDto inDto)
+    {
+        return await filesSettingsHelper.SetShowQuickActions(inDto.Set);
+    }
+
+    /// <remarks>
     /// Updates a file version if a file with such a name already exists.
     /// </remarks>
     /// <summary>Update a file version if it exists</summary>

@@ -5,14 +5,38 @@
 # Nothing is hidden from the report. A finding stops being shown only when a rule here says so
 # explicitly (`off`), and the only such rule is a proven false positive, not debt.
 #
-# Prerequisite: npm i -g @stoplight/spectral-cli   (in PowerShell call `spectral.cmd`, not `spectral`)
+# Prerequisite: npm i -g @stoplight/spectral-cli @api-common/spectral-reporter
+# (in PowerShell call `spectral.cmd` and `spectral-reporter.cmd` - the bare names resolve to npm's
+# unsigned .ps1 shims, which a restrictive execution policy refuses to run.)
 # Run from common/Tools/ASC.Api.Documentation/ASC.Api.Documentation, with lint/ already created:
 #
-#   spectral lint -r SDK/.spectral.yaml --fail-severity hint -f html --output.html lint/report.html -f markdown --output.markdown lint/report.md -f json --output.json lint/report.json json/api_2.0.json json/files_2.0.json json/people_2.0.json json/backup_2.0.json json/newai_2.0.json
+#   spectral lint -r SDK/.spectral.yaml --fail-severity hint -f markdown --output.markdown lint/report.md -f json --output.json lint/report.json json/api_2.0.json json/files_2.0.json json/people_2.0.json json/backup_2.0.json json/newai_2.0.json ; spectral-reporter lint/report.json -o lint/report.html
 #
-# Three formats on purpose: markdown is read and diffed, html is its complete twin, and json is what
+# One line, three artefacts, one job each: markdown is read and diffed line by line, json is what
 # count.py aggregates - it carries the rule code, path and severity as data instead of as rendered
-# table cells.
+# table cells - and html is the one to show to a person.
+#
+# Spectral writes the first two and nothing else; the html is rendered from lint/report.json afterwards
+# by @api-common/spectral-reporter (Apache-2.0, no dependencies, reads the json and writes html; it
+# never touches the documents or the ruleset), which gives severity tiles and per-rule/per-file bar
+# charts where spectral's own -f html gave a bare list. Install it globally with spectral itself, as
+# above - called through `npx` it stops to ask permission to download the package on any machine where
+# it is not cached, which is not something to hit in the middle of a run.
+#
+# Why `;` and not `|` or `&&`. A pipe cannot carry the json here: --output.json sends it to the file
+# count.py needs, so stdout is empty, and piping instead of writing that file would cost the run its
+# machine-readable half. `&&` would skip the html entirely, because --fail-severity hint makes spectral
+# exit 1 whenever a finding exists - which is every run. `;` runs the render regardless, and leaves
+# each side its own exit code.
+#
+# --fail-severity hint is not optional, and it governs all three artefacts. The markdown formatter
+# prints only findings at or below failSeverity and the CLI default is `error`; the json obeys the same
+# flag, and the html can only show what the json carries. Without the flag every artefact collapses to
+# a handful of errors - which reads exactly like progress and is not.
+#
+# One consequence for anything that greps the html: it is no longer the built-in formatter's markup, so
+# checks written against that (`class="severity"` counting, and the message-text greps that went with
+# it) do not apply. Count and grep findings in report.md and report.json, which carry rule names.
 #
 # The open population as of 2026-09-01: path-segment-camel-case 68, and nothing else. It is blocked
 # rather than untouched - the only fix is renaming a public route, which moves the wire. That is not

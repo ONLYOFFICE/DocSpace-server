@@ -436,6 +436,20 @@ public class ModelTierJsonConverter : JsonConverter<ModelTier?>
     }
 }
 
+public record ModelReasoning
+{
+    public bool Mandatory { get; init; }
+
+    [JsonPropertyName("default_enabled")]
+    public bool DefaultEnabled { get; init; } = true;
+
+    [JsonPropertyName("supported_efforts")]
+    public IEnumerable<string> SupportedEfforts { get; init; } = [];
+
+    [JsonPropertyName("default_effort")]
+    public string DefaultEffort { get; init; }
+}
+
 public record Model
 {
     public required string Id { get; init; }
@@ -447,6 +461,8 @@ public record Model
     public ModelTier? Tier { get; init; }
 
     public int? Rank { get; init; }
+
+    public ModelReasoning Reasoning { get; init; }
 
     [JsonPropertyName("revision_id")]
     public required Guid RevisionId { get; init; }
