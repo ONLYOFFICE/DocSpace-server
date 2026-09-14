@@ -69,26 +69,31 @@ public class AiGateway(
 
     public bool Configured => aiGatewayConfiguration.Configured;
 
+    public async Task<bool> IsAiAccessEnabledAsync()
+    {
+        var settings = await settingsManager.LoadAsync<TenantAiAccessSettings>(tenantManager.GetCurrentTenantId());
+        return settings.Enabled;
+    }
+
     public async Task<bool> IsAiEnabledAsync()
     {
-        if (!Configured)
-        {
-            return false;
-        }
-
-        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantManager.GetCurrentTenantId());
-        return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AITools);
+        return await IsWalletServiceEnabledAsync(TenantWalletService.AITools);
     }
 
     public async Task<bool> IsSearchEnabledAsync()
     {
-        if (!Configured)
+        return await IsWalletServiceEnabledAsync(TenantWalletService.AISearch);
+    }
+
+    private async Task<bool> IsWalletServiceEnabledAsync(TenantWalletService service)
+    {
+        if (!Configured || !await IsAiAccessEnabledAsync())
         {
             return false;
         }
 
         var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantManager.GetCurrentTenantId());
-        return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AISearch);
+        return settings.EnabledServices != null && settings.EnabledServices.Contains(service);
     }
 
     public async Task<string> GetKeyAsync(bool allowEmpty = false)
