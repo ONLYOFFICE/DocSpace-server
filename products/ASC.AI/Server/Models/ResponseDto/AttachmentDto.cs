@@ -77,6 +77,8 @@ public static partial class AttachmentMapper
     [MapPropertyFromSource(nameof(AttachmentDto.Type), Use = nameof(MapType))]
     public static partial AttachmentDto MapToDto(AttachmentResult result);
 
+    public static partial SuggestedQuestionsDto MapToDto(SuggestedQuestionsResult result);
+
     private static string? MapEntryId(AttachmentResult result) =>
         result.EntryId?.ToString() ?? result.ThirdpartyEntryId;
 
