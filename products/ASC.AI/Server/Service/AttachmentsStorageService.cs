@@ -191,14 +191,11 @@ public class AttachmentsStorageService(
             return [];
         }
 
-        var result = new Dictionary<int, FormAnalysis>();
+        var analyses = await Task.WhenAll(files
+            .Where(f => f.IsForm)
+            .Select(async file => (file.Id, Analysis: await AnalyzeFormAsync(file))));
 
-        foreach (var file in files.Where(f => f.IsForm))
-        {
-            result[file.Id] = await AnalyzeFormAsync(file);
-        }
-
-        return result;
+        return analyses.ToDictionary(pair => pair.Id, pair => pair.Analysis);
     }
 
     private async Task<FormAnalysis> AnalyzeFormAsync(File<int> file)
