@@ -88,10 +88,12 @@ public class FormPreAnalysisService(
     // Shared and cached under many keys. Never mutated.
     private static readonly List<FormQuestionSuggestion> _noSuggestions = [];
 
+    // Pre-analysis calls the model over the OpenAI Chat Completions wire (see OpenAiChatCompletionClient).
     // Every other provider the chat supports (openrouter, groq, ollama, openaicompatible, ...) is a thin
-    // wrapper over the OpenAI wire format; only these three carry a transport of their own.
+    // wrapper over that wire; these carry a transport of their own (they extend AbstractBaseProvider
+    // rather than OpenAIProvider in @onlyoffice/ai-chat, core/providers/*), so they are excluded.
     private static readonly FrozenSet<string> _nonOpenAiProviders =
-        new[] { "anthropic", "genai", "stabilityai" }.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
+        new[] { "anthropic", "genai", "mistral", "stabilityai" }.ToFrozenSet(StringComparer.OrdinalIgnoreCase);
 
     private static readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web);
 
