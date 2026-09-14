@@ -702,7 +702,7 @@ public class PaymentController(
 
         var quotaList = await quotaService.GetTenantQuotasAsync();
         var quota = quotaList.FirstOrDefault(q => q.Wallet && q.TenantId == (int)inDto.Service);
-        if (quota == null)
+        if (quota == null || ((quota.AITools || quota.AISearch) && !await aiGateway.IsAiAccessEnabledAsync()))
         {
             throw new ItemNotFoundException("Service could not be found");
         }
