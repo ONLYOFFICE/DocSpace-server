@@ -32,7 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 // Build-time OpenAPI emitter. Writes this AI service's OpenAPI document
-// as `newai_2.0.json` into the shared documentation folder, so it can be
+// as `aichat_2.0.json` into the shared documentation folder, so it can be
 // merged with the .NET services' documents by ASC.Api.Documentation.
 //
 // This is a pure, offline step: it imports only the declarative route
@@ -78,7 +78,7 @@ const DEFAULT_OUTPUT = path.resolve(
   "ASC.Api.Documentation",
   "ASC.Api.Documentation",
   "json",
-  "newai_2.0.json",
+  "aichat_2.0.json",
 );
 
 function parseOutput(argv: string[]): string {

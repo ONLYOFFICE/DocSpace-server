@@ -55,8 +55,8 @@ if (logpath != null) {
 }
 
 const fileName: string = logpath
-  ? path.join(logpath, "web.newai.%DATE%.log")
-  : path.join(__dirname, "..", "..", "..", "..", "Logs", "web.newai.%DATE%.log");
+  ? path.join(logpath, "web.ai-chat.%DATE%.log")
+  : path.join(__dirname, "..", "..", "..", "..", "Logs", "web.ai-chat.%DATE%.log");
 const dirName = path.dirname(fileName);
 
 const awsRoot: { cloudWatch?: AwsCloudWatchConfig } | undefined = config.get("aws");
@@ -68,7 +68,7 @@ const awsRegion = aws?.region;
 const logGroupName = aws?.logGroupName;
 const logStreamName = (aws?.logStreamName ?? "")
   .replace("${hostname}", os.hostname())
-  .replace("${applicationContext}", "NewAi")
+  .replace("${applicationContext}", "AI.Chat")
   .replace("${guid}", randomUUID())
   .replace("${date}", date.format(new Date(), "YYYY/MM/DDTHH.mm.ss"));
 
@@ -116,7 +116,7 @@ if (logConsole) {
 const customFormat = winston.format((info) => {
   const now = new Date();
   info["date"] = date.format(now, "YYYY-MM-DD HH:mm:ss");
-  info["applicationContext"] = "NewAi";
+  info["applicationContext"] = "AI.Chat";
   if (typeof info.level === "string") {
     info.level = info.level.toUpperCase();
   }

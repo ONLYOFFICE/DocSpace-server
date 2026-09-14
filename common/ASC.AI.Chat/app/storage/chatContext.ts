@@ -65,12 +65,12 @@ import logger from "../log.js";
 
 const PATH = "/chat-context";
 
-const CHAT_CONTEXT_DISABLED = process.env["NEW_AI_CHAT_CONTEXT"] === "off";
-const OPT_OUT_HEADER = "x-newai-chat-context";
+const CHAT_CONTEXT_DISABLED = process.env["AI_CHAT_CONTEXT"] === "off";
+const OPT_OUT_HEADER = "x-ai-chat-context";
 const app: AppConfig | undefined = nconf.get("app");
 const IS_PRODUCTION = (app?.environment ?? "").toLowerCase() === "production";
 
-// Per-request opt-out (`x-newai-chat-context: off`) for side-by-side
+// Per-request opt-out (`x-ai-chat-context: off`) for side-by-side
 // measurement on a development stand; ignored in production.
 function requestOptsOut(): boolean {
   if (IS_PRODUCTION) {
