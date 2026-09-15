@@ -166,9 +166,10 @@ export function getFileInfoCache():
 }
 
 // The entry the current round is attributed to (see RequestContext.sourceMeta).
-// Set by `primeSourceMeta` before the engine runs; read by the ONLYOFFICE
-// provider override on every request it builds within the round — streaming
-// chat, tool-call resume rounds, one-shot actions, title generation. Passing
+// Set by `primeSourceMeta` before the engine runs; read back by the engines'
+// `resolveSource` dep, which the library carries into every request of the
+// round — streaming chat, tool-call resume rounds, one-shot actions, title
+// generation, web search. Passing
 // `undefined` clears a value left by an earlier resolution in the same request.
 export function setSourceMeta(source: SourceMeta | undefined): void {
   const store = als.getStore();
