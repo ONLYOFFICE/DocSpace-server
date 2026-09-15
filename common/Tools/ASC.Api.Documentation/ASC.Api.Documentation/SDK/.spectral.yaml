@@ -10,7 +10,7 @@
 # unsigned .ps1 shims, which a restrictive execution policy refuses to run.)
 # Run from common/Tools/ASC.Api.Documentation/ASC.Api.Documentation, with lint/ already created:
 #
-#   spectral lint -r SDK/.spectral.yaml --fail-severity hint -f markdown --output.markdown lint/report.md -f json --output.json lint/report.json json/api_2.0.json json/files_2.0.json json/people_2.0.json json/backup_2.0.json json/newai_2.0.json ; spectral-reporter lint/report.json -o lint/report.html
+#   spectral lint -r SDK/.spectral.yaml --fail-severity hint -f markdown --output.markdown lint/report.md -f json --output.json lint/report.json json/api_2.0.json json/files_2.0.json json/people_2.0.json json/backup_2.0.json json/aichat_2.0.json ; spectral-reporter lint/report.json -o lint/report.html
 #
 # One line, three artefacts, one job each: markdown is read and diffed line by line, json is what
 # count.py aggregates - it carries the rule code, path and severity as data instead of as rendered
@@ -44,7 +44,7 @@
 #
 # What closed since 2026-08-27, and why the counts above dropped from 146: `operation-description`
 # (103 -> 0), `schema-description` and `schema-property-description` (72 -> 0, prose for the
-# @onlyoffice/ai-chat types now lives in common/ASC.NewAi/scripts/lib/schemaDocs.ts), and the
+# @onlyoffice/ai-chat types now lives in common/ASC.AI.Chat/scripts/lib/schemaDocs.ts), and the
 # KeyValuePairStringStringValues leak (fixed by MapType<IFormCollection> in OpenApiExtension.cs).
 #
 # SCOPE. This file is `spectral:oas` plus local rules: OpenAPI structure and house style. An OWASP
@@ -95,7 +95,7 @@ rules:
       @forms, @search, @self).
     message: 'Route segment is not camelCase: {{property}}'
     given: $.paths
-    severity: warn # measured: 68 of 536 paths (66 kebab-case, 2 snake_case; 63 of them in newai)
+    severity: warn # measured: 68 of 536 paths (66 kebab-case, 2 snake_case; 63 of them in aichat)
     # Blocked, not untouched: the only fix is renaming a public route, which moves the wire.
     # 63 belong to @onlyoffice/ai-chat, 3 to api, 2 to files.
     then:

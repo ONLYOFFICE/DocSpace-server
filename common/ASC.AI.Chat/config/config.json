@@ -4,7 +4,7 @@
     "port": 9837,
     "appsettings": "../../../../buildtools/config",
     "environment": "Development",
-    "logName": "web.newai.%DATE%.log",
+    "logName": "web.ai-chat.%DATE%.log",
     "proxy": {
       "url": "http://localhost:8092"
     },

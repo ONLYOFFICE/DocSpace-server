@@ -131,20 +131,20 @@ dotnet build common/Tools/ASC.Api.Documentation/ASC.Api.Documentation.slnx -t:Re
   (or on the `<Properties Name="MSBuild">` block inside the slnx) means a build that silently emits
   nothing the moment either condition changes.
 - `-t:Rebuild` (not a plain build) — forces the document tool to re-run.
-- One document is not .NET: the `EmitNewAiOpenApi` target in the tool's csproj runs
-  `yarn install --immutable` + `yarn openapi` in the Node service under `common/ASC.NewAi`, writing
+- One document is not .NET: the `EmitAiChatOpenApi` target in the tool's csproj runs
+  `yarn install --immutable` + `yarn openapi` in the Node service under `common/ASC.AI.Chat`, writing
   into the same documents directory. That emitter reads the AI service's document from there, so
   `ASC.AI` must build first — the slnx `BuildDependency` guarantees the order. Yarn
   peer-dependency warnings are normal and not a failure.
 
   That yarn step also rewrites a **tracked** file of its own outside the documents directory —
-  `common/ASC.NewAi/app/generated/openapi-schemas.json` — so stage A shows up in
+  `common/ASC.AI.Chat/app/generated/openapi-schemas.json` — so stage A shows up in
   `git status` in two places, not one. Expected, not a stray edit.
 - **The yarn step is the one part not proven OS-neutral.** The tool's csproj builds its working
-  directory as `$(MSBuildProjectDirectory)\..\..\..\ASC.NewAi` — backslashes — and hands it to `Exec`.
+  directory as `$(MSBuildProjectDirectory)\..\..\..\ASC.AI.Chat` — backslashes — and hands it to `Exec`.
   Stage A is only verified on Windows. If it fails on Linux/macOS with a path that looks like one
   mashed-together segment, that is the cause, and the fix belongs in the csproj, not here: do not
-  work around it by running yarn by hand, because then `newai_2.0.json` is emitted outside the
+  work around it by running yarn by hand, because then `aichat_2.0.json` is emitted outside the
   build and nothing guarantees `ASC.AI` ran first.
 - **The build does not render the Markdown API reference.** It only emits the `json/*.json`
   documents. The reference is produced by the `Markdown` command in stage B like any other target,

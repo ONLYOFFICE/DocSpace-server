@@ -34,26 +34,28 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for getting the group member security information.
+/// The request that names the folder and the group whose members are being listed.
 /// </summary>
 public class GroupMemberSecurityFolderRequestDto<T>
 {
     /// <summary>
-    /// The folder ID.
+    /// The folder or room whose access is being read. A folder stored on the portal is numbered, while a folder in a
+    /// connected third-party account is named by an opaque string.
     /// </summary>
-    /// <example>1</example>
+    /// <example>10</example>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 
     /// <summary>
-    /// The group ID.
+    /// The group whose members are listed. Take it from the entries of `GET api/2.0/files/folder/{id}/share` that
+    /// stand for a group; a group that holds no rights on this folder is answered with an empty list.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
+    /// <example>9924256a-739c-462b-af15-e652a3b1b6eb</example>
     [FromRoute(Name = "groupId")]
     public required Guid GroupId { get; set; }
 
     /// <summary>
-    /// The number of items to be retrieved in the current query.
+    /// How many members at most to answer with.
     /// </summary>
     /// <example>25</example>
     [FromQuery(Name = "count")]
@@ -61,40 +63,43 @@ public class GroupMemberSecurityFolderRequestDto<T>
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
-    /// The starting index for the query result set.
+    /// How many members to skip before answering, used together with `count` to page through a large group.
     /// </summary>
     /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
-    /// The filter value used for searching or querying group members based on text input.
+    /// Keeps only the members whose first name, last name or email contains this value. The value is matched in lower
+    /// case, so an uppercase one finds nothing.
     /// </summary>
-    /// <example>My Document</example>
+    /// <example>john</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }
 /// <summary>
-/// The group member security request generic parameters.
+/// The request that names the file and the group whose members are being listed.
 /// </summary>
 public class GroupMemberSecurityFileRequestDto<T>
 {
     /// <summary>
-    /// The file ID.
+    /// The file whose access is being read. A file stored on the portal is numbered, while a file in a connected
+    /// third-party account is named by an opaque string.
     /// </summary>
-    /// <example>1</example>
+    /// <example>10</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The group ID.
+    /// The group whose members are listed. Take it from the entries of `GET api/2.0/files/file/{id}/share` that stand
+    /// for a group; a group that holds no rights on this file is answered with an empty list.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
+    /// <example>9924256a-739c-462b-af15-e652a3b1b6eb</example>
     [FromRoute(Name = "groupId")]
     public required Guid GroupId { get; set; }
 
     /// <summary>
-    /// The number of items to be retrieved in the current query.
+    /// How many members at most to answer with.
     /// </summary>
     /// <example>25</example>
     [FromQuery(Name = "count")]
@@ -102,16 +107,17 @@ public class GroupMemberSecurityFileRequestDto<T>
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
-    /// The starting index for the query result set.
+    /// How many members to skip before answering, used together with `count` to page through a large group.
     /// </summary>
     /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
-    /// The filter value used for searching or querying group members based on text input.
+    /// Keeps only the members whose first name, last name or email contains this value. The value is matched in lower
+    /// case, so an uppercase one finds nothing.
     /// </summary>
-    /// <example>My Document</example>
+    /// <example>john</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }

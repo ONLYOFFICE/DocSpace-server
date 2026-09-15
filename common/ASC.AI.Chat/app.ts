@@ -70,12 +70,12 @@ app.use((_req, res, next) => {
 });
 
 // CORS is off by default: the chat UI reaches this service same-origin via
-// the DocSpace nginx (`/api/2.0/new-ai`), so no cross-origin request is
+// the DocSpace nginx (`/api/2.0/ai`), so no cross-origin request is
 // expected. A blanket `cors()` would emit `Access-Control-Allow-Origin: *`
 // on an authenticated, user-scoped API — undesirable. Set
-// `NEW_AI_CORS_ORIGINS` (comma-separated) only if a real cross-origin
+// `AI_CHAT_CORS_ORIGINS` (comma-separated) only if a real cross-origin
 // caller exists; an explicit allowlist is then honored with credentials.
-const corsOrigins = (process.env["NEW_AI_CORS_ORIGINS"] ?? "")
+const corsOrigins = (process.env["AI_CHAT_CORS_ORIGINS"] ?? "")
   .split(",")
   .map((o) => o.trim())
   .filter(Boolean);
@@ -130,7 +130,7 @@ const httpServer = http.createServer(app);
 
 httpServer.listen(config.port, config.hostname, () => {
   logger.info(
-    `Start NewAi Service listening on port ${config.port} `
+    `Start AI.Chat Service listening on port ${config.port} `
       + `appsettings path='${config.appsettings}'`,
   );
 });
