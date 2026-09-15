@@ -39,7 +39,9 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class RoomIdRequestDto<T>
 {
     /// <summary>
-    /// The room ID.
+    /// The room to act on, named by the identifier that `GET api/2.0/files/rooms` reports for it. Rooms kept in the
+    /// portal itself use whole numbers, while a room backed by a connected third-party account uses the string form
+    /// of the same listing.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "id")]

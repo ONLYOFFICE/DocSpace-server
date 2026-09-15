@@ -48,10 +48,10 @@ public abstract class SdkCommandBase<TSettings> : AsyncCommand<TSettings>
     /// </summary>
     private string OpenApiToolsConfig => Path.Combine(WorkingDirectory, "openapitools.json");
 
-    public override ValidationResult Validate(CommandContext context, TSettings settings) =>
+    protected override ValidationResult Validate(CommandContext context, TSettings settings) =>
         ToolRunner.ValidateAvailable("openapi-generator-cli", "--openapitools", OpenApiToolsConfig, "version");
 
-    public override async Task<int> ExecuteAsync(
+    protected override async Task<int> ExecuteAsync(
         CommandContext context,
         TSettings settings,
         CancellationToken cancellationToken)

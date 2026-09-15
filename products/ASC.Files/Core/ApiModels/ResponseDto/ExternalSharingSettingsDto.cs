@@ -34,36 +34,41 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The Access Control external sharing settings.
+/// The external sharing policy of the portal as it now stands.
 /// </summary>
 public class ExternalSharingSettingsDto
 {
     /// <summary>
-    /// Specifies whether external (public) link creation is allowed.
+    /// Whether links that open a file or a room without a portal account may be created. While it is false the portal
+    /// also reports sharing on social networks as off and the default link type as internal, whatever was asked for.
     /// </summary>
     /// <example>true</example>
     public bool ExternalShare { get; set; }
 
     /// <summary>
-    /// Specifies the default sharing link type: true = DocSpace users only, false = Anyone with the link.
+    /// The kind of link the portal offers first: true means a link only accounts of this portal can open, false one
+    /// that anyone holding it can open.
     /// </summary>
     /// <example>false</example>
     public bool DefaultShareLinkInternal { get; set; }
 
     /// <summary>
-    /// When external sharing is restricted, specifies whether the restriction applies to the My Documents section.
+    /// Whether the restriction covers personal documents. It only has an effect while external sharing is off, so a
+    /// true here with sharing allowed restricts nothing.
     /// </summary>
     /// <example>true</example>
     public bool ExternalShareApplyToDocuments { get; set; }
 
     /// <summary>
-    /// When external sharing is restricted, specifies whether the restriction applies to the Rooms section.
+    /// Whether the restriction covers rooms, including the creation of new public ones. It only has an effect while
+    /// external sharing is off.
     /// </summary>
     /// <example>true</example>
     public bool ExternalShareApplyToRooms { get; set; }
 
     /// <summary>
-    /// When external sharing is restricted, specifies whether existing public links are blocked immediately.
+    /// Whether links created before the restriction stop opening as well. With false they keep working and only new
+    /// ones are refused.
     /// </summary>
     /// <example>true</example>
     public bool BlockExistingLinksOnRestrict { get; set; }
