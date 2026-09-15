@@ -696,7 +696,11 @@ public class FileMarker(
 
         if (removeTags.Count > 0)
         {
-            await tagDao.RemoveTagsAsync(removeTags);
+            // Detach the links, do not delete the tag rows. A "new" tag is one row per user, shared by
+            // every entry that user has marked, and RemoveTagsAsync resolves it by (owner, name, type)
+            // and deletes the row together with all of its links - so clearing one section's marks
+            // cleared the user's marks everywhere.
+            await tagDao.RemoveTagLinksAsync(removeTags);
         }
 
         var socketManager = serviceProvider.GetRequiredService<SocketManager>();

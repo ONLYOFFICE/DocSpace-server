@@ -304,6 +304,12 @@ public class FilesSettingsDto
     public bool DisplayFileExtension { get; set; }
 
     /// <summary>
+    /// Specifies whether to display the quick action buttons.
+    /// </summary>
+    /// <example>true</example>
+    public bool ShowQuickActions { get; set; }
+
+    /// <summary>
     /// Whether the caller is told about the result of a conversion. There is no operation in this document that
     /// writes it.
     /// </summary>
@@ -522,6 +528,7 @@ public class FilesSettingsDtoConverter(
             StoreOriginalFiles = await filesSettingsHelper.GetStoreOriginalFiles(),
             KeepNewFileName = await filesSettingsHelper.GetKeepNewFileName(),
             DisplayFileExtension = await filesSettingsHelper.GetDisplayFileExtension(),
+            ShowQuickActions = await filesSettingsHelper.GetShowQuickActions(),
             HideConfirmCancelOperation = await filesSettingsHelper.GetHideConfirmCancelOperation(),
             HideConfirmConvertSave = await filesSettingsHelper.GetHideConfirmConvertSave(),
             HideConfirmConvertOpen = await filesSettingsHelper.GetHideConfirmConvertOpen(),

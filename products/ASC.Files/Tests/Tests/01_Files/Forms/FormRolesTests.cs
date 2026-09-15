@@ -135,8 +135,12 @@ public class FormRolesTests(
         exception.ErrorCode.Should().Be(404);
     }
 
-    /// <summary>Historically bug 81346; already fixed, this is the expected behaviour today.</summary>
+    /// <summary>
+    /// Bug 81346: asking for the form roles of a file id that does not exist did not answer 404.
+    /// Fixed - a missing file is a 404 here like everywhere else.
+    /// </summary>
     [Fact]
+    [Trait("Bug", "81346")]
     public async Task GetAllFormRoles_NonExistentFile_Returns404()
     {
         // Arrange

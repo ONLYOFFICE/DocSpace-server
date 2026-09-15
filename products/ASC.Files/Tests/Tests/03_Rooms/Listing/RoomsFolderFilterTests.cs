@@ -211,7 +211,9 @@ public class RoomsFolderFilterTests(
 
     /// <remarks>
     /// Bug 81808: filtering GET /files/rooms by <c>tags</c> (JSON-serialized, as the endpoint
-    /// documents it) fails instead of returning only the tagged room.
+    /// documents it) fails instead of returning only the tagged room. The tag is attached at
+    /// creation time, the way the TypeScript suite does it — the sibling case in
+    /// <c>RoomsFolderValidationTests</c> covers a tag added to an existing room.
     /// </remarks>
     [Fact]
     [Trait("Bug", "81808")]
@@ -222,8 +224,8 @@ public class RoomsFolderFilterTests(
         var tag = "AutotestFilterTag" + Guid.NewGuid().ToString()[..8];
         await _roomsApi.CreateRoomTagAsync(new CreateTagRequestDto(tag), TestContext.Current.CancellationToken);
 
-        var tagged = await CreateCustomRoom("Autotest Room With Tag");
-        await _roomsApi.AddRoomTagsAsync(tagged.Id, new BatchTagsRequestDto([tag]), TestContext.Current.CancellationToken);
+        var tagged = await CreateRoom(
+            new CreateRoomRequestDto("Autotest Room With Tag", roomType: RoomType.CustomRoom, tags: [tag]));
         var untagged = await CreateCustomRoom("Autotest Room No Tag");
 
         // Act
@@ -233,6 +235,33 @@ public class RoomsFolderFilterTests(
         var ids = raw.Folders.Select(f => f.Id).ToList();
         ids.Should().Contain(tagged.Id);
         ids.Should().NotContain(untagged.Id);
+    }
+
+    /// <remarks>
+    /// Bug 81808, the other half of it: <c>tags</c> is a <see cref="string"/> holding a serialized
+    /// JSON array, and <c>VirtualRoomsCommonController.GetRoomsFolder</c> hands it straight to
+    /// <see cref="JsonSerializer.Deserialize{TValue}(string, JsonSerializerOptions)"/> with nothing
+    /// around it. A caller that sends a bare tag name — which is what the TypeScript client does,
+    /// because its generated signature takes an array and serializes it as a repeated query
+    /// parameter — makes that call throw, and the request ends as 500. A malformed query value is
+    /// the caller's mistake and belongs in the 400 family.
+    /// </remarks>
+    [Theory]
+    [InlineData("AutotestFilterTag")]
+    [InlineData("AutotestTagA,AutotestTagB")]
+    [Trait("Bug", "81808")]
+    public async Task GetRoomsFolder_TagsFilterNotJson_ReturnsBadRequest(string tags)
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _roomsApi.GetRoomsFolderAsync(
+                tags: tags, cancellationToken: TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
     }
 
     /// <inheritdoc cref="GetRoomsFolder_TagsFilter_ReturnsOnlyRoomsWithSelectedTag"/>

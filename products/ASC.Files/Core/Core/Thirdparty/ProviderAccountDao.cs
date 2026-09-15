@@ -65,6 +65,14 @@ internal class ProviderAccountDao(
         var providersInfo = GetProvidersInfoInternalAsync(linkId);
 
         var allproviders = await providersInfo.ToListAsync();
+
+        // Single() answered an unknown link id with "Sequence contains no elements", which reached the
+        // caller as a 500. A provider id that names nothing is a missing resource.
+        if (allproviders.Count == 0)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
         return allproviders.Single();
     }
 

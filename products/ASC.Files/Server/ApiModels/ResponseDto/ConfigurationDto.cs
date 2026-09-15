@@ -299,6 +299,12 @@ public class CustomizationConfigDto
     /// The button that starts filling out the form. It is empty when this opening offers no such button.
     /// </summary>
     public StartFillingForm StartFillingForm { get; set; }
+
+    /// <summary>
+    /// The AI configuration settings.
+    /// </summary>
+    /// <example>{"disabled": false}</example>
+    public AIConfig Ai { get; set; }
 }
 
 /// <summary>
@@ -669,7 +675,8 @@ public class CustomizationConfigConverter<T>(
             MentionShare = await source.GetMentionShare(file),
             Review = source.GetReview(configuration.EditorConfig.ModeWrite),
             SubmitForm = await source.GetSubmitForm(file),
-            Anonymous = anonymousConfigConverter.Convert(configuration)
+            Anonymous = anonymousConfigConverter.Convert(configuration),
+            Ai = await source.GetAIConfigAsync()
         };
 
         return result;

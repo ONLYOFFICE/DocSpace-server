@@ -30,12 +30,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { WebSearchEngine } from "@onlyoffice/ai-chat/core";
+import { WebSearchEngine, sourceMetadataFields } from "@onlyoffice/ai-chat/core";
 import type { WebSearchConfig } from "@onlyoffice/ai-chat/core";
 
 import logger from "../log.js";
 import { isObject } from "../narrow.js";
 import { markForwardHeadersToProvider } from "../requestContext.js";
+import { safeResolveSource } from "../storage/docspaceFilesApi.js";
+import type { SourceKind, SourceMeta } from "../storage/docspaceFilesApi.js";
 import { storage } from "../storage/index.js";
 import { asyncHandler } from "./_helpers.js";
 
@@ -53,8 +55,34 @@ import { asyncHandler } from "./_helpers.js";
 //
 // The plugin's `formatResponse` treats any non-2xx as an error payload,
 // so provider failures pass through with their status and body.
+//
+// Like the OpenAI passthrough, the plugin names the entry the search is
+// billed to through the `entityId` / `entityKind` query parameters. The
+// source is resolved server-side from the Files API under the caller's
+// credentials and added to the ONLYOFFICE-gateway body as the `metadata`
+// object (`source_id` / `source_type` / `source_title`) — the same shape the
+// library's own web-search source sends for an engine round. A plugin that
+// sends no entry, or names one the caller cannot see, yields no metadata.
 
 const EXA_BASE_URL = "https://api.exa.ai";
+const ENTITY_ID_PARAM = "entityId";
+const ENTITY_KIND_PARAM = "entityKind";
+
+function sourceKindOf(value: string | null): SourceKind {
+  return value === "file" ? "file" : "folder";
+}
+
+function queryParam(originalUrl: string, name: string): string | undefined {
+  const queryIndex = originalUrl.indexOf("?");
+  if (queryIndex < 0) {
+    return undefined;
+  }
+  return new URLSearchParams(originalUrl.slice(queryIndex + 1)).get(name) ?? undefined;
+}
+
+function usesOnlyofficeBranch(config: WebSearchConfig): boolean {
+  return config.isCloudProvider === true || !isExaProvider(config.provider);
+}
 
 const engine = new WebSearchEngine({ storage });
 
@@ -80,13 +108,17 @@ function buildUpstream(
   config: WebSearchConfig,
   subPath: "search" | "contents",
   incoming: Record<string, unknown>,
+  source: SourceMeta | undefined,
 ): UpstreamRequest | undefined {
-  if (config.isCloudProvider || !isExaProvider(config.provider)) {
+  if (usesOnlyofficeBranch(config)) {
     const baseUrl =
       config.baseUrl || (config.isCloudProvider ? config.provider : "");
     if (!baseUrl) {
       return undefined;
     }
+    // Inserted first so a `metadata` the plugin sent itself wins, matching
+    // the OpenAI passthrough. Only this branch: Exa has no use for it.
+    const metadata = sourceMetadataFields(source);
     return {
       url: new URL(subPath, normalizeBaseUrl(baseUrl)).href,
       headers: {
@@ -94,7 +126,7 @@ function buildUpstream(
         ...(config.key ? { Authorization: `Bearer ${config.key}` } : {}),
         ...config.headers,
       },
-      body: JSON.stringify(incoming),
+      body: JSON.stringify(metadata ? { metadata, ...incoming } : incoming),
     };
   }
   return {
@@ -128,8 +160,17 @@ function passthrough(subPath: "search" | "contents") {
       return;
     }
 
+    // The Files API round trip is spent only where the answer is used — the
+    // Exa branch sends no metadata.
+    const source = usesOnlyofficeBranch(config)
+      ? await safeResolveSource(
+          queryParam(req.originalUrl, ENTITY_ID_PARAM),
+          sourceKindOf(queryParam(req.originalUrl, ENTITY_KIND_PARAM) ?? null),
+        )
+      : undefined;
+
     const incoming = isObject(req.body) ? req.body : {};
-    const upstream = buildUpstream(config, subPath, incoming);
+    const upstream = buildUpstream(config, subPath, incoming, source);
     if (!upstream) {
       res.status(404).json({ error: "Web search is not configured" });
       return;

@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -90,6 +90,69 @@ public class RoomDeleteFileOpsTests(
 
         var list = (await _roomsApi.GetRoomsFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
         list.Folders.Should().Contain(f => f.Title != null && f.Title.Contains("Autotest Admin Room For Owner Duplicate"));
+    }
+
+    /// <summary>
+    /// BUG 83820: duplicating another user's room copied the room but stopped on its content with
+    /// "You don't have enough permission to copy the file" — the administrator bypass in
+    /// <c>FileSecurity</c> granted Copy/Duplicate only for the room entry itself, not for the entries
+    /// inside it. Fixed by gating room content the same way Download is gated: the containing room
+    /// must not deny downloading.
+    /// </summary>
+    [Fact]
+    [Trait("Bug", "83820")]
+    public async Task DuplicateBatchItems_OwnerDuplicatesDocSpaceAdminsRoomWithFile_FileIsCopied()
+    {
+        // Arrange
+        var admin = await InviteMember(EmployeeType.DocSpaceAdmin);
+        await _filesClient.Authenticate(admin);
+        var room = await CreateCustomRoom("Autotest Admin Room With File For Owner Duplicate");
+        await CreateFile("Autotest Admin Room File", room.Id);
+
+        await _filesClient.Authenticate(Owner);
+
+        // Act
+        var results = (await _filesOperationsApi.DuplicateBatchItemsAsync(
+            new DuplicateRequestDto { FolderIds = [new(room.Id)] },
+            TestContext.Current.CancellationToken)).Response;
+
+        if (results.Exists(r => !r.Finished))
+        {
+            results = await WaitLongOperation(results[0].Id);
+        }
+
+        // Assert
+        results.Should().OnlyContain(r => r.Finished && r.Error == "");
+
+        // The room list is read raw: FolderContentDtoInteger.Folders is typed List<FileEntryBaseDto>,
+        // which carries Title but not Id, so the duplicate cannot be addressed through the SDK model.
+        var duplicateId = await FindRoomId("Autotest Admin Room With File For Owner Duplicate", room.Id);
+        duplicateId.Should().NotBeNull();
+
+        var info = (await _foldersApi.GetFolderInfoAsync(duplicateId.Value, TestContext.Current.CancellationToken)).Response;
+        info.FilesCount.Should().Be(1);
+    }
+
+    /// <summary>Reads GET /files/rooms raw and returns the id of the first room whose title contains
+    /// <paramref name="titlePart"/> and whose id differs from <paramref name="excludeId"/>.</summary>
+    private async Task<int?> FindRoomId(string titlePart, int excludeId)
+    {
+        using var response = await _filesClient.GetAsync("api/2.0/files/rooms", TestContext.Current.CancellationToken);
+        response.EnsureSuccessStatusCode();
+
+        using var json = JsonDocument.Parse(await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken));
+
+        foreach (var folder in json.RootElement.GetProperty("response").GetProperty("folders").EnumerateArray())
+        {
+            var id = folder.GetProperty("id").GetInt32();
+
+            if (id != excludeId && folder.GetProperty("title").GetString()?.Contains(titlePart) == true)
+            {
+                return id;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>

@@ -474,6 +474,19 @@ public class SettingsController(
     }
 
     /// <remarks>
+    /// Specifies whether to display quick action buttons or not.
+    /// </remarks>
+    /// <summary>Display quick actions</summary>
+    /// <path>api/2.0/files/showquickactions</path>
+    [Tags("Files / Settings")]
+    [SwaggerResponse(200, "Boolean value: true if the parameter is enabled", typeof(bool))]
+    [HttpPut("showquickactions")]
+    public async Task<bool> ShowQuickActions(SettingsRequestDto inDto)
+    {
+        return await filesSettingsHelper.SetShowQuickActions(inDto.Set);
+    }
+
+    /// <remarks>
     /// Reports that uploading a file under a name that already exists does not update the existing file. The
     /// operation is a stub kept for compatibility: the request body is read but ignored, nothing is stored, and the
     /// answer is always false, so calling it changes no behaviour and repeating it changes nothing. What actually

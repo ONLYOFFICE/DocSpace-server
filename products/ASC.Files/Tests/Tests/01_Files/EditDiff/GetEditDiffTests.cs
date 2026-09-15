@@ -106,6 +106,11 @@ public class GetEditDiffTests(
         diff.Previous.Should().BeNull();
     }
 
+    /// <remarks>
+    /// Bug 81245: a non-existent fileId used to return something other than 404 from this
+    /// endpoint. Fixed; the trait stays as a regression guard.
+    /// </remarks>
+    [Trait("Bug", "81245")]
     [Fact]
     public async Task GetEditDiff_NonExistentFileId_Returns404()
     {
@@ -114,6 +119,7 @@ public class GetEditDiffTests(
             async () => await _filesApi.GetEditDiffUrlAsync(999999999, cancellationToken: TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(404);
+        exception.ErrorContent?.ToString().Should().Contain("The required file was not found");
     }
 
     [Fact]

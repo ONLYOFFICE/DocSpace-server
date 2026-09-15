@@ -169,8 +169,12 @@ public class FormRolesPermissionsTests(
         response.StatusCode.Should().Be(HttpStatusCode.OK);
     }
 
-    /// <summary>Historically bug 81348; already fixed, this is the expected behaviour today.</summary>
+    /// <summary>
+    /// Bug 81348: a Guest with no access to the room holding the form could read its roles.
+    /// Fixed - the endpoint now refuses them with 403.
+    /// </summary>
     [Fact]
+    [Trait("Bug", "81348")]
     public async Task GetAllFormRoles_GuestWithoutRoomAccess_Returns403()
     {
         // Arrange

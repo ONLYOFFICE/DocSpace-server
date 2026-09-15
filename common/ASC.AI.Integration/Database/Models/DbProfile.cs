@@ -55,7 +55,7 @@ public class DbProfile : BaseEntity
     [Required]
     public required string ModelId { get; set; }
 
-    public bool? Reasoning { get; set; }
+    public ReasoningConfig? Reasoning { get; set; }
     public Capabilities? Capabilities { get; set; }
     public bool? UseResponsesApi { get; set; }
     public bool? CanUseTool { get; set; }
@@ -133,7 +133,10 @@ public static class DbProfileExtension
                 .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Reasoning)
-                .HasColumnName("reasoning");
+                .HasColumnName("reasoning")
+                .HasColumnType("json")
+                .HasCharSet("utf8")
+                .UseCollation("utf8_general_ci");
 
             entity.Property(e => e.Capabilities)
                 .HasColumnName("capabilities");
@@ -194,7 +197,8 @@ public static class DbProfileExtension
                 .HasMaxLength(255);
 
             entity.Property(e => e.Reasoning)
-                .HasColumnName("reasoning");
+                .HasColumnName("reasoning")
+                .HasColumnType("jsonb");
 
             entity.Property(e => e.Capabilities)
                 .HasColumnName("capabilities");

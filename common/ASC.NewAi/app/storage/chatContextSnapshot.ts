@@ -32,6 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { McpServerConfig, Profile, Thread, WebSearchConfig } from "@onlyoffice/ai-chat/core";
+import type { ReasoningLevel } from "./reasoningDepth.js";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 import type { DocspaceFolderInfo } from "./docspaceFilesApi.js";
 import type { JsonObject } from "../narrow.js";
@@ -60,7 +61,8 @@ export interface ChatContextScope {
   folder: DocspaceFolderInfo | undefined;
   /** `ActionType` name -> profile id, already resolved by the C# side. */
   assignments: Record<string, string>;
-  deepMode: boolean | null;
+  /** The stored extended-thinking depth (`off` = deep mode off), `null` when none is persisted. */
+  reasoningLevel: ReasoningLevel | null;
   /** Raw `serverType -> { disabled, allowAlways }` map as the C# storage serves it. */
   toolPrefs: JsonObject;
   mcpServers: Record<string, McpServerConfig>;

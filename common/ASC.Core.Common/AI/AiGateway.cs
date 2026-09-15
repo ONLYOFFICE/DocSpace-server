@@ -69,26 +69,31 @@ public class AiGateway(
 
     public bool Configured => aiGatewayConfiguration.Configured;
 
+    public async Task<bool> IsAiAccessEnabledAsync()
+    {
+        var settings = await settingsManager.LoadAsync<TenantAiAccessSettings>(tenantManager.GetCurrentTenantId());
+        return settings.Enabled;
+    }
+
     public async Task<bool> IsAiEnabledAsync()
     {
-        if (!Configured)
-        {
-            return false;
-        }
-
-        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantManager.GetCurrentTenantId());
-        return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AITools);
+        return await IsWalletServiceEnabledAsync(TenantWalletService.AITools);
     }
 
     public async Task<bool> IsSearchEnabledAsync()
     {
-        if (!Configured)
+        return await IsWalletServiceEnabledAsync(TenantWalletService.AISearch);
+    }
+
+    private async Task<bool> IsWalletServiceEnabledAsync(TenantWalletService service)
+    {
+        if (!Configured || !await IsAiAccessEnabledAsync())
         {
             return false;
         }
 
         var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantManager.GetCurrentTenantId());
-        return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AISearch);
+        return settings.EnabledServices != null && settings.EnabledServices.Contains(service);
     }
 
     public async Task<string> GetKeyAsync(bool allowEmpty = false)
@@ -436,6 +441,20 @@ public class ModelTierJsonConverter : JsonConverter<ModelTier?>
     }
 }
 
+public record ModelReasoning
+{
+    public bool Mandatory { get; init; }
+
+    [JsonPropertyName("default_enabled")]
+    public bool DefaultEnabled { get; init; } = true;
+
+    [JsonPropertyName("supported_efforts")]
+    public IEnumerable<string> SupportedEfforts { get; init; } = [];
+
+    [JsonPropertyName("default_effort")]
+    public string DefaultEffort { get; init; }
+}
+
 public record Model
 {
     public required string Id { get; init; }
@@ -447,6 +466,8 @@ public record Model
     public ModelTier? Tier { get; init; }
 
     public int? Rank { get; init; }
+
+    public ModelReasoning Reasoning { get; init; }
 
     [JsonPropertyName("revision_id")]
     public required Guid RevisionId { get; init; }

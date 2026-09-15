@@ -47,6 +47,7 @@ import {
   markForwardHeadersToProvider,
   getCustomServerNames,
   getChatContextSnapshot,
+  getSourceMeta,
 } from "../requestContext.js";
 import { primeChatContext, describeChatContextUsage } from "../storage/chatContext.js";
 import { customToolsSource, primeCustomServers } from "../tools/customTools.js";
@@ -56,7 +57,7 @@ import { asyncHandler, streamNdjson, streamOpenAiSse, attachmentLimitError } fro
 import { observeChatStream } from "../telemetry/chatStream.js";
 import type { StreamDialect } from "../telemetry/chatStream.js";
 import { assertThreadCreatable } from "./threadsController.js";
-import { isObject } from "../narrow.js";
+import { isObject, parseInt10 } from "../narrow.js";
 import {
   HttpToolsAdapter,
   safeGetToolsPrompt,
@@ -262,11 +263,11 @@ async function withAgentInstruction<T>(body: T): Promise<T> {
 
 // Attribute the round to the DocSpace entry it runs for — the agent whose
 // chat this is, or else the folder the user is in. The resolved source lands
-// on the request context, and the ONLYOFFICE provider override
-// (`app/providers/onlyofficeSourceProvider.ts`) turns it into the request's
+// on the request context; the engine reads it through its `resolveSource`
+// dep and the library's ONLYOFFICE provider turns it into the request's
 // `metadata` object (`source_id` / `source_type` / `source_title`) on every
-// request of the round, tool-call resume rounds included, so the backend can
-// attribute usage. Server-resolved on purpose: type and title come from the
+// request of the round, tool-call resume rounds and web search included, so
+// the backend can attribute usage. Server-resolved on purpose: type and title come from the
 // Files API under the caller's credentials, so a client cannot claim someone
 // else's entry. A round with no resolvable scope leaves the context empty and
 // the field stays absent.
@@ -305,9 +306,33 @@ function customScopeOf(body: unknown): string | undefined {
   return typeof entityId === "string" ? entityId : undefined;
 }
 
+// How often a streaming assistant message is flushed to the C# service
+// (`PUT /internal/ai/messages/{id}`) while the round is in progress. The
+// library default (150 ms) is tuned for a local adapter; here every write
+// is an HTTP hop, so pace them to a few seconds. The first create and the
+// terminal write are unconditional; this only paces the intermediate ones,
+// and the library salvages the staged text if the stream dies early.
+// Override with `NEW_AI_PERSIST_INTERVAL_MS`; anything that is not a
+// positive integer keeps the default here rather than falling through to
+// the library's 150 ms fallback.
+const DEFAULT_PERSIST_INTERVAL_MS = 10_000;
+const PERSIST_INTERVAL_MS = ((): number => {
+  const configured = parseInt10(process.env["NEW_AI_PERSIST_INTERVAL_MS"]);
+  return configured !== undefined && configured > 0 ? configured : DEFAULT_PERSIST_INTERVAL_MS;
+})();
+
 const toolsAdapter = new HttpToolsAdapter();
 const engine = new AIEngine({
   storage,
+  persistIntervalMs: PERSIST_INTERVAL_MS,
+  // The entry the round is billed to. Every model-bound handler resolves it
+  // server-side into the request context first (`withSourceMetadata`), so
+  // the hook only reads that value back: the library then carries it into
+  // every request of the round — chat, tool-call resume rounds, the title,
+  // the built-in image tool — and into the web-search body as `metadata`.
+  // Being wired, the hook also makes the library ignore any `source` a
+  // client put in `actionArgs`.
+  resolveSource: () => getSourceMeta(),
   // System (host-configured MCP) tools and registered custom MCP servers
   // run server-side and pause for UI approval; most DocSpace integration
   // tools run silently. Compose all three — before customToolsSource was
@@ -636,9 +661,9 @@ export const aiController = {
     // (approval gating) before the tools adapter fires.
     await primeCustomServers(contextScopeOf(req.body));
     // Attribute the round to its source for the backend's usage accounting, as
-    // every other model-bound route does. The provider override reads it from
-    // the request context, so both the streaming (`sendMessage`) and one-shot
-    // (`sendMessageSync`) branches carry it.
+    // every other model-bound route does. The engine's `resolveSource` reads it
+    // from the request context, so both the streaming (`sendMessage`) and
+    // one-shot (`sendMessageSync`) branches carry it.
     const body = await withSourceMetadata(
       withRequestSignal(res, req.body),
       customScopeOf(req.body),

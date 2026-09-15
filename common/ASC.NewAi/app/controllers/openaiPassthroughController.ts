@@ -39,7 +39,7 @@ import { markForwardHeadersToProvider } from "../requestContext.js";
 import { storage } from "../storage/index.js";
 import { safeResolveSource } from "../storage/docspaceFilesApi.js";
 import type { SourceKind, SourceMeta } from "../storage/docspaceFilesApi.js";
-import { sourceMetadata } from "../providers/onlyofficeSourceProvider.js";
+import { sourceMetadataFields } from "@onlyoffice/ai-chat/core";
 import { asyncHandler, startStreamHeartbeat } from "./_helpers.js";
 import { isObject } from "../narrow.js";
 
@@ -186,7 +186,7 @@ function spliceMetadata(
   if (!contentType || !contentType.toLowerCase().includes("json")) {
     return body;
   }
-  const metadata = sourceMetadata(source);
+  const metadata = sourceMetadataFields(source);
   if (!metadata) {
     return body;
   }

@@ -61,8 +61,8 @@ export interface RequestContext {
   // files and folders have independent id spaces.
   fileInfoCache?: Map<string, Promise<DocspaceFileInfo | undefined>>;
   // The entry this round is attributed to, resolved by `primeSourceMeta`
-  // before the engine runs and read by the ONLYOFFICE provider override when
-  // it builds the request `metadata` (`app/providers/onlyofficeSourceProvider.ts`).
+  // before the engine runs and handed to the library through the engines'
+  // `resolveSource` dep, which carries it into every request `metadata`.
   // Absent when the round names no resolvable entry.
   sourceMeta?: SourceMeta;
   // The chat round's aggregate read (`GET internal/ai/chat-context`), primed
