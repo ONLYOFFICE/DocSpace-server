@@ -39,53 +39,50 @@ namespace ASC.FederatedLogin;
 [DebuggerDisplay("{AccessToken} (expired: {IsExpired})")]
 public class OAuth20Token
 {
-    /// <summary>
-    /// Access token
-    /// </summary>
+    /// <summary>The token sent to the provider with every request made on behalf of the account.</summary>
     /// <example>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</example>
     [JsonPropertyName("access_token")]
     public string AccessToken { get; set; }
 
     /// <summary>
-    /// Refresh token
+    /// The token used to obtain a new access token when the current one expires. A provider that issues no refresh
+    /// token leaves it empty, and the account then has to be connected again to keep working.
     /// </summary>
     /// <example>def50200a1b2c3d4e5f6...</example>
     [JsonPropertyName("refresh_token")]
     public string RefreshToken { get; set; }
 
     /// <summary>
-    /// Expires in
+    /// How long the access token stays usable, in seconds counted from `timestamp`. Zero means the provider did not
+    /// say, and the token is then treated as expired.
     /// </summary>
     /// <example>3600</example>
     [JsonPropertyName("expires_in")]
     [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
     public long ExpiresIn { get; set; }
 
-    /// <summary>
-    /// Client id
-    /// </summary>
+    /// <summary>The OAuth 2.0 client ID of the application the token was issued to.</summary>
     /// <example>my-client-id</example>
     [JsonPropertyName("client_id")]
     public string ClientID { get; set; }
 
     /// <summary>
-    /// Client secret
+    /// The client secret of the application the token was issued to, needed when the token is refreshed.
     /// </summary>
     /// <example>my-client-secret</example>
     [JsonPropertyName("client_secret")]
     public string ClientSecret { get; set; }
 
     /// <summary>
-    /// Redirect uri
+    /// The redirect URL the authorization code behind this token was obtained with; providers require the same value
+    /// again when the token is refreshed.
     /// </summary>
     /// <example>https://app.example.com/callback</example>
     [Url]
     [JsonPropertyName("redirect_uri")]
     public string RedirectUri { get; set; }
 
-    /// <summary>
-    /// Timestamp
-    /// </summary>
+    /// <summary>When the token was issued, in UTC. This is the point `expires_in` is counted from.</summary>
     /// <example>2026-01-01T00:00:00Z</example>
     [JsonPropertyName("timestamp")]
     public DateTime Timestamp { get; set; }
@@ -97,7 +94,8 @@ public class OAuth20Token
     public string OriginJson { get; set; }
 
     /// <summary>
-    /// Is expired
+    /// Whether the access token can no longer be used and has to be refreshed. It is also true when the provider did
+    /// not say how long the token lives.
     /// </summary>
     /// <example>false</example>
     public bool IsExpired

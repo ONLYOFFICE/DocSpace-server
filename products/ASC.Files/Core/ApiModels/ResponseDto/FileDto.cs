@@ -36,239 +36,268 @@ using ImageMagick;
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The file parameters.
+/// A stored file as the calling account sees it: where it lives, which revision this is, how it can be opened and
+/// what the portal is currently doing with it.
 /// </summary>
 public class FileDto<T> : FileEntryDto<T>
 {
     /// <summary>
-    /// The folder ID where the file is located.
+    /// The folder the file is stored in. When the file was reached through a share and the caller cannot open its
+    /// real parent, the identifier of the Shared with me section is reported instead, so this is where the file is
+    /// visible rather than where it physically sits.
     /// </summary>
     /// <example>10</example>
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The file version.
+    /// The revision this entry describes. It starts at 1 and moves to the next number each time new content is stored
+    /// over the file, except for an editing session opened against the file itself, which replaces the content and
+    /// keeps the number. `GET api/2.0/files/file/{fileId}/history` lists them all.
     /// </summary>
     /// <example>3</example>
     public int Version { get; set; }
 
     /// <summary>
-    /// The version group of the file.
+    /// Groups revisions that belong together, which is how a history can fold a long editing session into one entry:
+    /// versions saved inside one session share this number, and an upload over the file starts a new group.
     /// </summary>
     /// <example>1</example>
     public int VersionGroup { get; set; }
 
     /// <summary>
-    /// The content length of the file.
+    /// The size already formatted for display, with a unit and the separators of the caller's language. Read
+    /// `pureContentLength` for a number to calculate with.
     /// </summary>
-    /// <example>12345</example>
+    /// <example>1.29 MB</example>
     public string ContentLength { get; set; }
 
     /// <summary>
-    /// The pure content length of the file.
+    /// The size of the stored content in bytes, and null for an empty file.
     /// </summary>
-    /// <example>12345</example>
+    /// <example>1352001</example>
     public long? PureContentLength { get; set; }
 
     /// <summary>
-    /// The current status of the file.
+    /// What the portal is currently doing with the file and how the caller stands towards it - open in the editor,
+    /// unread, being converted, and so on. The value is a bit mask that combines those states, so a file can report a
+    /// number that matches none of the published members on its own.
     /// </summary>
-    /// <example>0</example>
+    /// <example>2</example>
     public FileStatus FileStatus { get; set; }
 
     /// <summary>
-    /// The list of users editing the file.
+    /// The accounts that have the file open in the editor at this moment, as account identifier to display name, and
+    /// empty when nobody has. The all-zero identifier stands for people who came in through an external link without
+    /// signing in, and its name carries their number in brackets when there is more than one.
     /// </summary>
-    /// <example>{"00000000-0000-0000-0000-000000000000": "John Doe"}</example>
+    /// <example>{"9a1e28c4-51f2-4f6b-b0a3-0c21e7f2a7d1": "John Doe"}</example>
     public Dictionary<Guid, string> EditingBy { get; set; }
 
     /// <summary>
-    /// Specifies if the file is muted or not.
+    /// Not a property of the file at all: it repeats, inverted, the calling account's own switch for new-item badges,
+    /// so it is the same in every entry of one answer. True means that account has badges turned off.
     /// </summary>
     /// <example>false</example>
     public bool Mute { get; set; }
 
     /// <summary>
-    /// The URL link to view the file.
+    /// The address that returns the bytes of the file - a download, in spite of the name; `webUrl` is the address a
+    /// person opens. When the file was reached through an external link the address carries the key of that link, so
+    /// it keeps working without signing in.
     /// </summary>
-    /// <example>https://www.onlyoffice.com/viewfile?fileid=2221</example>
+    /// <example>https://example.com/filehandler.ashx?action=download&amp;fileid=2221</example>
     [Url]
     public string ViewUrl { get; set; }
 
     /// <summary>
-    /// The Web URL link to the file.
+    /// The page that opens the file in a browser: the editor for a format the portal edits, the media viewer for
+    /// pictures, audio and video, and the download address for a format it cannot show at all.
     /// </summary>
-    /// <example>http://localhost/files/document.docx</example>
+    /// <example>https://example.com/doceditor?fileid=2221</example>
     [Url]
     public string WebUrl { get; set; }
 
     /// <summary>
-    /// The file type.
+    /// The broad kind of content, worked out from the extension, which is what a client uses to pick an icon or a
+    /// viewer without parsing `fileExst` itself.
     /// </summary>
-    /// <example>0</example>
+    /// <example>7</example>
     public FileType FileType { get; set; }
 
     /// <summary>
-    /// The file extension.
+    /// The extension of the stored file, leading dot included and always lower case. For a format the portal keeps in
+    /// a converted shape this is the extension it is served under, not the one it was uploaded with.
     /// </summary>
-    /// <example>.txt</example>
+    /// <example>.docx</example>
     public string FileExst { get; set; }
 
     /// <summary>
-    /// The comment to the file.
+    /// The note kept with this revision. The portal writes it itself for revisions it creates, an upload over an
+    /// existing file among them, and an editor stores the note a person typed when saving a version.
     /// </summary>
-    /// <example>This is a comment</example>
+    /// <example>Uploaded file</example>
     public string Comment { get; set; }
 
     /// <summary>
-    /// Specifies if the file is encrypted or not.
+    /// True for a file in a private room, whose content the server never sees and which therefore cannot be converted
+    /// or taken over by an upload. Null, rather than false, for an ordinary file.
     /// </summary>
     /// <example>false</example>
     public bool? Encrypted { get; set; }
 
     /// <summary>
-    /// The thumbnail URL of the file.
+    /// The address of the generated preview image. It is filled in only while `thumbnailStatus` says the preview has
+    /// been created, and it carries a suffix that changes with the file, so an image cached for an earlier revision
+    /// is not reused.
     /// </summary>
-    /// <example>http://localhost/thumbnails/file.png</example>
+    /// <example>https://example.com/filehandler.ashx?action=thumb&amp;fileid=2221</example>
     [Url]
     public string ThumbnailUrl { get; set; }
 
     /// <summary>
-    /// The current thumbnail status of the file.
+    /// How far the preview image has got. Only the created state means `thumbnailUrl` holds an address; the others
+    /// mean there is none, either because it is still being produced or because this format has no preview.
     /// </summary>
-    /// <example>0</example>
+    /// <example>1</example>
     public Thumbnail ThumbnailStatus { get; set; }
 
     /// <summary>
-    /// Specifies if the file is locked or not.
+    /// True while the file is held under a lock that stops anyone but its holder from editing it, and null rather
+    /// than false when there is no lock. `lockedBy` names the holder unless the caller is the holder.
     /// </summary>
     /// <example>false</example>
     public bool? Locked { get; set; }
 
     /// <summary>
-    /// The user ID of the person who locked the file.
+    /// The display name of the account holding the lock, and null when the caller holds it - so `locked` true
+    /// together with no name here means the lock is the caller's own.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
+    /// <example>John Doe</example>
     public string LockedBy { get; set; }
 
     /// <summary>
-    /// Specifies if the file has a draft or not.
+    /// For a fillable PDF form, whether the caller already has a filling draft of it, in which case `draftLocation`
+    /// says where that draft lives. Null for anything that is not a form.
     /// </summary>
     /// <example>false</example>
     public bool? HasDraft { get; set; }
 
     /// <summary>
-    /// The status of the form filling process.
+    /// How far the filling of this form has got for the calling account, and whose turn it is now. It is worked out
+    /// only inside a virtual data room, where filling runs in steps; everywhere else it stays at the none value.
     /// </summary>
-    /// <example>0</example>
+    /// <example>3</example>
     public FormFillingStatus FormFillingStatus { get; set; } = FormFillingStatus.None;
 
     /// <summary>
-    /// Specifies if the file is a form or not.
+    /// Whether the PDF is a fillable form rather than a plain document. When the stored classification does not say,
+    /// the portal opens the file to find out, so the answer is reliable for a PDF and null for anything else.
     /// </summary>
-    /// <example>false</example>
+    /// <example>true</example>
     public bool? IsForm { get; set; }
 
     /// <summary>
-    /// Specifies if the Custom Filter editing mode is enabled for a file or not.
+    /// True while a spreadsheet is in the mode where each person sorts and filters their own view without changing
+    /// what the others see, and null rather than false when it is not.
     /// </summary>
     /// <example>false</example>
     public bool? CustomFilterEnabled { get; set; }
 
     /// <summary>
-    /// The name of the user who enabled a Custom Filter editing mode for a file.
+    /// The display name of the account that turned that mode on, and null when the caller turned it on themselves.
     /// </summary>
     /// <example>John Doe</example>
     public string CustomFilterEnabledBy { get; set; }
 
     /// <summary>
-    /// Specifies if the filling has started or not.
+    /// For a form in a room for filling, whether it has been released for filling; until then it is still being
+    /// prepared and only the people running the room work with it. Null for a file this does not apply to.
     /// </summary>
-    /// <example>false</example>
+    /// <example>true</example>
     public bool? StartFilling { get; set; }
 
     /// <summary>
-    /// Specifies if the form filling has started but the file is still being saved by the document editor. Filling and editing are not allowed.
+    /// True during the short window in which a released form is still being written out by the editor. Neither
+    /// filling nor editing is accepted while it lasts, so a client should wait and read the file again.
     /// </summary>
     /// <example>false</example>
     public bool? IsFillingPreparing { get; set; }
 
     /// <summary>
-    /// The InProcess folder ID of the file.
+    /// Left empty by the portal: the folder holding the caller's draft is reported in `draftLocation` instead.
     /// </summary>
     /// <example>10</example>
     public int? InProcessFolderId { get; set; }
 
     /// <summary>
-    /// The InProcess folder title of the file.
+    /// Left empty by the portal, like the identifier beside it; the draft's folder is named in `draftLocation`.
     /// </summary>
     /// <example>In Process</example>
     public string InProcessFolderTitle { get; set; }
 
     /// <summary>
-    /// The ID of the FormFillingFolderDone folder that corresponds to this original form.
+    /// The folder that collects the completed copies of this form. It is filled in only for the original form of a
+    /// room for filling, and only for a caller allowed to work with that form; null everywhere else.
     /// </summary>
     /// <example>55</example>
     public int? ResultsFolderId { get; set; }
 
     /// <summary>
-    /// The file draft information with its location.
+    /// Where the caller's own filling draft of this form is kept. Null when there is no draft yet, which is the same
+    /// thing `hasDraft` reports.
     /// </summary>
-    /// <example>{"folderId": 10, "folderTitle": "In Process", "fileId": 123, "fileTitle": "Draft.pdf"}</example>
+    /// <example>{"folderId": 10, "fileId": 123, "fileTitle": "John Doe - Application.pdf"}</example>
     public DraftLocation<T> DraftLocation { get; set; }
 
     /// <summary>
-    /// The file accessibility.
+    /// Which ways of opening this format the portal supports at all - its own editor, the picture viewer, the media
+    /// player and so on. It answers whether the format can be shown, not whether this account may do it; rights are
+    /// reported in `security`.
     /// </summary>
-    /// <example>{"ImageView": true, "MediaView": true, "WebView": true}</example>
+    /// <example>{"WebView": true, "ImageView": false, "MediaView": false}</example>
     public IDictionary<Accessibility, bool> ViewAccessibility { get; set; }
 
     /// <summary>
-    /// The time when the file was last opened.
+    /// The moment the caller last opened the file. It is kept per account and is what orders the Recent section, so
+    /// it is null for a file this account has never opened. Written with the offset of the portal's time zone.
     /// </summary>
-    /// <example>2021-01-01T00:00:00Z</example>
+    /// <example>2026-09-11T13:45:00+03:00</example>
     public ApiDateTime LastOpened { get; set; }
 
     /// <summary>
-    /// The date when the file will be expired.
+    /// The moment the file falls under the lifetime rule of the room holding it and is removed. It is counted from
+    /// the first revision rather than the latest one, so editing a file does not postpone it, and it is null when the
+    /// room sets no lifetime. Written with the offset of the portal's time zone.
     /// </summary>
-    /// <example>2025-12-31T23:59:59Z</example>
+    /// <example>2026-12-31T23:59:59+03:00</example>
     public ApiDateTime Expired { get; set; }
 
     /// <summary>
-    /// The file entry type.
+    /// Always the file value, which is what tells files from folders in a listing that mixes both.
     /// </summary>
-    /// <example>1</example>
+    /// <example>2</example>
     public override FileEntryType FileEntryType => FileEntryType.File;
 
     /// <summary>
-    /// The vectorization status of the file.
+    /// How far the indexing of the file's content for AI search has got. It is null for a file that has never been
+    /// queued for indexing, which is every file while the feature is off for the portal.
     /// </summary>
-    /// <example>0</example>
+    /// <example>1</example>
     public VectorizationStatus? VectorizationStatus { get; set; }
 
     /// <summary>
-    /// The name of the table in the external database that corresponds to this form.
+    /// The table collecting the submitted values of this form in the external database configured for its room. The
+    /// field is left out of the answer entirely when the form has no such table.
     /// </summary>
     /// <example>form_123_v1</example>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string ExternalDbTableName { get; set; }
 
     /// <summary>
-    /// The dimensions (width and height) of the image file in pixels.
-    /// This property is populated only for image files that can be viewed (supported formats like PNG, JPEG, GIF, BMP, etc.).
-    /// For non-image files, this property remains null.
+    /// The pixel size of the picture, measured by reading the stored file rather than taken from any stored metadata.
+    /// Null for anything that is not a picture the portal can show, and also when the file could not be read.
     /// </summary>
-    /// <remarks>
-    /// The dimensions are determined using ImageMagick library during file processing.
-    /// If the image cannot be read or processed, the dimensions will not be set.
-    /// </remarks>
-    /// <example>
-    /// {
-    ///     "Width": 1920,
-    ///     "Height": 1080
-    /// }
-    /// </example>
+    /// <example>{"width": 1920, "height": 1080}</example>
     public Size Dimensions { get; set; }
 }
 
@@ -754,31 +783,34 @@ public class FileDtoHelper(
 }
 
 /// <summary>
-/// The file draft parameters.
+/// Where the caller's own filling draft of a form is kept.
 /// </summary>
 public class DraftLocation<T>
 {
     /// <summary>
-    /// The InProcess folder ID of the draft.
+    /// The folder holding the draft: the sub-folder that the room for filling keeps for drafts of this particular
+    /// form.
     /// </summary>
     /// <example>10</example>
     public T FolderId { get; set; }
 
     /// <summary>
-    /// The InProcess folder title of the draft.
+    /// The title of that folder, which the portal takes from the form itself when the form is released for filling.
     /// </summary>
-    /// <example>Draft Folder</example>
+    /// <example>Application</example>
     public string FolderTitle { get; set; }
 
     /// <summary>
-    /// The draft ID.
+    /// The draft itself - the copy the caller fills in, not the original form, and the identifier to pass to the file
+    /// operations while filling.
     /// </summary>
     /// <example>123</example>
     public T FileId { get; set; }
 
     /// <summary>
-    /// The draft title.
+    /// The title of the draft, which the portal builds from the name of the person filling it and the name of the
+    /// form. Null when the draft the record points at no longer exists.
     /// </summary>
-    /// <example>Draft Document</example>
+    /// <example>John Doe - Application.pdf</example>
     public string FileTitle { get; set; }
 }
