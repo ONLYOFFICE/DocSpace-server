@@ -64,4 +64,11 @@ public class RoomGroupsRequestDto
     /// <example>true</example>
     [FromQuery(Name = "includeMembers")]
     public bool IncludeMembers { get; set; } = true;
+
+    /// <summary>
+    /// The section to list the groups of: Active for Rooms and Forms for Forms. Active when omitted.
+    /// </summary>
+    /// <example>Active</example>
+    [FromQuery(Name = "searchArea")]
+    public SearchArea? SearchArea { get; set; }
 }

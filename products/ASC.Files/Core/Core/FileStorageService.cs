@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -5856,18 +5856,23 @@ public class FileStorageService //: IFileStorageService
 
     /// <summary>
     /// Resolves the rooms a group operation refers to before anything is written: every id is
-    /// classified as available, missing or inaccessible. When nothing at all could be resolved the
-    /// operation is refused outright — 404 when the ids simply do not exist, 403 when at least one
-    /// of them exists but the caller may not read it — so that a rejected request never leaves a
-    /// half-built group behind.
+    /// classified as available, missing, inaccessible or belonging to the other section. When nothing
+    /// at all could be resolved the operation is refused outright — 403 when at least one of the ids
+    /// exists but the caller may not read it, 400 when the only thing wrong is that the rooms live in
+    /// the other section, 404 when the ids simply do not exist — so that a rejected request never
+    /// leaves a half-built group behind.
     /// </summary>
-    public async Task<(List<int> InternalRooms, List<string> ThirdpartyRooms, bool AnyRejected)> ResolveGroupRoomsAsync(List<int> intIds, List<string> stringIds)
+    public async Task<(List<int> InternalRooms, List<string> ThirdpartyRooms, bool AnyRejected)> ResolveGroupRoomsAsync(List<int> intIds, List<string> stringIds, SearchArea searchArea)
     {
-        var (internalRooms, internalNotFound, internalDenied) = await ResolveRoomsAsync(intIds);
-        var (thirdpartyRooms, thirdpartyNotFound, thirdpartyDenied) = await ResolveRoomsAsync(stringIds);
+        var internalResult = await ResolveRoomsAsync(intIds, searchArea);
+        var thirdpartyResult = await ResolveRoomsAsync(stringIds, searchArea);
 
-        var notFound = internalNotFound + thirdpartyNotFound;
-        var denied = internalDenied + thirdpartyDenied;
+        var internalRooms = internalResult.Available;
+        var thirdpartyRooms = thirdpartyResult.Available;
+
+        var notFound = internalResult.NotFound + thirdpartyResult.NotFound;
+        var denied = internalResult.Denied + thirdpartyResult.Denied;
+        var wrongArea = internalResult.WrongArea + thirdpartyResult.WrongArea;
 
         if (internalRooms.Count == 0 && thirdpartyRooms.Count == 0)
         {
@@ -5876,10 +5881,15 @@ public class FileStorageService //: IFileStorageService
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ViewFolder);
             }
 
+            if (wrongArea > 0)
+            {
+                throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(searchArea));
+            }
+
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
-        return (internalRooms, thirdpartyRooms, notFound + denied > 0);
+        return (internalRooms, thirdpartyRooms, notFound + denied + wrongArea > 0);
     }
 
     /// <summary>
@@ -5887,6 +5897,8 @@ public class FileStorageService //: IFileStorageService
     /// be detached from it: the link is the caller's own data, and a room they lost access to - or
     /// that no longer exists at all - must not stay in their group forever. Ids that are not linked
     /// go through the usual resolution, so removing something that never existed is still refused.
+    /// A removal never checks the room against the group's section: a room that ended up in the group
+    /// before the sections were split must stay detachable.
     /// </summary>
     public async Task<(List<int> InternalRooms, List<string> ThirdpartyRooms, bool AnyRejected)> ResolveGroupRoomsForRemovalAsync(int groupId, List<int> intIds, List<string> stringIds)
     {
@@ -5906,7 +5918,7 @@ public class FileStorageService //: IFileStorageService
             return (internalRooms, thirdpartyRooms, false);
         }
 
-        var (resolvedInt, resolvedString, anyRejected) = await ResolveGroupRoomsAsync(unlinkedInt, unlinkedString);
+        var (resolvedInt, resolvedString, anyRejected) = await ResolveGroupRoomsAsync(unlinkedInt, unlinkedString, SearchArea.Any);
 
         internalRooms.AddRange(resolvedInt);
         thirdpartyRooms.AddRange(resolvedString);
@@ -5914,15 +5926,16 @@ public class FileStorageService //: IFileStorageService
         return (internalRooms, thirdpartyRooms, anyRejected);
     }
 
-    private async Task<(List<T> Available, int NotFound, int Denied)> ResolveRoomsAsync<T>(List<T> roomIds)
+    private async Task<(List<T> Available, int NotFound, int Denied, int WrongArea)> ResolveRoomsAsync<T>(List<T> roomIds, SearchArea searchArea)
     {
         var available = new List<T>();
         var notFound = 0;
         var denied = 0;
+        var wrongArea = 0;
 
         if (roomIds.Count == 0)
         {
-            return (available, notFound, denied);
+            return (available, notFound, denied, wrongArea);
         }
 
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -5939,13 +5952,45 @@ public class FileStorageService //: IFileStorageService
             {
                 denied++;
             }
+            // a room the caller can see, but of the other section: it is a bad request rather than a
+            // permission problem, so it is counted apart from the denied ones
+            else if (!searchArea.MatchesRoomType(room.FolderType))
+            {
+                wrongArea++;
+            }
             else
             {
                 available.Add(roomId);
             }
         }
 
-        return (available, notFound, denied);
+        return (available, notFound, denied, wrongArea);
+    }
+
+    /// <summary>
+    /// The section an existing group belongs to. Nothing is stored: the section is derived from the
+    /// rooms the group references, the same way the room listings themselves are split.
+    /// </summary>
+    public async Task<SearchArea> GetGroupSearchAreaAsync(int groupId)
+    {
+        var refs = await daoFactory.GetRoomGroupDao<int>().GetRoomsByGroupAsync(groupId).ToListAsync();
+
+        var internalTypesTask = RoomTypesAsync(refs.Where(r => r.InternalRoomId.HasValue).Select(r => r.InternalRoomId.Value).ToList());
+        var thirdpartyTypesTask = RoomTypesAsync(refs.Where(r => r.ThirdpartyRoomId != null).Select(r => r.ThirdpartyRoomId).ToList());
+
+        await Task.WhenAll(internalTypesTask, thirdpartyTypesTask);
+
+        return RoomGroupArea.Derive([.. internalTypesTask.Result, .. thirdpartyTypesTask.Result]);
+
+        async Task<List<FolderType>> RoomTypesAsync<T>(List<T> roomIds)
+        {
+            if (roomIds.Count == 0)
+            {
+                return [];
+            }
+
+            return await daoFactory.GetFolderDao<T>().GetFoldersAsync(roomIds).Select(r => r.FolderType).ToListAsync();
+        }
     }
 
     public IAsyncEnumerable<RoomGroup> GetGroupsAsync()

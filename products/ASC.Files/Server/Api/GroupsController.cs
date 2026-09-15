@@ -54,6 +54,7 @@ public class GroupsController(
     public async Task<RoomGroupDto> AddRoomGroup(RoomGroupRequestDto inDto)
     {
         var name = ValidateGroupName(inDto.Name);
+        var searchArea = ValidateSearchArea(inDto.SearchArea);
         var (roomIntIds, roomStringIds) = ParseRoomIds(inDto.Rooms);
 
         if (roomIntIds.Count == 0 && roomStringIds.Count == 0)
@@ -64,7 +65,7 @@ public class GroupsController(
         await RoomLogoManager.ValidateRoomCover(inDto.Icon);
 
         // resolved before the group row is written, so a request that resolves nothing leaves nothing behind
-        var (intIds, stringIds, anyRejected) = await fileStorageService.ResolveGroupRoomsAsync(roomIntIds, roomStringIds);
+        var (intIds, stringIds, anyRejected) = await fileStorageService.ResolveGroupRoomsAsync(roomIntIds, roomStringIds, searchArea);
 
         var group = await fileStorageService.SaveRoomGroupAsync(new RoomGroup
         {
@@ -80,7 +81,7 @@ public class GroupsController(
             throw new InvalidOperationException("Some of the rooms could not be added to the group.");
         }
 
-        return await roomGroupDtoHelper.GetAsync(group, true);
+        return await roomGroupDtoHelper.GetAsync(group, true, searchArea);
     }
 
     /// <remarks>
@@ -115,6 +116,7 @@ public class GroupsController(
         }
 
         var group = await fileStorageService.GetGroupInfoAsync(inDto.Id);
+        var searchArea = await fileStorageService.GetGroupSearchAreaAsync(group.Id);
 
         if (update.GroupName != null)
         {
@@ -127,7 +129,7 @@ public class GroupsController(
         if (update.RoomsToAdd is { Count: > 0 })
         {
             var (addInt, addString) = ParseRoomIds(update.RoomsToAdd);
-            var (intIds, stringIds, anyRejected) = await fileStorageService.ResolveGroupRoomsAsync(addInt, addString);
+            var (intIds, stringIds, anyRejected) = await fileStorageService.ResolveGroupRoomsAsync(addInt, addString, searchArea);
 
             await AddRoomsToGroupAsync(intIds, stringIds, group);
             rejected |= anyRejected;
@@ -147,7 +149,7 @@ public class GroupsController(
             throw new InvalidOperationException("Some of the rooms could not be applied to the group.");
         }
 
-        return await roomGroupDtoHelper.GetAsync(group, true);
+        return await roomGroupDtoHelper.GetAsync(group, true, searchArea);
     }
 
     /// <remarks>
@@ -175,9 +177,17 @@ public class GroupsController(
     [HttpGet("")]
     public async IAsyncEnumerable<RoomGroupDto> GetRoomGroups(RoomGroupsRequestDto inDto)
     {
+        var searchArea = ValidateSearchArea(inDto.SearchArea);
+
         await foreach (var group in fileStorageService.GetGroupsAsync())
         {
-            yield return await roomGroupDtoHelper.GetAsync(group, inDto.IncludeMembers);
+            var dto = await roomGroupDtoHelper.GetAsync(group, inDto.IncludeMembers, searchArea);
+
+            // a group none of whose rooms live in this section is not part of it
+            if (dto != null)
+            {
+                yield return dto;
+            }
         }
     }
 
@@ -219,6 +229,21 @@ public class GroupsController(
         {
             await fileStorageService.RemoveRoomFromGroupAsync(id, group.Id);
         }
+    }
+
+    /// <summary>
+    /// A group lives either in the Rooms section or in the Forms one, so only those two areas are
+    /// accepted; any other value of the shared <see cref="SearchArea"/> dictionary is a bad request.
+    /// A missing value means Active, which is what a client that predates the split sends.
+    /// </summary>
+    private static SearchArea ValidateSearchArea(SearchArea? searchArea)
+    {
+        return searchArea switch
+        {
+            null or SearchArea.Active => SearchArea.Active,
+            SearchArea.Forms => SearchArea.Forms,
+            _ => throw new ArgumentException($"'{searchArea}' is not a valid room group area.", nameof(searchArea))
+        };
     }
 
     private static string ValidateGroupName(string name)

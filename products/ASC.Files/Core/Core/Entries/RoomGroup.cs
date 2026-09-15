@@ -41,6 +41,38 @@ public class RoomGroup
     public Guid UserID { get; set; }
 }
 
+/// <summary>
+/// The Rooms / Forms split as the groups see it. A group does not store the section it belongs to:
+/// exactly like the room listings, the section is derived from the rooms themselves, so a group of
+/// form-filling rooms is a Forms group and everything else is a Rooms group. Archived rooms still
+/// count here - a room leaves the listing when it is archived, not the group.
+/// </summary>
+public static class RoomGroupArea
+{
+    /// <summary>
+    /// The section a group is shown in when the caller did not ask for one. A group is a Forms group
+    /// only when every room it references is a form-filling room; a group with no rooms left, and a
+    /// mixed group inherited from before the split, stay in Rooms.
+    /// </summary>
+    public static SearchArea Derive(IReadOnlyCollection<FolderType> roomTypes)
+    {
+        return roomTypes.Count > 0 && roomTypes.All(t => t == FolderType.FillingFormsRoom)
+            ? SearchArea.Forms
+            : SearchArea.Active;
+    }
+
+    /// <summary>
+    /// Whether the group takes part in the given section: it does when at least one of its rooms
+    /// belongs there. A group that has no rooms at all belongs to Rooms, the default section.
+    /// </summary>
+    public static bool BelongsTo(IReadOnlyCollection<FolderType> roomTypes, SearchArea searchArea)
+    {
+        return roomTypes.Count == 0
+            ? searchArea == SearchArea.Active
+            : roomTypes.Any(t => searchArea.MatchesRoomType(t));
+    }
+}
+
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class RoomGroupMapper
 {

@@ -63,6 +63,12 @@ public class RoomGroupDto
     public Guid UserId { get; set; }
 
     /// <summary>
+    /// The section the group belongs to: Active for Rooms and Forms for Forms.
+    /// </summary>
+    /// <example>Active</example>
+    public SearchArea SearchArea { get; set; }
+
+    /// <summary>
     /// The list of rooms in the group. 
     /// </summary>
     /// <example>[{"id":1,"title":"Room 1"},{"id":2,"title":"Room 2"}]</example>
@@ -78,15 +84,14 @@ public class RoomGroupDto
 [Scope]
 public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory daoFactory)
 {
-    public async Task<RoomGroupDto> GetAsync(RoomGroup group, bool includeMembers)
+    /// <summary>
+    /// Builds the response for one group. <paramref name="searchArea"/> is the section the group is
+    /// being looked at from: its rooms are then limited to that section, and a group that has no room
+    /// there at all is not part of it - <c>null</c> is returned so the listing can skip it. When no
+    /// section is given, the group's own one is derived from its rooms.
+    /// </summary>
+    public async Task<RoomGroupDto> GetAsync(RoomGroup group, bool includeMembers, SearchArea? searchArea = null)
     {
-        var result = new RoomGroupDto
-        {
-            Id = group.Id,
-            Name = group.Name,
-            UserId = group.UserID
-        };
-
         var roomGroupDao = daoFactory.GetRoomGroupDao<int>();
         var roomGroupRefs = await roomGroupDao.GetRoomsByGroupAsync(group.Id).ToListAsync();
 
@@ -105,8 +110,37 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
             }
         }
 
-        var internalRoomsTask = GetFoldersAsync(fInt).ToListAsync().AsTask();
-        var thirdPartyRoomsTask = GetFoldersAsync(fString).ToListAsync().AsTask();
+        var internalFoldersTask = GetFoldersAsync(fInt).ToListAsync().AsTask();
+        var thirdPartyFoldersTask = GetFoldersAsync(fString).ToListAsync().AsTask();
+
+        await Task.WhenAll(internalFoldersTask, thirdPartyFoldersTask);
+
+        var internalFolders = internalFoldersTask.Result;
+        var thirdPartyFolders = thirdPartyFoldersTask.Result;
+
+        List<FolderType> roomTypes =
+        [
+            .. internalFolders.Select(r => r.FolderType),
+            .. thirdPartyFolders.Select(r => r.FolderType)
+        ];
+
+        if (searchArea.HasValue && !RoomGroupArea.BelongsTo(roomTypes, searchArea.Value))
+        {
+            return null;
+        }
+
+        var area = searchArea ?? RoomGroupArea.Derive(roomTypes);
+
+        var result = new RoomGroupDto
+        {
+            Id = group.Id,
+            Name = group.Name,
+            UserId = group.UserID,
+            SearchArea = area
+        };
+
+        var internalRoomsTask = MapAsync(internalFolders, area).ToListAsync().AsTask();
+        var thirdPartyRoomsTask = MapAsync(thirdPartyFolders, area).ToListAsync().AsTask();
 
         await Task.WhenAll(internalRoomsTask, thirdPartyRoomsTask);
 
@@ -140,14 +174,24 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
 
         return result;
 
-        async IAsyncEnumerable<FileEntryBaseDto> GetFoldersAsync<T>(IEnumerable<T> folders)
+        IAsyncEnumerable<Folder<T>> GetFoldersAsync<T>(IEnumerable<T> folders)
         {
-            var folderDao = daoFactory.GetFolderDao<T>();
+            return daoFactory.GetFolderDao<T>().GetFoldersAsync(folders);
+        }
 
-            await foreach (var folder in folderDao.GetFoldersAsync(folders))
+        async IAsyncEnumerable<FileEntryBaseDto> MapAsync<T>(IEnumerable<Folder<T>> folders, SearchArea roomArea)
+        {
+            foreach (var folder in folders)
             {
                 // an archived room leaves its groups; the reference is kept so that unarchiving restores the membership
                 if (folder.RootFolderType == FolderType.Archive)
+                {
+                    continue;
+                }
+
+                // a room of the other section is invisible in this group's listing, so it must not be
+                // counted either - otherwise the group shows a room count it never lists
+                if (!roomArea.MatchesRoomType(folder.FolderType))
                 {
                     continue;
                 }
