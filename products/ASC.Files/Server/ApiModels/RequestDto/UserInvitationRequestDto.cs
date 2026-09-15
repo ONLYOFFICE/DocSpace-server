@@ -34,18 +34,21 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The user invitation parameters.
+/// Which pending room invitations are to be sent again.
 /// </summary>
 public class UserInvitation
 {
     /// <summary>
-    /// The list of user IDs.
+    /// The accounts to write to, taken from `GET api/2.0/files/rooms/{id}/share`. Anyone who has already joined, is
+    /// not in the room, or is invisible to the caller is skipped without an error, and the field is ignored once
+    /// every pending invitation is being resent.
     /// </summary>
-    /// <example>["00000000-0000-0000-0000-000000000000"]</example>
+    /// <example>["e9a7b4c1-2d3f-4a56-8b90-1c2d3e4f5a6b"]</example>
     public IEnumerable<Guid> UsersIds { get; set; }
 
     /// <summary>
-    /// Specifies whether to resend all user invitations or not.
+    /// Whether every invitation of the room that is still waiting is sent again. With it on the list of accounts is
+    /// ignored, and with it off an empty list means that nothing is sent at all.
     /// </summary>
     /// <example>false</example>
     public bool ResendAll { get; set; }
@@ -57,14 +60,14 @@ public class UserInvitation
 public class UserInvitationRequestDto<T>
 {
     /// <summary>
-    /// The room ID.
+    /// The room whose invitations are resent, named by the identifier that `GET api/2.0/files/rooms` reports for it.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// The user invitation parameters.
+    /// Which pending invitations to send again.
     /// </summary>
     [FromBody]
     public required UserInvitation UserInvitation { get; set; }

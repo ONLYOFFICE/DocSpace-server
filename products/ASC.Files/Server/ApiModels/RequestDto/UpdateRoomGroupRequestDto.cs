@@ -34,34 +34,38 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for updating a group.
+/// The room group to change and the changes to apply to it.
 /// </summary>
 public class UpdateRoomGroupRequestDto
 {
     /// <summary>
-    /// The group ID.
+    /// The room group to change, identified by the value `GET api/2.0/files/group` reports for it. A group of another
+    /// account cannot be addressed and reads as missing.
     /// </summary>
-    /// <example>1</example>
+    /// <example>42</example>
     [FromRoute(Name = "id")]
     public required int Id { get; set; }
 
     /// <summary>
-    /// The request for updating a group.
+    /// The changes to apply. Carrying none of them leaves the group as it is, and each of them may be sent on its own
+    /// or together with the others.
     /// </summary>
-    /// <example>{"groupName": "New Group Name"}</example>
+    /// <example>{"groupName": "Client projects", "roomsToAdd": [12, 15], "roomsToRemove": [7]}</example>
     [FromBody]
     public required UpdateRoomGroupRequest UpdateRoom { get; set; }
 }
 
 /// <summary>
-/// The changes to apply to a room group: its name and the rooms to add or remove.
+/// The changes to apply to a room group: a new name, rooms to attach and rooms to detach, in any combination.
 /// </summary>
 public class UpdateRoomGroupRequest
 {
     /// <summary>
-    /// The list of room IDs to add to the group.
+    /// The rooms to attach to the group, each given as a number for a room stored in the portal or as a string for a
+    /// room on a connected third-party account. Every identifier has to name a room the caller can read; repeats and
+    /// rooms the group already holds are collapsed rather than refused.
     /// </summary>
-    /// <example>[1, 2, 3]</example>
+    /// <example>[12, 15]</example>
     public List<JsonElement> RoomsToAdd
     {
         get;
@@ -73,9 +77,11 @@ public class UpdateRoomGroupRequest
     }
 
     /// <summary>
-    /// The list of room IDs to remove from the group.
+    /// The rooms to detach from the group, in the same two forms. Detaching leaves the room and its content
+    /// untouched, and a room the group already holds can be detached even when the caller has lost access to it in
+    /// the meantime.
     /// </summary>
-    /// <example>[1, 2, 3]</example>
+    /// <example>[7]</example>
     public List<JsonElement> RoomsToRemove
     {
         get;
@@ -87,9 +93,10 @@ public class UpdateRoomGroupRequest
     }
 
     /// <summary>
-    /// The group name.
+    /// The new name of the group, trimmed of surrounding spaces before it is stored. Leaving the member out keeps the
+    /// current name, and a name that is blank once trimmed is refused.
     /// </summary>
-    /// <example>New Group Name</example>
+    /// <example>Client projects</example>
     [StringLength(128)]
     public string GroupName
     {

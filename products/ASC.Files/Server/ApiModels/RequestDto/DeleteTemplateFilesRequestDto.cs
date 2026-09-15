@@ -39,7 +39,8 @@ namespace ASC.Files.ApiModels.RequestDto;
 public class DeleteTemplateFilesRequestDto
 {
     /// <summary>
-    /// The file IDs.
+    /// The files to take off the template list, by id; this array is the whole request body. Only a file stored in
+    /// the portal itself can be a template, which is why an id here is always numeric.
     /// </summary>
     /// <example>[1, 2, 3]</example>
     [FromBody]

@@ -34,19 +34,20 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters of the URL to the changes of a file version.
+/// The query that reads the addresses an editor needs to show the changes of a version.
 /// </summary>
 public class EditDiffUrlRequestDto<T>
 {
     /// <summary>
-    /// The file ID.
+    /// The file whose changes are read.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The file version.
+    /// The version to show the changes of, as reported by `GET api/2.0/files/file/{fileId}/edit/history`; 0 means the
+    /// current version.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "version")]
