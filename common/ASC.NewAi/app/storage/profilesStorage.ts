@@ -147,8 +147,7 @@ export function dtoToProfile(raw: unknown): Profile | undefined {
 // gives, never to "every depth with an off switch": that would offer Off
 // for Claude Fable or Grok 4.5, which cannot stop, and show depths the
 // model does not distinguish. An `external` profile is answered for the
-// provider it is based on; the shadowed `onlyoffice` type answers through
-// its static (see `providers/onlyofficeSourceProvider.ts`).
+// provider it is based on.
 function toReasoningConfig(
   input: Pick<Profile, "reasoning" | "reasoningSupport" | "providerType" | "modelId" | "basedOn">,
 ): Record<string, unknown> | null {

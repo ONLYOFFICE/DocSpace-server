@@ -44,6 +44,7 @@ import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional, attachmentLimitError } from "./_helpers.js";
 import { asString, parseInt10, isObject, getString } from "../narrow.js";
 import { assertEntityAccessible, primeSourceMeta } from "../storage/docspaceFilesApi.js";
+import { getSourceMeta } from "../requestContext.js";
 import { agentAssignedProfileId } from "./agentProfile.js";
 
 // `cursor` arrives JSON-stringified in the query (see the route table in
@@ -92,7 +93,10 @@ function parseThreadsCursor(raw: unknown): ThreadsCursor | undefined {
   return undefined;
 }
 
-const engine = new ThreadsEngine({ storage });
+// `resolveSource` reads the entry `primeSourceMeta` resolved into the request
+// context, so the title request carries the same `metadata` a chat round
+// sends (see aiController).
+const engine = new ThreadsEngine({ storage, resolveSource: () => getSourceMeta() });
 
 interface CreateBody {
   title: string;
@@ -201,10 +205,11 @@ export const threadsController = {
     await assertEntityAccessible(getString(body, "entityId"));
     // The title generated on create must reach the provider with the same
     // source metadata a chat round sends. Resolved server-side into the
-    // request context, where the ONLYOFFICE provider override reads it
-    // (mirrors withSourceMetadata in aiController); a client-supplied
-    // `entityMeta` is ignored — type and title come from the Files API under
-    // the caller's credentials, so a client cannot claim someone else's entry.
+    // request context, where the engine's `resolveSource` reads it (mirrors
+    // withSourceMetadata in aiController); a client-supplied
+    // `entityMeta.source` is ignored — type and title come from the Files API
+    // under the caller's credentials, so a client cannot claim someone else's
+    // entry.
     await primeSourceMeta(getString(body, "entityId"));
     const result = await engine.openOrCreate(body as OpenOrCreateInput);
     res.json(result);
@@ -301,7 +306,7 @@ export const threadsController = {
     // for. The Thread DTO does not echo its entityId back, so the body is the
     // only scope source here — but only the id is taken as a hint; the source
     // itself is re-resolved server-side under the caller's credentials into
-    // the request context, where the ONLYOFFICE provider override reads it.
+    // the request context, where the engine's `resolveSource` reads it.
     const entityIdHint = isObject(args.entityMeta)
       ? getString(args.entityMeta, "entityId")
       : undefined;
