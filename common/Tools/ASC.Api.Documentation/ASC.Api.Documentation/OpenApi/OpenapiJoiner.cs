@@ -35,7 +35,7 @@ namespace ASC.Api.Documentation;
 
 public class OpenapiJoiner : AsyncCommand<JoinSettings>
 {
-    public override async Task<int> ExecuteAsync(CommandContext context, JoinSettings settings, CancellationToken cancellationToken)
+    protected override async Task<int> ExecuteAsync(CommandContext context, JoinSettings settings, CancellationToken cancellationToken)
     {
         await AnsiConsole.Progress()
             .StartAsync(async ctx =>
