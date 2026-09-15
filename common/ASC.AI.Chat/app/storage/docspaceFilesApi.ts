@@ -243,9 +243,9 @@ export type SourceType = "Agent" | "File" | "Folder" | "Room" | "Form";
 
 /**
  * The resolved source of a round, sent by the ONLYOFFICE provider (and the
- * OpenAI passthrough) as the request's `metadata` object — see
- * `sourceMetadata` in `app/providers/onlyofficeSourceProvider.ts` for the
- * wire keys (`source_id` / `source_type` / `source_title`).
+ * passthroughs) as the request's `metadata` object — structurally the
+ * library's `SourceMeta`; `sourceMetadataFields` from `@onlyoffice/ai-chat`
+ * spells the wire keys (`source_id` / `source_type` / `source_title`).
  */
 export interface SourceMeta {
   id: string;
@@ -375,8 +375,8 @@ export async function safeResolveSource(
 
 /**
  * Resolve the round's source and remember it on the request context, where
- * the ONLYOFFICE provider override reads it when it builds the request body
- * (`app/providers/onlyofficeSourceProvider.ts`). Every model-bound handler
+ * the engines' `resolveSource` dep reads it before the library builds the
+ * request body (see aiController). Every model-bound handler
  * calls this before invoking the engine; a round with no resolvable source
  * leaves the context empty and the request carries no `metadata`.
  */

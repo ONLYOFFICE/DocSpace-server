@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -1647,9 +1647,26 @@ public class FileSecurity(
                         }
                     }
 
-                    if (action is FilesSecurityActions.Duplicate or FilesSecurityActions.Copy && isRoom && !folder.SettingsDenyDownload)
+                    if (action is FilesSecurityActions.Duplicate or FilesSecurityActions.Copy)
                     {
-                        return true;
+                        // an administrator may duplicate a whole room, so they must be able to copy
+                        // its content as well - otherwise the recursive copy of the room stops on the
+                        // first file inside it. The gate is the same as for Download: whichever room
+                        // the entry belongs to must not deny downloading.
+                        if (isRoom)
+                        {
+                            if (!folder.SettingsDenyDownload)
+                            {
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            if (room is not { SettingsDenyDownload: true })
+                            {
+                                return true;
+                            }
+                        }
                     }
 
                     switch (action)
