@@ -47,6 +47,8 @@ public static class NginxConfiguration
 
         var certDir = DevCertificateGenerator.EnsureCertificate(basePath);
         var sslConfPath = Path.Combine(builder.AppHostDirectory, "nginx", "docspace-ssl.conf.template");
+        var otelConfPath = Path.Combine(builder.AppHostDirectory, "nginx", "otel.conf");
+        var otelEnvPath = Path.Combine(builder.AppHostDirectory, "nginx", "otel.main");
 
         var openResty = builder.AddContainer(Constants.OpenRestyContainer, "openresty/openresty", "1.27.1.2-10-alpine" + (isArm64 ? "-arm64" : ""))
             .WithBindMount(Path.Combine(basePath, "buildtools", "config", "nginx"), "/etc/nginx/conf.d/")
@@ -58,6 +60,8 @@ public static class NginxConfiguration
             .WithBindMount(Path.Combine(clientBasePath, "packages", "management"), "/var/www/management")
             .WithBindMount(certDir, "/etc/nginx/certs/", isReadOnly: true)
             .WithBindMount(sslConfPath, "/etc/nginx/dev-templates/docspace-ssl.conf.template", isReadOnly: true)
+            .WithBindMount(otelConfPath, "/etc/nginx/conf.d/00-otel.conf", isReadOnly: true)
+            .WithBindMount(otelEnvPath, "/etc/nginx/conf.d/00-otel.main", isReadOnly: true)
             .WithContainerRuntimeArgs(
                 "-p", $"0.0.0.0:{Constants.AppHostPort}:{Constants.RestyPort}",
                 "-p", $"0.0.0.0:{Constants.AppHostHttpsPort}:{Constants.RestyHttpsPort}");
@@ -79,8 +83,32 @@ public static class NginxConfiguration
         const string sslEnvVar = "RESTY_HTTP_PORT";
         openResty.WithEnvironment(sslEnvVar, Constants.RestyPort.ToString());
 
+        // Router request logs as OTLP records for the Aspire dashboard. The Lua
+        // exporter (buildtools/config/nginx/lua/otel) speaks OTLP/HTTP only, so
+        // it can only work when the dashboard's HTTP receiver is up - profiles
+        // that want it set ASPIRE_DASHBOARD_OTLP_HTTP_ENDPOINT_URL. Traces stay
+        // off: they additionally need opentelemetry-lua and the lua-protobuf C
+        // module, which only the docker `router` image carries.
+        var otelLogs = Uri.TryCreate(builder.Configuration["ASPIRE_DASHBOARD_OTLP_HTTP_ENDPOINT_URL"],
+            UriKind.Absolute, out var otlpHttpUri);
+
+        if (otelLogs)
+        {
+            openResty.WithEnvironment("OTEL_LOGS_ENABLED", "true");
+            openResty.WithEnvironment("OTEL_TRACES_ENABLED", "false");
+            openResty.WithEnvironment("OTEL_SERVICE_NAME", Constants.OpenRestyContainer);
+            openResty.WithEnvironment("OTEL_EXPORTER_OTLP_ENDPOINT",
+                "http://" + Constants.HostDockerInternal + ":" + otlpHttpUri!.Port.ToString());
+        }
+
+        // lua-resty-http is not bundled with OpenResty and the logs exporter needs it
+        var otelInstall = otelLogs
+            ? "/usr/local/openresty/bin/opm get ledgetech/lua-resty-http || echo 'otel: lua-resty-http install failed, router logs are not exported'; "
+            : "";
+
         openResty.WithArgs("/bin/sh", "-c",
-            $"apk add --no-cache gettext && " +
+            $"apk add --no-cache gettext{(otelLogs ? " curl perl" : "")} && " +
+            otelInstall +
             $"envsubst '{string.Join(' ', serviceUrls.Select(r => $"${r.Key}"))}' < /etc/nginx/includes/onlyoffice-upstream-map.conf.template > /etc/nginx/includes/onlyoffice-upstream-map.conf && " +
             $"envsubst '${sslEnvVar}' < /etc/nginx/dev-templates/docspace-ssl.conf.template > /etc/nginx/conf.d/docspace-ssl.conf && " +
             $"/usr/local/openresty/bin/openresty -g 'daemon off;'");
