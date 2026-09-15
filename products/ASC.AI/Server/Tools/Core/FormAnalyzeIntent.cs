@@ -33,23 +33,29 @@
 
 namespace ASC.AI.Tools.Core;
 
-public class ToolContext
+/// <summary>
+/// Remembers that a specific attachment was created to analyse a form ("Analyze responses"). Keyed by
+/// attachment id, so re-attaching the same form in another chat does not inherit the launch.
+/// </summary>
+[Scope]
+public class FormAnalyzeIntent(
+    TenantManager tenantManager,
+    IFusionCache fusionCache)
 {
-    public JsonElement? FolderId { get; init; }
-    public int FormId { get; init; }
+    private static readonly TimeSpan _duration = TimeSpan.FromHours(6);
 
-    /// <summary>The attachment the form was attached under; keys the per-attachment analyze intent.</summary>
-    public string? AttachmentId { get; init; }
-}
+    public async Task SetAsync(Guid attachmentId)
+    {
+        await fusionCache.SetAsync(GetCacheKey(attachmentId), true, opt => opt.SetDuration(_duration));
+    }
 
-public class ResolvedToolContext
-{
-    public IFolder? Folder { get; init; }
-    public FileEntry? Form { get; init; }
+    public async Task<bool> GetAsync(Guid attachmentId)
+    {
+        return (await fusionCache.TryGetAsync<bool>(GetCacheKey(attachmentId))).GetValueOrDefault();
+    }
 
-    /// <summary>
-    /// True when the user launched form-response analysis for <see cref="Form"/> (resolved server-side
-    /// from the attach intent). Gates the form-data tools.
-    /// </summary>
-    public bool Analyze { get; init; }
+    private string GetCacheKey(Guid attachmentId)
+    {
+        return $"ai:form:analyze:{tenantManager.GetCurrentTenantId()}:{attachmentId}";
+    }
 }

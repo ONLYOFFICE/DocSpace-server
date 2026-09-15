@@ -34,7 +34,12 @@
 import { randomUUID } from "crypto";
 import { aiService } from "../storage/httpClient.js";
 import { storage } from "../storage/index.js";
-import { getResolvedFormId, setResolvedFormId } from "../requestContext.js";
+import {
+    getResolvedFormId,
+    setResolvedFormId,
+    getResolvedAttachmentId,
+    setResolvedAttachmentId,
+} from "../requestContext.js";
 import { getArray, getString, isObject, parseInt10 } from "../narrow.js";
 import logger from "../log.js";
 import type { ToolsAdapter, TMCPItem } from "@onlyoffice/ai-chat/core";
@@ -66,11 +71,13 @@ type ToolsList = {
     prompt: string;
 };
 
-// `ToolContext` on the C# side — `{ folderId, formId }`. `entityId` is the
-// opaque widget scope token; for room-bound chat it carries the room id.
+// `ToolContext` on the C# side — `{ folderId, formId, attachmentId }`. `entityId`
+// is the opaque widget scope token; for room-bound chat it carries the room id.
+// `attachmentId` keys the per-attachment analyze intent that gates the form-data tools.
 type ToolContextDto = {
     folderId: number;
     formId: number;
+    attachmentId: string;
 };
 
 // A ref-carrying content part encodes `{ref, title, kind}` as JSON in
@@ -127,9 +134,11 @@ export function extractAttachmentRefIds(message: unknown): string[] {
 // Whether the file actually is a started form is validated on the C# side
 // (`FormDataToolsFactory.TryInitAsync`); a non-form id resolves to an empty
 // tool bundle.
-async function resolveFormId(attachmentId: string[] | undefined): Promise<number> {
+async function resolveForm(
+    attachmentId: string[] | undefined,
+): Promise<{ formId: number; attachmentId: string }> {
     if (!attachmentId || attachmentId.length === 0) {
-        return 0;
+        return { formId: 0, attachmentId: "" };
     }
     try {
         const records = await storage.attachments.readManyByIds(attachmentId);
@@ -137,17 +146,18 @@ async function resolveFormId(attachmentId: string[] | undefined): Promise<number
             const entryId = record?.path?.split("/", 1)[0];
             const numeric = parseInt10(entryId, 0) ?? 0;
             if (numeric > 0) {
-                return numeric;
+                // The attachment id keys the analyze intent on the C# side.
+                return { formId: numeric, attachmentId: record?.id ?? "" };
             }
         }
     } catch (err) {
         logger.warn(
-            `resolveFormId: failed to resolve attachment(s) [${attachmentId.join(",")}]: ${
+            `resolveForm: failed to resolve attachment(s) [${attachmentId.join(",")}]: ${
                 err instanceof Error ? err.message : String(err)
             }`,
         );
     }
-    return 0;
+    return { formId: 0, attachmentId: "" };
 }
 
 // Resolve the round's form context from the attachment refs the controller
@@ -161,13 +171,18 @@ async function toContext(
 ): Promise<ToolContextDto> {
     const folderId = parseInt10(entityId, 0) ?? 0;
     if (attachmentId && attachmentId.length > 0) {
-        const formId = await resolveFormId(attachmentId);
-        if (formId > 0) {
-            setResolvedFormId(formId);
+        const resolved = await resolveForm(attachmentId);
+        if (resolved.formId > 0) {
+            setResolvedFormId(resolved.formId);
+            setResolvedAttachmentId(resolved.attachmentId);
         }
-        return { folderId, formId };
+        return { folderId, formId: resolved.formId, attachmentId: resolved.attachmentId };
     }
-    return { folderId, formId: getResolvedFormId() ?? 0 };
+    return {
+        folderId,
+        formId: getResolvedFormId() ?? 0,
+        attachmentId: getResolvedAttachmentId() ?? "",
+    };
 }
 
 // `ToolDescriptor` on the C# side — `{ name, description, parameters }`,

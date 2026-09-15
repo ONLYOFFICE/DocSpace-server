@@ -200,7 +200,8 @@ public class FormDataToolsFactory(
 
     public async Task<ToolBundle> BuildAsync(ResolvedToolContext context)
     {
-        if (context.Form is not File<int> form
+        if (!context.Analyze
+            || context.Form is not File<int> form
             || !externalDatabaseClient.IsEnabled()
             || !await fileSecurity.CanUpdateXlsxAsync(form))
         {

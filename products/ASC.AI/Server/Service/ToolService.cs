@@ -37,7 +37,8 @@ namespace ASC.AI.Service;
 public class ToolService(
     IServiceProvider serviceProvider,
     IDaoFactory daoFactory,
-    FileSecurity fileSecurity)
+    FileSecurity fileSecurity,
+    FormAnalyzeIntent formAnalyzeIntent)
 {
     public async Task<ToolListResponse> GetToolsAsync(ToolContext context)
     {
@@ -124,10 +125,15 @@ public class ToolService(
 
         await Task.WhenAll(folderTask, formTask);
 
+        // Form-data tools run only inside a launched analysis, kept per attachment to isolate conversations.
+        var analyze = Guid.TryParse(context.AttachmentId, out var attachmentId)
+            && await formAnalyzeIntent.GetAsync(attachmentId);
+
         return new ResolvedToolContext
         {
             Folder = await folderTask,
-            Form = await formTask
+            Form = await formTask,
+            Analyze = analyze
         };
     }
 

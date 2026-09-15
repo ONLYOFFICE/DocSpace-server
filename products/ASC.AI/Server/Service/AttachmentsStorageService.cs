@@ -60,6 +60,7 @@ public class AttachmentsStorageService(
     ExternalDatabaseClient externalDatabaseClient,
     FormSchemaProvider formSchemaProvider,
     FormPreAnalysisService formPreAnalysisService,
+    FormAnalyzeIntent formAnalyzeIntent,
     ILogger<AttachmentsStorageService> logger,
     AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
@@ -75,7 +76,7 @@ public class AttachmentsStorageService(
 
     private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
-    public async IAsyncEnumerable<AttachmentResult> CreateManyAsync(HashSet<string> entryIds)
+    public async IAsyncEnumerable<AttachmentResult> CreateManyAsync(HashSet<string> entryIds, HashSet<string> analyzeEntryIds)
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 
@@ -120,13 +121,24 @@ public class AttachmentsStorageService(
         var created = await storage.CreateManyAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, createParams);
         var index = 0;
 
-        // Before the loop: this enumerable is consumed lazily, so analysing inside it would spread
-        // model calls across the whole response.
-        var analyses = await AnalyzeFormsAsync(internalFiles);
+        // Only files the client marked analyzeOnly are analysed: for the rest nothing form-analysis runs
+        // (no external-DB probe, no model warm-up, no intent). Done before the loop, which is consumed
+        // lazily, so the model calls do not spread across the whole response.
+        var analyzeFiles = internalFiles.Where(f => analyzeEntryIds.Contains(f.Id.ToString())).ToList();
+        var analyses = await AnalyzeFormsAsync(analyzeFiles);
 
         foreach (var file in internalFiles)
         {
-            yield return await ToResultAsync(intDao, created[index++], file, analyses.GetValueOrDefault(file.Id));
+            var attachment = created[index++];
+            var analysis = analyses.GetValueOrDefault(file.Id);
+
+            // Remember the intent per attachment, so another chat that attaches the same form is isolated.
+            if (analysis is { CanAnalyze: true })
+            {
+                await formAnalyzeIntent.SetAsync(attachment.Id);
+            }
+
+            yield return await ToResultAsync(intDao, attachment, file, analysis);
         }
 
         foreach (var file in thirdpartyFiles)
@@ -207,8 +219,9 @@ public class AttachmentsStorageService(
                 return FormAnalysis.None;
             }
 
-            // Warm the cache so the questions are already generating by the time the client long-polls.
+            // Warm the questions cache so they are ready by the time the client long-polls.
             _ = await formPreAnalysisService.GenerateAsync(file, _preAnalysisStartWait);
+
             return new FormAnalysis(true);
         }
         catch (Exception e)
@@ -219,21 +232,33 @@ public class AttachmentsStorageService(
     }
 
     /// <summary>
-    /// Long-poll for a form's starter questions by its entry id: held open until the model answers or the
-    /// poll wait elapses. Returns "unavailable" for anything that is not an analysable started form, "ready"
-    /// with the questions once generated, or "pending" while the model is still working (poll again).
+    /// Long-poll for a form's starter questions by the attachment it was attached under. Returns "ready"
+    /// with the questions, "pending" while the model is still working, or "unavailable".
     /// </summary>
-    public async Task<SuggestedQuestionsResult> GetSuggestedQuestionsAsync(string entryId)
+    public async Task<SuggestedQuestionsResult> GetSuggestedQuestionsAsync(string attachmentId)
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 
-        if (!int.TryParse(entryId, out var fileId) || !externalDatabaseClient.IsEnabled())
+        if (!Guid.TryParse(attachmentId, out var id) || !externalDatabaseClient.IsEnabled())
         {
             return SuggestedQuestionsResult.Unavailable;
         }
 
+        if (!await formAnalyzeIntent.GetAsync(id))
+        {
+            return SuggestedQuestionsResult.Unavailable;
+        }
+
+        var fileId = 0;
         try
         {
+            var attachment = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, id);
+            if (attachment?.EntryId is not { } entryId)
+            {
+                return SuggestedQuestionsResult.Unavailable;
+            }
+
+            fileId = entryId;
             var file = await DaoFactory.GetFileDao<int>().GetFileAsync(fileId);
             if (file is not { IsForm: true }
                 || !await FileSecurity.CanReadAsync(file)
