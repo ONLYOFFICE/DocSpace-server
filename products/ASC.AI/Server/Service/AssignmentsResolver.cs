@@ -42,7 +42,7 @@ public record AssignmentPolicy
 }
 
 [Scope]
-public class AssignmentsResolver(AiGateway gateway, ILogger<AssignmentsResolver> logger)
+public class AssignmentsResolver(AiGateway gateway, AiConfiguration aiConfiguration, ILogger<AssignmentsResolver> logger)
 {
     private static readonly AssignmentPolicy[] _policies =
     [
@@ -56,6 +56,12 @@ public class AssignmentsResolver(AiGateway gateway, ILogger<AssignmentsResolver>
         {
             ActionType = ActionType.ImageGeneration,
             ModelType = "image",
+            TierOrder = [ModelTier.Standard, ModelTier.Flagship, ModelTier.Light]
+        },
+        new()
+        {
+            ActionType = ActionType.FormAnalysis,
+            ModelType = "chat",
             TierOrder = [ModelTier.Standard, ModelTier.Flagship, ModelTier.Light]
         }
     ];
@@ -78,12 +84,7 @@ public class AssignmentsResolver(AiGateway gateway, ILogger<AssignmentsResolver>
         }
 
         var models = await GetModelsAsync();
-        if (models == null)
-        {
-            return stored;
-        }
-
-        if (stored.HasValue && models.Any(m => m.RevisionId == stored.Value))
+        if (models == null || stored.HasValue && models.Any(m => m.RevisionId == stored.Value))
         {
             return stored;
         }
@@ -105,7 +106,7 @@ public class AssignmentsResolver(AiGateway gateway, ILogger<AssignmentsResolver>
         return Resolve(stored, applyDefaults, models);
     }
 
-    internal static Dictionary<ActionType, Guid> Resolve(Dictionary<ActionType, Guid> stored, bool applyDefaults, List<Model>? models)
+    internal Dictionary<ActionType, Guid> Resolve(Dictionary<ActionType, Guid> stored, bool applyDefaults, List<Model>? models)
     {
         var unassigned = stored
             .Where(a => a.Value == AssignmentsStorage.UnassignedProfileId)
@@ -163,12 +164,18 @@ public class AssignmentsResolver(AiGateway gateway, ILogger<AssignmentsResolver>
         }
     }
 
-    private static Guid? PickDefault(AssignmentPolicy policy, List<Model> models)
+    private Guid? PickDefault(AssignmentPolicy policy, List<Model> models)
     {
         var candidates = models
             .Where(m => string.Equals(m.Type, policy.ModelType, StringComparison.OrdinalIgnoreCase)
                         && (policy.Filter == null || policy.Filter(m)))
             .ToList();
+
+        var preferred = SelectPreferred(policy.ActionType, candidates);
+        if (preferred != null)
+        {
+            return preferred.RevisionId;
+        }
 
         foreach (var tier in policy.TierOrder)
         {
@@ -180,6 +187,24 @@ public class AssignmentsResolver(AiGateway gateway, ILogger<AssignmentsResolver>
         }
 
         return SelectByRank(candidates, null)?.RevisionId;
+    }
+
+    private Model? SelectPreferred(ActionType actionType, List<Model> candidates)
+    {
+        if (actionType != ActionType.FormAnalysis)
+        {
+            return null;
+        }
+
+        var configured = aiConfiguration.FormAnalysisModel;
+        if (configured is null)
+        {
+            return null;
+        }
+
+        return configured.RevisionId.HasValue
+            ? candidates.Find(m => m.RevisionId == configured.RevisionId.Value)
+            : candidates.Find(m => string.Equals(m.Id, configured.Id, StringComparison.OrdinalIgnoreCase));
     }
 
     private static Model? SelectByRank(List<Model> candidates, ModelTier? tier)
