@@ -432,15 +432,13 @@ public class FileDtoHelper(
                     result.RootFolderId = folderShareAsync;
                     var parent = await _daoFactory.GetCacheFolderDao<T>().GetFolderAsync(result.FolderId);
 
-                    if (!parent.SecurityByUsers.TryGetValue(currentUserId, out _))
-                    {
-                        parent.SecurityByUsers.Add(currentUserId, new Dictionary<FileSecurity.FilesSecurityActions, bool>());
-                    }
+                    var parentSecurity = parent.SecurityByUsers.GetOrAdd(currentUserId,
+                        _ => new ConcurrentDictionary<FileSecurity.FilesSecurityActions, bool>());
 
-                    if (!parent.SecurityByUsers[currentUserId].TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canReadParent))
+                    if (!parentSecurity.TryGetValue(FileSecurity.FilesSecurityActions.Read, out var canReadParent))
                     {
                         canReadParent = await _fileSecurity.CanReadAsync(parent);
-                        parent.SecurityByUsers[currentUserId][FileSecurity.FilesSecurityActions.Read] = canReadParent;
+                        parentSecurity[FileSecurity.FilesSecurityActions.Read] = canReadParent;
                     }
 
                     if (!canReadParent)
