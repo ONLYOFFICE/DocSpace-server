@@ -269,7 +269,7 @@ const source = new SystemToolsSource({
 // Agent rooms carry an MCP whitelist: only the servers enabled for the
 // agent are served to its chat. The whitelist is the agent's per-entity
 // custom-servers map in `/mcp-servers` (managed by the agent
-// create/edit dialog through the new-ai `tools/*` routes): an entry whose
+// create/edit dialog through the AI.Chat `tools/*` routes): an entry whose
 // name matches a system server acts as the "enabled" marker for it.
 // Returns `undefined` when `entityId` is absent, not an agent room, or the
 // agent has no stored server map at all (never configured — no restriction,

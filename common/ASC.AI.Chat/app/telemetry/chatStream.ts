@@ -41,20 +41,20 @@
 import { context, metrics, trace, SpanStatusCode } from "@opentelemetry/api";
 import { isObject } from "../narrow.js";
 
-const tracer = trace.getTracer("asc-new-ai");
-const meter = metrics.getMeter("asc-new-ai");
+const tracer = trace.getTracer("asc-ai-chat");
+const meter = metrics.getMeter("asc-ai-chat");
 
-const latencyHistogram = meter.createHistogram("newai.chat.latency", {
+const latencyHistogram = meter.createHistogram("ai_chat.latency", {
   unit: "ms",
   description: "Time from round start to the first model chunk",
 });
 
-const generationHistogram = meter.createHistogram("newai.chat.generation", {
+const generationHistogram = meter.createHistogram("ai_chat.generation", {
   unit: "ms",
   description: "Time from the first model chunk to the end of the stream",
 });
 
-const roundsCounter = meter.createCounter("newai.chat.rounds", {
+const roundsCounter = meter.createCounter("ai_chat.rounds", {
   description: "Streaming chat rounds by terminal outcome",
 });
 
@@ -111,7 +111,7 @@ export function observeChatStream<T>(
   dialect: StreamDialect = "chat",
 ): AsyncIterable<T> {
   const startedAt = performance.now();
-  const span = tracer.startSpan(route, { attributes: { "newai.route": route } });
+  const span = tracer.startSpan(route, { attributes: { "ai_chat.route": route } });
   const spanContext = trace.setSpan(context.active(), span);
 
   return (async function* () {
@@ -130,7 +130,7 @@ export function observeChatStream<T>(
           firstChunkAt = performance.now();
           latencyHistogram.record(firstChunkAt - startedAt, { route });
           span.addEvent("gen_ai.first_token");
-          span.setAttribute("newai.timing.latency_ms", Math.round(firstChunkAt - startedAt));
+          span.setAttribute("ai_chat.timing.latency_ms", Math.round(firstChunkAt - startedAt));
         }
         // The last terminal event wins (in-engine tool rounds emit several).
         outcome = terminalOutcome(dialect, event) ?? outcome;
@@ -144,10 +144,10 @@ export function observeChatStream<T>(
       const endedAt = performance.now();
       if (firstChunkAt !== null) {
         generationHistogram.record(endedAt - firstChunkAt, { route });
-        span.setAttribute("newai.timing.generation_ms", Math.round(endedAt - firstChunkAt));
+        span.setAttribute("ai_chat.timing.generation_ms", Math.round(endedAt - firstChunkAt));
       }
       roundsCounter.add(1, { route, outcome });
-      span.setAttribute("newai.outcome", outcome);
+      span.setAttribute("ai_chat.outcome", outcome);
       if (outcome === "incomplete-error" || outcome === "stream-error") {
         span.setStatus({ code: SpanStatusCode.ERROR });
       }

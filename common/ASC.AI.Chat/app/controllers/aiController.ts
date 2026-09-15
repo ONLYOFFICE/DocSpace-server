@@ -312,12 +312,12 @@ function customScopeOf(body: unknown): string | undefined {
 // is an HTTP hop, so pace them to a few seconds. The first create and the
 // terminal write are unconditional; this only paces the intermediate ones,
 // and the library salvages the staged text if the stream dies early.
-// Override with `NEW_AI_PERSIST_INTERVAL_MS`; anything that is not a
+// Override with `AI_CHAT_PERSIST_INTERVAL_MS`; anything that is not a
 // positive integer keeps the default here rather than falling through to
 // the library's 150 ms fallback.
 const DEFAULT_PERSIST_INTERVAL_MS = 10_000;
 const PERSIST_INTERVAL_MS = ((): number => {
-  const configured = parseInt10(process.env["NEW_AI_PERSIST_INTERVAL_MS"]);
+  const configured = parseInt10(process.env["AI_CHAT_PERSIST_INTERVAL_MS"]);
   return configured !== undefined && configured > 0 ? configured : DEFAULT_PERSIST_INTERVAL_MS;
 })();
 

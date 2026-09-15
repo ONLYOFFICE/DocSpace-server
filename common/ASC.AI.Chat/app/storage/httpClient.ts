@@ -39,10 +39,10 @@ import type { AppConfig } from "../types.js";
 // Hard ceiling for a single upstream round-trip so a hung AI service / MCP
 // server can't pin a Node socket (and the caller's request) indefinitely.
 // Generous by default because tool calls proxied through the .NET service
-// can be slow; override with `NEW_AI_UPSTREAM_TIMEOUT_MS`. Note this guards
+// can be slow; override with `AI_CHAT_UPSTREAM_TIMEOUT_MS`. Note this guards
 // request/response calls only — long-lived chat *streams* are bounded by
 // the client-driven abort signal, not by this timeout.
-const UPSTREAM_TIMEOUT_MS = parseInt10(process.env["NEW_AI_UPSTREAM_TIMEOUT_MS"], 300_000) ?? 300_000;
+const UPSTREAM_TIMEOUT_MS = parseInt10(process.env["AI_CHAT_UPSTREAM_TIMEOUT_MS"], 300_000) ?? 300_000;
 
 /**
  * Build an {@link AbortSignal} that fires on a timeout, on an upstream

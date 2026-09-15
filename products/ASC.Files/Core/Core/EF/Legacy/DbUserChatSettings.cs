@@ -36,7 +36,7 @@ using User = ASC.Core.Common.EF.User;
 namespace ASC.Files.Core.EF.Legacy;
 
 /// <summary>
-/// Legacy `ai_user_chat_settings` row. Schema-only: the pre-ASC.NewAi chat stack is gone and nothing reads this. Registered in MigrationContext so the table survives.
+/// Legacy `ai_user_chat_settings` row. Schema-only: the pre-ASC.AI.Chat chat stack is gone and nothing reads this. Registered in MigrationContext so the table survives.
 /// </summary>
 public class DbUserChatSettings : BaseEntity
 {
