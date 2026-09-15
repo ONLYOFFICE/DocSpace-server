@@ -259,6 +259,9 @@ public abstract class EditorController<T>(
 
         if (formOpenSetup != null)
         {
+            // the editor needs an explicit null in user.roles to let the form be filled without role restrictions
+            result.EditorConfig.User ??= new UserConfig();
+
             if (formOpenSetup.RootFolder.FolderType is FolderType.VirtualDataRoom)
             {
                 result.StartFilling = file.Security[FileSecurity.FilesSecurityActions.StartFilling];

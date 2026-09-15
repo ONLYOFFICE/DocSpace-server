@@ -1410,6 +1410,7 @@ public class UserConfig
     /// Roles
     /// </summary>
     /// <example>["admin","editor"]</example>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public List<string> Roles { get; set; }
 
     /// <summary>
