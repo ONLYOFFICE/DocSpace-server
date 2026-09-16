@@ -34,33 +34,37 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for generating a folder history report.
+/// The query that starts a history report of one folder.
 /// </summary>
 public class FolderHistoryReportRequestDto
 {
     /// <summary>
-    /// The folder ID whose history is exported.
+    /// The folder whose history is exported; the report covers the folder itself and the entries inside it.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public required int FolderId { get; set; }
 
     /// <summary>
-    /// The output file format of the report. Defaults to XLSX.
+    /// The shape the report is written in: `Xlsx` produces a spreadsheet that is saved as a file of the portal, while
+    /// `Csv` produces a comma-separated text file that is uploaded to "My documents" without being reported back with
+    /// a file identifier.
     /// </summary>
     /// <example>Xlsx</example>
     [FromQuery(Name = "format")]
     public AuditReportFormat Format { get; set; } = AuditReportFormat.Xlsx;
 
     /// <summary>
-    /// The start date of the history period to export.
+    /// The earliest moment an exported entry may have, read in the time zone of the portal; left out, the report
+    /// starts at the oldest entry the portal still keeps.
     /// </summary>
     /// <example>2025-01-01T00:00:00</example>
     [FromQuery(Name = "from")]
     public DateTime? From { get; set; }
 
     /// <summary>
-    /// The end date of the history period to export.
+    /// The latest moment an exported entry may have, read in the time zone of the portal; left out, the report ends
+    /// at the newest entry.
     /// </summary>
     /// <example>2025-12-31T23:59:59</example>
     [FromQuery(Name = "to")]

@@ -66,7 +66,7 @@ public class OperationsReportBuilder(
             ? await GetTenantWalletServiceAsync(taskData.ServiceName.First())
             : null;
 
-        var addSourceColumns = tenantWalletService is TenantWalletService.AITools;
+        var addSourceColumns = tenantWalletService is TenantWalletService.AITools or TenantWalletService.AISearch;
         if (addSourceColumns)
         {
             columns.Add(new ReportColumn(Resource.AccountingCustomerOperationSourceType));

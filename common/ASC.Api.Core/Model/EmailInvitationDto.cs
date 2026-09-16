@@ -51,9 +51,11 @@ public class EmailInvitationsDto
 public class EmailInvitationDto
 {
     /// <summary>
-    /// The email address.
+    /// The address of somebody who has no portal account yet. An invitation is sent to it and an account is created
+    /// once it is accepted, so this is the field to use instead of an account identifier when the person is new to
+    /// the portal.
     /// </summary>
-    /// <example>user@example.com</example>
+    /// <example>jane.doe@example.com</example>
     [EmailAddress]
     [MaxLength(255)]
     public string Email { get; set; }

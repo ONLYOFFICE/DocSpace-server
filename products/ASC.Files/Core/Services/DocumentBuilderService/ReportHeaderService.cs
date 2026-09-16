@@ -59,9 +59,9 @@ public class ReportHeaderService(
     // The logo is drawn into a fixed box, so the box has to keep the proportions the logo was
     // authored at or it comes out stretched. Both logos are laid out at the same 10 mm height, so
     // the width follows from the source size:
-    //   built-in    177 x 24 px (client's logo/lightsmall.svg)          -> 177 * 10 / 24
+    //   built-in    130 x 24 px (client's logo/lightsmall.svg)          -> 130 * 10 / 24
     //   white-label 422 x 48 px (TenantWhiteLabelSettings.LogoLightSmallSize) -> 422 * 10 / 48
-    private const double DefaultLogoWidthMm = 73.8;
+    private const double DefaultLogoWidthMm = 54.2;
     private const double BrandedLogoWidthMm = 87.9;
     private const double LogoHeightMm = 10;
 

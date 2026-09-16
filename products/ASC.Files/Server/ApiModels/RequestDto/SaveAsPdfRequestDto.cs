@@ -34,18 +34,19 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for saving a file as PDF.
+/// The place and the name the PDF copy of a file is stored under.
 /// </summary>
 public class SaveAsPdf<T>
 {
     /// <summary>
-    /// The folder ID to save the file as PDF.
+    /// The folder the PDF is created in; the caller has to be allowed to create files there.
     /// </summary>
     /// <example>1</example>
     public required T FolderId { get; set; }
 
     /// <summary>
-    /// The file title to save as PDF.
+    /// The name of the PDF, without an extension - `.pdf` is appended. Left empty, the name of the source file is
+    /// reused with its extension replaced.
     /// </summary>
     /// <example>My Document</example>
     public required string Title { get; set; }
@@ -53,20 +54,21 @@ public class SaveAsPdf<T>
 
 
 /// <summary>
-/// The request parameters for saving the file as PDF.
+/// The request that stores a file as a PDF beside it.
 /// </summary>
 public class SaveAsPdfRequestDto<T>
 {
     /// <summary>
-    /// The file ID to save as PDF.
+    /// The file to convert; it is left untouched.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// The parameters for saving the file as PDF.
+    /// The destination folder and the name of the PDF.
     /// </summary>
+    /// <example>{"folderId": 1, "title": "Contract signed"}</example>
     [FromBody]
     public required SaveAsPdf<T> File { get; set; }
 }

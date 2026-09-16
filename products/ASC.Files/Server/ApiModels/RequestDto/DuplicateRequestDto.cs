@@ -34,18 +34,22 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for duplicating files and fodlers.
+/// The files and folders to duplicate.
 /// </summary>
 public class DuplicateRequestDto : FileOperationRequestBaseDto
 {
     /// <summary>
-    /// The list of folder IDs.
+    /// The folders to duplicate, by id; the copy of each one is created in the folder that already holds it. A number
+    /// addresses a folder stored in the portal itself, a string addresses a folder on a connected third-party
+    /// account, and both kinds may be sent in one list.
     /// </summary>
     /// <example>[1, 2, 3]</example>
     public List<JsonElement> FolderIds { get; set; } = [];
 
     /// <summary>
-    /// The list of file IDs.
+    /// The files to duplicate, by id; the copy of each one is created in the folder that already holds it. A number
+    /// addresses a file stored in the portal itself, a string addresses a file on a connected third-party account,
+    /// and both kinds may be sent in one list.
     /// </summary>
     /// <example>[1, 2, 3]</example>
     public List<JsonElement> FileIds { get; set; } = [];
