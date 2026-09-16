@@ -49,8 +49,10 @@ const MAX_QUESTIONS = 4;
 const MAX_QUESTION_LENGTH = 120;
 const MAX_PROMPT_LENGTH = 320;
 
-// Held under the proxy's request ceiling; a slower model just spans a few polls.
-const POLL_WAIT_MS = 25_000;
+// One-shot budget (no retry — the client waits on the socket). Keep it under the client's
+// give-up timeout (SUGGESTED_QUESTIONS_TIMEOUT_MS, 60s) so a finished generation still
+// reaches a listening client.
+const GENERATION_BUDGET_MS = 45_000;
 
 const SYSTEM_PROMPT =
   "You generate starter analytics questions for a form-submission dataset.\n" +
@@ -193,10 +195,8 @@ async function generate(
     return UNAVAILABLE;
   }
 
-  // Bound the model call under the proxy's request ceiling: on timeout the client
-  // gets "pending" and polls again, so a slow model just spans a few polls.
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), POLL_WAIT_MS);
+  const timer = setTimeout(() => controller.abort(), GENERATION_BUDGET_MS);
   try {
     const message = await customSync({
       profile,
@@ -223,9 +223,9 @@ async function generate(
 }
 
 /**
- * The long-poll body: "ready" with questions (freshly generated or cached),
- * "pending" while a model is configured but produced nothing yet (poll again),
- * or "unavailable" (not an analysable launched form, or no model configured).
+ * Kick off generation without blocking: "ready" (cached), "unavailable", or "pending" —
+ * the model runs in the background and the result is pushed over the socket, so the client
+ * subscribes instead of polling.
  */
 export async function getSuggestedQuestions(
   attachmentId: string,
@@ -238,13 +238,20 @@ export async function getSuggestedQuestions(
     return { status: "ready", questions: analysis.questions };
   }
 
-  const existing = inflight.get(attachmentId);
-  if (existing) {
-    return existing;
+  // Run once in the background (single-flight), answer "pending" now. The job inherits this
+  // request's AsyncLocalStorage context, so its saveQuestions call keeps the forwarded auth.
+  if (!inflight.has(attachmentId)) {
+    const job = generate(attachmentId, analysis.schema).finally(() =>
+      inflight.delete(attachmentId),
+    );
+    inflight.set(attachmentId, job);
+    job.catch((err) =>
+      logger.warn(
+        `suggestedQuestions: background generation failed for attachment ${attachmentId}: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      ),
+    );
   }
-  const promise = generate(attachmentId, analysis.schema).finally(() =>
-    inflight.delete(attachmentId),
-  );
-  inflight.set(attachmentId, promise);
-  return promise;
+  return PENDING;
 }

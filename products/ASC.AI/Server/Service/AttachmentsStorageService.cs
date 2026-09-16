@@ -61,6 +61,7 @@ public class AttachmentsStorageService(
     FormSchemaProvider formSchemaProvider,
     FormAnalyzeIntent formAnalyzeIntent,
     IFusionCache fusionCache,
+    AiSocketManager aiSocketManager,
     ILogger<AttachmentsStorageService> logger,
     AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
@@ -287,6 +288,9 @@ public class AttachmentsStorageService(
                 GetFormQuestionsCacheKey(tenantManager.GetCurrentTenantId(), file, CultureInfo.CurrentUICulture),
                 questions.ToList(),
                 opt => opt.SetDuration(_formQuestionsCacheDuration));
+
+            // Push to the chat client over the socket so the questions arrive without a long-poll.
+            await aiSocketManager.SendFormQuestionsAsync(attachmentId, questions);
         }
         catch (Exception e)
         {
