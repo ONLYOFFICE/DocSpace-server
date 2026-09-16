@@ -67,7 +67,7 @@ public class RoomGroupDto
     /// </summary>
     /// <example>9a1b2c3d-4e5f-6071-8293-a4b5c6d7e8f9</example>
     public Guid UserId { get; set; }
-    
+
     /// <summary>
     /// The section the group belongs to, which categorizes it within the application's structure. This property determines
     /// which area of the interface the group is associated with and affects how its rooms are filtered and displayed.
