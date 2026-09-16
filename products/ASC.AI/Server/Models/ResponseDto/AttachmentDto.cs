@@ -48,26 +48,6 @@ public class AttachmentDto
     public bool CanAnalyze { get; init; }
 }
 
-/// <summary>A starter question about a form's submissions, and the request the chat gets when it is picked.</summary>
-public class FormQuestionDto
-{
-    /// <summary>Short, button-sized question.</summary>
-    public required string Question { get; init; }
-
-    /// <summary>The expanded request sent to the chat.</summary>
-    public required string Prompt { get; init; }
-}
-
-/// <summary>
-/// One long-poll answer for a form's starter questions. <see cref="Status"/> is "ready" (questions
-/// present), "pending" (still generating — poll again), or "unavailable" (not an analysable form — stop).
-/// </summary>
-public class SuggestedQuestionsDto
-{
-    public required string Status { get; init; }
-    public IReadOnlyList<FormQuestionDto> Questions { get; init; } = [];
-}
-
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
     PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class AttachmentMapper
@@ -76,8 +56,6 @@ public static partial class AttachmentMapper
     [MapPropertyFromSource(nameof(AttachmentDto.EntryId), Use = nameof(MapEntryId))]
     [MapPropertyFromSource(nameof(AttachmentDto.Type), Use = nameof(MapType))]
     public static partial AttachmentDto MapToDto(AttachmentResult result);
-
-    public static partial SuggestedQuestionsDto MapToDto(SuggestedQuestionsResult result);
 
     private static string? MapEntryId(AttachmentResult result) =>
         result.EntryId?.ToString() ?? result.ThirdpartyEntryId;

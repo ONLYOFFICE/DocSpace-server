@@ -59,20 +59,19 @@ public class AttachmentsStorageService(
     VectorizationGlobalSettings vectorizationGlobalSettings,
     ExternalDatabaseClient externalDatabaseClient,
     FormSchemaProvider formSchemaProvider,
-    FormPreAnalysisService formPreAnalysisService,
     FormAnalyzeIntent formAnalyzeIntent,
+    IFusionCache fusionCache,
     ILogger<AttachmentsStorageService> logger,
     AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
     private static readonly TimeSpan _downloadUrlExpiration = TimeSpan.FromHours(1);
 
-    // The attach never waits for the model — only long enough to start the call, which then finishes
-    // in the background and fills the cache. The client fetches the questions from the long-poll endpoint.
-    private static readonly TimeSpan _preAnalysisStartWait = TimeSpan.FromMilliseconds(200);
+    // A form with hundreds of fields would blow the model's context and time budget.
+    private const int MaxPromptColumns = 60;
+    private const int MaxEnumValuesPerColumn = 10;
 
-    // The long-poll: held open until the model answers or this elapses, then the client polls again.
-    // Kept under the proxy's request ceiling; a slow model simply spans a few polls.
-    private static readonly TimeSpan _preAnalysisLongPollWait = TimeSpan.FromSeconds(25);
+    private static readonly TimeSpan _formQuestionsCacheDuration = TimeSpan.FromHours(12);
+    private static readonly FormAnalysisDto _unavailableFormAnalysis = new() { Status = "unavailable" };
 
     private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
@@ -214,15 +213,9 @@ public class AttachmentsStorageService(
     {
         try
         {
-            if (await formSchemaProvider.TryGetTableNameAsync(file) is null)
-            {
-                return FormAnalysis.None;
-            }
-
-            // Warm the questions cache so they are ready by the time the client long-polls.
-            _ = await formPreAnalysisService.GenerateAsync(file, _preAnalysisStartWait);
-
-            return new FormAnalysis(true);
+            return await formSchemaProvider.TryGetTableNameAsync(file) is null
+                ? FormAnalysis.None
+                : new FormAnalysis(true);
         }
         catch (Exception e)
         {
@@ -232,56 +225,113 @@ public class AttachmentsStorageService(
     }
 
     /// <summary>
-    /// Long-poll for a form's starter questions by the attachment it was attached under. Returns "ready"
-    /// with the questions, "pending" while the model is still working, or "unavailable".
+    /// The form starter-questions state for ASC.NewAi, which runs the model call: "unavailable" (not an
+    /// analysable launched form), "ready" (cached questions), or "generate" (the caller should generate
+    /// from the returned schema and post the result back with <see cref="SaveFormQuestionsAsync"/>).
     /// </summary>
-    public async Task<SuggestedQuestionsResult> GetSuggestedQuestionsAsync(string attachmentId)
+    public async Task<FormAnalysisDto> GetFormAnalysisAsync(Guid attachmentId)
     {
-        await AssertUserHasAccessAsync(_allowedTypes);
-
-        if (!Guid.TryParse(attachmentId, out var id) || !externalDatabaseClient.IsEnabled())
+        if (!externalDatabaseClient.IsEnabled() || !await formAnalyzeIntent.GetAsync(attachmentId))
         {
-            return SuggestedQuestionsResult.Unavailable;
+            return _unavailableFormAnalysis;
         }
 
-        if (!await formAnalyzeIntent.GetAsync(id))
-        {
-            return SuggestedQuestionsResult.Unavailable;
-        }
-
-        var fileId = 0;
         try
         {
-            var attachment = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, id);
-            if (attachment?.EntryId is not { } entryId)
+            var file = await ResolveFormAsync(attachmentId);
+            if (file is null)
             {
-                return SuggestedQuestionsResult.Unavailable;
+                return _unavailableFormAnalysis;
             }
 
-            fileId = entryId;
-            var file = await DaoFactory.GetFileDao<int>().GetFileAsync(fileId);
-            if (file is not { IsForm: true }
-                || !await FileSecurity.CanReadAsync(file)
-                || await formSchemaProvider.TryGetTableNameAsync(file) is null)
+            var culture = CultureInfo.CurrentUICulture;
+
+            var cached = await fusionCache.TryGetAsync<List<FormQuestionDto>>(GetFormQuestionsCacheKey(tenantManager.GetCurrentTenantId(), file, culture));
+            if (cached is { HasValue: true, Value.Count: > 0 })
             {
-                return SuggestedQuestionsResult.Unavailable;
+                return new FormAnalysisDto { Status = "ready", Questions = cached.Value };
             }
 
-            var questions = await formPreAnalysisService.GenerateAsync(file, _preAnalysisLongPollWait);
-            if (questions.Count > 0)
+            var schema = await formSchemaProvider.TryReadAsync(file);
+            if (schema is null || schema.RowCount == 0 || schema.Columns.Count == 0)
             {
-                return SuggestedQuestionsResult.Ready(questions);
+                return _unavailableFormAnalysis;
             }
 
-            return await formPreAnalysisService.IsAvailableAsync()
-                ? SuggestedQuestionsResult.Pending
-                : SuggestedQuestionsResult.Unavailable;
+            return new FormAnalysisDto { Status = "generate", Schema = ToSchemaDto(file, schema, culture) };
         }
         catch (Exception e)
         {
-            logger.WarnFormAnalysisFailed(e, fileId);
-            return SuggestedQuestionsResult.Unavailable;
+            logger.WarnFormQuestionsFailed(e, attachmentId);
+            return _unavailableFormAnalysis;
         }
+    }
+
+    /// <summary>Caches questions ASC.NewAi generated for the attachment's form, so later polls are instant.</summary>
+    public async Task SaveFormQuestionsAsync(Guid attachmentId, IReadOnlyList<FormQuestionDto> questions)
+    {
+        if (questions.Count == 0 || !await formAnalyzeIntent.GetAsync(attachmentId))
+        {
+            return;
+        }
+
+        try
+        {
+            var file = await ResolveFormAsync(attachmentId);
+            if (file is null)
+            {
+                return;
+            }
+
+            await fusionCache.SetAsync(
+                GetFormQuestionsCacheKey(tenantManager.GetCurrentTenantId(), file, CultureInfo.CurrentUICulture),
+                questions.ToList(),
+                opt => opt.SetDuration(_formQuestionsCacheDuration));
+        }
+        catch (Exception e)
+        {
+            logger.WarnFormQuestionsFailed(e, attachmentId);
+        }
+    }
+
+    private async Task<File<int>?> ResolveFormAsync(Guid attachmentId)
+    {
+        var attachment = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, attachmentId);
+        if (attachment?.EntryId is not { } fileId)
+        {
+            return null;
+        }
+
+        var file = await DaoFactory.GetFileDao<int>().GetFileAsync(fileId);
+        return file is { IsForm: true } && await FileSecurity.CanReadAsync(file) ? file : null;
+    }
+
+    private static FormSchemaDto ToSchemaDto(File<int> file, FormSchema schema, CultureInfo culture)
+    {
+        var columns = schema.Columns
+            .Take(MaxPromptColumns)
+            .Select(c => new FormColumnDto
+            {
+                Name = c.Name,
+                Label = c.Label is not null && c.Label != c.Name ? c.Label : null,
+                Type = c.Type.ToString(),
+                Values = c.EnumValues is { Count: > 0 } values ? values.Take(MaxEnumValuesPerColumn).ToList() : null
+            })
+            .ToList();
+
+        return new FormSchemaDto
+        {
+            Title = file.Title,
+            RowCount = schema.RowCount,
+            Columns = columns,
+            Culture = culture.Name,
+            CultureName = culture.EnglishName
+        };
+    }
+
+    private static string GetFormQuestionsCacheKey(int tenantId, File<int> file, CultureInfo culture)
+    {
+        return $"ai:form:preanalysis:{tenantId}:{file.Id}:{file.Version}:{culture.Name}";
     }
 
     /// <summary>
@@ -469,17 +519,11 @@ public class AttachmentsStorageService(
     }
 }
 
-/// <summary>The result of a long-poll for a form's starter questions: a status and, when ready, the questions.</summary>
-public sealed record SuggestedQuestionsResult(string Status, IReadOnlyList<FormQuestionSuggestion> Questions)
-{
-    public static readonly SuggestedQuestionsResult Pending = new("pending", []);
-    public static readonly SuggestedQuestionsResult Unavailable = new("unavailable", []);
-
-    public static SuggestedQuestionsResult Ready(IReadOnlyList<FormQuestionSuggestion> questions) => new("ready", questions);
-}
-
 internal static partial class AttachmentsStorageServiceLogger
 {
     [LoggerMessage(LogLevel.Warning, "Form analysis check failed for file {fileId}")]
     public static partial void WarnFormAnalysisFailed(this ILogger<AttachmentsStorageService> logger, Exception exception, int fileId);
+
+    [LoggerMessage(LogLevel.Warning, "Form starter-questions failed for attachment {attachmentId}")]
+    public static partial void WarnFormQuestionsFailed(this ILogger<AttachmentsStorageService> logger, Exception exception, Guid attachmentId);
 }

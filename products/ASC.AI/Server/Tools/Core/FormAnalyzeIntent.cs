@@ -42,7 +42,9 @@ public class FormAnalyzeIntent(
     TenantManager tenantManager,
     IFusionCache fusionCache)
 {
-    private static readonly TimeSpan _duration = TimeSpan.FromHours(6);
+    // Long enough to span a chat conversation; matches the starter-questions cache so a long analysis
+    // chat keeps its form-data tools for as long as its questions stay cached.
+    private static readonly TimeSpan _duration = TimeSpan.FromHours(12);
 
     public async Task SetAsync(Guid attachmentId)
     {

@@ -31,27 +31,26 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Tools.Core;
+namespace ASC.AI.Api;
 
-/// <summary>
-/// Renders submission-table columns for the prompts the model sees. Shared so the tools and the
-/// pre-analysis cannot describe the same schema differently.
-/// </summary>
-public static class FormSchemaFormatter
+// Internal: consumed by ASC.NewAi, which runs the model call for a form's starter questions. This side
+// serves the submission schema to generate from and the shared question cache.
+[Scope]
+[ApiEndpoint("ai", Internal = true)]
+[AiFeature]
+[ApiExplorerSettings(IgnoreApi = true)]
+public class FormAnalysisController(AttachmentsStorageService attachmentsStorageService) : ControllerBase
 {
-    /// <summary>Renders a column as <c>col_status "Status" (String) [approved/pending]</c>.</summary>
-    public static string FormatColumn(DbColumnDefinition column, int maxEnumValues = int.MaxValue)
+    [HttpGet("form-analysis/{id}")]
+    public async Task<FormAnalysisDto> ReadAsync(FormAnalysisRequestDto inDto)
     {
-        var label = column.Label is not null && column.Label != column.Name ? $" \"{column.Label}\"" : string.Empty;
-        var desc = $"{column.Name}{label} ({column.Type})";
+        return await attachmentsStorageService.GetFormAnalysisAsync(inDto.Id);
+    }
 
-        if (column.EnumValues is not { Count: > 0 } values)
-        {
-            return desc;
-        }
-
-        return values.Count <= maxEnumValues
-            ? $"{desc} [{string.Join("/", values)}]"
-            : $"{desc} [{string.Join("/", values.Take(maxEnumValues))}/...]";
+    [HttpPost("form-analysis/{id}/questions")]
+    public async Task<IActionResult> SaveQuestionsAsync(SaveFormQuestionsRequestDto inDto)
+    {
+        await attachmentsStorageService.SaveFormQuestionsAsync(inDto.Id, inDto.Body.Questions);
+        return NoContent();
     }
 }

@@ -36,6 +36,7 @@ import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { isObject, parseInt10 } from "../narrow.js";
 import { setAnalyzeEntryIds } from "../requestContext.js";
+import { getSuggestedQuestions } from "../forms/suggestedQuestions.js";
 
 const engine = new AttachmentsEngine({ storage });
 
@@ -209,14 +210,14 @@ export const attachmentsController = {
   }),
 
   // Long-poll for a form's starter questions by the attachment id it was attached under; the client polls
-  // on `status` ("ready" | "pending" | "unavailable").
+  // on `status` ("ready" | "pending" | "unavailable"). The model call runs here — see forms/suggestedQuestions.
   getSuggestedQuestions: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["id"] as const);
     if (typeof args.id !== "string" || args.id.length === 0) {
       res.status(400).json({ error: "id is required" });
       return;
     }
-    const result = await storage.attachments.getSuggestedQuestions(args.id);
+    const result = await getSuggestedQuestions(args.id);
     res.json(result);
   }),
 

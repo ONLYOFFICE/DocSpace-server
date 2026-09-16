@@ -42,7 +42,7 @@ import {
   canTakeUpload,
 } from "./docspaceFilesApi.js";
 import { getForwardedHeaders, getAnalyzeEntryIds } from "../requestContext.js";
-import { getBoolean, getNumber, getObjectArray, getString, isObject } from "../narrow.js";
+import { getBoolean, getNumber, getString, isObject } from "../narrow.js";
 import type { JsonObject } from "../narrow.js";
 import { getOnlyofficeFileType } from "./onlyofficeFileType.js";
 import logger from "../log.js";
@@ -321,32 +321,6 @@ function dtoToAttachment(raw: unknown): Attachment | null {
     result.canAnalyze = canAnalyze;
   }
   return result;
-}
-
-export interface SuggestedQuestion {
-  question: string;
-  prompt: string;
-}
-
-// One long-poll answer from the C# `attachments/{id}/suggested-questions` endpoint: a status plus, when
-// ready, the questions. `status` is "ready" | "pending" (poll again) | "unavailable" (not analysable, stop).
-export interface SuggestedQuestionsResult {
-  status: string;
-  questions: SuggestedQuestion[];
-}
-
-function parseSuggestedQuestions(raw: unknown): SuggestedQuestionsResult {
-  const obj = isObject(raw) ? raw : {};
-  const status = getString(obj, "status") ?? "unavailable";
-  const questions: SuggestedQuestion[] = [];
-  for (const entry of getObjectArray(obj, "questions") ?? []) {
-    const question = getString(entry, "question");
-    const prompt = getString(entry, "prompt");
-    if (question !== undefined && prompt !== undefined) {
-      questions.push({ question, prompt });
-    }
-  }
-  return { status, questions };
 }
 
 export class HttpAttachmentsStorage implements AttachmentsStorage {
@@ -691,12 +665,6 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       }
       throw err;
     }
-  }
-
-  // Long-poll the C# side for a form's starter questions by the attachment id it was attached under.
-  async getSuggestedQuestions(attachmentId: string): Promise<SuggestedQuestionsResult> {
-    const raw = await aiService.get(`${PATH}/${encodeURIComponent(attachmentId)}/suggested-questions`);
-    return parseSuggestedQuestions(raw);
   }
 
   async readManyByIds(ids: string[]): Promise<(Attachment | null)[]> {

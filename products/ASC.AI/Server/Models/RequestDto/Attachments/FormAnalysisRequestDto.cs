@@ -33,8 +33,22 @@
 
 namespace ASC.AI.Models.RequestDto.Attachments;
 
-public class SuggestedQuestionsRequestDto
+public class FormAnalysisRequestDto
 {
     [FromRoute(Name = "id")]
-    public required string Id { get; init; }
+    public required Guid Id { get; init; }
+}
+
+public class SaveFormQuestionsRequestDto
+{
+    [FromRoute(Name = "id")]
+    public required Guid Id { get; init; }
+
+    [FromBody]
+    public required SaveFormQuestionsRequestBody Body { get; init; }
+}
+
+public class SaveFormQuestionsRequestBody
+{
+    public required List<FormQuestionDto> Questions { get; init; }
 }
