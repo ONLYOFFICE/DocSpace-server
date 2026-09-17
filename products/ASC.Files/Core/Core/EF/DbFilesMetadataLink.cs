@@ -41,6 +41,12 @@ public class DbFilesMetadataLink : BaseEntity, IDbFile
     public FileEntryType EntryType { get; set; }
     public bool Cascade { get; set; }
     public int? SourceFolderId { get; set; }
+
+    /// <summary>
+    /// How the cascade of a folder link treats the values its sub-entries already hold. Meaningful for cascading folder links only.
+    /// </summary>
+    public MetadataConflictResolveType CascadeConflict { get; set; }
+
     public Guid CreateBy { get; set; }
     public DateTime CreateOn { get; set; }
 
@@ -95,6 +101,10 @@ public static class DbFilesMetadataLinkExtension
                     .HasColumnName("is_cascade")
                     .HasDefaultValueSql("'0'");
 
+                entity.Property(e => e.CascadeConflict)
+                    .HasColumnName("cascade_conflict")
+                    .HasDefaultValueSql("'0'");
+
                 entity.Property(e => e.SourceFolderId).HasColumnName("source_folder_id");
 
                 entity.Property(e => e.CreateBy)
@@ -136,6 +146,10 @@ public static class DbFilesMetadataLinkExtension
                 entity.Property(e => e.Cascade)
                     .HasColumnName("is_cascade")
                     .HasDefaultValueSql("false");
+
+                entity.Property(e => e.CascadeConflict)
+                    .HasColumnName("cascade_conflict")
+                    .HasDefaultValueSql("0");
 
                 entity.Property(e => e.SourceFolderId).HasColumnName("source_folder_id");
 

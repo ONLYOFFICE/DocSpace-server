@@ -85,9 +85,11 @@ public static class DbFilesMetadataTemplateExtension
                     .HasCharSet("utf8")
                     .UseCollation("utf8_general_ci");
 
+                // the sentinel makes EF write an explicit false instead of leaving the column to its default of 1
                 entity.Property(e => e.Visible)
                     .HasColumnName("visible")
-                    .HasDefaultValueSql("'1'");
+                    .HasDefaultValueSql("'1'")
+                    .HasSentinel(true);
 
                 entity.Property(e => e.IsSystem)
                     .HasColumnName("is_system")
@@ -137,7 +139,8 @@ public static class DbFilesMetadataTemplateExtension
 
                 entity.Property(e => e.Visible)
                     .HasColumnName("visible")
-                    .HasDefaultValueSql("true");
+                    .HasDefaultValueSql("true")
+                    .HasSentinel(true);
 
                 entity.Property(e => e.IsSystem)
                     .HasColumnName("is_system")

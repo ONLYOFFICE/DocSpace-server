@@ -94,6 +94,9 @@ internal class MetadataDao(
             dbTemplate.Visible = template.Visible;
             dbTemplate.ModifiedBy = userId;
             dbTemplate.ModifiedOn = now;
+
+            // the context is no-tracking, so a loaded entity has to be re-attached for its changes to be saved
+            filesDbContext.MetadataTemplates.Update(dbTemplate);
         }
 
         await filesDbContext.SaveChangesAsync();
@@ -268,6 +271,9 @@ internal class MetadataDao(
             dbField.Order = field.Order;
             dbField.ModifiedBy = userId;
             dbField.ModifiedOn = now;
+
+            // the context is no-tracking, so a loaded entity has to be re-attached for its changes to be saved
+            filesDbContext.MetadataFields.Update(dbField);
         }
 
         await filesDbContext.SaveChangesAsync();
@@ -368,6 +374,7 @@ internal class MetadataDao(
                     EntryId = entryId,
                     EntryType = link.EntryType,
                     Cascade = link.Cascade,
+                    CascadeConflict = link.Cascade ? link.CascadeConflict : MetadataConflictResolveType.Skip,
                     SourceFolderId = link.SourceFolderId,
                     CreateBy = link.CreateBy != Guid.Empty ? link.CreateBy : userId,
                     CreateOn = now
@@ -376,14 +383,31 @@ internal class MetadataDao(
             else
             {
                 // direct assignment wins over cascaded provenance, cascade flag is never downgraded
+                var changed = false;
+
                 if (existing.SourceFolderId != null && link.SourceFolderId == null)
                 {
                     existing.SourceFolderId = null;
+                    changed = true;
                 }
 
                 if (link.Cascade && !existing.Cascade)
                 {
                     existing.Cascade = true;
+                    changed = true;
+                }
+
+                // a repeated cascade request re-declares how the subtree conflicts are treated: the latest mode wins
+                if (link.Cascade && existing.CascadeConflict != link.CascadeConflict)
+                {
+                    existing.CascadeConflict = link.CascadeConflict;
+                    changed = true;
+                }
+
+                if (changed)
+                {
+                    // the context is no-tracking, so the found entity has to be re-attached for its changes to be saved
+                    filesDbContext.MetadataLinks.Update(existing);
                 }
             }
         }
@@ -541,6 +565,30 @@ internal class MetadataDao(
         {
             await filesDbContext.DeleteMetadataValuesByEntriesAsync(tenantId, [entryId], entryType);
         }
+    }
+
+    public async Task<bool> CopyMetadataAsync(int fromEntryId, int toEntryId, FileEntryType entryType)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var userId = _authContext.CurrentAccount.ID;
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        // the context is created inside the strategy, so a retried attempt starts from an empty change tracker
+        // instead of re-adding the rows of the failed one on top of themselves
+        return await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            var copied = await context.CopyMetadataAsync(tenantId, fromEntryId, toEntryId, entryType, userId);
+
+            await tx.CommitAsync();
+
+            return copied;
+        });
     }
 
     public async IAsyncEnumerable<int> GetSubtreeFolderIdsAsync(int rootFolderId)
@@ -781,6 +829,7 @@ internal class MetadataDao(
             EntryType = dbLink.EntryType,
             Cascade = dbLink.Cascade,
             SourceFolderId = dbLink.SourceFolderId,
+            CascadeConflict = dbLink.CascadeConflict,
             CreateBy = dbLink.CreateBy,
             CreateOn = dbLink.CreateOn
         };

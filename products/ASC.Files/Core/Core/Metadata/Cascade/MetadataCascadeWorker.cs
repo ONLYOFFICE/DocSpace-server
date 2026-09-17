@@ -41,33 +41,51 @@ public class MetadataCascadeWorker(
 {
     private readonly DistributedTaskQueue<MetadataCascadeOperation> _queue = queueFactory.CreateQueue<MetadataCascadeOperation>();
 
+    /// <summary>
+    /// Enqueues a cascade operation for the folder. A running operation is reused only when it propagates the very
+    /// same templates in the same mode with the same conflict rule; any other request gets its own operation, otherwise
+    /// the templates (or the Overwrite) of the second request would silently never reach the subtree. The operations
+    /// of a tenant run one after another (see <see cref="MetadataCascadeOperation.DoJob"/>). Completed operations are dropped.
+    /// </summary>
     public async Task<string> StartAsync(int tenantId, Guid userId, int folderId, IEnumerable<int> templateIds, MetadataConflictResolveType conflict, MetadataCascadeMode mode)
     {
+        var requestedTemplateIds = templateIds.Distinct().Order().ToArray();
+
         await using (await distributedLockProvider.TryAcquireFairLockAsync($"lock_metadata_cascade_{tenantId}"))
         {
-            var item = (await _queue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId && t.FolderId == folderId && t.Mode == mode);
+            var folderTasks = (await _queue.GetAllTasks()).Where(t => t.TenantId == tenantId && t.FolderId == folderId && t.Mode == mode).ToList();
 
-            if (item is { IsCompleted: true })
+            foreach (var completed in folderTasks.Where(t => t.IsCompleted))
             {
-                await _queue.DequeueTask(item.Id);
-                item = null;
+                await _queue.DequeueTask(completed.Id);
             }
 
-            if (item == null)
+            var running = folderTasks.FirstOrDefault(t => !t.IsCompleted && t.Conflict == conflict && t.TemplateIds.SequenceEqual(requestedTemplateIds));
+
+            if (running != null)
             {
-                item = serviceProvider.GetService<MetadataCascadeOperation>();
-
-                item.Init(tenantId, userId, folderId, templateIds, conflict, mode);
-
-                await _queue.EnqueueTask(item);
+                return running.Id;
             }
+
+            var item = serviceProvider.GetService<MetadataCascadeOperation>();
+
+            item.Init(tenantId, userId, folderId, requestedTemplateIds, conflict, mode);
+
+            await _queue.EnqueueTask(item);
 
             return item.Id;
         }
     }
 
+    /// <summary>
+    /// Returns the assignment operation of the folder to report: a running one first, otherwise the most recent.
+    /// </summary>
     public async Task<MetadataCascadeOperation> GetStatusAsync(int tenantId, int folderId)
     {
-        return (await _queue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId && t.FolderId == folderId && t.Mode == MetadataCascadeMode.Assign);
+        var folderTasks = (await _queue.GetAllTasks())
+            .Where(t => t.TenantId == tenantId && t.FolderId == folderId && t.Mode == MetadataCascadeMode.Assign)
+            .ToList();
+
+        return folderTasks.FirstOrDefault(t => !t.IsCompleted) ?? folderTasks.MaxBy(t => t.LastModifiedOn);
     }
 }

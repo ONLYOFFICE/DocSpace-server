@@ -195,23 +195,24 @@ public class MetadataService(
         return saved;
     }
 
-    public async Task<MetadataField> UpdateFieldAsync(int fieldId, MetadataField update, int? order = null)
+    public async Task<MetadataField> UpdateFieldAsync(int templateId, int fieldId, MetadataFieldUpdate update)
     {
         await DemandTemplateManagementAsync(create: false);
 
         var metadataDao = daoFactory.GetMetadataDao<int>();
 
-        var field = await metadataDao.GetFieldAsync(fieldId) ?? throw new ItemNotFoundException();
-        var template = await metadataDao.GetTemplateAsync(field.TemplateId, withFields: false) ?? throw new ItemNotFoundException();
+        var field = await GetTemplateFieldAsync(metadataDao, templateId, fieldId);
+        var template = await metadataDao.GetTemplateAsync(templateId, withFields: false) ?? throw new ItemNotFoundException();
 
         if (!string.IsNullOrEmpty(update.Name))
         {
             field.Name = update.Name;
         }
 
-        if (update.Type != field.Type)
+        // the type is optional in a partial update: only an explicitly requested different type is a type change
+        if (update.Type is { } type && type != field.Type)
         {
-            if (template.IsSystem && update.Type != MetadataFieldType.String)
+            if (template.IsSystem && type != MetadataFieldType.String)
             {
                 throw new ArgumentException(@"The system template supports only string fields", nameof(update));
             }
@@ -221,7 +222,7 @@ public class MetadataService(
                 throw new ArgumentException(@"The field type cannot be changed because values exist", nameof(update));
             }
 
-            field.Type = update.Type;
+            field.Type = type;
         }
 
         if (update.Options != null)
@@ -242,7 +243,7 @@ public class MetadataService(
             field.Options = options;
         }
 
-        field.Order = order ?? field.Order;
+        field.Order = update.Order ?? field.Order;
 
         ValidateField(field);
 
@@ -253,13 +254,13 @@ public class MetadataService(
         return saved;
     }
 
-    public async Task DeleteFieldAsync(int fieldId)
+    public async Task DeleteFieldAsync(int templateId, int fieldId)
     {
         await DemandTemplateManagementAsync(create: false);
 
         var metadataDao = daoFactory.GetMetadataDao<int>();
 
-        var field = await metadataDao.GetFieldAsync(fieldId) ?? throw new ItemNotFoundException();
+        var field = await GetTemplateFieldAsync(metadataDao, templateId, fieldId);
 
         var affectedValues = await metadataDao.GetValueEntriesAsync(fieldId);
 
@@ -359,7 +360,8 @@ public class MetadataService(
             TemplateId = templateId,
             EntryId = folderId,
             EntryType = FileEntryType.Folder,
-            Cascade = cascade
+            Cascade = cascade,
+            CascadeConflict = cascade ? conflict : MetadataConflictResolveType.Skip
         }));
 
         await filesMessageService.SendAsync(MessageAction.MetadataTemplateAssigned, entry, entry.Title);
@@ -371,14 +373,17 @@ public class MetadataService(
             return null;
         }
 
-        await filesMessageService.SendAsync(MessageAction.MetadataCascadeStarted, entry, entry.Title);
-
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        return await cascadeWorker.StartAsync(tenantId, authContext.CurrentAccount.ID, folderId, templateIdsList, conflict, MetadataCascadeMode.Assign);
+        var taskId = await cascadeWorker.StartAsync(tenantId, authContext.CurrentAccount.ID, folderId, templateIdsList, conflict, MetadataCascadeMode.Assign);
+
+        // recorded after the start so the audit never claims a cascade that was not enqueued
+        await filesMessageService.SendAsync(MessageAction.MetadataCascadeStarted, entry, entry.Title);
+
+        return taskId;
     }
 
-    public async Task UnassignTemplateFromFolderAsync(int folderId, int templateId, bool deleteValues = true)
+    public async Task UnassignTemplateFromFolderAsync(int folderId, int templateId)
     {
         var entry = await DemandEntryAccessAsync(folderId, FileEntryType.Folder, edit: true);
 
@@ -387,7 +392,7 @@ public class MetadataService(
         var link = await metadataDao.GetLinksAsync(folderId, FileEntryType.Folder)
             .FirstOrDefaultAsync(l => l.TemplateId == templateId);
 
-        await UnassignTemplateAsync(folderId, FileEntryType.Folder, templateId, deleteValues);
+        await UnassignTemplateAsync(folderId, FileEntryType.Folder, templateId);
 
         await NotifyUpdateAsync(entry);
 
@@ -406,7 +411,11 @@ public class MetadataService(
         return await cascadeWorker.GetStatusAsync(tenantManager.GetCurrentTenantId(), folderId);
     }
 
-    public async Task UnassignTemplateAsync(int entryId, FileEntryType entryType, int templateId, bool deleteValues = true)
+    /// <summary>
+    /// Removes the template from the entry together with the values of its fields: a value without its template
+    /// would be invisible in the UI yet still match the metadata filters.
+    /// </summary>
+    public async Task UnassignTemplateAsync(int entryId, FileEntryType entryType, int templateId)
     {
         var entry = await DemandEntryAccessAsync(entryId, entryType, edit: true);
 
@@ -414,13 +423,10 @@ public class MetadataService(
 
         await metadataDao.DeleteLinksAsync(entryId, entryType, templateId);
 
-        if (deleteValues)
+        var fieldIds = await metadataDao.GetFieldsAsync(templateId).Select(f => f.Id).ToListAsync();
+        if (fieldIds.Count > 0)
         {
-            var fieldIds = await metadataDao.GetFieldsAsync(templateId).Select(f => f.Id).ToListAsync();
-            if (fieldIds.Count > 0)
-            {
-                await metadataDao.DeleteValuesAsync(entryId, entryType, fieldIds);
-            }
+            await metadataDao.DeleteValuesAsync(entryId, entryType, fieldIds);
         }
 
         await filesMessageService.SendAsync(MessageAction.MetadataTemplateUnassigned, entry, entry.Title);
@@ -462,6 +468,7 @@ public class MetadataService(
                 throw new ArgumentException(@"The field does not belong to a template assigned to the entry", nameof(values));
             }
 
+            NormalizeValue(value);
             ValidateValue(field, value);
         }
 
@@ -523,6 +530,23 @@ public class MetadataService(
         return (await metadataDao.GetValuesAsync(entryId, entryType, [field.Id]).ToListAsync()).FirstOrDefault();
     }
 
+    /// <summary>
+    /// Brings the value to its stored form. A date without a time zone offset is treated as UTC — the same rule
+    /// the metadata filters apply to their date bounds, so a value can be found by the day it was written with.
+    /// </summary>
+    public static void NormalizeValue(MetadataValue value)
+    {
+        if (value.DateValue is { } date)
+        {
+            value.DateValue = date.Kind switch
+            {
+                DateTimeKind.Utc => date,
+                DateTimeKind.Local => date.ToUniversalTime(),
+                _ => DateTime.SpecifyKind(date, DateTimeKind.Utc)
+            };
+        }
+    }
+
     public static void ValidateValue(MetadataField field, MetadataValue value)
     {
         if (value.IsEmpty)
@@ -544,10 +568,6 @@ public class MetadataService(
                 {
                     throw new ArgumentException($@"The field '{field.Name}' accepts a date value only", nameof(value));
                 }
-
-                value.DateValue = value.DateValue.Value.Kind == DateTimeKind.Utc
-                    ? value.DateValue
-                    : value.DateValue.Value.ToUniversalTime();
 
                 break;
             case MetadataFieldType.Number:
@@ -599,6 +619,21 @@ public class MetadataService(
         }
 
         return entry;
+    }
+
+    /// <summary>
+    /// Loads the field and checks that it belongs to the template named in the route, so a field cannot be reached through another template.
+    /// </summary>
+    private static async Task<MetadataField> GetTemplateFieldAsync(IMetadataDao<int> metadataDao, int templateId, int fieldId)
+    {
+        var field = await metadataDao.GetFieldAsync(fieldId);
+
+        if (field == null || field.TemplateId != templateId)
+        {
+            throw new ItemNotFoundException();
+        }
+
+        return field;
     }
 
     private static async Task<MetadataField> CreateFieldInternalAsync(IMetadataDao<int> metadataDao, MetadataTemplate template, MetadataField field)

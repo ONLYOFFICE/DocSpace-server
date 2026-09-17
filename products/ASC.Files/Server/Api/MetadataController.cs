@@ -158,7 +158,7 @@ public class MetadataController(
     [HttpPut("metadata/templates/{templateId:int}/fields/{fieldId:int}")]
     public async Task<MetadataFieldDto> UpdateField(UpdateMetadataFieldRequestDto inDto)
     {
-        var field = await metadataService.UpdateFieldAsync(inDto.FieldId, ToField(inDto.Field), inDto.Field.Order);
+        var field = await metadataService.UpdateFieldAsync(inDto.TemplateId, inDto.FieldId, ToFieldUpdate(inDto.Field));
 
         return metadataDtoHelper.Get(field);
     }
@@ -174,7 +174,7 @@ public class MetadataController(
     [HttpDelete("metadata/templates/{templateId:int}/fields/{fieldId:int}")]
     public async Task DeleteField(DeleteMetadataFieldRequestDto inDto)
     {
-        await metadataService.DeleteFieldAsync(inDto.FieldId);
+        await metadataService.DeleteFieldAsync(inDto.TemplateId, inDto.FieldId);
     }
 
     /// <summary>
@@ -352,6 +352,17 @@ public class MetadataController(
             Type = request.Type,
             Options = request.Options?.Select(o => new MetadataFieldOption(o.Id ?? Guid.Empty, o.Value)).ToList(),
             Order = request.Order ?? 0
+        };
+    }
+
+    private static MetadataFieldUpdate ToFieldUpdate(UpdateMetadataFieldRequest request)
+    {
+        return new MetadataFieldUpdate
+        {
+            Name = request.Name,
+            Type = request.Type,
+            Options = request.Options?.Select(o => new MetadataFieldOption(o.Id ?? Guid.Empty, o.Value)).ToList(),
+            Order = request.Order
         };
     }
 

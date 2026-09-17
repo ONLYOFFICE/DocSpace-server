@@ -89,10 +89,20 @@ public partial class FilesDbContext
         return MetadataQueries.DeleteMetadataLinkAsync(this, tenantId, entryId, entryType, templateId);
     }
 
-    [PreCompileQuery]
+    /// <summary>
+    /// Turns the links inherited from the folder into direct assignments. Not precompiled on purpose:
+    /// an <c>ExecuteUpdate</c> inside <c>EF.CompileAsyncQuery</c> fails to translate, which surfaced as a 403 on every un-cascade.
+    /// </summary>
     public Task<int> ConvertMetadataCascadeLinksToDirectAsync(int tenantId, int sourceFolderId, int? templateId)
     {
-        return MetadataQueries.ConvertMetadataCascadeLinksToDirectAsync(this, tenantId, sourceFolderId, templateId);
+        var links = MetadataLinks.Where(r => r.TenantId == tenantId && r.SourceFolderId == sourceFolderId);
+
+        if (templateId is { } id)
+        {
+            links = links.Where(r => r.TemplateId == id);
+        }
+
+        return links.ExecuteUpdateAsync(s => s.SetProperty(r => r.SourceFolderId, (int?)null));
     }
 
     [PreCompileQuery]
@@ -101,15 +111,39 @@ public partial class FilesDbContext
         return MetadataQueries.DeleteMetadataValuesByFieldsAsync(this, tenantId, entryId, entryType, fieldIds);
     }
 
-    public async Task ApplyMetadataCascadeLinksAsync(int tenantId, int entryId, FileEntryType entryType, int parentFolderId, Guid createBy)
+    /// <summary>
+    /// Stamps the entry with the cascading templates of its new ancestors and inherits their values, see the batch overload.
+    /// Returns <c>true</c> when anything was written, so the caller knows the entry's metadata document must be refreshed after the commit.
+    /// </summary>
+    public async Task<bool> ApplyMetadataCascadeLinksAsync(int tenantId, int entryId, FileEntryType entryType, int parentFolderId, Guid createBy)
     {
+        var changed = await ApplyMetadataCascadeLinksAsync(tenantId, [entryId], entryType, parentFolderId, createBy);
+
+        return changed.Count > 0;
+    }
+
+    /// <summary>
+    /// Stamps the entries, all placed into the same parent folder, with the cascading templates of their new ancestors and
+    /// inherits the values of the nearest cascading ancestor into them. A field is filled when the entry has no value for it;
+    /// when the folder supplying the field cascades with <see cref="MetadataConflictResolveType.Overwrite"/>, the entry's own
+    /// value is replaced. An inherited link that already exists is re-pointed to the new nearest source, a direct one is left alone.
+    /// Runs on the caller's context and transaction. Returns the identifiers of the entries that were written, so their
+    /// metadata documents can be refreshed after the commit.
+    /// </summary>
+    public async Task<IReadOnlyCollection<int>> ApplyMetadataCascadeLinksAsync(int tenantId, IReadOnlyCollection<int> entryIds, FileEntryType entryType, int parentFolderId, Guid createBy)
+    {
+        if (entryIds.Count == 0)
+        {
+            return [];
+        }
+
         var levelByFolderId = await Tree
             .Where(t => t.FolderId == parentFolderId)
             .ToDictionaryAsync(t => t.ParentId, t => t.Level);
 
         if (levelByFolderId.Count == 0)
         {
-            return;
+            return [];
         }
 
         var ancestorIds = levelByFolderId.Keys.ToList();
@@ -120,38 +154,59 @@ public partial class FilesDbContext
 
         if (cascadeLinks.Count == 0)
         {
-            return;
+            return [];
         }
 
-        var existingTemplateIds = await MetadataLinks
-            .Where(r => r.TenantId == tenantId && r.EntryId == entryId && r.EntryType == entryType)
-            .Select(r => r.TemplateId)
-            .ToListAsync();
+        var linkTuples = cascadeLinks.Select(l => (l.TemplateId, l.EntryId)).ToList();
 
-        var nearestSources = MetadataCascadeResolver.ResolveNearestSources(
-            cascadeLinks.Select(l => (l.TemplateId, l.EntryId)),
-            levelByFolderId);
+        var nearestSources = MetadataCascadeResolver.ResolveNearestSources(linkTuples, levelByFolderId);
 
-        var added = false;
+        // how the folder supplying a template treats the values the entry already holds: (template, source folder) -> mode
+        var conflictBySource = cascadeLinks.ToDictionary(l => (l.TemplateId, l.EntryId), l => l.CascadeConflict);
 
-        foreach (var (templateId, sourceFolderId) in nearestSources.Where(s => !existingTemplateIds.Contains(s.Key)))
+        var existingLinksByEntry = (await MetadataLinks
+                .Where(r => r.TenantId == tenantId && r.EntryType == entryType && entryIds.Contains(r.EntryId))
+                .ToListAsync())
+            .ToLookup(l => l.EntryId);
+
+        var changed = new HashSet<int>();
+        var now = DateTime.UtcNow;
+
+        foreach (var entryId in entryIds)
         {
-            await MetadataLinks.AddAsync(new DbFilesMetadataLink
-            {
-                TenantId = tenantId,
-                TemplateId = templateId,
-                EntryId = entryId,
-                EntryType = entryType,
-                SourceFolderId = sourceFolderId,
-                CreateBy = createBy,
-                CreateOn = DateTime.UtcNow
-            });
+            var entryLinks = existingLinksByEntry[entryId].ToDictionary(l => l.TemplateId);
 
-            added = true;
+            foreach (var (templateId, sourceFolderId) in nearestSources)
+            {
+                if (entryLinks.TryGetValue(templateId, out var existing))
+                {
+                    // a direct assignment keeps its provenance; an inherited one follows the entry to its new nearest source,
+                    // otherwise an un-cascade on the old source would convert an entry that left its tree long ago
+                    if (existing.SourceFolderId != null && existing.SourceFolderId != sourceFolderId)
+                    {
+                        existing.SourceFolderId = sourceFolderId;
+                        MetadataLinks.Update(existing);
+                        changed.Add(entryId);
+                    }
+
+                    continue;
+                }
+
+                await MetadataLinks.AddAsync(new DbFilesMetadataLink
+                {
+                    TenantId = tenantId,
+                    TemplateId = templateId,
+                    EntryId = entryId,
+                    EntryType = entryType,
+                    SourceFolderId = sourceFolderId,
+                    CreateBy = createBy,
+                    CreateOn = now
+                });
+
+                changed.Add(entryId);
+            }
         }
 
-        // the entry inherits the values of the cascade source folders, but only into its empty
-        // fields: the entry's own values always win, so a move never destroys existing metadata
         var sourceFolderIds = cascadeLinks.Select(l => l.EntryId).Distinct().ToList();
 
         var sourceValues = await MetadataValues
@@ -167,87 +222,176 @@ public partial class FilesDbContext
                 .Select(f => new { f.Id, f.TemplateId })
                 .ToDictionaryAsync(f => f.Id, f => f.TemplateId);
 
-            var filledFieldIds = (await MetadataValues
-                    .Where(r => r.TenantId == tenantId && r.EntryId == entryId && r.EntryType == entryType)
-                    .Select(r => r.FieldId)
-                    .ToListAsync())
-                .ToHashSet();
-
             var fieldSources = MetadataCascadeResolver.ResolveFieldSources(
                 sourceValues.Select(v => (v.FieldId, v.EntryId)),
-                cascadeLinks.Select(l => (l.TemplateId, l.EntryId)),
+                linkTuples,
                 fieldTemplates,
                 levelByFolderId);
 
-            foreach (var (fieldId, sourceEntryId) in fieldSources)
+            if (fieldSources.Count > 0)
             {
-                if (filledFieldIds.Contains(fieldId))
+                var fieldIds = fieldSources.Keys.ToList();
+
+                // the fields whose source folder cascades with Overwrite replace the entries' own values, the others only fill the gaps
+                var overwriteFieldIds = fieldSources
+                    .Where(s => conflictBySource.GetValueOrDefault((fieldTemplates[s.Key], s.Value)) == MetadataConflictResolveType.Overwrite)
+                    .Select(s => s.Key)
+                    .ToHashSet();
+
+                var filledFieldsByEntry = (await MetadataValues
+                        .Where(r => r.TenantId == tenantId && r.EntryType == entryType && entryIds.Contains(r.EntryId) && fieldIds.Contains(r.FieldId))
+                        .Select(r => new { r.EntryId, r.FieldId })
+                        .Distinct()
+                        .ToListAsync())
+                    .ToLookup(r => r.EntryId, r => r.FieldId);
+
+                var overwrittenEntryIds = entryIds
+                    .Where(id => filledFieldsByEntry[id].Any(overwriteFieldIds.Contains))
+                    .ToList();
+
+                if (overwrittenEntryIds.Count > 0)
                 {
-                    continue;
+                    var overwriteFieldIdList = overwriteFieldIds.ToList();
+
+                    await MetadataValues
+                        .Where(r => r.TenantId == tenantId && r.EntryType == entryType && overwrittenEntryIds.Contains(r.EntryId) && overwriteFieldIdList.Contains(r.FieldId))
+                        .ExecuteDeleteAsync();
                 }
 
-                foreach (var value in sourceValues.Where(v => v.FieldId == fieldId && v.EntryId == sourceEntryId))
+                foreach (var entryId in entryIds)
                 {
-                    await MetadataValues.AddAsync(new DbFilesMetadataValue
-                    {
-                        TenantId = tenantId,
-                        EntryId = entryId,
-                        EntryType = entryType,
-                        FieldId = value.FieldId,
-                        OptionId = value.OptionId,
-                        ValueString = value.ValueString,
-                        ValueNumber = value.ValueNumber,
-                        ValueDate = value.ValueDate,
-                        CreateBy = createBy,
-                        CreateOn = DateTime.UtcNow,
-                        ModifiedBy = createBy,
-                        ModifiedOn = DateTime.UtcNow
-                    });
+                    var filledFieldIds = filledFieldsByEntry[entryId].ToHashSet();
 
-                    added = true;
+                    foreach (var (fieldId, sourceEntryId) in fieldSources)
+                    {
+                        if (filledFieldIds.Contains(fieldId) && !overwriteFieldIds.Contains(fieldId))
+                        {
+                            continue;
+                        }
+
+                        foreach (var value in sourceValues.Where(v => v.FieldId == fieldId && v.EntryId == sourceEntryId))
+                        {
+                            await MetadataValues.AddAsync(new DbFilesMetadataValue
+                            {
+                                TenantId = tenantId,
+                                EntryId = entryId,
+                                EntryType = entryType,
+                                FieldId = value.FieldId,
+                                OptionId = value.OptionId,
+                                ValueString = value.ValueString,
+                                ValueNumber = value.ValueNumber,
+                                ValueDate = value.ValueDate,
+                                CreateBy = createBy,
+                                CreateOn = now,
+                                ModifiedBy = createBy,
+                                ModifiedOn = now
+                            });
+
+                            changed.Add(entryId);
+                        }
+                    }
                 }
             }
         }
 
-        if (added)
+        if (changed.Count > 0)
         {
             await SaveChangesAsync();
         }
+
+        return changed;
     }
 
-    public async Task CopyMetadataAsync(int tenantId, int fromEntryId, int toEntryId, FileEntryType entryType, Guid createBy)
+    /// <summary>
+    /// Copies the directly assigned templates of the source entry and the values of their fields (plus the values of the
+    /// system template) onto the copy. The metadata the copy has already inherited from its new ancestors is left intact:
+    /// only the values of the copied templates are replaced. Runs on the caller's context and transaction — the caller owns
+    /// the execution strategy, so a retried attempt starts from a fresh change tracker (see <c>IMetadataDao.CopyMetadataAsync</c>).
+    /// Returns <c>true</c> when anything was written.
+    /// </summary>
+    public async Task<bool> CopyMetadataAsync(int tenantId, int fromEntryId, int toEntryId, FileEntryType entryType, Guid createBy)
     {
         var sourceLinks = await MetadataLinks
             .Where(r => r.TenantId == tenantId && r.EntryId == fromEntryId && r.EntryType == entryType && r.SourceFolderId == null)
             .ToListAsync();
 
-        var existingTemplateIds = await MetadataLinks
-            .Where(r => r.TenantId == tenantId && r.EntryId == toEntryId && r.EntryType == entryType)
-            .Select(r => r.TemplateId)
-            .ToListAsync();
+        var copiedTemplateIds = sourceLinks.Select(l => l.TemplateId).ToList();
 
-        foreach (var link in sourceLinks.Where(l => !existingTemplateIds.Contains(l.TemplateId)))
+        var systemTemplateId = await MetadataTemplates
+            .Where(t => t.TenantId == tenantId && t.IsSystem)
+            .Select(t => (int?)t.Id)
+            .FirstOrDefaultAsync();
+
+        if (systemTemplateId.HasValue)
         {
+            copiedTemplateIds.Add(systemTemplateId.Value);
+        }
+
+        if (copiedTemplateIds.Count == 0)
+        {
+            return false;
+        }
+
+        var existingLinks = (await MetadataLinks
+                .Where(r => r.TenantId == tenantId && r.EntryId == toEntryId && r.EntryType == entryType)
+                .ToListAsync())
+            .ToDictionary(l => l.TemplateId);
+
+        var changed = false;
+        var now = DateTime.UtcNow;
+
+        foreach (var link in sourceLinks)
+        {
+            var cascade = entryType == FileEntryType.Folder && link.Cascade;
+
+            if (existingLinks.TryGetValue(link.TemplateId, out var existing))
+            {
+                // the copy inherited the template from its new ancestors while the source had it assigned directly:
+                // the direct assignment wins over the cascaded provenance, the same rule SaveLinksAsync applies
+                if (existing.SourceFolderId != null)
+                {
+                    existing.SourceFolderId = null;
+                    existing.Cascade = existing.Cascade || cascade;
+                    existing.CascadeConflict = existing.Cascade ? link.CascadeConflict : MetadataConflictResolveType.Skip;
+                    MetadataLinks.Update(existing);
+                    changed = true;
+                }
+
+                continue;
+            }
+
             await MetadataLinks.AddAsync(new DbFilesMetadataLink
             {
                 TenantId = tenantId,
                 TemplateId = link.TemplateId,
                 EntryId = toEntryId,
                 EntryType = entryType,
-                Cascade = entryType == FileEntryType.Folder && link.Cascade,
+                Cascade = cascade,
+                CascadeConflict = cascade ? link.CascadeConflict : MetadataConflictResolveType.Skip,
                 CreateBy = createBy,
-                CreateOn = DateTime.UtcNow
+                CreateOn = now
             });
+
+            changed = true;
         }
 
+        // only the fields of the copied templates travel with the copy; a value of a template that is not
+        // linked on the copy would be invisible in the UI yet still match the metadata filters
+        var copiedFieldIds = await MetadataFields
+            .Where(f => f.TenantId == tenantId && copiedTemplateIds.Contains(f.TemplateId))
+            .Select(f => f.Id)
+            .ToListAsync();
+
         var sourceValues = await MetadataValues
-            .Where(r => r.TenantId == tenantId && r.EntryId == fromEntryId && r.EntryType == entryType)
+            .Where(r => r.TenantId == tenantId && r.EntryId == fromEntryId && r.EntryType == entryType && copiedFieldIds.Contains(r.FieldId))
             .ToListAsync();
 
         if (sourceValues.Count > 0)
         {
+            var replacedFieldIds = sourceValues.Select(v => v.FieldId).Distinct().ToList();
+
             await MetadataValues
-                .Where(r => r.TenantId == tenantId && r.EntryId == toEntryId && r.EntryType == entryType)
+                .Where(r => r.TenantId == tenantId && r.EntryId == toEntryId && r.EntryType == entryType && replacedFieldIds.Contains(r.FieldId))
                 .ExecuteDeleteAsync();
 
             foreach (var value in sourceValues)
@@ -263,14 +407,21 @@ public partial class FilesDbContext
                     ValueNumber = value.ValueNumber,
                     ValueDate = value.ValueDate,
                     CreateBy = createBy,
-                    CreateOn = DateTime.UtcNow,
+                    CreateOn = now,
                     ModifiedBy = createBy,
-                    ModifiedOn = DateTime.UtcNow
+                    ModifiedOn = now
                 });
             }
+
+            changed = true;
         }
 
-        await SaveChangesAsync();
+        if (changed)
+        {
+            await SaveChangesAsync();
+        }
+
+        return changed;
     }
 }
 
@@ -340,14 +491,6 @@ static file class MetadataQueries
                 ctx.MetadataLinks
                     .Where(r => r.TenantId == tenantId && r.EntryId == entryId && r.EntryType == entryType && r.TemplateId == templateId)
                     .ExecuteDelete());
-
-    public static readonly Func<FilesDbContext, int, int, int?, Task<int>> ConvertMetadataCascadeLinksToDirectAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int sourceFolderId, int? templateId) =>
-                ctx.MetadataLinks
-                    .Where(r => r.TenantId == tenantId && r.SourceFolderId == sourceFolderId)
-                    .Where(r => templateId == null || r.TemplateId == templateId)
-                    .ExecuteUpdate(s => s.SetProperty(r => r.SourceFolderId, (int?)null)));
 
     public static readonly Func<FilesDbContext, int, int, FileEntryType, IEnumerable<int>, Task<int>> DeleteMetadataValuesByFieldsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

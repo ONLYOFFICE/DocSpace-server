@@ -55,7 +55,34 @@ public class MetadataFieldRequest
     public List<MetadataFieldOptionRequest> Options { get; set; }
 
     /// <summary>
-    /// The field display order inside the template. Omit it on update to keep the current order.
+    /// The field display order inside the template.
+    /// </summary>
+    public int? Order { get; set; }
+}
+
+/// <summary>
+/// The parameters of a metadata field update. Every property is optional: a property that is omitted keeps its current value.
+/// </summary>
+public class UpdateMetadataFieldRequest
+{
+    /// <summary>
+    /// The new field name.
+    /// </summary>
+    /// <example>Contract number</example>
+    public string Name { get; set; }
+
+    /// <summary>
+    /// The new field type. The type can be changed only while the field has no values.
+    /// </summary>
+    public MetadataFieldType? Type { get; set; }
+
+    /// <summary>
+    /// The new choice options of the field. The options in use cannot be removed.
+    /// </summary>
+    public List<MetadataFieldOptionRequest> Options { get; set; }
+
+    /// <summary>
+    /// The new field display order inside the template.
     /// </summary>
     public int? Order { get; set; }
 }
@@ -199,10 +226,10 @@ public class UpdateMetadataFieldRequestDto
     public required int FieldId { get; set; }
 
     /// <summary>
-    /// The parameters of the field.
+    /// The parameters of the field update.
     /// </summary>
     [FromBody]
-    public required MetadataFieldRequest Field { get; set; }
+    public required UpdateMetadataFieldRequest Field { get; set; }
 }
 
 /// <summary>
@@ -346,7 +373,7 @@ public class MetadataValueRequest
     public long? NumberValue { get; set; }
 
     /// <summary>
-    /// The date value.
+    /// The date value. A value without a time zone offset is treated as UTC, the same way the metadata filters treat their date bounds.
     /// </summary>
     public DateTime? DateValue { get; set; }
 

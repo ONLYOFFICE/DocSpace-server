@@ -36,7 +36,12 @@ namespace ASC.Files.Core.IntegrationEvents.Events;
 public enum FolderIndexAction
 {
     Index = 0,
-    Delete = 1
+    Delete = 1,
+
+    /// <summary>
+    /// The folder was moved: its ancestor chain, and the one of its whole subtree, changed.
+    /// </summary>
+    UpdateFolders = 2
 }
 
 [ProtoContract]

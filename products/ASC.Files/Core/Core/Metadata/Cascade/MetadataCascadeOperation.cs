@@ -38,9 +38,13 @@ public class MetadataCascadeOperation : DistributedTaskProgress
 {
     private const int BatchSize = 1000;
 
+    /// <summary>
+    /// The longest a pass waits for the previous one of the same tenant. Long enough for any realistic subtree,
+    /// finite so a stuck predecessor surfaces as an error instead of a silently hanging queue.
+    /// </summary>
+    private static readonly TimeSpan _runLockTimeout = TimeSpan.FromHours(1);
+
     private Guid _userId;
-    private int[] _templateIds;
-    private MetadataConflictResolveType _conflict;
     private int _processed;
     private int _total;
     private MetadataIndexHelper _metadataIndexHelper;
@@ -49,6 +53,18 @@ public class MetadataCascadeOperation : DistributedTaskProgress
     public int TenantId { get; set; }
     public int FolderId { get; set; }
     public MetadataCascadeMode Mode { get; set; }
+
+    /// <summary>
+    /// The templates the operation propagates, sorted. Public so the queue keeps it: the worker tells two
+    /// operations on the same folder apart by it.
+    /// </summary>
+    public int[] TemplateIds { get; set; } = [];
+
+    /// <summary>
+    /// How the pass treats the values the sub-entries already hold. Public for the same reason as <see cref="TemplateIds"/>:
+    /// a request with another mode must not be folded into a running operation.
+    /// </summary>
+    public MetadataConflictResolveType Conflict { get; set; }
 
     public MetadataCascadeOperation()
     {
@@ -65,8 +81,8 @@ public class MetadataCascadeOperation : DistributedTaskProgress
         FolderId = folderId;
         Mode = mode;
         _userId = userId;
-        _templateIds = templateIds.Distinct().ToArray();
-        _conflict = conflict;
+        TemplateIds = templateIds.Distinct().Order().ToArray();
+        Conflict = conflict;
     }
 
     protected override async Task DoJob()
@@ -77,34 +93,40 @@ public class MetadataCascadeOperation : DistributedTaskProgress
         var fileSecurity = scope.ServiceProvider.GetService<FileSecurity>();
         var daoFactory = scope.ServiceProvider.GetService<IDaoFactory>();
         var socketManager = scope.ServiceProvider.GetService<SocketManager>();
+        var distributedLockProvider = scope.ServiceProvider.GetService<IDistributedLockProvider>();
         var logger = scope.ServiceProvider.GetService<ILogger<MetadataCascadeOperation>>();
         _metadataIndexHelper = scope.ServiceProvider.GetService<MetadataIndexHelper>();
 
         try
         {
-            await tenantManager.SetCurrentTenantAsync(TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
-
-            var folderDao = daoFactory.GetFolderDao<int>();
-            var metadataDao = daoFactory.GetMetadataDao<int>();
-
-            var folder = await folderDao.GetFolderAsync(FolderId) ?? throw new ItemNotFoundException();
-
-            if (!await fileSecurity.CanEditAsync(folder))
+            // the passes of one tenant run one after another: two operations over nested or overlapping subtrees
+            // would otherwise both read "no link yet" for the same entry and both insert it, failing a whole batch
+            await using (await distributedLockProvider.TryAcquireFairLockAsync($"lock_metadata_cascade_run_{TenantId}", _runLockTimeout))
             {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-            }
+                await tenantManager.SetCurrentTenantAsync(TenantId);
+                await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
 
-            if (Mode == MetadataCascadeMode.Stamp)
-            {
-                await StampAsync(metadataDao, folder);
-            }
-            else
-            {
-                await AssignAsync(metadataDao, folder);
-            }
+                var folderDao = daoFactory.GetFolderDao<int>();
+                var metadataDao = daoFactory.GetMetadataDao<int>();
 
-            await socketManager.UpdateFolderAsync(folder);
+                var folder = await folderDao.GetFolderAsync(FolderId) ?? throw new ItemNotFoundException();
+
+                if (!await fileSecurity.CanEditAsync(folder))
+                {
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+                }
+
+                if (Mode == MetadataCascadeMode.Stamp)
+                {
+                    await StampAsync(metadataDao, folder);
+                }
+                else
+                {
+                    await AssignAsync(metadataDao, folder);
+                }
+
+                await socketManager.UpdateFolderAsync(folder);
+            }
 
             Percentage = 100;
             IsCompleted = true;
@@ -123,7 +145,7 @@ public class MetadataCascadeOperation : DistributedTaskProgress
 
     private async Task AssignAsync(IMetadataDao<int> metadataDao, Folder<int> folder)
     {
-        var fieldTemplates = await GetFieldTemplatesAsync(metadataDao, _templateIds);
+        var fieldTemplates = await GetFieldTemplatesAsync(metadataDao, TemplateIds);
 
         var folderValues = await metadataDao.GetValuesAsync(FolderId, FileEntryType.Folder)
             .Where(v => fieldTemplates.ContainsKey(v.FieldId) && !v.IsEmpty)
@@ -136,11 +158,11 @@ public class MetadataCascadeOperation : DistributedTaskProgress
 
         // nested folders cascading the same template keep their own values (the nearest
         // ancestor wins): their subtrees are excluded from the pass for that template
-        var nestedCascadeLinks = await metadataDao.GetCascadeLinksInSubtreeAsync(FolderId, _templateIds);
+        var nestedCascadeLinks = await metadataDao.GetCascadeLinksInSubtreeAsync(FolderId, TemplateIds);
 
         if (nestedCascadeLinks.Count == 0)
         {
-            await ApplyToSubtreeAsync(metadataDao, subfolderIds, _templateIds, FolderId, folderValues, _conflict);
+            await ApplyToSubtreeAsync(metadataDao, subfolderIds, TemplateIds, FolderId, folderValues, Conflict);
             return;
         }
 
@@ -151,7 +173,7 @@ public class MetadataCascadeOperation : DistributedTaskProgress
         var emptyRoots = new HashSet<int>();
 
         // templates sharing the same set of nested cascading folders are processed in a single pass
-        foreach (var group in _templateIds.GroupBy(t => nestedRootsByTemplate.GetValueOrDefault(t, emptyRoots), HashSet<int>.CreateSetComparer()))
+        foreach (var group in TemplateIds.GroupBy(t => nestedRootsByTemplate.GetValueOrDefault(t, emptyRoots), HashSet<int>.CreateSetComparer()))
         {
             var groupTemplateIds = group.ToArray();
             var groupValues = folderValues.Where(v => groupTemplateIds.Contains(fieldTemplates[v.FieldId])).ToList();
@@ -164,7 +186,7 @@ public class MetadataCascadeOperation : DistributedTaskProgress
                 groupSubfolderIds = subfolderIds.Where(id => !excluded.Contains(id)).ToList();
             }
 
-            await ApplyToSubtreeAsync(metadataDao, groupSubfolderIds, groupTemplateIds, FolderId, groupValues, _conflict);
+            await ApplyToSubtreeAsync(metadataDao, groupSubfolderIds, groupTemplateIds, FolderId, groupValues, Conflict);
         }
     }
 
@@ -212,14 +234,17 @@ public class MetadataCascadeOperation : DistributedTaskProgress
 
         var subfolderIds = await metadataDao.GetSubtreeFolderIdsAsync(FolderId).ToListAsync();
 
-        foreach (var group in nearestSources.GroupBy(s => s.Value))
+        // how the folder supplying a template treats the values the entries already hold: (template, source folder) -> mode
+        var conflictBySource = cascadeLinks.ToDictionary(l => (l.TemplateId, (int)l.EntryId), l => l.CascadeConflict);
+
+        foreach (var group in nearestSources.GroupBy(s => (SourceFolderId: s.Value, Conflict: conflictBySource[(s.Key, s.Value)])))
         {
             var groupTemplateIds = group.Select(s => s.Key).ToArray();
             var groupValues = effectiveValues.Where(v => groupTemplateIds.Contains(fieldTemplates[v.FieldId])).ToList();
 
-            // the moved folder itself was stamped inline during the move, its files were not;
-            // stamping uses Skip so the entries' own values always survive
-            await ApplyToSubtreeAsync(metadataDao, subfolderIds, groupTemplateIds, group.Key, groupValues, MetadataConflictResolveType.Skip);
+            // the moved folder itself was stamped inline during the move, its content is stamped here with the rule the
+            // source folder cascades with: Skip keeps the entries' own values, Overwrite replaces them with the folder's
+            await ApplyToSubtreeAsync(metadataDao, subfolderIds, groupTemplateIds, group.Key.SourceFolderId, groupValues, group.Key.Conflict);
         }
     }
 

@@ -173,7 +173,50 @@ public class FoldersMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fix
 
     #endregion
 
+    #region Index consistency
+
+    [Fact]
+    public async Task Folders_AfterTheTemplateIsUnassigned_AreNotReturnedByTheFilterRightAway()
+    {
+        var data = await ArrangeAsync();
+
+        var before = await data.SearchAsync(data.Eq(ClientField, "ACME"), expectedFolders: [data.MatchingFolderId], expectedFiles: [data.MatchingFileId]);
+        before.FolderIds().Should().Equal(data.MatchingFolderId);
+
+        await data.Api.UnassignFolderTemplateAsync(data.MatchingFolderId, data.TemplateId, TestContext.Current.CancellationToken);
+
+        // the stale document used to be deleted without a refresh, so a listing right after the unassign still returned
+        // the folder; this is a single request on purpose, a retry would hide exactly that lag
+        var after = await data.Api.GetFolderContentAsync(data.RoomId, data.TemplateId, [data.Eq(ClientField, "ACME")], cancellationToken: TestContext.Current.CancellationToken);
+
+        after.FolderIds().Should().BeEmpty("the folder lost its values together with the template");
+        after.FileIds().Should().Equal(new[] { data.MatchingFileId }, "the file keeps its own value");
+    }
+
+    #endregion
+
     #region Text search
+
+    [Fact]
+    public async Task Folders_TextSearchWithExtension_DoesNotReturnOtherExtensionsMatchedByMetadata()
+    {
+        var data = await ArrangeAsync();
+
+        var marker = "Marker" + Guid.NewGuid().ToString()[..8];
+        var sheet = await CreateFile($"sheet-{Guid.NewGuid().ToString()[..8]}.xlsx", data.RoomId);
+
+        await data.Api.AddFolderCustomFieldAsync(data.MatchingFolderId, "Reference", marker, TestContext.Current.CancellationToken);
+        await data.Api.AddFileCustomFieldAsync(sheet.Id, "Reference", marker, TestContext.Current.CancellationToken);
+
+        var byText = await data.SearchByTextAsync(marker, expectedFolders: [data.MatchingFolderId], expectedFiles: [sheet.Id]);
+        byText.FileIds().Should().Equal(new[] { sheet.Id }, "the text search must find the sheet by its system template value first");
+
+        // the metadata ids used to be united with the title search after the extension was applied, so a .xlsx matched
+        // by its metadata slipped into a listing limited to .docx
+        var byTextAndExtension = await data.Api.GetFolderContentAsync(data.RoomId, filterValue: marker, extension: "docx", cancellationToken: TestContext.Current.CancellationToken);
+
+        byTextAndExtension.FileIds().Should().BeEmpty("the sheet does not have the requested extension");
+    }
 
     [Fact]
     public async Task Folders_TextSearch_FindsTheSubFolderByItsSystemTemplateValue()
@@ -247,6 +290,12 @@ public class FoldersMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fix
         await api.SetFileValuesAsync(matchingFile.Id, [data.Value(ClientField, "ACME")], TestContext.Current.CancellationToken);
         await api.SetFileValuesAsync(otherFile.Id, [data.Value(ClientField, "Globex")], TestContext.Current.CancellationToken);
         await api.SetFileValuesAsync(nestedFile.Id, [data.Value(ClientField, "Nested")], TestContext.Current.CancellationToken);
+
+        // the values reach the index with a small lag; a negative search polled before that lag is over would
+        // pass for the wrong reason, so every test starts from a state where the written values are searchable
+        var indexed = await data.SearchAsync(data.Eq(ClientField, "Nested"), expectedFolders: [data.NestedFolderId], expectedFiles: [data.NestedFileId]);
+        indexed.FolderIds().Should().Equal(new[] { data.NestedFolderId }, "the arranged values must be searchable before the test starts");
+        indexed.FileIds().Should().Equal(data.NestedFileId);
 
         return data;
     }

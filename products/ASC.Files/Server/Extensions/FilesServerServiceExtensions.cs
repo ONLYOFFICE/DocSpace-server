@@ -49,6 +49,10 @@ public static class FilesServerServiceExtensions
 
         services.RegisterQueue<AsyncTaskData<int>>();
         services.RegisterQueue<AsyncTaskData<string>>();
+
+        // the cascade assignment is enqueued by the metadata API in this process; without the queue service
+        // the operations would sit in the channel forever and the templates would never reach the subtree
+        services.RegisterQueue<MetadataCascadeOperation>();
         services.AddStartupTask<CheckPdfStartupTask>()
             .TryAddSingleton(services);
 

@@ -67,14 +67,39 @@ public class MetadataValidationTests
     }
 
     [Fact]
-    public void ValidateValue_ShouldPassAndNormalizeToUtc_WhenDateFieldHasLocalDate()
+    public void NormalizeValue_ShouldConvertLocalDateToUtc()
+    {
+        var local = new DateTime(2026, 1, 15, 10, 0, 0, DateTimeKind.Local);
+        var value = new MetadataValue { FieldId = 1, DateValue = local };
+
+        MetadataService.NormalizeValue(value);
+
+        value.DateValue!.Value.Kind.Should().Be(DateTimeKind.Utc);
+        value.DateValue.Value.Should().Be(local.ToUniversalTime());
+    }
+
+    [Fact]
+    public void NormalizeValue_ShouldTreatUnspecifiedDateAsUtc()
+    {
+        // an offset-less date must not be shifted by the server time zone: the filters assume UTC for such values
+        var value = new MetadataValue { FieldId = 1, DateValue = new DateTime(2026, 1, 15, 0, 0, 0, DateTimeKind.Unspecified) };
+
+        MetadataService.NormalizeValue(value);
+
+        value.DateValue.Should().Be(new DateTime(2026, 1, 15, 0, 0, 0, DateTimeKind.Utc));
+        value.DateValue!.Value.Kind.Should().Be(DateTimeKind.Utc);
+    }
+
+    [Fact]
+    public void ValidateValue_ShouldNotChangeTheValue()
     {
         var field = CreateField(MetadataFieldType.Date);
-        var value = new MetadataValue { FieldId = 1, DateValue = new DateTime(2026, 1, 15, 10, 0, 0, DateTimeKind.Local) };
+        var local = new DateTime(2026, 1, 15, 10, 0, 0, DateTimeKind.Local);
+        var value = new MetadataValue { FieldId = 1, DateValue = local };
 
         MetadataService.ValidateValue(field, value);
 
-        value.DateValue!.Value.Kind.Should().Be(DateTimeKind.Utc);
+        value.DateValue.Should().Be(local, "validation must not normalize, that is a separate step");
     }
 
     [Fact]

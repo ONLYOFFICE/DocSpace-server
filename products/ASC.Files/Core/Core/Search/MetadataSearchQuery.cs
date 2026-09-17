@@ -84,6 +84,39 @@ public readonly record struct MetadataSearchScope(MetadataSearchScopeType Type, 
 public static class MetadataSearchQuery
 {
     /// <summary>
+    /// Selects the identifiers of the entries matching the metadata filter from the index.
+    /// The result counts as a failure — so the caller falls back to SQL — when the index is unavailable or when the
+    /// result reached <see cref="BaseIndexer{T}.QueryLimit"/>: a capped id list intersected with the caller's query
+    /// would silently drop matches instead of returning them.
+    /// </summary>
+    public static Task<(bool Success, List<int> Ids)> TrySelectMetadataIdsAsync<TDoc>(FactoryIndexer<TDoc> indexer, MetadataFilter metadataFilter, MetadataSearchScope scope)
+        where TDoc : MetadataSearchItemBase
+    {
+        var selector = BuildSelector<TDoc>(metadataFilter, scope);
+
+        return TrySelectIdsAsync(indexer, s => selector(s));
+    }
+
+    /// <summary>
+    /// Selects the identifiers of the entries whose system template values match the free text, see <see cref="TrySelectMetadataIdsAsync{TDoc}"/> for the failure rule.
+    /// </summary>
+    public static Task<(bool Success, List<int> Ids)> TrySelectGlobalTextIdsAsync<TDoc>(FactoryIndexer<TDoc> indexer, string searchText, MetadataSearchScope scope)
+        where TDoc : MetadataSearchItemBase
+    {
+        var selector = BuildGlobalTextSelector<TDoc>(searchText, scope);
+
+        return TrySelectIdsAsync(indexer, s => selector(s));
+    }
+
+    private static async Task<(bool Success, List<int> Ids)> TrySelectIdsAsync<TDoc>(FactoryIndexer<TDoc> indexer, Expression<Func<Selector<TDoc>, Selector<TDoc>>> expression)
+        where TDoc : MetadataSearchItemBase
+    {
+        var (success, ids) = await indexer.TrySelectIdsAsync(expression);
+
+        return success && ids.Count < BaseIndexer<TDoc>.QueryLimit ? (true, ids) : (false, []);
+    }
+
+    /// <summary>
     /// Builds the OpenSearch selector for the structured metadata filter. All conditions are combined with AND,
     /// the options within a single choice condition are combined with OR.
     /// </summary>

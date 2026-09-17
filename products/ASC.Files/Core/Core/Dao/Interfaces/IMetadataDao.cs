@@ -60,6 +60,12 @@ public interface IMetadataDao<T>
     IAsyncEnumerable<MetadataValue> GetValuesAsync(IEnumerable<T> entryIds, FileEntryType entryType);
     Task DeleteValuesAsync(T entryId, FileEntryType entryType, IEnumerable<int> fieldIds = null);
 
+    /// <summary>
+    /// Copies the directly assigned templates and the values of the source entry onto its copy in a transaction of its own.
+    /// Returns <c>true</c> when anything was written, so the copy's metadata document must be refreshed.
+    /// </summary>
+    Task<bool> CopyMetadataAsync(T fromEntryId, T toEntryId, FileEntryType entryType);
+
     IAsyncEnumerable<int> GetSubtreeFolderIdsAsync(int rootFolderId);
     IAsyncEnumerable<int> GetFileIdsByParentFoldersAsync(IEnumerable<int> folderIds);
     Task ApplyCascadeBatchAsync(IReadOnlyCollection<int> entryIds, FileEntryType entryType, IReadOnlyCollection<int> templateIds, int sourceFolderId, IReadOnlyCollection<MetadataValue> values, MetadataConflictResolveType conflict);

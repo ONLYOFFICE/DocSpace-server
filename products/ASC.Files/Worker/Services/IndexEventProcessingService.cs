@@ -131,6 +131,9 @@ public class IndexEventProcessingService(
             case FileIndexAction.UpdateFolders:
                 dbFile.Folders = await filesDbContext.DbFolderTreesAsync(dbFile.ParentId).ToListAsync();
                 await factoryIndexer.UpdateAsync(dbFile, UpdateAction.Replace, w => w.Folders);
+
+                // the metadata document carries the same ancestor chain and goes stale on a move as well
+                await serviceProvider.GetRequiredService<MetadataIndexHelper>().RefreshEntriesAsync(FileEntryType.File, [@event.FileId]);
                 break;
         }
     }
@@ -160,6 +163,43 @@ public class IndexEventProcessingService(
         if (dbFolder != null)
         {
             await factoryIndexer.IndexAsync(dbFolder);
+        }
+
+        if (@event.Action == FolderIndexAction.UpdateFolders)
+        {
+            await RefreshMovedSubtreeMetadataAsync(serviceProvider, filesDbContext, @event.TenantId, @event.FolderId);
+        }
+    }
+
+    /// <summary>
+    /// The metadata documents store the ancestor chain of the entry. After a folder move the chain of the folder,
+    /// of every sub-folder and of every file below is stale, so the documents of the entries holding values are rebuilt.
+    /// </summary>
+    private static async Task RefreshMovedSubtreeMetadataAsync(IServiceProvider serviceProvider, FilesDbContext filesDbContext, int tenantId, int folderId)
+    {
+        const int batchSize = 1000;
+
+        var metadataIndexHelper = serviceProvider.GetRequiredService<MetadataIndexHelper>();
+
+        var subtreeFolderIds = await filesDbContext.Tree
+            .Where(t => t.ParentId == folderId)
+            .Select(t => t.FolderId)
+            .ToListAsync();
+
+        foreach (var folderBatch in subtreeFolderIds.Chunk(batchSize))
+        {
+            await metadataIndexHelper.RefreshEntriesAsync(FileEntryType.Folder, folderBatch);
+
+            var fileIds = await filesDbContext.Files
+                .Where(f => f.TenantId == tenantId && f.CurrentVersion && folderBatch.Contains(f.ParentId))
+                .Select(f => f.Id)
+                .Distinct()
+                .ToListAsync();
+
+            foreach (var fileBatch in fileIds.Chunk(batchSize))
+            {
+                await metadataIndexHelper.RefreshEntriesAsync(FileEntryType.File, fileBatch);
+            }
         }
     }
 }

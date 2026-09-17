@@ -94,6 +94,8 @@ public static class FilesWorkerServiceExtensions
         services.RegisterQueue<FormFillingReportTask>();
         services.RegisterQueue<CreateRoomTemplateOperation>();
         services.RegisterQueue<CreateRoomFromTemplateOperation>();
+        // the folder move runs here and stamps the moved subtree through the same queue
+        services.RegisterQueue<MetadataCascadeOperation>();
         services.RegisterQueue<EncryptionOperation>(timeUntilUnregisterInSeconds: 60 * 60 * 24);
         services.RegisterQueue<CustomerOperationsReportTask>();
         services.RegisterQueue<AuditReportTask>();

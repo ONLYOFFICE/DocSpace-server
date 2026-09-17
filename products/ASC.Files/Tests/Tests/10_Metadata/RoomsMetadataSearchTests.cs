@@ -482,6 +482,11 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fixtu
             new MetadataValuePayload { FieldId = data.FieldId(TagsField), OptionIds = [data.OptionId(TagsField, "Urgent")] }
         ], TestContext.Current.CancellationToken);
 
+        // the values reach the index with a small lag; a negative search polled before that lag is over would
+        // pass for the wrong reason, so every test starts from a state where the written values are searchable
+        var indexed = await data.SearchAsync(data.Eq(ClientField, "ACME"), expected: [data.MatchingRoomId]);
+        indexed.RoomIds().Should().Equal(new[] { data.MatchingRoomId }, "the arranged values must be searchable before the test starts");
+
         return data;
     }
 

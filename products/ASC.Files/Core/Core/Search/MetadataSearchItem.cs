@@ -365,7 +365,26 @@ public class MetadataIndexHelper(
     FactoryIndexerFolderMetadata folderIndexer,
     ILogger<MetadataIndexHelper> logger)
 {
-    public async Task IndexEntriesAsync(FileEntryType entryType, IReadOnlyCollection<int> entryIds)
+    /// <summary>
+    /// Rebuilds the metadata documents of the entries. An entry without values loses its document.
+    /// Use it after the values of the entries changed.
+    /// </summary>
+    public Task IndexEntriesAsync(FileEntryType entryType, IReadOnlyCollection<int> entryIds)
+    {
+        return IndexEntriesAsync(entryType, entryIds, removeMissing: true);
+    }
+
+    /// <summary>
+    /// Rebuilds the metadata documents of the entries that have values and leaves the others alone.
+    /// Use it when the entries themselves changed (moved, re-parented) but their values did not: the document
+    /// carries the ancestor chain of the entry, which goes stale otherwise.
+    /// </summary>
+    public Task RefreshEntriesAsync(FileEntryType entryType, IReadOnlyCollection<int> entryIds)
+    {
+        return IndexEntriesAsync(entryType, entryIds, removeMissing: false);
+    }
+
+    private async Task IndexEntriesAsync(FileEntryType entryType, IReadOnlyCollection<int> entryIds, bool removeMissing)
     {
         if (entryIds.Count == 0)
         {
@@ -380,11 +399,11 @@ public class MetadataIndexHelper(
 
             if (entryType == FileEntryType.File)
             {
-                await IndexAsync(filesDbContext, fileIndexer, FileEntryType.File, entryIds, tenantId);
+                await IndexAsync(filesDbContext, fileIndexer, FileEntryType.File, entryIds, tenantId, removeMissing);
             }
             else
             {
-                await IndexAsync(filesDbContext, folderIndexer, FileEntryType.Folder, entryIds, tenantId);
+                await IndexAsync(filesDbContext, folderIndexer, FileEntryType.Folder, entryIds, tenantId, removeMissing);
             }
         }
         catch (Exception e)
@@ -393,7 +412,7 @@ public class MetadataIndexHelper(
         }
     }
 
-    private static async Task IndexAsync<TDoc>(FilesDbContext filesDbContext, FactoryIndexer<TDoc> indexer, FileEntryType entryType, IReadOnlyCollection<int> entryIds, int tenantId)
+    private static async Task IndexAsync<TDoc>(FilesDbContext filesDbContext, FactoryIndexer<TDoc> indexer, FileEntryType entryType, IReadOnlyCollection<int> entryIds, int tenantId, bool removeMissing)
         where TDoc : MetadataSearchItemBase, new()
     {
         var docs = await MetadataSearchHelper.BuildDocsAsync<TDoc>(filesDbContext, entryType, entryIds, tenantId);
@@ -403,9 +422,16 @@ public class MetadataIndexHelper(
             await indexer.Index(docs);
         }
 
-        foreach (var missingId in entryIds.Except(docs.Select(d => d.Id)))
+        if (!removeMissing)
         {
-            await indexer.DeleteAsync(r => r.Where(a => a.Id, missingId));
+            return;
+        }
+
+        var missingIds = entryIds.Except(docs.Select(d => d.Id)).ToArray();
+
+        if (missingIds.Length > 0)
+        {
+            await indexer.DeleteAsync(r => r.In(a => a.Id, missingIds));
         }
     }
 }

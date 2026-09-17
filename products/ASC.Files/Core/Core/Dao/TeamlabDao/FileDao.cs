@@ -40,6 +40,7 @@ internal class FileDao(
         FactoryIndexerFile factoryIndexer,
         FactoryIndexerForm factoryIndexerFormData,
         FactoryIndexerFileMetadata factoryIndexerFileMetadata,
+        MetadataIndexHelper metadataIndexHelper,
         UserManager userManager,
         FileUtility fileUtility,
         IDbContextFactory<FilesDbContext> dbContextManager,
@@ -579,6 +580,7 @@ internal class FileDao(
             }
 
             var isNew = false;
+            var metadataInherited = false;
             var cloneStreamForSave = new MemoryStream();
             var streamChange = false;
             var needVectorization = false;
@@ -705,11 +707,17 @@ internal class FileDao(
 
                         if (isNew)
                         {
-                            await filesDbContext.ApplyMetadataCascadeLinksAsync(tenantId, file.Id, FileEntryType.File, file.ParentId, file.CreateBy);
+                            metadataInherited = await filesDbContext.ApplyMetadataCascadeLinksAsync(tenantId, file.Id, FileEntryType.File, file.ParentId, file.CreateBy);
                         }
 
                         await tx.CommitAsync();
                     });
+
+                    if (metadataInherited)
+                    {
+                        // the inherited values are visible to the SQL fallback at once, the index must not lag behind
+                        await metadataIndexHelper.IndexEntriesAsync(FileEntryType.File, [file.Id]);
+                    }
 
                     file.PureTitle = file.Title;
                     file.RootCreateBy = currentFolder.RootCreateBy;
@@ -1352,6 +1360,8 @@ internal class FileDao(
 
             var q = Query(context.Files).Where(r => r.Id == fileId);
 
+            var metadataInherited = false;
+
             await using (var tx = await context.Database.BeginTransactionAsync())
             {
                 var oldParentId = (await q.FirstOrDefaultAsync())?.ParentId;
@@ -1475,7 +1485,7 @@ internal class FileDao(
                 {
                     // stamped inside the transaction, otherwise a failure right after the commit
                     // would leave the moved file without the metadata inherited at the destination
-                    await context.ApplyMetadataCascadeLinksAsync(tenantId, fileId, FileEntryType.File, toFolderId, _authContext.CurrentAccount.ID);
+                    metadataInherited = await context.ApplyMetadataCascadeLinksAsync(tenantId, fileId, FileEntryType.File, toFolderId, _authContext.CurrentAccount.ID);
                 }
 
                 await tx.CommitAsync();
@@ -1498,6 +1508,13 @@ internal class FileDao(
                 await IncrementCountAsync(context, toFolderId, tenantId, FileEntryType.File);
             }
 
+            if (metadataInherited)
+            {
+                await metadataIndexHelper.IndexEntriesAsync(FileEntryType.File, [fileId]);
+            }
+
+            // the worker refreshes the search documents of the file, the metadata one included: the ancestor
+            // chain stored in them is stale after a move
             await eventBus.PublishAsync(new FileIndexIntegrationEvent(file.CreateBy, tenantId)
             {
                 FileId = fileId,
@@ -1538,11 +1555,13 @@ internal class FileDao(
 
         var tenantId = _tenantManager.GetCurrentTenantId();
         var folderDao = daoFactory.GetFolderDao<int>();
+        var trashId = await globalFolder.GetFolderTrashAsync(daoFactory);
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
         List<DbFile> movedFiles = null;
+        IReadOnlyCollection<int> metadataInheritedIds = [];
 
         await strategy.ExecuteAsync(async () =>
         {
@@ -1556,6 +1575,13 @@ internal class FileDao(
 
             await context.UpdateFilesFolderIdAsync(tenantId, ids, parents, toFolderId);
 
+            if (toFolderId != trashId)
+            {
+                // the same stamping the single-file move does: the batch is the regular path inside a room,
+                // so without it the moved files would never inherit the cascade of the destination
+                metadataInheritedIds = await context.ApplyMetadataCascadeLinksAsync(tenantId, movedFiles.Select(f => f.Id).Distinct().ToList(), FileEntryType.File, toFolderId, _authContext.CurrentAccount.ID);
+            }
+
             await tx.CommitAsync();
         });
 
@@ -1564,6 +1590,11 @@ internal class FileDao(
         if (movedIds.Count == 0)
         {
             return movedIds;
+        }
+
+        if (metadataInheritedIds.Count > 0)
+        {
+            await metadataIndexHelper.IndexEntriesAsync(FileEntryType.File, metadataInheritedIds);
         }
 
         // the rows are already moved: the follow-ups below are best-effort each,
@@ -1691,9 +1722,9 @@ internal class FileDao(
             copy = await SaveFileAsync(copy, stream, true, true, null);
         }
 
-        await using (var filesDbContext = await _dbContextFactory.CreateDbContextAsync())
+        if (await daoFactory.GetMetadataDao<int>().CopyMetadataAsync(file.Id, copy.Id, FileEntryType.File))
         {
-            await filesDbContext.CopyMetadataAsync(_tenantManager.GetCurrentTenantId(), file.Id, copy.Id, FileEntryType.File, _authContext.CurrentAccount.ID);
+            await metadataIndexHelper.IndexEntriesAsync(FileEntryType.File, [copy.Id]);
         }
 
         if (file.ThumbnailStatus != Thumbnail.Created)
@@ -2967,23 +2998,41 @@ internal class FileDao(
                 }
             }
 
-            if (success && searchByText)
-            {
-                // the string values of the globally visible system template participate in the general text search:
-                // the entry matches when either its own fields or its global metadata match, so the id sets are united
-                var funcForGlobalText = MetadataSearchQuery.BuildGlobalTextSelector<DbFileMetadataSearch>(searchText, MetadataSearchScope.For(parentId, withSubfolders));
-                Expression<Func<Selector<DbFileMetadataSearch>, Selector<DbFileMetadataSearch>>> expressionGlobalText = s => funcForGlobalText(s);
-
-                var (globalTextSuccess, globalTextIds) = await factoryIndexerFileMetadata.TrySelectIdsAsync(expressionGlobalText);
-                if (globalTextSuccess && globalTextIds.Count > 0)
-                {
-                    searchIds = searchIds.Union(globalTextIds).ToList();
-                }
-            }
-
             if (success)
             {
-                q = q.Where(r => searchIds.Contains(r.Id));
+                if (searchByText)
+                {
+                    // the string values of the globally visible system template participate in the general text search:
+                    // the entry matches when either its own fields or its global metadata match, so the id sets are united
+                    var (globalTextSuccess, globalTextIds) = await MetadataSearchQuery.TrySelectGlobalTextIdsAsync(factoryIndexerFileMetadata, searchText, MetadataSearchScope.For(parentId, withSubfolders));
+
+                    if (globalTextSuccess)
+                    {
+                        searchIds = searchIds.Union(globalTextIds).ToList();
+                    }
+                    else
+                    {
+                        // the metadata index is not there yet (it is created by the first full indexing pass) or it is
+                        // overflowing: the global metadata part of the search comes from the database instead
+                        var lowerText = GetSearchText(searchText);
+                        var globalTextSqlIds = MetadataSearchQuery.SystemTemplateTextEntryIds(filesDbContext, tenantId, FileEntryType.File, lowerText);
+
+                        q = q.Where(r => searchIds.Contains(r.Id) || globalTextSqlIds.Contains(r.Id));
+                        searchIds = null;
+                    }
+                }
+
+                if (searchIds != null)
+                {
+                    q = q.Where(r => searchIds.Contains(r.Id));
+                }
+
+                if (searchByText && searchByExtension)
+                {
+                    // the extension lives in the index selector only, and the metadata ids united above were not
+                    // selected by it: the extension is applied again in SQL so the union cannot bypass it
+                    q = BuildSearch(q, extension, SearchType.End);
+                }
             }
             else
             {
@@ -3004,10 +3053,9 @@ internal class FileDao(
 
         if (searchByMetadata)
         {
-            var funcForMetadata = MetadataSearchQuery.BuildSelector<DbFileMetadataSearch>(metadataFilter, MetadataSearchScope.For(parentId, withSubfolders));
-            Expression<Func<Selector<DbFileMetadataSearch>, Selector<DbFileMetadataSearch>>> expressionMetadata = s => funcForMetadata(s);
-
-            var (metadataSuccess, metadataIds) = await factoryIndexerFileMetadata.TrySelectIdsAsync(expressionMetadata);
+            // scoped by the ancestor chain stored in the metadata document; the document is refreshed when the file
+            // is moved (see IndexEventProcessingService), so the scope stays valid and keeps the id list per folder
+            var (metadataSuccess, metadataIds) = await MetadataSearchQuery.TrySelectMetadataIdsAsync(factoryIndexerFileMetadata, metadataFilter, MetadataSearchScope.For(parentId, withSubfolders));
 
             if (metadataSuccess)
             {
@@ -3340,6 +3388,7 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         FactoryIndexerFile factoryIndexer,
         FactoryIndexerForm factoryIndexerFormData,
         FactoryIndexerFileMetadata factoryIndexerFileMetadata,
+        MetadataIndexHelper metadataIndexHelper,
         UserManager userManager,
         FileUtility fileUtility,
         IDbContextFactory<FilesDbContext> dbContextManager,
@@ -3383,6 +3432,7 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         factoryIndexer,
         factoryIndexerFormData,
         factoryIndexerFileMetadata,
+        metadataIndexHelper,
         userManager,
         fileUtility,
         dbContextManager,

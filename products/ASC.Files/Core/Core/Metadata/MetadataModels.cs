@@ -67,6 +67,17 @@ public class MetadataField
 }
 
 /// <summary>
+/// The partial update of a metadata field definition: a null member keeps the current value.
+/// </summary>
+public class MetadataFieldUpdate
+{
+    public string Name { get; set; }
+    public MetadataFieldType? Type { get; set; }
+    public List<MetadataFieldOption> Options { get; set; }
+    public int? Order { get; set; }
+}
+
+/// <summary>
 /// The metadata field choice option.
 /// </summary>
 public record MetadataFieldOption(Guid Id, string Value);
@@ -105,6 +116,7 @@ public class MetadataTemplateLink
     public FileEntryType EntryType { get; set; }
     public bool Cascade { get; set; }
     public int? SourceFolderId { get; set; }
+    public MetadataConflictResolveType CascadeConflict { get; set; }
     public Guid CreateBy { get; set; }
     public DateTime CreateOn { get; set; }
 }

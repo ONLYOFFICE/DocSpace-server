@@ -4765,6 +4765,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("is_cascade")
                         .HasDefaultValueSql("'0'");
 
+                    b.Property<int>("CascadeConflict")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("cascade_conflict")
+                        .HasDefaultValueSql("'0'");
+
                     b.Property<string>("CreateBy")
                         .IsRequired()
                         .HasColumnType("char(38)")
