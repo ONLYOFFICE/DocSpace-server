@@ -349,8 +349,11 @@ public class DbTenantService(
     {
         await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenant = await tenantDbContext.Tenants.SingleOrDefaultAsync(r => r.Id == id);
-        tenantDbContext.Tenants.Remove(tenant);
-        await tenantDbContext.SaveChangesAsync();
+        if(tenant != null)
+        {
+            tenantDbContext.Tenants.Remove(tenant);
+            await tenantDbContext.SaveChangesAsync();
+        }
     }
 
     public async Task<IEnumerable<TenantVersion>> GetTenantVersionsAsync()
