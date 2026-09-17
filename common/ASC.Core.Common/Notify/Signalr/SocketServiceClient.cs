@@ -159,7 +159,12 @@ public class SocketService(
                         // socket was closed by the finalizer - one connection per notification, hundreds open at peak.
                         using var response = await httpClient.SendAsync(socketData.RequestMessage, HttpCompletionOption.ResponseHeadersRead, stoppingToken);
                     }
-                    catch (Exception e) when (e is TaskCanceledException or TimeoutException && !stoppingToken.IsCancellationRequested)
+                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                    {
+                        // The service is shutting down: every in-flight request cancels at once, so logging them
+                        // would produce a burst of identical entries for an entirely expected event.
+                    }
+                    catch (Exception e) when (e is TaskCanceledException or TimeoutException)
                     {
                         // A timeout is an expected transient condition (socket service busy or restarting) - the stack
                         // trace is always the same and floods the log, so only the target is worth recording.
@@ -202,9 +207,10 @@ public static class SocketHttpClientExtension
             })
             .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
             {
-                // Must stay below the socket service keepAliveTimeout, otherwise the node side closes idle connections
-                // first and requests land on a socket that is already going away.
-                PooledConnectionIdleTimeout = TimeSpan.FromSeconds(2),
+                // Must stay below the socket service keepAliveTimeout (65s), otherwise the node side closes idle
+                // connections first and requests land on a socket that is already going away. Keep it close to that
+                // bound: a short idle timeout would force a fresh TCP connection on every gap between notifications.
+                PooledConnectionIdleTimeout = TimeSpan.FromSeconds(60),
                 PooledConnectionLifetime = TimeSpan.FromMinutes(5),
                 ConnectTimeout = TimeSpan.FromSeconds(3),
                 AllowAutoRedirect = false
