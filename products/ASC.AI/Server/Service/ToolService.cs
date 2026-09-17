@@ -133,7 +133,8 @@ public class ToolService(
         {
             Folder = await folderTask,
             Form = await formTask,
-            Analyze = analyze
+            Analyze = analyze,
+            FormSubAgent = context.FormSubAgent
         };
     }
 

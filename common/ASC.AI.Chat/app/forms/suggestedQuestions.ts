@@ -78,7 +78,7 @@ const inflight = new Map<string, Promise<SuggestedQuestionsResult>>();
 // this member yet, so it is named by its wire string.
 const FORM_ANALYSIS_ACTION = "FormAnalysis" as ActionType;
 
-async function resolveFormsProfile(): Promise<Profile | undefined> {
+export async function resolveFormsProfile(): Promise<Profile | undefined> {
   // Prefer the dedicated FormAnalysis slot; fall back to the general chat model
   // (Default) so analysis works wherever a chat model is configured, even when
   // neither a gateway default nor an explicit FormAnalysis assignment exists.
@@ -164,7 +164,7 @@ function parseQuestions(text: string): SuggestedQuestion[] {
   return result;
 }
 
-function extractText(message: unknown): string {
+export function extractText(message: unknown): string {
   if (!isObject(message)) {
     return "";
   }

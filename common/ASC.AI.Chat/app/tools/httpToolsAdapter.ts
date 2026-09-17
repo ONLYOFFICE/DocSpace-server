@@ -78,6 +78,7 @@ type ToolContextDto = {
     folderId: number;
     formId: number;
     attachmentId: string;
+    formSubAgent: boolean;
 };
 
 // A ref-carrying content part encodes `{ref, title, kind}` as JSON in
@@ -168,6 +169,7 @@ async function resolveForm(
 async function toContext(
     entityId: string | undefined,
     attachmentId?: string[],
+    formSubAgent = false,
 ): Promise<ToolContextDto> {
     const folderId = parseInt10(entityId, 0) ?? 0;
     if (attachmentId && attachmentId.length > 0) {
@@ -176,12 +178,13 @@ async function toContext(
             setResolvedFormId(resolved.formId);
             setResolvedAttachmentId(resolved.attachmentId);
         }
-        return { folderId, formId: resolved.formId, attachmentId: resolved.attachmentId };
+        return { folderId, formId: resolved.formId, attachmentId: resolved.attachmentId, formSubAgent };
     }
     return {
         folderId,
         formId: getResolvedFormId() ?? 0,
         attachmentId: getResolvedAttachmentId() ?? "",
+        formSubAgent,
     };
 }
 
@@ -231,6 +234,9 @@ function parseList(raw: unknown): ToolsList {
  * dialog before running them.
  */
 export class HttpToolsAdapter implements ToolsAdapter {
+    // Set by the form-analysis sub-agent so C# emits the form-data tools for it only; false for main.
+    constructor(private readonly formSubAgent = false) {}
+
     // `_config.attachmentId` (the engine's whole-thread ref collection) is
     // unused: the controller already resolved the formId into the request
     // context, which this `list` reads back through `toContext`.
@@ -265,7 +271,7 @@ export class HttpToolsAdapter implements ToolsAdapter {
         entityId?: string,
     ): Promise<unknown> {
         const body = {
-            ...(await toContext(entityId)),
+            ...(await toContext(entityId, undefined, this.formSubAgent)),
             calls: [{ id: randomUUID(), name: toolName, arguments: args }],
         };
         // Verbose lifecycle logging: DocSpace integration tools run silently
@@ -337,12 +343,18 @@ export class HttpToolsAdapter implements ToolsAdapter {
         return prompt;
     }
 
+    // Tools + prompt in one `tools/list` hit, flat (ungrouped) — for the form-analysis sub-agent,
+    // which needs both and passes the tools straight to the model (no approval split needed).
+    async listToolset(entityId?: string): Promise<{ tools: TMCPItem[]; prompt: string }> {
+        return this.list(entityId);
+    }
+
     private async list(entityId: string | undefined, attachmentId?: string[]): Promise<ToolsList> {
         // Runs on every stream (tool list + prompt fragment) before the
         // assistant reply starts; a stalled list here delays the whole chat,
         // so time it and report the tool count.
         const started = Date.now();
-        const context = await toContext(entityId, attachmentId);
+        const context = await toContext(entityId, attachmentId, this.formSubAgent);
         logger.info(
             `docspaceTools.list entityId=${entityId ?? "-"} -> ${LIST_PATH} context=${JSON.stringify(context)}`,
         );

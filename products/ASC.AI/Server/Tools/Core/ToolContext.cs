@@ -40,6 +40,10 @@ public class ToolContext
 
     /// <summary>The attachment the form was attached under; keys the per-attachment analyze intent.</summary>
     public string? AttachmentId { get; init; }
+
+    /// <summary>Set by the ASC.AI.Chat form-analysis sub-agent so the form-data tools are emitted for it
+    /// only, and never for the main chat agent.</summary>
+    public bool FormSubAgent { get; init; }
 }
 
 public class ResolvedToolContext
@@ -52,4 +56,8 @@ public class ResolvedToolContext
     /// from the attach intent). Gates the form-data tools.
     /// </summary>
     public bool Analyze { get; init; }
+
+    /// <summary>True when the request comes from the form-analysis sub-agent (which runs the form-data
+    /// tools on the FormAnalysis model), so the tools are withheld from the main chat agent.</summary>
+    public bool FormSubAgent { get; init; }
 }

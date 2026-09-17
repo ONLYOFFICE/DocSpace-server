@@ -200,7 +200,10 @@ public class FormDataToolsFactory(
 
     public async Task<ToolBundle> BuildAsync(ResolvedToolContext context)
     {
-        if (!context.Analyze
+        // Emitted only to the form-analysis sub-agent (which runs on the FormAnalysis model); the main
+        // chat agent never gets these tools, so form-data questions are always delegated to the sub-agent.
+        if (!context.FormSubAgent
+            || !context.Analyze
             || context.Form is not File<int> form
             || !externalDatabaseClient.IsEnabled()
             || !await fileSecurity.CanUpdateXlsxAsync(form))
