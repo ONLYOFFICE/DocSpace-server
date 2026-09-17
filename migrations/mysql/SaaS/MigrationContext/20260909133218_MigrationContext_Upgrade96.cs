@@ -54,6 +54,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     entry_id = table.Column<int>(type: "int", nullable: false),
                     entry_type = table.Column<int>(type: "int", nullable: false),
                     is_cascade = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValueSql: "'0'"),
+                    cascade_conflict = table.Column<int>(type: "int", nullable: false, defaultValueSql: "'0'"),
                     source_folder_id = table.Column<int>(type: "int", nullable: true),
                     create_by = table.Column<string>(type: "char(38)", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),

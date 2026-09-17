@@ -48,6 +48,12 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public IAsyncEnumerable<DbFilesMetadataLink> MetadataLinksByFilesAndFoldersAsync(int tenantId, IEnumerable<int> fileIds, IEnumerable<int> folderIds)
+    {
+        return MetadataQueries.MetadataLinksByFilesAndFoldersAsync(this, tenantId, fileIds, folderIds);
+    }
+
+    [PreCompileQuery]
     public IAsyncEnumerable<int> MetadataCascadeTemplateIdsAsync(int tenantId, int folderId)
     {
         return MetadataQueries.MetadataCascadeTemplateIdsAsync(this, tenantId, folderId);
@@ -90,6 +96,28 @@ public partial class FilesDbContext
     }
 
     /// <summary>
+    /// Turns the inherited links of the entries below the folder (the folder itself included) into direct assignments when
+    /// their source folder is neither an ancestor of the folder nor inside its subtree: after a move such a source is not
+    /// above the entries any more, and the metadata they materialized from it is theirs to keep (see
+    /// <see cref="ApplyMetadataCascadeLinksAsync(int, IReadOnlyCollection{int}, FileEntryType, int, Guid)"/> for the moved
+    /// folder itself). Runs on the caller's context and transaction, after the tree of the folder has been re-parented.
+    /// Not precompiled for the same reason as <see cref="ConvertMetadataCascadeLinksToDirectAsync"/>.
+    /// </summary>
+    public Task<int> ConvertOrphanedMetadataCascadeLinksInSubtreeAsync(int tenantId, int folderId)
+    {
+        var subtreeFolderIds = Tree.Where(t => t.ParentId == folderId).Select(t => t.FolderId);
+        var ancestorIds = Tree.Where(t => t.FolderId == folderId).Select(t => t.ParentId);
+        var subtreeFileIds = Files.Where(f => f.TenantId == tenantId && subtreeFolderIds.Contains(f.ParentId)).Select(f => f.Id);
+
+        return MetadataLinks
+            .Where(l => l.TenantId == tenantId && l.SourceFolderId != null &&
+                !ancestorIds.Contains(l.SourceFolderId.Value) && !subtreeFolderIds.Contains(l.SourceFolderId.Value) &&
+                ((l.EntryType == FileEntryType.Folder && subtreeFolderIds.Contains(l.EntryId)) ||
+                 (l.EntryType == FileEntryType.File && subtreeFileIds.Contains(l.EntryId))))
+            .ExecuteUpdateAsync(s => s.SetProperty(l => l.SourceFolderId, (int?)null));
+    }
+
+    /// <summary>
     /// Turns the links inherited from the folder into direct assignments. Not precompiled on purpose:
     /// an <c>ExecuteUpdate</c> inside <c>EF.CompileAsyncQuery</c> fails to translate, which surfaced as a 403 on every un-cascade.
     /// </summary>
@@ -126,9 +154,10 @@ public partial class FilesDbContext
     /// Stamps the entries, all placed into the same parent folder, with the cascading templates of their new ancestors and
     /// inherits the values of the nearest cascading ancestor into them. A field is filled when the entry has no value for it;
     /// when the folder supplying the field cascades with <see cref="MetadataConflictResolveType.Overwrite"/>, the entry's own
-    /// value is replaced. An inherited link that already exists is re-pointed to the new nearest source, a direct one is left alone.
-    /// Runs on the caller's context and transaction. Returns the identifiers of the entries that were written, so their
-    /// metadata documents can be refreshed after the commit.
+    /// value is replaced. An inherited link that already exists is re-pointed to the new nearest source; when no new ancestor
+    /// cascades its template any more, the entry has left the source's tree with the materialized metadata, so the link becomes
+    /// a direct assignment. A direct one is left alone. Runs on the caller's context and transaction. Returns the identifiers
+    /// of the entries that were written, so their metadata documents can be refreshed after the commit.
     /// </summary>
     public async Task<IReadOnlyCollection<int>> ApplyMetadataCascadeLinksAsync(int tenantId, IReadOnlyCollection<int> entryIds, FileEntryType entryType, int parentFolderId, Guid createBy)
     {
@@ -152,11 +181,6 @@ public partial class FilesDbContext
             .Where(r => r.TenantId == tenantId && r.Cascade && r.EntryType == FileEntryType.Folder && ancestorIds.Contains(r.EntryId))
             .ToListAsync();
 
-        if (cascadeLinks.Count == 0)
-        {
-            return [];
-        }
-
         var linkTuples = cascadeLinks.Select(l => (l.TemplateId, l.EntryId)).ToList();
 
         var nearestSources = MetadataCascadeResolver.ResolveNearestSources(linkTuples, levelByFolderId);
@@ -176,12 +200,21 @@ public partial class FilesDbContext
         {
             var entryLinks = existingLinksByEntry[entryId].ToDictionary(l => l.TemplateId);
 
+            // an inherited link whose template no new ancestor cascades: the entry left the source's tree and keeps the
+            // materialized metadata as its own, otherwise an un-cascade on the old source would convert (and a copy would
+            // skip) an entry that is not below it any more
+            foreach (var orphan in entryLinks.Values.Where(l => l.SourceFolderId != null && !nearestSources.ContainsKey(l.TemplateId)))
+            {
+                orphan.SourceFolderId = null;
+                MetadataLinks.Update(orphan);
+                changed.Add(entryId);
+            }
+
             foreach (var (templateId, sourceFolderId) in nearestSources)
             {
                 if (entryLinks.TryGetValue(templateId, out var existing))
                 {
-                    // a direct assignment keeps its provenance; an inherited one follows the entry to its new nearest source,
-                    // otherwise an un-cascade on the old source would convert an entry that left its tree long ago
+                    // a direct assignment keeps its provenance; an inherited one follows the entry to its new nearest source
                     if (existing.SourceFolderId != null && existing.SourceFolderId != sourceFolderId)
                     {
                         existing.SourceFolderId = sourceFolderId;
@@ -209,9 +242,11 @@ public partial class FilesDbContext
 
         var sourceFolderIds = cascadeLinks.Select(l => l.EntryId).Distinct().ToList();
 
-        var sourceValues = await MetadataValues
-            .Where(r => r.TenantId == tenantId && r.EntryType == FileEntryType.Folder && sourceFolderIds.Contains(r.EntryId))
-            .ToListAsync();
+        var sourceValues = sourceFolderIds.Count == 0
+            ? []
+            : await MetadataValues
+                .Where(r => r.TenantId == tenantId && r.EntryType == FileEntryType.Folder && sourceFolderIds.Contains(r.EntryId))
+                .ToListAsync();
 
         if (sourceValues.Count > 0)
         {
@@ -245,26 +280,54 @@ public partial class FilesDbContext
                         .ToListAsync())
                     .ToLookup(r => r.EntryId, r => r.FieldId);
 
+                // a folder cascading a template itself is the nearest source of that template for its subtree and for itself,
+                // so its values of that template are left alone whatever the ancestor's conflict rule — the same exclusion
+                // the cascade passes apply to a nested cascading folder (see MetadataCascadeOperation)
+                var protectedFieldsByEntry = entryIds.ToDictionary(id => id, id =>
+                {
+                    var ownCascadeTemplateIds = existingLinksByEntry[id].Where(l => l.Cascade).Select(l => l.TemplateId).ToHashSet();
+
+                    return ownCascadeTemplateIds.Count == 0
+                        ? []
+                        : fieldIds.Where(f => ownCascadeTemplateIds.Contains(fieldTemplates[f])).ToHashSet();
+                });
+
                 var overwrittenEntryIds = entryIds
-                    .Where(id => filledFieldsByEntry[id].Any(overwriteFieldIds.Contains))
+                    .Where(id => filledFieldsByEntry[id].Any(f => overwriteFieldIds.Contains(f) && !protectedFieldsByEntry[id].Contains(f)))
                     .ToList();
 
                 if (overwrittenEntryIds.Count > 0)
                 {
                     var overwriteFieldIdList = overwriteFieldIds.ToList();
 
-                    await MetadataValues
-                        .Where(r => r.TenantId == tenantId && r.EntryType == entryType && overwrittenEntryIds.Contains(r.EntryId) && overwriteFieldIdList.Contains(r.FieldId))
-                        .ExecuteDeleteAsync();
+                    var plainEntryIds = overwrittenEntryIds.Where(id => protectedFieldsByEntry[id].Count == 0).ToList();
+
+                    if (plainEntryIds.Count > 0)
+                    {
+                        await MetadataValues
+                            .Where(r => r.TenantId == tenantId && r.EntryType == entryType && plainEntryIds.Contains(r.EntryId) && overwriteFieldIdList.Contains(r.FieldId))
+                            .ExecuteDeleteAsync();
+                    }
+
+                    // the cascading folders are few: each one keeps its own fields and gives up the rest
+                    foreach (var entryId in overwrittenEntryIds.Where(id => protectedFieldsByEntry[id].Count > 0))
+                    {
+                        var entryFieldIds = overwriteFieldIdList.Where(f => !protectedFieldsByEntry[entryId].Contains(f)).ToList();
+
+                        await MetadataValues
+                            .Where(r => r.TenantId == tenantId && r.EntryType == entryType && r.EntryId == entryId && entryFieldIds.Contains(r.FieldId))
+                            .ExecuteDeleteAsync();
+                    }
                 }
 
                 foreach (var entryId in entryIds)
                 {
                     var filledFieldIds = filledFieldsByEntry[entryId].ToHashSet();
+                    var protectedFieldIds = protectedFieldsByEntry[entryId];
 
                     foreach (var (fieldId, sourceEntryId) in fieldSources)
                     {
-                        if (filledFieldIds.Contains(fieldId) && !overwriteFieldIds.Contains(fieldId))
+                        if (protectedFieldIds.Contains(fieldId) || (filledFieldIds.Contains(fieldId) && !overwriteFieldIds.Contains(fieldId)))
                         {
                             continue;
                         }
@@ -438,6 +501,17 @@ static file class MetadataQueries
             (FilesDbContext ctx, int tenantId, IEnumerable<int> entryIds, FileEntryType entryType) =>
                 ctx.MetadataLinks
                     .Where(r => r.TenantId == tenantId && r.EntryType == entryType && entryIds.Contains(r.EntryId)));
+
+    /// <summary>
+    /// The links of the files and the folders of one listing page in a single round trip (the listing used to query the two kinds separately).
+    /// </summary>
+    public static readonly Func<FilesDbContext, int, IEnumerable<int>, IEnumerable<int>, IAsyncEnumerable<DbFilesMetadataLink>> MetadataLinksByFilesAndFoldersAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, IEnumerable<int> fileIds, IEnumerable<int> folderIds) =>
+                ctx.MetadataLinks
+                    .Where(r => r.TenantId == tenantId &&
+                        ((r.EntryType == FileEntryType.File && fileIds.Contains(r.EntryId)) ||
+                         (r.EntryType == FileEntryType.Folder && folderIds.Contains(r.EntryId)))));
 
     public static readonly Func<FilesDbContext, int, int, IAsyncEnumerable<int>> MetadataCascadeTemplateIdsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(

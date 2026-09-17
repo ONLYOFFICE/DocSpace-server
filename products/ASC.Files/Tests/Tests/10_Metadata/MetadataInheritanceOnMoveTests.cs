@@ -129,6 +129,79 @@ public class MetadataInheritanceOnMoveTests(AspireAppFixture fixture) : BaseTest
         data.ValueOf(fileMetadata, ClientField).Should().Be(FolderClient, "the file inside the moved folder is stamped by the background pass");
     }
 
+    [Fact]
+    public async Task MovedCascadingFolder_IntoOverwriteCascadingFolder_KeepsItsOwnCascadeForItsSubtree()
+    {
+        var data = await ArrangeAsync(Overwrite);
+
+        // the moving folder cascades the same template with its own Client and an empty Department
+        var moving = await CreateFolder($"Moving {data.Suffix}", data.PlainFolderId);
+        await data.Api.AssignFolderTemplatesAsync(moving.Id, [data.TemplateId], cascade: false, TestContext.Current.CancellationToken);
+        await data.Api.SetFolderValuesAsync(moving.Id, [data.Value(ClientField, OwnClient)], TestContext.Current.CancellationToken);
+        await data.Api.AssignFolderTemplatesAsync(moving.Id, [data.TemplateId], cascade: true, TestContext.Current.CancellationToken);
+
+        var nested = await CreateFile($"nested-{data.Suffix}.docx", moving.Id);
+
+        var inherited = await data.Api.GetFileMetadataAsync(nested.Id, TestContext.Current.CancellationToken);
+        data.ValueOf(inherited, ClientField).Should().Be(OwnClient, "the file inherits the moving folder's value on creation");
+
+        await MoveAsync([], [moving.Id], data.CascadingFolderId);
+
+        // the stamp pass over the moved subtree used to ignore the nested cascades: with Overwrite at the destination it
+        // rewrote every entry below the moving folder with the destination's values, although the moving folder is the
+        // nearest cascading ancestor of its own subtree (the rule the assign pass already follows)
+        var folderMetadata = await PollMetadataAsync(data.Api, moving.Id, m => data.ValueOf(m, ClientField) != null, isFolder: true);
+        data.ValueOf(folderMetadata, ClientField).Should().Be(OwnClient, "the moved cascading folder keeps its own value, like a nested cascading folder does in the assign pass");
+
+        // the pass has nothing to do for this template; the deadline is the only way to be sure it did not touch the file
+        var fileMetadata = await PollMetadataAsync(data.Api, nested.Id, m => data.ValueOf(m, ClientField) == FolderClient, TimeSpan.FromSeconds(10));
+        data.ValueOf(fileMetadata, ClientField).Should().Be(OwnClient, "the file below the moved cascading folder keeps the value of its nearest cascading ancestor");
+        data.ValueOf(fileMetadata, DepartmentField).Should().BeNull("the template is excluded from the destination's pass as a whole, its empty fields included");
+    }
+
+    [Fact]
+    public async Task MovedFile_OutOfCascadingFolder_OwnsTheInheritedTemplate_SoACopyCarriesIt()
+    {
+        var data = await ArrangeAsync(Skip);
+
+        var file = await CreateFile($"owned-{data.Suffix}.docx", data.CascadingFolderId);
+
+        await MoveAsync([file.Id], [], data.PlainFolderId);
+
+        var target = await CreateFolder($"Copy target {data.Suffix}", data.RoomId);
+
+        await CopyAsync(file.Id, target.Id);
+
+        var copy = await FindFileAsync(data.Api, target.Id, file.Title);
+
+        // only the direct assignments are copied. The link used to keep pointing at the cascading folder the file had left,
+        // so the copy came without the template until somebody un-cascaded that folder and the link turned direct by accident
+        var copyMetadata = await PollMetadataAsync(data.Api, copy.Id, m => data.ValueOf(m, ClientField) != null);
+        data.ValueOf(copyMetadata, ClientField).Should().Be(FolderClient, "what the file inherited became its own when it left the cascading folder, so the copy carries it");
+    }
+
+    [Fact]
+    public async Task MovedFolder_OutOfCascadingFolder_ItsContentOwnsTheInheritedTemplate()
+    {
+        var data = await ArrangeAsync(Skip);
+
+        var moving = await CreateFolder($"Moving out {data.Suffix}", data.CascadingFolderId);
+        var nested = await CreateFile($"nested-out-{data.Suffix}.docx", moving.Id);
+
+        await MoveAsync([], [moving.Id], data.PlainFolderId);
+
+        var target = await CreateFolder($"Copy target {data.Suffix}", data.RoomId);
+
+        await CopyAsync(nested.Id, target.Id);
+
+        var copy = await FindFileAsync(data.Api, target.Id, nested.Title);
+
+        // the destination cascades nothing, so no background pass runs over the moved subtree: the links of the content
+        // are converted inside the move transaction, otherwise they would keep pointing at the folder left behind
+        var copyMetadata = await PollMetadataAsync(data.Api, copy.Id, m => data.ValueOf(m, ClientField) != null);
+        data.ValueOf(copyMetadata, ClientField).Should().Be(FolderClient, "the file below the moved folder owns what it inherited, so the copy carries it");
+    }
+
     #region Arrange
 
     private async Task<InheritanceData> ArrangeAsync(int conflictResolveType)
@@ -199,6 +272,44 @@ public class MetadataInheritanceOnMoveTests(AspireAppFixture fixture) : BaseTest
         {
             var statuses = await WaitLongOperation(results.FirstOrDefault()?.Id);
             statuses.Should().AllSatisfy(s => s.Finished.Should().BeTrue("the move operation must finish"));
+        }
+    }
+
+    private async Task CopyAsync(int fileId, int toFolderId)
+    {
+        var copyParams = new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(toFolderId),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new BatchRequestDtoAllOfFileIds(fileId)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
+
+        var results = (await _filesOperationsApi.CopyBatchItemsAsync(copyParams, TestContext.Current.CancellationToken)).Response;
+
+        if (results.Any(r => !r.Finished))
+        {
+            var statuses = await WaitLongOperation(results.FirstOrDefault()?.Id);
+            statuses.Should().AllSatisfy(s => s.Finished.Should().BeTrue("the copy operation must finish"));
+        }
+    }
+
+    private static async Task<RoomEntryResponse> FindFileAsync(MetadataApiClient api, int folderId, string title)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(15);
+
+        while (true)
+        {
+            var content = await api.GetFolderContentAsync(folderId, withSubFolders: false, cancellationToken: TestContext.Current.CancellationToken);
+            var file = content.Files.FirstOrDefault(f => f.Title == title);
+
+            if (file != null || DateTime.UtcNow > deadline)
+            {
+                return file ?? throw new InvalidOperationException($"The copy '{title}' did not appear in folder {folderId}.");
+            }
+
+            await Task.Delay(200, TestContext.Current.CancellationToken);
         }
     }
 

@@ -107,6 +107,20 @@ public class MetadataTemplateManagementTests(AspireAppFixture fixture) : BaseTes
     }
 
     [Fact]
+    public async Task UpdateTemplate_ReturnsTheTemplateWithItsFields()
+    {
+        var api = await ArrangeAsync();
+        var template = await api.CreateTemplateAsync("Fields " + Suffix(),
+            [new MetadataFieldPayload { Name = "Code", Type = StringType }], TestContext.Current.CancellationToken);
+
+        var updated = await api.UpdateTemplateAsync(template.Id, new { name = "Fields renamed " + Suffix() }, TestContext.Current.CancellationToken);
+
+        // the response used to be built from the saved copy, which carries no fields: a client re-rendering the template
+        // from the PUT response dropped every field from the UI
+        updated.Fields.Should().ContainSingle(f => f.Name == "Code", "the updated template is returned whole, its fields included");
+    }
+
+    [Fact]
     public async Task UpdateField_WithExplicitType_ChangesTheTypeOfAnEmptyField()
     {
         var api = await ArrangeAsync();

@@ -574,21 +574,39 @@ internal class FolderDao(
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
         var folderId = folder.Id;
+        var metadataInheritedIds = new List<int>();
 
         await strategy.ExecuteAsync(async () =>
         {
             await using var tx = await filesDbContext.Database.BeginTransactionAsync();
 
-            folderId = await InternalSaveFolderToDbAsync(filesDbContext, folder);
+            // a retried transaction must not report the ids of the rolled-back attempt
+            metadataInheritedIds.Clear();
+
+            var saved = await InternalSaveFolderToDbAsync(filesDbContext, folder);
+            folderId = saved.Id;
+
+            if (saved.MetadataInherited)
+            {
+                metadataInheritedIds.Add(folderId);
+            }
 
             foreach (var child in children)
             {
                 child.ParentId = folderId;
-                await InternalSaveFolderToDbAsync(filesDbContext, child);
+
+                var savedChild = await InternalSaveFolderToDbAsync(filesDbContext, child);
+
+                if (savedChild.MetadataInherited)
+                {
+                    metadataInheritedIds.Add(savedChild.Id);
+                }
             }
 
             await tx.CommitAsync();
         });
+
+        await IndexInheritedMetadataAsync(metadataInheritedIds);
 
         await PublishFolderIndexEventAsync(folder);
 
@@ -610,6 +628,7 @@ internal class FolderDao(
         ArgumentNullException.ThrowIfNull(folder);
 
         var folderId = folder.Id;
+        var metadataInherited = false;
 
         if (transaction == null)
         {
@@ -620,7 +639,7 @@ internal class FolderDao(
             {
                 await using var tx = await filesDbContext.Database.BeginTransactionAsync();
 
-                folderId = await InternalSaveFolderToDbAsync(filesDbContext, folder);
+                (folderId, metadataInherited) = await InternalSaveFolderToDbAsync(filesDbContext, folder);
 
                 await tx.CommitAsync();
             });
@@ -629,8 +648,14 @@ internal class FolderDao(
         {
             // A live transaction was passed in: the caller owns the commit, so we must not
             // publish the index event here — the surrounding transaction is not committed yet.
-            // The caller publishes it after tx.CommitAsync().
-            return await InternalSaveFolderToDbAsync(dbContext, folder);
+            // The caller publishes it after tx.CommitAsync(). This path creates the system (bunch)
+            // folders only, which have no cascading ancestors, so there is no inherited metadata to index.
+            return (await InternalSaveFolderToDbAsync(dbContext, folder)).Id;
+        }
+
+        if (metadataInherited)
+        {
+            await IndexInheritedMetadataAsync([folderId]);
         }
 
         await PublishFolderIndexEventAsync(folder);
@@ -650,7 +675,22 @@ internal class FolderDao(
         }
     }
 
-    private async Task<int> InternalSaveFolderToDbAsync(FilesDbContext filesDbContext, Folder<int> folder)
+    /// <summary>
+    /// A new folder inherits the cascading metadata of its ancestors inside the save transaction (see
+    /// <see cref="FilesDbContext.ApplyMetadataCascadeLinksAsync(int, int, FileEntryType, int, Guid)"/>). The inherited
+    /// values are visible to the SQL fallback at once, but the metadata search document has to be built here: the worker's
+    /// <c>FolderIndexAction.Index</c> handler refreshes the folder document only, so without this call a sub-folder created
+    /// in a cascading room would be missing from the metadata filter until an unrelated reindex.
+    /// </summary>
+    private async Task IndexInheritedMetadataAsync(IReadOnlyCollection<int> folderIds)
+    {
+        if (folderIds.Count > 0)
+        {
+            await metadataIndexHelper.IndexEntriesAsync(FileEntryType.Folder, folderIds);
+        }
+    }
+
+    private async Task<(int Id, bool MetadataInherited)> InternalSaveFolderToDbAsync(FilesDbContext filesDbContext, Folder<int> folder)
     {
         folder.Title = Global.ReplaceInvalidCharsAndTruncate(folder.Title);
 
@@ -667,6 +707,7 @@ internal class FolderDao(
         }
 
         var isNew = false;
+        var metadataInherited = false;
 
         var tenantId = _tenantManager.GetCurrentTenantId();
         var toUpdate = folder.Id != 0 ? await filesDbContext.FolderForUpdateAsync(tenantId, folder.Id) : null;
@@ -785,7 +826,7 @@ internal class FolderDao(
             await filesDbContext.AddRangeAsync(treeToAdd);
             await filesDbContext.SaveChangesAsync();
 
-            await filesDbContext.ApplyMetadataCascadeLinksAsync(tenantId, folder.Id, FileEntryType.Folder, folder.ParentId, folder.CreateBy);
+            metadataInherited = await filesDbContext.ApplyMetadataCascadeLinksAsync(tenantId, folder.Id, FileEntryType.Folder, folder.ParentId, folder.CreateBy);
         }
 
         if (isNew)
@@ -794,8 +835,7 @@ internal class FolderDao(
             await SetCustomOrder(filesDbContext, folder.Id, folder.ParentId);
         }
 
-        return folder.Id;
-
+        return (folder.Id, metadataInherited);
     }
 
     public async Task<int> SetWatermarkSettings(WatermarkSettings watermarkSettings, Folder<int> room)
@@ -1227,6 +1267,15 @@ internal class FolderDao(
             }
 
             await context.SaveChangesAsync();
+
+            if (!trashId.Equals(toFolderId))
+            {
+                // the content of the moved folder keeps what it inherited from the ancestors left behind as its own metadata.
+                // Only after the save above: the query tells a source left behind from a source still above by the ancestor
+                // rows of the moved folder, and the re-parented rows are pending in the change tracker until then
+                await context.ConvertOrphanedMetadataCascadeLinksInSubtreeAsync(tenantId, folderId);
+            }
+
             await tx.CommitAsync();
             await ChangeTreeFolderSizeAsync(toCounterFolderId, folder.Counter);
             await ChangeTreeFolderSizeAsync(fromCounterFolderId, -1 * folder.Counter);

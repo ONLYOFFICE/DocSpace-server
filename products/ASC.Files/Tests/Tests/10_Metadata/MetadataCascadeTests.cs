@@ -112,6 +112,34 @@ public class MetadataCascadeTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
+    public async Task NewSubFolder_InACascadingRoom_IsFoundByTheMetadataFilterRightAway()
+    {
+        var api = await ArrangeAsync();
+        var suffix = Suffix();
+
+        var template = await api.CreateTemplateAsync("Fresh " + suffix, [new MetadataFieldPayload { Name = ClientField, Type = 0 }], TestContext.Current.CancellationToken);
+        var clientFieldId = template.Field(ClientField).Id;
+
+        var room = await CreateCustomRoom($"Fresh {suffix}");
+
+        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+        await api.SetFolderValuesAsync(room.Id, [new MetadataValuePayload { FieldId = clientFieldId, StringValue = "ACME" }], TestContext.Current.CancellationToken);
+        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: true, TestContext.Current.CancellationToken);
+        await PollCascadeStatusAsync(api, room.Id);
+
+        var folder = await CreateFolder($"Fresh sub {suffix}", room.Id);
+
+        var metadata = await api.GetFolderMetadataAsync(folder.Id, TestContext.Current.CancellationToken);
+        ValueOf(metadata, template.Id, clientFieldId).Should().Be("ACME", "a new folder inherits the cascade inside its save transaction");
+
+        // the inherited values used to reach the database only: the new folder had no metadata search document, and the
+        // filter is served by the index whenever it answers, so the folder stayed invisible until an unrelated reindex
+        var content = await PollFolderContentAsync(api, room.Id, template.Id, [new { fieldId = clientFieldId, op = "eq", value = "ACME" }], expectedFolderId: folder.Id);
+
+        content.FolderIds().Should().Contain(folder.Id, "the new sub-folder must be searchable by its inherited metadata");
+    }
+
+    [Fact]
     public async Task Cascade_PropagatesOnlyTheFilledFolderFields_AndLinksTheTemplateRegardless()
     {
         var api = await ArrangeAsync();
@@ -367,6 +395,26 @@ public class MetadataCascadeTests(AspireAppFixture fixture) : BaseTest(fixture)
     private static string? ValueOf(List<EntryMetadataResponse> metadata, int templateId, int fieldId)
     {
         return metadata.FirstOrDefault(e => e.Template.Id == templateId)?.Values.FirstOrDefault(v => v.FieldId == fieldId)?.StringValue;
+    }
+
+    /// <summary>
+    /// Requests the room content filtered by metadata, retrying only to absorb the indexing lag of a freshly written document.
+    /// </summary>
+    private static async Task<FolderContentResponse> PollFolderContentAsync(MetadataApiClient api, int roomId, int templateId, object[] conditions, int expectedFolderId)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(15);
+
+        while (true)
+        {
+            var content = await api.GetFolderContentAsync(roomId, templateId, conditions, cancellationToken: TestContext.Current.CancellationToken);
+
+            if (content.FolderIds().Contains(expectedFolderId) || DateTime.UtcNow > deadline)
+            {
+                return content;
+            }
+
+            await Task.Delay(200, TestContext.Current.CancellationToken);
+        }
     }
 
     private static string Suffix()

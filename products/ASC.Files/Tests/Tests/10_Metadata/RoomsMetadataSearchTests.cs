@@ -358,6 +358,35 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fixtu
     }
 
     [Fact]
+    public async Task Rooms_WithUnsupportedMetadataFilterOperator_ReturnsBadRequest()
+    {
+        var data = await ArrangeAsync();
+
+        // the operator used to be ignored: "contains" ran as an exact match and returned nothing, without a hint why
+        using var response = await data.Api.GetRoomsResponseAsync(
+            metadataTemplateId: data.TemplateId,
+            metadataFilters: [new { fieldId = data.FieldId(ClientField), op = "contains", value = "ACM" }],
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task Rooms_WithOperatorOfAnotherFieldType_ReturnsBadRequest()
+    {
+        var data = await ArrangeAsync();
+
+        // "range" belongs to the number and date fields, a string field takes "eq" only; the value is complete on
+        // purpose, so the operator is the only thing wrong with the request
+        using var response = await data.Api.GetRoomsResponseAsync(
+            metadataTemplateId: data.TemplateId,
+            metadataFilters: [new { fieldId = data.FieldId(ClientField), op = "range", value = "ACME" }],
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
     public async Task Rooms_WithFieldFromAnotherTemplate_ReturnsBadRequest()
     {
         var data = await ArrangeAsync();

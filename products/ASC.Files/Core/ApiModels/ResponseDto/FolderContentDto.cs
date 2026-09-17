@@ -304,28 +304,26 @@ public class FolderContentDtoHelper(
             return;
         }
 
-        var metadataDao = daoFactory.GetMetadataDao<int>();
+        // one round trip for the whole page: the listing is the hottest read path, and it used to ask for the files and the folders separately
+        var links = await daoFactory.GetMetadataDao<int>()
+            .GetLinksAsync(fileDtos.Select(f => f.Id), folderDtos.Select(f => f.Id))
+            .ToListAsync();
 
-        if (fileDtos.Count > 0)
+        if (links.Count == 0)
         {
-            var links = await metadataDao.GetLinksAsync(fileDtos.Select(f => f.Id), FileEntryType.File).ToListAsync();
-            var byEntry = links.ToLookup(l => (int)l.EntryId, l => l.TemplateId);
-
-            foreach (var dto in fileDtos.Where(dto => byEntry.Contains(dto.Id)))
-            {
-                dto.AssignedMetadataTemplates = byEntry[dto.Id].Distinct().ToList();
-            }
+            return;
         }
 
-        if (folderDtos.Count > 0)
-        {
-            var links = await metadataDao.GetLinksAsync(folderDtos.Select(f => f.Id), FileEntryType.Folder).ToListAsync();
-            var byEntry = links.ToLookup(l => (int)l.EntryId, l => l.TemplateId);
+        var byEntry = links.ToLookup(l => (l.EntryType, (int)l.EntryId), l => l.TemplateId);
 
-            foreach (var dto in folderDtos.Where(dto => byEntry.Contains(dto.Id)))
-            {
-                dto.AssignedMetadataTemplates = byEntry[dto.Id].Distinct().ToList();
-            }
+        foreach (var dto in fileDtos.Where(dto => byEntry.Contains((FileEntryType.File, dto.Id))))
+        {
+            dto.AssignedMetadataTemplates = byEntry[(FileEntryType.File, dto.Id)].Distinct().ToList();
+        }
+
+        foreach (var dto in folderDtos.Where(dto => byEntry.Contains((FileEntryType.Folder, dto.Id))))
+        {
+            dto.AssignedMetadataTemplates = byEntry[(FileEntryType.Folder, dto.Id)].Distinct().ToList();
         }
     }
 

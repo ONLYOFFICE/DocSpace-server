@@ -712,6 +712,12 @@ public class EntryManager(IDaoFactory daoFactory,
 
             return (entries, total);
         }
+        else if (metadataFilter is { Conditions.Count: > 0 })
+        {
+            // a provider based folder: the metadata values are stored for the internal entries only, so nothing inside it
+            // can match the filter. The listing is empty instead of being returned unfiltered (the rule FileSecurity applies
+            // to the provider based rooms), and the provider is not asked at all
+        }
         else
         {
             var folders = daoFactory.GetFolderDao<T>().GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject);

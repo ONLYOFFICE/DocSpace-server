@@ -51,6 +51,7 @@ public interface IMetadataDao<T>
     Task SaveLinksAsync(IEnumerable<MetadataTemplateLink> links);
     IAsyncEnumerable<MetadataTemplateLink> GetLinksAsync(T entryId, FileEntryType entryType);
     IAsyncEnumerable<MetadataTemplateLink> GetLinksAsync(IEnumerable<T> entryIds, FileEntryType entryType);
+    IAsyncEnumerable<MetadataTemplateLink> GetLinksAsync(IEnumerable<T> fileIds, IEnumerable<T> folderIds);
     IAsyncEnumerable<int> GetCascadeTemplateIdsForAncestorsAsync(T folderId);
     Task DeleteLinksAsync(T entryId, FileEntryType entryType, int? templateId = null);
     Task ConvertCascadeLinksToDirectAsync(int sourceFolderId, int? templateId = null);

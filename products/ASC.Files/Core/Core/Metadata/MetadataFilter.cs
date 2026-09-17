@@ -63,11 +63,31 @@ public class MetadataFilterCondition
 public class MetadataFilterConditionRequest
 {
     public int FieldId { get; set; }
+
+    /// <summary>
+    /// The operator, one of <see cref="MetadataFilterOperators"/>. Optional: the field type alone determines how the
+    /// condition is evaluated, so an omitted operator is accepted, while a present one has to match the field type.
+    /// </summary>
     public string Op { get; set; }
     public string Value { get; set; }
     public string From { get; set; }
     public string To { get; set; }
     public List<Guid> OptionIds { get; set; }
+}
+
+/// <summary>
+/// The operators a metadata filter condition may name (see the <c>metadataFilters</c> query parameter).
+/// </summary>
+public static class MetadataFilterOperators
+{
+    /// <summary>Exact match: string fields, and number fields given a single <c>value</c>.</summary>
+    public const string Equals = "eq";
+
+    /// <summary>Inclusive range with an optional side: number and date fields.</summary>
+    public const string Range = "range";
+
+    /// <summary>Any of the requested options: choice fields.</summary>
+    public const string In = "in";
 }
 
 [Scope]
@@ -125,6 +145,8 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
 
     private static MetadataFilterCondition ToCondition(MetadataFilterConditionRequest request, MetadataField field)
     {
+        ValidateOperator(request, field);
+
         var condition = new MetadataFilterCondition { FieldId = field.Id, FieldType = field.Type };
 
         switch (field.Type)
@@ -178,6 +200,32 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
         }
 
         return condition;
+    }
+
+    /// <summary>
+    /// The operator used to be read by nobody, so a mistyped or unsupported one ("contains", "gt") was silently evaluated
+    /// as the field type dictates and returned a confusing result. Now it has to be one the field type supports.
+    /// </summary>
+    private static void ValidateOperator(MetadataFilterConditionRequest request, MetadataField field)
+    {
+        if (string.IsNullOrEmpty(request.Op))
+        {
+            return;
+        }
+
+        var supported = field.Type switch
+        {
+            MetadataFieldType.String => request.Op is MetadataFilterOperators.Equals,
+            MetadataFieldType.Number => request.Op is MetadataFilterOperators.Equals or MetadataFilterOperators.Range,
+            MetadataFieldType.Date => request.Op is MetadataFilterOperators.Range,
+            MetadataFieldType.SingleChoice or MetadataFieldType.MultiChoice => request.Op is MetadataFilterOperators.In,
+            _ => false
+        };
+
+        if (!supported)
+        {
+            throw new ArgumentException($@"The operator '{request.Op}' is not supported for the field '{field.Name}'");
+        }
     }
 
     private static DateTime? ParseDate(string value, MetadataField field)

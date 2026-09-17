@@ -160,10 +160,28 @@ public class MetadataCascadeOperation : DistributedTaskProgress
         // ancestor wins): their subtrees are excluded from the pass for that template
         var nestedCascadeLinks = await metadataDao.GetCascadeLinksInSubtreeAsync(FolderId, TemplateIds);
 
+        foreach (var (groupTemplateIds, groupSubfolderIds) in await SplitByNestedCascadesAsync(metadataDao, TemplateIds, subfolderIds, nestedCascadeLinks))
+        {
+            var groupValues = folderValues.Where(v => groupTemplateIds.Contains(fieldTemplates[v.FieldId])).ToList();
+
+            await ApplyToSubtreeAsync(metadataDao, groupSubfolderIds, groupTemplateIds, FolderId, groupValues, Conflict);
+        }
+    }
+
+    /// <summary>
+    /// Splits the templates by the nested folders that cascade them inside the subtree. The nearest cascading folder
+    /// wins, so the subtree of such a folder is left out of the pass for that template; templates sharing the same
+    /// set of nested cascading folders are processed in a single pass.
+    /// </summary>
+    private static async Task<List<(int[] TemplateIds, List<int> SubfolderIds)>> SplitByNestedCascadesAsync(
+        IMetadataDao<int> metadataDao,
+        IReadOnlyCollection<int> templateIds,
+        List<int> subfolderIds,
+        IReadOnlyCollection<MetadataTemplateLink> nestedCascadeLinks)
+    {
         if (nestedCascadeLinks.Count == 0)
         {
-            await ApplyToSubtreeAsync(metadataDao, subfolderIds, TemplateIds, FolderId, folderValues, Conflict);
-            return;
+            return [(templateIds.ToArray(), subfolderIds)];
         }
 
         var nestedRootsByTemplate = nestedCascadeLinks
@@ -171,13 +189,10 @@ public class MetadataCascadeOperation : DistributedTaskProgress
             .ToDictionary(g => g.Key, g => g.Select(l => (int)l.EntryId).ToHashSet());
 
         var emptyRoots = new HashSet<int>();
+        var result = new List<(int[] TemplateIds, List<int> SubfolderIds)>();
 
-        // templates sharing the same set of nested cascading folders are processed in a single pass
-        foreach (var group in TemplateIds.GroupBy(t => nestedRootsByTemplate.GetValueOrDefault(t, emptyRoots), HashSet<int>.CreateSetComparer()))
+        foreach (var group in templateIds.GroupBy(t => nestedRootsByTemplate.GetValueOrDefault(t, emptyRoots), HashSet<int>.CreateSetComparer()))
         {
-            var groupTemplateIds = group.ToArray();
-            var groupValues = folderValues.Where(v => groupTemplateIds.Contains(fieldTemplates[v.FieldId])).ToList();
-
             var groupSubfolderIds = subfolderIds;
 
             if (group.Key.Count > 0)
@@ -186,8 +201,10 @@ public class MetadataCascadeOperation : DistributedTaskProgress
                 groupSubfolderIds = subfolderIds.Where(id => !excluded.Contains(id)).ToList();
             }
 
-            await ApplyToSubtreeAsync(metadataDao, groupSubfolderIds, groupTemplateIds, FolderId, groupValues, Conflict);
+            result.Add((group.ToArray(), groupSubfolderIds));
         }
+
+        return result;
     }
 
     private async Task StampAsync(IMetadataDao<int> metadataDao, Folder<int> folder)
@@ -209,6 +226,23 @@ public class MetadataCascadeOperation : DistributedTaskProgress
         var linkTuples = cascadeLinks.Select(l => (l.TemplateId, (int)l.EntryId)).ToList();
 
         var nearestSources = MetadataCascadeResolver.ResolveNearestSources(linkTuples, levelByFolderId);
+
+        // the moved folder is the nearest cascading ancestor of its whole subtree for the templates it cascades
+        // itself, so the destination's cascade of those templates has nothing to stamp below it
+        var ownCascadeTemplateIds = await metadataDao.GetLinksAsync(FolderId, FileEntryType.Folder)
+            .Where(l => l.Cascade)
+            .Select(l => l.TemplateId)
+            .ToListAsync();
+
+        foreach (var templateId in ownCascadeTemplateIds)
+        {
+            nearestSources.Remove(templateId);
+        }
+
+        if (nearestSources.Count == 0)
+        {
+            return;
+        }
 
         var fieldTemplates = await GetFieldTemplatesAsync(metadataDao, nearestSources.Keys);
 
@@ -234,17 +268,25 @@ public class MetadataCascadeOperation : DistributedTaskProgress
 
         var subfolderIds = await metadataDao.GetSubtreeFolderIdsAsync(FolderId).ToListAsync();
 
+        // the same rule the assign pass follows: a nested folder cascading the template is the nearest source for its own
+        // subtree, so that subtree keeps its values even when the destination cascades with Overwrite
+        var nestedCascadeLinks = await metadataDao.GetCascadeLinksInSubtreeAsync(FolderId, nearestSources.Keys);
+
         // how the folder supplying a template treats the values the entries already hold: (template, source folder) -> mode
         var conflictBySource = cascadeLinks.ToDictionary(l => (l.TemplateId, (int)l.EntryId), l => l.CascadeConflict);
 
-        foreach (var group in nearestSources.GroupBy(s => (SourceFolderId: s.Value, Conflict: conflictBySource[(s.Key, s.Value)])))
+        foreach (var sourceGroup in nearestSources.GroupBy(s => (SourceFolderId: s.Value, Conflict: conflictBySource[(s.Key, s.Value)])))
         {
-            var groupTemplateIds = group.Select(s => s.Key).ToArray();
-            var groupValues = effectiveValues.Where(v => groupTemplateIds.Contains(fieldTemplates[v.FieldId])).ToList();
+            var sourceTemplateIds = sourceGroup.Select(s => s.Key).ToList();
 
-            // the moved folder itself was stamped inline during the move, its content is stamped here with the rule the
-            // source folder cascades with: Skip keeps the entries' own values, Overwrite replaces them with the folder's
-            await ApplyToSubtreeAsync(metadataDao, subfolderIds, groupTemplateIds, group.Key.SourceFolderId, groupValues, group.Key.Conflict);
+            foreach (var (groupTemplateIds, groupSubfolderIds) in await SplitByNestedCascadesAsync(metadataDao, sourceTemplateIds, subfolderIds, nestedCascadeLinks))
+            {
+                var groupValues = effectiveValues.Where(v => groupTemplateIds.Contains(fieldTemplates[v.FieldId])).ToList();
+
+                // the moved folder itself was stamped inline during the move, its content is stamped here with the rule the
+                // source folder cascades with: Skip keeps the entries' own values, Overwrite replaces them with the folder's
+                await ApplyToSubtreeAsync(metadataDao, groupSubfolderIds, groupTemplateIds, sourceGroup.Key.SourceFolderId, groupValues, sourceGroup.Key.Conflict);
+            }
         }
     }
 

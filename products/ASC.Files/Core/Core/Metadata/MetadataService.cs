@@ -86,7 +86,9 @@ public class MetadataService(
 
         var metadataDao = daoFactory.GetMetadataDao<int>();
 
-        var template = await metadataDao.GetTemplateAsync(templateId, withFields: false) ?? throw new ItemNotFoundException();
+        // loaded with the fields: the update touches the name and the visibility only, but the response is the whole
+        // template, and the saved copy the DAO returns carries no fields
+        var template = await metadataDao.GetTemplateAsync(templateId) ?? throw new ItemNotFoundException();
 
         if (template.IsSystem)
         {
@@ -102,6 +104,7 @@ public class MetadataService(
         template.Visible = visible ?? template.Visible;
 
         var saved = await metadataDao.SaveTemplateAsync(template);
+        saved.Fields = template.Fields;
 
         filesMessageService.Send(MessageAction.MetadataTemplateUpdated, saved.Name);
 

@@ -439,6 +439,18 @@ internal class MetadataDao(
         }
     }
 
+    public async IAsyncEnumerable<MetadataTemplateLink> GetLinksAsync(IEnumerable<int> fileIds, IEnumerable<int> folderIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var link in filesDbContext.MetadataLinksByFilesAndFoldersAsync(tenantId, fileIds, folderIds))
+        {
+            yield return ToLink(link);
+        }
+    }
+
     public async IAsyncEnumerable<int> GetCascadeTemplateIdsForAncestorsAsync(int folderId)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
