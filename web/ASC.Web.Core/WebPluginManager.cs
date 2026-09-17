@@ -455,7 +455,7 @@ public class WebPluginManager(
 
         var tag = CacheExtention.GetWebPluginsTag(webPlugin.System ? Tenant.DefaultTenant : tenantId);
 
-        await _cache.RemoveByTagAsync(tag);
+        await _cache.RemoveByTagAndNotifyAsync(tag);
 
         await quotaSocketManager.ChangeWebPlugin(webPlugin.Name, enabled);
 

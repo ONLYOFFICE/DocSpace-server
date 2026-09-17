@@ -40,6 +40,30 @@ public static class CacheExtention
         return cacheProvider.GetCache("memory");
     }
 
+    /// <summary>
+    /// Removes a key from the "memory" cache AND tells the other nodes to drop it.
+    /// The "memory" cache skips backplane notifications by default (an L1-only cache that notified on every
+    /// factory fill turned shared keys into a cross-process DB ping-pong), so an invalidation that must be
+    /// seen by other processes has to opt back in — always use this instead of a bare RemoveAsync.
+    /// </summary>
+    public static ValueTask RemoveAndNotifyAsync(this IFusionCache cache, string key, CancellationToken token = default)
+    {
+        return cache.RemoveAsync(key, options => options.SetSkipBackplaneNotifications(false), token);
+    }
+
+    /// <summary>
+    /// Expires every "memory" cache entry carrying <paramref name="tag"/> on this node AND on the other nodes.
+    /// Tag invalidation is a tag-timestamp entry, and with <c>options == null</c> FusionCache writes it with
+    /// <c>TagsDefaultEntryOptions</c> — which, unlike the memory cache's <c>DefaultEntryOptions</c>, neither skips
+    /// the distributed cache nor the backplane, so the timestamp lands in Redis where every process checks it.
+    /// Do NOT pass <c>DefaultEntryOptions</c> here: with <c>SkipDistributedCacheWrite = true</c> the timestamp
+    /// stays on one node and the other services keep serving stale data.
+    /// </summary>
+    public static ValueTask RemoveByTagAndNotifyAsync(this IFusionCache cache, string tag, CancellationToken token = default)
+    {
+        return cache.RemoveByTagAsync(tag, options: null, token);
+    }
+
     public static string GetUserTag(int tenant, Guid userId)
     {
         return $"user-{tenant}-{userId}";
@@ -65,14 +89,14 @@ public static class CacheExtention
         return $"quota-{key}";
     }
 
-    public static string GetTenantQuotaRowTag(int tenant, string path)
+    /// <summary>
+    /// Tenant-wide tag for every cached quota-row list (portal-wide and per-user) of the tenant.
+    /// Deliberately not derived from the rows themselves: a list cached while the tenant has no rows yet
+    /// would otherwise carry no tags and could never be expired.
+    /// </summary>
+    public static string GetTenantQuotaRowsTag(int tenant)
     {
-        return $"quotarows-{tenant}-{path}";
-    }
-
-    public static string GetTenantQuotaRowTag(int tenant, string path, Guid userId)
-    {
-        return $"quotarows-{tenant}-{path}-{userId}";
+        return $"quotarows-{tenant}";
     }
 
     public static string GetRelationTag(int tenant, Guid sourceUserId)

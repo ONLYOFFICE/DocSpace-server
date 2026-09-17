@@ -148,7 +148,14 @@ public static class ServiceCollectionExtension
                     {
                         Duration = TimeSpan.MaxValue,
                         SkipDistributedCacheRead = true,
-                        SkipDistributedCacheWrite = true
+                        SkipDistributedCacheWrite = true,
+                        // L1-only cache + backplane: with automatic notifications every factory fill in one
+                        // process evicted the same key from every other process's L1, which then re-read the DB,
+                        // filled, and notified back — keys shared by all services (tenant -1 settings such as
+                        // BaseDomain) were never served from cache (measured 2026-09-03: ~2.7k core_settings
+                        // reads per service per test run). Only explicit invalidations must cross the backplane:
+                        // see CacheExtention.RemoveAndNotifyAsync / RemoveByTagAndNotifyAsync.
+                        SkipBackplaneNotifications = true
                     }
                 })
 #pragma warning disable CA2000 // MemoryCache is owned and disposed by FusionCache
