@@ -39,27 +39,32 @@ namespace ASC.Files.ApiModels.RequestDto;
 public class FileIdRequestDto<T>
 {
     /// <summary>
-    /// The file unique identifier.
+    /// The file the operation addresses. Take the identifier from a listing such as `GET api/2.0/files/{folderId}`: a
+    /// file stored on the portal is numbered, while a file in a connected third-party account is named by an opaque
+    /// string.
     /// </summary>
-    /// <example>1</example>
+    /// <example>10</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 }
 
 /// <summary>
-/// The request parameters for accessing a file by its primary ID, with optional pagination settings.
+/// The request that names one file, and how much of a list to answer with.
 /// </summary>
 public class FilePrimaryIdRequestDto<T>
 {
     /// <summary>
-    /// The file unique identifier.
+    /// The file the operation addresses. Take the identifier from a listing such as `GET api/2.0/files/{folderId}`: a
+    /// file stored on the portal is numbered, while a file in a connected third-party account is named by an opaque
+    /// string.
     /// </summary>
     /// <example>10</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// The number of items to retrieve in the request.
+    /// How many entries at most to answer with, in the operations of this file that return a list; an operation that
+    /// answers with a single object is not affected by it.
     /// </summary>
     /// <example>25</example>
     [FromQuery(Name = "count")]
@@ -67,7 +72,8 @@ public class FilePrimaryIdRequestDto<T>
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
-    /// The starting index for the query results.
+    /// How many entries of such a list to skip before answering, used together with `count` to walk through it page
+    /// by page.
     /// </summary>
     /// <example>0</example>
     [FromQuery(Name = "startIndex")]
@@ -75,14 +81,16 @@ public class FilePrimaryIdRequestDto<T>
 }
 
 /// <summary>
-/// The request parameters for accessing an operation by its ID.
+/// The operation to cancel.
 /// </summary>
 public class OperationIdRequestDto
 {
     /// <summary>
-    /// The operation unique identifier.
+    /// The operation to cancel, as returned in `id` when it was started. A call that leaves the route segment out
+    /// cancels every operation of the caller, and an id that is not among their operations cancels nothing without
+    /// being an error.
     /// </summary>
-    /// <example>some-operation-id</example>
+    /// <example>b2f3e9a4-7c15-4d8e-9f60-3a1c5e7d0b42</example>
     [FromRoute(Name = "id")]
     public required string Id { get; set; } = null;
 }

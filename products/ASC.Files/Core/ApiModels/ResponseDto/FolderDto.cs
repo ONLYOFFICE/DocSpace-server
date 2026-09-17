@@ -33,207 +33,215 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// The folder parameters.
-/// </summary>
+/// <summary>The folder, with the fields that only a room carries filled in when the folder is a room.</summary>
 public class FolderDto<T> : FileEntryDto<T>
 {
     /// <summary>
-    /// The parent folder ID of the folder.
+    /// The folder this one is listed in. For a room it is the root of the section the room lives in, and for an entry
+    /// opened through a sharing link whose real parent the caller may not read it is the root of the section with the
+    /// entries shared with them.
     /// </summary>
     /// <example>10</example>
     public T ParentId { get; set; }
 
     /// <summary>
-    /// The number of files that the folder contains.
+    /// How many files lie directly in the folder, without counting the subfolders. The roots of the `Rooms`, room
+    /// templates and default templates sections always report 0, because the number is not collected for them.
     /// </summary>
     /// <example>5</example>
     public int FilesCount { get; set; }
 
     /// <summary>
-    /// The number of folders that the folder contains.
+    /// How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are
+    /// subtracted, so the number matches what a listing of it shows, and the roots of the `Rooms` and templates
+    /// sections report 0.
     /// </summary>
     /// <example>7</example>
     public int FoldersCount { get; set; }
 
     /// <summary>
-    /// Specifies if the folder can be shared or not.
+    /// Whether the caller may hand out access to the folder. It is filled in only for the folder a folder-contents
+    /// answer is about, and is null in every other answer, so null says nothing about the sharing rights.
     /// </summary>
     /// <example>true</example>
     public bool? IsShareable { get; set; }
 
     /// <summary>
-    /// The new element index in the folder.
+    /// How many entries inside the folder the caller has not opened yet, the number drawn as the badge on it. An
+    /// account that turned the badges off in its own settings always reads 0 here, so 0 alone does not prove that
+    /// everything has been seen.
     /// </summary>
-    /// <example>0</example>
+    /// <example>3</example>
     public int New { get; set; }
 
     /// <summary>
-    /// Specifies if the folder notifications are enabled or not.
+    /// Whether the caller silenced the notifications of this room: true means no message about its activity reaches
+    /// them. The choice belongs to the reading account rather than to the room, so two members of one room read
+    /// different values.
     /// </summary>
     /// <example>false</example>
     public bool Mute { get; set; }
 
     /// <summary>
-    /// The list of tags of the folder.
+    /// The names of the tags attached to the room. Empty for a folder that is not a room, since only rooms carry
+    /// tags, and the names are the ones from the portal tag catalogue.
     /// </summary>
-    /// <example>["tag1", "tag2"]</example>
+    /// <example>["Marketing", "Q3"]</example>
     public IEnumerable<string> Tags { get; set; }
 
     /// <summary>
-    /// The folder logo.
+    /// The addresses of the room logo in four sizes, together with the colour and the built-in cover that are drawn
+    /// when no logo was uploaded. A room without a logo answers with four empty addresses rather than with null, and
+    /// the field is null for a folder that is not a room.
     /// </summary>
-    /// <example>{"original": "", "large": "", "medium": "", "small": ""}</example>
+    /// <example>
+    /// {"original": "", "large": "", "medium": "", "small": "", "color": "F2C4C4", "cover": {"id": "bookmark"}}
+    /// </example>
     public Logo Logo { get; set; }
 
     /// <summary>
-    /// Specifies if the folder is pinned or not.
+    /// Whether the caller pinned the room to the top of their own room list. Pinning is personal and is lost when the
+    /// room is archived.
     /// </summary>
     /// <example>false</example>
     public bool Pinned { get; set; }
 
     /// <summary>
-    /// The room type of the folder.
+    /// The kind of the room, which decides the default access rules of its members. Null for a folder that is not a
+    /// room.
     /// </summary>
-    /// <example>0</example>
+    /// <example>2</example>
     public RoomType? RoomType { get; set; }
 
     /// <summary>
-    /// Specifies if the folder is private or not.
+    /// Whether the room is a private one, which limits it to the accounts invited into it and needs encryption keys
+    /// set up for each of them.
     /// </summary>
     /// <example>false</example>
     public bool Private { get; set; }
 
     /// <summary>
-    /// Specifies if the folder is indexed or not.
+    /// Whether the contents of the room are kept in an explicit numbered order, the one reported as `order` on each
+    /// entry, instead of being left to the sorting the reader asks for.
     /// </summary>
     /// <example>true</example>
     public bool Indexing { get; set; }
 
     /// <summary>
-    /// Specifies if the folder can be downloaded or not.
+    /// Whether downloading and printing the contents of the room is forbidden, which leaves its members with viewing
+    /// and editing in the editor.
     /// </summary>
     /// <example>false</example>
     public bool DenyDownload { get; set; }
 
     /// <summary>
-    /// The room data lifetime settings of the folder.
+    /// The rule by which the files of the room are removed once they grow old. Null when the room has no such rule,
+    /// which is also what is reported after the rule is switched off, because switching it off erases it.
     /// </summary>
-    /// <example>{"value": 12, "deletePermanently": false}</example>
+    /// <example>{"enabled": true, "period": 1, "value": 12, "deletePermanently": false}</example>
     public RoomDataLifetimeDto Lifetime { get; set; }
 
     /// <summary>
-    /// The watermark settings of the folder.
+    /// The watermark stamped over the documents of the room while they are viewed and printed. Null when the room has
+    /// no watermark, and for every folder that is not a room.
     /// </summary>
-    /// <example>{"enabled": false}</example>
+    /// <example>{"additions": 1, "text": "Confidential", "rotate": -45, "imageScale": 100}</example>
     public WatermarkDto Watermark { get; set; }
 
     /// <summary>
-    /// The folder type.
+    /// The part the folder plays inside its room: one of the service folders of the form-filling flow, or the
+    /// knowledge and result storages of an AI room. It stays null for an ordinary folder and for the room itself, so
+    /// it does not describe folders in general.
     /// </summary>
-    /// <example>0</example>
+    /// <example>27</example>
     public FolderType? Type { get; set; }
 
     /// <summary>
-    /// Specifies if the folder is placed in the room or not.
+    /// Whether the caller holds the room through an invitation of their own: true for the account that created it and
+    /// for a member invited personally, false when the access comes from a group they belong to, and null for a
+    /// folder that is not a room.
     /// </summary>
     /// <example>false</example>
     public bool? InRoom { get; set; }
 
     /// <summary>
-    /// The folder quota limit.
+    /// How much space the files of the room may take, in bytes. It is the limit set on this room, or the portal
+    /// default for rooms when none was set. Null when the tariff of the portal does not count room statistics, when
+    /// room quotas are switched off, when the room lies in the archive or the trash, or when the caller may only read
+    /// it.
     /// </summary>
     /// <example>1073741824</example>
     public long? QuotaLimit { get; set; }
 
     /// <summary>
-    /// Specifies if the folder room has a custom quota or not.
+    /// Whether `quotaLimit` is a limit set on this room (true) or the portal default for rooms (false). Null exactly
+    /// when `quotaLimit` is null.
     /// </summary>
     /// <example>false</example>
     public bool? IsCustomQuota { get; set; }
 
     /// <summary>
-    /// How much folder space is used (counter).
+    /// How much the files of the room take, in bytes, as of the last time the counter was recomputed. The counter is
+    /// refreshed when a file operation finishes, so a read right after an upload or a deletion can still report the
+    /// previous figure. Null for a folder that is not a room.
     /// </summary>
     /// <example>524288000</example>
     public long? UsedSpace { get; set; }
 
     /// <summary>
-    /// Specifies if the folder is password protected or not.
+    /// Whether the sharing link the folder was opened through asks for a password that has not been entered yet.
+    /// While it is true the contents stay unreadable; send the password to `POST api/2.0/files/share/{key}/password`
+    /// first. Null when the folder was not reached through a link.
     /// </summary>
     /// <example>false</example>
     public bool? PasswordProtected { get; set; }
 
     /// <summary>
-    /// Specifies if an external link to the folder is expired or not.
+    /// Deprecated, read `isLinkExpired` instead: whether the sharing link the folder was opened through has run out
+    /// of its lifetime.
     /// </summary>
     /// <example>false</example>
     [Obsolete("Use IsLinkExpired instead")]
     public bool? Expired { get; set; }
 
     /// <summary>
-    /// The file entry type of the folder.
+    /// Always reports a folder, which is what tells folders from files apart in a listing that mixes both.
     /// </summary>
     /// <example>1</example>
     public override FileEntryType FileEntryType => FileEntryType.Folder;
 
     /// <summary>
-    /// The AI chat settings for the folder room. Contains configuration for AI provider, model selection, and custom prompts.
-    /// Only applicable to rooms with AI chat functionality enabled. Null if the room does not have chat settings configured.
+    /// The chat configuration of an AI room. Only the system prompt is reported here, whatever else the room stores,
+    /// and the field is null for every folder that is not an AI room.
     /// </summary>
-    /// <remarks>
-    /// This property configures AI-powered chat capabilities for a room. The settings include:
-    /// - ProviderId: Identifier for the AI provider (e.g., OpenAI, Azure, internal gateway)
-    /// - ModelId: Specific AI model to use (e.g., "gpt-4", "gpt-3.5-turbo")
-    /// - Prompt: Custom system prompt to guide AI behavior for this room
-    /// - Internal: Auto-calculated flag indicating if using the internal AI gateway
-    /// </remarks>
-    /// <example>
-    /// {
-    ///   "ProviderId": 1,
-    ///   "ModelId": "gpt-4",
-    ///   "Prompt": "You are a helpful assistant for project documentation.",
-    ///   "Internal": false
-    /// }
-    /// </example>
+    /// <example>{"prompt": "You are a helpful assistant for project documentation."}</example>
     public ChatSettingsDto ChatSettings { get; set; }
 
     /// <summary>
-    /// The room type of the root folder. Indicates the type of the parent room if the current folder is nested within a room hierarchy.
-    /// This property helps identify the context in which a nested folder exists.
+    /// The kind of the room the folder lies in. It is filled in only for the folder a folder-contents answer is
+    /// about, and only when that room is an AI room, so it is null in every other answer and for every other room
+    /// kind.
     /// </summary>
-    /// <remarks>
-    /// When a folder is located inside a room (e.g., a subfolder within a collaboration room), this property indicates
-    /// the room type of the topmost room in the hierarchy. This is useful for applying room-specific logic or permissions
-    /// to nested folders.
-    ///
-    /// Common room types include:
-    /// - CustomRoom (2): Custom collaboration room
-    /// - FillingFormsRoom (4): Forms filling room
-    /// - EditingRoom (5): Document editing room
-    /// - ReviewRoom (6): Document review room
-    /// - ReadOnlyRoom (7): Read-only room
-    /// - PublicRoom (8): Public access room
-    ///
-    /// Null if the folder is not nested within a room or is itself a top-level room.
-    /// </remarks>
-    /// <example>2</example>
+    /// <example>9</example>
     public RoomType? RootRoomType { get; set; }
 
     /// <summary>
-    /// Specifies whether to save form data as XLSX file.
+    /// Whether the answers collected in this form-filling room are also gathered into a spreadsheet next to the
+    /// completed copies. Filled in for form-filling rooms only.
     /// </summary>
     /// <example>false</example>
     public bool? SaveFormAsXLSX {  get; set; }
 
     /// <summary>
-    /// Specifies whether to send form data to external database.
+    /// Whether the answers collected in this form-filling room are also pushed into the external database configured
+    /// for the portal. Filled in for form-filling rooms only.
     /// </summary>
     /// <example>false</example>
     public bool? SendFormToExternalDB { get; set; }
 
     /// <summary>
-    /// The original form ID that corresponds to this FormFillingFolderDone folder.
+    /// The form the completed copies in this folder were filled from, taken from the copy submitted last. Null while
+    /// the folder holds no completed copy, and for every folder that does not collect them.
     /// </summary>
     /// <example>42</example>
     public int? OriginalFormId { get; set; }

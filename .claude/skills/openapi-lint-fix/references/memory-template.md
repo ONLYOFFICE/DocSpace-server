@@ -38,7 +38,7 @@ ratcheted mixes two points in time.
 
 | n | severity | rule | documents | status |
 |---|---|---|---|---|
-| 70 | warn | path-segment-camel-case | newai 65, api 3, files 2 | blocked, see §3.x — renames public routes |
+| 70 | warn | path-segment-camel-case | aichat 65, api 3, files 2 | blocked, see §3.x — renames public routes |
 
 The counts must sum to §1's TOTAL. The `documents` column carries the spread; `status` carries only
 what the spread cannot say — why the debt sits where it does, and what it is waiting on.

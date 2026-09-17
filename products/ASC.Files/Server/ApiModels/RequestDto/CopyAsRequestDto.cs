@@ -34,57 +34,63 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for copying a file.
+/// The parameters of a file copy that may change the format on the way.
 /// </summary>
 public class CopyAs<T>
 {
     /// <summary>
-    /// The copied file name.
+    /// The title of the copy, extension included. That extension decides the format: the same one as the source
+    /// copies the content as it is, a different one has it converted first.
     /// </summary>
     /// <example>Document Copy.docx</example>
     public required string DestTitle { get; set; }
 
     /// <summary>
-    /// The destination folder ID of the copied file.
+    /// The folder the copy is placed in, as a number for a folder inside the portal and as a string for one in a
+    /// connected third-party storage; obtain it from `GET api/2.0/files/@root`. Anything else is answered with an
+    /// empty body and nothing is copied.
     /// </summary>
     /// <example>1</example>
     public required T DestFolderId { get; set; }
 
     /// <summary>
-    /// Specifies whether to allow creating the copied file of an external extension or not.
+    /// Whether the extension of the new title may be one the portal does not edit itself.
     /// </summary>
     /// <example>false</example>
     public bool EnableExternalExt { get; set; }
 
     /// <summary>
-    /// The copied file password.
+    /// The password that opens the source document, for a file that is protected by one.
     /// </summary>
     /// <example>password123</example>
     public string Password { get; set; }
 
     /// <summary>
-    /// Specifies whether to convert the file to form or not.
+    /// Whether the copy is to become a PDF form rather than a plain document, which the conversion supports for the
+    /// text formats it can read.
     /// </summary>
     /// <example>false</example>
     public bool ToForm { get; set; }
 }
 
 /// <summary>
-/// The request parameters for copying a file.
+/// The request that copies a file under a new title.
 /// </summary>
 public class CopyAsRequestDto<T>
 {
     /// <summary>
-    /// The file ID to copy.
+    /// The file to copy.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The parameters for copying a file.
+    /// The title, the destination and the conversion options of the copy.
     /// </summary>
-    /// <example>{"destTitle": "Document Copy.docx", "destFolderId": "1", "enableExternalExt": false, "password": "password123", "toForm": false}</example>
+    /// <example>
+    /// {"destTitle": "Contract copy.pdf", "destFolderId": 1, "enableExternalExt": false, "toForm": true}
+    /// </example>
     [FromBody]
     public required CopyAs<JsonElement> File { get; set; }
 }

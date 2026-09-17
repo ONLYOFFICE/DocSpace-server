@@ -34,19 +34,21 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for accessing a group by its ID.
+/// The room group to address and how much of it to return.
 /// </summary>
 public class RoomGroupIdRequestDto
 {
     /// <summary>
-    /// The group unique identifier.
+    /// The room group to act on, identified by the value `GET api/2.0/files/group` reports for it. A group of another
+    /// account cannot be addressed and reads as missing.
     /// </summary>
-    /// <example>10</example>
+    /// <example>42</example>
     [FromRoute(Name = "id")]
     public required int Id { get; set; }
 
     /// <summary>
-    /// Whether to include group members.
+    /// Whether the rooms of the group are listed in the answer: true fills the `rooms` array, false leaves it out and
+    /// reports only how many there are in `totalRooms`.
     /// </summary>
     /// <example>true</example>
     [FromQuery(Name = "includeMembers")]
@@ -54,12 +56,13 @@ public class RoomGroupIdRequestDto
 }
 
 /// <summary>
-/// The request parameters for listing room groups.
+/// How much of every room group to return in the listing.
 /// </summary>
 public class RoomGroupsRequestDto
 {
     /// <summary>
-    /// Whether to include group members.
+    /// Whether the rooms of each group are listed in the answer: true fills the `rooms` array of every entry, false
+    /// leaves it out and reports only how many there are in `totalRooms`.
     /// </summary>
     /// <example>true</example>
     [FromQuery(Name = "includeMembers")]

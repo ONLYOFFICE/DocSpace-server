@@ -253,13 +253,16 @@ public static class StorageHandlerExtensions
 
         if (NotRegistered(builder, url))
         {
-            builder.MapGet(url, handler.InvokeAsync);
+            // Serving stored files is not part of the REST API, and the route carries no
+            // operationId, which the documentation joiner rejects. Keep it out of the
+            // generated document rather than publishing a static-file handler as an endpoint.
+            builder.MapGet(url, handler.InvokeAsync).ExcludeFromDescription();
 
             var newUrl = url.Replace("{0}", "{t1}/{t2}/{t3}");
 
             if (newUrl != url && NotRegistered(builder, newUrl))
             {
-                builder.MapGet(newUrl, handler.InvokeAsync);
+                builder.MapGet(newUrl, handler.InvokeAsync).ExcludeFromDescription();
             }
         }
 
