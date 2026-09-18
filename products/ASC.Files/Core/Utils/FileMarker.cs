@@ -51,7 +51,7 @@ public class FileMarkerCache(IFusionCacheProvider cacheProvider)
 
     public async Task RemoveAsync(string key)
     {
-        await _cache.RemoveAsync(key);
+        await _cache.RemoveAndNotifyAsync(key);
     }
 }
 

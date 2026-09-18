@@ -228,6 +228,12 @@ public class AbstractDao
 
     internal async Task<int> SetCustomOrder(FilesDbContext filesDbContext, int fileId, int parentFolderId, FileEntryType fileEntryType, int order = 0)
     {
+        if (parentFolderId == 0)
+        {
+            // a root folder (my, trash, share, rooms, ...) has no parent room: nothing to index, nothing to order
+            return 0;
+        }
+
         var tenantId = _tenantManager.GetCurrentTenantId();
         var indexing = await filesDbContext.IsIndexingAsync(tenantId, parentFolderId, fileEntryType);
 
