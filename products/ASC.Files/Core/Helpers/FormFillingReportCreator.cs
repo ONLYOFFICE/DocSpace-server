@@ -647,7 +647,7 @@ public class FormFillingReportCreator(
         {
             return value;
         }
-        return options.FirstOrDefault(o => string.Equals(o, value, StringComparison.OrdinalIgnoreCase));
+        return options.FirstOrDefault(o => string.Equals(o, value, StringComparison.OrdinalIgnoreCase)) ?? value;
     }
 
     private static DateTime? ParseDate(string value, string format, CultureInfo culture)
