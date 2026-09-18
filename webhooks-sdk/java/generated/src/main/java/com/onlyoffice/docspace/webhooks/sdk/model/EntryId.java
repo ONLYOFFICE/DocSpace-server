@@ -50,7 +50,7 @@ import com.google.gson.JsonParseException;
 
 import com.onlyoffice.docspace.webhooks.sdk.JSON;
 
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-09-18T14:35:03.811557400+03:00[Europe/Moscow]", comments = "Generator version: 7.25.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.25.0")
 public class EntryId extends AbstractOpenApiSchema {
     private static final Logger log = Logger.getLogger(EntryId.class.getName());
 
