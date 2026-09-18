@@ -56,6 +56,8 @@ public class WebhookSender(
     };
 
     private const string SignatureHeader = "x-docspace-signature-256";
+    private const string EventIdHeader = "x-docspace-event-id";
+    private const string EventTimestampHeader = "x-docspace-event-timestamp";
 
     public const string WebhookHttpClient = "webhookHttpClient";
     public const string WebhookHttpClientSslIgnore = "webhookHttpClientSslIgnore";
@@ -147,6 +149,10 @@ public class WebhookSender(
                     }
 
                     request.Headers.Add("Accept", "*/*");
+
+                    request.Headers.Add(EventIdHeader, entry.Id.ToString(CultureInfo.InvariantCulture));
+                    request.Headers.Add(EventTimestampHeader, $"{webhookPayload.Event.CreateOn:s}Z");
+
                     request.Headers.Add(SignatureHeader, $"sha256={GetSecretHash(entry.Config.SecretKey, requestPayload)}");
 
                     request.Content = new StringContent(requestPayload, Encoding.UTF8, "application/json");
