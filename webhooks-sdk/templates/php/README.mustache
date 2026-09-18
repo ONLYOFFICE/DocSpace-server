@@ -1,0 +1,103 @@
+# {{packageName}}
+
+The ONLYOFFICE DocSpace Webhooks SDK for PHP is a library that provides tools for receiving webhook deliveries from DocSpace. It decodes each delivery into ready-to-use models.
+
+It is the inbound counterpart to the DocSpace API SDK: that library calls DocSpace, this one handles what DocSpace sends you. It makes no requests of its own.
+
+For more information, please visit [https://helpdesk.onlyoffice.com/hc/en-us](https://helpdesk.onlyoffice.com/hc/en-us)
+
+## Requirements
+
+PHP 8.1+
+
+## Installation
+
+```
+composer require {{packageName}}
+```
+
+## Usage
+
+A receiver does two things, in this order: verify the signature, then decode.
+
+Verify against the **raw request body** — `file_get_contents('php://input')`, not `$_POST`. A body that has been parsed and re-encoded is a different byte sequence and will never match.
+
+Answer as soon as the signature checks out and do the real work afterwards. A delivery gets five attempts over roughly 31 seconds, after which it is abandoned; a subscription that goes three days without a single successful delivery is switched off.
+
+## Getting Started
+
+```php
+<?php
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+use {{invokerPackage}}\Model\FileEntryPayload;
+use {{invokerPackage}}\Model\UserPayload;
+use {{invokerPackage}}\Model\WebhookEventInfo;
+use {{invokerPackage}}\ObjectSerializer;
+
+const SECRET = 'YOUR_SUBSCRIPTION_SECRET_KEY';
+
+/**
+ * Constant-time, case-insensitive check over the raw body. DocSpace emits
+ * UPPERCASE hexadecimal where some other services emit lowercase.
+ */
+function verify(string $body, ?string $signature): bool
+{
+    if ($signature === null || $signature === '') {
+        return false;
+    }
+    $expected = 'sha256=' . hash_hmac('sha256', $body, SECRET);
+    return hash_equals(strtolower($expected), strtolower(trim($signature)));
+}
+
+// The signature covers exactly these bytes.
+$body = file_get_contents('php://input');
+$signature = $_SERVER['HTTP_X_DOCSPACE_SIGNATURE_256'] ?? null;
+
+if (!verify($body, $signature)) {
+    http_response_code(401);
+    exit;
+}
+
+// Acknowledge now; anything slow belongs after this point.
+http_response_code(200);
+
+$envelope = json_decode($body);
+$event = ObjectSerializer::deserialize($envelope->event, WebhookEventInfo::class);
+$trigger = $event->getTrigger();
+
+if (str_starts_with($trigger, 'user.')) {
+    $user = ObjectSerializer::deserialize($envelope->payload, UserPayload::class);
+    error_log(sprintf('%s: %s', $trigger, $user->getUserName()));
+} else {
+    // Files, folders, rooms, agents and forms share one payload shape.
+    // fileEntryType tells them apart: 1 folder, 2 file.
+    $entry = ObjectSerializer::deserialize($envelope->payload, FileEntryPayload::class);
+    $kind = $entry->getFileEntryType() === 2 ? 'file' : 'folder';
+    error_log(sprintf('%s: %s "%s"', $trigger, $kind, $entry->getTitle()));
+}
+```
+
+Entry identifiers are the one field the generated models do not carry: `id` and `parentId` are declared as `oneOf(integer, string)`, which this generator renders as a property-less class. Read them from the decoded envelope — `$envelope->payload->id` — rather than from the model.
+
+## Documentation for Verification
+
+Every delivery carries `x-docspace-signature-256`, an HMAC-SHA256 of the raw body keyed with the subscription's secret, formatted as `sha256=` followed by uppercase hexadecimal. Compare it with `hash_equals` and case-insensitively, as above.
+
+Two further headers, `x-docspace-event-id` and `x-docspace-event-timestamp`, repeat `event.id` and `event.createOn` so a stale or already-seen delivery can be dropped without reading the body. They are **not** covered by the signature: reject on them freely, but never accept on them. The values inside the verified body are the authoritative ones.
+
+Deduplicate on `event.id`. It is stable across the server's automatic retries, though a manual retry by an administrator creates a new record and therefore a new id.
+
+## Documentation for Events
+
+`event.trigger` names the event that caused the delivery, for example `file.created`. `GET api/2.0/settings/webhook/triggers` lists every event, the value to subscribe with, and whether your role may subscribe to it.
+
+Files, folders, rooms, agents and forms all deliver the same payload shape; use `fileEntryType` (1 folder, 2 file) to tell them apart. A file's name arrives in `title`, and a field missing from the JSON means empty, `false` or zero — never "unknown".
+
+New events are added over time. Treat an unfamiliar `event.trigger` as something to ignore rather than an error, so an upgrade cannot break your endpoint.
+
+## Documentation for Models
+
+{{#models}}{{#model}} - [{{classname}}](docs/Model/{{classname}}.md)
+{{/model}}{{/models}}

@@ -1,139 +1,111 @@
 # onlyoffice/docspace-webhooks-sdk
 
-Wire contract for OUTBOUND DocSpace webhook deliveries.
+The ONLYOFFICE DocSpace Webhooks SDK for PHP is a library that provides tools for receiving webhook deliveries from DocSpace. It decodes each delivery into ready-to-use models.
 
-This is a hand-maintained document. It is NOT the REST API spec and shares no
-schemas with it: webhook payloads are the internal domain entities
-(UserInfo, GroupInfo, File<T>, Folder<T>), not the controller DTOs.
+It is the inbound counterpart to the DocSpace API SDK: that library calls DocSpace, this one handles what DocSpace sends you. It makes no requests of its own.
 
-SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)
-  1. PropertyNamingPolicy = CamelCase.
-  2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and
-     default-valued property is OMITTED. Consequently almost nothing here is
-     `required`, and absence never means \"unset\" -- it means \"default\".
-  3. [JsonIgnore] on the domain type is honoured.
-  4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is
-     set only on the sender's options, by which point `payload` is an opaque
-     JsonElement, so it never applies to payload bodies.
-  5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated
-     to whole seconds (WebhookPayload.GetShortUtcNow).
-  6. Entry ids are generic T: int for internal storage, string for
-     third-party providers. Modelled here as oneOf[integer, string].
+For more information, please visit [https://helpdesk.onlyoffice.com/hc/en-us](https://helpdesk.onlyoffice.com/hc/en-us)
 
-TRANSPORT
-  POST, Content-Type: application/json; charset=utf-8
-  Redirects are not followed. Retry budget is ~31s (5 attempts, exponential
-  from 1s), so receivers must acknowledge fast and process out of band.
+## Requirements
 
-  Headers:
-    x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw
-                              body>. GitHub emits lowercase hex, so compare
-                              case-insensitively. This is the only header
-                              that is authenticated.
-    x-docspace-event-id       Copy of event.id.
-    x-docspace-event-timestamp
-                              Copy of event.createOn, same ISO-8601 UTC
-                              spelling, e.g. 2026-09-17T10:22:56Z.
+PHP 8.1+
 
-  The last two exist so a receiver can drop a stale or already-seen delivery
-  without parsing the body. They are NOT covered by the signature, which is
-  computed over the body alone, so anything in transit can rewrite them.
+## Installation
 
-  Reject on them freely -- dropping a delivery is fail-safe, and whoever can
-  rewrite a header could drop the request instead. Never ACCEPT on them: a
-  replayed delivery with its timestamp header rewritten to \"now\" still
-  carries a valid signature, so a receiver that checks freshness only
-  against the header has no replay protection at all. After verifying,
-  re-check event.createOn and event.id from the parsed body; they are the
-  authoritative values, and comparing them against the headers also detects
-  tampering for free.
-
-
-
-## Installation & Usage
-
-### Requirements
-
-PHP 8.1 and later.
-
-### Composer
-
-To install the bindings via [Composer](https://getcomposer.org/), add the following to `composer.json`:
-
-```json
-{
-  "repositories": [
-    {
-      "type": "vcs",
-      "url": "https://github.com/GIT_USER_ID/GIT_REPO_ID.git"
-    }
-  ],
-  "require": {
-    "GIT_USER_ID/GIT_REPO_ID": "*@dev"
-  }
-}
+```
+composer require onlyoffice/docspace-webhooks-sdk
 ```
 
-Then run `composer install`
+## Usage
 
-### Manual Installation
+A receiver does two things, in this order: verify the signature, then decode.
 
-Download the files and include `autoload.php`:
+Verify against the **raw request body** — `file_get_contents('php://input')`, not `$_POST`. A body that has been parsed and re-encoded is a different byte sequence and will never match.
 
-```php
-<?php
-require_once('/path/to/onlyoffice/docspace-webhooks-sdk/vendor/autoload.php');
-```
+Answer as soon as the signature checks out and do the real work afterwards. A delivery gets five attempts over roughly 31 seconds, after which it is abandoned; a subscription that goes three days without a single successful delivery is switched off.
 
 ## Getting Started
 
-Please follow the [installation procedure](#installation--usage) and then run the following:
-
 ```php
 <?php
-require_once(__DIR__ . '/vendor/autoload.php');
 
+require_once __DIR__ . '/vendor/autoload.php';
 
+use OnlyOffice\DocSpace\Webhooks\Sdk\Model\FileEntryPayload;
+use OnlyOffice\DocSpace\Webhooks\Sdk\Model\UserPayload;
+use OnlyOffice\DocSpace\Webhooks\Sdk\Model\WebhookEventInfo;
+use OnlyOffice\DocSpace\Webhooks\Sdk\ObjectSerializer;
+
+const SECRET = 'YOUR_SUBSCRIPTION_SECRET_KEY';
+
+/**
+ * Constant-time, case-insensitive check over the raw body. DocSpace emits
+ * UPPERCASE hexadecimal where some other services emit lowercase.
+ */
+function verify(string $body, ?string $signature): bool
+{
+    if ($signature === null || $signature === '') {
+        return false;
+    }
+    $expected = 'sha256=' . hash_hmac('sha256', $body, SECRET);
+    return hash_equals(strtolower($expected), strtolower(trim($signature)));
+}
+
+// The signature covers exactly these bytes.
+$body = file_get_contents('php://input');
+$signature = $_SERVER['HTTP_X_DOCSPACE_SIGNATURE_256'] ?? null;
+
+if (!verify($body, $signature)) {
+    http_response_code(401);
+    exit;
+}
+
+// Acknowledge now; anything slow belongs after this point.
+http_response_code(200);
+
+$envelope = json_decode($body);
+$event = ObjectSerializer::deserialize($envelope->event, WebhookEventInfo::class);
+$trigger = $event->getTrigger();
+
+if (str_starts_with($trigger, 'user.')) {
+    $user = ObjectSerializer::deserialize($envelope->payload, UserPayload::class);
+    error_log(sprintf('%s: %s', $trigger, $user->getUserName()));
+} else {
+    // Files, folders, rooms, agents and forms share one payload shape.
+    // fileEntryType tells them apart: 1 folder, 2 file.
+    $entry = ObjectSerializer::deserialize($envelope->payload, FileEntryPayload::class);
+    $kind = $entry->getFileEntryType() === 2 ? 'file' : 'folder';
+    error_log(sprintf('%s: %s "%s"', $trigger, $kind, $entry->getTitle()));
+}
 ```
 
-## API Endpoints
+Entry identifiers are the one field the generated models do not carry: `id` and `parentId` are declared as `oneOf(integer, string)`, which this generator renders as a property-less class. Read them from the decoded envelope — `$envelope->payload->id` — rather than from the model.
 
-All URIs are relative to *http://localhost*
+## Documentation for Verification
 
-Class | Method | HTTP request | Description
------------- | ------------- | ------------- | -------------
+Every delivery carries `x-docspace-signature-256`, an HMAC-SHA256 of the raw body keyed with the subscription's secret, formatted as `sha256=` followed by uppercase hexadecimal. Compare it with `hash_equals` and case-insensitively, as above.
 
-## Models
+Two further headers, `x-docspace-event-id` and `x-docspace-event-timestamp`, repeat `event.id` and `event.createOn` so a stale or already-seen delivery can be dropped without reading the body. They are **not** covered by the signature: reject on them freely, but never accept on them. The values inside the verified body are the authoritative ones.
 
-- [EntryId](docs/Model/EntryId.md)
-- [FileEntryPayload](docs/Model/FileEntryPayload.md)
-- [FormSubmitPayload](docs/Model/FormSubmitPayload.md)
-- [GroupPayload](docs/Model/GroupPayload.md)
-- [UserPayload](docs/Model/UserPayload.md)
-- [WebhookConfigInfo](docs/Model/WebhookConfigInfo.md)
-- [WebhookEnvelope](docs/Model/WebhookEnvelope.md)
-- [WebhookEventInfo](docs/Model/WebhookEventInfo.md)
-- [WebhookTargetInfo](docs/Model/WebhookTargetInfo.md)
+Deduplicate on `event.id`. It is stable across the server's automatic retries, though a manual retry by an administrator creates a new record and therefore a new id.
 
-## Authorization
-Endpoints do not require authorization.
+## Documentation for Events
 
-## Tests
+`event.trigger` names the event that caused the delivery, for example `file.created`. `GET api/2.0/settings/webhook/triggers` lists every event, the value to subscribe with, and whether your role may subscribe to it.
 
-To run the tests, use:
+Files, folders, rooms, agents and forms all deliver the same payload shape; use `fileEntryType` (1 folder, 2 file) to tell them apart. A file's name arrives in `title`, and a field missing from the JSON means empty, `false` or zero — never "unknown".
 
-```bash
-composer install
-vendor/bin/phpunit
-```
+New events are added over time. Treat an unfamiliar `event.trigger` as something to ignore rather than an error, so an upgrade cannot break your endpoint.
 
-## Author
+## Documentation for Models
 
+ - [EntryId](docs/Model/EntryId.md)
+ - [FileEntryPayload](docs/Model/FileEntryPayload.md)
+ - [FormSubmitPayload](docs/Model/FormSubmitPayload.md)
+ - [GroupPayload](docs/Model/GroupPayload.md)
+ - [UserPayload](docs/Model/UserPayload.md)
+ - [WebhookConfigInfo](docs/Model/WebhookConfigInfo.md)
+ - [WebhookEnvelope](docs/Model/WebhookEnvelope.md)
+ - [WebhookEventInfo](docs/Model/WebhookEventInfo.md)
+ - [WebhookTargetInfo](docs/Model/WebhookTargetInfo.md)
 
-## About this package
-
-This PHP package is automatically generated by the [OpenAPI Generator](https://openapi-generator.tech) project:
-
-- API version: `0.1.0`
-    - Generator version: `7.25.0`
-- Build package: `org.openapitools.codegen.languages.PhpClientCodegen`

@@ -175,7 +175,93 @@ public final class JSON {{
 """
 
 
-EMITTERS = {"typescript": typescript, "csharp": csharp, "java": java}
+def markdown(trigger_map, schemas, args):
+    """
+    A reference table of every trigger and the payload it carries.
+
+    openapi-generator cannot produce this: x-docspace-trigger-payloads is a
+    root-level vendor extension, and mustache templates only ever see the model
+    and operation trees. So the contract's own map is rendered here instead.
+    """
+    doc_path = args.doc_path or ""
+
+    # This page is published on the public documentation site, so it describes
+    # only what a subscriber needs. How it is produced, and how the server
+    # happens to serialize its payloads, are not part of that -- the only trace
+    # left is an HTML comment, which renders as nothing.
+    titles = {
+        "user": "Users",
+        "group": "Groups",
+        "file": "Files",
+        "folder": "Folders",
+        "room": "Rooms",
+        "agent": "Agents",
+        "form": "Forms",
+    }
+
+    families, order = {}, []
+    for trigger, payload in trigger_map.items():
+        if trigger == "*":
+            continue  # described in prose below, not a row in any table
+        family = trigger.split(".")[0]
+        if family not in families:
+            families[family] = []
+            order.append(family)
+        families[family].append((trigger, payload))
+
+    sections = []
+    for family in order:
+        rows = chr(10).join(
+            f"| `{trigger}` | [`{payload}`]({doc_path}{payload}.md) |"
+            for trigger, payload in families[family]
+        )
+        sections.append(
+            f"## {titles.get(family, family.title())}\n\n"
+            f"| Event | Payload |\n|---|---|\n{rows}\n"
+        )
+
+    body = chr(10).join(sections)
+    total = len([t for t in trigger_map if t != "*"])
+
+    return f"""<!-- Generated from the DocSpace webhook contract. Do not edit by hand. -->
+
+# Webhook events
+
+DocSpace can notify your endpoint about {total} events. Each delivery names the
+one that caused it in `event.trigger`, and carries that event's subject in
+`payload`.
+
+A subscription chooses which events it wants. Subscribe to `*` to receive all of
+them, including any added in future. `GET api/2.0/settings/webhook/triggers`
+lists every event with the value to subscribe with, and whether your role is
+allowed to.
+
+## Payloads
+
+Files, folders, rooms, agents and forms all deliver the **same payload shape**.
+Nothing in it is specific to one kind of entry, so use `fileEntryType` to tell
+them apart: `1` is a folder, `2` is a file.
+
+Note that a file's name arrives in `title`, and that absent fields are simply
+defaults — a property missing from the JSON means empty, `false` or zero, never
+"unknown".
+
+{body}
+## Events added later
+
+New events are introduced over time, and a subscription to `*` will start
+receiving them as soon as the portal is upgraded. Treat an unfamiliar
+`event.trigger` as something to ignore rather than an error, so an upgrade
+cannot break your endpoint.
+"""
+
+
+EMITTERS = {
+    "typescript": typescript,
+    "csharp": csharp,
+    "java": java,
+    "markdown": markdown,
+}
 
 
 def main():
@@ -187,6 +273,8 @@ def main():
     # additional-properties in generate.sh, and those follow the API SDK naming.
     ap.add_argument("--package", default="")
     ap.add_argument("--model-package", dest="model_package", default="")
+    # Relative path from the emitted file to the per-model docs.
+    ap.add_argument("--doc-path", dest="doc_path", default="")
     args = ap.parse_args()
 
     with open(args.spec, encoding="utf-8") as fh:
