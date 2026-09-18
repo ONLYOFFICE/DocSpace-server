@@ -38,8 +38,18 @@ namespace ASC.Files.Core;
 /// </summary>
 public class MetadataFilter
 {
+    /// <summary>
+    /// The template the entries must be assigned to. On its own it narrows the listing to the entries carrying the
+    /// template; together with <see cref="Conditions"/> it also pins the fields the conditions may name.
+    /// </summary>
     public int? TemplateId { get; set; }
+
     public List<MetadataFilterCondition> Conditions { get; set; } = [];
+
+    /// <summary>
+    /// <c>true</c> when the filter narrows nothing, so the callers treat it the same as a missing one.
+    /// </summary>
+    public bool IsEmpty => TemplateId == null && Conditions.Count == 0;
 }
 
 /// <summary>
@@ -81,7 +91,7 @@ public class MetadataFilterConditionRequest
 public static class MetadataFilterOperators
 {
     /// <summary>Exact match: string fields, and number fields given a single <c>value</c>.</summary>
-    public const string Equals = "eq";
+    public const string Equal = "eq";
 
     /// <summary>Inclusive range with an optional side: number and date fields.</summary>
     public const string Range = "range";
@@ -95,30 +105,26 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
 {
     private static readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web);
 
+    /// <summary>
+    /// Builds the filter from the query string parameters. A template without conditions is a filter of its own: the
+    /// listing is narrowed to the entries the template is assigned to. It used to be read for validation only, so such a
+    /// request came back unfiltered with a 200.
+    /// </summary>
     public async Task<MetadataFilter> ParseAsync(int? templateId, string json)
     {
-        if (string.IsNullOrEmpty(json))
-        {
-            return null;
-        }
-
-        List<MetadataFilterConditionRequest> requests;
-
-        try
-        {
-            requests = JsonSerializer.Deserialize<List<MetadataFilterConditionRequest>>(json, _jsonOptions);
-        }
-        catch (JsonException)
-        {
-            throw new ArgumentException(@"Invalid metadata filter format", nameof(json));
-        }
-
-        if (requests is not { Count: > 0 })
-        {
-            return null;
-        }
-
         var metadataDao = daoFactory.GetMetadataDao<int>();
+
+        if (templateId.HasValue && await metadataDao.GetTemplateAsync(templateId.Value, withFields: false) == null)
+        {
+            throw new ArgumentException($@"Unknown metadata template {templateId}", nameof(templateId));
+        }
+
+        var requests = ParseConditions(json);
+
+        if (requests.Count == 0)
+        {
+            return templateId.HasValue ? new MetadataFilter { TemplateId = templateId } : null;
+        }
 
         var fields = await metadataDao.GetFieldsAsync(requests.Select(r => r.FieldId).Distinct())
             .ToDictionaryAsync(f => f.Id);
@@ -141,6 +147,23 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
         }
 
         return filter;
+    }
+
+    private static List<MetadataFilterConditionRequest> ParseConditions(string json)
+    {
+        if (string.IsNullOrEmpty(json))
+        {
+            return [];
+        }
+
+        try
+        {
+            return JsonSerializer.Deserialize<List<MetadataFilterConditionRequest>>(json, _jsonOptions) ?? [];
+        }
+        catch (JsonException)
+        {
+            throw new ArgumentException(@"Invalid metadata filter format", nameof(json));
+        }
     }
 
     private static MetadataFilterCondition ToCondition(MetadataFilterConditionRequest request, MetadataField field)
@@ -215,8 +238,8 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
 
         var supported = field.Type switch
         {
-            MetadataFieldType.String => request.Op is MetadataFilterOperators.Equals,
-            MetadataFieldType.Number => request.Op is MetadataFilterOperators.Equals or MetadataFilterOperators.Range,
+            MetadataFieldType.String => request.Op is MetadataFilterOperators.Equal,
+            MetadataFieldType.Number => request.Op is MetadataFilterOperators.Equal or MetadataFilterOperators.Range,
             MetadataFieldType.Date => request.Op is MetadataFilterOperators.Range,
             MetadataFieldType.SingleChoice or MetadataFieldType.MultiChoice => request.Op is MetadataFilterOperators.In,
             _ => false

@@ -173,7 +173,8 @@ public class GetFolderRequestDto<T>
     public Location? Location { get; set; }
 
     /// <summary>
-    /// The ID of the metadata template whose fields are used in the metadata filters.
+    /// The ID of the metadata template the entries must be assigned to. On its own it narrows the listing to the entries
+    /// carrying the template; together with the metadata filters it also pins the template the filtered fields belong to.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "metadataTemplateId")]

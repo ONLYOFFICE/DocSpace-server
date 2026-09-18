@@ -351,6 +351,20 @@ internal class MetadataDao(
         return await Query(filesDbContext.MetadataValues).AnyAsync(r => r.FieldId == fieldId);
     }
 
+    public async Task<bool> HasValuesAsync(int fieldId, IEnumerable<Guid> optionIds)
+    {
+        var ids = optionIds.Select(id => id.ToString()).ToList();
+
+        if (ids.Count == 0)
+        {
+            return false;
+        }
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await Query(filesDbContext.MetadataValues).AnyAsync(r => r.FieldId == fieldId && ids.Contains(r.OptionId));
+    }
+
     public async Task SaveLinksAsync(IEnumerable<MetadataTemplateLink> links)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -664,6 +678,16 @@ internal class MetadataDao(
                 .ToListAsync();
 
             var existingLinkSet = existingLinks.Select(l => (l.EntryId, l.TemplateId)).ToHashSet();
+
+            // the folder the pass runs for is the nearest cascading ancestor of every entry in the batch (the subtrees of the
+            // nested cascading folders were left out by the caller), so an inherited link pointing at a farther source follows
+            // it, the same way a move re-points it in ApplyMetadataCascadeLinksAsync; a direct assignment keeps its provenance.
+            // Without this an un-cascade on the farther folder converted the links below the nearer one, and one on the nearer
+            // folder converted nothing
+            await context.MetadataLinks
+                .Where(r => r.TenantId == tenantId && r.EntryType == entryType && entryIds.Contains(r.EntryId) && templateIds.Contains(r.TemplateId) &&
+                    r.SourceFolderId != null && r.SourceFolderId != sourceFolderId)
+                .ExecuteUpdateAsync(s => s.SetProperty(r => r.SourceFolderId, sourceFolderId));
 
             foreach (var entryId in entryIds)
             {

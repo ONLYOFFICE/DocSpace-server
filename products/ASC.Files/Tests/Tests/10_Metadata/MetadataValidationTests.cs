@@ -31,12 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using MetadataField = ASC.Files.Core.MetadataField;
-using MetadataFieldOption = ASC.Files.Core.MetadataFieldOption;
-using MetadataFieldType = ASC.Files.Core.MetadataFieldType;
-using MetadataService = ASC.Files.Core.MetadataService;
-using MetadataValue = ASC.Files.Core.MetadataValue;
-
 namespace ASC.Files.Tests.Tests._10_Metadata;
 
 public class MetadataValidationTests

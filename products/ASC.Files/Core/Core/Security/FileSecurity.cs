@@ -2857,7 +2857,7 @@ public class FileSecurity(
 
         // the metadata values are stored for the internal entries only, so a provider based room can never
         // match the filter: it is excluded instead of being returned unfiltered
-        var thirdPartyRoomsEntries = storageFilter == StorageFilter.Internal || privacyFilter == RoomPrivacyFilter.Private || metadataFilter is { Conditions.Count: > 0 } ?
+        var thirdPartyRoomsEntries = storageFilter == StorageFilter.Internal || privacyFilter == RoomPrivacyFilter.Private || metadataFilter is { IsEmpty: false } ?
             [] :
             await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectOwnerId, subjectEntries, groupId)
                 .Where(r => withSubfolders || r.IsRoom)
@@ -2968,7 +2968,7 @@ public class FileSecurity(
 
         // the metadata values are stored for the internal entries only, so a provider based room can never
         // match the filter: it is excluded instead of being returned unfiltered
-        var thirdPartyRooms = storageFilter == StorageFilter.Internal || privacyFilter == RoomPrivacyFilter.Private || metadataFilter is { Conditions.Count: > 0 }
+        var thirdPartyRooms = storageFilter == StorageFilter.Internal || privacyFilter == RoomPrivacyFilter.Private || metadataFilter is { IsEmpty: false }
             ? []
             : await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, thirdPartyRecords.Keys, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectOwnerId, subjectEntries, groupId)
                 .Where(r => withSubfolders || r.IsRoom)

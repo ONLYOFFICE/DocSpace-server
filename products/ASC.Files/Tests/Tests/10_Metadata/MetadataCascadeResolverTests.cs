@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using MetadataCascadeResolver = ASC.Files.Core.MetadataCascadeResolver;
-
 namespace ASC.Files.Tests.Tests._10_Metadata;
 
 public class MetadataCascadeResolverTests

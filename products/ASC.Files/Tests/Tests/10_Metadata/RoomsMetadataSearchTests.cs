@@ -34,191 +34,12 @@
 namespace ASC.Files.Tests.Tests._10_Metadata;
 
 /// <summary>
-/// Covers the rooms listing filtered by the room metadata.
+/// Covers the rooms listing filtered by the room metadata: the combination with the other filters, the response
+/// shape, the lifecycle of the values, the error cases and the access rules.
 /// </summary>
-/// <remarks>
-/// Both the OpenSearch path and its SQL fallback must produce the same result, so these tests are valid
-/// regardless of whether the metadata index is reachable during the run.
-/// </remarks>
 [Trait("Category", "Metadata")]
-public class RoomsMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fixture)
+public class RoomsMetadataSearchTests(AspireAppFixture fixture) : RoomsMetadataSearchTestsBase(fixture)
 {
-    private const int SearchAreaArchive = 1;
-    private const int CustomRoomType = 5;
-
-    private const string ClientField = "Client";
-    private const string SignedField = "Signed";
-    private const string AmountField = "Amount";
-    private const string StatusField = "Status";
-    private const string TagsField = "Tags";
-
-    private static readonly DateTime _matchingDate = new(2026, 3, 15, 0, 0, 0, DateTimeKind.Utc);
-    private static readonly DateTime _otherDate = new(2027, 1, 20, 0, 0, 0, DateTimeKind.Utc);
-
-    #region String
-
-    [Fact]
-    public async Task Rooms_FilteredByStringField_ReturnsOnlyTheMatchingRoom()
-    {
-        var data = await ArrangeAsync();
-
-        var rooms = await data.SearchAsync(data.Eq(ClientField, "ACME"), expected: [data.MatchingRoomId]);
-
-        rooms.RoomIds().Should().Equal(data.MatchingRoomId);
-        rooms.Total.Should().Be(1, "the total must reflect the filtered listing");
-    }
-
-    [Fact]
-    public async Task Rooms_FilteredByStringField_IsCaseInsensitive()
-    {
-        var data = await ArrangeAsync();
-
-        var rooms = await data.SearchAsync(data.Eq(ClientField, "aCmE"), expected: [data.MatchingRoomId]);
-
-        rooms.RoomIds().Should().Equal(data.MatchingRoomId);
-    }
-
-    [Fact]
-    public async Task Rooms_FilteredByStringField_DoesNotMatchSubstring()
-    {
-        var data = await ArrangeAsync();
-
-        // the matching room holds exactly "ACME", the condition is an exact match and must not match a prefix
-        var rooms = await data.SearchAsync(data.Eq(ClientField, "ACM"), expected: []);
-
-        rooms.Folders.Should().BeEmpty();
-    }
-
-    #endregion
-
-    #region Number
-
-    [Fact]
-    public async Task Rooms_FilteredByNumberRange_ReturnsOnlyTheMatchingRoom()
-    {
-        var data = await ArrangeAsync();
-
-        var rooms = await data.SearchAsync(data.Range(AmountField, from: 100, to: 200), expected: [data.MatchingRoomId]);
-
-        rooms.RoomIds().Should().Equal(data.MatchingRoomId);
-    }
-
-    [Fact]
-    public async Task Rooms_FilteredByNumberRange_IncludesTheBoundaries()
-    {
-        var data = await ArrangeAsync();
-
-        // the matching room holds exactly 150
-        var rooms = await data.SearchAsync(data.Range(AmountField, from: 150, to: 150), expected: [data.MatchingRoomId]);
-
-        rooms.RoomIds().Should().Equal(data.MatchingRoomId);
-    }
-
-    [Fact]
-    public async Task Rooms_FilteredByNumberRange_SupportsTheOpenUpperBound()
-    {
-        var data = await ArrangeAsync();
-
-        // 150 and 900: both rooms match
-        var rooms = await data.SearchAsync(data.Range(AmountField, from: 100, to: null), expected: [data.MatchingRoomId, data.PartialRoomId]);
-
-        rooms.RoomIds().Should().BeEquivalentTo(new[] { data.MatchingRoomId, data.PartialRoomId });
-    }
-
-    #endregion
-
-    #region Date
-
-    [Fact]
-    public async Task Rooms_FilteredByDateRange_ReturnsOnlyTheMatchingRoom()
-    {
-        var data = await ArrangeAsync();
-
-        var rooms = await data.SearchAsync(
-            data.DateRange(SignedField, from: new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc), to: new DateTime(2026, 6, 30, 0, 0, 0, DateTimeKind.Utc)),
-            expected: [data.MatchingRoomId]);
-
-        rooms.RoomIds().Should().Equal(data.MatchingRoomId);
-    }
-
-    [Fact]
-    public async Task Rooms_FilteredByDateRange_ExcludesTheRoomOutsideTheRange()
-    {
-        var data = await ArrangeAsync();
-
-        var rooms = await data.SearchAsync(
-            data.DateRange(SignedField, from: new DateTime(2030, 1, 1, 0, 0, 0, DateTimeKind.Utc), to: new DateTime(2030, 12, 31, 0, 0, 0, DateTimeKind.Utc)),
-            expected: []);
-
-        rooms.Folders.Should().BeEmpty();
-    }
-
-    #endregion
-
-    #region Choice
-
-    [Fact]
-    public async Task Rooms_FilteredBySingleChoice_ReturnsOnlyTheMatchingRoom()
-    {
-        var data = await ArrangeAsync();
-
-        var rooms = await data.SearchAsync(data.In(StatusField, "Signed"), expected: [data.MatchingRoomId]);
-
-        rooms.RoomIds().Should().Equal(data.MatchingRoomId);
-    }
-
-    [Fact]
-    public async Task Rooms_FilteredBySingleChoice_CombinesTheOptionsWithOr()
-    {
-        var data = await ArrangeAsync();
-
-        var rooms = await data.SearchAsync(data.In(StatusField, "Signed", "Draft"), expected: [data.MatchingRoomId, data.PartialRoomId]);
-
-        rooms.RoomIds().Should().BeEquivalentTo(new[] { data.MatchingRoomId, data.PartialRoomId });
-    }
-
-    [Fact]
-    public async Task Rooms_FilteredByMultiChoice_MatchesAnySelectedOptionWithoutDuplicates()
-    {
-        var data = await ArrangeAsync();
-
-        // the matching room holds both Legal and Finance: it must be returned exactly once
-        var rooms = await data.SearchAsync(data.In(TagsField, "Legal", "Finance"), expected: [data.MatchingRoomId]);
-
-        rooms.RoomIds().Should().Equal(data.MatchingRoomId);
-    }
-
-    #endregion
-
-    #region Several conditions
-
-    [Fact]
-    public async Task Rooms_FilteredBySeveralConditions_CombinesThemWithAnd()
-    {
-        var data = await ArrangeAsync();
-
-        // the partial room shares the client but neither the amount nor the status
-        var rooms = await data.SearchAsync(
-            [data.Eq(ClientField, "ACME"), data.Range(AmountField, from: 100, to: 200), data.In(StatusField, "Signed")],
-            expected: [data.MatchingRoomId]);
-
-        rooms.RoomIds().Should().Equal(data.MatchingRoomId);
-    }
-
-    [Fact]
-    public async Task Rooms_FilteredBySeveralConditions_ExcludesThePartiallyMatchingRoom()
-    {
-        var data = await ArrangeAsync();
-
-        var rooms = await data.SearchAsync(
-            [data.Eq(ClientField, "ACME"), data.In(StatusField, "Draft")],
-            expected: []);
-
-        rooms.Folders.Should().BeEmpty("the partially matching room holds the Draft status but not the ACME client");
-    }
-
-    #endregion
-
     #region Combination with the other filters
 
     [Fact]
@@ -404,6 +225,28 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fixtu
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
+
+    [Fact]
+    public async Task Rooms_FilteredByTemplateAlone_ReturnTheRoomsCarryingIt()
+    {
+        var data = await ArrangeAsync();
+
+        // the template id without conditions used to be read for validation only, so the listing came back unfiltered
+        var rooms = await data.Api.GetRoomsAsync(data.TemplateId, cancellationToken: TestContext.Current.CancellationToken);
+
+        rooms.RoomIds().Should().BeEquivalentTo(new[] { data.MatchingRoomId, data.PartialRoomId }, "both rooms carry the template, the bare one does not");
+    }
+
+    [Fact]
+    public async Task Rooms_FilteredByUnknownTemplate_ReturnsBadRequest()
+    {
+        await ArrangeAsync();
+
+        using var response = await new MetadataApiClient(_filesClient).GetRoomsResponseAsync(metadataTemplateId: int.MaxValue, cancellationToken: TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
     #endregion
 
     #region Access
@@ -435,207 +278,6 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fixtu
         notShared.Folders.Should().BeEmpty();
 
         await _filesClient.Authenticate(Owner);
-    }
-
-    #endregion
-
-    #region Arrange
-
-    private async Task<MetadataSearchData> ArrangeAsync()
-    {
-        await _filesClient.Authenticate(Owner);
-
-        var api = new MetadataApiClient(_filesClient);
-        var suffix = Guid.NewGuid().ToString()[..8];
-
-        var template = await api.CreateTemplateAsync("Contracts " + suffix,
-        [
-            new MetadataFieldPayload { Name = ClientField, Type = 0 },
-            new MetadataFieldPayload { Name = SignedField, Type = 1 },
-            new MetadataFieldPayload { Name = AmountField, Type = 2 },
-            new MetadataFieldPayload
-            {
-                Name = StatusField,
-                Type = 3,
-                Options = [new MetadataFieldOptionPayload { Value = "Draft" }, new MetadataFieldOptionPayload { Value = "Signed" }]
-            },
-            new MetadataFieldPayload
-            {
-                Name = TagsField,
-                Type = 4,
-                Options =
-                [
-                    new MetadataFieldOptionPayload { Value = "Legal" },
-                    new MetadataFieldOptionPayload { Value = "Finance" },
-                    new MetadataFieldOptionPayload { Value = "Urgent" }
-                ]
-            }
-        ], TestContext.Current.CancellationToken);
-
-        var matching = await CreateCustomRoom($"Matching {suffix}");
-        var partial = await CreateCustomRoom($"Partial {suffix}");
-        var bare = await CreateCustomRoom($"Bare {suffix}");
-
-        var data = new MetadataSearchData(api, template)
-        {
-            MatchingRoomId = matching.Id,
-            PartialRoomId = partial.Id,
-            BareRoomId = bare.Id,
-            BareRoomTitle = bare.Title
-        };
-
-        foreach (var roomId in new[] { matching.Id, partial.Id })
-        {
-            await api.AssignFolderTemplatesAsync(roomId, [template.Id], cascade: false, TestContext.Current.CancellationToken);
-        }
-
-        await api.SetFolderValuesAsync(matching.Id,
-        [
-            new MetadataValuePayload { FieldId = data.FieldId(ClientField), StringValue = "ACME" },
-            new MetadataValuePayload { FieldId = data.FieldId(SignedField), DateValue = _matchingDate },
-            new MetadataValuePayload { FieldId = data.FieldId(AmountField), NumberValue = 150 },
-            new MetadataValuePayload { FieldId = data.FieldId(StatusField), OptionIds = [data.OptionId(StatusField, "Signed")] },
-            new MetadataValuePayload
-            {
-                FieldId = data.FieldId(TagsField),
-                OptionIds = [data.OptionId(TagsField, "Legal"), data.OptionId(TagsField, "Finance")]
-            }
-        ], TestContext.Current.CancellationToken);
-
-        await api.SetFolderValuesAsync(partial.Id,
-        [
-            new MetadataValuePayload { FieldId = data.FieldId(ClientField), StringValue = "Globex" },
-            new MetadataValuePayload { FieldId = data.FieldId(SignedField), DateValue = _otherDate },
-            new MetadataValuePayload { FieldId = data.FieldId(AmountField), NumberValue = 900 },
-            new MetadataValuePayload { FieldId = data.FieldId(StatusField), OptionIds = [data.OptionId(StatusField, "Draft")] },
-            new MetadataValuePayload { FieldId = data.FieldId(TagsField), OptionIds = [data.OptionId(TagsField, "Urgent")] }
-        ], TestContext.Current.CancellationToken);
-
-        // the values reach the index with a small lag; a negative search polled before that lag is over would
-        // pass for the wrong reason, so every test starts from a state where the written values are searchable
-        var indexed = await data.SearchAsync(data.Eq(ClientField, "ACME"), expected: [data.MatchingRoomId]);
-        indexed.RoomIds().Should().Equal(new[] { data.MatchingRoomId }, "the arranged values must be searchable before the test starts");
-
-        return data;
-    }
-
-    /// <summary>
-    /// The arranged template and rooms plus the condition builders and the polling request helper.
-    /// </summary>
-    private sealed class MetadataSearchData(MetadataApiClient api, MetadataTemplateResponse template)
-    {
-        public MetadataApiClient Api { get; } = api;
-        public int TemplateId { get; } = template.Id;
-
-        public int MatchingRoomId { get; init; }
-        public int PartialRoomId { get; init; }
-        public int BareRoomId { get; init; }
-        public string BareRoomTitle { get; init; } = "";
-
-        public int FieldId(string name)
-        {
-            return template.Field(name).Id;
-        }
-
-        public Guid OptionId(string fieldName, string optionValue)
-        {
-            return template.Field(fieldName).Option(optionValue);
-        }
-
-        public object Eq(string fieldName, string value)
-        {
-            return new { fieldId = FieldId(fieldName), op = "eq", value };
-        }
-
-        public object Range(string fieldName, long? from, long? to)
-        {
-            return new
-            {
-                fieldId = FieldId(fieldName),
-                op = "range",
-                from = from?.ToString(CultureInfo.InvariantCulture),
-                to = to?.ToString(CultureInfo.InvariantCulture)
-            };
-        }
-
-        public object DateRange(string fieldName, DateTime from, DateTime to)
-        {
-            return new
-            {
-                fieldId = FieldId(fieldName),
-                op = "range",
-                from = from.ToString("O", CultureInfo.InvariantCulture),
-                to = to.ToString("O", CultureInfo.InvariantCulture)
-            };
-        }
-
-        public object In(string fieldName, params string[] optionValues)
-        {
-            return new
-            {
-                fieldId = FieldId(fieldName),
-                op = "in",
-                optionIds = optionValues.Select(v => OptionId(fieldName, v)).ToList()
-            };
-        }
-
-        public Task<RoomsContentResponse> SearchAsync(object condition, int[] expected, string? filterValue = null, int? searchArea = null, int? roomType = null, TimeSpan? timeout = null)
-        {
-            return PollAsync([condition], expected, filterValue, searchArea, roomType, timeout);
-        }
-
-        public Task<RoomsContentResponse> SearchAsync(object[] conditions, int[] expected, string? filterValue = null, int? searchArea = null, int? roomType = null, TimeSpan? timeout = null)
-        {
-            return PollAsync(conditions, expected, filterValue, searchArea, roomType, timeout);
-        }
-
-        /// <summary>
-        /// Searches by the free text only, without a structured metadata filter.
-        /// </summary>
-        public Task<RoomsContentResponse> SearchByTextAsync(string text, int[] expected, TimeSpan? timeout = null)
-        {
-            return PollAsync(conditions: null, expected, filterValue: text, searchArea: null, roomType: null, timeout);
-        }
-
-        /// <summary>
-        /// Requests the unfiltered rooms listing, retrying until the condition holds.
-        /// </summary>
-        public Task<RoomsContentResponse> ListAsync(Func<RoomsContentResponse, bool> until, int? searchArea = null, TimeSpan? timeout = null)
-        {
-            return PollAsync(until, conditions: null, filterValue: null, searchArea, roomType: null, timeout);
-        }
-
-        private Task<RoomsContentResponse> PollAsync(object[]? conditions, int[] expected, string? filterValue, int? searchArea, int? roomType, TimeSpan? timeout)
-        {
-            return PollAsync(r => r.RoomIds().Order().SequenceEqual(expected.Order()), conditions, filterValue, searchArea, roomType, timeout);
-        }
-
-        /// <summary>
-        /// Requests the rooms listing, retrying until the condition holds.
-        /// The metadata values are indexed right after they are written, the retry only absorbs the indexing lag.
-        /// </summary>
-        private async Task<RoomsContentResponse> PollAsync(Func<RoomsContentResponse, bool> until, object[]? conditions, string? filterValue, int? searchArea, int? roomType, TimeSpan? timeout)
-        {
-            using var deadline = new CancellationTokenSource(timeout ?? TimeSpan.FromSeconds(15));
-
-            while (true)
-            {
-                var rooms = await Api.GetRoomsAsync(
-                    conditions == null ? null : TemplateId,
-                    conditions,
-                    filterValue,
-                    searchArea,
-                    roomType,
-                    TestContext.Current.CancellationToken);
-
-                if (until(rooms) || deadline.IsCancellationRequested)
-                {
-                    return rooms;
-                }
-
-                await Task.Delay(200, TestContext.Current.CancellationToken);
-            }
-        }
     }
 
     #endregion

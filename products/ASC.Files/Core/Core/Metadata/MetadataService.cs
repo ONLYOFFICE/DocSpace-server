@@ -238,7 +238,9 @@ public class MetadataService(
                 .Except(options.Select(o => o.Id))
                 .ToList();
 
-            if (removedOptionIds.Count > 0 && await metadataDao.HasValuesAsync(fieldId))
+            // only an option somebody has selected is protected; any value of the field used to block the removal of
+            // every option, so an unused one could not be dropped without clearing the field on all entries first
+            if (removedOptionIds.Count > 0 && await metadataDao.HasValuesAsync(fieldId, removedOptionIds))
             {
                 throw new ArgumentException(@"An option in use cannot be removed", nameof(update));
             }

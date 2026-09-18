@@ -48,6 +48,11 @@ public interface IMetadataDao<T>
     Task DeleteFieldAsync(int fieldId);
     Task<bool> HasValuesAsync(int fieldId);
 
+    /// <summary>
+    /// Whether any entry has one of the options selected in the choice field.
+    /// </summary>
+    Task<bool> HasValuesAsync(int fieldId, IEnumerable<Guid> optionIds);
+
     Task SaveLinksAsync(IEnumerable<MetadataTemplateLink> links);
     IAsyncEnumerable<MetadataTemplateLink> GetLinksAsync(T entryId, FileEntryType entryType);
     IAsyncEnumerable<MetadataTemplateLink> GetLinksAsync(IEnumerable<T> entryIds, FileEntryType entryType);

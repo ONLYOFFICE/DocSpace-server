@@ -164,11 +164,67 @@ public class MetadataTemplateManagementTests(AspireAppFixture fixture) : BaseTes
         reloaded.Visible.Should().BeFalse();
     }
 
+    [Fact]
+    public async Task UpdateField_RemovingAnUnusedOption_Succeeds_WhileAnotherOptionIsSelected()
+    {
+        var (api, template, field) = await ArrangeChoiceFieldWithSelectedOptionAsync("Draft");
+
+        // any value of the field used to protect every option: the unused "Signed" could not be dropped while "Draft"
+        // was selected somewhere, the field had to be cleared on every entry first
+        var updated = await api.UpdateFieldAsync(template.Id, field.Id,
+            new { options = new[] { new { id = field.Option("Draft"), value = "Draft" } } }, TestContext.Current.CancellationToken);
+
+        updated.Options.Select(o => o.Value).Should().Equal("Draft");
+
+        var reloaded = await api.GetTemplateAsync(template.Id, TestContext.Current.CancellationToken);
+        reloaded.Field("Status").Options.Select(o => o.Value).Should().Equal("Draft");
+    }
+
+    [Fact]
+    public async Task UpdateField_RemovingASelectedOption_ReturnsBadRequest()
+    {
+        var (api, template, field) = await ArrangeChoiceFieldWithSelectedOptionAsync("Draft");
+
+        using var response = await api.UpdateFieldResponseAsync(template.Id, field.Id,
+            new { options = new[] { new { id = field.Option("Signed"), value = "Signed" } } }, TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest, "the removed option is selected on an entry");
+
+        var reloaded = await api.GetTemplateAsync(template.Id, TestContext.Current.CancellationToken);
+        reloaded.Field("Status").Options.Select(o => o.Value).Should().BeEquivalentTo(["Draft", "Signed"]);
+    }
+
     private async Task<MetadataApiClient> ArrangeAsync()
     {
         await _filesClient.Authenticate(Owner);
 
         return new MetadataApiClient(_filesClient);
+    }
+
+    /// <summary>
+    /// A template with the choice field Status (Draft, Signed) assigned to a room that has <paramref name="selectedOption"/> selected.
+    /// </summary>
+    private async Task<(MetadataApiClient Api, MetadataTemplateResponse Template, MetadataFieldResponse Field)> ArrangeChoiceFieldWithSelectedOptionAsync(string selectedOption)
+    {
+        var api = await ArrangeAsync();
+        var suffix = Suffix();
+
+        var template = await api.CreateTemplateAsync("Options " + suffix,
+        [
+            new MetadataFieldPayload
+            {
+                Name = "Status",
+                Type = SingleChoiceType,
+                Options = [new MetadataFieldOptionPayload { Value = "Draft" }, new MetadataFieldOptionPayload { Value = "Signed" }]
+            }
+        ], TestContext.Current.CancellationToken);
+        var field = template.Field("Status");
+
+        var room = await CreateCustomRoom($"Options {suffix}");
+        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+        await api.SetFolderValuesAsync(room.Id, [new MetadataValuePayload { FieldId = field.Id, OptionIds = [field.Option(selectedOption)] }], TestContext.Current.CancellationToken);
+
+        return (api, template, field);
     }
 
     private static string Suffix()

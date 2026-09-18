@@ -2968,7 +2968,7 @@ internal class FileDao(
 
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
-        var searchByMetadata = metadataFilter is { Conditions.Count: > 0 };
+        var searchByMetadata = metadataFilter is { IsEmpty: false };
 
         if (withSubfolders && (searchByText || searchByExtension || searchByMetadata || filterType != FilterType.None || subjectID != Guid.Empty))
         {
@@ -3051,7 +3051,15 @@ internal class FileDao(
             }
         }
 
-        if (searchByMetadata)
+        if (metadataFilter is { TemplateId: { } templateId })
+        {
+            // the assignment is a fact of the link table, not of the values, so it is not asked from the index
+            var templateEntryIds = MetadataSearchQuery.TemplateEntryIds(filesDbContext, tenantId, FileEntryType.File, templateId);
+
+            q = q.Where(r => templateEntryIds.Contains(r.Id));
+        }
+
+        if (metadataFilter is { Conditions.Count: > 0 })
         {
             // scoped by the ancestor chain stored in the metadata document; the document is refreshed when the file
             // is moved (see IndexEventProcessingService), so the scope stays valid and keeps the id list per folder

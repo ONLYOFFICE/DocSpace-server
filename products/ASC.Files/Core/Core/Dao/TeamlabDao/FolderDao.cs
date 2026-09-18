@@ -323,6 +323,14 @@ internal class FolderDao(
             }
         }
 
+        if (metadataFilter is { TemplateId: { } templateId })
+        {
+            // the assignment is a fact of the link table, not of the values, so it is not asked from the index
+            var templateEntryIds = MetadataSearchQuery.TemplateEntryIds(filesDbContext, tenantId, FileEntryType.Folder, templateId);
+
+            q = q.Where(r => templateEntryIds.Contains(r.Id));
+        }
+
         if (metadataFilter is { Conditions.Count: > 0 })
         {
             var (metadataSuccess, metadataIds) = await MetadataSearchQuery.TrySelectMetadataIdsAsync(factoryIndexerFolderMetadata, metadataFilter, scope);
@@ -356,7 +364,7 @@ internal class FolderDao(
 
         // the shortcut counts the direct children as they are, so it must stay off whenever anything narrows them
         if (filterType == FilterType.None && subjectId == Guid.Empty && string.IsNullOrEmpty(searchText) && !withSubfolders && !excludeSubject && roomId == 0 && (folderType == null || folderType.Count == 0) &&
-            metadataFilter is not { Conditions.Count: > 0 })
+            metadataFilter is not { IsEmpty: false })
         {
             return await filesDbContext.Tree.CountAsync(r => r.ParentId == parentId && r.Level == 1);
         }
@@ -2537,7 +2545,7 @@ internal class FolderDao(
 
         var q = GetFolderQuery(filesDbContext, r => r.ParentId == parentId);
 
-        if (withSubfolders && (filterType != FilterType.None || subjectId != Guid.Empty || !string.IsNullOrEmpty(searchText) || metadataFilter is { Conditions.Count: > 0 }))
+        if (withSubfolders && (filterType != FilterType.None || subjectId != Guid.Empty || !string.IsNullOrEmpty(searchText) || metadataFilter is { IsEmpty: false }))
         {
             q = GetFolderQuery(filesDbContext)
                     .Join(filesDbContext.Tree, r => r.Id, a => a.FolderId, (folder, tree) => new { folder, tree })

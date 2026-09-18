@@ -125,6 +125,23 @@ public class FoldersMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fix
 
     #endregion
 
+    #region Template filter
+
+    [Fact]
+    public async Task Folders_FilteredByTemplateAlone_ReturnTheEntriesCarryingIt()
+    {
+        var data = await ArrangeAsync();
+
+        // the template id without conditions used to be read for validation only, so the listing came back unfiltered
+        var content = await data.Api.GetFolderContentAsync(data.RoomId, data.TemplateId, cancellationToken: TestContext.Current.CancellationToken);
+
+        content.FolderIds().Should().BeEquivalentTo(new[] { data.MatchingFolderId, data.OtherFolderId, data.NestedFolderId }, "the bare folder has no template");
+        content.FileIds().Should().BeEquivalentTo(new[] { data.MatchingFileId, data.OtherFileId, data.NestedFileId });
+        content.Total.Should().Be(6, "the total must count only the entries carrying the template");
+    }
+
+    #endregion
+
     #region Subtree behaviour
 
     [Fact]
@@ -270,6 +287,7 @@ public class FoldersMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fix
             BareFolderId = bareFolder.Id,
             NestedFolderId = nestedFolder.Id,
             MatchingFileId = matchingFile.Id,
+            OtherFileId = otherFile.Id,
             NestedFileId = nestedFile.Id
         };
 
@@ -314,6 +332,7 @@ public class FoldersMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fix
         public int BareFolderId { get; init; }
         public int NestedFolderId { get; init; }
         public int MatchingFileId { get; init; }
+        public int OtherFileId { get; init; }
         public int NestedFileId { get; init; }
 
         public MetadataValuePayload Value(string fieldName, string value)

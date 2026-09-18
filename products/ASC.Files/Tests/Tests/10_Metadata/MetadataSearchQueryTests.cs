@@ -31,11 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using DbFilesMetadataValue = ASC.Files.Core.EF.DbFilesMetadataValue;
-using MetadataFieldType = ASC.Files.Core.MetadataFieldType;
-using MetadataFilterCondition = ASC.Files.Core.MetadataFilterCondition;
-using MetadataSearchQuery = ASC.Web.Files.Core.Search.MetadataSearchQuery;
-
 namespace ASC.Files.Tests.Tests._10_Metadata;
 
 /// <summary>

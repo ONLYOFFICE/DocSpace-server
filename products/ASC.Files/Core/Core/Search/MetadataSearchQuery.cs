@@ -236,6 +236,18 @@ public static class MetadataSearchQuery
     }
 
     /// <summary>
+    /// The identifiers of the entries the template is assigned to, directly or by inheritance. Always evaluated in SQL:
+    /// the metadata documents exist for the entries holding values only, so an index lookup would miss an assignment
+    /// without values, and the link table is keyed by the tenant and the template anyway.
+    /// </summary>
+    public static IQueryable<int> TemplateEntryIds(FilesDbContext filesDbContext, int tenantId, FileEntryType entryType, int templateId)
+    {
+        return filesDbContext.MetadataLinks
+            .Where(l => l.TenantId == tenantId && l.TemplateId == templateId && l.EntryType == entryType)
+            .Select(l => l.EntryId);
+    }
+
+    /// <summary>
     /// The SQL counterpart of <see cref="BuildGlobalTextSelector{TDoc}"/>: the identifiers of the entries whose
     /// system template string values contain the text. The text is expected to be already lowered.
     /// </summary>

@@ -712,7 +712,7 @@ public class EntryManager(IDaoFactory daoFactory,
 
             return (entries, total);
         }
-        else if (metadataFilter is { Conditions.Count: > 0 })
+        else if (metadataFilter is { IsEmpty: false })
         {
             // a provider based folder: the metadata values are stored for the internal entries only, so nothing inside it
             // can match the filter. The listing is empty instead of being returned unfiltered (the rule FileSecurity applies

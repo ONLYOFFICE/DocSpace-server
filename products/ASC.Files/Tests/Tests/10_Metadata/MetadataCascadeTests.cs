@@ -266,6 +266,49 @@ public class MetadataCascadeTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
+    public async Task Cascade_OnANestedFolder_TakesOverTheInheritedLinks_SoTheRoomUncascadeLeavesThemInherited()
+    {
+        var api = await ArrangeAsync();
+        var suffix = Suffix();
+
+        var template = await api.CreateTemplateAsync("Takeover " + suffix, [new MetadataFieldPayload { Name = ClientField, Type = 0 }], TestContext.Current.CancellationToken);
+        var clientFieldId = template.Field(ClientField).Id;
+
+        var room = await CreateCustomRoom($"Takeover {suffix}");
+        var nested = await CreateFolder($"Nested {suffix}", room.Id);
+        var file = await CreateFile($"doc-{suffix}.docx", nested.Id);
+
+        // the room cascades first, so the file inherits the template from the room
+        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+        await api.SetFolderValuesAsync(room.Id, [new MetadataValuePayload { FieldId = clientFieldId, StringValue = "Room" }], TestContext.Current.CancellationToken);
+        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: true, TestContext.Current.CancellationToken);
+
+        var fromRoom = await PollMetadataAsync(api, file.Id, FileEntryType.File, m => ValueOf(m, template.Id, clientFieldId) == "Room");
+        ValueOf(fromRoom, template.Id, clientFieldId).Should().Be("Room", "the room's cascade must reach the file first");
+
+        // then the nested folder cascades the same template and becomes the nearest source of the file
+        await api.AssignFolderTemplatesAsync(nested.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+        await api.SetFolderValuesAsync(nested.Id, [new MetadataValuePayload { FieldId = clientFieldId, StringValue = "Nested" }], TestContext.Current.CancellationToken);
+        await api.AssignFolderTemplatesAsync(nested.Id, [template.Id], cascade: true, TestContext.Current.CancellationToken, conflictResolveType: 1);
+
+        var fromNested = await PollMetadataAsync(api, file.Id, FileEntryType.File, m => ValueOf(m, template.Id, clientFieldId) == "Nested");
+        ValueOf(fromNested, template.Id, clientFieldId).Should().Be("Nested", "the nested folder's cascade must reach the file");
+
+        // the room's un-cascade converts the links still inherited from the room only; the file's link used to keep the
+        // room as its source and turned into a direct assignment here although the nested folder still cascades it
+        await api.UnassignFolderTemplateAsync(room.Id, template.Id, TestContext.Current.CancellationToken);
+
+        await CopyFileAsync(file.Id, room.Id);
+        var copy = await FindFileAsync(api, room.Id, file.Title);
+
+        var copyMetadata = await api.GetFileMetadataAsync(copy.Id, TestContext.Current.CancellationToken);
+        copyMetadata.Should().NotContain(m => m.Template.Id == template.Id, "a copy carries the direct assignments only, and the file's link is inherited from the nested folder");
+
+        var fileMetadata = await api.GetFileMetadataAsync(file.Id, TestContext.Current.CancellationToken);
+        ValueOf(fileMetadata, template.Id, clientFieldId).Should().Be("Nested", "the file itself keeps the template inherited from the nested folder");
+    }
+
+    [Fact]
     public async Task CopyFile_IntoCascadingRoom_KeepsTheCopiedAndTheInheritedValues()
     {
         var api = await ArrangeAsync();
