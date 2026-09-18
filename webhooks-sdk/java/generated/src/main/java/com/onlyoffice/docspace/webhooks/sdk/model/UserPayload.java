@@ -53,7 +53,7 @@ import com.onlyoffice.docspace.webhooks.sdk.JSON;
 /**
  * ASC.Core.Common/Core/UserInfo.cs -- the domain entity, verbatim. It carries NO [JsonIgnore] at all, so every public member below reaches the wire. sid / ssoNameId / ssoSessionId / ldapQouta are null on portals without LDAP or SSO and therefore invisible in most test captures; they DO appear on LDAP/SSO tenants, and are flagged REVIEW below. 
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-09-18T14:35:03.811557400+03:00[Europe/Moscow]", comments = "Generator version: 7.25.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.25.0")
 public class UserPayload {
   public static final String SERIALIZED_NAME_ID = "id";
   @SerializedName(SERIALIZED_NAME_ID)

@@ -34,6 +34,10 @@ default_props="models,modelTests=false,modelDocs=true"
 # and which is far too large to stand in for by hand. Nothing in the sample
 # touches the HTTP classes, so guzzle is never loaded.
 #
+# java sets hideGenerationTimestamp: it is the only generator here that stamps
+# the wall-clock time into every model, so without it all nine files show up as
+# modified after each run with no semantic change.
+#
 # csharp pins library=httpclient. The 7.x default (generichost) wraps every
 # property in Option<T> and needs its converters registered by hand, both of
 # which live in the un-generated Client namespace; httpclient emits plain POCOs
@@ -41,7 +45,7 @@ default_props="models,modelTests=false,modelDocs=true"
 targets=(
   "csharp|csharp|models,modelTests=false,modelDocs=true,supportingFiles=README.md|packageName=DocSpace.Webhooks.SDK,library=httpclient,targetFramework=net8.0|templates/csharp"
   "go|go||packageName=docspace_webhooks_sdk"
-  "java|java||modelPackage=com.onlyoffice.docspace.webhooks.sdk.model,invokerPackage=com.onlyoffice.docspace.webhooks.sdk,groupId=com.onlyoffice,artifactId=docspace-webhooks-sdk"
+  "java|java||modelPackage=com.onlyoffice.docspace.webhooks.sdk.model,invokerPackage=com.onlyoffice.docspace.webhooks.sdk,groupId=com.onlyoffice,artifactId=docspace-webhooks-sdk,hideGenerationTimestamp=true"
   "kotlin|kotlin||packageName=onlyoffice.docspace.webhooks.sdk"
   "php|php|models,supportingFiles,modelTests=false,modelDocs=true|invokerPackage=OnlyOffice\DocSpace\Webhooks\Sdk,packageName=onlyoffice/docspace-webhooks-sdk"
   "python|python||packageName=docspace_webhooks_sdk"

@@ -56,7 +56,7 @@ import com.onlyoffice.docspace.webhooks.sdk.JSON;
 /**
  * The payload for EVERY file, folder, room, agent and form trigger.  There is deliberately no File- or Folder-specific schema. WebhookManager calls PublishAsync&lt;T1,T2&gt; with a static parameter type of FileEntry&lt;T&gt;, so T1 binds to the abstract base and System.Text.Json serializes by DECLARED type. File&lt;T&gt; and Folder&lt;T&gt; members -- pureTitle, version, contentLength, folderType, filesCount, isRoom -- therefore never reach the wire, however the entry was published.  One consequence worth internalising: &#x60;title&#x60; IS present, even for files. File&lt;T&gt; hides Title behind [JsonIgnore] and exposes pureTitle instead, but that override is invisible here because the base declaration is what gets serialized.  Verified against a captured production delivery: all 14 keys of a real file.created payload are members of this schema and nothing else. (Files/Core/Core/Entries/FileEntry.cs; [JsonIgnore] members excluded.) 
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-09-18T14:35:03.811557400+03:00[Europe/Moscow]", comments = "Generator version: 7.25.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.25.0")
 public class FileEntryPayload {
   public static final String SERIALIZED_NAME_ID = "id";
   @SerializedName(SERIALIZED_NAME_ID)
