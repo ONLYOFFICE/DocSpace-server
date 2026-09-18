@@ -1,4 +1,4 @@
-# onlyoffice/docspace-webhooks-sdk
+# {{packageName}}
 
 The ONLYOFFICE DocSpace Webhooks SDK for PHP is a library that provides tools for receiving webhook deliveries from DocSpace. It decodes each delivery into ready-to-use models.
 
@@ -13,7 +13,7 @@ PHP 8.1+
 ## Installation
 
 ```
-composer require onlyoffice/docspace-webhooks-sdk
+composer require {{packageName}}
 ```
 
 ## Usage
@@ -31,10 +31,10 @@ Answer as soon as the signature checks out and do the real work afterwards. A de
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use OnlyOffice\DocSpace\Webhooks\Sdk\Model\FileEntryPayload;
-use OnlyOffice\DocSpace\Webhooks\Sdk\Model\UserPayload;
-use OnlyOffice\DocSpace\Webhooks\Sdk\Model\WebhookEventInfo;
-use OnlyOffice\DocSpace\Webhooks\Sdk\ObjectSerializer;
+use {{invokerPackage}}\Model\FileEntryPayload;
+use {{invokerPackage}}\Model\UserPayload;
+use {{invokerPackage}}\Model\WebhookEventInfo;
+use {{invokerPackage}}\ObjectSerializer;
 
 const SECRET = 'YOUR_SUBSCRIPTION_SECRET_KEY';
 
@@ -99,13 +99,5 @@ New events are added over time. Treat an unfamiliar `event.trigger` as something
 
 ## Documentation for Models
 
- - [EntryId](docs/Model/EntryId.md)
- - [FileEntryPayload](docs/Model/FileEntryPayload.md)
- - [FormSubmitPayload](docs/Model/FormSubmitPayload.md)
- - [GroupPayload](docs/Model/GroupPayload.md)
- - [UserPayload](docs/Model/UserPayload.md)
- - [WebhookConfigInfo](docs/Model/WebhookConfigInfo.md)
- - [WebhookEnvelope](docs/Model/WebhookEnvelope.md)
- - [WebhookEventInfo](docs/Model/WebhookEventInfo.md)
- - [WebhookTargetInfo](docs/Model/WebhookTargetInfo.md)
-
+{{#models}}{{#model}} - [{{classname}}](docs/Model/{{classname}}.md)
+{{/model}}{{/models}}

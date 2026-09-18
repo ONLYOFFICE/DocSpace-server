@@ -1,0 +1,145 @@
+# docspace-webhooks-sdk
+
+The ONLYOFFICE DocSpace Webhooks SDK for Java is a library that provides tools for receiving webhook deliveries from DocSpace. It decodes each delivery into ready-to-use models.
+
+It is the inbound counterpart to the DocSpace API SDK: that library calls DocSpace, this one handles what DocSpace sends you. It makes no requests of its own.
+
+For more information, please visit [https://helpdesk.onlyoffice.com/hc/en-us](https://helpdesk.onlyoffice.com/hc/en-us)
+
+## Requirements
+
+Java 17+
+
+## Installation
+
+```xml
+<dependency>
+  <groupId>com.onlyoffice</groupId>
+  <artifactId>docspace-webhooks-sdk</artifactId>
+  <version>0.1.0</version>
+</dependency>
+```
+
+## Usage
+
+A receiver does two things, in this order: verify the signature, then decode.
+
+Verify against the **raw request body**. A body that has been parsed and re-serialized is a different byte sequence and will never match, so hash the bytes that arrived before deserializing them.
+
+Answer as soon as the signature checks out and do the real work afterwards. A delivery gets five attempts over roughly 31 seconds, after which it is abandoned; a subscription that goes three days without a single successful delivery is switched off.
+
+## Getting Started
+
+```java
+import com.sun.net.httpserver.HttpServer;
+
+import com.onlyoffice.docspace.webhooks.sdk.model.FileEntryPayload;
+import com.onlyoffice.docspace.webhooks.sdk.model.UserPayload;
+import com.onlyoffice.docspace.webhooks.sdk.model.WebhookEventInfo;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.util.HexFormat;
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+public class WebhookReceiver {
+
+    private static final String SECRET = "YOUR_SUBSCRIPTION_SECRET_KEY";
+
+    /**
+     * Constant-time, case-insensitive check over the raw body. DocSpace emits
+     * UPPERCASE hexadecimal where some other services emit lowercase.
+     */
+    static boolean verify(byte[] body, String signature) throws Exception {
+        if (signature == null || signature.isBlank()) {
+            return false;
+        }
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(new SecretKeySpec(SECRET.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+        String expected = "sha256=" + HexFormat.of().formatHex(mac.doFinal(body));
+        return MessageDigest.isEqual(
+                expected.toLowerCase().getBytes(StandardCharsets.UTF_8),
+                signature.trim().toLowerCase().getBytes(StandardCharsets.UTF_8));
+    }
+
+    public static void main(String[] args) throws Exception {
+        HttpServer server = HttpServer.create(new InetSocketAddress(5555), 0);
+
+        server.createContext("/webhook", exchange -> {
+            try {
+                byte[] body = exchange.getRequestBody().readAllBytes();
+                String signature = exchange.getRequestHeaders()
+                        .getFirst("x-docspace-signature-256");
+
+                if (!verify(body, signature)) {
+                    exchange.sendResponseHeaders(401, -1);
+                    return;
+                }
+
+                // Acknowledge now; anything slow belongs after this point.
+                exchange.sendResponseHeaders(200, -1);
+
+                String json = new String(body, StandardCharsets.UTF_8);
+                JsonObject envelope = JsonParser.parseString(json).getAsJsonObject();
+                String payload = envelope.get("payload").toString();
+
+                WebhookEventInfo event =
+                        WebhookEventInfo.fromJson(envelope.get("event").toString());
+                String trigger = event.getTrigger();
+
+                if (trigger.startsWith("user.")) {
+                    UserPayload user = UserPayload.fromJson(payload);
+                    System.out.printf("%s: %s%n", trigger, user.getUserName());
+                } else {
+                    // Files, folders, rooms, agents and forms share one payload
+                    // shape. fileEntryType tells them apart: 1 folder, 2 file.
+                    FileEntryPayload entry = FileEntryPayload.fromJson(payload);
+                    String kind = Integer.valueOf(2).equals(entry.getFileEntryType())
+                            ? "file" : "folder";
+                    System.out.printf("%s: %s \"%s\"%n", trigger, kind, entry.getTitle());
+                }
+            } catch (Exception e) {
+                exchange.sendResponseHeaders(500, -1);
+            } finally {
+                exchange.close();
+            }
+        });
+
+        server.start();
+    }
+}
+```
+
+## Documentation for Verification
+
+Every delivery carries `x-docspace-signature-256`, an HMAC-SHA256 of the raw body keyed with the subscription's secret, formatted as `sha256=` followed by uppercase hexadecimal. Compare it with `MessageDigest.isEqual` and case-insensitively, as above.
+
+Two further headers, `x-docspace-event-id` and `x-docspace-event-timestamp`, repeat `event.id` and `event.createOn` so a stale or already-seen delivery can be dropped without reading the body. They are **not** covered by the signature: reject on them freely, but never accept on them. The values inside the verified body are the authoritative ones.
+
+Deduplicate on `event.id`. It is stable across the server's automatic retries, though a manual retry by an administrator creates a new record and therefore a new id.
+
+## Documentation for Events
+
+`event.trigger` names the event that caused the delivery, for example `file.created`. `GET api/2.0/settings/webhook/triggers` lists every event, the value to subscribe with, and whether your role may subscribe to it.
+
+Files, folders, rooms, agents and forms all deliver the same payload shape; use `fileEntryType` (1 folder, 2 file) to tell them apart. A file's name arrives in `title`, and a field missing from the JSON means empty, `false` or zero — never "unknown".
+
+New events are added over time. Treat an unfamiliar `event.trigger` as something to ignore rather than an error, so an upgrade cannot break your endpoint.
+
+## Documentation for Models
+
+ - [EntryId](docs/EntryId.md)
+ - [FileEntryPayload](docs/FileEntryPayload.md)
+ - [FormSubmitPayload](docs/FormSubmitPayload.md)
+ - [GroupPayload](docs/GroupPayload.md)
+ - [UserPayload](docs/UserPayload.md)
+ - [WebhookConfigInfo](docs/WebhookConfigInfo.md)
+ - [WebhookEnvelope](docs/WebhookEnvelope.md)
+ - [WebhookEventInfo](docs/WebhookEventInfo.md)
+ - [WebhookTargetInfo](docs/WebhookTargetInfo.md)
+

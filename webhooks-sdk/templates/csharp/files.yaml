@@ -1,0 +1,24 @@
+# Extra supporting files for the C# SDK.
+#
+# openapi-generator can only be told about custom output files through a config
+# file -- there is no command-line equivalent -- so generate.sh passes this with
+# -c whenever templates/<lang>/files.yaml exists. Everything else stays on the
+# command line alongside the other languages.
+#
+# Two gotchas, both found the hard way:
+#
+#   1. A file listed here is still subject to the supportingFiles allowlist in
+#      --global-property. If it is not named there it is silently "Skipped by
+#      supportingFiles options supplied by user".
+#   2. That allowlist separates its entries with a COLON, because commas already
+#      separate the top-level global properties:
+#           --global-property "models,supportingFiles=README.md:RECEIVING.md"
+#
+# TRIGGERS.md is NOT here: it is built from the contract's
+# x-docspace-trigger-payloads block, which mustache cannot see, so
+# tools/gen-trigger-map.py emits it as a post-step instead.
+
+files:
+  RECEIVING.mustache:
+    destinationFilename: RECEIVING.md
+    templateType: SupportingFiles
