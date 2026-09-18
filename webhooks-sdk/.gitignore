@@ -1,0 +1,78 @@
+# =============================================================================
+# webhooks-sdk
+#
+# NOTE: generated/ is committed on purpose -- it IS the SDK, and regenerating
+# needs a JDK plus openapi-generator-cli that not every consumer will have.
+# Only build output, caches and downloaded dependencies belong in here.
+#
+# Kept deliberately self-contained: some of these (node_modules/, .vs/,
+# *-lock.json) are already covered by the repo-root .gitignore, but this
+# directory has been discussed as a candidate for its own repository, and the
+# rules should survive that move.
+# =============================================================================
+
+# --- generator ---------------------------------------------------------------
+# Per-run log that generate.sh writes into each generated/ tree.
+.generate.log
+
+# --- C# / .NET ---------------------------------------------------------------
+csharp/**/bin/
+csharp/**/obj/
+*.user
+*.suo
+
+# --- Java / Kotlin (Maven) ---------------------------------------------------
+java/target/
+kotlin/target/
+*.class
+# ...and Gradle, should either project ever switch to it.
+.gradle/
+java/build/
+kotlin/build/
+
+# --- Python ------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- TypeScript / Node -------------------------------------------------------
+typescript/node_modules/
+typescript/dist/
+*.tsbuildinfo
+# package-lock.json is already excluded repo-wide by the root *-lock.json rule.
+
+# --- Go ----------------------------------------------------------------------
+go/vendor/
+# go.mod and go.sum ARE committed: go.sum is a checksum database, not a
+# conventional lockfile, and omitting it breaks verifiable builds.
+
+# --- PHP ---------------------------------------------------------------------
+php/vendor/
+php/composer.lock
+.php-cs-fixer.cache
+
+# --- Ruby --------------------------------------------------------------------
+ruby/.bundle/
+ruby/vendor/
+# A library pins nothing for its consumers, so the lockfile is not committed.
+ruby/Gemfile.lock
+
+# --- Swift -------------------------------------------------------------------
+swift/.build/
+swift/.swiftpm/
+# Same reasoning as Gemfile.lock -- this is a library, not an application.
+swift/Package.resolved
+
+# --- editors / OS ------------------------------------------------------------
+.vs/
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db

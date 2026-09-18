@@ -1,0 +1,462 @@
+openapi: 3.1.0
+info:
+  title: ONLYOFFICE DocSpace Webhooks
+  version: 0.1.0
+  description: |
+    Wire contract for OUTBOUND DocSpace webhook deliveries.
+
+    This is a hand-maintained document. It is NOT the REST API spec and shares no
+    schemas with it: webhook payloads are the internal domain entities
+    (UserInfo, GroupInfo, File<T>, Folder<T>), not the controller DTOs.
+
+    SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)
+      1. PropertyNamingPolicy = CamelCase.
+      2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and
+         default-valued property is OMITTED. Consequently almost nothing here is
+         `required`, and absence never means "unset" -- it means "default".
+      3. [JsonIgnore] on the domain type is honoured.
+      4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is
+         set only on the sender's options, by which point `payload` is an opaque
+         JsonElement, so it never applies to payload bodies.
+      5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated
+         to whole seconds (WebhookPayload.GetShortUtcNow).
+      6. Entry ids are generic T: int for internal storage, string for
+         third-party providers. Modelled here as oneOf[integer, string].
+
+    TRANSPORT
+      POST, Content-Type: application/json; charset=utf-8
+      Redirects are not followed. Retry budget is ~31s (5 attempts, exponential
+      from 1s), so receivers must acknowledge fast and process out of band.
+
+      Headers:
+        x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw
+                                  body>. GitHub emits lowercase hex, so compare
+                                  case-insensitively. This is the only header
+                                  that is authenticated.
+        x-docspace-event-id       Copy of event.id.
+        x-docspace-event-timestamp
+                                  Copy of event.createOn, same ISO-8601 UTC
+                                  spelling, e.g. 2026-09-17T10:22:56Z.
+
+      The last two exist so a receiver can drop a stale or already-seen delivery
+      without parsing the body. They are NOT covered by the signature, which is
+      computed over the body alone, so anything in transit can rewrite them.
+
+      Reject on them freely -- dropping a delivery is fail-safe, and whoever can
+      rewrite a header could drop the request instead. Never ACCEPT on them: a
+      replayed delivery with its timestamp header rewritten to "now" still
+      carries a valid signature, so a receiver that checks freshness only
+      against the header has no replay protection at all. After verifying,
+      re-check event.createOn and event.id from the parsed body; they are the
+      authoritative values, and comparing them against the headers also detects
+      tampering for free.
+
+paths: {}
+
+x-docspace-trigger-payloads:
+  description: >
+    Machine-readable trigger -> payload schema map. Source of truth for the SDK
+    dispatch layer. Verified against every PublishAsync call site.
+  map:
+    user.created: UserPayload
+    user.invited: UserPayload
+    user.updated: UserPayload
+    user.deleted: UserPayload
+    group.created: GroupPayload
+    group.updated: GroupPayload
+    group.deleted: GroupPayload
+    file.created: FileEntryPayload
+    file.uploaded: FileEntryPayload
+    file.updated: FileEntryPayload
+    file.trashed: FileEntryPayload
+    file.deleted: FileEntryPayload
+    file.restored: FileEntryPayload
+    file.copied: FileEntryPayload
+    file.moved: FileEntryPayload
+    file.downloaded: FileEntryPayload
+    folder.created: FileEntryPayload
+    folder.updated: FileEntryPayload
+    folder.trashed: FileEntryPayload
+    folder.deleted: FileEntryPayload
+    folder.restored: FileEntryPayload
+    folder.copied: FileEntryPayload
+    folder.moved: FileEntryPayload
+    folder.downloaded: FileEntryPayload
+    room.created: FileEntryPayload
+    room.updated: FileEntryPayload
+    room.archived: FileEntryPayload
+    room.deleted: FileEntryPayload
+    room.restored: FileEntryPayload
+    room.copied: FileEntryPayload
+    agent.created: FileEntryPayload
+    agent.updated: FileEntryPayload
+    agent.deleted: FileEntryPayload
+    form.submit: FormSubmitPayload
+    form.filled.out: FileEntryPayload
+    form.stopped: FileEntryPayload
+    "*": null
+
+components:
+  schemas:
+
+    # ---------------------------------------------------------------- envelope
+
+    WebhookEnvelope:
+      type: object
+      description: >
+        The body of every delivery. `payload` is narrowed by `event.trigger`
+        per x-docspace-trigger-payloads.
+      properties:
+        event:
+          $ref: "#/components/schemas/WebhookEventInfo"
+        payload:
+          description: >
+            Trigger-specific body. Left untyped so that codegen stays clean in
+            all 9 target languages; the runtime narrows it.
+        webhook:
+          $ref: "#/components/schemas/WebhookConfigInfo"
+
+    WebhookEventInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int32
+          description: >
+            Delivery-log record id. Stable across the automatic retries of one
+            delivery; a MANUAL retry mints a new record and therefore a new id.
+            Use as the idempotency key, with that caveat.
+        createOn:
+          type: string
+          format: date-time
+          description: >
+            UTC, whole seconds. No header timestamp exists, so replay defence
+            must read this from the verified body.
+        createBy:
+          type: string
+          format: uuid
+          description: Acting user. Omitted when the empty guid (background jobs).
+        trigger:
+          type: string
+          description: e.g. "file.created". "*" only in the legacy-payload fallback.
+        triggerId:
+          type: integer
+          format: int64
+          description: Bit value of the trigger. Omitted when 0 (the "*" fallback).
+
+    EntryId:
+      description: >
+        Entry identifier. Generic T in the domain types: integer for entries in
+        DocSpace's own storage, string for entries backed by a third-party
+        provider. Both occur on the same portal.
+      oneOf:
+        - type: integer
+        - type: string
+
+    WebhookTargetInfo:
+      type: object
+      description: Present only when the subscription is scoped to one entity.
+      properties:
+        id:
+          $ref: "#/components/schemas/EntryId"
+        type:
+          type: string
+          enum: [user, group, file, folder, room, form, agent]
+
+    WebhookConfigInfo:
+      type: object
+      description: The subscription, plus its delivery state at send time.
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        url:
+          type: string
+        triggers:
+          type: array
+          items:
+            type: string
+          description: Subscribed events, or ["*"] for the catch-all.
+        target:
+          $ref: "#/components/schemas/WebhookTargetInfo"
+        lastFailureOn:
+          type: string
+          format: date-time
+        lastFailureContent:
+          type: string
+        lastSuccessOn:
+          type: string
+          format: date-time
+        retryCount:
+          type: integer
+          description: Omitted on the first attempt (0). Present from attempt 2.
+        retryOn:
+          type: string
+          format: date-time
+
+    # ---------------------------------------------------------------- payloads
+
+    UserPayload:
+      type: object
+      description: |
+        ASC.Core.Common/Core/UserInfo.cs -- the domain entity, verbatim.
+        It carries NO [JsonIgnore] at all, so every public member below reaches
+        the wire. sid / ssoNameId / ssoSessionId / ldapQouta are null on portals
+        without LDAP or SSO and therefore invisible in most test captures; they
+        DO appear on LDAP/SSO tenants, and are flagged REVIEW below.
+      properties:
+        id:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+        userName:
+          type: string
+        email:
+          type: string
+          format: email
+        birthDate:
+          type: string
+          format: date-time
+        sex:
+          type: boolean
+        status:
+          type: integer
+          description: enum EmployeeStatus
+        activationStatus:
+          type: integer
+          description: enum EmployeeActivationStatus (flags)
+        terminatedDate:
+          type: string
+          format: date-time
+        title:
+          type: string
+        workFromDate:
+          type: string
+          format: date-time
+        location:
+          type: string
+        notes:
+          type: string
+        contacts:
+          type: string
+          description: >
+            Flattened form of contactsList. BOTH are emitted -- the same data twice.
+        contactsList:
+          type: array
+          items:
+            type: string
+        removed:
+          type: boolean
+        lastModified:
+          type: string
+          format: date-time
+        tenantId:
+          type: integer
+        cultureName:
+          type: string
+        mobilePhone:
+          type: string
+        mobilePhoneActivationStatus:
+          type: integer
+          description: enum MobilePhoneActivationStatus
+        createDate:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+          format: uuid
+        spam:
+          type: boolean
+        sid:
+          type: string
+          description: LDAP identifier. REVIEW.
+        ldapQouta:
+          type: integer
+          format: int64
+          description: >
+            sic -- misspelled in the domain type, and misspelled on the wire.
+            LDAP quota. REVIEW.
+        ssoNameId:
+          type: string
+          description: SAML identifier. REVIEW.
+        ssoSessionId:
+          type: string
+          description: >
+            SAML SESSION identifier. REVIEW -- should almost certainly not be
+            on the wire.
+        isActive:
+          type: boolean
+          readOnly: true
+          description: computed getter
+        checkActivation:
+          type: boolean
+          readOnly: true
+          description: computed getter
+
+    GroupPayload:
+      type: object
+      description: >
+        ASC.Core.Common/Core/GroupInfo.cs. Note `ID` in C#; the camelCase policy
+        lowercases the whole leading run, so it is "id" on the wire, while
+        `CategoryID` becomes "categoryID".
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        categoryID:
+          type: string
+          format: uuid
+        parent:
+          $ref: "#/components/schemas/GroupPayload"
+        sid:
+          type: string
+          description: LDAP identifier. REVIEW.
+        removed:
+          type: boolean
+
+    FileEntryPayload:
+      type: object
+      description: |
+        The payload for EVERY file, folder, room, agent and form trigger.
+
+        There is deliberately no File- or Folder-specific schema. WebhookManager
+        calls PublishAsync<T1,T2> with a static parameter type of FileEntry<T>,
+        so T1 binds to the abstract base and System.Text.Json serializes by
+        DECLARED type. File<T> and Folder<T> members -- pureTitle, version,
+        contentLength, folderType, filesCount, isRoom -- therefore never reach
+        the wire, however the entry was published.
+
+        One consequence worth internalising: `title` IS present, even for files.
+        File<T> hides Title behind [JsonIgnore] and exposes pureTitle instead,
+        but that override is invisible here because the base declaration is what
+        gets serialized.
+
+        Verified against a captured production delivery: all 14 keys of a real
+        file.created payload are members of this schema and nothing else.
+        (Files/Core/Core/Entries/FileEntry.cs; [JsonIgnore] members excluded.)
+      properties:
+        id:
+          $ref: "#/components/schemas/EntryId"
+        parentId:
+          $ref: "#/components/schemas/EntryId"
+        rootId:
+          $ref: "#/components/schemas/EntryId"
+        originId:
+          $ref: "#/components/schemas/EntryId"
+        originRoomId:
+          $ref: "#/components/schemas/EntryId"
+        folderIdDisplay:
+          $ref: "#/components/schemas/EntryId"
+        mutableId:
+          type: boolean
+        title:
+          type: string
+          description: >
+            The entry name, e.g. "321.xlsx". Present for files as well as
+            folders: File<T> overrides Title with [JsonIgnore] and exposes
+            pureTitle instead, but that override is never reached because the
+            base declaration is what gets serialized.
+        isNew:
+          type: boolean
+          description: Declared abstract on FileEntry; omitted when false.
+        createBy:
+          type: string
+          format: uuid
+        createOn:
+          type: string
+          format: date-time
+        modifiedBy:
+          type: string
+          format: uuid
+        modifiedOn:
+          type: string
+          format: date-time
+        sharedBy:
+          type: string
+          format: uuid
+        rootCreateBy:
+          type: string
+          format: uuid
+        parentRoomCreatedBy:
+          type: string
+          format: uuid
+        rootFolderType:
+          type: integer
+          description: enum FolderType
+        parentRoomType:
+          type: integer
+          description: enum FolderType
+        fileEntryType:
+          type: integer
+          description: >
+            enum FileEntryType -- 1 folder, 2 file. The ONLY way to tell a folder
+            from a file: no subtype-specific fields are ever sent.
+        access:
+          type: integer
+          description: enum FileShare
+        shared:
+          type: boolean
+        sharedForUser:
+          type: boolean
+        sharedExternal:
+          type: boolean
+        parentShared:
+          type: boolean
+        providerId:
+          type: integer
+        providerKey:
+          type: string
+        originTitle:
+          type: string
+        originRoomTitle:
+          type: string
+        order:
+          type: integer
+        error:
+          type: string
+        tags:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+          description: "TODO: expand Tag."
+        shareRecord:
+          type: object
+          additionalProperties: true
+          description: "TODO: expand FileShareRecord<T>."
+        security:
+          type: object
+          additionalProperties:
+            type: boolean
+          description: >
+            Caller-relative permission map (enum FilesSecurityActions -> bool).
+            Internal ACL state on the wire. REVIEW.
+        securityByUsers:
+          type: object
+          additionalProperties:
+            type: object
+            additionalProperties:
+              type: boolean
+          description: >
+            Per-user permission map. Initialised non-null, so it is emitted as
+            {} rather than omitted. REVIEW.
+
+    FormSubmitPayload:
+      type: object
+      description: |
+        Files/Core/Utils/WebhookManager.cs -> SubmittedFormData<T>. The ONLY
+        trigger with a wrapper rather than a bare entry, and the only one whose
+        `webhook.target.id` refers to a different entity (the original form)
+        than the entry that changed. form.filled.out and form.stopped do NOT use
+        this shape -- they send FilePayload.
+      properties:
+        originalForm:
+          $ref: "#/components/schemas/FileEntryPayload"
+        submittedForm:
+          $ref: "#/components/schemas/FileEntryPayload"
