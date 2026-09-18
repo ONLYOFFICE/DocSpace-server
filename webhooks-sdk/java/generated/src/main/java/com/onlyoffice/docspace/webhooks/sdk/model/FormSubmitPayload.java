@@ -50,7 +50,7 @@ import com.onlyoffice.docspace.webhooks.sdk.JSON;
 /**
  * Files/Core/Utils/WebhookManager.cs -&gt; SubmittedFormData&lt;T&gt;. The ONLY trigger with a wrapper rather than a bare entry, and the only one whose &#x60;webhook.target.id&#x60; refers to a different entity (the original form) than the entry that changed. form.filled.out and form.stopped do NOT use this shape -- they send FilePayload. 
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2026-09-18T14:35:03.811557400+03:00[Europe/Moscow]", comments = "Generator version: 7.25.0")
+@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.25.0")
 public class FormSubmitPayload {
   public static final String SERIALIZED_NAME_ORIGINAL_FORM = "originalForm";
   @SerializedName(SERIALIZED_NAME_ORIGINAL_FORM)
