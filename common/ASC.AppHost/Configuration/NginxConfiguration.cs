@@ -75,11 +75,20 @@ public static class NginxConfiguration
             .WithBindMount(Path.Combine(clientBasePath, "packages", "management"), "/var/www/management")
             .WithBindMount(certDir, "/etc/nginx/certs/", isReadOnly: true)
             .WithBindMount(sslConfPath, "/etc/nginx/dev-templates/docspace-ssl.conf.template", isReadOnly: true)
-            .WithBindMount(otelConfPath, "/etc/nginx/conf.d/00-otel.conf", isReadOnly: true)
-            .WithBindMount(otelEnvPath, "/etc/nginx/conf.d/00-otel.main", isReadOnly: true)
             .WithContainerRuntimeArgs(
                 "-p", $"0.0.0.0:{Constants.AppHostPort}:{Constants.RestyPort}",
                 "-p", $"0.0.0.0:{Constants.AppHostHttpsPort}:{Constants.RestyHttpsPort}");
+
+        if (otel)
+        {
+            // The lua hooks are only mounted when telemetry is on. The modules
+            // behind them bail out on their own when the OTEL_* flags are unset,
+            // but not mounting them at all keeps the plain image free of any
+            // dependency on the Lua tree.
+            openResty
+                .WithBindMount(otelConfPath, "/etc/nginx/conf.d/00-otel.conf", isReadOnly: true)
+                .WithBindMount(otelEnvPath, "/etc/nginx/conf.d/00-otel.main", isReadOnly: true);
+        }
 
         if (startPackages != null)
         {
@@ -112,19 +121,30 @@ public static class NginxConfiguration
             openResty.WithEnvironment("OTEL_SERVICE_NAME", Constants.OpenRestyContainer);
             openResty.WithEnvironment("OTEL_EXPORTER_OTLP_ENDPOINT",
                 "http://" + Constants.HostDockerInternal + ":" + otlpHttpUri!.Port.ToString());
+            // config.lua reads none of this - nginx does not even declare the
+            // variable in otel.main, so Lua cannot see it. It is corrected only
+            // so it stops contradicting the endpoint next to it, which
+            // WithOtlpExporter left pointing at gRPC.
+            openResty.WithEnvironment("OTEL_EXPORTER_OTLP_PROTOCOL", "http/protobuf");
         }
 
-        // None of the three Lua dependencies ships with OpenResty. Versions match
-        // the otel-build stage of buildtools/install/docker/build/Dockerfile, which
-        // bakes them into the production router image; here they are installed at
-        // start (~12 s) so the dev router can stay a stock image. A failure leaves
-        // the router serving normally, only without telemetry.
+        // None of the three Lua dependencies ships with OpenResty. All three are
+        // pinned to the versions the otel-build stage of
+        // buildtools/install/docker/build/Dockerfile bakes into the production
+        // router image; here they are installed at start (~12 s) so the dev router
+        // can stay a stock image.
+        //
+        // Clearing the flags on failure is what keeps a failed install harmless:
+        // with them still set, rewrite.lua requires opentelemetry on every request
+        // and the router answers 500 to everything instead of merely losing its
+        // telemetry. The exports reach nginx because it is started from this shell.
         var otelInstall = otel
             ? "{ /usr/local/openresty/luajit/bin/luarocks install lua-protobuf 0.3.3 && " +
-              "/usr/local/openresty/bin/opm get ledgetech/lua-resty-http && " +
+              "/usr/local/openresty/bin/opm get ledgetech/lua-resty-http=0.16.1 && " +
               "curl -sSL https://github.com/yangxikun/opentelemetry-lua/archive/refs/tags/v0.2.6.tar.gz | tar -xz -C /tmp && " +
               "cp -r /tmp/opentelemetry-lua-0.2.6/lib/opentelemetry /usr/local/openresty/site/lualib/ ; } " +
-              "|| echo 'otel: dependency install failed, router telemetry is off'; "
+              "|| { echo 'otel: dependency install failed, router telemetry is off'; " +
+              "export OTEL_TRACES_ENABLED=false OTEL_LOGS_ENABLED=false; }; "
             : "";
 
         openResty.WithArgs("/bin/sh", "-c",
