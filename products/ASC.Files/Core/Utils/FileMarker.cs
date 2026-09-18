@@ -545,18 +545,16 @@ public class FileMarker(
             var room = await DocSpaceHelper.GetParentRoom(fileEntry, folderDao);
             var file = await fileDao.GetFileAsync(fileEntry.Id);
 
-            if (file.IsForm && room.FolderType == FolderType.VirtualDataRoom)
+            if (file.IsPdf && room.FolderType == FolderType.VirtualDataRoom)
             {
                 var allRoleUserIds = await fileDao.GetFormRoles(file.Id).Where(r => r.UserId != authContext.CurrentAccount.ID).Select(r => r.UserId).ToListAsync();
-                if (allRoleUserIds.Count == 0)
+                if (allRoleUserIds.Count > 0)
                 {
+                    taskData.UserIDs = allRoleUserIds;
+                    var markerHelper = serviceProvider.GetService<FileMarkerHelper<T>>();
+                    await markerHelper.Add(taskData);
                     return;
                 }
-
-                taskData.UserIDs = allRoleUserIds;
-                var markerHelper = serviceProvider.GetService<FileMarkerHelper<T>>();
-                await markerHelper.Add(taskData);
-                return;
             }
         }
         var fileMarkerHelper = serviceProvider.GetService<FileMarkerHelper<T>>();

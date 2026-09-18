@@ -1090,7 +1090,7 @@ public class CustomizationConfig<T>(
 
     public async Task<SubmitForm> GetSubmitForm(File<T> file)
     {
-        if (!file.IsForm)
+        if (!file.IsPdf)
         {
             return null;
         }

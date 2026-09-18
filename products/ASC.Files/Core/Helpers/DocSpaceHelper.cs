@@ -188,7 +188,7 @@ public static class DocSpaceHelper
             return false;
         }
 
-        if (file.IsForm)
+        if (file.IsPdf)
         {
             return true;
         }

@@ -561,7 +561,7 @@ public class FileDtoHelper(
                 _ = await _fileSecurity.SetSecurity(new[] { currentRoom }.ToAsyncEnumerable()).ToListAsync();
             }
 
-            result.IsForm = file.IsForm;
+            result.IsForm = file.IsPdf;
 
             if (DocSpaceHelper.IsFormsFillingSystemFolder(currentFolder.FolderType))
             {

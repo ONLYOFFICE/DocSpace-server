@@ -208,9 +208,14 @@ public class File<T> : FileEntry<T>
     public string LockedBy { get; set; }
 
     /// <summary>
-    /// Specifies if the file is a form or not.
+    /// Specifies if the file is a PDF document. All PDFs are treated as fillable forms.
     /// </summary>
-    public bool IsForm => FileUtility.GetFileTypeByFileName(Title) == FileType.Pdf;
+    public bool IsPdf => FileUtility.GetFileTypeByFileName(Title) == FileType.Pdf;
+
+    /// <summary>
+    /// Specifies if the file is an ONLYOFFICE PDF form (created from a form template).
+    /// </summary>
+    public bool IsForm => (FilterType)Category == FilterType.PdfForm;
 
     /// <summary>
     /// Specifies if a Custom Filter editing mode is enabled for a file or not.

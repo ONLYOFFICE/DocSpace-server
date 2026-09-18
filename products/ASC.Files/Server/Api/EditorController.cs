@@ -184,7 +184,7 @@ public abstract class EditorController<T>(
         FormOpenSetup<T> formOpenSetup = null;
 
         var rootFolder = await documentServiceHelper.GetRootFolderAsync(file);
-        if (file.IsForm && rootFolder.RootFolderType != FolderType.RoomTemplates)
+        if (file.IsPdf && rootFolder.RootFolderType != FolderType.RoomTemplates)
         {
             formOpenSetup = rootFolder.FolderType switch
             {

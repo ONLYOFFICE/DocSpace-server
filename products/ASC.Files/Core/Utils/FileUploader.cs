@@ -65,7 +65,7 @@ public class FileUploader(
         var dao = daoFactory.GetFileDao<T>();
         file = await dao.SaveFileAsync(file, data);
 
-        if (file.IsForm)
+        if (file.IsPdf)
         {
             await StopFormFillingIfNeededAsync(file.Id, dao);
         }
@@ -348,7 +348,7 @@ public class FileUploader(
                     await cloneStreamForSave.DisposeAsync();
                 }
 
-                if (!uploadSession.UseChunks && uploadSession.File?.IsForm == true)
+                if (!uploadSession.UseChunks && uploadSession.File?.IsPdf == true)
                 {
                     await StopFormFillingIfNeededAsync(uploadSession.File.Id, dao);
                 }
@@ -370,7 +370,7 @@ public class FileUploader(
 
         uploadSession.File = await dao.FinalizeUploadSessionAsync(uploadSession);
 
-        if (uploadSession.File.IsForm)
+        if (uploadSession.File.IsPdf)
         {
             await StopFormFillingIfNeededAsync(uploadSession.File.Id, dao);
         }
