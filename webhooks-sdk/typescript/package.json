@@ -1,0 +1,20 @@
+{
+  "name": "@onlyoffice/docspace-webhooks-sdk",
+  "version": "0.1.0",
+  "description": "Verify and parse ONLYOFFICE DocSpace webhook deliveries",
+  "license": "AGPL-3.0-only",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "tsc && node --test \"dist/test/**/*.test.js\"",
+    "sample": "tsc && node dist/samples/log-webhook.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
