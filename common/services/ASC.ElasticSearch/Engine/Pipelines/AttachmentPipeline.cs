@@ -46,9 +46,12 @@ internal static class AttachmentPipeline
                     pp.Attachment<Attachment>(a =>
                             a.Field("document.data")
                                 .TargetField("document.attachment")
-                                .IndexedCharacters(-1))
+                                .IndexedCharacters(-1)
+                                .IgnoreMissing()
+                                .IgnoreFailure())
                         .Remove<Document>(x =>
-                            x.Field("document.data"))));
+                            x.Field("document.data")
+                                .IgnoreMissing())));
         }
     }
 }
