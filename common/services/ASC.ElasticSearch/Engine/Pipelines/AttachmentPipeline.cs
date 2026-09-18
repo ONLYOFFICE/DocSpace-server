@@ -48,7 +48,12 @@ internal static class AttachmentPipeline
                                 .TargetField("document.attachment")
                                 .IndexedCharacters(-1)
                                 .IgnoreMissing()
-                                .IgnoreFailure())
+                                // Unreadable content - an encrypted or a damaged file - must not fail the whole
+                                // index request: the document still has to be searchable by its metadata. The
+                                // reason is kept on the document itself, so the affected files stay countable.
+                                .OnFailure(of => of.Set<Document>(s => s
+                                    .Field("document.attachmentError")
+                                    .Value("{{_ingest.on_failure_message}}"))))
                         .Remove<Document>(x =>
                             x.Field("document.data")
                                 .IgnoreMissing())));
