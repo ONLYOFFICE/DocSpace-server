@@ -46,6 +46,63 @@ they are openapi-generator's default, and models-only output keeps them so long
 as `modelDocs` is not turned off. Descriptions written in the contract are what
 lands in the tables, so the contract is the only place to edit them.
 
+### Package READMEs
+
+Every language emits `generated/README.md` — the package landing page, in the
+same shape as the `sdk/docspace-api-sdk-*` ones: title, intro, Installation,
+Usage, Getting Started, then `Documentation for …` sections. Two of those are
+renamed for an inbound library: *Authorization* becomes **Verification**, and
+*API Endpoints* becomes **Events**, since this SDK receives rather than calls.
+
+Each comes from `templates/<lang>/README.mustache`. Seven languages simply
+override the generator's own README; TypeScript has none to override, so it is
+declared through `templates/typescript/files.yaml` instead.
+
+Every Getting Started sample was extracted from the generated README and
+checked: C#, Go, Java and Kotlin compile, Python and PHP pass a syntax check,
+and the C# one was additionally run against the shared fixture end to end. Ruby
+and Swift are unverified — no toolchain available.
+
+A caveat found while writing them: `packageName` is not the variable that names
+the package everywhere. Java uses `artifactId`, Ruby `gemName`, Swift
+`projectName`, Python `projectName` for the pip name. Guessing wrong renders an
+empty heading, so probe before adding a language.
+
+### Custom Markdown pages
+
+Beyond the per-model docs, a language can ship hand-written pages. C# has two,
+and is the only one that needs them — its pages are the generic webhook
+documentation; the other eight get a single self-contained README:
+
+- `RECEIVING.md` — verification, the unsigned pre-filter headers, parsing, the
+  retry budget and deduplication. Written as `templates/csharp/RECEIVING.mustache`,
+  so `{{packageName}}` and the model list are interpolated.
+- `TRIGGERS.md` — every event you can subscribe to and the payload it
+  delivers, grouped by subject. Written for the public documentation site, so
+  it carries no generator or server-internal detail.
+
+The two use different mechanisms, for a reason:
+
+**`RECEIVING.md` is native.** openapi-generator takes extra output files only
+from a config file — there is no command-line equivalent — so `generate.sh`
+passes `-c templates/<lang>/files.yaml` whenever that file exists. Two traps,
+both hit while wiring this up:
+
+1. A file declared in `files:` is *still* filtered by the `supportingFiles`
+   allowlist. Not named there, and it is silently skipped.
+2. That allowlist separates entries with a **colon**, because commas already
+   separate the top-level global properties:
+   `--global-property "models,supportingFiles=README.md:RECEIVING.md"`.
+
+**`TRIGGERS.md` cannot be.** It is built from `x-docspace-trigger-payloads`, a
+root-level vendor extension, and mustache templates only ever see the model and
+operation trees. So `tools/gen-trigger-map.py --lang markdown` emits it as a
+post-step, the same way it emits `Triggers.cs` and Java's `JSON.java`.
+
+To give another language its own pages: add `templates/<lang>/files.yaml` plus
+the `.mustache`, set a `template-dir` on its target row, and name the output in
+that target's `supportingFiles` list.
+
 DocSpace also has a second, unrelated Markdown mechanism —
 `GenerateMarkdownDocsCommand` in `ASC.Api.Documentation`, which splits the
 joined spec per service, renders it through a custom `my-markdown` codegen,
@@ -181,9 +238,15 @@ Consequences worth knowing before you write a receiver:
   server's automatic retries, but a *manual* retry from the admin UI creates a new
   delivery record and therefore a new id — the same logical event arrives with a
   different key.
-- **Answer fast.** The server retries 5 times with exponential backoff from 1 s and
-  then gives up permanently — a total budget of about 31 seconds. Acknowledge
-  immediately and process out of band.
+- **Answer fast.** A delivery gets 5 attempts with exponential backoff from 1 s —
+  about 31 seconds in total — after which it is abandoned and only an
+  administrator can replay it from the delivery log. Acknowledge immediately and
+  process out of band.
+- **Sustained failure disables the subscription.** Three days without a single
+  successful delivery and it is switched off until someone re-enables it; the
+  clock runs from the last success, or from creation if it has never succeeded.
+  Answering **410 Gone** deletes the subscription outright on the first
+  occurrence, with no grace period.
 
 ## Samples
 

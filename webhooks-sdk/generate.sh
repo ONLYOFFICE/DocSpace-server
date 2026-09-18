@@ -43,15 +43,15 @@ default_props="models,modelTests=false,modelDocs=true"
 # which live in the un-generated Client namespace; httpclient emits plain POCOs
 # that need only the two small shims in src/Compat.cs.
 targets=(
-  "csharp|csharp|models,modelTests=false,modelDocs=true,supportingFiles=README.md|packageName=DocSpace.Webhooks.SDK,library=httpclient,targetFramework=net8.0|templates/csharp"
-  "go|go||packageName=docspace_webhooks_sdk"
-  "java|java||modelPackage=com.onlyoffice.docspace.webhooks.sdk.model,invokerPackage=com.onlyoffice.docspace.webhooks.sdk,groupId=com.onlyoffice,artifactId=docspace-webhooks-sdk,hideGenerationTimestamp=true"
-  "kotlin|kotlin||packageName=onlyoffice.docspace.webhooks.sdk"
-  "php|php|models,supportingFiles,modelTests=false,modelDocs=true|invokerPackage=OnlyOffice\DocSpace\Webhooks\Sdk,packageName=onlyoffice/docspace-webhooks-sdk"
-  "python|python||packageName=docspace_webhooks_sdk"
-  "ruby|ruby||gemName=docspace-webhooks-sdk,moduleName=DocspaceWebhooksSdk"
-  "swift|swift6||projectName=DocSpaceWebhooksSDK"
-  "typescript|typescript-fetch|models,supportingFiles,modelTests=false,modelDocs=true"
+  "csharp|csharp|models,modelTests=false,modelDocs=true,supportingFiles=README.md:RECEIVING.md|packageName=DocSpace.Webhooks.SDK,library=httpclient,targetFramework=net8.0|templates/csharp"
+  "go|go|models,modelTests=false,modelDocs=true,supportingFiles=README.md|packageName=docspace_webhooks_sdk|templates/go"
+  "java|java|models,modelTests=false,modelDocs=true,supportingFiles=README.md|modelPackage=com.onlyoffice.docspace.webhooks.sdk.model,invokerPackage=com.onlyoffice.docspace.webhooks.sdk,groupId=com.onlyoffice,artifactId=docspace-webhooks-sdk,hideGenerationTimestamp=true|templates/java"
+  "kotlin|kotlin|models,modelTests=false,modelDocs=true,supportingFiles=README.md|packageName=onlyoffice.docspace.webhooks.sdk|templates/kotlin"
+  "php|php|models,supportingFiles,modelTests=false,modelDocs=true|invokerPackage=OnlyOffice\DocSpace\Webhooks\Sdk,packageName=onlyoffice/docspace-webhooks-sdk|templates/php"
+  "python|python|models,modelTests=false,modelDocs=true,supportingFiles=README.md|packageName=docspace_webhooks_sdk|templates/python"
+  "ruby|ruby|models,modelTests=false,modelDocs=true,supportingFiles=README.md|gemName=docspace-webhooks-sdk,moduleName=DocspaceWebhooksSdk|templates/ruby"
+  "swift|swift6|models,modelTests=false,modelDocs=true,supportingFiles=README.md|projectName=DocSpaceWebhooksSDK|templates/swift"
+  "typescript|typescript-fetch|models,supportingFiles,modelTests=false,modelDocs=true||templates/typescript"
 )
 
 [ -f "$spec" ] || { echo "spec not found: $spec" >&2; exit 1; }
@@ -109,6 +109,15 @@ for t in "${targets[@]}"; do
     tmpl_args="-t $here/$tmpl"
   fi
 
+  # Custom output files can only be declared in a config file -- there is no
+  # command-line equivalent -- so one is picked up by convention when present.
+  # Anything it names must ALSO appear in the supportingFiles allowlist above,
+  # colon-separated, or the generator silently skips it.
+  cfg_args=""
+  if [ -n "$tmpl" ] && [ -f "$here/$tmpl/files.yaml" ]; then
+    cfg_args="-c $here/$tmpl/files.yaml"
+  fi
+
   if openapi-generator-cli generate \
        -i "$spec" \
        -g "$gen" \
@@ -116,6 +125,7 @@ for t in "${targets[@]}"; do
        --global-property "$props" \
        $extra_args \
        $tmpl_args \
+       $cfg_args \
        > "$here/$dir/generated/.generate.log" 2>&1
   then
     echo "    models: $(find "$here/$dir/generated" -type f ! -name '.generate.log' | wc -l) files"
@@ -144,7 +154,8 @@ for t in "${targets[@]}"; do
       ;;
     csharp)
       python "$here/tools/gen-trigger-map.py" --lang csharp --spec "$spec"              --package DocSpace.Webhooks.SDK --model-package DocSpace.Webhooks.SDK.Model --out "$here/$dir/generated/src/DocSpace.Webhooks.SDK/Triggers.cs"
-      echo "    triggers: generated/src/DocSpace.Webhooks.SDK/Triggers.cs"
+      python "$here/tools/gen-trigger-map.py" --lang markdown --spec "$spec" --doc-path docs/ --out "$here/$dir/generated/TRIGGERS.md"
+      echo "    triggers: generated/src/DocSpace.Webhooks.SDK/Triggers.cs + generated/TRIGGERS.md"
       ;;
     typescript)
       python "$here/tools/gen-trigger-map.py" --lang typescript --spec "$spec" \

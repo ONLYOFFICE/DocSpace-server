@@ -1,0 +1,13 @@
+# The typescript-fetch generator registers no README supporting file, so there
+# is nothing for a template override to replace -- it has to be declared as a
+# custom output file instead. (Every other language ships its own README
+# template, which templates/<lang>/README.mustache simply overrides.)
+#
+# This target uses unrestricted `supportingFiles`, so no allowlist entry is
+# needed here. Where the allowlist names specific files, a custom file must be
+# named in it too, colon-separated -- see templates/csharp/files.yaml.
+
+files:
+  README.mustache:
+    destinationFilename: README.md
+    templateType: SupportingFiles
