@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>DocSpace.Webhooks.SDK</RootNamespace>
+    <AssemblyName>DocSpace.Webhooks.SDK</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- The generated models are not our code to tidy. -->
+    <NoWarn>$(NoWarn);CS1591;CS0472;CS8600;CS8602;CS8603;CS8604;CS8618;CS8625;CS8765</NoWarn>
+    <!-- This SDK is standalone; keep the repo's central package pinning out. -->
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Contract models + trigger table, emitted by ../../../generate.sh.
+         Never edited by hand; wiped and rewritten on every regeneration. -->
+    <Compile Include="../../generated/src/DocSpace.Webhooks.SDK/**/*.cs"
+             LinkBase="Generated" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+</Project>
