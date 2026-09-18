@@ -1,0 +1,112 @@
+# @onlyoffice/docspace-webhooks-sdk
+
+The ONLYOFFICE DocSpace Webhooks SDK for TypeScript is a library that provides tools for receiving webhook deliveries from DocSpace. It verifies the signature on each delivery and decodes its payload into ready-to-use models.
+
+It is the inbound counterpart to `@onlyoffice/docspace-api-sdk`: that library calls DocSpace, this one handles what DocSpace sends you. It makes no requests of its own.
+
+For more information, please visit [https://helpdesk.onlyoffice.com/hc/en-us](https://helpdesk.onlyoffice.com/hc/en-us)
+
+## Requirements
+
+Node.js 18+
+
+## Installation
+
+```
+npm install @onlyoffice/docspace-webhooks-sdk
+```
+
+## Usage
+
+A receiver does two things, in this order: verify, then parse.
+
+```ts
+if (!verifySignature(body, secret, signature)) {
+    return res.status(401).end();
+}
+
+const hook = parseWebhook(body);
+```
+
+`body` must be the **raw bytes exactly as received**. A body that has been through `JSON.parse` and `JSON.stringify` is a different byte sequence and will never match, so mount `express.raw()` on the webhook route rather than `express.json()`.
+
+Answer as soon as the signature checks out and do the real work afterwards. A delivery gets five attempts over roughly 31 seconds, after which it is abandoned; a subscription that goes three days without a single successful delivery is switched off.
+
+## Getting Started
+
+```ts
+import express from 'express';
+import {
+    verifySignature,
+    parseWebhook,
+    isKnownWebhook,
+    readSignatureHeader,
+} from '@onlyoffice/docspace-webhooks-sdk';
+
+const app = express();
+const secret = 'YOUR_SUBSCRIPTION_SECRET_KEY';
+
+// express.raw() keeps the body as a Buffer; express.json() would reparse it and
+// the signature would never match.
+app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+    const signature = readSignatureHeader(req.headers);
+
+    if (!verifySignature(req.body, secret, signature)) {
+        return res.status(401).end();
+    }
+
+    const hook = parseWebhook(req.body);
+
+    // Acknowledge now; anything slow belongs after this point.
+    res.status(200).end();
+
+    if (!isKnownWebhook(hook)) {
+        return;               // an event added after this build
+    }
+
+    switch (hook.trigger) {
+        case 'user.created':
+        case 'user.updated':
+            console.log(`${hook.trigger}: ${hook.payload.userName}`);
+            break;
+
+        case 'file.created':
+        case 'folder.created':
+            // Files and folders share one payload shape; fileEntryType tells
+            // them apart: 1 folder, 2 file.
+            console.log(
+                `${hook.trigger}: ` +
+                `${hook.payload.fileEntryType === 2 ? 'file' : 'folder'} ` +
+                `"${hook.payload.title}"`,
+            );
+            break;
+    }
+});
+
+app.listen(5555);
+```
+
+Switching on `hook.trigger` after `isKnownWebhook` narrows `hook.payload` to the type that event carries, with no cast.
+
+## Documentation for Verification
+
+Every delivery carries `x-docspace-signature-256`, an HMAC-SHA256 of the raw body keyed with the subscription's secret, formatted as `sha256=` followed by uppercase hexadecimal.
+
+`verifySignature` handles the three details that are easy to get wrong: it hashes the raw body, compares in constant time, and folds case — DocSpace emits uppercase hexadecimal where some other services emit lowercase.
+
+Two further headers, `x-docspace-event-id` and `x-docspace-event-timestamp`, repeat `event.id` and `event.createOn` so a stale or already-seen delivery can be dropped without reading the body. They are **not** covered by the signature: reject on them freely, but never accept on them. The values inside the verified body are the authoritative ones.
+
+Deduplicate on `event.id`. It is stable across the server's automatic retries, though a manual retry by an administrator creates a new record and therefore a new id.
+
+## Documentation for Events
+
+`event.trigger` names the event that caused the delivery, for example `file.created`. `GET api/2.0/settings/webhook/triggers` lists every event, the value to subscribe with, and whether your role may subscribe to it.
+
+Files, folders, rooms, agents and forms all deliver the same payload shape; use `fileEntryType` (1 folder, 2 file) to tell them apart. A file's name arrives in `title`, and a field missing from the JSON means empty, `false` or zero — never "unknown".
+
+New events are added over time. `isKnownWebhook` returns false for one this build does not recognise, and the body stays available on `hook.raw`, so an upgrade cannot break your endpoint.
+
+## Documentation for Models
+
+{{#models}}{{#model}} - [{{classname}}](docs/{{classname}}.md)
+{{/model}}{{/models}}
