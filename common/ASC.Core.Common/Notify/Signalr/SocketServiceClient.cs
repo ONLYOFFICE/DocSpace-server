@@ -159,6 +159,17 @@ public class SocketService(
                         // socket was closed by the finalizer - one connection per notification, hundreds open at peak.
                         using var response = await httpClient.SendAsync(socketData.RequestMessage, HttpCompletionOption.ResponseHeadersRead, stoppingToken);
                     }
+                    catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                    {
+                        // The service is shutting down: every in-flight request cancels at once, so logging them
+                        // would produce a burst of identical entries for an entirely expected event.
+                    }
+                    catch (Exception e) when (e is TaskCanceledException or TimeoutException)
+                    {
+                        // A timeout is an expected transient condition (socket service busy or restarting) - the stack
+                        // trace is always the same and floods the log, so only the target is worth recording.
+                        logger.WarningServiceTimeout(socketData.RequestMessage.Method.Method, socketData.RequestMessage.RequestUri?.ToString());
+                    }
                     catch (Exception e)
                     {
                         logger.ErrorService(e);
@@ -189,10 +200,22 @@ public static class SocketHttpClientExtension
                     client.BaseAddress = new Uri(url);
                 }
 
-                client.Timeout = TimeSpan.FromSeconds(5);
+                // Covers the whole SendAsync, including the wait for a pooled connection - 5s was tight enough to
+                // cancel requests that had not even been sent yet.
+                client.Timeout = TimeSpan.FromSeconds(15);
                 client.DefaultRequestHeaders.ConnectionClose = false;
             })
-            .SetHandlerLifetime(TimeSpan.FromMinutes(5));
+            .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+            {
+                // Must stay below the socket service keepAliveTimeout (65s), otherwise the node side closes idle
+                // connections first and requests land on a socket that is already going away. Keep it close to that
+                // bound: a short idle timeout would force a fresh TCP connection on every gap between notifications.
+                PooledConnectionIdleTimeout = TimeSpan.FromSeconds(60),
+                PooledConnectionLifetime = TimeSpan.FromMinutes(5),
+                ConnectTimeout = TimeSpan.FromSeconds(3),
+                AllowAutoRedirect = false
+            })
+            .SetHandlerLifetime(Timeout.InfiniteTimeSpan);
     }
 }
 
