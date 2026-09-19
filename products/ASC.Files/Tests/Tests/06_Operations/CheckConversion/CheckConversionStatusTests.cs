@@ -57,7 +57,7 @@ public class CheckConversionStatusTests(
         // Act
         var result = await _filesOperationsApi.StartFileConversionAsync(
             file.Id,
-            new CheckConversionRequestDtoInteger(startConvert: true, outputType: "pdf"),
+            new CheckConversionRequestDto(startConvert: true, outputType: "pdf"),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -92,7 +92,7 @@ public class CheckConversionStatusTests(
         // Act
         var result = await _filesOperationsApi.StartFileConversionAsync(
             file.Id,
-            new CheckConversionRequestDtoInteger(startConvert: true, outputType: "pdf"),
+            new CheckConversionRequestDto(startConvert: true, outputType: "pdf"),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -111,7 +111,7 @@ public class CheckConversionStatusTests(
         // Act
         var result = await _filesOperationsApi.StartFileConversionAsync(
             file.Id,
-            new CheckConversionRequestDtoInteger(startConvert: true, outputType: "pdf"),
+            new CheckConversionRequestDto(startConvert: true, outputType: "pdf"),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -130,7 +130,7 @@ public class CheckConversionStatusTests(
         // Act
         var result = await _filesOperationsApi.StartFileConversionAsync(
             file.Id,
-            new CheckConversionRequestDtoInteger(startConvert: false),
+            new CheckConversionRequestDto(startConvert: false),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -145,7 +145,7 @@ public class CheckConversionStatusTests(
         // Act
         var result = await _filesOperationsApi.StartFileConversionAsync(
             999999999,
-            new CheckConversionRequestDtoInteger(startConvert: true, outputType: "pdf"),
+            new CheckConversionRequestDto(startConvert: true, outputType: "pdf"),
             TestContext.Current.CancellationToken);
 
         // Assert

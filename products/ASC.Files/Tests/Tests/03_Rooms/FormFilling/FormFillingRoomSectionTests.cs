@@ -358,7 +358,7 @@ public class FormFillingRoomSectionTests(
 
         await _filesApi.ManageFormFillingAsync(
             formId.ToString(),
-            new ManageFormFillingDtoInteger(formId, FormFillingManageAction.Start),
+            new ManageFormFillingDto(formId, FormFillingManageAction.Start),
             TestContext.Current.CancellationToken);
     }
 }

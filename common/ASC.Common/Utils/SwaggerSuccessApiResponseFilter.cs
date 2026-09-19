@@ -201,7 +201,7 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
     }
     
     // The wrapper name normally drops the payload's `Dto` marker - `FileDto` becomes `FileWrapper`, the
-    // flattened generic `FileDtoInteger` becomes `FileIntegerWrapper`. But `components/schemas` is shared
+    // third-party `ThirdPartyFileDto` becomes `ThirdPartyFileWrapper`. But `components/schemas` is shared
     // with real C# classes and several of them are already called `*Wrapper`
     // (`CompanyWhiteLabelSettingsWrapper`, `TenantWalletSettingsWrapper` - request bodies). The `TryAdd`
     // above then kept the stranger and the 200 response was documented as that unrelated type, which is
@@ -252,8 +252,8 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
     }
 
     // `Dto` is a marker of a payload type name, not a word: it is cut where a type name can end - at the
-    // end of the id, or in front of the next capital, as in the flattened generic `FileDtoInteger`. Never
-    // at the start and never inside a word, so `DtoFileDto` becomes `DtoFile` and not `File`.
+    // end of the id, or in front of the next capital, as in the flattened generic `NewItemsDtoRoomNewItemsDto`.
+    // Never at the start and never inside a word, so `DtoFileDto` becomes `DtoFile` and not `File`.
     private static string StripDtoMarker(string schemaId)
     {
         var stripped = schemaId;

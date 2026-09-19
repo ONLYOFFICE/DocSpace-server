@@ -79,7 +79,7 @@ public class RoomQuotaPermissionsTests(
         if (action == QuotaAction.Reset)
         {
             await _quotaApi.UpdateRoomsQuotaAsync(
-                new UpdateRoomsQuotaRequestDtoInteger([new(room.Id)], QuotaMinimalBytes),
+                new UpdateRoomsQuotaRequestDto([new(room.Id)], QuotaMinimalBytes),
                 TestContext.Current.CancellationToken);
         }
 
@@ -98,13 +98,13 @@ public class RoomQuotaPermissionsTests(
             if (action == QuotaAction.Update)
             {
                 await _quotaApi.UpdateRoomsQuotaAsync(
-                    new UpdateRoomsQuotaRequestDtoInteger([new(room.Id)], QuotaMinimalBytes),
+                    new UpdateRoomsQuotaRequestDto([new(room.Id)], QuotaMinimalBytes),
                     TestContext.Current.CancellationToken);
             }
             else
             {
                 await _quotaApi.ResetRoomQuotaAsync(
-                    new UpdateRoomsRoomIdsRequestDtoInteger([new(room.Id)]),
+                    new UpdateRoomsRoomIdsRequestDto([new(room.Id)]),
                     TestContext.Current.CancellationToken);
             }
         });

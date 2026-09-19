@@ -41,7 +41,7 @@ namespace ASC.Files.Tests.Tests._01_Files.Editing;
 public abstract class EditingTestBase(AspireAppFixture fixture) : BaseTest(fixture)
 {
     /// <summary>Creates a custom room and a file inside it, owned by the currently authenticated user.</summary>
-    protected async Task<(FolderDtoInteger Room, FileDtoInteger File)> CreateRoomWithFile(string roomTitle, string fileTitle)
+    protected async Task<(FolderDto Room, FileDto File)> CreateRoomWithFile(string roomTitle, string fileTitle)
     {
         var room = await CreateCustomRoom(roomTitle);
         var file = await CreateFile(fileTitle, room.Id);

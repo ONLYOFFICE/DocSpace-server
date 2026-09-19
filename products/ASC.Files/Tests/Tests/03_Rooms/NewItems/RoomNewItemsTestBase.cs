@@ -91,7 +91,7 @@ public abstract class RoomNewItemsTestBase(
     /// anything created afterwards counts as new for that member. Leaves the client authenticated
     /// as the owner.
     /// </summary>
-    protected async Task<(FolderDtoInteger Room, User Member)> CreateRoomWithVisitor(string title, FileShare access)
+    protected async Task<(FolderDto Room, User Member)> CreateRoomWithVisitor(string title, FileShare access)
     {
         await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom(title);

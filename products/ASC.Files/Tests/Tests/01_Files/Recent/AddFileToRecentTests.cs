@@ -171,7 +171,7 @@ public class AddFileToRecentTests(
         // Act
         await _filesApi.AddFileToRecentAsync(file.Id, cancellationToken: TestContext.Current.CancellationToken);
 
-        // Assert - FolderContentDtoInteger.Files is typed FileEntryBaseDto, which carries Title but
+        // Assert - FolderContentDto.Files is typed FileEntryBaseDto, which carries Title but
         // not Id, so the file is matched by its (unique) title.
         var recent = await PollRecentUntil(r => r.Files.Any(f => f.Title == file.Title));
         recent.Files.Should().Contain(f => f.Title == file.Title);

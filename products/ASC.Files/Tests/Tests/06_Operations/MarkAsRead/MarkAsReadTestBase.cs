@@ -73,7 +73,7 @@ public abstract class MarkAsReadTestBase(
     /// Creates a room, invites a member with Read access and lets them open it, so that anything
     /// created afterwards counts as new for that member. Leaves the client authenticated as the owner.
     /// </summary>
-    protected async Task<(FolderDtoInteger Room, User Member)> CreateRoomWithReadVisitor(string title)
+    protected async Task<(FolderDto Room, User Member)> CreateRoomWithReadVisitor(string title)
     {
         await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom(title);

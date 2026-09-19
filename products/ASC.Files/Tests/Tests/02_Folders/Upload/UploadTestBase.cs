@@ -57,7 +57,7 @@ public abstract class UploadTestBase(
     /// Uploads a single in-memory file to the given folder through
     /// <c>POST /api/2.0/files/{folderId}/upload</c>, returning the response array's file entries.
     /// </summary>
-    protected async Task<List<FileDtoInteger>> UploadToFolderAsync(
+    protected async Task<List<FileDto>> UploadToFolderAsync(
         int folderId,
         byte[]? content,
         string fileName,
@@ -81,7 +81,7 @@ public abstract class UploadTestBase(
     /// Uploads a single in-memory file to the My Documents section through
     /// <c>POST /api/2.0/files/@my/upload</c>, returning the response array's file entries.
     /// </summary>
-    protected async Task<List<FileDtoInteger>> UploadToMyAsync(
+    protected async Task<List<FileDto>> UploadToMyAsync(
         byte[]? content,
         string fileName,
         string contentType = "application/octet-stream",
@@ -103,7 +103,7 @@ public abstract class UploadTestBase(
     /// Inserts a single in-memory file into the My Documents section through
     /// <c>POST /api/2.0/files/@my/insert</c>, returning the inserted file entry.
     /// </summary>
-    protected async Task<FileDtoInteger> InsertToMyAsync(
+    protected async Task<FileDto> InsertToMyAsync(
         byte[]? content,
         string fileName,
         string? title = null,

@@ -16,10 +16,16 @@
 
 package com.example.codegen;
 
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.servers.*;
 import io.swagger.v3.oas.models.headers.*;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.oas.models.parameters.Parameter;
+import io.swagger.v3.oas.models.parameters.RequestBody;
+import io.swagger.v3.oas.models.responses.ApiResponse;
+import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Json31;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 
@@ -162,8 +168,117 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
         return objs;
     }
 
+    private static final String THIRD_PARTY_VARIANT = "x-thirdparty-variant";
+    private static final String IS_THIRD_PARTY_VARIANT = "x-is-thirdparty-variant";
+    private static final String THIRD_PARTY_VARIANT_OPERATION = "x-thirdparty-variant-operation";
+
+    // A generic controller action exists twice on the server, on one and the same route: closed over int for
+    // an entry the portal stores itself and over string for an entry on a connected third-party account. The
+    // document describes the int shape as the operation and the string shape as `x-thirdparty-variant` - only
+    // the parameters, request body and responses that differ. The variant is turned into a second
+    // CodegenOperation under the same name, which the class template then renders as one more overload:
+    // `GetFileInfo(int fileId)` returns FileWrapper, `GetFileInfo(string fileId)` returns ThirdPartyFileWrapper.
+    @Override
+    public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List<Server> servers) {
+        CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);
+
+        Object extension = operation.getExtensions() == null ? null : operation.getExtensions().get(THIRD_PARTY_VARIANT);
+        if (extension instanceof Map) {
+            Operation variant = thirdPartyVariant(operation, (Map<?, ?>) extension);
+            CodegenOperation variantOp = super.fromOperation(path, httpMethod, variant, servers);
+            variantOp.vendorExtensions.remove(THIRD_PARTY_VARIANT);
+            variantOp.vendorExtensions.put(IS_THIRD_PARTY_VARIANT, true);
+            op.vendorExtensions.put(THIRD_PARTY_VARIANT_OPERATION, variantOp);
+        }
+
+        return op;
+    }
+
+    // The variant as a full Operation: the original with the pieces named by the extension swapped in. Built
+    // through the swagger models rather than patched on the CodegenOperation, so that the generator derives the
+    // parameter and return types of the overload exactly as it does for every other operation.
+    private static Operation thirdPartyVariant(Operation operation, Map<?, ?> extension) {
+        Operation variant = new Operation()
+            .operationId(operation.getOperationId())
+            .summary(operation.getSummary() == null ? null : operation.getSummary() + " (third-party storage)")
+            .description(operation.getDescription())
+            .tags(operation.getTags())
+            .deprecated(operation.getDeprecated())
+            .security(operation.getSecurity())
+            .servers(operation.getServers())
+            .externalDocs(operation.getExternalDocs())
+            .callbacks(operation.getCallbacks())
+            .extensions(operation.getExtensions() == null ? null : new LinkedHashMap<>(operation.getExtensions()));
+
+        List<Parameter> parameters = new ArrayList<>();
+        if (operation.getParameters() != null) {
+            parameters.addAll(operation.getParameters());
+        }
+        Object parameterOverrides = extension.get("parameters");
+        if (parameterOverrides instanceof List) {
+            for (Object item : (List<?>) parameterOverrides) {
+                Parameter override = Json31.mapper().convertValue(item, Parameter.class);
+                int index = -1;
+                for (int i = 0; i < parameters.size(); i++) {
+                    Parameter existing = parameters.get(i);
+                    if (Objects.equals(existing.getName(), override.getName()) && Objects.equals(existing.getIn(), override.getIn())) {
+                        index = i;
+                        break;
+                    }
+                }
+                if (index >= 0) {
+                    parameters.set(index, override);
+                } else {
+                    parameters.add(override);
+                }
+            }
+        }
+        variant.setParameters(parameters);
+
+        Object requestBody = extension.get("requestBody");
+        variant.setRequestBody(requestBody instanceof Map
+            ? Json31.mapper().convertValue(requestBody, RequestBody.class)
+            : operation.getRequestBody());
+
+        ApiResponses responses = new ApiResponses();
+        if (operation.getResponses() != null) {
+            responses.putAll(operation.getResponses());
+        }
+        Object responseOverrides = extension.get("responses");
+        if (responseOverrides instanceof Map) {
+            for (Map.Entry<?, ?> entry : ((Map<?, ?>) responseOverrides).entrySet()) {
+                responses.put(String.valueOf(entry.getKey()), Json31.mapper().convertValue(entry.getValue(), ApiResponse.class));
+            }
+        }
+        variant.setResponses(responses);
+
+        return variant;
+    }
+
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
+        // Before the base class processes the list, so that the overloads get the same treatment as the
+        // operations they were derived from.
+        if (objs != null && objs.getOperations() != null && objs.getOperations().getOperation() != null) {
+            ListIterator<CodegenOperation> iterator = objs.getOperations().getOperation().listIterator();
+            while (iterator.hasNext()) {
+                CodegenOperation op = iterator.next();
+                Object variant = op.vendorExtensions.remove(THIRD_PARTY_VARIANT_OPERATION);
+                if (variant instanceof CodegenOperation) {
+                    CodegenOperation variantOp = (CodegenOperation) variant;
+                    // What DefaultGenerator sets on an operation after fromOperation, which the variant never went through.
+                    variantOp.tags = op.tags;
+                    variantOp.baseName = op.baseName;
+                    variantOp.operationIdLowerCase = op.operationIdLowerCase;
+                    variantOp.operationIdCamelCase = op.operationIdCamelCase;
+                    variantOp.operationIdSnakeCase = op.operationIdSnakeCase;
+                    variantOp.authMethods = op.authMethods;
+                    variantOp.hasAuthMethods = op.hasAuthMethods;
+                    iterator.add(variantOp);
+                }
+            }
+        }
+
         super.postProcessOperationsWithModels(objs, allModels);
 
         if (objs != null && objs.getOperations() != null) {

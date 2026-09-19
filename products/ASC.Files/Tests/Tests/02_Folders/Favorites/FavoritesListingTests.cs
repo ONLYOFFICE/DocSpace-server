@@ -149,7 +149,7 @@ public class FavoritesListingTests(
     [Fact]
     public async Task GetFavorites_FileFromRoom_ShowsOriginRoomTitle()
     {
-        // Arrange - FolderContentDtoInteger.Files is typed List<FileEntryBaseDto>, which does not
+        // Arrange - FolderContentDto.Files is typed List<FileEntryBaseDto>, which does not
         // carry originRoomTitle, so this reads the raw response (see FavoritesTestBase).
         var room = await CreateCustomRoom("Autotest Favorites Origin Room");
         var file = await CreateFile("Autotest Favorites Room File.docx", room.Id);

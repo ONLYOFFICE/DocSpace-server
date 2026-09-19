@@ -45,7 +45,7 @@ public abstract class ReferenceDataTestBase(AspireAppFixture fixture) : RoomsPer
     /// <summary>
     /// Creates a custom room with one file inside it, as the currently authenticated caller.
     /// </summary>
-    protected async Task<(FolderDtoInteger Room, FileDtoInteger File)> CreateRoomWithFile(string roomTitle, string fileTitle)
+    protected async Task<(FolderDto Room, FileDto File)> CreateRoomWithFile(string roomTitle, string fileTitle)
     {
         var room = await CreateCustomRoom(roomTitle);
         var file = await CreateFile(fileTitle, room.Id);

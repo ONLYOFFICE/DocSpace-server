@@ -56,7 +56,7 @@ public class ReferenceDataTests(
 
         // Act
         var result = await _filesApi.GetReferenceDataAsync(
-            new GetReferenceDataDtoInteger(fileKey, instanceId),
+            new GetReferenceDataDto(fileKey, instanceId),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -76,7 +76,7 @@ public class ReferenceDataTests(
 
         // Act
         var result = await _filesApi.GetReferenceDataAsync(
-            new GetReferenceDataDtoInteger(fileKey, instanceId),
+            new GetReferenceDataDto(fileKey, instanceId),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -96,7 +96,7 @@ public class ReferenceDataTests(
 
         // Act
         var result = await _filesApi.GetReferenceDataAsync(
-            new GetReferenceDataDtoInteger(fileKey, instanceId, sourceFileId: file.Id),
+            new GetReferenceDataDto(fileKey, instanceId, sourceFileId: file.Id),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -121,7 +121,7 @@ public class ReferenceDataTests(
         // Act
         await _filesClient.Authenticate(user);
         var result = await _filesApi.GetReferenceDataAsync(
-            new GetReferenceDataDtoInteger(fileKey, instanceId),
+            new GetReferenceDataDto(fileKey, instanceId),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -142,7 +142,7 @@ public class ReferenceDataTests(
 
         // Act
         var result = await _filesApi.GetReferenceDataAsync(
-            new GetReferenceDataDtoInteger(fileKey, instanceId, sourceFileId: file.Id, path: "Sheet1!A1", link: link.SharedLink.ShareLink),
+            new GetReferenceDataDto(fileKey, instanceId, sourceFileId: file.Id, path: "Sheet1!A1", link: link.SharedLink.ShareLink),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -167,7 +167,7 @@ public class ReferenceDataTests(
 
         // Act
         var result = await _filesApi.GetReferenceDataAsync(
-            new GetReferenceDataDtoInteger("totally-fake-file-key-12345", "fake-instance-id"),
+            new GetReferenceDataDto("totally-fake-file-key-12345", "fake-instance-id"),
             TestContext.Current.CancellationToken);
 
         // Assert

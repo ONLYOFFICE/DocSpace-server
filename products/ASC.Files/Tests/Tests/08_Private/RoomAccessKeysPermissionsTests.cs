@@ -42,7 +42,7 @@ namespace ASC.Files.Tests.Tests._08_Privacy;
 [Trait("Feature", "PrivacyRoom")]
 public class RoomAccessKeysPermissionsTests(AspireAppFixture fixture) : PrivacyRoomTestBase(fixture)
 {
-    private async Task<(FolderDtoInteger Room, EncryptionKeyDto OwnerKey)> CreatePrivateRoomAsOwner()
+    private async Task<(FolderDto Room, EncryptionKeyDto OwnerKey)> CreatePrivateRoomAsOwner()
     {
         await _filesClient.Authenticate(Owner);
         var ownerKey = await SetFakeKeys(publicKeyPrefix: "owner");

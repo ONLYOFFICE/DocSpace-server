@@ -88,7 +88,7 @@ public abstract class ThirdPartyTestBase(AspireAppFixture fixture) : BaseTest(fi
     /// <summary>
     /// Connects the configured Nextcloud account and returns the third-party folder it created.
     /// </summary>
-    protected async Task<FolderDtoString> ConnectNextcloud(string customerTitle)
+    protected async Task<ThirdPartyFolderDto> ConnectNextcloud(string customerTitle)
     {
         var response = await _thirdPartyApi.SaveThirdPartyAsync(
             NextcloudRequest(customerTitle), TestContext.Current.CancellationToken);

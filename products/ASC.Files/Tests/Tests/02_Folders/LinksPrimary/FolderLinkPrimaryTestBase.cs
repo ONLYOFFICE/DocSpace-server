@@ -42,7 +42,7 @@ public abstract class FolderLinkPrimaryTestBase(
     : BaseTest(fixture)
 {
     /// <summary>Creates a custom room and returns it together with its (get-or-create) primary link id.</summary>
-    protected async Task<(FolderDtoInteger Room, Guid LinkId)> CreateRoomWithPrimaryLink(string title)
+    protected async Task<(FolderDto Room, Guid LinkId)> CreateRoomWithPrimaryLink(string title)
     {
         await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom(title);

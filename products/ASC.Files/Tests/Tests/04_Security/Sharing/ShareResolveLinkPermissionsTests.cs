@@ -45,7 +45,7 @@ public class ShareResolveLinkPermissionsTests(
     AspireAppFixture fixture)
     : SharingTestBase(fixture)
 {
-    private async Task<(FolderDtoInteger Room, string RequestToken)> CreateRoomWithPrimaryLink(string title)
+    private async Task<(FolderDto Room, string RequestToken)> CreateRoomWithPrimaryLink(string title)
     {
         var room = await CreateCustomRoom(title);
         var link = (await _roomsApi.GetRoomsPrimaryExternalLinkAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;

@@ -162,7 +162,7 @@ public class CopyNestedDestinationTests(
         FolderTitles(content).Should().NotContain(srcFolderTitle, "content=true copies the folder's contents, not the folder itself");
     }
 
-    private async Task<(FolderDtoInteger Room, int Folder3Id)> CreateLevel3Folder(string roomTitle, string level2Title, string level3Title)
+    private async Task<(FolderDto Room, int Folder3Id)> CreateLevel3Folder(string roomTitle, string level2Title, string level3Title)
     {
         var room = await CreateCustomRoom(roomTitle);
         var level2 = await CreateFolder(level2Title, room.Id);

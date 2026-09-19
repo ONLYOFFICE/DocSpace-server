@@ -1410,7 +1410,7 @@ const OPERATION_RESPONSE_SCHEMAS: Readonly<Record<string, Json>> = {
   // or the lookup failed, so it is documented as an addition, not a promise.
   aiAgentsGet: {
     allOf: [
-      { $ref: "#/components/schemas/AiFolderIntegerWrapper" },
+      { $ref: "#/components/schemas/AiFolderWrapper" },
       {
         type: "object",
         properties: {

@@ -49,7 +49,7 @@ public abstract class DeleteVersionTestBase(
     /// Creates a file in the caller's My Documents and bumps it to a second version, which is the
     /// precondition every delete-version test needs.
     /// </summary>
-    protected async Task<FileDtoInteger> CreateFileWithSecondVersion(string title, User? user = null)
+    protected async Task<FileDto> CreateFileWithSecondVersion(string title, User? user = null)
     {
         var owner = user ?? Owner;
         var file = await CreateFileInMy(title, owner);

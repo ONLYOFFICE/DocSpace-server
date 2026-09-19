@@ -194,7 +194,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FolderContentIntegerWrapper"
+                  "$ref": "#/components/schemas/FolderContentWrapper"
                 }
               }
             }
@@ -309,7 +309,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FolderIntegerWrapper"
+                  "$ref": "#/components/schemas/FolderWrapper"
                 }
               }
             }
@@ -431,7 +431,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FolderIntegerWrapper"
+                  "$ref": "#/components/schemas/FolderWrapper"
                 }
               }
             }
@@ -563,7 +563,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FolderIntegerWrapper"
+                  "$ref": "#/components/schemas/FolderWrapper"
                 }
               }
             }
@@ -790,7 +790,7 @@
             "application/json": {
               "schema": {
                 "description": "The rooms whose storage limit is to be changed, and the limit to give them.",
-                "$ref": "#/components/schemas/UpdateRoomsQuotaRequestDtoInteger"
+                "$ref": "#/components/schemas/UpdateRoomsQuotaRequestDto"
               }
             }
           }
@@ -812,7 +812,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FolderIntegerArrayWrapper"
+                  "$ref": "#/components/schemas/FolderArrayWrapper"
                 }
               }
             }
@@ -907,7 +907,7 @@
             "application/json": {
               "schema": {
                 "description": "The rooms that are to go back to the default storage limit of the portal.",
-                "$ref": "#/components/schemas/UpdateRoomsRoomIdsRequestDtoInteger"
+                "$ref": "#/components/schemas/UpdateRoomsRoomIdsRequestDto"
               }
             }
           }
@@ -929,7 +929,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FolderIntegerArrayWrapper"
+                  "$ref": "#/components/schemas/FolderArrayWrapper"
                 }
               }
             }
@@ -2539,13 +2539,13 @@
         "description": "What every file and folder in an answer has in common; the concrete shape is a file or a folder, told apart by the\r\nentry type.",
         "x-derived": true,
         "x-derived-types": [
-          "FileDtoInteger",
-          "FileDtoString",
-          "FolderDtoInteger",
-          "FolderDtoString"
+          "FileDto",
+          "ThirdPartyFileDto",
+          "FolderDto",
+          "ThirdPartyFolderDto"
         ]
       },
-      "FileEntryDtoInteger": {
+      "FileEntryDto": {
         "allOf": [
           {
             "$ref": "#/components/schemas/FileEntryBaseDto"
@@ -3217,7 +3217,52 @@
         ],
         "description": "One sharing entry: an account, a group or an email address, and the access level it is given."
       },
-      "FolderContentDtoInteger": {
+      "FolderArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FolderDto"
+            },
+            "description": "The list of FolderDto objects returned by the operation."
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the list of FolderDto objects."
+      },
+      "FolderContentDto": {
         "required": [
           "pathParts",
           "total"
@@ -3264,7 +3309,7 @@
           },
           "current": {
             "description": "The folder or section the page was read from, with its own title, type and access rights. It describes the\r\ncontainer, not the entries, and is filled in even when the page is empty.",
-            "$ref": "#/components/schemas/FolderDtoInteger"
+            "$ref": "#/components/schemas/FolderDto"
           },
           "pathParts": {
             "examples": [
@@ -3314,12 +3359,12 @@
         },
         "description": "One page of the contents of a folder or of a section: its entries split into files and folders, the folder itself,\r\nand the counters needed to page through the rest."
       },
-      "FolderContentIntegerWrapper": {
+      "FolderContentWrapper": {
         "type": "object",
         "properties": {
           "response": {
-            "description": "The FolderContentDtoInteger object returned by the operation.",
-            "$ref": "#/components/schemas/FolderContentDtoInteger"
+            "description": "The FolderContentDto object returned by the operation.",
+            "$ref": "#/components/schemas/FolderContentDto"
           },
           "count": {
             "type": "integer",
@@ -3354,12 +3399,12 @@
             "format": "int32"
           }
         },
-        "description": "The successful API response containing the FolderContentDtoInteger object."
+        "description": "The successful API response containing the FolderContentDto object."
       },
-      "FolderDtoInteger": {
+      "FolderDto": {
         "allOf": [
           {
-            "$ref": "#/components/schemas/FileEntryDtoInteger"
+            "$ref": "#/components/schemas/FileEntryDto"
           },
           {
             "type": "object",
@@ -3584,93 +3629,6 @@
         ],
         "description": "The folder, with the fields that only a room carries filled in when the folder is a room."
       },
-      "FolderIntegerArrayWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FolderDtoInteger"
-            },
-            "description": "The list of FolderDtoInteger objects returned by the operation."
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        },
-        "description": "The successful API response containing the list of FolderDtoInteger objects."
-      },
-      "FolderIntegerWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "description": "The FolderDtoInteger object returned by the operation.",
-            "$ref": "#/components/schemas/FolderDtoInteger"
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        },
-        "description": "The successful API response containing the FolderDtoInteger object."
-      },
       "FolderType": {
         "oneOf": [
           {
@@ -3786,6 +3744,48 @@
         ],
         "description": "The folder type.",
         "x-enum-type": "integer"
+      },
+      "FolderWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "description": "The FolderDto object returned by the operation.",
+            "$ref": "#/components/schemas/FolderDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the FolderDto object."
       },
       "Logo": {
         "required": [
@@ -4357,7 +4357,7 @@
         "additionalProperties": false,
         "description": "The fields of a room that a partial update changes."
       },
-      "UpdateRoomsQuotaRequestDtoInteger": {
+      "UpdateRoomsQuotaRequestDto": {
         "type": "object",
         "properties": {
           "roomIds": {
@@ -4401,7 +4401,7 @@
         },
         "description": "The rooms whose storage limit is to be changed, and the limit to give them."
       },
-      "UpdateRoomsRoomIdsRequestDtoInteger": {
+      "UpdateRoomsRoomIdsRequestDto": {
         "type": "object",
         "properties": {
           "roomIds": {

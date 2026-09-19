@@ -158,7 +158,7 @@ public abstract class EmptyTrashTestBase(
     /// <summary>
     /// Reads the Trash of the currently authenticated user.
     /// </summary>
-    protected async Task<FolderContentDtoInteger> GetTrashAsync()
+    protected async Task<FolderContentDto> GetTrashAsync()
     {
         return (await _foldersApi.GetTrashFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
     }

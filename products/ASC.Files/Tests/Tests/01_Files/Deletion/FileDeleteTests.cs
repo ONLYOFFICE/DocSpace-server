@@ -502,14 +502,14 @@ public class FileDeleteTests(
             { RoomType.VirtualDataRoom, FolderType.VirtualDataRoom }
         };
 
-    private async Task<FolderContentDtoInteger> GetTrashAsync(List<FolderType>? folderType = null)
+    private async Task<FolderContentDto> GetTrashAsync(List<FolderType>? folderType = null)
     {
         var trashId = await GetTrashFolderIdAsync(Owner);
 
         return (await _foldersApi.GetFolderByFolderIdAsync(trashId, folderType: folderType?.Select(r=> (int)r).ToList(), cancellationToken: TestContext.Current.CancellationToken)).Response;
     }
 
-    private async Task MoveFilesToTrash(params FileDtoInteger[] files)
+    private async Task MoveFilesToTrash(params FileDto[] files)
     {
         foreach (var file in files)
         {
@@ -517,7 +517,7 @@ public class FileDeleteTests(
         }
     }
 
-    private async Task MoveToTrashAndWait(FileDtoInteger[] files, FolderDtoInteger[] folders)
+    private async Task MoveToTrashAndWait(FileDto[] files, FolderDto[] folders)
     {
         foreach (var file in files)
         {
@@ -600,7 +600,7 @@ public class FileDeleteTests(
         Assert.Fail($"The operation '{what}' has not finished in time");
     }
 
-    private async Task<FolderDtoInteger> CreateRoom(RoomType roomType, string title) => roomType switch
+    private async Task<FolderDto> CreateRoom(RoomType roomType, string title) => roomType switch
     {
         RoomType.CustomRoom => await CreateCustomRoom(title),
         RoomType.PublicRoom => await CreatePublicRoom(title),
@@ -648,7 +648,7 @@ public class FileDeleteTests(
         trashData.Folders.Should().Contain(f => f.Title == folderInMyInsideFolder.Title);
     }
 
-    private async Task DeleteFileAndWaitForCompletion(FileDtoInteger fileInMy)
+    private async Task DeleteFileAndWaitForCompletion(FileDto fileInMy)
     {
         var results = (await _filesApi.DeleteFileAsync(fileInMy.Id, new Delete { Immediately = false }, true, TestContext.Current.CancellationToken)).Response;
         var operationId = results.FirstOrDefault()?.Id;
@@ -662,7 +662,7 @@ public class FileDeleteTests(
         results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
     }
 
-    private async Task DeleteFolderAndWaitForCompletion(FolderDtoInteger folder)
+    private async Task DeleteFolderAndWaitForCompletion(FolderDto folder)
     {
         var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { Immediately = false }, TestContext.Current.CancellationToken)).Response;
         var operationId = results.FirstOrDefault()?.Id;

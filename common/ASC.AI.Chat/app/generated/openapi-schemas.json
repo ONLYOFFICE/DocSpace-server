@@ -34,6 +34,17 @@
       "additionalProperties": false,
       "description": "Error body — a single human-readable message."
     },
+    "AiAiReasoningLevel": {
+      "type": "string",
+      "enum": [
+        "off",
+        "low",
+        "medium",
+        "high",
+        "max"
+      ],
+      "description": "Provider-neutral extended-thinking depth. `off` disables thinking where the model allows it."
+    },
     "AiAiActionArgs": {
       "type": "object",
       "properties": {
@@ -49,10 +60,14 @@
         },
         "isReasoning": {
           "type": "boolean",
-          "description": "Enable extended thinking / reasoning for this request.",
+          "description": "Legacy extended-thinking switch; stands for `medium`. `reasoningLevel` wins when both are set.",
           "examples": [
             false
           ]
+        },
+        "reasoningLevel": {
+          "$ref": "#/components/schemas/AiAiReasoningLevel",
+          "description": "Depth of extended thinking for the round; providers clamp it to what the model accepts."
         },
         "prompt": {
           "type": "object",
@@ -82,8 +97,7 @@
           ]
         }
       },
-      "additionalProperties": false,
-      "description": "Wire-serializable subset of the engine's `ActionArgs` — drops the engine-injected `signal`/`fetch`; `profile`/`messages` are owned by the engine and never sent by the caller."
+      "additionalProperties": false
     },
     "AiTMCPItem": {
       "type": "object",
@@ -725,6 +739,10 @@
             false
           ]
         },
+        "reasoningSupport": {
+          "$ref": "#/components/schemas/AiReasoningSupport",
+          "description": "Extended-thinking capabilities of the selected model as reported by the provider's catalogue at save time (see `Model.reasoningSupport`). When present the composer's Effort row follows it exactly; when absent the provider's id-based table answers. Hosts persist it with the rest of the profile."
+        },
         "capabilities": {
           "type": "number",
           "description": "Bitmask of capabilities supported by the selected model.",
@@ -811,6 +829,47 @@
         "external"
       ],
       "description": "Union of all 17 built-in AI provider type identifiers.\n\nThe `\"external\"` provider has no built-in transport — it delegates every HTTP request to `PlatformAdapter.externalFetch` and parses the response with the inner provider selected by `Profile.basedOn`."
+    },
+    "AiReasoningSupport": {
+      "type": "object",
+      "properties": {
+        "thinks": {
+          "type": "boolean",
+          "description": "Whether the model can think at all. False hides the whole control."
+        },
+        "canDisable": {
+          "type": "boolean",
+          "description": "Whether `\"off\"` really turns thinking off. False means the model thinks always and off only drops to its lowest depth (or leaves the default depth, where there is no knob)."
+        },
+        "depths": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/AiReasoningDepth"
+          },
+          "description": "Depths the model distinguishes, lowest first. Empty when thinking is an on/off switch with no depth (or the model doesn't think). A level not listed is clamped to the nearest one — see `clampReasoningLevel`."
+        },
+        "defaultDepth": {
+          "$ref": "#/components/schemas/AiReasoningDepth",
+          "description": "The depth the model runs at when nothing asks for one — what a stored `\"off\"` means on a model that cannot be switched off. Known only where a catalogue reports it (OpenRouter's `default_effort`); otherwise `DEFAULT_REASONING_LEVEL` clamped to `depths` is assumed."
+        }
+      },
+      "required": [
+        "thinks",
+        "canDisable",
+        "depths"
+      ],
+      "additionalProperties": false,
+      "description": "What one model can do with extended thinking. Providers describe each model through this shape so the UI offers only the choices that change the request, and the request builders clamp to the same table."
+    },
+    "AiReasoningDepth": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "max"
+      ],
+      "description": "A `ReasoningLevel` above off — a depth the model can think at."
     },
     "AiAssignmentMutationResult": {
       "description": "Outcome of `AssignmentsEngine.assign` / `AssignmentsEngine.unassign`. Either a success or a field-scoped error suitable for displaying in the profile editor.",
@@ -1091,6 +1150,10 @@
             false
           ]
         },
+        "reasoningSupport": {
+          "$ref": "#/components/schemas/AiReasoningSupport",
+          "description": "Extended-thinking capabilities of the selected model as reported by the provider's catalogue at save time (see `Model.reasoningSupport`). When present the composer's Effort row follows it exactly; when absent the provider's id-based table answers. Hosts persist it with the rest of the profile."
+        },
         "capabilities": {
           "type": "number",
           "description": "Bitmask of capabilities supported by the selected model.",
@@ -1190,6 +1253,10 @@
           "examples": [
             false
           ]
+        },
+        "reasoningSupport": {
+          "$ref": "#/components/schemas/AiReasoningSupport",
+          "description": "What the model can do with extended thinking, when the provider's catalogue says so (OpenRouter and the ONLYOFFICE route report a per-model `reasoning` object). Copied onto the profile at save time; absent, the widget falls back to the provider's id-based table."
         },
         "capabilities": {
           "type": "number",
@@ -2020,15 +2087,15 @@
       },
       "description": "The AI module settings."
     },
-    "AiFolderIntegerArrayWrapper": {
+    "AiFolderArrayWrapper": {
       "type": "object",
       "properties": {
         "response": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/AiFolderDtoInteger"
+            "$ref": "#/components/schemas/AiFolderDto"
           },
-          "description": "The list of FolderDtoInteger objects returned by the operation."
+          "description": "The list of FolderDto objects returned by the operation."
         },
         "count": {
           "type": "integer",
@@ -2063,12 +2130,12 @@
           "format": "int32"
         }
       },
-      "description": "The successful API response containing the list of FolderDtoInteger objects."
+      "description": "The successful API response containing the list of FolderDto objects."
     },
-    "AiFolderDtoInteger": {
+    "AiFolderDto": {
       "allOf": [
         {
-          "$ref": "#/components/schemas/AiFileEntryDtoInteger"
+          "$ref": "#/components/schemas/AiFileEntryDto"
         },
         {
           "type": "object",
@@ -2078,7 +2145,7 @@
                 10
               ],
               "type": "integer",
-              "description": "The parent folder ID of the folder.",
+              "description": "The folder this one is listed in. For a room it is the root of the section the room lives in, and for an entry\r\nopened through a sharing link whose real parent the caller may not read it is the root of the section with the\r\nentries shared with them.",
               "format": "int32"
             },
             "filesCount": {
@@ -2086,7 +2153,7 @@
                 5
               ],
               "type": "integer",
-              "description": "The number of files that the folder contains.",
+              "description": "How many files lie directly in the folder, without counting the subfolders. The roots of the `Rooms`, room\r\ntemplates and default templates sections always report 0, because the number is not collected for them.",
               "format": "int32"
             },
             "foldersCount": {
@@ -2094,7 +2161,7 @@
                 7
               ],
               "type": "integer",
-              "description": "The number of folders that the folder contains.",
+              "description": "How many subfolders lie directly in the folder. For an AI room the two service subfolders it always holds are\r\nsubtracted, so the number matches what a listing of it shows, and the roots of the `Rooms` and templates\r\nsections report 0.",
               "format": "int32"
             },
             "isShareable": {
@@ -2105,14 +2172,14 @@
                 "null",
                 "boolean"
               ],
-              "description": "Specifies if the folder can be shared or not."
+              "description": "Whether the caller may hand out access to the folder. It is filled in only for the folder a folder-contents\r\nanswer is about, and is null in every other answer, so null says nothing about the sharing rights."
             },
             "new": {
               "examples": [
-                0
+                3
               ],
               "type": "integer",
-              "description": "The new element index in the folder.",
+              "description": "How many entries inside the folder the caller has not opened yet, the number drawn as the badge on it. An\r\naccount that turned the badges off in its own settings always reads 0 here, so 0 alone does not prove that\r\neverything has been seen.",
               "format": "int32"
             },
             "mute": {
@@ -2120,13 +2187,13 @@
                 false
               ],
               "type": "boolean",
-              "description": "Specifies if the folder notifications are enabled or not."
+              "description": "Whether the caller silenced the notifications of this room: true means no message about its activity reaches\r\nthem. The choice belongs to the reading account rather than to the room, so two members of one room read\r\ndifferent values."
             },
             "tags": {
               "examples": [
                 [
-                  "tag1",
-                  "tag2"
+                  "Marketing",
+                  "Q3"
                 ]
               ],
               "type": [
@@ -2136,10 +2203,10 @@
               "items": {
                 "type": "string"
               },
-              "description": "The list of tags of the folder."
+              "description": "The names of the tags attached to the room. Empty for a folder that is not a room, since only rooms carry\r\ntags, and the names are the ones from the portal tag catalogue."
             },
             "logo": {
-              "description": "The folder logo.",
+              "description": "The addresses of the room logo in four sizes, together with the colour and the built-in cover that are drawn\r\nwhen no logo was uploaded. A room without a logo answers with four empty addresses rather than with null, and\r\nthe field is null for a folder that is not a room.",
               "$ref": "#/components/schemas/AiLogo"
             },
             "pinned": {
@@ -2147,10 +2214,10 @@
                 false
               ],
               "type": "boolean",
-              "description": "Specifies if the folder is pinned or not."
+              "description": "Whether the caller pinned the room to the top of their own room list. Pinning is personal and is lost when the\r\nroom is archived."
             },
             "roomType": {
-              "description": "The room type of the folder.",
+              "description": "The kind of the room, which decides the default access rules of its members. Null for a folder that is not a\r\nroom.",
               "$ref": "#/components/schemas/AiRoomType"
             },
             "private": {
@@ -2158,32 +2225,32 @@
                 false
               ],
               "type": "boolean",
-              "description": "Specifies if the folder is private or not."
+              "description": "Whether the room is a private one, which limits it to the accounts invited into it and needs encryption keys\r\nset up for each of them."
             },
             "indexing": {
               "examples": [
                 true
               ],
               "type": "boolean",
-              "description": "Specifies if the folder is indexed or not."
+              "description": "Whether the contents of the room are kept in an explicit numbered order, the one reported as `order` on each\r\nentry, instead of being left to the sorting the reader asks for."
             },
             "denyDownload": {
               "examples": [
                 false
               ],
               "type": "boolean",
-              "description": "Specifies if the folder can be downloaded or not."
+              "description": "Whether downloading and printing the contents of the room is forbidden, which leaves its members with viewing\r\nand editing in the editor."
             },
             "lifetime": {
-              "description": "The room data lifetime settings of the folder.",
+              "description": "The rule by which the files of the room are removed once they grow old. Null when the room has no such rule,\r\nwhich is also what is reported after the rule is switched off, because switching it off erases it.",
               "$ref": "#/components/schemas/AiRoomDataLifetimeDto"
             },
             "watermark": {
-              "description": "The watermark settings of the folder.",
+              "description": "The watermark stamped over the documents of the room while they are viewed and printed. Null when the room has\r\nno watermark, and for every folder that is not a room.",
               "$ref": "#/components/schemas/AiWatermarkDto"
             },
             "type": {
-              "description": "The folder type.",
+              "description": "The part the folder plays inside its room: one of the service folders of the form-filling flow, or the\r\nknowledge and result storages of an AI room. It stays null for an ordinary folder and for the room itself, so\r\nit does not describe folders in general.",
               "$ref": "#/components/schemas/AiFolderType"
             },
             "inRoom": {
@@ -2194,7 +2261,7 @@
                 "null",
                 "boolean"
               ],
-              "description": "Specifies if the folder is placed in the room or not."
+              "description": "Whether the caller holds the room through an invitation of their own: true for the account that created it and\r\nfor a member invited personally, false when the access comes from a group they belong to, and null for a\r\nfolder that is not a room."
             },
             "quotaLimit": {
               "examples": [
@@ -2204,7 +2271,7 @@
                 "null",
                 "integer"
               ],
-              "description": "The folder quota limit.",
+              "description": "How much space the files of the room may take, in bytes. It is the limit set on this room, or the portal\r\ndefault for rooms when none was set. Null when the tariff of the portal does not count room statistics, when\r\nroom quotas are switched off, when the room lies in the archive or the trash, or when the caller may only read\r\nit.",
               "format": "int64"
             },
             "isCustomQuota": {
@@ -2215,7 +2282,7 @@
                 "null",
                 "boolean"
               ],
-              "description": "Specifies if the folder room has a custom quota or not."
+              "description": "Whether `quotaLimit` is a limit set on this room (true) or the portal default for rooms (false). Null exactly\r\nwhen `quotaLimit` is null."
             },
             "usedSpace": {
               "examples": [
@@ -2225,7 +2292,7 @@
                 "null",
                 "integer"
               ],
-              "description": "How much folder space is used (counter).",
+              "description": "How much the files of the room take, in bytes, as of the last time the counter was recomputed. The counter is\r\nrefreshed when a file operation finishes, so a read right after an upload or a deletion can still report the\r\nprevious figure. Null for a folder that is not a room.",
               "format": "int64"
             },
             "passwordProtected": {
@@ -2236,7 +2303,7 @@
                 "null",
                 "boolean"
               ],
-              "description": "Specifies if the folder is password protected or not."
+              "description": "Whether the sharing link the folder was opened through asks for a password that has not been entered yet.\r\nWhile it is true the contents stay unreadable; send the password to `POST api/2.0/files/share/{key}/password`\r\nfirst. Null when the folder was not reached through a link."
             },
             "expired": {
               "examples": [
@@ -2246,15 +2313,15 @@
                 "null",
                 "boolean"
               ],
-              "description": "Specifies if an external link to the folder is expired or not.",
+              "description": "Deprecated, read `isLinkExpired` instead: whether the sharing link the folder was opened through has run out\r\nof its lifetime.",
               "deprecated": true
             },
             "chatSettings": {
-              "description": "The AI chat settings for the folder room. Contains configuration for AI provider, model selection, and custom prompts.\r\nOnly applicable to rooms with AI chat functionality enabled. Null if the room does not have chat settings configured.",
+              "description": "The chat configuration of an AI room. Only the system prompt is reported here, whatever else the room stores,\r\nand the field is null for every folder that is not an AI room.",
               "$ref": "#/components/schemas/AiChatSettingsDto"
             },
             "rootRoomType": {
-              "description": "The room type of the root folder. Indicates the type of the parent room if the current folder is nested within a room hierarchy.\r\nThis property helps identify the context in which a nested folder exists.",
+              "description": "The kind of the room the folder lies in. It is filled in only for the folder a folder-contents answer is\r\nabout, and only when that room is an AI room, so it is null in every other answer and for every other room\r\nkind.",
               "$ref": "#/components/schemas/AiRoomType"
             },
             "saveFormAsXLSX": {
@@ -2265,7 +2332,7 @@
                 "null",
                 "boolean"
               ],
-              "description": "Specifies whether to save form data as XLSX file."
+              "description": "Whether the answers collected in this form-filling room are also gathered into a spreadsheet next to the\r\ncompleted copies. Filled in for form-filling rooms only."
             },
             "sendFormToExternalDB": {
               "examples": [
@@ -2275,7 +2342,7 @@
                 "null",
                 "boolean"
               ],
-              "description": "Specifies whether to send form data to external database."
+              "description": "Whether the answers collected in this form-filling room are also pushed into the external database configured\r\nfor the portal. Filled in for form-filling rooms only."
             },
             "originalFormId": {
               "examples": [
@@ -2285,29 +2352,29 @@
                 "null",
                 "integer"
               ],
-              "description": "The original form ID that corresponds to this FormFillingFolderDone folder.",
+              "description": "The form the completed copies in this folder were filled from, taken from the copy submitted last. Null while\r\nthe folder holds no completed copy, and for every folder that does not collect them.",
               "format": "int32"
             }
           }
         }
       ],
-      "description": "The folder parameters."
+      "description": "The folder, with the fields that only a room carries filled in when the folder is a room."
     },
     "AiChatSettingsDto": {
       "type": "object",
       "properties": {
         "prompt": {
           "examples": [
-            "You are a helpful assistant."
+            "You are a helpful assistant for project documentation."
           ],
           "type": [
             "null",
             "string"
           ],
-          "description": "The system prompt for the chat."
+          "description": "The instruction put in front of every conversation held in the room, which sets the role the assistant takes\r\nand the way it answers. Empty when the room was left on the behaviour the portal provides by default."
         }
       },
-      "description": "The chat settings parameters."
+      "description": "The chat configuration of an AI room."
     },
     "AiFolderType": {
       "oneOf": [
@@ -2436,7 +2503,7 @@
       "type": "object",
       "properties": {
         "additions": {
-          "description": "Specifies whether to display in the watermark: username, user email, user ip-adress, current date, and room name.",
+          "description": "Which details of the reader and of the room are stamped alongside the text. The values combine, so a number\r\nthat is not a member on its own is the sum of several of them, and 0 means that only the text is stamped.",
           "$ref": "#/components/schemas/AiWatermarkAdditions"
         },
         "text": {
@@ -2447,14 +2514,14 @@
             "null",
             "string"
           ],
-          "description": "The watermark text."
+          "description": "The fixed line drawn over the document, printed before the details selected alongside it. Empty when the room\r\nstamps an image instead."
         },
         "rotate": {
           "examples": [
-            45
+            -45
           ],
           "type": "integer",
-          "description": "The watermark text and image rotate.",
+          "description": "How far the stamp is turned, in degrees, with negative values turning it anticlockwise and 0 drawing it\r\nhorizontally.",
           "format": "int32"
         },
         "imageScale": {
@@ -2462,25 +2529,25 @@
             100
           ],
           "type": "integer",
-          "description": "The watermark image scale.",
+          "description": "How large the image is drawn, as a percentage of its own size. It is 0 for a text watermark, where nothing is\r\nscaled.",
           "format": "int32"
         },
         "imageUrl": {
           "examples": [
-            "http://localhost/watermark.png"
+            "https://portal.example.com/storage/watermark_a1b2c3.png"
           ],
           "type": [
             "null",
             "string"
           ],
-          "description": "The watermark image url."
+          "description": "The address the stamped picture is served from, inside the storage of the room. Empty for a text watermark."
         },
         "imageHeight": {
           "examples": [
             100
           ],
           "type": "number",
-          "description": "The watermark image height.",
+          "description": "The height the picture is drawn with, in pixels, kept together with the width so that the proportions survive.\r\nIt is 0 for a text watermark.",
           "format": "double"
         },
         "imageWidth": {
@@ -2488,11 +2555,11 @@
             200
           ],
           "type": "number",
-          "description": "The watermark image width.",
+          "description": "The width the picture is drawn with, in pixels, kept together with the height so that the proportions survive.\r\nIt is 0 for a text watermark.",
           "format": "double"
         }
       },
-      "description": "The watermark settings."
+      "description": "The watermark drawn over the documents of a room while they are viewed and printed."
     },
     "AiWatermarkAdditions": {
       "oneOf": [
@@ -2540,18 +2607,18 @@
       "properties": {
         "deletePermanently": {
           "examples": [
-            true
+            false
           ],
           "type": "boolean",
-          "description": "Specifies whether to permanently delete the room data or not."
+          "description": "Decides what happens to a file that has grown too old: it is erased outright, or it is moved to the trash of\r\nthe account that created the room, from where it can still be brought back."
         },
         "period": {
-          "description": "Specifies the time period type of the room data lifetime.",
+          "description": "The unit the age is counted in. Months and years are counted as calendar ones, so the same number of them\r\ncovers a different number of days depending on when the clean-up runs.",
           "$ref": "#/components/schemas/AiRoomDataLifetimePeriod"
         },
         "value": {
           "examples": [
-            33
+            12
           ],
           "maximum": 999,
           "minimum": 1,
@@ -2559,7 +2626,7 @@
             "null",
             "integer"
           ],
-          "description": "Specifies the time period value of the room data lifetime.",
+          "description": "How many periods a file may stay in the room, counted from the moment it was last changed rather than from the\r\nmoment the rule was set. Files that are already older than this are removed by the next clean-up.",
           "format": "int32"
         },
         "enabled": {
@@ -2570,10 +2637,10 @@
             "null",
             "boolean"
           ],
-          "description": "Specifies whether the room data lifetime setting is enabled or not."
+          "description": "Switches the rule on and off. Switching it off erases the rule instead of keeping it aside, so afterwards the\r\nroom reports no rule at all and the other three values have to be sent again to bring it back."
         }
       },
-      "description": "The room data lifetime information."
+      "description": "The rule by which the files of a room are removed once they have been lying in it for too long."
     },
     "AiRoomDataLifetimePeriod": {
       "oneOf": [
@@ -2750,7 +2817,7 @@
       },
       "description": "The logo cover information."
     },
-    "AiFileEntryDtoInteger": {
+    "AiFileEntryDto": {
       "allOf": [
         {
           "$ref": "#/components/schemas/AiFileEntryBaseDto"
@@ -2763,7 +2830,7 @@
                 10
               ],
               "type": "integer",
-              "description": "The file entry ID.",
+              "description": "The identifier to pass back to the other operations of this entry. It is a number for storage on the portal\r\nand a string for a connected third-party account, and it is unique only within its own kind, so files and\r\nfolders may carry the same value.",
               "format": "int32"
             },
             "rootFolderId": {
@@ -2771,7 +2838,7 @@
                 1
               ],
               "type": "integer",
-              "description": "The root folder ID of the file entry.",
+              "description": "The section the entry ultimately lies in, as an identifier that can be listed like any other folder. For an\r\nentry inside a room this is the rooms section, not the room.",
               "format": "int32"
             },
             "originId": {
@@ -2779,7 +2846,7 @@
                 12
               ],
               "type": "integer",
-              "description": "The origin ID of the file entry.",
+              "description": "The folder the entry was deleted from, which is where restoring it puts it back. It is left out of the answer\r\nunless the entry is in the trash.",
               "format": "int32"
             },
             "originRoomId": {
@@ -2787,41 +2854,41 @@
                 22
               ],
               "type": "integer",
-              "description": "The origin room ID of the file entry.",
+              "description": "The room the entry was deleted from, left out of the answer for anything that was not deleted out of a room.",
               "format": "int32"
             },
             "originTitle": {
               "examples": [
-                "Original Title"
+                "Contracts"
               ],
               "type": [
                 "null",
                 "string"
               ],
-              "description": "The origin title of the file entry."
+              "description": "The name of the folder the entry was deleted from, for showing where it would be restored to. It is null for\r\nan entry that is not in the trash."
             },
             "originRoomTitle": {
               "examples": [
-                "Original Room"
+                "Legal team"
               ],
               "type": [
                 "null",
                 "string"
               ],
-              "description": "The origin room title of the file entry."
+              "description": "The name of the room the entry was deleted from, null for anything that was not deleted out of a room."
             },
             "canShare": {
               "examples": [
                 true
               ],
               "type": "boolean",
-              "description": "Specifies if the file entry can be shared or not."
+              "description": "Whether the calling account may change who has access to the entry, and so whether offering a sharing dialog\r\nfor it makes sense. It is false in rooms whose access is fixed by the room itself, such as a private one, even\r\nfor its manager."
             },
             "shareSettings": {
               "examples": [
                 {
-                  "ExternalLink": 1,
-                  "InvitationLink": 2
+                  "PrimaryExternalLink": 1,
+                  "ExternalLink": 2
                 }
               ],
               "type": [
@@ -2850,7 +2917,7 @@
                   "format": "int32"
                 }
               },
-              "description": "A dictionary representing the sharing settings for the file entry."
+              "description": "How many links of each kind currently exist for the entry, counted separately for the primary link and the\r\nadditional ones. Kinds with no links are left out, and the whole field is null when the caller may not change\r\nthe access or no link exists at all."
             },
             "security": {
               "examples": [
@@ -3007,14 +3074,14 @@
                   "type": "boolean"
                 }
               },
-              "description": "The actions that can be performed with the file entry."
+              "description": "What the calling account may do with this entry, one flag per action, and the cheapest way to decide which\r\noperations to offer without trying them. The flags already take the room's settings and the account's role\r\ninto account."
             },
             "availableShareRights": {
               "examples": [
                 {
                   "ExternalLink": [
                     "Read",
-                    "Edit"
+                    "Editing"
                   ]
                 }
               ],
@@ -3054,17 +3121,17 @@
                   }
                 }
               },
-              "description": "The available external rights of the file entry."
+              "description": "Which access levels may be handed out on this entry, listed per kind of recipient, so that a client offers\r\nonly levels the entry actually supports - a room for filling forms and a plain folder do not accept the same\r\nones."
             },
             "requestToken": {
               "examples": [
-                "token-abc-123"
+                "q7Ry8cQ1lZ0dP3sK2mXfA9tBnV6hJ4uE8wCz5oLg"
               ],
               "type": [
                 "null",
                 "string"
               ],
-              "description": "The request token of the file entry."
+              "description": "The token of the link the entry is being read through, which is the value the external-share operations expect\r\nand which also has to be carried by the download and preview addresses. It is null whenever the entry is not\r\nbeing read through a link."
             },
             "external": {
               "examples": [
@@ -3074,10 +3141,10 @@
                 "null",
                 "boolean"
               ],
-              "description": "Specifies if the folder can be accessed via an external link or not."
+              "description": "Set when the link being used was made for this very entry, and false when the entry is reached through a link\r\nto the room around it. It is null when no link is involved."
             },
             "expirationDate": {
-              "description": "Represents the expiration date of the file entry.",
+              "description": "When the link being used stops working, written with the offset of the portal's time zone. It is null for a\r\nlink that never expires and whenever no link is involved.",
               "$ref": "#/components/schemas/AiApiDateTime"
             },
             "isLinkExpired": {
@@ -3088,12 +3155,12 @@
                 "null",
                 "boolean"
               ],
-              "description": "Indicates whether the shareable link associated with the file or folder has expired."
+              "description": "Set when the link being used has already passed its expiration date, which is why the entry cannot be opened\r\neven though it is described here. It is null when no link is involved."
             }
           }
         }
       ],
-      "description": "The generic file entry information."
+      "description": "The part of a file or folder that depends on how the entry is identified: by a number on the portal, or by a\r\nstring on a connected third-party account."
     },
     "AiApiDateTime": {
       "type": "object",
@@ -3130,18 +3197,18 @@
             "null",
             "string"
           ],
-          "description": "The file entry title."
+          "description": "The name shown for the entry. For a file it carries the extension, which is how the format is recognised, and\r\nfor a room it is the room name."
         },
         "access": {
-          "description": "The access rights to the file entry.",
+          "description": "The level the calling account holds on this entry, resolved from its own rights, the groups it belongs to and\r\nany link it came in through. It is the level itself, not what the account may do with it - the action flags\r\nbelow answer that.",
           "$ref": "#/components/schemas/AiFileShare"
         },
         "sharedBy": {
-          "description": "Provides information about the employee who shared the file or folder.",
+          "description": "Who gave the calling account the access it is using. It is filled in only while the entry is being read\r\nthrough a share, and never for a caller without an account.",
           "$ref": "#/components/schemas/AiEmployeeDto"
         },
         "ownedBy": {
-          "description": "The information about the employee who owns the file entry.",
+          "description": "Who owns the place the entry is shared from - the creator of the room it lies in, or of the personal section\r\nthat holds it. It is filled in only while the entry is being read through a share, and never for a caller\r\nwithout an account.",
           "$ref": "#/components/schemas/AiEmployeeDto"
         },
         "shared": {
@@ -3149,28 +3216,28 @@
             false
           ],
           "type": "boolean",
-          "description": "Specifies if the file entry is shared via link or not."
+          "description": "Whether at least one external link exists for the entry, whichever kind. It says nothing about accounts and\r\ngroups - those are counted by the flag for members below."
         },
         "sharedForUser": {
           "examples": [
             false
           ],
           "type": "boolean",
-          "description": "Specifies if the file entry is shared for user or not."
+          "description": "Whether at least one account or group has been given rights on the entry directly, as opposed to reaching it\r\nthrough a link or through the room around it."
         },
         "sharedExternal": {
           "examples": [
             false
           ],
           "type": "boolean",
-          "description": "Specifies if the file entry is shared via a public (non-internal) external link."
+          "description": "Whether one of the entry's links is open to people outside the portal, as opposed to a link that only its own\r\nmembers can follow. This is the flag to watch when the concern is who can reach the content from outside."
         },
         "parentShared": {
           "examples": [
             false
           ],
           "type": "boolean",
-          "description": "Indicates whether the parent entity is shared."
+          "description": "Whether the entry is reachable because the room or folder around it is shared, rather than through rights of\r\nits own. A copy or a move takes the entry out of that scope."
         },
         "shortWebUrl": {
           "examples": [
@@ -3180,46 +3247,46 @@
             "null",
             "string"
           ],
-          "description": "The short Web URL.",
+          "description": "A shortened address that opens the entry through the link it is being read with. It is an empty string\r\nwhenever no link applies, which is the usual case for a member browsing their own rooms.",
           "format": "uri"
         },
         "created": {
-          "description": "The creation date and time of the file entry.",
+          "description": "When the entry was created, written with the offset of the portal's time zone. For a file restored from an\r\nolder version this is still the moment the file first appeared.",
           "$ref": "#/components/schemas/AiApiDateTime"
         },
         "createdBy": {
-          "description": "The file entry author.",
+          "description": "Who created the entry. It is null for a caller without an account, who is told nothing about the portal's\r\nmembers.",
           "$ref": "#/components/schemas/AiEmployeeDto"
         },
         "updated": {
-          "description": "The last date and time when the file entry was updated.",
+          "description": "When the entry last changed, written with the offset of the portal's time zone. It is never reported as\r\nearlier than the creation moment, so the two can be compared safely.",
           "$ref": "#/components/schemas/AiApiDateTime"
         },
         "autoDelete": {
-          "description": "The date and time when the file entry will be automatically deleted.",
+          "description": "When the entry will disappear on its own, written with the offset of the portal's time zone. It is filled in\r\nonly where a removal is actually scheduled - something in the trash while the portal cleans it up\r\nautomatically, or a guest's own documents - so a null means nothing is scheduled rather than that the entry is\r\npermanent.",
           "$ref": "#/components/schemas/AiApiDateTime"
         },
         "rootFolderType": {
-          "description": "The root folder type of the file entry.",
+          "description": "The section the entry ultimately belongs to, which is what tells a personal document from one inside a room,\r\nfrom a template and from something in the trash or the archive.",
           "$ref": "#/components/schemas/AiFolderType"
         },
         "parentRoomType": {
-          "description": "The parent room type of the file entry.",
+          "description": "The kind of room the entry lies in, which decides what the room allows - filling forms, public links,\r\nindexing. It is null for an entry that is not inside a room at all.",
           "$ref": "#/components/schemas/AiFolderType"
         },
         "updatedBy": {
-          "description": "The user who updated the file entry.",
+          "description": "Who changed the entry last. It is null for a caller without an account.",
           "$ref": "#/components/schemas/AiEmployeeDto"
         },
         "providerItem": {
           "examples": [
-            false
+            true
           ],
           "type": [
             "null",
             "boolean"
           ],
-          "description": "Specifies if the file entry provider is specified or not."
+          "description": "Set when the entry is stored on a connected third-party account rather than on the portal, and null when it is\r\nstored on the portal. Such an entry is identified by a string rather than a number, and some operations skip\r\nit."
         },
         "providerKey": {
           "examples": [
@@ -3229,7 +3296,7 @@
             "null",
             "string"
           ],
-          "description": "The provider key of the file entry."
+          "description": "Which third-party service holds the entry, matching the keys accepted by the third-party operations. It is\r\nnull for an entry stored on the portal."
         },
         "providerId": {
           "examples": [
@@ -3239,41 +3306,41 @@
             "null",
             "integer"
           ],
-          "description": "The provider ID of the file entry.",
+          "description": "The connected account the entry comes from, for telling apart two connections to the same service. It is null\r\nfor an entry stored on the portal.",
           "format": "int32"
         },
         "order": {
           "examples": [
-            "1"
+            "1.3.2"
           ],
           "type": [
             "null",
             "string"
           ],
-          "description": "The order of the file entry."
+          "description": "The place of the entry in a room where the members arrange the content themselves, given as the position of\r\nthe entry preceded by the positions of the folders leading to it, separated by dots. It is empty when nothing\r\nhas been arranged."
         },
         "isFavorite": {
           "examples": [
-            false
+            true
           ],
           "type": [
             "null",
             "boolean"
           ],
-          "description": "Specifies if the file is a favorite or not."
+          "description": "Set when the calling account has marked the entry as a favorite, which is what puts it into the favorites\r\nlisting. For a file that is not marked it is null rather than false."
         },
         "fileEntryType": {
-          "description": "The file entry type.",
+          "description": "Tells a folder from a file, and so which of the two shapes the rest of the object has. A room is reported as a\r\nfolder here.",
           "$ref": "#/components/schemas/AiFileEntryType"
         }
       },
-      "description": "The file entry information.",
+      "description": "What every file and folder in an answer has in common; the concrete shape is a file or a folder, told apart by the\r\nentry type.",
       "x-derived": true,
       "x-derived-types": [
-        "FileDtoInteger",
-        "FileDtoString",
-        "FolderDtoInteger",
-        "FolderDtoString"
+        "FileDto",
+        "ThirdPartyFileDto",
+        "FolderDto",
+        "ThirdPartyFolderDto"
       ]
     },
     "AiFileEntryType": {
@@ -3465,7 +3532,7 @@
           ]
         }
       ],
-      "description": "The access rights type.",
+      "description": "The level of access a subject has to a file, a folder or a room. The same scale is used by the sharing\r\noperations, by the default sharing rights and by the access records of a room, and not every level is\r\nmeaningful everywhere - a room accepts the role-shaped levels, a single file the editing ones.",
       "x-enum-type": "integer"
     },
     "AiFileOperationWrapper": {
@@ -3523,16 +3590,16 @@
       "properties": {
         "id": {
           "examples": [
-            "00000000-0000-0000-0000-000000000000"
+            "a1f4c9b2-3d8e-4f77-9b16-2c5de8f0a913"
           ],
           "type": [
             "null",
             "string"
           ],
-          "description": "The file operation ID."
+          "description": "The identifier of the operation, the one to pass to `PUT api/2.0/files/fileops/terminate/{id}` to stop it.\r\nOperations belong to the account that started them, so an identifier of somebody else is never listed here."
         },
         "Operation": {
-          "description": "The file operation type.",
+          "description": "What the operation does with the entries, which also decides what else is reported: only a download fills\r\n`url`, and a deletion leaves `files` and `folders` empty.",
           "$ref": "#/components/schemas/AiFileOperationType"
         },
         "progress": {
@@ -3540,45 +3607,45 @@
             100
           ],
           "type": "integer",
-          "description": "The file operation progress in percentage.",
+          "description": "How far the operation has come, from 0 to 100. Reaching 100 only means it stopped; whether it did what it was\r\nasked for is told by `error`.",
           "format": "int32"
         },
         "error": {
           "examples": [
-            "File not found."
+            "Folder not found."
           ],
           "type": [
             "null",
             "string"
           ],
-          "description": "The file operation error message."
+          "description": "The reason the operation could not finish its work, in the language of the request. Empty when nothing went\r\nwrong, which is the only way to tell a successful operation from a failed one."
         },
         "processed": {
           "examples": [
-            "1"
+            "12"
           ],
           "type": [
             "null",
             "string"
           ],
-          "description": "The file operation processing status."
+          "description": "How many entries the operation has handled so far, written as a decimal number in a string. It counts items,\r\nnot percent, and stays behind `progress` on operations that walk into subfolders."
         },
         "finished": {
           "examples": [
             true
           ],
           "type": "boolean",
-          "description": "Specifies if the file operation is finished or not."
+          "description": "Whether the operation has stopped running. A finished operation is reported once and then dropped, so the next\r\nread of the operation list no longer contains it."
         },
         "url": {
           "examples": [
-            "http://localhost/download"
+            "https://portal.example.com/filehandler.ashx?action=bulk"
           ],
           "type": [
             "null",
             "string"
           ],
-          "description": "The file operation URL.",
+          "description": "The address the packed archive can be downloaded from once a bulk download has finished. Empty for every other\r\nkind of operation.",
           "format": "uri"
         },
         "files": {
@@ -3595,17 +3662,17 @@
             "array"
           ],
           "items": {
-            "description": "The file entry information.",
+            "description": "What every file and folder in an answer has in common; the concrete shape is a file or a folder, told apart by the\r\nentry type.",
             "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
-          "description": "The list of files of the file operation."
+          "description": "The files the operation produced or moved, in the order it wrote them down. Empty while nothing has been\r\nwritten yet and for a deletion, which reports no entries at all."
         },
         "folders": {
           "examples": [
             [
               {
                 "id": 20,
-                "title": "My Folder"
+                "title": "Reports"
               }
             ]
           ],
@@ -3614,17 +3681,17 @@
             "array"
           ],
           "items": {
-            "description": "The file entry information.",
+            "description": "What every file and folder in an answer has in common; the concrete shape is a file or a folder, told apart by the\r\nentry type.",
             "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
-          "description": "The list of folders of the file operation."
+          "description": "The folders the operation produced or moved, in the order it wrote them down. Empty while nothing has been\r\nwritten yet and for a deletion."
         },
         "status": {
-          "description": "The status of the distributed task related to the file operation.",
+          "description": "The state of the background task behind the operation, which tells a task that was cancelled or that crashed\r\nfrom one that ran to its end.",
           "$ref": "#/components/schemas/AiDistributedTaskStatus"
         }
       },
-      "description": "The file operation information."
+      "description": "One background file operation of the caller, as it stood when the answer was built."
     },
     "AiDistributedTaskStatus": {
       "oneOf": [
@@ -3770,7 +3837,7 @@
       "type": "object",
       "properties": {
         "date": {
-          "description": "The date and time when the new item was created.",
+          "description": "The day the grouped entries were last changed, written with the offset of the portal time zone. The time part\r\nis the moment of the newest entry of the group.",
           "$ref": "#/components/schemas/AiApiDateTime"
         },
         "items": {
@@ -3782,10 +3849,10 @@
             "description": "The agent new item's information.",
             "$ref": "#/components/schemas/AiAgentNewItemsDto"
           },
-          "description": "The list of items."
+          "description": "What changed on that day, the most recent first. Folders are left out of it, so an entry here is always a file\r\nor a room that holds them."
         }
       },
-      "description": "The new item parameters."
+      "description": "One day of the entries the caller has not opened yet, the groups running from the most recent day backwards."
     },
     "AiAgentNewItemsDto": {
       "required": [
@@ -3804,7 +3871,7 @@
             "array"
           ],
           "items": {
-            "description": "The file entry information.",
+            "description": "What every file and folder in an answer has in common; the concrete shape is a file or a folder, told apart by the\r\nentry type.",
             "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
           "description": "The list of file entry items."
@@ -3812,12 +3879,12 @@
       },
       "description": "The agent new item's information."
     },
-    "AiFolderIntegerWrapper": {
+    "AiFolderWrapper": {
       "type": "object",
       "properties": {
         "response": {
-          "description": "The FolderDtoInteger object returned by the operation.",
-          "$ref": "#/components/schemas/AiFolderDtoInteger"
+          "description": "The FolderDto object returned by the operation.",
+          "$ref": "#/components/schemas/AiFolderDto"
         },
         "count": {
           "type": "integer",
@@ -3852,14 +3919,14 @@
           "format": "int32"
         }
       },
-      "description": "The successful API response containing the FolderDtoInteger object."
+      "description": "The successful API response containing the FolderDto object."
     },
-    "AiFolderContentIntegerWrapper": {
+    "AiFolderContentWrapper": {
       "type": "object",
       "properties": {
         "response": {
-          "description": "The FolderContentDtoInteger object returned by the operation.",
-          "$ref": "#/components/schemas/AiFolderContentDtoInteger"
+          "description": "The FolderContentDto object returned by the operation.",
+          "$ref": "#/components/schemas/AiFolderContentDto"
         },
         "count": {
           "type": "integer",
@@ -3894,9 +3961,9 @@
           "format": "int32"
         }
       },
-      "description": "The successful API response containing the FolderContentDtoInteger object."
+      "description": "The successful API response containing the FolderContentDto object."
     },
-    "AiFolderContentDtoInteger": {
+    "AiFolderContentDto": {
       "required": [
         "pathParts",
         "total"
@@ -3917,10 +3984,10 @@
             "array"
           ],
           "items": {
-            "description": "The file entry information.",
+            "description": "What every file and folder in an answer has in common; the concrete shape is a file or a folder, told apart by the\r\nentry type.",
             "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
-          "description": "The list of files in the folder."
+          "description": "The file entries of this page. It is empty when the folder holds no files, when the filters matched none of\r\nthem, and in the sections that list rooms only."
         },
         "folders": {
           "examples": [
@@ -3936,28 +4003,34 @@
             "array"
           ],
           "items": {
-            "description": "The file entry information.",
+            "description": "What every file and folder in an answer has in common; the concrete shape is a file or a folder, told apart by the\r\nentry type.",
             "$ref": "#/components/schemas/AiFileEntryBaseDto"
           },
-          "description": "The list of folders in the folder."
+          "description": "The folder entries of this page. In a section of rooms these entries are the rooms themselves, which is where\r\ntheir type, tags, logo and quota are read from."
         },
         "current": {
-          "description": "The current folder information.",
-          "$ref": "#/components/schemas/AiFolderDtoInteger"
+          "description": "The folder or section the page was read from, with its own title, type and access rights. It describes the\r\ncontainer, not the entries, and is filled in even when the page is empty.",
+          "$ref": "#/components/schemas/AiFolderDto"
         },
         "pathParts": {
           "examples": [
-            "{key = \"Key\", path = \"//path//to//folder\"}"
+            [
+              {
+                "id": 1,
+                "title": "Rooms",
+                "folderType": 14
+              }
+            ]
           ],
           "type": "null",
-          "description": "The folder path."
+          "description": "The breadcrumbs of the current folder, ordered from the root of the section down to it. Each element carries\r\nthe identifier, the title and the folder and room types, and folders the caller cannot read are left out, so\r\nthe chain can be shorter than the real depth."
         },
         "startIndex": {
           "examples": [
             0
           ],
           "type": "integer",
-          "description": "The folder start index.",
+          "description": "The position of the first entry of this page in the whole result, echoing the requested start index. Add the\r\nnumber of entries received to it to ask for the next page.",
           "format": "int32"
         },
         "count": {
@@ -3965,7 +4038,7 @@
             4
           ],
           "type": "integer",
-          "description": "The number of folder elements.",
+          "description": "How many entries this page carries, files and folders together. A page shorter than the requested size means\r\nthe result is exhausted.",
           "format": "int32"
         },
         "total": {
@@ -3973,7 +4046,7 @@
             4
           ],
           "type": "integer",
-          "description": "The total number of elements in the folder.",
+          "description": "How many entries matched before paging was applied, across the whole folder. Page until the start index plus\r\nthe entries received reaches it.",
           "format": "int32"
         },
         "new": {
@@ -3981,11 +4054,11 @@
             0
           ],
           "type": "integer",
-          "description": "The new element index in the folder.",
+          "description": "How many entries of this folder are marked as new for the caller. It is 0 for every listing when the account\r\nhas switched the new-item badges off, so a zero here does not prove that nothing has changed.",
           "format": "int32"
         }
       },
-      "description": "The folder content information."
+      "description": "One page of the contents of a folder or of a section: its entries split into files and folders, the folder itself,\r\nand the counters needed to page through the rest."
     }
   },
   "operations": {
@@ -4529,6 +4602,29 @@
         "type": "boolean"
       }
     },
+    "aiPreferencesGetReasoningLevel": {
+      "response": {
+        "$ref": "#/components/schemas/AiAiReasoningLevel"
+      }
+    },
+    "aiPreferencesSetReasoningLevel": {
+      "request": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/AiAiReasoningLevel",
+            "description": "New extended-thinking depth; `off` turns deep mode off."
+          },
+          "entityId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "additionalProperties": false
+      }
+    },
     "aiProfilesCreate": {
       "request": {
         "$ref": "#/components/schemas/AiCreateProfileInput"
@@ -4642,6 +4738,10 @@
           "reasoning": {
             "type": "boolean",
             "description": "Whether extended thinking is enabled for this profile's model."
+          },
+          "reasoningSupport": {
+            "$ref": "#/components/schemas/AiReasoningSupport",
+            "description": "Extended-thinking capabilities of the selected model as reported by the provider's catalogue at save time (see `Model.reasoningSupport`). When present the composer's Effort row follows it exactly; when absent the provider's id-based table answers. Hosts persist it with the rest of the profile."
           },
           "capabilities": {
             "type": "number",
@@ -5517,7 +5617,7 @@
         ]
       },
       "response": {
-        "$ref": "#/components/schemas/AiFolderIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderWrapper"
       }
     },
     "aiAgentsUpdate": {
@@ -5587,7 +5687,7 @@
         }
       },
       "response": {
-        "$ref": "#/components/schemas/AiFolderIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderWrapper"
       }
     },
     "aiAgentsDelete": {
@@ -5632,7 +5732,7 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/AiFolderIntegerArrayWrapper"
+        "$ref": "#/components/schemas/AiFolderArrayWrapper"
       }
     },
     "aiAgentsResetQuota": {
@@ -5657,12 +5757,12 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/AiFolderIntegerArrayWrapper"
+        "$ref": "#/components/schemas/AiFolderArrayWrapper"
       }
     },
     "aiAgentsList": {
       "response": {
-        "$ref": "#/components/schemas/AiFolderContentIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderContentWrapper"
       }
     },
     "aiAgentsNews": {
@@ -5672,7 +5772,7 @@
     },
     "aiAgentsGet": {
       "response": {
-        "$ref": "#/components/schemas/AiFolderIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderWrapper"
       }
     },
     "aiSettingsGet": {

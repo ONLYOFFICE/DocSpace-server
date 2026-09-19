@@ -94,7 +94,7 @@ public class RoomLinkAnonymousAccessTests(
         data.Shared.Should().BeTrue();
     }
 
-    private async Task<FolderDtoInteger> CreateRoom(string title, RoomType roomType)
+    private async Task<FolderDto> CreateRoom(string title, RoomType roomType)
     {
         return roomType switch
         {

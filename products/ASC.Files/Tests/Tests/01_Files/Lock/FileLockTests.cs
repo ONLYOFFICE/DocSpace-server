@@ -143,7 +143,7 @@ public class FileLockTests(
         // Arrange
         await _filesClient.Authenticate(Owner);
 
-        var files = new List<FileDtoInteger>();
+        var files = new List<FileDto>();
         for (var i = 1; i <= 3; i++)
         {
             files.Add(await CreateFileInMy($"Autotest Lock Multi File {i}.docx", Owner));

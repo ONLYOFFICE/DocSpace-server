@@ -105,7 +105,7 @@ public abstract class RoomsPermissionsTestBase(
     /// Creates a room owned by the caller holding one pending invited user, which is what the resend
     /// endpoint targets.
     /// </summary>
-    protected async Task<FolderDtoInteger> CreateRoomWithPendingUser()
+    protected async Task<FolderDto> CreateRoomWithPendingUser()
     {
         var room = await CreateCustomRoom("Autotest Resend Perm");
 

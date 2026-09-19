@@ -131,7 +131,7 @@ public class RoomTagDetachIntegrationTests(
         await _roomsApi.DeleteRoomTagsAsync(room.Id, new BatchTagsRequestDto(["ContentsTag"]), TestContext.Current.CancellationToken);
 
         // Assert
-        // FolderContentDtoInteger.Folders is typed List<FileEntryBaseDto>, which carries Title but
+        // FolderContentDto.Folders is typed List<FileEntryBaseDto>, which carries Title but
         // neither Id nor Logo — so the inner folder is identified by title, not id.
         var content = (await _foldersApi.GetFolderByFolderIdAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         content.Folders.Select(f => f.Title).Should().Contain(innerFolderTitle);
@@ -150,7 +150,7 @@ public class RoomTagDetachIntegrationTests(
         await _roomsApi.DeleteRoomTagsAsync(room.Id, new BatchTagsRequestDto(["ListTag"]), TestContext.Current.CancellationToken);
 
         // Assert
-        // FolderContentDtoInteger.Folders is typed List<FileEntryBaseDto>, which drops both "id"
+        // FolderContentDto.Folders is typed List<FileEntryBaseDto>, which drops both "id"
         // and "tags" — read the raw JSON to get at the room's tags in the list response.
         // filterValue is served from the search index, which is written asynchronously, so poll for
         // the room instead of racing that write with a bare read.

@@ -34,6 +34,8 @@
 using System.Text.Json.Nodes;
 using System.Xml.XPath;
 
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+
 using Scalar.AspNetCore;
 
 using Swashbuckle.AspNetCore.Swagger;
@@ -49,6 +51,10 @@ public static class OpenApiExtension
         // Drives the documents written at build time, which read SwaggerOptions from DI and never touch the
         // middleware. Not a duplicate of the version set in UseOpenApi: that one only serves the http endpoint.
         services.Configure<SwaggerOptions>(o => o.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1);
+
+        // Registered as one more ApiExplorer provider, not a Swashbuckle filter: the third-party twin of a
+        // generic action has to be told apart before Swashbuckle resolves the two identical routes to one.
+        services.TryAddEnumerable(ServiceDescriptor.Transient<IApiDescriptionProvider, ThirdPartyVariantApiDescriptionProvider>());
 
         return services.AddSwaggerGen(c =>
         {
@@ -135,8 +141,12 @@ public static class OpenApiExtension
             c.OperationFilter<RateLimitOperationFilter>();
             c.DocumentFilter<RateLimitDocumentFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
-            // Must stay last: it rewrites what the filters above have produced into openapi 3.1 form.
+            // Must stay after every filter that produces content: it rewrites what the filters above have
+            // produced into openapi 3.1 form.
             c.DocumentFilter<OpenApi31SchemaDocumentFilter>();
+            // Last of all: it only moves the finished third-party operations into the real ones, and has to
+            // see them in their final 3.1 form.
+            c.DocumentFilter<ThirdPartyVariantDocumentFilter>();
             // In openapi 3.1 `format` no longer affects the encoding - the content type does, so a file part is
             // described by `contentMediaType` alone, without `type`.
             c.MapType<IFormFile>(() => new OpenApiSchema
@@ -383,24 +393,7 @@ public static class OpenApiExtension
 
     public static string CustomSchemaId(Type type)
     {
-        var name = type.Name;
-
-        if (string.IsNullOrEmpty(name))
-        {
-            return name;
-        }
-
-        if (type.IsGenericType)
-        {
-            name = name.Split('`')[0];
-            var genericArgs = string.Join("", type.GetGenericArguments().Select(CustomSchemaId));
-            name += genericArgs;
-        }
-
-        // Fix for nested classes
-        name = name.Replace("+", "_");
-        name = name.Replace("Int32", "Integer");
-        return name;
+        return OpenApiSchemaId.Of(type);
     }
 
     private class AllowAnonymousFilter : IOperationFilter
