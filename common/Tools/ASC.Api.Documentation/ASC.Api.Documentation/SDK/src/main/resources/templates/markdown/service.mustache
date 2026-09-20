@@ -49,6 +49,20 @@ This endpoint does not need any parameter.
 
 {{#returnType}}{{#vendorExtensions.x-return-model-anchor}}[**{{returnType}}**](#{{vendorExtensions.x-return-model-anchor}}){{/vendorExtensions.x-return-model-anchor}}{{^vendorExtensions.x-return-model-anchor}}**{{returnType}}**{{/vendorExtensions.x-return-model-anchor}}{{/returnType}}{{^returnType}}null (empty response body){{/returnType}}
 
+{{#vendorExtensions.x-thirdparty-variant-operation}}
+#### Third-party storage
+
+For a file or folder in a connected third-party storage the identifier is a string such as `sbox-42`, and the call differs in these parts only:
+
+|Name | In | Type | Description | Notes |
+|------------- | ------------- | ------------- | ------------- | -------------|
+{{#allParams}}{{#vendorExtensions.x-thirdparty-changed}}| **{{paramName}}** | {{vendorExtensions.x-param-in}} | {{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{#dataFormat}} ({{dataFormat}}){{/dataFormat}} | {{description}} | {{{vendorExtensions.x-notes}}} |
+{{/vendorExtensions.x-thirdparty-changed}}{{/allParams}}
+{{#vendorExtensions.x-thirdparty-return-changed}}
+Return type: {{#returnType}}{{#vendorExtensions.x-return-model-anchor}}[**{{returnType}}**](#{{vendorExtensions.x-return-model-anchor}}){{/vendorExtensions.x-return-model-anchor}}{{^vendorExtensions.x-return-model-anchor}}**{{returnType}}**{{/vendorExtensions.x-return-model-anchor}}{{/returnType}}{{^returnType}}null (empty response body){{/returnType}}
+{{/vendorExtensions.x-thirdparty-return-changed}}
+
+{{/vendorExtensions.x-thirdparty-variant-operation}}
 #### Authorization
 
 {{^authMethods}}No authorization required{{/authMethods}}{{#authMethods}}[{{name}}](#{{vendorExtensions.x-anchor}}){{#vendorExtensions.x-scopes}} (scopes: {{vendorExtensions.x-scopes}}){{/vendorExtensions.x-scopes}}{{^-last}}, {{/-last}}{{/authMethods}}

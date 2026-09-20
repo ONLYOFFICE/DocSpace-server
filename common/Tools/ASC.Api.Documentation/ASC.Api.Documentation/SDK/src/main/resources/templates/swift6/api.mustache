@@ -25,6 +25,7 @@ extension {{projectName}}API {
 var fields: String?
 {{/x-supportsFields}}
 {{#operation}}
+    {{^vendorExtensions.x-is-thirdparty-variant}}
     {{#allParams}}
     {{#isEnum}}
 
@@ -51,6 +52,7 @@ var fields: String?
     }
     {{/isEnum}}
     {{/allParams}}
+    {{/vendorExtensions.x-is-thirdparty-variant}}
 {{^useVapor}}
 {{#useObjcBlock}}
 

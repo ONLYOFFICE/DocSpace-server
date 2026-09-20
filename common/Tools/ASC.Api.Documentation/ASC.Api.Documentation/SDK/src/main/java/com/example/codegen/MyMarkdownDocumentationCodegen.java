@@ -23,6 +23,7 @@ import io.swagger.v3.oas.models.*;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.*;
 import io.swagger.v3.oas.models.security.*;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.servers.*;
 
 import java.time.*;
@@ -438,63 +439,84 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
 
         for (CodegenOperation operation : results.getOperations().getOperation()) {
             operation.vendorExtensions.put(ANCHOR, slug(operation.operationId));
+            markOperation(operation);
 
-            if (operation.allParams != null) {
-                for (CodegenParameter parameter : operation.allParams) {
-                    String location = parameterLocation(parameter);
-                    parameter.description = tableText(parameter.description);
-                    parameter.vendorExtensions.put(PARAM_IN, location);
-                    parameter.vendorExtensions.put(NOTES, notes(
-                            parameter.required,
-                            statedExample(operation, parameter.baseName, location),
-                            parameter.defaultValue,
-                            parameter.allowableValues,
-                            parameter.minimum,
-                            parameter.maximum,
-                            parameter.minLength,
-                            parameter.maxLength,
-                            parameter.pattern,
-                            parameter.isNullable));
-
-                    if (isDocumented(parameter.baseType)) {
-                        parameter.vendorExtensions.put(MODEL_DOC, parameter.baseType);
-                        parameter.vendorExtensions.put(MODEL_ANCHOR, documentedModels.get(parameter.baseType));
-                    }
-                }
-            }
-
-            if (operation.responses != null) {
-                for (CodegenResponse response : operation.responses) {
-                    response.message = tableText(response.message);
-
-                    if (isDocumented(response.baseType)) {
-                        response.vendorExtensions.put(MODEL_ANCHOR, documentedModels.get(response.baseType));
-                    }
-                }
-            }
-
-            if (operation.authMethods != null) {
-                for (CodegenSecurity security : operation.authMethods) {
-                    security.vendorExtensions.put(ANCHOR, slug(security.name));
-
-                    // Absent rather than empty: the template engine treats "" as present and
-                    // would render a bare "(scopes: )" for schemes that require none.
-                    String scopes = scopeList(security);
-                    if (!scopes.isEmpty()) {
-                        security.vendorExtensions.put(SCOPES, scopes);
-                    } else {
-                        security.vendorExtensions.remove(SCOPES);
-                    }
-                }
-            }
-
-            if (isDocumented(operation.returnBaseType)) {
-                operation.vendorExtensions.put(RETURN_MODEL_DOC, operation.returnBaseType);
-                operation.vendorExtensions.put(RETURN_MODEL_ANCHOR, documentedModels.get(operation.returnBaseType));
+            // The third-party twin is rendered inside the operation's own section, from the same marks.
+            Object variant = operation.vendorExtensions.get(ThirdPartyVariants.VARIANT_OPERATION);
+            if (variant instanceof CodegenOperation) {
+                markOperation((CodegenOperation) variant);
             }
         }
 
         return results;
+    }
+
+    // The string-id twin of a generic action (see ThirdPartyVariants) stays attached to its operation: the
+    // page shows it as a subsection of the operation rather than as an operation of its own.
+    @Override
+    public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List<Server> servers) {
+        CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);
+        ThirdPartyVariants.attach(this, op, path, httpMethod, operation, servers, ThirdPartyVariants.Naming.OVERLOAD);
+        return op;
+    }
+
+    /**
+     * Links and notes for the parameters, responses, authorization and return type of one operation.
+     */
+    private void markOperation(CodegenOperation operation) {
+        if (operation.allParams != null) {
+            for (CodegenParameter parameter : operation.allParams) {
+                String location = parameterLocation(parameter);
+                parameter.description = tableText(parameter.description);
+                parameter.vendorExtensions.put(PARAM_IN, location);
+                parameter.vendorExtensions.put(NOTES, notes(
+                        parameter.required,
+                        statedExample(operation, parameter.baseName, location),
+                        parameter.defaultValue,
+                        parameter.allowableValues,
+                        parameter.minimum,
+                        parameter.maximum,
+                        parameter.minLength,
+                        parameter.maxLength,
+                        parameter.pattern,
+                        parameter.isNullable));
+
+                if (isDocumented(parameter.baseType)) {
+                    parameter.vendorExtensions.put(MODEL_DOC, parameter.baseType);
+                    parameter.vendorExtensions.put(MODEL_ANCHOR, documentedModels.get(parameter.baseType));
+                }
+            }
+        }
+
+        if (operation.responses != null) {
+            for (CodegenResponse response : operation.responses) {
+                response.message = tableText(response.message);
+
+                if (isDocumented(response.baseType)) {
+                    response.vendorExtensions.put(MODEL_ANCHOR, documentedModels.get(response.baseType));
+                }
+            }
+        }
+
+        if (operation.authMethods != null) {
+            for (CodegenSecurity security : operation.authMethods) {
+                security.vendorExtensions.put(ANCHOR, slug(security.name));
+
+                // Absent rather than empty: the template engine treats "" as present and
+                // would render a bare "(scopes: )" for schemes that require none.
+                String scopes = scopeList(security);
+                if (!scopes.isEmpty()) {
+                    security.vendorExtensions.put(SCOPES, scopes);
+                } else {
+                    security.vendorExtensions.remove(SCOPES);
+                }
+            }
+        }
+
+        if (isDocumented(operation.returnBaseType)) {
+            operation.vendorExtensions.put(RETURN_MODEL_DOC, operation.returnBaseType);
+            operation.vendorExtensions.put(RETURN_MODEL_ANCHOR, documentedModels.get(operation.returnBaseType));
+        }
     }
 
     @Override

@@ -17,6 +17,7 @@
 package com.example.codegen;
 
 import org.openapitools.codegen.languages.JavaClientCodegen;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.servers.*;
 import io.swagger.v3.oas.models.headers.*;
 import static org.openapitools.codegen.utils.StringUtils.camelize;
@@ -78,8 +79,25 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
     }
 
 
+    // The third-party twin of a generic action (see ThirdPartyVariants): the string-id shape the document
+    // carries as `x-thirdparty-variant`, exposed as an overload of the same method.
+    @Override
+    public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List<Server> servers) {
+        CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);
+        ThirdPartyVariants.attach(this, op, path, httpMethod, operation, servers, ThirdPartyVariants.Naming.OVERLOAD);
+        return op;
+    }
+
+    @Override
+    public void postProcess() {
+        super.postProcess();
+        StaleOutput.delete(this);
+    }
+
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
+        ThirdPartyVariants.insert(this, objs);
+
         super.postProcessOperationsWithModels(objs, allModels);
 
         if (objs != null && objs.getOperations() != null) {

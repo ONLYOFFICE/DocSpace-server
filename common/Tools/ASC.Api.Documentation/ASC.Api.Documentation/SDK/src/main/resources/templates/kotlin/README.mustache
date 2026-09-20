@@ -101,11 +101,13 @@ All URIs are relative to *https://your-docspace.onlyoffice.com*
         <td colspan="3" style="text-align: center;"><strong>{{x-classname}}</strong></td>
       </tr>
       {{#operations.operation}}
+      {{^vendorExtensions.x-is-thirdparty-variant}}
       <tr>
         <td><a href="{{apiDocPath}}{{classname}}.md#{{operationIdLowerCase}}"><strong>{{operationId}}</strong></a></td>
         <td><strong>{{httpMethod}}</strong> {{path}}</td>
         <td>{{{summary}}}</td>
       </tr>
+      {{/vendorExtensions.x-is-thirdparty-variant}}
       {{/operations.operation}}
     {{/apis}}</tbody>
   </table>
