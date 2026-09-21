@@ -498,7 +498,7 @@ public class DocumentConfigDto
     /// configuration is built, so the answer is trustworthy even for a freshly uploaded file.
     /// </summary>
     /// <example>false</example>
-    public bool? IsForm { get; set; }
+    public bool IsForm { get; set; }
 
     /// <summary>
     /// Extra instructions for the editors, currently the watermark to draw over the document. It is empty when the
@@ -784,11 +784,8 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter, 
             Options = source.Options
         };
 
-        if (FileUtility.GetFileTypeByExtention(FileUtility.GetFileExtension(file.Title)) == FileType.Pdf
-            && await fileChecker.IsFormPDFFile(file))
-        {
-            result.IsForm = true;
-        }
+        result.IsForm = FileUtility.GetFileTypeByExtention(FileUtility.GetFileExtension(file.Title)) == FileType.Pdf
+            && await fileChecker.IsFormPDFFile(file);
 
         return result;
     }

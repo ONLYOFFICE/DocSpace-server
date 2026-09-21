@@ -179,21 +179,4 @@ public static class DocSpaceHelper
     {
         return await folderDao.GetParentFoldersAsync(file.ParentId).FirstOrDefaultAsync(f => f.IsRoom);
     }
-
-    public static async ValueTask<bool> IsFormOrCompletedForm<T>(File<T> file, IDaoFactory daoFactory)
-    {
-        var extension = FileUtility.GetFileExtension(file.Title);
-        if (FileUtility.GetFileTypeByExtention(extension) != FileType.Pdf)
-        {
-            return false;
-        }
-
-        if (file.IsPdf)
-        {
-            return true;
-        }
-
-        var roles = await daoFactory.GetCacheFileDao<T>().GetFormRoles(file.Id).ToListAsync();
-        return roles.Count != 0 && roles.All(r => r.Submitted);
-    }
 }

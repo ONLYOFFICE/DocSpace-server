@@ -1199,7 +1199,7 @@ public class FileSecurity(
                 }
             }
 
-            if (file != null && !hasFullAccess && !await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
+            if (file != null && !hasFullAccess && !file.IsPdf)
             {
                 var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
                 if (shareRecord is { Share: FileShare.FillForms })
@@ -1543,7 +1543,7 @@ public class FileSecurity(
             }
         }
 
-        if (file == null || !await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory) || (file is { IsPdf: true } && e.RootFolderType != FolderType.VirtualRooms))
+        if (file is not { IsPdf: true } || e.RootFolderType != FolderType.VirtualRooms)
         {
             switch (action)
             {
@@ -1703,7 +1703,7 @@ public class FileSecurity(
                     FilesSecurityActions.SubmitToFormGallery or
                     FilesSecurityActions.CopyLink or
                                      FilesSecurityActions.OpenForm
-                    && await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
+                    && file is { IsPdf: true })
                 {
 
                     if (action == FilesSecurityActions.FillForms)
@@ -3509,7 +3509,7 @@ public class FileSecurity(
 
             foreach (var s in shares)
             {
-                if (s is FileShare.Restrict || (s is FileShare.Read && !file.IsPdf))
+                if (s is FileShare.Restrict or FileShare.Read)
                 {
                     sharesToAdd.Add(s);
                     continue;
@@ -3534,9 +3534,9 @@ public class FileSecurity(
                 {
                     case FileShare.Editing when (file.IsPdf && parentRoomType != FolderType.FillingFormsRoom || !file.IsPdf) && canEdit:
                     case FileShare.FillForms when file.IsPdf && DocSpaceHelper.IsFillFormsRoom(parentRoomType):
-                    case FileShare.CustomFilter when !file.IsPdf && canCustomFiltering:
-                    case FileShare.Comment when !file.IsPdf && canComment:
-                    case FileShare.Review when !file.IsPdf && canReview:
+                    case FileShare.CustomFilter when canCustomFiltering:
+                    case FileShare.Comment when canComment:
+                    case FileShare.Review when canReview:
                     case FileShare.ReadWrite:
                         sharesToAdd.Add(s);
                         break;

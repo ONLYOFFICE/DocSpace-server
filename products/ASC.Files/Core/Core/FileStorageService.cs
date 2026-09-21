@@ -5617,7 +5617,7 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
-        if (!await DocSpaceHelper.IsFormOrCompletedForm(form, daoFactory))
+        if (!form.IsPdf)
         {
             throw new InvalidOperationException();
         }
@@ -5772,7 +5772,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (!await DocSpaceHelper.IsFormOrCompletedForm(form, daoFactory))
+        if (!form.IsPdf)
         {
             throw new InvalidOperationException();
         }
@@ -6022,7 +6022,7 @@ public class FileStorageService //: IFileStorageService
         }
         else
         {
-            if (!await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
+            if (!file.IsPdf)
             {
                 throw new InvalidOperationException();
             }

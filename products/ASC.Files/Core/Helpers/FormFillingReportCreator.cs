@@ -46,6 +46,8 @@ public class FormFillingReportCreator(
     FactoryIndexerForm factoryIndexerForm,
     FactoryIndexerFormMetadata factoryIndexerFormMetadata)
 {
+    private static readonly HashSet<string> _checkboxOffStates =
+        new(StringComparer.OrdinalIgnoreCase) { "off", "false", "0", "no", "n", "unchecked" };
 
     public async Task UpdateFormFillingReport<T>(int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile, bool sendFormToExternalDB, bool settingsSaveFormAsXLSX)
     {
@@ -634,9 +636,6 @@ public class FormFillingReportCreator(
             _ => value
         };
     }
-
-    private static readonly HashSet<string> _checkboxOffStates =
-        new(StringComparer.OrdinalIgnoreCase) { "off", "false", "0", "no", "n", "unchecked" };
 
     private static bool ParseCheckbox(string value) =>
         bool.TryParse(value, out var b) ? b : !_checkboxOffStates.Contains(value.Trim());
