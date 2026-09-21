@@ -1450,7 +1450,7 @@
     <value>Docs Connect-ի մշակողի փաթեթ</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>DocsCloud-ի քվոտայի հաշվետվություն ({0})</value>
+    <value>Docs Connect-ի քվոտայի հաշվետվություն ({0})</value>
   </data>
   <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
     <value>Աղբյուրի տեսակը</value>

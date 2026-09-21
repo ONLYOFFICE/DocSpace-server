@@ -1447,7 +1447,7 @@
     <value>图片</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>DocsCloud 配额报告 ({0})</value>
+    <value>Docs Connect 配额报告 ({0})</value>
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>使用云托管租户和您自己的 API 密钥，将 ONLYOFFICE Docs 编辑器嵌入您的应用程序。</value>

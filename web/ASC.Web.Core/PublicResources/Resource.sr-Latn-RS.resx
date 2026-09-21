@@ -1447,7 +1447,7 @@
     <value>Slika</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>Izveštaj o kvoti DocsCloud ({0})</value>
+    <value>Izveštaj o kvoti Docs Connect ({0})</value>
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Ugradite urednike ONLYOFFICE Docs u vašu aplikaciju sa zakupcima hostovanim u oblaku i vašim sopstvenim API ključevima.</value>

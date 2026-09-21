@@ -1447,7 +1447,7 @@
     <value>Hình ảnh</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>Báo cáo hạn mức DocsCloud ({0})</value>
+    <value>Báo cáo hạn mức Docs Connect ({0})</value>
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Nhúng các trình soạn thảo ONLYOFFICE Docs vào ứng dụng của bạn với các tenant được lưu trữ trên đám mây và khóa API riêng của bạn.</value>

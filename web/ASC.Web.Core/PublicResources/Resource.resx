@@ -1465,7 +1465,7 @@
     <value>Image</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>DocsCloud Quota Report ({0})</value>
+    <value>Docs Connect Quota Report ({0})</value>
   </data>
   <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
     <value>User quota</value>

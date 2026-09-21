@@ -1444,7 +1444,7 @@
     <value>Docs Connect Entwicklerpaket</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>DocsCloud-Kontingentbericht ({0})</value>
+    <value>Docs Connect-Kontingentbericht ({0})</value>
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Betten Sie ONLYOFFICE Docs-Editoren in Ihre App mit cloud-gehosteten Mandanten und eigenen API-Schlüsseln ein.</value>

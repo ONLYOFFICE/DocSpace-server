@@ -1447,7 +1447,7 @@
     <value>Afbeelding</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>DocsCloud-quotumrapport ({0})</value>
+    <value>Docs Connect-quotumrapport ({0})</value>
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Integreer ONLYOFFICE Docs-editors in uw app met cloud-gehoste tenants en uw eigen API-sleutels.</value>

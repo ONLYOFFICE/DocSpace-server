@@ -1447,7 +1447,7 @@
     <value>Attēls</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>DocsCloud kvotu atskaite ({0})</value>
+    <value>Docs Connect kvotu atskaite ({0})</value>
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Ieguliet ONLYOFFICE Docs redaktorus savā lietotnē ar mākonī mitinātiem nomniekiem un savām API atslēgām.</value>

@@ -1360,7 +1360,7 @@
     <value>Зображення</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>Звіт про квоту DocsCloud ({0})</value>
+    <value>Звіт про квоту Docs Connect ({0})</value>
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Вбудуйте редактори ONLYOFFICE Docs у свій застосунок із хмарними орендарями та власними ключами API.</value>

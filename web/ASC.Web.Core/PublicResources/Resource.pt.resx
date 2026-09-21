@@ -1447,7 +1447,7 @@
     <value>Imagem</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>Relatório de quota do DocsCloud ({0})</value>
+    <value>Relatório de quota do Docs Connect ({0})</value>
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Incorpore os editores do ONLYOFFICE Docs na sua aplicação com inquilinos alojados na nuvem e as suas próprias chaves de API.</value>

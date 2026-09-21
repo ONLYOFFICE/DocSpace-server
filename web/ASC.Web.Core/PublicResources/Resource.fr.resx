@@ -1450,7 +1450,7 @@
     <value>Intégrez les éditeurs ONLYOFFICE Docs dans votre application avec des locataires hébergés dans le cloud et vos propres clés API.</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>Rapport de quota DocsCloud ({0})</value>
+    <value>Rapport de quota Docs Connect ({0})</value>
   </data>
   <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
     <value>L'accès expire</value>

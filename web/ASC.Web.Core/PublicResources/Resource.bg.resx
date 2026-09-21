@@ -1444,7 +1444,7 @@
     <value>Пакет за разработчици на Docs Connect</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>Отчет за квотата на DocsCloud ({0})</value>
+    <value>Отчет за квотата на Docs Connect ({0})</value>
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Вградете редакторите на ONLYOFFICE Docs във вашето приложение с облачно хоствани наематели и ваши собствени API ключове.</value>

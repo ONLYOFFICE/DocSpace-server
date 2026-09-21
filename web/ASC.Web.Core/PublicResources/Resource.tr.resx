@@ -1447,7 +1447,7 @@
     <value>Görsel</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>DocsCloud Kota Raporu ({0})</value>
+    <value>Docs Connect Kota Raporu ({0})</value>
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>ONLYOFFICE Docs editörlerini bulut barındırmalı kiracılar ve kendi API anahtarlarınızla uygulamanıza entegre edin.</value>

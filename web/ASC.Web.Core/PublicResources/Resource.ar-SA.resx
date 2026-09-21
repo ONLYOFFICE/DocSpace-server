@@ -1447,7 +1447,7 @@
     <value>حزمة Docs Connect للمطورين</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>تقرير حصة DocsCloud ({0})</value>
+    <value>تقرير حصة Docs Connect ({0})</value>
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>قم بتضمين محرري ONLYOFFICE Docs في تطبيقك مع مستأجرين مستضافين على السحابة ومفاتيح API الخاصة بك.</value>

@@ -1447,7 +1447,7 @@
     <value>Imagine</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>Raport cotă DocsCloud ({0})</value>
+    <value>Raport cotă Docs Connect ({0})</value>
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Încorporați editorii ONLYOFFICE Docs în aplicația dvs. cu chiriași găzduiți în cloud și propriile chei API.</value>

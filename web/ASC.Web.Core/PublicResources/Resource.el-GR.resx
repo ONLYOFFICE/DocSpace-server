@@ -1450,7 +1450,7 @@
     <value>Πακέτο ανάπτυξης Docs Connect</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>Αναφορά χωρητικότητας DocsCloud ({0})</value>
+    <value>Αναφορά χωρητικότητας Docs Connect ({0})</value>
   </data>
   <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
     <value>Τύπος πηγής</value>

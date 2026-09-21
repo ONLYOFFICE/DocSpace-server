@@ -1447,7 +1447,7 @@
     <value>Obraz</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>Raport limitów DocsCloud ({0})</value>
+    <value>Raport limitów Docs Connect ({0})</value>
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Osadź edytory ONLYOFFICE Docs w swojej aplikacji z dzierżawcami hostowanymi w chmurze i własnymi kluczami API.</value>

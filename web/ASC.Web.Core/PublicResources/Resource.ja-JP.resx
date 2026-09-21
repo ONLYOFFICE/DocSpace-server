@@ -1447,7 +1447,7 @@
     <value>画像</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>DocsCloud クォータレポート ({0})</value>
+    <value>Docs Connect クォータレポート ({0})</value>
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>クラウドホスト型テナントと独自のAPIキーを使用して、ONLYOFFICE Docsエディタをアプリに組み込みます。</value>

@@ -1447,7 +1447,7 @@
     <value>Kuva</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>DocsCloud-kiintiöraportti ({0})</value>
+    <value>Docs Connect -kiintiöraportti ({0})</value>
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Upota ONLYOFFICE Docs -editorit sovellukseesi pilvessä isännöidyillä vuokralaisilla ja omilla API-avaimillasi.</value>

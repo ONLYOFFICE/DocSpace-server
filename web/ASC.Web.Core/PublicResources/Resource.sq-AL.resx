@@ -1450,7 +1450,7 @@
     <value>Paketa e zhvilluesit Docs Connect</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>Raporti i kuotës DocsCloud ({0})</value>
+    <value>Raporti i kuotës Docs Connect ({0})</value>
   </data>
   <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
     <value>Lloji i burimit</value>

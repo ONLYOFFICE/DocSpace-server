@@ -1447,7 +1447,7 @@
     <value>Vložte editory ONLYOFFICE Docs do své aplikace s cloudovými nájemci a vlastními klíči API.</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>Zpráva o kvótě DocsCloud ({0})</value>
+    <value>Zpráva o kvótě Docs Connect ({0})</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
     <value>Vývojářský balíček Docs Connect</value>

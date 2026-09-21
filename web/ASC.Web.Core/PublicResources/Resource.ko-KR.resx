@@ -1447,7 +1447,7 @@
     <value>이미지</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>DocsCloud 할당량 보고서 ({0})</value>
+    <value>Docs Connect 할당량 보고서 ({0})</value>
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>클라우드 호스팅 테넌트와 자체 API 키를 사용하여 ONLYOFFICE Docs 편집기를 앱에 내장하세요.</value>
