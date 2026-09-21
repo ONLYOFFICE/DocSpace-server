@@ -39,6 +39,8 @@ public record ChatParameters
     public string Prompt { get; init; }
 }
 
+public record AiAgentChatBinding(int RoomId, int ChatProviderId, string ModelId);
+
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
 public static partial class ChatParametersMapper
 {
