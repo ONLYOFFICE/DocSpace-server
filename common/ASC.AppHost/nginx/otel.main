@@ -1,0 +1,13 @@
+# Main-context part of the router OpenTelemetry wiring (local dev only).
+# Picked up by `include /etc/nginx/conf.d/*.main;` at the end of the image's
+# nginx.conf, so the stock nginx.conf does not have to be replaced.
+#
+# nginx drops every environment variable inherited from its parent except TZ,
+# so the OTEL_* values set by the AppHost have to be declared here - otherwise
+# os.getenv() returns nil in the workers and otel/config.lua keeps everything
+# switched off.
+env OTEL_TRACES_ENABLED;
+env OTEL_LOGS_ENABLED;
+env OTEL_EXPORTER_OTLP_ENDPOINT;
+env OTEL_SERVICE_NAME;
+env OTEL_EXPORTER_OTLP_HEADERS;
