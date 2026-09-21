@@ -264,6 +264,13 @@ dotnet_diagnostic.CA2000.severity = none
 # IDE0068: Use recommended dispose pattern (detects missing using)
 dotnet_diagnostic.IDE0068.severity = warning
 
+# AV0014: Add [ApiController] to the controller or assembly.
+# Disabled because the Asp.Versioning analyzer looks for [ApiController] itself and does not walk
+# the attribute inheritance chain. Every DocSpace controller carries [ApiEndpoint], which derives
+# from ApiControllerAttribute, so the behaviour the rule asks for is already in place and the rule
+# fires on all ~100 controllers. Re-enable if the analyzer learns about derived attributes.
+dotnet_diagnostic.AV0014.severity = none
+
 [*.{cs,vb}]
 
 

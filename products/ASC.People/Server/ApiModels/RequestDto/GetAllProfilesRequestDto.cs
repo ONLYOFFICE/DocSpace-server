@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -43,7 +43,7 @@ namespace ASC.People.ApiModels.RequestDto;
 public class GetAllProfilesRequestDto
 {
     /// <summary>
-    /// The maximum number of items to be retrieved in the response.
+    /// The size of the page. It defaults to 100, which is also the largest value the operation accepts.
     /// </summary>
     /// <example>25</example>
     [FromQuery(Name = "count")]
@@ -51,46 +51,47 @@ public class GetAllProfilesRequestDto
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
-    /// The zero-based index of the first item to be retrieved in a filtered result set.
+    /// The number of matches to skip before the page starts. It defaults to 0, and the total number of matches is
+    /// reported in the total count of the response.
     /// </summary>
     /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
-    /// Specifies the filter criteria for user-related queries.
+    /// The only recognised value is `group`, which makes `filterValue` the ID of the group to keep the members of.
+    /// Any other value, and omitting the field, applies no group filter.
     /// </summary>
-    /// <example>displayName</example>
+    /// <example>group</example>
     [FromQuery(Name = "filterBy")]
     public string FilterBy { get; set; }
 
     /// <summary>
-    /// Specifies the property or field name by which the results should be sorted.
+    /// What to order the accounts by, compared without regard to case: `FirstName`, `LastName`, `DisplayName`,
+    /// `Type`, `Email`, `Department`, `UsedSpace`, `CreatedBy` or `RegistrationDate`.
     /// </summary>
-    /// <example>displayName</example>
+    /// <example>DisplayName</example>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
 
     /// <summary>
-    /// The order in which the results are sorted.
+    /// The direction of the ordering: `Ascending`, which is the default, or `Descending`.
     /// </summary>
-    /// <example>0</example>
+    /// <example>Ascending</example>
     [FromQuery(Name = "sortOrder")]
     public SortOrder SortOrder { get; set; }
 
     /// <summary>
-    /// The character or string used to separate multiple filter values in a filtering query.
+    /// The character that splits `filterValue` into several terms, of which any one may match. Omit it to split
+    /// the value on spaces instead, in which case every term has to match.
     /// </summary>
     /// <example>,</example>
-    /// <remarks>
-    /// This property defines the delimiter applied when multiple filter criteria are provided.
-    /// It allows the request to parse and handle multiple filtering values effectively.
-    /// </remarks>
     [FromQuery(Name = "filterSeparator")]
     public string FilterSeparator { get; set; }
 
     /// <summary>
-    /// The text value used as an additional filter criterion for profiles retrieval.
+    /// The text to match against the name and the email of the account, case-insensitively. Omit it to apply no
+    /// text filter.
     /// </summary>
     /// <example>John</example>
     [FromQuery(Name = "filterValue")]

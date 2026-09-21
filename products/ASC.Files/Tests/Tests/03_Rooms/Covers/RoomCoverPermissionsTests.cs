@@ -95,6 +95,34 @@ public class RoomCoverPermissionsTests(
         exception.ErrorCode.Should().Be(401);
     }
 
+    /// <remarks>
+    /// Bug 83679: in the UI, the room-group creation dialog depends on this request, and a Guest who
+    /// already has room access (invited as <see cref="FileShare.ContentCreator"/>) must be able to
+    /// read the covers gallery. The endpoint still answers 403, which is why guests cannot use that
+    /// dialog. This is a
+    /// different bug from 81012 above: 81012 covers a Guest with no room access at all, this one
+    /// covers a Guest who does have access to a room and is still refused the covers gallery.
+    /// </remarks>
+    [Fact]
+    [Trait("Bug", "83679")]
+    public async Task GetCovers_GuestWithRoomAccess_CanReadCoversGallery()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateCustomRoom("Autotest Guest Group Covers Room");
+
+        var guest = await InviteMember(EmployeeType.Guest);
+        await InviteToRoom(room.Id, guest, FileShare.ContentCreator);
+
+        await _filesClient.Authenticate(guest);
+
+        // Act
+        var covers = await _roomsApi.GetRoomCoversAsync(TestContext.Current.CancellationToken);
+
+        // Assert
+        covers.Should().NotBeNull("a Guest who has access to a room may read the covers gallery");
+    }
+
     #endregion
 
     #region PUT /files/rooms/{id}/cover - access control

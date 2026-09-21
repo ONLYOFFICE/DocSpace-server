@@ -51,7 +51,7 @@ public class ProfileStorageController(ProfileStorageService profileStorageServic
     {
         var profiles = inDto.Profiles.Select(ProfileMapper.MapToProfileData).ToList();
         var created = await profileStorageService.CreateManyAsync(profiles);
-        return created.Select(ProfileMapper.MapToDto).ToList();
+        return [.. created.Select(ProfileMapper.MapToDto)];
     }
 
     [HttpGet("profiles/{id}")]
@@ -65,7 +65,7 @@ public class ProfileStorageController(ProfileStorageService profileStorageServic
     public async Task<List<ProfileDto>> ReadAllAsync()
     {
         var profiles = await profileStorageService.ReadAllAsync();
-        return profiles.Select(ProfileMapper.MapToDto).ToList();
+        return [.. profiles.Select(ProfileMapper.MapToDto)];
     }
 
     [HttpPut("profiles/{id}")]

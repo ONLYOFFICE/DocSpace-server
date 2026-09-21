@@ -43,6 +43,7 @@
   <Project Path="products/ASC.Files/Worker/ASC.Files.Worker.csproj" />
   <Project Path="products/ASC.People/Server/ASC.People.csproj" />
   <Project Path="products/ASC.People/Tests/ASC.People.Tests.csproj" />
+  <Project Path="web/ASC.Web.Api.Tests/ASC.Web.Api.Tests.csproj" />
   <Project Path="web/ASC.Web.Api/ASC.Web.Api.csproj" />
   <Project Path="web/ASC.Web.Core/ASC.Web.Core.csproj" />
   <Project Path="web/ASC.Web.Studio/ASC.Web.Studio.csproj" />

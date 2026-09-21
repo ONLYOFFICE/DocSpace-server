@@ -65,7 +65,7 @@ public enum ProviderType
 }
 
 /// <summary>
-/// Legacy `ai_providers` row. Schema-only: the pre-ASC.NewAi chat stack is gone and nothing reads this. Registered in MigrationContext so the table survives.
+/// Legacy `ai_providers` row. Schema-only: the pre-ASC.AI.Chat chat stack is gone and nothing reads this. Registered in MigrationContext so the table survives.
 /// </summary>
 public class DbAiProvider : BaseEntity
 {

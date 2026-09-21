@@ -34,14 +34,16 @@
 namespace ASC.Data.Backup.ApiModels;
 
 /// <summary>
-/// The dump parameters.
+/// The request parameter that switches an operation from one portal to the whole server.
 /// </summary>
 public class DumpDto
 {
     /// <summary>
-    /// Specifies if a dump will be created or not.
+    /// Applies the operation to the whole server rather than to the current portal, which requires the space
+    /// access permission and works on a standalone installation only. Server-wide backups and schedules are
+    /// kept apart from the ones of a portal, so the two values address different data.
     /// </summary>
-    /// <example>true</example>
+    /// <example>false</example>
     [FromQuery]
     public bool Dump { get; set; }
 }

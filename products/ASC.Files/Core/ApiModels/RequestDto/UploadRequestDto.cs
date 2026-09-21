@@ -39,30 +39,38 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class UploadRequestDto : IModelWithFile
 {
     /// <summary>
-    /// The file to be uploaded.
+    /// The content to store, sent as a `multipart/form-data` part; the name of that part becomes the title of the
+    /// stored file, with characters a title cannot hold replaced and the name cut to 170 characters. A request
+    /// without it is rejected as invalid.
     /// </summary>
     /// <example>binary file data</example>
     [FromForm]
     public IFormFile File { get; set; }
 
     /// <summary>
-    /// Specifies whether to create the new file if it already exists or not.
+    /// Settles the clash with a file already carrying that title: left out, the content is written as the next
+    /// version of that file; set to true, both survive and the new one gets a numeric suffix in its title.
     /// </summary>
     /// <example>true</example>
     [FromQuery(Name = "createNewIfExist")]
     public bool CreateNewIfExist { get; set; }
 
     /// <summary>
-    /// Specifies whether to upload documents in the original formats as well or not.
+    /// Reaches further than this request: it writes a setting on the calling account, the same one
+    /// `PUT api/2.0/files/storeoriginal` writes, and it stays in force for later uploads. True keeps both the
+    /// uploaded file and the copy the portal converts it into, false replaces the uploaded file with the converted
+    /// one, and leaving it out keeps whatever the account already has.
     /// </summary>
     /// <example>true</example>
     [FromQuery(Name = "storeOriginalFile")]
     public bool? StoreOriginalFileFlag { get; set; }
 
     /// <summary>
-    /// Specifies whether to keep the file converting status or not.
+    /// Decides whether the outcome of the background conversion outlives the conversion itself. True keeps the queue
+    /// record, so `GET api/2.0/files/file/{fileId}/checkconversion` can still report the result or the error; left
+    /// out, the record is cleared the moment the conversion ends and that call finds nothing.
     /// </summary>
-    /// <example>false</example>
+    /// <example>true</example>
     [FromQuery(Name = "keepConvertStatus")]
     public bool KeepConvertStatus { get; set; }
 }
@@ -73,7 +81,8 @@ public class UploadRequestDto : IModelWithFile
 public class UploadWithFolderRequestDto<T> : UploadRequestDto
 {
     /// <summary>
-    /// The folder ID to upload a file.
+    /// The folder that receives the file; take the id from a listing such as `GET api/2.0/files/@root`. A room or an
+    /// ordinary folder inside one is accepted, a section root is not.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "folderId")]

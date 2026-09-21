@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -34,8 +34,10 @@
 namespace ASC.Core.Billing;
 
 [Scope]
-public class AccountingClient(IOptions<AccountingConfiguration> configuration, ICache cache, IAccountingApi accountingApi)
+public class AccountingClient(IOptions<AccountingConfiguration> configuration, ICache cache, IFusionCache hybridCache, IAccountingApi accountingApi)
 {
+    private static readonly TimeSpan _servicePricesCacheDuration = TimeSpan.FromDays(1);
+
     public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
 
     public async Task<Balance> GetCustomerBalanceAsync(string portalId)
@@ -121,6 +123,31 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
         EnsureConfigured();
 
         return await accountingApi.GetServiceInfoAsync(serviceName);
+    }
+
+    /// <summary>
+    /// Returns the prices of the service. The accounting service addresses prices by service ID, so the name is
+    /// resolved first; the result is not tenant-specific and is cached for all portals.
+    /// </summary>
+    public async Task<List<ServicePriceInfo>> GetServicePricesAsync(string serviceName, bool active = false)
+    {
+        EnsureConfigured();
+
+        return await hybridCache.GetOrSetAsync<List<ServicePriceInfo>>(GetServicePricesCacheKey(serviceName, active), async (_, _) =>
+        {
+            var serviceInfo = await accountingApi.GetServiceInfoAsync(serviceName);
+            if (serviceInfo == null)
+            {
+                return [];
+            }
+
+            return await accountingApi.GetServicePricesAsync(serviceInfo.Id, active);
+        }, opt => opt.SetDuration(_servicePricesCacheDuration));
+    }
+
+    private static string GetServicePricesCacheKey(string serviceName, bool active)
+    {
+        return $"accounting-service-prices-{serviceName}-{active}";
     }
 
     public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, List<string> serviceNames)
@@ -401,6 +428,17 @@ public class CustomerInfo
     public PaymentMethodStatus PaymentMethodStatus { get; init; }
 
     /// <summary>
+    /// The payment method type, e.g. "card".
+    /// </summary>
+    public string PaymentMethodType { get; init; }
+
+    /// <summary>
+    /// Indicates whether the payment method is delayed, i.e. a deposit is accepted immediately but the money
+    /// reaches the wallet only once the transfer settles. Such a wallet cannot be topped up automatically.
+    /// </summary>
+    public bool IsDelayedPaymentMethod { get; init; }
+
+    /// <summary>
     /// The email address of the customer.
     /// </summary>
     public string Email { get; init; }
@@ -458,6 +496,9 @@ public class Balance
     }
 }
 
+/// <summary>
+/// The currency an amount is expressed in.
+/// </summary>
 public class CurrencyCode
 {
     /// <summary>
@@ -467,6 +508,9 @@ public class CurrencyCode
     public string Currency { get; init; }
 }
 
+/// <summary>
+/// An amount of money together with its currency.
+/// </summary>
 public class CurrencyAmount : CurrencyCode
 {
     /// <summary>
@@ -559,6 +603,172 @@ public class ServiceInfo
     /// The account number.
     /// </summary>
     public int AccountNumber { get; init; }
+}
+
+/// <summary>
+/// The time unit the price is bound to.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum PriceTimeUnit
+{
+    [Description("None")]
+    None,
+    [Description("Hour")]
+    Hour,
+    [Description("Day")]
+    Day,
+    [Description("Week")]
+    Week,
+    [Description("Month")]
+    Month,
+    [Description("Year")]
+    Year,
+    [Description("ThreeYears")]
+    ThreeYears
+}
+
+/// <summary>
+/// The price status.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum PriceStatus
+{
+    [Description("Draft")]
+    Draft,
+    [Description("Approved")]
+    Approved,
+    [Description("Rejected")]
+    Rejected
+}
+
+/// <summary>
+/// Represents a price of the service.
+/// </summary>
+public class ServicePriceInfo
+{
+    /// <summary>
+    /// The price unique identifier.
+    /// </summary>
+    /// <example>12345</example>
+    public int Id { get; init; }
+
+    /// <summary>
+    /// The account number.
+    /// </summary>
+    /// <example>1010</example>
+    public int AccountNumber { get; init; }
+
+    /// <summary>
+    /// The service ID.
+    /// </summary>
+    /// <example>12345</example>
+    public int ServiceId { get; init; }
+
+    /// <summary>
+    /// The time unit the price is bound to.
+    /// </summary>
+    /// <example>None</example>
+    public PriceTimeUnit TimeUnit { get; init; }
+
+    /// <summary>
+    /// The cost price.
+    /// </summary>
+    /// <example>1500.75</example>
+    public decimal CostPrice { get; init; }
+
+    /// <summary>
+    /// The extra charge added to the cost price.
+    /// </summary>
+    /// <example>1500.75</example>
+    public decimal ExtraCharge { get; init; }
+
+    /// <summary>
+    /// The resulting service price.
+    /// </summary>
+    /// <example>1500.75</example>
+    public decimal ServicePrice { get; init; }
+
+    /// <summary>
+    /// The quota the price is set for.
+    /// </summary>
+    /// <example>100</example>
+    public double? Quota { get; init; }
+
+    /// <summary>
+    /// The period the price is effective in.
+    /// </summary>
+    public TimeBound TimeBound { get; init; }
+
+    /// <summary>
+    /// The price status.
+    /// </summary>
+    /// <example>Draft</example>
+    public PriceStatus Status { get; init; }
+
+    /// <summary>
+    /// The date and time when the price was created.
+    /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
+    public DateTime Created { get; init; }
+
+    /// <summary>
+    /// The discount category ID.
+    /// </summary>
+    /// <example>12345</example>
+    public int? DiscountCategoryId { get; init; }
+
+    /// <summary>
+    /// The discount category.
+    /// </summary>
+    public DiscountCategory DiscountCategory { get; init; }
+}
+
+/// <summary>
+/// Represents the period the price is effective in.
+/// </summary>
+public class TimeBound
+{
+    /// <summary>
+    /// The date and time when the period starts.
+    /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
+    public DateTime StartDate { get; init; }
+
+    /// <summary>
+    /// The date and time when the period ends.
+    /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
+    public DateTime? EndDate { get; init; }
+}
+
+/// <summary>
+/// Represents a discount category applied to the price.
+/// </summary>
+public class DiscountCategory
+{
+    /// <summary>
+    /// The discount category unique identifier.
+    /// </summary>
+    /// <example>12345</example>
+    public int Id { get; init; }
+
+    /// <summary>
+    /// The discount value.
+    /// </summary>
+    /// <example>10.5</example>
+    public decimal ValueDiscount { get; init; }
+
+    /// <summary>
+    /// The discount category description.
+    /// </summary>
+    /// <example>Annual subscription discount</example>
+    public string Description { get; init; }
+
+    /// <summary>
+    /// The date and time when the discount category was created.
+    /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
+    public DateTime Created { get; init; }
 }
 
 public class BaseReport<T>
@@ -753,16 +963,22 @@ public class Operation
     public string ParticipantDisplayName { get; set; }
 
     /// <summary>
-    /// AI Agent id.
+    /// Id of the entity the AI operation was performed on.
     /// </summary>
     /// <example>123</example>
-    public string AgentId { get; set; }
+    public string SourceId { get; set; }
 
     /// <summary>
-    /// AI Agent name.
+    /// Type of the entity the AI operation was performed on: Agent, File, Folder, Room or Form.
+    /// </summary>
+    /// <example>Agent</example>
+    public string SourceType { get; set; }
+
+    /// <summary>
+    /// Name of the entity the AI operation was performed on.
     /// </summary>
     /// <example>My AI Agent</example>
-    public string AgentTitle { get; set; }
+    public string SourceTitle { get; set; }
 
     /// <summary>
     /// Metadata of the operation.
@@ -817,19 +1033,26 @@ public static class AccountingHttpClientExtension
 
         services.AddTransient<AccountingAuthHandler>();
 
-        services
-            .AddRefitClient<IAccountingApi>(new RefitSettings
+        var refitSettings = new RefitSettings
+        {
+            ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
             {
-                ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-                }),
-                UrlParameterFormatter = new AccountingUrlParameterFormatter(),
-                UrlParameterKeyFormatter = new CamelCaseUrlParameterKeyFormatter(),
-                ExceptionFactory = CreateExceptionAsync
-            })
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            }),
+            UrlParameterKeyFormatter = new CamelCaseUrlParameterKeyFormatter(),
+            ExceptionFactory = CreateExceptionAsync,
+            TransportExceptionFactory = CreateTransportException,
+            UrlParameterFormatterMap = {
+                // The accounting service expects lowercase boolean query values ("true"/"false"); Refit's default
+                // formatter renders them as "True"/"False". Everything else keeps the default formatting.
+                [typeof(bool)] = new LowerCaseBooleanFormatter()
+            }
+        };
+
+        services
+            .AddRefitGeneratedClient<IAccountingApi>(refitSettings)
             .ConfigureHttpClient((sp, client) =>
             {
                 var url = accountingSettings?.Url;
@@ -885,9 +1108,21 @@ public static class AccountingHttpClientExtension
         });
     }
 
+    // ExceptionFactory only sees HTTP responses. A transport failure (DNS, connect, TLS, timeout) would otherwise
+    // surface as Refit.ApiRequestException and escape the AccountingException hierarchy the callers catch.
+    private static Exception CreateTransportException(HttpRequestMessage request, Exception exception, CancellationToken cancellationToken)
+    {
+        // A caller-requested cancellation is not a service failure - let it propagate unchanged.
+        if (exception is OperationCanceledException && cancellationToken.IsCancellationRequested)
+        {
+            return exception;
+        }
+
+        return new AccountingException($"Accounting request to {request.RequestUri} failed: {exception.Message}", exception);
+    }
     // Maps non-success responses to the domain exceptions the callers expect (payment required / customer not found),
     // and wraps any other failure into AccountingException with the status code and response body.
-    private static async Task<Exception> CreateExceptionAsync(HttpResponseMessage response)
+    private static async ValueTask<Exception> CreateExceptionAsync(HttpResponseMessage response)
     {
         if (response.IsSuccessStatusCode)
         {
@@ -914,18 +1149,13 @@ public static class AccountingHttpClientExtension
                content.Contains("not found", StringComparison.OrdinalIgnoreCase);
     }
 
-    // The accounting service expects lowercase boolean query values ("true"/"false"); Refit's default formatter
-    // renders them as "True"/"False". Everything else falls through to the default behaviour.
-    private sealed class AccountingUrlParameterFormatter : DefaultUrlParameterFormatter
+    // Registered in UrlParameterFormatterMap for bool only, so nullable and non-nullable booleans in both
+    // scalar parameters and flattened query objects render as "true"/"false".
+    private sealed class LowerCaseBooleanFormatter : IUrlParameterFormatter
     {
-        public override string Format(object parameterValue, ICustomAttributeProvider attributeProvider, Type type)
+        public string Format(object parameterValue, ICustomAttributeProvider attributeProvider, Type type)
         {
-            if (parameterValue is bool boolValue)
-            {
-                return boolValue ? "true" : "false";
-            }
-
-            return base.Format(parameterValue, attributeProvider, type);
+            return parameterValue is bool boolValue ? (boolValue ? "true" : "false") : parameterValue?.ToString();
         }
     }
 }

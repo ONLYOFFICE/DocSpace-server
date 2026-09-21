@@ -34,24 +34,28 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The product administrator parameters.
+/// Whether one user administers one portal module, echoing back the pair that was asked about.
 /// </summary>
 public class ProductAdministratorDto
 {
     /// <summary>
-    /// The product ID.
+    /// The module the verdict is about, echoed from the request. The all-zero GUID stands for the portal as a
+    /// whole rather than for any single module.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid ProductId { get; set; }
 
     /// <summary>
-    /// The user unique identifier.
+    /// The user the verdict is about, echoed from the request unchanged - it is not checked for existing.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid UserId { get; set; }
 
     /// <summary>
-    /// Indicates whether the user has administrator privileges for the product.
+    /// Whether that user administers that module. It is `true` for a DocSpace administrator whatever the module,
+    /// since the portal-wide role covers every one of them. A `false` can also mean the identifiers name no user
+    /// or no module at all, so it is not proof that the user exists, and it says nothing about whether the module
+    /// is enabled for the portal - `GET api/2.0/settings/security/{id}` reports that.
     /// </summary>
     /// <example>true</example>
     public required bool Administrator { get; set; }

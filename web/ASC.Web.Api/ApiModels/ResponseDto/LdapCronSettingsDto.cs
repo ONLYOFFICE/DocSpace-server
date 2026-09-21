@@ -34,17 +34,19 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The LDAP cron settings.
+/// When the portal synchronises itself with the directory on its own.
 /// </summary>
 /// <example>
 /// {
-///   "cron": "example value"
+///   "cron": "0 0 * * *"
 /// }
 /// </example>
 public class LdapCronSettingsDto
 {
     /// <summary>
-    /// The LDAP cron settings expression.
+    /// The schedule of the automatic synchronisation as a cron expression, read in the portal time zone. It is
+    /// empty when nothing is scheduled, in which case the directory is only read by an explicit call to
+    /// `GET api/2.0/settings/ldap/sync`, and it is cleared whenever directory authentication is switched off.
     /// </summary>
     /// <example>0 0 * * *</example>
     public string Cron { get; set; }

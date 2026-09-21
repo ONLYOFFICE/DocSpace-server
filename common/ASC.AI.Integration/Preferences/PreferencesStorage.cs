@@ -46,15 +46,29 @@ public class PreferencesStorage(
             ? await context.GetPreferencesByEntryAsync(tenantId, userId, entryId.Value)
             : await context.GetPreferencesAsync(tenantId, userId);
 
-        if (entity == null)
+        return entity == null ? null : ToDomain(entity);
+    }
+
+    public async Task<ScopedValues<Preferences?>> ReadByScopesAsync(int tenantId, Guid userId, int? firstEntryId, int? secondEntryId)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        Preferences? global = null;
+        var byEntry = ScopedValues.CreateEntryBuckets<Preferences?>(firstEntryId, secondEntryId, () => null);
+
+        await foreach (var entity in context.GetPreferencesByScopesAsync(tenantId, userId, firstEntryId, secondEntryId))
         {
-            return null;
+            if (entity.EntryId.HasValue)
+            {
+                byEntry[entity.EntryId.Value] = ToDomain(entity);
+            }
+            else
+            {
+                global = ToDomain(entity);
+            }
         }
 
-        return new Preferences
-        {
-            DeepMode = entity.DeepMode
-        };
+        return new(global, byEntry);
     }
 
     public async Task UpsertAsync(int tenantId, Guid userId, Preferences preferences, int? entryId = null)
@@ -80,11 +94,11 @@ public class PreferencesStorage(
                         TenantId = tenantId,
                         CreatedBy = userId,
                         EntryId = entryId,
-                        DeepMode = preferences.DeepMode
+                        Depth = preferences.Depth
                     };
 
                     context.Preferences.Attach(entity);
-                    context.Entry(entity).Property(x => x.DeepMode).IsModified = true;
+                    context.Entry(entity).Property(x => x.Depth).IsModified = true;
                 }
                 else
                 {
@@ -94,7 +108,7 @@ public class PreferencesStorage(
                         TenantId = tenantId,
                         CreatedBy = userId,
                         EntryId = entryId,
-                        DeepMode = preferences.DeepMode
+                        Depth = preferences.Depth
                     });
                 }
 
@@ -116,6 +130,11 @@ public class PreferencesStorage(
             await context.DeletePreferencesAsync(tenantId, userId);
         }
     }
+
+    private static Preferences ToDomain(DbPreference entity) => new()
+    {
+        Depth = entity.Depth
+    };
 
     private static string GetLockKey(int tenantId, Guid userId, int? entryId)
     {

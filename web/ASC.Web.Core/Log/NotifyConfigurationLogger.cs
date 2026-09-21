@@ -39,7 +39,4 @@ internal static partial class NotifyConfigurationLogger
 
     [LoggerMessage(LogLevel.Error, "AddLetterLogo")]
     public static partial void ErrorAddLetterLogo(this ILogger<ProductSecurityInterceptor> logger, Exception exception);
-
-    [LoggerMessage(LogLevel.Error, "NotifyClientRegisterCallback")]
-    public static partial void ErrorNotifyClientRegisterCallback(this ILogger<ProductSecurityInterceptor> logger, Exception exception);
 }

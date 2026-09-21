@@ -1,0 +1,105 @@
+{{>licenseInfo}}
+
+package samples
+
+import {{packageName}}.infrastructure.ApiClient
+import {{packageName}}.apis.Authentication.AuthenticationApi
+import {{packageName}}.apis.Files.FoldersApi
+import {{packageName}}.apis.Rooms.RoomsApi
+import {{packageName}}.apis.Backup.BackupApi
+
+import {{packageName}}.models.AuthRequestsDto
+import {{packageName}}.models.CreateFolder
+import {{packageName}}.models.DeleteFolder
+import {{packageName}}.models.BackupDto
+import {{packageName}}.models.SearchArea
+import {{packageName}}.models.SortOrder
+import {{packageName}}.models.BackupStorageType
+
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+
+fun main() = runBlocking {
+
+    // --- CONFIG ---
+    val apiClient = ApiClient(
+        baseUrl = "https://your-docspace.onlyoffice.com",
+        authNames = arrayOf("Bearer")
+    )
+
+    // --- LOGS ---
+    // apiClient.setLogger { message -> println(message) }
+
+    // --- AUTH ---
+    val authApi = apiClient.createService(AuthenticationApi::class.java)
+
+    val authDto = AuthRequestsDto(
+        userName = "example@onlyoffice.com",
+        password = "11111111"
+    )
+
+    val authResponse = authApi.authenticateMe(authDto)
+    val token = authResponse.body()?.response?.token
+        ?: error("Authentication failed: ${authResponse.code()}")
+
+    apiClient.setBearerToken(token)
+
+    // --- FOLDERS ---
+    val foldersApi = apiClient.createService(FoldersApi::class.java)
+
+    val myFolder = foldersApi.getMyFolder(count = 100, startIndex = 0)
+    val myFolderId = myFolder.body()?.response?.current?.id
+        ?: error("Unable to get the My folder id")
+    println("My folder id: $myFolderId")
+
+    val created = foldersApi.createFolder(myFolderId, CreateFolder(title = "TestTitle"))
+    val newFolderId = created.body()?.response?.id
+        ?: error("Unable to create the folder")
+    println("Created folder: $newFolderId")
+
+    val renamed = foldersApi.renameFolder(newFolderId, CreateFolder(title = "Updated title"))
+    println("My folder title: ${renamed.body()?.response?.title}")
+
+    val deleted = foldersApi.deleteFolder(
+        newFolderId,
+        DeleteFolder(immediately = true, deleteAfter = false)
+    )
+    println("Folder deleted status: ${deleted.code()}")
+
+    // --- ROOMS ---
+    val roomsApi = apiClient.createService(RoomsApi::class.java)
+
+    val rooms = roomsApi.getRoomsFolder(
+        searchArea = SearchArea.Active,
+        count = 100,
+        startIndex = 0,
+        sortBy = "DateAndTime",
+        sortOrder = SortOrder.Descending
+    )
+    println("Rooms status: ${rooms.code()}")
+
+    // --- BACKUP ---
+    val backupApi = apiClient.createService(BackupApi::class.java)
+
+    val backupResponse = backupApi.startBackup(
+        BackupDto(dump = false, storageType = BackupStorageType.DataStore)
+    )
+
+    // Retrofit does not throw on HTTP errors, so the response must be checked explicitly.
+    if (!backupResponse.isSuccessful) {
+        println("Backup request failed: HTTP ${backupResponse.code()} ${backupResponse.errorBody()?.string()}")
+        return@runBlocking
+    }
+    println("Backup started")
+
+    var attempts = 0
+    while (attempts < 60) {
+        val progress = backupApi.getBackupProgress()
+        if (progress.body()?.response?.isCompleted == true) {
+            println("Backup completed")
+            break
+        }
+        attempts++
+        delay(1000)
+    }
+}

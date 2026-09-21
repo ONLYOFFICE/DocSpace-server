@@ -42,9 +42,9 @@ public class EditorToolsFactory(
     GlobalFolderHelper globalFolderHelper,
     FileUtility fileUtility) : IAiToolFactory
 {
-    private const string GenerateDocxName = "docspace_generate_docx";
-    private const string GeneratePresentationName = "docspace_generate_presentation";
-    private const string GenerateFormName = "docspace_generate_form";
+    private const string GenerateDocxName = "onlyoffice_generate_docx";
+    private const string GeneratePresentationName = "onlyoffice_generate_presentation";
+    private const string GenerateFormName = "onlyoffice_generate_form";
 
     private const string GenerateDocxDescription = "Use this function if you are asked to generate a textual document (report, article, letter, etc.) based on a description. Input: Short description of what needs to be generated.";
     private const string GeneratePresentationDescription = "Generates a complete presentation with custom theme, fonts, and streaming content.";

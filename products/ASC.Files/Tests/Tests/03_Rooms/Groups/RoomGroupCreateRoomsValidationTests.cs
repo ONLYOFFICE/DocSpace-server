@@ -59,7 +59,7 @@ public class RoomGroupCreateRoomsValidationTests(
         // Assert
         exception.ErrorCode.Should().Be(403);
 
-        var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
         list.Select(g => g.Name).Should().NotContain("Empty Rooms");
     }
 
@@ -199,7 +199,7 @@ public class RoomGroupCreateRoomsValidationTests(
             cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
-        var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
         list.Select(g => g.Name).Should().Contain("Atomic Create");
         exception.ErrorCode.Should().Be(403);
     }

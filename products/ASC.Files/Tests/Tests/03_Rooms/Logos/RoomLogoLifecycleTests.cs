@@ -79,6 +79,29 @@ public class RoomLogoLifecycleTests(
         exception.ErrorCode.Should().Be(403);
     }
 
+    /// <summary>
+    /// 81679 originally reported that <c>POST /files/rooms/{id}/logo</c> accepted a non-image
+    /// <c>tmpFile</c>. The only public way to obtain a <c>tmpFile</c> is <c>POST /files/logos</c>,
+    /// which (per the BUG 82518 fix, see <see cref="RoomLogoUploadBugTests"/>) now rejects
+    /// non-image content outright — so this endpoint can no longer be reached with a non-image
+    /// <c>tmpFile</c> via the public API; the chain is blocked one step earlier, at upload.
+    /// </summary>
+    [Fact]
+    [Trait("Bug", "81679")]
+    public async Task CreateLogo_NonImageTmpFileChain_IsBlockedAtUpload()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        // Act
+        using var response = await UploadRoomLogoRaw(
+            HttpMethod.Post,
+            [(Encoding.UTF8.GetBytes("this is not a valid image"), "logo.png", "image/png")]);
+
+        // Assert
+        response.StatusCode.Should().Be((HttpStatusCode)400);
+    }
+
     [Fact]
     public async Task CreateLogo_DoesNotModifyOtherRoomMetadata()
     {

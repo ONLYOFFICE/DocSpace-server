@@ -53,10 +53,10 @@ public class RoomGroupCrossUserIsolationTests(
         await CreateRoomGroup("Admin Only Group", [adminRoom]);
 
         // Act
-        var adminList = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var adminList = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         await _filesClient.Authenticate(Owner);
-        var ownerList = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var ownerList = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
         var ownerNames = ownerList.Select(g => g.Name).ToList();

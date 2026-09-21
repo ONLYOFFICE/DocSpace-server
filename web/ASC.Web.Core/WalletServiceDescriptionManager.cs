@@ -35,6 +35,8 @@ namespace ASC.Web.Core;
 
 public class WalletServiceDescriptionManager
 {
+    private const string AgentSourceType = "Agent";
+
     private static readonly Dictionary<string, string> _mapping = new()
     {
         { "chat", "total_tokens" },
@@ -132,16 +134,42 @@ public class WalletServiceDescriptionManager
         return metadata.TryGetValue(BillingClient.MetadataModel, out var model) ? model : string.Empty;
     }
 
-    public static (string, string) GetAgentInfo(Dictionary<string, string> metadata)
+    /// <summary>
+    /// Reads the source of an AI operation from its metadata. Supports both the current
+    /// source_id/source_type/source_title triple and the legacy agent_id/agent_title pair,
+    /// which is always reported as the <c>Agent</c> source type.
+    /// </summary>
+    public static (string sourceId, string sourceType, string sourceTitle) GetSourceInfo(Dictionary<string, string> metadata)
     {
         if (metadata == null)
         {
-            return (null, null);
+            return (null, null, null);
+        }
+
+        metadata.TryGetValue(BillingClient.MetadataSourceId, out var sourceId);
+        metadata.TryGetValue(BillingClient.MetadataSourceType, out var sourceType);
+        metadata.TryGetValue(BillingClient.MetadataSourceTitle, out var sourceTitle);
+
+        if (sourceId != null || sourceType != null || sourceTitle != null)
+        {
+            return (sourceId, sourceType, sourceTitle);
         }
 
         metadata.TryGetValue(BillingClient.MetadataAgentId, out var agentId);
         metadata.TryGetValue(BillingClient.MetadataAgentTitle, out var agentTitle);
 
-        return (agentId, agentTitle);
+        return agentId == null && agentTitle == null
+            ? (null, null, null)
+            : (agentId, AgentSourceType, agentTitle);
+    }
+
+    /// <summary>
+    /// Returns the localized name of the source type, or the raw value for an unknown one.
+    /// </summary>
+    public static string GetSourceTypeTitle(string sourceType)
+    {
+        return string.IsNullOrEmpty(sourceType)
+            ? string.Empty
+            : Resource.ResourceManager.GetString($"AccountingCustomerOperationSourceType_{sourceType}") ?? sourceType;
     }
 }

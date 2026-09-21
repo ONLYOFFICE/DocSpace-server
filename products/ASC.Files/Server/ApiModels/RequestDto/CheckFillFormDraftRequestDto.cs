@@ -34,30 +34,37 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for checking the form draft filling.
+/// The revision of the form to open and what the caller intends to do with it.
 /// </summary>
 public class CheckFillFormDraft
 {
     /// <summary>
-    /// The file version of the form draft.
+    /// The revision of the form to open. Pass 0 for the current revision; a positive number addresses that entry of
+    /// the file history and is accepted only from a caller who may read the history, so a member who only has
+    /// fill-forms access must send 0.
     /// </summary>
-    /// <example>1</example>
+    /// <example>0</example>
     public required int Version { get; set; }
 
     /// <summary>
-    /// The action with the form draft.
+    /// What the caller intends to do with the form. `view` asks for a read-only address and `embedded` for an address
+    /// to be shown inside a frame; both only resolve the address and leave the file untouched. Leave it out to enter
+    /// the filling flow, where the personal draft is created or reused. The value is matched case-insensitively, and
+    /// anything else behaves like an empty value.
     /// </summary>
     /// <example>view</example>
     public string Action { get; set; }
 
     /// <summary>
-    /// Specifies whether to request the form for viewing or not.
+    /// Whether the caller asked for a read-only address. The server derives it from `action` being `view` and ignores
+    /// any value sent with the request.
     /// </summary>
     /// <example>false</example>
     public bool RequestView => (Action ?? "").Equals("view", StringComparison.InvariantCultureIgnoreCase);
 
     /// <summary>
-    /// Specifies whether to request an embedded form or not.
+    /// Whether the caller asked for an address to be shown inside a frame. The server derives it from `action` being
+    /// `embedded` and ignores any value sent with the request.
     /// </summary>
     /// <example>false</example>
     public bool RequestEmbedded => (Action ?? "").Equals("embedded", StringComparison.InvariantCultureIgnoreCase);
@@ -65,21 +72,22 @@ public class CheckFillFormDraft
 
 
 /// <summary>
-/// The request parameters for checking the form draft filling.
+/// The form to open for filling, together with the revision and the intent of the call.
 /// </summary>
 public class CheckFillFormDraftRequestDto<T>
 {
     /// <summary>
-    /// The file ID of the form draft.
+    /// The identifier of the PDF form to open, as it is returned by a room listing such as
+    /// `GET api/2.0/files/{folderId}`. The identifier of an already created draft is accepted here as well.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The parameters for checking the form draft filling.
+    /// The revision of the form to open and what the caller intends to do with it.
     /// </summary>
-    /// <example>{"version": 1, "action": "view"}</example>
+    /// <example>{"version": 0, "action": "view"}</example>
     [FromBody]
     public required CheckFillFormDraft File { get; set; }
 }

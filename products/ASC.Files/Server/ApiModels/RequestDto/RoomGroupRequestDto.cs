@@ -34,30 +34,35 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for creating a room group
+/// The name, the icon and the rooms of a room group to create.
 /// </summary>
 public class RoomGroupRequestDto
 {
     /// <summary>
-    /// Group name
+    /// The name to show the group under. Surrounding spaces are trimmed before it is stored, a name that is blank
+    /// once trimmed is refused, and the name does not have to differ from the names of the caller's other groups.
     /// </summary>
-    /// <example>My Group</example>
+    /// <example>Client projects</example>
     [Required]
     [StringLength(128)]
     public string Name { get; set; }
 
     /// <summary>
-    /// Group icon
+    /// The icon of the group, given as the identifier of one of the built-in covers listed by
+    /// `GET api/2.0/files/rooms/covers`. An uploaded image cannot be used, and any value that is not one of those
+    /// identifiers is refused.
     /// </summary>
-    /// <example>cover1</example>
+    /// <example>star</example>
     [Required]
     [StringLength(50)]
     public string Icon { get; set; }
 
     /// <summary>
-    /// The list of room IDs.
+    /// The rooms to gather in the group, each given as a number for a room stored in the portal or as a string for a
+    /// room on a connected third-party account. Every identifier has to name a room the caller can read; repeats are
+    /// collapsed, and an element of any other shape - a decimal number, a number sent as a string, null - is refused.
     /// </summary>
-    /// <example>[1, 2, 3]</example>
+    /// <example>[12, 15, "folder-123-abc"]</example>
     [Required]
     public List<JsonElement> Rooms { get; set; }
 }

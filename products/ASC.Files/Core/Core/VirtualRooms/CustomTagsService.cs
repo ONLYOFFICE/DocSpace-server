@@ -202,7 +202,7 @@ public class CustomTagsService(
         return folder;
     }
 
-    public async IAsyncEnumerable<object> GetTagsInfoAsync<T>(string searchText, TagType tagType, int from, int count)
+    public async IAsyncEnumerable<string> GetTagsInfoAsync<T>(string searchText, TagType tagType, int from, int count)
     {
         if (!await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
         {

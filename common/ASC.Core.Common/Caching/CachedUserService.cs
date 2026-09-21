@@ -162,7 +162,7 @@ public class CachedUserService : IUserService
 
         user = await _service.SaveUserAsync(tenant, user);
 
-        await _cache.RemoveByTagAsync(tag);
+        await _cache.RemoveByTagAndNotifyAsync(tag);
 
         return user;
     }
@@ -172,7 +172,7 @@ public class CachedUserService : IUserService
         await _service.RemoveUserAsync(tenant, id, immediate);
 
         var tag = CacheExtention.GetUserTag(tenant, id);
-        await _cache.RemoveByTagAsync(tag);
+        await _cache.RemoveByTagAndNotifyAsync(tag);
     }
 
     public async Task<byte[]> GetUserPhotoAsync(int tenant, Guid id)
@@ -192,7 +192,7 @@ public class CachedUserService : IUserService
         await _service.SetUserPhotoAsync(tenant, id, photo);
 
         var tag = CacheExtention.GetUserPhotoTag(tenant, id);
-        await _cache.RemoveAsync(tag);
+        await _cache.RemoveAndNotifyAsync(tag);
     }
 
     public async Task SaveUsersRelationAsync(int tenantId, Guid sourceUserId, Guid targetUserId)
@@ -200,7 +200,7 @@ public class CachedUserService : IUserService
         await _service.SaveUsersRelationAsync(tenantId, sourceUserId, targetUserId);
 
         var tag = CacheExtention.GetRelationTag(tenantId, sourceUserId);
-        await _cache.RemoveByTagAsync(tag);
+        await _cache.RemoveByTagAndNotifyAsync(tag);
     }
 
     public async Task<Dictionary<Guid, UserRelation>> GetUserRelationsAsync(int tenantId, Guid sourceUserId)
@@ -229,7 +229,7 @@ public class CachedUserService : IUserService
         await _service.DeleteUserRelationAsync(tenantId, sourceUserId, targetUserId);
 
         var tag = CacheExtention.GetRelationTag(tenantId, sourceUserId);
-        await _cache.RemoveByTagAsync(tag);
+        await _cache.RemoveByTagAndNotifyAsync(tag);
     }
 
     public async Task<DateTime> GetUserPasswordStampAsync(int tenant, Guid id)
@@ -262,7 +262,7 @@ public class CachedUserService : IUserService
 
         group = await _service.SaveGroupAsync(tenant, group);
 
-        await _cache.RemoveByTagAsync(tag);
+        await _cache.RemoveByTagAndNotifyAsync(tag);
 
         return group;
     }
@@ -272,7 +272,7 @@ public class CachedUserService : IUserService
         await _service.RemoveGroupAsync(tenant, id);
 
         var tag = CacheExtention.GetGroupTag(tenant, id);
-        await _cache.RemoveByTagAsync(tag);
+        await _cache.RemoveByTagAndNotifyAsync(tag);
     }
 
 
@@ -313,7 +313,7 @@ public class CachedUserService : IUserService
         r = await _service.SaveUserGroupRefAsync(tenant, r);
 
         var tag = CacheExtention.GetGroupRefsTag(tenant);
-        await _cache.RemoveByTagAsync(tag);
+        await _cache.RemoveByTagAndNotifyAsync(tag);
 
         return r;
     }
@@ -323,7 +323,7 @@ public class CachedUserService : IUserService
         await _service.RemoveUserGroupRefAsync(tenant, userId, groupId, refType);
 
         var tag = CacheExtention.GetGroupRefsTag(tenant);
-        await _cache.RemoveByTagAsync(tag);
+        await _cache.RemoveByTagAndNotifyAsync(tag);
     }
 
 

@@ -45,6 +45,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     protected const string PromptFoldersPath = "/internal/ai/prompt-folders";
     protected const string PreferencesPath = "/internal/ai/preferences";
     protected const string ToolPrefsPath = "/internal/ai/tool-prefs";
+    protected const string ChatContextPath = "/internal/ai/chat-context";
 
     protected const string SystemToolsServerType = "00000000-0000-0000-0000-000000000001";
 
@@ -103,7 +104,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             BaseUrl = "https://api.openai.com/v1",
             Key = "sk-test-key-" + Guid.NewGuid().ToString("N"),
             ModelId = "gpt-4o-mini",
-            Reasoning = false,
+            Reasoning = new ReasoningConfig { Thinks = false, CanDisable = true, Depths = [ReasoningDepth.None], DefaultDepth = ReasoningDepth.None },
             Capabilities = Capabilities.Chat,
             UseResponsesApi = false,
             CanUseTool = true
@@ -117,7 +118,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             BaseUrl = "https://api.anthropic.com/v1",
             Key = "sk-ant-" + Guid.NewGuid().ToString("N"),
             ModelId = "claude-sonnet-4-6",
-            Reasoning = true,
+            Reasoning = new ReasoningConfig { Thinks = true, CanDisable = false, Depths = [ReasoningDepth.Low, ReasoningDepth.Medium, ReasoningDepth.High], DefaultDepth = ReasoningDepth.Medium },
             Capabilities = Capabilities.Chat | Capabilities.Vision,
             UseResponsesApi = true,
             CanUseTool = false
@@ -277,17 +278,9 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     {
         await _clients.FilesHttpClient.Authenticate(Owner);
 
-        var body = new
-        {
-            title = title ?? $"room-{Guid.NewGuid():N}",
-            roomType = "AiRoom"
-        };
+        var request = new CreateRoomRequestDto(title ?? $"room-{Guid.NewGuid():N}", roomType: RoomType.AiRoom);
+        var room = (await _clients.RoomsApi.CreateRoomAsync(request, TestContext.Current.CancellationToken)).Response;
 
-        using var response = await _clients.FilesApi.PostAsync(
-            "/api/2.0/files/rooms",
-            body,
-            TestContext.Current.CancellationToken);
-        var room = await _clients.FilesApi.ReadAsync<RoomFolderDto>(response, TestContext.Current.CancellationToken);
         return room.Id;
     }
 
@@ -298,8 +291,8 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
     {
         await _clients.FilesHttpClient.Authenticate(Owner);
 
-        using var response = await _clients.FilesApi.GetAsync("/api/2.0/files/@my", TestContext.Current.CancellationToken);
-        var content = await _clients.FilesApi.ReadAsync<FolderContentDto>(response, TestContext.Current.CancellationToken);
+        var content = (await _clients.FoldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
+
         return content.Current.Id;
     }
 
@@ -318,11 +311,11 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return wrapper?.Response;
     }
 
-    protected async Task UpsertPreferencesAsync(bool? deepMode, string? entityId = null)
+    protected async Task UpsertPreferencesAsync(ReasoningDepth? depth, string? entityId = null)
     {
         using var response = await _ai.PutAsync(
             PreferencesPath,
-            new { deepMode, entityId },
+            new { depth, entityId },
             TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
     }
@@ -357,6 +350,44 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             new { allowAlways, entityId },
             TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
+    }
+
+    protected static string BuildChatContextPath(
+        Guid? threadId = null,
+        string? entityId = null,
+        string? contextEntityId = null,
+        bool? includeMessages = null)
+    {
+        var query = new List<string>();
+        if (threadId is not null)
+        {
+            query.Add($"threadId={threadId}");
+        }
+        if (entityId is not null)
+        {
+            query.Add($"entityId={entityId}");
+        }
+        if (contextEntityId is not null)
+        {
+            query.Add($"contextEntityId={contextEntityId}");
+        }
+        if (includeMessages is not null)
+        {
+            query.Add($"includeMessages={includeMessages.Value.ToString().ToLowerInvariant()}");
+        }
+
+        return query.Count > 0 ? $"{ChatContextPath}?{string.Join("&", query)}" : ChatContextPath;
+    }
+
+    protected async Task<ChatContextDto> ReadChatContextAsync(
+        Guid? threadId = null,
+        string? entityId = null,
+        string? contextEntityId = null,
+        bool? includeMessages = null)
+    {
+        var path = BuildChatContextPath(threadId, entityId, contextEntityId, includeMessages);
+        using var response = await _ai.GetAsync(path, TestContext.Current.CancellationToken);
+        return await _ai.ReadAsync<ChatContextDto>(response, TestContext.Current.CancellationToken);
     }
 
     private static string BuildScopedAssignmentPath(string actionType, string? entityId) =>
@@ -425,8 +456,4 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         using var response = await _ai.GetAsync($"{PromptsPath}/{id}", TestContext.Current.CancellationToken);
         return await _ai.ReadAsync<PromptDto>(response, TestContext.Current.CancellationToken);
     }
-
-    private sealed record RoomFolderDto(int Id);
-
-    private sealed record FolderContentDto(RoomFolderDto Current);
 }

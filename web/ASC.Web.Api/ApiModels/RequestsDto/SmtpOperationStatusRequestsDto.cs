@@ -34,7 +34,7 @@
 namespace ASC.Api.Settings.Smtp;
 
 /// <summary>
-/// The request parameters for tracking SMTP (Simple Mail Transfer Protocol) operation status.
+/// The state of the background job that sends the portal SMTP test message.
 /// </summary>
 /// <example>
 /// {
@@ -48,31 +48,37 @@ namespace ASC.Api.Settings.Smtp;
 public class SmtpOperationStatusRequestsDto
 {
     /// <summary>
-    /// Specifies whether the SMTP operation has finished processing.
+    /// Whether the job has finished. This is the field to poll; the first answer that reports it true also discards
+    /// the job, so read `error` out of that same answer rather than calling again.
     /// </summary>
     /// <example>true</example>
     public bool Completed { get; set; }
 
     /// <summary>
-    /// The unique identifier for tracking the SMTP operation.
+    /// The identifier of the queued job. A portal only ever has one test job at a time, so it names the run rather
+    /// than selecting among several.
     /// </summary>
     /// <example>smtp-op-123</example>
     public string Id { get; set; }
 
     /// <summary>
-    /// The error message if the SMTP operation encountered issues.
+    /// Why the test failed. It stays empty while the job runs and also once the relay has accepted the message, so
+    /// an empty value on a finished job is what success looks like; an unreachable relay is reported here after a
+    /// 30-second connection timeout rather than as a failed request.
     /// </summary>
     /// <example>SMTP connection failed.</example>
     public string Error { get; set; }
 
     /// <summary>
-    /// The current state of the SMTP operation.
+    /// The step the job has reached, in words - `Connect to host` or `Send test message`, for instance. It is meant
+    /// to be shown to a person and is not a fixed set of values to branch on.
     /// </summary>
     /// <example>Completed</example>
     public string Status { get; set; }
 
     /// <summary>
-    /// The progress indicator showing completion percentage of the operation.
+    /// How far the job has got, as a percentage climbing to 100. Reaching 100 says the job ran to the end, not that
+    /// the message was accepted - that is what an empty `error` says.
     /// </summary>
     /// <example>1</example>
     public int Percents { get; set; }

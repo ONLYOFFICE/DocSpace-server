@@ -34,26 +34,29 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for generating OAuth confirmation code.
+/// What the external provider sent back to the portal callback page after the user answered the consent screen.
 /// </summary>
 public class ConfirmationCodeRequestDto
 {
     /// <summary>
-    /// The callback URL for redirecting the user after successful authentication.
+    /// Where the callback page sends the browser once it has read the outcome. It is followed as given, so it has to
+    /// be an address the user can open rather than one only the portal can reach.
     /// </summary>
     /// <example>https://example.com/oauth/callback</example>
     [FromQuery(Name = "redirect")]
     public string Redirect { get; set; }
 
     /// <summary>
-    /// The OAuth authorization code received from the identity provider.
+    /// The authorization code the provider issued after the user granted access. It is short-lived and single-use,
+    /// and is exchanged for a token by whichever operation connects the account rather than here.
     /// </summary>
     /// <example>4/0AY0e-g7X...</example>
     [FromQuery(Name = "code")]
     public string Code { get; set; }
 
     /// <summary>
-    /// The error message or code returned by the OAuth provider if authentication fails.
+    /// The failure the provider reported instead of a code, such as the user declining the consent screen. When it
+    /// is present the outcome is a failure whatever `code` holds.
     /// </summary>
     /// <example>access_denied</example>
     [FromQuery(Name = "error")]
@@ -61,12 +64,15 @@ public class ConfirmationCodeRequestDto
 }
 
 /// <summary>
-/// The request parameters for generating OAuth confirmation URLs.
+/// Which external provider the consent URL is built for.
 /// </summary>
 public class ConfirmationCodeUrlRequestDto
 {
     /// <summary>
-    /// The identity provider used for authentication.
+    /// The provider whose consent screen is wanted. Only Google, Dropbox, Docusign, Box, OneDrive, Wordpress and
+    /// Github produce a URL; any other provider is answered with 200 and no URL rather than an error. The provider
+    /// credentials have to be saved with `POST api/2.0/settings/authservice` first, or the URL comes back without a
+    /// client identifier and the provider refuses it.
     /// </summary>
     /// <example>{}</example>
     [FromRoute(Name = "provider")]

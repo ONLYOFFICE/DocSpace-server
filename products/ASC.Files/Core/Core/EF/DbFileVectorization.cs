@@ -49,6 +49,9 @@ public class DbFileVectorization : BaseEntity
     }
 }
 
+/// <summary>
+/// The status of a file's vectorization for AI search.
+/// </summary>
 public enum VectorizationStatus
 {
     [Description("In Progress")]

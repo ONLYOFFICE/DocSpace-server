@@ -264,7 +264,7 @@ public sealed class ReassignsFailedNotifyAction(DisplayUserSettingsHelper displa
             new TagValue(CommonTags.FromUserLink, await GetUserProfileLinkAsync(fromUser.Id)),
             new TagValue(CommonTags.ToUserName, toUser.DisplayUserName(displayUserSettingsHelper)),
             new TagValue(CommonTags.ToUserLink, await GetUserProfileLinkAsync(toUser.Id)),
-            new TagValue(CommonTags.Message, message)
+            new TagValue(CommonTags.Message, message.HtmlEncode())
         ];
     }
 
@@ -360,7 +360,7 @@ public sealed class RemoveUserDataFailedNotifyAction(DisplayUserSettingsHelper d
             new TagValue(CommonTags.UserName, await displayUserSettingsHelper.GetFullUserNameAsync(recipientId)),
             new TagValue(CommonTags.FromUserName, fromUserName.HtmlEncode()),
             new TagValue(CommonTags.FromUserLink, await GetUserProfileLinkAsync(user.Id)),
-            new TagValue(CommonTags.Message, message)
+            new TagValue(CommonTags.Message, message.HtmlEncode())
         ];
     }
 
@@ -473,8 +473,8 @@ public sealed class UserMessageToAdminNotifyAction(TenantManager tenantManager) 
     {
         List<ITagValue> tags =
         [
-            new TagValue(CommonTags.Body, message),
-            new TagValue(CommonTags.UserEmail, email)
+            new TagValue(CommonTags.Body, message.HtmlEncode()),
+            new TagValue(CommonTags.UserEmail, email.HtmlEncode())
         ];
 
         if (!string.IsNullOrEmpty(culture))
@@ -503,9 +503,9 @@ public sealed class UserMessageToSalesNotifyAction(TenantManager tenantManager) 
     {
         Tags = [
 
-            new TagValue(CommonTags.Body, message),
-            new TagValue(CommonTags.UserEmail, email),
-            new TagValue(CommonTags.UserName, userName)
+            new TagValue(CommonTags.Body, message.HtmlEncode()),
+            new TagValue(CommonTags.UserEmail, email.HtmlEncode()),
+            new TagValue(CommonTags.UserName, userName.HtmlEncode())
         ];
     }
 }
@@ -570,10 +570,10 @@ public sealed class PasswordChangedNotifyAction(CommonLinkUtility commonLinkUtil
             new TagValue(CommonTags.UserName, userInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.UserEmail, userInfo.Email),
             new TagValue(CommonTags.Date, auditEvent.Date.ToShortDateString() + " " + auditEvent.Date.ToShortTimeString()),
-            new TagValue(CommonTags.Device, auditEvent.Platform),
-            new TagValue(CommonTags.Location, location),
-            new TagValue(CommonTags.Browser, auditEvent.Browser),
-            new TagValue(CommonTags.IP, auditEvent.IP),
+            new TagValue(CommonTags.Device, auditEvent.Platform.HtmlEncode()),
+            new TagValue(CommonTags.Location, location.HtmlEncode()),
+            new TagValue(CommonTags.Browser, auditEvent.Browser.HtmlEncode()),
+            new TagValue(CommonTags.IP, auditEvent.IP.HtmlEncode()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
@@ -615,10 +615,10 @@ public sealed class SuspiciousLoginNotifyAction(CommonLinkUtility commonLinkUtil
             new TagValue(CommonTags.UserName, userInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.UserEmail, userInfo.Email),
             new TagValue(CommonTags.Date, loginEvent.Date.ToShortDateString() + " " + loginEvent.Date.ToShortTimeString()),
-            new TagValue(CommonTags.Device, loginEvent.Platform),
-            new TagValue(CommonTags.Location, location),
-            new TagValue(CommonTags.Browser, loginEvent.Browser),
-            new TagValue(CommonTags.IP, loginEvent.IP),
+            new TagValue(CommonTags.Device, loginEvent.Platform.HtmlEncode()),
+            new TagValue(CommonTags.Location, location.HtmlEncode()),
+            new TagValue(CommonTags.Browser, loginEvent.Browser.HtmlEncode()),
+            new TagValue(CommonTags.IP, loginEvent.IP.HtmlEncode()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
@@ -730,8 +730,7 @@ public sealed class JoinUsersNotifyAction(CommonLinkUtility commonLinkUtility, I
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_join, () => WebstudioNotifyPatternResource.pattern_join),
-            new JabberPattern(() => WebstudioNotifyPatternResource.pattern_join)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_join, () => WebstudioNotifyPatternResource.pattern_join)
         ];
     }
 
@@ -1312,7 +1311,7 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         Tags = [
-            new TagValue(CommonTags.Message, roomTitle),
+            new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
@@ -1342,7 +1341,7 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         Tags = [
-            new TagValue(CommonTags.Message, roomTitle),
+            new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
@@ -1371,7 +1370,7 @@ public sealed class SaasRoomInviteExistingUserNotifyAction(StudioNotifyHelper st
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         Tags = [
-            new TagValue(CommonTags.Message, roomTitle),
+            new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
             new TagValue(CommonTags.InviteLink, roomUrl),
             TagValues.OrangeButton(orangeButtonText, roomUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
@@ -1400,7 +1399,7 @@ public sealed class SaasAgentInviteExistingUserNotifyAction(StudioNotifyHelper s
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         Tags = [
-            new TagValue(CommonTags.Message, roomTitle),
+            new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
             new TagValue(CommonTags.InviteLink, roomUrl),
             TagValues.OrangeButton(orangeButtonText, roomUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
@@ -3286,7 +3285,7 @@ public sealed class UserRoleChangedNotifyAction(ExternalResourceSettingsHelper e
 
         Tags =
         [
-            new TagValue("RoomTitle", roomTitle),
+            new TagValue("RoomTitle", roomTitle.HtmlEncode()),
             new TagValue("RoomUrl", roomUrl),
             new TagValue("UserRole", userRole),
             new TagValue("HelpCenterUrl", externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("accessrights", culture)),
@@ -3316,7 +3315,7 @@ public sealed class UserAgentRoleChangedNotifyAction(ExternalResourceSettingsHel
 
         Tags =
         [
-            new TagValue("RoomTitle", roomTitle),
+            new TagValue("RoomTitle", roomTitle.HtmlEncode()),
             new TagValue("RoomUrl", roomUrl),
             new TagValue("UserRole", userRole),
             new TagValue("HelpCenterUrl", externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("accessrights", culture)),
@@ -3344,6 +3343,36 @@ public sealed class TopUpWalletErrorNotifyAction(CommonLinkUtility commonLinkUti
     {
         var culture = GetCulture(user);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGoToWalletSettings", GetCulture(user));
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+        Tags =
+        [
+            new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.Culture, culture.Name),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/billing/wallet")),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours)
+        ];
+    }
+}
+
+[Scope]
+public sealed class WalletAutoTopUpUnavailableNotifyAction(CommonLinkUtility commonLinkUtility, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
+{
+    public override string ID => "wallet_auto_top_up_unavailable";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_wallet_auto_top_up_unavailable, () => WebstudioNotifyPatternResource.pattern_wallet_auto_top_up_unavailable),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_wallet_auto_top_up_unavailable)
+        ];
+    }
+
+    public void Init(UserInfo user)
+    {
+        var culture = GetCulture(user);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGoToWalletSettings", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
         Tags =
@@ -3469,7 +3498,7 @@ public sealed class ApiKeyExpiredNotifyAction(StudioNotifyHelper studioNotifyHel
         Tags =
         [
             new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.Message, keyName),
+            new TagValue(CommonTags.Message, keyName.HtmlEncode()),
             new TagValue(CommonTags.Culture, culture.Name),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours)
         ];

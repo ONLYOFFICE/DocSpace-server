@@ -246,12 +246,12 @@
         </condition>
         <if>
             <then>
-                <root level="ERROR">
+                <root level="WARN">
                     <appender-ref ref="JSON_FILE"/>
                 </root>
             </then>
             <else>
-                <root level="ERROR">
+                <root level="WARN">
                     <appender-ref ref="JSON_CONSOLE_ASYNC"/>
                 </root>
             </else>

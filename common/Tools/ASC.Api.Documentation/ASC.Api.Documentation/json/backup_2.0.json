@@ -2,12 +2,17 @@
   "openapi": "3.1.1",
   "info": {
     "title": "Api",
+    "description": "REST API of ONLYOFFICE DocSpace - a multi-tenant platform for document management, collaboration and file sharing. Requests are authenticated with the portal session cookie, an API key, Basic credentials, or an OAuth 2.0 / OpenID Connect token; see the security schemes of this document.",
     "contact": {
       "name": "API Support",
       "url": "https://helpdesk.onlyoffice.com/hc/en-us",
       "email": "support@onlyoffice.com"
     },
-    "version": "3.7.0",
+    "license": {
+      "name": "AGPL-3.0-only",
+      "url": "https://www.gnu.org/licenses/agpl-3.0.html"
+    },
+    "version": "4.0.0",
     "x-scalar-sdk-installation": [
       {
         "lang": "Node",
@@ -29,7 +34,7 @@
   "servers": [
     {
       "url": "{baseUrl}",
-      "description": "Server configuration",
+      "description": "The production DocSpace portal, at the customer's own domain.",
       "variables": {
         "baseUrl": {
           "default": "",
@@ -45,16 +50,16 @@
           "Backup"
         ],
         "summary": "Get the backup schedule",
-        "description": "Returns the backup schedule of the current portal.",
+        "description": "Returns the backup schedule of the current portal. A portal keeps at most one schedule, so no ID is\r\npassed in, and when none is set the call still answers 200 with a body that carries no `response`\r\nmember at all. `dump` asks for the schedule of the whole server instead of the one of this portal and\r\nrequires the space access permission.\r\nThe answer cannot be sent back unchanged: `storageParams` is returned as an object keyed by parameter\r\nname, while `POST api/2.0/backup/createbackupschedule` expects an array of key and value pairs. For\r\nevery storage type except `ThirdPartyConsumer` the `folderId` key of the answer is built from the\r\nstored base path rather than read back from the saved parameters, and a schedule that keeps an\r\nunlimited number of copies reports `backupsStored` as null instead of 0.",
         "operationId": "getBackupSchedule",
         "parameters": [
           {
             "name": "Dump",
             "in": "query",
-            "description": "Specifies if a dump will be created or not.",
+            "description": "Applies the operation to the whole server rather than to the current portal, which requires the space\r\naccess permission and works on a standalone installation only. Server-wide backups and schedules are\r\nkept apart from the ones of a portal, so the two values address different data.",
             "schema": {
               "examples": [
-                true
+                false
               ],
               "type": "boolean"
             }
@@ -62,34 +67,16 @@
         ],
         "responses": {
           "200": {
-            "description": "Backup schedule",
+            "description": "The backup schedule, or an empty payload when none is set",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -100,22 +87,53 @@
               }
             }
           },
+          "402": {
+            "description": "The portal subscription has expired or has not been paid"
+          },
           "403": {
-            "description": "Access denied"
+            "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
                 "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -129,19 +147,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -164,13 +176,13 @@
           "Backup"
         ],
         "summary": "Create the backup schedule",
-        "description": "Creates the backup schedule of the current portal with the parameters specified in the request.",
+        "description": "Sets the backup schedule of the current portal. A portal keeps at most one schedule, so this replaces\r\nthe existing one rather than adding a second, and `dump` writes the schedule of the whole server\r\ninstead, which requires the space access permission and works on a standalone installation only.\r\nScheduled backups have to be allowed by the pricing plan of a portal that is not a standalone\r\ninstallation.\r\n`cronParams` is a period plus a time rather than a cron string: `hour` is the hour of the day from 0\r\nto 23, and `day` has to be given for `EveryWeek`, where it is the day of the week from 1 to 7 with\r\nSunday as 1, and for `EveryMonth`, where it is the day of the month from 1 to 31. It is left out for\r\n`EveryDay`, and because an omitted `day` is stored as 0, which neither period accepts, a weekly or\r\nmonthly schedule sent without it fails instead of falling back to a default.\r\n`backupsStored` is the number of scheduled copies to keep, from 1 to 30, and it defaults to 1. Older\r\ncopies are removed by a background cleaner, and only the ones this schedule created: archives made by\r\n`POST api/2.0/backup/startbackup` are not counted and not removed. A portal whose subscription stops\r\ncovering backups has its schedule deleted by the scheduler, not suspended, and its administrators are\r\nnotified that the scheduled backup failed.\r\nThe keys expected in `storageParams` are the same as for `POST api/2.0/backup/startbackup`, except\r\nthat they are sent as an array of key and value pairs here and returned as an object by\r\n`GET api/2.0/backup/getbackupschedule`.",
         "operationId": "createBackupSchedule",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "description": "The backup schedule parameters.",
+                "description": "The request parameters for setting the backup schedule.",
                 "$ref": "#/components/schemas/BackupScheduleDto"
               }
             }
@@ -178,34 +190,16 @@
         },
         "responses": {
           "200": {
-            "description": "Boolean value: true if the operation is successful",
+            "description": "True if the schedule was saved",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -217,30 +211,48 @@
             }
           },
           "400": {
-            "description": "BackupStored must be 1 - 30 or backup can not start as dump"
+            "description": "The number of the stored copies is outside 1 - 30, or a dump was requested on a portal that is not a standalone installation"
           },
           "402": {
-            "description": "Your pricing plan does not support this option"
+            "description": "The portal subscription does not cover scheduled backups, has expired or has not been paid"
           },
           "403": {
-            "description": "Access denied"
+            "description": "No permissions to perform this action"
           },
           "404": {
-            "description": "The required folder was not found"
+            "description": "The target folder was not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
                 "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -254,19 +266,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -289,16 +295,16 @@
           "Backup"
         ],
         "summary": "Delete the backup schedule",
-        "description": "Deletes the backup schedule of the current portal.",
+        "description": "Deletes the backup schedule of the current portal, which stops the scheduled backups; `dump` deletes\r\nthe schedule of the whole server instead and requires the space access permission. The archives the\r\nschedule has already produced are kept and stay listed by\r\n`GET api/2.0/backup/getbackuphistory` - delete them through\r\n`DELETE api/2.0/backup/deletebackup/{id}` if they are no longer wanted.\r\nThe result is always true, including when there was no schedule to delete, so it confirms that the\r\nportal now has none rather than that anything was removed. The deletion is written to the audit trail\r\neither way.",
         "operationId": "deleteBackupSchedule",
         "parameters": [
           {
             "name": "Dump",
             "in": "query",
-            "description": "Specifies if a dump will be created or not.",
+            "description": "Applies the operation to the whole server rather than to the current portal, which requires the space\r\naccess permission and works on a standalone installation only. Server-wide backups and schedules are\r\nkept apart from the ones of a portal, so the two values address different data.",
             "schema": {
               "examples": [
-                true
+                false
               ],
               "type": "boolean"
             }
@@ -306,34 +312,16 @@
         ],
         "responses": {
           "200": {
-            "description": "Boolean value: true if the operation is successful",
+            "description": "True once the portal has no backup schedule, whether or not one had to be deleted",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -344,22 +332,53 @@
               }
             }
           },
+          "402": {
+            "description": "The portal subscription has expired or has not been paid"
+          },
           "403": {
-            "description": "Access denied"
+            "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
                 "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -373,19 +392,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -408,13 +421,13 @@
           "Backup"
         ],
         "summary": "Start the backup",
-        "description": "Starts the backup of the current portal with the parameters specified in the request.",
+        "description": "Queues a backup of the current portal and returns straight away: the archive itself is written by the\r\nseparate backup worker service, which picks the job up from an integration event, so the response\r\nreports a progress of 0 and the `Created` status, and its `taskId` is the handle to poll with\r\n`GET api/2.0/backup/getbackupprogress`. The caller needs the portal settings permission, and\r\n`dump` - a backup of the whole server instead of this one portal - additionally requires the space\r\naccess permission and is rejected outside a standalone installation.\r\nThe keys expected in `storageParams` depend on `storageType`: `Documents` takes an integer `folderId`,\r\n`ThridpartyDocuments` takes a provider-specific non-integer `folderId`, `Local` takes `filePath` and\r\nworks on a standalone installation only, `ThirdPartyConsumer` takes `module` together with the settings\r\nof that consumer, and `DataStore` takes no keys at all; the `subdir` key is added by the operation\r\nitself and must not be sent.\r\nA portal that has already used up the free backups of the current calendar month is charged through the\r\npaid backup service instead, and the call is rejected with 402 when that service is not available to it.",
         "operationId": "startBackup",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "description": "The backup parameters.",
+                "description": "The request parameters for starting a backup.",
                 "$ref": "#/components/schemas/BackupDto"
               }
             }
@@ -422,34 +435,16 @@
         },
         "responses": {
           "200": {
-            "description": "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link",
+            "description": "The state of the queued backup job",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -461,30 +456,48 @@
             }
           },
           "400": {
-            "description": "Wrong folder type or backup can`t start as dump"
+            "description": "The folder ID does not match the storage type, or a dump was requested on a portal that is not a standalone installation"
           },
           "402": {
-            "description": "Your pricing plan does not support this option"
+            "description": "The free backups of the current month are used up and the paid backup service is not available to this portal"
           },
           "403": {
-            "description": "Access denied"
+            "description": "No permissions to perform this action"
           },
           "404": {
-            "description": "The required folder was not found"
+            "description": "The target folder or the backup quota was not found"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
                 "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -498,19 +511,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -532,39 +539,21 @@
         "tags": [
           "Backup"
         ],
-        "summary": "Cancel current backup",
-        "description": "Cancel current backup.",
+        "summary": "Cancel the running backup",
+        "description": "Drops the backup job of the current portal from the queue, which cancels it if it is still running.\r\nThe caller needs the portal settings permission. It answers false, not an error, when there is nothing\r\nto cancel, so the result says whether a job was actually dropped rather than whether the call\r\nsucceeded.\r\nThis affects backup jobs only: a restoring job cannot be cancelled through the API. The cancelled job\r\nleaves the queue, so a following `GET api/2.0/backup/getbackupprogress` reports no job at all rather\r\nthan a job with the `Canceled` status.",
         "operationId": "cancelBackup",
         "responses": {
           "200": {
-            "description": "Boolean value: true if the operation is successful",
+            "description": "True if a backup job was dropped from the queue, false if there was nothing to cancel",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -575,19 +564,40 @@
               }
             }
           },
+          "403": {
+            "description": "No permissions to perform this action"
+          },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
                 "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -601,19 +611,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -636,16 +640,16 @@
           "Backup"
         ],
         "summary": "Get the backup progress",
-        "description": "Returns the progress of the started backup.",
+        "description": "Reports the state of the backup job of the current portal, and is the operation to poll after\r\n`POST api/2.0/backup/startbackup`. The queue holds one job per portal, so no job ID is passed in;\r\n`dump` asks for the state of the server-wide job instead and requires the space access permission.\r\nWhen there is no such job - none was ever started, or the finished one has already been dropped from\r\nthe queue - the call still answers 200, but the body carries no `response` member at all, so a client\r\nhas to treat the payload as optional rather than expect an empty object.\r\nWhile the job runs, `isCompleted` is false, `error` and `link` are empty strings and `progress` grows\r\nfrom 0 to 100. Once it stops, `isCompleted` turns true and `status` says how it ended: a non-empty\r\n`error` is the only report of a failure, `warning` is set when the archive was written but some files\r\ncould not be read or when the job was cancelled, and `link` becomes the download link to the stored\r\narchive.",
         "operationId": "getBackupProgress",
         "parameters": [
           {
             "name": "Dump",
             "in": "query",
-            "description": "Specifies if a dump will be created or not.",
+            "description": "Applies the operation to the whole server rather than to the current portal, which requires the space\r\naccess permission and works on a standalone installation only. Server-wide backups and schedules are\r\nkept apart from the ones of a portal, so the two values address different data.",
             "schema": {
               "examples": [
-                true
+                false
               ],
               "type": "boolean"
             }
@@ -653,34 +657,16 @@
         ],
         "responses": {
           "200": {
-            "description": "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link",
+            "description": "The state of the backup job, or an empty payload when there is no such job",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -692,21 +678,49 @@
             }
           },
           "403": {
-            "description": "Access denied"
+            "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
                 "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -720,19 +734,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -755,16 +763,16 @@
           "Backup"
         ],
         "summary": "Get the backup history",
-        "description": "Returns the history of the started backup.",
+        "description": "Lists the backups of the current portal whose archive is still present in the storage it was written\r\nto. The records come back in no particular order, so sort them by `createdOn` if the newest one is\r\nwanted. `dump` lists the backups of the whole server instead and requires the space access\r\npermission.\r\nDespite being a read operation, this prunes the history as it goes: a record whose archive is no\r\nlonger in its storage is deleted outright, so the list can shrink between two calls without anybody\r\ndeleting anything. A record whose storage can no longer be reached at all - a disconnected\r\nthird-party account, for instance - is neither returned nor deleted, so it stays invisible while\r\nstill occupying the history.\r\nThe `id` of a record is the same value as the `taskId` that\r\n`POST api/2.0/backup/startbackup` returned for it, and it is what\r\n`DELETE api/2.0/backup/deletebackup/{id}` and the `backupId` of\r\n`POST api/2.0/backup/startrestore` expect.",
         "operationId": "getBackupHistory",
         "parameters": [
           {
             "name": "Dump",
             "in": "query",
-            "description": "Specifies if a dump will be created or not.",
+            "description": "Applies the operation to the whole server rather than to the current portal, which requires the space\r\naccess permission and works on a standalone installation only. Server-wide backups and schedules are\r\nkept apart from the ones of a portal, so the two values address different data.",
             "schema": {
               "examples": [
-                true
+                false
               ],
               "type": "boolean"
             }
@@ -772,34 +780,16 @@
         ],
         "responses": {
           "200": {
-            "description": "List of backup history records",
+            "description": "The backups whose archive is still stored",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -810,22 +800,53 @@
               }
             }
           },
+          "402": {
+            "description": "The portal subscription has expired or has not been paid"
+          },
           "403": {
-            "description": "Access denied"
+            "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
                 "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -839,19 +860,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -874,17 +889,17 @@
           "Backup"
         ],
         "summary": "Delete the backup",
-        "description": "Deletes the backup with the ID specified in the request.",
+        "description": "Deletes one backup: first its history record, then the archive in the storage the record points at.\r\nThe ID is the one listed by `GET api/2.0/backup/getbackuphistory`, which is also the `taskId` the\r\nbackup was started with.\r\nDeleting a backup of the whole server rather than of one portal additionally requires the space\r\naccess permission. A record that belongs to another portal is left untouched and the call still\r\nanswers true, so the result confirms that the request was accepted rather than that anything was\r\ndeleted - check with `GET api/2.0/backup/getbackuphistory` if it matters.\r\nThe record is removed before the archive, so when the storage can no longer be reached the archive\r\nstays behind with nothing pointing at it.",
         "operationId": "deleteBackup",
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "description": "The backup ID.",
+            "description": "The ID of the backup to delete, taken from the route. It is the `id` of a record listed by\r\n`GET api/2.0/backup/getbackuphistory`, which is also the `taskId` the backup was started with.",
             "required": true,
             "schema": {
               "examples": [
-                "00000000-0000-0000-0000-000000000000"
+                "11111111-1111-1111-1111-111111111111"
               ],
               "type": "string",
               "format": "uuid"
@@ -893,34 +908,16 @@
         ],
         "responses": {
           "200": {
-            "description": "Boolean value: true if the operation is successful",
+            "description": "True once the request has been accepted, whether or not a backup was deleted",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -931,22 +928,53 @@
               }
             }
           },
+          "402": {
+            "description": "The portal subscription has expired or has not been paid"
+          },
           "403": {
-            "description": "Access denied"
+            "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
                 "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -960,19 +988,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -995,16 +1017,16 @@
           "Backup"
         ],
         "summary": "Delete the backup history",
-        "description": "Deletes the backup history from the current portal.",
+        "description": "Deletes every backup of the current portal, both the history records and the archives themselves, and\r\nleaves the backup schedule alone. `dump` clears the backups of the whole server instead and requires\r\nthe space access permission.\r\nThe records are walked one by one and a failure on any of them is swallowed, so the result is always\r\ntrue even when some archives could not be deleted: it does not mean the history is now empty. Call\r\n`GET api/2.0/backup/getbackuphistory` afterwards to see what is left.\r\nEach record is removed before its archive, so an archive whose deletion fails stays in the storage\r\nwith nothing pointing at it.",
         "operationId": "deleteBackupHistory",
         "parameters": [
           {
             "name": "Dump",
             "in": "query",
-            "description": "Specifies if a dump will be created or not.",
+            "description": "Applies the operation to the whole server rather than to the current portal, which requires the space\r\naccess permission and works on a standalone installation only. Server-wide backups and schedules are\r\nkept apart from the ones of a portal, so the two values address different data.",
             "schema": {
               "examples": [
-                true
+                false
               ],
               "type": "boolean"
             }
@@ -1012,34 +1034,16 @@
         ],
         "responses": {
           "200": {
-            "description": "Boolean value: true if the operation is successful",
+            "description": "True once every record has been walked, whether or not all of them were deleted",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -1050,22 +1054,53 @@
               }
             }
           },
+          "402": {
+            "description": "The portal subscription has expired or has not been paid"
+          },
           "403": {
-            "description": "Access denied"
+            "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
                 "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -1079,19 +1114,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -1114,13 +1143,13 @@
           "Backup"
         ],
         "summary": "Start the restoring process",
-        "description": "Starts the data restoring process of the current portal with the parameters specified in the request.",
+        "description": "Queues the restoring of the current portal from a backup and returns straight away: the work itself is\r\ndone by the separate backup worker service, which picks the job up from an integration event, so the\r\nresponse reports a progress of 0 and the `Created` status, and the returned `taskId` is the handle to\r\npoll with `GET api/2.0/backup/getrestoreprogress` - the one operation of this service that stays\r\nreachable while the portal is being restored, because every other one answers 403 in that state.\r\nThe source is given either by `backupId`, which is the ID of a record from\r\n`GET api/2.0/backup/getbackuphistory`, or, when `backupId` is not a GUID, by the `filePath` key of\r\n`storageParams` together with the matching `storageType`; an all-zero GUID is parsed as a GUID and\r\ntherefore reaches neither branch.\r\nThe caller needs the portal settings permission, restoring has to be allowed by the pricing plan of a\r\nportal that is not a standalone installation, and `dump` - restoring the whole server rather than this\r\none portal - additionally requires the space access permission.",
         "operationId": "startBackupRestore",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "description": "The backup restoring parameters.",
+                "description": "The request parameters for restoring a portal from a backup.",
                 "$ref": "#/components/schemas/BackupRestoreDto"
               }
             }
@@ -1128,34 +1157,16 @@
         },
         "responses": {
           "200": {
-            "description": "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link",
+            "description": "The state of the queued restoring job",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -1166,31 +1177,56 @@
               }
             }
           },
-          "400": {
-            "description": "Backup can not start as dump"
-          },
           "402": {
-            "description": "Your pricing plan does not support this option"
+            "description": "The pricing plan of this portal does not allow restoring"
           },
           "403": {
-            "description": "Access denied"
+            "description": "No permissions to perform this action"
           },
           "404": {
-            "description": "The required file or folder was not found"
+            "description": "The backup record was not found, or the file it points to is missing"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
                 "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -1204,19 +1240,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -1239,13 +1269,13 @@
           "Backup"
         ],
         "summary": "Get the restoring progress",
-        "description": "Returns the progress of the started restoring process.",
+        "description": "Reports the state of the restoring job, and is the operation to poll after\r\n`POST api/2.0/backup/startrestore`. It is the only operation of this service that needs no\r\nauthorization and the only one that stays reachable while the portal is being restored, which is\r\nexactly the state a client polls it in - every other operation of the service answers 403 then.\r\n`dump` is read as three states rather than as a flag: omit it to get whichever restoring job concerns\r\nthis portal, including a server-wide one, pass false to get the job of this portal only, and pass true\r\nto get the server-wide job; on a portal that is not a standalone installation the value is forced to\r\nfalse. When there is no matching job the call still answers 200, but the body carries no `response`\r\nmember at all.\r\n`isCompleted` is the field to poll, a non-empty `error` is the only report of a failure, and neither\r\n`link` nor `warning` is ever filled in for a restoring job.",
         "operationId": "getRestoreProgress",
         "parameters": [
           {
             "name": "Dump",
             "in": "query",
-            "description": "Specifies if a dump will be created or not.",
+            "description": "Which restoring job to look for, read as three states rather than as a flag: leave it out for\r\nwhichever job concerns this portal, including a server-wide one, send false for the job of this\r\nportal alone, and send true for the server-wide job. On a portal that is not a standalone\r\ninstallation the value is forced to false.",
             "schema": {
               "examples": [
                 false
@@ -1256,34 +1286,16 @@
         ],
         "responses": {
           "200": {
-            "description": "Backup progress: completed or not, progress percentage, error, tenant ID, backup progress item (Backup, Restore, Transfer), link",
+            "description": "The state of the restoring job, or an empty payload when there is no such job",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -1298,12 +1310,33 @@
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
                 "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -1323,16 +1356,16 @@
           "Backup"
         ],
         "summary": "Get the number of backups",
-        "description": "Returns the number of backups for a period of time. The default is the current calendar month.",
+        "description": "Counts the backups of the current portal that were created within a period, and `paid` chooses which\r\nkind is counted: false, the default, counts the ones covered by the free monthly allowance, and true\r\ncounts the ones charged to the portal wallet.\r\nThe period defaults to the current calendar month - `from` becomes the first day of the month at\r\n00:00 UTC and `to` becomes the moment of the call. Both bounds are UTC and inclusive, and a `from`\r\nlater than `to` is rejected. Called with no parameters at all, this returns exactly the figure the\r\nfree monthly allowance is measured against.\r\nThe count is over history records rather than over stored archives, so it includes backups that have\r\nalready been deleted; use `GET api/2.0/backup/getbackuphistory` to see what can still be restored.",
         "operationId": "getBackupsCount",
         "parameters": [
           {
             "name": "from",
             "in": "query",
-            "description": "The from date.",
+            "description": "The start of the period, in UTC and inclusive. It defaults to the first day of the current calendar\r\nmonth at 00:00 UTC, and it has to be no later than `to`.",
             "schema": {
               "examples": [
-                "2025-01-01T00:00:00Z"
+                "2026-03-01T00:00:00Z"
               ],
               "type": "string",
               "format": "date-time"
@@ -1341,10 +1374,10 @@
           {
             "name": "to",
             "in": "query",
-            "description": "The to date.",
+            "description": "The end of the period, in UTC and inclusive. It defaults to the moment of the call.",
             "schema": {
               "examples": [
-                "2025-12-31T23:59:59Z"
+                "2026-03-31T23:59:59Z"
               ],
               "type": "string",
               "format": "date-time"
@@ -1353,7 +1386,7 @@
           {
             "name": "paid",
             "in": "query",
-            "description": "Specifies if the backups are paid or not.",
+            "description": "Counts the backups charged to the portal wallet when true, and the ones covered by the free monthly\r\nallowance when false, which is the default. It is read only by\r\n`GET api/2.0/backup/getbackupscount` and is ignored by\r\n`GET api/2.0/backup/getbackupscountbypaid`, which always reports both.",
             "schema": {
               "examples": [
                 false
@@ -1364,34 +1397,16 @@
         ],
         "responses": {
           "200": {
-            "description": "Number of backups",
+            "description": "The number of backups created within the period",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -1403,24 +1418,42 @@
             }
           },
           "400": {
-            "description": "From date must be less than to date"
+            "description": "The start of the period is later than its end"
           },
           "403": {
-            "description": "Access denied"
+            "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
                 "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -1434,19 +1467,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -1468,17 +1495,17 @@
         "tags": [
           "Backup"
         ],
-        "summary": "Get the number of free and paid backups",
-        "description": "Returns the number of free and paid backups for a period of time. The default is the current calendar month.",
+        "summary": "Get free and paid backup counts",
+        "description": "Counts the backups of the current portal created within a period and splits the result into the ones\r\ncovered by the free monthly allowance and the ones charged to the portal wallet, which saves calling\r\n`GET api/2.0/backup/getbackupscount` twice.\r\nThe `paid` query parameter is accepted but not read here: the answer always carries both figures. The\r\nperiod behaves as it does for `GET api/2.0/backup/getbackupscount` - it defaults to the current\r\ncalendar month, both bounds are UTC and inclusive, and a `from` later than `to` is rejected.\r\nThe counts are over history records rather than over stored archives, so they include backups that\r\nhave already been deleted.",
         "operationId": "getBackupsCounts",
         "parameters": [
           {
             "name": "from",
             "in": "query",
-            "description": "The from date.",
+            "description": "The start of the period, in UTC and inclusive. It defaults to the first day of the current calendar\r\nmonth at 00:00 UTC, and it has to be no later than `to`.",
             "schema": {
               "examples": [
-                "2025-01-01T00:00:00Z"
+                "2026-03-01T00:00:00Z"
               ],
               "type": "string",
               "format": "date-time"
@@ -1487,10 +1514,10 @@
           {
             "name": "to",
             "in": "query",
-            "description": "The to date.",
+            "description": "The end of the period, in UTC and inclusive. It defaults to the moment of the call.",
             "schema": {
               "examples": [
-                "2025-12-31T23:59:59Z"
+                "2026-03-31T23:59:59Z"
               ],
               "type": "string",
               "format": "date-time"
@@ -1499,7 +1526,7 @@
           {
             "name": "paid",
             "in": "query",
-            "description": "Specifies if the backups are paid or not.",
+            "description": "Counts the backups charged to the portal wallet when true, and the ones covered by the free monthly\r\nallowance when false, which is the default. It is read only by\r\n`GET api/2.0/backup/getbackupscount` and is ignored by\r\n`GET api/2.0/backup/getbackupscountbypaid`, which always reports both.",
             "schema": {
               "examples": [
                 false
@@ -1510,34 +1537,16 @@
         ],
         "responses": {
           "200": {
-            "description": "Number of free and paid backups",
+            "description": "The number of free and of paid backups created within the period",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -1549,24 +1558,42 @@
             }
           },
           "400": {
-            "description": "From date must be less than to date"
+            "description": "The start of the period is later than its end"
           },
           "403": {
-            "description": "Access denied"
+            "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
                 "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -1580,19 +1607,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -1614,39 +1635,21 @@
         "tags": [
           "Backup"
         ],
-        "summary": "Get the backup service state",
-        "description": "Returns the backup service state.",
+        "summary": "Check whether backups are enabled",
+        "description": "Reports whether the paid backup service is switched on for the current portal. This is a wallet\r\nsetting of the portal, not the health of the backup service or of the worker that runs the jobs, so a\r\nfalse answer does not mean backups are unavailable and a true one does not mean they are working.\r\nWhile it is on, backups beyond the free monthly allowance are charged to the portal wallet. While it\r\nis off and that allowance is used up, `POST api/2.0/backup/startbackup` and\r\n`POST api/2.0/backup/createbackupschedule` answer 402.\r\nStarting a backup once the allowance is used up switches the service on by itself, as soon as a\r\nbilling session opens for the portal, so this flag can change without anybody editing the portal\r\nsettings.",
         "operationId": "getBackupsServiceState",
         "responses": {
           "200": {
-            "description": "Backup service state",
+            "description": "Whether the paid backup service is switched on for this portal",
             "headers": {
               "X-RateLimit-Limit": {
-                "description": "Sliding window rate limit: 1500 requests per minute per user/IP.",
-                "schema": {
-                  "examples": [
-                    1500
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Limit"
               },
               "X-RateLimit-Remaining": {
-                "description": "Number of requests remaining in the current sliding window (1500 req/min). Concurrent limits also apply: 50 parallel GET requests, 15 parallel POST/PUT requests.",
-                "schema": {
-                  "examples": [
-                    1
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
               },
               "X-RateLimit-Reset": {
-                "description": "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-                "schema": {
-                  "examples": [
-                    1750000000
-                  ],
-                  "type": "integer"
-                }
+                "$ref": "#/components/headers/X-RateLimit-Reset"
               }
             },
             "content": {
@@ -1658,21 +1661,39 @@
             }
           },
           "403": {
-            "description": "Access denied"
+            "description": "No permissions to perform this action"
           },
           "401": {
-            "description": "Unauthorized"
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests.",
             "headers": {
               "Retry-After": {
-                "description": "Seconds to wait before retrying. Up to 60s for the sliding window (1500 req/min), up to 86400s for the daily POST/PUT limit (10000/day).",
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
                 "schema": {
-                  "examples": [
-                    30
-                  ],
-                  "type": "integer"
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
                 }
               }
             }
@@ -1686,19 +1707,13 @@
         },
         "security": [
           {
-            "asc_auth_key": [
-              "read",
-              "write"
-            ]
+            "asc_auth_key": [ ]
           },
           {
             "Bearer": [ ]
           },
           {
-            "ApiKeyBearer": [
-              "read",
-              "write"
-            ]
+            "ApiKeyBearer": [ ]
           },
           {
             "Basic": [ ]
@@ -1722,15 +1737,15 @@
         "type": "object",
         "properties": {
           "storageType": {
-            "description": "The backup storage type.",
+            "description": "The storage the archive is written to. It defaults to `Documents`, and it decides which keys\r\n`storageParams` has to carry.",
             "$ref": "#/components/schemas/BackupStorageType"
           },
           "storageParams": {
             "examples": [
               [
                 {
-                  "key": "path",
-                  "value": "/backup"
+                  "key": "folderId",
+                  "value": "1234"
                 }
               ]
             ],
@@ -1739,20 +1754,20 @@
               "array"
             ],
             "items": {
+              "description": "One entry of a keyed collection, carried as an explicit pair of `key` and `value` fields instead of as a member\r\nof a JSON object, so that the key is not restricted to a string and the entries keep the order they are sent in.",
               "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
             },
-            "description": "The backup storage parameters."
+            "description": "The settings of the chosen storage, as an array of key and value pairs. `Documents` needs an integer\r\n`folderId`, `ThridpartyDocuments` a provider-specific non-integer `folderId`, `Local` a `filePath`,\r\n`ThirdPartyConsumer` a `module` plus the settings of that consumer, and `DataStore` none. The\r\n`subdir` key is added by the operation itself and must not be sent."
           },
           "dump": {
             "examples": [
               false
             ],
             "type": "boolean",
-            "description": "Specifies if a dump will be created or not."
+            "description": "Backs up the whole server rather than this one portal. It requires the space access permission and\r\nworks on a standalone installation only."
           }
         },
-        "additionalProperties": false,
-        "description": "The backup parameters."
+        "description": "The request parameters for starting a backup."
       },
       "BackupHistoryRecord": {
         "required": [
@@ -1766,24 +1781,24 @@
         "properties": {
           "id": {
             "examples": [
-              "00000000-0000-0000-0000-000000000000"
+              "11111111-1111-1111-1111-111111111111"
             ],
             "type": "string",
-            "description": "The backup ID.",
+            "description": "The ID of the backup, which is the same value as the `taskId` the backup was started with. Pass it to\r\n`DELETE api/2.0/backup/deletebackup/{id}` or as the `backupId` of\r\n`POST api/2.0/backup/startrestore`.",
             "format": "uuid"
           },
           "fileName": {
             "examples": [
-              "tenant-backup"
+              "myportal_2026-03-01_02-15-00.tar.gz"
             ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The backup file name."
+            "description": "The name of the stored archive. It is built from the portal alias and the moment the backup started,\r\nor from `workspace` instead of the alias for a backup of the whole server."
           },
           "storageType": {
-            "description": "The backup storage type.",
+            "description": "The storage the archive was written to, reported as a number rather than as a name.",
             "$ref": "#/components/schemas/BackupStorageType"
           },
           "createdOn": {
@@ -1791,20 +1806,19 @@
               "2026-03-01T02:15:00Z"
             ],
             "type": "string",
-            "description": "The backup creation date.",
+            "description": "The date and time the backup was stored at, in UTC.",
             "format": "date-time"
           },
           "expiresOn": {
             "examples": [
-              "2026-03-31T02:15:00Z"
+              "0001-01-01T00:00:00Z"
             ],
             "type": "string",
-            "description": "The backup expiration date.",
+            "description": "The date and time a background cleaner removes this backup at. Only a backup written to `DataStore`\r\nexpires, one day after it was stored; for every other storage type this is `0001-01-01T00:00:00`,\r\nwhich means the backup is kept until it is deleted by hand or pushed out by the stored-copies limit\r\nof a schedule.",
             "format": "date-time"
           }
         },
-        "additionalProperties": false,
-        "description": "The backup history parameters."
+        "description": "One stored backup of a portal."
       },
       "BackupHistoryRecordArrayWrapper": {
         "type": "object",
@@ -1813,7 +1827,8 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/BackupHistoryRecord"
-            }
+            },
+            "description": "The list of BackupHistoryRecord objects returned by the operation."
           },
           "count": {
             "type": "integer",
@@ -1847,7 +1862,8 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the list of BackupHistoryRecord objects."
       },
       "BackupPeriod": {
         "oneOf": [
@@ -1881,7 +1897,7 @@
             ]
           }
         ],
-        "description": "The backup period type.",
+        "description": "How often a scheduled backup runs. `EveryWeek` and `EveryMonth` also need the day to be given, while\r\n`EveryDay` does not.",
         "x-enum-type": "integer"
       },
       "BackupProgress": {
@@ -1892,75 +1908,74 @@
               false
             ],
             "type": "boolean",
-            "description": "Specifies if the backup is completed or not."
+            "description": "Specifies whether the job has stopped running. This is the field to poll: true means the job will not\r\nchange any more, whether it succeeded, failed or was cancelled, and `status` tells which of the three\r\nit is."
           },
           "progress": {
             "examples": [
               50
             ],
             "type": "integer",
-            "description": "The backup progress in percentage.",
+            "description": "The share of the job that is already done, from 0 to 100. A job that has only been queued reports 0,\r\nbecause the work starts when a separate worker service picks it up.",
             "format": "int32"
           },
           "error": {
             "examples": [
-              null
+              "An error occurred during processing"
             ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The backup error message."
+            "description": "The message of the error that stopped the job. It is an empty string, not null, while the job runs\r\nand after a job that succeeded, so the sign of a failure is a non-empty value - and this is the only\r\nplace where the reason is reported."
           },
           "warning": {
             "examples": [
-              null
+              "Some files were not included in the backup. For more details, please check storage/missing_info"
             ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The backup warning message."
+            "description": "A message about a job that stopped without failing: it names the entry inside the archive that lists\r\nthe files which could not be read, when a backup finished without some of them, and it says so when\r\nthe job was cancelled. It is an empty string otherwise, and it is only ever filled in for a backup\r\njob - a cancelled restoring job leaves it empty."
           },
           "link": {
             "examples": [
-              "https://example.com/backup/task_123"
+              "https://example.com/products/files/httphandlers/filehandler.ashx?action=download&fileid=1234"
             ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The backup link."
+            "description": "The link to download the stored archive. It is an empty string until the archive has been uploaded,\r\nand it is only ever filled in for a backup job, never for a restoring one."
           },
           "tenantId": {
             "examples": [
               1
             ],
             "type": "integer",
-            "description": "The tenant ID.",
+            "description": "The ID of the portal the job belongs to, or -1 for a job that covers the whole server.",
             "format": "int32"
           },
           "backupProgressEnum": {
-            "description": "The backup progress type.",
+            "description": "Whether this is a backup or a restoring job, reported as a number rather than as a name.",
             "$ref": "#/components/schemas/BackupProgressEnum"
           },
           "status": {
-            "description": "The backup progress status.",
+            "description": "The state of the job: `Created` while it waits for a worker to pick it up, `Running` while it works,\r\n`Completed` once it has finished on its own, `Canceled` after it was cancelled, and `Failted` when it\r\nstopped on an error, in which case `error` carries the reason. Reported as a number rather than as a\r\nname.",
             "$ref": "#/components/schemas/DistributedTaskStatus"
           },
           "taskId": {
             "examples": [
-              "task_123"
+              "11111111-1111-1111-1111-111111111111"
             ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The task ID."
+            "description": "The ID of the job. It is the handle to poll this operation with, and for a backup job it also becomes\r\nthe `id` of the record in `GET api/2.0/backup/getbackuphistory`."
           }
         },
-        "additionalProperties": false,
-        "description": "The backup progress parameters."
+        "description": "The state of one backup or restoring job."
       },
       "BackupProgressEnum": {
         "oneOf": [
@@ -1994,13 +2009,14 @@
             ]
           }
         ],
-        "description": "The backup progress type",
+        "description": "What kind of job a progress report belongs to. `Transfer` describes moving a portal between regions and\r\nis never reported by this API, because no operation of it starts such a job.",
         "x-enum-type": "integer"
       },
       "BackupProgressWrapper": {
         "type": "object",
         "properties": {
           "response": {
+            "description": "The BackupProgress object returned by the operation.",
             "$ref": "#/components/schemas/BackupProgress"
           },
           "count": {
@@ -2035,7 +2051,8 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the BackupProgress object."
       },
       "BackupRestoreDto": {
         "required": [
@@ -2045,24 +2062,24 @@
         "properties": {
           "backupId": {
             "examples": [
-              "00000000-0000-0000-0000-000000000000"
+              "11111111-1111-1111-1111-111111111111"
             ],
             "type": [
               "null",
               "string"
             ],
-            "description": "The backup ID."
+            "description": "The ID of the backup to restore from, as listed by `GET api/2.0/backup/getbackuphistory`. Send\r\nanything that is not a GUID to restore from a file given by `storageParams` instead; an all-zero GUID\r\nselects neither, because it parses as a GUID and then matches no record."
           },
           "storageType": {
-            "description": "The backup storage type.",
+            "description": "The storage the archive is read from. It defaults to `Documents` and is only used when `backupId` is\r\nnot a GUID, because a known backup carries the storage of its own record.",
             "$ref": "#/components/schemas/BackupStorageType"
           },
           "storageParams": {
             "examples": [
               [
                 {
-                  "key": "path",
-                  "value": "/backup"
+                  "key": "filePath",
+                  "value": "1234"
                 }
               ]
             ],
@@ -2071,41 +2088,41 @@
               "array"
             ],
             "items": {
+              "description": "One entry of a keyed collection, carried as an explicit pair of `key` and `value` fields instead of as a member\r\nof a JSON object, so that the key is not restricted to a string and the entries keep the order they are sent in.",
               "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
             },
-            "description": "The backup storage parameters."
+            "description": "The location of the archive, as an array of key and value pairs. The key read here is `filePath` -\r\nnot the `folderId` a backup is started with - and it holds a file ID for `Documents`, a\r\nprovider-specific file ID for `ThridpartyDocuments` and a path on the server for `Local`. It is only\r\nused when `backupId` is not a GUID."
           },
           "notify": {
             "examples": [
               true
             ],
             "type": "boolean",
-            "description": "Notifies users about the portal restoring process or not."
+            "description": "Chooses who is emailed when the restoring starts and when it finishes: every active user of the\r\nportal when true, and its owner alone when false. Mail goes only to accounts that have been\r\nactivated, so this decides the audience rather than whether anybody is notified at all."
           },
           "dump": {
             "examples": [
               false
             ],
             "type": "boolean",
-            "description": "Specifies if a dump will be created or not."
+            "description": "Restores the whole server rather than this one portal. It requires the space access permission."
           }
         },
-        "additionalProperties": false,
-        "description": "The backup restoring parameters."
+        "description": "The request parameters for restoring a portal from a backup."
       },
       "BackupScheduleDto": {
         "type": "object",
         "properties": {
           "storageType": {
-            "description": "The backup storage type.",
+            "description": "The storage the scheduled archives are written to. It defaults to `Documents`, and it decides which\r\nkeys `storageParams` has to carry.",
             "$ref": "#/components/schemas/BackupStorageType"
           },
           "storageParams": {
             "examples": [
               [
                 {
-                  "key": "path",
-                  "value": "/backup"
+                  "key": "folderId",
+                  "value": "1234"
                 }
               ]
             ],
@@ -2114,9 +2131,10 @@
               "array"
             ],
             "items": {
+              "description": "One entry of a keyed collection, carried as an explicit pair of `key` and `value` fields instead of as a member\r\nof a JSON object, so that the key is not restricted to a string and the entries keep the order they are sent in.",
               "$ref": "#/components/schemas/ItemKeyValuePairObjectObject"
             },
-            "description": "The backup storage parameters."
+            "description": "The settings of the chosen storage, as an array of key and value pairs. `Documents` and\r\n`ThridpartyDocuments` need `folderId`, `Local` needs `filePath`, `ThirdPartyConsumer` needs `module`\r\nplus the settings of that consumer, and `DataStore` needs none."
           },
           "backupsStored": {
             "examples": [
@@ -2126,11 +2144,11 @@
               "null",
               "integer"
             ],
-            "description": "The maximum number of the stored backup copies.",
+            "description": "The number of scheduled copies to keep, from 1 to 30. It defaults to 1, and only the copies this\r\nschedule creates are counted and removed - archives started by hand are left alone.",
             "format": "int32"
           },
           "cronParams": {
-            "description": "The backup cron parameters.",
+            "description": "When the backup runs. It is required: a request without it fails rather than falling back to a\r\ndefault.",
             "$ref": "#/components/schemas/Cron"
           },
           "dump": {
@@ -2138,11 +2156,10 @@
               false
             ],
             "type": "boolean",
-            "description": "Specifies if a dump will be created or not."
+            "description": "Schedules a backup of the whole server rather than of this one portal. It requires the space access\r\npermission and works on a standalone installation only."
           }
         },
-        "additionalProperties": false,
-        "description": "The backup schedule parameters."
+        "description": "The request parameters for setting the backup schedule."
       },
       "BackupServiceStateDto": {
         "type": "object",
@@ -2152,16 +2169,16 @@
               true
             ],
             "type": "boolean",
-            "description": "Specifies if the backup service is enabled or not."
+            "description": "Specifies whether the paid backup service is switched on for this portal, which is a setting of its\r\nwallet rather than the health of the backup service. While it is true, backups beyond the free\r\nmonthly allowance are charged to the wallet."
           }
         },
-        "additionalProperties": false,
-        "description": "Backup service state."
+        "description": "Whether the paid backup service is switched on for a portal."
       },
       "BackupServiceStateWrapper": {
         "type": "object",
         "properties": {
           "response": {
+            "description": "The BackupServiceStateDto object returned by the operation.",
             "$ref": "#/components/schemas/BackupServiceStateDto"
           },
           "count": {
@@ -2196,7 +2213,8 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the BackupServiceStateDto object."
       },
       "BackupStorageType": {
         "oneOf": [
@@ -2239,7 +2257,7 @@
             ]
           }
         ],
-        "description": "The backup storage type.",
+        "description": "Where a backup archive is stored. The value decides which keys the storage parameters of an operation\r\nhave to carry: `Documents` and `ThridpartyDocuments` need a folder ID, `Local` needs a file path and\r\nworks on a standalone installation only, `ThirdPartyConsumer` needs the module of the consumer plus its\r\nsettings, and `DataStore` needs none. `CustomCloud` is not implemented and no storage can be built for\r\nit.",
         "x-enum-type": "integer"
       },
       "BackupsCountResultDto": {
@@ -2250,7 +2268,7 @@
               3
             ],
             "type": "integer",
-            "description": "The number of free backups.",
+            "description": "The number of backups covered by the free monthly allowance.",
             "format": "int32"
           },
           "paid": {
@@ -2258,17 +2276,17 @@
               5
             ],
             "type": "integer",
-            "description": "The number of paid backups.",
+            "description": "The number of backups charged to the portal wallet.",
             "format": "int32"
           }
         },
-        "additionalProperties": false,
-        "description": "The number of backups."
+        "description": "The backups of a portal, split by who paid for them."
       },
       "BackupsCountResultWrapper": {
         "type": "object",
         "properties": {
           "response": {
+            "description": "The BackupsCountResultDto object returned by the operation.",
             "$ref": "#/components/schemas/BackupsCountResultDto"
           },
           "count": {
@@ -2303,13 +2321,15 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the BackupsCountResultDto object."
       },
       "BooleanWrapper": {
         "type": "object",
         "properties": {
           "response": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "The boolean value returned by the operation."
           },
           "count": {
             "type": "integer",
@@ -2343,64 +2363,63 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the boolean value."
       },
       "Cron": {
         "type": "object",
         "properties": {
           "period": {
-            "description": "The backup period type.",
+            "description": "How often the backup runs: `EveryDay`, `EveryWeek` or `EveryMonth`. It defaults to `EveryDay`.",
             "$ref": "#/components/schemas/BackupPeriod"
           },
           "hour": {
             "examples": [
-              0
+              2
             ],
             "type": "integer",
-            "description": "The time of the day to start the backup process.",
+            "description": "The hour of the day the backup starts at, from 0 to 23. Minutes cannot be chosen - it always starts\r\non the hour.",
             "format": "int32"
           },
           "day": {
             "examples": [
-              0
+              1
             ],
             "type": [
               "null",
               "integer"
             ],
-            "description": "The day of the week to start the backup process.",
+            "description": "The day the backup runs on: the day of the week from 1 to 7, Sunday being 1, for `EveryWeek`, and the\r\nday of the month from 1 to 31 for `EveryMonth`. Leave it out for `EveryDay` only - an omitted value is\r\nstored as 0, which neither of the other two periods accepts, so a weekly or monthly schedule sent\r\nwithout it fails.",
             "format": "int32"
           }
         },
-        "additionalProperties": false,
-        "description": "The backup cron parameters."
+        "description": "The request parameters for the time the scheduled backup runs."
       },
       "CronParams": {
         "type": "object",
         "properties": {
           "period": {
-            "description": "The backup period type.",
+            "description": "How often the backup runs: 0 for every day, 1 for every week and 2 for every month.",
             "$ref": "#/components/schemas/BackupPeriod"
           },
           "hour": {
             "examples": [
-              0
+              2
             ],
             "type": "integer",
-            "description": "The time of the day to start the backup process.",
+            "description": "The hour of the day the backup starts at, from 0 to 23.",
             "format": "int32"
           },
           "day": {
             "examples": [
-              0
+              1
             ],
             "type": "integer",
-            "description": "The day of the week to start the backup process.",
+            "description": "The day the backup runs on: the day of the week from 1 to 7, Sunday being 1, for a weekly schedule,\r\nand the day of the month from 1 to 31 for a monthly one. It is 0 for a daily schedule.",
             "format": "int32"
           }
         },
-        "additionalProperties": false,
-        "description": "The backup cron parameters."
+        "description": "The time a scheduled backup runs at."
       },
       "DistributedTaskStatus": {
         "oneOf": [
@@ -2440,13 +2459,54 @@
             ]
           }
         ],
+        "description": "The status of the distributed task.",
         "x-enum-type": "integer"
+      },
+      "ErrorApiResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "description": "The response status flag. Always 1 on an error, as opposed to 0 on success.",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "The HTTP status code of the response, repeated in the body.",
+            "format": "int32"
+          },
+          "error": {
+            "type": "object",
+            "properties": {
+              "message": {
+                "type": "string",
+                "description": "The human-readable error message."
+              },
+              "type": {
+                "type": "string",
+                "description": "The .NET type of the underlying exception. Only sent when stack traces are enabled."
+              },
+              "stack": {
+                "type": "string",
+                "description": "The stack trace of the underlying exception. Only sent when stack traces are enabled."
+              },
+              "hresult": {
+                "type": "integer",
+                "description": "The HRESULT of the underlying exception. Only sent when stack traces are enabled.",
+                "format": "int32"
+              }
+            },
+            "description": "What went wrong."
+          }
+        },
+        "description": "The error body returned with every failed request."
       },
       "Int32Wrapper": {
         "type": "object",
         "properties": {
           "response": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The int32 value returned by the operation."
           },
           "count": {
             "type": "integer",
@@ -2480,19 +2540,22 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the int32 value."
       },
       "ItemKeyValuePairObjectObject": {
         "type": "object",
         "properties": {
           "key": {
-            "type": "null"
+            "type": "null",
+            "description": "The left half of the pair. Where the pair configures something, this is the identifier the value belongs to -\r\na setting name, a module id, a logo slot; where the pair reports the result of a call, this is the result\r\nitself, such as the flag telling whether the call succeeded. Which of the two it is, and which keys are\r\naccepted, is stated by the operation that sends or returns the pair."
           },
           "value": {
-            "type": "null"
+            "type": "null",
+            "description": "The right half of the pair: what is assigned to the key next to it, or what is reported for it. Its meaning\r\nand its accepted values follow from the key, so read them from the operation that sends or returns the pair."
           }
         },
-        "additionalProperties": false
+        "description": "One entry of a keyed collection, carried as an explicit pair of `key` and `value` fields instead of as a member\r\nof a JSON object, so that the key is not restricted to a string and the entries keep the order they are sent in."
       },
       "ScheduleDto": {
         "required": [
@@ -2505,12 +2568,14 @@
         "type": "object",
         "properties": {
           "storageType": {
-            "description": "The backup storage type.",
+            "description": "The storage the scheduled archives are written to, reported as a number rather than as the name the\r\nschedule was created with.",
             "$ref": "#/components/schemas/BackupStorageType"
           },
           "storageParams": {
             "examples": [
-              { }
+              {
+                "folderId": "1234"
+              }
             ],
             "type": [
               "null",
@@ -2522,10 +2587,10 @@
                 "string"
               ]
             },
-            "description": "The backup storage parameters."
+            "description": "The settings of the storage, as an object keyed by parameter name - not as the array of key and value\r\npairs the schedule was created with, so it cannot be sent back unchanged. For every storage type\r\nexcept `ThirdPartyConsumer` the `folderId` key is built from the stored base path."
           },
           "cronParams": {
-            "description": "The backup cron parameters.",
+            "description": "When the backup runs, read back from the stored cron expression. `day` is 0 for a daily schedule,\r\nbecause a daily one has no day.",
             "$ref": "#/components/schemas/CronParams"
           },
           "backupsStored": {
@@ -2536,7 +2601,7 @@
               "null",
               "integer"
             ],
-            "description": "The maximum number of the stored backup copies.",
+            "description": "The number of scheduled copies kept. It is null, not 0, when the schedule keeps an unlimited number.",
             "format": "int32"
           },
           "lastBackupTime": {
@@ -2544,7 +2609,7 @@
               "2026-01-01T00:00:00Z"
             ],
             "type": "string",
-            "description": "The date and time when the last backup was reated.",
+            "description": "The date and time the schedule last ran at. It is `0001-01-01T00:00:00` until the schedule has run\r\nfor the first time.",
             "format": "date-time"
           },
           "dump": {
@@ -2552,16 +2617,16 @@
               false
             ],
             "type": "boolean",
-            "description": "Specifies if a dump will be created or not."
+            "description": "Specifies whether this schedule backs up the whole server instead of one portal."
           }
         },
-        "additionalProperties": false,
-        "description": "The backup schedule parameters."
+        "description": "The backup schedule of a portal."
       },
       "ScheduleWrapper": {
         "type": "object",
         "properties": {
           "response": {
+            "description": "The ScheduleDto object returned by the operation.",
             "$ref": "#/components/schemas/ScheduleDto"
           },
           "count": {
@@ -2596,7 +2661,8 @@
             "description": "HTTP status code of the response (duplicate of status)",
             "format": "int32"
           }
-        }
+        },
+        "description": "The successful API response containing the ScheduleDto object."
       }
     },
     "headers": {
@@ -2606,7 +2672,10 @@
           "examples": [
             1500
           ],
-          "type": "integer"
+          "maximum": 1500,
+          "minimum": 0,
+          "type": "integer",
+          "format": "int32"
         }
       },
       "X-RateLimit-Remaining": {
@@ -2615,7 +2684,10 @@
           "examples": [
             1
           ],
-          "type": "integer"
+          "maximum": 1500,
+          "minimum": 0,
+          "type": "integer",
+          "format": "int32"
         }
       },
       "X-RateLimit-Reset": {
@@ -2624,7 +2696,9 @@
           "examples": [
             1750000000
           ],
-          "type": "integer"
+          "minimum": 0,
+          "type": "integer",
+          "format": "int64"
         }
       },
       "Retry-After": {
@@ -2633,7 +2707,10 @@
           "examples": [
             30
           ],
-          "type": "integer"
+          "maximum": 86400,
+          "minimum": 0,
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
@@ -2651,7 +2728,7 @@
       },
       "Bearer": {
         "type": "http",
-        "description": "Enter 'Bearer {JWT Token}'",
+        "description": "Enter 'Bearer {JWT Token}'. Tokens are validated per RFC8725 (JSON Web Token Best Current Practices): signatures are required and checked against a server-side algorithm allow-list (ES256, RS256) rather than the token header, and issuer, audience and expiry are all verified.",
         "scheme": "bearer",
         "bearerFormat": "JWT"
       },
@@ -2663,7 +2740,7 @@
       },
       "OAuth2": {
         "type": "oauth2",
-        "description": "OAuth2 flow with Authorization Code",
+        "description": "OAuth2 flow with Authorization Code. The access tokens it issues are JWTs, validated per RFC8725 exactly as the Bearer scheme describes.",
         "flows": {
           "authorizationCode": {
             "authorizationUrl": "",

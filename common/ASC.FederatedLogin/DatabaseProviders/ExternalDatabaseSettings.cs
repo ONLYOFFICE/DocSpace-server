@@ -34,9 +34,17 @@
 #nullable enable
 namespace ASC.FederatedLogin.DatabaseProviders;
 
+/// <summary>
+/// The engine of an external database.
+/// </summary>
 [EnumExtensions]
 public enum ExternalDatabaseType { MySql, Sqlite }
 
+/// <summary>
+/// The outcome of a connection test against an external database.
+/// </summary>
+/// <param name="Success">Specifies whether the connection to the database succeeded.</param>
+/// <param name="Error">The reason the connection failed, or null when it succeeded.</param>
 public record ConnectionTestResult(bool Success, string? Error = null)
 {
     public static ConnectionTestResult Ok() => new(true);
@@ -44,32 +52,67 @@ public record ConnectionTestResult(bool Success, string? Error = null)
 }
 #nullable disable
 
+/// <summary>
+/// The connection parameters of an external database.
+/// </summary>
 public class ExternalDatabaseSettings
 {
+    /// <summary>
+    /// The engine of the external database.
+    /// </summary>
+    /// <example>mysql</example>
     [JsonPropertyName("databaseType")]
     public string DatabaseType { get; set; }
 
     public ExternalDatabaseType? DatabaseTypeEnum =>
         ExternalDatabaseTypeExtensions.TryParse(DatabaseType, ignoreCase: true, out var t) ? t : null;
 
+    /// <summary>
+    /// The host name or the IP address of the database server.
+    /// </summary>
+    /// <example>localhost</example>
     [JsonPropertyName("dbHost")]
     public string Host { get; set; }
 
+    /// <summary>
+    /// The port the database server listens on.
+    /// </summary>
+    /// <example>3306</example>
     [JsonPropertyName("dbPort")]
     public int Port { get; set; }
 
+    /// <summary>
+    /// The name of the database to connect to.
+    /// </summary>
+    /// <example>docspace</example>
     [JsonPropertyName("dbName")]
     public string DatabaseName { get; set; }
 
+    /// <summary>
+    /// The user name to connect with.
+    /// </summary>
+    /// <example>root</example>
     [JsonPropertyName("dbUser")]
     public string User { get; set; }
 
+    /// <summary>
+    /// The password to connect with.
+    /// </summary>
+    /// <example>my-secret-password</example>
     [JsonPropertyName("dbPassword")]
     public string Password { get; set; }
 
+    /// <summary>
+    /// Specifies whether the connection to the database is secured with SSL.
+    /// </summary>
+    /// <example>false</example>
     [JsonPropertyName("dbSsl")]
     public bool UseSsl { get; set; }
 
+    /// <summary>
+    /// The path to the database file, used by the SQLite engine only.
+    /// </summary>
+    /// <example>/var/lib/docspace/external.db</example>
     [JsonPropertyName("sqliteFilePath")]
     public string SqliteFilePath { get; set; }
 }

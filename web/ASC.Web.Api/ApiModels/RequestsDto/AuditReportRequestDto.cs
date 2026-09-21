@@ -36,12 +36,14 @@ using ASC.Files.Core.Services.DocumentBuilderService;
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for generating an audit report.
+/// The file format the queued audit report is built in.
 /// </summary>
 public class AuditReportRequestDto
 {
     /// <summary>
-    /// The output file format of the report. Defaults to XLSX.
+    /// The format the report file is written in. The workbook format is the default and is the only one that leaves
+    /// the finished file addressable by ID: a report asked for as CSV comes back with an empty `resultFileId`, so it
+    /// can only be reached through `resultFileName` and `resultFileUrl`.
     /// </summary>
     /// <example>Xlsx</example>
     [FromQuery(Name = "format")]

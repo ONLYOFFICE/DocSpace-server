@@ -60,6 +60,12 @@ public partial class AiIntegrationContext
     }
 
     [PreCompileQuery]
+    public IAsyncEnumerable<DbAssignment> GetAllAssignmentsByScopesAsync(int tenantId, int? firstEntryId, int? secondEntryId)
+    {
+        return AssignmentQueriesContainer.GetAllAssignmentsByScopesAsync(this, tenantId, firstEntryId, secondEntryId);
+    }
+
+    [PreCompileQuery]
     public IAsyncEnumerable<DbAssignment> GetAssignmentsByTypesAsync(int tenantId, IEnumerable<ActionType> actionTypes)
     {
         return AssignmentQueriesContainer.GetAssignmentsByTypesAsync(this, tenantId, actionTypes);
@@ -141,6 +147,14 @@ static file class AssignmentQueriesContainer
             (AiIntegrationContext ctx, int tenantId, int entryId) =>
                 ctx.Assignments
                     .Where(x => x.TenantId == tenantId && x.EntryId == entryId)
+                    .OrderBy(x => x.ActionType)
+                    .AsQueryable());
+
+    public static readonly Func<AiIntegrationContext, int, int?, int?, IAsyncEnumerable<DbAssignment>> GetAllAssignmentsByScopesAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, int? firstEntryId, int? secondEntryId) =>
+                ctx.Assignments
+                    .Where(x => x.TenantId == tenantId && (x.EntryId == null || x.EntryId == firstEntryId || x.EntryId == secondEntryId))
                     .OrderBy(x => x.ActionType)
                     .AsQueryable());
 

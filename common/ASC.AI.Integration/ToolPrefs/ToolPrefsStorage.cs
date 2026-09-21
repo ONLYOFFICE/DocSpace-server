@@ -49,6 +49,22 @@ public class ToolPrefsStorage(
         return await rows.ToDictionaryAsync(x => x.ServerType, ToDomain);
     }
 
+    public async Task<ScopedValues<Dictionary<string, ToolPreference>>> ReadByScopesAsync(int tenantId, Guid createdBy, int? firstEntryId, int? secondEntryId)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        var global = new Dictionary<string, ToolPreference>();
+        var byEntry = ScopedValues.CreateEntryBuckets(firstEntryId, secondEntryId, () => new Dictionary<string, ToolPreference>());
+
+        await foreach (var entity in context.GetAllToolPrefsByScopesAsync(tenantId, createdBy, firstEntryId, secondEntryId))
+        {
+            var target = entity.EntryId.HasValue ? byEntry[entity.EntryId.Value] : global;
+            target[entity.ServerType] = ToDomain(entity);
+        }
+
+        return new ScopedValues<Dictionary<string, ToolPreference>>(global, byEntry);
+    }
+
     public async Task UpsertAsync(int tenantId, Guid createdBy, IReadOnlyDictionary<string, ToolPreference> items, int? entryId = null)
     {
         if (items.Count == 0)

@@ -39,14 +39,15 @@ namespace ASC.Files.ApiModels.RequestDto;
 public class GetRoomLinksRequestDto<T>
 {
     /// <summary>
-    /// The room ID.
+    /// The room whose links are listed, named by the identifier that `GET api/2.0/files/rooms` reports for it.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// The link type.
+    /// Narrows the answer to one kind of link: invitation links, which turn whoever opens them into a member, or
+    /// external links, which open the room without an account. Leaving it out returns both kinds together.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "type")]

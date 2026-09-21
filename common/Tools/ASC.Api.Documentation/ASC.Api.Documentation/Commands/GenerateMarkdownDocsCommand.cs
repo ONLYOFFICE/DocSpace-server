@@ -53,7 +53,7 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
-    public override async Task<int> ExecuteAsync(
+    protected override async Task<int> ExecuteAsync(
         CommandContext context,
         NoArgumentsCommandSettings settings,
         CancellationToken cancellationToken)

@@ -48,6 +48,13 @@ internal static class LetterAssertions
         new("""(&#8221;|&#8220;|")\s*:\s*(&#8220;|&#8221;|")(https?://|mailto:)""", RegexOptions.Compiled);
 
     /// <summary>
+    /// A tag reference inside another tag's value — <c>TagValues.TrulyYours</c> signs off with
+    /// "Truly Yours, <c>${LetterLogoText}</c> Team", so the value is resolved further before it lands in
+    /// the body and only the stretches between the references are carried through verbatim.
+    /// </summary>
+    private static readonly Regex _tagReference = new(@"\$\{?[a-zA-Z0-9_]+\}?", RegexOptions.Compiled);
+
+    /// <summary>
     /// Nothing environment-specific may be baked into this culture's pattern text:
     /// <list type="bullet">
     /// <item>the product name is <c>${LetterLogoText}</c>, so a white-labelled portal sends its own
@@ -137,6 +144,63 @@ internal static class LetterAssertions
 
         tags.Should().Contain(tag => tag.Tag == CommonTags.EmbeddedAttachments,
             "the content id has to point at something, or the reader sees a broken image");
+    }
+
+    /// <summary>
+    /// A tag value that is markup has to reach the letter as markup. Several of them are —
+    /// <c>TagValues.OrangeButton</c> is the whole call-to-action, <c>TagValues.TrulyYours</c> the
+    /// signature, <c>TableTop</c>/<c>TableBottom</c> the item table — and the reader sees the difference
+    /// immediately: escaped, the letter prints its own HTML in the middle of the text.
+    ///
+    /// The engine hands every interpolated value through a no-textile zone that encodes it on the way in
+    /// and decodes it on the way out (<c>NoTextileBlockModifier</c>), so this is the one property of that
+    /// round trip a letter test can state: what the action put in a tag is what the body carries. The
+    /// checks that came before this one all passed while the markup was escaped — the button URL, the
+    /// caption and the site link are still present as text, just no longer clickable.
+    ///
+    /// A value the action escaped itself (<c>keyName.HtmlEncode()</c>, a display name) carries no raw
+    /// <c>&lt;</c> and is deliberately not covered here: it must stay escaped, which is what
+    /// <c>ApiKeyExpiredLetterTests</c> asserts.
+    ///
+    /// Only the tags this culture's pattern actually references are checked, the same list
+    /// <see cref="ShouldHaveNoUnresolvedTags"/> reads. An action is free to set a tag its letter never
+    /// prints — <c>profile_delete</c> is handed a <c>TrulyYours</c> and the payment warnings an
+    /// <c>OrangeButton</c> that their patterns do not mention — and a value that is never substituted
+    /// has nothing to say about how markup survives rendering.
+    /// </summary>
+    public static void ShouldRenderMarkupTags(this RenderedLetter letter, List<ITagValue> tags)
+    {
+        foreach (var tag in tags)
+        {
+            if (tag.Value is not string value || !value.Contains('<'))
+            {
+                continue;
+            }
+
+            if (!letter.ReferencedTags.Contains(tag.Tag))
+            {
+                continue;
+            }
+
+            // A value spanning several lines is wrapped line by line before the styler runs, so it has no
+            // single verbatim form to look for. None of the markup tags is one today.
+            if (value.Contains('\n') || value.Contains('\r'))
+            {
+                continue;
+            }
+
+            foreach (var fragment in _tagReference.Split(value))
+            {
+                if (!fragment.Contains('<'))
+                {
+                    continue;
+                }
+
+                letter.Body.Should().Contain(fragment,
+                    $"tag '{tag.Tag}' carries markup the letter is built out of; escaped, the reader is "
+                    + "shown the HTML instead of what it renders");
+            }
+        }
     }
 
     /// <summary>

@@ -39,14 +39,16 @@ namespace ASC.People.ApiModels.RequestDto;
 public class NecessaryReassignDto
 {
     /// <summary>
-    /// The user ID.
+    /// The ID of the user whose rooms and shared files are checked.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// The expected user type.
+    /// The type the user is about to be changed to, which decides what counts as data that has to be reassigned:
+    /// `RoomAdmin`, `DocSpaceAdmin` and `User` are checked for owned rooms only, while `Guest` is also checked for
+    /// files that are still shared. The default is `All`, which checks owned rooms only.
     /// </summary>
-    /// <example>1</example>
+    /// <example>RoomAdmin</example>
     public EmployeeType Type { get; set; }
 }

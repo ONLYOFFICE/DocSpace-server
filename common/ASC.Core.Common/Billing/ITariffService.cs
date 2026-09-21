@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -55,7 +55,7 @@ public interface ITariffService
     bool IsConfigured();
     Task<CustomerInfo> GetCustomerInfoAsync(int tenantId, bool refresh = false);
     Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, Dictionary<string, string> metadata = null, bool waitForChanges = false);
-    Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null);
+    Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null, bool allowTopUp = true);
 
     Task<Balance> GetCustomerBalanceAsync(int tenantId, bool refresh = false);
     Task<Session> OpenCustomerSessionAsync(int tenantId, string serviceName, string externalRef, int quantity, int duration);
@@ -67,6 +67,7 @@ public interface ITariffService
     Task<UsageReport> GetCustomerServiceUsageAsync(int tenantId, UsageFilter filter);
     Task<List<Currency>> GetAllAccountingCurrenciesAsync();
     List<string> GetSupportedAccountingCurrencies();
+    Task<List<ServicePriceInfo>> GetAccountingServicePricesAsync(string serviceName, bool active = false);
 
     Task<bool> IsFreeTariffAsync(Tariff tariff);
 }

@@ -106,6 +106,22 @@ public class McpServersStorage(
         return result;
     }
 
+    public async Task<ScopedValues<List<McpServer>>> ReadByScopesAsync(int tenantId, int? firstEntryId, int? secondEntryId)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        var global = new List<McpServer>();
+        var byEntry = ScopedValues.CreateEntryBuckets(firstEntryId, secondEntryId, () => new List<McpServer>());
+
+        await foreach (var entity in context.GetAllMcpServersByScopesAsync(tenantId, firstEntryId, secondEntryId))
+        {
+            var target = entity.EntryId.HasValue ? byEntry[entity.EntryId.Value] : global;
+            target.Add(await ToDomainAsync(entity));
+        }
+
+        return new ScopedValues<List<McpServer>>(global, byEntry);
+    }
+
     public async Task<bool> UpdateAsync(int tenantId, string name, string config, int? entryId = null)
     {
         var encryptedConfig = await EncryptConfigAsync(config);

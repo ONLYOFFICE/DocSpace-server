@@ -96,7 +96,7 @@ public class RoomGroupOwnCapabilityTests(
         (await _roomGroupsApi.GetRoomGroupInfoAsync(created.Id, cancellationToken: TestContext.Current.CancellationToken)).Response.Icon.Id.Should().Be("heart");
 
         // list — the group is visible in the role's own listing.
-        var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
         list.Select(g => g.Id).Should().Contain(created.Id);
 
         // delete — then gone.
@@ -161,7 +161,7 @@ public class RoomGroupOwnCapabilityTests(
         }
 
         // Assert — nothing is created in the caller's listing.
-        var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
         list.Select(g => g.Name).Should().NotContain($"{role} No Access");
     }
 

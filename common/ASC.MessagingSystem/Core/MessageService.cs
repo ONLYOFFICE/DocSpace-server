@@ -311,6 +311,22 @@ public class MessageService(
         return await Sender.SendAsync(message);
     }
 
+    public async Task SendAsync(MessageUserData userData, MessageAction action, string ip, string browser, string platform, params string[] description)
+    {
+        if (Sender == null)
+        {
+            return;
+        }
+
+        var message = messageFactory.Create(userData, action, ip, browser, platform, description);
+        if (!messagePolicy.Check(message))
+        {
+            return;
+        }
+
+        await Sender.SendAsync(message);
+    }
+
     private static bool TryAddNotificationParam(MessageAction action, Guid userId, out string parameter)
     {
         return TryAddNotificationParam(action, [userId], out parameter);

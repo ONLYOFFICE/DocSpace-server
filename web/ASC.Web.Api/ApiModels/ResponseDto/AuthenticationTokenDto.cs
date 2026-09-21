@@ -34,48 +34,59 @@
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
-/// The authentication token parameters.
+/// The outcome of a sign-in attempt: either the authentication token, or the second factor still to be passed.
 /// </summary>
 public class AuthenticationTokenDto
 {
     /// <summary>
-    /// The authentication token.
+    /// The token to put in the `Authorization` header of later calls. It is empty whenever a second factor is
+    /// still outstanding, which is what `sms` or `tfa` then says; the same token is also set as a portal cookie by
+    /// the call that issued it, so a browser client does not have to carry it itself.
     /// </summary>
     /// <example>abcde12345</example>
     public string Token { get; set; }
 
     /// <summary>
-    /// The token expiration time.
+    /// When the token stops being accepted. It stays at its zero value when `session=true` tied the token to the
+    /// browser session instead of to a fixed moment. On the two operations that only send an SMS it carries a
+    /// different meaning: there is no token, and this is the moment the code that was just sent expires.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     public DateTime Expires { get; set; }
 
     /// <summary>
-    /// Specifies if the authentication code is sent by SMS or not.
+    /// Whether an SMS code is the second factor in play. Next to an empty `token` it means the code has to be sent
+    /// to `POST api/2.0/authentication/{code}` before a token is issued; next to a filled `token` it means the
+    /// code just accepted was an SMS one.
     /// </summary>
     /// <example>true</example>
     public bool Sms { get; set; }
 
     /// <summary>
-    /// The phone number.
+    /// The stored phone number with its middle digits masked, filled in only while `sms` is set and a number is
+    /// already activated for the user. It is there to be shown to the person signing in, not to be sent back.
     /// </summary>
     /// <example>+1***1234</example>
     public string PhoneNoise { get; set; }
 
     /// <summary>
-    /// Specifies if the two-factor application is used or not.
+    /// Whether an authenticator app is the second factor in play, with the same two readings as `sms`.
     /// </summary>
     /// <example>true</example>
     public bool Tfa { get; set; }
 
     /// <summary>
-    /// The two-factor authentication key.
+    /// The secret to enrol in an authenticator app, in the manual-entry form. It is filled in only while `tfa` is
+    /// set and the app has not been connected yet, which is the one moment the secret is handed out; once the app
+    /// is connected it stays empty. `GET api/2.0/settings/tfaapp/setup` returns the same secret with a QR code.
     /// </summary>
     /// <example>JBSWY3DPEHPK3PXP</example>
     public string TfaKey { get; set; }
 
     /// <summary>
-    /// The confirmation email URL.
+    /// The confirmation link the client has to open to get past the second factor. It points at phone activation
+    /// while no number is activated, at authenticator-app activation while the app is not connected, and at the
+    /// plain code prompt once either is in place. It is empty in an answer that already carries a token.
     /// </summary>
     /// <example>https://example.com/confirm?token=abc123</example>
     [Url]
