@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,24 +31,9 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Core.Common.Notify.Jabber;
-
-public class MessageClass : IComparable<MessageClass>
+namespace ASC.Core.Common.Log;
+internal static partial class NotifySenderLogger
 {
-    [JsonPropertyName("i")]
-    public int Id { get; set; }
-
-    [JsonPropertyName("u")]
-    public string UserName { get; set; }
-
-    [JsonPropertyName("t")]
-    public string Text { get; set; }
-
-    [JsonPropertyName("d")]
-    public DateTime DateTime { get; set; }
-
-    public int CompareTo(MessageClass other)
-    {
-        return Id.CompareTo(other.Id);
-    }
+    [LoggerMessage(LogLevel.Debug, "Unexpected error")]
+    public static partial void ErrorUnexpected(this ILogger logger, Exception exception);
 }
