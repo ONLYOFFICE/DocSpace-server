@@ -39,6 +39,8 @@ public static class AiServerServiceExtensions
     {
         services.AddBaseDbContextPool<FilesDbContext>();
         services.RegisterQuotaFeature();
+        services.AddBaseDbContextPool<LegacyAiDbContext>();
+        services.AddStartupTask<LegacyAiProvidersMigrationStartupTask>();
 
         return services;
     }

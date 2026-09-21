@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -30,24 +30,25 @@
 // Public License v3.
 //
 // SPDX-License-Identifier: AGPL-3.0-only
+namespace ASC.AI.Migration;
 
-namespace ASC.Files.Core.EF;
-
-public record ChatParameters
+/// <summary>
+/// Read-only view of the pre-ASC.NewAi provider tables (`ai_providers`, `ai_providers_default`,
+/// `ai_model_settings`). Exists only for <see cref="LegacyAiProvidersMigrator"/>; the entities are
+/// otherwise registered in MigrationContext alone so that the tables survive.
+/// </summary>
+public partial class LegacyAiDbContext(DbContextOptions<LegacyAiDbContext> options) : BaseDbContext(options)
 {
-    public string ModelId { get; init; }
-    public string Prompt { get; init; }
-}
+    public DbSet<DbAiProvider> Providers { get; set; }
+    public DbSet<DbDefaultAiProvider> DefaultProviders { get; set; }
+    public DbSet<DbAiModelSettings> ModelSettings { get; set; }
 
-public record AiAgentChatBinding(int RoomId, int ChatProviderId, string ModelId);
-
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class ChatParametersMapper
-{
-    [MapProperty(nameof(DbRoomChatSettings.ChatProviderId), nameof(ChatSettings.ProviderId))]
-    [MapProperty([nameof(DbRoomChatSettings.ChatParameters), nameof(ChatParameters.ModelId)], [nameof(ChatSettings.ModelId)])]
-    [MapProperty([nameof(DbRoomChatSettings.ChatParameters), nameof(ChatParameters.Prompt)], [nameof(ChatSettings.Prompt)])]
-    public static partial ChatSettings Map(this DbRoomChatSettings source);
-
-    public static partial ChatParameters Map(this ChatSettings source);
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        ModelBuilderWrapper.From(modelBuilder, Database)
+            .AddDbTenant()
+            .AddDbAiProviders()
+            .AddDbDefaultAiProviders()
+            .AddDbAiModelSettings();
+    }
 }

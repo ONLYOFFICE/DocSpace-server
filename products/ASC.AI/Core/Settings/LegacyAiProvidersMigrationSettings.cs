@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,23 +31,15 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Core.EF;
+namespace ASC.AI.Core.Settings;
 
-public record ChatParameters
+public record LegacyAiProvidersMigrationSettings : ISettings<LegacyAiProvidersMigrationSettings>
 {
-    public string ModelId { get; init; }
-    public string Prompt { get; init; }
-}
+    public static Guid ID { get; } = new("7C1E9A2B-4F3D-4B8E-9A6C-2D5F8E1B3C7A");
 
-public record AiAgentChatBinding(int RoomId, int ChatProviderId, string ModelId);
+    public bool Completed { get; init; }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class ChatParametersMapper
-{
-    [MapProperty(nameof(DbRoomChatSettings.ChatProviderId), nameof(ChatSettings.ProviderId))]
-    [MapProperty([nameof(DbRoomChatSettings.ChatParameters), nameof(ChatParameters.ModelId)], [nameof(ChatSettings.ModelId)])]
-    [MapProperty([nameof(DbRoomChatSettings.ChatParameters), nameof(ChatParameters.Prompt)], [nameof(ChatSettings.Prompt)])]
-    public static partial ChatSettings Map(this DbRoomChatSettings source);
+    public DateTime LastModified { get; set; }
 
-    public static partial ChatParameters Map(this ChatSettings source);
+    public LegacyAiProvidersMigrationSettings GetDefault() => new();
 }
