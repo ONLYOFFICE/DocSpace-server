@@ -39,8 +39,10 @@ namespace ASC.Files.Tests.ApiFactories;
 public class AspireAppFixture : AspireHostFixture<PortalClients>
 {
     // Web.Studio is not called by any test here - it is started because it hosts the only subscriber
-    // that persists audit events, which the file and folder history suites read back.
-    protected override IEnumerable<string> Resources => [ResourceNames.Files, ResourceNames.People, ResourceNames.WebStudio];
+    // that persists audit events, which the file and folder history suites read back. Nextcloud is
+    // the storage the third-party suites connect to rooms.
+    protected override IEnumerable<string> Resources =>
+        [ResourceNames.Files, ResourceNames.People, ResourceNames.WebStudio, ResourceNames.Nextcloud];
 
     protected override PortalClients CreateClients(PortalContext context)
     {

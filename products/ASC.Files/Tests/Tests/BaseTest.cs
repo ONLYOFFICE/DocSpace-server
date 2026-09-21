@@ -139,7 +139,7 @@ public class BaseTest(
         Timing.Write("setup.total", setupSw.ElapsedMilliseconds);
     }
 
-    public ValueTask DisposeAsync()
+    public virtual ValueTask DisposeAsync()
     {
         // Each test owns its portal and clients; nothing is shared, so just dispose the clients.
         _clients.Dispose();

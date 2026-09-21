@@ -288,6 +288,30 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
+    /// <summary>
+    /// A Nextcloud with one ready account, for the tests that connect a WebDAV storage to a room.
+    /// It installs itself on first start from the environment below, and the mounted config turns
+    /// off the brute-force and rate-limit protection: the credential tests send wrong passwords on
+    /// purpose, and the throttling those trigger would otherwise outlast the portal's third-party
+    /// request timeout.
+    /// </summary>
+    public ConnectionStringManager AddNextcloud()
+    {
+        var configPath = Path.Combine(builder.AppHostDirectory, "Dockerfiles", "nextcloud", "docspace.config.php");
+
+        builder.AddContainer(Constants.NextcloudContainer, "nextcloud", Constants.NextcloudVersion)
+            .WithHttpEndpoint(targetPort: 80, name: "http")
+            .WithEnvironment("NEXTCLOUD_ADMIN_USER", Constants.NextcloudUser)
+            .WithEnvironment("NEXTCLOUD_ADMIN_PASSWORD", Constants.NextcloudPassword)
+            .WithEnvironment("SQLITE_DATABASE", "nextcloud")
+            .WithEnvironment("NEXTCLOUD_TRUSTED_DOMAINS", $"localhost 127.0.0.1 {Constants.HostDockerInternal}")
+            // The image copies /usr/src/nextcloud/config/*.config.php into the live config on install.
+            .WithBindMount(configPath, "/usr/src/nextcloud/config/docspace.config.php", isReadOnly: true)
+            .WithHttpHealthCheck("/status.php");
+
+        return this;
+    }
+
     public ConnectionStringManager AddMailPit()
     {
         // --max: MailPit keeps 500 messages by default and prunes every minute. A full letter-test

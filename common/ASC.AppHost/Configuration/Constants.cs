@@ -87,4 +87,11 @@ public static class Constants
 
     public const string IdentityRegistrationContainer = "onlyoffice-identity-registration";
     public const string IdentityAuthorizationContainer = "onlyoffice-identity-authorization";
+
+    // The Nextcloud the integration tests connect as third-party storage. The account is created by
+    // the image on first start (SQLite, no volume), so every run begins with an empty one.
+    public const string NextcloudContainer = "nextcloud";
+    public const string NextcloudVersion = "33-apache";
+    public const string NextcloudUser = "docspace";
+    public const string NextcloudPassword = "docspace-tests";
 }
