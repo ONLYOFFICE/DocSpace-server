@@ -34,7 +34,7 @@
 namespace ASC.Files.Core.EF.Legacy;
 
 /// <summary>
-/// Legacy `ai_chat_message_attachment` row. Schema-only: the pre-ASC.NewAi chat stack is gone and nothing reads this. Registered in MigrationContext so the table survives.
+/// Legacy `ai_chat_message_attachment` row. Schema-only: the pre-ASC.AI.Chat chat stack is gone and nothing reads this. Registered in MigrationContext so the table survives.
 /// </summary>
 public class DbChatMessageAttachment : BaseEntity
 {

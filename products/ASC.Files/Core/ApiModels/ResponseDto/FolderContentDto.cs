@@ -33,55 +33,65 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
- /// <summary>
-/// The folder content information.
+/// <summary>
+/// One page of the contents of a folder or of a section: its entries split into files and folders, the folder itself,
+/// and the counters needed to page through the rest.
 /// </summary>
 public class FolderContentDto<T>
 {
     /// <summary>
-    /// The list of files in the folder.
+    /// The file entries of this page. It is empty when the folder holds no files, when the filters matched none of
+    /// them, and in the sections that list rooms only.
     /// </summary>
     /// <example>[{"id": 10, "title": "document.docx"}]</example>
     public List<FileEntryBaseDto> Files { get; set; }
 
     /// <summary>
-    /// The list of folders in the folder.
+    /// The folder entries of this page. In a section of rooms these entries are the rooms themselves, which is where
+    /// their type, tags, logo and quota are read from.
     /// </summary>
     /// <example>[{"id": 20, "title": "My Folder"}]</example>
     public List<FileEntryBaseDto> Folders { get; set; }
 
     /// <summary>
-    /// The current folder information.
+    /// The folder or section the page was read from, with its own title, type and access rights. It describes the
+    /// container, not the entries, and is filled in even when the page is empty.
     /// </summary>
     /// <example>{"id": 10, "title": "My Documents"}</example>
     public FolderDto<T> Current { get; set; }
 
     /// <summary>
-    /// The folder path.
+    /// The breadcrumbs of the current folder, ordered from the root of the section down to it. Each element carries
+    /// the identifier, the title and the folder and room types, and folders the caller cannot read are left out, so
+    /// the chain can be shorter than the real depth.
     /// </summary>
-    /// <example>{key = "Key", path = "//path//to//folder"}</example>
+    /// <example>[{"id": 1, "title": "Rooms", "folderType": 14}]</example>
     public required object PathParts { get; set; }
 
     /// <summary>
-    /// The folder start index.
+    /// The position of the first entry of this page in the whole result, echoing the requested start index. Add the
+    /// number of entries received to it to ask for the next page.
     /// </summary>
     /// <example>0</example>
     public int StartIndex { get; set; }
 
     /// <summary>
-    /// The number of folder elements.
+    /// How many entries this page carries, files and folders together. A page shorter than the requested size means
+    /// the result is exhausted.
     /// </summary>
     /// <example>4</example>
     public int Count { get; set; }
 
     /// <summary>
-    /// The total number of elements in the folder.
+    /// How many entries matched before paging was applied, across the whole folder. Page until the start index plus
+    /// the entries received reaches it.
     /// </summary>
     /// <example>4</example>
     public required int Total { get; set; }
 
     /// <summary>
-    /// The new element index in the folder.
+    /// How many entries of this folder are marked as new for the caller. It is 0 for every listing when the account
+    /// has switched the new-item badges off, so a zero here does not prove that nothing has changed.
     /// </summary>
     /// <example>0</example>
     public int New { get; set; }

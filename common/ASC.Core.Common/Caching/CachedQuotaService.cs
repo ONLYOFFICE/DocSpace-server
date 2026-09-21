@@ -87,7 +87,7 @@ internal class CachedQuotaService() : IQuotaService
         var q = await _service.SaveTenantQuotaAsync(quota);
 
         var tag = CacheExtention.GetTenantQuotaTag((await _geolocationHelper.GetIPGeolocationFromHttpContextAsync()).Key);
-        await _cache.RemoveByTagAsync(tag);
+        await _cache.RemoveByTagAndNotifyAsync(tag);
 
         return q;
     }
@@ -100,14 +100,12 @@ internal class CachedQuotaService() : IQuotaService
     public async Task SetTenantQuotaRowAsync(TenantQuotaRow row, bool exchange)
     {
         await _service.SetTenantQuotaRowAsync(row, exchange);
-        var tag = CacheExtention.GetTenantQuotaRowTag(row.TenantId, row.Path);
-        await _cache.RemoveByTagAsync(tag);
 
-        if (row.UserId != Guid.Empty)
-        {
-            tag = CacheExtention.GetTenantQuotaRowTag(row.TenantId, row.Path, row.UserId);
-            await _cache.RemoveByTagAsync(tag);
-        }
+        // One tenant-wide tag on every cached row list, whatever it contained. Tagging lists by the paths of
+        // their rows left a list cached while the tenant had no rows yet (fresh portal) with no tags at all,
+        // so no invalidation could ever reach it — that only went unnoticed while factory fills still
+        // broadcast backplane evictions to the other services.
+        await _cache.RemoveByTagAndNotifyAsync(CacheExtention.GetTenantQuotaRowsTag(row.TenantId));
     }
 
     public async Task<IEnumerable<TenantQuotaRow>> FindTenantQuotaRowsAsync(int tenantId)
@@ -117,7 +115,7 @@ internal class CachedQuotaService() : IQuotaService
         var result = await _cache.GetOrSetAsync<IEnumerable<TenantQuotaRow>>(key, async (ctx, token) =>
         {
             var result = await _service.FindTenantQuotaRowsAsync(tenantId);
-            ctx.Tags = result.Select(r => CacheExtention.GetTenantQuotaRowTag(tenantId, r.Path)).ToArray();
+            ctx.Tags = [CacheExtention.GetTenantQuotaRowsTag(tenantId)];
             return ctx.Modified(result);
         }, _cacheExpiration);
 
@@ -131,7 +129,7 @@ internal class CachedQuotaService() : IQuotaService
         var result = await _cache.GetOrSetAsync<IEnumerable<TenantQuotaRow>>(key, async (ctx, token) =>
         {
             var result = await _service.FindUserQuotaRowsAsync(tenantId, userId);
-            ctx.Tags = result.Select(r => CacheExtention.GetTenantQuotaRowTag(tenantId, r.Path, userId)).ToArray();
+            ctx.Tags = [CacheExtention.GetTenantQuotaRowsTag(tenantId)];
             return ctx.Modified(result);
         }, _cacheExpiration);
 

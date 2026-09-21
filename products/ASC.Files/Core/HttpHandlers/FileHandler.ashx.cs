@@ -1532,9 +1532,9 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             };
             fileData = JsonSerializer.Deserialize<TrackerData>(body, options);
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            logger.ErrorDocServiceTrackReadBody(e);
+            logger.WarningDocServiceTrackBodyAborted();
             throw new HttpException(StatusCodes.Status499ClientClosedRequest, "Client closed the connection prematurely");
         }
         catch (JsonException e)

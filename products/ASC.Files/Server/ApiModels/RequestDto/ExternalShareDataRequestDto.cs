@@ -34,28 +34,33 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for getting external shared data.
+/// The token of an external share link and, optionally, an entry inside what it points at.
 /// </summary>
 public class ExternalShareDataRequestDto
 {
     /// <summary>
-    /// The unique key of the external shared data.
+    /// The token of the external share link, taken verbatim from the `requestToken` of a link returned by the link
+    /// operations of an entry, such as `GET api/2.0/files/rooms/{id}/link`. It is an opaque URL-safe string that
+    /// carries the link's own identifier, so it cannot be assembled by hand.
     /// </summary>
-    /// <example>doc_key_123</example>
+    /// <example>q7Ry8cQ1lZ0dP3sK2mXfA9tBnV6hJ4uE8wCz5oLg</example>
     [FromRoute(Name = "key")]
     public required string Key { get; set; }
 
     /// <summary>
-    /// The unique document identifier.
+    /// A file inside the room the link points at, echoed back in the answer's entity fields so a client can show what
+    /// was opened. The value is ignored when the file does not sit under the link's target, and passing it together
+    /// with a folder has no effect - the file wins.
     /// </summary>
-    /// <example>1</example>
+    /// <example>9</example>
     [FromQuery(Name = "fileId")]
     public string FileId { get; set; } = null;
 
     /// <summary>
-    /// The unique folder identifier.
+    /// A folder inside the room the link points at, echoed back in the answer's entity fields. It is ignored when the
+    /// folder does not sit under the link's target, and when a file is passed as well.
     /// </summary>
-    /// <example>1</example>
+    /// <example>3</example>
     [FromQuery(Name = "folderId")]
     public string FolderId { get; set; } = null;
 }

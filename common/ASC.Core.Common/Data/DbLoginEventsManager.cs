@@ -54,7 +54,7 @@ public class LoginEventsCache(IFusionCacheProvider cacheProvider)
     {
         foreach (var id in ids)
         {
-            await _cache.RemoveAsync(BuildKey(id));
+            await _cache.RemoveAndNotifyAsync(BuildKey(id));
         }
     }
 

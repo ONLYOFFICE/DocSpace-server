@@ -1033,13 +1033,13 @@ public class FileSecurity(
 
         await foreach (var entry in entries)
         {
-            if (entry.Security != null && entry.SecurityByUsers != null && entry.SecurityByUsers.TryGetValue(userId, out _))
+            if (entry.Security != null && entry.SecurityByUsers.TryGetValue(userId, out _))
             {
                 yield return entry;
                 continue;
             }
 
-            var security = new Dictionary<FilesSecurityActions, bool>();
+            var security = new ConcurrentDictionary<FilesSecurityActions, bool>();
             var parentFolders = await GetFileParentFolders(entry.ParentId);
             var shares = await PreloadEntrySharesAsync(entry, userId, isDocSpaceAdmin);
 
@@ -1048,11 +1048,7 @@ public class FileSecurity(
                 security[action] = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
             }
 
-            entry.Security = security;
-
-            entry.SecurityByUsers ??= new Dictionary<Guid, IDictionary<FilesSecurityActions, bool>>();
-
-            entry.SecurityByUsers.TryAdd(userId, security);
+            entry.Security = entry.SecurityByUsers.GetOrAdd(userId, security);
 
             yield return entry;
         }
@@ -1099,7 +1095,7 @@ public class FileSecurity(
             return false;
         }
 
-        if (entry.SecurityByUsers != null && entry.SecurityByUsers.TryGetValue(userId, out var sec) && sec.TryGetValue(action, out var result))
+        if (entry.SecurityByUsers.TryGetValue(userId, out var sec) && sec.TryGetValue(action, out var result))
         {
             return result;
         }
@@ -1657,9 +1653,26 @@ public class FileSecurity(
                         }
                     }
 
-                    if (action is FilesSecurityActions.Duplicate or FilesSecurityActions.Copy && isRoom && !folder.SettingsDenyDownload)
+                    if (action is FilesSecurityActions.Duplicate or FilesSecurityActions.Copy)
                     {
+                        // an administrator may duplicate a whole room, so they must be able to copy
+                        // its content as well - otherwise the recursive copy of the room stops on the
+                        // first file inside it. The gate is the same as for Download: whichever room
+                        // the entry belongs to must not deny downloading.
+                        if (isRoom)
+                        {
+                            if (!folder.SettingsDenyDownload)
+                            {
                         return true;
+                    }
+                        }
+                        else
+                        {
+                            if (room is not { SettingsDenyDownload: true })
+                            {
+                                return true;
+                            }
+                        }
                     }
 
                     switch (action)

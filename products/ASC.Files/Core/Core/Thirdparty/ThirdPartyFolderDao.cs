@@ -121,7 +121,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             rooms = rooms.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
-        var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         rooms = FilterByTags(rooms, withoutTags, tags, filesDbContext);
 
         await foreach (var room in rooms)

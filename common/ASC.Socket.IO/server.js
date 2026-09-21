@@ -97,7 +97,14 @@ app.use(logger("tiny", {
     return req.url.endsWith("/health"); 
   }
 }));
-app.use(session);
+
+// The internal /controller API is called by the backend without cookies. With saveUninitialized every
+// such call created a brand new session and persisted it: a Redis round trip added to the response time
+// of every notification, plus an orphan session key left behind. Sessions are only meaningful for the
+// socket.io handshake, which goes through sharedsession below.
+app.use((req, res, next) =>
+  req.path.startsWith("/controller") ? next() : session(req, res, next)
+);
 
 const httpServer = createServer(app);
 
@@ -153,6 +160,12 @@ const filesHub = require("./app/hubs/files.js")(io);
 
 app.use("/controller", require("./app/controllers")(filesHub));
 app.use("/", require("./app/controllers/healthCheck.js") ());
+
+// Node closes idle keep-alive connections after 5s by default, which is shorter than the connection
+// idle timeout of the backend HTTP pool: requests kept landing on sockets that were already going away.
+// headersTimeout must stay above keepAliveTimeout.
+httpServer.keepAliveTimeout = 65000;
+httpServer.headersTimeout = 66000;
 
 httpServer.listen(port, hostname, () => winston.info(`Server started on port: ${port}`));
 
