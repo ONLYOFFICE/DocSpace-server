@@ -190,8 +190,7 @@ public class FileDto<T> : FileEntryDto<T>
     public FormFillingStatus FormFillingStatus { get; set; } = FormFillingStatus.None;
 
     /// <summary>
-    /// Whether the PDF is a fillable form rather than a plain document. When the stored classification does not say,
-    /// the portal opens the file to find out, so the answer is reliable for a PDF and null for anything else.
+    /// Whether the file is a PDF, and so offered as a fillable form. It is null for any other file type.
     /// </summary>
     /// <example>true</example>
     public bool? IsForm { get; set; }
