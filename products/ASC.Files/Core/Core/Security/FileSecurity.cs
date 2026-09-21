@@ -1180,8 +1180,7 @@ public class FileSecurity(
 
         var room = parentFolders.FirstOrDefault(r => r.IsRoom);
 
-        if (file != null && action == FilesSecurityActions.Edit && file.Category == (int)FilterType.Pdf && file.IsCompletedForm
-            && room is not { FolderType: FolderType.VirtualDataRoom })
+        if (file is { IsCompletedForm: true } && action == FilesSecurityActions.Edit)
         {
             return false;
         }
@@ -1189,15 +1188,6 @@ public class FileSecurity(
         if (room is { FolderType: FolderType.VirtualDataRoom })
         {
             var hasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
-
-            if (file is { IsCompletedForm: true } && action == FilesSecurityActions.Edit && !hasFullAccess)
-            {
-                var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
-                if (shareRecord is not { Share: FileShare.ContentCreator or FileShare.RoomManager or FileShare.Editing })
-                {
-                    return false;
-                }
-            }
 
             if (file != null && !hasFullAccess && !file.IsPdf)
             {
