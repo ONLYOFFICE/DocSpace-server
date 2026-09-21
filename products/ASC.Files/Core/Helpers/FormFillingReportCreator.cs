@@ -638,7 +638,7 @@ public class FormFillingReportCreator(
     }
 
     private static bool ParseCheckbox(string value) =>
-        bool.TryParse(value, out var b) ? b : !_checkboxOffStates.Contains(value.Trim());
+        bool.TryParse(value, out var b) ? b : !string.IsNullOrWhiteSpace(value) && !_checkboxOffStates.Contains(value.Trim());
 
     private static object NormalizeEnumValue(string value, List<string> options)
     {
