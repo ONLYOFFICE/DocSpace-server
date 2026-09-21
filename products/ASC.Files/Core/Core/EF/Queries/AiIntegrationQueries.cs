@@ -64,6 +64,12 @@ public partial class FilesDbContext
     {
         return AiIntegrationQueries.DeleteAttachmentsByFolderIdsAsync(this, tenantId, folderIds);
     }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<AiAgentChatBinding> AiAgentChatBindingsAsync(int tenantId)
+    {
+        return AiIntegrationQueries.AiAgentChatBindingsAsync(this, tenantId);
+    }
 }
 
 static file class AiIntegrationQueries
@@ -97,4 +103,13 @@ static file class AiIntegrationQueries
             ctx.Attachments
                 .Where(x => x.TenantId == tenantId && x.EntryId != null && folderIds.Contains(x.EntryId.Value))
                 .ExecuteDelete());
+
+    public static readonly Func<FilesDbContext, int, IAsyncEnumerable<AiAgentChatBinding>> AiAgentChatBindingsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId) =>
+            ctx.Folders
+                .Where(f => f.TenantId == tenantId && f.FolderType == FolderType.AiRoom)
+                .Join(ctx.Set<DbRoomChatSettings>(),
+                    f => new { f.TenantId, RoomId = f.Id },
+                    s => new { s.TenantId, s.RoomId },
+                    (f, s) => new AiAgentChatBinding(s.RoomId, s.ChatProviderId, s.ChatParameters == null ? null : s.ChatParameters.ModelId)));
 }
