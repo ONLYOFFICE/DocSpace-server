@@ -53,7 +53,7 @@ const TOOL_NAME = "analyze_form";
 const SERVER_TYPE = FORM_ANALYSIS_TYPE;
 // Runaway-loop guard, not the normal stop (the model ends by answering without a tool call);
 // 10 matches common agent defaults (LangChain 15, OpenAI Agents 10).
-const MAX_ROUNDS = 10;
+const MAX_ROUNDS = 20;
 
 const ANALYZE_FORM_TOOL: TMCPItem = {
   name: TOOL_NAME,
