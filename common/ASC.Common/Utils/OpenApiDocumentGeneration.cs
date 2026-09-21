@@ -49,22 +49,33 @@ public static class OpenApiDocumentGeneration
     private const string OverrideVariable = "ASC_OPENAPI_DOCUMENT_GENERATION";
 
     /// <summary>
+    /// True when the mode was turned on by <c>ASC_OPENAPI_DOCUMENT_GENERATION</c> rather than detected.
+    /// </summary>
+    /// <remarks>
+    /// A real service must never run this way - it would have no background services, no warmup and no Redis -
+    /// so the host warns about it at startup instead of letting the variable take effect unnoticed.
+    /// </remarks>
+    public static bool ForcedByEnvironmentVariable { get; } =
+        string.Equals(Environment.GetEnvironmentVariable(OverrideVariable), "true", StringComparison.OrdinalIgnoreCase);
+
+    /// <summary>
     /// True when the current process only builds the service graph to emit OpenAPI documents.
     /// </summary>
     /// <remarks>
     /// The entry assembly name belongs to a third-party tool and may change when the package is upgraded.
     /// Setting <c>ASC_OPENAPI_DOCUMENT_GENERATION=true</c> forces the same mode, which is the escape hatch when
     /// a future generator stops being recognised (the symptom is the build failing on the 2-minute timeout again).
+    /// Declared after the property it reads: static initializers run in declaration order.
     /// </remarks>
-    public static bool IsRunning { get; } = Resolve();
+    public static bool IsRunning { get; } = ForcedByEnvironmentVariable || IsStartedByGenerator();
 
-    private static bool Resolve()
+    /// <summary>
+    /// The name of the variable that forces the mode, for diagnostics.
+    /// </summary>
+    public static string OverrideVariableName => OverrideVariable;
+
+    private static bool IsStartedByGenerator()
     {
-        if (string.Equals(Environment.GetEnvironmentVariable(OverrideVariable), "true", StringComparison.OrdinalIgnoreCase))
-        {
-            return true;
-        }
-
         var entryAssemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
 
         return entryAssemblyName != null && entryAssemblyName.StartsWith(GeneratorAssemblyPrefix, StringComparison.OrdinalIgnoreCase);
