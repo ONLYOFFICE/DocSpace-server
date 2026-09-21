@@ -2079,8 +2079,8 @@ public class FileStorageService //: IFileStorageService
 
         if (room is { FolderType: FolderType.PublicRoom })
         {
-            // External link default: all PDFs need Editing to enable form filling (IsPdf, not IsForm)
-            await SetExternalLinkAsync(file, Guid.NewGuid(), file.IsPdf ? FileShare.Editing : FileShare.Read, title ?? FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+            // An anonymous public link starts read-only even for a form; raising it to Editing is a deliberate act
+            await SetExternalLinkAsync(file, Guid.NewGuid(), FileShare.Read, title ?? FilesCommonResource.DefaultExternalLinkTitle, primary: true);
         }
 
         return file;
@@ -4264,9 +4264,13 @@ public class FileStorageService //: IFileStorageService
 
             share = entry switch
             {
+                // Any PDF is fillable, so fill-oriented rooms start the link at FillForms.
                 File<T> { IsPdf: true, RootFolderType: FolderType.VirtualRooms, ParentRoomType: FolderType.FillingFormsRoom or FolderType.VirtualDataRoom } => FileShare.FillForms,
-                File<T> { IsPdf: true, RootFolderType: FolderType.USER } when share != FileShare.Editing && share != FileShare.FillForms => FileShare.Editing,
-                File<T> { IsPdf: true, RootFolderType: not FolderType.USER } => FileShare.Editing,
+                // A public room hands its link to anonymous visitors, so a PDF never starts above Read
+                // there - not even a form. Raising it stays a deliberate act through the link settings.
+                File<T> { IsPdf: true, ParentRoomType: FolderType.PublicRoom } => FileShare.Read,
+                File<T> { IsForm: true, RootFolderType: FolderType.USER } when share != FileShare.Editing && share != FileShare.FillForms => FileShare.Editing,
+                File<T> { IsForm: true, RootFolderType: not FolderType.USER } => FileShare.Editing,
                 _ => share
             };
 
@@ -6288,10 +6292,10 @@ public class FileStorageService //: IFileStorageService
         {
             linkId = Guid.NewGuid();
 
-            // External link default: all PDFs need Editing to enable form filling (IsPdf, not IsForm)
+            // An anonymous public link starts read-only even for a form; raising it to Editing is a deliberate act
             var (defaultTitle, defaultAccess) = folder.FolderType switch
             {
-                FolderType.PublicRoom => (FilesCommonResource.DefaultExternalLinkTitle, entry is File<T> { IsPdf: true } ? FileShare.Editing : FileShare.Read),
+                FolderType.PublicRoom => (FilesCommonResource.DefaultExternalLinkTitle, FileShare.Read),
                 FolderType.FillingFormsRoom => (FilesCommonResource.FillOutExternalLinkTitle, FileShare.FillForms),
                 _ => throw new InvalidOperationException()
             };
