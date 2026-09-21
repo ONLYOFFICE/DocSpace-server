@@ -45,10 +45,28 @@ namespace ASC.Common.Utils;
 /// </remarks>
 public static class OpenApiDocumentGeneration
 {
-    private const string GeneratorAssemblyName = "GetDocument.Insider";
+    private const string GeneratorAssemblyPrefix = "GetDocument";
+    private const string OverrideVariable = "ASC_OPENAPI_DOCUMENT_GENERATION";
 
     /// <summary>
     /// True when the current process only builds the service graph to emit OpenAPI documents.
     /// </summary>
-    public static bool IsRunning { get; } = Assembly.GetEntryAssembly()?.GetName().Name == GeneratorAssemblyName;
+    /// <remarks>
+    /// The entry assembly name belongs to a third-party tool and may change when the package is upgraded.
+    /// Setting <c>ASC_OPENAPI_DOCUMENT_GENERATION=true</c> forces the same mode, which is the escape hatch when
+    /// a future generator stops being recognised (the symptom is the build failing on the 2-minute timeout again).
+    /// </remarks>
+    public static bool IsRunning { get; } = Resolve();
+
+    private static bool Resolve()
+    {
+        if (string.Equals(Environment.GetEnvironmentVariable(OverrideVariable), "true", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        var entryAssemblyName = Assembly.GetEntryAssembly()?.GetName().Name;
+
+        return entryAssemblyName != null && entryAssemblyName.StartsWith(GeneratorAssemblyPrefix, StringComparison.OrdinalIgnoreCase);
+    }
 }

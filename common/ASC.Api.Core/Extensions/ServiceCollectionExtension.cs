@@ -66,6 +66,14 @@ public static class ServiceCollectionExtension
     {
         public IServiceCollection AddCacheNotify(IConfiguration configuration)
         {
+            if (OpenApiDocumentGeneration.IsRunning)
+            {
+                // Nothing publishes or consumes notifications while a document is generated, and no broker is
+                // guaranteed to be reachable on a build agent. Short-circuiting here rather than gating
+                // IsRabbitMqEnabled keeps the ActiveMQ branch below - which has no such switch - out of the way too.
+                return services.AddSingleton(typeof(ICacheNotify<>), typeof(MemoryCacheNotify<>));
+            }
+
             var redisConfiguration = configuration.GetSection("Redis").Get<RedisConfiguration>();
             var kafkaConfiguration = configuration.GetSection("kafka").Get<KafkaSettings>();
             var rabbitMqConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
@@ -285,6 +293,13 @@ public static class ServiceCollectionExtension
         public IServiceCollection AddEventBus(IConfiguration configuration)
         {
             services.AddSingleton<IEventBusSubscriptionsManager, InMemoryEventBusSubscriptionsManager>();
+
+            if (OpenApiDocumentGeneration.IsRunning)
+            {
+                // Same reasoning as in AddCacheNotify: no integration event crosses the process while a document
+                // is generated, so never hand out a bus that would dial a broker.
+                return services.AddSingleton<IEventBus, EventBusInMemory>();
+            }
 
             var rabbitMqConfiguration = configuration.GetSection("RabbitMQ").Get<RabbitMQSettings>();
             var activeMqConfiguration = configuration.GetSection("ActiveMQ").Get<ActiveMQSettings>();
