@@ -1193,7 +1193,7 @@ public class FileSecurity(
             if (file is { IsCompletedForm: true } && action == FilesSecurityActions.Edit && !hasFullAccess)
             {
                 var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
-                if (shareRecord is not { Share: FileShare.ContentCreator or FileShare.RoomManager } && e.Access is not FileShare.Editing)
+                if (shareRecord is not { Share: FileShare.ContentCreator or FileShare.RoomManager or FileShare.Editing })
                 {
                     return false;
                 }
