@@ -55,8 +55,7 @@ public static class OpenApiDocumentGeneration
     /// A real service must never run this way - it would have no background services, no warmup and no Redis -
     /// so the host warns about it at startup instead of letting the variable take effect unnoticed.
     /// </remarks>
-    public static bool ForcedByEnvironmentVariable { get; } =
-        string.Equals(Environment.GetEnvironmentVariable(OverrideVariable), "true", StringComparison.OrdinalIgnoreCase);
+    public static bool ForcedByEnvironmentVariable { get; } = IsForcedByEnvironmentVariable();
 
     /// <summary>
     /// True when the current process only builds the service graph to emit OpenAPI documents.
@@ -65,14 +64,20 @@ public static class OpenApiDocumentGeneration
     /// The entry assembly name belongs to a third-party tool and may change when the package is upgraded.
     /// Setting <c>ASC_OPENAPI_DOCUMENT_GENERATION=true</c> forces the same mode, which is the escape hatch when
     /// a future generator stops being recognised (the symptom is the build failing on the 2-minute timeout again).
-    /// Declared after the property it reads: static initializers run in declaration order.
     /// </remarks>
-    public static bool IsRunning { get; } = ForcedByEnvironmentVariable || IsStartedByGenerator();
+    public static bool IsRunning { get; } = IsForcedByEnvironmentVariable() || IsStartedByGenerator();
 
     /// <summary>
     /// The name of the variable that forces the mode, for diagnostics.
     /// </summary>
     public static string OverrideVariableName => OverrideVariable;
+
+    // Both properties call this instead of reading each other: a static initializer that reads another one
+    // silently depends on declaration order, and sorting the members would turn the override off without a warning.
+    private static bool IsForcedByEnvironmentVariable()
+    {
+        return string.Equals(Environment.GetEnvironmentVariable(OverrideVariable), "true", StringComparison.OrdinalIgnoreCase);
+    }
 
     private static bool IsStartedByGenerator()
     {
