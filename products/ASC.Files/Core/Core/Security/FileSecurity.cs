@@ -1194,9 +1194,13 @@ public class FileSecurity(
         {
             var hasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
 
-            if (file is { IsCompletedForm: true } && !hasFullAccess && action == FilesSecurityActions.Edit)
+            if (file is { IsCompletedForm: true } && action == FilesSecurityActions.Edit && !hasFullAccess)
             {
-                return false;
+                var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
+                if (shareRecord is not { Share: FileShare.ContentCreator or FileShare.RoomManager } && e.Access is not FileShare.Editing)
+                {
+                    return false;
+                }
             }
 
             if (file != null && !hasFullAccess && !await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
