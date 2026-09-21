@@ -118,7 +118,8 @@ public class TenantLogoManager(
     /// <summary>
     /// Returns the portal top logo (LogoLightSmall) as a self-contained base64 data URI
     /// (e.g. "data:image/svg+xml;base64,..."), for consumers that must embed the image rather than
-    /// reference it by URL. The built-in default logo never changes, so it is cached.
+    /// reference it by URL. The default logo is the same for every portal, so it is cached under a
+    /// key carrying the version of the file it was built from.
     /// </summary>
     public async Task<string> GetTopLogoDataUriAsync(bool dark = false)
     {
@@ -142,28 +143,40 @@ public class TenantLogoManager(
         return await GetDefaultTopLogoDataUriAsync(dark);
     }
 
-    // The default (or partner) logo is portal-independent and does not change, so it is fetched once and cached.
+    // The default (or partner) logo is portal-independent, so it is fetched once and cached for all
+    // of them. The key is the source path itself, which carries everything the bytes depend on: the
+    // version query (the build number, or the ETag of a partner logo), the theme and the regional
+    // variant of the file (web:logo:custom-cultures). Replacing the file changes that path, so the
+    // new logo is picked up at once and the entry built from the old one simply ages out - keyed by
+    // the theme alone, a replacement stayed invisible until the entry expired.
     private async Task<string> GetDefaultTopLogoDataUriAsync(bool dark)
     {
-        var cacheKey = $"toplogodatauri_default_{dark}";
-
-        var cached = await hybridCache.GetOrDefaultAsync<string>(cacheKey);
-        if (!string.IsNullOrEmpty(cached))
-        {
-            return cached;
-        }
-
         try
         {
             var logoPath = await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.LightSmall, dark);
-            var logoUrl = commonLinkUtility.GetFullAbsolutePath(logoPath.Split('?')[0]);
+
+            var queryIndex = logoPath.IndexOf('?');
+            var ext = Path.GetExtension(queryIndex < 0 ? logoPath : logoPath[..queryIndex]).TrimStart('.');
+
+            var cacheKey = $"toplogodatauri_default_{logoPath}";
+
+            var cached = await hybridCache.GetOrDefaultAsync<string>(cacheKey);
+            if (!string.IsNullOrEmpty(cached))
+            {
+                return cached;
+            }
+
+            // The query carries the version of the file - the build number for the built-in logo,
+            // the ETag for a partner one - and is what makes the caches in front of the storage
+            // re-read a replaced file, so the request is made with it rather than without.
+            var logoUrl = commonLinkUtility.GetFullAbsolutePath(logoPath);
 
 #pragma warning disable CA2000
             var httpClient = clientFactory.CreateClient();
 #pragma warning restore CA2000
             var data = await httpClient.GetByteArrayAsync(logoUrl);
 
-            var dataUri = ToDataUri(data, Path.GetExtension(logoUrl).TrimStart('.'));
+            var dataUri = ToDataUri(data, ext);
 
             if (!string.IsNullOrEmpty(dataUri))
             {
