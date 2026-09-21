@@ -2079,6 +2079,7 @@ public class FileStorageService //: IFileStorageService
 
         if (room is { FolderType: FolderType.PublicRoom })
         {
+            // External link default: all PDFs need Editing to enable form filling (IsPdf, not IsForm)
             await SetExternalLinkAsync(file, Guid.NewGuid(), file.IsPdf ? FileShare.Editing : FileShare.Read, title ?? FilesCommonResource.DefaultExternalLinkTitle, primary: true);
         }
 
@@ -6287,6 +6288,7 @@ public class FileStorageService //: IFileStorageService
         {
             linkId = Guid.NewGuid();
 
+            // External link default: all PDFs need Editing to enable form filling (IsPdf, not IsForm)
             var (defaultTitle, defaultAccess) = folder.FolderType switch
             {
                 FolderType.PublicRoom => (FilesCommonResource.DefaultExternalLinkTitle, entry is File<T> { IsPdf: true } ? FileShare.Editing : FileShare.Read),
