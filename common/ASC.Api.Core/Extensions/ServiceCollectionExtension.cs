@@ -47,7 +47,12 @@ public static class ServiceCollectionExtension
 {
     public static bool IsRedisEnabled(IConfiguration configuration)
     {
-        return !string.Equals(configuration["Redis:Enabled"], "false", StringComparison.OrdinalIgnoreCase)
+        // Redis is the only dependency the service graph connects to before the host is built
+        // (GetRedisConnectionMultiplexerAsync). The OpenAPI document generator serves no request and is killed
+        // after 2 minutes, so it must not wait for infrastructure that a build agent may not even have:
+        // pretend Redis is turned off and let every consumer fall back to its in-memory path.
+        return !OpenApiDocumentGeneration.IsRunning
+            && !string.Equals(configuration["Redis:Enabled"], "false", StringComparison.OrdinalIgnoreCase)
             && configuration.GetSection("Redis").Get<RedisConfiguration>() != null;
     }
 
@@ -479,6 +484,25 @@ public static class ServiceCollectionExtension
         public IServiceCollection AddDistributedTaskQueue()
         {
             services.AddSingleton<IDistributedTaskQueueFactory, DefaultDistributedTaskQueueFactory>();
+
+            return services;
+        }
+
+        /// <summary>
+        /// Drops every background service when the process was started by the OpenAPI document generator.
+        /// </summary>
+        /// <remarks>
+        /// The generator waits for the application to start before it reads the endpoints, so a hosted service
+        /// that registers an instance in the database or opens a queue connection delays - or fails - the whole
+        /// document generation on an agent that has no such infrastructure. None of them does anything useful here.
+        /// Call it right before <c>builder.Build()</c>, after every other registration.
+        /// </remarks>
+        public IServiceCollection SkipBackgroundServicesForDocumentGeneration()
+        {
+            if (OpenApiDocumentGeneration.IsRunning)
+            {
+                services.RemoveAll<IHostedService>();
+            }
 
             return services;
         }

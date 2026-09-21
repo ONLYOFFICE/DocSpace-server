@@ -56,6 +56,13 @@ public static class HostExtension
         {
             await Task.Yield();
 
+            // Warmups, cache and database round-trips make no sense when the process was started
+            // only to emit OpenAPI documents - and the generator kills it after 2 minutes.
+            if (OpenApiDocumentGeneration.IsRunning)
+            {
+                return;
+            }
+
             var logger = webHost.Services.GetRequiredService<ILoggerFactory>().CreateLogger("ASC.Api.Core.Extensions.HostExtension");
             var warmupState = webHost.Services.GetService<WarmupState>();
             warmupState?.StartWarmup();
