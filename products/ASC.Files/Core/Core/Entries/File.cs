@@ -168,7 +168,7 @@ public class File<T> : FileEntry<T>
                 FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
                 FileType.Archive => FilterType.ArchiveOnly,
                 FileType.Audio or FileType.Video => FilterType.MediaOnly,
-                FileType.Pdf => (FilterType)Category == FilterType.PdfForm ? FilterType.PdfForm : FilterType.Pdf,
+                FileType.Pdf => IsPdfForm ? FilterType.PdfForm : FilterType.Pdf,
                 FileType.Diagram => FilterType.DiagramsOnly,
                 _ => FilterType.None
             };
@@ -213,9 +213,10 @@ public class File<T> : FileEntry<T>
     public bool IsPdf => FileUtility.GetFileTypeByFileName(Title) == FileType.Pdf;
 
     /// <summary>
-    /// Specifies if the file is an ONLYOFFICE PDF form (created from a form template).
+    /// Specifies if the file is an ONLYOFFICE PDF form (created from a form template). It only drives the
+    /// forms filter - what may be filled is decided by <see cref="IsPdf"/>.
     /// </summary>
-    public bool IsForm => (FilterType)Category == FilterType.PdfForm;
+    public bool IsPdfForm => (FilterType)Category == FilterType.PdfForm;
 
     /// <summary>
     /// Specifies if a Custom Filter editing mode is enabled for a file or not.

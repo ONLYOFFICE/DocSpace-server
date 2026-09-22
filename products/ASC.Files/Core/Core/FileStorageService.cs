@@ -4269,8 +4269,9 @@ public class FileStorageService //: IFileStorageService
                 // A public room hands its link to anonymous visitors, so a PDF never starts above Read
                 // there - not even a form. Raising it stays a deliberate act through the link settings.
                 File<T> { IsPdf: true, ParentRoomType: FolderType.PublicRoom } => FileShare.Read,
-                File<T> { IsForm: true, RootFolderType: FolderType.USER } when share != FileShare.Editing && share != FileShare.FillForms => FileShare.Editing,
-                File<T> { IsForm: true, RootFolderType: not FolderType.USER } => FileShare.Editing,
+                // Anywhere else the link opens the PDF for editing, so it can be filled in place.
+                File<T> { IsPdf: true, RootFolderType: FolderType.USER } when share != FileShare.Editing && share != FileShare.FillForms => FileShare.Editing,
+                File<T> { IsPdf: true, RootFolderType: not FolderType.USER } => FileShare.Editing,
                 _ => share
             };
 
