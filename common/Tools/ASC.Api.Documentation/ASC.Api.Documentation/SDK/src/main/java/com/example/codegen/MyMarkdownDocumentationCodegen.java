@@ -122,35 +122,20 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
     }
 
     /**
-     * Prose the templates print as it stands, so that a backtick in a description opens a code
-     * span and an apostrophe reads as an apostrophe. Everything the templates print unescaped has
-     * to come through here, because Markdown carries HTML straight to the page: an angle bracket
-     * left alone is read as a tag and swallows what it encloses.
-     * <p>
-     * Only the brackets are escaped, and the result contains none, so escaping the same text
-     * twice is the same as escaping it once - which it has to be, since `vars`, `allVars` and
-     * `parentVars` hand the same property to {@link #markProperties} more than once.
-     */
-    private static String pageText(String text) {
-        if (text == null) {
-            return null;
-        }
-
-        return text.replace("<", "&lt;").replace(">", "&gt;");
-    }
-
-    /**
      * Descriptions end up inside Markdown tables, where an unescaped pipe starts a new cell and
      * a newline ends the row - either one silently mangles the table from that point on.
+     * <p>
+     * The break is written closed, because the pages are compiled as MDX, where an unclosed tag
+     * is an error rather than a line break.
      */
     private static String tableText(String text) {
         if (text == null) {
             return null;
         }
 
-        return pageText(text)
+        return text
                 .replace("|", "\\|")
-                .replaceAll("\\r\\n|\\r|\\n", "<br>")
+                .replaceAll("\\r\\n|\\r|\\n", "<br/>")
                 .trim();
     }
 
@@ -429,10 +414,6 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
                 // rather than as a model that has no properties to list.
                 model.vendorExtensions.put(HAS_PROPERTIES, hasProperties(model));
 
-                // Before the labels are parsed out of it, so that a value's label is escaped the
-                // same way as the description it was taken from.
-                model.description = pageText(model.description);
-
                 markEnumValues(model);
 
                 markProperties(model.name, model.vars);
@@ -461,10 +442,6 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
 
         for (CodegenOperation operation : results.getOperations().getOperation()) {
             operation.vendorExtensions.put(ANCHOR, slug(operation.operationId));
-
-            // Printed as prose rather than in a table, so only the angle brackets need escaping.
-            operation.summary = pageText(operation.summary);
-            operation.notes = pageText(operation.notes);
 
             if (operation.allParams != null) {
                 for (CodegenParameter parameter : operation.allParams) {
@@ -531,15 +508,6 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
         if (securities != null) {
             for (CodegenSecurity security : securities) {
                 security.vendorExtensions.put(ANCHOR, slug(security.name));
-
-                if (security.scopes != null) {
-                    for (Map<String, Object> scope : security.scopes) {
-                        Object description = scope.get("description");
-                        if (description != null) {
-                            scope.put("description", pageText(String.valueOf(description)));
-                        }
-                    }
-                }
             }
         }
 
