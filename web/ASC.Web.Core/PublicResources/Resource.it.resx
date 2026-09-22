@@ -1462,7 +1462,7 @@
     <value>ID della fonte</value>
   </data>
   <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
-    <value>Agente AI</value>
+    <value>Agente IA</value>
   </data>
   <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
     <value>File</value>

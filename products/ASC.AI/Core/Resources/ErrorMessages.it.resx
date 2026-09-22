@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AiSettingsAccessDenied" xml:space="preserve">
-    <value>Non hai il permesso di gestire le impostazioni AI</value>
+    <value>Non hai il permesso di gestire le impostazioni IA</value>
   </data>
   <data name="AttachmentProcessFailed" xml:space="preserve">
     <value>Impossibile elaborare i file: {0}. I file potrebbero essere danneggiati o crittografati</value>
