@@ -177,6 +177,12 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Historiku i transaksioneve</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Totali i shpenzuar</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Përmbledhje sipas përdoruesit</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Lloji</value>
   </data>

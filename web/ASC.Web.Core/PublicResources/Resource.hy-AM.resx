@@ -177,6 +177,12 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Գործարքների պատմություն</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Ընդհանուր ծախսը</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Ամփոփում ըստ օգտատերերի</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Տեսակ</value>
   </data>

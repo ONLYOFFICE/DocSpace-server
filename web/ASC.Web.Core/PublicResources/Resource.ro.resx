@@ -177,6 +177,12 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Istoricul operațiilor</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Total cheltuit</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Rezumat pe utilizatori</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Tip</value>
   </data>

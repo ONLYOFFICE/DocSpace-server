@@ -177,6 +177,12 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Zgodovina transakcij</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Skupaj porabljeno</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Povzetek po uporabnikih</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Tip</value>
   </data>

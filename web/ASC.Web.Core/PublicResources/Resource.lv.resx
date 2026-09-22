@@ -177,6 +177,12 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Darījumu vēsture</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Kopā iztērēts</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Kopsavilkums pēc lietotājiem</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Tips</value>
   </data>

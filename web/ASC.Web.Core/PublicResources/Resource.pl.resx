@@ -177,6 +177,12 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Historia transakcji</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Łącznie wydano</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Podsumowanie wg użytkowników</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Typ</value>
   </data>

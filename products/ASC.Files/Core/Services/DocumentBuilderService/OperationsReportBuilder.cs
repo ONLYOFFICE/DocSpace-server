@@ -76,6 +76,19 @@ public class OperationsReportBuilder(
 
         var dateFormat = context.Header.LongDateFormat;
 
+        // Second sheet: how much each participant spent in total over the reported period. Only the
+        // debit side is summed - credits are top-ups, not consumption.
+        var pivot = new ReportPivot(
+            Resource.AccountingCustomerOperationsReportSummarySheetName,
+            [Resource.AccountingCustomerOperationContact],
+            [
+                new ReportPivotDataField(
+                    Resource.AccountingCustomerOperationDebit,
+                    "Sum",
+                    Resource.AccountingCustomerOperationsReportSummaryDebit,
+                    MoneyFormat)
+            ]);
+
         var definition = new ReportDefinition(
             Resource.AccountingCustomerOperationsReportSheetName,
             Resource.AccountingCustomerOperationsReportSheetName,
@@ -106,7 +119,8 @@ public class OperationsReportBuilder(
 
                     await writer.WriteAsync(SerializeOperations(records, dateFormat, context.Options, addSourceColumns));
                 }
-            });
+            },
+            pivot);
 
         return await RenderAsync(context, definition);
     }

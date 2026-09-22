@@ -177,6 +177,12 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>История на транзакциите</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Общо изразходвано</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Обобщение по потребители</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Тип</value>
   </data>

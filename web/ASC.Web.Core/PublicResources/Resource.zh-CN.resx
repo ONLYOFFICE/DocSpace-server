@@ -171,6 +171,12 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>交易记录</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>总支出</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>按用户汇总</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>类型</value>
   </data>

@@ -177,6 +177,12 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>거래 내역</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>총 사용액</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>사용자별 요약</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>전형</value>
   </data>

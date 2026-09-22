@@ -484,6 +484,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Total spent.
+        /// </summary>
+        public static string AccountingCustomerOperationsReportSummaryDebit {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationsReportSummaryDebit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Summary by user.
+        /// </summary>
+        public static string AccountingCustomerOperationsReportSummarySheetName {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationsReportSummarySheetName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Type.
         /// </summary>
         public static string AccountingCustomerOperationType {

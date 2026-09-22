@@ -177,6 +177,12 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Lịch sử giao dịch</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Tổng đã chi</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Tóm tắt theo người dùng</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Kiểu</value>
   </data>

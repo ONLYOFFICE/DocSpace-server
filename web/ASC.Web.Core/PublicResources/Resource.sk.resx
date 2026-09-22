@@ -177,6 +177,12 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>História transakcií</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Celkovo minuté</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Súhrn podľa používateľov</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Typ</value>
   </data>

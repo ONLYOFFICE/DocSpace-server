@@ -177,6 +177,12 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>İşlem geçmişi</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Toplam harcama</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Kullanıcıya göre özet</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Tip</value>
   </data>
