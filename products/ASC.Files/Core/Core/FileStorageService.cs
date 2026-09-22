@@ -388,7 +388,10 @@ public class FileStorageService //: IFileStorageService
             orderBy = await filesSettingsHelper.GetDefaultOrder();
         }
 
-        if (Equals(parent.Id, await globalFolderHelper.FolderShareAsync) && orderBy.SortedBy == SortedByType.DateAndTime)
+        // The share root is the only folder of type SHARE, so the type check is the same test as comparing ids,
+        // minus the side effect: the FolderShareAsync getter creates the root when it is missing, which made every
+        // first listing in a tenant pay for a folder insert under a distributed lock.
+        if (parent.FolderType == FolderType.SHARE && orderBy.SortedBy == SortedByType.DateAndTime)
         {
             orderBy.SortedBy = SortedByType.New;
         }
@@ -2044,7 +2047,7 @@ public class FileStorageService //: IFileStorageService
 
         var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => f.IsRoom);
 
-        if (file.IsForm && (room?.FolderType == FolderType.VirtualDataRoom || room?.FolderType == FolderType.FillingFormsRoom))
+        if (file.IsPdf && (room?.FolderType == FolderType.VirtualDataRoom || room?.FolderType == FolderType.FillingFormsRoom))
         {
             var users = (await fileSharing.GetSharedInfoAsync(room))
                 .Where(ace => ace is not { Access: FileShare.FillForms } && ace.Id != authContext.CurrentAccount.ID)
@@ -2076,7 +2079,8 @@ public class FileStorageService //: IFileStorageService
 
         if (room is { FolderType: FolderType.PublicRoom })
         {
-            await SetExternalLinkAsync(file, Guid.NewGuid(), file.IsForm ? FileShare.Editing : FileShare.Read, title ?? FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+            // An anonymous public link starts read-only even for a form; raising it to Editing is a deliberate act
+            await SetExternalLinkAsync(file, Guid.NewGuid(), FileShare.Read, title ?? FilesCommonResource.DefaultExternalLinkTitle, primary: true);
         }
 
         return file;
@@ -4163,7 +4167,7 @@ public class FileStorageService //: IFileStorageService
             yield return ace;
         }
         //hack for the form-filling room. return a link to a file with the room key.
-        if (entry is File<T> { IsForm: true } file)
+        if (entry is File<T> { IsPdf: true } file)
         {
             var parentRoom = await DocSpaceHelper.GetParentRoom(file, daoFactory.GetCacheFolderDao<T>());
             if (parentRoom?.FolderType != FolderType.FillingFormsRoom)
@@ -4260,9 +4264,14 @@ public class FileStorageService //: IFileStorageService
 
             share = entry switch
             {
-                File<T> { IsForm: true, RootFolderType: FolderType.VirtualRooms, ParentRoomType: FolderType.FillingFormsRoom or FolderType.VirtualDataRoom } => FileShare.FillForms,
-                File<T> { IsForm: true, RootFolderType: FolderType.USER } when share != FileShare.Editing && share != FileShare.FillForms => FileShare.Editing,
-                File<T> { IsForm: true, RootFolderType: not FolderType.USER } => FileShare.Editing,
+                // Any PDF is fillable, so fill-oriented rooms start the link at FillForms.
+                File<T> { IsPdf: true, RootFolderType: FolderType.VirtualRooms, ParentRoomType: FolderType.FillingFormsRoom or FolderType.VirtualDataRoom } => FileShare.FillForms,
+                // A public room hands its link to anonymous visitors, so a PDF never starts above Read
+                // there - not even a form. Raising it stays a deliberate act through the link settings.
+                File<T> { IsPdf: true, ParentRoomType: FolderType.PublicRoom } => FileShare.Read,
+                // Anywhere else the link opens the PDF for editing, so it can be filled in place.
+                File<T> { IsPdf: true, RootFolderType: FolderType.USER } when share != FileShare.Editing && share != FileShare.FillForms => FileShare.Editing,
+                File<T> { IsPdf: true, RootFolderType: not FolderType.USER } => FileShare.Editing,
                 _ => share
             };
 
@@ -4658,7 +4667,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         //hack for the form-filling room. return a link to a file with the room key.
-        if (entry is File<T> { IsForm: true })
+        if (entry is File<T> { IsPdf: true })
         {
             var parentRoom = await DocSpaceHelper.GetParentRoom(entry, daoFactory.GetCacheFolderDao<T>());
             if (parentRoom?.FolderType == FolderType.FillingFormsRoom && share is FileShare.FillForms or FileShare.None)
@@ -5613,7 +5622,7 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
-        if (!await DocSpaceHelper.IsFormOrCompletedForm(form, daoFactory))
+        if (!form.IsPdf)
         {
             throw new InvalidOperationException();
         }
@@ -5768,7 +5777,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (!await DocSpaceHelper.IsFormOrCompletedForm(form, daoFactory))
+        if (!form.IsPdf)
         {
             throw new InvalidOperationException();
         }
@@ -6018,7 +6027,7 @@ public class FileStorageService //: IFileStorageService
         }
         else
         {
-            if (!await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
+            if (!file.IsPdf)
             {
                 throw new InvalidOperationException();
             }
@@ -6201,7 +6210,7 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
-        if (!form.IsForm)
+        if (!form.IsPdf)
         {
             throw new InvalidOperationException();
         }
@@ -6284,9 +6293,10 @@ public class FileStorageService //: IFileStorageService
         {
             linkId = Guid.NewGuid();
 
+            // An anonymous public link starts read-only even for a form; raising it to Editing is a deliberate act
             var (defaultTitle, defaultAccess) = folder.FolderType switch
             {
-                FolderType.PublicRoom => (FilesCommonResource.DefaultExternalLinkTitle, entry is File<T> { IsForm: true } ? FileShare.Editing : FileShare.Read),
+                FolderType.PublicRoom => (FilesCommonResource.DefaultExternalLinkTitle, FileShare.Read),
                 FolderType.FillingFormsRoom => (FilesCommonResource.FillOutExternalLinkTitle, FileShare.FillForms),
                 _ => throw new InvalidOperationException()
             };

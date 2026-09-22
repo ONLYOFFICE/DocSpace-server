@@ -46,9 +46,17 @@ internal static class AttachmentPipeline
                     pp.Attachment<Attachment>(a =>
                             a.Field("document.data")
                                 .TargetField("document.attachment")
-                                .IndexedCharacters(-1))
+                                .IndexedCharacters(-1)
+                                .IgnoreMissing()
+                                // Unreadable content - an encrypted or a damaged file - must not fail the whole
+                                // index request: the document still has to be searchable by its metadata. The
+                                // reason is kept on the document itself, so the affected files stay countable.
+                                .OnFailure(of => of.Set<Document>(s => s
+                                    .Field("document.attachmentError")
+                                    .Value("{{_ingest.on_failure_message}}"))))
                         .Remove<Document>(x =>
-                            x.Field("document.data"))));
+                            x.Field("document.data")
+                                .IgnoreMissing())));
         }
     }
 }

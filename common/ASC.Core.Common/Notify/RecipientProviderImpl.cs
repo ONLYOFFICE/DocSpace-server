@@ -117,11 +117,6 @@ public class RecipientProviderImpl(UserManager userManager) : IRecipientProvider
                     return [user.Email];
                 }
 
-                if (senderName == Configuration.Constants.NotifyMessengerSenderSysName)
-                {
-                    return [user.UserName];
-                }
-
                 if (senderName == Configuration.Constants.NotifyPushSenderSysName)
                 {
                     return [user.UserName];

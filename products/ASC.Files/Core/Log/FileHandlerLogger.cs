@@ -108,4 +108,7 @@ internal static partial class FileHandlerLogger
 
     [LoggerMessage(LogLevel.Information, "Starting file download (chunk {offset}-{endOffset})")]
     public static partial void InformationStartingFileDownLoad(this ILogger<FileHandlerService> logger, long offset, long endOffset);
+
+    [LoggerMessage(LogLevel.Warning, "DocService track: client closed the connection before the body was read")]
+    public static partial void WarningDocServiceTrackBodyAborted(this ILogger<FileHandlerService> logger);
 }

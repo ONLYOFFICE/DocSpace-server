@@ -1277,7 +1277,7 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
 
         await fileMarker.MarkAsNewAsync(file);
 
-        if (isForm && file.IsForm)
+        if (isForm && file.IsPdf)
         {
             var fileDao = daoFactory.GetFileDao<T>();
             var properties = await fileDao.GetProperties(file.Id) ?? new EntryProperties<T> { FormFilling = new FormFillingProperties<T>() };
@@ -1532,9 +1532,9 @@ public class FileHandlerService(FilesLinkUtility filesLinkUtility,
             };
             fileData = JsonSerializer.Deserialize<TrackerData>(body, options);
         }
-        catch (OperationCanceledException e)
+        catch (OperationCanceledException)
         {
-            logger.ErrorDocServiceTrackReadBody(e);
+            logger.WarningDocServiceTrackBodyAborted();
             throw new HttpException(StatusCodes.Status499ClientClosedRequest, "Client closed the connection prematurely");
         }
         catch (JsonException e)

@@ -198,7 +198,7 @@ public class AttachmentsStorageService(
     /// </summary>
     private async Task<Dictionary<int, FormAnalysis>> AnalyzeFormsAsync(List<File<int>> files)
     {
-        if (!externalDatabaseClient.IsEnabled() || !files.Exists(f => f.IsForm))
+        if (!externalDatabaseClient.IsEnabled() || !files.Exists(f => f.IsPdf))
         {
             return [];
         }

@@ -68,6 +68,7 @@ global using ASC.AI.Core.Settings;
 global using ASC.AI.Integration.McpServers;
 global using ASC.AI.Integration.Messages;
 global using ASC.AI.Integration.WebSearch;
+global using ASC.AI.Migration;
 global using ASC.AI.Service;
 global using ASC.AI.Tools.Core;
 global using ASC.Core;
@@ -80,7 +81,9 @@ global using ASC.Common.Web;
 global using ASC.Core.Billing;
 global using ASC.Core.Common;
 global using ASC.Core.Common.EF;
+global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.EF.Model.Ai;
+global using ASC.Core.Common.EF.Model.Ai.Legacy;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Notify.Socket;
 global using ASC.Core.Tenants;
@@ -110,6 +113,7 @@ global using ASC.Web.Files.Helpers;
 global using ASC.Web.Files.Services.WCFService;
 global using ASC.Web.Files.Services.WCFService.FileOperations;
 
+global using Microsoft.EntityFrameworkCore;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.AspNetCore.RateLimiting;
@@ -127,6 +131,7 @@ global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Threading.Channels;
 global using System.Security;
+global using System.Security.Cryptography;
 
 global using Swashbuckle.AspNetCore.Annotations;
 

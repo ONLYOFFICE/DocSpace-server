@@ -379,7 +379,9 @@ public class EntryManager(IDaoFactory daoFactory,
         var entries = new List<FileEntry>();
         var filterType = filterTypes?.FirstOrDefault() ?? FilterType.None;
 
-        searchInContent = searchInContent && filterType != FilterType.ByExtension && !Equals(parent.Id, await globalFolderHelper.FolderTrashAsync);
+        // Type check instead of comparing with FolderTrashAsync: that getter creates the user's trash root when it is
+        // missing, so the first listing of every new user paid for a folder insert under a distributed lock here.
+        searchInContent = searchInContent && filterType != FilterType.ByExtension && parent.FolderType != FolderType.TRASH;
 
         if (parent.FolderType == FolderType.TRASH)
         {
@@ -1643,7 +1645,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
             }
 
-            if (file.IsForm && file.IsCompletedForm && file.Forcesave != ForcesaveType.None)
+            if (file.IsPdf && file.IsCompletedForm && file.Forcesave != ForcesaveType.None)
             {
                 await fileDao.UpdateCategoryAsync(file.Id, file.Version, (int)FilterType.PdfForm);
                 return file;
@@ -1674,7 +1676,7 @@ public class EntryManager(IDaoFactory daoFactory,
         await fileMarker.MarkAsNewAsync(file);
         await fileMarker.RemoveMarkAsNewAsync(file);
 
-        if (file.IsForm)
+        if (file.IsPdf)
         {
             await OnFormVersionChangedAsync(file);
         }

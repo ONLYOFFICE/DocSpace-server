@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,29 +31,9 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Common.Module;
-
-public class BaseWcfClient<TService> : ClientBase<TService>, IDisposable where TService : class
+namespace ASC.Core.Common.Log;
+internal static partial class NotifySenderLogger
 {
-    void IDisposable.Dispose()
-    {
-        // msdn recommendation to close wcf client
-        try
-        {
-            //Close();
-        }
-        catch (CommunicationException)
-        {
-            Abort();
-        }
-        catch (TimeoutException)
-        {
-            Abort();
-        }
-        catch (Exception)
-        {
-            Abort();
-            throw;
-        }
-    }
+    [LoggerMessage(LogLevel.Debug, "Unexpected error")]
+    public static partial void ErrorUnexpected(this ILogger logger, Exception exception);
 }

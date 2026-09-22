@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,9 +31,13 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Core.Common.Log;
-internal static partial class JabberSenderLogger
-{
-    [LoggerMessage(LogLevel.Debug, "Unexpected error")]
-    public static partial void ErrorUnexpected(this ILogger logger, Exception exception);
-}
+
+namespace ASC.Core.Users;
+
+/// <summary>
+/// Thrown by the user store when the username being saved is already taken in the tenant. Derives from
+/// <see cref="ArgumentException"/> so that callers handling the store's argument errors keep working;
+/// <c>UserManager.SaveUserInfo</c> reports it as <see cref="InvalidOperationException"/> - the contract it had
+/// while it pre-read the username itself.
+/// </summary>
+public class DuplicateUserNameException() : ArgumentException($"Duplicate {nameof(UserInfo.UserName)}");

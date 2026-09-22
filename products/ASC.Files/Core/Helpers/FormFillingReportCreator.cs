@@ -47,6 +47,9 @@ public class FormFillingReportCreator(
     FactoryIndexerFormMetadata factoryIndexerFormMetadata,
     CoreBaseSettings coreBaseSettings)
 {
+    private static readonly HashSet<string> _checkboxOffStates =
+        new(StringComparer.OrdinalIgnoreCase) { "off", "false", "0", "no", "n", "unchecked" };
+
     public async Task UpdateFormFillingReport<T>(int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl, File<T> formsDataFile, bool sendFormToExternalDB, bool settingsSaveFormAsXLSX)
     {
         await GetSubmitFormsData(formsDataFile, originalFormId, originalFormVersion, roomId, resultFormNumber, formsDataUrl);
@@ -628,10 +631,23 @@ public class FormFillingReportCreator(
 
         return meta.Type switch
         {
-            "checkBox" => bool.TryParse(value, out var b) ? b : value,
+            "checkBox" => ParseCheckbox(value),
             "dateTime" => ParseDate(value, meta.Format, culture, enabledCultures),
+            "comboBox" or "dropDownList" or "radio" => NormalizeEnumValue(value, meta.PossibleValues),
             _ => value
         };
+    }
+
+    private static bool ParseCheckbox(string value) =>
+        bool.TryParse(value, out var b) ? b : !string.IsNullOrWhiteSpace(value) && !_checkboxOffStates.Contains(value.Trim());
+
+    private static object NormalizeEnumValue(string value, List<string> options)
+    {
+        if (options is not { Count: > 0 })
+        {
+            return value;
+        }
+        return options.FirstOrDefault(o => string.Equals(o, value, StringComparison.OrdinalIgnoreCase)) ?? value;
     }
 
     private static DateTime? ParseDate(string value, string format, CultureInfo culture, IReadOnlyList<CultureInfo> enabledCultures)
