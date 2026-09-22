@@ -1871,4 +1871,22 @@ $TrulyYours</value>
   <data name="subject_suspicious_login" xml:space="preserve">
     <value>تسجيل دخول مشبوه إلى حسابك ${LetterLogoText}</value>
   </data>
+  <data name="pattern_suspicious_login" xml:space="preserve">
+    <value>h1.تم اكتشاف تسجيل دخول مشبوه
+
+ لاحظنا تسجيل دخول إلى حسابك*$UserName* ،*$UserEmail* في*$Date${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}" يبدو مختلفاً عن نشاطك المعتاد.
+
+IP: *$IP*
+الجهاز: *$Device*
+#if($Location != "")
+الموقع: *$Location*
+#end
+المتصفح: *$Browser*
+
+إذا كنت أنت من قام بذلك - فلا حاجة إلى اتخاذ أي خطوات إضافية. إذا لم تتعرف على تسجيل الدخول هذا، يرجى تغيير كلمة المرور الخاصة بك فوراً.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

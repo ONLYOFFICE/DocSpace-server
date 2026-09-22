@@ -1864,4 +1864,22 @@ $TrulyYours</value>
   <data name="subject_suspicious_login" xml:space="preserve">
     <value>Կասկածելի մուտք ձեր ${LetterLogoText} հաշիվ</value>
   </data>
+  <data name="pattern_suspicious_login" xml:space="preserve">
+    <value>h1.Հայտնաբերվել է կասկածելի մուտք
+
+Մենք նկատեցինք մուտք ձեր *$UserName*, *$UserEmail* հաշիվ *$Date* ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}"−ում, որը տարբերվում է ձեր սովորական գործունեությունից։
+
+IP: *$IP*
+Սարք: *$Device*
+#if($Location != "")
+Գտնվելու վայր: *$Location*
+#end
+Դիտարկիչ: *$Browser*
+
+Եթե սա դուք էիք — լրացուցիչ քայլեր չեն պահանջվում։ Եթե չեք ճանաչում այս մուտքը, խնդրում ենք անմիջապես փոխել ձեր գաղտնաբառը։
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

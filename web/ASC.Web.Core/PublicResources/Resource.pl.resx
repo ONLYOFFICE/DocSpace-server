@@ -895,7 +895,7 @@
     <value>Zmiany we wtyczkach systemowych są zabronione</value>
   </data>
   <data name="ErrorWebPluginMaxCount" xml:space="preserve">
-    <value>Przekroczono limit wtyczek:</value>
+    <value>Przekroczono limit wtyczek</value>
   </data>
   <data name="ErrorWebPluginName" xml:space="preserve">
     <value>Nieprawidłowa nazwa wtyczki</value>
@@ -1475,5 +1475,59 @@
   </data>
   <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
     <value>Formularz</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Firma</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Data wygenerowania</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Okres</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Raport</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Łącznie</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Aktywny</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Dostęp wygasa</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Typ użytkownika</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>ID użytkownika</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Edytory</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Edytory dokumentów z pełnymi uprawnieniami</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Limit użytkownika</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Przeglądarka na żywo</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Przeglądarki dokumentów tylko do odczytu</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Zewnętrzny</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Wewnętrzny</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Pozostało</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Limit subskrypcji</value>
   </data>
 </root>

@@ -1863,4 +1863,22 @@ $TrulyYours</value>
   <data name="subject_suspicious_login" xml:space="preserve">
     <value>Подозрителен вход в акаунта ви ${LetterLogoText}</value>
   </data>
+  <data name="pattern_suspicious_login" xml:space="preserve">
+    <value>h1.Открит е подозрителен вход
+
+Забелязахме вход в акаунта ви *$UserName*, *$UserEmail* на *$Date* в ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}", който изглежда различен от обичайната ви активност.
+
+IP: *$IP*
+Устройство: *$Device*
+#if($Location != "")
+Местоположение: *$Location*
+#end
+Браузър: *$Browser*
+
+Ако това сте вие — не са необходими допълнителни стъпки. Ако не разпознавате този вход, моля, сменете паролата си незабавно.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

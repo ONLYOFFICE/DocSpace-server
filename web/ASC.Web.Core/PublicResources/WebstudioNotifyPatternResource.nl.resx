@@ -1868,4 +1868,22 @@ $TrulyYours</value>
   <data name="subject_suspicious_login" xml:space="preserve">
     <value>Verdachte aanmelding bij uw ${LetterLogoText}-account</value>
   </data>
+  <data name="pattern_suspicious_login" xml:space="preserve">
+    <value>h1.Verdachte aanmelding gedetecteerd
+
+We hebben een aanmelding bij uw account *$UserName*, *$UserEmail* op *$Date* in ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}" opgemerkt die afwijkt van uw gebruikelijke activiteit.
+
+IP: *$IP*
+Apparaat: *$Device*
+#if($Location != "")
+Locatie: *$Location*
+#end
+Browser: *$Browser*
+
+Als u dit zelf was — zijn er geen verdere stappen vereist. Als u deze aanmelding niet herkent, wijzig dan onmiddellijk uw wachtwoord.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

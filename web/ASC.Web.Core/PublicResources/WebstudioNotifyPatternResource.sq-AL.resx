@@ -1874,4 +1874,22 @@ $TrulyYours</value>
   <data name="subject_suspicious_login" xml:space="preserve">
     <value>Hyrje e dyshimtë në llogarinë tuaj ${LetterLogoText}</value>
   </data>
+  <data name="pattern_suspicious_login" xml:space="preserve">
+    <value>h1.U zbulua hyrje e dyshimtë
+
+Vumë re një hyrje në llogarinë tuaj *$UserName*, *$UserEmail* më *$Date* në ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}" që duket e ndryshme nga aktiviteti juaj i zakonshëm.
+
+IP: *$IP*
+Pajisja: *$Device*
+#if($Location != "")
+Vendndodhja: *$Location*
+#end
+Shfletuesi: *$Browser*
+
+Nëse kjo ishit ju - nuk kërkohen hapa të mëtejshëm. Nëse nuk e njohni këtë hyrje, ju lutemi ndryshoni menjëherë fjalëkalimin tuaj.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

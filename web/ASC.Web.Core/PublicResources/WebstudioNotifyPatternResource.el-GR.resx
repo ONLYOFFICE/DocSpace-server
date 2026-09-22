@@ -1868,4 +1868,22 @@ $TrulyYours</value>
   <data name="subject_suspicious_login" xml:space="preserve">
     <value>Ύποπτη σύνδεση στον λογαριασμό σας ${LetterLogoText}</value>
   </data>
+  <data name="pattern_suspicious_login" xml:space="preserve">
+    <value>h1.Εντοπίστηκε ύποπτη σύνδεση
+
+Παρατηρήσαμε μια σύνδεση στον λογαριασμό σας *$UserName*, *$UserEmail* στις *$Date* στο ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}" που φαίνεται διαφορετική από τη συνήθη δραστηριότητά σας.
+
+IP: *$IP*
+Συσκευή: *$Device*
+#if($Location != "")
+Τοποθεσία: *$Location*
+#end
+Πρόγραμμα περιήγησης: *$Browser*
+
+Εάν ήσασταν εσείς — δεν απαιτούνται περαιτέρω ενέργειες. Εάν δεν αναγνωρίζετε αυτήν τη σύνδεση, αλλάξτε αμέσως τον κωδικό πρόσβασής σας.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

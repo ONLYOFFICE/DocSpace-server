@@ -1890,4 +1890,22 @@ $TrulyYours</value>
   <data name="subject_suspicious_login" xml:space="preserve">
     <value>您的 ${LetterLogoText} 账户检测到可疑登录</value>
   </data>
+  <data name="pattern_suspicious_login" xml:space="preserve">
+    <value>h1.检测到可疑登录
+
+我们注意到您的账户 *$UserName*, *$UserEmail* 于*$Date* 在 ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}" 上发生了一次与您日常活动不同的登录。
+
+IP: *$IP*
+设备: *$Device*
+#if($Location != "")
+位置: *$Location*
+#end
+浏览器: *$Browser*
+
+如果这是您本人的操作，则无需采取任何进一步措施。如果您不认识此登录，请立即更改您的密码。
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

@@ -1867,4 +1867,22 @@ $TrulyYours</value>
   <data name="subject_suspicious_login" xml:space="preserve">
     <value>${LetterLogoText} hesabınıza şübhəli giriş</value>
   </data>
+  <data name="pattern_suspicious_login" xml:space="preserve">
+    <value>h1.Şübhəli giriş aşkarlandı
+
+*$Date* tarixində ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}" platformasında * UserName*, *$UserEmail* hesabınıza adi fəaliyyətinizdən fərqli görünən bir giriş aşkar etdik.
+
+IP: *$IP*
+Cihaz: *$Device*
+#if($Location != "")
+Konum: *$Location*
+#end
+Brauzer: *$Browser*
+
+Bu siz idinizsə — əlavə addımlar tələb olunmur. Bu girişi tanımırsınızsa, zəhmət olmasa dərhal şifrənizi dəyişdirin.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

@@ -1065,7 +1065,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Basta aprire la sezione &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;Fatturazione&lt;/a&gt; : è il punto unico da cui aggiungere nuove funzioni quando vuoi.&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;&#8226; &lt;b&gt;Docs Connect.&lt;/b&gt; Incorpora gli editor online nella tua applicazione. Sono disponibili API e oltre 50 integrazioni pronte all'uso. Il mese di prova gratuito parte automaticamente.&lt;br /&gt;&lt;br /&gt;• &lt;b&gt;Funzionalità IA.&lt;/b&gt; Accedi a un'ampia gamma di modelli IA tramite l'integrazione con OpenRouter. Paghi solo ciò che usi.&lt;br /&gt;&lt;br /&gt;• &lt;b&gt;Ricerca IA.&lt;/b&gt; Porta informazioni in tempo reale da internet direttamente nelle tue chat con l'IA, per risposte più intelligenti e utili.&lt;br /&gt;&lt;br /&gt;• &lt;b&gt;Spazio su disco aggiuntivo.&lt;/b&gt; Regola lo spazio sulla quantità esatta che ti serve, così non resti mai a corto.&lt;br /&gt;&lt;br /&gt;• &lt;b&gt;Backup.&lt;/b&gt; Aggiungi backup supplementari per tenere al sicuro i file importanti.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;• &lt;b&gt;Docs Connect.&lt;/b&gt; Incorpora gli editor online nella tua applicazione. Sono disponibili API e oltre 50 integrazioni pronte all'uso. Il mese di prova gratuito parte automaticamente.&lt;br /&gt;&lt;br /&gt;• &lt;b&gt;Funzionalità IA.&lt;/b&gt; Accedi a un'ampia gamma di modelli IA tramite l'integrazione con OpenRouter. Paghi solo ciò che usi.&lt;br /&gt;&lt;br /&gt;• &lt;b&gt;Ricerca IA.&lt;/b&gt; Porta informazioni in tempo reale da internet direttamente nelle tue chat con l'IA, per risposte più intelligenti e utili.&lt;br /&gt;&lt;br /&gt;• &lt;b&gt;Spazio su disco aggiuntivo.&lt;/b&gt; Regola lo spazio sulla quantità esatta che ti serve, così non resti mai a corto.&lt;br /&gt;&lt;br /&gt;• &lt;b&gt;Backup.&lt;/b&gt; Aggiungi backup supplementari per tenere al sicuro i file importanti.&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td style="font-family: 'Open Sans', Helvetica, Arial, Tahoma; font-size: 16px; font-weight: bold; line-height: 22px; Margin: 0; padding-bottom: 32px; padding-top: 0; text-align: center;"&gt;$OrangeButton&lt;/td&gt;&lt;/tr&gt;
 
@@ -1118,7 +1118,7 @@ $TrulyYours</value>
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: center;"&gt;Vuoi portare la potenza dell'editing documentale sulla tua piattaforma? ${LetterLogoText} ti offre tre modi semplici per farlo.&lt;/td&gt;&lt;/tr&gt;
 
-&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;&#8226; &lt;b&gt;Collega&lt;/b&gt;: innesta ${LetterLogoText} Docs nella tua piattaforma con &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;oltre 50 connettori pronti&lt;/a&gt; per gli strumenti più diffusi.&lt;br /&gt;• &lt;b&gt;Integra&lt;/b&gt;: incorpora Docs nel tuo ecosistema con i protocolli standard o con la nostra &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL2"&gt;API&lt;/a&gt;.&lt;br /&gt;• &lt;b&gt;Crea&lt;/b&gt;: costruisci il tuo spazio di lavoro documentale con app flessibili e modulari.&lt;/td&gt;&lt;/tr&gt;
+&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;• &lt;b&gt;Collega&lt;/b&gt;: innesta ${LetterLogoText} Docs nella tua piattaforma con &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL1"&gt;oltre 50 connettori pronti&lt;/a&gt; per gli strumenti più diffusi.&lt;br /&gt;• &lt;b&gt;Integra&lt;/b&gt;: incorpora Docs nel tuo ecosistema con i protocolli standard o con la nostra &lt;a style="color: #FF6F3D; text-decoration: none;" target="_blank" href="$URL2"&gt;API&lt;/a&gt;.&lt;br /&gt;• &lt;b&gt;Crea&lt;/b&gt;: costruisci il tuo spazio di lavoro documentale con app flessibili e modulari.&lt;/td&gt;&lt;/tr&gt;
 
 &lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: left;"&gt;&lt;b style="font-size: 16px; line-height: 22px;"&gt;Esplora gli strumenti per sviluppatori&lt;/b&gt;&lt;br /&gt;&lt;br /&gt;Qualunque cosa tu stia costruendo, abbiamo lo strumento giusto per integrare, estendere e automatizzare ${LetterLogoText} Docs: SDK Embed e Plugin, webhook, OAuth 2.0 e altro ancora.&lt;/td&gt;&lt;/tr&gt;
 
@@ -1866,5 +1866,23 @@ $TrulyYours</value>
   </data>
   <data name="subject_suspicious_login" xml:space="preserve">
     <value>Accesso sospetto al tuo account ${LetterLogoText}</value>
+  </data>
+  <data name="pattern_suspicious_login" xml:space="preserve">
+    <value>h1.Rilevato accesso sospetto
+
+Abbiamo notato un accesso al tuo account *$UserName*, *$UserEmail* il *$Date* su ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}" che sembra diverso dalla tua solita attività.
+
+IP: *$IP*
+Dispositivo: *$Device*
+#if($Location != "")
+Posizione: *$Location*
+#end
+Browser: *$Browser*
+
+Se eri tu — non sono necessarie ulteriori azioni. Se non riconosci questo accesso, ti preghiamo di cambiare immediatamente la tua password.
+
+$OrangeButton
+
+$TrulyYours</value>
   </data>
 </root>

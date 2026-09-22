@@ -1866,4 +1866,22 @@ $TrulyYours</value>
   <data name="subject_suspicious_login" xml:space="preserve">
     <value>Verdächtige Anmeldung bei Ihrem ${LetterLogoText}-Konto</value>
   </data>
+  <data name="pattern_suspicious_login" xml:space="preserve">
+    <value>h1.Verdächtiger Anmeldeversuch erkannt
+
+Wir haben eine Anmeldung bei Ihrem Konto *$UserName*, *$UserEmail* am *$Date* in ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}" festgestellt, die von Ihrer üblichen Aktivität abweicht.
+
+IP: *$IP*
+Gerät: *$Device*
+#if($Location != "")
+Standort: *$Location*
+#end
+Browser: *$Browser*
+
+Wenn Sie das waren — sind keine weiteren Schritte erforderlich. Wenn Sie diese Anmeldung nicht erkennen, ändern Sie bitte sofort Ihr Passwort.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

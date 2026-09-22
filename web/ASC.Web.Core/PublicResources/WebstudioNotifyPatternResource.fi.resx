@@ -1866,4 +1866,22 @@ $TrulyYours</value>
   <data name="subject_suspicious_login" xml:space="preserve">
     <value>Epäilyttävä kirjautuminen ${LetterLogoText}-tiliisi</value>
   </data>
+  <data name="pattern_suspicious_login" xml:space="preserve">
+    <value>h1.Epäilyttävä kirjautuminen havaittu
+
+Havaitsimme kirjautumisen tiliisi *$UserName*, *$UserEmail* päivänä *$Date* palvelussa ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}", joka näyttää poikkeavan tavallisesta toiminnastasi.
+
+IP: *$IP*
+Laite: *$Device*
+#if($Location != "")
+Sijainti: *$Location*
+#end
+Selain: *$Browser*
+
+Jos tämä olit sinä — mitään lisätoimia ei tarvita. Jos et tunnista tätä kirjautumista, vaihda salasanasi välittömästi.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

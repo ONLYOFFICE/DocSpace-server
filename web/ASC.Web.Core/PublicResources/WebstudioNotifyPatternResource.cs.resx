@@ -1867,4 +1867,22 @@ $TrulyYours</value>
   <data name="subject_suspicious_login" xml:space="preserve">
     <value>Podezřelé přihlášení k vašemu účtu ${LetterLogoText}</value>
   </data>
+  <data name="pattern_suspicious_login" xml:space="preserve">
+    <value>h1.Bylo zjištěno podezřelé přihlášení
+
+Zaznamenali jsme přihlášení k vašemu účtu *$UserName*, *$UserEmail* dne *$Date* v ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}", které vypadá jinak než vaše obvyklá aktivita.
+
+IP: *$IP*
+Zařízení: *$Device*
+#if($Location != "")
+Poloha: *$Location*
+#end
+Prohlížeč: *$Browser*
+
+Pokud jste to byli vy — nejsou nutné žádné další kroky. Pokud toto přihlášení nepoznáváte, okamžitě si změňte heslo.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

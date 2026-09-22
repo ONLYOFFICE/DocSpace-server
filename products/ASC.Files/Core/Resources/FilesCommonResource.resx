@@ -280,7 +280,7 @@
     <value>The required folder was not found</value>
   </data>
   <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Invalid folder id</value>
+    <value>Invalid folder ID</value>
   </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Invalid provider</value>

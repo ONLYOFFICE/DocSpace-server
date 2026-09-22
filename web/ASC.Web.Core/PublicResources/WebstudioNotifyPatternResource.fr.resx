@@ -1867,4 +1867,22 @@ $TrulyYours</value>
   <data name="subject_suspicious_login" xml:space="preserve">
     <value>Connexion suspecte à votre compte ${LetterLogoText}</value>
   </data>
+  <data name="pattern_suspicious_login" xml:space="preserve">
+    <value>h1.Connexion suspecte détectée
+
+Nous avons remarqué une connexion à votre compte *$UserName*, *$UserEmail* le *$Date* sur ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}" qui semble différente de votre activité habituelle.
+
+IP : *$IP*
+Appareil : *$Device*
+#if($Location != "")
+Emplacement : *$Location*
+#end
+Navigateur : *$Browser*
+
+Si c'était vous — aucune autre action n'est requise. Si vous ne reconnaissez pas cette connexion, veuillez changer votre mot de passe immédiatement.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>
