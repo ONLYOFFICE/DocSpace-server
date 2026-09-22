@@ -202,9 +202,18 @@ public class AssignmentsResolver(AiGateway gateway, AiConfiguration aiConfigurat
             return null;
         }
 
-        return configured.RevisionId.HasValue
-            ? candidates.Find(m => m.RevisionId == configured.RevisionId.Value)
-            : candidates.Find(m => string.Equals(m.Id, configured.Id, StringComparison.OrdinalIgnoreCase));
+        // Prefer the pinned revision; if it has rotated out of the catalogue, fall back to the
+        // model id so the configured default still wins over the generic tier-based pick.
+        if (configured.RevisionId.HasValue)
+        {
+            var byRevision = candidates.Find(m => m.RevisionId == configured.RevisionId.Value);
+            if (byRevision != null)
+            {
+                return byRevision;
+            }
+        }
+
+        return candidates.Find(m => string.Equals(m.Id, configured.Id, StringComparison.OrdinalIgnoreCase));
     }
 
     private static Model? SelectByRank(List<Model> candidates, ModelTier? tier)
