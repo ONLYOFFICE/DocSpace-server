@@ -204,7 +204,7 @@ public class AttachmentsStorageService(
         }
 
         var analyses = await Task.WhenAll(files
-            .Where(f => f.IsForm)
+            .Where(f => f.IsPdf)
             .Select(async file => (file.Id, Analysis: await AnalyzeFormAsync(file))));
 
         return analyses.ToDictionary(pair => pair.Id, pair => pair.Analysis);
@@ -307,7 +307,7 @@ public class AttachmentsStorageService(
         }
 
         var file = await DaoFactory.GetFileDao<int>().GetFileAsync(fileId);
-        return file is { IsForm: true } && await FileSecurity.CanReadAsync(file) ? file : null;
+        return file is { IsPdf: true } && await FileSecurity.CanReadAsync(file) ? file : null;
     }
 
     private static FormSchemaDto ToSchemaDto(File<int> file, FormSchema schema, CultureInfo culture)
@@ -353,7 +353,7 @@ public class AttachmentsStorageService(
         try
         {
             var file = await DaoFactory.GetFileDao<int>().GetFileAsync(entryId);
-            if (file is not { IsForm: true })
+            if (file is not { IsPdf: true })
             {
                 return null;
             }
