@@ -154,7 +154,7 @@ public class RateLimitOperationFilter(
         Format = "int32",
         Minimum = "0",
         Maximum = maximum.ToString(CultureInfo.InvariantCulture),
-        Example = example
+        Examples = [example]
     };
 
     private static OpenApiSchema UnixTimestamp(long example) => new()
@@ -162,7 +162,7 @@ public class RateLimitOperationFilter(
         Type = JsonSchemaType.Integer,
         Format = "int64",
         Minimum = "0",
-        Example = example
+        Examples = [example]
     };
 
     internal static (OpenApiHeader Limit, OpenApiHeader Remaining, OpenApiHeader Reset, OpenApiHeader RetryAfter) BuildGlobalHeaders(RateLimiterSettings settings) =>
