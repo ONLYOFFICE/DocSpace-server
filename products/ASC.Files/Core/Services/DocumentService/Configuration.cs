@@ -1102,7 +1102,7 @@ public class CustomizationConfig<T>(
 
     public async Task<SubmitForm> GetSubmitForm(File<T> file)
     {
-        if (!file.IsForm)
+        if (!file.IsPdf)
         {
             return null;
         }
@@ -1436,6 +1436,7 @@ public class UserConfig
     /// data room, where the role decides which fields open for them.
     /// </summary>
     /// <example>["Manager"]</example>
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     public List<string> Roles { get; set; }
 
     /// <summary>
