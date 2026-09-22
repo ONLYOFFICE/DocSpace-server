@@ -62,7 +62,7 @@ public class ExternalResourceSettings(ExternalResourceSettingsHelper helper, Ten
 public class CultureSpecificExternalResources
 {
     /// <summary>
-    /// The link to the administration panel. It is returned only to the full administrators of a server (standalone) portal.
+    /// The link to the administration panel. It is returned only to the full administrators of a licensed (Enterprise) server (standalone) portal.
     /// </summary>
     public CultureSpecificExternalResource AdminPanel { get; set; }
 
