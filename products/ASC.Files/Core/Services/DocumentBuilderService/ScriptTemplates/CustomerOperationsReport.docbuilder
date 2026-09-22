@@ -7,6 +7,10 @@ var defaultBorderColorWhite = Api.CreateColorFromRGB(255, 255, 255);
 
 var MAX_COLUMN_WIDTH = 100;
 
+// Height of every row inside a report table, header included. Both sheets use it, so the two tables
+// cannot drift apart.
+var TABLE_ROW_HEIGHT = 19.5;
+
 // Reference-safe names the two sheets wear while the pivot is created - see insertPivot().
 var PIVOT_SOURCE_TEMP_SHEET_NAME = "PivotSource";
 var PIVOT_TARGET_TEMP_SHEET_NAME = "PivotTarget";
@@ -111,7 +115,7 @@ function prepareHeader() {
             "borderColor": defaultBorderColorWhite
         });
     }
-    return { height: 19.5, dataArray: row };
+    return { height: TABLE_ROW_HEIGHT, dataArray: row };
 }
 
 function prepareData() {
@@ -131,7 +135,7 @@ function prepareData() {
                 "borderColor": defaultBorderColorWhite
             });
         }
-        table.push({ height: 19.5, dataArray: rowValues });
+        table.push({ height: TABLE_ROW_HEIGHT, dataArray: rowValues });
     }
     return table;
 }
@@ -200,7 +204,7 @@ function prepareTotal(headerRowIndex) {
         row.push(cell);
     }
 
-    return { height: 19.5, dataArray: row };
+    return { height: TABLE_ROW_HEIGHT, dataArray: row };
 }
 
 function trackColumnLength(columnLengths, colIndex, length) {
@@ -361,10 +365,21 @@ function stylePivot(pivotWorksheet, pivotTable) {
         }
     }
 
+    // The pivot leaves its rows at the sheet default, which is shorter than the rows the detail
+    // table writes, so the two tables would not line up.
+    for (var row = firstRow; row <= lastRow; row++) {
+        pivotWorksheet.GetRange("A" + row).SetRowHeight(TABLE_ROW_HEIGHT);
+    }
+
     // The grand total closes the summary the way the total row closes the detail table.
     rowRange(lastRow, lastRow).SetBold(true);
 
     var wholeRange = rowRange(firstRow, lastRow);
+
+    // The pivot leaves its cells sitting on the bottom of the row, which shows now that the rows are
+    // as tall as the detail table's. Every cell the detail table writes is vertically centred.
+    wholeRange.SetAlignVertical("center");
+
     wholeRange.SetBorders("Top", "Medium", defaultBorderColorWhite);
     wholeRange.SetBorders("Bottom", "Medium", defaultBorderColorWhite);
     wholeRange.SetBorders("Left", "Medium", defaultBorderColorWhite);
@@ -377,13 +392,15 @@ function stylePivot(pivotWorksheet, pivotTable) {
 // so the header block and the logo land where they do on the first tab; the pivot's row labels and
 // values only widen a column where they need more room than the detail table did.
 function setPivotColumnWidths(pivotWorksheet, pivot, columnLengths) {
+    // The tabular layout gives every row field a column of its own, and the values follow them.
     for (var i = 0; i < pivot.rowFields.length; i++) {
-        trackColumnLength(columnLengths, 1, getSourceColumnLength(pivot.rowFields[i]));
+        trackColumnLength(columnLengths, i + 1, getSourceColumnLength(pivot.rowFields[i]));
     }
 
     for (var i = 0; i < pivot.dataFields.length; i++) {
-        trackColumnLength(columnLengths, i + 2, getMaxLineLength(pivot.dataFields[i].caption));
-        trackColumnLength(columnLengths, i + 2, getSourceColumnLength(pivot.dataFields[i].field));
+        var column = pivot.rowFields.length + i + 1;
+        trackColumnLength(columnLengths, column, getMaxLineLength(pivot.dataFields[i].caption));
+        trackColumnLength(columnLengths, column, getSourceColumnLength(pivot.dataFields[i].field));
     }
 
     setColumnWidths(pivotWorksheet, columnLengths);
@@ -455,12 +472,6 @@ function writePivot(headerRowIndex, colCount, detailColumnLengths) {
         pivotTable.GetPivotFields(pivot.rowFields[i]).SetOrientation("Rows");
     }
 
-    // When the report mixes currencies the currency becomes a column field, so each currency gets
-    // its own set of totals instead of being folded into one meaningless sum.
-    if (hasMixedCurrencies()) {
-        pivotTable.GetPivotFields(inputData.keys[inputData.totalCurrencyColumn]).SetOrientation("Columns");
-    }
-
     for (var i = 0; i < pivot.dataFields.length; i++) {
         var dataField = pivot.dataFields[i];
         var addedField = pivotTable.AddDataField(dataField.field);
@@ -469,9 +480,20 @@ function writePivot(headerRowIndex, colCount, detailColumnLengths) {
         addedField.SetNumberFormat(dataField.format);
     }
 
+    // Every row carries its own currency, but the grand total would still add different currencies
+    // together, so it is dropped exactly where the detail table drops its total row.
+    if (hasMixedCurrencies()) {
+        pivotTable.SetRowGrand(false);
+    }
+
     // Drop the built-in pivot style: it paints the grand total row on its own, which breaks the
     // row banding stylePivot() applies. With no style the sheet wears only the report's colors.
     pivotTable.SetStyleName("None");
+
+    // With more than one row field the pivot repeats every outer value as a subtotal row. Here the
+    // outer field is the participant and the inner one only splits their spending by currency, so
+    // the subtotals would restate rows the reader has just read.
+    pivotTable.SetLayoutSubtotals(false);
 
     // The pivot labels its row column "Row Labels" and its total row "Grand Total" in English
     // whatever the report culture. A tabular row axis puts the field's own localized header on the

@@ -77,10 +77,12 @@ public class OperationsReportBuilder(
         var dateFormat = context.Header.LongDateFormat;
 
         // Second sheet: how much each participant spent in total over the reported period. Only the
-        // debit side is summed - credits are top-ups, not consumption.
+        // debit side is summed - credits are top-ups, not consumption. The currency is a row field
+        // of its own, so each participant is totalled per currency; a pivot always lays its row
+        // fields out ahead of the values, which is why it precedes the total.
         var pivot = new ReportPivot(
             Resource.AccountingCustomerOperationsReportSummarySheetName,
-            [Resource.AccountingCustomerOperationContact],
+            [Resource.AccountingCustomerOperationContact, Resource.AccountingCustomerOperationCurrency],
             [
                 new ReportPivotDataField(
                     Resource.AccountingCustomerOperationDebit,
