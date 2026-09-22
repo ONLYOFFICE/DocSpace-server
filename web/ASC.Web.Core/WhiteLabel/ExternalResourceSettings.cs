@@ -34,14 +34,15 @@
 namespace ASC.Web.Core.WhiteLabel;
 
 [Scope]
-public class ExternalResourceSettings(ExternalResourceSettingsHelper helper)
+public class ExternalResourceSettings(ExternalResourceSettingsHelper helper, CoreBaseSettings coreBaseSettings)
 {
-    public CultureSpecificExternalResources GetCultureSpecificExternalResources(CultureInfo culture = null, AdditionalWhiteLabelSettings whiteLabelSettings = null)
+    public CultureSpecificExternalResources GetCultureSpecificExternalResources(CultureInfo culture = null, AdditionalWhiteLabelSettings whiteLabelSettings = null, bool isDocSpaceAdmin = false)
     {
         culture ??= CultureInfo.CurrentCulture;
 
         return new()
         {
+            AdminPanel = coreBaseSettings.Standalone && isDocSpaceAdmin ? helper.AdminPanel.GetCultureSpecificExternalResource(culture) : null,
             Api = helper.Api.GetCultureSpecificExternalResource(culture),
             Common = helper.Common.GetCultureSpecificExternalResource(culture),
             Forum = whiteLabelSettings.UserForumEnabled ? helper.Forum.GetCultureSpecificExternalResource(culture) : null,
@@ -60,6 +61,11 @@ public class ExternalResourceSettings(ExternalResourceSettingsHelper helper)
 /// </summary>
 public class CultureSpecificExternalResources
 {
+    /// <summary>
+    /// The link to the administration panel. It is returned only to the full administrators of a server (standalone) portal.
+    /// </summary>
+    public CultureSpecificExternalResource AdminPanel { get; set; }
+
     /// <summary>
     /// The link to the product API.
     /// </summary>
