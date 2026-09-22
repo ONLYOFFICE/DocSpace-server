@@ -44,3 +44,8 @@ common/services/ASC.Monolith/DocStore/
 # ---------- Claude Code ----------
 /.claude/settings.local.json
 /.claude/worktrees
+
+# openapi-desc-opt: the queue and the batch manifest are rebuilt by every scan and mean nothing
+# outside the pass that wrote them.
+/.claude/skills/openapi-desc-opt/unoptimized-controllers.md
+/.claude/skills/openapi-desc-opt/batch-manifest.json

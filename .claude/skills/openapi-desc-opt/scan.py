@@ -11,7 +11,7 @@ Usage (from the repository root):
 The procedure this implements is `references/list-rules.md`; section numbers in the comments below
 point at it. Two things it deliberately does NOT do: it never works from a pre-built surface
 snapshot (a snapshot ages, the sources do not), and it never runs the schema-level checks, whose unit is a DTO and not a
-controller (rule 2, step 4).
+controller (list rules §1).
 """
 
 import argparse
@@ -35,9 +35,23 @@ PROJECTS = {
     "apisystem": dict(project="common/services/ASC.ApiSystem",   doc="apisystem_common.json", asm="ASC.ApiSystem",   scope=False),
 }
 
+# The size of the published surface, per document: controllers, actions in the sources, operations in
+# the document. These move only when somebody adds or removes an action, so a mismatch here is the
+# index breaking, not the API changing — and a controller the index quietly lost takes its findings
+# with it, which reads exactly like a pass that fixed them. That is why the numbers live here and are
+# checked on every run instead of sitting in a document somebody has to remember to compare against.
+# Update a row in the same commit that adds or removes the actions, and say so in the message.
+EXPECTED_SURFACE = {
+    "api":       dict(controllers=26, actions=254, operations=254),
+    "files":     dict(controllers=29, actions=318, operations=215),
+    "people":    dict(controllers=13, actions=91,  operations=82),
+    "backup":    dict(controllers=1,  actions=14,  operations=14),
+    "ai":        dict(controllers=3,  actions=14,  operations=14),
+    "apisystem": dict(controllers=2,  actions=14,  operations=14),
+}
+
 JSON_DIR = "common/Tools/ASC.Api.Documentation/ASC.Api.Documentation/json"
 LIST_PATH = ".claude/skills/openapi-desc-opt/unoptimized-controllers.md"
-LOG_PATH = ".claude/skills/openapi-desc-opt/optimized-log.md"
 
 VERBS = ("get", "post", "put", "delete", "patch", "head", "options", "trace")
 
@@ -555,7 +569,7 @@ def git(root, *args):
 
 
 def freshness(root, scope):
-    """Is each document younger than the sources it was generated from? (rule 2, step 1.)
+    """Is each document younger than the sources it was generated from? (SKILL.md step 1.)
 
     A finding taken off a document older than its controller is a finding about a text that no longer
     exists, and the pass that closes it edits code that is already right. Two signals, because either
@@ -585,7 +599,7 @@ def freshness(root, scope):
 
 
 def run(root, scope, threshold):
-    result = dict(sections=[], diag=collections.OrderedDict(), stale=[], unmatched={}, closed=closed_earlier(root))
+    result = dict(sections=[], diag=collections.OrderedDict(), stale=[], unmatched={})
     for key in scope:
         meta = PROJECTS[key]
         doc_path = os.path.join(root, JSON_DIR, meta["doc"])
@@ -659,52 +673,30 @@ def run(root, scope, threshold):
         result["stale"].extend(stale_ops)
         if unmatched:
             result["unmatched"][key] = ['{0} {1} — "{2}"'.format(o["verb"].upper(), o["path"], o["summary"]) for o in unmatched]
-    result["batches"] = plan_batches(result, result["closed"])
+    result["batches"] = plan_batches(result)
     result["cross_doc_params"] = cross_document_params(result)
     return result
 
 
-def closed_earlier(root):
-    """What a previous pass reported closed, read out of the run log if there is one.
+def surface_drift(result):
+    """Where the indexed surface disagrees with EXPECTED_SURFACE, one line per document.
 
-    A controller that comes back after being closed is the one row nobody should silently work twice:
-    either the fix did not survive a merge, or the pass closed the wrong thing. Marked in the list
-    rather than hidden, because which of the two it is only a human can tell.
-
-    Keyed by controller AND check, which the earlier version was not. A pass closes the findings of
-    one section, so a controller logged for `empty-response-text` still carrying `long-summary`
-    findings never went anywhere — it was never claimed. Matching on the name alone flags controllers
-    that were never claimed for the check now open on them and, once batches read the same flag,
-    scatters them into solo passes: the fragmentation the batching is there to remove, caused by the
-    warning about it.
+    `unmatched` is checked here too: it is not a size but it has the same job — an operation nobody
+    could tie to an action carries findings nobody can attribute, so a non-zero value invalidates the
+    run just as a lost controller does.
     """
-    path = os.path.join(root, LOG_PATH)
-    if not os.path.exists(path):
-        return {}
-    out = {}
-    for line in read_text(path).splitlines():
-        m = re.match(r"\s*[-*]\s*(\d{4}-\d{2}-\d{2})\s+(\w+)", line)
-        if not m:
-            continue
-        entry = out.setdefault(m.group(2), dict(date=m.group(1), checks=set()))
-        entry["date"] = max(entry["date"], m.group(1))
-        # The log line names the checks the pass closed, between the operation count and the
-        # semicolon: "— 5 operations, empty-response-text; edit in ...". A line that names none (an
-        # older format, a hand-written note) claims every check, which is the safe reading: it can
-        # only make the flag fire where it might not have to, never silence it.
-        body = line.split("—", 1)[1] if "—" in line else ""
-        named = {c for c in TIERS if c in body}
-        entry["checks"] |= named or set(TIERS)
-    return out
-
-
-def returned_as(names, checks, closed):
-    """Which of these controllers were logged closed for one of these checks — the real "came back"."""
     out = []
-    for name in sorted(names):
-        entry = closed.get(name)
-        if entry and (entry["checks"] & set(checks)):
-            out.append(name)
+    for key, diag in result["diag"].items():
+        if diag.get("error"):
+            continue
+        expected = EXPECTED_SURFACE.get(key)
+        if expected:
+            for field, want in expected.items():
+                got = diag.get(field)
+                if got != want:
+                    out.append("{0}.{1}: {2}, expected {3}".format(key, field, got, want))
+        if diag.get("unmatched"):
+            out.append("{0}.unmatched: {1}, expected 0".format(key, diag["unmatched"]))
     return out
 
 
@@ -764,7 +756,7 @@ def plural(n, one, many):
 
 # --- batches ----------------------------------------------------------------------------------
 
-def edit_sites(result, closed):
+def edit_sites(result):
     """The places a pass actually types, which is not the same list as the rows of the queue.
 
     Two collapses happen here and they are the reason the row count overstates the work. A parameter
@@ -798,7 +790,6 @@ def edit_sites(result, closed):
         # A property's sentence has to hold for every operation that binds it, so the cost sits in the
         # checking rather than in the typing: one point per consuming operation beyond the first.
         site["weight"] = base + (len(site["ops"]) - 1 if site["param"] else 0)
-        site["returned"] = returned_as(site["rows"], [site["check"]], closed)
     return sorted(sites.values(),
                   key=lambda s: (s["tier"], DOC_ORDER.get(s["doc"], 99), s["check"], s["file"], s["target"]))
 
@@ -847,7 +838,7 @@ def pack(file_groups):
     return [b for b in sorted(bins, key=lambda b: -weight_of(b)) if b]
 
 
-def plan_batches(result, closed):
+def plan_batches(result):
     """Group the edit sites into the passes they should be done in.
 
     The axis is (document × check). The document, because the build and the regeneration are per
@@ -857,7 +848,7 @@ def plan_batches(result, closed):
     DTO properties is the same problem the skill already forbids when it keeps tier C out of a tier B
     pass.
     """
-    sites = edit_sites(result, closed)
+    sites = edit_sites(result)
     groups = collections.OrderedDict()
     for site in sites:
         groups.setdefault((site["tier"], site["doc"], site["check"]), []).append(site)
@@ -865,18 +856,8 @@ def plan_batches(result, closed):
     batches = []
     for (tier, doc, check), members in groups.items():
         total = weight_of(members)
-        # A controller the log says was already closed for THIS check goes alone: when its finding is
-        # open again, the question to answer is which edit was lost, and a batch is the one place that
-        # question cannot be answered.
-        for site in [s for s in members if s["returned"]]:
-            batches.append(make_batch(doc, check, [site], total,
-                                      "the controller came back into the queue ({0}) — a pass of its own"
-                                      .format(", ".join(site["returned"]))))
-        rest = [s for s in members if not s["returned"]]
-        if not rest:
-            continue
         by_file = collections.OrderedDict()
-        for site in rest:
+        for site in members:
             by_file.setdefault(site["file"], []).append(site)
         for chunk in pack(list(by_file.values())):
             batches.append(make_batch(doc, check, chunk, total, None))
@@ -1070,19 +1051,12 @@ def render_batch(batch, lines):
     lines.append("")
 
 
-def render_row(row, closed, lines, mandatory):
+def render_row(row, lines, mandatory):
     tiers = row["tiers"]
     lines.append("#### {0}".format(row["name"]))
     lines.append("")
     lines.append("- file: `{0}`".format(row["file"]))
     lines.append("- operations with findings: {0}".format(row["operations"]))
-    back = returned_as([row["name"]], {f["check"] for f in row["findings"]}, closed)
-    if back:
-        lines.append("- **came back into the queue**: the log says {0} closed {1} here — "
-                     "check whether the edit was lost in a merge"
-                     .format(closed[row["name"]]["date"],
-                             ", ".join(sorted(closed[row["name"]]["checks"]
-                                              & {f["check"] for f in row["findings"]}))))
     lines.append("- findings here: {0} (A {1} · B {2} · C {3})".format(
         sum(tiers.values()), tiers["A"], tiers["B"], tiers["C"]))
     if row["other"]:
@@ -1188,7 +1162,7 @@ def render(result, threshold):
                              plural(section["operations"], "operation", "operations")))
         lines.append("")
         for row in section["rows"]:
-            render_row(row, result["closed"], lines, True)
+            render_row(row, lines, True)
 
     lines.append("## Recommended{0}".format(advisory_label))
     lines.append("")
@@ -1210,7 +1184,7 @@ def render(result, threshold):
             plural(len(section["advisory"]), "controller", "controllers")))
         lines.append("")
         for row in section["advisory"]:
-            render_row(row, result["closed"], lines, False)
+            render_row(row, lines, False)
     if result["stale"]:
         lines.append("## Document older than its source — not findings, a reason to regenerate")
         lines.append("")
@@ -1271,6 +1245,13 @@ def main():
 
     for key, diag in result["diag"].items():
         print("{0:10} ".format(key) + "  ".join("{0}={1}".format(k, v) for k, v in diag.items()))
+    drifted = surface_drift(result)
+    for line in drifted:
+        print("SURFACE: " + line)
+    if drifted:
+        print("SURFACE: the index disagrees with EXPECTED_SURFACE in scan.py. Find the commit that "
+              "moved it before trusting any finding below — a controller the index lost takes its "
+              "findings with it and looks like a closed batch.")
     must = sum(len(s["rows"]) for s in result["sections"])
     advisory = sum(len(s["advisory"]) for s in result["sections"])
     print("TOTAL: mandatory {0}, recommended {1}".format(must, advisory))

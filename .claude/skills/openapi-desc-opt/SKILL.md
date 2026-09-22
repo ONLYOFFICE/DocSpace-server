@@ -1,15 +1,15 @@
 ---
 name: openapi-desc-opt
-description: "Closing the next batch of the endpoint-description queue, end to end: refresh the queue of controllers whose published `summary`/`description`/parameter/response texts still fail `.claude/rules/openapi-endpoint-docs.md`, take the batch it plans (one document, one check, 8-10 points of edit sites), rewrite the C# sources behind it, regenerate that service's OpenAPI document and prove the declared findings have left the queue. USE FOR: which controllers still have unoptimized descriptions, build or refresh the list of unoptimized controllers, optimize the next controller or the next batch, take the first entry of the list, continue the description campaign, are there any endpoints left with thin descriptions — use it even when the user names neither the list nor the campaign, as long as they mean the quality of the published endpoint texts. DO NOT USE FOR: Spectral linter findings on the documents (openapi-lint-fix), a DTO-property campaign of its own, hand-editing `json/*_2.0.json` or `sdk/docspace-api-spec/docspace-backend.yaml`, or regenerating the SDKs (generate-sdk)."
+description: "Closing the next batch of the endpoint-description queue, end to end: refresh the queue of controllers whose published `summary`/`description`/parameter/response texts still fail the endpoint-documentation rules (`.claude/rules/openapi-endpoint-docs.md` for the operation, `.claude/rules/openapi-dto-docs.md` for properties), take the batch it plans (one document, one check, a budgeted set of edit sites), rewrite the C# sources behind it, regenerate that service's OpenAPI document and prove the declared findings have left the queue. USE FOR: which controllers still have unoptimized descriptions, build or refresh the list of unoptimized controllers, optimize the next controller or the next batch, take the first entry of the list, continue the description campaign, are there any endpoints left with thin descriptions — use it even when the user names neither the list nor the campaign, as long as they mean the quality of the published endpoint texts. DO NOT USE FOR: Spectral linter findings on the documents (openapi-lint-fix), a DTO-property campaign of its own, hand-editing `json/*_2.0.json` or `sdk/docspace-api-spec/docspace-backend.yaml`, or regenerating the SDKs (generate-sdk)."
 ---
 
 # Closing the next batch of the description queue
 
 One pass, one batch. A batch is a set of **edit sites** — the places something is actually typed —
-drawn from one document and one check, worth 8 to 10 points on the weights in
-`references/list-rules.md` §6.2. It is not a set of controllers, and that difference is the point:
-fourteen `tautological-param` findings in `files` are two DTO properties, so fourteen rows of the
-queue are two edits, while fourteen `long-summary` findings in the same document are twelve.
+drawn from one document and one check, budgeted on the weights in `references/list-rules.md` §6.2.
+It is not a set of controllers, and that difference is the point: a dozen `tautological-param`
+findings can be two DTO properties, so a dozen rows of the queue are two edits, while a dozen
+`long-summary` findings in the same document are a dozen separate titles.
 
 The queue is an inventory of documentation debt: a finding leaves it by being rewritten, never by
 being skipped, and never because a scan happened to stop seeing it. That distinction is the whole
@@ -29,16 +29,18 @@ absence is a parsing accident.
 
 | File | What it is |
 |---|---|
-| `.claude/skills/openapi-desc-opt/scan.py` | builds the queue: indexes the C# actions, reads the documents, runs the checks, writes the list |
+| `.claude/skills/openapi-desc-opt/scan.py` | builds the queue: indexes the C# actions, reads the documents, checks the surface against `EXPECTED_SURFACE`, runs the checks, writes the list and plans the batches |
 | `.claude/skills/openapi-desc-opt/unoptimized-controllers.md` | the list: the next batch, "Must fix" (tiers A and B) and "Recommended" (tier C), rewritten by every scan, deleted when both are empty |
-| `.claude/skills/openapi-desc-opt/batch-manifest.json` | what this pass declared it would close, written by `--batch` in step 3 and verified by `--verify-batch` in step 7 |
-| `.claude/skills/openapi-desc-opt/optimized-log.md` | one line per closed batch, appended by hand in step 8 |
-| `.claude/skills/openapi-desc-opt/references/list-rules.md` | how the queue is defined: units, checks, tiers, filters, control figures |
+| `.claude/skills/openapi-desc-opt/batch-manifest.json` | what this pass declared it would close, written by `--batch` in step 3 and verified by `--verify-batch` in step 7; absent until a batch is committed, and removed by `--batch` when there is nothing left to declare |
+| `.claude/skills/openapi-desc-opt/references/list-rules.md` | how the queue is defined: units, checks, tiers, filters, the axis of a batch |
 | `.claude/skills/openapi-desc-opt/references/writing-traps.md` | what this codebase does to text you edit — read before the first edit |
-| `.claude/rules/openapi-endpoint-docs.md` | the quality bar the rewrite has to meet |
+| `.claude/rules/openapi-endpoint-docs.md` | the quality bar for the operation: title, description, response codes |
+| `.claude/rules/openapi-dto-docs.md` | the quality bar for a parameter, a DTO property, an enum member |
 
-The queue, the manifest and the log are untracked working files. Do not commit them and do not put
-findings in the repository's own documentation.
+The queue and the manifest are working files of one pass: `.gitignore` keeps them out, and nothing
+about them means anything on another machine. What a pass closed is recorded where the rest of this
+repository's history is — in the commit that closed it. Do not put findings in the repository's own
+documentation.
 
 Scope is the four documents of the public bundle — `api`, `files`, `people`, `backup`. `ai` and
 `apisystem` are outside it (list rules §5.5); they stay one flag away,
@@ -96,22 +98,24 @@ still on disk.
 The summary line per document is worth reading before the list itself:
 
 ```
-files      controllers=29  operations=215  actions=318  unmatched=0  stale=1  must_fix=9  advisory=5
+files      controllers=..  operations=..  actions=..  unmatched=0  stale=0  must_fix=..  advisory=..
 ```
 
-- `controllers` and `actions` come from the C# sources, `operations` from the document. The reference
-  figures are in `references/list-rules.md` §7 — 26/29/13/1 controllers and 254/318/91/14 actions. A number that moved by itself means the index broke, not that the API
-  changed, until you have found the commit that changed it.
+- `controllers` and `actions` come from the C# sources, `operations` from the document. The scan
+  checks them against `EXPECTED_SURFACE` in `scan.py` itself and prints a `SURFACE:` line when they
+  disagree. Such a line means the index broke, not that the API changed — stop and find the commit
+  that moved it, because a controller the index lost takes its findings with it and reads exactly
+  like a closed batch.
 - `unmatched` must be 0. Operations are tied to actions by their normalised title; anything unmatched
   is an operation whose findings nobody can attribute, and they are listed at the end of the file.
 - `stale` counts operations whose published description no longer matches the `<remarks>` behind it.
   On freshly regenerated documents it is zero or close to it; a jump means step 1 was skipped or a
   regeneration silently failed.
 
-Under the header the list now carries **"Batch of the next pass"**: the edit sites this pass should
+Under the header the list carries **"Batch of the next pass"**: the edit sites this pass should
 take, their weights, and — below it — the rest of the planned passes, so the size of what is left is
-readable as passes rather than as rows. Twelve rows of the advisory section can plan as five passes,
-not twelve — which is the number worth reporting.
+readable as passes rather than as rows. A section of a dozen rows routinely plans as a handful of
+passes, because sites group; the number of passes is the one worth reporting.
 
 - `must_fix` and `advisory` count the rows of the two sections of the file. **The split is between
   findings, not between controllers**: tier A and B findings go to **"Must fix"**, tier C ones — a
@@ -129,20 +133,15 @@ not twelve — which is the number worth reporting.
 **If both sections are empty** the script deletes the list and says so. Report that no findings
 remain in the scope, and stop — there is nothing to fix and nothing to verify.
 
-**If "Must fix" is empty but "Recommended" is not**, the pass ends here, and it ends with this
-answer and nothing else:
-
-> The mandatory findings are closed. What is left are recommendations: 20 parameters whose
-> description all but repeats the name (fileId — 12, userid — 4) and 15 titles longer than six
-> words (SettingsController — 7, FilesControllerCommon — 2). None of this stops anyone from using
-> the API — I will take it on only if you say so.
-
-`scan.py` prints that sentence itself when the mandatory section comes out empty, so it is copied,
-not composed: plain prose rather than rule codes, because the person reading it is deciding whether
-to spend an evening on it and `tautological-param — 20 findings` gives them nothing to decide with.
-The examples inside it are grouped the way the fix is grouped — parameters by the parameter, since
-one DTO property closes every operation that binds it, titles by controller, since there the edit is
-per action. Say it, and stop.
+**If "Must fix" is empty but "Recommended" is not**, the pass ends here, and it ends with the
+sentence `scan.py` printed under the header — copied, not composed. It says that the mandatory
+findings are closed, then what is left in plain prose: how many parameters all but repeat their
+name and how many titles run long, with the worst offenders named. Rule codes are deliberately
+absent, because the person reading it is deciding whether to spend an evening on this, and
+`tautological-param — N findings` gives them nothing to decide with. The examples in it are
+grouped the way the fix is grouped — parameters by the parameter, since one DTO property closes
+every operation that binds it, titles by controller, since there the edit is per action. Say it,
+and stop.
 
 This is the milestone of the campaign and the one place
 where doing more is worse than stopping: the advisory section is by construction text that already
@@ -164,9 +163,8 @@ written afterwards proves nothing — it would be a description of the diff, not
 The batch is the one the planner put first. It holds edit sites of one document and one check,
 because the build and the regeneration are per project and because a diff that mixes rewritten titles
 with rewritten DTO properties cannot be reviewed as one thing. The planner already keeps a file's
-sites together and sends three kinds of work into a pass of their own — a controller that came back
-for the same check, a site whose blast radius leaves its document, and anything needing a behaviour
-decision (`references/list-rules.md` §6.3).
+sites together and sends two kinds of work into a pass of their own — a site whose blast radius
+leaves its document, and anything needing a behaviour decision (`references/list-rules.md` §6.3).
 
 **A pass works "Must fix" and nothing else.** A tier C site is never picked up because the
 mandatory section ran out, because it stands in the same file, or because the controller you are
@@ -187,7 +185,9 @@ Then open the files the batch names. Two things about where the text actually li
 
 ## 4. Rewrite the text
 
-Read `.claude/rules/openapi-endpoint-docs.md` — the whole file, not from memory — and
+Read the rule the batch's check belongs to — the whole file, not from memory:
+`.claude/rules/openapi-endpoint-docs.md` for a description, a title or a response text,
+`.claude/rules/openapi-dto-docs.md` for a parameter finding, which is typed on a DTO property — and
 `references/writing-traps.md` before the first edit. The rule is the bar; the traps file is what this
 codebase does to text that looks fine in the editor.
 
@@ -232,24 +232,27 @@ python .claude/skills/openapi-desc-opt/scan.py --verify-batch
 ```
 
 This recomputes the queue from the freshly regenerated document and compares it against the manifest.
-It is set equality, not an impression of the diff, and it prints one of four verdicts. **It proves
-nothing unless step 6 really rewrote the document** — everything below rests on that.
+It is set equality, not an impression of the diff: it names every finding that moved, in whichever
+direction, and closes with a single `VERDICT:` line. **It proves nothing unless step 6 really rewrote
+the document** — everything below rests on that.
 
-1. **`the batch closed in full, the diff matched the declaration`** — what was declared closed, nothing else
-   moved, the counts held. This is the outcome to report.
-2. **`STILL OPEN`** — a declared finding survived. The line names it, so read what the finding now says
-   before editing again: a `thin-description` that survived a rewrite usually means the text went into
-   the wrong tag (a second `<remarks>`, or `<summary>`), and a parameter finding that survived usually
-   means the text went on the action instead of the DTO property that feeds it. A partly closed batch
-   is a reportable result, not a failure — the remainder is simply the next batch, and the manifest
-   names it precisely.
-3. **`CLOSED BEYOND THE DECLARATION`** — something closed that the pass never claimed. Usually a shared
-   DTO property reaching further than the planner counted, which is good news and still has to be
-   named in the report rather than discovered by the next pass.
-4. **`COUNTER MOVED`** — `controllers`, `operations`, `actions` or `unmatched` moved, or `stale`
-   grew. Stop and work out why before reporting anything: a controller that vanished because the
-   parser lost it takes its findings with it and reads exactly like a fix. This is the failure mode
-   the whole step exists for.
+Read the named lines before the verdict, because each kind asks for something different:
+
+- **a declared finding that is still open** — the edit did not land where the check looks. A
+  `thin-description` that survived a rewrite usually means the text went into the wrong tag (a second
+  `<remarks>`, or `<summary>`); a parameter finding that survived usually means the text went on the
+  action instead of the DTO property that feeds it. A partly closed batch is a reportable result, not
+  a failure — the remainder is simply the next batch, and the manifest names it precisely.
+- **something closed that was never declared** — usually a shared DTO property reaching further than
+  the planner counted. Good news, and still to be named in the report rather than discovered by the
+  next pass.
+- **something that appeared** — a finding that was not open when the batch was declared. The edit
+  itself is the first suspect: a rewritten title that ran past six words, a new response text of two
+  words. Fix it inside this pass; it is your own diff.
+- **a counter that moved** — the surface or `stale` is not where the manifest left it. Stop and work
+  out why before reporting anything: a controller that vanished because the parser lost it takes its
+  findings with it and reads exactly like a fix. This is the failure mode the whole step exists
+  for.
 
 A diff against the previous list stays useful for reading what changed in prose, but it is no longer
 the proof:
@@ -263,26 +266,9 @@ pass: a pass closes the findings of one check, and the other checks were never i
 plainly — "the N declared findings are closed, the controller still has M tier C findings under
 'Recommended'" — so that nobody reads a surviving row as a failed fix.
 
-## 8. Log the pass and report
+## 8. Report
 
-Append one line **per controller the batch closed** to
-`.claude/skills/openapi-desc-opt/optimized-log.md` (create it if this is the first pass) in exactly
-this shape, because the next scan parses it — the date, the controller, and **the check names**,
-which have to appear between the dash and the semicolon:
-
-```markdown
-- 2026-01-15 ExampleController — 5 operations, empty-response-text; batch api·empty-response-text (5 sites), edit in ExampleController.cs, document api_2.0.json regenerated
-```
-
-The check names are load-bearing, not decoration. The flag "came back into the queue" fires on the pair
-controller + check, so a line that names no check claims every check for that controller and will
-flag it on findings nobody ever closed — and then send them into passes of their own.
-
-A controller that genuinely returns — open again on a check the log says was closed — is flagged in
-the list and goes into a pass of its own. That is not an error to hide: either a merge lost the edit
-or the pass closed the wrong thing, and only a person can tell which.
-
-Then report, in the user's language and in this order: which batch was closed — the document, the check, the edit
+Report, in the user's language and in this order: which batch was closed — the document, the check, the edit
 sites and the controllers they cover — what was rewritten (actions, DTO properties, response texts),
 the proof from step 7 as `--verify-batch` printed it, and then where the campaign now stands, which is
 one of three endings and has to be said in as many words:
@@ -313,7 +299,7 @@ half-closed a batch and cannot say which half is not.
 - **The documents cannot be regenerated.** Work on the snapshot if you must, but do not report a
   finding as closed on the strength of an unregenerated document.
 - **The batch is heavier than the ceiling.** The planner says so on the batch itself: it happens when
-  one file holds more than ten points, and a file is not split between passes. Carry it, or ask
+  one file holds more points than the budget allows, and a file is not split between passes. Carry it, or ask
   whether to take only part of the file — and if you do take part, say which part in the report,
   because the manifest will show the rest as surviving.
 - **The row's only open findings are tier C.** Then it is not in "Must fix" at all, and the pass
@@ -325,5 +311,5 @@ half-closed a batch and cannot say which half is not.
   mismatch, and ask before touching the handler.
 - **The finding is an artefact.** A response text the generator prints everywhere, an operation whose
   title collides with another's, a controller that the index sees but the document does not. Fix
-  `scan.py` or its filters rather than the controller, and re-run the control figures of
-  `references/list-rules.md` §7 afterwards to show the fix did not move anything else.
+  `scan.py` or its filters rather than the controller, and check afterwards that the run prints no
+  `SURFACE:` line, to show the fix did not move anything else.

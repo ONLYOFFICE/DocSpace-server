@@ -1,6 +1,7 @@
 # Writing traps: what bites when you rewrite an endpoint's text in this repository
 
-`.claude/rules/openapi-endpoint-docs.md` says what good text is. This file says what this codebase
+`.claude/rules/openapi-endpoint-docs.md` (the operation) and `.claude/rules/openapi-dto-docs.md` (the
+property) say what good text is. This file says what this codebase
 does to text that looks fine in the editor — the handful of mechanisms that swallow an edit, publish
 it somewhere else than intended, or turn a documentation pass into a behaviour change.
 
@@ -10,10 +11,9 @@ report, because they change with every run.
 
 ## The generator
 
-**`<summary>` becomes the operation's `summary`, `<remarks>` becomes its `description`.** Inverted
-relative to ordinary C# habit: the short title goes in `<summary>`, the long explanation in
-`<remarks>`, and the `<remarks>` block is written first. Swapping them silently exchanges the title
-and the description across the published contract and all eight SDKs.
+**The `<summary>`/`<remarks>` mapping is inverted relative to C# habit** (rule §0), and swapping
+them fails silently: the build says nothing, and the title and the description trade places across
+the contract and all eight SDKs.
 
 **A second `<remarks>` block on the same action is dropped without a word.** Only the first one
 reaches the document. If an action seems to ignore a rewrite, count the blocks before doubting the
@@ -27,16 +27,15 @@ argument, so the tag matches nothing, reaches no document, and costs two compile
 genuinely cannot be bound: if a DTO property can carry the value, `[FromRoute]` plus an XML
 `<summary>` on that property both documents and binds it, which is strictly better.
 
-**A parameter's text comes from the bound DTO property, which many operations share.** Rewriting
-`fileId` in one place improves six operations at once — that is the whole point of the "common
-identifiers" queue in the list rules (§4.2) — but it also means the text must be true of every one of
-them. Anything true of a single operation belongs in that operation's `<remarks>`.
+**A parameter's text comes from the bound DTO property, which many operations share.** Rewriting a
+common identifier once improves every operation that binds it — that is the whole point of the
+"common identifiers" queue in the list rules (§4.2) — but it also means the text must be true of
+every one of them. Anything true of a single operation belongs in that operation's `<remarks>`.
 
 **Response texts come from `[SwaggerResponse(code, "text")]`, and the generator adds its own on top.**
-`400 Bad request.`, `401 Unauthorized`, `429 Too many requests.`, `500 Internal server error.`, `502`,
-`503` are printed by a filter for every operation; no controller edit changes them, and `scan.py`
-already filters them out. If a finding names one of these, the filter has a hole — fix the filter,
-do not "fix" the controller.
+A filter prints the standard client- and server-error texts for every operation, so no controller
+edit changes them; the scan drops them before the checks run. If a finding ever names one, the filter
+has a hole — fix the filter, do not "fix" the controller.
 
 **A doubly-misspelled XML tag is silent in the whole C# toolchain.** `<ssummary>` compiles, warns
 about nothing, and simply never appears in the document. When an edit does not show up after a
@@ -58,14 +57,14 @@ as 500, an `InvalidOperationException` as 403, a quota refusal as 402. The `[Swa
 part of the contract and the SDKs; changing which codes are listed is a contract change, so treat the
 set as frozen unless the user asked for it, and make the *texts* accurate instead.
 
-**`ApiDateTime` is shifted twice.** Never write that such a value is "in UTC" or "in the portal's time
-zone" — both readings are wrong for at least some callers, and an agent that trusts either will send
-back a time that lands hours away.
+**One exception: adding the 200 an action already returns is not a contract change.** An action with
+no `[SwaggerResponse(200, ...)]` is published with the generator's own `"OK"`, which is exactly what
+`empty-response-text` fires on — and on a `Task`-returning action there is no other code to add. So
+writing `[SwaggerResponse(200, "<what the caller now knows>")]` where none stood replaces a default
+text with a true one and adds no code to the contract. It stops being this case the moment the code
+is one the handler may not reach — then it falls back under the paragraph above.
 
-**A positional `record`'s `<param>` example leaks into the description.** For positional records the
-`<example>` never reaches the schema and the text ends up inside the property description instead, so
-those DTOs have no example coverage to speak of. Do not chase examples there in a controller pass.
-
-**Say where an identifier comes from.** The most common real gap behind a `tautological-param`
-finding is not wording but origin: which operation hands out this ID, and what a numeric value
-addresses versus a string one (portal entry versus an entry on a connected third-party account).
+**Say where an identifier comes from.** The real gap behind a `tautological-param` finding is
+usually not the wording but the origin: which operation hands out this ID, and what a numeric value
+addresses as against a string one (an entry of the portal versus one on a connected third-party
+account). Rewording the sentence without answering that closes the check and not the gap.
