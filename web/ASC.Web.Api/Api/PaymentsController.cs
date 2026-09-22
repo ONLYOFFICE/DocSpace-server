@@ -206,16 +206,16 @@ public class PaymentController(
 
     /// <remarks>
     /// Buys more units of a wallet service - extra administrators, disk storage, backup, AI tools, AI search or
-    /// DocsCloud - or writes down the quantity that service will have after the next renewal, depending on
+    /// Docs Connect - or writes down the quantity that service will have after the next renewal, depending on
     /// `productQuantityType`. With `Add` (1) the units are bought at once and paid out of the portal wallet, so the
     /// wallet needs a sub-account in the accounting currency and enough money on it; with `Set` (0) nothing is
     /// charged now and the quantity only takes effect in the next period, where an empty or zero quantity cancels a
     /// change scheduled earlier. `Renew` and `Sub` are not accepted here. The portal needs a billing customer and the
     /// caller has to be a DocSpace administrator; a service that is an add-on to the plan also needs the plan itself
     /// to be paid, otherwise the answer is 402. Minimum quantities apply - disk storage starts at 100 units, the
-    /// DocsCloud developer pack at 10, and the administrators may not be fewer than the portal already has - and in
-    /// the `Add` form they are checked only while the portal does not hold that service yet. Asking for the DocsCloud
-    /// plan in the `Set` form while the developer pack is active schedules the reversion to it at the next period,
+    /// Docs Connect Dev Pack at 10, and the administrators may not be fewer than the portal already has - and in
+    /// the `Add` form they are checked only while the portal does not hold that service yet. Asking for the Docs Connect
+    /// plan in the `Set` form while Docs Connect Dev Pack is active schedules the reversion to it at the next period,
     /// while the upgrade in the other direction is not done here at all: use
     /// `POST api/2.0/settings/docscloud/switchtodevpack`. The result is `true` when the change was accepted; the call
     /// is mutating, spends money in its `Add` form and is limited to ten requests a minute per user by default. Price
@@ -652,7 +652,7 @@ public class PaymentController(
 
     /// <remarks>
     /// Lists every service the portal may pay for out of its wallet - extra administrators, disk storage, backup, AI
-    /// tools, AI search and DocsCloud - with the price of a unit, the unit it is sold in and whether the portal has
+    /// tools, AI search and Docs Connect - with the price of a unit, the unit it is sold in and whether the portal has
     /// it switched on. Nothing has to be called first, the caller needs the permission to edit the portal settings,
     /// and the call is read-only. Services that are variants of one another are folded together: the visible one
     /// carries the rest in its `innerServices`, so a client renders one card per group. The AI services are left out
@@ -1156,12 +1156,12 @@ public class PaymentController(
 
     /// <remarks>
     /// Lists the wallet services the portal is running right now: the add-ons its plan pays for that are in the
-    /// active state, plus the ones an administrator switched on by hand in the wallet service settings; the DocsCloud
+    /// active state, plus the ones an administrator switched on by hand in the wallet service settings; the Docs Connect
     /// trial is listed as well, although it is not paid from the wallet. Only a DocSpace administrator may call it,
     /// no billing customer is needed for it, and the call is read-only. Every item names the service, its title and
     /// the unit it is measured in, and says whether it is a subscription; a subscribed service also carries the limit
     /// it grants and how much of it is used where that number is known - the editor seats and the editors currently
-    /// active for DocsCloud, the purchased units and the units already consumed for disk storage. A service listed
+    /// active for Docs Connect, the purchased units and the units already consumed for disk storage. A service listed
     /// with no limit is one whose usage is not counted this way, not one without a limit. The catalogue of what could
     /// be switched on is `GET api/2.0/portal/payment/walletservices`, and switching one is
     /// `POST api/2.0/portal/payment/servicestate`.
