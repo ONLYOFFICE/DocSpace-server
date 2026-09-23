@@ -256,6 +256,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Portal", "Operations for working with portal" },
         { "Settings", "Operations for working with settings" },
         { "Backup", "Operations for working with backup" },
+        { "Docs", "Operations carried out by the document service on behalf of the portal." },
         { "Files / Files", "Operations for working with files." },
         { "Files / Folders", "Operations for working with folders." },
         { "Files / Operations", "Operations for performing actions on files and folders." },

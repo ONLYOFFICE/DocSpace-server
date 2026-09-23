@@ -47,6 +47,12 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
     CoreSettings coreSettings,
     IHttpClientFactory clientFactory)
 {
+    /// <summary>
+    /// The variant of a document service endpoint that takes the source uploaded with the request. The url properties
+    /// of <see cref="FilesLinkUtility"/> carry no trailing slash, so it is simply appended.
+    /// </summary>
+    private const string FromFileSuffix = "/from-file";
+
     public static string GenerateRevisionId(string expectedKey)
     {
         return ASC.Files.Core.Helpers.DocumentService.GenerateRevisionId(expectedKey);
@@ -171,6 +177,33 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 isAsync,
                 filesLinkUtility.DocServiceSignatureSecret,
                 filesLinkUtility.DocServiceSignatureHeader,
+                await filesLinkUtility.GetDocServiceSslVerificationAsync(),
+                clientFactory);
+        }
+        catch (Exception ex)
+        {
+            throw CustomizeError(ex);
+        }
+    }
+
+    /// <summary>
+    /// Converts a file the portal already holds by uploading its content to the document service, instead of handing
+    /// over an address for it to fetch. The conversion parameters travel as the document service defines them, and the
+    /// answer is the converted document itself.
+    /// </summary>
+    public async Task<Stream> GetConvertedFileAsync(Stream file,
+                                      string fileName,
+                                      ConvertFromFileBody body)
+    {
+        logger.DebugDocServiceConvertFromFile(body.FileType, body.OutputType, fileName, filesLinkUtility.DocServiceConverterUrl);
+        try
+        {
+            return await ASC.Files.Core.Helpers.DocumentService.GetConvertedFileAsync(
+                filesLinkUtility.DocServiceConverterUrl + FromFileSuffix,
+                file,
+                fileName,
+                body,
+                filesLinkUtility.DocServiceSignatureSecret,
                 await filesLinkUtility.GetDocServiceSslVerificationAsync(),
                 clientFactory);
         }

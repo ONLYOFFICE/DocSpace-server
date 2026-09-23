@@ -37,6 +37,9 @@ internal static partial class DocumentServiceConnectorLogger
     [LoggerMessage(LogLevel.Debug, "DocService convert from {fromExtension} to {toExtension} - {documentUri}, DocServiceConverterUrl:{docServiceConverterUrl}")]
     public static partial void DebugDocServiceConvert(this ILogger<DocumentServiceConnector> logger, string fromExtension, string toExtension, string documentUri, string docServiceConverterUrl);
 
+    [LoggerMessage(LogLevel.Debug, "DocService convert uploaded file from {fromExtension} to {toExtension} - {fileName}, DocServiceConverterUrl:{docServiceConverterUrl}")]
+    public static partial void DebugDocServiceConvertFromFile(this ILogger<DocumentServiceConnector> logger, string fromExtension, string toExtension, string fileName, string docServiceConverterUrl);
+
     [LoggerMessage(LogLevel.Debug, "DocService command {method} fileId {fileId} docKey {docKey} callbackUrl {callbackUrl} users {users} meta {meta}")]
     public static partial void DebugDocServiceCommand(this ILogger<DocumentServiceConnector> logger, string method, string fileId, string docKey, string callbackUrl, string users, string meta);
 
