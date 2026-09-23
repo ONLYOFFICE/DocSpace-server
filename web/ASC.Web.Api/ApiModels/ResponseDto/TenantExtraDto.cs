@@ -36,87 +36,95 @@ using License = ASC.Core.Billing.License;
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The tenant extra parameters.
+/// Everything a payment page needs about the portal at once: the build, the subscription, the quota and the
+/// document-server licence.
 /// </summary>
 /// <example>
 /// {
-///   "customMode": true,
-///   "opensource": true,
+///   "customMode": false,
+///   "opensource": false,
 ///   "enterprise": true,
-///   "developer": true,
-///   "tariff": {},
-///   "quota": {},
-///   "notPaid": true,
-///   "licenseAccept": "example value",
-///   "enableTariffPage": true,
-///   "docServerUserQuota": "2024-01-15T10:30:00Z",
-///   "docServerLicense": {}
+///   "developer": false,
+///   "notPaid": false,
+///   "licenseAccept": "01/15/2024 10:30:00",
+///   "enableTariffPage": true
 /// }
 /// </example>
 public class TenantExtraDto
 {
     /// <summary>
-    /// Specifies if an extra tenant license is customizable or not.
+    /// Whether the installation runs in the vendor's white-label mode, in which the payment pages and the vendor
+    /// links are suppressed. This flag and the three below describe the build, not the subscription.
     /// </summary>
-    /// <example>true</example>
+    /// <example>false</example>
     public bool CustomMode { get; set; }
 
     /// <summary>
-    /// Specifies if an extra tenant license is Community or not.
+    /// Whether the installation runs the open-source build, which has no paid plan at all.
     /// </summary>
-    /// <example>true</example>
+    /// <example>false</example>
     public bool Opensource { get; set; }
 
     /// <summary>
-    /// Specifies if an extra tenant license is Enterprise or not.
+    /// Whether the installation runs on an Enterprise licence file, which is what makes the licence operations
+    /// under `api/2.0/settings/license` usable.
     /// </summary>
     /// <example>true</example>
     public bool Enterprise { get; set; }
 
     /// <summary>
-    /// Specifies if an extra tenant license is Developer or not.
+    /// Whether the installation runs on a Developer licence, an Enterprise licence meant for embedding rather
+    /// than for production use.
     /// </summary>
-    /// <example>true</example>
+    /// <example>false</example>
     public bool Developer { get; set; }
 
     /// <summary>
-    /// The license tariff.
+    /// The subscription in force, in the internal shape rather than the one `GET api/2.0/portal/tariff` returns -
+    /// nothing here is withheld by role, since the whole operation already demands the portal-settings right.
     /// </summary>
     /// <example>{}</example>
     public Tariff Tariff { get; set; }
 
     /// <summary>
-    /// The license quota.
+    /// The quota the subscription grants, with its features and how much of each is already used, exactly as
+    /// `GET api/2.0/portal/payment/quota` reports it.
     /// </summary>
     /// <example>{}</example>
     public QuotaDto Quota { get; set; }
 
     /// <summary>
-    /// Specifies if the license is paid or not.
+    /// Whether the portal is behind on payment, which is what puts the interface into its restricted state.
+    /// Note the sense: `true` means unpaid.
     /// </summary>
-    /// <example>true</example>
+    /// <example>false</example>
     public bool NotPaid { get; set; }
 
     /// <summary>
-    /// The time when the license was accepted.
+    /// When the licence agreement was accepted for this installation, as a formatted date string rather than an
+    /// ISO timestamp. A date at the minimum a date can hold means it has never been accepted.
     /// </summary>
-    /// <example>2024-01-15T10:30:00Z</example>
+    /// <example>01/15/2024 10:30:00</example>
     public string LicenseAccept { get; set; }
 
     /// <summary>
-    /// Specifies if the tariff page is enabled or not.
+    /// Whether the interface should offer its payment page at all. It is `false` in white-label mode, on an
+    /// Amazon-image installation and on a server installation with no licence path configured, where paying
+    /// happens outside the portal.
     /// </summary>
     /// <example>true</example>
     public bool EnableTariffPage { get; set; }
 
     /// <summary>
-    /// The ONLYOFFICE Docs user quotas.
+    /// The editing users the document server counts against its own licence, each with the moment its seat frees
+    /// up. It is empty when the document server could not be reached, which is not the same as no users.
     /// </summary>
-    /// <example>2024-01-15T10:30:00Z</example>
+    /// <example>{ "00000000-0000-0000-0000-000000000001": "2024-01-15T10:30:00Z" }</example>
     public Dictionary<string, DateTime> DocServerUserQuota { get; set; }
 
     /// <summary>
-    /// The ONLYOFFICE Docs license.
+    /// The licence of the document server behind this portal, which is a separate licence from the portal's own
+    /// subscription. It is empty when the document server could not be reached.
     /// </summary>
     /// <example>{}</example>
     public License DocServerLicense { get; set; }

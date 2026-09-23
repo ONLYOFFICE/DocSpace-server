@@ -75,7 +75,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
     info =
         @Info(
             title = "ASC.Identity.Registration",
-            version = "1.2.0",
+            version = "1.3.0",
             description = "API for managing oauth2 clients",
             termsOfService = "",
             contact =

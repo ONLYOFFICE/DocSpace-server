@@ -34,12 +34,13 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for receiving an invitation link.
+/// Which role the portal invitation link grants.
 /// </summary>
 public class InvitationLinkRequestDto
 {
     /// <summary>
-    /// The type of employee role for the invitation link (DocSpaceAdmin, RoomAdmin or User).
+    /// The role whoever follows the link joins with. Only `DocSpaceAdmin`, `RoomAdmin` and `User` have a link; any
+    /// other role is refused. The portal keeps at most one link per role, so this value alone identifies it.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "employeeType")]
@@ -47,24 +48,27 @@ public class InvitationLinkRequestDto
 }
 
 /// <summary>
-/// The request parameters for creating an invitation link.
+/// The role a new invitation link grants, and the limits placed on it.
 /// </summary>
 public class InvitationLinkCreateRequestDto
 {
     /// <summary>
-    /// The type of employee role for the invitation link (DocSpaceAdmin, RoomAdmin or User).
+    /// The role whoever follows the link joins with. Only `DocSpaceAdmin`, `RoomAdmin` and `User` are accepted, and
+    /// the role cannot be changed afterwards - delete the link and create one for the other role instead.
     /// </summary>
     /// <example>1</example>
     public required EmployeeType EmployeeType { get; set; }
 
     /// <summary>
-    /// The expiration date of the invitation link.
+    /// When the link stops letting anyone in, read in the portal time zone. It has to lie in the future; leaving it
+    /// out creates a link with no deadline at all.
     /// </summary>
     /// <example>2025-06-15T10:30:00.0000000Z</example>
     public DateTime? Expiration { get; set; }
 
     /// <summary>
-    /// The maximum number of times the invitation link can be used.
+    /// How many accounts may join through the link in total. Leaving it out creates a link with no use limit; the
+    /// uses spent so far are reported as `currentUseCount`.
     /// </summary>
     /// <example>1</example>
     [Range(1, 1000)]
@@ -72,24 +76,28 @@ public class InvitationLinkCreateRequestDto
 }
 
 /// <summary>
-/// The request parameters for updating an invitation link.
+/// The invitation link being changed, with the deadline and use limit it is to have afterwards.
 /// </summary>
 public class InvitationLinkUpdateRequestDto
 {
     /// <summary>
-    /// The ID of the invitation link.
+    /// The link to change, by the `id` that creating or reading it returned. The role behind that id cannot be
+    /// changed here.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid Id { get; set; }
 
     /// <summary>
-    /// The expiration date of the invitation link.
+    /// The new deadline, read in the portal time zone. The body is applied as a whole, so leaving it out clears the
+    /// deadline rather than keeping the current one; a moment in the past is refused.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     public DateTime? Expiration { get; set; }
 
     /// <summary>
-    /// The maximum number of times the invitation link can be used.
+    /// The new total number of accounts that may join through the link. It may not be lower than the uses already
+    /// spent, which the link reports as `currentUseCount`, and leaving it out removes the limit rather than keeping
+    /// the current one.
     /// </summary>
     /// <example>1</example>
     [Range(1, 1000)]
@@ -97,12 +105,13 @@ public class InvitationLinkUpdateRequestDto
 }
 
 /// <summary>
-/// The request parameters for deleting an invitation link.
+/// Which invitation link is withdrawn.
 /// </summary>
 public class InvitationLinkDeleteRequestDto
 {
     /// <summary>
-    /// The ID of the invitation link.
+    /// The link to delete, by the `id` that creating or reading it returned. A link recreated for the same role
+    /// afterwards gets a new id, a new URL and a use count starting from zero.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid Id { get; set; }

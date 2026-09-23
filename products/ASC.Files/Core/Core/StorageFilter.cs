@@ -33,6 +33,9 @@
 
 namespace ASC.Files.Core.Core;
 
+/// <summary>
+/// The storage kind to filter the entries by.
+/// </summary>
 public enum StorageFilter
 {
     [Description("None")]

@@ -219,7 +219,7 @@ func (a *{{{classname}}}Service) {{nickname}}Execute(r {{#structPrefix}}{{&class
 	{{^isCollectionFormatMulti}}
 		parameterAddToHeaderOrQuery(localVarQueryParams, "{{{baseName}}}", r.{{paramName}}, "{{style}}", "{{collectionFormat}}")
 	{{/isCollectionFormatMulti}}
-	{{#defaultValue}} else {
+	}{{#defaultValue}} else {
 	{{#isArray}}
 		var defaultValue {{{dataType}}} = {{{dataType}}}{{{.}}}
 		parameterAddToHeaderOrQuery(localVarQueryParams, "{{{baseName}}}", defaultValue, "{{style}}", "{{collectionFormat}}")
@@ -230,8 +230,7 @@ func (a *{{{classname}}}Service) {{nickname}}Execute(r {{#structPrefix}}{{&class
 		parameterAddToHeaderOrQuery(localVarQueryParams, "{{{baseName}}}", defaultValue, "{{style}}", "{{collectionFormat}}")
 		r.{{paramName}} = &defaultValue
 	{{/isArray}}
-	{{/defaultValue}}
-		}
+	}{{/defaultValue}}
 	{{/required}}
 	{{/queryParams}}
 	// to determine the Content-Type header

@@ -55,6 +55,6 @@ public class AspireAppFixture : AspireHostFixture<PortalClients>
 
         // The owner's root folder tree is provisioned lazily on first access — warm that too,
         // it is what every test creating a room hits right after registration.
-        using var rootFolders = await clients.FilesApi.GetAsync("/api/2.0/files/@root", TestContext.Current.CancellationToken);
+        await clients.FoldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken);
     }
 }

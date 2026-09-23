@@ -49,6 +49,10 @@ public static class ResourceNames
     public const string People = "onlyoffice-people";
     public const string Ai = "onlyoffice-ai";
 
+    /// <summary>The identity (OAuth2) containers — Spring services built from common/ASC.Identity.</summary>
+    public const string IdentityRegistration = "onlyoffice-identity-registration";
+    public const string IdentityAuthorization = "onlyoffice-identity-authorization";
+
     /// <summary>
     /// The DocSpace database, for a suite that talks to it directly rather than through a service —
     /// also the name its connection string is published under.

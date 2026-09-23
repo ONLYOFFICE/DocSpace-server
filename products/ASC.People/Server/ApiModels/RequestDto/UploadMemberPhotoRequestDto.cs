@@ -39,21 +39,26 @@ namespace ASC.People.ApiModels.RequestDto;
 public class UploadMemberPhotoRequestDto
 {
     /// <summary>
-    /// The user ID.
+    /// The profile whose avatar is uploaded, taken from the route. Either the ID of the account or its user name is
+    /// accepted, and it has to be the calling account, because a profile photo can only be changed by its owner.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "userid")]
     public required string UserId { get; set; }
 
     /// <summary>
-    /// The image data.
+    /// The image itself, sent as a multipart form field. It has to be a raster format the portal can read and stay
+    /// within the portal limit on image size; sending no file makes the operation answer with `success` false rather
+    /// than an error status.
     /// </summary>
-    /// <example>{"file": "photo.jpg"}</example>
+    /// <example>photo.png</example>
     [FromForm]
     public required IFormFile File { get; set; }
 
     /// <summary>
-    /// Specifies whether to autosave a photo or not.
+    /// Set it to true to make the uploaded image the avatar right away. With the default false the image is only
+    /// stored as a temporary file whose name comes back in `data`, and it has to be passed to
+    /// `POST api/2.0/people/{userid}/photo/thumbnails` to take effect.
     /// </summary>
     /// <example>true</example>
     [FromForm(Name = "Autosave")]

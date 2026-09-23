@@ -104,8 +104,8 @@ public static class DbMessageExtension
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_ai_integration_messages_thread");
 
-            entity.HasIndex(e => new { e.TenantId, e.ThreadId, e.Timestamp })
-                .HasDatabaseName("IX_tenant_id_thread_id_timestamp");
+            entity.HasIndex(e => new { e.TenantId, e.ThreadId, e.Timestamp, e.Id })
+                .HasDatabaseName("IX_tenant_id_thread_id_timestamp_id");
         });
     }
 
@@ -144,8 +144,8 @@ public static class DbMessageExtension
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_ai_integration_messages_thread");
 
-            entity.HasIndex(e => new { e.TenantId, e.ThreadId, e.Timestamp })
-                .HasDatabaseName("IX_ai_integration_messages_tenant_id_thread_id_timestamp");
+            entity.HasIndex(e => new { e.TenantId, e.ThreadId, e.Timestamp, e.Id })
+                .HasDatabaseName("IX_ai_integration_messages_tenant_id_thread_id_timestamp_id");
         });
     }
 }

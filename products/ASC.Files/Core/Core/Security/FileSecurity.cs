@@ -1036,13 +1036,14 @@ public class FileSecurity(
             if (entry.Security != null && entry.SecurityByUsers != null && entry.SecurityByUsers.TryGetValue(userId, out _))
             {
                 yield return entry;
+                continue;
             }
 
             var security = new Dictionary<FilesSecurityActions, bool>();
             var parentFolders = await GetFileParentFolders(entry.ParentId);
             var shares = await PreloadEntrySharesAsync(entry, userId, isDocSpaceAdmin);
 
-            foreach (var action in Enum.GetValues<FilesSecurityActions>().Where(r => _securityEntries[entry.FileEntryType].Contains(r)))
+            foreach (var action in _securityEntries[entry.FileEntryType])
             {
                 security[action] = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
             }

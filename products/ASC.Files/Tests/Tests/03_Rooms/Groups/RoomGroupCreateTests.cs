@@ -126,7 +126,7 @@ public class RoomGroupCreateTests(
         // Assert
         g1.Id.Should().NotBe(g2.Id);
 
-        var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var names = list.Select(g => g.Name).ToList();
         names.Should().Contain(["Group One", "Group Two"]);
     }
@@ -235,7 +235,7 @@ public class RoomGroupCreateTests(
         // Assert
         exception.ErrorCode.Should().Be(500);
 
-        var groups = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var groups = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
         groups.Should().NotContain(g => g.Name.Contains("😀"), "the refused name must not be stored");
     }
 
@@ -283,7 +283,7 @@ public class RoomGroupCreateTests(
         var created = await CreateRoomGroup("In The List", [roomId]);
 
         // Act
-        var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
         var found = list.SingleOrDefault(g => g.Id == created.Id);

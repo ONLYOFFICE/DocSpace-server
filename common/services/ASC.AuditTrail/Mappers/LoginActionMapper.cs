@@ -63,5 +63,6 @@ internal class LoginNoneModuleActionMapper : ILocationActionMapper
 
         Actions.Add(MessageAction.LoginSuccessViaSocialAccount, new MessageMaps(nameof(AuditReportResource.LoginSuccessSocialAccount)));
         Actions.Add(MessageAction.LoginSuccessViaSocialApp, new MessageMaps(nameof(AuditReportResource.LoginSuccessSocialApp)));
+        Actions.Add(MessageAction.SuspiciousLoginDetected, new MessageMaps(nameof(AuditReportResource.SuspiciousLoginDetected), ActionType.None, ProductType.Login, LocationType.None));
     }
 }

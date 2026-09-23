@@ -40,6 +40,12 @@ import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js"
 import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject } from "../narrow.js";
 import type { ToolPrefsStorage } from "@onlyoffice/ai-chat/core";
+import {
+  chatContextScope,
+  invalidateChatContext,
+  readChatContext,
+  reportChatContextMiss,
+} from "./chatContextSnapshot.js";
 
 const BASE_PATH = "/tool-prefs";
 const DISABLED_PATH = `${BASE_PATH}/disabled`;
@@ -49,13 +55,32 @@ function entityIdQuery(entityId: string | undefined): Record<string, QueryValue>
   return entityId ? { entityId } : undefined;
 }
 
+// The round snapshot's raw `serverType -> { disabled, allowAlways }` map for
+// the scope `entityId` folds to, or `undefined` when the read must go to the
+// AI service (no snapshot, stale after a write, or an id the snapshot does
+// not describe).
+function snapshotToolPrefs(entityId: string | undefined): unknown {
+  const snapshot = readChatContext("toolPrefs");
+  const scope = snapshot ? chatContextScope(snapshot, entityId) : undefined;
+  return scope?.toolPrefs;
+}
+
 // `scopedEntityId` must already be gated via `resolveAgentEntityId`.
 async function fetchToolPrefs(scopedEntityId: string | undefined): Promise<unknown> {
+  const fromSnapshot = snapshotToolPrefs(scopedEntityId);
+  if (fromSnapshot !== undefined) {
+    return fromSnapshot;
+  }
+  reportChatContextMiss(`toolPrefs.read(${scopedEntityId ?? "-"})`);
   const query = entityIdQuery(scopedEntityId);
   return aiService.get(BASE_PATH, query ? { query } : undefined);
 }
 
 async function readToolPrefsRaw(entityId: string | undefined): Promise<unknown> {
+  const fromSnapshot = snapshotToolPrefs(entityId);
+  if (fromSnapshot !== undefined) {
+    return fromSnapshot;
+  }
   return fetchToolPrefs(await resolveAgentEntityId(entityId));
 }
 
@@ -182,7 +207,7 @@ function withoutPortalServer(
 // The DocSpace integration tools are one logical source split over two group
 // keys only because the engine gates approval per serverType (the approval
 // tools live under the `-approval` group). A user disabling e.g.
-// docspace_generate_docx cannot know which of the two keys the tool is
+// onlyoffice_generate_docx cannot know which of the two keys the tool is
 // grouped under — the split is an implementation detail — so on read the two
 // disabled lists are merged and served under BOTH keys: a name disabled
 // under either takes effect regardless of the group the tool is emitted in
@@ -214,6 +239,7 @@ async function putDisabled(
     disabled: withoutPortalServer(withClearedKeys(disabled, stored)),
     entityId: scopedEntityId,
   });
+  invalidateChatContext("toolPrefs");
 }
 
 async function putAllowAlways(
@@ -226,6 +252,7 @@ async function putAllowAlways(
     allowAlways: withClearedKeys(allowAlways, stored),
     entityId: scopedEntityId,
   });
+  invalidateChatContext("toolPrefs");
 }
 
 export class HttpToolPrefsStorage implements ToolPrefsStorage {

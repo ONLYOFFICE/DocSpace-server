@@ -40,7 +40,10 @@ namespace ASC.Notify.Tests.Invites;
 /// </summary>
 public class SaasAgentInviteExistingUserLetterTests : LetterTestBase<SaasAgentInviteExistingUserNotifyAction>
 {
-    private const string AgentTitle = "Agent title";
+    // Named by whoever creates the agent and rendered as ${Message}, so the letter has to escape it —
+    // see SaasRoomInviteExistingUserLetterTests for the room twin.
+    private const string AgentTitle = "<a href=//evil.com>Agent title</a>";
+    private const string EncodedAgentTitle = "&lt;a href=//evil.com&gt;Agent title&lt;/a&gt;";
 
     private static string AgentUrl(LetterScope scope)
     {
@@ -58,8 +61,9 @@ public class SaasAgentInviteExistingUserLetterTests : LetterTestBase<SaasAgentIn
     {
         letter.Body.Should().Contain(Resource("ButtonJoinAgent", scope.Culture))
             .And.Contain(AgentUrl(scope))
-            .And.Contain(AgentTitle)
             .And.Contain(scope.PortalUrl);
+
+        letter.Body.Should().Contain(EncodedAgentTitle).And.NotContain(AgentTitle);
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)

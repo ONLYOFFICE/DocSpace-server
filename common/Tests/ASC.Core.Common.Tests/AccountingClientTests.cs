@@ -222,6 +222,7 @@ public class AccountingClientTests
         services.AddSingleton(typeof(ICache), typeof(AscCache));
         services.AddScoped<AccountingClient>();
         services.AddAccountingHttpClient(configuration);
+        services.AddFusionCache();
 
         var provider = services.BuildServiceProvider();
         var client = provider.GetRequiredService<AccountingClient>();
@@ -252,6 +253,7 @@ public class AccountingClientTests
         services.AddSingleton<IConfiguration>(configuration);
         services.AddSingleton(typeof(ICache), typeof(AscCache));
         services.AddScoped<AccountingClient>();
+        services.AddFusionCache();
 
         services.AddAccountingHttpClient(configuration);
 

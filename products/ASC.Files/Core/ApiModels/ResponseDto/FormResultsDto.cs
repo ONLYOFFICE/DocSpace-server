@@ -33,6 +33,9 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// A single filled-in form submission.
+/// </summary>
 public class FormResultsDto
 {
     /// <summary>
@@ -48,6 +51,9 @@ public class FormResultsDto
     public IEnumerable<FormsItemData> FormsData { get; set; }
 }
 
+/// <summary>
+/// All submissions of a form, together with the metadata of its fields.
+/// </summary>
 public class FormSubmissionsDto
 {
     /// <summary>

@@ -37,7 +37,7 @@ import logger from "./log.js";
 import { buildOpenApiDocument, docsHtml } from "./openapi.js";
 import type { EngineDoc, OpenApiSchemaBundle } from "./openapi.js";
 import { createRequire } from "module";
-import { API_PREFIX, ENGINE_DOCS, CUSTOM_ROUTE_DOCS } from "./apiCatalog.js";
+import { API_PREFIX, ENGINE_DOCS, CUSTOM_ROUTE_DOCS, CUSTOM_TAG_DOCS } from "./apiCatalog.js";
 
 // Concrete request/response schemas, produced by the build-time generator
 // (`yarn openapi`) and committed. Backs the served document with real types;
@@ -141,6 +141,7 @@ export default function registerRoutes(app: Application): void {
     apiPrefix: API_PREFIX,
     engines: ENGINE_DOCS,
     customRoutes: CUSTOM_ROUTE_DOCS,
+    customTagDescriptions: CUSTOM_TAG_DOCS,
     schemas: openApiSchemas,
   });
   router.get("/openapi.json", (_req, res) => {

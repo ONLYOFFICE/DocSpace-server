@@ -32,6 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 global using System.ComponentModel.DataAnnotations;
+global using System.Net;
 global using System.Net.Mail;
 global using System.Security;
 global using System.Security.Claims;

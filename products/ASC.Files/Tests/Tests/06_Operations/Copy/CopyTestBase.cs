@@ -132,22 +132,4 @@ public abstract class CopyTestBase(
 
         return form.Id;
     }
-
-    private async Task<int> CopyFileAsRaw(int fileId, string destTitle, int destFolderId, bool toForm)
-    {
-        var payload = JsonSerializer.Serialize(new { destTitle, destFolderId, toForm });
-        using var content = new StringContent(payload, Encoding.UTF8, "application/json");
-        using var response = await _filesClient.PostAsync($"api/2.0/files/file/{fileId}/copyas", content, TestContext.Current.CancellationToken);
-
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            throw new HttpRequestException($"Unable to copy file {fileId} as '{destTitle}' ({(int)response.StatusCode}): {body}");
-        }
-
-        using var json = JsonDocument.Parse(body);
-
-        return json.RootElement.GetProperty("response").GetProperty("id").GetInt32();
-    }
 }

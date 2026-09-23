@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for handling the current portal tariff.
+/// Whether the portal tariff is taken from the cache or re-read from the billing system.
 /// </summary>
 /// <example>
 /// {
@@ -44,7 +44,8 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 public class CurrentPortalTariffRequestDto
 {
     /// <summary>
-    /// The value indicating whether the current portal tariff information should be refreshed.
+    /// Whether the tariff is re-read from the billing system instead of the portal cache. The remote read is slower,
+    /// so ask for it right after a payment and leave it off for ordinary page loads.
     /// </summary>
     /// <example>true</example>
     [FromQuery(Name = "refresh")]

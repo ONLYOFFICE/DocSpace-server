@@ -54,7 +54,7 @@ public class RoomGroupLifecycleTests(
         info.Name.Should().Be("Lifecycle");
 
         // Assert — appears in list
-        var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
         list.Select(g => g.Id).Should().Contain(groupId);
 
         // Act & Assert — rename
@@ -101,7 +101,7 @@ public class RoomGroupLifecycleTests(
         info.Icon.Id.Should().Be("flag");
         info.TotalRooms.Should().Be(1);
 
-        var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
         var g = list.Single(x => x.Id == created.Id);
         g.Name.Should().Be("CR After");
         g.Icon.Id.Should().Be("flag");
@@ -125,7 +125,7 @@ public class RoomGroupLifecycleTests(
         var info = (await _roomGroupsApi.GetRoomGroupInfoAsync(created.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         info.TotalRooms.Should().Be(2);
 
-        var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
         list.Single(x => x.Id == created.Id).TotalRooms.Should().Be(2);
     }
 
@@ -146,7 +146,7 @@ public class RoomGroupLifecycleTests(
         var info = (await _roomGroupsApi.GetRoomGroupInfoAsync(created.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         info.TotalRooms.Should().Be(1);
 
-        var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
         list.Single(x => x.Id == created.Id).TotalRooms.Should().Be(1);
     }
 

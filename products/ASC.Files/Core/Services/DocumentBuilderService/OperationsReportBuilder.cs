@@ -66,10 +66,12 @@ public class OperationsReportBuilder(
             ? await GetTenantWalletServiceAsync(taskData.ServiceName.First())
             : null;
 
-        var addAgentColumn = tenantWalletService is TenantWalletService.AITools;
-        if (addAgentColumn)
+        var addSourceColumns = tenantWalletService is TenantWalletService.AITools;
+        if (addSourceColumns)
         {
-            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationAgent));
+            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationSourceType));
+            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationSourceTitle));
+            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationSourceId));
         }
 
         var dateFormat = context.Header.LongDateFormat;
@@ -102,7 +104,7 @@ public class OperationsReportBuilder(
                         continue;
                     }
 
-                    await writer.WriteAsync(SerializeOperations(records, dateFormat, context.Options, addAgentColumn));
+                    await writer.WriteAsync(SerializeOperations(records, dateFormat, context.Options, addSourceColumns));
                 }
             });
 
@@ -152,7 +154,7 @@ public class OperationsReportBuilder(
             foreach (var operation in report.Collection)
             {
                 var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, operation.Metadata);
-                var (agentId, agentTitle) = WalletServiceDescriptionManager.GetAgentInfo(operation.Metadata);
+                var (sourceId, sourceType, sourceTitle) = WalletServiceDescriptionManager.GetSourceInfo(operation.Metadata);
 
                 operation.Description = description;
                 operation.Details = WalletServiceDescriptionManager.GetServiceDetails(operation.Metadata);
@@ -162,8 +164,9 @@ public class OperationsReportBuilder(
                 operation.ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
                     ? value
                     : operation.ParticipantName;
-                operation.AgentId = agentId;
-                operation.AgentTitle = agentTitle;
+                operation.SourceId = sourceId;
+                operation.SourceType = sourceType;
+                operation.SourceTitle = sourceTitle;
             }
 
             yield return report.Collection;
@@ -177,7 +180,7 @@ public class OperationsReportBuilder(
         }
     }
 
-    private static string SerializeOperations(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions, bool addAgentColumn)
+    private static string SerializeOperations(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions, bool addSourceColumns)
     {
         var sb = new StringBuilder();
 
@@ -196,9 +199,11 @@ public class OperationsReportBuilder(
                 new(record.Currency, "@")
             };
 
-            if (addAgentColumn)
+            if (addSourceColumns)
             {
-                properties.Add(new PropertyValue(record.AgentTitle, "@"));
+                properties.Add(new PropertyValue(WalletServiceDescriptionManager.GetSourceTypeTitle(record.SourceType), "@"));
+                properties.Add(new PropertyValue(record.SourceTitle, "@"));
+                properties.Add(new PropertyValue(record.SourceId, "@"));
             }
 
             _ = sb.AppendLine(JsonSerializer.Serialize(properties, jsonSerializerOptions) + ",");

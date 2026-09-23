@@ -135,6 +135,7 @@ public class FoldersControllerInternal(
     /// Get the folder history report generation status
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}/log/report</path>
+    /// <param name="folderId">The folder unique identifier.</param>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Operation execution status", typeof(DocumentBuilderTaskDto))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
@@ -159,6 +160,7 @@ public class FoldersControllerInternal(
     /// Terminate the folder history report generation
     /// </summary>
     /// <path>api/2.0/files/folder/{folderId}/log/report</path>
+    /// <param name="folderId">The folder unique identifier.</param>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "Ok")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]

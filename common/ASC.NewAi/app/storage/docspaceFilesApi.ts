@@ -32,10 +32,17 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import { proxyBaseUrl, withTimeout } from "./httpClient.js";
-import { getForwardedHeaders, getFolderInfoCache } from "../requestContext.js";
+import {
+  countFilesApiRead,
+  getForwardedHeaders,
+  getFolderInfoCache,
+  getFileInfoCache,
+  setSourceMeta,
+} from "../requestContext.js";
 import { isObject, getNumber, getObject, getString, getEntityId } from "../narrow.js";
 import logger from "../log.js";
 import { sanitizeInstruction } from "../sanitizeInstruction.js";
+import { lookupChatContextFolder } from "./chatContextSnapshot.js";
 
 // Derived from the DocSpace `FolderDto<int>` (see
 // products/ASC.Files/Core/ApiModels/ResponseDto/FolderDto.cs) returned by
@@ -52,6 +59,8 @@ export interface DocspaceFolderInfo {
   prompt?: string;
   /** `FolderDto.Type` — the raw `FolderType` value. */
   folderType?: number;
+  /** `FolderDto.RoomType` — the raw `RoomType` value; only rooms carry one. */
+  roomType?: number;
   /**
    * Whether the current user may create entries here (`FolderDto.Security`
    * -> `FilesSecurityActions.Create`). `undefined` when the DTO carries no
@@ -65,6 +74,19 @@ export interface DocspaceFolderInfo {
 // type `FolderType.AiRoom`. The DTO also carries it as `RoomType.AiRoom`.
 const FOLDER_TYPE_AI_ROOM = 31;
 const ROOM_TYPE_AI_ROOM = 9;
+
+// The form-filling room — the one room kind the "Forms" section shows. That
+// section is virtual (anchored on an empty `FolderType.Forms` folder); its
+// rooms physically live in the VirtualRooms tree and differ from the rooms
+// of the "Rooms" section only by this type (`FileSecurity.MatchesFormsSplit`).
+const FOLDER_TYPE_FORM_ROOM = 15;
+const ROOM_TYPE_FORM_ROOM = 1;
+
+// Every other member of `DocSpaceHelper.RoomTypes` — the rooms of the "Rooms"
+// section: EditingRoom, CustomRoom, PublicRoom, VirtualDataRoom. Both the
+// `FolderType` and the `RoomType` spelling, as the DTO carries both.
+const FOLDER_TYPES_ROOM = new Set<number>([16, 19, 22, 29]);
+const ROOM_TYPES_ROOM = new Set<number>([2, 5, 6, 8]);
 
 // Folder types the Files API refuses an upload into outright, whatever the
 // caller's rights — see `FileUploader.GetFolderIdAsync` in
@@ -126,6 +148,9 @@ function parseFolderInfo(raw: unknown): DocspaceFolderInfo | undefined {
   if (folderType !== undefined) {
     result.folderType = folderType;
   }
+  if (roomType !== undefined) {
+    result.roomType = roomType;
+  }
   // `FolderDto.Security` is a dictionary keyed by the `FilesSecurityActions`
   // enum name; the JSON casing has changed before, so match case-insensitively
   // rather than pinning "Create".
@@ -154,6 +179,7 @@ export async function getFolderInfo(
 ): Promise<DocspaceFolderInfo | undefined> {
   const url = `${proxyBaseUrl}/api/2.0/files/folder/${encodeURIComponent(folderId)}`;
   const { signal, cancel } = withTimeout(undefined);
+  countFilesApiRead();
   try {
     const res = await fetch(url, { headers: getForwardedHeaders(), signal });
     if (res.status === 404) {
@@ -174,13 +200,19 @@ export async function getFolderInfo(
 
 /**
  * Request-scoped memoization of {@link getFolderInfo}. A single chat round
- * reads the same folder more than once — the agent instruction, the entity
+ * reads the same folder more than once — the agent instruction, the source
  * metadata — and the DTO cannot change mid-request, so the second reader
  * joins the first fetch instead of issuing its own. Falls through to a plain
  * fetch outside a request context. Rejections are not cached: the entry is
  * dropped so a later reader can retry.
  */
 function getFolderInfoOnce(folderId: string): Promise<DocspaceFolderInfo | undefined> {
+  // A primed chat round already carries the folders it is scoped to (from
+  // `GET internal/ai/chat-context`) — no Files API round-trip for those.
+  const fromSnapshot = lookupChatContextFolder(folderId);
+  if (fromSnapshot.hit) {
+    return Promise.resolve(fromSnapshot.info);
+  }
   const cache = getFolderInfoCache();
   if (!cache) {
     return getFolderInfo(folderId);
@@ -195,44 +227,166 @@ function getFolderInfoOnce(folderId: string): Promise<DocspaceFolderInfo | undef
   return pending;
 }
 
+/** What kind of DocSpace entry a client names as the round's source. */
+export type SourceKind = "folder" | "file";
+
 /**
- * The host entity behind a chat round, in the shape `@onlyoffice/ai-chat`
- * expects in `actionArgs` (`entityId` / `entityTitle`) — the ONLYOFFICE
- * provider turns the pair into the request's `metadata` object
- * (`agent_id` / `agent_title`).
+ * The DocSpace entry a model request is attributed to, as the billing
+ * backend classifies it. Rooms split by the section they belong to: an
+ * `Agent` is a room of the "AI Agents" section, a `Form` a room of the
+ * "Forms" section, a `Room` one of the "Rooms" section. Every other folder
+ * — a plain folder in any room or in "My documents", the system subfolders
+ * of an agent (Knowledge, Result Storage) or of a form room, the section
+ * roots — is a `Folder`; every file is a `File`.
  */
-export interface AgentEntityMeta {
-  entityId?: string;
-  entityTitle?: string;
+export type SourceType = "Agent" | "File" | "Folder" | "Room" | "Form";
+
+/**
+ * The resolved source of a round, sent by the ONLYOFFICE provider (and the
+ * OpenAI passthrough) as the request's `metadata` object — see
+ * `sourceMetadata` in `app/providers/onlyofficeSourceProvider.ts` for the
+ * wire keys (`source_id` / `source_type` / `source_title`).
+ */
+export interface SourceMeta {
+  id: string;
+  type: SourceType;
+  title?: string;
 }
 
 /**
- * Best-effort resolution of the agent room a round runs for. Only agent
- * rooms describe an entity — a regular folder, an absent scope, or a failed
- * fetch all yield an empty object, which the provider renders as no
- * `metadata` at all. Never throws (mirrors {@link safeGetAgentInstruction}):
- * metadata is telemetry for the backend, never a reason to fail a chat.
+ * Classify a folder by the DTO's `type` (`FolderType`) and `roomType`
+ * (`RoomType`); either spelling suffices. Mirrors `DocSpaceHelper.RoomTypes`
+ * on the C# side, split by section.
  */
-export async function safeGetAgentEntity(
+export function folderSourceType(info: DocspaceFolderInfo): SourceType {
+  const { folderType, roomType } = info;
+  if (info.isAgent || folderType === FOLDER_TYPE_AI_ROOM || roomType === ROOM_TYPE_AI_ROOM) {
+    return "Agent";
+  }
+  if (folderType === FOLDER_TYPE_FORM_ROOM || roomType === ROOM_TYPE_FORM_ROOM) {
+    return "Form";
+  }
+  if (
+    (folderType !== undefined && FOLDER_TYPES_ROOM.has(folderType))
+    || (roomType !== undefined && ROOM_TYPES_ROOM.has(roomType))
+  ) {
+    return "Room";
+  }
+  return "Folder";
+}
+
+// Derived from the DocSpace `FileDto<int>` (see
+// products/ASC.Files/Core/ApiModels/ResponseDto/FileDto.cs) returned by
+// `GET /api/2.0/files/file/{fileId}` (FilesController.GetFileInfo). Only the
+// title is read: a file is always a `File` source, whatever its format.
+export interface DocspaceFileInfo {
+  title?: string;
+}
+
+function parseFileInfo(raw: unknown): DocspaceFileInfo | undefined {
+  const envelope = isObject(raw) ? getObject(raw, "response") : undefined;
+  if (!envelope || getEntityId(envelope, "id") === undefined) {
+    return undefined;
+  }
+  return { title: getString(envelope, "title") };
+}
+
+/**
+ * Fetch file details from the DocSpace Files API
+ * (`GET /api/2.0/files/file/{fileId}`) on behalf of the current user. Same
+ * contract as {@link getFolderInfo}: `undefined` on 404 or an unparseable
+ * response, {@link DocspaceApiHttpError} for other HTTP failures.
+ */
+export async function getFileInfo(fileId: string): Promise<DocspaceFileInfo | undefined> {
+  const url = `${proxyBaseUrl}/api/2.0/files/file/${encodeURIComponent(fileId)}`;
+  const { signal, cancel } = withTimeout(undefined);
+  countFilesApiRead();
+  try {
+    const res = await fetch(url, { headers: getForwardedHeaders(), signal });
+    if (res.status === 404) {
+      return undefined;
+    }
+    if (!res.ok) {
+      throw new DocspaceApiHttpError(res.status, res.statusText, url);
+    }
+    const parsed = parseFileInfo(await res.json());
+    if (!parsed) {
+      logger.warn(`getFileInfo(${fileId}) -> unparseable response from ${url}`);
+    }
+    return parsed;
+  } finally {
+    cancel();
+  }
+}
+
+// Request-scoped memoization of {@link getFileInfo}, the file-side twin of
+// `getFolderInfoOnce`. Files and folders have independent id spaces, so the
+// two caches are kept apart.
+function getFileInfoOnce(fileId: string): Promise<DocspaceFileInfo | undefined> {
+  const cache = getFileInfoCache();
+  if (!cache) {
+    return getFileInfo(fileId);
+  }
+  const cached = cache.get(fileId);
+  if (cached) {
+    return cached;
+  }
+  const pending = getFileInfo(fileId);
+  cache.set(fileId, pending);
+  pending.catch(() => cache.delete(fileId));
+  return pending;
+}
+
+/**
+ * Best-effort resolution of the entry a round runs for. The client only ever
+ * names the entry (`entityId` + which table it lives in, `kind`); the type
+ * and the title come from the Files API under the caller's credentials, so
+ * a client cannot describe an entry it cannot see. An absent id, a 404/403,
+ * or an unparseable response all yield `undefined`, which the provider
+ * renders as no `metadata` at all. Never throws (mirrors
+ * {@link safeGetAgentInstruction}): metadata is telemetry for the backend,
+ * never a reason to fail a chat.
+ */
+export async function safeResolveSource(
   entityId: string | undefined,
-): Promise<AgentEntityMeta> {
+  kind: SourceKind = "folder",
+): Promise<SourceMeta | undefined> {
   if (!entityId) {
-    return {};
+    return undefined;
   }
   try {
-    const info = await getFolderInfoOnce(entityId);
-    if (!info?.isAgent) {
-      return {};
+    if (kind === "file") {
+      const file = await getFileInfoOnce(entityId);
+      return file ? { id: entityId, type: "File", title: file.title } : undefined;
     }
-    return { entityId, entityTitle: info.title };
+    const folder = await getFolderInfoOnce(entityId);
+    return folder
+      ? { id: entityId, type: folderSourceType(folder), title: folder.title }
+      : undefined;
   } catch (err) {
     logger.warn(
-      `agent entity fetch failed: ${
+      `source entity fetch failed (${kind} ${entityId}): ${
         err instanceof Error ? err.message : String(err)
       }`,
     );
-    return {};
+    return undefined;
   }
+}
+
+/**
+ * Resolve the round's source and remember it on the request context, where
+ * the ONLYOFFICE provider override reads it when it builds the request body
+ * (`app/providers/onlyofficeSourceProvider.ts`). Every model-bound handler
+ * calls this before invoking the engine; a round with no resolvable source
+ * leaves the context empty and the request carries no `metadata`.
+ */
+export async function primeSourceMeta(
+  entityId: string | undefined,
+  kind: SourceKind = "folder",
+): Promise<SourceMeta | undefined> {
+  const source = await safeResolveSource(entityId, kind);
+  setSourceMeta(source);
+  return source;
 }
 
 /**
@@ -348,7 +502,7 @@ export async function resolveAgentEntityId(
   if (!entityId) {
     return undefined;
   }
-  const folderInfo = await getFolderInfo(entityId);
+  const folderInfo = await getFolderInfoOnce(entityId);
   return folderInfo?.isAgent ? entityId : undefined;
 }
 
@@ -370,7 +524,7 @@ export async function assertEntityAccessible(
   }
   let accessible: boolean;
   try {
-    accessible = (await getFolderInfo(entityId)) !== undefined;
+    accessible = (await getFolderInfoOnce(entityId)) !== undefined;
   } catch (err) {
     if (err instanceof DocspaceApiHttpError && err.status === 403) {
       accessible = false; // no access → treat as not found (don't reveal it)

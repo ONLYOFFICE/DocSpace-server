@@ -34,127 +34,135 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The webhook configuration parameters.
+/// One webhook subscription of the portal: where deliveries go, which events they cover, and how they have fared.
 /// </summary>
 /// <example>
 /// {
-///   "name": "example value",
-///   "uri": "example value",
+///   "id": 1,
+///   "name": "Room activity",
+///   "uri": "https://example.com/hooks/docspace",
 ///   "enabled": true,
 ///   "sSL": true,
-///   "triggers": 0,
-///   "targetId": "example value",
-///   "createdBy": {},
+///   "triggers": 128,
+///   "targetId": "00000000-0000-0000-0000-000000000001",
+///   "createdBy": { "displayName": "Mike Zanyatski" },
 ///   "createdOn": "2024-01-15T10:30:00Z",
-///   "modifiedBy": {},
-///   "modifiedOn": "2024-01-15T10:30:00Z",
-///   "lastFailureOn": "2024-01-15T10:30:00Z",
-///   "lastFailureContent": "example value",
 ///   "lastSuccessOn": "2024-01-15T10:30:00Z"
 /// }
 /// </example>
 public class WebhooksConfigDto
 {
     /// <summary>
-    /// The webhook ID.
+    /// The identifier of the subscription, which is what `PUT api/2.0/settings/webhook`,
+    /// `DELETE api/2.0/settings/webhook/{id}` and the `configId` filter of the delivery log address it by.
     /// </summary>
     /// <example>1</example>
     public required int Id { get; set; }
 
     /// <summary>
-    /// The webhook name.
+    /// The label the subscription was given, free text with no meaning to the portal.
     /// </summary>
-    /// <example>John</example>
+    /// <example>Room activity</example>
     public string Name { get; set; }
 
     /// <summary>
-    /// The webhook URI.
+    /// The address every delivery is posted to. The signing secret that lets the receiver verify a delivery is
+    /// never part of this answer, so it has to be kept from the moment the subscription was created.
     /// </summary>
-    /// <example>https://example.com</example>
+    /// <example>https://example.com/hooks/docspace</example>
     public string Uri { get; set; }
 
     /// <summary>
-    /// Specifies if the webhooks are enabled or not.
+    /// Whether the subscription is delivering. While it is `false` events are dropped rather than queued, so
+    /// nothing arrives late after it is switched back on.
     /// </summary>
     /// <example>true</example>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// The webhook SSL verification (enabled or not).
+    /// Whether the certificate of `uri` is verified before a delivery. While it is `false` a self-signed
+    /// certificate is accepted as well.
     /// </summary>
     /// <example>true</example>
     public bool SSL { get; set; }
 
     /// <summary>
-    /// The webhook trigger type.
+    /// The events the subscription covers, as the bits of `GET api/2.0/settings/webhook/triggers` added
+    /// together. `0` is the catch-all and means every event, not none.
     /// </summary>
-    /// <example>All</example>
+    /// <example>128</example>
     public WebhookTrigger Triggers { get; set; }
 
     /// <summary>
-    /// The webhook target ID.
+    /// The single room or file the subscription is narrowed to, empty for a subscription that covers the whole
+    /// portal. It is kept as an opaque value, so both a numeric and a third-party identifier can appear.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000001</example>
     public string TargetId { get; set; }
 
     /// <summary>
-    /// The user who created the webhook.
+    /// The member who created the subscription, which is also who a non-administrator is limited to seeing. It is
+    /// empty for a subscription created by a portal background job.
     /// </summary>
     /// <example>{ "displayName": "Mike Zanyatski" }</example>
     public EmployeeDto CreatedBy { get; set; }
 
     /// <summary>
-    /// The date and time when the webhook was created.
+    /// When the subscription was created, in the portal time zone.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     public DateTime? CreatedOn { get; set; }
 
     /// <summary>
-    /// The user who modified the webhook.
+    /// The member who last changed the subscription, empty while nobody has changed it since it was created.
     /// </summary>
     /// <example>{ "displayName": "Mike Zanyatski" }</example>
     public EmployeeDto ModifiedBy { get; set; }
 
     /// <summary>
-    /// The date and time when the webhook was modified.
+    /// When it was last changed, in the portal time zone, and empty under the same condition as `modifiedBy`.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     public DateTime? ModifiedOn { get; set; }
 
     /// <summary>
-    /// The date and time of the webhook last failure.
+    /// When a delivery last failed, in the portal time zone. It is empty for a subscription that has never
+    /// failed, and it is not cleared by a later success - compare it with `lastSuccessOn` to see which came last.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     public DateTime? LastFailureOn { get; set; }
 
     /// <summary>
-    /// The webhook last failure content.
+    /// What the target answered on that failure, truncated, for diagnosing without opening the delivery log. It
+    /// is empty when the failure produced no body at all, a timeout for instance.
     /// </summary>
-    /// <example>example value</example>
+    /// <example>502 Bad Gateway</example>
     public string LastFailureContent { get; set; }
 
     /// <summary>
-    /// The date and time of the webhook last success.
+    /// When a delivery last succeeded, in the portal time zone, empty for a subscription that has never
+    /// delivered. Both this and `lastFailureOn` being empty means nothing has been attempted yet.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     public DateTime? LastSuccessOn { get; set; }
 }
 
 /// <summary>
-/// The webhook configuration with its status.
+/// A webhook subscription together with how its last delivery ended.
 /// </summary>
 public class WebhooksConfigWithStatusDto
 {
     /// <summary>
-    /// The webhook configuration.
+    /// The subscription itself. Despite the plural name it is one subscription, not a list.
     /// </summary>
-    /// <example>{ "id": 1, "name": "John" }</example>
+    /// <example>{ "id": 1, "name": "Room activity" }</example>
     public WebhooksConfigDto Configs { get; set; }
 
     /// <summary>
-    /// The webhook status.
+    /// The HTTP status code the target answered on the last attempt. `0` means nothing has been delivered yet,
+    /// which is not the same as a failure.
     /// </summary>
-    /// <example>1</example>
+    /// <example>200</example>
     public int Status { get; set; }
 }
 

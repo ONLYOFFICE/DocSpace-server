@@ -158,7 +158,7 @@ public class DefaultAccessRightsTests(AspireAppFixture fixture) : SharingDefault
     }
 
     [Fact]
-    [Trait("Bug", "XXXXX")]
+    [Trait("Bug", "79905")]
     public async Task ChangeDefaultAccessRights_InvalidFileShareValue_ReturnsBadRequest()
     {
         // Act

@@ -31,19 +31,27 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { aiService, AiServiceHttpError, aiServiceBaseUrl } from "./httpClient.js";
-import { isObject, getString, getNumber, getBoolean } from "../narrow.js";
+import { aiService, AiServiceHttpError, aiServiceBaseUrl, withTimeout } from "./httpClient.js";
+import { isObject, getString, getNumber, getBoolean, getArray } from "../narrow.js";
 import logger from "../log.js";
 import {
+  countUpstreamCall,
+  countUpstreamRead,
   getForwardedHeaders,
   shouldForwardHeadersToProvider,
 } from "../requestContext.js";
-import type { ProfilesStorage, Profile } from "@onlyoffice/ai-chat/core";
+import { CapabilitiesUI } from "@onlyoffice/ai-chat/core";
+import type { Model, ProfilesStorage, Profile } from "@onlyoffice/ai-chat/core";
+import {
+  invalidateChatContext,
+  readChatContext,
+  reportChatContextMiss,
+} from "./chatContextSnapshot.js";
 
 const PATH = "/profiles";
 const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
 
-function withOnlyofficeProviderOverrides(
+export function withOnlyofficeProviderOverrides(
   profile: Profile | undefined,
 ): Profile | undefined {
   if (!profile || profile.providerType !== "onlyoffice") {
@@ -59,7 +67,7 @@ function withOnlyofficeProviderOverrides(
   return resolved;
 }
 
-function dtoToProfile(raw: unknown): Profile | undefined {
+export function dtoToProfile(raw: unknown): Profile | undefined {
   if (!isObject(raw)) {
     return undefined;
   }
@@ -134,9 +142,35 @@ function toCreateBody(input: Omit<Profile, "id" | "createdAt"> | Profile): Recor
   };
 }
 
+// The provider a round (or the image tool) is about to call, AFTER the
+// onlyoffice override — so `baseUrl` is the portal's own gateway path for
+// paid profiles and the raw provider URL otherwise. The override rewrites
+// `baseUrl` to the INTERNAL gateway address and merges the caller's
+// forwarded auth headers — exactly what in-process provider calls (chat
+// engine, openai passthrough) need, and exactly what must never leave the
+// process; HTTP responses use `readByIdRaw` instead (Bug 82821). `key` is
+// only reported as present/absent; never logged. `source` is the raw DTO
+// (HTTP path) or the literal "chat-context" (served from the round snapshot).
+function logResolvedProfile(id: string, profile: Profile | undefined, source: unknown): void {
+  const via = source === "chat-context" ? " via chat-context" : "";
+  logger.info(
+    profile
+      ? `HttpProfilesStorage.readById(${id})${via} -> providerType=${profile.providerType} ` +
+          `model=${profile.modelId} baseUrl=${profile.baseUrl} hasKey=${profile.key !== undefined} ` +
+          `capabilities=${profile.capabilities ?? "-"} canUseTool=${profile.canUseTool ?? "-"} ` +
+          `useProxy=${profile.useProxy ?? "-"} isCloud=${profile.isCloudProvider ?? "-"} ` +
+          `headers=[${Object.keys(profile.headers ?? {}).sort().join(",")}]`
+      : source === "chat-context"
+        ? `HttpProfilesStorage.readById(${id}) via chat-context -> NOT FOUND`
+        : `HttpProfilesStorage.readById(${id}) -> UNUSABLE payload (a required field is missing): ` +
+            `${JSON.stringify(source).slice(0, 500)}`,
+  );
+}
+
 export class HttpProfilesStorage implements ProfilesStorage {
   async create(profile: Omit<Profile, "id" | "createdAt">): Promise<Profile> {
     const raw = await aiService.post(PATH, toCreateBody(profile));
+    invalidateChatContext("profiles");
     const result = dtoToProfile(raw);
     if (!result) {
       throw new Error("ai service returned invalid profile");
@@ -148,6 +182,7 @@ export class HttpProfilesStorage implements ProfilesStorage {
     const raw = await aiService.post(`${PATH}/batch`, {
       profiles: profiles.map(toCreateBody),
     });
+    invalidateChatContext("profiles");
     if (!Array.isArray(raw)) {
       return [];
     }
@@ -162,28 +197,21 @@ export class HttpProfilesStorage implements ProfilesStorage {
   }
 
   async readById(id: string): Promise<Profile | undefined> {
+    // A primed round holds the portal's full profile list — the id either
+    // resolves there or does not exist for this user.
+    const snapshot = readChatContext("profiles");
+    if (snapshot) {
+      const profile = withOnlyofficeProviderOverrides(
+        snapshot.profiles.find((p) => p.id === id),
+      );
+      logResolvedProfile(id, profile, "chat-context");
+      return profile;
+    }
+    reportChatContextMiss(`profiles.readById(${id})`);
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
       const profile = withOnlyofficeProviderOverrides(dtoToProfile(raw));
-      // The provider override above rewrites `baseUrl` to the INTERNAL
-      // gateway address and merges the caller's forwarded auth headers —
-      // exactly what in-process provider calls (chat engine, openai
-      // passthrough) need, and exactly what must never leave the process.
-      // HTTP responses use `readByIdRaw` below instead (Bug 82821).
-      // The provider a round (or the image tool) is about to call, AFTER the
-      // onlyoffice override — so `baseUrl` is the portal's own gateway path
-      // for paid profiles and the raw provider URL otherwise. `key` is only
-      // reported as present/absent; never logged.
-      logger.info(
-        profile
-          ? `HttpProfilesStorage.readById(${id}) -> providerType=${profile.providerType} ` +
-              `model=${profile.modelId} baseUrl=${profile.baseUrl} hasKey=${profile.key !== undefined} ` +
-              `capabilities=${profile.capabilities ?? "-"} canUseTool=${profile.canUseTool ?? "-"} ` +
-              `useProxy=${profile.useProxy ?? "-"} isCloud=${profile.isCloudProvider ?? "-"} ` +
-              `headers=[${Object.keys(profile.headers ?? {}).sort().join(",")}]`
-          : `HttpProfilesStorage.readById(${id}) -> UNUSABLE payload (a required field is missing): ` +
-              `${JSON.stringify(raw).slice(0, 500)}`,
-      );
+      logResolvedProfile(id, profile, raw);
       return profile;
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
@@ -200,6 +228,10 @@ export class HttpProfilesStorage implements ProfilesStorage {
   // an HTTP response may echo: the override's internal service address and
   // forwarded auth headers must never reach a client (Bug 82821).
   async readByIdRaw(id: string): Promise<Profile | undefined> {
+    const snapshot = readChatContext("profiles");
+    if (snapshot) {
+      return snapshot.profiles.find((p) => p.id === id);
+    }
     try {
       const raw = await aiService.get(`${PATH}/${encodeURIComponent(id)}`);
       return dtoToProfile(raw);
@@ -213,6 +245,11 @@ export class HttpProfilesStorage implements ProfilesStorage {
   }
 
   async readAll(): Promise<Profile[]> {
+    const snapshot = readChatContext("profiles");
+    if (snapshot) {
+      return snapshot.profiles;
+    }
+    reportChatContextMiss("profiles.readAll");
     const raw = await aiService.get(PATH);
     if (!Array.isArray(raw)) {
       return [];
@@ -229,9 +266,11 @@ export class HttpProfilesStorage implements ProfilesStorage {
 
   async update(profile: Profile): Promise<void> {
     await aiService.put(`${PATH}/${encodeURIComponent(profile.id)}`, toCreateBody(profile));
+    invalidateChatContext("profiles");
   }
 
   async delete(id: string): Promise<void> {
+    invalidateChatContext("profiles");
     try {
       await aiService.delete(`${PATH}/${encodeURIComponent(id)}`);
     } catch (err) {
@@ -240,5 +279,91 @@ export class HttpProfilesStorage implements ProfilesStorage {
       }
       throw err;
     }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// ONLYOFFICE gateway model catalog
+
+const lowered = (values: unknown[] | undefined): string[] =>
+  (values ?? []).filter((v): v is string => typeof v === "string").map((v) => v.toLowerCase());
+
+// Mirror of the C# ProfileStorageService.MapCapabilities/HasCapability
+// mapping (products/ASC.AI), which builds GET /ai/profiles/list from this
+// same catalog: type chat/image -> Chat/Image, an "image" input modality ->
+// Vision, an "image" output modality -> Image, "tools" -> Tools, "reasoning"
+// -> the reasoning flag. Embedding models are skipped there too.
+function mapGatewayModel(raw: unknown): Model | undefined {
+  if (!isObject(raw)) {
+    return undefined;
+  }
+  const id = getString(raw, "id");
+  if (id === undefined) {
+    return undefined;
+  }
+  const type = getString(raw, "type")?.toLowerCase();
+  if (type === "embedding") {
+    return undefined;
+  }
+  const capabilityNames = lowered(getArray(raw, "capabilities"));
+  let capabilities: number = CapabilitiesUI.None;
+  if (type === "chat") {
+    capabilities |= CapabilitiesUI.Chat;
+  } else if (type === "image") {
+    capabilities |= CapabilitiesUI.Image;
+  }
+  if (lowered(getArray(raw, "input_modalities")).includes("image")) {
+    capabilities |= CapabilitiesUI.Vision;
+  }
+  if (lowered(getArray(raw, "output_modalities")).includes("image")) {
+    capabilities |= CapabilitiesUI.Image;
+  }
+  if (capabilityNames.includes("tools")) {
+    capabilities |= CapabilitiesUI.Tools;
+  }
+  return {
+    id,
+    name: getString(raw, "alias") ?? id,
+    provider: "onlyoffice",
+    reasoning: capabilityNames.includes("reasoning"),
+    capabilities,
+  };
+}
+
+/**
+ * List the ONLYOFFICE gateway model catalog through the portal's gateway
+ * proxy (`/api/2.0/ai/gateway/models` — the C# side signs the gateway key
+ * and swaps in `customer/models` for paid portals).
+ *
+ * The onlyoffice provider's own OpenAI-compatible `/models` listing carries
+ * bare ids only, so the engine stamps every model with the broad default
+ * capability mask — while `GET /ai/profiles/list` synthesizes its answer
+ * from this rich catalog. Serving `list-provider-models` from the same
+ * catalog keeps the two methods consistent (Bug 83113).
+ */
+export async function listOnlyofficeGatewayModels(signal?: AbortSignal): Promise<Model[]> {
+  const url = `${aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}/models`;
+  countUpstreamRead();
+  countUpstreamCall("GET");
+  const { signal: reqSignal, cancel } = withTimeout(signal);
+  try {
+    const res = await fetch(url, {
+      headers: { ...getForwardedHeaders() },
+      signal: reqSignal,
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new AiServiceHttpError(res.status, res.statusText, text, url);
+    }
+    const json: unknown = await res.json();
+    const data = isObject(json) ? getArray(json, "data") : undefined;
+    if (!data) {
+      throw new Error(`gateway models listing returned no data array (${url})`);
+    }
+    return data
+      .map(mapGatewayModel)
+      .filter((m): m is Model => m !== undefined);
+  } finally {
+    cancel();
   }
 }

@@ -34,7 +34,9 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for managing encryption settings.
+/// The stored state of the server storage encryption. No operation binds this type, so it reaches no published
+/// contract; encryption is started with `POST api/2.0/settings/encryption/start` and followed with
+/// `GET api/2.0/settings/encryption/progress`.
 /// </summary>
 /// <example>
 /// {
@@ -47,25 +49,28 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 public class EncryptionSettingsRequestsDto
 {
     /// <summary>
-    /// The password used for encryption.
+    /// The key the stored data is encrypted with. It is generated on the server and never handed out by the API.
     /// </summary>
     /// <example>SecurePassword123!</example>
     public string Password { get; set; }
 
     /// <summary>
-    /// The current status of encryption.
+    /// Where the installation stands between decrypted and encrypted. The two intermediate values mean a pass is
+    /// running and the portals are unavailable; the stored value is also what decides the direction of the next
+    /// pass, since encryption and decryption are started by the same operation.
     /// </summary>
     /// <example>Enabled</example>
     public EncryprtionStatus Status { get; set; }
 
     /// <summary>
-    /// Specifies whether to notify users about encryption changes.
+    /// Whether the users were to be mailed before the portals went down for the pass.
     /// </summary>
     /// <example>true</example>
     public bool NotifyUsers { get; set; }
 
     /// <summary>
-    /// The root path of the server where encrypted data is stored.
+    /// The address the portals answered on when the pass was started, which the notification letters are built
+    /// against, since the portals are unreachable while the pass runs.
     /// </summary>
     /// <example>/var/www/encrypted</example>
     public string ServerRootPath { get; set; }

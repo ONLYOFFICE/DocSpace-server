@@ -40,14 +40,16 @@ namespace ASC.People.ApiModels.RequestDto;
 public class MoveGroupMemebersRequestDto
 {
     /// <summary>
-    /// The group ID to move from.
+    /// The ID of the group the members are taken from. It is emptied but not deleted, and it has to be a group that
+    /// has not been deleted already.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "fromId")]
     public required Guid FromId { get; set; }
 
     /// <summary>
-    /// The group ID to move to.
+    /// The ID of the group the members are moved into. It is the group the answer describes, and it has to be a
+    /// group that has not been deleted already.
     /// </summary>
     /// <example>11111111-1111-1111-1111-111111111111</example>
     [FromRoute(Name = "toId")]

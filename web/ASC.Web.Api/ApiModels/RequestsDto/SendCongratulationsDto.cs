@@ -34,37 +34,42 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The parameters for sending congratulatory email notifications.
+/// Which freshly registered account receives the welcome letter, and the key that proves the request.
 /// </summary>
 public class SendCongratulationsDto
 {
     /// <summary>
-    /// The user ID to receive the congratulatory message.
+    /// The account the welcome letter is addressed to, by portal user ID. The key in `key` has to have been issued
+    /// for this same account, so the pair is what authorises the call.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid Userid { get; set; }
 
     /// <summary>
-    /// The template identifier or email configuration key.
+    /// The confirmation key from the sign-in link the portal issued for that account, which stands in for a token
+    /// here. It is accepted for one hour after it was created; a wrong, foreign or expired key answers 403 and sends
+    /// nothing.
     /// </summary>
     /// <example>birthday</example>
     public required string Key { get; set; }
 }
 
-///<summary>
-/// The instructions parameters for sending account removal or deactivation instructions.
-///</summary>
+/// <summary>
+/// Which account is asking for the portal removal instructions, and the key that proves the request.
+/// </summary>
 public class SendRemoveInstructionsDto
 {
-    ///<summary>
-    /// The ID of the user requesting account removal.
-    ///</summary>
+    /// <summary>
+    /// The account the instructions are addressed to, by portal user ID. On a self-hosted installation only the
+    /// portal owner may be named here.
+    /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid Userid { get; set; }
 
-    ///<summary>
-    /// The email configuration key.
-    ///</summary>
+    /// <summary>
+    /// The confirmation key issued for that account for the portal removal, which stands in for a token here. It is
+    /// accepted for one hour after it was created; a wrong, foreign or expired key answers 403 and sends nothing.
+    /// </summary>
     /// <example>remove_instructions</example>
     public required string Key { get; set; }
 }

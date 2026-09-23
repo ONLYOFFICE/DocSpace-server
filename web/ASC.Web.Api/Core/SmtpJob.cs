@@ -31,7 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using AuthenticationException = System.Security.Authentication.AuthenticationException;
 using SmtpClient = MailKit.Net.Smtp.SmtpClient;
 
 namespace ASC.Api.Settings.Smtp;

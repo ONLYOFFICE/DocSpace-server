@@ -1308,9 +1308,6 @@
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Yeniliklər</value>
   </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>Agent</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>Söhbət</value>
   </data>
@@ -1454,5 +1451,29 @@
   </data>
   <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
     <value>Şəkil</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Mənbə növü</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Mənbə adı</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>Mənbə İD</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>AI agenti</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Fayl</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Qovluq</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Otaq</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Forma</value>
   </data>
 </root>

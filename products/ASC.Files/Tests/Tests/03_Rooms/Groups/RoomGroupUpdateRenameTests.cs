@@ -94,7 +94,7 @@ public class RoomGroupUpdateRenameTests(
         // Assert
         exception.ErrorCode.Should().Be(500);
 
-        var groups = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var groups = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
         groups.Single(g => g.Id == created.Id).Name.Should().Be("Plain", "a refused rename must leave the old name in place");
     }
 

@@ -45,6 +45,9 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
     public const string MetadataModel = "model";
     public const string MetadataAgentTitle = "agent_title";
     public const string MetadataAgentId = "agent_id";
+    public const string MetadataSourceId = "source_id";
+    public const string MetadataSourceType = "source_type";
+    public const string MetadataSourceTitle = "source_title";
 
     public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
 

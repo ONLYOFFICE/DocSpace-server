@@ -31,7 +31,8 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import type { DocspaceFolderInfo } from "./storage/docspaceFilesApi.js";
+import type { DocspaceFolderInfo, DocspaceFileInfo, SourceMeta } from "./storage/docspaceFilesApi.js";
+import type { ChatContextSnapshot } from "./storage/chatContextSnapshot.js";
 
 export type ForwardedHeaders = Record<string, string>;
 
@@ -55,6 +56,28 @@ export interface RequestContext {
   // DTO cannot change within one request, so the second reader joins the
   // first fetch (see `getFolderInfoOnce`).
   folderInfoCache?: Map<string, Promise<DocspaceFolderInfo | undefined>>;
+  // In-flight `GET /files/file/{id}` reads, keyed by file id — the file-side
+  // twin of `folderInfoCache` (see `getFileInfoOnce`). Kept apart because
+  // files and folders have independent id spaces.
+  fileInfoCache?: Map<string, Promise<DocspaceFileInfo | undefined>>;
+  // The entry this round is attributed to, resolved by `primeSourceMeta`
+  // before the engine runs and read by the ONLYOFFICE provider override when
+  // it builds the request `metadata` (`app/providers/onlyofficeSourceProvider.ts`).
+  // Absent when the round names no resolvable entry.
+  sourceMeta?: SourceMeta;
+  // The chat round's aggregate read (`GET internal/ai/chat-context`), primed
+  // by the send handlers before the engine runs. Storage read methods serve
+  // from it instead of issuing their own per-entity requests — see
+  // `storage/chatContextSnapshot.ts`. Absent on every other route.
+  chatContext?: ChatContextSnapshot;
+  // Diagnostics for the aggregate: how many GETs still reached the AI
+  // service during this request, and which reads bypassed the snapshot.
+  upstreamReads?: number;
+  // Every request to the AI service in this request, keyed by HTTP method,
+  // and every folder read against the Files API — the full round-trip bill.
+  upstreamCalls?: Record<string, number>;
+  filesApiReads?: number;
+  chatContextMisses?: string[];
 }
 
 export interface AppConfig {

@@ -1308,9 +1308,6 @@
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Čo je nové</value>
   </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>Agent</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>Chat</value>
   </data>
@@ -1454,5 +1451,29 @@
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Vložte editory ONLYOFFICE Docs do svojej aplikácie s cloudovými nájomníkmi a vlastnými kľúčmi API.</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Typ zdroja</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Názov zdroja</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>ID zdroja</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>AI agent</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Súbor</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Priečinok</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Miestnosť</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Formulár</value>
   </data>
 </root>

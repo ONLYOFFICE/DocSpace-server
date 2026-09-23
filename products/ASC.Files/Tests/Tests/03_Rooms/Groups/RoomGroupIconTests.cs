@@ -53,7 +53,7 @@ public class RoomGroupIconTests(
         updated.Id.Should().Be(created.Id);
         var info = (await _roomGroupsApi.GetRoomGroupInfoAsync(created.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         info.Icon.Id.Should().Be("heart");
-        var list = (await _roomGroupsApi.GetRoomGroupsAsync(0, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(false, cancellationToken: TestContext.Current.CancellationToken)).Response;
         list.Single(g => g.Id == created.Id).Icon.Id.Should().Be("heart");
     }
 

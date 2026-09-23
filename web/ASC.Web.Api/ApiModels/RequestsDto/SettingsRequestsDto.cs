@@ -36,7 +36,7 @@ using ASC.Files.Core;
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for managing the owner-specific settings.
+/// The portal member named as the new owner of the portal.
 /// </summary>
 /// <example>
 /// {
@@ -46,14 +46,16 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 public class OwnerIdSettingsRequestDto
 {
     /// <summary>
-    /// The ID of the owner whose settings are being managed.
+    /// The member who is to become the portal owner, by user ID. They have to be an active member of this portal and
+    /// not a guest; a member who is not a DocSpace administrator yet is promoted to one as part of the transfer, so
+    /// the portal needs a paid seat for them.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000001</example>
     public required Guid OwnerId { get; set; }
 }
 
 /// <summary>
-/// The request parameters for managing the version-specific settings.
+/// The portal version the tenant is switched to.
 /// </summary>
 /// <example>
 /// {
@@ -63,14 +65,15 @@ public class OwnerIdSettingsRequestDto
 public class SettingsRequestsDto
 {
     /// <summary>
-    /// The version ID.
+    /// The version to put the tenant on, by version ID. It has to be one of the versions
+    /// `GET api/2.0/settings/version` reports for this installation; any other value answers 404.
     /// </summary>
     /// <example>2</example>
     public required int VersionId { get; set; }
 }
 
 /// <summary>
-/// The request parameters for managing the user interface tips visibility.
+/// Whether the interface tips are shown to the calling user.
 /// </summary>
 /// <example>
 /// {
@@ -80,14 +83,15 @@ public class SettingsRequestsDto
 public class TipsRequestDto
 {
     /// <summary>
-    /// Controls the visibility of the user interface tips (displayed or hidden).
+    /// Whether the interface tips are shown. The setting belongs to the calling account alone and never affects
+    /// anybody else; switching the tips off also unsubscribes that account from the tips mailing.
     /// </summary>
     /// <example>true</example>
     public bool Show { get; set; } //tips
 }
 
 /// <summary>
-/// The request parameters for setting the default product configuration.
+/// The section the calling user's account opens into after signing in.
 /// </summary>
 /// <example>
 /// {
@@ -97,14 +101,16 @@ public class TipsRequestDto
 public class DefaultProductRequestDto
 {
     /// <summary>
-    /// The ID of the product to be set as default.
+    /// The section to land on. Only the folder types the client offers as a landing page are accepted - the rooms
+    /// list, My documents, shared with me, favorites, recent, forms and the AI agents folder - and anything else is
+    /// refused. My documents is refused for a guest as well, since a guest has no personal storage.
     /// </summary>
     /// <example>1</example>
     public required FolderType DefaultFolderType { get; set; }
 }
 
 /// <summary>
-/// The request parameters for configuring the time zone settings.
+/// The portal interface language and time zone, set together.
 /// </summary>
 /// <example>
 /// {
@@ -115,20 +121,24 @@ public class DefaultProductRequestDto
 public class TimeZoneRequestDto
 {
     /// <summary>
-    /// The language code for the time zone localization.
+    /// The portal interface language, as a culture name such as `en-US` or a bare language such as `en`. It has to
+    /// be one of the cultures enabled for the installation; a culture that is not enabled leaves the language as it
+    /// was instead of failing the call.
     /// </summary>
     /// <example>en</example>
     public required string Lng { get; set; }
 
     /// <summary>
-    /// The IANA time zone identifier.
+    /// The time zone every portal date is rendered in, as an IANA identifier such as `America/New_York`. A Windows
+    /// identifier is converted to its IANA equivalent, and a value that matches nothing falls back to UTC rather
+    /// than failing the call.
     /// </summary>
     /// <example>America/New_York</example>
     public string TimeZoneID { get; set; }
 }
 
 /// <summary>
-/// The request parameters for managing the Developer Tools access settings for the current tenant.
+/// Whether the `User` role is barred from the portal developer tools.
 /// </summary>
 /// <example>
 /// {
@@ -138,14 +148,15 @@ public class TimeZoneRequestDto
 public class TenantDevToolsAccessSettingsDto
 {
     /// <summary>
-    /// Determines if users have restricted access to the Developer Tools.
+    /// Whether members holding the `User` role are barred from the developer tools - API keys, OAuth applications
+    /// and webhooks. Room administrators and DocSpace administrators keep their access either way.
     /// </summary>
     /// <example>false</example>
     public bool LimitedAccessForUsers { get; set; }
 }
 
 /// <summary>
-/// The request parameters for managing the visibility settings of the promotional banners for the current tenant.
+/// Whether the portal promotional banners are hidden.
 /// </summary>
 /// <example>
 /// {
@@ -155,30 +166,27 @@ public class TenantDevToolsAccessSettingsDto
 public class TenantBannerSettingsDto
 {
     /// <summary>
-    /// The banners visibility flag.
+    /// Whether the promotional banners are hidden from every user of the portal. The flag is only honoured on a
+    /// self-hosted installation; a SaaS portal keeps showing the banners whatever is stored here.
     /// </summary>
     /// <example>true</example>
     public bool Hidden { get; set; }
 }
 
 /// <summary>
-/// The request parameters for managing the tenant-level AI access settings.
+/// Whether AI functionality is available on the portal.
 /// </summary>
-/// <remarks>
-/// Controls whether all AI functionality (chat, agents, vectorization) is available for the current tenant.
-/// When disabled, the AI Agents folder is hidden from root folder listings and AI status checks return disabled immediately.
-/// Only DocSpaceAdmin users can modify this setting.
-/// </remarks>
 /// <example>
 /// {
-///   "aiEnabled": false
+///   "enabled": false
 /// }
 /// </example>
 public class TenantAiAccessSettingsDto
 {
     /// <summary>
-    /// Specifies whether AI functionality is enabled for the tenant.
-    /// Set to <c>true</c> to enable all AI features or <c>false</c> to disable them tenant-wide.
+    /// Whether AI is available on the portal at all - chat, agents and vectorization together. Switching it off
+    /// hides the AI Agents folder and makes every AI endpoint unreachable for all members at once, not only for the
+    /// caller, and the change is pushed to connected clients rather than waiting for their next request.
     /// </summary>
     /// <example>false</example>
     public bool Enabled { get; set; }

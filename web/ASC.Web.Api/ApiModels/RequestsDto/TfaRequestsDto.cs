@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for configuring the Two-Factor Authentication (TFA) settings.
+/// The portal two-factor policy: which method is in force, who must pass it, and from where it is waived.
 /// </summary>
 /// <example>
 /// {
@@ -48,67 +48,81 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 public class TfaRequestsDto
 {
     /// <summary>
-    /// The two-factor authentication type.
+    /// The second factor the portal demands. The two methods are mutually exclusive, so switching one on switches
+    /// the other off, and any value outside the defined set is read as switching TFA off rather than refused.
     /// </summary>
     /// <example>None</example>
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public TfaRequestsDtoType Type { get; set; }
 
     /// <summary>
-    /// The ID of the user for whom the TFA settings are being configured.
+    /// The account the request concerns, by portal user ID. Naming the portal owner is refused unless it is the
+    /// caller's own account. Where an operation detaches an authenticator application, the empty GUID and the
+    /// caller's own ID both mean the caller.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid Id { get; set; }
 
     /// <summary>
     /// The list of IP addresses that bypass TFA verification. Each entry is a single address, an inclusive
-    /// "from-to" range or a CIDR block.
+    /// "from-to" range or a CIDR block. This is the whole list that is to hold afterwards, so send the addresses
+    /// already trusted along with a new one; an entry that cannot be parsed fails the call with 400, and accounts
+    /// named as mandatory still have to pass the challenge even from a trusted address.
     /// </summary>
     /// <example>["192.0.2.1", "198.51.100.1-198.51.100.20", "203.0.113.0/24"]</example>
     [IpAddressOrRange]
     public List<string> TrustedIps { get; set; }
 
     /// <summary>
-    /// The list of user IDs for whom TFA is mandatory.
+    /// The accounts that must pass the challenge whatever their address, by portal user ID. This is the whole list
+    /// that is to hold afterwards - leaving it out clears it rather than keeping it - and naming the portal owner is
+    /// refused unless the caller is the owner.
     /// </summary>
     /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public List<Guid> MandatoryUsers { get; set; }
 
     /// <summary>
-    /// The list group IDs whose members must use TFA.
+    /// The groups whose members must pass the challenge whatever their address, by group ID. This is the whole list
+    /// that is to hold afterwards - leaving it out clears it rather than keeping it.
     /// </summary>
     /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public List<Guid> MandatoryGroups { get; set; }
 }
 
 /// <summary>
-/// The two-factor authentication type.
+/// The two-factor method a portal can demand.
 /// </summary>
 public enum TfaRequestsDtoType
 {
+    /// <summary>No second factor is demanded; sending it also switches off whichever method was in force.</summary>
     [Description("None")]
     None = 0,
 
+    /// <summary>A code sent by SMS to the number stored for the account; the portal needs an SMS provider.</summary>
     [Description("Sms")]
     Sms = 1,
 
+    /// <summary>A code from an authenticator application the account links once and then keeps.</summary>
     [Description("App")]
     App = 2
 }
 
 /// <summary>
-/// The request parameters for validating the two-factor authentication codes.
+/// The one-time code that completes a pending two-factor step, and how long the resulting sign-in lasts.
 /// </summary>
 public class TfaValidateRequestsDto
 {
     /// <summary>
-    /// The verification code provided by the user.
+    /// The code to check - either one from the authenticator application or one of the account's unused backup
+    /// codes, which is spent by the check. A wrong code is refused with 400 and counts against the portal login
+    /// attempt limit.
     /// </summary>
     /// <example>123456</example>
     public required string Code { get; set; }
 
     /// <summary>
-    /// Specifies whether the authentication is session-based.
+    /// Whether the sign-in that follows is tied to the browser session. When it is, the session ends with the
+    /// browser rather than lasting for the portal session lifetime.
     /// </summary>
     /// <example>true</example>
     public bool Session { get; set; }

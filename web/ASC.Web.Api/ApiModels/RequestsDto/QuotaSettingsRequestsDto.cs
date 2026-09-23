@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for managing the user storage quota configurations.
+/// The default storage limit given to newly created users, rooms or AI agents, and whether it is enforced.
 /// </summary>
 /// <example>
 /// {
@@ -44,13 +44,17 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 public class QuotaSettingsRequestsDto
 {
     /// <summary>
-    /// Specifies whether the storage quota restrictions are enabled.
+    /// Whether the limit is enforced at all. While it is false the size is ignored and nothing created afterwards
+    /// carries a limit; objects that already have one keep it either way.
     /// </summary>
     /// <example>true</example>
     public bool EnableQuota { get; set; }
 
     /// <summary>
-    /// The default storage quota value applied to new users.
+    /// The starting limit, in bytes, written as a JSON number. It has to parse as a whole number and may not exceed
+    /// the portal total storage quota, nor, on a self-hosted installation with a portal-wide quota switched on, that
+    /// quota; anything larger is refused with 400. It is applied to objects created from now on and leaves the
+    /// limits of existing ones as they are.
     /// </summary>
     /// <example>1073741824</example>
     public required JsonElement DefaultQuota { get; set; }

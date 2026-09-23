@@ -100,18 +100,28 @@ public class UserController(
     : PeopleControllerBase(userManager, permissionContext, apiContext, userPhotoManager, httpContextAccessor, urlValidator, setupInfo, httpClientFactory)
 {
     /// <remarks>
-    /// Returns the user claims.
+    /// Returns the identity the current request was authenticated with, as the portal sees it: the account name and
+    /// the full list of claims attached to the token or the cookie.
+    /// It is a diagnostics operation meant for working out why a call is rejected - which account a token really
+    /// belongs to, and which scopes and roles it carries - rather than a source of profile data.
+    /// It needs no permission of its own and reports on the caller only, so it cannot be used to inspect another
+    /// account.
+    /// The call is read-only, and every claim comes back as a single `type:value` string, in the order the
+    /// authentication produced them.
+    /// An account name of `Unknown Name` means the identity carries no name claim, not that the request is
+    /// unauthenticated.
+    /// For the profile behind the identity, read `GET api/2.0/people/@self`.
     /// </remarks>
     /// <summary>
     /// Get user claims
     /// </summary>
     /// <path>api/2.0/people/tokendiagnostics</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Claims", typeof(object))]
+    [SwaggerResponse(200, "The account name and the claims of the current identity", typeof(TokenDiagnosticsDto))]
     [HttpGet("tokendiagnostics")]
-    public object GetClaims()
+    public TokenDiagnosticsDto GetClaims()
     {
-        var result = new
+        var result = new TokenDiagnosticsDto
         {
             Name = User.Identity?.Name ?? "Unknown Name",
             Claims = (from c in User.Claims select c.Type + ":" + c.Value).ToList()
@@ -225,15 +235,32 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Adds a new portal user with the first name, last name, email address, and several optional parameters specified in the request.
+    /// Creates a portal profile, either by an administrator adding somebody directly or by a person accepting an
+    /// invitation link, which is why the operation accepts both an authenticated session and an invitation
+    /// confirmation token.
+    /// Set `fromInviteLink` to true and pass the invitation `key` for the second case: the resulting type then comes
+    /// from the link and the `type` in the request is ignored, and an invalid or expired link answers 403.
+    /// Without a link the caller needs the permission to add users of the requested type, cannot create a guest
+    /// through this operation at all, has to be a DocSpace admin to create a room admin and the portal owner to
+    /// create another DocSpace admin; either way the portal has to allow inviting members, or guests when the link
+    /// says so.
+    /// The password is optional: `passwordHash` is taken as it is, a plain `password` is checked against the portal
+    /// password policy and rejected with 400 when it is too weak, and when both are omitted a random password is
+    /// generated and the account is created without anybody knowing it.
+    /// When the portal has no free paid seat the account is still created, silently as a `User` instead of the
+    /// requested type, so read the `type` in the answer rather than assuming the request was honoured.
+    /// Creating a profile raises a `UserCreated` webhook, downloads the avatar named in `files` if one is given, and
+    /// answers with the new profile including its ID.
+    /// To invite several people by email at once instead, use `POST api/2.0/people/invite`.
     /// </remarks>
     /// <summary>
     /// Add a user
     /// </summary>
     /// <path>api/2.0/people</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Newly added user with the detailed information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
+    [SwaggerResponse(200, "The new profile with its detailed information", typeof(EmployeeFullDto))]
+    [SwaggerResponse(400, "The password does not meet the portal password policy")]
+    [SwaggerResponse(403, "The invitation link is invalid or has expired, the portal does not allow inviting this kind of account, or the caller may not create an account of the requested type")]
     [HttpPost]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Authenticated")]
     public async Task<EmployeeFullDto> AddMember(MemberRequestDto inDto)
@@ -411,7 +438,22 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Invites users specified in the request to the current portal.
+    /// Invites people to the portal by email, creating a pending profile for each address and mailing it an
+    /// invitation link.
+    /// The caller has to be a room admin or a DocSpace admin - a member or a guest is rejected - the portal has to
+    /// allow inviting members, and inviting a room admin additionally requires DocSpace admin rights while inviting
+    /// another DocSpace admin requires the portal owner; a `Guest` type is not accepted here at all.
+    /// An address that already belongs to a profile is not mailed again: the existing account is only related to the
+    /// caller, and its type is raised when the invitation asks for a higher one, while a disabled account rejects
+    /// the whole call with 400.
+    /// The whole call is rejected before anything is sent when the invitations would need more paid seats than the
+    /// tariff has left, and a malformed or punycode address is rejected with 400, so the list is validated as a
+    /// batch but applied one address at a time - a failure partway through leaves the earlier invitations sent.
+    /// The answer is not the result of this call: it lists every profile of the portal that is still pending and
+    /// that the caller may see, so previously invited people appear in it as well.
+    /// Each newly invited profile raises a `UserInvited` webhook, and repeated calls are throttled.
+    /// Use `PUT api/2.0/people/invite` to send the invitation email again, and `POST api/2.0/people` to create a
+    /// profile without mailing anybody.
     /// </remarks>
     /// <summary>
     /// Invite users
@@ -419,9 +461,9 @@ public class UserController(
     /// <path>api/2.0/people/invite</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "List of users", typeof(List<EmployeeDto>))]
-    [SwaggerResponse(400, "Incorrect email or User disabled")]
-    [SwaggerResponse(402, "The number of admins exceeds the limit")]
+    [SwaggerResponse(200, "Every pending profile the caller may see, not only the ones just invited", typeof(List<EmployeeDto>))]
+    [SwaggerResponse(400, "An address is malformed or written in punycode, or it belongs to a disabled account")]
+    [SwaggerResponse(402, "The invitations would need more paid seats than the tariff has left")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("invite")]
     [EnableRateLimiting(RateLimiterPolicy.EmailInvitationApi)]
@@ -525,15 +567,25 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Sets a new password to the user with the ID specified in the request.
+    /// Sets a new password on an account, which is the step that completes a password change or a password
+    /// recovery.
+    /// The request has to carry the confirmation token from the emailed link rather than an ordinary session, and an
+    /// expired or already used token is answered with 401.
+    /// The account has to exist and be `Active`, so the password of a disabled account or of an open invitation
+    /// cannot be set, and only the portal owner may set the owner's own password.
+    /// Send either `passwordHash`, which is taken as it is, or a plain `password`, which is checked against the
+    /// portal password policy; sending neither, or a password the policy rejects, answers 400.
+    /// The change ends every other session of that account and emails it a notice that the password was changed.
+    /// The answer is the profile, which does not carry the password in any form.
+    /// To have the recovery link sent in the first place, use `POST api/2.0/people/password`.
     /// </remarks>
     /// <summary>Change a user password</summary>
     /// <path>api/2.0/people/{userid}/password</path>
     [Tags("People / Password")]
-    [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "Incorrect userId or password")]
-    [SwaggerResponse(403, "The link is invalid or no permissions to perform this action")]
-    [SwaggerResponse(404, "The user could not be found")]
+    [SwaggerResponse(200, "The profile whose password was changed", typeof(EmployeeFullDto))]
+    [SwaggerResponse(400, "The user ID is empty, no password was sent, or the password does not meet the portal policy")]
+    [SwaggerResponse(403, "The account is not active, or only its owner may change this password")]
+    [SwaggerResponse(404, "No account has the specified ID")]
     [AllowNotPayment]
     [HttpPut("{userid:guid}/password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -606,15 +658,24 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Sets a new email to the user with the ID specified in the request.
+    /// Sets a new email address on an account, which is the step that completes an email change.
+    /// The request has to carry the confirmation token from the emailed link rather than an ordinary session, and an
+    /// expired or already used token is answered with 401.
+    /// The account has to exist and be `Active`, and only the portal owner may change the owner's own address.
+    /// Pass the address either in plain text as `email` or, as it arrives inside the confirmation link, encrypted as
+    /// `encEmail`; an empty or malformed address answers 400.
+    /// An address equal to the current one is accepted and changes nothing, while a new one is stored in lowercase
+    /// and marks the account `Activated`, because following the link proves the address works.
+    /// The answer is the profile with its new address.
+    /// The change is requested through `POST api/2.0/people/email`, which is what sends the link.
     /// </remarks>
     /// <summary>Change a user email</summary>
     /// <path>api/2.0/people/{userid}/email</path>
     [Tags("People / Email")]
-    [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "Incorrect userId or email")]
-    [SwaggerResponse(403, "The link is invalid or no permissions to perform this action")]
-    [SwaggerResponse(404, "The user could not be found")]
+    [SwaggerResponse(200, "The profile with its new address", typeof(EmployeeFullDto))]
+    [SwaggerResponse(400, "The user ID is empty, or the address is missing or malformed")]
+    [SwaggerResponse(403, "The account is not active, or only its owner may change this address")]
+    [SwaggerResponse(404, "No account has the specified ID")]
     [AllowNotPayment]
     [HttpPut("{userid:guid}/email")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -672,16 +733,28 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Deletes a user with the ID specified in the request from the portal.
+    /// Deletes a portal profile and queues the erasure of the data behind it.
+    /// The account has to be disabled first - set the `Terminated` status through
+    /// `PUT api/2.0/people/status/{status}`, otherwise the operation answers 403 - and it must not be a system
+    /// account or one imported from LDAP.
+    /// The caller needs the permission to add and remove users, and has to be the portal owner to delete a DocSpace
+    /// administrator.
+    /// The profile disappears at once, together with its avatar, its group memberships, its file shares and its
+    /// OAuth clients, while the data it owned is erased by a queued job afterwards, which can be watched through
+    /// `GET api/2.0/people/remove/progress/{userid}`.
+    /// The removal is permanent and cannot be undone, so hand the rooms and the shared files over first through
+    /// `POST api/2.0/people/reassign/start` - an account whose reassignment has not finished cannot be deleted.
+    /// The call raises a `UserDeleted` webhook and answers with the profile as it was just before it was removed.
+    /// To delete several accounts at once use `PUT api/2.0/people/delete`.
     /// </remarks>
     /// <summary>
     /// Delete a user
     /// </summary>
     /// <path>api/2.0/people/{userid}</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Deleted user detailed information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation or user is not suspended")]
-    [SwaggerResponse(404, "User not found")]
+    [SwaggerResponse(200, "The profile as it was just before it was deleted", typeof(EmployeeFullDto))]
+    [SwaggerResponse(403, "The account is not disabled, is a system or an LDAP account, or the caller may not delete a DocSpace administrator")]
+    [SwaggerResponse(404, "No user has the specified ID")]
     [HttpDelete("{userid}")]
     public async Task<EmployeeFullDto> DeleteMember(GetMemberByIdRequestDto inDto)
     {
@@ -746,16 +819,28 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Deletes the current user profile.
+    /// Closes the calling account at its owner's request: it does not erase the profile, it disables it, ends every
+    /// session it has and tells the portal administrators that the account asked to be removed.
+    /// It is the second step of the self-service removal - the first is `PUT api/2.0/people/self/delete`, which mails
+    /// the confirmation link - so the request has to carry the confirmation token from that link rather than an
+    /// ordinary session.
+    /// It always acts on the calling account and takes no parameters; the portal owner and an account imported from
+    /// LDAP cannot close themselves and get 403.
+    /// After the call the account has the `Terminated` status and can no longer sign in, but its rooms, files and
+    /// group memberships are untouched, which is why an administrator still has to erase it through
+    /// `DELETE api/2.0/people/{userid}` - that operation requires exactly this disabled state.
+    /// The step is reversible until then: re-enabling the account through `PUT api/2.0/people/status/{status}`
+    /// restores it.
+    /// The call raises a `UserUpdated` webhook, not a delete one, and answers with the profile in its new state.
     /// </remarks>
     /// <summary>
-    /// Delete my profile
+    /// Close my own profile
     /// </summary>
     /// <path>api/2.0/people/@self</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Detailed information about my profile", typeof(EmployeeFullDto))]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "User not found")]
+    [SwaggerResponse(200, "The profile of the caller with the Terminated status", typeof(EmployeeFullDto))]
+    [SwaggerResponse(403, "The caller is the portal owner, an LDAP account or a system account")]
+    [SwaggerResponse(404, "The calling account no longer exists")]
     [HttpDelete("@self")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "ProfileRemove")]
     public async Task<EmployeeFullDto> DeleteProfile()
@@ -799,15 +884,24 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Deletes guests from the list and excludes them from rooms to which they were invited.
+    /// Removes the listed guests from the caller's own list of guests and withdraws the access the caller had
+    /// granted them.
+    /// It does not delete the accounts: each guest keeps its profile and any access other members gave it, and only
+    /// the link to the caller and the caller's own shares disappear.
+    /// The caller has to be a room admin or a DocSpace admin, and every listed account has to exist, be an active
+    /// guest and be one of the caller's own guests - a single entry that is not rejects the whole call with 403 and
+    /// changes nothing.
+    /// The call returns no body; read `GET api/2.0/people/filter` with `area` set to `Guests` to see what is left.
+    /// To delete a guest account for good, disable it and then use `DELETE api/2.0/people/{userid}`.
     /// </remarks>
     /// <summary>
-    /// Delete guests
+    /// Remove guest relations
     /// </summary>
     /// <path>api/2.0/people/guests</path>
-    [SwaggerResponse(200, "Request parameters for deleting guests")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
     [Tags("People / Guests")]
+    [SwaggerResponse(200, "The guests are no longer linked to the caller. No content is returned")]
+    [SwaggerResponse(400, "The userIds field is missing")]
+    [SwaggerResponse(403, "The caller is not an admin, or an entry is not an active guest of the caller")]
     [HttpDelete("guests")]
     public async Task DeleteGuests(UpdateMembersRequestDto inDto)
     {
@@ -846,16 +940,25 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns a link to share a guest with another user.
+    /// Builds a link that lets another member of the portal take over the caller's guest, so that the guest becomes
+    /// visible to them as well.
+    /// The account in the route has to exist and be a guest - any other type is rejected with 400 - and the caller
+    /// has to be able to see it and must not be a guest itself.
+    /// The call is read-only: it only mints the link and changes nothing, and it can be repeated as often as needed.
+    /// The answer is a shortened confirmation URL as plain text; hand it to the person who should get the guest, and
+    /// their client completes the hand-over with `POST api/2.0/people/guests/share/approve`.
+    /// The link carries a confirmation token and therefore expires, so mint it when it is about to be used rather
+    /// than storing it.
     /// </remarks>
     /// <summary>
     /// Get a guest sharing link
     /// </summary>
     /// <path>api/2.0/people/guests/{userid}/share</path>
     [Tags("Portal / Guests")]
-    [SwaggerResponse(200, "User share link", typeof(string))]
-    [SwaggerResponse(404, "User not found")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "The shortened confirmation link, as plain text", typeof(string))]
+    [SwaggerResponse(400, "The account is not a guest")]
+    [SwaggerResponse(403, "The caller is a guest, or is not allowed to see that account")]
+    [SwaggerResponse(404, "No account has the specified ID")]
     [HttpGet("guests/{userid:guid}/share")]
     public async Task<string> GetGuestSharingLink(GuestShareRequestDto inDto)
     {
@@ -887,16 +990,25 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Approves a guest sharing link and returns the detailed information about a guest.
+    /// Accepts a guest that another member shared, which links that guest to the calling account and makes it
+    /// visible in the caller's list of guests.
+    /// Everything the operation needs comes from the confirmation token of the link produced by
+    /// `GET api/2.0/people/guests/{userid}/share`: the request body is not read at all, so there is nothing to fill
+    /// in, and an expired or already used token is answered with 401.
+    /// The caller has to be a room admin or a DocSpace admin; a member or a guest gets 403.
+    /// The account the token names has to exist and still be a guest, otherwise the operation answers 404 or 400.
+    /// The call is idempotent: a guest that is already linked to the caller is simply returned again.
+    /// The answer is the full profile of the guest.
     /// </remarks>
     /// <summary>
     /// Approve a guest sharing link
     /// </summary>
     /// <path>api/2.0/people/guests/share/approve</path>
     [Tags("People / Guests")]
-    [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(404, "User not found")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "The full profile of the guest now linked to the caller", typeof(EmployeeFullDto))]
+    [SwaggerResponse(400, "The account named by the token is not a guest")]
+    [SwaggerResponse(403, "The caller is a member or a guest")]
+    [SwaggerResponse(404, "The account named by the token no longer exists")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "GuestShareLink")]
     [HttpPost("guests/share/approve")]
@@ -937,7 +1049,15 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns a list of users matching the status filter and search query.
+    /// Searches the accounts that are in one particular state - the status is taken from the route - and whose name,
+    /// user name, email or contacts contain the search term.
+    /// Only a DocSpace administrator may call it; every other account, including a room admin, gets 403.
+    /// The call is read-only and is not paged: it matches in memory over every account of that status and streams
+    /// all of them, so it is meant for administrative lookups rather than for a user-facing list - use
+    /// `GET api/2.0/people/filter` when a page and a total are needed.
+    /// The term is matched as a case-insensitive substring and is required; `filterBy` set to `group` turns `text`
+    /// into a group ID and keeps only the members of that group, so `text` then has to be a valid identifier.
+    /// The answer holds full profiles, in no particular order.
     /// </remarks>
     /// <summary>
     /// Search users by status filter
@@ -945,8 +1065,8 @@ public class UserController(
     /// <path>api/2.0/people/status/{status}/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "The full profiles of the matching accounts", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [HttpGet("status/{status}/search")]
     public async IAsyncEnumerable<EmployeeFullDto> SearchUsersByStatus(AdvancedSearchDto inDto)
     {
@@ -977,15 +1097,24 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns a list of profiles for all the portal users.
+    /// Returns a page of the working accounts of the portal, with the full profile of each of them.
+    /// It reports only the accounts whose status is `Active`, so disabled accounts and open invitations are never
+    /// listed - use `GET api/2.0/people/status/{status}` for those, or `GET api/2.0/people/filter` to search across
+    /// every state.
+    /// The caller has to be a room admin, a DocSpace admin or a People module admin; a member or a guest gets 403.
+    /// The call is read-only, paged by `count` and `startIndex`, ordered by `sortBy` and `sortOrder`, and reports
+    /// the number of matches in the total count of the response.
+    /// Narrow it with `filterValue` on the name and the email, and with `filterBy` set to `group` to keep only the
+    /// members of the group whose ID is passed in `filterValue`.
     /// </remarks>
     /// <summary>
-    /// Get profiles
+    /// Get the active profiles
     /// </summary>
     /// <path>api/2.0/people</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(200, "A page of active accounts, with their full profiles", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "The caller is a member or a guest")]
     [HttpGet]
     public IAsyncEnumerable<EmployeeFullDto> GetAllProfiles(GetAllProfilesRequestDto inDto)
     {
@@ -1004,16 +1133,25 @@ public class UserController(
         return GetByStatus(status);
     }
 
-    /// <summary>
-    /// Check if a user exists by email
-    /// </summary>
     /// <remarks>
-    /// Returns data indicating whether a user with the specified email exists on the portal.
+    /// Reports whether an email address already belongs to a portal profile, and in what state that profile is.
+    /// It is meant for the invitation and sign-up screens, which is why it accepts a confirmation token as well as an
+    /// ordinary session, and why it is available on an unpaid portal.
+    /// Pass the address either in plain text as `email` or, when it arrived inside an invitation link, encrypted as
+    /// `encemail`; one of the two is required and a malformed or overlong address answers 400.
+    /// The call is read-only, and the answer carries `exists` plus the `status` of the profile - `Active`,
+    /// `Terminated` or `Pending` - which is left out entirely when nothing matches, so a pending invitation can be
+    /// told apart from a working account and from a free address.
+    /// It reveals only that an address is taken and not who owns it - read `GET api/2.0/people/email` for the
+    /// profile itself, which needs the right to see that account.
     /// </remarks>
+    /// <summary>
+    /// Check whether an email is taken
+    /// </summary>
     /// <path>api/2.0/people/exists</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "User existence result", typeof(UserExistsResponseDto))]
-    [SwaggerResponse(400, "Incorrect email")]
+    [SwaggerResponse(200, "Whether the address is taken, and the status of the profile that holds it", typeof(UserExistsResponseDto))]
+    [SwaggerResponse(400, "Both email and encemail are missing, or the address is malformed or longer than 255 characters")]
     [AllowNotPayment]
     [HttpGet("exists")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,GuestShareLink,Authenticated")]
@@ -1036,17 +1174,26 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns the detailed information about a profile of the user with the email specified in the request.
+    /// Returns the full profile of the account that owns an email address.
+    /// Pass the address either in plain text as `email` or, when it arrived inside an invitation link, encrypted as
+    /// `encemail`; one of the two is required and a malformed or overlong address answers 400.
+    /// The caller has to be allowed to see that account - a guest, for instance, only sees the accounts it is
+    /// related to - and an address that belongs to nobody answers 404.
+    /// The call is read-only, and `culture` changes nothing about the profile: it only picks the language of the
+    /// error message when the lookup fails.
+    /// To find out whether an address is taken without the right to see its owner, use
+    /// `GET api/2.0/people/exists`, and to look an account up by its ID or user name use
+    /// `GET api/2.0/people/{userid}`.
     /// </remarks>
     /// <summary>
     /// Get a profile by user email
     /// </summary>
     /// <path>api/2.0/people/email</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "Incorrect email")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "User not found")]
+    [SwaggerResponse(200, "The full profile of the account that owns the address", typeof(EmployeeFullDto))]
+    [SwaggerResponse(400, "Both email and encemail are missing, or the address is malformed or longer than 255 characters")]
+    [SwaggerResponse(403, "The caller is not allowed to see that account")]
+    [SwaggerResponse(404, "No account owns the specified address")]
     [HttpGet("email")]
     public async Task<EmployeeFullDto> GetProfileByEmail(GetMemberByEmailRequestDto inDto)
     {
@@ -1074,16 +1221,24 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns the detailed information about a profile of the user with the ID specified in the request.
+    /// Returns the profile of one account, looked up by its user name first and by its ID if the name matches
+    /// nothing, so both forms work in the route.
+    /// The caller has to be allowed to see that account - a guest, for instance, only sees the accounts it is
+    /// related to - and a value that matches neither a name nor an ID answers 404.
+    /// A request authenticated with an invitation link is treated differently: it skips that visibility check and
+    /// gets a reduced profile with the identifying fields only, which is what an invitation page needs.
+    /// The call is read-only and is available on an unpaid portal.
+    /// To read the calling account use `GET api/2.0/people/@self`, and to look an account up by address use
+    /// `GET api/2.0/people/email`.
     /// </remarks>
     /// <summary>
     /// Get a profile by user ID
     /// </summary>
     /// <path>api/2.0/people/{userid}</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Detailed profile information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "Incorrect UserId")]
-    [SwaggerResponse(404, "User not found")]
+    [SwaggerResponse(200, "The full profile, or a reduced one for a request authenticated with an invitation link", typeof(EmployeeFullDto))]
+    [SwaggerResponse(403, "The caller is not allowed to see that account")]
+    [SwaggerResponse(404, "No account has the specified ID or user name")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Authenticated")]
     [HttpGet("{userid}", Order = 1)]
@@ -1127,7 +1282,16 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns a list of profiles filtered by the user status.
+    /// Returns a page of the accounts that are in one particular state - the status is taken from the route - with
+    /// the full profile of each of them.
+    /// The caller has to be a room admin, a DocSpace admin or a People module admin; a member or a guest gets 403.
+    /// The call is read-only, paged by `count` and `startIndex`, ordered by `sortBy` and `sortOrder`, and reports
+    /// the number of matches in the total count of the response.
+    /// Narrow it with `filterValue` on the name and the email; setting `filterBy` to `group` makes the same
+    /// `filterValue` the ID of the group to keep the members of, and because the value is then applied as the text
+    /// filter as well, that combination normally matches nothing - use `GET api/2.0/people/filter` with `groupId`
+    /// to filter by group.
+    /// `GET api/2.0/people` is the same operation fixed to the `Active` status.
     /// </remarks>
     /// <summary>
     /// Get profiles by status
@@ -1135,7 +1299,8 @@ public class UserController(
     /// <path>api/2.0/people/status/{status}</path>
     /// <collection>list</collection>
     [Tags("People / User status")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(200, "A page of accounts in the requested state, with their full profiles", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "The caller is a member or a guest")]
     [HttpGet("status/{status}")]
     public IAsyncEnumerable<EmployeeFullDto> GetByStatus(GetByStatusRequestDto inDto)
     {
@@ -1164,16 +1329,27 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns a list of users with full information about them matching the parameters specified in the request.
+    /// Returns a page of portal accounts selected by the full set of account filters, with the complete profile of
+    /// each of them.
+    /// The caller has to be a room admin, a DocSpace admin or a People module admin; a member or a guest gets 403,
+    /// and a DocSpace admin additionally sees the accounts an ordinary admin does not.
+    /// The call is read-only, paged by `count` and `startIndex`, ordered by `sortBy` and `sortOrder`, and reports
+    /// the number of matches in the total count of the response.
+    /// Filters combine as conditions that all have to hold, with three interactions worth knowing: `withoutGroup`
+    /// makes `groupId` irrelevant, `employeeType` wins over `employeeTypes` when both are sent, and `area` set to
+    /// `Guests` or `People` cancels the type filters that contradict it.
+    /// `GET api/2.0/people/simple/filter` accepts exactly the same filters and returns the short profile instead, so
+    /// use that one for pickers and lists and this one when the full profile is really needed.
+    /// It is available on an unpaid portal.
     /// </remarks>
     /// <summary>
-    /// Search users with detailed information by extended filter
+    /// Filter users in detail
     /// </summary>
     /// <path>api/2.0/people/filter</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "A page of matching accounts, with their full profiles", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "The caller is a member or a guest")]
     [AllowNotPayment]
     [HttpGet("filter")]
     public async IAsyncEnumerable<EmployeeFullDto> SearchUsersByExtendedFilter(SimpleByFilterRequestDto inDto)
@@ -1228,29 +1404,48 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns a list of users matching the search query. This method uses the query parameters.
+    /// Searches the active accounts of the portal by a term passed in the query string, and is the same search as
+    /// `GET api/2.0/people/@search/{query}`, which takes the term in the path instead.
+    /// Only a DocSpace administrator may call it; every other account, including a room admin, gets 403.
+    /// Only accounts with the `Active` status are searched, so a pending invitation and a disabled account are never
+    /// found - use `GET api/2.0/people/filter` to search across states.
+    /// The call is read-only and is not paged: every match is streamed, without a total.
+    /// It takes the search term and nothing else - the group filter of
+    /// `GET api/2.0/people/@search/{query}` is not reachable here, because the handler forwards only `query` - so
+    /// use that operation when the result has to be narrowed to one group.
+    /// The answer holds full profiles, because the handler passes the request on to the operation that builds the
+    /// complete profile.
     /// </remarks>
-    /// <summary>Search users (using query parameters)</summary>
+    /// <summary>Search users by query</summary>
     /// <path>api/2.0/people/search</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "List of users", typeof(IAsyncEnumerable<EmployeeDto>))]
+    [SwaggerResponse(200, "The full profiles of the matching active accounts", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [HttpGet("search")]
-    public IAsyncEnumerable<EmployeeDto> SearchUsersByQuery(GetPeopleByQueryRequestDto inDto)
+    public IAsyncEnumerable<EmployeeFullDto> SearchUsersByQuery(GetPeopleByQueryRequestDto inDto)
     {
         var query = new GetMemberByQueryRequestDto { Query = inDto.Query };
         return GetSearch(query);
     }
 
     /// <remarks>
-    /// Returns a list of users matching the search query.
+    /// Searches the active accounts of the portal by a term taken from the path, and is the same search as
+    /// `GET api/2.0/people/search`, which takes the term in the query string instead.
+    /// Only a DocSpace administrator may call it; every other account, including a room admin, gets 403.
+    /// Only accounts with the `Active` status are searched, so a pending invitation and a disabled account are never
+    /// found - use `GET api/2.0/people/filter` to search across states.
+    /// The call is read-only and is not paged: every match is streamed, without a total.
+    /// `filterBy` set to `group` turns `text` into a group ID and keeps only the members of that group, so `text`
+    /// then has to be a valid identifier.
+    /// The answer holds full profiles.
     /// </remarks>
     /// <summary>Search users</summary>
     /// <path>api/2.0/people/@search/{query}</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "The full profiles of the matching active accounts", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [HttpGet("@search/{query}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetSearch(GetMemberByQueryRequestDto inDto)
     {
@@ -1274,16 +1469,27 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns a list of users matching the parameters specified in the request.
+    /// Returns a page of portal accounts selected by the full set of account filters, with the short profile of each
+    /// of them - the identifying fields, the avatar and the display name, without the contacts, the groups or the
+    /// quota.
+    /// The caller has to be a room admin, a DocSpace admin or a People module admin; a member or a guest gets 403.
+    /// The call is read-only, paged by `count` and `startIndex`, ordered by `sortBy` and `sortOrder`, and reports
+    /// the number of matches in the total count of the response.
+    /// It accepts exactly the same filters as `GET api/2.0/people/filter` and differs only in how much of each
+    /// profile comes back, so prefer this one for pickers, mentions and any list that shows names, and switch to the
+    /// other only when the full profile is needed.
+    /// Filters combine as conditions that all have to hold, and the same interactions apply: `withoutGroup` makes
+    /// `groupId` irrelevant, `employeeType` wins over `employeeTypes`, and `area` cancels the type filters that
+    /// contradict it.
     /// </remarks>
     /// <summary>
-    /// Search users by extended filter
+    /// Filter users in brief
     /// </summary>
     /// <path>api/2.0/people/simple/filter</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "List of users", typeof(IAsyncEnumerable<EmployeeDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "A page of matching accounts, with their short profiles", typeof(IAsyncEnumerable<EmployeeDto>))]
+    [SwaggerResponse(403, "The caller is a member or a guest")]
     [HttpGet("simple/filter")]
     public async IAsyncEnumerable<EmployeeDto> GetSimpleByFilter(SimpleByFilterRequestDto inDto)
     {
@@ -1320,7 +1526,20 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Deletes a list of the users with the IDs specified in the request.
+    /// Deletes several portal profiles in one call and queues the erasure of the data behind each of them.
+    /// Every listed account has to be disabled already - set the `Terminated` status through
+    /// `PUT api/2.0/people/status/{status}` first, because a single account that is still active rejects the whole
+    /// call with 403 - and the caller needs the permission to add and remove users.
+    /// System and LDAP accounts are dropped from the list without an error, and so are the accounts the caller may
+    /// not delete: a room admin when the caller is not a DocSpace admin, and a DocSpace admin when the caller is not
+    /// the portal owner.
+    /// The answer lists every account that was asked for, including the ones that were skipped, so it is not proof
+    /// that an account was deleted - read `GET api/2.0/people/{userid}` for that, which then answers 404.
+    /// The removal is permanent and cannot be undone, and each deleted account raises a `UserDeleted` webhook while
+    /// its data is erased by a queued job that can be watched through
+    /// `GET api/2.0/people/remove/progress/{userid}`.
+    /// Hand the rooms and the shared files over first through `POST api/2.0/people/reassign/start` - an account with
+    /// an unfinished reassignment cannot be deleted.
     /// </remarks>
     /// <summary>
     /// Delete users
@@ -1328,10 +1547,9 @@ public class UserController(
     /// <path>api/2.0/people/delete</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(400, "Incorrect UserIds")]
-    [SwaggerResponse(403, "No permissions to perform this action or users are not suspended")]
-    [SwaggerResponse(409, "Data reassign process is not complete")]
+    [SwaggerResponse(200, "Every account that was asked for, including the ones that were skipped", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "The userIds field is missing")]
+    [SwaggerResponse(403, "No permissions to perform this action, or one of the listed accounts is not disabled")]
     [HttpPut("delete", Order = -1)]
     public async IAsyncEnumerable<EmployeeFullDto> RemoveUsers(UpdateMembersRequestDto inDto)
     {
@@ -1391,7 +1609,18 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Resends emails to the users who have not activated their emails.
+    /// Sends the invitation or activation email again to the accounts that have not finished joining the portal.
+    /// Set `resendAll` to true to reach every pending account of the portal, in which case `userIds` is ignored and
+    /// the caller has to be a room admin or a DocSpace admin; with the default false only the listed accounts are
+    /// reached, and a member or a guest may then list nothing but their own ID.
+    /// Which email goes out depends on the state of each account: a pending invitation gets a fresh invitation link,
+    /// while an account that exists but has not confirmed its address gets activation instructions instead.
+    /// Accounts that are already active or that are disabled are skipped, and so are the pending accounts the caller
+    /// has no right to invite, without an error.
+    /// The answer lists only the targeted accounts the caller is allowed to see, so it can be shorter than the
+    /// request and is not a delivery report.
+    /// Repeated calls are throttled, and each call issues new links that make the previously sent ones useless.
+    /// To invite an address that has no profile yet, use `POST api/2.0/people/invite`.
     /// </remarks>
     /// <summary>
     /// Resend activation emails
@@ -1399,8 +1628,8 @@ public class UserController(
     /// <path>api/2.0/people/invite</path>
     /// <collection>list</collection>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "The targeted accounts the caller is allowed to see", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "A member or a guest asked for resendAll, or listed an account other than their own")]
     [AllowNotPayment]
     [HttpPut("invite")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -1541,14 +1770,21 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns a theme which is set to the current portal.
+    /// Returns the interface theme the calling account has chosen: `Base` for the light theme, `Dark` for the dark
+    /// one, or `System` to follow whatever the operating system asks for.
+    /// The setting belongs to the account and not to the portal, despite the name of the route, so it describes the
+    /// caller alone and cannot be read for anybody else.
+    /// It needs no permission and is read-only.
+    /// A caller that has never chosen a theme gets the portal default rather than an empty answer.
+    /// The same value is also reported as `theme` by `GET api/2.0/people/@self`, so a client that reads the profile
+    /// on start-up does not need this operation as well.
     /// </remarks>
     /// <summary>
     /// Get the portal theme
     /// </summary>
     /// <path>api/2.0/people/theme</path>
     [Tags("People / Theme")]
-    [SwaggerResponse(200, "Theme", typeof(DarkThemeSettings))]
+    [SwaggerResponse(200, "The interface theme of the calling account", typeof(DarkThemeSettings))]
     [HttpGet("theme")]
     public async Task<DarkThemeSettings> GetPortalTheme()
     {
@@ -1556,14 +1792,21 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Changes the current portal theme.
+    /// Sets the interface theme of the calling account to `Base` for the light theme, `Dark` for the dark one, or
+    /// `System` to follow whatever the operating system asks for.
+    /// The setting belongs to the account and not to the portal, despite the name of the route, so it changes
+    /// nothing for anybody else and cannot be set on another account.
+    /// It needs no permission, takes effect at once and is idempotent - sending the theme that is already in use
+    /// changes nothing.
+    /// The answer echoes the theme that was stored, which is the value the request asked for.
+    /// The same value is reported as `theme` by `GET api/2.0/people/@self`.
     /// </remarks>
     /// <summary>
     /// Change the portal theme
     /// </summary>
     /// <path>api/2.0/people/theme</path>
     [Tags("People / Theme")]
-    [SwaggerResponse(200, "Theme", typeof(DarkThemeSettings))]
+    [SwaggerResponse(200, "The interface theme that was stored", typeof(DarkThemeSettings))]
     [HttpPut("theme")]
     public async Task<DarkThemeSettings> ChangePortalTheme(DarkThemeSettingsRequestDto inDto)
     {
@@ -1578,14 +1821,24 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns the detailed information about the current user profile.
+    /// Returns the profile of the account the request is authenticated as, together with the session details only
+    /// this operation reports.
+    /// It takes no parameters, needs no permission and always describes the caller, so it is the operation to call
+    /// right after signing in to find out who the token belongs to and what that account may do.
+    /// The call is read-only and available on an unpaid portal.
+    /// Beyond the ordinary profile fields it fills in four that stay empty everywhere else: `theme` with the
+    /// interface theme the account chose, `loginEventId` with the identifier of the current session,
+    /// `hasPersonalFolder` with whether the account has a personal folder, and `authCookieLifetime` with the seconds
+    /// the session has left - the last one only when less than a day remains or the portal is configured to expose
+    /// it, so an absent value means neither, not an endless session.
+    /// To read somebody else use `GET api/2.0/people/{userid}`, which reports none of these four.
     /// </remarks>
     /// <summary>
     /// Get my profile
     /// </summary>
     /// <path>api/2.0/people/@self</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Detailed information about my profile", typeof(EmployeeFullDto))]
+    [SwaggerResponse(200, "The profile of the caller, with the theme, the session and the personal folder details", typeof(EmployeeFullDto))]
     [AllowNotPayment]
     [HttpGet("@self")]
     public async Task<EmployeeFullDto> GetSelfProfile()
@@ -1621,17 +1874,27 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Sends a message to the user email with the instructions to change the email address connected to the portal.
+    /// Starts changing the email address of an account, and what it actually does depends on who calls it.
+    /// A caller acting on their own account only gets a confirmation letter sent to the new address, and the address
+    /// stays unchanged until that link is followed, which lands on `PUT api/2.0/people/{userid}/email`.
+    /// A DocSpace administrator acting on somebody else changes the address immediately instead: the account is
+    /// marked as not activated, every session of it is ended, and activation instructions are sent to the new
+    /// address - and passing the address the account already has is then rejected with 400.
+    /// A caller who is not an administrator may only address their own account, nobody but the owner may change the
+    /// owner's address, and only the owner may change the address of another DocSpace administrator.
+    /// The target has to be an account that is neither disabled nor a pending invitation, otherwise the operation
+    /// answers 404, and an address that already belongs to somebody answers 400.
+    /// The answer is a ready-to-display message naming the address the letter was sent to.
     /// </remarks>
     /// <summary>
     /// Send instructions to change email
     /// </summary>
     /// <path>api/2.0/people/email</path>
     [Tags("People / Email")]
-    [SwaggerResponse(200, "Message text", typeof(string))]
-    [SwaggerResponse(400, "Incorrect userId or email")]
-    [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "User not found")]
+    [SwaggerResponse(200, "The message stating which address the letter was sent to", typeof(string))]
+    [SwaggerResponse(400, "The user ID is empty, the address is missing, malformed, already taken, or equal to the current one")]
+    [SwaggerResponse(403, "The caller may not change the address of that account")]
+    [SwaggerResponse(404, "The account does not exist, is disabled, or is a pending invitation")]
     [AllowNotPayment]
     [HttpPost("email")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -1720,8 +1983,18 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Sends a password recovery email to the specified user address.
-    /// For unauthenticated requests, CAPTCHA validation is required when CAPTCHA is enabled in the configuration.
+    /// Emails a password recovery link to an address, and is the entry point of the recovery flow rather than the
+    /// operation that changes anything.
+    /// It needs no authentication, which is how a person who cannot sign in uses it; when the portal has a CAPTCHA
+    /// configured, an unauthenticated request has to pass it and answers 403 if it does not.
+    /// An unauthenticated caller always gets the same success message, whether or not the address belongs to an
+    /// account, so the answer cannot be used to find out which addresses are registered.
+    /// An authenticated caller does get told: a failure is answered with 403, and asking for somebody else requires
+    /// DocSpace administrator rights, while the owner's password can be asked for by the owner alone and another
+    /// administrator's only by the owner.
+    /// The link that is sent leads to `PUT api/2.0/people/{userid}/password`, which is where the new password is
+    /// set; no password is ever sent by email despite the wording of the message.
+    /// Repeated calls are throttled.
     /// </remarks>
     /// <summary>
     /// Remind a user password
@@ -1729,8 +2002,8 @@ public class UserController(
     /// <path>api/2.0/people/password</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Password")]
-    [SwaggerResponse(200, "Email with the password", typeof(string))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "The message stating that the recovery link was sent to the address", typeof(string))]
+    [SwaggerResponse(403, "The CAPTCHA was not passed, or an authenticated caller may not ask for that account")]
     [AllowNotPayment]
     [AllowAnonymous]
     [HttpPost("password")]
@@ -1792,15 +2065,27 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Sets the required activation status to the list of users with the IDs specified in the request.
+    /// Sets the activation state of the calling account, which is how a person finishes confirming their email
+    /// address after following the link they were sent.
+    /// The request has to carry the confirmation token from that link rather than an ordinary session, and the
+    /// account must be allowed to edit its own profile.
+    /// Despite taking a list, it accepts exactly one ID and that ID has to be the calling account: an empty list,
+    /// more than one entry, or somebody else's ID is answered with 400, so it cannot be used to activate other
+    /// people.
+    /// Setting `Activated` on the portal owner sends the administrator welcome email, once per portal.
+    /// The change raises a `UserUpdated` webhook, and the answer holds the profile in its new state - or nothing at
+    /// all when the account has meanwhile disappeared, which is skipped without an error.
+    /// The account status is a different thing and is changed through `PUT api/2.0/people/status/{status}`.
     /// </remarks>
     /// <summary>
-    /// Set an activation status to the users
+    /// Set my activation status
     /// </summary>
     /// <path>api/2.0/people/activationstatus/{activationstatus}</path>
     /// <collection>list</collection>
     [Tags("People / User status")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(200, "The profile of the caller in its new activation state", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "The list is empty, holds more than one ID, or names an account other than the caller")]
+    [SwaggerResponse(403, "The account may not edit its own profile")]
     [AllowNotPayment]
     [HttpPut("activationstatus/{activationstatus}")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Activation,EmailActivation")]
@@ -1847,17 +2132,25 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Updates the user culture with the parameters specified in the request.
+    /// Changes the interface language of a profile, which decides the language of the portal for that account and of
+    /// the emails it receives.
+    /// The culture has to be one the portal has enabled, otherwise the operation answers 400; read the enabled list
+    /// from the portal settings rather than guessing a code.
+    /// A caller may only change their own language - the ID in the route has to be the calling account, and an
+    /// administrator gets 403 for anybody else - and the account must be allowed to edit its own profile.
+    /// The change takes effect immediately, raises a `UserUpdated` webhook, and answers with the profile carrying
+    /// the new `cultureName`.
+    /// Other profile fields are not touched here; use `PUT api/2.0/people/{userid}` for those.
     /// </remarks>
     /// <summary>
     /// Update a user culture
     /// </summary>
     /// <path>api/2.0/people/{userid}/culture</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Detailed user information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "The specified culture is not in the list of available ones")]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "User not found")]
+    [SwaggerResponse(200, "The profile with its new culture", typeof(EmployeeFullDto))]
+    [SwaggerResponse(400, "The specified culture is not enabled on the portal")]
+    [SwaggerResponse(403, "The ID in the route is not the calling account, or the account may not edit its own profile")]
+    [SwaggerResponse(404, "No user has the specified ID")]
     [HttpPut("{userid}/culture")]
     public async Task<EmployeeFullDto> UpdateMemberCulture(UpdateMemberCultureByIdRequestDto inDto)
     {
@@ -1882,17 +2175,37 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Updates the data for the selected portal user with the first name, last name, email address, and/or optional parameters specified in the request.
+    /// Updates a portal profile, and which fields it accepts depends on whose profile it is - the two halves of this
+    /// operation do not overlap.
+    /// On the caller's own profile it applies `firstName`, `lastName`, `location`, `comment`, `spam`, `contacts`,
+    /// `department` and the avatar named in `files`, while `disable` and `isUser` are ignored; on somebody else's
+    /// profile only `disable` and `isUser` are applied and every descriptive field is ignored, so an administrator
+    /// cannot rename another account through this operation.
+    /// The caller needs the permission to edit that profile, cannot touch the portal owner, and has to be the portal
+    /// owner to touch another DocSpace administrator; on an account imported from LDAP or SSO the name and the
+    /// location are silently left alone even on one's own profile.
+    /// Omitted fields keep their current values, an unusable pair of names answers 400, and `disable` set to true
+    /// gives the account the `Terminated` status and ends every session it has, which is the state
+    /// `DELETE api/2.0/people/{userid}` then requires.
+    /// The `isUser` flag turns the account into a guest when true and back into a member when false, both of which
+    /// can answer 402 because either direction takes a seat; a request to make the portal owner, a DocSpace
+    /// administrator or a module administrator a guest is ignored without an error.
+    /// A change raises a `UserUpdated` webhook and the answer holds the profile as it is afterwards, so read it
+    /// instead of assuming the request was applied.
+    /// For the language use `PUT api/2.0/people/{userid}/culture`, for the type
+    /// `PUT api/2.0/people/type/{type}`, and for the status of several accounts at once
+    /// `PUT api/2.0/people/status/{status}`.
     /// </remarks>
     /// <summary>
     /// Update a user
     /// </summary>
     /// <path>api/2.0/people/{userid}</path>
     [Tags("People / Profiles")]
-    [SwaggerResponse(200, "Updated user with the detailed information", typeof(EmployeeFullDto))]
-    [SwaggerResponse(400, "Incorrect user name")]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
-    [SwaggerResponse(404, "User not found")]
+    [SwaggerResponse(200, "The profile as it is after the update", typeof(EmployeeFullDto))]
+    [SwaggerResponse(400, "The first and last name pair is not a valid user name")]
+    [SwaggerResponse(402, "The tariff or the user quota does not allow the requested guest or member seat")]
+    [SwaggerResponse(403, "The account is the portal owner or a system account, the caller may not edit it, or only the portal owner may edit a DocSpace administrator")]
+    [SwaggerResponse(404, "No user has the specified ID")]
     [HttpPut("{userid}", Order = 1)]
     public async Task<EmployeeFullDto> UpdateMember(UpdateMemberByIdRequestDto inDto)
     {
@@ -2060,7 +2373,20 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Changes a status of the users with the IDs specified in the request.
+    /// Enables or disables several portal accounts at once, which is the way to suspend somebody without deleting
+    /// them and to bring them back later.
+    /// Only `Active` and `Terminated` are accepted in the route; any other status answers 400.
+    /// The caller needs the permission to edit users, and the whole list is checked before anything is applied: a
+    /// system account, an LDAP account, the portal owner, the caller themselves, or - unless the caller is the
+    /// portal owner - a DocSpace administrator rejects the entire call with 403 and changes nothing.
+    /// Disabling ends every session of the account and takes its seat back, while enabling takes a seat again and
+    /// can therefore answer 402 when the tariff or the user quota has none left; the accounts are then processed one
+    /// by one, so a quota failure partway through leaves the earlier ones enabled.
+    /// Enabling only affects accounts that were disabled, and an account that had never filled in its name comes
+    /// back as `Pending` rather than `Active` when it still has an unused invitation, so read the `status` in the
+    /// answer instead of assuming it matches the request.
+    /// Each changed account raises a `UserUpdated` webhook, and disabling is what
+    /// `DELETE api/2.0/people/{userid}` requires before it will delete an account.
     /// </remarks>
     /// <summary>
     /// Change a user status
@@ -2068,9 +2394,10 @@ public class UserController(
     /// <path>api/2.0/people/status/{status}</path>
     /// <collection>list</collection>
     [Tags("People / User status")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(400, "Incorrect status")]
-    [SwaggerResponse(403, "No permissions to perform this action or cannot change status for a specific user (yourself, owner, LDAP ...)")]
+    [SwaggerResponse(200, "The listed accounts with their statuses after the change", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "The requested status is neither Active nor Terminated")]
+    [SwaggerResponse(402, "The tariff or the user quota does not allow enabling one more account")]
+    [SwaggerResponse(403, "No permissions to perform this action, or the list names a system, LDAP, owner, self or DocSpace admin account")]
     [HttpPut("status/{status}")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserStatus(UpdateMemberStatusRequestDto inDto)
     {
@@ -2192,7 +2519,19 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Changes a type of the users with the IDs specified in the request.
+    /// Changes the type of the existing portal users listed in `userIds` to the type given in the route, in one call.
+    /// The caller needs the permission to add and remove users of the requested type, cannot change their own type or
+    /// the type of the portal owner, and cannot use this operation at all while being a guest; changing somebody to
+    /// `Guest` additionally requires the portal to allow inviting guests.
+    /// Every listed account has to be visible to the caller and must not be disabled.
+    /// The change is applied immediately: each converted user gets a notification email and raises a `UserUpdated`
+    /// webhook, and the accounts are processed one by one, so a rejection in the middle leaves the users before it
+    /// already converted - re-read them before retrying.
+    /// The answer streams the converted users with their detailed information, in the order they were processed.
+    /// Converting somebody to a paid type takes a paid seat, so the operation answers 402 when the tariff or the
+    /// paid-user quota does not allow one more.
+    /// This operation only moves the type and leaves the rooms and the shared files of the account where they are -
+    /// to hand them over to another admin in the same step, use `POST api/2.0/people/type` instead.
     /// </remarks>
     /// <summary>
     /// Change a user type
@@ -2200,7 +2539,8 @@ public class UserController(
     /// <path>api/2.0/people/type/{type}</path>
     /// <collection>list</collection>
     [Tags("People / User type")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(200, "The converted users with their detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(402, "The tariff or the paid-user quota does not allow one more paid user")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("type/{type}")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserType(UpdateMemberTypeRequestDto inDto)
@@ -2264,14 +2604,24 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Starts updating the type of the user or guest when reassigning rooms and shared files.
+    /// Queues an asynchronous job that converts one account to `Guest` or `User` and, in the same job, hands the
+    /// rooms and the shared files of that account over to another administrator.
+    /// Only `Guest` and `User` are accepted here, because they are the types that cannot own rooms; for any other
+    /// type use `PUT api/2.0/people/type/{type}`, which converts immediately and transfers nothing.
+    /// The caller needs the permission to add and remove users of the requested type, has to be the portal owner to
+    /// convert a DocSpace administrator, and converting to `Guest` also requires the portal to allow inviting guests.
+    /// The account being converted has to be active and cannot be the caller, and the recipient - `reassignUserId`,
+    /// or the caller when it is omitted - has to be an active room admin or DocSpace admin other than that account.
+    /// The conversion does not finish within this call: poll `GET api/2.0/people/type/progress/{userid}` with the
+    /// converted user ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/type/terminate`.
+    /// A failure inside the running job is reported in the `error` field of the progress, not as a status code here.
     /// </remarks>
     /// <summary>Start updating user type</summary>
     /// <path>api/2.0/people/type</path>
     [Tags("People / User type")]
-    [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
-    [SwaggerResponse(400, "Can not update user type")]
-    [SwaggerResponse(403, "Access denied")]
+    [SwaggerResponse(200, "The state of the queued user type change", typeof(TaskProgressResponseDto))]
+    [SwaggerResponse(400, "The requested type is neither Guest nor User, the account is a system account, disabled or the caller, the recipient is the same account or is not an active admin, or a non-owner tried to convert a DocSpace admin")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("type")]
     public async Task<TaskProgressResponseDto> StartUserTypeUpdate(StartUpdateUserTypeDto inDto)
     {
@@ -2325,12 +2675,19 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Returns the progress of updating the user type.
+    /// Returns the current state of the user type change queued for the user with the ID specified in the request.
+    /// A conversion must have been queued by `POST api/2.0/people/type` first: when nothing is queued for that user
+    /// the operation answers 200 with an empty body.
+    /// The caller needs the permission to add and remove users.
+    /// The call is read-only and is the polling operation of this flow - repeat it until `isCompleted` is true,
+    /// reading `percentage` for the 0 to 100 progress and `error` for the message left by a failed job.
+    /// Use `PUT api/2.0/people/type/terminate` to cancel a conversion that is still running.
     /// </remarks>
-    /// <summary>Get the progress of updating user type</summary>
+    /// <summary>Get the user type change progress</summary>
     /// <path>api/2.0/people/type/progress/{userid}</path>
     [Tags("People / User type")]
-    [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
+    [SwaggerResponse(200, "The state of the queued user type change, or an empty body when nothing is queued for the user", typeof(TaskProgressResponseDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("type/progress/{userid:guid}")]
     public async Task<TaskProgressResponseDto> GetUserTypeUpdateProgress(UserIdRequestDto inDto)
     {
@@ -2343,12 +2700,19 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Terminates the process of updating the type of the user or guest.
+    /// Cancels the user type change queued for the user with the ID specified in the request.
+    /// The caller needs the permission to add and remove users.
+    /// The operation is idempotent: when nothing is queued for that user it answers 200 with an empty body, and
+    /// repeating it on an already cancelled job changes nothing.
+    /// Cancelling removes the job from the queue and does not undo the type change or the transfers it has already
+    /// made, and a cancelled job cannot be resumed - start a new one through `POST api/2.0/people/type`.
+    /// The returned progress reports `status` as `Canceled` and `isCompleted` as true.
     /// </remarks>
     /// <summary>Terminate updating user type</summary>
     /// <path>api/2.0/people/type/terminate</path>
     [Tags("People / User type")]
-    [SwaggerResponse(200, "Update type progress", typeof(TaskProgressResponseDto))]
+    [SwaggerResponse(200, "The state of the cancelled user type change, or an empty body when nothing was queued for the user", typeof(TaskProgressResponseDto))]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("type/terminate")]
     public async Task<TaskProgressResponseDto> TerminateUserTypeUpdate(TerminateRequestDto inDto)
     {
@@ -2402,7 +2766,19 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Changes a quota limit for the users with the IDs specified in the request.
+    /// Gives the listed accounts their own storage limit, replacing the portal default for each of them.
+    /// The caller needs the permission to edit the portal settings, which in practice means a DocSpace
+    /// administrator or the portal owner.
+    /// `quota` is a whole number of bytes: a value of 0 or more becomes the personal limit, while any negative value
+    /// switches the personal limit off and hands the account back to the portal default.
+    /// The value has to fit the portal: a limit larger than the total storage the tariff allows, or larger than the
+    /// portal-wide quota on a standalone installation, is rejected with 400, and so is a value that is not a whole
+    /// number.
+    /// System accounts are dropped from the list without an error, the accounts are processed one by one, and the
+    /// answer holds the ones that were reached.
+    /// Setting a limit does not free any space and does not delete anything: an account already over its new limit
+    /// simply cannot add more.
+    /// Use `PUT api/2.0/people/resetquota` to return accounts to the portal default.
     /// </remarks>
     /// <summary>
     /// Change a user quota limit
@@ -2410,8 +2786,8 @@ public class UserController(
     /// <path>api/2.0/people/userquota</path>
     /// <collection>list</collection>
     [Tags("People / Quota")]
-    [SwaggerResponse(200, "List of users with the detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(400, "The entered quota value is invalid or greater than the total storage size")]
+    [SwaggerResponse(200, "The accounts whose limit was changed", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "The value is not a whole number of bytes, or it exceeds the storage the portal allows")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("userquota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuota(UpdateMembersQuotaRequestDto inDto)
@@ -2473,7 +2849,18 @@ public class UserController(
     }
 
     /// <remarks>
-    /// Resets a quota limit of users with the IDs specified in the request.
+    /// Drops the personal storage limit of the listed accounts, so that each of them follows the portal default
+    /// again.
+    /// The caller needs the permission to edit the portal settings, which in practice means a DocSpace
+    /// administrator or the portal owner.
+    /// On a hosted portal the tariff has to include the storage statistics feature, otherwise the operation answers
+    /// 402; a standalone installation has no such condition.
+    /// It takes only `userIds` - the `quota` field of the request body is not read here - and system accounts are
+    /// dropped from the list without an error.
+    /// The accounts are processed one by one and the answer holds the ones that were reached, each already showing
+    /// the portal default as its limit.
+    /// Nothing is deleted and no space is freed; only the limit that applies changes.
+    /// Use `PUT api/2.0/people/userquota` to give an account its own limit instead.
     /// </remarks>
     /// <summary>
     /// Reset a user quota limit
@@ -2481,10 +2868,9 @@ public class UserController(
     /// <path>api/2.0/people/resetquota</path>
     /// <collection>list</collection>
     [Tags("People / Quota")]
-    [SwaggerResponse(200, "User detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(403, "The invitation link is invalid or its validity has expired")]
-    [SwaggerResponse(409, "Conflict - system user quota cannot be reset")]
+    [SwaggerResponse(200, "The accounts that now follow the portal default limit", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(402, "The tariff of a hosted portal does not include the storage statistics feature")]
+    [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("resetquota")]
     public async IAsyncEnumerable<EmployeeFullDto> ResetUsersQuota(UpdateMembersQuotaRequestDto inDto)
     {
@@ -2806,16 +3192,28 @@ public class UserControllerAdditional<T>(
     : ApiControllerBase
 {
     /// <remarks>
-    /// Returns the users with the sharing settings in a room with the ID specified in request.
+    /// Returns the accounts that are relevant to the room with the ID given in the route, and reports for each of
+    /// them whether it already has access to that room.
+    /// The caller only needs read access to the room, not the right to manage its access, but a guest may not call
+    /// it at all; an ID that matches no room answers 404.
+    /// The call is read-only, works without a filter - leaving `filterValue` empty returns every matching account
+    /// rather than nothing - and is paged by `count` and `startIndex`, with the number of matches in the total count
+    /// of the response.
+    /// Pass `excludeShared` to keep only the accounts that have no access yet, `includeShared` to keep only those
+    /// that already have it, and neither to get both kinds with the `shared` field telling them apart.
+    /// A DocSpace administrator additionally sees the guests that are not related to the caller.
+    /// To search users and groups together, or to build an access dialog that needs the right to manage sharing, use
+    /// `GET api/2.0/accounts/room/{id}/search` instead.
     /// </remarks>
     /// <summary>
-    /// Get users with room sharing settings
+    /// Search users for a room
     /// </summary>
     /// <path>api/2.0/people/room/{id}</path>
     /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "The matching accounts, each with its access state for the room", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "The caller is a guest or cannot read the room")]
+    [SwaggerResponse(404, "No room has the specified ID")]
     [HttpGet("room/{id}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithRoomShared(UsersWithFileEntitySharedRequestDto<T> inDto)
     {
@@ -2827,15 +3225,28 @@ public class UserControllerAdditional<T>(
         }
     }
     /// <remarks>
-    /// Returns the users with the sharing settings in a folder with the ID specified in request.
+    /// Returns the accounts that are relevant to the folder with the ID given in the route, and reports for each of
+    /// them whether it already has access to that folder.
+    /// The caller only needs read access to the folder, not the right to manage its access, but a guest may not call
+    /// it at all; an ID that matches no folder answers 404.
+    /// The call is read-only, works without a filter - leaving `filterValue` empty returns every matching account
+    /// rather than nothing - and is paged by `count` and `startIndex`, with the number of matches in the total count
+    /// of the response.
+    /// Pass `excludeShared` to keep only the accounts that have no access yet, `includeShared` to keep only those
+    /// that already have it, and neither to get both kinds with the `shared` field telling them apart.
+    /// A DocSpace administrator additionally sees the guests that are not related to the caller.
+    /// To search users and groups together, or to build an access dialog that needs the right to manage sharing, use
+    /// `GET api/2.0/accounts/folder/{id}/search` instead.
     /// </remarks>
     /// <summary>
-    /// Get users with folder sharing settings
+    /// Search users for a folder
     /// </summary>
     /// <path>api/2.0/people/folder/{id}</path>
+    /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "The matching accounts, each with its access state for the folder", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "The caller is a guest or cannot read the folder")]
+    [SwaggerResponse(404, "No folder has the specified ID")]
     [HttpGet("folder/{id}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithFoldersShared(UsersWithFileEntitySharedRequestDto<T> inDto)
     {
@@ -2847,15 +3258,28 @@ public class UserControllerAdditional<T>(
         }
     }
     /// <remarks>
-    /// Returns the users with the sharing settings in a file with the ID specified in request.
+    /// Returns the accounts that are relevant to the file with the ID given in the route, and reports for each of
+    /// them whether it already has access to that file.
+    /// The caller only needs read access to the file, not the right to manage its access, but a guest may not call
+    /// it at all; an ID that matches no file answers 404.
+    /// The call is read-only, works without a filter - leaving `filterValue` empty returns every matching account
+    /// rather than nothing - and is paged by `count` and `startIndex`, with the number of matches in the total count
+    /// of the response.
+    /// Pass `excludeShared` to keep only the accounts that have no access yet, `includeShared` to keep only those
+    /// that already have it, and neither to get both kinds with the `shared` field telling them apart.
+    /// A DocSpace administrator additionally sees the guests that are not related to the caller.
+    /// To search users and groups together, or to build an access dialog that needs the right to manage sharing, use
+    /// `GET api/2.0/accounts/file/{id}/search` instead.
     /// </remarks>
     /// <summary>
-    /// Get users with file sharing settings
+    /// Search users for a file
     /// </summary>
     /// <path>api/2.0/people/file/{id}</path>
+    /// <collection>list</collection>
     [Tags("People / Search")]
-    [SwaggerResponse(200, "Ok", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(200, "The matching accounts, each with its access state for the file", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(403, "The caller is a guest or cannot read the file")]
+    [SwaggerResponse(404, "No file has the specified ID")]
     [HttpGet("file/{id}")]
     public async IAsyncEnumerable<EmployeeFullDto> GetUsersWithFilesShared(UsersWithFileEntitySharedRequestDto<T> inDto)
     {

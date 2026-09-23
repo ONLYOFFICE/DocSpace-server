@@ -36,8 +36,16 @@ namespace ASC.Web.Files.Utils;
 public class FileChecker(
     IDaoFactory daoFactory,
     IConfiguration configuration,
+    TenantManager tenantManager,
     IFusionCache cache)
 {
+    // DSE3 container (encrypted files in private rooms): the client marks a PDF form by setting
+    // bit 0x02 in the flags byte (offset 6) of the unencrypted header. Flag semantics are frozen
+    // across format versions, so the byte is read independently of the version byte.
+    private const string Dse3Magic = "DSE3";
+    private const byte Dse3FlagIsForm = 0x02;
+    private static readonly TimeSpan _isFormCacheDuration = TimeSpan.FromDays(1);
+
     public async Task<bool> CheckExtendedPDF<T>(File<T> file)
     {
         const int limit = 300;
@@ -51,13 +59,25 @@ public class FileChecker(
         using var reader = new StreamReader(stream, Encoding.GetEncoding("iso-8859-1"));
         var message = await reader.ReadToEndAsync();
 
+        // iso-8859-1 is byte-transparent: each char equals the source byte. Encrypted DSE3 blobs
+        // carry no ONLYOFFICEFORM signature, so read the form flag from the header instead.
+        if (message.Length >= 7 && message.StartsWith(Dse3Magic, StringComparison.Ordinal))
+        {
+            return ((byte)message[6] & Dse3FlagIsForm) != 0;
+        }
+
         var config = configuration.GetSection("files:oform").Get<OFormSettings>();
 
         return IsExtendedPDFFile(message, config.Signature);
     }
     public async Task<bool> IsFormPDFFile<T>(File<T> file)
     {
-        var isFormCache = await cache.TryGetAsync<bool>(FileConstant.IsFormKeyPrefix + file.Id);
+        // Key must embed tenant (file ids collide across tenants) and version (a new version can flip
+        // the flag), and carry a finite TTL — the default entry duration is TimeSpan.MaxValue and there
+        // is no invalidation, so a stale value would otherwise stick forever.
+        var key = GetIsFormCacheKey(tenantManager.GetCurrentTenantId(), file);
+
+        var isFormCache = await cache.TryGetAsync<bool>(key);
 
         if (isFormCache.HasValue)
         {
@@ -65,8 +85,13 @@ public class FileChecker(
         }
 
         var isForm = await CheckExtendedPDF(file);
-        await cache.SetAsync(FileConstant.IsFormKeyPrefix + file.Id, isForm);
+        await cache.SetAsync(key, isForm, _isFormCacheDuration);
         return isForm;
+    }
+
+    private static string GetIsFormCacheKey<T>(int tenantId, File<T> file)
+    {
+        return $"{FileConstant.IsFormKeyPrefix}{tenantId}_{file.Id}_{file.Version}";
     }
     private static bool IsExtendedPDFFile(string text, string signature)
     {

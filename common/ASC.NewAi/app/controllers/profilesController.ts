@@ -34,6 +34,7 @@
 import { ProfilesEngine } from "@onlyoffice/ai-chat/core";
 import type { Profile, CreateProfileInput, ProviderType } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
+import { listOnlyofficeGatewayModels } from "../storage/profilesStorage.js";
 import { aiService, AiServiceHttpError } from "../storage/httpClient.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString, isObject } from "../narrow.js";
@@ -201,6 +202,27 @@ export const profilesController = {
       return;
     }
     await assertSafeBaseUrl(baseUrl);
+    if (providerType === "onlyoffice") {
+      // The onlyoffice provider's OpenAI-compatible /models returns bare
+      // ids, so the engine stamps every model with the broad default
+      // capability mask — while GET /profiles/list synthesizes its answer
+      // from the gateway's rich catalog. Serve this listing from that same
+      // catalog so both methods agree (Bug 83113); the runtime override
+      // (withOnlyofficeProviderOverrides) already points every onlyoffice
+      // profile at this gateway regardless of the submitted baseUrl. Fall
+      // back to the provider listing when the gateway is unavailable
+      // (self-hosted portals without the AI gateway).
+      try {
+        res.json(await listOnlyofficeGatewayModels());
+        return;
+      } catch (err) {
+        logger.warn(
+          `gateway models listing failed, falling back to the provider listing: ${
+            err instanceof Error ? err.message : String(err)
+          }`,
+        );
+      }
+    }
     try {
       const models = await engine.listProviderModels({
         providerType,

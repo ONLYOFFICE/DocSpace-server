@@ -275,12 +275,13 @@ public interface IDataStore
     ///<returns></returns>
     Task<Uri> MoveAsync(string srcdomain, string srcpath, string newdomain, string newpath, Guid ownerId, bool quotaCheckFileSize = true);
 
-    ///<summary>
-    /// Saves the file in the temp. In fact, almost no different from the usual Save except that generates the file name itself. An inconvenient thing.
-    ///</summary>
-    ///<param name="domain"></param>
-    ///<param name="stream"></param>
-    ///<returns></returns>
+    /// <summary>
+    ///  Saves the file in the temp. In fact, almost no different from the usual Save except that generates the file name itself. An inconvenient thing.
+    /// </summary>
+    /// <param name="domain"></param>
+    /// <param name="stream"></param>
+    /// <param name="token"></param>
+    /// <returns></returns>
     Task<(Uri, string)> SaveTempAsync(string domain, Stream stream, CancellationToken token = default);
 
     /// <summary>

@@ -35,6 +35,12 @@ import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js"
 import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject, getString } from "../narrow.js";
 import type { McpServersStorage, McpServerConfig } from "@onlyoffice/ai-chat/core";
+import {
+  chatContextScope,
+  invalidateChatContext,
+  readChatContext,
+  reportChatContextMiss,
+} from "./chatContextSnapshot.js";
 
 const PATH = "/mcp-servers";
 
@@ -42,7 +48,7 @@ function entityIdQuery(entityId: string | undefined): Record<string, QueryValue>
   return entityId ? { entityId } : undefined;
 }
 
-function parseConfig(raw: unknown): McpServerConfig | null {
+export function parseMcpServerConfig(raw: unknown): McpServerConfig | null {
   if (raw === null || raw === undefined) {
     return null;
   }
@@ -68,9 +74,16 @@ export class HttpMcpServersStorage implements McpServersStorage {
       config: JSON.stringify(config),
       entityId: scopedEntityId ?? null,
     });
+    invalidateChatContext("mcpServers");
   }
 
   async readByName(name: string, entityId?: string): Promise<McpServerConfig | null> {
+    const snapshot = readChatContext("mcpServers");
+    const scope = snapshot ? chatContextScope(snapshot, entityId) : undefined;
+    if (scope) {
+      return scope.mcpServers[name] ?? null;
+    }
+    reportChatContextMiss(`mcpServers.readByName(${name}, ${entityId ?? "-"})`);
     try {
       const query = entityIdQuery(await resolveAgentEntityId(entityId));
       const raw = await aiService.get(
@@ -81,7 +94,7 @@ export class HttpMcpServersStorage implements McpServersStorage {
         return null;
       }
       const cfg = getString(raw, "config");
-      return parseConfig(cfg);
+      return parseMcpServerConfig(cfg);
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
         return null;
@@ -94,6 +107,12 @@ export class HttpMcpServersStorage implements McpServersStorage {
   // (each `{ name, config }`), so we have to assemble the name → config map
   // client-side rather than reading an object back.
   async readAll(entityId?: string): Promise<Record<string, McpServerConfig>> {
+    const snapshot = readChatContext("mcpServers");
+    const scope = snapshot ? chatContextScope(snapshot, entityId) : undefined;
+    if (scope) {
+      return { ...scope.mcpServers };
+    }
+    reportChatContextMiss(`mcpServers.readAll(${entityId ?? "-"})`);
     const query = entityIdQuery(await resolveAgentEntityId(entityId));
     const raw = await aiService.get(PATH, query ? { query } : undefined);
     if (!Array.isArray(raw)) {
@@ -108,7 +127,7 @@ export class HttpMcpServersStorage implements McpServersStorage {
       if (name === undefined) {
         continue;
       }
-      const cfg = parseConfig(getString(item, "config"));
+      const cfg = parseMcpServerConfig(getString(item, "config"));
       if (cfg !== null) {
         result[name] = cfg;
       }
@@ -122,6 +141,7 @@ export class HttpMcpServersStorage implements McpServersStorage {
       config: JSON.stringify(config),
       entityId: scopedEntityId ?? null,
     });
+    invalidateChatContext("mcpServers");
   }
 
   async replaceAll(
@@ -134,9 +154,11 @@ export class HttpMcpServersStorage implements McpServersStorage {
       payload[n] = JSON.stringify(c);
     }
     await aiService.put(PATH, { servers: payload, entityId: scopedEntityId ?? null });
+    invalidateChatContext("mcpServers");
   }
 
   async delete(name: string, entityId?: string): Promise<void> {
+    invalidateChatContext("mcpServers");
     try {
       const query = entityIdQuery(await resolveAgentEntityId(entityId));
       await aiService.delete(

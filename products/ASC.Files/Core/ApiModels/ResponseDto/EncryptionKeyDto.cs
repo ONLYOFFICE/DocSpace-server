@@ -33,18 +33,49 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
+/// <summary>
+/// The encryption key pair of a user.
+/// </summary>
 public class EncryptionKeyDto
 {
     private const string DefaultCryptoEngineId = "{DC522726-5E0E-43E5-AA02-8EA156BECBC5}";
 
+    /// <summary>
+    /// The identifier of the key pair.
+    /// </summary>
+    /// <example>9924256B-447C-4F19-9dbd-8ad8c39e8ff5</example>
     public Guid Id { get; set; } = Guid.NewGuid();
+
+    /// <summary>
+    /// The identifier of the user the key pair belongs to.
+    /// </summary>
+    /// <example>9924256B-447C-4F19-9dbd-8ad8c39e8ff5</example>
     public Guid UserId { get; set; }
     //public EncryptionKeyType Type { get; set; }
+
+    /// <summary>
+    /// The date and time when the key pair was created.
+    /// </summary>
+    /// <example>2025-01-01T00:00:00</example>
     public DateTime Date { get; set; } = DateTime.Now;
     //public string Version { get; set; }
+
+    /// <summary>
+    /// The public key of the pair, used to encrypt the file keys.
+    /// </summary>
+    /// <example>MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A...</example>
     public string PublicKey { get; set; }
+
+    /// <summary>
+    /// The private key of the pair, encrypted with the user password.
+    /// </summary>
+    /// <example>U2FsdGVkX1+Lm3s...</example>
     public string PrivateKeyEnc { get; set; }
 
+    /// <summary>
+    /// The identifier of the crypto engine the key pair was issued for.
+    /// </summary>
+    /// <example>{DC522726-5E0E-43E5-AA02-8EA156BECBC5}</example>
     public string CryptoEngineId { get; set; } = DefaultCryptoEngineId;
     //public string CryptoEngineId => DefaultCryptoEngineId;
 }
