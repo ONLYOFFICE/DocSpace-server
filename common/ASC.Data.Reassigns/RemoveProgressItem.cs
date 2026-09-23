@@ -57,6 +57,7 @@ public class RemoveProgressItem : DistributedTaskProgress
     //private readonly MailGarbageEngine _mailEraser;
 
     private IDictionary<string, StringValues> _httpHeaders;
+    private string _baseUri;
     private int _tenantId;
     private Guid _currentUserId;
     private bool _notify;
@@ -78,9 +79,10 @@ public class RemoveProgressItem : DistributedTaskProgress
     //_docService = Web.Files.Classes.Global.FileStorageService;
     //_mailEraser = new MailGarbageEngine();
 
-    public void Init(IDictionary<string, StringValues> httpHeaders, int tenantId, UserInfo user, Guid currentUserId, bool notify, bool deleteProfile, bool isGuest)
+    public void Init(IDictionary<string, StringValues> httpHeaders, string baseUri, int tenantId, UserInfo user, Guid currentUserId, bool notify, bool deleteProfile, bool isGuest)
     {
         _httpHeaders = httpHeaders;
+        _baseUri = baseUri;
         _tenantId = tenantId;
         User = user;
         UserId = user.Id;
@@ -103,6 +105,11 @@ public class RemoveProgressItem : DistributedTaskProgress
         var logger = loggerFactory.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
         var userName = userFormatter.GetUserName(User);
+
+        if (!string.IsNullOrEmpty(_baseUri))
+        {
+            scope.ServiceProvider.GetRequiredService<BaseCommonLinkUtility>().ServerUri = _baseUri;
+        }
 
         try
         {
