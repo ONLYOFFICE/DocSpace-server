@@ -35,12 +35,12 @@ import { WebSearchEngine } from "@onlyoffice/ai-chat/core";
 import type { WebSearchConfig } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
-import { asString } from "../narrow.js";
+import { isObject } from "../narrow.js";
 import { assertSafeBaseUrl } from "../security.js";
 import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
 
-async function checkConfigUrl(config: WebSearchConfig | undefined): Promise<void> {
-  await assertSafeBaseUrl(config?.baseUrl);
+async function checkConfigUrl(config: WebSearchConfig): Promise<void> {
+  await assertSafeBaseUrl(config.baseUrl);
 }
 
 const engine = new WebSearchEngine({ storage });
@@ -52,6 +52,15 @@ const engine = new WebSearchEngine({ storage });
 // their 403 before any outbound connection is made (Bugs 83234 / 83235).
 async function assertWebSearchAccess(): Promise<void> {
   await storage.webSearch.read();
+}
+
+function badRequest(message: string): never {
+  throw Object.assign(new Error(message), { status: 400, expose: true });
+}
+
+/** A field a client actually sent a value for; `null` counts as "not set". */
+function isSet(value: unknown): boolean {
+  return value !== undefined && value !== null;
 }
 
 /**
@@ -69,9 +78,69 @@ function unpackConfig(body: unknown): { body: unknown; entityId: unknown } {
   };
 }
 
+/**
+ * Narrow a request argument to a {@link WebSearchConfig}, or reject the
+ * request with 400.
+ *
+ * Everything the engine cannot work with has to be refused here, because
+ * the engine does not guard its input: `validateConfigShape` reads
+ * `config.provider` straight away, so an absent or non-object config threw
+ * a TypeError that the error boundary could only report as 500 (Bug 82812).
+ * The cases that got there in practice were a body carrying the config
+ * unwrapped (no `body`/`config` key, so `unpackConfig` yields `undefined`)
+ * and an empty `{}`.
+ *
+ * Optional fields are type-checked rather than dropped: a mistyped `key`
+ * or `baseUrl` is a malformed request, not a request without one. `null`
+ * is the exception — it is the wire form of "not set" for a client that
+ * serializes every field, and the read path (`parseWebSearchConfig`) has
+ * always taken it as absent, so it is accepted here too.
+ */
+function asConfig(value: unknown): WebSearchConfig {
+  if (!isObject(value)) {
+    badRequest("config is required and must be an object");
+  }
+  const { provider, key, baseUrl, isCloudProvider, headers } = value as Record<string, unknown>;
+  if (typeof provider !== "string" || !provider.trim()) {
+    badRequest("config.provider is required and must be a non-empty string");
+  }
+  if (isSet(key) && typeof key !== "string") {
+    badRequest("config.key must be a string");
+  }
+  if (isSet(baseUrl) && typeof baseUrl !== "string") {
+    badRequest("config.baseUrl must be a string");
+  }
+  if (isSet(isCloudProvider) && typeof isCloudProvider !== "boolean") {
+    badRequest("config.isCloudProvider must be a boolean");
+  }
+  if (isSet(headers) && !isObject(headers)) {
+    badRequest("config.headers must be an object");
+  }
+  return value as unknown as WebSearchConfig;
+}
+
+/**
+ * Narrow the optional `entityId` argument, or reject with 400.
+ *
+ * Absent, null and empty all mean "portal-wide scope" — the widget omits the
+ * argument that way. Anything else that is not a string (a repeated query
+ * parameter arrives as an array) is a malformed request: it used to be
+ * silently dropped by `asString`, so a scoped read answered with the
+ * portal-wide configuration instead of refusing the request.
+ */
+function asEntityId(value: unknown): string | undefined {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  if (typeof value !== "string") {
+    badRequest("entityId must be a string");
+  }
+  return value.trim() ? value : undefined;
+}
+
 export const webSearchController = {
   getActiveConfig: asyncHandler(async (req, res) => {
-    const entityId = asString(req.query["entityId"]);
+    const entityId = asEntityId(req.query["entityId"]);
     // A room config must not be readable by someone who cannot open the
     // room (Bug 82901). Inaccessible/unknown rooms surface as 404 — the
     // same convention as threads/create.
@@ -81,35 +150,39 @@ export const webSearchController = {
   }),
 
   isConfigured: asyncHandler(async (req, res) => {
-    const entityId = asString(req.query["entityId"]);
+    const entityId = asEntityId(req.query["entityId"]);
     await assertEntityAccessible(entityId);
     const value = await engine.isConfigured(entityId);
     res.json(value);
   }),
 
   testConnection: asyncHandler<WebSearchConfig>(async (req, res) => {
+    // The access gate runs first: a Guest or an AI-disabled portal must get
+    // its 403 rather than a report on the shape of the body it sent.
     await assertWebSearchAccess();
-    await checkConfigUrl(req.body);
-    const result = await engine.testConnection(req.body);
+    const config = asConfig(req.body);
+    await checkConfigUrl(config);
+    const result = await engine.testConnection(config);
     res.json(result);
   }),
 
   configure: asyncHandler(async (req, res) => {
     const args = unpackConfig(req.body);
-    await assertEntityAccessible(args.entityId as string | undefined);
-    await checkConfigUrl(args.body as WebSearchConfig);
-    const result = await engine.configure(
-      args.body as WebSearchConfig,
-      args.entityId as string | undefined,
-    );
+    const entityId = asEntityId(args.entityId);
+    await assertEntityAccessible(entityId);
+    const config = asConfig(args.body);
+    await checkConfigUrl(config);
+    const result = await engine.configure(config, entityId);
     res.json(result);
   }),
 
   setActiveConfig: asyncHandler(async (req, res) => {
     const args = unpackConfig(req.body);
-    await assertEntityAccessible(args.entityId as string | undefined);
-    await checkConfigUrl(args.body as WebSearchConfig);
-    await engine.setActiveConfig(args.body as WebSearchConfig, args.entityId as string | undefined);
+    const entityId = asEntityId(args.entityId);
+    await assertEntityAccessible(entityId);
+    const config = asConfig(args.body);
+    await checkConfigUrl(config);
+    await engine.setActiveConfig(config, entityId);
     res.json({ success: true });
   }),
 
