@@ -31,12 +31,12 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Models.RequestDto.TextToDocx;
+namespace ASC.AI.Core.MdTextToDocx;
 
-public class PublishTextToDocxRequestDto
+[JsonConverter(typeof(JsonStringEnumConverter<MdOutputFormat>))]
+public enum MdOutputFormat
 {
-    public required string Title { get; init; }
-    public required string Content { get; init; }
-    public required JsonElement FolderId { get; init; }
-    public MdOutputFormat Format { get; init; }
+    Docx = 0,
+    Pdf = 1,
+    Md = 2
 }

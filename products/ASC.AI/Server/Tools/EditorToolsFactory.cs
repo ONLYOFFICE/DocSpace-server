@@ -115,7 +115,7 @@ public class EditorToolsFactory(
         }
 
         var resultStorage = await daoFactory.GetFolderDao<int>()
-            .GetFoldersAsync(agent.Id, FolderType.ResultStorage)
+            .GetFoldersAsync(agent.Id, FolderType.ChatOutputs)
             .FirstOrDefaultAsync();
 
         return resultStorage is null ? null : CreateTarget(resultStorage);

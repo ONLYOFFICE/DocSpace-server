@@ -343,7 +343,7 @@ public class FileStorageService //: IFileStorageService
                 {
                     SearchArea.Knowledge => await folderDao.GetFoldersAsync(parent.Id, FolderType.Knowledge)
                         .FirstOrDefaultAsync(),
-                    SearchArea.ResultStorage => await folderDao.GetFoldersAsync(parent.Id, FolderType.ResultStorage)
+                    SearchArea.ResultStorage => await folderDao.GetFoldersAsync(parent.Id, FolderType.ChatOutputs)
                         .FirstOrDefaultAsync(),
                     _ => parent
                 };
@@ -1214,8 +1214,8 @@ public class FileStorageService //: IFileStorageService
                 knowledge.FolderType = FolderType.Knowledge;
 
                 var resultStorage = serviceProvider.GetService<Folder<T>>();
-                resultStorage.Title = FilesCommonResource.ResultStorageFolder;
-                resultStorage.FolderType = FolderType.ResultStorage;
+                resultStorage.Title = FilesCommonResource.ChatOutputsFolder;
+                resultStorage.FolderType = FolderType.ChatOutputs;
 
                 folderId = await folderDao.SaveFolderAsync(newFolder, [knowledge, resultStorage]);
             }

@@ -497,10 +497,15 @@ public class OpenApi31SchemaDocumentFilter : IDocumentFilter
 
     private static void Rewrite(OpenApiSchema schema)
     {
+        // Swashbuckle and the OpenAPI reader still populate the singular (obsolete) "example"
+        // keyword; this filter is the place that normalises it to the JSON Schema "examples"
+        // array, so reading and clearing the obsolete member here is intentional.
+#pragma warning disable CS0618 // Type or member is obsolete
         if (schema.Example != null)
         {
             schema.Examples = [schema.Example];
             schema.Example = null;
         }
+#pragma warning restore CS0618
     }
 }

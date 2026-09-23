@@ -761,17 +761,23 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   // Web search - the four room-scoped operations resolve the room; the two
   // that accept a configuration validate its URL; the passthrough pair relays
   // the provider's answer.
-  aiWebSearchGetActiveConfig: { "404": true },
-  aiWebSearchIsConfigured: { "404": true },
+  aiWebSearchGetActiveConfig: { "400": "`entityId` is not a string.", "404": true },
+  aiWebSearchIsConfigured: { "400": "`entityId` is not a string.", "404": true },
   aiWebSearchTestConnection: {
-    "400": "The provider URL is missing, malformed, or points at a private network address.",
+    "400":
+      "The configuration is missing or malformed, or the provider URL points at a private "
+      + "network address.",
   },
   aiWebSearchConfigure: {
-    "400": "The provider URL is missing, malformed, or points at a private network address.",
+    "400":
+      "The configuration is missing or malformed, or the provider URL points at a private "
+      + "network address.",
     "404": true,
   },
   aiWebSearchSetActiveConfig: {
-    "400": "The provider URL is missing, malformed, or points at a private network address.",
+    "400":
+      "The configuration is missing or malformed, or the provider URL points at a private "
+      + "network address.",
     "404": true,
   },
   aiWebSearchPassthroughSearch: {

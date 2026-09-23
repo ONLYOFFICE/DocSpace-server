@@ -97,6 +97,12 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
                 return exitCode;
             }
 
+            // Before the document is cut up, so that the service document and every operation
+            // document cut out of it carry the same escaping.
+            await MdxSafe.ApplyAsync(
+                Path.Combine(outputDirectory, $"{document.Name}.md"),
+                cancellationToken);
+
             var sliced = await MarkdownSlicer.SliceAsync(
                 Path.Combine(outputDirectory, $"{document.Name}.md"),
                 document.Name,

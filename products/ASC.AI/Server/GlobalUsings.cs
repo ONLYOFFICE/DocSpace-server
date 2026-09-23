@@ -64,6 +64,7 @@ global using ASC.AI.Models.RequestDto.ToolPreferences;
 global using ASC.AI.Models.RequestDto.Tools;
 global using ASC.AI.Models.RequestDto.Vectorization;
 global using ASC.AI.Models.RequestDto.WebSearch;
+global using ASC.AI.Core.MdTextToDocx;
 global using ASC.AI.Core.Settings;
 global using ASC.AI.Integration.McpServers;
 global using ASC.AI.Integration.Messages;

@@ -112,7 +112,7 @@ public class EnumCleaner
             }
             else if (value is JsonArray childArr)
             {
-                foreach (var item in childArr)
+                foreach (var item in childArr.OfType<JsonNode>())
                 {
                     ProcessNode(item, preferredEnumType, obj);
                 }

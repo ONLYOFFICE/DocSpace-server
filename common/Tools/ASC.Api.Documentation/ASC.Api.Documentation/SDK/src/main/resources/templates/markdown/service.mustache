@@ -2,7 +2,7 @@
 {{#docsUrl}}
 
 The browsable version of this reference, with a request builder and code samples, is published at
-<{{{.}}}>.
+[{{{.}}}]({{{.}}}).
 {{/docsUrl}}
 
 All URIs are relative to *{{{basePath}}}*, where the host is the address of your DocSpace instance.
@@ -25,9 +25,9 @@ All URIs are relative to *{{{basePath}}}*, where the host is the address of your
 
 `{{httpMethod}} {{path}}`
 
-{{summary}}{{#notes}}
+{{{summary}}}{{#notes}}
 
-{{.}}{{/notes}}
+{{{.}}}{{/notes}}
 
 #### Parameters
 {{^allParams}}
@@ -35,14 +35,14 @@ This endpoint does not need any parameter.
 {{/allParams}}{{#allParams}}{{#-first}}
 |Name | In | Type | Description | Notes |
 |------------- | ------------- | ------------- | ------------- | -------------|
-{{/-first}}| **{{paramName}}** | {{vendorExtensions.x-param-in}} | {{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{#dataFormat}} ({{dataFormat}}){{/dataFormat}} | {{description}} | {{{vendorExtensions.x-notes}}} |
+{{/-first}}| **{{paramName}}** | {{vendorExtensions.x-param-in}} | {{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{#dataFormat}} ({{dataFormat}}){{/dataFormat}} | {{{description}}} | {{{vendorExtensions.x-notes}}} |
 {{/allParams}}
 
 #### Responses
 
 | Status code | Description | Type | Response headers |
 |------------- | ------------- | ------------- | -------------|
-{{#responses}}| **{{code}}** | {{message}} | {{#dataType}}{{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{/dataType}}{{^dataType}}-{{/dataType}} | {{#headers}}`{{baseName}}`{{^-last}}, {{/-last}}{{/headers}}{{^headers}}-{{/headers}} |
+{{#responses}}| **{{code}}** | {{{message}}} | {{#dataType}}{{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{/dataType}}{{^dataType}}-{{/dataType}} | {{#headers}}`{{baseName}}`{{^-last}}, {{/-last}}{{/headers}}{{^headers}}-{{/headers}} |
 {{/responses}}
 
 #### Return type
@@ -66,22 +66,22 @@ This endpoint does not need any parameter.
 
 ### Model {{{vendorExtensions.x-title}}}
 {{#description}}
-{{.}}
+{{{.}}}
 {{/description}}
 {{#vendorExtensions.x-enum-doc}}
 
 Possible values:
 
 {{#values}}
-- `{{enumValue}}`{{#enumLabel}} — {{.}}{{/enumLabel}}{{#enumConstant}} (`{{.}}`){{/enumConstant}}
+- `{{enumValue}}`{{#enumLabel}} — {{{.}}}{{/enumLabel}}{{#enumConstant}} (`{{.}}`){{/enumConstant}}
 {{/values}}
 {{/vendorExtensions.x-enum-doc}}
 {{#vendorExtensions.x-has-properties}}
 
 | Name | Type | Description | Notes |
 |------------ | ------------- | ------------- | -------------|
-{{#parent}}{{#parentVars}}| **{{name}}** | {{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{#dataFormat}} ({{dataFormat}}){{/dataFormat}} | {{description}} | {{{vendorExtensions.x-notes}}}{{#readOnly}} [readonly]{{/readOnly}} |
-{{/parentVars}}{{/parent}}{{#vars}}| **{{name}}** | {{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{#dataFormat}} ({{dataFormat}}){{/dataFormat}} | {{description}} | {{{vendorExtensions.x-notes}}}{{#readOnly}} [readonly]{{/readOnly}} |
+{{#parent}}{{#parentVars}}| **{{name}}** | {{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{#dataFormat}} ({{dataFormat}}){{/dataFormat}} | {{{description}}} | {{{vendorExtensions.x-notes}}}{{#readOnly}} [readonly]{{/readOnly}} |
+{{/parentVars}}{{/parent}}{{#vars}}| **{{name}}** | {{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{#dataFormat}} ({{dataFormat}}){{/dataFormat}} | {{{description}}} | {{{vendorExtensions.x-notes}}}{{#readOnly}} [readonly]{{/readOnly}} |
 {{/vars}}
 {{/vendorExtensions.x-has-properties}}
 {{/model}}{{/models}}
@@ -108,6 +108,6 @@ All endpoints do not require authorization.
 - **Flow**: {{flow}}
 - **Authorization URL**: {{authorizationUrl}}
 - **Scopes**: {{^scopes}}N/A{{/scopes}}
-{{#scopes}}  - {{scope}}: {{description}}
+{{#scopes}}  - {{scope}}: {{{description}}}
 {{/scopes}}
 {{/isOAuth}}{{/authMethods}}
