@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>Ustawienia AI użytkownika zostały zaktualizowane</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Profil AI przypisany do agenta AI dla akcji: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Profil AI przypisany do akcji: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Profil modelu AI został utworzony: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Profil modelu AI został usunięty: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Profil AI został odłączony od akcji: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Profil modelu AI został zaktualizowany: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Pliki [{0}]. Oznaczono jako przeczytane</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Pliki [{0}]. Plik nie został zapisany. Przekroczono limit pamięci portalu.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Pliki [{0}]. Zapisanie pliku przekracza limit pamięci portalu.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Foldery [{0}]. Oznaczono jako przeczytane</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Klucz szyfrowania prywatnego pokoju {0} został utworzony</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Klucz szyfrowania prywatnego pokoju {0} został usunięty</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Klucz szyfrowania prywatnego pokoju {0} został zaktualizowany</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Wykryto podejrzane logowanie: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>Serwer MCP {0} agenta AI został zaktualizowany</value>
+  </data>
 </root>

@@ -601,4 +601,10 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
     <value>Formulari është ndryshuar. Ky draft është i vjetëruar dhe nuk mund të dorëzohet.</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>ID e dosjes është e pavlefshme</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Ky veprim është i disponueshëm vetëm në një dhomë private</value>
+  </data>
 </root>
