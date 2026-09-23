@@ -604,4 +604,7 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
     <value>Cette action est uniquement disponible dans une salle privée</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>ID de dossier invalide</value>
+  </data>
 </root>

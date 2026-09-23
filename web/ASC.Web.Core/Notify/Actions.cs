@@ -730,8 +730,7 @@ public sealed class JoinUsersNotifyAction(CommonLinkUtility commonLinkUtility, I
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_join, () => WebstudioNotifyPatternResource.pattern_join),
-            new JabberPattern(() => WebstudioNotifyPatternResource.pattern_join)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_join, () => WebstudioNotifyPatternResource.pattern_join)
         ];
     }
 

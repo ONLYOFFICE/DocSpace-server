@@ -401,7 +401,7 @@ public class FolderDtoHelper(
         result.Lifetime = folder.SettingsLifetime.MapToDto();
         result.AvailableShareRights = (await _fileSecurity.GetAccesses(folder)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
 
-        if (folder.FolderType is FolderType.Knowledge or FolderType.ResultStorage)
+        if (folder.FolderType is FolderType.Knowledge or FolderType.ChatOutputs)
         {
             result.Type = folder.FolderType;
         }

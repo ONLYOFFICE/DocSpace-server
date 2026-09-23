@@ -173,7 +173,7 @@ public class AttachmentsStorageService(
     /// </summary>
     private async Task<bool> CanAnalyzeFormAsync(File<int> file)
     {
-        if (file is not { IsForm: true } || !externalDatabaseClient.IsEnabled())
+        if (file is not { IsPdf: true } || !externalDatabaseClient.IsEnabled())
         {
             return false;
         }

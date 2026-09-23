@@ -704,7 +704,7 @@ public class PermissionCheckStarter<T, TTo>(
 
         if (toFolder.RootFolderType == FolderType.VirtualRooms &&
             parentFolders.Any(folder => folder.FolderType == FolderType.FillingFormsRoom) &&
-            !file.IsForm)
+            !file.IsPdf)
         {
             throw new InvalidOperationException(copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom);
         }

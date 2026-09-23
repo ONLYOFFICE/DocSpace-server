@@ -601,4 +601,10 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>Instrucțiunea unui agent IA nu poate depăși {0} caractere</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>ID folder invalid</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Această acțiune este disponibilă doar într-o cameră privată</value>
+  </data>
 </root>

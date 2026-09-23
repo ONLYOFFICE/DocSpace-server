@@ -85,15 +85,6 @@ public class NotifyStylerTests
         body.Should().Contain($"[{ButtonCaption}]({ButtonUrl})", "the button must stay clickable");
     }
 
-    [Fact]
-    public async Task JabberStyler_OrangeButton_ShouldShowTheCaptionOnce()
-    {
-        var body = await RenderAsync(new JabberStyler(), FormReceivedPattern);
-
-        Occurrences(body, ButtonCaption).Should().Be(1,
-            $"the Outlook-only fallback must not reach the reader either: {body}");
-    }
-
     /// <summary>
     /// Why <c>${LetterLogoText}</c> has to be resolved before the stylers run — which is what
     /// <c>NotifyTransferRequest.BeforeTransferRequestAsync</c> does to the tag values on its way out.

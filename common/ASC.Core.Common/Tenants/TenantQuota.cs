@@ -499,7 +499,7 @@ public class TenantQuota
     private readonly CountDocsCloudFeature _countDocsCloud;
 
     /// <summary>
-    /// The number of DocsCloud users.
+    /// The number of Docs Connect users.
     /// </summary>
     /// <example>true</example>
     public int DocsCloud
@@ -511,7 +511,7 @@ public class TenantQuota
     private readonly TenantQuotaFeatureFlag _docsCloudDevPack;
 
     /// <summary>
-    /// Specifies if the DocsCloudDevPack enabled or not.
+    /// Specifies if the Docs Connect Dev Pack enabled or not.
     /// </summary>
     /// <example>true</example>
     public bool DocsCloudDevPack
@@ -523,7 +523,7 @@ public class TenantQuota
     private readonly TenantQuotaFeatureFlag _docsCloudTrial;
 
     /// <summary>
-    /// Specifies if the DocsCloudTrial enabled or not.
+    /// Specifies if the Docs Connect trial enabled or not.
     /// </summary>
     /// <example>true</example>
     public bool DocsCloudTrial

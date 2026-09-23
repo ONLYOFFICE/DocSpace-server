@@ -68,6 +68,7 @@ internal abstract class Target
 
     protected abstract Task ResolveAsync(FileSecurity fileSecurity);
     public abstract Task SaveFile(FileConverter fileConverter, string fileUri, string fileType, string title, bool updateIfExists);
+    public abstract Task SaveFile(IServiceProvider serviceProvider, Stream content, string title, string fileType);
 }
 
 internal class Target<TFolder>(IFolderDao<TFolder> folderDao, TFolder folderId) : Target
@@ -85,7 +86,7 @@ internal class Target<TFolder>(IFolderDao<TFolder> folderDao, TFolder folderId) 
 
         if (_folder.FolderType is FolderType.AiRoom)
         {
-            var folder = await folderDao.GetFoldersAsync(_folder.Id, FolderType.ResultStorage)
+            var folder = await folderDao.GetFoldersAsync(_folder.Id, FolderType.ChatOutputs)
                 .FirstOrDefaultAsync() ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
 
             _folder = folder;
@@ -100,5 +101,22 @@ internal class Target<TFolder>(IFolderDao<TFolder> folderDao, TFolder folderId) 
     public override async Task SaveFile(FileConverter fileConverter, string fileUri, string fileType, string title, bool updateIfExists)
     {
         await fileConverter.SaveConvertedFileAsync(_folder, fileUri, fileType, title, updateIfExists);
+    }
+
+    public override async Task SaveFile(IServiceProvider serviceProvider, Stream content, string title, string fileType)
+    {
+        var fileDao = serviceProvider.GetRequiredService<IDaoFactory>().GetFileDao<TFolder>();
+
+        var file = serviceProvider.GetRequiredService<File<TFolder>>();
+        file.ParentId = _folder!.Id;
+        file.Title = await fileDao.GetAvailableTitleAsync(FileUtility.ReplaceFileExtension(title, fileType), _folder.Id);
+        file.ContentLength = content.Length;
+        file.ThumbnailStatus = Thumbnail.Waiting;
+
+        file = await fileDao.SaveFileAsync(file, content);
+
+        await serviceProvider.GetRequiredService<SocketManager>().CreateFileAsync(file);
+        await serviceProvider.GetRequiredService<FilesMessageService>().SendAsync(MessageAction.FileCreated, file, file.Title);
+        await serviceProvider.GetRequiredService<FileMarker>().MarkAsNewAsync(file);
     }
 }

@@ -7,16 +7,22 @@ var defaultBorderColorWhite = Api.CreateColorFromRGB(255, 255, 255);
 
 var MAX_COLUMN_WIDTH = 100;
 
+// Height of every row inside a report table, header included. Both sheets use it, so the two tables
+// cannot drift apart.
+var TABLE_ROW_HEIGHT = 19.5;
+
+// Reference-safe names the two sheets wear while the pivot is created - see insertPivot().
+var PIVOT_SOURCE_TEMP_SHEET_NAME = "PivotSource";
+var PIVOT_TARGET_TEMP_SHEET_NAME = "PivotTarget";
+
 var inputData = ${inputData};
 
 var values = [${dataValues}];
 
 var oWorksheet = Api.GetActiveSheet();
 
-var currentRowIndex = 1;
-var currentColIndex = 1;
-
-var columnMaxLengths = {};
+// How many logos have been placed so far - see getLogoSrc().
+var placedLogoCount = 0;
 
 var colors = {
     mainBgColor: Api.CreateColorFromRGB(inputData.themeColors.mainBgColor[0], inputData.themeColors.mainBgColor[1], inputData.themeColors.mainBgColor[2]),
@@ -109,7 +115,7 @@ function prepareHeader() {
             "borderColor": defaultBorderColorWhite
         });
     }
-    return { height: 19.5, dataArray: row };
+    return { height: TABLE_ROW_HEIGHT, dataArray: row };
 }
 
 function prepareData() {
@@ -129,9 +135,34 @@ function prepareData() {
                 "borderColor": defaultBorderColorWhite
             });
         }
-        table.push({ height: 19.5, dataArray: rowValues });
+        table.push({ height: TABLE_ROW_HEIGHT, dataArray: rowValues });
     }
     return table;
+}
+
+function getCurrency(rowIndex) {
+    var currencyCol = inputData.totalCurrencyColumn;
+    if (currencyCol < 0 || values[rowIndex] == null || values[rowIndex][currencyCol] == null) {
+        return null;
+    }
+    return values[rowIndex][currencyCol].value;
+}
+
+// True when the report carries a currency column and its rows do not all share the same currency.
+// Summing across currencies would be meaningless, so both the total row and the pivot key off this.
+function hasMixedCurrencies() {
+    if (inputData.totalCurrencyColumn < 0) {
+        return false;
+    }
+
+    var firstCurrency = getCurrency(0);
+    for (var r = 1; r < values.length; r++) {
+        if (getCurrency(r) !== firstCurrency) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 function prepareTotal(headerRowIndex) {
@@ -139,18 +170,11 @@ function prepareTotal(headerRowIndex) {
         return null;
     }
 
-    // Summing across different currencies would be meaningless, so skip the total row entirely
-    // when the currency column holds more than one distinct value.
-    var currencyCol = inputData.totalCurrencyColumn;
-    var firstCurrency = currencyCol >= 0 && values[0][currencyCol] != null ? values[0][currencyCol].value : null;
-    if (currencyCol >= 0) {
-        for (var r = 1; r < values.length; r++) {
-            var currency = values[r][currencyCol] != null ? values[r][currencyCol].value : null;
-            if (currency !== firstCurrency) {
-                return null;
-            }
-        }
+    if (hasMixedCurrencies()) {
+        return null;
     }
+
+    var firstCurrency = getCurrency(0);
 
     var firstDataRow = headerRowIndex + 1;
     var lastDataRow = headerRowIndex + values.length;
@@ -180,22 +204,28 @@ function prepareTotal(headerRowIndex) {
         row.push(cell);
     }
 
-    return { height: 19.5, dataArray: row };
+    return { height: TABLE_ROW_HEIGHT, dataArray: row };
 }
 
-function writeCell(position, data) {
+function trackColumnLength(columnLengths, colIndex, length) {
+    if (!columnLengths[colIndex] || length > columnLengths[colIndex]) {
+        columnLengths[colIndex] = length;
+    }
+}
+
+function writeCell(worksheet, position, data) {
     if (data == null) {
         return;
     }
 
-    var sRange = oWorksheet.GetRange(position);
+    var sRange = worksheet.GetRange(position);
 
     if (data.format) {
         sRange.SetNumberFormat(data.format);
     }
 
     if (data.url) {
-        oWorksheet.SetHyperlink(position, data.url, "", data.value, data.value);
+        worksheet.SetHyperlink(position, data.url, "", data.value, data.value);
     } else if (data.value != null) {
         sRange.SetValue(data.value);
         sRange.SetWrap(true);
@@ -219,70 +249,300 @@ function writeCell(position, data) {
     }
 }
 
-function writeTable(table) {
+// Writes a table from startRowIndex down and returns the row index just after the last one written,
+// so blocks can be chained down a sheet. The widest value seen per column lands in columnLengths,
+// which the caller uses to size the columns once everything is on the sheet.
+function writeTable(worksheet, startRowIndex, table, columnLengths) {
+    var rowIndex = startRowIndex;
+
     for (var i = 0; i < table.length; i++) {
         var row = table[i];
+        var colIndex = 1;
 
         for (var j = 0; j < row.dataArray.length; j++) {
             var data = row.dataArray[j];
-            if (data == null) {
-                currentColIndex++;
-                continue;
+            if (data != null) {
+                trackColumnLength(columnLengths, colIndex, getMaxLineLength(data.value));
+                writeCell(worksheet, toColumnName(colIndex) + rowIndex, data);
             }
-
-            var length = getMaxLineLength(data.value);
-            if (!columnMaxLengths[currentColIndex] || length > columnMaxLengths[currentColIndex]) {
-                columnMaxLengths[currentColIndex] = length;
-            }
-
-            var position = toColumnName(currentColIndex) + currentRowIndex;
-            writeCell(position, data);
-
-            currentColIndex++;
+            colIndex++;
         }
 
-        oWorksheet.GetRange("A" + currentRowIndex).SetRowHeight(row.height);
-
-        currentRowIndex++;
-        currentColIndex = 1;
+        worksheet.GetRange("A" + rowIndex).SetRowHeight(row.height);
+        rowIndex++;
     }
+
+    return rowIndex;
 }
 
-function writeImg() {
+// AddImage keeps the vector original of an SVG logo only for the first drawing built from a given
+// source string: a second sheet passing the identical string silently falls back to the small
+// raster preview, and the logo renders blurred there. Trailing whitespace makes each sheet's string
+// unique while the base64 payload still decodes to exactly the same image. A logo referenced by URL
+// is handed over untouched - there the string is a real address, and such a logo carries no vector
+// original to lose in the first place.
+function getLogoSrc() {
+    var logoSrc = inputData.logoSrc;
+
+    if (logoSrc.indexOf("data:") == 0) {
+        for (var i = 0; i < placedLogoCount; i++) {
+            logoSrc += " ";
+        }
+    }
+
+    placedLogoCount++;
+
+    return logoSrc;
+}
+
+// Hangs the logo to the left of the seventh column boundary, at the top of the sheet. Both sheets
+// place it the same way, so the summary opens looking like the detail table.
+function writeImg(worksheet) {
     if (!inputData.logoSrc) {
         return;
     }
-    oWorksheet.AddImage(inputData.logoSrc, inputData.logoWidthMm * 36000, inputData.logoHeightMm * 36000, 7, -inputData.logoWidthMm * 36000, 0, inputData.logoHeightMm * 36000);
+    worksheet.AddImage(getLogoSrc(), inputData.logoWidthMm * 36000, inputData.logoHeightMm * 36000, 7, -inputData.logoWidthMm * 36000, 0, inputData.logoHeightMm * 36000);
 }
 
-function setColumnWidths() {
-    for (var col in columnMaxLengths) {
-        if (columnMaxLengths.hasOwnProperty(col)) {
+// Longest value held by the given source column, header included, measured the same way the detail
+// sheet measures its own columns.
+function getSourceColumnLength(fieldName) {
+    var colIndex = inputData.keys.indexOf(fieldName);
+    var maxLength = getMaxLineLength(fieldName);
+
+    for (var r = 0; colIndex >= 0 && r < values.length; r++) {
+        var cell = values[r][colIndex];
+        var length = getMaxLineLength(cell != null ? cell.value : null);
+        if (length > maxLength) {
+            maxLength = length;
+        }
+    }
+
+    return maxLength;
+}
+
+// First row of the pivot's values. Everything between the pivot's top row and this one is header:
+// one row normally, two once a column field splits the totals per currency.
+function getPivotFirstDataRow(pivotTable) {
+    var dataBody = pivotTable.GetDataBodyRange();
+    return dataBody != null ? dataBody.GetRow() : pivotTable.GetTableRange1().GetRow() + 1;
+}
+
+// Dresses the summary sheet in the detail table's colors: the blue header, the alternating row
+// fill and the white cell borders. The pivot is laid out by the editor, so its rows are found
+// through the pivot itself rather than counted while writing.
+function stylePivot(pivotWorksheet, pivotTable) {
+    var tableRange = pivotTable.GetTableRange1();
+    if (tableRange == null) {
+        return;
+    }
+
+    var firstRow = tableRange.GetRow();
+    var lastRow = firstRow + tableRange.GetRowsCount() - 1;
+    var firstColumn = toColumnName(tableRange.GetCol());
+    var lastColumn = toColumnName(tableRange.GetCol() + tableRange.GetColumnsCount() - 1);
+
+    function rowRange(from, to) {
+        return pivotWorksheet.GetRange(firstColumn + from + ":" + lastColumn + to);
+    }
+
+    var firstDataRow = getPivotFirstDataRow(pivotTable);
+
+    var headerRange = rowRange(firstRow, firstDataRow - 1);
+    headerRange.SetFontSize(defaultFontSize);
+    headerRange.SetBold(true);
+    headerRange.SetFontColor(colors.mainFontColor);
+    headerRange.SetFillColor(colors.mainBgColor);
+
+    // Band the body the way the detail table bands its rows: the first row under the header stays
+    // clear, the next is filled, and so on down to the grand total.
+    for (var row = firstDataRow; row <= lastRow; row++) {
+        var bodyRange = rowRange(row, row);
+        bodyRange.SetFontSize(defaultFontSize);
+        bodyRange.SetFontColor(defaultFontColorBlack);
+        if ((row - firstDataRow) % 2 != 0) {
+            bodyRange.SetFillColor(colors.lightBgColor);
+        }
+    }
+
+    // The pivot leaves its rows at the sheet default, which is shorter than the rows the detail
+    // table writes, so the two tables would not line up.
+    for (var row = firstRow; row <= lastRow; row++) {
+        pivotWorksheet.GetRange("A" + row).SetRowHeight(TABLE_ROW_HEIGHT);
+    }
+
+    // The grand total closes the summary the way the total row closes the detail table.
+    rowRange(lastRow, lastRow).SetBold(true);
+
+    var wholeRange = rowRange(firstRow, lastRow);
+
+    // The pivot leaves its cells sitting on the bottom of the row, which shows now that the rows are
+    // as tall as the detail table's. Every cell the detail table writes is vertically centred.
+    wholeRange.SetAlignVertical("center");
+
+    wholeRange.SetBorders("Top", "Medium", defaultBorderColorWhite);
+    wholeRange.SetBorders("Bottom", "Medium", defaultBorderColorWhite);
+    wholeRange.SetBorders("Left", "Medium", defaultBorderColorWhite);
+    wholeRange.SetBorders("Right", "Medium", defaultBorderColorWhite);
+    wholeRange.SetBorders("InsideVertical", "Medium", defaultBorderColorWhite);
+    wholeRange.SetBorders("InsideHorizontal", "Medium", defaultBorderColorWhite);
+}
+
+// The pivot sizes none of its own columns. columnLengths arrives seeded with the detail sheet's,
+// so the header block and the logo land where they do on the first tab; the pivot's row labels and
+// values only widen a column where they need more room than the detail table did.
+function setPivotColumnWidths(pivotWorksheet, pivot, columnLengths) {
+    // The tabular layout gives every row field a column of its own, and the values follow them.
+    for (var i = 0; i < pivot.rowFields.length; i++) {
+        trackColumnLength(columnLengths, i + 1, getSourceColumnLength(pivot.rowFields[i]));
+    }
+
+    for (var i = 0; i < pivot.dataFields.length; i++) {
+        var column = pivot.rowFields.length + i + 1;
+        trackColumnLength(columnLengths, column, getMaxLineLength(pivot.dataFields[i].caption));
+        trackColumnLength(columnLengths, column, getSourceColumnLength(pivot.dataFields[i].field));
+    }
+
+    setColumnWidths(pivotWorksheet, columnLengths);
+}
+
+// Api.InsertPivotExistingWorksheet builds both of its references by pasting the sheet name in front
+// of the address without escaping it, so a sheet name holding a space - which the localized names
+// here do - produces a reference the formula parser rejects, and no pivot is created. Lend both
+// sheets reference-safe names for the call and restore them straight after: the pivot keeps its
+// source as a parsed formula, so it follows the rename.
+function insertPivot(sourceRange, destinationRange) {
+    var sourceWorksheet = sourceRange.GetWorksheet();
+    var destinationWorksheet = destinationRange.GetWorksheet();
+
+    var sourceName = sourceWorksheet.GetName();
+    var destinationName = destinationWorksheet.GetName();
+
+    sourceWorksheet.SetName(PIVOT_SOURCE_TEMP_SHEET_NAME);
+    destinationWorksheet.SetName(PIVOT_TARGET_TEMP_SHEET_NAME);
+
+    try {
+        return Api.InsertPivotExistingWorksheet(sourceRange, destinationRange, true);
+    } finally {
+        sourceWorksheet.SetName(sourceName);
+        destinationWorksheet.SetName(destinationName);
+    }
+}
+
+// Builds the summary sheet: a pivot over the detail table that aggregates the requested value
+// columns per row field. Reports that define no pivot, and reports with no rows, keep a single sheet.
+function writePivot(headerRowIndex, colCount, detailColumnLengths) {
+    var pivot = inputData.pivot;
+
+    if (!pivot || values.length == 0) {
+        return;
+    }
+
+    // The sheet is created and filled here rather than left to InsertPivotNewWorksheet, which would
+    // drop the pivot at the top of a bare sheet: the summary carries the same header block as the
+    // detail table, so the pivot has to start below it.
+    var pivotWorksheet = Api.AddSheet(pivot.sheetName);
+    pivotWorksheet.SetDisplayGridlines(false);
+
+    // Start from the widths the detail sheet settled on, so the header block reads identically on
+    // both tabs and the logo, anchored to a column boundary, lands in the same place.
+    var columnLengths = {};
+    for (var col in detailColumnLengths) {
+        if (detailColumnLengths.hasOwnProperty(col)) {
+            columnLengths[col] = detailColumnLengths[col];
+        }
+    }
+
+    var pivotRowIndex = writeTable(pivotWorksheet, 1, prepareInfo(), columnLengths);
+
+    writeImg(pivotWorksheet);
+
+    var sourceRange = oWorksheet.GetRange("A" + headerRowIndex + ":" + toColumnName(colCount) + (headerRowIndex + values.length));
+
+    var pivotTable = insertPivot(sourceRange, pivotWorksheet.GetRange("A" + pivotRowIndex));
+
+    // Nothing is laid out implicitly: every field starts hidden and only the ones the report asks
+    // for are placed.
+    var allFields = pivotTable.GetPivotFields();
+    for (var i = 0; i < allFields.length; i++) {
+        allFields[i].SetOrientation("Hidden");
+    }
+
+    for (var i = 0; i < pivot.rowFields.length; i++) {
+        pivotTable.GetPivotFields(pivot.rowFields[i]).SetOrientation("Rows");
+    }
+
+    for (var i = 0; i < pivot.dataFields.length; i++) {
+        var dataField = pivot.dataFields[i];
+        var addedField = pivotTable.AddDataField(dataField.field);
+        addedField.SetFunction(dataField.aggregation);
+        addedField.SetCaption(dataField.caption);
+        addedField.SetNumberFormat(dataField.format);
+    }
+
+    // Every row carries its own currency, but the grand total would still add different currencies
+    // together, so it is dropped exactly where the detail table drops its total row.
+    if (hasMixedCurrencies()) {
+        pivotTable.SetRowGrand(false);
+    }
+
+    // Drop the built-in pivot style: it paints the grand total row on its own, which breaks the
+    // row banding stylePivot() applies. With no style the sheet wears only the report's colors.
+    pivotTable.SetStyleName("None");
+
+    // With more than one row field the pivot repeats every outer value as a subtotal row. Here the
+    // outer field is the participant and the inner one only splits their spending by currency, so
+    // the subtotals would restate rows the reader has just read.
+    pivotTable.SetLayoutSubtotals(false);
+
+    // The pivot labels its row column "Row Labels" and its total row "Grand Total" in English
+    // whatever the report culture. A tabular row axis puts the field's own localized header on the
+    // row column instead, and the grand total reuses the caption the detail sheet's total row uses.
+    pivotTable.SetRowAxisLayout("Tabular", false);
+    pivotTable.SetGrandTotalName(inputData.resources.total);
+
+    pivotTable.Update();
+
+    setPivotColumnWidths(pivotWorksheet, pivot, columnLengths);
+    stylePivot(pivotWorksheet, pivotTable);
+
+    // Hold the header block and the pivot's own header in view, the way the detail sheet holds
+    // everything above its data rows.
+    pivotWorksheet.GetFreezePanes().FreezeRows(getPivotFirstDataRow(pivotTable) - 1);
+
+    pivotWorksheet.GetRange("A1").Select();
+}
+
+function setColumnWidths(worksheet, columnLengths) {
+    for (var col in columnLengths) {
+        if (columnLengths.hasOwnProperty(col)) {
             var columnLetter = toColumnName(parseInt(col));
-            oWorksheet.GetRange(columnLetter + "1").SetColumnWidth(Math.min(columnMaxLengths[col] * 1.2, MAX_COLUMN_WIDTH));
+            worksheet.GetRange(columnLetter + "1").SetColumnWidth(Math.min(columnLengths[col] * 1.2, MAX_COLUMN_WIDTH));
         }
     }
 }
 
 customizeWorksheet();
 
-writeImg();
+var columnMaxLengths = {};
 
-writeTable(prepareInfo());
+writeImg(oWorksheet);
+
+var currentRowIndex = writeTable(oWorksheet, 1, prepareInfo(), columnMaxLengths);
 
 var headerRowIndex = currentRowIndex;
 var colCount = inputData.keys.length;
 
-writeTable([prepareHeader()]);
+currentRowIndex = writeTable(oWorksheet, currentRowIndex, [prepareHeader()], columnMaxLengths);
 
-writeTable(prepareData());
+currentRowIndex = writeTable(oWorksheet, currentRowIndex, prepareData(), columnMaxLengths);
 
 var totalRow = prepareTotal(headerRowIndex);
 if (totalRow != null) {
-    writeTable([totalRow]);
+    writeTable(oWorksheet, currentRowIndex, [totalRow], columnMaxLengths);
 }
 
-setColumnWidths();
+setColumnWidths(oWorksheet, columnMaxLengths);
 
 var freezePanes = oWorksheet.GetFreezePanes();
 freezePanes.FreezeRows(headerRowIndex);
@@ -292,6 +552,11 @@ if (values.length > 0) {
     oWorksheet.FormatAsTable(formattedTableRange);
 }
 
+writePivot(headerRowIndex, colCount, columnMaxLengths);
+
+// Building the summary leaves it active, but the detail table is the report's main view, so the
+// file has to open on it.
+oWorksheet.SetActive();
 oWorksheet.GetRange("A1").Select();
 
 Api.Save();

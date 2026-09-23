@@ -156,7 +156,7 @@ public class DocsCloudClient(
 
     /// <summary>
     /// Drops the cached tenant so the next read reflects a just-changed subscription (e.g. a started trial or a
-    /// DocsCloud/DocsCloudDevPack purchase).
+    /// Docs Connect/Docs Connect Dev Pack purchase).
     /// </summary>
     public async Task ClearCacheAsync(string portalId)
     {
@@ -197,7 +197,7 @@ public class DocsCloudClient(
 }
 
 /// <summary>
-/// Represents a DocsCloud tenant of a portal.
+/// Represents a Docs Connect tenant of a portal.
 /// </summary>
 public class DocsCloudTenant
 {
@@ -273,7 +273,7 @@ public class DocsCloudTenant
 }
 
 /// <summary>
-/// Represents the payment information of a DocsCloud tenant.
+/// Represents the payment information of a Docs Connect tenant.
 /// </summary>
 public class DocsCloudPayment
 {
@@ -327,7 +327,7 @@ public class DocsCloudPayment
 }
 
 /// <summary>
-/// Represents the configuration of a DocsCloud tenant.
+/// Represents the configuration of a Docs Connect tenant.
 /// </summary>
 public class DocsCloudConfig
 {
@@ -360,7 +360,7 @@ public class DocsCloudConfig
 }
 
 /// <summary>
-/// Represents the security configuration of a DocsCloud tenant.
+/// Represents the security configuration of a Docs Connect tenant.
 /// </summary>
 public class DocsCloudSecurityConfig
 {
@@ -380,7 +380,7 @@ public class DocsCloudSecurityConfig
 }
 
 /// <summary>
-/// Represents the server configuration of a DocsCloud tenant.
+/// Represents the server configuration of a Docs Connect tenant.
 /// </summary>
 public class DocsCloudServerConfig
 {
@@ -401,7 +401,7 @@ public class DocsCloudServerConfig
 }
 
 /// <summary>
-/// Represents the WOPI configuration of a DocsCloud tenant.
+/// Represents the WOPI configuration of a Docs Connect tenant.
 /// </summary>
 public class DocsCloudWopiConfig
 {
@@ -413,7 +413,7 @@ public class DocsCloudWopiConfig
 }
 
 /// <summary>
-/// Represents the IP filter configuration of a DocsCloud tenant.
+/// Represents the IP filter configuration of a Docs Connect tenant.
 /// </summary>
 public class DocsCloudIpFilterConfig
 {
@@ -425,7 +425,7 @@ public class DocsCloudIpFilterConfig
 }
 
 /// <summary>
-/// Represents the IP filter rule of a DocsCloud tenant.
+/// Represents the IP filter rule of a Docs Connect tenant.
 /// </summary>
 public class DocsCloudIpFilterRule
 {
@@ -445,7 +445,7 @@ public class DocsCloudIpFilterRule
 }
 
 /// <summary>
-/// Represents the usage statistics of a DocsCloud tenant.
+/// Represents the usage statistics of a Docs Connect tenant.
 /// </summary>
 public class DocsCloudUsage
 {
@@ -463,7 +463,7 @@ public class DocsCloudUsage
 }
 
 /// <summary>
-/// Represents the license and server information of a DocsCloud tenant, with usage statistics for the current period.
+/// Represents the license and server information of a Docs Connect tenant, with usage statistics for the current period.
 /// </summary>
 public class DocsCloudTenantInfo
 {
@@ -473,7 +473,7 @@ public class DocsCloudTenantInfo
     public DocsCloudLicenseInfo License { get; init; }
 
     /// <summary>
-    /// The DocsCloud server information.
+    /// The Docs Connect server information.
     /// </summary>
     public DocsCloudServerInfo Server { get; init; }
 
@@ -489,7 +489,7 @@ public class DocsCloudTenantInfo
 }
 
 /// <summary>
-/// Represents the license information of a DocsCloud tenant.
+/// Represents the license information of a Docs Connect tenant.
 /// </summary>
 public class DocsCloudLicenseInfo
 {
@@ -513,7 +513,7 @@ public class DocsCloudLicenseInfo
 }
 
 /// <summary>
-/// Represents the DocsCloud server information.
+/// Represents the Docs Connect server information.
 /// </summary>
 public class DocsCloudServerInfo
 {
@@ -537,7 +537,7 @@ public class DocsCloudServerInfo
 }
 
 /// <summary>
-/// Represents the user limits of a DocsCloud license.
+/// Represents the user limits of a Docs Connect license.
 /// </summary>
 public class DocsCloudUsersLimit
 {
@@ -555,7 +555,7 @@ public class DocsCloudUsersLimit
 }
 
 /// <summary>
-/// Represents the usage statistics of a DocsCloud tenant for the current period.
+/// Represents the usage statistics of a Docs Connect tenant for the current period.
 /// </summary>
 public class DocsCloudStats
 {
@@ -577,7 +577,7 @@ public class DocsCloudStats
 }
 
 /// <summary>
-/// Represents the usage statistics of a single DocsCloud user category (editor or viewer).
+/// Represents the usage statistics of a single Docs Connect user category (editor or viewer).
 /// </summary>
 public class DocsCloudUserStats
 {
@@ -613,7 +613,7 @@ public class DocsCloudUserStats
 }
 
 /// <summary>
-/// Represents the current user quota of a DocsCloud tenant.
+/// Represents the current user quota of a Docs Connect tenant.
 /// </summary>
 public class DocsCloudQuota
 {
@@ -631,7 +631,7 @@ public class DocsCloudQuota
 }
 
 /// <summary>
-/// Represents a single user entry of a DocsCloud quota.
+/// Represents a single user entry of a Docs Connect quota.
 /// </summary>
 public class DocsCloudQuotaUser
 {

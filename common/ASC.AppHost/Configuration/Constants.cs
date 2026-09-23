@@ -68,6 +68,11 @@ public static class Constants
     public const int TelegramPort = 5050;
     public const int MonolithPort = 5027;
 
+    // Keep in sync with OPENRESTY_VERSION in
+    // buildtools/install/docker/build/Dockerfile, so the dev router runs the
+    // release the production router image is built from.
+    public const string OpenRestyVersion = "1.31.1.1-2";
+
     public const int OtelCollectorGrpcPort = 4317;
     public const int OtelCollectorHttpPort = 4318;
 

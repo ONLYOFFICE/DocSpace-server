@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,26 +31,9 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using System;
-using System.Collections.Generic;
-using System.Net.Security;
-using System.ServiceModel;
-
-namespace ASC.Core.Notify.Jabber
+namespace ASC.Core.Common.Log;
+internal static partial class NotifySenderLogger
 {
-    [ServiceContract]
-    public interface IReverseJabberService
-    {
-        [OperationContract(IsOneWay=true)]
-        void SendMessage(string callerUserName, string calleeUserName, string messageText, int tenantId, string domain);
-
-        [OperationContract(IsOneWay=true)]
-        void SendInvite(string chatRoomName, string calleeUserName, string domain);
-
-        [OperationContract(IsOneWay=true)]
-        void SendState(string from, byte state, int tenantId, string domain);
-
-        [OperationContract(IsOneWay=true)]
-        void SendOfflineMessages(string callerUserName, List<string> users, int tenantId);
-    }
+    [LoggerMessage(LogLevel.Debug, "Unexpected error")]
+    public static partial void ErrorUnexpected(this ILogger logger, Exception exception);
 }

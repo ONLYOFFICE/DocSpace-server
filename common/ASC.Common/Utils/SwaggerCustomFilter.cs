@@ -112,10 +112,11 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
 
             var arraySchema = UpdateSchema(checkType, new OpenApiSchema());
 
-            if (arraySchema?.Example != null)
+            var arrayExample = arraySchema?.Examples?.FirstOrDefault();
+            if (arrayExample != null)
             {
-                array.Add(arraySchema.Example);
-                result.Example = array;
+                array.Add(arrayExample);
+                result.Examples = [array];
             }
 
             if (arraySchema?.OneOf != null && arraySchema.OneOf?.Count != 0)
@@ -135,12 +136,12 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 new OpenApiSchema
                 {
                     Type = JsonSchemaType.Integer,
-                    Example = SwaggerSchemaCustomAttribute.DefaultIntExample
+                    Examples = [SwaggerSchemaCustomAttribute.DefaultIntExample]
                 },
                 new OpenApiSchema
                 {
                     Type = JsonSchemaType.String,
-                    Example = SwaggerSchemaCustomAttribute.DefaultStringExample
+                    Examples = [SwaggerSchemaCustomAttribute.DefaultStringExample]
                 }
             };
 
@@ -215,7 +216,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                         Enum = enumDataString,
                         Type = JsonSchemaType.String,
                         Description = $"[{string.Join(", ", enumDescriptionString)}]",
-                        Example = enumDataString[0]
+                        Examples = [enumDataString[0]]
                     }
                 };
 
@@ -226,7 +227,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                         Enum = enumDataInt,
                         Type = JsonSchemaType.Integer,
                         Description = $"[{string.Join(", ", enumDescriptionInt)}]",
-                        Example = enumDataInt[0],
+                        Examples = [enumDataInt[0]],
                         Extensions = new Dictionary<string, IOpenApiExtension>
                         {
                             ["x-enum-varnames"] = new JsonNodeExtension(enumVarNames)
@@ -240,7 +241,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                         Enum = enumDataLong,
                         Type = JsonSchemaType.Integer,
                         Description = $"[{string.Join(", ", enumDescriptionLong)}]",
-                        Example = enumDescriptionLong[0],
+                        Examples = [enumDescriptionLong[0]],
                         Extensions = new Dictionary<string, IOpenApiExtension>
                         {
                             ["x-enum-varnames"] = new JsonNodeExtension(enumVarNames)
@@ -259,7 +260,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         else if (checkType == typeof(TimeSpan))
         {
             var timeSpan = TimeSpan.Zero.ToString();
-            result.Example = timeSpan;
+            result.Examples = [timeSpan];
         }
 
         return result;
