@@ -917,10 +917,46 @@ public class VirtualRoomsCommonController(
     [Tags("Rooms")]
     [SwaggerResponse(200, "Returns the contents of the \"Rooms\" section", typeof(FolderContentDto<int>))]
     [SwaggerResponse(403, "You don't have enough permission to view the room content")]
+    [SwaggerResponse(400, "Invalid metadata filter")]
     [HttpGet("rooms")]
     public async Task<FolderContentDto<int>> GetRoomsFolder(RoomContentRequestDto inDto)
     {
-        var parentId = inDto.SearchArea switch
+        var parentId = await GetRoomsSectionIdAsync(inDto.SearchArea);
+
+        var tagNames = !string.IsNullOrEmpty(inDto.Tags)
+            ? JsonSerializer.Deserialize<IEnumerable<string>>(inDto.Tags)
+            : null;
+
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters);
+
+        return await GetRoomsAsync(parentId, inDto.Type, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter,
+            inDto.SubjectId, inDto.SubjectOwnerId, inDto.WithoutTags ?? false, tagNames, inDto.ExcludeSubject ?? false, inDto.Provider ?? ProviderFilter.None,
+            inDto.QuotaFilter ?? QuotaFilter.All, inDto.StorageFilter ?? StorageFilter.None, inDto.PrivacyFilter ?? RoomPrivacyFilter.None, inDto.GroupId);
+    }
+
+    /// <remarks>
+    /// Searches the rooms by metadata. The same filter the rooms listing takes in the "metadataTemplateId" and "metadataFilters"
+    /// query parameters, here as a typed request body for the clients that build the conditions as objects rather than as a JSON string.
+    /// </remarks>
+    /// <summary>Search the rooms by metadata</summary>
+    /// <path>api/2.0/files/rooms/search</path>
+    [Tags("Rooms")]
+    [SwaggerResponse(200, "Returns the matching rooms of the section", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "Invalid metadata filter")]
+    [SwaggerResponse(403, "You don't have enough permission to view the room content")]
+    [HttpPost("rooms/search")]
+    public async Task<FolderContentDto<int>> SearchRooms(RoomsMetadataSearchRequestDto inDto)
+    {
+        var parentId = await GetRoomsSectionIdAsync(inDto.SearchArea);
+
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters);
+
+        return await GetRoomsAsync(parentId, inDto.Type, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.FilterValue, metadataFilter);
+    }
+
+    private async Task<int> GetRoomsSectionIdAsync(SearchArea? searchArea)
+    {
+        return searchArea switch
         {
             SearchArea.Archive => await globalFolderHelper.GetFolderArchive(),
             SearchArea.Templates => await globalFolderHelper.GetFolderRoomTemplatesAsync(),
@@ -928,32 +964,48 @@ public class VirtualRoomsCommonController(
             SearchArea.Forms => await globalFolderHelper.GetFolderFormsAsync(),
             _ => await globalFolderHelper.GetFolderVirtualRooms()
         };
+    }
 
-        var filter = RoomTypeExtensions.MapToFilterType(inDto.Type);
-
-        var tagNames = !string.IsNullOrEmpty(inDto.Tags)
-            ? JsonSerializer.Deserialize<IEnumerable<string>>(inDto.Tags)
-            : null;
+    /// <summary>
+    /// The rooms listing shared by the query string listing and the typed search: the search passes the metadata filter,
+    /// the text, the types, the section and the paging, and leaves the other filters at their defaults.
+    /// </summary>
+    private async Task<FolderContentDto<int>> GetRoomsAsync(
+        int parentId,
+        IEnumerable<RoomType> types,
+        SearchArea? searchArea,
+        string sortBy,
+        SortOrder sortOrder,
+        int startIndex,
+        int count,
+        string filterValue,
+        MetadataFilter metadataFilter,
+        Guid? subjectId = null,
+        Guid? subjectOwnerId = null,
+        bool withoutTags = false,
+        IEnumerable<string> tagNames = null,
+        bool excludeSubject = false,
+        ProviderFilter provider = ProviderFilter.None,
+        QuotaFilter quotaFilter = QuotaFilter.All,
+        StorageFilter storageFilter = StorageFilter.None,
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
+        int? groupId = null)
+    {
+        var filter = RoomTypeExtensions.MapToFilterType(types);
 
         // An unrecognised sortBy used to be dropped on the floor: the listing came back in the
         // default order and the caller had no way to tell its sort had been ignored. The accepted
         // values are the names of SortedByType - sorting by name is "AZ", not "title".
         OrderBy orderBy = null;
-        if (!string.IsNullOrEmpty(inDto.SortBy))
+        if (!string.IsNullOrEmpty(sortBy))
         {
-            if (!SortedByTypeExtensions.TryParse(inDto.SortBy, true, out var sortBy))
+            if (!SortedByTypeExtensions.TryParse(sortBy, true, out var sortedBy))
             {
-                throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(inDto.SortBy));
+                throw new ArgumentException(FilesCommonResource.ErrorMessage_BadRequest, nameof(sortBy));
             }
 
-            orderBy = new OrderBy(sortBy, inDto.SortOrder == SortOrder.Ascending);
+            orderBy = new OrderBy(sortedBy, sortOrder == SortOrder.Ascending);
         }
-
-        var startIndex = inDto.StartIndex;
-        var count = inDto.Count;
-        var filterValue = inDto.Text;
-
-        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters);
 
         var content = await fileStorageService.GetFolderItemsAsync(
             parentId,
@@ -961,24 +1013,24 @@ public class VirtualRoomsCommonController(
             count,
             filter,
             false,
-            inDto.SubjectId,
+            subjectId,
             Guid.Empty,
             filterValue,
             [],
             true,
             false,
             orderBy,
-            inDto.SearchArea ?? SearchArea.Active,
+            searchArea ?? SearchArea.Active,
             0,
-            inDto.WithoutTags ?? false,
+            withoutTags,
             tagNames,
-            inDto.ExcludeSubject ?? false,
-            inDto.Provider ?? ProviderFilter.None,
-            inDto.SubjectOwnerId,
-            quotaFilter: inDto.QuotaFilter ?? QuotaFilter.All,
-            storageFilter: inDto.StorageFilter ?? StorageFilter.None,
-            groupId: inDto.GroupId ?? null,
-            privacyFilter: inDto.PrivacyFilter ?? RoomPrivacyFilter.None,
+            excludeSubject,
+            provider,
+            subjectOwnerId,
+            quotaFilter: quotaFilter,
+            storageFilter: storageFilter,
+            groupId: groupId,
+            privacyFilter: privacyFilter,
             metadataFilter: metadataFilter);
 
         var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex);

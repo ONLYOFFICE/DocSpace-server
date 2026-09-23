@@ -122,10 +122,35 @@ public class MetadataTemplateLink
 }
 
 /// <summary>
-/// The metadata of an entry: the template with the values of its fields.
+/// A template assigned to an entry with the values of its fields.
 /// </summary>
-public class EntryMetadata
+public class TemplateMetadata
 {
     public MetadataTemplate Template { get; set; }
     public List<MetadataValue> Values { get; set; } = [];
+}
+
+/// <summary>
+/// A custom text field of an entry with its value. The custom fields live in the hidden system template, which the
+/// API never shows: outside they are free-standing fields that need no template assignment.
+/// </summary>
+public class CustomFieldValue
+{
+    public MetadataField Field { get; set; }
+    public string Value { get; set; }
+}
+
+/// <summary>
+/// One custom field of a set request. The field is named, not identified: a name the tenant has not seen yet creates
+/// the field, and a <c>null</c> value removes the field from the entry.
+/// </summary>
+public record CustomFieldUpdate(string Name, string Value);
+
+/// <summary>
+/// The metadata of an entry: the assigned templates with their values, and the custom fields holding a value.
+/// </summary>
+public class EntryMetadata
+{
+    public List<TemplateMetadata> Templates { get; set; } = [];
+    public List<CustomFieldValue> CustomFields { get; set; } = [];
 }

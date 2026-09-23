@@ -509,7 +509,7 @@ public class BaseTest(
     /// all marked <c>[ApiExplorerSettings(IgnoreApi = true)]</c>, so they never made it into Swagger and
     /// therefore not into the client either.
     /// </summary>
-    private async Task<int> GetSectionRootIdAsync(string path)
+    protected async Task<int> GetSectionRootIdAsync(string path)
     {
         using var response = await _filesClient.GetAsync(path, TestContext.Current.CancellationToken);
 

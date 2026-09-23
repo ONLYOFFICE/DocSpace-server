@@ -175,6 +175,8 @@ public class GetFolderRequestDto<T>
     /// <summary>
     /// The ID of the metadata template the entries must be assigned to. On its own it narrows the listing to the entries
     /// carrying the template; together with the metadata filters it also pins the template the filtered fields belong to.
+    /// Supported for the rooms, the trash, the regular folders and the "Shared with me", "Recent" and "Favorites" sections
+    /// (the third-party entries never carry metadata and are left out); the "Templates" and "Private" sections reject it with 400.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "metadataTemplateId")]
@@ -183,6 +185,9 @@ public class GetFolderRequestDto<T>
     /// <summary>
     /// The URL-encoded JSON array of the metadata filter conditions,
     /// e.g. [{"fieldId":1,"op":"eq","value":"ACME"},{"fieldId":2,"op":"range","from":"2026-01-01","to":"2026-06-30"},{"fieldId":3,"op":"in","optionIds":["..."]}].
+    /// The range bounds are inclusive; a date-only bound covers the whole day, so "to":"2026-06-30" includes the values stored on 30 June.
+    /// A custom field is addressed by its name instead of the fieldId: {"name":"Client","op":"eq","value":"ACME"}.
+    /// The same filter is taken as a typed request body by POST api/2.0/files/{folderId}/search.
     /// </summary>
     [FromQuery(Name = "metadataFilters")]
     public string MetadataFilters { get; set; }
@@ -242,6 +247,29 @@ public class GetCommonFolderRequestDto
     /// <example>My Document</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
+}
+
+/// <summary>
+/// The request parameters for getting the "Favorites" folder.
+/// </summary>
+public class GetFavoritesFolderRequestDto : GetCommonFolderRequestDto
+{
+    /// <summary>
+    /// The ID of the metadata template the favorite entries must be assigned to. On its own it narrows the listing to the entries
+    /// carrying the template; together with the metadata filters it also pins the template the filtered fields belong to.
+    /// The third-party entries never carry metadata and are left out when the filter is set.
+    /// </summary>
+    /// <example>1</example>
+    [FromQuery(Name = "metadataTemplateId")]
+    public int? MetadataTemplateId { get; set; }
+
+    /// <summary>
+    /// The URL-encoded JSON array of the metadata filter conditions,
+    /// e.g. [{"fieldId":1,"op":"eq","value":"ACME"},{"fieldId":2,"op":"range","from":"2026-01-01","to":"2026-06-30"},{"fieldId":3,"op":"in","optionIds":["..."]}].
+    /// The range bounds are inclusive; a date-only bound covers the whole day. A custom field is addressed by its name instead of the fieldId: {"name":"Client","op":"eq","value":"ACME"}.
+    /// </summary>
+    [FromQuery(Name = "metadataFilters")]
+    public string MetadataFilters { get; set; }
 }
 
 /// <summary>
@@ -452,4 +480,21 @@ public class GetRecentFolderRequestDto
     /// <example>My Document</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
+
+    /// <summary>
+    /// The ID of the metadata template the recent files must be assigned to. On its own it narrows the listing to the files
+    /// carrying the template; together with the metadata filters it also pins the template the filtered fields belong to.
+    /// The third-party files never carry metadata and are left out when the filter is set.
+    /// </summary>
+    /// <example>1</example>
+    [FromQuery(Name = "metadataTemplateId")]
+    public int? MetadataTemplateId { get; set; }
+
+    /// <summary>
+    /// The URL-encoded JSON array of the metadata filter conditions,
+    /// e.g. [{"fieldId":1,"op":"eq","value":"ACME"},{"fieldId":2,"op":"range","from":"2026-01-01","to":"2026-06-30"},{"fieldId":3,"op":"in","optionIds":["..."]}].
+    /// The range bounds are inclusive; a date-only bound covers the whole day. A custom field is addressed by its name instead of the fieldId: {"name":"Client","op":"eq","value":"ACME"}.
+    /// </summary>
+    [FromQuery(Name = "metadataFilters")]
+    public string MetadataFilters { get; set; }
 }

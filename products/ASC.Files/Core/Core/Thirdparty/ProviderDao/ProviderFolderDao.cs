@@ -223,9 +223,16 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         }
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(IEnumerable<string> folderIds, IEnumerable<string> excludeParentIds  = null, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(IEnumerable<string> folderIds, IEnumerable<string> excludeParentIds  = null, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false,
+        MetadataFilter metadataFilter = null)
     {
         var result = AsyncEnumerable.Empty<Folder<string>>();
+
+        if (metadataFilter is { IsEmpty: false })
+        {
+            // the third-party entries never carry metadata: nothing can match, the providers are not asked
+            return result;
+        }
 
         foreach (var (selectorLocal, matchedIds) in _selectorFactory.GetSelectors(folderIds))
         {
@@ -805,9 +812,10 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
         throw new NotImplementedException();
     }
 
-    public async IAsyncEnumerable<Folder<string>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count)
+    public async IAsyncEnumerable<Folder<string>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count,
+        MetadataFilter metadataFilter = null)
     {
-        if (CheckInvalidFilter(filterType) || location == Location.Link)
+        if (CheckInvalidFilter(filterType) || location == Location.Link || metadataFilter is { IsEmpty: false })
         {
             yield break;
         }

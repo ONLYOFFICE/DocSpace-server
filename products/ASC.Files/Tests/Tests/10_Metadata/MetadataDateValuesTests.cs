@@ -75,6 +75,54 @@ public class MetadataDateValuesTests(AspireAppFixture fixture) : BaseTest(fixtur
         rooms.RoomIds().Should().Contain(room.Id, "the day the value was written on must match the day filter");
     }
 
+    [Fact]
+    public async Task DateValue_WithTime_IsFoundByTheDateOnlyRangeEndingOnItsDay()
+    {
+        var (api, template, room) = await ArrangeAsync(new DateTime(2026, 6, 30, 14, 0, 0, DateTimeKind.Utc));
+
+        // the UI sends the range as two dates: "to" without a time must cover the whole day, not stop at its midnight
+        var condition = new { fieldId = template.Field(SignedField).Id, from = "2026-06-01", to = "2026-06-30" };
+
+        var rooms = await PollRoomsAsync(api, template.Id, condition, room.Id);
+
+        rooms.RoomIds().Should().Contain(room.Id, "a date-only upper bound is inclusive of the whole day");
+    }
+
+    [Fact]
+    public async Task DateValue_WithTime_IsNotFoundByAnUpperBoundInstantBeforeIt()
+    {
+        var (api, template, room) = await ArrangeAsync(new DateTime(2026, 6, 30, 14, 0, 0, DateTimeKind.Utc));
+
+        // arrange check: the value is indexed and found by the day, so the miss below is the bound, not the index lagging
+        var byDay = await PollRoomsAsync(api, template.Id, new { fieldId = template.Field(SignedField).Id, to = "2026-06-30" }, room.Id);
+        byDay.RoomIds().Should().Contain(room.Id);
+
+        var condition = new { fieldId = template.Field(SignedField).Id, to = "2026-06-30T12:00:00Z" };
+
+        var rooms = await api.GetRoomsAsync(template.Id, [condition], cancellationToken: TestContext.Current.CancellationToken);
+
+        rooms.RoomIds().Should().NotContain(room.Id, "a bound carrying a time is an instant and is not stretched to the end of the day");
+    }
+
+    private async Task<(MetadataApiClient Api, MetadataTemplateResponse Template, FolderDtoInteger Room)> ArrangeAsync(DateTime value)
+    {
+        await _filesClient.Authenticate(Owner);
+
+        var api = new MetadataApiClient(_filesClient);
+        var suffix = Guid.NewGuid().ToString()[..8];
+
+        var template = await api.CreateTemplateAsync("Dates " + suffix,
+            [new MetadataFieldPayload { Name = SignedField, Type = 1 }], TestContext.Current.CancellationToken);
+        var room = await CreateCustomRoom($"Dated {suffix}");
+
+        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+        await api.SetFolderValuesAsync(room.Id,
+            [new MetadataValuePayload { FieldId = template.Field(SignedField).Id, DateValue = value }],
+            TestContext.Current.CancellationToken);
+
+        return (api, template, room);
+    }
+
     private static async Task<RoomsContentResponse> PollRoomsAsync(MetadataApiClient api, int templateId, object condition, int expectedRoomId)
     {
         var deadline = DateTime.UtcNow.AddSeconds(15);

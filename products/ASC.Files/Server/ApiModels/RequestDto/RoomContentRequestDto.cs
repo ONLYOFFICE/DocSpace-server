@@ -169,6 +169,9 @@ public class RoomContentRequestDto
     /// <summary>
     /// The URL-encoded JSON array of the metadata filter conditions,
     /// e.g. [{"fieldId":1,"op":"eq","value":"ACME"},{"fieldId":2,"op":"range","from":"2026-01-01","to":"2026-06-30"},{"fieldId":3,"op":"in","optionIds":["..."]}].
+    /// The range bounds are inclusive; a date-only bound covers the whole day, so "to":"2026-06-30" includes the values stored on 30 June.
+    /// A custom field is addressed by its name instead of the fieldId: {"name":"Client","op":"eq","value":"ACME"}.
+    /// The same filter is taken as a typed request body by POST api/2.0/files/rooms/search.
     /// </summary>
     [FromQuery(Name = "metadataFilters")]
     public string MetadataFilters { get; set; }

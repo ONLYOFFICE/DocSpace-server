@@ -74,7 +74,7 @@ public class RoomsMetadataSearchTests(AspireAppFixture fixture) : RoomsMetadataS
         // metadata document, so the free text search must find the room by that value and not by its title
         var marker = "Marker" + Guid.NewGuid().ToString()[..8];
 
-        await data.Api.AddFolderCustomFieldAsync(data.MatchingRoomId, "Reference", marker, TestContext.Current.CancellationToken);
+        await data.Api.SetFolderCustomFieldAsync(data.MatchingRoomId, "Reference", marker, TestContext.Current.CancellationToken);
 
         var rooms = await data.SearchByTextAsync(marker, expected: [data.MatchingRoomId]);
 

@@ -433,9 +433,9 @@ public class SetMetadataValues
 }
 
 /// <summary>
-/// The request parameters for adding a custom text field to a file.
+/// The request parameters for setting the custom fields of a file.
 /// </summary>
-public class AddFileCustomFieldRequestDto<T>
+public class SetFileCustomFieldsRequestDto<T>
 {
     /// <summary>
     /// The file ID.
@@ -445,16 +445,16 @@ public class AddFileCustomFieldRequestDto<T>
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The parameters of the custom field.
+    /// The custom fields to set.
     /// </summary>
     [FromBody]
-    public required AddCustomField Field { get; set; }
+    public required SetCustomFields Set { get; set; }
 }
 
 /// <summary>
-/// The request parameters for adding a custom text field to a folder.
+/// The request parameters for setting the custom fields of a folder.
 /// </summary>
-public class AddFolderCustomFieldRequestDto<T>
+public class SetFolderCustomFieldsRequestDto<T>
 {
     /// <summary>
     /// The folder ID.
@@ -464,26 +464,174 @@ public class AddFolderCustomFieldRequestDto<T>
     public required T FolderId { get; set; }
 
     /// <summary>
-    /// The parameters of the custom field.
+    /// The custom fields to set.
     /// </summary>
     [FromBody]
-    public required AddCustomField Field { get; set; }
+    public required SetCustomFields Set { get; set; }
+}
+
+/// <summary>
+/// The parameters for setting custom fields.
+/// </summary>
+public class SetCustomFields
+{
+    /// <summary>
+    /// The custom fields to set on the entry. A listed field gets the value, a null or empty value removes the field
+    /// from the entry, the fields not listed are left alone. A name the portal has not seen yet creates the field.
+    /// </summary>
+    public required List<CustomFieldRequest> Fields { get; set; }
 }
 
 /// <summary>
 /// The parameters of a custom text field.
 /// </summary>
-public class AddCustomField
+public class CustomFieldRequest
 {
     /// <summary>
-    /// The field name.
+    /// The field name. The names are matched without regard to case.
     /// </summary>
     /// <example>Project code</example>
     public required string Name { get; set; }
 
     /// <summary>
-    /// The field value.
+    /// The field value. Null or empty removes the field from the entry.
     /// </summary>
     /// <example>A-42</example>
     public string Value { get; set; }
+}
+
+/// <summary>
+/// The request parameters for searching a folder by metadata.
+/// </summary>
+public class SearchFolderRequestDto<T>
+{
+    /// <summary>
+    /// The folder ID.
+    /// </summary>
+    /// <example>1</example>
+    [FromRoute(Name = "folderId")]
+    public required T FolderId { get; set; }
+
+    /// <summary>
+    /// The search parameters.
+    /// </summary>
+    [FromBody]
+    public required FolderMetadataSearch Search { get; set; }
+}
+
+/// <summary>
+/// The typed form of the metadata search of a folder: the same filter the folder listing takes in the "metadataTemplateId"
+/// and "metadataFilters" query parameters, with the conditions as objects instead of a JSON string.
+/// </summary>
+public class FolderMetadataSearch
+{
+    /// <summary>
+    /// The ID of the metadata template the entries must be assigned to. On its own it narrows the listing to the entries
+    /// carrying the template; together with the conditions it also pins the template the filtered fields belong to.
+    /// </summary>
+    /// <example>1</example>
+    public int? MetadataTemplateId { get; set; }
+
+    /// <summary>
+    /// The metadata filter conditions, combined with AND. A custom field is addressed by its name instead of the field ID.
+    /// </summary>
+    public List<MetadataFilterConditionRequest> MetadataFilters { get; set; }
+
+    /// <summary>
+    /// The text to search for in the titles and in the custom fields.
+    /// </summary>
+    /// <example>ACME</example>
+    public string FilterValue { get; set; }
+
+    /// <summary>
+    /// Specifies whether to search the whole subtree of the folder (the default) or its direct children only.
+    /// </summary>
+    /// <example>true</example>
+    public bool? WithSubFolders { get; set; }
+
+    /// <summary>
+    /// The filter type.
+    /// </summary>
+    public FilterType? FilterType { get; set; }
+
+    /// <summary>
+    /// The number of entries to return.
+    /// </summary>
+    /// <example>25</example>
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The zero-based index of the first entry to return.
+    /// </summary>
+    /// <example>0</example>
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// The field to sort by, a name of the SortedByType values.
+    /// </summary>
+    /// <example>DateAndTime</example>
+    public string SortBy { get; set; }
+
+    /// <summary>
+    /// The sort order.
+    /// </summary>
+    public SortOrder SortOrder { get; set; }
+}
+
+/// <summary>
+/// The typed form of the metadata search of the rooms: the same filter the rooms listing takes in the "metadataTemplateId"
+/// and "metadataFilters" query parameters, with the conditions as objects instead of a JSON string.
+/// </summary>
+public class RoomsMetadataSearchRequestDto
+{
+    /// <summary>
+    /// The ID of the metadata template the rooms must be assigned to. On its own it narrows the listing to the rooms
+    /// carrying the template; together with the conditions it also pins the template the filtered fields belong to.
+    /// </summary>
+    /// <example>1</example>
+    public int? MetadataTemplateId { get; set; }
+
+    /// <summary>
+    /// The metadata filter conditions, combined with AND. A custom field is addressed by its name instead of the field ID.
+    /// </summary>
+    public List<MetadataFilterConditionRequest> MetadataFilters { get; set; }
+
+    /// <summary>
+    /// The text to search for in the room titles and in the custom fields.
+    /// </summary>
+    /// <example>ACME</example>
+    public string FilterValue { get; set; }
+
+    /// <summary>
+    /// The section to search in: the active rooms (the default), the archive or the templates.
+    /// </summary>
+    public SearchArea? SearchArea { get; set; }
+
+    /// <summary>
+    /// The room types to search among.
+    /// </summary>
+    public IEnumerable<RoomType> Type { get; set; }
+
+    /// <summary>
+    /// The number of rooms to return.
+    /// </summary>
+    /// <example>25</example>
+    public int Count { get; set; } = ApiContext.DefaultCount;
+
+    /// <summary>
+    /// The zero-based index of the first room to return.
+    /// </summary>
+    /// <example>0</example>
+    public int StartIndex { get; set; }
+
+    /// <summary>
+    /// The field to sort by, a name of the SortedByType values.
+    /// </summary>
+    /// <example>DateAndTime</example>
+    public string SortBy { get; set; }
+
+    /// <summary>
+    /// The sort order.
+    /// </summary>
+    public SortOrder SortOrder { get; set; }
 }

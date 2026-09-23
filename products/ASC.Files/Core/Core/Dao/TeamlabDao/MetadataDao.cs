@@ -104,6 +104,68 @@ internal class MetadataDao(
         return ToTemplate(dbTemplate);
     }
 
+    public async Task<MetadataTemplate> SaveTemplateWithFieldsAsync(MetadataTemplate template, IEnumerable<MetadataField> fields)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var now = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
+        var userId = _authContext.CurrentAccount.ID;
+        var fieldsList = fields?.ToList() ?? [];
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        return await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            var dbTemplate = new DbFilesMetadataTemplate
+            {
+                TenantId = tenantId,
+                Name = template.Name,
+                Visible = template.Visible,
+                IsSystem = template.IsSystem,
+                CreateBy = userId,
+                CreateOn = now,
+                ModifiedBy = userId,
+                ModifiedOn = now
+            };
+
+            await context.MetadataTemplates.AddAsync(dbTemplate);
+
+            // the fields need the template id, so the template is flushed first; both writes are still one transaction
+            await context.SaveChangesAsync();
+
+            var dbFields = fieldsList.Select(field => new DbFilesMetadataField
+            {
+                TenantId = tenantId,
+                TemplateId = dbTemplate.Id,
+                Name = field.Name,
+                Type = field.Type,
+                Options = SerializeOptions(field.Options),
+                Order = field.Order,
+                CreateBy = userId,
+                CreateOn = now,
+                ModifiedBy = userId,
+                ModifiedOn = now
+            }).ToList();
+
+            if (dbFields.Count > 0)
+            {
+                await context.MetadataFields.AddRangeAsync(dbFields);
+                await context.SaveChangesAsync();
+            }
+
+            await tx.CommitAsync();
+
+            var saved = ToTemplate(dbTemplate);
+            saved.Fields.AddRange(dbFields.Select(ToField));
+
+            return saved;
+        });
+    }
+
     public async Task<MetadataTemplate> GetTemplateAsync(int templateId, bool withFields = true)
     {
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
@@ -349,6 +411,18 @@ internal class MetadataDao(
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         return await Query(filesDbContext.MetadataValues).AnyAsync(r => r.FieldId == fieldId);
+    }
+
+    public async Task<List<int>> GetUnusedFieldIdsAsync(int templateId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await Query(filesDbContext.MetadataFields)
+            .Where(f => f.TemplateId == templateId && !filesDbContext.MetadataValues.Any(v => v.TenantId == tenantId && v.FieldId == f.Id))
+            .Select(f => f.Id)
+            .ToListAsync();
     }
 
     public async Task<bool> HasValuesAsync(int fieldId, IEnumerable<Guid> optionIds)

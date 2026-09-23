@@ -110,6 +110,7 @@ public interface IFolderDao<T>
     /// <param name="parentType"></param>
     /// <param name="containingForms"></param>
     /// <param name="folderType"></param>
+    /// <param name="metadataFilter">the structured metadata filter</param>
     /// <returns></returns>
     IAsyncEnumerable<Folder<T>> GetFoldersAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
         bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, bool containingForms = false, List<FolderType> folderType = null,
@@ -129,8 +130,10 @@ public interface IFolderDao<T>
     /// <param name="searchSubfolders"></param>
     /// <param name="checkShare"></param>
     /// <param name="excludeSubject"></param>
+    /// <param name="metadataFilter">the structured metadata filter; the third-party folders never carry metadata and are left out when it is set</param>
     /// <returns></returns>
-    IAsyncEnumerable<Folder<T>> GetFoldersAsync(IEnumerable<T> folderIds, IEnumerable<T> excludeParentIds = null, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false);
+    IAsyncEnumerable<Folder<T>> GetFoldersAsync(IEnumerable<T> folderIds, IEnumerable<T> excludeParentIds = null, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false,
+        MetadataFilter metadataFilter = null);
 
     /// <summary>
     ///     Get folder, contains folder with id
@@ -494,7 +497,8 @@ public interface IFolderDao<T>
     Task<Dictionary<T, ChatSettings>> GetChatSettingsAsync(IEnumerable<T> agentIds);
 
     IAsyncEnumerable<Folder<T>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count);
+        string searchText, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count,
+        MetadataFilter metadataFilter = null);
 
     Task<int> GetSharedFoldersCountAsync(T parentId);
 

@@ -62,6 +62,7 @@ public class MetadataController(
     [Tags("Files / Metadata")]
     [SwaggerResponse(200, "New metadata template", typeof(MetadataTemplateDto))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(400, "Invalid template or a template with this name already exists")]
     [HttpPost("metadata/templates")]
     public async Task<MetadataTemplateDto> CreateTemplate(CreateMetadataTemplateRequestDto inDto)
     {
@@ -70,20 +71,6 @@ public class MetadataController(
         var template = await metadataService.CreateTemplateAsync(inDto.Name, inDto.Visible, fields);
 
         return metadataDtoHelper.Get(template);
-    }
-
-    /// <summary>
-    /// Returns the system metadata template with the global visibility, or null when it does not exist yet.
-    /// </summary>
-    /// <path>api/2.0/files/metadata/templates/system</path>
-    [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "System metadata template", typeof(MetadataTemplateDto))]
-    [HttpGet("metadata/templates/system")]
-    public async Task<MetadataTemplateDto> GetSystemTemplate()
-    {
-        var template = await metadataService.GetSystemTemplateAsync();
-
-        return template == null ? null : metadataDtoHelper.Get(template);
     }
 
     /// <summary>
@@ -109,6 +96,7 @@ public class MetadataController(
     [SwaggerResponse(200, "Updated metadata template", typeof(MetadataTemplateDto))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Template not found")]
+    [SwaggerResponse(400, "A template with this name already exists")]
     [HttpPut("metadata/templates/{templateId:int}")]
     public async Task<MetadataTemplateDto> UpdateTemplate(UpdateMetadataTemplateRequestDto inDto)
     {
@@ -139,6 +127,7 @@ public class MetadataController(
     [SwaggerResponse(200, "New metadata field", typeof(MetadataFieldDto))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Template not found")]
+    [SwaggerResponse(400, "Invalid field: an empty name, options on a non-choice field or a choice field without options")]
     [HttpPost("metadata/templates/{templateId:int}/fields")]
     public async Task<MetadataFieldDto> CreateField(CreateMetadataFieldRequestDto inDto)
     {
@@ -155,6 +144,7 @@ public class MetadataController(
     [SwaggerResponse(200, "Updated metadata field", typeof(MetadataFieldDto))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Field not found")]
+    [SwaggerResponse(400, "Invalid field, a type change on a field with values or the removal of an option in use")]
     [HttpPut("metadata/templates/{templateId:int}/fields/{fieldId:int}")]
     public async Task<MetadataFieldDto> UpdateField(UpdateMetadataFieldRequestDto inDto)
     {
@@ -178,35 +168,35 @@ public class MetadataController(
     }
 
     /// <summary>
-    /// Returns the metadata of the file.
+    /// Returns the metadata of the file: the assigned templates with their values and the custom fields.
     /// </summary>
     /// <path>api/2.0/files/metadata/file/{fileId}</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "File metadata", typeof(List<EntryMetadataDto>))]
+    [SwaggerResponse(200, "File metadata", typeof(EntryMetadataDto))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "File not found")]
     [HttpGet("metadata/file/{fileId:int}")]
-    public async Task<List<EntryMetadataDto>> GetFileMetadata(FileIdRequestDto<int> inDto)
+    public async Task<EntryMetadataDto> GetFileMetadata(FileIdRequestDto<int> inDto)
     {
         var metadata = await metadataService.GetEntryMetadataAsync(inDto.FileId, FileEntryType.File);
 
-        return metadata.Select(metadataDtoHelper.Get).ToList();
+        return metadataDtoHelper.Get(metadata);
     }
 
     /// <summary>
-    /// Returns the metadata of the folder.
+    /// Returns the metadata of the folder: the assigned templates with their values and the custom fields.
     /// </summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "Folder metadata", typeof(List<EntryMetadataDto>))]
+    [SwaggerResponse(200, "Folder metadata", typeof(EntryMetadataDto))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Folder not found")]
     [HttpGet("metadata/folder/{folderId:int}")]
-    public async Task<List<EntryMetadataDto>> GetFolderMetadata(FolderIdRequestDto<int> inDto)
+    public async Task<EntryMetadataDto> GetFolderMetadata(FolderIdRequestDto<int> inDto)
     {
         var metadata = await metadataService.GetEntryMetadataAsync(inDto.FolderId, FileEntryType.Folder);
 
-        return metadata.Select(metadataDtoHelper.Get).ToList();
+        return metadataDtoHelper.Get(metadata);
     }
 
     /// <summary>
@@ -228,7 +218,7 @@ public class MetadataController(
     /// </summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/templates</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "Cascade operation status or null when no cascade is requested", typeof(MetadataOperationDto))]
+    [SwaggerResponse(200, "Cascade operation status; a completed operation without an ID when no cascade is requested", typeof(MetadataOperationDto))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Folder not found")]
     [HttpPut("metadata/folder/{folderId:int}/templates")]
@@ -236,7 +226,8 @@ public class MetadataController(
     {
         var taskId = await metadataService.AssignTemplatesToFolderAsync(inDto.FolderId, inDto.Assign.TemplateIds, inDto.Assign.Cascade, inDto.Assign.ConflictResolveType);
 
-        return taskId == null ? null : metadataDtoHelper.Get(await metadataService.GetCascadeStatusAsync(inDto.FolderId));
+        // without a cascade the assignment is finished in this call, which the answer states as a completed operation instead of a null body
+        return metadataDtoHelper.Get(taskId == null ? null : await metadataService.GetCascadeStatusAsync(inDto.FolderId));
     }
 
     /// <summary>
@@ -244,7 +235,7 @@ public class MetadataController(
     /// </summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/templates/progress</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "Cascade operation status", typeof(MetadataOperationDto))]
+    [SwaggerResponse(200, "Cascade operation status; a completed operation without an ID when the folder has no cascade to report", typeof(MetadataOperationDto))]
     [SwaggerResponse(404, "Folder not found")]
     [HttpGet("metadata/folder/{folderId:int}/templates/progress")]
     public async Task<MetadataOperationDto> GetCascadeProgress(FolderIdRequestDto<int> inDto)
@@ -281,13 +272,14 @@ public class MetadataController(
     }
 
     /// <summary>
-    /// Sets the metadata field values on the file.
+    /// Sets the metadata field values on the file and returns every value the file holds for its templates.
     /// </summary>
     /// <path>api/2.0/files/metadata/file/{fileId}/values</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "Updated metadata values", typeof(List<MetadataValueDto>))]
+    [SwaggerResponse(200, "All the metadata values of the file", typeof(List<MetadataValueDto>))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "File not found")]
+    [SwaggerResponse(400, "A value does not match the field type, or the field belongs to a template the file does not have")]
     [HttpPut("metadata/file/{fileId:int}/values")]
     public async Task<List<MetadataValueDto>> SetFileValues(SetFileMetadataValuesRequestDto<int> inDto)
     {
@@ -297,13 +289,14 @@ public class MetadataController(
     }
 
     /// <summary>
-    /// Sets the metadata field values on the folder.
+    /// Sets the metadata field values on the folder and returns every value the folder holds for its templates.
     /// </summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/values</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "Updated metadata values", typeof(List<MetadataValueDto>))]
+    [SwaggerResponse(200, "All the metadata values of the folder", typeof(List<MetadataValueDto>))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Folder not found")]
+    [SwaggerResponse(400, "A value does not match the field type, or the field belongs to a template the folder does not have")]
     [HttpPut("metadata/folder/{folderId:int}/values")]
     public async Task<List<MetadataValueDto>> SetFolderValues(SetFolderMetadataValuesRequestDto<int> inDto)
     {
@@ -313,35 +306,42 @@ public class MetadataController(
     }
 
     /// <summary>
-    /// Adds a custom text field from the system template to the file and sets its value.
+    /// Sets the custom text fields of the file by name: a listed field gets the value, a null or empty value removes the field, the fields not listed are left alone.
     /// </summary>
-    /// <path>api/2.0/files/metadata/file/{fileId}/customfield</path>
+    /// <path>api/2.0/files/metadata/file/{fileId}/customFields</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "Metadata value of the custom field", typeof(MetadataValueDto))]
+    [SwaggerResponse(200, "The custom fields of the file with their values", typeof(List<CustomFieldValueDto>))]
+    [SwaggerResponse(400, "Invalid custom fields or too many of them")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "File not found")]
-    [HttpPost("metadata/file/{fileId:int}/customfield")]
-    public async Task<MetadataValueDto> AddFileCustomField(AddFileCustomFieldRequestDto<int> inDto)
+    [HttpPut("metadata/file/{fileId:int}/customFields")]
+    public async Task<List<CustomFieldValueDto>> SetFileCustomFields(SetFileCustomFieldsRequestDto<int> inDto)
     {
-        var value = await metadataService.AddCustomFieldAsync(inDto.FileId, FileEntryType.File, inDto.Field.Name, inDto.Field.Value);
+        var fields = await metadataService.SetCustomFieldsAsync(inDto.FileId, FileEntryType.File, ToCustomFieldUpdates(inDto.Set));
 
-        return value == null ? null : metadataDtoHelper.Get(value);
+        return fields.Select(MetadataDtoHelper.Get).ToList();
     }
 
     /// <summary>
-    /// Adds a custom text field from the system template to the folder and sets its value.
+    /// Sets the custom text fields of the folder by name: a listed field gets the value, a null or empty value removes the field, the fields not listed are left alone.
     /// </summary>
-    /// <path>api/2.0/files/metadata/folder/{folderId}/customfield</path>
+    /// <path>api/2.0/files/metadata/folder/{folderId}/customFields</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "Metadata value of the custom field", typeof(MetadataValueDto))]
+    [SwaggerResponse(200, "The custom fields of the folder with their values", typeof(List<CustomFieldValueDto>))]
+    [SwaggerResponse(400, "Invalid custom fields or too many of them")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Folder not found")]
-    [HttpPost("metadata/folder/{folderId:int}/customfield")]
-    public async Task<MetadataValueDto> AddFolderCustomField(AddFolderCustomFieldRequestDto<int> inDto)
+    [HttpPut("metadata/folder/{folderId:int}/customFields")]
+    public async Task<List<CustomFieldValueDto>> SetFolderCustomFields(SetFolderCustomFieldsRequestDto<int> inDto)
     {
-        var value = await metadataService.AddCustomFieldAsync(inDto.FolderId, FileEntryType.Folder, inDto.Field.Name, inDto.Field.Value);
+        var fields = await metadataService.SetCustomFieldsAsync(inDto.FolderId, FileEntryType.Folder, ToCustomFieldUpdates(inDto.Set));
 
-        return value == null ? null : metadataDtoHelper.Get(value);
+        return fields.Select(MetadataDtoHelper.Get).ToList();
+    }
+
+    private static List<CustomFieldUpdate> ToCustomFieldUpdates(SetCustomFields set)
+    {
+        return set.Fields.Select(f => new CustomFieldUpdate(f.Name, f.Value)).ToList();
     }
 
     private static MetadataField ToField(MetadataFieldRequest request)

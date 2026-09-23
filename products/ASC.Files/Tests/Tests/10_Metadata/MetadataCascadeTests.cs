@@ -389,6 +389,24 @@ public class MetadataCascadeTests(AspireAppFixture fixture) : BaseTest(fixture)
         }
     }
 
+    [Fact]
+    public async Task AssignFolderTemplates_WithoutCascade_ReportsACompletedOperation()
+    {
+        var api = await ArrangeAsync();
+        var suffix = Suffix();
+        var template = await api.CreateTemplateAsync("Plain " + suffix, [new MetadataFieldPayload { Name = ClientField, Type = 0 }], TestContext.Current.CancellationToken);
+        var room = await CreateCustomRoom($"Plain {suffix}");
+
+        // the body used to be null: the assignment is finished in the call itself, and the answer says so
+        var status = await api.AssignFolderTemplatesWithStatusAsync(room.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+
+        status.Should().BeEquivalentTo(new { Id = (string?)null, Progress = 100d, IsCompleted = true, Error = (string?)null });
+
+        var progress = await api.GetCascadeProgressAsync(room.Id, TestContext.Current.CancellationToken);
+
+        progress.Should().BeEquivalentTo(status, "a folder that never cascaded reports the same completed operation");
+    }
+
     /// <summary>
     /// Waits until the reported cascade operation of the folder is completed and returns it.
     /// </summary>

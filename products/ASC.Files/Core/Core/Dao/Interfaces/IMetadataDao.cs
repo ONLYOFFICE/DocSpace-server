@@ -36,6 +36,13 @@ namespace ASC.Files.Core;
 public interface IMetadataDao<T>
 {
     Task<MetadataTemplate> SaveTemplateAsync(MetadataTemplate template);
+
+    /// <summary>
+    /// Creates a template together with its fields in one transaction, so a failed field write cannot leave a template
+    /// without its fields behind. Returns the saved template with the saved fields.
+    /// </summary>
+    Task<MetadataTemplate> SaveTemplateWithFieldsAsync(MetadataTemplate template, IEnumerable<MetadataField> fields);
+
     Task<MetadataTemplate> GetTemplateAsync(int templateId, bool withFields = true);
     IAsyncEnumerable<MetadataTemplate> GetTemplatesAsync(bool? visible = null, bool includeSystem = true, bool withFields = false);
     Task DeleteTemplateAsync(int templateId);
@@ -47,6 +54,11 @@ public interface IMetadataDao<T>
     IAsyncEnumerable<MetadataField> GetFieldsAsync(IEnumerable<int> fieldIds);
     Task DeleteFieldAsync(int fieldId);
     Task<bool> HasValuesAsync(int fieldId);
+
+    /// <summary>
+    /// The identifiers of the fields of the template that no entry holds a value for.
+    /// </summary>
+    Task<List<int>> GetUnusedFieldIdsAsync(int templateId);
 
     /// <summary>
     /// Whether any entry has one of the options selected in the choice field.

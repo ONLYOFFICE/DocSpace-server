@@ -222,8 +222,8 @@ public class FoldersMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fix
         var marker = "Marker" + Guid.NewGuid().ToString()[..8];
         var sheet = await CreateFile($"sheet-{Guid.NewGuid().ToString()[..8]}.xlsx", data.RoomId);
 
-        await data.Api.AddFolderCustomFieldAsync(data.MatchingFolderId, "Reference", marker, TestContext.Current.CancellationToken);
-        await data.Api.AddFileCustomFieldAsync(sheet.Id, "Reference", marker, TestContext.Current.CancellationToken);
+        await data.Api.SetFolderCustomFieldAsync(data.MatchingFolderId, "Reference", marker, TestContext.Current.CancellationToken);
+        await data.Api.SetFileCustomFieldAsync(sheet.Id, "Reference", marker, TestContext.Current.CancellationToken);
 
         var byText = await data.SearchByTextAsync(marker, expectedFolders: [data.MatchingFolderId], expectedFiles: [sheet.Id]);
         byText.FileIds().Should().Equal(new[] { sheet.Id }, "the text search must find the sheet by its system template value first");
@@ -244,11 +244,29 @@ public class FoldersMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fix
         // document: the sub-folder must be found by that value rather than by its title
         var marker = "Marker" + Guid.NewGuid().ToString()[..8];
 
-        await data.Api.AddFolderCustomFieldAsync(data.MatchingFolderId, "Reference", marker, TestContext.Current.CancellationToken);
+        await data.Api.SetFolderCustomFieldAsync(data.MatchingFolderId, "Reference", marker, TestContext.Current.CancellationToken);
 
         var content = await data.SearchByTextAsync(marker, expectedFolders: [data.MatchingFolderId], expectedFiles: []);
 
         content.FolderIds().Should().Equal(data.MatchingFolderId);
+    }
+
+    #endregion
+
+    #region Access
+
+    [Fact]
+    public async Task Folders_AnonymousWithMetadataFilter_IsRefusedBeforeTheFilterIsValidated()
+    {
+        var data = await ArrangeAsync();
+
+        await _filesClient.Authenticate(null);
+
+        // the listing endpoint is anonymous; an unknown template used to answer 400 before the folder access was checked,
+        // which told a caller without any access which template ids exist in the tenant
+        using var response = await data.Api.GetFolderContentResponseAsync(data.RoomId, metadataTemplateId: int.MaxValue, cancellationToken: TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized, "the access check comes before the filter validation");
     }
 
     #endregion

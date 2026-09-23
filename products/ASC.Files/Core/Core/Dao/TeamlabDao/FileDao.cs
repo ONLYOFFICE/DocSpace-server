@@ -182,7 +182,8 @@ internal class FileDao(
         }
     }
 
-    public async IAsyncEnumerable<File<int>> GetFilesFilteredAsync(IEnumerable<int> fileIds, IEnumerable<int> excludeParentsIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent)
+    public async IAsyncEnumerable<File<int>> GetFilesFilteredAsync(IEnumerable<int> fileIds, IEnumerable<int> excludeParentsIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent,
+        MetadataFilter metadataFilter = null)
     {
         if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
         {
@@ -196,6 +197,8 @@ internal class FileDao(
         {
             query = query.Where(r => !filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && excludeParentsIds.Contains(r.ParentId)));
         }
+
+        query = await ApplyMetadataFilterAsync(query, filesDbContext, metadataFilter, MetadataSearchScope.None);
 
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
@@ -2458,7 +2461,8 @@ internal class FileDao(
         List<FolderType> folderType,
         OrderBy orderBy,
         int offset,
-        int count)
+        int count,
+        MetadataFilter metadataFilter = null)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -2470,6 +2474,7 @@ internal class FileDao(
         var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId, folderType);
 
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
+        q = await ApplyMetadataFilterAsync(q, filesDbContext, metadataFilter, MetadataSearchScope.None);
 
         q = orderBy == null
             ? q
@@ -3017,7 +3022,11 @@ internal class FileDao(
                         var lowerText = GetSearchText(searchText);
                         var globalTextSqlIds = MetadataSearchQuery.SystemTemplateTextEntryIds(filesDbContext, tenantId, FileEntryType.File, lowerText);
 
-                        q = q.Where(r => searchIds.Contains(r.Id) || globalTextSqlIds.Contains(r.Id));
+                        // the query reads its captured variables when it runs, not when it is built: the ids go through
+                        // their own variable, because the shared one is cleared right below to keep the plain filter off
+                        var textSearchIds = searchIds;
+
+                        q = q.Where(r => textSearchIds.Contains(r.Id) || globalTextSqlIds.Contains(r.Id));
                         searchIds = null;
                     }
                 }
@@ -3051,32 +3060,9 @@ internal class FileDao(
             }
         }
 
-        if (metadataFilter is { TemplateId: { } templateId })
-        {
-            // the assignment is a fact of the link table, not of the values, so it is not asked from the index
-            var templateEntryIds = MetadataSearchQuery.TemplateEntryIds(filesDbContext, tenantId, FileEntryType.File, templateId);
-
-            q = q.Where(r => templateEntryIds.Contains(r.Id));
-        }
-
-        if (metadataFilter is { Conditions.Count: > 0 })
-        {
-            // scoped by the ancestor chain stored in the metadata document; the document is refreshed when the file
-            // is moved (see IndexEventProcessingService), so the scope stays valid and keeps the id list per folder
-            var (metadataSuccess, metadataIds) = await MetadataSearchQuery.TrySelectMetadataIdsAsync(factoryIndexerFileMetadata, metadataFilter, MetadataSearchScope.For(parentId, withSubfolders));
-
-            if (metadataSuccess)
-            {
-                q = q.Where(r => metadataIds.Contains(r.Id));
-            }
-            else
-            {
-                foreach (var conditionIds in MetadataSearchQuery.FilteredEntryIdsPerCondition(filesDbContext, tenantId, FileEntryType.File, metadataFilter))
-                {
-                    q = q.Where(r => conditionIds.Contains(r.Id));
-                }
-            }
-        }
+        // scoped by the ancestor chain stored in the metadata document; the document is refreshed when the file
+        // is moved (see IndexEventProcessingService), so the scope stays valid and keeps the id list per folder
+        q = await ApplyMetadataFilterAsync(q, filesDbContext, metadataFilter, MetadataSearchScope.For(parentId, withSubfolders));
 
         q = orderBy == null
             ? q
@@ -3238,6 +3224,92 @@ internal class FileDao(
                     q = BuildSearch<T, DbFile>(q, searchText, SearchType.End);
                 }
                 break;
+        }
+
+        return q;
+    }
+
+    /// <summary>
+    /// Narrows a file query by the structured metadata filter. The template assignment is a fact of the link table,
+    /// so it always comes from the database; the field conditions are asked from the metadata index and fall back to
+    /// the database when the index is not there or overflows.
+    /// </summary>
+    /// <remarks>
+    /// The listings that are already limited to a set of files (the tags of the "Recent" and "Favorites" sections,
+    /// the share records of the "Shared with me" section) pass <see cref="MetadataSearchScope.None"/>: the index is
+    /// asked tenant-wide and the id list is intersected with the listing's own query.
+    /// </remarks>
+    private async Task<IQueryable<DbFile>> ApplyMetadataFilterAsync(IQueryable<DbFile> q, FilesDbContext filesDbContext, MetadataFilter metadataFilter, MetadataSearchScope scope)
+    {
+        if (metadataFilter is not { IsEmpty: false })
+        {
+            return q;
+        }
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        if (metadataFilter.TemplateId is { } templateId)
+        {
+            var templateEntryIds = MetadataSearchQuery.TemplateEntryIds(filesDbContext, tenantId, FileEntryType.File, templateId);
+
+            q = q.Where(r => templateEntryIds.Contains(r.Id));
+        }
+
+        if (metadataFilter.Conditions.Count > 0)
+        {
+            var (success, metadataIds) = await MetadataSearchQuery.TrySelectMetadataIdsAsync(factoryIndexerFileMetadata, metadataFilter, scope);
+
+            if (success)
+            {
+                q = q.Where(r => metadataIds.Contains(r.Id));
+            }
+            else
+            {
+                foreach (var conditionIds in MetadataSearchQuery.FilteredEntryIdsPerCondition(filesDbContext, tenantId, FileEntryType.File, metadataFilter))
+                {
+                    q = q.Where(r => conditionIds.Contains(r.Id));
+                }
+            }
+        }
+
+        return q;
+    }
+
+    /// <summary>
+    /// The same narrowing for the projections that carry the file as <see cref="IQueryResult{T}.Entry"/> (the tag listings).
+    /// </summary>
+    private async Task<IQueryable<T>> ApplyMetadataFilterAsync<T>(IQueryable<T> q, FilesDbContext filesDbContext, MetadataFilter metadataFilter, MetadataSearchScope scope)
+        where T : IQueryResult<DbFile>
+    {
+        if (metadataFilter is not { IsEmpty: false })
+        {
+            return q;
+        }
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        if (metadataFilter.TemplateId is { } templateId)
+        {
+            var templateEntryIds = MetadataSearchQuery.TemplateEntryIds(filesDbContext, tenantId, FileEntryType.File, templateId);
+
+            q = q.Where(r => templateEntryIds.Contains(r.Entry.Id));
+        }
+
+        if (metadataFilter.Conditions.Count > 0)
+        {
+            var (success, metadataIds) = await MetadataSearchQuery.TrySelectMetadataIdsAsync(factoryIndexerFileMetadata, metadataFilter, scope);
+
+            if (success)
+            {
+                q = q.Where(r => metadataIds.Contains(r.Entry.Id));
+            }
+            else
+            {
+                foreach (var conditionIds in MetadataSearchQuery.FilteredEntryIdsPerCondition(filesDbContext, tenantId, FileEntryType.File, metadataFilter))
+                {
+                    q = q.Where(r => conditionIds.Contains(r.Entry.Id));
+                }
+            }
         }
 
         return q;

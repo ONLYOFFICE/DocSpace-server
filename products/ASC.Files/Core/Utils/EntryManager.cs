@@ -396,10 +396,19 @@ public class EntryManager(IDaoFactory daoFactory,
 
         var (filesFilterType, filesSearchText, fileExtension) = applyFilterOption != ApplyFilterOption.Folders ? (filterType, searchText, extension) : (FilterType.None, string.Empty, Array.Empty<string>());
 
+        // these sections gather their entries from tags and shares inside queries that do not know the metadata filter:
+        // the request is refused instead of coming back unfiltered with a 200. The rooms, the trash, the regular folders
+        // and the "Shared with me", "Recent" and "Favorites" sections push the filter into their queries below
+        if (metadataFilter is { IsEmpty: false } &&
+            parent.FolderType is FolderType.Templates or FolderType.DefaultTemplates or FolderType.Privacy)
+        {
+            throw new ArgumentException(@"The metadata filter is not supported for this section", nameof(metadataFilter));
+        }
+
         if (parent.FolderType == FolderType.SHARE)
         {
             //share
-            var shared = await fileSecurity.GetSharesForMeAsync(filterType, subjectGroup, subjectId, sharedBy, searchText, extension, searchInContent, withSubfolders).ToListAsync();
+            var shared = await fileSecurity.GetSharesForMeAsync(filterType, subjectGroup, subjectId, sharedBy, searchText, extension, searchInContent, withSubfolders, metadataFilter).ToListAsync();
 
             entries.AddRange(shared);
 
@@ -414,11 +423,11 @@ public class EntryManager(IDaoFactory daoFactory,
             total = 0;
 
             var providerFiles = await GetThirdPartyFilesByTagAsync<T>(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject,
-                location, 0, folderType, recentOrderBy);
+                location, 0, folderType, recentOrderBy, metadataFilter);
 
             if (providerFiles.Count == 0)
             {
-                var files = fileDao.GetFilesByTagAsync(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, 0,  folderType, recentOrderBy, from, count);
+                var files = fileDao.GetFilesByTagAsync(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, 0,  folderType, recentOrderBy, from, count, metadataFilter);
 
                 await foreach (var e in fileSecurity.CanReadAsync(files).Where(r => r.Item2).Select(t => t.Item1))
                 {
@@ -435,7 +444,7 @@ public class EntryManager(IDaoFactory daoFactory,
             }
 
             var dbFiles = await fileSecurity.CanReadAsync(fileDao.GetFilesByTagAsync(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent,
-                    excludeSubject, location, 0, folderType, recentOrderBy, 0, -1))
+                    excludeSubject, location, 0, folderType, recentOrderBy, 0, -1, metadataFilter))
                 .Where(r => r.Item2).Select(t => (FileEntry)t.Item1).ToListAsync();
 
             var allFiles = dbFiles.Concat(providerFiles).ToList();
@@ -457,14 +466,14 @@ public class EntryManager(IDaoFactory daoFactory,
             total = 0;
 
             var providerFolders = await GetThirdPartyFoldersByTagAsync<T>(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId,
-                folderType, orderBy);
+                folderType, orderBy, metadataFilter);
             var providerFiles = await GetThirdPartyFilesByTagAsync<T>(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject,
-                location, trashId, folderType, orderBy);
+                location, trashId, folderType, orderBy, metadataFilter);
 
             if (providerFolders.Count == 0 && providerFiles.Count == 0)
             {
                 var allFoldersCountTask = 0;
-                var foldersFromDb = folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, folderType, orderBy, from, count);
+                var foldersFromDb = folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, folderType, orderBy, from, count, metadataFilter);
                 List<Folder<T>> folders = [];
 
                 await foreach (var e in fileSecurity.CanReadAsync(foldersFromDb).Where(r => r.Item2).Select(t => t.Item1))
@@ -482,7 +491,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 var filesCount = count - folders.Count;
                 var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - allFoldersCountTask, 0);
 
-                var filesFromDb = fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, folderType, orderBy, filesOffset, filesCount);
+                var filesFromDb = fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, folderType, orderBy, filesOffset, filesCount, metadataFilter);
                 List<File<T>> files = [];
 
                 await foreach (var e in fileSecurity.CanReadAsync(filesFromDb).Where(r => r.Item2).Select(t => t.Item1))
@@ -505,11 +514,11 @@ public class EntryManager(IDaoFactory daoFactory,
             }
 
             var dbFolders = await fileSecurity.CanReadAsync(folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject,
-                    location, trashId, folderType, orderBy, 0, -1))
+                    location, trashId, folderType, orderBy, 0, -1, metadataFilter))
                 .Where(r => r.Item2).Select(t => (FileEntry)t.Item1).ToListAsync();
 
             var dbFiles = await fileSecurity.CanReadAsync(fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent,
-                    excludeSubject, location, trashId, folderType, orderBy, 0, -1))
+                    excludeSubject, location, trashId, folderType, orderBy, 0, -1, metadataFilter))
                 .Where(r => r.Item2).Select(t => (FileEntry)t.Item1).ToListAsync();
 
             var sortedFolders = await SortEntries<T>(dbFolders.Concat(providerFolders).ToList(), orderBy, false);
@@ -868,11 +877,12 @@ public class EntryManager(IDaoFactory daoFactory,
     /// <summary>
     /// Returns the readable third-party files marked with the specified tags. Entries of the rooms with a connected third-party storage
     /// are not stored in the database, so they have to be requested from the provider separately from the internal ones.
+    /// The third-party entries never carry metadata, so with a metadata filter the providers are not asked at all.
     /// </summary>
     private async Task<List<FileEntry>> GetThirdPartyFilesByTagAsync<T>(Guid userId, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText,
-        string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy)
+        string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, MetadataFilter metadataFilter)
     {
-        if (typeof(T) == typeof(string) || !await filesSettingsHelper.GetEnableThirdParty())
+        if (typeof(T) == typeof(string) || metadataFilter is { IsEmpty: false } || !await filesSettingsHelper.GetEnableThirdParty())
         {
             return [];
         }
@@ -884,12 +894,12 @@ public class EntryManager(IDaoFactory daoFactory,
     }
 
     /// <summary>
-    /// Returns the readable third-party folders marked with the specified tags.
+    /// Returns the readable third-party folders marked with the specified tags; none with a metadata filter, see <see cref="GetThirdPartyFilesByTagAsync{T}"/>.
     /// </summary>
     private async Task<List<FileEntry>> GetThirdPartyFoldersByTagAsync<T>(Guid userId, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText,
-        bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy)
+        bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, MetadataFilter metadataFilter)
     {
-        if (typeof(T) == typeof(string) || !await filesSettingsHelper.GetEnableThirdParty())
+        if (typeof(T) == typeof(string) || metadataFilter is { IsEmpty: false } || !await filesSettingsHelper.GetEnableThirdParty())
         {
             return [];
         }

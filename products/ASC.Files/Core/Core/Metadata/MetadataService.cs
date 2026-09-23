@@ -48,9 +48,26 @@ public class MetadataService(
 {
     public const string SystemTemplateName = "System";
 
+    /// <summary>
+    /// The most custom fields one entry may hold. The custom fields are free-form and any editor creates them, so the
+    /// limit keeps a single entry from turning into a spreadsheet.
+    /// </summary>
+    public const int MaxCustomFieldsPerEntry = 50;
+
+    private const int MaxCustomFieldNameLength = 255;
+
+    /// <summary>
+    /// The assignment of a template is a check-then-insert on the link table; two concurrent assignments of the same
+    /// template to the same entry (a double click) would otherwise collide on the primary key instead of being idempotent.
+    /// </summary>
+    private string GetLinksLockKey(int entryId, FileEntryType entryType)
+    {
+        return $"metadata_links_{tenantManager.GetCurrentTenantId()}_{(int)entryType}_{entryId}";
+    }
+
     public async Task<MetadataTemplate> CreateTemplateAsync(string name, bool visible, IEnumerable<MetadataField> fields = null)
     {
-        await DemandTemplateManagementAsync(create: true);
+        await DemandTemplateManagementAsync();
 
         ArgumentException.ThrowIfNullOrEmpty(name);
 
@@ -60,20 +77,14 @@ public class MetadataService(
 
         var fieldsList = fields?.ToList();
 
-        // the whole batch is validated before anything is persisted, otherwise an invalid
-        // field would leave an orphan template behind
+        // the whole batch is validated before anything is persisted, and the template is saved together with its fields
+        // in one transaction, otherwise an invalid field or a failed write would leave an orphan template behind
         foreach (var field in fieldsList ?? [])
         {
-            PrepareField(field, isSystemTemplate: false);
+            PrepareField(field);
         }
 
-        var template = await metadataDao.SaveTemplateAsync(new MetadataTemplate { Name = name, Visible = visible });
-
-        foreach (var field in fieldsList ?? [])
-        {
-            field.TemplateId = template.Id;
-            template.Fields.Add(await metadataDao.SaveFieldAsync(field));
-        }
+        var template = await metadataDao.SaveTemplateWithFieldsAsync(new MetadataTemplate { Name = name, Visible = visible }, fieldsList);
 
         filesMessageService.Send(MessageAction.MetadataTemplateCreated, template.Name);
 
@@ -82,18 +93,13 @@ public class MetadataService(
 
     public async Task<MetadataTemplate> UpdateTemplateAsync(int templateId, string name, bool? visible)
     {
-        await DemandTemplateManagementAsync(create: false);
+        await DemandTemplateManagementAsync();
 
         var metadataDao = daoFactory.GetMetadataDao<int>();
 
         // loaded with the fields: the update touches the name and the visibility only, but the response is the whole
         // template, and the saved copy the DAO returns carries no fields
-        var template = await metadataDao.GetTemplateAsync(templateId) ?? throw new ItemNotFoundException();
-
-        if (template.IsSystem)
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
+        var template = await GetUserTemplateAsync(metadataDao, templateId, withFields: true);
 
         if (!string.IsNullOrEmpty(name) && !name.Equals(template.Name, StringComparison.OrdinalIgnoreCase))
         {
@@ -113,16 +119,11 @@ public class MetadataService(
 
     public async Task DeleteTemplateAsync(int templateId)
     {
-        await DemandTemplateManagementAsync(create: false);
+        await DemandTemplateManagementAsync();
 
         var metadataDao = daoFactory.GetMetadataDao<int>();
 
-        var template = await metadataDao.GetTemplateAsync(templateId, withFields: false) ?? throw new ItemNotFoundException();
-
-        if (template.IsSystem)
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-        }
+        var template = await GetUserTemplateAsync(metadataDao, templateId, withFields: false);
 
         var affectedLinks = await metadataDao.GetLinksByTemplateAsync(templateId);
 
@@ -135,63 +136,29 @@ public class MetadataService(
 
     public async Task<MetadataTemplate> GetTemplateAsync(int templateId)
     {
-        return await daoFactory.GetMetadataDao<int>().GetTemplateAsync(templateId) ?? throw new ItemNotFoundException();
-    }
-
-    public IAsyncEnumerable<MetadataTemplate> GetTemplatesAsync(bool? visible = null, bool withFields = false)
-    {
-        return daoFactory.GetMetadataDao<int>().GetTemplatesAsync(visible, includeSystem: true, withFields);
+        return await GetUserTemplateAsync(daoFactory.GetMetadataDao<int>(), templateId, withFields: true);
     }
 
     /// <summary>
-    /// Returns the system template or <c>null</c> when it has not been created yet. Unlike
-    /// <see cref="GetOrCreateSystemTemplateAsync"/> this never writes, so it is safe for read-only requests.
+    /// The templates a user can see and assign. The system template holding the custom fields is not one of them:
+    /// the API shows the custom fields on the entries themselves (see <see cref="SetCustomFieldsAsync"/>).
     /// </summary>
-    public async Task<MetadataTemplate> GetSystemTemplateAsync()
+    public IAsyncEnumerable<MetadataTemplate> GetTemplatesAsync(bool? visible = null, bool withFields = false)
     {
-        return await daoFactory.GetMetadataDao<int>().GetSystemTemplateAsync();
-    }
-
-    public async Task<MetadataTemplate> GetOrCreateSystemTemplateAsync()
-    {
-        var metadataDao = daoFactory.GetMetadataDao<int>();
-
-        var template = await metadataDao.GetSystemTemplateAsync();
-        if (template != null)
-        {
-            return template;
-        }
-
-        var tenantId = tenantManager.GetCurrentTenantId();
-
-        await using (await distributedLockProvider.TryAcquireFairLockAsync($"metadata_system_template_{tenantId}"))
-        {
-            template = await metadataDao.GetSystemTemplateAsync();
-            if (template != null)
-            {
-                return template;
-            }
-
-            return await metadataDao.SaveTemplateAsync(new MetadataTemplate
-            {
-                Name = SystemTemplateName,
-                Visible = true,
-                IsSystem = true
-            });
-        }
+        return daoFactory.GetMetadataDao<int>().GetTemplatesAsync(visible, includeSystem: false, withFields);
     }
 
     public async Task<MetadataField> CreateFieldAsync(int templateId, MetadataField field)
     {
-        await DemandTemplateManagementAsync(create: false);
+        await DemandTemplateManagementAsync();
 
         var metadataDao = daoFactory.GetMetadataDao<int>();
 
-        var template = await metadataDao.GetTemplateAsync(templateId, withFields: false) ?? throw new ItemNotFoundException();
+        _ = await GetUserTemplateAsync(metadataDao, templateId, withFields: false);
 
         field.TemplateId = templateId;
 
-        var saved = await CreateFieldInternalAsync(metadataDao, template, field);
+        var saved = await CreateFieldInternalAsync(metadataDao, field);
 
         filesMessageService.Send(MessageAction.MetadataFieldCreated, saved.Name);
 
@@ -200,12 +167,12 @@ public class MetadataService(
 
     public async Task<MetadataField> UpdateFieldAsync(int templateId, int fieldId, MetadataFieldUpdate update)
     {
-        await DemandTemplateManagementAsync(create: false);
+        await DemandTemplateManagementAsync();
 
         var metadataDao = daoFactory.GetMetadataDao<int>();
 
+        _ = await GetUserTemplateAsync(metadataDao, templateId, withFields: false);
         var field = await GetTemplateFieldAsync(metadataDao, templateId, fieldId);
-        var template = await metadataDao.GetTemplateAsync(templateId, withFields: false) ?? throw new ItemNotFoundException();
 
         if (!string.IsNullOrEmpty(update.Name))
         {
@@ -215,11 +182,6 @@ public class MetadataService(
         // the type is optional in a partial update: only an explicitly requested different type is a type change
         if (update.Type is { } type && type != field.Type)
         {
-            if (template.IsSystem && type != MetadataFieldType.String)
-            {
-                throw new ArgumentException(@"The system template supports only string fields", nameof(update));
-            }
-
             if (await metadataDao.HasValuesAsync(fieldId))
             {
                 throw new ArgumentException(@"The field type cannot be changed because values exist", nameof(update));
@@ -261,22 +223,132 @@ public class MetadataService(
 
     public async Task DeleteFieldAsync(int templateId, int fieldId)
     {
-        await DemandTemplateManagementAsync(create: false);
+        await DemandTemplateManagementAsync();
 
         var metadataDao = daoFactory.GetMetadataDao<int>();
 
+        _ = await GetUserTemplateAsync(metadataDao, templateId, withFields: false);
         var field = await GetTemplateFieldAsync(metadataDao, templateId, fieldId);
 
-        var affectedValues = await metadataDao.GetValueEntriesAsync(fieldId);
-
-        await metadataDao.DeleteFieldAsync(fieldId);
-
-        filesMessageService.Send(MessageAction.MetadataFieldDeleted, field.Name);
-
-        await ReindexEntriesAsync(affectedValues.Select(v => ((int)v.EntryId, v.EntryType)));
+        await DeleteFieldInternalAsync(metadataDao, field);
     }
 
-    public async Task<List<EntryMetadata>> GetEntryMetadataAsync(int entryId, FileEntryType entryType)
+    /// <summary>
+    /// Sets the custom fields of the entry by name: a listed field gets the value, a null or empty value removes the field
+    /// from the entry, the fields not listed are left alone. A name the tenant has not seen yet creates the field; a field
+    /// no entry holds a value for any more is dropped, so the hidden dictionary follows the values instead of growing forever.
+    /// Every write of the custom fields of a tenant runs under one lock: a create, a drop and a value write must not
+    /// interleave, or a value could land on a field another request has just dropped.
+    /// </summary>
+    public async Task<List<CustomFieldValue>> SetCustomFieldsAsync(int entryId, FileEntryType entryType, IReadOnlyCollection<CustomFieldUpdate> updates)
+    {
+        var normalized = NormalizeCustomFieldUpdates(updates);
+
+        var entry = await DemandEntryAccessAsync(entryId, entryType, edit: true);
+
+        var metadataDao = daoFactory.GetMetadataDao<int>();
+        var tenantId = tenantManager.GetCurrentTenantId();
+
+        MetadataTemplate systemTemplate;
+        List<MetadataValue> values;
+
+        await using (await distributedLockProvider.TryAcquireFairLockAsync($"metadata_system_template_{tenantId}"))
+        {
+            systemTemplate = await metadataDao.GetSystemTemplateAsync();
+
+            if (systemTemplate == null)
+            {
+                // the tenant has no custom fields yet: nothing to remove from, and nothing to create when only removals came
+                if (normalized.All(u => u.Value == null))
+                {
+                    return [];
+                }
+
+                systemTemplate = await metadataDao.SaveTemplateAsync(new MetadataTemplate { Name = SystemTemplateName, Visible = true, IsSystem = true });
+            }
+
+            // two fields with one name should not exist, but the fields used to be renamed without the lock: the first one
+            // by order is the field the name means, the same choice the reads make, so a stale duplicate cannot fail the write
+            var fieldsByName = systemTemplate.Fields
+                .GroupBy(f => f.Name, StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => g.First(), StringComparer.OrdinalIgnoreCase);
+
+            // the limit is checked before anything is written, so a refused request leaves no fields behind
+            var heldFieldIds = await metadataDao.GetValuesAsync(entryId, entryType, systemTemplate.Fields.Select(f => f.Id))
+                .Select(v => v.FieldId)
+                .ToHashSetAsync();
+
+            var newFields = 0;
+
+            foreach (var update in normalized)
+            {
+                if (fieldsByName.TryGetValue(update.Name, out var known))
+                {
+                    if (update.Value == null)
+                    {
+                        heldFieldIds.Remove(known.Id);
+                    }
+                    else
+                    {
+                        heldFieldIds.Add(known.Id);
+                    }
+                }
+                else if (update.Value != null)
+                {
+                    newFields++;
+                }
+            }
+
+            if (heldFieldIds.Count + newFields > MaxCustomFieldsPerEntry)
+            {
+                throw new ArgumentException($@"An entry can hold at most {MaxCustomFieldsPerEntry} custom fields", nameof(updates));
+            }
+
+            var writes = new List<MetadataValue>();
+
+            foreach (var update in normalized)
+            {
+                if (!fieldsByName.TryGetValue(update.Name, out var field))
+                {
+                    if (update.Value == null)
+                    {
+                        // removing a field the tenant does not have is a no-op, not an error
+                        continue;
+                    }
+
+                    field = await metadataDao.SaveFieldAsync(new MetadataField
+                    {
+                        TemplateId = systemTemplate.Id,
+                        Name = update.Name,
+                        Type = MetadataFieldType.String,
+                        Order = systemTemplate.Fields.Count
+                    });
+
+                    systemTemplate.Fields.Add(field);
+                    fieldsByName[field.Name] = field;
+                }
+
+                // a null value is an empty MetadataValue, which the DAO stores as "no row"
+                writes.Add(new MetadataValue { FieldId = field.Id, StringValue = update.Value });
+            }
+
+            await metadataDao.SetValuesAsync(entryId, entryType, writes);
+
+            await DropUnusedCustomFieldsAsync(metadataDao, systemTemplate);
+
+            values = await metadataDao.GetValuesAsync(entryId, entryType, systemTemplate.Fields.Select(f => f.Id)).ToListAsync();
+        }
+
+        await filesMessageService.SendAsync(MessageAction.MetadataValuesUpdated, entry, entry.Title);
+
+        await NotifyUpdateAsync(entry);
+
+        await metadataIndexHelper.IndexEntriesAsync(entryType, [entryId]);
+
+        return ToCustomFields(systemTemplate, values);
+    }
+
+    public async Task<EntryMetadata> GetEntryMetadataAsync(int entryId, FileEntryType entryType)
     {
         await DemandEntryAccessAsync(entryId, entryType, edit: false);
 
@@ -288,18 +360,15 @@ public class MetadataService(
 
         var values = await metadataDao.GetValuesAsync(entryId, entryType).ToListAsync();
 
-        var result = new List<EntryMetadata>();
+        var result = new EntryMetadata();
 
+        // the custom fields are never assigned: a field is on the entry when the entry holds a value for it
         var systemTemplate = await metadataDao.GetSystemTemplateAsync();
         if (systemTemplate != null)
         {
             templateIds.Remove(systemTemplate.Id);
 
-            result.Add(new EntryMetadata
-            {
-                Template = systemTemplate,
-                Values = FilterValues(values, systemTemplate)
-            });
+            result.CustomFields = ToCustomFields(systemTemplate, values);
         }
 
         foreach (var templateId in templateIds)
@@ -310,7 +379,7 @@ public class MetadataService(
                 continue;
             }
 
-            result.Add(new EntryMetadata
+            result.Templates.Add(new TemplateMetadata
             {
                 Template = template,
                 Values = FilterValues(values, template)
@@ -330,7 +399,7 @@ public class MetadataService(
 
         foreach (var templateId in templateIds.Distinct())
         {
-            _ = await metadataDao.GetTemplateAsync(templateId, withFields: false) ?? throw new ItemNotFoundException();
+            _ = await GetUserTemplateAsync(metadataDao, templateId, withFields: false);
 
             links.Add(new MetadataTemplateLink
             {
@@ -340,7 +409,10 @@ public class MetadataService(
             });
         }
 
-        await metadataDao.SaveLinksAsync(links);
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLinksLockKey(entryId, entryType)))
+        {
+            await metadataDao.SaveLinksAsync(links);
+        }
 
         await filesMessageService.SendAsync(MessageAction.MetadataTemplateAssigned, entry, entry.Title);
 
@@ -357,17 +429,20 @@ public class MetadataService(
 
         foreach (var templateId in templateIdsList)
         {
-            _ = await metadataDao.GetTemplateAsync(templateId, withFields: false) ?? throw new ItemNotFoundException();
+            _ = await GetUserTemplateAsync(metadataDao, templateId, withFields: false);
         }
 
-        await metadataDao.SaveLinksAsync(templateIdsList.Select(templateId => new MetadataTemplateLink
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLinksLockKey(folderId, FileEntryType.Folder)))
         {
-            TemplateId = templateId,
-            EntryId = folderId,
-            EntryType = FileEntryType.Folder,
-            Cascade = cascade,
-            CascadeConflict = cascade ? conflict : MetadataConflictResolveType.Skip
-        }));
+            await metadataDao.SaveLinksAsync(templateIdsList.Select(templateId => new MetadataTemplateLink
+            {
+                TemplateId = templateId,
+                EntryId = folderId,
+                EntryType = FileEntryType.Folder,
+                Cascade = cascade,
+                CascadeConflict = cascade ? conflict : MetadataConflictResolveType.Skip
+            }));
+        }
 
         await filesMessageService.SendAsync(MessageAction.MetadataTemplateAssigned, entry, entry.Title);
 
@@ -426,6 +501,8 @@ public class MetadataService(
 
         var metadataDao = daoFactory.GetMetadataDao<int>();
 
+        _ = await GetUserTemplateAsync(metadataDao, templateId, withFields: false);
+
         await metadataDao.DeleteLinksAsync(entryId, entryType, templateId);
 
         var fieldIds = await metadataDao.GetFieldsAsync(templateId).Select(f => f.Id).ToListAsync();
@@ -456,16 +533,19 @@ public class MetadataService(
             .ToListAsync();
 
         var systemTemplate = await metadataDao.GetSystemTemplateAsync(withFields: false);
-        if (systemTemplate != null)
-        {
-            assignedTemplateIds.Add(systemTemplate.Id);
-        }
 
         foreach (var value in valuesList)
         {
             if (!fields.TryGetValue(value.FieldId, out var field))
             {
                 throw new ItemNotFoundException();
+            }
+
+            // the custom fields have their own endpoint and it is their only writer: it creates and drops the fields
+            // under a lock, and a value written past that lock could land on a field being dropped
+            if (systemTemplate != null && field.TemplateId == systemTemplate.Id)
+            {
+                throw new ArgumentException(@"The custom fields are set through the customFields endpoint", nameof(values));
             }
 
             if (!assignedTemplateIds.Contains(field.TemplateId))
@@ -485,54 +565,26 @@ public class MetadataService(
 
         await metadataIndexHelper.IndexEntriesAsync(entryType, [entryId]);
 
-        return await metadataDao.GetValuesAsync(entryId, entryType, valuesList.Select(v => v.FieldId)).ToListAsync();
+        // the answer is the state of the entry, not an echo of the request: the same rule the custom fields follow,
+        // so a client needs no second request after a write
+        return await GetTemplateValuesAsync(metadataDao, entryId, entryType, systemTemplate);
     }
 
-    public async Task<MetadataValue> AddCustomFieldAsync(int entryId, FileEntryType entryType, string name, string value)
+    /// <summary>
+    /// Every value the entry holds for the fields of its templates. The custom fields are left out: they have their own answer.
+    /// </summary>
+    private static async Task<List<MetadataValue>> GetTemplateValuesAsync(IMetadataDao<int> metadataDao, int entryId, FileEntryType entryType, MetadataTemplate systemTemplate)
     {
-        ArgumentException.ThrowIfNullOrEmpty(name);
+        var values = await metadataDao.GetValuesAsync(entryId, entryType).ToListAsync();
 
-        var entry = await DemandEntryAccessAsync(entryId, entryType, edit: true);
-
-        var metadataDao = daoFactory.GetMetadataDao<int>();
-
-        var systemTemplate = await GetOrCreateSystemTemplateAsync();
-
-        var field = systemTemplate.Fields.FirstOrDefault(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-
-        if (field == null)
+        if (systemTemplate == null || values.Count == 0)
         {
-            var tenantId = tenantManager.GetCurrentTenantId();
-
-            // the field name is not unique in the schema, so concurrent calls with the same name
-            // are serialized by the same lock that guards the system template itself
-            await using (await distributedLockProvider.TryAcquireFairLockAsync($"metadata_system_template_{tenantId}"))
-            {
-                systemTemplate = await metadataDao.GetTemplateAsync(systemTemplate.Id) ?? systemTemplate;
-
-                field = systemTemplate.Fields.FirstOrDefault(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-
-                field ??= await metadataDao.SaveFieldAsync(new MetadataField
-                {
-                    TemplateId = systemTemplate.Id,
-                    Name = name,
-                    Type = MetadataFieldType.String,
-                    Order = systemTemplate.Fields.Count
-                });
-            }
+            return values;
         }
 
-        var metadataValue = new MetadataValue { FieldId = field.Id, StringValue = value };
+        var customFieldIds = await metadataDao.GetFieldsAsync(systemTemplate.Id).Select(f => f.Id).ToHashSetAsync();
 
-        await metadataDao.SetValuesAsync(entryId, entryType, [metadataValue]);
-
-        await filesMessageService.SendAsync(MessageAction.MetadataValuesUpdated, entry, entry.Title);
-
-        await NotifyUpdateAsync(entry);
-
-        await metadataIndexHelper.IndexEntriesAsync(entryType, [entryId]);
-
-        return (await metadataDao.GetValuesAsync(entryId, entryType, [field.Id]).ToListAsync()).FirstOrDefault();
+        return values.Where(v => !customFieldIds.Contains(v.FieldId)).ToList();
     }
 
     /// <summary>
@@ -627,6 +679,99 @@ public class MetadataService(
     }
 
     /// <summary>
+    /// Loads a template the API exposes. The system template holding the custom fields does not exist for the template
+    /// endpoints: it cannot be read, changed, deleted, assigned or given fields through them, the custom field endpoints are its face.
+    /// </summary>
+    private static async Task<MetadataTemplate> GetUserTemplateAsync(IMetadataDao<int> metadataDao, int templateId, bool withFields)
+    {
+        var template = await metadataDao.GetTemplateAsync(templateId, withFields);
+
+        if (template == null || template.IsSystem)
+        {
+            throw new ItemNotFoundException();
+        }
+
+        return template;
+    }
+
+    /// <summary>
+    /// Drops the custom fields no entry holds a value for. Runs under the tenant's custom field lock, so a field found
+    /// unused here is not about to receive a value from another request.
+    /// </summary>
+    private static async Task DropUnusedCustomFieldsAsync(IMetadataDao<int> metadataDao, MetadataTemplate systemTemplate)
+    {
+        foreach (var fieldId in await metadataDao.GetUnusedFieldIdsAsync(systemTemplate.Id))
+        {
+            await metadataDao.DeleteFieldAsync(fieldId);
+
+            systemTemplate.Fields.RemoveAll(f => f.Id == fieldId);
+        }
+    }
+
+    private static List<CustomFieldUpdate> NormalizeCustomFieldUpdates(IReadOnlyCollection<CustomFieldUpdate> updates)
+    {
+        if (updates is not { Count: > 0 })
+        {
+            throw new ArgumentException(@"At least one custom field is required", nameof(updates));
+        }
+
+        var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var result = new List<CustomFieldUpdate>(updates.Count);
+
+        foreach (var update in updates)
+        {
+            var name = update.Name?.Trim();
+
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new ArgumentException(@"The custom field name cannot be empty", nameof(updates));
+            }
+
+            if (name.Length > MaxCustomFieldNameLength)
+            {
+                throw new ArgumentException($@"The custom field name cannot be longer than {MaxCustomFieldNameLength} characters", nameof(updates));
+            }
+
+            // the name is the key of the field, so the same field twice in one request has no single meaning
+            if (!names.Add(name))
+            {
+                throw new ArgumentException($@"The custom field '{name}' is listed more than once", nameof(updates));
+            }
+
+            result.Add(new CustomFieldUpdate(name, string.IsNullOrEmpty(update.Value) ? null : update.Value));
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// The custom fields the entry holds a value for, in their display order. A custom field is never assigned: it is on
+    /// the entry exactly when the entry holds a value for it.
+    /// </summary>
+    private static List<CustomFieldValue> ToCustomFields(MetadataTemplate systemTemplate, List<MetadataValue> values)
+    {
+        var valueByField = FilterValues(values, systemTemplate).ToDictionary(v => v.FieldId);
+
+        return systemTemplate.Fields
+            .Where(f => valueByField.ContainsKey(f.Id))
+            .OrderBy(f => f.Order)
+            .ThenBy(f => f.Id)
+            .Select(f => new CustomFieldValue { Field = f, Value = valueByField[f.Id].StringValue })
+            .ToList();
+    }
+
+    private async Task DeleteFieldInternalAsync(IMetadataDao<int> metadataDao, MetadataField field)
+    {
+        var affectedValues = await metadataDao.GetValueEntriesAsync(field.Id);
+
+        await metadataDao.DeleteFieldAsync(field.Id);
+
+        filesMessageService.Send(MessageAction.MetadataFieldDeleted, field.Name);
+
+        await ReindexEntriesAsync(affectedValues.Select(v => ((int)v.EntryId, v.EntryType)));
+    }
+
+    /// <summary>
     /// Loads the field and checks that it belongs to the template named in the route, so a field cannot be reached through another template.
     /// </summary>
     private static async Task<MetadataField> GetTemplateFieldAsync(IMetadataDao<int> metadataDao, int templateId, int fieldId)
@@ -641,20 +786,15 @@ public class MetadataService(
         return field;
     }
 
-    private static async Task<MetadataField> CreateFieldInternalAsync(IMetadataDao<int> metadataDao, MetadataTemplate template, MetadataField field)
+    private static async Task<MetadataField> CreateFieldInternalAsync(IMetadataDao<int> metadataDao, MetadataField field)
     {
-        PrepareField(field, template.IsSystem);
+        PrepareField(field);
 
         return await metadataDao.SaveFieldAsync(field);
     }
 
-    private static void PrepareField(MetadataField field, bool isSystemTemplate)
+    private static void PrepareField(MetadataField field)
     {
-        if (isSystemTemplate && field.Type != MetadataFieldType.String)
-        {
-            throw new ArgumentException(@"The system template supports only string fields", nameof(field));
-        }
-
         field.Options = WithGeneratedOptionIds(field.Options);
 
         ValidateField(field);
@@ -699,15 +839,15 @@ public class MetadataService(
         }
     }
 
-    private async Task DemandTemplateManagementAsync(bool create)
+    /// <summary>
+    /// The templates and their fields are a portal-wide dictionary, so every change to them, the creation included, is
+    /// for the DocSpace admins only. A room admin manages rooms, not the vocabulary the whole portal files by.
+    /// </summary>
+    private async Task DemandTemplateManagementAsync()
     {
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
 
-        var allowed = create
-            ? userType is EmployeeType.RoomAdmin or EmployeeType.DocSpaceAdmin
-            : userType is EmployeeType.DocSpaceAdmin;
-
-        if (!allowed)
+        if (userType != EmployeeType.DocSpaceAdmin)
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
@@ -715,13 +855,8 @@ public class MetadataService(
 
     private async Task CheckTemplateNameIsFreeAsync(IMetadataDao<int> metadataDao, string name, int exceptTemplateId)
     {
-        // the system template is created lazily, so its name has to be reserved even before it exists
-        if (name.Equals(SystemTemplateName, StringComparison.OrdinalIgnoreCase))
-        {
-            throw new ArgumentException($@"Template with name '{name}' already exists", nameof(name));
-        }
-
-        var exists = await metadataDao.GetTemplatesAsync()
+        // the system template is not visible, so its name is not taken from the users' point of view
+        var exists = await metadataDao.GetTemplatesAsync(includeSystem: false)
             .AnyAsync(t => t.Id != exceptTemplateId && t.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
         if (exists)

@@ -231,4 +231,43 @@ public class MetadataTemplateManagementTests(AspireAppFixture fixture) : BaseTes
     {
         return Guid.NewGuid().ToString()[..8];
     }
+
+    [Fact]
+    public async Task SetValues_ReturnsEveryValueTheEntryHolds_NotOnlyTheOnesSent()
+    {
+        var api = await ArrangeAsync();
+        var suffix = Suffix();
+        var template = await api.CreateTemplateAsync("Whole " + suffix,
+            [new MetadataFieldPayload { Name = "Client", Type = StringType }, new MetadataFieldPayload { Name = "Amount", Type = NumberType }],
+            TestContext.Current.CancellationToken);
+        var room = await CreateCustomRoom($"Whole {suffix}");
+
+        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+        await api.SetFolderValuesAsync(room.Id, [new MetadataValuePayload { FieldId = template.Field("Client").Id, StringValue = "ACME" }], TestContext.Current.CancellationToken);
+        await api.SetFolderCustomFieldAsync(room.Id, "Project code", "A-42", TestContext.Current.CancellationToken);
+
+        var result = await api.SetFolderValuesWithResultAsync(room.Id, [new MetadataValuePayload { FieldId = template.Field("Amount").Id, NumberValue = 7 }], TestContext.Current.CancellationToken);
+
+        // the answer is the state of the entry, so the client needs no second request; the custom fields have their own answer
+        result.Select(v => v.FieldId).Should().BeEquivalentTo([template.Field("Client").Id, template.Field("Amount").Id]);
+        result.Single(v => v.FieldId == template.Field("Amount").Id).NumberValue.Should().Be(7);
+    }
+
+
+    [Theory]
+    [InlineData(EmployeeType.RoomAdmin)]
+    [InlineData(EmployeeType.User)]
+    public async Task CreateTemplate_ByANonDocSpaceAdmin_ReturnsForbidden(EmployeeType employeeType)
+    {
+        var api = await ArrangeAsync();
+        var member = await InviteContact(employeeType);
+
+        await _filesClient.Authenticate(member);
+
+        // the templates are the vocabulary of the whole portal: a room admin used to be allowed to create one
+        using var response = await api.CreateTemplateResponseAsync("Forbidden " + Suffix(), [new MetadataFieldPayload { Name = "Client", Type = StringType }], TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
 }

@@ -323,19 +323,40 @@ internal class FolderDao(
             }
         }
 
-        if (metadataFilter is { TemplateId: { } templateId })
+        return await ApplyMetadataFilterAsync(q, filesDbContext, metadataFilter, scope);
+    }
+
+    /// <summary>
+    /// Narrows a folder query by the structured metadata filter. The template assignment is a fact of the link table,
+    /// so it always comes from the database; the field conditions are asked from the metadata index and fall back to
+    /// the database when the index is not there or overflows.
+    /// </summary>
+    /// <remarks>
+    /// The listings that are already limited to a set of folders (the tags of the "Favorites" section, the share
+    /// records of the "Shared with me" section) pass <see cref="MetadataSearchScope.None"/>: the index is asked
+    /// tenant-wide and the id list is intersected with the listing's own query.
+    /// </remarks>
+    private async Task<IQueryable<DbFolder>> ApplyMetadataFilterAsync(IQueryable<DbFolder> q, FilesDbContext filesDbContext, MetadataFilter metadataFilter, MetadataSearchScope scope)
+    {
+        if (metadataFilter is not { IsEmpty: false })
         {
-            // the assignment is a fact of the link table, not of the values, so it is not asked from the index
+            return q;
+        }
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        if (metadataFilter.TemplateId is { } templateId)
+        {
             var templateEntryIds = MetadataSearchQuery.TemplateEntryIds(filesDbContext, tenantId, FileEntryType.Folder, templateId);
 
             q = q.Where(r => templateEntryIds.Contains(r.Id));
         }
 
-        if (metadataFilter is { Conditions.Count: > 0 })
+        if (metadataFilter.Conditions.Count > 0)
         {
-            var (metadataSuccess, metadataIds) = await MetadataSearchQuery.TrySelectMetadataIdsAsync(factoryIndexerFolderMetadata, metadataFilter, scope);
+            var (success, metadataIds) = await MetadataSearchQuery.TrySelectMetadataIdsAsync(factoryIndexerFolderMetadata, metadataFilter, scope);
 
-            if (metadataSuccess)
+            if (success)
             {
                 q = q.Where(r => metadataIds.Contains(r.Id));
             }
@@ -344,6 +365,46 @@ internal class FolderDao(
                 foreach (var conditionIds in MetadataSearchQuery.FilteredEntryIdsPerCondition(filesDbContext, tenantId, FileEntryType.Folder, metadataFilter))
                 {
                     q = q.Where(r => conditionIds.Contains(r.Id));
+                }
+            }
+        }
+
+        return q;
+    }
+
+    /// <summary>
+    /// The same narrowing for the projections that carry the folder as <see cref="IQueryResult{T}.Entry"/> (the tag listings).
+    /// </summary>
+    private async Task<IQueryable<T>> ApplyMetadataFilterAsync<T>(IQueryable<T> q, FilesDbContext filesDbContext, MetadataFilter metadataFilter, MetadataSearchScope scope)
+        where T : IQueryResult<DbFolder>
+    {
+        if (metadataFilter is not { IsEmpty: false })
+        {
+            return q;
+        }
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        if (metadataFilter.TemplateId is { } templateId)
+        {
+            var templateEntryIds = MetadataSearchQuery.TemplateEntryIds(filesDbContext, tenantId, FileEntryType.Folder, templateId);
+
+            q = q.Where(r => templateEntryIds.Contains(r.Entry.Id));
+        }
+
+        if (metadataFilter.Conditions.Count > 0)
+        {
+            var (success, metadataIds) = await MetadataSearchQuery.TrySelectMetadataIdsAsync(factoryIndexerFolderMetadata, metadataFilter, scope);
+
+            if (success)
+            {
+                q = q.Where(r => metadataIds.Contains(r.Entry.Id));
+            }
+            else
+            {
+                foreach (var conditionIds in MetadataSearchQuery.FilteredEntryIdsPerCondition(filesDbContext, tenantId, FileEntryType.Folder, metadataFilter))
+                {
+                    q = q.Where(r => conditionIds.Contains(r.Entry.Id));
                 }
             }
         }
@@ -510,7 +571,8 @@ internal class FolderDao(
         return await filesDbContext.ContainsFormsInFolder(tenantId, folder.Id);
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(IEnumerable<int> folderIds, IEnumerable<int> excludeParentIds = null, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
+    public async IAsyncEnumerable<Folder<int>> GetFoldersAsync(IEnumerable<int> folderIds, IEnumerable<int> excludeParentIds = null, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false,
+        MetadataFilter metadataFilter = null)
     {
         if (CheckInvalidFilter(filterType))
         {
@@ -542,6 +604,7 @@ internal class FolderDao(
             q = success ? q.Where(r => searchIds.Contains(r.Id)) : BuildSearch(q, searchText, SearchType.Any);
         }
 
+        q = await ApplyMetadataFilterAsync(q, filesDbContext, metadataFilter, MetadataSearchScope.None);
 
         if (subjectID.HasValue && subjectID != Guid.Empty)
         {
@@ -903,7 +966,8 @@ internal class FolderDao(
         return room;
     }
 
-    public async IAsyncEnumerable<Folder<int>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count)
+    public async IAsyncEnumerable<Folder<int>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count,
+        MetadataFilter metadataFilter = null)
     {
         if (CheckInvalidFilter(filterType))
         {
@@ -915,6 +979,7 @@ internal class FolderDao(
         var q = GetFoldersByTagQuery(filesDbContext, tagOwner, tagType, location, trashId, folderType);
 
         q = await GetFoldersQueryWithFilters(q, subjectGroup, subjectId, searchText, excludeSubject);
+        q = await ApplyMetadataFilterAsync(q, filesDbContext, metadataFilter, MetadataSearchScope.None);
 
         q = orderBy == null
             ? q

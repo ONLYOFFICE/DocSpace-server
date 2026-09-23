@@ -68,20 +68,50 @@ public class MetadataFilterCondition
 }
 
 /// <summary>
-/// The raw metadata filter condition as it comes from the query string JSON.
+/// One metadata filter condition as the clients send it: an element of the "metadataFilters" JSON of the listings and of
+/// the body of the search endpoints. All conditions are combined with AND.
 /// </summary>
 public class MetadataFilterConditionRequest
 {
+    /// <summary>
+    /// The ID of the template field the condition is on. A custom field is addressed by <see cref="Name"/> instead.
+    /// </summary>
+    /// <example>1</example>
     public int FieldId { get; set; }
+
+    /// <summary>
+    /// The name of a custom field, for the conditions on the custom fields, which have no identifier outside. Either the
+    /// field ID or the name is given; the name is matched without regard to case.
+    /// </summary>
+    public string Name { get; set; }
 
     /// <summary>
     /// The operator, one of <see cref="MetadataFilterOperators"/>. Optional: the field type alone determines how the
     /// condition is evaluated, so an omitted operator is accepted, while a present one has to match the field type.
     /// </summary>
+    /// <example>eq</example>
     public string Op { get; set; }
+
+    /// <summary>
+    /// The exact value: string fields, and number fields given a single value.
+    /// </summary>
+    /// <example>ACME</example>
     public string Value { get; set; }
+
+    /// <summary>
+    /// The inclusive lower bound of a range. A date given without a time ("2026-06-01") is the start of that day (UTC).
+    /// </summary>
     public string From { get; set; }
+
+    /// <summary>
+    /// The inclusive upper bound of a range. A date given without a time ("2026-06-30") covers the whole day (UTC);
+    /// a value with a time is an instant and is taken as is.
+    /// </summary>
     public string To { get; set; }
+
+    /// <summary>
+    /// The options any of which the choice field must hold.
+    /// </summary>
     public List<Guid> OptionIds { get; set; }
 }
 
@@ -110,21 +140,39 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
     /// listing is narrowed to the entries the template is assigned to. It used to be read for validation only, so such a
     /// request came back unfiltered with a 200.
     /// </summary>
-    public async Task<MetadataFilter> ParseAsync(int? templateId, string json)
+    public Task<MetadataFilter> ParseAsync(int? templateId, string json)
+    {
+        return ParseAsync(templateId, ParseConditions(json));
+    }
+
+    /// <summary>
+    /// Builds the filter from typed conditions, the form the search endpoints take in their body. The query string
+    /// variant is parsed into the same conditions first, so both roads validate and evaluate identically.
+    /// </summary>
+    public async Task<MetadataFilter> ParseAsync(int? templateId, IEnumerable<MetadataFilterConditionRequest> conditions)
     {
         var metadataDao = daoFactory.GetMetadataDao<int>();
 
-        if (templateId.HasValue && await metadataDao.GetTemplateAsync(templateId.Value, withFields: false) == null)
+        // the system template is not exposed, so for the filter it does not exist either: the custom fields are
+        // filtered by their field ids like any other field
+        if (templateId.HasValue && await metadataDao.GetTemplateAsync(templateId.Value, withFields: false) is null or { IsSystem: true })
         {
             throw new ArgumentException($@"Unknown metadata template {templateId}", nameof(templateId));
         }
 
-        var requests = ParseConditions(json);
+        var requests = conditions?.ToList() ?? [];
+
+        if (requests.Contains(null))
+        {
+            throw new ArgumentException(@"Invalid metadata filter format", nameof(conditions));
+        }
 
         if (requests.Count == 0)
         {
             return templateId.HasValue ? new MetadataFilter { TemplateId = templateId } : null;
         }
+
+        await ResolveCustomFieldNamesAsync(metadataDao, requests);
 
         var fields = await metadataDao.GetFieldsAsync(requests.Select(r => r.FieldId).Distinct())
             .ToDictionaryAsync(f => f.Id);
@@ -135,18 +183,49 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
         {
             if (!fields.TryGetValue(request.FieldId, out var field))
             {
-                throw new ArgumentException($@"Unknown metadata field {request.FieldId}", nameof(json));
+                throw new ArgumentException($@"Unknown metadata field {request.FieldId}", nameof(conditions));
             }
 
             if (templateId.HasValue && field.TemplateId != templateId.Value)
             {
-                throw new ArgumentException($@"The field {request.FieldId} does not belong to the template {templateId}", nameof(json));
+                throw new ArgumentException($@"The field {request.FieldId} does not belong to the template {templateId}", nameof(conditions));
             }
 
             filter.Conditions.Add(ToCondition(request, field));
         }
 
         return filter;
+    }
+
+    /// <summary>
+    /// The custom fields are addressed by name, so a condition naming one gets the identifier of the matching field of
+    /// the system template. A name no entry holds a value for is unknown: such a field has been dropped.
+    /// </summary>
+    private static async Task ResolveCustomFieldNamesAsync(IMetadataDao<int> metadataDao, List<MetadataFilterConditionRequest> requests)
+    {
+        var named = requests.Where(r => r.FieldId == 0).ToList();
+
+        if (named.Count == 0)
+        {
+            return;
+        }
+
+        var systemTemplate = await metadataDao.GetSystemTemplateAsync();
+
+        foreach (var request in named)
+        {
+            var name = request.Name?.Trim();
+
+            if (string.IsNullOrEmpty(name))
+            {
+                throw new ArgumentException(@"A metadata filter condition requires a fieldId or a name", nameof(requests));
+            }
+
+            var field = systemTemplate?.Fields.FirstOrDefault(f => f.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                ?? throw new ArgumentException($@"Unknown custom field '{name}'", nameof(requests));
+
+            request.FieldId = field.Id;
+        }
     }
 
     private static List<MetadataFilterConditionRequest> ParseConditions(string json)
@@ -184,8 +263,8 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
                 break;
 
             case MetadataFieldType.Date:
-                condition.DateFrom = ParseDate(request.From, field);
-                condition.DateTo = ParseDate(request.To, field);
+                condition.DateFrom = ParseDate(request.From, field, endOfDay: false);
+                condition.DateTo = ParseDate(request.To, field, endOfDay: true);
 
                 if (condition.DateFrom == null && condition.DateTo == null)
                 {
@@ -251,11 +330,22 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
         }
     }
 
-    private static DateTime? ParseDate(string value, MetadataField field)
+    /// <summary>
+    /// A bound given as a date only names the whole day: as the upper bound it is moved to the last second of that day,
+    /// otherwise every value stored later than midnight fell out of the "inclusive" range the UI sends as two dates.
+    /// The last second, not the last tick: the values live in a datetime column without fractional seconds, so a
+    /// finer bound would only depend on how the server rounds it. A bound carrying a time is an instant and is taken as is.
+    /// </summary>
+    private static DateTime? ParseDate(string value, MetadataField field, bool endOfDay)
     {
         if (string.IsNullOrEmpty(value))
         {
             return null;
+        }
+
+        if (DateTime.TryParseExact(value, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out var day))
+        {
+            return endOfDay ? day.AddDays(1).AddSeconds(-1) : day;
         }
 
         if (!DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out var result))

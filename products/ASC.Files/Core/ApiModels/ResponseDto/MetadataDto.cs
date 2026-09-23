@@ -54,11 +54,6 @@ public class MetadataTemplateDto
     public bool Visible { get; set; }
 
     /// <summary>
-    /// Specifies if this is the system template with the global visibility.
-    /// </summary>
-    public bool IsSystem { get; set; }
-
-    /// <summary>
     /// The user who created the template.
     /// </summary>
     public Guid CreateBy { get; set; }
@@ -168,9 +163,9 @@ public class MetadataValueDto
 }
 
 /// <summary>
-/// The metadata of an entry: the template with the values of its fields.
+/// A metadata template assigned to an entry with the values of its fields.
 /// </summary>
-public class EntryMetadataDto
+public class TemplateMetadataDto
 {
     /// <summary>
     /// The metadata template.
@@ -181,6 +176,41 @@ public class EntryMetadataDto
     /// The metadata field values.
     /// </summary>
     public List<MetadataValueDto> Values { get; set; }
+}
+
+/// <summary>
+/// The custom text field of an entry: a free-form name with its value. Custom fields belong to no template, need no
+/// assignment and are addressed by name.
+/// </summary>
+public class CustomFieldValueDto
+{
+    /// <summary>
+    /// The field name.
+    /// </summary>
+    /// <example>Project code</example>
+    public string Name { get; set; }
+
+    /// <summary>
+    /// The field value on the entry.
+    /// </summary>
+    /// <example>A-42</example>
+    public string Value { get; set; }
+}
+
+/// <summary>
+/// The metadata of an entry: the assigned templates with their values, and the custom fields holding a value.
+/// </summary>
+public class EntryMetadataDto
+{
+    /// <summary>
+    /// The assigned metadata templates with the values of their fields.
+    /// </summary>
+    public List<TemplateMetadataDto> Templates { get; set; }
+
+    /// <summary>
+    /// The custom fields with their values.
+    /// </summary>
+    public List<CustomFieldValueDto> CustomFields { get; set; }
 }
 
 /// <summary>
@@ -219,7 +249,6 @@ public class MetadataDtoHelper(ApiDateTimeHelper apiDateTimeHelper)
             Id = template.Id,
             Name = template.Name,
             Visible = template.Visible,
-            IsSystem = template.IsSystem,
             CreateBy = template.CreateBy,
             CreateOn = apiDateTimeHelper.Get(template.CreateOn),
             ModifiedBy = template.ModifiedBy,
@@ -253,19 +282,41 @@ public class MetadataDtoHelper(ApiDateTimeHelper apiDateTimeHelper)
         };
     }
 
-    public EntryMetadataDto Get(EntryMetadata metadata)
+    public TemplateMetadataDto Get(TemplateMetadata metadata)
     {
-        return new EntryMetadataDto
+        return new TemplateMetadataDto
         {
             Template = Get(metadata.Template),
             Values = metadata.Values?.Select(Get).ToList()
         };
     }
 
+    public static CustomFieldValueDto Get(CustomFieldValue customField)
+    {
+        return new CustomFieldValueDto
+        {
+            Name = customField.Field.Name,
+            Value = customField.Value
+        };
+    }
+
+    public EntryMetadataDto Get(EntryMetadata metadata)
+    {
+        return new EntryMetadataDto
+        {
+            Templates = metadata.Templates.Select(Get).ToList(),
+            CustomFields = metadata.CustomFields.Select(Get).ToList()
+        };
+    }
+
+    /// <summary>
+    /// A missing operation means the folder has nothing running and nothing recent to report. That is answered as a
+    /// completed operation without an ID, so a caller never gets a null body with a 200.
+    /// </summary>
     public MetadataOperationDto Get(MetadataCascadeOperation operation)
     {
         return operation == null
-            ? null
+            ? new MetadataOperationDto { Progress = 100, IsCompleted = true }
             : new MetadataOperationDto
             {
                 Id = operation.Id,

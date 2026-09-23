@@ -98,9 +98,9 @@ internal class SharePointFileDao(
     }
 
     public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, IEnumerable<string> excludeParentsIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent)
+        string[] extension, bool searchInContent, MetadataFilter metadataFilter = null)
     {
-        if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
+        if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly || metadataFilter is { IsEmpty: false })
         {
             return AsyncEnumerable.Empty<File<string>>();
         }
