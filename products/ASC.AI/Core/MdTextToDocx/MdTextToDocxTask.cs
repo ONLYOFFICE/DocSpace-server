@@ -52,6 +52,9 @@ public class MdTextToDocxTaskData
 
     [ProtoMember(5)]
     public string? ThirdpartyFolderId { get; set; }
+
+    [ProtoMember(6)]
+    public MdOutputFormat Format { get; set; }
 }
 
 [Transient]
@@ -110,10 +113,17 @@ public class MdTextToDocxTask(IServiceScopeFactory serviceScopeFactory) : Distri
 
             fileUri = docService.ReplaceCommunityAddress(fileUri);
 
+            var toExtension = _data.Format switch
+            {
+                MdOutputFormat.Docx => "docx",
+                MdOutputFormat.Pdf => "pdf",
+                _ => throw new ArgumentOutOfRangeException(nameof(_data.Format), _data.Format, null)
+            };
+
             var (_, outFileUri, outFileType) = await docService.GetConvertedUriAsync(
                 fileUri,
                 "md",
-                "docx",
+                toExtension,
                 Guid.NewGuid().ToString("n"),
                 null,
                 CultureInfo.CurrentUICulture.Name,
