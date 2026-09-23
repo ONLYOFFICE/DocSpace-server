@@ -41,6 +41,7 @@ internal class FileDao(
         FactoryIndexerForm factoryIndexerFormData,
         FactoryIndexerFileMetadata factoryIndexerFileMetadata,
         MetadataIndexHelper metadataIndexHelper,
+        MetadataTemplatesCache metadataTemplatesCache,
         UserManager userManager,
         FileUtility fileUtility,
         IDbContextFactory<FilesDbContext> dbContextManager,
@@ -3007,31 +3008,12 @@ internal class FileDao(
             {
                 if (searchByText)
                 {
-                    // the string values of the globally visible system template participate in the general text search:
-                    // the entry matches when either its own fields or its global metadata match, so the id sets are united
-                    var (globalTextSuccess, globalTextIds) = await MetadataSearchQuery.TrySelectGlobalTextIdsAsync(factoryIndexerFileMetadata, searchText, MetadataSearchScope.For(parentId, withSubfolders));
-
-                    if (globalTextSuccess)
-                    {
-                        searchIds = searchIds.Union(globalTextIds).ToList();
-                    }
-                    else
-                    {
-                        // the metadata index is not there yet (it is created by the first full indexing pass) or it is
-                        // overflowing: the global metadata part of the search comes from the database instead
-                        var lowerText = GetSearchText(searchText);
-                        var globalTextSqlIds = MetadataSearchQuery.SystemTemplateTextEntryIds(filesDbContext, tenantId, FileEntryType.File, lowerText);
-
-                        // the query reads its captured variables when it runs, not when it is built: the ids go through
-                        // their own variable, because the shared one is cleared right below to keep the plain filter off
-                        var textSearchIds = searchIds;
-
-                        q = q.Where(r => textSearchIds.Contains(r.Id) || globalTextSqlIds.Contains(r.Id));
-                        searchIds = null;
-                    }
+                    // the string values of the system template take part in the general text search: the files matched by
+                    // them are united with the files matched by their own fields
+                    q = await MetadataSearchQuery.ApplyTextSearchAsync(q, filesDbContext, tenantId, FileEntryType.File, factoryIndexerFileMetadata, searchIds, searchText, GetSearchText(searchText),
+                        MetadataSearchScope.For(parentId, withSubfolders), await metadataTemplatesCache.HasSystemTemplateAsync(), r => r.Id);
                 }
-
-                if (searchIds != null)
+                else
                 {
                     q = q.Where(r => searchIds.Contains(r.Id));
                 }
@@ -3047,10 +3029,17 @@ internal class FileDao(
             {
                 if (searchByText)
                 {
-                    var lowerText = GetSearchText(searchText);
-                    var globalTextIds = MetadataSearchQuery.SystemTemplateTextEntryIds(filesDbContext, tenantId, FileEntryType.File, lowerText);
+                    if (await metadataTemplatesCache.HasSystemTemplateAsync())
+                    {
+                        var lowerText = GetSearchText(searchText);
+                        var globalTextIds = MetadataSearchQuery.SystemTemplateTextEntryIds(filesDbContext, tenantId, FileEntryType.File, lowerText);
 
-                    q = q.Where(f => f.Title.ToLower().Contains(lowerText) || globalTextIds.Contains(f.Id));
+                        q = q.Where(f => f.Title.ToLower().Contains(lowerText) || globalTextIds.Contains(f.Id));
+                    }
+                    else
+                    {
+                        q = BuildSearch(q, searchText, SearchType.Any);
+                    }
                 }
 
                 if (searchByExtension)
@@ -3230,89 +3219,25 @@ internal class FileDao(
     }
 
     /// <summary>
-    /// Narrows a file query by the structured metadata filter. The template assignment is a fact of the link table,
-    /// so it always comes from the database; the field conditions are asked from the metadata index and fall back to
-    /// the database when the index is not there or overflows.
+    /// Narrows a file query by the structured metadata filter, see <see cref="MetadataSearchQuery.ApplyFilterAsync{TRow, TDoc}"/>.
     /// </summary>
     /// <remarks>
     /// The listings that are already limited to a set of files (the tags of the "Recent" and "Favorites" sections,
     /// the share records of the "Shared with me" section) pass <see cref="MetadataSearchScope.None"/>: the index is
     /// asked tenant-wide and the id list is intersected with the listing's own query.
     /// </remarks>
-    private async Task<IQueryable<DbFile>> ApplyMetadataFilterAsync(IQueryable<DbFile> q, FilesDbContext filesDbContext, MetadataFilter metadataFilter, MetadataSearchScope scope)
+    private Task<IQueryable<DbFile>> ApplyMetadataFilterAsync(IQueryable<DbFile> q, FilesDbContext filesDbContext, MetadataFilter metadataFilter, MetadataSearchScope scope)
     {
-        if (metadataFilter is not { IsEmpty: false })
-        {
-            return q;
-        }
-
-        var tenantId = _tenantManager.GetCurrentTenantId();
-
-        if (metadataFilter.TemplateId is { } templateId)
-        {
-            var templateEntryIds = MetadataSearchQuery.TemplateEntryIds(filesDbContext, tenantId, FileEntryType.File, templateId);
-
-            q = q.Where(r => templateEntryIds.Contains(r.Id));
-        }
-
-        if (metadataFilter.Conditions.Count > 0)
-        {
-            var (success, metadataIds) = await MetadataSearchQuery.TrySelectMetadataIdsAsync(factoryIndexerFileMetadata, metadataFilter, scope);
-
-            if (success)
-            {
-                q = q.Where(r => metadataIds.Contains(r.Id));
-            }
-            else
-            {
-                foreach (var conditionIds in MetadataSearchQuery.FilteredEntryIdsPerCondition(filesDbContext, tenantId, FileEntryType.File, metadataFilter))
-                {
-                    q = q.Where(r => conditionIds.Contains(r.Id));
-                }
-            }
-        }
-
-        return q;
+        return MetadataSearchQuery.ApplyFilterAsync(q, filesDbContext, _tenantManager.GetCurrentTenantId(), FileEntryType.File, factoryIndexerFileMetadata, metadataFilter, scope, r => r.Id);
     }
 
     /// <summary>
     /// The same narrowing for the projections that carry the file as <see cref="IQueryResult{T}.Entry"/> (the tag listings).
     /// </summary>
-    private async Task<IQueryable<T>> ApplyMetadataFilterAsync<T>(IQueryable<T> q, FilesDbContext filesDbContext, MetadataFilter metadataFilter, MetadataSearchScope scope)
+    private Task<IQueryable<T>> ApplyMetadataFilterAsync<T>(IQueryable<T> q, FilesDbContext filesDbContext, MetadataFilter metadataFilter, MetadataSearchScope scope)
         where T : IQueryResult<DbFile>
     {
-        if (metadataFilter is not { IsEmpty: false })
-        {
-            return q;
-        }
-
-        var tenantId = _tenantManager.GetCurrentTenantId();
-
-        if (metadataFilter.TemplateId is { } templateId)
-        {
-            var templateEntryIds = MetadataSearchQuery.TemplateEntryIds(filesDbContext, tenantId, FileEntryType.File, templateId);
-
-            q = q.Where(r => templateEntryIds.Contains(r.Entry.Id));
-        }
-
-        if (metadataFilter.Conditions.Count > 0)
-        {
-            var (success, metadataIds) = await MetadataSearchQuery.TrySelectMetadataIdsAsync(factoryIndexerFileMetadata, metadataFilter, scope);
-
-            if (success)
-            {
-                q = q.Where(r => metadataIds.Contains(r.Entry.Id));
-            }
-            else
-            {
-                foreach (var conditionIds in MetadataSearchQuery.FilteredEntryIdsPerCondition(filesDbContext, tenantId, FileEntryType.File, metadataFilter))
-                {
-                    q = q.Where(r => conditionIds.Contains(r.Entry.Id));
-                }
-            }
-        }
-
-        return q;
+        return MetadataSearchQuery.ApplyFilterAsync(q, filesDbContext, _tenantManager.GetCurrentTenantId(), FileEntryType.File, factoryIndexerFileMetadata, metadataFilter, scope, r => r.Entry.Id);
     }
 
     private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId, List<FolderType> folderType)
@@ -3469,6 +3394,7 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         FactoryIndexerForm factoryIndexerFormData,
         FactoryIndexerFileMetadata factoryIndexerFileMetadata,
         MetadataIndexHelper metadataIndexHelper,
+        MetadataTemplatesCache metadataTemplatesCache,
         UserManager userManager,
         FileUtility fileUtility,
         IDbContextFactory<FilesDbContext> dbContextManager,
@@ -3513,6 +3439,7 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         factoryIndexerFormData,
         factoryIndexerFileMetadata,
         metadataIndexHelper,
+        metadataTemplatesCache,
         userManager,
         fileUtility,
         dbContextManager,

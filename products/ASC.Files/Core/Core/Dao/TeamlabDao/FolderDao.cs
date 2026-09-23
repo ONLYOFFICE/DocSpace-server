@@ -38,6 +38,7 @@ internal class FolderDao(
         FactoryIndexerFolder factoryIndexer,
         FactoryIndexerFolderMetadata factoryIndexerFolderMetadata,
         MetadataIndexHelper metadataIndexHelper,
+        MetadataTemplatesCache metadataTemplatesCache,
         UserManager userManager,
         IDbContextFactory<FilesDbContext> dbContextManager,
         TenantManager tenantManager,
@@ -294,32 +295,21 @@ internal class FolderDao(
 
             if (success)
             {
-                // the string values of the globally visible system template participate in the general text search:
-                // the folder matches when either its title or its global metadata match, so the id sets are united
-                var (globalTextSuccess, globalTextIds) = await MetadataSearchQuery.TrySelectGlobalTextIdsAsync(factoryIndexerFolderMetadata, searchText, scope);
-
-                if (globalTextSuccess)
-                {
-                    searchIds = searchIds.Union(globalTextIds).ToList();
-
-                    q = q.Where(r => searchIds.Contains(r.Id));
-                }
-                else
-                {
-                    // the metadata index is not there yet (it is created by the first full indexing pass) or it is
-                    // overflowing: the global metadata part of the search comes from the database instead
-                    var lowerText = GetSearchText(searchText);
-                    var globalTextSqlIds = MetadataSearchQuery.SystemTemplateTextEntryIds(filesDbContext, tenantId, FileEntryType.Folder, lowerText);
-
-                    q = q.Where(r => searchIds.Contains(r.Id) || globalTextSqlIds.Contains(r.Id));
-                }
+                // the string values of the system template take part in the general text search: the folders matched by
+                // them are united with the folders matched by their titles
+                q = await MetadataSearchQuery.ApplyTextSearchAsync(q, filesDbContext, tenantId, FileEntryType.Folder, factoryIndexerFolderMetadata, searchIds, searchText, GetSearchText(searchText),
+                    scope, await metadataTemplatesCache.HasSystemTemplateAsync(), r => r.Id);
             }
-            else
+            else if (await metadataTemplatesCache.HasSystemTemplateAsync())
             {
                 var lowerText = GetSearchText(searchText);
                 var globalTextIds = MetadataSearchQuery.SystemTemplateTextEntryIds(filesDbContext, tenantId, FileEntryType.Folder, lowerText);
 
                 q = q.Where(r => r.Title.ToLower().Contains(lowerText) || globalTextIds.Contains(r.Id));
+            }
+            else
+            {
+                q = BuildSearch(q, searchText, SearchType.Any);
             }
         }
 
@@ -327,89 +317,25 @@ internal class FolderDao(
     }
 
     /// <summary>
-    /// Narrows a folder query by the structured metadata filter. The template assignment is a fact of the link table,
-    /// so it always comes from the database; the field conditions are asked from the metadata index and fall back to
-    /// the database when the index is not there or overflows.
+    /// Narrows a folder query by the structured metadata filter, see <see cref="MetadataSearchQuery.ApplyFilterAsync{TRow, TDoc}"/>.
     /// </summary>
     /// <remarks>
     /// The listings that are already limited to a set of folders (the tags of the "Favorites" section, the share
     /// records of the "Shared with me" section) pass <see cref="MetadataSearchScope.None"/>: the index is asked
     /// tenant-wide and the id list is intersected with the listing's own query.
     /// </remarks>
-    private async Task<IQueryable<DbFolder>> ApplyMetadataFilterAsync(IQueryable<DbFolder> q, FilesDbContext filesDbContext, MetadataFilter metadataFilter, MetadataSearchScope scope)
+    private Task<IQueryable<DbFolder>> ApplyMetadataFilterAsync(IQueryable<DbFolder> q, FilesDbContext filesDbContext, MetadataFilter metadataFilter, MetadataSearchScope scope)
     {
-        if (metadataFilter is not { IsEmpty: false })
-        {
-            return q;
-        }
-
-        var tenantId = _tenantManager.GetCurrentTenantId();
-
-        if (metadataFilter.TemplateId is { } templateId)
-        {
-            var templateEntryIds = MetadataSearchQuery.TemplateEntryIds(filesDbContext, tenantId, FileEntryType.Folder, templateId);
-
-            q = q.Where(r => templateEntryIds.Contains(r.Id));
-        }
-
-        if (metadataFilter.Conditions.Count > 0)
-        {
-            var (success, metadataIds) = await MetadataSearchQuery.TrySelectMetadataIdsAsync(factoryIndexerFolderMetadata, metadataFilter, scope);
-
-            if (success)
-            {
-                q = q.Where(r => metadataIds.Contains(r.Id));
-            }
-            else
-            {
-                foreach (var conditionIds in MetadataSearchQuery.FilteredEntryIdsPerCondition(filesDbContext, tenantId, FileEntryType.Folder, metadataFilter))
-                {
-                    q = q.Where(r => conditionIds.Contains(r.Id));
-                }
-            }
-        }
-
-        return q;
+        return MetadataSearchQuery.ApplyFilterAsync(q, filesDbContext, _tenantManager.GetCurrentTenantId(), FileEntryType.Folder, factoryIndexerFolderMetadata, metadataFilter, scope, r => r.Id);
     }
 
     /// <summary>
     /// The same narrowing for the projections that carry the folder as <see cref="IQueryResult{T}.Entry"/> (the tag listings).
     /// </summary>
-    private async Task<IQueryable<T>> ApplyMetadataFilterAsync<T>(IQueryable<T> q, FilesDbContext filesDbContext, MetadataFilter metadataFilter, MetadataSearchScope scope)
+    private Task<IQueryable<T>> ApplyMetadataFilterAsync<T>(IQueryable<T> q, FilesDbContext filesDbContext, MetadataFilter metadataFilter, MetadataSearchScope scope)
         where T : IQueryResult<DbFolder>
     {
-        if (metadataFilter is not { IsEmpty: false })
-        {
-            return q;
-        }
-
-        var tenantId = _tenantManager.GetCurrentTenantId();
-
-        if (metadataFilter.TemplateId is { } templateId)
-        {
-            var templateEntryIds = MetadataSearchQuery.TemplateEntryIds(filesDbContext, tenantId, FileEntryType.Folder, templateId);
-
-            q = q.Where(r => templateEntryIds.Contains(r.Entry.Id));
-        }
-
-        if (metadataFilter.Conditions.Count > 0)
-        {
-            var (success, metadataIds) = await MetadataSearchQuery.TrySelectMetadataIdsAsync(factoryIndexerFolderMetadata, metadataFilter, scope);
-
-            if (success)
-            {
-                q = q.Where(r => metadataIds.Contains(r.Entry.Id));
-            }
-            else
-            {
-                foreach (var conditionIds in MetadataSearchQuery.FilteredEntryIdsPerCondition(filesDbContext, tenantId, FileEntryType.Folder, metadataFilter))
-                {
-                    q = q.Where(r => conditionIds.Contains(r.Entry.Id));
-                }
-            }
-        }
-
-        return q;
+        return MetadataSearchQuery.ApplyFilterAsync(q, filesDbContext, _tenantManager.GetCurrentTenantId(), FileEntryType.Folder, factoryIndexerFolderMetadata, metadataFilter, scope, r => r.Entry.Id);
     }
 
     public async Task<int> GetFoldersCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText,
@@ -2847,6 +2773,7 @@ internal class CacheFolderDao(
     FactoryIndexerFolder factoryIndexer,
     FactoryIndexerFolderMetadata factoryIndexerFolderMetadata,
     MetadataIndexHelper metadataIndexHelper,
+    MetadataTemplatesCache metadataTemplatesCache,
     UserManager userManager,
     IDbContextFactory<FilesDbContext> dbContextManager,
     TenantManager tenantManager,
@@ -2870,6 +2797,7 @@ internal class CacheFolderDao(
         factoryIndexer,
         factoryIndexerFolderMetadata,
         metadataIndexHelper,
+        metadataTemplatesCache,
         userManager,
         dbContextManager,
         tenantManager,

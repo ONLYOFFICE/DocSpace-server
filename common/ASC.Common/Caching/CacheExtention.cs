@@ -124,4 +124,9 @@ public static class CacheExtention
     {
         return $"settings-{tenant}-{key}";
     }
+
+    public static string GetMetadataTemplatesTag(int tenant)
+    {
+        return $"metadatatemplates-{tenant}";
+    }
 }

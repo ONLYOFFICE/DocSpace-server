@@ -271,6 +271,74 @@ public class FoldersMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fix
 
     #endregion
 
+    #region Tenant without metadata
+
+    [Fact]
+    public async Task Folders_ListedBeforeTheFirstTemplate_ReportTheTemplateAssignedAfterwards()
+    {
+        await _filesClient.Authenticate(Owner);
+
+        var api = new MetadataApiClient(_filesClient);
+        var suffix = Guid.NewGuid().ToString()[..8];
+        var room = await CreateCustomRoom($"Fresh {suffix}");
+        var folder = await CreateFolder($"Folder {suffix}", room.Id);
+
+        // a listing of a tenant without templates skips the metadata queries and remembers that there is nothing to
+        // ask for; the first template must drop that memory, or the assignments made after it stay invisible
+        var before = await api.GetFolderContentAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken);
+        before.Folders.Should().ContainSingle().Which.AssignedMetadataTemplates.Should().BeNullOrEmpty();
+
+        var template = await api.CreateTemplateAsync("Late " + suffix, [new MetadataFieldPayload { Name = ClientField, Type = 0 }], TestContext.Current.CancellationToken);
+        await api.AssignFolderTemplatesAsync(folder.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+
+        var after = await api.GetFolderContentAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken);
+        after.Folders.Should().ContainSingle().Which.AssignedMetadataTemplates.Should().Contain(template.Id);
+    }
+
+    [Fact]
+    public async Task Folders_SearchedByTextBeforeTheFirstCustomField_FindTheValueSetAfterwards()
+    {
+        await _filesClient.Authenticate(Owner);
+
+        var api = new MetadataApiClient(_filesClient);
+        var suffix = Guid.NewGuid().ToString()[..8];
+        var room = await CreateCustomRoom($"Fresh {suffix}");
+        var folder = await CreateFolder($"Folder {suffix}", room.Id);
+        var marker = "Marker" + suffix;
+
+        // a text search of a tenant without custom fields skips the metadata part and remembers that there is nothing
+        // to look at; the first custom field creates the system template and must drop that memory
+        var before = await api.GetFolderContentAsync(room.Id, filterValue: marker, cancellationToken: TestContext.Current.CancellationToken);
+        before.Folders.Should().BeEmpty();
+
+        await api.SetFolderCustomFieldAsync(folder.Id, "Reference", marker, TestContext.Current.CancellationToken);
+
+        var after = await PollByTextAsync(api, room.Id, marker, expectedFolders: [folder.Id]);
+        after.FolderIds().Should().Equal(folder.Id);
+    }
+
+    /// <summary>
+    /// Requests the folder content by text until the expected folders are returned; the retry only absorbs the indexing lag.
+    /// </summary>
+    private static async Task<FolderContentResponse> PollByTextAsync(MetadataApiClient api, int roomId, string text, int[] expectedFolders)
+    {
+        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+
+        while (true)
+        {
+            var content = await api.GetFolderContentAsync(roomId, filterValue: text, cancellationToken: TestContext.Current.CancellationToken);
+
+            if (content.FolderIds().Order().SequenceEqual(expectedFolders.Order()) || deadline.IsCancellationRequested)
+            {
+                return content;
+            }
+
+            await Task.Delay(200, TestContext.Current.CancellationToken);
+        }
+    }
+
+    #endregion
+
     #region Arrange
 
     private async Task<FolderSearchData> ArrangeAsync()

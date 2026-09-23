@@ -360,10 +360,14 @@ public class MetadataService(
 
         var values = await metadataDao.GetValuesAsync(entryId, entryType).ToListAsync();
 
+        // the templates of the tenant come with their fields in one go: they used to be loaded one by one per link,
+        // two queries each, on a request that is made for every opened entry
+        var templates = await metadataDao.GetTemplatesAsync(withFields: true).ToDictionaryAsync(t => t.Id);
+
         var result = new EntryMetadata();
 
         // the custom fields are never assigned: a field is on the entry when the entry holds a value for it
-        var systemTemplate = await metadataDao.GetSystemTemplateAsync();
+        var systemTemplate = templates.Values.FirstOrDefault(t => t.IsSystem);
         if (systemTemplate != null)
         {
             templateIds.Remove(systemTemplate.Id);
@@ -373,8 +377,7 @@ public class MetadataService(
 
         foreach (var templateId in templateIds)
         {
-            var template = await metadataDao.GetTemplateAsync(templateId);
-            if (template == null)
+            if (!templates.TryGetValue(templateId, out var template))
             {
                 continue;
             }

@@ -105,6 +105,7 @@ public class FolderContentDtoHelper(
     BreadCrumbsManager breadCrumbsManager,
     AiAccessibility accessibility,
     IDaoFactory daoFactory,
+    MetadataTemplatesCache metadataTemplatesCache,
     FolderContentDtoHelperSettings settings)
 {
 
@@ -300,6 +301,13 @@ public class FolderContentDtoHelper(
         var folderDtos = (result.Folders ?? []).OfType<FileEntryDto<int>>().ToList();
 
         if (fileDtos.Count == 0 && folderDtos.Count == 0)
+        {
+            return;
+        }
+
+        // a tenant without templates has no links either: the listing is the hottest read path, so it does not pay
+        // the link query for metadata that cannot be there
+        if (!await metadataTemplatesCache.HasTemplatesAsync())
         {
             return;
         }

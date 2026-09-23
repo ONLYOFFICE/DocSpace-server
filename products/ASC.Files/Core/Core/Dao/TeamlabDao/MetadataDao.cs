@@ -44,7 +44,8 @@ internal class MetadataDao(
     SettingsManager settingsManager,
     AuthContext authContext,
     IServiceProvider serviceProvider,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    MetadataTemplatesCache metadataTemplatesCache)
     : AbstractDao(dbContextManager,
         userManager,
         tenantManager,
@@ -101,6 +102,11 @@ internal class MetadataDao(
 
         await filesDbContext.SaveChangesAsync();
 
+        if (template.Id == 0)
+        {
+            await metadataTemplatesCache.InvalidateAsync(tenantId);
+        }
+
         return ToTemplate(dbTemplate);
     }
 
@@ -115,7 +121,7 @@ internal class MetadataDao(
 
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
-        return await strategy.ExecuteAsync(async () =>
+        var saved = await strategy.ExecuteAsync(async () =>
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await context.Database.BeginTransactionAsync();
@@ -159,11 +165,15 @@ internal class MetadataDao(
 
             await tx.CommitAsync();
 
-            var saved = ToTemplate(dbTemplate);
-            saved.Fields.AddRange(dbFields.Select(ToField));
+            var result = ToTemplate(dbTemplate);
+            result.Fields.AddRange(dbFields.Select(ToField));
 
-            return saved;
+            return result;
         });
+
+        await metadataTemplatesCache.InvalidateAsync(tenantId);
+
+        return saved;
     }
 
     public async Task<MetadataTemplate> GetTemplateAsync(int templateId, bool withFields = true)
@@ -276,6 +286,8 @@ internal class MetadataDao(
 
             await tx.CommitAsync();
         });
+
+        await metadataTemplatesCache.InvalidateAsync(tenantId);
     }
 
     public async Task<MetadataTemplate> GetSystemTemplateAsync(bool withFields = true)
@@ -444,63 +456,67 @@ internal class MetadataDao(
         var tenantId = _tenantManager.GetCurrentTenantId();
         var now = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
         var userId = _authContext.CurrentAccount.ID;
+        var linksList = links.ToList();
 
-        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
-
-        foreach (var link in links)
+        await RetryOnDuplicateKeyAsync(async () =>
         {
-            var entryId = (int)link.EntryId;
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-            var existing = await filesDbContext.MetadataLinks.FindAsync(tenantId, link.TemplateId, entryId, link.EntryType);
-
-            if (existing == null)
+            foreach (var link in linksList)
             {
-                await filesDbContext.MetadataLinks.AddAsync(new DbFilesMetadataLink
+                var entryId = (int)link.EntryId;
+
+                var existing = await filesDbContext.MetadataLinks.FindAsync(tenantId, link.TemplateId, entryId, link.EntryType);
+
+                if (existing == null)
                 {
-                    TenantId = tenantId,
-                    TemplateId = link.TemplateId,
-                    EntryId = entryId,
-                    EntryType = link.EntryType,
-                    Cascade = link.Cascade,
-                    CascadeConflict = link.Cascade ? link.CascadeConflict : MetadataConflictResolveType.Skip,
-                    SourceFolderId = link.SourceFolderId,
-                    CreateBy = link.CreateBy != Guid.Empty ? link.CreateBy : userId,
-                    CreateOn = now
-                });
+                    await filesDbContext.MetadataLinks.AddAsync(new DbFilesMetadataLink
+                    {
+                        TenantId = tenantId,
+                        TemplateId = link.TemplateId,
+                        EntryId = entryId,
+                        EntryType = link.EntryType,
+                        Cascade = link.Cascade,
+                        CascadeConflict = link.Cascade ? link.CascadeConflict : MetadataConflictResolveType.Skip,
+                        SourceFolderId = link.SourceFolderId,
+                        CreateBy = link.CreateBy != Guid.Empty ? link.CreateBy : userId,
+                        CreateOn = now
+                    });
+                }
+                else
+                {
+                    // direct assignment wins over cascaded provenance, cascade flag is never downgraded
+                    var changed = false;
+
+                    if (existing.SourceFolderId != null && link.SourceFolderId == null)
+                    {
+                        existing.SourceFolderId = null;
+                        changed = true;
+                    }
+
+                    if (link.Cascade && !existing.Cascade)
+                    {
+                        existing.Cascade = true;
+                        changed = true;
+                    }
+
+                    // a repeated cascade request re-declares how the subtree conflicts are treated: the latest mode wins
+                    if (link.Cascade && existing.CascadeConflict != link.CascadeConflict)
+                    {
+                        existing.CascadeConflict = link.CascadeConflict;
+                        changed = true;
+                    }
+
+                    if (changed)
+                    {
+                        // the context is no-tracking, so the found entity has to be re-attached for its changes to be saved
+                        filesDbContext.MetadataLinks.Update(existing);
+                    }
+                }
             }
-            else
-            {
-                // direct assignment wins over cascaded provenance, cascade flag is never downgraded
-                var changed = false;
 
-                if (existing.SourceFolderId != null && link.SourceFolderId == null)
-                {
-                    existing.SourceFolderId = null;
-                    changed = true;
-                }
-
-                if (link.Cascade && !existing.Cascade)
-                {
-                    existing.Cascade = true;
-                    changed = true;
-                }
-
-                // a repeated cascade request re-declares how the subtree conflicts are treated: the latest mode wins
-                if (link.Cascade && existing.CascadeConflict != link.CascadeConflict)
-                {
-                    existing.CascadeConflict = link.CascadeConflict;
-                    changed = true;
-                }
-
-                if (changed)
-                {
-                    // the context is no-tracking, so the found entity has to be re-attached for its changes to be saved
-                    filesDbContext.MetadataLinks.Update(existing);
-                }
-            }
-        }
-
-        await filesDbContext.SaveChangesAsync();
+            await filesDbContext.SaveChangesAsync();
+        });
     }
 
     public async IAsyncEnumerable<MetadataTemplateLink> GetLinksAsync(int entryId, FileEntryType entryType)
@@ -592,7 +608,7 @@ internal class MetadataDao(
 
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
-        await strategy.ExecuteAsync(async () =>
+        await RetryOnDuplicateKeyAsync(() => strategy.ExecuteAsync(async () =>
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await context.Database.BeginTransactionAsync();
@@ -611,7 +627,7 @@ internal class MetadataDao(
 
             await context.SaveChangesAsync();
             await tx.CommitAsync();
-        });
+        }));
     }
 
     public async IAsyncEnumerable<MetadataValue> GetValuesAsync(int entryId, FileEntryType entryType, IEnumerable<int> fieldIds = null)
@@ -741,7 +757,7 @@ internal class MetadataDao(
 
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
-        await strategy.ExecuteAsync(async () =>
+        await RetryOnDuplicateKeyAsync(() => strategy.ExecuteAsync(async () =>
         {
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await context.Database.BeginTransactionAsync();
@@ -822,7 +838,7 @@ internal class MetadataDao(
 
             await context.SaveChangesAsync();
             await tx.CommitAsync();
-        });
+        }));
     }
 
     public async Task<List<MetadataTemplateLink>> GetCascadeLinksByFoldersAsync(IEnumerable<int> folderIds)
@@ -896,6 +912,45 @@ internal class MetadataDao(
             .Where(r => r.TenantId == tenantId && r.FieldId == fieldId)
             .Select(r => new MetadataValue { FieldId = r.FieldId, EntryId = r.EntryId, EntryType = r.EntryType })
             .ToListAsync();
+    }
+
+    /// <summary>
+    /// Runs a write that reads the existing link or value rows and inserts the missing ones. The cascade pass and
+    /// the user requests are not serialized against each other, so a request writing the same entry in between (an
+    /// assignment of the same template, a value for the same field) makes the insert collide on the primary key;
+    /// the write is then repeated from scratch and its second read sees the row and skips it, instead of failing the
+    /// request or dropping the rest of the cascade.
+    /// </summary>
+    private static async Task RetryOnDuplicateKeyAsync(Func<Task> write)
+    {
+        const int attempts = 3;
+
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                await write();
+
+                return;
+            }
+            catch (DbUpdateException e) when (attempt < attempts && IsDuplicateKey(e))
+            {
+            }
+        }
+    }
+
+    /// <summary>
+    /// The collision is told by the provider's error code, not by the message: MySQL localizes the message
+    /// with <c>lc_messages</c>, so a self-hosted server in another language would never match the English text.
+    /// </summary>
+    private static bool IsDuplicateKey(DbUpdateException exception)
+    {
+        return exception.InnerException switch
+        {
+            MySqlConnector.MySqlException { ErrorCode: MySqlConnector.MySqlErrorCode.DuplicateKeyEntry } => true,
+            Npgsql.PostgresException { SqlState: Npgsql.PostgresErrorCodes.UniqueViolation } => true,
+            _ => false
+        };
     }
 
     private static MetadataTemplate ToTemplate(DbFilesMetadataTemplate dbTemplate)

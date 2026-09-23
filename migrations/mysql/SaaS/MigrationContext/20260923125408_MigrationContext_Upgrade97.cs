@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     /// <inheritdoc />
-    public partial class MigrationContext_Upgrade96 : Migration
+    public partial class MigrationContext_Upgrade97 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -54,8 +54,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     entry_id = table.Column<int>(type: "int", nullable: false),
                     entry_type = table.Column<int>(type: "int", nullable: false),
                     is_cascade = table.Column<bool>(type: "tinyint(1)", nullable: false, defaultValueSql: "'0'"),
-                    cascade_conflict = table.Column<int>(type: "int", nullable: false, defaultValueSql: "'0'"),
                     source_folder_id = table.Column<int>(type: "int", nullable: true),
+                    cascade_conflict = table.Column<int>(type: "int", nullable: false, defaultValueSql: "'0'"),
                     create_by = table.Column<string>(type: "char(38)", nullable: false, collation: "utf8_general_ci")
                         .Annotation("MySql:CharSet", "utf8"),
                     create_on = table.Column<DateTime>(type: "datetime", nullable: false)

@@ -117,6 +117,112 @@ public static class MetadataSearchQuery
     }
 
     /// <summary>
+    /// Narrows an entry query by the structured metadata filter. The template assignment is a fact of the link table,
+    /// so it always comes from the database. The field conditions are asked from the metadata index first, and every
+    /// condition is then confirmed against the value table for the candidates the index returned: the documents are
+    /// written best effort after the values (an index that is down at that moment leaves a document holding the old
+    /// or the removed value behind) and the full indexing pass selects the entries by their modified values, so a
+    /// removed value is never reconciled — the database is the truth, the index only keeps the work small. When the
+    /// index is not there or overflows, the same conditions filter the query on their own. The selector names the
+    /// entry identifier of a row: the file or the folder itself, or the entry carried by a tag projection.
+    /// </summary>
+    public static async Task<IQueryable<TRow>> ApplyFilterAsync<TRow, TDoc>(
+        IQueryable<TRow> query,
+        FilesDbContext filesDbContext,
+        int tenantId,
+        FileEntryType entryType,
+        FactoryIndexer<TDoc> indexer,
+        MetadataFilter metadataFilter,
+        MetadataSearchScope scope,
+        Expression<Func<TRow, int>> idSelector)
+        where TDoc : MetadataSearchItemBase
+    {
+        if (metadataFilter is not { IsEmpty: false })
+        {
+            return query;
+        }
+
+        if (metadataFilter.TemplateId is { } templateId)
+        {
+            var templateEntryIds = TemplateEntryIds(filesDbContext, tenantId, entryType, templateId);
+
+            query = WhereId(query, idSelector, id => templateEntryIds.Contains(id));
+        }
+
+        if (metadataFilter.Conditions.Count == 0)
+        {
+            return query;
+        }
+
+        var (success, candidateIds) = await TrySelectMetadataIdsAsync(indexer, metadataFilter, scope);
+
+        if (success)
+        {
+            query = WhereId(query, idSelector, id => candidateIds.Contains(id));
+        }
+
+        foreach (var condition in metadataFilter.Conditions)
+        {
+            query = WhereId(query, idSelector, EntryMatchesCondition(filesDbContext, tenantId, entryType, condition));
+        }
+
+        return query;
+    }
+
+    /// <summary>
+    /// Adds the free text part of a listing once the title index answered with <paramref name="titleIds"/>: the string
+    /// values of the system template take part in the text search, so the entries whose metadata match are united
+    /// with the entries whose titles match. Without a system template the tenant has no such values, and the title
+    /// ids are applied as they are, which spares the metadata index request and the SQL fallback on every search.
+    /// The metadata candidates the index returns are confirmed against the value table, the same way
+    /// <see cref="ApplyFilterAsync{TRow, TDoc}"/> confirms its conditions: a document holding a value that has since
+    /// been cleared (the index was down at that moment, and the full pass never reconciles a removed value) would
+    /// otherwise keep the entry in the text search results for good.
+    /// </summary>
+    public static async Task<IQueryable<TRow>> ApplyTextSearchAsync<TRow, TDoc>(
+        IQueryable<TRow> query,
+        FilesDbContext filesDbContext,
+        int tenantId,
+        FileEntryType entryType,
+        FactoryIndexer<TDoc> indexer,
+        List<int> titleIds,
+        string searchText,
+        string lowerText,
+        MetadataSearchScope scope,
+        bool hasSystemTemplate,
+        Expression<Func<TRow, int>> idSelector)
+        where TDoc : MetadataSearchItemBase
+    {
+        if (!hasSystemTemplate)
+        {
+            return WhereId(query, idSelector, id => titleIds.Contains(id));
+        }
+
+        var (success, globalTextIds) = await TrySelectGlobalTextIdsAsync(indexer, searchText, scope);
+
+        // the metadata index is not there yet (it is created by the first full indexing pass) or it is overflowing:
+        // the global metadata part of the search comes from the database alone; with the index it is narrowed to
+        // the candidates the index returned first, so the confirmation probes a handful of rows instead of scanning
+        var globalTextSqlIds = SystemTemplateTextEntryIds(filesDbContext, tenantId, entryType, lowerText);
+
+        if (success)
+        {
+            var candidateIds = globalTextIds.Except(titleIds).ToList();
+
+            if (candidateIds.Count == 0)
+            {
+                return WhereId(query, idSelector, id => titleIds.Contains(id));
+            }
+
+            var confirmedIds = globalTextSqlIds.Where(id => candidateIds.Contains(id));
+
+            return WhereId(query, idSelector, id => titleIds.Contains(id) || confirmedIds.Contains(id));
+        }
+
+        return WhereId(query, idSelector, id => titleIds.Contains(id) || globalTextSqlIds.Contains(id));
+    }
+
+    /// <summary>
     /// Builds the OpenSearch selector for the structured metadata filter. All conditions are combined with AND,
     /// the options within a single choice condition are combined with OR.
     /// </summary>
@@ -212,30 +318,6 @@ public static class MetadataSearchQuery
     }
 
     /// <summary>
-    /// The SQL counterpart of <see cref="BuildSelector{TDoc}"/>: one identifier sub-query per filter condition.
-    /// Used as a fallback when the metadata index is unavailable.
-    /// </summary>
-    /// <remarks>
-    /// The conditions are returned separately so the caller applies them as independent predicates and they are
-    /// combined with AND by the outer query — the same shape the inlined version had. Intersecting them into a
-    /// single sub-query would also work on the supported servers, but it buys nothing and needs INTERSECT,
-    /// which older self-hosted MySQL builds (before 8.0.31) do not have.
-    /// </remarks>
-    public static IEnumerable<IQueryable<int>> FilteredEntryIdsPerCondition(FilesDbContext filesDbContext, int tenantId, FileEntryType entryType, MetadataFilter metadataFilter)
-    {
-        if (metadataFilter is not { Conditions.Count: > 0 })
-        {
-            throw new ArgumentException(@"The metadata filter must contain at least one condition", nameof(metadataFilter));
-        }
-
-        return metadataFilter.Conditions.Select(condition => filesDbContext.MetadataValues
-            .Where(v => v.TenantId == tenantId && v.EntryType == entryType)
-            .Where(BuildConditionPredicate(condition))
-            .Select(v => v.EntryId)
-            .Distinct());
-    }
-
-    /// <summary>
     /// The identifiers of the entries the template is assigned to, directly or by inheritance. Always evaluated in SQL:
     /// the metadata documents exist for the entries holding values only, so an index lookup would miss an assignment
     /// without values, and the link table is keyed by the tenant and the template anyway.
@@ -259,6 +341,21 @@ public static class MetadataSearchQuery
                     filesDbContext.MetadataTemplates.Any(t => t.TenantId == tenantId && t.Id == f.TemplateId && t.IsSystem)))
             .Select(v => v.EntryId)
             .Distinct();
+    }
+
+    /// <summary>
+    /// The SQL counterpart of one condition of <see cref="BuildSelector{TDoc}"/>: whether the entry holds a value row
+    /// matching the condition. A correlated existence check, so confirming a candidate costs one probe of the value
+    /// table by its primary key.
+    /// </summary>
+    public static Expression<Func<int, bool>> EntryMatchesCondition(FilesDbContext filesDbContext, int tenantId, FileEntryType entryType, MetadataFilterCondition condition)
+    {
+        var valuePredicate = BuildConditionPredicate(condition);
+
+        Expression<Func<int, bool>> entryPredicate = id => filesDbContext.MetadataValues.Any(v =>
+            v.TenantId == tenantId && v.EntryType == entryType && v.EntryId == id && ValueMatches(v));
+
+        return (Expression<Func<int, bool>>)new InlinePredicateVisitor(valuePredicate).Visit(entryPredicate);
     }
 
     /// <summary>
@@ -296,6 +393,53 @@ public static class MetadataSearchQuery
 
             default:
                 throw new ArgumentOutOfRangeException(nameof(condition), condition.FieldType, @"Unknown metadata field type");
+        }
+    }
+
+    /// <summary>
+    /// Applies a predicate over the entry identifier to the rows of the query, whatever carries the identifier. The
+    /// predicate is written once against the identifier and bound to the row through <paramref name="idSelector"/>,
+    /// so the files, the folders and their tag projections share one filter instead of a copy each; the captured
+    /// variables stay in place, and the provider translates the result exactly as the inlined lambda.
+    /// </summary>
+    private static IQueryable<TRow> WhereId<TRow>(IQueryable<TRow> query, Expression<Func<TRow, int>> idSelector, Expression<Func<int, bool>> predicate)
+    {
+        var body = new ParameterReplaceVisitor(predicate.Parameters[0], idSelector.Body).Visit(predicate.Body);
+
+        return query.Where(Expression.Lambda<Func<TRow, bool>>(body, idSelector.Parameters));
+    }
+
+    /// <summary>
+    /// The placeholder <see cref="InlinePredicateVisitor"/> replaces with the condition predicate; it is never invoked.
+    /// </summary>
+    private static bool ValueMatches(DbFilesMetadataValue value)
+    {
+        throw new InvalidOperationException("The placeholder must be replaced before the query runs");
+    }
+
+    /// <summary>
+    /// Replaces the <see cref="ValueMatches"/> call with the body of the value predicate, bound to the argument of the call.
+    /// </summary>
+    private sealed class InlinePredicateVisitor(Expression<Func<DbFilesMetadataValue, bool>> predicate) : ExpressionVisitor
+    {
+        private static readonly MethodInfo _placeholder = typeof(MetadataSearchQuery).GetMethod(nameof(ValueMatches), BindingFlags.Static | BindingFlags.NonPublic);
+
+        protected override Expression VisitMethodCall(MethodCallExpression node)
+        {
+            if (node.Method == _placeholder)
+            {
+                return new ParameterReplaceVisitor(predicate.Parameters[0], node.Arguments[0]).Visit(predicate.Body);
+            }
+
+            return base.VisitMethodCall(node);
+        }
+    }
+
+    private sealed class ParameterReplaceVisitor(ParameterExpression parameter, Expression replacement) : ExpressionVisitor
+    {
+        protected override Expression VisitParameter(ParameterExpression node)
+        {
+            return node == parameter ? replacement : base.VisitParameter(node);
         }
     }
 
