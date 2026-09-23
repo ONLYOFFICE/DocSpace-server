@@ -359,7 +359,7 @@ public abstract class EditorController<T>(
             result.File.CanShare = false;
         }
 
-        if (rootFolder.FolderType is FolderType.ResultStorage && file.Id is int fileId)
+        if (rootFolder.FolderType is FolderType.ChatOutputs && file.Id is int fileId)
         {
             var toolCallState = await editorToolCallStateStore.GetAsync(fileId);
             if (toolCallState is not null)

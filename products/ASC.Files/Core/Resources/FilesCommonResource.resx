@@ -165,6 +165,9 @@
   <data name="Author_Me" xml:space="preserve">
     <value>Me</value>
   </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Chat outputs</value>
+  </data>
   <data name="CommentAutosave" xml:space="preserve">
     <value>Autosaved</value>
   </data>
