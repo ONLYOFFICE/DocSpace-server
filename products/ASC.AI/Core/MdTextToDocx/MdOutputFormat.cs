@@ -37,5 +37,6 @@ namespace ASC.AI.Core.MdTextToDocx;
 public enum MdOutputFormat
 {
     Docx = 0,
-    Pdf = 1
+    Pdf = 1,
+    Md = 2
 }

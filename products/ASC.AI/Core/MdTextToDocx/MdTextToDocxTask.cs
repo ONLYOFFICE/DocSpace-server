@@ -103,39 +103,17 @@ public class MdTextToDocxTask(IServiceScopeFactory serviceScopeFactory) : Distri
             // was deleted or whose permissions changed after the event was published.
             var target = await Target.InitializeAsync(daoFactory, fileSecurity, userManager, authContext, _data.FolderId, _data.ThirdpartyFolderId);
 
-            var pathProvider = scope.ServiceProvider.GetRequiredService<PathProvider>();
-
             var bytes = Encoding.UTF8.GetBytes(_data.Content);
             await using var ms = new MemoryStream(bytes);
-            var fileUri = await pathProvider.GetTempUrlAsync(ms, ".md");
 
-            var docService = scope.ServiceProvider.GetRequiredService<DocumentServiceConnector>();
-
-            fileUri = docService.ReplaceCommunityAddress(fileUri);
-
-            var toExtension = _data.Format switch
+            if (_data.Format is MdOutputFormat.Md)
             {
-                MdOutputFormat.Docx => "docx",
-                MdOutputFormat.Pdf => "pdf",
-                _ => throw new ArgumentOutOfRangeException(nameof(_data.Format), _data.Format, null)
-            };
-
-            var (_, outFileUri, outFileType) = await docService.GetConvertedUriAsync(
-                fileUri,
-                "md",
-                toExtension,
-                Guid.NewGuid().ToString("n"),
-                null,
-                CultureInfo.CurrentUICulture.Name,
-                null,
-                null,
-                null,
-                false,
-                false);
-
-            var fileConverter = scope.ServiceProvider.GetRequiredService<FileConverter>();
-
-            await target.SaveFile(fileConverter, outFileUri, outFileType, _data.Title, false);
+                await target.SaveFile(scope.ServiceProvider, ms, _data.Title, "md");
+            }
+            else
+            {
+                await ConvertAndSaveAsync(scope.ServiceProvider, target, ms);
+            }
 
             if (Status <= DistributedTaskStatus.Running)
             {
@@ -148,5 +126,39 @@ public class MdTextToDocxTask(IServiceScopeFactory serviceScopeFactory) : Distri
             Exception = e;
             Status = DistributedTaskStatus.Failted;
         }
+    }
+
+    private async Task ConvertAndSaveAsync(IServiceProvider serviceProvider, Target target, Stream content)
+    {
+        var toExtension = _data.Format switch
+        {
+            MdOutputFormat.Docx => "docx",
+            MdOutputFormat.Pdf => "pdf",
+            _ => throw new ArgumentOutOfRangeException(nameof(_data.Format), _data.Format, null)
+        };
+
+        var pathProvider = serviceProvider.GetRequiredService<PathProvider>();
+        var fileUri = await pathProvider.GetTempUrlAsync(content, ".md");
+
+        var docService = serviceProvider.GetRequiredService<DocumentServiceConnector>();
+
+        fileUri = docService.ReplaceCommunityAddress(fileUri);
+
+        var (_, outFileUri, outFileType) = await docService.GetConvertedUriAsync(
+            fileUri,
+            "md",
+            toExtension,
+            Guid.NewGuid().ToString("n"),
+            null,
+            CultureInfo.CurrentUICulture.Name,
+            null,
+            null,
+            null,
+            false,
+            false);
+
+        var fileConverter = serviceProvider.GetRequiredService<FileConverter>();
+
+        await target.SaveFile(fileConverter, outFileUri, outFileType, _data.Title, false);
     }
 }
