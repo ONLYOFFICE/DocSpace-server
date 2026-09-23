@@ -781,26 +781,26 @@ ${LetterLogoText} Support Team
 [${__SiteLink}](${__SiteLink})</value>
   </data>
   <data name="pattern_portal_delete" xml:space="preserve">
-    <value>h1.Löschen des Leerzeichens "${__VirtualRootPath}":"${__VirtualRootPath}"
- 
+    <value>h1. Löschung des Arbeitsbereich "${__VirtualRootPath}":"${__VirtualRootPath}"
+
 Hallo $OwnerName,
- 
-Sie haben permanent Ihr "${__VirtualRootPath}":"${__VirtualRootPath}" zu löschen angefordert.
- 
-*Wichtig! Alle Daten, die auf dem gespeicherten wurden, sowie Ihre Registrierungsdaten, werden gelöscht und können nicht wiederhergestellt werden.*
- 
+
+Sie haben die dauerhafte Löschung Ihres Arbeitsbereich "${__VirtualRootPath}":"${__VirtualRootPath}" beantragt.
+
+*Wichtig! Alle in Ihrem Arbeitsbereich gespeicherten Daten sowie Ihre Registrierungsdaten gehen unwiederbringlich verloren und können nicht wiederhergestellt werden.*
+
 #if($AutoRenew == "True")
-Bevor Sie Ihr löschen lassen, vergewissern Sie sich, dass die Option der automatischen Verlängerung Ihres Abonnements ausgeschaltet ist. Überprüfen Sie den Status dieser Option über Ihr persönliches Konto auf der Stripe-Website.
+Bevor Sie den Arbeitsbereich löschen, stellen Sie bitte sicher, dass die automatische Abrechnung deaktiviert ist. Den Status der automatischen Abrechnung können Sie in Ihrem Stripe-Konto überprüfen.
 #end
- 
-Wenn Sie noch Ihr "${__VirtualRootPath}":"${__VirtualRootPath}" löschen möchten, folgen Sie bitte dem Link herunter, um den Vorgang zu bestätigen:
- 
+
+Wenn Sie Ihren Arbeitsbereich "${__VirtualRootPath}":"${__VirtualRootPath}" weiterhin löschen möchten, folgen Sie bitte dem nachstehenden Link, um den Vorgang zu bestätigen:
+
 $OrangeButton
- 
+
 *Hinweis:* Dieser Link ist nur für 7 Tage gültig. Bitte erfüllen Sie den Portalslöschvorgang innerhalb dieses Zeitraums.
- 
+
 Falls Sie einige Fragen haben oder Hilfe brauchen, kontaktieren Sie uns bitte unter "${__SalesEmail}":"mailto:${__SalesEmail}"
- 
+
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_deleted_to_support" xml:space="preserve">
@@ -824,19 +824,19 @@ Bitte stellen Sie sicher, dass die automatische Abrechnung deaktiviert ist. Übe
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_delete_tg" xml:space="preserve">
-    <value>Löschen des Portals [${__VirtualRootPath}](${__VirtualRootPath})
+    <value>Löschung des Portals [${__VirtualRootPath}](${__VirtualRootPath})
 
 Hallo $OwnerName,
 
-Sie haben das dauerhaft Löschen Ihres Portals [${__VirtualRootPath}](${__VirtualRootPath}) angefordert.
+Sie haben die dauerhafte Löschung Ihres Portals [${__VirtualRootPath}](${__VirtualRootPath}) beantragt.
 
-_Wichtig! Alle im Portal gespeicherten Daten und alle Registrierungs-Details werden dadurch verloren gehen und können nicht wieder hergestellt werden._
+_Wichtig! Alle im Portal gespeicherten Daten sowie Ihre Registrierungsdaten gehen unwiederbringlich verloren und können nicht wiederhergestellt werden._
 
 #if($AutoRenew == "True")
-Bitte stelle Sie vor dem Löschen des Portals sicher, dass die automatische Rechnungsstellung ausgeschaltet ist. Sie können den Status der automatischen Rechnungsstellung in Ihrem Stripe-Konto kontrollieren.
+Bevor Sie den Portals löschen, stellen Sie bitte sicher, dass die automatische Abrechnung deaktiviert ist. Den Status der automatischen Abrechnung können Sie in Ihrem Stripe-Konto überprüfen.
 #end
 
-Wenn Sie Ihr Portal [${__VirtualRootPath}](${__VirtualRootPath}) wirklich löschen wollen, bestätigen Sie bitte die Operation mit folgendem Link:
+Wenn Sie Ihr Portal [${__VirtualRootPath}](${__VirtualRootPath}) weiterhin löschen möchten, folgen Sie bitte dem nachstehenden Link, um den Vorgang zu bestätigen:
 
 $OrangeButton
 

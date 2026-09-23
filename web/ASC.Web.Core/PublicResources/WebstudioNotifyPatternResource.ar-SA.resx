@@ -1874,7 +1874,7 @@ $TrulyYours</value>
   <data name="pattern_suspicious_login" xml:space="preserve">
     <value>h1.تم اكتشاف تسجيل دخول مشبوه
 
- لاحظنا تسجيل دخول إلى حسابك*$UserName* ،*$UserEmail* في*$Date${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}" يبدو مختلفاً عن نشاطك المعتاد.
+ لاحظنا تسجيل دخول إلى حسابك *$UserName* ،*$UserEmail* ف *$Date* ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}" يبدو مختلفاً عن نشاطك المعتاد.
 
 IP: *$IP*
 الجهاز: *$Device*

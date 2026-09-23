@@ -2307,7 +2307,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("pattern_wallet_auto_top_up_unavailable", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to h1. Welcome to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt;!
         ///
@@ -3171,7 +3171,7 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("subject_wallet_auto_top_up_unavailable", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Welcome to ${LetterLogoText}!.
         /// </summary>

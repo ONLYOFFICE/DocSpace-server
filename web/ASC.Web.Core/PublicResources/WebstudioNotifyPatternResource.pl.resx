@@ -1870,7 +1870,7 @@ $TrulyYours</value>
   <data name="pattern_suspicious_login" xml:space="preserve">
     <value>h1.Wykryto podejrzane logowanie
 
-Zauważyliśmy logowanie na Twoje konto *$UserName*, *$UserEmail* w dniu *$Date*w ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}", które wygląda inaczej niż Twoja zwykła aktywność.
+Zauważyliśmy logowanie na Twoje konto *$UserName*, *$UserEmail* w dniu *$Date* w ${LetterLogoText}: "${__VirtualRootPath}":"${__VirtualRootPath}", które wygląda inaczej niż Twoja zwykła aktywność.
 
 IP: *$IP*
 Urządzenie: *$Device*
