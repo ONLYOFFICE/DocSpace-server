@@ -130,9 +130,7 @@ public class AppsController(
         var app = await appSettingsService.GetAppAsync(tenantId, inDto.Id)
             ?? throw new ItemNotFoundException($"App '{inDto.Id}' not found");
 
-        return string.IsNullOrEmpty(app.Settings)
-            ? null
-            : JsonDocument.Parse(app.Settings).RootElement;
+        return ParseSettings(app.Settings);
     }
 
     /// <remarks>
@@ -210,9 +208,15 @@ public class AppsController(
         {
             Id = app.Id,
             Enabled = app.Enabled,
-            Settings = string.IsNullOrEmpty(app.Settings)
-                ? null
-                : JsonDocument.Parse(app.Settings).RootElement
+            Settings = ParseSettings(app.Settings)
         };
+    }
+
+    // JsonElement.Parse, not JsonDocument.Parse(...).RootElement: the document rents its buffer from the array pool
+    // and has to be disposed, while the element handed out here must outlive it. JsonElement.Parse returns a
+    // self-contained element instead.
+    private static JsonElement? ParseSettings(string settings)
+    {
+        return string.IsNullOrEmpty(settings) ? null : JsonElement.Parse(settings);
     }
 }
