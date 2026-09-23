@@ -35,5 +35,5 @@ namespace ASC.AI.Integration.Preferences;
 
 public class Preferences
 {
-    public bool? DeepMode { get; init; }
+    public ReasoningDepth? Depth { get; init; }
 }

@@ -38,7 +38,9 @@ namespace ASC.Files.Tests.ApiFactories;
 /// </summary>
 public class AspireAppFixture : AspireHostFixture<PortalClients>
 {
-    protected override IEnumerable<string> Resources => [ResourceNames.Files, ResourceNames.People];
+    // Web.Studio is not called by any test here - it is started because it hosts the only subscriber
+    // that persists audit events, which the file and folder history suites read back.
+    protected override IEnumerable<string> Resources => [ResourceNames.Files, ResourceNames.People, ResourceNames.WebStudio];
 
     protected override PortalClients CreateClients(PortalContext context)
     {

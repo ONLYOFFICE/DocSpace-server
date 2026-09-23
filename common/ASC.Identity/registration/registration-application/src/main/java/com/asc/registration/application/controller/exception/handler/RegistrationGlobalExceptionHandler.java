@@ -53,6 +53,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -60,6 +61,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 /**
@@ -150,6 +152,24 @@ public class RegistrationGlobalExceptionHandler {
   public ProblemDetail handleMissingParameterException(
       MissingServletRequestParameterException ex, HttpServletRequest request) {
     return createProblemDetail(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI());
+  }
+
+  /**
+   * Handles {@link MethodArgumentTypeMismatchException} raised when a request parameter cannot be
+   * converted to the declared type (for example a pagination cursor that is not a valid date-time).
+   *
+   * @param ex the type-mismatch exception
+   * @param request the current request
+   * @return a {@link ProblemDetail} with HTTP status 400 (Bad Request)
+   */
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ProblemDetail handleTypeMismatchException(
+      MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+    var name = ex.getName() != null ? ex.getName() : "parameter";
+    return createProblemDetail(
+        HttpStatus.BAD_REQUEST,
+        String.format("Invalid value for parameter '%s'", name),
+        request.getRequestURI());
   }
 
   /**
@@ -412,6 +432,20 @@ public class RegistrationGlobalExceptionHandler {
       HttpMediaTypeNotSupportedException ex, HttpServletRequest request) {
     return createProblemDetail(
         HttpStatus.UNSUPPORTED_MEDIA_TYPE, ex.getMessage(), request.getRequestURI());
+  }
+
+  /**
+   * Handles {@link HttpMediaTypeNotAcceptableException} thrown when the request {@code Accept}
+   * header does not match any media type the endpoint produces.
+   *
+   * @param ex the not-acceptable exception
+   * @param request the current request
+   * @return a {@link ProblemDetail} with HTTP status 406 (Not Acceptable)
+   */
+  @ExceptionHandler(value = HttpMediaTypeNotAcceptableException.class)
+  public ProblemDetail handleNotAcceptableMediaType(
+      HttpMediaTypeNotAcceptableException ex, HttpServletRequest request) {
+    return createProblemDetail(HttpStatus.NOT_ACCEPTABLE, ex.getMessage(), request.getRequestURI());
   }
 
   /**

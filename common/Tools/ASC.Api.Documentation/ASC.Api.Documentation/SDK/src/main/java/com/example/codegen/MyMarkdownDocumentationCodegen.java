@@ -124,15 +124,53 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
     /**
      * Descriptions end up inside Markdown tables, where an unescaped pipe starts a new cell and
      * a newline ends the row - either one silently mangles the table from that point on.
+     * <p>
+     * The break is written closed, because the pages are compiled as MDX, where an unclosed tag
+     * is an error rather than a line break.
      */
     private static String tableText(String text) {
         if (text == null) {
             return null;
         }
 
-        return text.replace("|", "\\|")
-                .replaceAll("\\r\\n|\\r|\\n", "<br>")
+        return text
+                .replace("|", "\\|")
+                .replaceAll("\\r\\n|\\r|\\n", "<br/>")
                 .trim();
+    }
+
+    /**
+     * A note's value, printed as a code span. These are literals the document states rather than
+     * prose, and read as markup as soon as they are printed as prose: a domain regex such as
+     * `[a-z0-9]([a-z0-9-])` is a Markdown link, and a JSON example is an MDX expression.
+     * <p>
+     * A line break becomes a space rather than a tag, because a tag inside a code span prints as
+     * its own source.
+     */
+    private static String codeText(String text) {
+        if (text == null) {
+            return null;
+        }
+
+        String value = text
+                .replaceAll("\\r\\n|\\r|\\n", " ")
+                .replace("|", "\\|")
+                .trim();
+
+        // A code span is fenced by a longer run of backticks than any run inside it, and one that
+        // starts or ends with a backtick needs a space to keep its own text off the fence.
+        int longest = 0;
+        int run = 0;
+
+        for (int i = 0; i < value.length(); i++) {
+            run = value.charAt(i) == '`' ? run + 1 : 0;
+            longest = Math.max(longest, run);
+        }
+
+        String fence = "`".repeat(longest + 1);
+        String padding = value.startsWith("`") || value.endsWith("`") ? " " : "";
+
+        return fence + padding + value + padding + fence;
     }
 
     /**
@@ -157,10 +195,10 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
         notes.add(required ? "[required]" : "[optional]");
 
         if (isStated(example)) {
-            notes.add("[example: " + tableText(example) + "]");
+            notes.add("[example: " + codeText(example) + "]");
         }
         if (isStated(defaultValue)) {
-            notes.add("[default to " + tableText(defaultValue) + "]");
+            notes.add("[default to " + codeText(defaultValue) + "]");
         }
         Object rawValues = allowableValues == null ? null : allowableValues.get("values");
         if (rawValues instanceof List) {
@@ -168,9 +206,9 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
             if (!values.isEmpty()) {
                 StringJoiner joiner = new StringJoiner(", ");
                 for (Object value : values) {
-                    joiner.add(String.valueOf(value));
+                    joiner.add(codeText(String.valueOf(value)));
                 }
-                notes.add("[enum: " + tableText(joiner.toString()) + "]");
+                notes.add("[enum: " + joiner + "]");
             }
         }
         if (isStated(minimum)) {
@@ -186,7 +224,7 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
             notes.add("[maxLength: " + maxLength + "]");
         }
         if (isStated(pattern)) {
-            notes.add("[pattern: " + tableText(pattern) + "]");
+            notes.add("[pattern: " + codeText(pattern) + "]");
         }
         if (nullable) {
             notes.add("[nullable]");

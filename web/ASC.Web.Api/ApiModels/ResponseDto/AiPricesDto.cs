@@ -140,6 +140,27 @@ public class AiChatPriceDto
     /// </summary>
     /// <example>15.0</example>
     public decimal Completion { get; init; }
+
+    /// <summary>
+    /// The cost of one million prompt tokens served from the prompt cache. It is absent when the model does not
+    /// support prompt caching.
+    /// </summary>
+    /// <example>0.2</example>
+    public decimal? PromptCacheRead { get; init; }
+
+    /// <summary>
+    /// The cost of one million prompt tokens written to the prompt cache with the default lifetime. It is absent
+    /// when the model does not support prompt caching.
+    /// </summary>
+    /// <example>2.5</example>
+    public decimal? PromptCacheWrite { get; init; }
+
+    /// <summary>
+    /// The cost of one million prompt tokens written to the prompt cache with a one-hour lifetime. It is absent
+    /// when the model offers no such option.
+    /// </summary>
+    /// <example>4.0</example>
+    public decimal? PromptCacheWrite1H { get; init; }
 }
 
 /// <summary>

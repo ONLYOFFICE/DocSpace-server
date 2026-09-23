@@ -250,6 +250,19 @@ public class BillingClientTests
     }
 
     [Fact]
+    public async Task TransportFailure_IsMappedToBillingException()
+    {
+        // A transport failure never reaches ExceptionFactory, which only sees HTTP responses; the
+        // TransportExceptionFactory keeps it inside the BillingException hierarchy instead of leaking
+        // Refit.ApiRequestException to the callers.
+        var (client, _) = CreateClient(_ => throw new HttpRequestException("connection refused"));
+
+        var act = async () => await client.GetPaymentsAsync("portal-1");
+
+        (await act.Should().ThrowExactlyAsync<BillingException>())
+            .WithInnerException<HttpRequestException>();
+    }
+    [Fact]
     public async Task EmptyResponseBody_ThrowsBillingNotConfiguredException()
     {
         var (client, _) = CreateClient(_ => Json(HttpStatusCode.OK, ""));
@@ -350,8 +363,11 @@ public class BillingClientTests
 
         services.AddBillingHttpClient(configuration);
 
-        // Replace the real network handler with our capturing one.
-        services.ConfigureHttpClientDefaults(b => b.ConfigurePrimaryHttpMessageHandler(() => handler));
+        // Replace the real network handler with our capturing one. AddRefitGeneratedClient sets a primary
+        // handler on its own named client, which overrides ConfigureHttpClientDefaults - so the
+        // override has to target that exact client by name.
+        services.AddHttpClient(Refit.UniqueName.ForType<IBillingApi>())
+                .ConfigurePrimaryHttpMessageHandler(() => handler);
 
         var provider = services.BuildServiceProvider();
         return (provider.GetRequiredService<BillingClient>(), handler);

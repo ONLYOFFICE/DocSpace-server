@@ -65,6 +65,14 @@ internal class ProviderAccountDao(
         var providersInfo = GetProvidersInfoInternalAsync(linkId);
 
         var allproviders = await providersInfo.ToListAsync();
+
+        // Single() answered an unknown link id with "Sequence contains no elements", which reached the
+        // caller as a 500. A provider id that names nothing is a missing resource.
+        if (allproviders.Count == 0)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
         return allproviders.Single();
     }
 
@@ -95,7 +103,7 @@ internal class ProviderAccountDao(
     public virtual async IAsyncEnumerable<IProviderInfo> GetProvidersInfoAsync(Guid userId)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var thirdPartyAccounts = filesDbContext.ThirdPartyAccountsAsync(tenantId, userId);
 
         await foreach (var t in thirdPartyAccounts)
@@ -107,7 +115,7 @@ internal class ProviderAccountDao(
     private async IAsyncEnumerable<IProviderInfo> GetProvidersInfoInternalAsync(int linkId = -1, FolderType folderType = FolderType.DEFAULT, string searchText = null)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
-        var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         var thirdPartyAccounts = filesDbContext.ThirdPartyAccountsByFilterAsync(tenantId, linkId, folderType, authContext.CurrentAccount.ID, GetSearchText(searchText));
         await foreach (var t in thirdPartyAccounts)
         {

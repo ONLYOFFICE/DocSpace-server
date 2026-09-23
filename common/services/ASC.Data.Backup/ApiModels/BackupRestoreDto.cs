@@ -43,7 +43,7 @@ public class BackupRestoreDto
     /// anything that is not a GUID to restore from a file given by `storageParams` instead; an all-zero GUID
     /// selects neither, because it parses as a GUID and then matches no record.
     /// </summary>
-    /// <example>5f4b2c1a-9d3e-4f8a-b7c6-1e2d3f4a5b6c</example>
+    /// <example>11111111-1111-1111-1111-111111111111</example>
     public required string BackupId { get; set; }
 
     /// <summary>

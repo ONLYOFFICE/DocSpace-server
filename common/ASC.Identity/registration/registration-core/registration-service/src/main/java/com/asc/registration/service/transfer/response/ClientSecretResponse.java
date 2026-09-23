@@ -34,6 +34,7 @@
 package com.asc.registration.service.transfer.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import java.io.Serializable;
 import lombok.*;
 
@@ -46,9 +47,15 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Schema(description = "The response carrying a regenerated client secret.")
 public class ClientSecretResponse implements Serializable {
 
   /** The client secret. */
   @JsonProperty("client_secret")
+  @Schema(
+      description =
+          "The newly generated client secret. It replaces the previous one immediately, so every "
+              + "deployed copy of the client has to be updated with this value.",
+      example = "6c7cf17b-1bd3-47d5-94c6-be2d3570e168")
   private String clientSecret;
 }

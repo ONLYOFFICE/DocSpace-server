@@ -118,6 +118,6 @@ public record BackupProgress
     /// The ID of the job. It is the handle to poll this operation with, and for a backup job it also becomes
     /// the `id` of the record in `GET api/2.0/backup/getbackuphistory`.
     /// </summary>
-    /// <example>5f4b2c1a-9d3e-4f8a-b7c6-1e2d3f4a5b6c</example>
+    /// <example>11111111-1111-1111-1111-111111111111</example>
     public string TaskId { get; set; }
 }

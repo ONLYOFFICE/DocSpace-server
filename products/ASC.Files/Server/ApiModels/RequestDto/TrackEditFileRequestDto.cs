@@ -34,33 +34,37 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters to track file changes when editing.
+/// The parameters of an editing session heartbeat.
 /// </summary>
 public class TrackEditFileRequestDto<T>
 {
     /// <summary>
-    /// The file ID to track editing changes.
+    /// The file whose editing session is being tracked.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The tab ID to track editing changes.
+    /// The client tab that holds the session, a value the client makes up once and repeats on every call about that
+    /// tab. Two tabs sending different values are tracked as two sessions on the same file, while the all-zero value
+    /// belongs to a session claimed for a single editor.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "tabId")]
     public Guid TabId { get; set; }
 
     /// <summary>
-    /// The document key for tracking changes.
+    /// The document key of the revision being edited, as `POST api/2.0/files/file/{fileId}/startedit` returned it. It
+    /// is checked against the file's current key on every call, so a key left over from an older revision is refused.
     /// </summary>
     /// <example>abc123</example>
     [FromQuery(Name = "docKeyForTrack")]
     public string DocKeyForTrack { get; set; }
 
     /// <summary>
-    /// Specifies whether to finish file tracking or not.
+    /// Ends the session for this tab and tells the other clients that editing has stopped. Left off, the session is
+    /// refreshed and the file stays marked as being edited.
     /// </summary>
     /// <example>true</example>
     [FromQuery(Name = "isFinish")]

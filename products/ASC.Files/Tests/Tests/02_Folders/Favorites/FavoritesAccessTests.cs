@@ -117,6 +117,42 @@ public class FavoritesAccessTests(
         favorites.Files.Should().NotContain(f => f.Title == file.Title);
     }
 
+    /// <summary>
+    /// <c>total</c> must describe the same selection the page is drawn from. It is counted separately
+    /// from the entries - without the paging limits - so it is the one place where the permission
+    /// filter can be forgotten: a favorite the caller may no longer read would then be missing from
+    /// the page but still counted, and paging would advertise items no request can ever reach.
+    /// </summary>
+    [Fact]
+    public async Task GetFavorites_UserLosesRoomAccess_TotalDropsWithTheEntry()
+    {
+        // Arrange
+        var room = await CreateCustomRoom("Autotest Room Favorites Total Access");
+        var file = await CreateFile("Autotest Favorites Total Access File.docx", room.Id);
+
+        var user = await InviteMember(EmployeeType.User);
+        await InviteToRoom(room.Id, user, FileShare.Read);
+
+        await _filesClient.Authenticate(user);
+        await ToggleFavorite(file.Id);
+
+        var before = await PollFavorites(f => f.Files.Any(x => x.Title == file.Title));
+        before.Total.Should().Be(before.Files.Count + before.Folders.Count,
+            "the count must match the selection even while the favorite is still readable");
+
+        // Act - the owner revokes the access the favorite depended on
+        await _filesClient.Authenticate(Owner);
+        await InviteToRoom(room.Id, user, FileShare.None);
+
+        await _filesClient.Authenticate(user);
+        var after = await PollFavorites(f => f.Files.All(x => x.Title != file.Title));
+
+        // Assert
+        after.Files.Should().NotContain(f => f.Title == file.Title);
+        after.Total.Should().Be(after.Files.Count + after.Folders.Count,
+            "an unreadable favorite must leave the count as well as the page");
+    }
+
     [Fact]
     public async Task GetFavorites_FileFavoritedByUser_NotVisibleInOwnerFavorites()
     {

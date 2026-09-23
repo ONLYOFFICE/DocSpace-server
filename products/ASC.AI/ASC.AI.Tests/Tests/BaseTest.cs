@@ -104,7 +104,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             BaseUrl = "https://api.openai.com/v1",
             Key = "sk-test-key-" + Guid.NewGuid().ToString("N"),
             ModelId = "gpt-4o-mini",
-            Reasoning = false,
+            Reasoning = new ReasoningConfig { Thinks = false, CanDisable = true, Depths = [ReasoningDepth.None], DefaultDepth = ReasoningDepth.None },
             Capabilities = Capabilities.Chat,
             UseResponsesApi = false,
             CanUseTool = true
@@ -118,7 +118,7 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
             BaseUrl = "https://api.anthropic.com/v1",
             Key = "sk-ant-" + Guid.NewGuid().ToString("N"),
             ModelId = "claude-sonnet-4-6",
-            Reasoning = true,
+            Reasoning = new ReasoningConfig { Thinks = true, CanDisable = false, Depths = [ReasoningDepth.Low, ReasoningDepth.Medium, ReasoningDepth.High], DefaultDepth = ReasoningDepth.Medium },
             Capabilities = Capabilities.Chat | Capabilities.Vision,
             UseResponsesApi = true,
             CanUseTool = false
@@ -311,11 +311,11 @@ public class BaseTest(AspireAppFixture fixture) : IAsyncLifetime
         return wrapper?.Response;
     }
 
-    protected async Task UpsertPreferencesAsync(bool? deepMode, string? entityId = null)
+    protected async Task UpsertPreferencesAsync(ReasoningDepth? depth, string? entityId = null)
     {
         using var response = await _ai.PutAsync(
             PreferencesPath,
-            new { deepMode, entityId },
+            new { depth, entityId },
             TestContext.Current.CancellationToken);
         response.EnsureSuccessStatusCode();
     }

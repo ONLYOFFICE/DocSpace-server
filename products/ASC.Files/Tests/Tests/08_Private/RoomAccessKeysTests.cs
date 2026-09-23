@@ -198,7 +198,13 @@ public class RoomAccessKeysTests(AspireAppFixture fixture) : PrivacyRoomTestBase
         exception.ErrorCode.Should().Be(404);
     }
 
+    /// <remarks>
+    /// Bug 82543: a non-encrypted room has no access keys, so the endpoint rejects the call with
+    /// 400. It used to leak a raw .NET <c>NotSupportedException</c> as HTTP 415 ("Specified method
+    /// is not supported."). Fixed — this now asserts the clean 400.
+    /// </remarks>
     [Fact]
+    [Trait("Bug", "82543")]
     public async Task GetUserKeysForRoom_NonPrivateRoom_RejectedWithCleanClientError()
     {
         // A non-encrypted room has no access keys, so the endpoint rejects the call with 400.

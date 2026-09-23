@@ -55,6 +55,14 @@ public sealed record RenderContext(
 /// in the total row (summed, or the currency echoed next to the sums).
 public sealed record ReportColumn(string Header, string Align = "left", bool Sum = false, bool Currency = false);
 
+/// One value column of the summary pivot: the source column, the aggregate function applied to it,
+/// the caption shown above it and the number format of the aggregated value.
+public sealed record ReportPivotDataField(string Field, string Aggregation, string Caption, string Format);
+
+/// An optional second sheet summarizing the detail table as a pivot. Fields are addressed by their
+/// localized column header, because that is what the pivot reads from the source range's header row.
+public sealed record ReportPivot(string SheetName, List<string> RowFields, List<ReportPivotDataField> DataFields);
+
 /// The report-specific pieces, resolved after the user's culture is applied so that
 /// the sheet name, report title, file name and column headers are localized correctly.
 public sealed record ReportDefinition(
@@ -62,7 +70,8 @@ public sealed record ReportDefinition(
     string ReportTitle,
     string OutputFileNameFormat,
     List<ReportColumn> Columns,
-    Func<StreamWriter, Task> WriteValues);
+    Func<StreamWriter, Task> WriteValues,
+    ReportPivot Pivot = null);
 
 /// <summary>
 /// Common scaffolding for all customer report types: resolves tenant/user, applies the user's
@@ -180,7 +189,10 @@ public abstract class CustomerReportBuilderBase(
             keys = definition.Columns.Select(x => x.Header).ToList(),
             aligns = definition.Columns.Select(x => x.Align).ToList(),
             totalColumns,
-            totalCurrencyColumn
+            totalCurrencyColumn,
+            // Omitted from the serialized data when the report defines no pivot, in which case the
+            // script writes the detail sheet only.
+            pivot = definition.Pivot
         };
 
         var outputFileName = string.Format(definition.OutputFileNameFormat + ".xlsx", context.UtcStartDate.ToShortDateString(), context.UtcEndDate.ToShortDateString());

@@ -34,87 +34,96 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for checking file conversion.
+/// The parameters of one file conversion.
 /// </summary>
 public class CheckConversionRequestDto<T>
 {
     /// <summary>
-    /// The file ID to check conversion proccess.
+    /// The file to convert. It is taken from the route of the operation, so a value sent in the body is overwritten.
     /// </summary>
     /// <example>1</example>
     public T FileId { get; set; }
 
     /// <summary>
-    /// Specifies if the conversion process is synchronous or not.
+    /// How to wait for the result: `true` converts inside the request and answers with the finished result, which is
+    /// only sensible for small documents, while `false` queues the conversion and answers with an entry to poll.
     /// </summary>
     /// <example>false</example>
     public bool Sync { get; set; }
 
     /// <summary>
-    /// Specifies whether to start a conversion process or not.
+    /// Whether the conversion is to be started. It is set by the operation itself, so a value sent in the body is
+    /// overwritten.
     /// </summary>
     /// <example>true</example>
     public bool StartConvert { get; set; }
 
     /// <summary>
-    /// The file version that is converted.
+    /// The version to convert; 0 or less means the current version.
     /// </summary>
     /// <example>1</example>
     public int Version { get; set; }
 
     /// <summary>
-    /// The password of the converted file.
+    /// The password that opens the source document, for a file that is protected by one; anything else may be left
+    /// out.
     /// </summary>
     /// <example>password123</example>
     public string Password { get; set; }
 
     /// <summary>
-    /// The conversion output type.
+    /// The extension of the format to convert into, without the dot, and one the portal can produce from that
+    /// source format; left out, the default of the portal for that kind of document is used.
     /// </summary>
     /// <example>pdf</example>
     public string OutputType { get; set; }
 
     /// <summary>
-    /// Specifies whether to create a new file if it exists or not.
+    /// Where the result goes when the file has been converted before: `true` creates another file beside the source,
+    /// `false` replaces the converted file that already exists.
     /// </summary>
     /// <example>false</example>
     public bool CreateNewIfExist { get; set; }
 }
 
 /// <summary>
-/// The parameters for starting file conversion.
+/// The request that queues the conversion of a file.
 /// </summary>
 public class StartConversionRequestDto<T>
 {
     /// <summary>
-    /// The file ID to start conversion proccess.
+    /// The file to convert.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The parameters for checking file conversion.
+    /// The parameters of the conversion. The whole body may be omitted, in which case the defaults of the portal
+    /// apply.
     /// </summary>
-    /// <example>{"fileId": "1", "sync": false, "startConvert": true, "version": 1, "password": "password123", "outputType": "pdf", "createNewIfExist": false}</example>
+    /// <example>
+    /// {"sync": false, "version": 1, "password": "p@ssw0rd", "outputType": "docx", "createNewIfExist": false}
+    /// </example>
     [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)]
     public CheckConversionRequestDto<T> CheckConversion { get; set; }
 }
 
 /// <summary>
-/// The parameters for checking file conversion status.
+/// The query that reads the conversion status of a file.
 /// </summary>
 public class CheckConversionStatusRequestDto<T>
 {
     /// <summary>
-    /// The file ID to check conversion status.
+    /// The file whose conversion is asked about.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// Specifies whether a conversion operation is started or not.
+    /// Whether to start the conversion as well: `true` queues it with the default output format and no password,
+    /// `false` only reports what the portal already knows.
     /// </summary>
     /// <example>false</example>
     [FromQuery(Name = "start")]

@@ -136,7 +136,7 @@ was fixed. Follow the finding back to whatever generated it:
 | a schema or property description | the `<summary>`/`<param>` XML doc on the DTO — plus `GenerateDocumentationFile=True` in the owning csproj, without which the xml is never produced and every type in that assembly comes out undescribed |
 | route casing, an operation's tags or summary | the controller: `[ApiEndpoint]`, the route template, `[Tags]`, the XML doc comment |
 | a path parameter with no description | whichever DTO property binds the placeholder — and if none does, `[SwaggerPathParameter]` on the action. **Not** an XML `<param>` tag: it reaches nothing here and costs two warnings, see `references/project-facts.md` |
-| anything in `newai_2.0.json` | the Node service `common/ASC.NewAi` — `scripts/schema/schemaTypes.ts`, `scripts/schema/shims.d.ts`, JSDoc on the local types. No C# edit can reach this document |
+| anything in `aichat_2.0.json` | the Node service `common/ASC.AI.Chat` — `scripts/schema/schemaTypes.ts`, `scripts/schema/shims.d.ts`, JSDoc on the local types. No C# edit can reach this document |
 | a framework or vendor type surfacing in the public API (`NoContentResult`, `KeyValuePair*`, third-party package types) | the **signature**, not the documentation |
 
 That last row is the one most often fixed the wrong way. When a foreign type appears in the contract,
@@ -319,8 +319,8 @@ nothing even on a perfectly successful build. The `Writing document` line stays 
 - Rebuild **every** document the fix reaches, and `ai_2.0.json` along with them whenever the shared
   generator changed: it is not linted, but leaving it as the single stale C# document turns the next
   diff into a puzzle for whoever reads it.
-- `newai_2.0.json` is not built by MSBuild: `yarn install --immutable && yarn openapi` in
-  `common/ASC.NewAi`. Needs Node and Yarn.
+- `aichat_2.0.json` is not built by MSBuild: `yarn install --immutable && yarn openapi` in
+  `common/ASC.AI.Chat`. Needs Node and Yarn.
 - Do **not** build the `ASC.Api.Documentation` project or solution to regenerate documents. Its build
   drags in the whole service graph and then runs the Markdown/SDK targets, which need
   openapi-generator-cli, Maven, a JDK and Node. Nothing about a linter fix requires any of that.
