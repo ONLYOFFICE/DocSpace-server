@@ -44,3 +44,7 @@ common/services/ASC.Monolith/DocStore/
 # ---------- Claude Code ----------
 /.claude/settings.local.json
 /.claude/worktrees
+
+# ---------- CodeGraph ----------
+# Local symbol index (codegraph.db and friends) — rebuilt per machine.
+/.codegraph/
