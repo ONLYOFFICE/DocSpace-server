@@ -352,7 +352,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
 
   // Export.
   aiExportTextToDocx:
-    "Queues a markdown-to-docx export and answers 202 as soon as the job is accepted, without waiting for it. `title`, `content` and `folderId` are all required, and a `content` of only whitespace counts as missing even though it is not empty. The conversion runs in the AI worker, which saves the .docx into the target folder - an agent room resolves to its own result-storage subfolder - so there is nothing to poll here: completion arrives as the ordinary folder-modified socket event. This route accepts a body of up to 15 MB rather than the 100 KB the rest of the API allows, because a whole thread transcript is sent in one request.",
+    "Queues a markdown export and answers 202 as soon as the job is accepted, without waiting for it. `title`, `content` and `folderId` are all required, and a `content` of only whitespace counts as missing even though it is not empty. `format` is optional and selects the output - `Docx` (the default), `Pdf`, or `Md`, which stores the markdown verbatim instead of converting it. The conversion runs in the AI worker, which saves the .docx into the target folder - an agent room resolves to its own result-storage subfolder - so there is nothing to poll here: completion arrives as the ordinary folder-modified socket event. This route accepts a body of up to 15 MB rather than the 100 KB the rest of the API allows, because a whole thread transcript is sent in one request.",
 
   // OpenAI passthrough - the editor plugin's external-provider transport.
   aiOpenaiChatCompletions:
@@ -654,7 +654,7 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
 
   // Export - asynchronous, so the success code is 202 rather than 200.
   aiExportTextToDocx: {
-    "400": "`title`, `content` or `folderId` is missing.",
+    "400": "`title`, `content` or `folderId` is missing, or `format` is not one of `Docx`, `Pdf`, `Md`.",
     "413": "The transcript is larger than 15 MB, this route's own parser limit.",
   },
 
@@ -761,17 +761,23 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   // Web search - the four room-scoped operations resolve the room; the two
   // that accept a configuration validate its URL; the passthrough pair relays
   // the provider's answer.
-  aiWebSearchGetActiveConfig: { "404": true },
-  aiWebSearchIsConfigured: { "404": true },
+  aiWebSearchGetActiveConfig: { "400": "`entityId` is not a string.", "404": true },
+  aiWebSearchIsConfigured: { "400": "`entityId` is not a string.", "404": true },
   aiWebSearchTestConnection: {
-    "400": "The provider URL is missing, malformed, or points at a private network address.",
+    "400":
+      "The configuration is missing or malformed, or the provider URL points at a private "
+      + "network address.",
   },
   aiWebSearchConfigure: {
-    "400": "The provider URL is missing, malformed, or points at a private network address.",
+    "400":
+      "The configuration is missing or malformed, or the provider URL points at a private "
+      + "network address.",
     "404": true,
   },
   aiWebSearchSetActiveConfig: {
-    "400": "The provider URL is missing, malformed, or points at a private network address.",
+    "400":
+      "The configuration is missing or malformed, or the provider URL points at a private "
+      + "network address.",
     "404": true,
   },
   aiWebSearchPassthroughSearch: {
@@ -1156,7 +1162,7 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
     "The tool's output as a string. A tool that failed reports it inside that string.",
 
   aiExportTextToDocx:
-    "Confirms the export was queued. The .docx arrives in the target folder later, announced by " +
+    "Confirms the export was queued. The file arrives in the target folder later, announced by " +
     "a folder-modified socket event.",
 
   aiOpenaiChatCompletions:

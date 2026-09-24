@@ -784,14 +784,7 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter, 
             Options = source.Options
         };
 
-        if (FileUtility.GetFileTypeByExtention(FileUtility.GetFileExtension(file.Title)) == FileType.Pdf && !file.IsForm && (FilterType)file.Category == FilterType.None)
-        {
-            result.IsForm = await fileChecker.IsFormPDFFile(file);
-        }
-        else
-        {
-            result.IsForm = file.IsForm;
-        }
+        result.IsForm = file.IsPdf && await fileChecker.IsFormPDFFile(file);
 
         return result;
     }

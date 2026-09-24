@@ -241,7 +241,7 @@ public abstract class EditorController<T>(
         FormOpenSetup<T> formOpenSetup = null;
 
         var rootFolder = await documentServiceHelper.GetRootFolderAsync(file);
-        if (file.IsForm && rootFolder.RootFolderType != FolderType.RoomTemplates)
+        if (file.IsPdf && rootFolder.RootFolderType != FolderType.RoomTemplates)
         {
             formOpenSetup = rootFolder.FolderType switch
             {
@@ -316,6 +316,9 @@ public abstract class EditorController<T>(
 
         if (formOpenSetup != null)
         {
+            // the editor needs an explicit null in user.roles to let the form be filled without role restrictions
+            result.EditorConfig.User ??= new UserConfig();
+
             if (formOpenSetup.RootFolder.FolderType is FolderType.VirtualDataRoom)
             {
                 result.StartFilling = file.Security[FileSecurity.FilesSecurityActions.StartFilling];
@@ -356,7 +359,7 @@ public abstract class EditorController<T>(
             result.File.CanShare = false;
         }
 
-        if (rootFolder.FolderType is FolderType.ResultStorage && file.Id is int fileId)
+        if (rootFolder.FolderType is FolderType.ChatOutputs && file.Id is int fileId)
         {
             var toolCallState = await editorToolCallStateStore.GetAsync(fileId);
             if (toolCallState is not null)

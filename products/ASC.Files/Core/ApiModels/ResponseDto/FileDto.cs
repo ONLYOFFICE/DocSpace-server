@@ -190,8 +190,7 @@ public class FileDto<T> : FileEntryDto<T>
     public FormFillingStatus FormFillingStatus { get; set; } = FormFillingStatus.None;
 
     /// <summary>
-    /// Whether the PDF is a fillable form rather than a plain document. When the stored classification does not say,
-    /// the portal opens the file to find out, so the answer is reliable for a PDF and null for anything else.
+    /// Whether the file is a PDF, and so offered as a fillable form. It is null for any other file type.
     /// </summary>
     /// <example>true</example>
     public bool? IsForm { get; set; }
@@ -320,7 +319,6 @@ public class FileDtoHelper(
     FileDateTime fileDateTime,
     ExternalShare externalShare,
     BreadCrumbsManager breadCrumbsManager,
-    FileChecker fileChecker,
     SecurityContext securityContext,
     UserManager userManager,
     IUrlShortener urlShortener,
@@ -589,11 +587,7 @@ public class FileDtoHelper(
                 _ = await _fileSecurity.SetSecurity(new[] { currentRoom }.ToAsyncEnumerable()).ToListAsync();
             }
 
-            result.IsForm = file.IsForm;
-            if (fileType == FileType.Pdf && !file.IsForm && (FilterType)file.Category == FilterType.None)
-            {
-                result.IsForm = await fileChecker.IsFormPDFFile(file);
-            }
+            result.IsForm = file.IsPdf;
 
             if (DocSpaceHelper.IsFormsFillingSystemFolder(currentFolder.FolderType))
             {

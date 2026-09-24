@@ -1224,4 +1224,37 @@
   <data name="FolderMarkedAsRead" xml:space="preserve">
     <value>Dossiers [{0}]. Marqués comme lus</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Profil IA attribué à l'agent IA pour l'action : {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Profil IA attribué à l'action : {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Profil de modèle IA créé : {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Profil de modèle IA supprimé : {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Profil IA dissocié de l'action : {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Profil de modèle IA mis à jour : {0}</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Clé de chiffrement de la salle privée {0} créée</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Clé de chiffrement de la salle privée {0} supprimée</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Clé de chiffrement de la salle privée {0} mise à jour</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Connexion suspecte détectée : {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>Serveur MCP {0} de l'agent IA mis à jour</value>
+  </data>
 </root>

@@ -304,7 +304,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UnknownNullableWrapper"
+                  "$ref": "#/components/schemas/JsonValueWrapper"
                 }
               }
             }
@@ -2409,7 +2409,7 @@
           "Portal / Payment"
         ],
         "summary": "Change a wallet service quantity",
-        "description": "Buys more units of a wallet service - extra administrators, disk storage, backup, AI tools, AI search or\r\nDocsCloud - or writes down the quantity that service will have after the next renewal, depending on\r\n`productQuantityType`. With `Add` (1) the units are bought at once and paid out of the portal wallet, so the\r\nwallet needs a sub-account in the accounting currency and enough money on it; with `Set` (0) nothing is\r\ncharged now and the quantity only takes effect in the next period, where an empty or zero quantity cancels a\r\nchange scheduled earlier. `Renew` and `Sub` are not accepted here. The portal needs a billing customer and the\r\ncaller has to be a DocSpace administrator; a service that is an add-on to the plan also needs the plan itself\r\nto be paid, otherwise the answer is 402. Minimum quantities apply - disk storage starts at 100 units, the\r\nDocsCloud developer pack at 10, and the administrators may not be fewer than the portal already has - and in\r\nthe `Add` form they are checked only while the portal does not hold that service yet. Asking for the DocsCloud\r\nplan in the `Set` form while the developer pack is active schedules the reversion to it at the next period,\r\nwhile the upgrade in the other direction is not done here at all: use\r\n`POST api/2.0/settings/docscloud/switchtodevpack`. The result is `true` when the change was accepted; the call\r\nis mutating, spends money in its `Add` form and is limited to ten requests a minute per user by default. Price\r\nthe same purchase without paying for it with `PUT api/2.0/portal/payment/calculatewallet`.",
+        "description": "Buys more units of a wallet service - extra administrators, disk storage, backup, AI tools, AI search or\r\nDocs Connect - or writes down the quantity that service will have after the next renewal, depending on\r\n`productQuantityType`. With `Add` (1) the units are bought at once and paid out of the portal wallet, so the\r\nwallet needs a sub-account in the accounting currency and enough money on it; with `Set` (0) nothing is\r\ncharged now and the quantity only takes effect in the next period, where an empty or zero quantity cancels a\r\nchange scheduled earlier. `Renew` and `Sub` are not accepted here. The portal needs a billing customer and the\r\ncaller has to be a DocSpace administrator; a service that is an add-on to the plan also needs the plan itself\r\nto be paid, otherwise the answer is 402. Minimum quantities apply - disk storage starts at 100 units, the\r\nDocs Connect Dev Pack at 10, and the administrators may not be fewer than the portal already has - and in\r\nthe `Add` form they are checked only while the portal does not hold that service yet. Asking for the Docs Connect\r\nplan in the `Set` form while Docs Connect Dev Pack is active schedules the reversion to it at the next period,\r\nwhile the upgrade in the other direction is not done here at all: use\r\n`POST api/2.0/settings/docscloud/switchtodevpack`. The result is `true` when the change was accepted; the call\r\nis mutating, spends money in its `Add` form and is limited to ten requests a minute per user by default. Price\r\nthe same purchase without paying for it with `PUT api/2.0/portal/payment/calculatewallet`.",
         "operationId": "updateWalletPayment",
         "requestBody": {
           "content": {
@@ -3445,7 +3445,7 @@
           "Portal / Payment"
         ],
         "summary": "Get wallet services",
-        "description": "Lists every service the portal may pay for out of its wallet - extra administrators, disk storage, backup, AI\r\ntools, AI search and DocsCloud - with the price of a unit, the unit it is sold in and whether the portal has\r\nit switched on. Nothing has to be called first, the caller needs the permission to edit the portal settings,\r\nand the call is read-only. Services that are variants of one another are folded together: the visible one\r\ncarries the rest in its `innerServices`, so a client renders one card per group. The AI services are left out\r\nentirely when AI is not enabled for the portal. This is the catalogue and not the state of the portal - what\r\nis actually running is `GET api/2.0/portal/payment/activeservices`, one service on its own is\r\n`GET api/2.0/portal/payment/walletservice`, and switching one on or off is\r\n`POST api/2.0/portal/payment/servicestate`.",
+        "description": "Lists every service the portal may pay for out of its wallet - extra administrators, disk storage, backup, AI\r\ntools, AI search and Docs Connect - with the price of a unit, the unit it is sold in and whether the portal has\r\nit switched on. Nothing has to be called first, the caller needs the permission to edit the portal settings,\r\nand the call is read-only. Services that are variants of one another are folded together: the visible one\r\ncarries the rest in its `innerServices`, so a client renders one card per group. The AI services are left out\r\nentirely when AI is not enabled for the portal. This is the catalogue and not the state of the portal - what\r\nis actually running is `GET api/2.0/portal/payment/activeservices`, one service on its own is\r\n`GET api/2.0/portal/payment/walletservice`, and switching one on or off is\r\n`POST api/2.0/portal/payment/servicestate`.",
         "operationId": "getWalletServices",
         "responses": {
           "200": {
@@ -5095,7 +5095,7 @@
           "Portal / Payment"
         ],
         "summary": "Get the active wallet services",
-        "description": "Lists the wallet services the portal is running right now: the add-ons its plan pays for that are in the\r\nactive state, plus the ones an administrator switched on by hand in the wallet service settings; the DocsCloud\r\ntrial is listed as well, although it is not paid from the wallet. Only a DocSpace administrator may call it,\r\nno billing customer is needed for it, and the call is read-only. Every item names the service, its title and\r\nthe unit it is measured in, and says whether it is a subscription; a subscribed service also carries the limit\r\nit grants and how much of it is used where that number is known - the editor seats and the editors currently\r\nactive for DocsCloud, the purchased units and the units already consumed for disk storage. A service listed\r\nwith no limit is one whose usage is not counted this way, not one without a limit. The catalogue of what could\r\nbe switched on is `GET api/2.0/portal/payment/walletservices`, and switching one is\r\n`POST api/2.0/portal/payment/servicestate`.",
+        "description": "Lists the wallet services the portal is running right now: the add-ons its plan pays for that are in the\r\nactive state, plus the ones an administrator switched on by hand in the wallet service settings; the Docs Connect\r\ntrial is listed as well, although it is not paid from the wallet. Only a DocSpace administrator may call it,\r\nno billing customer is needed for it, and the call is read-only. Every item names the service, its title and\r\nthe unit it is measured in, and says whether it is a subscription; a subscribed service also carries the limit\r\nit grants and how much of it is used where that number is known - the editor seats and the editors currently\r\nactive for Docs Connect, the purchased units and the units already consumed for disk storage. A service listed\r\nwith no limit is one whose usage is not counted this way, not one without a limit. The catalogue of what could\r\nbe switched on is `GET api/2.0/portal/payment/walletservices`, and switching one is\r\n`POST api/2.0/portal/payment/servicestate`.",
         "operationId": "getActiveServices",
         "responses": {
           "200": {
@@ -15747,8 +15747,8 @@
         "tags": [
           "Settings / DocsCloud"
         ],
-        "summary": "Start the DocsCloud trial",
-        "description": "Activates the free DocsCloud trial subscription for the current portal, and, once a DocsCloud server is\r\nassigned to the portal, allows the address of that server in the Content Security Policy settings.\r\nThe portal tariff must be in the trial or paid state (not delayed and not unpaid), and the portal must not\r\nalready hold a DocsCloud trial, DocsCloud or DocsCloudDevPack subscription: the quotas of the current\r\ntariff are listed by `GET api/2.0/portal/tariff`. The caller must be a portal administrator allowed to edit\r\nthe portal settings, on an installation where the billing service is configured. The operation changes the\r\nportal subscription and is not idempotent: repeating it after a successful activation fails with 400.\r\nIt returns `true` when the trial has been granted, and `false` when the billing service declines it\r\n(for example, when this portal has already used its trial), in which case nothing is changed. It never buys\r\na paid plan: an existing paid DocsCloud subscription is moved to DocsCloudDevPack by\r\n`POST api/2.0/settings/docscloud/switchtodevpack` instead.",
+        "summary": "Start the Docs Connect trial",
+        "description": "Activates the free Docs Connect trial subscription for the current portal, and, once a Docs Connect server is\r\nassigned to the portal, allows the address of that server in the Content Security Policy settings.\r\nThe portal tariff must be in the trial or paid state (not delayed and not unpaid), and the portal must not\r\nalready hold a Docs Connect trial, Docs Connect or Docs Connect Dev Pack subscription: the quotas of the current\r\ntariff are listed by `GET api/2.0/portal/tariff`. The caller must be a portal administrator allowed to edit\r\nthe portal settings, on an installation where the billing service is configured. The operation changes the\r\nportal subscription and is not idempotent: repeating it after a successful activation fails with 400.\r\nIt returns `true` when the trial has been granted, and `false` when the billing service declines it\r\n(for example, when this portal has already used its trial), in which case nothing is changed. It never buys\r\na paid plan: an existing paid Docs Connect subscription is moved to Docs Connect Dev Pack by\r\n`POST api/2.0/settings/docscloud/switchtodevpack` instead.",
         "operationId": "startDocsCloudTrial",
         "responses": {
           "200": {
@@ -15773,7 +15773,7 @@
             }
           },
           "400": {
-            "description": "The portal already has a DocsCloud trial, DocsCloud or DocsCloudDevPack subscription"
+            "description": "The portal already has a Docs Connect trial, Docs Connect or Docs Connect Dev Pack subscription"
           },
           "402": {
             "description": "The portal tariff is delayed or not paid, so the trial cannot be started"
@@ -15782,7 +15782,7 @@
             "description": "The caller is not allowed to edit the portal settings, or the billing service is not configured"
           },
           "404": {
-            "description": "The DocsCloud trial quota is not available on this installation"
+            "description": "The Docs Connect trial quota is not available on this installation"
           },
           "401": {
             "description": "Unauthorized",
@@ -15856,14 +15856,14 @@
         "tags": [
           "Settings / DocsCloud"
         ],
-        "summary": "Switch DocsCloud to DocsCloudDevPack",
-        "description": "Upgrades the paid DocsCloud subscription of the current portal to DocsCloudDevPack for the requested\r\nnumber of users, charging the price difference to the portal wallet and moving the DocsCloud license\r\nto the new product. The portal must hold an active DocsCloud subscription, must not already hold a\r\nDocsCloudDevPack one, and its tariff must not be delayed or unpaid: the quotas and the state of the\r\ncurrent tariff are listed by `GET api/2.0/portal/tariff`, and the amount that will be charged is\r\nreturned by `POST api/2.0/settings/docscloud/calculatedevpack` for the same `quantity`. The caller\r\nmust be a DocSpace administrator of a portal registered with the billing service. The switch is\r\nsynchronous, mutating and not idempotent: repeating it after a successful call fails with 400, and\r\nconcurrent calls for one portal are serialized so that the wallet is charged only once. It returns\r\n`true` when the subscription has been switched, and `false` when the billing service declines or\r\nfails to perform the switch, in which case nothing is charged and the portal stays on DocsCloud.\r\nOnly the DocsCloud to DocsCloudDevPack direction is supported: to change the number of users of a\r\nsubscription the portal already has, or to schedule a reversion from DocsCloudDevPack back to\r\nDocsCloud at the next billing period, use `PUT api/2.0/portal/payment/updatewallet` instead.",
+        "summary": "Switch Docs Connect to Docs Connect Dev Pack",
+        "description": "Upgrades the paid Docs Connect subscription of the current portal to Docs Connect Dev Pack for the requested\r\nnumber of users, charging the price difference to the portal wallet and moving the Docs Connect license\r\nto the new product. The portal must hold an active Docs Connect subscription, must not already hold a\r\nDocs Connect Dev Pack one, and its tariff must not be delayed or unpaid: the quotas and the state of the\r\ncurrent tariff are listed by `GET api/2.0/portal/tariff`, and the amount that will be charged is\r\nreturned by `POST api/2.0/settings/docscloud/calculatedevpack` for the same `quantity`. The caller\r\nmust be a DocSpace administrator of a portal registered with the billing service. The switch is\r\nsynchronous, mutating and not idempotent: repeating it after a successful call fails with 400, and\r\nconcurrent calls for one portal are serialized so that the wallet is charged only once. It returns\r\n`true` when the subscription has been switched, and `false` when the billing service declines or\r\nfails to perform the switch, in which case nothing is charged and the portal stays on Docs Connect.\r\nOnly the Docs Connect to Docs Connect Dev Pack direction is supported: to change the number of users of a\r\nsubscription the portal already has, or to schedule a reversion from Docs Connect Dev Pack back to\r\nDocs Connect at the next billing period, use `PUT api/2.0/portal/payment/updatewallet` instead.",
         "operationId": "switchToDevPack",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "description": "The request parameters for switching the DocsCloud subscription to DocsCloudDevPack, or for calculating\r\nthe cost of that switch.",
+                "description": "The request parameters for switching the Docs Connect subscription to Docs Connect Dev Pack, or for calculating\r\nthe cost of that switch.",
                 "$ref": "#/components/schemas/DocsCloudDevPackRequestDto"
               }
             }
@@ -15871,7 +15871,7 @@
         },
         "responses": {
           "200": {
-            "description": "Boolean value: true if the subscription is switched to DocsCloudDevPack, false if the billing service declines it",
+            "description": "Boolean value: true if the subscription is switched to Docs Connect Dev Pack, false if the billing service declines it",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -15892,7 +15892,7 @@
             }
           },
           "400": {
-            "description": "The quantity is below the allowed minimum, the portal has no active DocsCloud subscription, or it already has a DocsCloudDevPack subscription"
+            "description": "The quantity is below the allowed minimum, the portal has no active Docs Connect subscription, or it already has a Docs Connect Dev Pack subscription"
           },
           "402": {
             "description": "The portal tariff is delayed or not paid, so the subscription cannot be switched"
@@ -15901,7 +15901,7 @@
             "description": "The caller is not a DocSpace administrator, or the billing service is not configured"
           },
           "404": {
-            "description": "The portal is not registered as a billing customer, or the DocsCloud and DocsCloudDevPack wallet products are not configured on this installation"
+            "description": "The portal is not registered as a billing customer, or the Docs Connect and Docs Connect Dev Pack wallet products are not configured on this installation"
           },
           "401": {
             "description": "Unauthorized",
@@ -15975,14 +15975,14 @@
         "tags": [
           "Settings / DocsCloud"
         ],
-        "summary": "Calculate the DocsCloudDevPack switch cost",
-        "description": "Prices the upgrade of the paid DocsCloud subscription of the current portal to DocsCloudDevPack for\r\nthe requested number of users, without changing the subscription or charging anything. It applies the\r\nsame preconditions as the switch itself: the portal must hold an active DocsCloud subscription, must\r\nnot already hold a DocsCloudDevPack one, and its tariff must not be delayed or unpaid; the quotas and\r\nthe state of the current tariff are listed by `GET api/2.0/portal/tariff`. The caller must be a\r\nDocSpace administrator of a portal registered with the billing service. The call is read-only and\r\nidempotent, so it can be repeated for different quantities before any switch is made. It returns the\r\namount that switching would cost, the three-letter ISO 4217 currency of that amount, the quantity the\r\namount was calculated for, and the identifier of the billing operation; an empty result means the\r\nbilling service could not price the switch, which should then not be attempted. The switch itself is\r\nperformed by `POST api/2.0/settings/docscloud/switchtodevpack` with the same `quantity` and takes no\r\nidentifier from this response; to price a change in the number of users of a subscription the portal\r\nalready has, use `PUT api/2.0/portal/payment/calculatewallet` instead.",
+        "summary": "Calculate the Docs Connect Dev Pack switch cost",
+        "description": "Prices the upgrade of the paid Docs Connect subscription of the current portal to Docs Connect Dev Pack for\r\nthe requested number of users, without changing the subscription or charging anything. It applies the\r\nsame preconditions as the switch itself: the portal must hold an active Docs Connect subscription, must\r\nnot already hold a Docs Connect Dev Pack one, and its tariff must not be delayed or unpaid; the quotas and\r\nthe state of the current tariff are listed by `GET api/2.0/portal/tariff`. The caller must be a\r\nDocSpace administrator of a portal registered with the billing service. The call is read-only and\r\nidempotent, so it can be repeated for different quantities before any switch is made. It returns the\r\namount that switching would cost, the three-letter ISO 4217 currency of that amount, the quantity the\r\namount was calculated for, and the identifier of the billing operation; an empty result means the\r\nbilling service could not price the switch, which should then not be attempted. The switch itself is\r\nperformed by `POST api/2.0/settings/docscloud/switchtodevpack` with the same `quantity` and takes no\r\nidentifier from this response; to price a change in the number of users of a subscription the portal\r\nalready has, use `PUT api/2.0/portal/payment/calculatewallet` instead.",
         "operationId": "calculateDevPack",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "description": "The request parameters for switching the DocsCloud subscription to DocsCloudDevPack, or for calculating\r\nthe cost of that switch.",
+                "description": "The request parameters for switching the Docs Connect subscription to Docs Connect Dev Pack, or for calculating\r\nthe cost of that switch.",
                 "$ref": "#/components/schemas/DocsCloudDevPackRequestDto"
               }
             }
@@ -15990,7 +15990,7 @@
         },
         "responses": {
           "200": {
-            "description": "The cost of switching to DocsCloudDevPack for the requested quantity, or an empty result if the billing service could not price it",
+            "description": "The cost of switching to Docs Connect Dev Pack for the requested quantity, or an empty result if the billing service could not price it",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -16011,7 +16011,7 @@
             }
           },
           "400": {
-            "description": "The quantity is below the allowed minimum, the portal has no active DocsCloud subscription, or it already has a DocsCloudDevPack subscription"
+            "description": "The quantity is below the allowed minimum, the portal has no active Docs Connect subscription, or it already has a Docs Connect Dev Pack subscription"
           },
           "402": {
             "description": "The portal tariff is delayed or not paid, so the switch cannot be priced"
@@ -16020,7 +16020,7 @@
             "description": "The caller is not a DocSpace administrator, or the billing service is not configured"
           },
           "404": {
-            "description": "The portal is not registered as a billing customer, or the DocsCloud and DocsCloudDevPack wallet products are not configured on this installation"
+            "description": "The portal is not registered as a billing customer, or the Docs Connect and Docs Connect Dev Pack wallet products are not configured on this installation"
           },
           "401": {
             "description": "Unauthorized",
@@ -16094,14 +16094,14 @@
         "tags": [
           "Settings / DocsCloud"
         ],
-        "summary": "Get the DocsCloud tenant",
-        "description": "Returns the DocsCloud tenant of the current portal: the DocsCloud server assigned to the portal, with its\r\naddress, the date the tenant subscription ends and the payment the tenant was created for. A tenant exists\r\nonly after a DocsCloud subscription has been granted, by `POST api/2.0/settings/docscloud/trial` or by a\r\nDocsCloud purchase, and only on an installation where the DocsCloud service is configured. The caller must\r\nbe a portal administrator allowed to edit the portal settings. The call is read-only and idempotent, and it\r\nis served from a cache that keeps the tenant for an hour and the absence of a tenant for a minute, so pass\r\n`refresh=true` right after a subscription change to read the current state from DocsCloud instead. In the\r\nresult, `address` is the absolute URL of the assigned server, `isActive` tells whether `endDate` is still in\r\nthe future, and the dates are in UTC. An empty result means the portal has no DocsCloud tenant yet, which is\r\nthe normal state before a subscription and not an error, so this is the operation to call to find out whether\r\nDocsCloud is activated at all. The license and server details, the editing settings, the user quota and the\r\nusage statistics are not part of it: they live in `GET api/2.0/settings/docscloud/tenant/info`,\r\n`.../tenant/config`, `.../tenant/quota` and `.../tenant/usage`, each of which fails with 400 while the\r\nportal has no activated tenant.",
+        "summary": "Get the Docs Connect tenant",
+        "description": "Returns the Docs Connect tenant of the current portal: the Docs Connect server assigned to the portal, with its\r\naddress, the date the tenant subscription ends and the payment the tenant was created for. A tenant exists\r\nonly after a Docs Connect subscription has been granted, by `POST api/2.0/settings/docscloud/trial` or by a\r\nDocs Connect purchase, and only on an installation where the Docs Connect service is configured. The caller must\r\nbe a portal administrator allowed to edit the portal settings. The call is read-only and idempotent, and it\r\nis served from a cache that keeps the tenant for an hour and the absence of a tenant for a minute, so pass\r\n`refresh=true` right after a subscription change to read the current state from Docs Connect instead. In the\r\nresult, `address` is the absolute URL of the assigned server, `isActive` tells whether `endDate` is still in\r\nthe future, and the dates are in UTC. An empty result means the portal has no Docs Connect tenant yet, which is\r\nthe normal state before a subscription and not an error, so this is the operation to call to find out whether\r\nDocs Connect is activated at all. The license and server details, the editing settings, the user quota and the\r\nusage statistics are not part of it: they live in `GET api/2.0/settings/docscloud/tenant/info`,\r\n`.../tenant/config`, `.../tenant/quota` and `.../tenant/usage`, each of which fails with 400 while the\r\nportal has no activated tenant.",
         "operationId": "getTenant",
         "parameters": [
           {
             "name": "refresh",
             "in": "query",
-            "description": "Pass `true` to skip the cached copy and request the tenant from DocsCloud again, replacing the cached one; with the default `false` the answer may be up to an hour old, or up to a minute old while the portal has no tenant.",
+            "description": "Pass `true` to skip the cached copy and request the tenant from Docs Connect again, replacing the cached one; with the default `false` the answer may be up to an hour old, or up to a minute old while the portal has no tenant.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -16110,7 +16110,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The DocsCloud tenant of the portal, or an empty result if no DocsCloud tenant is assigned to it",
+            "description": "The Docs Connect tenant of the portal, or an empty result if no Docs Connect tenant is assigned to it",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -16215,14 +16215,14 @@
         "tags": [
           "Settings / DocsCloud"
         ],
-        "summary": "Get the DocsCloud tenant information",
-        "description": "Returns the DocsCloud license of the current portal, the DocsCloud server serving it, the user limits of\r\nthat license and the editor and viewer usage counted against them for the current period. The portal must\r\nhave an activated DocsCloud tenant, granted by `POST api/2.0/settings/docscloud/trial` or by a DocsCloud\r\npurchase: an empty result from `GET api/2.0/settings/docscloud/tenant` means there is none and this call\r\nfails with 400. The caller must be a portal administrator allowed to edit the portal settings, on an\r\ninstallation where the DocsCloud service is configured. The call is read-only, idempotent and cached for a\r\nminute, so pass `refresh=true` right after a subscription change to read the current state from DocsCloud.\r\nIn the result, `license.valid` is when the license expires and `license.trial` is reported as `false` once\r\nthe portal holds a paid DocsCloud or DocsCloudDevPack subscription, even when the license itself still says\r\ntrial; `usersLimit` caps the editors and the viewers allowed, `stats` counts the active, internal, external\r\nand remaining users of each of those two kinds over the last `stats.periodDay` days, and the dates are in\r\nUTC. The editing settings, the per-user quota lists and the address of the assigned server live in\r\n`.../tenant/config`, `.../tenant/quota` and `.../tenant`, while `.../tenant/usage` gives one active-user\r\ntotal instead of this per-role breakdown.",
+        "summary": "Get the Docs Connect tenant information",
+        "description": "Returns the Docs Connect license of the current portal, the Docs Connect server serving it, the user limits of\r\nthat license and the editor and viewer usage counted against them for the current period. The portal must\r\nhave an activated Docs Connect tenant, granted by `POST api/2.0/settings/docscloud/trial` or by a Docs Connect\r\npurchase: an empty result from `GET api/2.0/settings/docscloud/tenant` means there is none and this call\r\nfails with 400. The caller must be a portal administrator allowed to edit the portal settings, on an\r\ninstallation where the Docs Connect service is configured. The call is read-only, idempotent and cached for a\r\nminute, so pass `refresh=true` right after a subscription change to read the current state from Docs Connect.\r\nIn the result, `license.valid` is when the license expires and `license.trial` is reported as `false` once\r\nthe portal holds a paid Docs Connect or Docs Connect Dev Pack subscription, even when the license itself still says\r\ntrial; `usersLimit` caps the editors and the viewers allowed, `stats` counts the active, internal, external\r\nand remaining users of each of those two kinds over the last `stats.periodDay` days, and the dates are in\r\nUTC. The editing settings, the per-user quota lists and the address of the assigned server live in\r\n`.../tenant/config`, `.../tenant/quota` and `.../tenant`, while `.../tenant/usage` gives one active-user\r\ntotal instead of this per-role breakdown.",
         "operationId": "getTenantInfo",
         "parameters": [
           {
             "name": "refresh",
             "in": "query",
-            "description": "Pass `true` to skip the cached copy and request the license, server and usage information from DocsCloud again, replacing the cached one; with the default `false` the answer may be up to a minute old.",
+            "description": "Pass `true` to skip the cached copy and request the license, server and usage information from Docs Connect again, replacing the cached one; with the default `false` the answer may be up to a minute old.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -16231,7 +16231,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The DocsCloud license and server information of the portal, with the user limits of the license and the usage statistics for the current period",
+            "description": "The Docs Connect license and server information of the portal, with the user limits of the license and the usage statistics for the current period",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -16252,7 +16252,7 @@
             }
           },
           "400": {
-            "description": "The portal has no activated DocsCloud tenant, so there is no license information to return"
+            "description": "The portal has no activated Docs Connect tenant, so there is no license information to return"
           },
           "403": {
             "description": "The caller is not allowed to edit the portal settings"
@@ -16329,14 +16329,14 @@
         "tags": [
           "Settings / DocsCloud"
         ],
-        "summary": "Get the DocsCloud tenant configuration",
-        "description": "Returns the configuration of the DocsCloud tenant of the current portal: its name, the security secret and\r\nheader name, the file size limit and anonymous access switch of the server, the WOPI switch and the IP filter\r\nrules. The portal must have an activated DocsCloud tenant, granted by `POST api/2.0/settings/docscloud/trial`\r\nor by a DocsCloud purchase: an empty result from `GET api/2.0/settings/docscloud/tenant` means there is none\r\nand this call fails with 400. The caller must be a portal administrator allowed to edit the portal settings,\r\non an installation where the DocsCloud service is configured. The call is read-only, idempotent and cached for\r\nan hour, so pass `refresh=true` to read the current state from DocsCloud; the same values are changed by\r\n`PUT api/2.0/settings/docscloud/tenant/config`, which drops the cached copy itself, so no refresh is needed\r\nafter an update. In the result, `security.secret` is a credential, so the response should be treated as\r\nsensitive; `server.fileSizeLimit` is in bytes and an update cannot raise it above 209715200 (200 MB); and an\r\nempty or absent `ipFilter.rules` means no address restriction is configured. The license and server version,\r\nthe address of the assigned server, the per-user quota and the usage counters are not part of it: they live in\r\n`.../tenant/info`, `.../tenant`, `.../tenant/quota` and `.../tenant/usage`.",
+        "summary": "Get the Docs Connect tenant configuration",
+        "description": "Returns the configuration of the Docs Connect tenant of the current portal: its name, the security secret and\r\nheader name, the file size limit and anonymous access switch of the server, the WOPI switch and the IP filter\r\nrules. The portal must have an activated Docs Connect tenant, granted by `POST api/2.0/settings/docscloud/trial`\r\nor by a Docs Connect purchase: an empty result from `GET api/2.0/settings/docscloud/tenant` means there is none\r\nand this call fails with 400. The caller must be a portal administrator allowed to edit the portal settings,\r\non an installation where the Docs Connect service is configured. The call is read-only, idempotent and cached for\r\nan hour, so pass `refresh=true` to read the current state from Docs Connect; the same values are changed by\r\n`PUT api/2.0/settings/docscloud/tenant/config`, which drops the cached copy itself, so no refresh is needed\r\nafter an update. In the result, `security.secret` is a credential, so the response should be treated as\r\nsensitive; `server.fileSizeLimit` is in bytes and an update cannot raise it above 209715200 (200 MB); and an\r\nempty or absent `ipFilter.rules` means no address restriction is configured. The license and server version,\r\nthe address of the assigned server, the per-user quota and the usage counters are not part of it: they live in\r\n`.../tenant/info`, `.../tenant`, `.../tenant/quota` and `.../tenant/usage`.",
         "operationId": "getTenantConfig",
         "parameters": [
           {
             "name": "refresh",
             "in": "query",
-            "description": "Pass `true` to skip the cached copy and request the configuration from DocsCloud again, replacing the cached one; with the default `false` the answer may be up to an hour old.",
+            "description": "Pass `true` to skip the cached copy and request the configuration from Docs Connect again, replacing the cached one; with the default `false` the answer may be up to an hour old.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -16345,7 +16345,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The configuration of the DocsCloud tenant of the portal, with its security, server, WOPI and IP filter settings",
+            "description": "The configuration of the Docs Connect tenant of the portal, with its security, server, WOPI and IP filter settings",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -16366,7 +16366,7 @@
             }
           },
           "400": {
-            "description": "The portal has no activated DocsCloud tenant, so there is no configuration to return"
+            "description": "The portal has no activated Docs Connect tenant, so there is no configuration to return"
           },
           "403": {
             "description": "The caller is not allowed to edit the portal settings"
@@ -16441,14 +16441,14 @@
         "tags": [
           "Settings / DocsCloud"
         ],
-        "summary": "Update the DocsCloud tenant configuration",
-        "description": "Replaces the configuration of the DocsCloud tenant of the current portal: its name, the security secret and\r\nheader name, the file size limit and anonymous access switch of the server, the WOPI switch and the IP filter\r\nrules; it returns the configuration as DocsCloud stored it. The portal must have an activated DocsCloud tenant,\r\ngranted by `POST api/2.0/settings/docscloud/trial` or by a DocsCloud purchase: an empty result from\r\n`GET api/2.0/settings/docscloud/tenant` means there is none and this call fails with 400. Read the current\r\nvalues with `GET api/2.0/settings/docscloud/tenant/config` first and send back whole sections: the sections\r\nleft out of the request are not sent to DocsCloud at all, while a section that is present is sent with all of\r\nits fields, so a field left unset inside it goes out as `0`, `false` or empty. The caller must be a portal\r\nadministrator allowed to edit the portal settings, on an installation where the DocsCloud service is\r\nconfigured. The call is mutating,\r\nsynchronous and idempotent, it is recorded in the portal audit trail, and it drops the cached configuration\r\nitself, so the next read returns the new values without `refresh=true`. The `tenantName`, `security.secret`,\r\n`security.header` and every `ipFilter.rules` address are capped at 255 characters and `server.fileSizeLimit`\r\nat 209715200 bytes (200 MB); a value outside those bounds is rejected with 400 before anything reaches\r\nDocsCloud. It changes these settings only, never the subscription, the user quota or the license.",
+        "summary": "Update the Docs Connect tenant configuration",
+        "description": "Replaces the configuration of the Docs Connect tenant of the current portal: its name, the security secret and\r\nheader name, the file size limit and anonymous access switch of the server, the WOPI switch and the IP filter\r\nrules; it returns the configuration as Docs Connect stored it. The portal must have an activated Docs Connect tenant,\r\ngranted by `POST api/2.0/settings/docscloud/trial` or by a Docs Connect purchase: an empty result from\r\n`GET api/2.0/settings/docscloud/tenant` means there is none and this call fails with 400. Read the current\r\nvalues with `GET api/2.0/settings/docscloud/tenant/config` first and send back whole sections: the sections\r\nleft out of the request are not sent to Docs Connect at all, while a section that is present is sent with all of\r\nits fields, so a field left unset inside it goes out as `0`, `false` or empty. The caller must be a portal\r\nadministrator allowed to edit the portal settings, on an installation where the Docs Connect service is\r\nconfigured. The call is mutating,\r\nsynchronous and idempotent, it is recorded in the portal audit trail, and it drops the cached configuration\r\nitself, so the next read returns the new values without `refresh=true`. The `tenantName`, `security.secret`,\r\n`security.header` and every `ipFilter.rules` address are capped at 255 characters and `server.fileSizeLimit`\r\nat 209715200 bytes (200 MB); a value outside those bounds is rejected with 400 before anything reaches\r\nDocs Connect. It changes these settings only, never the subscription, the user quota or the license.",
         "operationId": "updateTenantConfig",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "description": "Represents the configuration of a DocsCloud tenant.",
+                "description": "Represents the configuration of a Docs Connect tenant.",
                 "$ref": "#/components/schemas/DocsCloudConfig"
               }
             }
@@ -16456,7 +16456,7 @@
         },
         "responses": {
           "200": {
-            "description": "The configuration of the DocsCloud tenant as DocsCloud stored it after the update",
+            "description": "The configuration of the Docs Connect tenant as Docs Connect stored it after the update",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -16477,7 +16477,7 @@
             }
           },
           "400": {
-            "description": "A text field is longer than 255 characters, the file size limit is outside 0-209715200 bytes, or the portal has no activated DocsCloud tenant"
+            "description": "A text field is longer than 255 characters, the file size limit is outside 0-209715200 bytes, or the portal has no activated Docs Connect tenant"
           },
           "403": {
             "description": "The caller is not allowed to edit the portal settings"
@@ -16554,14 +16554,14 @@
         "tags": [
           "Settings / DocsCloud"
         ],
-        "summary": "Get the DocsCloud tenant quota",
-        "description": "Returns the DocsCloud user quota of the current portal: the users who currently count as DocsCloud editors and\r\nthe users who count as viewers, each with the identifier DocsCloud knows them by and the date their quota entry\r\nexpires. The portal must have an activated DocsCloud tenant, granted by `POST api/2.0/settings/docscloud/trial`\r\nor by a DocsCloud purchase: an empty result from `GET api/2.0/settings/docscloud/tenant` means there is none\r\nand this call fails with 400. The caller must be a portal administrator allowed to edit the portal settings,\r\non an installation where the DocsCloud service is configured. The call is read-only, idempotent and cached for\r\na minute, so pass `refresh=true` to read the current state from DocsCloud. In the result, `users` holds the\r\neditor entries and `usersView` the viewer entries, both unordered; `userId` is the DocSpace user ID for a\r\nportal member and an identifier of DocsCloud's own for anyone else; `expire` is the date and time the entry\r\nexpires, as a UTC string; and empty lists mean no user has been counted yet. It lists the users themselves,\r\nnot the counters: the license limits with the per-role totals are in\r\n`GET api/2.0/settings/docscloud/tenant/info`, a single active-user total is in `.../tenant/usage`, and the\r\nsame lists as a downloadable \"xlsx\" file are produced by\r\n`POST api/2.0/settings/docscloud/tenant/quota/report`.",
+        "summary": "Get the Docs Connect tenant quota",
+        "description": "Returns the Docs Connect user quota of the current portal: the users who currently count as Docs Connect editors and\r\nthe users who count as viewers, each with the identifier Docs Connect knows them by and the date their quota entry\r\nexpires. The portal must have an activated Docs Connect tenant, granted by `POST api/2.0/settings/docscloud/trial`\r\nor by a Docs Connect purchase: an empty result from `GET api/2.0/settings/docscloud/tenant` means there is none\r\nand this call fails with 400. The caller must be a portal administrator allowed to edit the portal settings,\r\non an installation where the Docs Connect service is configured. The call is read-only, idempotent and cached for\r\na minute, so pass `refresh=true` to read the current state from Docs Connect. In the result, `users` holds the\r\neditor entries and `usersView` the viewer entries, both unordered; `userId` is the DocSpace user ID for a\r\nportal member and an identifier of Docs Connect's own for anyone else; `expire` is the date and time the entry\r\nexpires, as a UTC string; and empty lists mean no user has been counted yet. It lists the users themselves,\r\nnot the counters: the license limits with the per-role totals are in\r\n`GET api/2.0/settings/docscloud/tenant/info`, a single active-user total is in `.../tenant/usage`, and the\r\nsame lists as a downloadable \"xlsx\" file are produced by\r\n`POST api/2.0/settings/docscloud/tenant/quota/report`.",
         "operationId": "getTenantQuota",
         "parameters": [
           {
             "name": "refresh",
             "in": "query",
-            "description": "Pass `true` to skip the cached copy and request the user quota from DocsCloud again, replacing the cached one; with the default `false` the answer may be up to a minute old.",
+            "description": "Pass `true` to skip the cached copy and request the user quota from Docs Connect again, replacing the cached one; with the default `false` the answer may be up to a minute old.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -16570,7 +16570,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The editor and viewer users of the DocsCloud tenant of the portal, with the expiration date of each entry",
+            "description": "The editor and viewer users of the Docs Connect tenant of the portal, with the expiration date of each entry",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -16591,7 +16591,7 @@
             }
           },
           "400": {
-            "description": "The portal has no activated DocsCloud tenant, so there is no user quota to return"
+            "description": "The portal has no activated Docs Connect tenant, so there is no user quota to return"
           },
           "403": {
             "description": "The caller is not allowed to edit the portal settings"
@@ -16668,8 +16668,8 @@
         "tags": [
           "Settings / DocsCloud"
         ],
-        "summary": "Start the DocsCloud quota report",
-        "description": "Queues a background job that renders the current DocsCloud user quota of the portal into an \"xlsx\" file and\r\nsaves that file in the \"My documents\" folder of the calling user; the report lists the editor and the viewer\r\nusers with the type and the expiration date of each, and summarizes the internal, external and remaining users\r\nagainst the license limits. The file is not ready when the response arrives: poll\r\n`GET api/2.0/settings/docscloud/tenant/quota/report` until `isCompleted` is true, then take the file from\r\n`resultFileId` or `resultFileUrl`, and use `DELETE api/2.0/settings/docscloud/tenant/quota/report` to cancel a\r\njob that is still running. The caller must be a portal administrator allowed to edit the portal settings. The\r\nportal should have an activated DocsCloud tenant: this call does not check that, and without a tenant the job\r\nitself fails and reports the reason in the `error` of the status response. One report per caller runs at a\r\ntime: while a report of this user is still being built, the call describes that running job and no second\r\ngeneration is started, so a repeated call is safe. What comes back is the initial state of the job, with\r\n`percentage` 0 and a created `status`, not the report; the report is a point-in-time snapshot and carries the\r\ngeneration date in its file name. To read the same data as JSON, without building a file, use\r\n`GET api/2.0/settings/docscloud/tenant/quota`.",
+        "summary": "Start the Docs Connect quota report",
+        "description": "Queues a background job that renders the current Docs Connect user quota of the portal into an \"xlsx\" file and\r\nsaves that file in the \"My documents\" folder of the calling user; the report lists the editor and the viewer\r\nusers with the type and the expiration date of each, and summarizes the internal, external and remaining users\r\nagainst the license limits. The file is not ready when the response arrives: poll\r\n`GET api/2.0/settings/docscloud/tenant/quota/report` until `isCompleted` is true, then take the file from\r\n`resultFileId` or `resultFileUrl`, and use `DELETE api/2.0/settings/docscloud/tenant/quota/report` to cancel a\r\njob that is still running. The caller must be a portal administrator allowed to edit the portal settings. The\r\nportal should have an activated Docs Connect tenant: this call does not check that, and without a tenant the job\r\nitself fails and reports the reason in the `error` of the status response. One report per caller runs at a\r\ntime: while a report of this user is still being built, the call describes that running job and no second\r\ngeneration is started, so a repeated call is safe. What comes back is the initial state of the job, with\r\n`percentage` 0 and a created `status`, not the report; the report is a point-in-time snapshot and carries the\r\ngeneration date in its file name. To read the same data as JSON, without building a file, use\r\n`GET api/2.0/settings/docscloud/tenant/quota`.",
         "operationId": "createTenantQuotaReport",
         "responses": {
           "200": {
@@ -16766,12 +16766,12 @@
         "tags": [
           "Settings / DocsCloud"
         ],
-        "summary": "Get the DocsCloud quota report status",
-        "description": "Returns the state of the DocsCloud user quota report that the current user started with\r\n`POST api/2.0/settings/docscloud/tenant/quota/report`, so that the caller can follow the generation and pick\r\nup the resulting file. It reports the caller's own job only: a report started by another administrator is not\r\nvisible here, and an empty result means this user has no job, because none was started, because it was\r\nterminated, or because a finished one has already been cleared (a job state is kept for a day, and starting a\r\nnew report drops the previous finished one); that is a normal state and not an error. The caller must be a\r\nportal administrator allowed to edit the portal settings. The call is read-only and idempotent, and it is\r\nmeant to be polled while the job runs. In the result, `percentage` goes from 0 to 100 and `isCompleted`\r\nbecomes true both on success and on failure, so check `error`: it is empty when the report was built and\r\ncarries the failure message otherwise;\r\n`resultFileId`, `resultFileName` and `resultFileUrl` are filled in only once the file exists, and that file\r\nalso stays in the \"My documents\" folder of the caller. Use the `POST` operation on this path to start a report\r\nand the `DELETE` one to cancel it.",
+        "summary": "Get the Docs Connect quota report status",
+        "description": "Returns the state of the Docs Connect user quota report that the current user started with\r\n`POST api/2.0/settings/docscloud/tenant/quota/report`, so that the caller can follow the generation and pick\r\nup the resulting file. It reports the caller's own job only: a report started by another administrator is not\r\nvisible here, and an empty result means this user has no job, because none was started, because it was\r\nterminated, or because a finished one has already been cleared (a job state is kept for a day, and starting a\r\nnew report drops the previous finished one); that is a normal state and not an error. The caller must be a\r\nportal administrator allowed to edit the portal settings. The call is read-only and idempotent, and it is\r\nmeant to be polled while the job runs. In the result, `percentage` goes from 0 to 100 and `isCompleted`\r\nbecomes true both on success and on failure, so check `error`: it is empty when the report was built and\r\ncarries the failure message otherwise;\r\n`resultFileId`, `resultFileName` and `resultFileUrl` are filled in only once the file exists, and that file\r\nalso stays in the \"My documents\" folder of the caller. Use the `POST` operation on this path to start a report\r\nand the `DELETE` one to cancel it.",
         "operationId": "getTenantQuotaReport",
         "responses": {
           "200": {
-            "description": "The state of the DocsCloud quota report job of the caller, or an empty result if there is no such job",
+            "description": "The state of the Docs Connect quota report job of the caller, or an empty result if there is no such job",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -16864,8 +16864,8 @@
         "tags": [
           "Settings / DocsCloud"
         ],
-        "summary": "Terminate the DocsCloud quota report",
-        "description": "Cancels the DocsCloud user quota report that the current user started with\r\n`POST api/2.0/settings/docscloud/tenant/quota/report` and removes its job, so that a new report can be started\r\nright away. There is no precondition: the call is accepted even when this user has no report job at all, and\r\nit affects the caller's own job only, never one started by another administrator. The caller must be a portal\r\nadministrator allowed to edit the portal settings. The cancellation is asynchronous and idempotent: 200 means\r\nthe request has been queued for the report worker, not that the job has already stopped, so poll\r\n`GET api/2.0/settings/docscloud/tenant/quota/report` until it returns an empty result. Nothing is returned in\r\nthe body. A report file that has already been saved in the \"My documents\" folder of the caller is left there\r\nand has to be deleted through the file operations if it is no longer wanted.",
+        "summary": "Terminate the Docs Connect quota report",
+        "description": "Cancels the Docs Connect user quota report that the current user started with\r\n`POST api/2.0/settings/docscloud/tenant/quota/report` and removes its job, so that a new report can be started\r\nright away. There is no precondition: the call is accepted even when this user has no report job at all, and\r\nit affects the caller's own job only, never one started by another administrator. The caller must be a portal\r\nadministrator allowed to edit the portal settings. The cancellation is asynchronous and idempotent: 200 means\r\nthe request has been queued for the report worker, not that the job has already stopped, so poll\r\n`GET api/2.0/settings/docscloud/tenant/quota/report` until it returns an empty result. Nothing is returned in\r\nthe body. A report file that has already been saved in the \"My documents\" folder of the caller is left there\r\nand has to be deleted through the file operations if it is no longer wanted.",
         "operationId": "terminateTenantQuotaReport",
         "responses": {
           "200": {
@@ -16957,14 +16957,14 @@
         "tags": [
           "Settings / DocsCloud"
         ],
-        "summary": "Get the DocsCloud tenant usage",
-        "description": "Returns the DocsCloud usage of the current portal: the number of users who have been active in DocsCloud in\r\nthe current period, and the moment that period is counted from. The portal must have an activated DocsCloud\r\ntenant, granted by `POST api/2.0/settings/docscloud/trial` or by a DocsCloud purchase: an empty result from\r\n`GET api/2.0/settings/docscloud/tenant` means there is none and this call fails with 400. The caller must be a\r\nportal administrator allowed to edit the portal settings, on an installation where the DocsCloud service is\r\nconfigured. The call is read-only, idempotent and cached for a minute, so pass `refresh=true` to read the\r\ncurrent state from DocsCloud. In the result, `activeCount` counts the users seen since `since`, which is in\r\nUTC, and it is one total for the whole tenant, with no split by role and no limit to compare it against. For\r\nthe editor and viewer breakdown with the license limits use `GET api/2.0/settings/docscloud/tenant/info`, and\r\nfor the users counted one by one `GET api/2.0/settings/docscloud/tenant/quota`.",
+        "summary": "Get the Docs Connect tenant usage",
+        "description": "Returns the Docs Connect usage of the current portal: the number of users who have been active in Docs Connect in\r\nthe current period, and the moment that period is counted from. The portal must have an activated Docs Connect\r\ntenant, granted by `POST api/2.0/settings/docscloud/trial` or by a Docs Connect purchase: an empty result from\r\n`GET api/2.0/settings/docscloud/tenant` means there is none and this call fails with 400. The caller must be a\r\nportal administrator allowed to edit the portal settings, on an installation where the Docs Connect service is\r\nconfigured. The call is read-only, idempotent and cached for a minute, so pass `refresh=true` to read the\r\ncurrent state from Docs Connect. In the result, `activeCount` counts the users seen since `since`, which is in\r\nUTC, and it is one total for the whole tenant, with no split by role and no limit to compare it against. For\r\nthe editor and viewer breakdown with the license limits use `GET api/2.0/settings/docscloud/tenant/info`, and\r\nfor the users counted one by one `GET api/2.0/settings/docscloud/tenant/quota`.",
         "operationId": "getTenantUsage",
         "parameters": [
           {
             "name": "refresh",
             "in": "query",
-            "description": "Pass `true` to skip the cached copy and request the usage statistics from DocsCloud again, replacing the cached one; with the default `false` the answer may be up to a minute old.",
+            "description": "Pass `true` to skip the cached copy and request the usage statistics from Docs Connect again, replacing the cached one; with the default `false` the answer may be up to a minute old.",
             "schema": {
               "type": "boolean",
               "default": false
@@ -16973,7 +16973,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The number of active DocsCloud users of the portal and the date the count starts from",
+            "description": "The number of active Docs Connect users of the portal and the date the count starts from",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -16994,7 +16994,7 @@
             }
           },
           "400": {
-            "description": "The portal has no activated DocsCloud tenant, so there is no usage information to return"
+            "description": "The portal has no activated Docs Connect tenant, so there is no usage information to return"
           },
           "403": {
             "description": "The caller is not allowed to edit the portal settings"
@@ -29013,6 +29013,39 @@
             "type": "number",
             "description": "The cost of one million tokens the model writes back. It is normally the dearer of the two directions.",
             "format": "double"
+          },
+          "promptCacheRead": {
+            "examples": [
+              0.2
+            ],
+            "type": [
+              "null",
+              "number"
+            ],
+            "description": "The cost of one million prompt tokens served from the prompt cache. It is absent when the model does not\r\nsupport prompt caching.",
+            "format": "double"
+          },
+          "promptCacheWrite": {
+            "examples": [
+              2.5
+            ],
+            "type": [
+              "null",
+              "number"
+            ],
+            "description": "The cost of one million prompt tokens written to the prompt cache with the default lifetime. It is absent\r\nwhen the model does not support prompt caching.",
+            "format": "double"
+          },
+          "promptCacheWrite1H": {
+            "examples": [
+              4.0
+            ],
+            "type": [
+              "null",
+              "number"
+            ],
+            "description": "The cost of one million prompt tokens written to the prompt cache with a one-hour lifetime. It is absent\r\nwhen the model offers no such option.",
+            "format": "double"
           }
         },
         "description": "What a chat model charges, split by the direction the tokens flow in."
@@ -29701,21 +29734,6 @@
               {
                 "theme": "dark",
                 "language": "en"
-              }
-            ],
-            "type": "null",
-            "oneOf": [
-              {
-                "examples": [
-                  1234
-                ],
-                "type": "integer"
-              },
-              {
-                "examples": [
-                  "some text"
-                ],
-                "type": "string"
               }
             ],
             "description": "The settings document saved for this portal, stored and returned verbatim - the portal never looks inside\r\nit, and only the application knows its shape. It is empty while the portal has saved none, which means the\r\napplication falls back to its own defaults, and it also survives the application being switched off."
@@ -31967,6 +31985,10 @@
       "CultureSpecificExternalResources": {
         "type": "object",
         "properties": {
+          "adminPanel": {
+            "description": "The link to the administration panel. It is returned only to the full administrators of a licensed (Enterprise) server (standalone) portal.",
+            "$ref": "#/components/schemas/CultureSpecificExternalResource"
+          },
           "api": {
             "description": "The link to the product API.",
             "$ref": "#/components/schemas/CultureSpecificExternalResource"
@@ -33401,7 +33423,7 @@
             "$ref": "#/components/schemas/DocsCloudIpFilterConfig"
           }
         },
-        "description": "Represents the configuration of a DocsCloud tenant."
+        "description": "Represents the configuration of a Docs Connect tenant."
       },
       "DocsCloudConfigWrapper": {
         "type": "object",
@@ -33455,11 +33477,11 @@
             "maximum": 2147483647,
             "minimum": 1,
             "type": "integer",
-            "description": "The number of users to subscribe to DocsCloudDevPack for. It must be at least the number of users of\r\nthe currently purchased DocsCloud subscription, and at least the DocsCloudDevPack minimum configured\r\nfor the installation, which is 10 users by default; a smaller value is rejected with 400.",
+            "description": "The number of users to subscribe to Docs Connect Dev Pack for. It must be at least the number of users of\r\nthe currently purchased Docs Connect subscription, and at least the Docs Connect Dev Pack minimum configured\r\nfor the installation, which is 10 users by default; a smaller value is rejected with 400.",
             "format": "int32"
           }
         },
-        "description": "The request parameters for switching the DocsCloud subscription to DocsCloudDevPack, or for calculating\r\nthe cost of that switch."
+        "description": "The request parameters for switching the Docs Connect subscription to Docs Connect Dev Pack, or for calculating\r\nthe cost of that switch."
       },
       "DocsCloudIpFilterConfig": {
         "type": "object",
@@ -33478,13 +33500,13 @@
               "array"
             ],
             "items": {
-              "description": "Represents the IP filter rule of a DocsCloud tenant.",
+              "description": "Represents the IP filter rule of a Docs Connect tenant.",
               "$ref": "#/components/schemas/DocsCloudIpFilterRule"
             },
             "description": "The IP filter rules."
           }
         },
-        "description": "Represents the IP filter configuration of a DocsCloud tenant."
+        "description": "Represents the IP filter configuration of a Docs Connect tenant."
       },
       "DocsCloudIpFilterRule": {
         "type": "object",
@@ -33509,7 +33531,7 @@
             "description": "Whether the IP address is allowed."
           }
         },
-        "description": "Represents the IP filter rule of a DocsCloud tenant."
+        "description": "Represents the IP filter rule of a Docs Connect tenant."
       },
       "DocsCloudLicenseInfo": {
         "type": "object",
@@ -33538,7 +33560,7 @@
             "format": "date-time"
           }
         },
-        "description": "Represents the license information of a DocsCloud tenant."
+        "description": "Represents the license information of a Docs Connect tenant."
       },
       "DocsCloudPayment": {
         "type": "object",
@@ -33610,7 +33632,7 @@
             "description": "The three-character ISO 4217 currency symbol of the payment."
           }
         },
-        "description": "Represents the payment information of a DocsCloud tenant."
+        "description": "Represents the payment information of a Docs Connect tenant."
       },
       "DocsCloudQuota": {
         "type": "object",
@@ -33629,7 +33651,7 @@
               "array"
             ],
             "items": {
-              "description": "Represents a single user entry of a DocsCloud quota.",
+              "description": "Represents a single user entry of a Docs Connect quota.",
               "$ref": "#/components/schemas/DocsCloudQuotaUser"
             },
             "description": "The editor users."
@@ -33648,13 +33670,13 @@
               "array"
             ],
             "items": {
-              "description": "Represents a single user entry of a DocsCloud quota.",
+              "description": "Represents a single user entry of a Docs Connect quota.",
               "$ref": "#/components/schemas/DocsCloudQuotaUser"
             },
             "description": "The viewer users."
           }
         },
-        "description": "Represents the current user quota of a DocsCloud tenant."
+        "description": "Represents the current user quota of a Docs Connect tenant."
       },
       "DocsCloudQuotaUser": {
         "type": "object",
@@ -33680,7 +33702,7 @@
             "description": "The expiration date of the user."
           }
         },
-        "description": "Represents a single user entry of a DocsCloud quota."
+        "description": "Represents a single user entry of a Docs Connect quota."
       },
       "DocsCloudQuotaWrapper": {
         "type": "object",
@@ -33752,7 +33774,7 @@
             "description": "The security header name."
           }
         },
-        "description": "Represents the security configuration of a DocsCloud tenant."
+        "description": "Represents the security configuration of a Docs Connect tenant."
       },
       "DocsCloudServerConfig": {
         "type": "object",
@@ -33775,7 +33797,7 @@
             "format": "int64"
           }
         },
-        "description": "Represents the server configuration of a DocsCloud tenant."
+        "description": "Represents the server configuration of a Docs Connect tenant."
       },
       "DocsCloudServerInfo": {
         "type": "object",
@@ -33809,7 +33831,7 @@
             "format": "date-time"
           }
         },
-        "description": "Represents the DocsCloud server information."
+        "description": "Represents the Docs Connect server information."
       },
       "DocsCloudStats": {
         "type": "object",
@@ -33831,7 +33853,7 @@
             "$ref": "#/components/schemas/DocsCloudUserStats"
           }
         },
-        "description": "Represents the usage statistics of a DocsCloud tenant for the current period."
+        "description": "Represents the usage statistics of a Docs Connect tenant for the current period."
       },
       "DocsCloudTenant": {
         "type": "object",
@@ -33930,7 +33952,7 @@
             "$ref": "#/components/schemas/DocsCloudPayment"
           }
         },
-        "description": "Represents a DocsCloud tenant of a portal."
+        "description": "Represents a Docs Connect tenant of a portal."
       },
       "DocsCloudTenantInfo": {
         "type": "object",
@@ -33940,7 +33962,7 @@
             "$ref": "#/components/schemas/DocsCloudLicenseInfo"
           },
           "server": {
-            "description": "The DocsCloud server information.",
+            "description": "The Docs Connect server information.",
             "$ref": "#/components/schemas/DocsCloudServerInfo"
           },
           "usersLimit": {
@@ -33952,7 +33974,7 @@
             "$ref": "#/components/schemas/DocsCloudStats"
           }
         },
-        "description": "Represents the license and server information of a DocsCloud tenant, with usage statistics for the current period."
+        "description": "Represents the license and server information of a Docs Connect tenant, with usage statistics for the current period."
       },
       "DocsCloudTenantInfoWrapper": {
         "type": "object",
@@ -34058,7 +34080,7 @@
             "format": "int32"
           }
         },
-        "description": "Represents the usage statistics of a DocsCloud tenant."
+        "description": "Represents the usage statistics of a Docs Connect tenant."
       },
       "DocsCloudUsageWrapper": {
         "type": "object",
@@ -34145,7 +34167,7 @@
             "description": "Whether the number of remaining users is critically low."
           }
         },
-        "description": "Represents the usage statistics of a single DocsCloud user category (editor or viewer)."
+        "description": "Represents the usage statistics of a single Docs Connect user category (editor or viewer)."
       },
       "DocsCloudUsersLimit": {
         "type": "object",
@@ -34167,7 +34189,7 @@
             "format": "int32"
           }
         },
-        "description": "Represents the user limits of a DocsCloud license."
+        "description": "Represents the user limits of a Docs Connect license."
       },
       "DocsCloudWopiConfig": {
         "type": "object",
@@ -34180,7 +34202,7 @@
             "description": "Whether WOPI is enabled."
           }
         },
-        "description": "Represents the WOPI configuration of a DocsCloud tenant."
+        "description": "Represents the WOPI configuration of a Docs Connect tenant."
       },
       "DocumentBuilderTaskDto": {
         "required": [
@@ -35481,13 +35503,13 @@
               "RoomTemplates",
               "AiRoom",
               "Knowledge",
-              "ResultStorage",
+              "ChatOutputs",
               "AiAgents",
               "DefaultTemplates",
               "Forms"
             ],
             "type": "string",
-            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms]"
+            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms]"
           },
           {
             "examples": [
@@ -35526,7 +35548,7 @@
               36
             ],
             "type": "integer",
-            "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates, 36 - Forms]",
+            "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms]",
             "x-enum-varnames": [
               "DEFAULT",
               "COMMON",
@@ -35554,7 +35576,7 @@
               "RoomTemplates",
               "AiRoom",
               "Knowledge",
-              "ResultStorage",
+              "ChatOutputs",
               "AiAgents",
               "DefaultTemplates",
               "Forms"
@@ -36381,6 +36403,47 @@
           }
         },
         "description": "One entry of a keyed collection, carried as an explicit pair of `key` and `value` fields instead of as a member\r\nof a JSON object, so that the key is not restricted to a string and the entries keep the order they are sent in."
+      },
+      "JsonValueWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "description": "The JSON value returned by the operation, or null when there is none."
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing an arbitrary JSON value."
       },
       "LocationType": {
         "oneOf": [
@@ -40773,20 +40836,6 @@
             "examples": [
               { }
             ],
-            "oneOf": [
-              {
-                "examples": [
-                  1234
-                ],
-                "type": "integer"
-              },
-              {
-                "examples": [
-                  "some text"
-                ],
-                "type": "string"
-              }
-            ],
             "description": "The configuration the application reads, as any valid JSON value. Its shape is defined by the application and\r\nis neither validated nor interpreted by the portal, which stores it verbatim. It replaces the whole stored\r\ndocument rather than merging into it, and `null` drops it so the application falls back to its own defaults."
           }
         },
@@ -44323,7 +44372,7 @@
               true
             ],
             "type": "integer",
-            "description": "The number of DocsCloud users.",
+            "description": "The number of Docs Connect users.",
             "format": "int32"
           },
           "docsCloudDevPack": {
@@ -44331,14 +44380,14 @@
               true
             ],
             "type": "boolean",
-            "description": "Specifies if the DocsCloudDevPack enabled or not."
+            "description": "Specifies if the Docs Connect Dev Pack enabled or not."
           },
           "docsCloudTrial": {
             "examples": [
               true
             ],
             "type": "boolean",
-            "description": "Specifies if the DocsCloudTrial enabled or not."
+            "description": "Specifies if the Docs Connect trial enabled or not."
           }
         },
         "description": "The current tenant quota."
@@ -45829,48 +45878,6 @@
         },
         "description": "Whether the sign-in page offers the form for writing to the portal administrators."
       },
-      "UnknownNullableWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "null",
-            "description": "The response payload."
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        },
-        "description": "The successful API response."
-      },
       "UpcomingPaymentArrayWrapper": {
         "type": "object",
         "properties": {
@@ -46522,7 +46529,7 @@
               ],
               "format": "int32"
             },
-            "description": "The wallet service and the number of units of it, as a single pair. The key is the `serviceName` of a service\r\nfrom `GET api/2.0/portal/payment/walletservices`, and the value is read according to\r\n`productQuantityType`: the units to add, or the total the service is to have in the next period. Minimum\r\nquantities apply per service - disk storage starts at 100 units, the DocsCloud developer pack at 10, and the\r\nadministrators may not be fewer than the portal already has. Exactly one pair is accepted, and a null or zero\r\nvalue cancels a change scheduled earlier rather than buying nothing."
+            "description": "The wallet service and the number of units of it, as a single pair. The key is the `serviceName` of a service\r\nfrom `GET api/2.0/portal/payment/walletservices`, and the value is read according to\r\n`productQuantityType`: the units to add, or the total the service is to have in the next period. Minimum\r\nquantities apply per service - disk storage starts at 100 units, the Docs Connect Dev Pack at 10, and the\r\nadministrators may not be fewer than the portal already has. Exactly one pair is accepted, and a null or zero\r\nvalue cancels a change scheduled earlier rather than buying nothing."
           },
           "productQuantityType": {
             "description": "How the number in `quantity` is applied. `Add` buys the units straight away and charges them to the portal\r\nwallet, while `Set` charges nothing now and records the quantity the service is to have from the next period.\r\nOnly these two are accepted here; `Sub` and `Renew` are refused with 400.",

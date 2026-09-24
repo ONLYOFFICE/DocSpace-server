@@ -34,7 +34,7 @@
 namespace ASC.Core.Billing;
 
 /// <summary>
-/// Type-safe REST contract for the external DocsCloud service, implemented by Refit.
+/// Type-safe REST contract for the external Docs Connect service, implemented by Refit.
 /// All paths are relative — the base address, authentication and resilience are configured in
 /// <see cref="DocsCloudHttpClientExtension.AddDocsCloudHttpClient"/>. The public wrapper is <see cref="DocsCloudClient"/>.
 /// </summary>

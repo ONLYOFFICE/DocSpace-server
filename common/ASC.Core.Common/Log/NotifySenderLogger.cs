@@ -32,7 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Core.Common.Log;
-internal static partial class JabberSenderLogger
+internal static partial class NotifySenderLogger
 {
     [LoggerMessage(LogLevel.Debug, "Unexpected error")]
     public static partial void ErrorUnexpected(this ILogger logger, Exception exception);

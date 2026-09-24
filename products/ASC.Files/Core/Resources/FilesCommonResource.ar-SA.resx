@@ -601,4 +601,10 @@
   <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
     <value>تم تغيير النموذج. هذا المسودة قديمة ولا يمكن إرسالها.</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>معرّف المجلد غير صالح</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>هذا الإجراء متاح فقط في غرفة خاصة</value>
+  </data>
 </root>

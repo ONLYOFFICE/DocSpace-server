@@ -34,16 +34,20 @@
 namespace ASC.Api.Documentation;
 
 /// <summary>
-/// Cuts the joined OpenAPI document back into one sub-document per source service, so the
-/// Markdown documentation can be grouped the way the `json/*.json` documents are.
+/// Cuts the joined OpenAPI document into one sub-document per section of the API, so that the
+/// Markdown reference is published the way the documentation site presents it.
 /// </summary>
 /// <remarks>
-/// The split runs on the joined document rather than on the source files directly: only the
-/// joined document has been through <see cref="EnumCleaner"/>, the multipart fixups and the
-/// deepObject styling, and rendering from the raw sources would produce different Markdown.
-/// The source files are read only to learn which operations belong to which service -
-/// <see cref="OpenapiJoiner"/> rejects duplicate path+method pairs, so that mapping is
-/// unambiguous.
+/// The sections are the ones the documentation site presents, taken from `x-tagGroups` - the same
+/// thing its sidebar is built from - rather than from the services the operations are implemented
+/// by: a reader looks for rooms under Rooms and has no way of knowing that those endpoints are
+/// served by the Files service. Splitting by service put five unrelated sections into one document
+/// of fourteen thousand lines and spread Files across two.
+/// <para>
+/// The split runs on the joined document rather than on the source files: only the joined
+/// document has been through <see cref="EnumCleaner"/>, the multipart fixups and the deepObject
+/// styling, and rendering from the raw sources would produce different Markdown.
+/// </para>
 /// </remarks>
 internal static class OpenapiSplitter
 {
@@ -56,10 +60,14 @@ internal static class OpenapiSplitter
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
-    public static async Task<IReadOnlyList<SplitDocument>> SplitAsync(
+    /// <summary>
+    /// One sub-document per section, named by <paramref name="nameFor"/>: the caller decides what
+    /// a section is called on disk, because that name is also the published file name.
+    /// </summary>
+    public static async Task<IReadOnlyList<SplitDocument>> SplitBySectionAsync(
         string joinedPath,
-        IReadOnlyList<string> sourceFiles,
         string outputDirectory,
+        Func<string, string> nameFor,
         CancellationToken cancellationToken = default)
     {
         var joined = LoadObject(joinedPath);
@@ -72,19 +80,17 @@ internal static class OpenapiSplitter
         var results = new List<SplitDocument>();
         var covered = new HashSet<string>(StringComparer.Ordinal);
 
-        foreach (var sourceFile in sourceFiles)
+        foreach (var (section, wanted) in CollectSections(joined, joinedPaths))
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var name = GetDocumentName(sourceFile);
-            var wanted = CollectOperationKeys(LoadObject(sourceFile));
-
+            var name = nameFor(section);
             var document = BuildDocument(joined, joinedPaths, joinedSchemas, wanted, covered);
             var outputPath = Path.Combine(outputDirectory, $"{name}.json");
 
             await File.WriteAllTextAsync(outputPath, document.ToJsonString(_writeOptions), cancellationToken);
 
-            results.Add(new SplitDocument(name, outputPath));
+            results.Add(new SplitDocument(name, section, outputPath));
         }
 
         VerifyNothingDropped(joinedPaths, covered);
@@ -93,32 +99,53 @@ internal static class OpenapiSplitter
     }
 
     /// <summary>
-    /// `files_2.0.json` becomes `files`, `oauth.json` becomes `oauth`. The name ends up as the
-    /// Markdown file name, so it has to stay stable across runs.
+    /// The whole joined document, rebuilt the way a section is.
     /// </summary>
-    private static string GetDocumentName(string sourceFile)
+    /// <remarks>
+    /// The models document is rendered from this rather than from the joined file itself: a
+    /// schema is only told apart from an inline one openapi-generator promoted once
+    /// <see cref="BuildDocument"/> has marked it as one the document declares.
+    /// </remarks>
+    public static async Task<SplitDocument> WholeAsync(
+        string joinedPath,
+        string outputDirectory,
+        string name,
+        CancellationToken cancellationToken = default)
     {
-        var name = Path.GetFileNameWithoutExtension(sourceFile);
+        var joined = LoadObject(joinedPath);
+        var joinedPaths = joined["paths"]?.AsObject()
+            ?? throw new Exception($"Joined document has no paths: {joinedPath}");
+        var joinedSchemas = joined["components"]?["schemas"] as JsonObject;
 
-        var versionSuffix = name.LastIndexOf('_');
-        if (versionSuffix > 0)
+        Directory.CreateDirectory(outputDirectory);
+
+        var wanted = new HashSet<string>(StringComparer.Ordinal);
+
+        foreach (var (_, keys) in CollectSections(joined, joinedPaths))
         {
-            name = name[..versionSuffix];
+            wanted.UnionWith(keys);
         }
 
-        return name;
+        var document = BuildDocument(joined, joinedPaths, joinedSchemas, wanted, []);
+        var outputPath = Path.Combine(outputDirectory, $"{name}.json");
+
+        await File.WriteAllTextAsync(outputPath, document.ToJsonString(_writeOptions), cancellationToken);
+
+        return new SplitDocument(name, string.Empty, outputPath);
     }
 
-    private static HashSet<string> CollectOperationKeys(JsonObject source)
+    /// <summary>
+    /// The operations of the joined document grouped by the section each belongs to, ordered by
+    /// section name - which is the order they are published and listed in.
+    /// </summary>
+    private static SortedDictionary<string, HashSet<string>> CollectSections(
+        JsonObject joined,
+        JsonObject joinedPaths)
     {
-        var keys = new HashSet<string>(StringComparer.Ordinal);
+        var sections = new SortedDictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+        var groups = ReadTagGroups(joined);
 
-        if (source["paths"] is not JsonObject paths)
-        {
-            return keys;
-        }
-
-        foreach (var path in paths)
+        foreach (var path in joinedPaths)
         {
             if (path.Value is not JsonObject methods)
             {
@@ -127,14 +154,98 @@ internal static class OpenapiSplitter
 
             foreach (var method in methods)
             {
-                if (IsHttpMethod(method.Key))
+                if (!IsHttpMethod(method.Key))
                 {
-                    keys.Add(OperationKey(path.Key, method.Key));
+                    continue;
+                }
+
+                var section = SectionOf(method.Value, groups, path.Key, method.Key);
+
+                if (!sections.TryGetValue(section, out var keys))
+                {
+                    keys = new HashSet<string>(StringComparer.Ordinal);
+                    sections[section] = keys;
+                }
+
+                keys.Add(OperationKey(path.Key, method.Key));
+            }
+        }
+
+        return sections;
+    }
+
+    /// <summary>
+    /// Which tag belongs to which section, as `x-tagGroups` states it. That is what the site
+    /// builds its sidebar from, so reading it here is what keeps the two in step.
+    /// </summary>
+    private static Dictionary<string, string> ReadTagGroups(JsonObject joined)
+    {
+        var groups = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        if (joined["x-tagGroups"] is not JsonArray tagGroups)
+        {
+            return groups;
+        }
+
+        foreach (var groupNode in tagGroups)
+        {
+            if (groupNode is not JsonObject group || group["tags"] is not JsonArray tags)
+            {
+                continue;
+            }
+
+            var name = group["name"]?.ToString();
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                continue;
+            }
+
+            foreach (var tag in tags)
+            {
+                var tagName = tag?.ToString();
+
+                if (!string.IsNullOrEmpty(tagName))
+                {
+                    groups[tagName] = name;
                 }
             }
         }
 
-        return keys;
+        return groups;
+    }
+
+    /// <summary>
+    /// The section an operation belongs to: the group its first tag is in, or - for a tag no
+    /// group claims - what the tag states before the separator, so that `Files / Folders` and
+    /// `Files / Sharing` still end up together.
+    /// </summary>
+    /// <remarks>
+    /// An untagged operation is refused rather than swept into a catch-all section: a tag is what
+    /// puts an endpoint in front of a reader, on the site and here alike, and an endpoint filed
+    /// under "Other" is one nobody finds.
+    /// </remarks>
+    private static string SectionOf(
+        JsonNode? operation,
+        IReadOnlyDictionary<string, string> groups,
+        string path,
+        string method)
+    {
+        var tag = (operation?["tags"] as JsonArray)?.FirstOrDefault()?.ToString();
+
+        if (string.IsNullOrWhiteSpace(tag))
+        {
+            throw new Exception($"{method.ToUpperInvariant()} {path} states no tag, so it belongs to no section");
+        }
+
+        if (groups.TryGetValue(tag, out var group))
+        {
+            return group;
+        }
+
+        var separator = tag.IndexOf('/', StringComparison.Ordinal);
+
+        return (separator < 0 ? tag : tag[..separator]).Trim();
     }
 
     private static JsonObject BuildDocument(
@@ -473,5 +584,9 @@ internal static class OpenapiSplitter
         }
     }
 
-    internal sealed record SplitDocument(string Name, string Path);
+    /// <summary>
+    /// A sub-document on disk: the name it is published under, the section it holds (empty for
+    /// the models document, which stands for all of them) and where it was written.
+    /// </summary>
+    internal sealed record SplitDocument(string Name, string Section, string Path);
 }

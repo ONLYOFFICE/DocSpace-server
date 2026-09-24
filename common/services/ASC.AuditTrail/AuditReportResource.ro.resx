@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>Setările AI ale utilizatorului au fost actualizate</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Profilul AI a fost atribuit agentului AI pentru acțiunea: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Profilul AI a fost atribuit acțiunii: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Profilul modelului AI a fost creat: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Profilul modelului AI a fost șters: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Profilul AI a fost eliminat din acțiune: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Profilul modelului AI a fost actualizat: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Fișiere [{0}]. Marcate ca citite</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Fișiere [{0}]. Fișierul nu a fost salvat. Cota de stocare a portalului a fost depășită.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Fișiere [{0}]. Salvarea fișierului depășește cota de stocare a portalului.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Dosare [{0}]. Marcate ca citite</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Cheia de criptare a camerei private {0} a fost creată</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Cheia de criptare a camerei private {0} a fost ștearsă</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Cheia de criptare a camerei private {0} a fost actualizată</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Autentificare suspectă detectată: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>Serverul MCP {0} al agentului AI a fost actualizat</value>
+  </data>
 </root>

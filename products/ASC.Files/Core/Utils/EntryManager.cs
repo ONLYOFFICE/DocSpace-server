@@ -1645,7 +1645,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
             }
 
-            if (file.IsForm && file.IsCompletedForm && file.Forcesave != ForcesaveType.None)
+            if (file.IsPdf && file.IsCompletedForm && file.Forcesave != ForcesaveType.None)
             {
                 await fileDao.UpdateCategoryAsync(file.Id, file.Version, (int)FilterType.PdfForm);
                 return file;
@@ -1676,7 +1676,7 @@ public class EntryManager(IDaoFactory daoFactory,
         await fileMarker.MarkAsNewAsync(file);
         await fileMarker.RemoveMarkAsNewAsync(file);
 
-        if (file.IsForm)
+        if (file.IsPdf)
         {
             await OnFormVersionChangedAsync(file);
         }

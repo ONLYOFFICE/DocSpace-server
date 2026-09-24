@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>ユーザーのAI設定が更新されました</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>AIエージェントにアクション用AIプロファイルが割り当てられました：{0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>アクション用AIプロファイルが割り当てられました：{0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>AIモデルプロファイルが作成されました：{0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>AIモデルプロファイルが削除されました：{0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>アクションからAIプロファイルの割り当てが解除されました：{0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>AIモデルプロファイルが更新されました：{0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>ファイル [{0}]。既読としてマーク</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>ファイル [{0}]。ファイルが保存されませんでした。ポータルのストレージ容量を超過しました。</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>ファイル [{0}]。ファイルの保存がポータルのストレージ容量を超えています。</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>フォルダー [{0}]。既読としてマーク</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>プライベートルームの暗号化キー {0} が作成されました</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>プライベートルームの暗号化キー {0} が削除されました</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>プライベートルームの暗号化キー {0} が更新されました</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>不審なログインが検出されました：{0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>AIエージェントのMCPサーバー {0} が更新されました</value>
+  </data>
 </root>

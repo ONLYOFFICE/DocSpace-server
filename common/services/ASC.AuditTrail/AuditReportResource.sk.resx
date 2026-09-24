@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>Nastavenia AI používateľa boli aktualizované</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Profil AI bol priradený agentovi AI pre akciu: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Profil AI bol priradený k akcii: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Profil modelu AI bol vytvorený: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Profil modelu AI bol odstránený: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Priradenie profilu AI k akcii bolo zrušené: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Profil modelu AI bol aktualizovaný: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Súbory [{0}]. Označené ako prečítané</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Súbory [{0}]. Súbor nebol uložený. Kvóta úložiska portálu bola prekročená.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Súbory [{0}]. Uloženie súboru prekračuje kvótu úložiska portálu.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Priečinky [{0}]. Označené ako prečítané</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Šifrovací kľúč súkromnej miestnosti {0} bol vytvorený</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Šifrovací kľúč súkromnej miestnosti {0} bol odstránený</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Šifrovací kľúč súkromnej miestnosti {0} bol aktualizovaný</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Bolo zistené podozrivé prihlásenie: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>Server MCP {0} agenta AI bol aktualizovaný</value>
+  </data>
 </root>
