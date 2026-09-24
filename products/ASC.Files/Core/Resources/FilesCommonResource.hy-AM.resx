@@ -601,4 +601,10 @@
   <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
     <value>Ձևը փոփոխվել է: Այս սևագիրն հնացած է և չի կարող ներկայացվել:</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Թղթապանակի ID-ն անվավեր է</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Այս գործողությունը հասանելի է միայն մասնավոր սենյակում</value>
+  </data>
 </root>

@@ -1,9 +1,10 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.4.6">
+<Project Sdk="Aspire.AppHost.Sdk/13.5.4">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <Nullable>enable</Nullable>
         <IsAspireHost>true</IsAspireHost>
+        <AspireUseCliBundle>true</AspireUseCliBundle>
         <UserSecretsId>20a708ac-ae44-47fb-a499-7136e0bd5bae</UserSecretsId>
     </PropertyGroup>
 

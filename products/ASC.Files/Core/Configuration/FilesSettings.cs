@@ -68,6 +68,11 @@ public class FilesSettings : ISettings<FilesSettings>
     public bool DisplayFileExtension { get; set; }
 
     /// <summary>
+    /// Specifies whether to display quick action buttons next to file name.
+    /// </summary>
+    public bool? ShowQuickActions { get; set; }
+
+    /// <summary>
     /// Specifies whether to notify about file conversion.
     /// </summary>
     [JsonPropertyName("ConvertNotify")]
@@ -233,7 +238,8 @@ public class FilesSettings : ISettings<FilesSettings>
             DefaultShareLinkInternalSetting = false,
             ExternalShareApplyToDocumentsSetting = true,
             ExternalShareApplyToRoomsSetting = true,
-            BlockExistingLinksOnRestrictSetting = true
+            BlockExistingLinksOnRestrictSetting = true,
+            ShowQuickActions = true
         };
     }
 
@@ -373,6 +379,21 @@ public class FilesSettingsHelper(
         }
 
         return current.DisplayFileExtension;
+    }
+
+    public async Task<bool> GetShowQuickActions() => (await LoadForCurrentUser()).ShowQuickActions ?? true;
+
+    public async Task<bool> SetShowQuickActions(bool value)
+    {
+        var current = await LoadForCurrentUser();
+        if (current.ShowQuickActions != value)
+        {
+            current.ShowQuickActions = value;
+            await SaveForCurrentUser(current);
+            messageService.SendHeadersMessage(MessageAction.DocumentsShowQuickActionsUpdated);
+        }
+
+        return value;
     }
 
     public async Task<bool> GetConvertNotify() => (await LoadForCurrentUser()).ConvertNotifySetting;

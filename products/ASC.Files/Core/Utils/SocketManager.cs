@@ -65,7 +65,7 @@ public class SocketManager(
 
     public async Task CreateFileAsync<T>(File<T> file, IEnumerable<Guid> users = null)
     {
-        if (users == null && file.IsForm)
+        if (users == null && file.IsPdf)
         {
             users = await GetRecipientListForForm(file);
         }
@@ -334,27 +334,23 @@ public class SocketManager(
         if (sharedUsers != null && sharedUsers.Any())
         {
             var sharedFolder = await globalFolderHelper.GetFolderShareAsync<T>();
+            room = FolderRoom(sharedFolder);
 
-            if (!EqualityComparer<T>.Default.Equals(folderIdDisplay, sharedFolder))
+            if (withData)
             {
-                room = FolderRoom(sharedFolder);
+                entry.ParentId = sharedFolder;
+                data = await Serialize(entry);
+            }
 
-                if (withData)
+            foreach (var userIds in sharedUsers.Chunk(1000))
+            {
+                await base.MakeRequest(method, new
                 {
-                    entry.ParentId = sharedFolder;
-                    data = await Serialize(entry);
-                }
-
-                foreach (var userIds in sharedUsers.Chunk(1000))
-                {
-                    await base.MakeRequest(method, new
-                    {
-                        room,
-                        entry.Id,
-                        data,
-                        userIds
-                    });
-                }
+                    room,
+                    entry.Id,
+                    data,
+                    userIds
+                });
             }
         }
 
@@ -435,7 +431,7 @@ public class SocketManager(
         }
 
         var parent = await daoFactory.GetFolderDao<T>().GetFolderAsync(parentFolderId);
-        var whoCanReadParent = await fileSecurity.WhoCanReadAsync(parent, true);
+        var whoCanReadParent = (await fileSecurity.WhoCanReadAsync(parent, true)).ToList();
         var sharedAccessWhoCantReadParent = new List<Guid>();
         foreach (var s in sharedAccess)
         {

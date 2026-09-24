@@ -118,8 +118,8 @@ public enum FolderType
     [Description("Knowledge")]
     Knowledge = 32,
 
-    [Description("Result storage")]
-    ResultStorage = 33,
+    [Description("Chat outputs")]
+    ChatOutputs = 33,
 
     [Description("AI Agents")]
     AiAgents = 34,

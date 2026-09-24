@@ -45,7 +45,7 @@ server/
 ├── sdk/                 # Multi-language API SDKs (git submodules)
 ├── migrations/          # DB migrations (mysql/, postgre/ × SaaS/Standalone)
 ├── thirdparty/          # Third-party libs (Google.Authenticator, MS Graph, etc.)
-└── .aspire/             # Aspire CLI settings (settings.json); the AppHost project lives in common/ASC.AppHost
+└── aspire.config.json   # Aspire CLI settings (points at the AppHost in common/ASC.AppHost)
 ```
 
 ## Build & Run
@@ -67,7 +67,7 @@ cd common/Tools/ASC.Migration.Runner && dotnet run                    # Apply DB
 
 The AppHost has 5 launch profiles: `development`, `test`, `preview`, `integration-test`, `frontend-dev` — always pass `--launch-profile` explicitly.
 
-**Aspire CLI:** works from the repo root — the committed `.aspire/settings.json` points to the AppHost, no `--apphost` flag needed. The resource graph is defined in `common/ASC.AppHost/Program.cs` plus `common/ASC.AppHost/Configuration/` (`ProjectConfigurator.cs`, `ConnectionStringManager.cs`, `NginxConfiguration.cs`) — not in a single-file `apphost.cs`.
+**Aspire CLI:** works from the repo root — the committed `aspire.config.json` points to the AppHost (`appHostPath`, relative to the repo root), no `--apphost` flag needed. CLI 13.x dropped the older `.aspire/settings.json`; if the config is missing, recreate it with `aspire config set appHostPath "common/ASC.AppHost/ASC.AppHost.csproj"` (the CLI never writes the file on its own). The resource graph is defined in `common/ASC.AppHost/Program.cs` plus `common/ASC.AppHost/Configuration/` (`ProjectConfigurator.cs`, `ConnectionStringManager.cs`, `NginxConfiguration.cs`) — not in a single-file `apphost.cs`.
 
 **Package management:** Centralized in `Directory.Packages.props` — all version pins AND the global `TargetFramework` (net10.0) live there. `Directory.Build.props` only enables OpenAPI doc generation and strips native NuGet .pdb files; most csprojs set no TFM of their own.
 
@@ -82,8 +82,8 @@ Both live **outside this repo**, as siblings of `server/` in the parent `docspac
 
 ## Coding Conventions
 
-C# naming, style, and API conventions live in `.claude/rules/csharp-style.md` (loaded automatically when working with `.cs` files). Logging conventions: `.claude/rules/logging.md`. Caching conventions (FusionCache only — never hand-rolled caches; two cache instances, keys/tags, invalidation): `.claude/rules/caching.md`. HTTP client conventions (IHttpClientFactory only, reuse the standard named clients from BaseStartup): `.claude/rules/http-clients.md`. Code navigation rules (LSP-only): `.claude/rules/csharp-lsp.md`.
-
+C# naming, style, and API conventions live in `.claude/rules/csharp-style.md` (loaded automatically when working with `.cs` files). Logging conventions: `.claude/rules/logging.md`. Caching conventions (FusionCache only — never hand-rolled caches; two cache instances, keys/tags, invalidation): `.claude/rules/caching.md`. HTTP client conventions (IHttpClientFactory only, reuse the standard named clients from BaseStartup): `.claude/rules/http-clients.md`. Code navigation rules (CodeGraph + LSP, never Grep for a C# symbol): `.claude/rules/csharp-lsp.md`.
+Endpoint documentation for AI consumers — how `<summary>`/`<remarks>`, DTO property texts and `[SwaggerResponse]` have to read once the OpenAPI documents are used as agent tool definitions: `.claude/rules/openapi-endpoint-docs.md` for the operation (loaded with controllers) and `.claude/rules/openapi-dto-docs.md` for properties and enum members (loaded with DTOs, `ApiModels` and enums). The campaign that works through the backlog of those texts is the `openapi-desc-opt` skill.
 ## Testing
 
 Conventions for writing integration tests (per-test portal, roles, `ApiException` assertions, access-level matrices, class size vs parallelism): `.claude/rules/tests.md`.

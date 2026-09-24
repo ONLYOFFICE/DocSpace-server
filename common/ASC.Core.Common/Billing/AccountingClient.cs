@@ -428,6 +428,17 @@ public class CustomerInfo
     public PaymentMethodStatus PaymentMethodStatus { get; init; }
 
     /// <summary>
+    /// The payment method type, e.g. "card".
+    /// </summary>
+    public string PaymentMethodType { get; init; }
+
+    /// <summary>
+    /// Indicates whether the payment method is delayed, i.e. a deposit is accepted immediately but the money
+    /// reaches the wallet only once the transfer settles. Such a wallet cannot be topped up automatically.
+    /// </summary>
+    public bool IsDelayedPaymentMethod { get; init; }
+
+    /// <summary>
     /// The email address of the customer.
     /// </summary>
     public string Email { get; init; }
@@ -952,16 +963,22 @@ public class Operation
     public string ParticipantDisplayName { get; set; }
 
     /// <summary>
-    /// AI Agent id.
+    /// Id of the entity the AI operation was performed on.
     /// </summary>
     /// <example>123</example>
-    public string AgentId { get; set; }
+    public string SourceId { get; set; }
 
     /// <summary>
-    /// AI Agent name.
+    /// Type of the entity the AI operation was performed on: Agent, File, Folder, Room or Form.
+    /// </summary>
+    /// <example>Agent</example>
+    public string SourceType { get; set; }
+
+    /// <summary>
+    /// Name of the entity the AI operation was performed on.
     /// </summary>
     /// <example>My AI Agent</example>
-    public string AgentTitle { get; set; }
+    public string SourceTitle { get; set; }
 
     /// <summary>
     /// Metadata of the operation.
@@ -1016,19 +1033,26 @@ public static class AccountingHttpClientExtension
 
         services.AddTransient<AccountingAuthHandler>();
 
-        services
-            .AddRefitClient<IAccountingApi>(new RefitSettings
+        var refitSettings = new RefitSettings
+        {
+            ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
             {
-                ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true,
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-                }),
-                UrlParameterFormatter = new AccountingUrlParameterFormatter(),
-                UrlParameterKeyFormatter = new CamelCaseUrlParameterKeyFormatter(),
-                ExceptionFactory = CreateExceptionAsync
-            })
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            }),
+            UrlParameterKeyFormatter = new CamelCaseUrlParameterKeyFormatter(),
+            ExceptionFactory = CreateExceptionAsync,
+            TransportExceptionFactory = CreateTransportException,
+            UrlParameterFormatterMap = {
+                // The accounting service expects lowercase boolean query values ("true"/"false"); Refit's default
+                // formatter renders them as "True"/"False". Everything else keeps the default formatting.
+                [typeof(bool)] = new LowerCaseBooleanFormatter()
+            }
+        };
+
+        services
+            .AddRefitGeneratedClient<IAccountingApi>(refitSettings)
             .ConfigureHttpClient((sp, client) =>
             {
                 var url = accountingSettings?.Url;
@@ -1084,9 +1108,21 @@ public static class AccountingHttpClientExtension
         });
     }
 
+    // ExceptionFactory only sees HTTP responses. A transport failure (DNS, connect, TLS, timeout) would otherwise
+    // surface as Refit.ApiRequestException and escape the AccountingException hierarchy the callers catch.
+    private static Exception CreateTransportException(HttpRequestMessage request, Exception exception, CancellationToken cancellationToken)
+    {
+        // A caller-requested cancellation is not a service failure - let it propagate unchanged.
+        if (exception is OperationCanceledException && cancellationToken.IsCancellationRequested)
+        {
+            return exception;
+        }
+
+        return new AccountingException($"Accounting request to {request.RequestUri} failed: {exception.Message}", exception);
+    }
     // Maps non-success responses to the domain exceptions the callers expect (payment required / customer not found),
     // and wraps any other failure into AccountingException with the status code and response body.
-    private static async Task<Exception> CreateExceptionAsync(HttpResponseMessage response)
+    private static async ValueTask<Exception> CreateExceptionAsync(HttpResponseMessage response)
     {
         if (response.IsSuccessStatusCode)
         {
@@ -1113,18 +1149,13 @@ public static class AccountingHttpClientExtension
                content.Contains("not found", StringComparison.OrdinalIgnoreCase);
     }
 
-    // The accounting service expects lowercase boolean query values ("true"/"false"); Refit's default formatter
-    // renders them as "True"/"False". Everything else falls through to the default behaviour.
-    private sealed class AccountingUrlParameterFormatter : DefaultUrlParameterFormatter
+    // Registered in UrlParameterFormatterMap for bool only, so nullable and non-nullable booleans in both
+    // scalar parameters and flattened query objects render as "true"/"false".
+    private sealed class LowerCaseBooleanFormatter : IUrlParameterFormatter
     {
-        public override string Format(object parameterValue, ICustomAttributeProvider attributeProvider, Type type)
+        public string Format(object parameterValue, ICustomAttributeProvider attributeProvider, Type type)
         {
-            if (parameterValue is bool boolValue)
-            {
-                return boolValue ? "true" : "false";
-            }
-
-            return base.Format(parameterValue, attributeProvider, type);
+            return parameterValue is bool boolValue ? (boolValue ? "true" : "false") : parameterValue?.ToString();
         }
     }
 }

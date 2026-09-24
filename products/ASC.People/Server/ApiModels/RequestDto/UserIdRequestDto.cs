@@ -39,7 +39,8 @@ namespace ASC.People.ApiModels.RequestDto;
 public class UserIdRequestDto
 {
     /// <summary>
-    /// The user ID.
+    /// The ID of the user the operation applies to, taken from the route. For a progress operation it has to be the
+    /// same ID that was passed when the job was started.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "userid")]

@@ -58,21 +58,20 @@ public class TenantInfoSettings : ISettings<TenantInfoSettings>
 }
 
 /// <summary>
-/// Represents dimensions with width and height values.
+/// A pixel size measured on the image itself.
 /// </summary>
 public class Size
 {
     /// <summary>
-    /// Gets or sets the height dimension of an object, typically measured in pixels or other unit.
-    /// It defines the vertical size of the object.
+    /// The height of the image in pixels, read from the stored file rather than from any display setting.
     /// </summary>
-    /// <example>10</example>
+    /// <example>1080</example>
     public uint Height { get; set; }
     
     /// <summary>
-    /// Gets or sets the width dimension of an object, typically measured in pixels or other unit.
+    /// The width of the image in pixels, read from the stored file rather than from any display setting.
     /// </summary>
-    /// <example>10</example>
+    /// <example>1920</example>
     public uint Width { get; set; }
 
     public static implicit operator Size(MagickGeometry cache)

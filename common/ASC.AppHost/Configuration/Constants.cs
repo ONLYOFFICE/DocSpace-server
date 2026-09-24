@@ -43,7 +43,7 @@ public static class Constants
     public const int RestyHttpsPort = 443;
     public const int SocketIoPort = 9899;
     public const int SsoAuthPort = 9834;
-    public const int NewAiPort = 9837;
+    public const int AiChatPort = 9837;
     public const int WebDavPort = 1900;
     public const int IdentityRegistrationPort = 9090;
     public const int IdentityAuthorizationPort = 8080;
@@ -67,6 +67,11 @@ public static class Constants
 
     public const int TelegramPort = 5050;
     public const int MonolithPort = 5027;
+
+    // Keep in sync with OPENRESTY_VERSION in
+    // buildtools/install/docker/build/Dockerfile, so the dev router runs the
+    // release the production router image is built from.
+    public const string OpenRestyVersion = "1.31.1.1-2";
 
     public const int OtelCollectorGrpcPort = 4317;
     public const int OtelCollectorHttpPort = 4318;

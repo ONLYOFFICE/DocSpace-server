@@ -85,24 +85,32 @@ The consequence for this loop: step 6's check of the built `.xml` is the only ch
 this class of defect before a regeneration, because the build, the style check and a reading of the
 diff all pass.
 
-**Spectral prints nothing when the output flags are set.** With `--output.html`, `--output.markdown`
-and `--output.json` given, a successful run writes the three files and says nothing at all, while
+**Spectral prints nothing when the output flags are set.** With `--output.markdown` and
+`--output.json` given, a successful run writes both files and says nothing at all, while
 `--fail-severity hint` makes it exit 1 whenever any finding exists. A silent run that exits 1 is the
 normal, successful outcome. Do not read that exit code through a pipe — a pipe hands you the last
-command's status instead.
+command's status instead. The header command as a whole is not silent, though: its second half prints
+`✓ Wrote <path> (N findings)`, which is the cheapest available check on count.py's TOTAL.
 
 **The build's success line is localised; the document line is not.** Grepping build output for "Build
 succeeded" can find nothing on a perfectly successful build. `Writing document named '2.0'` stays
 English, which is another reason it is the line to look for.
 
-**A "top offending rules" summary in an HTML report did not come from Spectral.** The built-in HTML
-formatter renders a bare "Spectral Report" heading and one collapsible group per document, nothing
-else. A report with severity tiles and per-rule/per-file bar charts was rendered by
-`npx @api-common/spectral-reporter <spectral -f json output> -o <file>` (Apache-2.0, no dependencies,
-reads the JSON and writes HTML — it never touches the documents or the ruleset). Worth knowing in two
-directions: it is what to run when somebody asks to *look at* the findings rather than close one, and
-it is how to date an unfamiliar report someone shows you — a rule listed in such a summary may since
-have been closed or switched `off`. It also takes `--totals <file>`, a sidecar of
+**The HTML report is `@api-common/spectral-reporter`'s, not Spectral's.** Since 2026-09-08 the ruleset
+header command ends by rendering `lint/report.html` from `lint/report.json` with
+`spectral-reporter lint/report.json -o lint/report.html` (Apache-2.0, no dependencies,
+reads the JSON and writes HTML — it never touches the documents or the ruleset), which is what produces
+the severity tiles and per-rule/per-file bar charts. Spectral's own `-f html` is no longer used
+anywhere; it rendered a bare "Spectral Report" heading and one collapsible group per document, so an
+HTML report in that older shape dates from before the change — as does any check written against its
+`class="severity"` markup, which the reporter's html does not contain at all. Do not count findings in
+it either: it aggregates, so a rule name appears once or twice as a summary row (measured: 2 for
+`path-segment-camel-case` against 68 actual findings, 2026-09-08). Counting belongs to report.json. Worth knowing in two directions: this is the artefact to point at when
+somebody asks to *look at* the findings rather than close one, and it is how to date an unfamiliar
+report someone shows you — a rule listed in such a summary may since have been closed or
+switched `off`. Install it globally alongside spectral (`npm i -g @api-common/spectral-reporter`,
+bin name `spectral-reporter`, 0.2.0 as of 2026-09-08) rather than calling it through `npx`, which stops
+to ask permission to download the package. It also takes `--totals <file>`, a sidecar of
 `{"rules": {"<rule>": {"checked": N, "passed": N}}}`, which adds a compliance scoreboard; nothing
 generates that sidecar today, but it is the natural home for the ruleset's `# measured: 0` notes,
 since `checked 829 / passed 829` is evidence a check ran and held and an empty report never is.

@@ -168,4 +168,38 @@ public class RestoreVersionTests(
 
         exception.ErrorCode.Should().Be(403);
     }
+
+    /// <summary>
+    /// The route only supports POST; a raw GET must be rejected outright rather than silently
+    /// performing the restore. A GET is trivial to trigger via CSRF (an image tag, a prefetched
+    /// link) in a way a POST is not, so this is checked at the transport level rather than through
+    /// the generated client, which only ever issues a POST.
+    /// </summary>
+    /// <remarks>
+    /// Bug 78027: kept as a regression guard for a report of GET silently restoring a version. The
+    /// action is declared <c>[HttpPost("file/{fileId}/restoreversion")]</c> only, so ASP.NET's
+    /// routing rejects a GET before <c>FilesController.RestoreFileVersion</c> ever runs; the trait
+    /// stays on the test for traceability.
+    /// </remarks>
+    [Trait("Bug", "78027")]
+    [Fact]
+    public async Task RestoreVersion_GetVerb_IsRejectedNotSilentlyApplied()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var file = await CreateFileWithSecondVersion("Autotest Restore CSRF GET");
+
+        var countBefore = (await _filesApi.GetEditHistoryAsync(file.Id, TestContext.Current.CancellationToken)).Response.Count;
+
+        // Act
+        using var response = await _filesClient.GetAsync(
+            $"api/2.0/files/file/{file.Id}/restoreversion?version=1&doc=",
+            TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().NotBe(HttpStatusCode.OK);
+
+        var countAfter = (await _filesApi.GetEditHistoryAsync(file.Id, TestContext.Current.CancellationToken)).Response.Count;
+        countAfter.Should().Be(countBefore, "a rejected GET must not have restored the version as a side effect");
+    }
 }

@@ -1,9 +1,9 @@
 ---
 paths:
-  - "common/ASC.NewAi/**/*.ts"
+  - "common/ASC.AI.Chat/**/*.ts"
 ---
 
-# TypeScript Conventions (ASC.NewAi service)
+# TypeScript Conventions (ASC.AI.Chat service)
 
 ## Naming
 - **Files**: camelCase (`httpClient.ts`, `profilesController.ts`)

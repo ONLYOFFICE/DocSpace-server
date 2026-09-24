@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for handling LDAP (Lightweight Directory Access Protocol) synchronization scheduling.
+/// When the portal runs its LDAP synchronization on its own.
 /// </summary>
 /// <example>
 /// {
@@ -44,7 +44,9 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 public class LdapCronRequestDto
 {
     /// <summary>
-    /// The cron expression that defines the schedule for LDAP synchronization.
+    /// The schedule of the automatic synchronization, as a cron expression read in the portal time zone. An empty
+    /// value stops the automatic runs and leaves synchronization to be started by hand; the schedule only decides
+    /// when a run happens, never what it does, which follows the stored LDAP settings.
     /// </summary>
     /// <example>0 0 * * *</example>
     public string Cron { get; set; }

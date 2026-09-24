@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for configuring security settings of a single web module.
+/// The access rule stored for one portal module: whether it may be opened, and by whom.
 /// </summary>
 /// <example>
 /// {
@@ -45,19 +45,22 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 public class WebItemSecurityRequestsDto : IValidatableObject
 {
     /// <summary>
-    /// The module ID.
+    /// The module the rule applies to, given as a GUID. A value that is not a GUID fails the request as invalid.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public required string Id { get; set; }
 
     /// <summary>
-    /// Controls whether the security restrictions are enforced for this module.
+    /// Whether the module may be opened. It decides the outcome only while `subjects` names somebody: an empty
+    /// `subjects` array is stored as access for everyone whatever this flag says.
     /// </summary>
     /// <example>true</example>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// The collection of user and group identifiers granted access to the module.
+    /// The users and groups the rule is stored for, given by their IDs. This is the whole allow-list that is to hold
+    /// afterwards and not a list of additions - what was stored before is dropped. Leaving it out applies `enabled`
+    /// to everyone and skips the audit trail entry, while sending it empty stores access for everyone.
     /// </summary>
     /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public IEnumerable<Guid> Subjects { get; set; }
@@ -69,12 +72,15 @@ public class WebItemSecurityRequestsDto : IValidatableObject
 }
 
 /// <summary>
-/// The request parameters for configuring security settings across multiple web modules.
+/// The modules switched on or off together, one entry per module.
 /// </summary>
 public class WebItemsSecurityRequestsDto : IValidatableObject
 {
     /// <summary>
-    /// The list of module security configurations.
+    /// The modules to switch, each entry pairing a module GUID as its `key` with the new enabled flag as its
+    /// `value`. A key that is not a GUID fails the whole request as invalid, and a module listed twice is applied
+    /// once, from its first entry. No allow-list travels here: switching a product module on restores the users and
+    /// groups it was last restricted to, and everything else is stored as a plain allow or deny for everyone.
     /// </summary>
     /// <example>[{"key":"00000000-0000-0000-0000-000000000000","value":true}]</example>
     public IEnumerable<ItemKeyValuePair<string, bool>> Items { get; set; }

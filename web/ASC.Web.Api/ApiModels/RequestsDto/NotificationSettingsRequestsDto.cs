@@ -34,23 +34,27 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for configuring notification settings.
+/// Which kind of notification the calling user switches, and which way.
 /// </summary>
 /// <example>
 /// {
+///   "type": 0,
 ///   "isEnabled": true
 /// }
 /// </example>
 public class NotificationSettingsRequestsDto
 {
     /// <summary>
-    /// The notification to be configured.
+    /// The kind of notification being switched. A value outside the defined set is echoed back while nothing is
+    /// stored, so confirm the result with `GET api/2.0/settings/notification/{type}` rather than trusting the
+    /// answer.
     /// </summary>
     /// <example>0</example>
     public required NotificationType Type { get; set; }
 
     /// <summary>
-    /// Specifies if the specified notification type is enabled or not.
+    /// Whether that kind reaches the calling account. It applies to the caller own account alone and to every room
+    /// at once; a single room is silenced with `POST api/2.0/settings/notification/rooms` instead.
     /// </summary>
     /// <example>true</example>
     public bool IsEnabled { get; set; }
@@ -58,12 +62,13 @@ public class NotificationSettingsRequestsDto
 
 
 /// <summary>
-/// The request parameters for retrieving notification type information.
+/// Which kind of notification is read for the calling user.
 /// </summary>
 public class NotificationTypeRequestsDto
 {
     /// <summary>
-    /// The type of notification to query, specified in the route.
+    /// The kind of notification being asked about. A value outside the defined set fails the call rather than
+    /// falling back to a default.
     /// </summary>
     /// <example>0</example>
     [FromRoute(Name = "type")]

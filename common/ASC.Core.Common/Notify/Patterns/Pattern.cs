@@ -45,4 +45,3 @@ public abstract record Pattern(Func<string> Subject, Func<string> Body, string S
 public record EmailPattern(Func<string> Subject, Func<string> Body) : Pattern(Subject, Body, NotifyEMailSenderSysName, typeof(TextileStyler));
 public record TelegramPattern(Func<string> Body) : Pattern(() => string.Empty, Body, NotifyTelegramSenderSysName, typeof(MarkDownStyler));
 public record PushPattern(Func<string> Body) : Pattern(() => string.Empty, Body, NotifyPushSenderSysName, typeof(PushStyler));
-public record JabberPattern(Func<string> Body) : Pattern(() => string.Empty, Body, NotifyMessengerSenderSysName, typeof(JabberStyler));

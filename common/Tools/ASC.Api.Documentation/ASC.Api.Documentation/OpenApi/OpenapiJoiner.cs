@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -35,7 +35,7 @@ namespace ASC.Api.Documentation;
 
 public class OpenapiJoiner : AsyncCommand<JoinSettings>
 {
-    public override async Task<int> ExecuteAsync(CommandContext context, JoinSettings settings, CancellationToken cancellationToken)
+    protected override async Task<int> ExecuteAsync(CommandContext context, JoinSettings settings, CancellationToken cancellationToken)
     {
         await AnsiConsole.Progress()
             .StartAsync(async ctx =>
@@ -438,7 +438,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
 
                 var existing = trgSection[item.Key]!;
 
-                if(!JsonDeepEquals(existing, item.Value))
+                if(!JsonDeepEquals(existing, item.Value!))
                 {
                     throw new Exception($"Component conflict in '{section.Key}/{item.Key}' in {fileName}");
                 }

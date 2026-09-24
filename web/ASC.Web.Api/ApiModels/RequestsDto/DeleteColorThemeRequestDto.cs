@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for handling requests to delete a custom color theme.
+/// Which custom colour theme is removed from the portal.
 /// </summary>
 /// <example>
 /// {
@@ -44,7 +44,9 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 public class DeleteColorThemeRequestDto
 {
     /// <summary>
-    /// The ID of the portal theme to delete.
+    /// The theme to remove, by theme ID. An ID belonging to a built-in theme leaves the list untouched, and so does
+    /// one that is already gone - neither is reported as an error. Removing the theme currently in use moves the
+    /// portal to the remaining theme with the lowest ID.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "id")]

@@ -343,7 +343,7 @@ public class FileStorageService //: IFileStorageService
                 {
                     SearchArea.Knowledge => await folderDao.GetFoldersAsync(parent.Id, FolderType.Knowledge)
                         .FirstOrDefaultAsync(),
-                    SearchArea.ResultStorage => await folderDao.GetFoldersAsync(parent.Id, FolderType.ResultStorage)
+                    SearchArea.ResultStorage => await folderDao.GetFoldersAsync(parent.Id, FolderType.ChatOutputs)
                         .FirstOrDefaultAsync(),
                     _ => parent
                 };
@@ -388,7 +388,10 @@ public class FileStorageService //: IFileStorageService
             orderBy = await filesSettingsHelper.GetDefaultOrder();
         }
 
-        if (Equals(parent.Id, await globalFolderHelper.FolderShareAsync) && orderBy.SortedBy == SortedByType.DateAndTime)
+        // The share root is the only folder of type SHARE, so the type check is the same test as comparing ids,
+        // minus the side effect: the FolderShareAsync getter creates the root when it is missing, which made every
+        // first listing in a tenant pay for a folder insert under a distributed lock.
+        if (parent.FolderType == FolderType.SHARE && orderBy.SortedBy == SortedByType.DateAndTime)
         {
             orderBy.SortedBy = SortedByType.New;
         }
@@ -702,7 +705,20 @@ public class FileStorageService //: IFileStorageService
         var providerDao = daoFactory.ProviderDao;
 
         var parent = await folderDao.GetFolderAsync(parentId);
+
+        // An id that names no third-party folder - a plain internal folder id, or a well-formed but
+        // unknown provider id - used to dereference null here and end the request as 500.
+        if (parent == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
         var providerInfo = await providerDao.GetProviderInfoAsync(parent.ProviderId);
+
+        if (providerInfo == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
 
         if (providerInfo.RootFolderType != FolderType.VirtualRooms)
         {
@@ -971,6 +987,16 @@ public class FileStorageService //: IFileStorageService
         var settingDenyDownload = denyDownload ?? template.SettingsDenyDownload;
         var settingPrivate = @private ?? template.SettingsPrivate;
 
+        // Every other setting falls back to the template's own value; the tags did not, so a caller
+        // who named none got a room with an empty tag list instead of the template's tags.
+        if (tags == null || !tags.Any())
+        {
+            tags = await daoFactory.GetTagDao<int>()
+                .GetTagsAsync(template.Id, FileEntryType.Folder, TagType.Custom)
+                .Select(t => t.Name)
+                .ToListAsync();
+        }
+
         return await CreateRoomAsync(async () =>
         {
             await using (await distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetRoomsCountCheckKey(tenantId)))
@@ -1188,8 +1214,8 @@ public class FileStorageService //: IFileStorageService
                 knowledge.FolderType = FolderType.Knowledge;
 
                 var resultStorage = serviceProvider.GetService<Folder<T>>();
-                resultStorage.Title = FilesCommonResource.ResultStorageFolder;
-                resultStorage.FolderType = FolderType.ResultStorage;
+                resultStorage.Title = FilesCommonResource.ChatOutputsFolder;
+                resultStorage.FolderType = FolderType.ChatOutputs;
 
                 folderId = await folderDao.SaveFolderAsync(newFolder, [knowledge, resultStorage]);
             }
@@ -2021,7 +2047,7 @@ public class FileStorageService //: IFileStorageService
 
         var room = await folderDao.GetParentFoldersAsync(folder.Id).FirstOrDefaultAsync(f => f.IsRoom);
 
-        if (file.IsForm && (room?.FolderType == FolderType.VirtualDataRoom || room?.FolderType == FolderType.FillingFormsRoom))
+        if (file.IsPdf && (room?.FolderType == FolderType.VirtualDataRoom || room?.FolderType == FolderType.FillingFormsRoom))
         {
             var users = (await fileSharing.GetSharedInfoAsync(room))
                 .Where(ace => ace is not { Access: FileShare.FillForms } && ace.Id != authContext.CurrentAccount.ID)
@@ -2053,7 +2079,8 @@ public class FileStorageService //: IFileStorageService
 
         if (room is { FolderType: FolderType.PublicRoom })
         {
-            await SetExternalLinkAsync(file, Guid.NewGuid(), file.IsForm ? FileShare.Editing : FileShare.Read, title ?? FilesCommonResource.DefaultExternalLinkTitle, primary: true);
+            // An anonymous public link starts read-only even for a form; raising it to Editing is a deliberate act
+            await SetExternalLinkAsync(file, Guid.NewGuid(), FileShare.Read, title ?? FilesCommonResource.DefaultExternalLinkTitle, primary: true);
         }
 
         return file;
@@ -3350,7 +3377,14 @@ public class FileStorageService //: IFileStorageService
                 continue;
             }
 
-            if (!await fileSecurity.CanConvertAsync(file))
+            // Starting a conversion produces a new file, so it needs Convert rights (RoomManager or
+            // ContentCreator in a room). Merely asking how a conversion is going does not - it used to
+            // demand the same rights, which refused a member who may open and edit the very file.
+            var allowed = fileInfo.StartConvert
+                ? await fileSecurity.CanConvertAsync(file)
+                : await fileSecurity.CanReadAsync(file);
+
+            if (!allowed)
             {
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
             }
@@ -4133,7 +4167,7 @@ public class FileStorageService //: IFileStorageService
             yield return ace;
         }
         //hack for the form-filling room. return a link to a file with the room key.
-        if (entry is File<T> { IsForm: true } file)
+        if (entry is File<T> { IsPdf: true } file)
         {
             var parentRoom = await DocSpaceHelper.GetParentRoom(file, daoFactory.GetCacheFolderDao<T>());
             if (parentRoom?.FolderType != FolderType.FillingFormsRoom)
@@ -4230,9 +4264,14 @@ public class FileStorageService //: IFileStorageService
 
             share = entry switch
             {
-                File<T> { IsForm: true, RootFolderType: FolderType.VirtualRooms, ParentRoomType: FolderType.FillingFormsRoom or FolderType.VirtualDataRoom } => FileShare.FillForms,
-                File<T> { IsForm: true, RootFolderType: FolderType.USER } when share != FileShare.Editing && share != FileShare.FillForms => FileShare.Editing,
-                File<T> { IsForm: true, RootFolderType: not FolderType.USER } => FileShare.Editing,
+                // Any PDF is fillable, so fill-oriented rooms start the link at FillForms.
+                File<T> { IsPdf: true, RootFolderType: FolderType.VirtualRooms, ParentRoomType: FolderType.FillingFormsRoom or FolderType.VirtualDataRoom } => FileShare.FillForms,
+                // A public room hands its link to anonymous visitors, so a PDF never starts above Read
+                // there - not even a form. Raising it stays a deliberate act through the link settings.
+                File<T> { IsPdf: true, ParentRoomType: FolderType.PublicRoom } => FileShare.Read,
+                // Anywhere else the link opens the PDF for editing, so it can be filled in place.
+                File<T> { IsPdf: true, RootFolderType: FolderType.USER } when share != FileShare.Editing && share != FileShare.FillForms => FileShare.Editing,
+                File<T> { IsPdf: true, RootFolderType: not FolderType.USER } => FileShare.Editing,
                 _ => share
             };
 
@@ -4628,7 +4667,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         //hack for the form-filling room. return a link to a file with the room key.
-        if (entry is File<T> { IsForm: true })
+        if (entry is File<T> { IsPdf: true })
         {
             var parentRoom = await DocSpaceHelper.GetParentRoom(entry, daoFactory.GetCacheFolderDao<T>());
             if (parentRoom?.FolderType == FolderType.FillingFormsRoom && share is FileShare.FillForms or FileShare.None)
@@ -5100,7 +5139,31 @@ public class FileStorageService //: IFileStorageService
             _logger.ErrorWithException(ex);
         }
 
-        return showSharingSettings ? await fileSharing.GetSharedInfoShortFileAsync(file) : null;
+        // The body used to be filled in only when `showSharingSettings` was set, which happens for an
+        // encrypted file or an e-mail that resolves to nobody. Every ordinary mention therefore
+        // answered 200 with nothing in it, so the caller could not tell what access the people it had
+        // just mentioned actually have. Answer with one entry per mentioned recipient - including the
+        // ones who have no access at all, which is exactly what the caller needs to know before it
+        // decides whether to share.
+        var aces = await fileSharing.GetSharedInfoAsync(file);
+        var result = new List<AceShortWrapper>();
+
+        foreach (var recipientId in recipients)
+        {
+            var ace = aces.FirstOrDefault(a => a.Id == recipientId && a.SubjectType == SubjectType.User);
+            var recipient = await userManager.GetUsersAsync(recipientId);
+
+            // Plain access names (AceStatusEnum_*), not room roles (RoleEnum_*): this is the mention
+            // dialog in the editor, and "no access" only has a name in the plain set - RoleEnum_Restrict
+            // does not exist, so the room format would answer null for exactly the case the caller
+            // most needs to see.
+            result.Add(new AceShortWrapper(
+                ace?.SubjectName ?? recipient.DisplayUserName(displayUserSettingsHelper),
+                FileShareExtensions.GetAccessString(ace?.Access ?? FileShare.Restrict, false),
+                false));
+        }
+
+        return result;
     }
 
     public async Task<List<EncryptionKeyDto>> GetEncryptionAccessAsync<T>(T fileId)
@@ -5559,7 +5622,7 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
         }
-        if (!await DocSpaceHelper.IsFormOrCompletedForm(form, daoFactory))
+        if (!form.IsPdf)
         {
             throw new InvalidOperationException();
         }
@@ -5680,8 +5743,17 @@ public class FileStorageService //: IFileStorageService
             case FormFillingManageAction.Edit:
                 if (room.FolderType == FolderType.FillingFormsRoom)
                 {
+                    var wasFilling = properties.FormFilling.StartFilling;
+
                     properties.FormFilling.StartFilling = false;
                     properties.FormFilling.OriginalFormVersion = form.Version;
+
+                    if (wasFilling)
+                    {
+                        var editor = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
+                        await webhookManager.PublishAsync(WebhookTrigger.FormStopped, form);
+                        await filesMessageService.SendAsync(MessageAction.FormStopped, form, MessageInitiator.DocsService, editor?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
+                    }
                 }
 
                 break;
@@ -5705,7 +5777,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (!await DocSpaceHelper.IsFormOrCompletedForm(form, daoFactory))
+        if (!form.IsPdf)
         {
             throw new InvalidOperationException();
         }
@@ -5955,7 +6027,7 @@ public class FileStorageService //: IFileStorageService
         }
         else
         {
-            if (!await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
+            if (!file.IsPdf)
             {
                 throw new InvalidOperationException();
             }
@@ -6138,7 +6210,7 @@ public class FileStorageService //: IFileStorageService
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
-        if (!form.IsForm)
+        if (!form.IsPdf)
         {
             throw new InvalidOperationException();
         }
@@ -6221,9 +6293,10 @@ public class FileStorageService //: IFileStorageService
         {
             linkId = Guid.NewGuid();
 
+            // An anonymous public link starts read-only even for a form; raising it to Editing is a deliberate act
             var (defaultTitle, defaultAccess) = folder.FolderType switch
             {
-                FolderType.PublicRoom => (FilesCommonResource.DefaultExternalLinkTitle, entry is File<T> { IsForm: true } ? FileShare.Editing : FileShare.Read),
+                FolderType.PublicRoom => (FilesCommonResource.DefaultExternalLinkTitle, FileShare.Read),
                 FolderType.FillingFormsRoom => (FilesCommonResource.FillOutExternalLinkTitle, FileShare.FillForms),
                 _ => throw new InvalidOperationException()
             };

@@ -33,22 +33,41 @@
 
 namespace ASC.Web.Api.Controllers;
 
-///<remarks>
-/// Third-party API.
-///</remarks>
-///<name>thirdparty</name>
+/// <remarks>
+/// The first step of connecting an external account to a portal: the OAuth 2.0 consent URL that a client opens so
+/// that a user can grant this portal access to their Google, Dropbox, DocuSign, Box, OneDrive, WordPress or GitHub
+/// account. Nothing is stored here and no token is issued - the single public operation only assembles the address of
+/// the provider's own consent page out of the client id, secret and redirect URI that an administrator has saved for
+/// the portal with `POST api/2.0/settings/authservice`. The provider sends the user back to this portal's
+/// `thirdparty/{provider}/code` page with the authorization code in the URL fragment, and the code is then handed to
+/// the module that needs the account - a storage connection takes it as `token` in `POST api/2.0/files/thirdparty`.
+/// The operation is open to any signed-in portal user and needs no administrative right.
+/// </remarks>
+/// <name>thirdparty</name>
 [Scope]
 [ApiEndpoint("thirdparty")]
 public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : ControllerBase
 {
     /// <remarks>
-    /// Returns a request to get the confirmation code from URL.
+    /// Builds and returns, as a string, the OAuth 2.0 consent URL of one external provider - the address a client
+    /// opens in a browser so that the user can grant this portal access to their account. The provider's client id,
+    /// secret and redirect URI have to be saved for the portal first with `POST api/2.0/settings/authservice`;
+    /// without them the URL has no `client_id` and the provider refuses it. Any signed-in portal user may call it,
+    /// and the call is read-only and safe to repeat. The URL carries `response_type=code`, the portal's `client_id`,
+    /// the provider's `redirect_uri`, the scope the portal needs (Drive with offline access for Google, `signature`
+    /// for DocuSign) and a `state` pointing back at this portal's `thirdparty/{provider}/code` page, where the code
+    /// arrives in the URL fragment as `#code=...`, or `#error/...` when the user declines. Only Google `1`, Dropbox
+    /// `2`, Docusign `3`, Box `4`, OneDrive `5`, Wordpress `10` and Github `13` produce a URL; any other value is
+    /// answered with 200 and no URL instead of an error. With `desktop=true`, the whole query string is copied into
+    /// `state` and comes back on the callback. The code is not exchanged here: pass it on as `token` to
+    /// `POST api/2.0/files/thirdparty` to connect the account.
     /// </remarks>
-    /// <summary>Get the code request</summary>
-    /// <remarks>List of providers: Google, Dropbox, Docusign, Box, OneDrive, Wordpress.</remarks>
+    /// <summary>
+    /// Get provider consent URL
+    /// </summary>
     /// <path>api/2.0/thirdparty/{provider}</path>
     [Tags("ThirdParty")]
-    [SwaggerResponse(200, "Code request", typeof(string))]
+    [SwaggerResponse(200, "The consent URL of the provider, ready to be opened in a browser; empty when the requested provider is not one of the seven this operation supports", typeof(string))]
     [HttpGet("{provider}")]
     public string GetThirdPartyCode(ConfirmationCodeUrlRequestDto inDto)
     {

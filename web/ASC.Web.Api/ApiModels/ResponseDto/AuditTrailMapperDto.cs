@@ -39,13 +39,15 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class AuditTrailProductMapperDto
 {
     /// <summary>
-    /// The product name.
+    /// The product this branch of the tree belongs to, as the `productType` filter of this operation spells it and
+    /// as `GET api/2.0/security/audit/types` lists it under `productTypes`.
     /// </summary>
     /// <example>Documents</example>
     public string ProductType { get; set; }
 
     /// <summary>
-    /// The modules of the product.
+    /// The locations inside the product. It is empty when `moduleType` was passed and this product has no module
+    /// of that name, which is why a product can come back with nothing under it.
     /// </summary>
     public IEnumerable<AuditTrailModuleMapperDto> Modules { get; set; }
 }
@@ -56,36 +58,41 @@ public class AuditTrailProductMapperDto
 public class AuditTrailModuleMapperDto
 {
     /// <summary>
-    /// The module name.
+    /// The location inside the product, as the `moduleType` filter of `GET api/2.0/security/audit/events/filter`
+    /// spells it.
     /// </summary>
     /// <example>Files</example>
     public string ModuleType { get; set; }
 
     /// <summary>
-    /// The actions of the module.
+    /// Every action this module can record. Each action appears under exactly one module, so this tree is where a
+    /// caller learns which module a given action belongs to.
     /// </summary>
     public IEnumerable<AuditTrailActionMapperDto> Actions { get; set; }
 }
 
 /// <summary>
-/// One audit trail action and what it does to what.
+/// One audit trail action, with the kind of change it stands for and the kind of object it applies to.
 /// </summary>
 public class AuditTrailActionMapperDto
 {
     /// <summary>
-    /// The audit event action name.
+    /// The action name to send as the `action` filter of `GET api/2.0/security/audit/events/filter`, and the value
+    /// that comes back as `actionId` on an event.
     /// </summary>
     /// <example>FileCreated</example>
     public string MessageAction { get; set; }
 
     /// <summary>
-    /// The action type name.
+    /// The kind of change the action makes, accepted by the `actionType` filter of the same operation.
     /// </summary>
     /// <example>Create</example>
     public string ActionType { get; set; }
 
     /// <summary>
-    /// The name of the entry type the action targets.
+    /// The kind of object the action applies to, accepted by the `entryType` filter. It is `None` for an action
+    /// that targets no object, such as a settings change, and an action with a second object type reports only the
+    /// first one here.
     /// </summary>
     /// <example>File</example>
     public string Entity { get; set; }

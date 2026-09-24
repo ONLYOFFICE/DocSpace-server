@@ -177,6 +177,12 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>İşlem geçmişi</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Toplam harcama</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Kullanıcıya göre özet</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Tip</value>
   </data>
@@ -241,7 +247,7 @@
     <value>Uygulama Müşteri Kimliği</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Uygulamanın, bir Apple Kimliği hesabı kullanarak portalda oturum açmasını etkinleştirin.</value>
+    <value>Apple Kimliği hesabıyla çalışma alanınızda oturum açın</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Kullanıcılarınızın Apple Kimliği kullanarak {LogoText}'te oturum açmasına izin vermek için bu uygulamayı etkinleştirin. {0}Apple Developers Portal'a gidin ve yeni uygulama {LogoText} entegrasyonu oluşturun. Aldığınız verileri aşağıya girin:</value>
@@ -286,7 +292,7 @@
     <value>Kutu Anahtarı</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Box belgelerini ve klasörlerini yönetmek için uygulamaya bağlan.</value>
+    <value>Box dosyalarını ve klasörlerini yönetin</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Box hesabınızı Belgeler modülüne bağlamak için bu uygulamayı etkinleştirin. Box’taki dosyaları {LogoText} kullanıcıları ile yönetebilecek, düzenleyebilecek ve paylaşabileceksiniz. {0}Box geliştiriciler sayfasında hesabınızla oturum açın ve {LogoText} entegrasyonu için yeni bir uygulama oluşturun. Aldığınız verileri aşağıya girin:</value>
@@ -325,7 +331,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Dropbox belge ve klasörlerini yönetmek için uygulamaya bağlan.</value>
+    <value>Dropbox dosyalarını ve klasörlerini yönetin</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Dropbox hesabınızı Belgeler modülüne bağlamak için bu uygulamayı etkinleştirin. Dropbox'taki dosyaları, {LogoText} kullanıcılarıyla yönetebilecek, düzenleyebilecek ve paylaşabileceksiniz. {0}Dropbox Developers web sitesinde hesabınızda oturum açın ve {LogoText} entegrasyonu için yeni bir uygulama oluşturun. Aldığınız verileri aşağıya girin:</value>
@@ -361,7 +367,7 @@
     <value>Facebook Anahtar</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Facebook hesabı kullanarak uygulamaya bağlan ve kişileri ara.</value>
+    <value>Facebook hesabıyla çalışma alanınızda oturum açın</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Kullanıcılarınızın Facebook kullanarak {LogoText}'te oturum açmasına ve müşterilerinin Facebook hesaplarını CRM modülüne bağlamasına izin vermek için bu uygulamayı etkinleştirin. {0}Facebook Developers Portal'a gidin ve yeni uygulama {LogoText} entegrasyonu oluşturun. Aldığınız verileri aşağıya girin:</value>
@@ -415,7 +421,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Google hesabı kullanarak portala bağlan ve Google Drive belge ve klasörlerini yönet.</value>
+    <value>Google hesabıyla çalışma alanınızda oturum açın ve Google Drive dosyalarını ve klasörlerini yönetin</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Google Drive hesabınızı Belgeler modülüne bağlamak için bu uygulamayı etkinleştirin. Google Drive'daki dosyaları {LogoText} kullanıcılarıyla yönetebilecek, düzenleyebilecek ve paylaşabileceksiniz. {0}Google APIs konsoluna gidin ve {LogoText} entegrasyonu için yeni bir proje oluşturun. Aldığınız verileri aşağıya girin:</value>
@@ -424,7 +430,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>LinkedIn hesabı kullanarak uygulamaya bağlan.</value>
+    <value>LinkedIn hesabıyla çalışma alanınızda oturum açın</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Kullanıcılarınızın {LogoText}'te LinkedIn hesaplarını kullanarak oturum açmasına izin vermek için bu uygulamayı etkinleştirin. {0}LinkedIn Developers web sitesine gidin ve yeni uygulama {LogoText} entegrasyonu oluşturun. Aldığınız verileri aşağıya girin:</value>
@@ -553,7 +559,7 @@
     <value>Müşteri gizli</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>OneDrive belge ve klasörlerini yönetmek için uygulamaya bağlan.</value>
+    <value>OneDrive dosyalarını ve klasörlerini yönetin</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>OneDrive hesabınızı Belgeler modülüne bağlamak için bu uygulamayı etkinleştirin. {LogoText} kullanıcılarıyla OneDrive'daki dosyaları yönetebilecek, düzenleyebilecek ve paylaşabileceksiniz. {0}Microsoft Azure hesabınızda oturum açın ve {LogoText} entegrasyonu için yeni bir uygulama oluşturun. Aldığınız verileri aşağıya girin:</value>
@@ -583,7 +589,7 @@
     <value>Bot belirteci</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Portal bildirimlerini, Telegram ile almak için Telegram hesabını bağlayın.</value>
+    <value>Bildirimleri Telegram üzerinden alın</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Telegram aracılığıyla portal bildirimleri almak için Telegram bot'unu etkinleştirin. Telegram Masaüstü sürümünde, BotFather'ı kullanarak yeni bir bot oluşturabilirsiniz. Bu botu kullanmak için, portal kullanıcılarının Profil Sayfalarında Telegram bildirimlerini etkinleştirmeleri gerekir. {0}Botun kullanıcı adını ve aldığınız belirteci aşağıdaki alanlara yapıştırın.</value>
@@ -616,7 +622,7 @@
     <value>Müşteri Kimliği</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>X hesabı kullanarak uygulamaya bağlan.</value>
+    <value>X hesabıyla çalışma alanınızda oturum açın</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Kullanıcılarınızın, X'larını kullanarak {LogoText}'te oturum açmalarına ve müşterilerinin X hesaplarını CRM modülüne bağlamalarına izin vermek için bu uygulamayı etkinleştirin. {0}X Developers Portal'a gidin ve yeni bir uygulama {LogoText} entegrasyonu oluşturun. Aldığınız verileri aşağıya girin:</value>
@@ -655,7 +661,7 @@
     <value>Müşteri gizli</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Uygulamanın WeChat hesabı kullanarak portala giriş yapmasını etkinleştir.</value>
+    <value>WeChat hesabıyla çalışma alanınızda oturum açın</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Uygulamanın WeChat hesabı kullanarak portala giriş yapmasını etkinleştir.</value>
@@ -715,7 +721,7 @@
     <value>Zoom müşteri sırrı</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Uygulamanın bir Zoom hesabı kullanarak portalda oturum açmasını etkinleştirin.</value>
+    <value>Zoom hesabıyla çalışma alanınızda oturum açın</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Kullanıcılarınızın Zoom hesaplarını kullanarak {LogoText}'te oturum açmasına izin vermek için bu uygulamayı etkinleştirin. {0}Zoom Developers web sitesine gidin ve yeni bir uygulama {LogoText} entegrasyonu oluşturun. Aldığınız verileri aşağıya ekleyin:</value>
@@ -1308,9 +1314,6 @@
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Neler Yeni</value>
   </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>Ajan</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>Sohbet</value>
   </data>
@@ -1360,7 +1363,7 @@
     <value>Veritabanı bağlantısı</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Form sonuçlarını MySQL veya SQLite gibi harici bir veritabanında saklayın.</value>
+    <value>Form sonuçlarını MySQL veya SQLite gibi harici bir veritabanında saklayın</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Form sonuçlarını saklamak için harici bir veritabanı bağlayın.</value>
@@ -1384,7 +1387,7 @@
     <value>Müşteri gizli</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Uygulamanın Nextcloud hesabı kullanarak portala giriş yapmasına izin verin.</value>
+    <value>Nextcloud hesabıyla çalışma alanınızda oturum açın</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Uygulamanın Nextcloud hesabı kullanarak portala giriş yapmasına izin verin.</value>
@@ -1450,9 +1453,87 @@
     <value>Görsel</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>DocsCloud Kota Raporu ({0})</value>
+    <value>Docs Connect Kota Raporu ({0})</value>
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>ONLYOFFICE Docs editörlerini bulut barındırmalı kiracılar ve kendi API anahtarlarınızla uygulamanıza entegre edin.</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Kaynak tipi</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Kaynak ismi</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>Kaynak ID</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>Yapay zekâ ajanı</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Dosya</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Klasör</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Oda</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Form</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Şirket</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Oluşturulma tarihi</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Dönem</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Rapor</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Toplam</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Aktif</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Erişim süresi doluyor</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Kullanıcı türü</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>Kullanıcı kimliği</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Editörler</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Tam izinlere sahip belge editörleri</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Kalan</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Kullanıcı kotası</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Abonelik limiti</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Canlı görüntüleyici</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Salt okunur belge görüntüleyicileri</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Harici</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Dahili</value>
   </data>
 </root>

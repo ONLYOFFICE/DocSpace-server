@@ -177,6 +177,12 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>História transakcií</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Celkovo minuté</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Súhrn podľa používateľov</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Typ</value>
   </data>
@@ -241,7 +247,7 @@
     <value>ID klienta aplikácie</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Aktivujte aplikáciu na prihlásenie do portálu pomocou účtu Apple ID.</value>
+    <value>Prihláste sa do svojho pracovného priestoru pomocou účtu Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Aktivujte túto aplikáciu, aby ste umožnili používateľom prihlásiť sa na portál {LogoText} pomocou Apple ID. {0}Prejdite na Apple Developers Portal a vytvorte novú aplikáciu na integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
@@ -286,7 +292,7 @@
     <value>Box kľúč</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Pripojte aplikáciu a spravujte súbory a priečinky.</value>
+    <value>Spravujte súbory a priečinky Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Aktivujte túto aplikáciu, aby ste prepojili svoje konto Box s modulom Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory zo služby Box s používateľmi služby {LogoText}. {0}Prihláste sa do svojho účtu na stránke vývojárov služby Box a vytvorte novú aplikáciu pre integráciu s {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
@@ -325,7 +331,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Pripojte aplikáciu na správu Dropbox súborov a priečinkov.</value>
+    <value>Spravujte súbory a priečinky Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Aktivujte túto aplikáciu, aby ste pripojili účet Dropbox k modulu Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory z Dropbox s používateľmi {LogoText}. {0}Prihláste sa do svojho účtu na webovej stránke Dropbox Developers a vytvorte novú aplikáciu pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
@@ -361,7 +367,7 @@
     <value>Facebook kľúč</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Pripojte aplikáciu a prihláste sa na portál pomocou účtu Facebook.</value>
+    <value>Prihláste sa do svojho pracovného priestoru pomocou účtu Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} pomocou Facebooku a prepojiť účty ich zákazníkov na Facebooku s modulom CRM. {0}Prejdite na Facebook Developers Portal a vytvorte novú aplikáciu na integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
@@ -415,7 +421,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Pripojte projekt, aby ste sa mohli prihlásiť na portál pomocou účtu Google a spravovať súbory a priečinky na disku Google.</value>
+    <value>Prihláste sa do svojho pracovného priestoru pomocou účtu Google a spravujte súbory a priečinky na disku Google</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Aktivujte túto aplikáciu, aby ste prepojili svoj účet Google Drive s modulom Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory z Disku Google s používateľmi {LogoText}. {0}Prejdite do konzoly Google API a vytvorte nový projekt pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
@@ -424,7 +430,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Pripojte aplikáciu a prihláste sa na portál pomocou účtu LinkedIn.</value>
+    <value>Prihláste sa do svojho pracovného priestoru pomocou účtu LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} pomocou svojich účtov LinkedIn. {0}Prejdite na webovú stránku LinkedIn Developers a vytvorte novú aplikáciu na integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
@@ -553,7 +559,7 @@
     <value>Tajomstvo klienta</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Pripojte aplikáciu na správu súborov a priečinkov OneDrive.</value>
+    <value>Spravujte súbory a priečinky OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Aktivujte túto aplikáciu, aby ste prepojili svoj účet OneDrive s modulom Dokumenty. Budete môcť spravovať, upravovať a zdieľať súbory zo služby OneDrive s používateľmi {LogoText}. {0}Prihláste sa do svojho účtu Microsoft Azure a vytvorte novú aplikáciu pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
@@ -583,7 +589,7 @@
     <value>Token bota</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Pripojte účet Telegram, aby ste mohli dostávať oznámenia z portálu cez Telegram.</value>
+    <value>Dostávajte oznámenia cez Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Ak chcete dostávať oznámenia portálu v Telegrame, povoľte funkciu Telegram bot. Nového bota môžete vytvoriť pomocou funkcie BotFather v Telegram Desktop. Ak chcú používatelia portálu využívať tento bot, musia na svojej profilovej stránke povoliť upozornenia Telegram. {0}Vložte používateľské meno bota a token, ktorý ste dostali, do poličiek nižšie.</value>
@@ -616,7 +622,7 @@
     <value>ID klienta</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Pripojte aplikáciu a prihláste sa na portál pomocou účtu Twitter.</value>
+    <value>Prihláste sa do svojho pracovného priestoru pomocou účtu X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} pomocou svojho Twitteru a prepojiť účty svojich zákazníkov na Twitteri s modulom CRM. {0}Prejdite na Twitter Developers Portal a vytvorte novú aplikáciu pre integráciu {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
@@ -655,7 +661,7 @@
     <value>Tajný kľúč klienta</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Povoliť aplikácii prihlásenie do portálu pomocou účtu WeChat.</value>
+    <value>Prihláste sa do svojho pracovného priestoru pomocou účtu WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Povoliť aplikácii prihlásenie do portálu pomocou účtu WeChat.</value>
@@ -715,7 +721,7 @@
     <value>Tajomstvo klienta Zoom</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Umožnite aplikácii prihlásiť sa na portál pomocou účtu Zoom.</value>
+    <value>Prihláste sa do svojho pracovného priestoru pomocou účtu Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Aktivujte túto aplikáciu, aby sa vaši používatelia mohli prihlásiť do {LogoText} cez svoje účty Zoom. {0}Prejdite na webovú stránku Zoom Developers a vytvorte novú integráciu aplikácie {LogoText}. Vložte údaje, ktoré ste dostali nižšie:</value>
@@ -1308,9 +1314,6 @@
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Čo je nové</value>
   </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>Agent</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>Chat</value>
   </data>
@@ -1360,7 +1363,7 @@
     <value>Pripojenie k databáze</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Uložte výsledky formulára do externej databázy, napríklad MySQL alebo SQLite.</value>
+    <value>Ukladajte výsledky formulára do externej databázy, napríklad MySQL alebo SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Pripojte externú databázu na ukladanie výsledkov formulára.</value>
@@ -1384,7 +1387,7 @@
     <value>Tajomstvo klienta</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Povoľte aplikácii prihlásiť sa na portál pomocou účtu Nextcloud.</value>
+    <value>Prihláste sa do svojho pracovného priestoru pomocou účtu Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Povoľte aplikácii prihlásiť sa na portál pomocou účtu Nextcloud.</value>
@@ -1450,9 +1453,87 @@
     <value>Obrázok</value>
   </data>
   <data name="DocsCloudQuotaReportName" xml:space="preserve">
-    <value>Správa o kvóte DocsCloud ({0})</value>
+    <value>Správa o kvóte Docs Connect ({0})</value>
   </data>
   <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
     <value>Vložte editory ONLYOFFICE Docs do svojej aplikácie s cloudovými nájomníkmi a vlastnými kľúčmi API.</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Typ zdroja</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Názov zdroja</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>ID zdroja</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>AI agent</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Súbor</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Priečinok</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Miestnosť</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Formulár</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Spoločnosť</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Dátum generovania</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Obdobie</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Správa</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Celkom</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Aktívny</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Prístup vyprší</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Typ používateľa</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>ID používateľa</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Editory</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Editory dokumentov s plnými oprávneniami</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Limit predplatného</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Kvóta používateľa</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Živý prehliadač</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Prehliadače dokumentov iba na čítanie</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Externý</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Interný</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Zostatok</value>
   </data>
 </root>

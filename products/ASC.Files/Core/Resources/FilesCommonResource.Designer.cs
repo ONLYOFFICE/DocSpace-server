@@ -205,6 +205,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Chat outputs.
+        /// </summary>
+        public static string ChatOutputsFolder {
+            get {
+                return ResourceManager.GetString("ChatOutputsFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Autosaved.
         /// </summary>
         public static string CommentAutosave {
@@ -583,14 +592,14 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Invalid folder id.
+        ///   Looks up a localized string similar to Invalid folder ID.
         /// </summary>
         public static string ErrorMessage_InvalidFolderId {
             get {
                 return ResourceManager.GetString("ErrorMessage_InvalidFolderId", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Invalid provider.
         /// </summary>

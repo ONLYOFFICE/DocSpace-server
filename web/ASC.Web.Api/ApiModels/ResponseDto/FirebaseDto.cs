@@ -34,54 +34,58 @@
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
-/// The Firebase parameters.
+/// The Firebase project a client initialises its SDK with to receive push notifications from this portal.
 /// </summary>
 public class FirebaseDto
 {
     /// <summary>
-    /// The Firebase API key.
+    /// The web API key of the project. Every field of this object is an empty string on an installation that
+    /// configures no Firebase project, and an empty `projectId` is the cheapest thing to test for before
+    /// initialising an SDK. None of these values is a secret - they are meant to be embedded in a client.
     /// </summary>
     /// <example>AIzaSyDxK9L3j4H8mN2pQ5rS6tU7vW8xY9zA1bC</example>
     public required string ApiKey { get; set; }
 
     /// <summary>
-    /// The Firebase authentication domain.
+    /// The host the Firebase SDK performs its own authentication against.
     /// </summary>
     /// <example>myapp-12345.firebaseapp.com</example>
     public required string AuthDomain { get; set; }
 
     /// <summary>
-    /// The Firebase project ID.
+    /// The identifier of the Firebase project itself, which ties all the other fields together.
     /// </summary>
     /// <example>myapp-12345</example>
     public required string ProjectId { get; set; }
 
     /// <summary>
-    /// The Firebase storage bucket.
+    /// The Cloud Storage bucket of the project. The portal does not store portal files there; it is part of the
+    /// SDK configuration.
     /// </summary>
     /// <example>myapp-12345.appspot.com</example>
     public required string StorageBucket { get; set; }
 
     /// <summary>
-    /// The Firebase messaging sender ID.
+    /// The sender ID that push messages of this project arrive under, which a client checks an incoming message
+    /// against.
     /// </summary>
     /// <example>123456789012</example>
     public required string MessagingSenderId { get; set; }
 
     /// <summary>
-    /// The Firebase application ID.
+    /// The identifier of the Firebase application registration this client is to use.
     /// </summary>
     /// <example>1:123456789012:web:a1b2c3d4e5f6g7h8</example>
     public required string AppId { get; set; }
 
     /// <summary>
-    /// The Firebase measurement ID.
+    /// The Google Analytics measurement ID of the project, empty when the project reports no analytics.
     /// </summary>
     /// <example>G-ABCD123456</example>
     public required string MeasurementId { get; set; }
 
     /// <summary>
-    /// The Firebase database URL.
+    /// The Realtime Database endpoint of the project, empty when the project has no such database.
     /// </summary>
     /// <example>https://myapp-12345.firebaseio.com</example>
     public required string DatabaseURL { get; set; }

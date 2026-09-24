@@ -48,12 +48,12 @@ public class PreferencesReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     [Fact]
     public async Task Read_Global_Existing_ReturnsValue()
     {
-        await UpsertPreferencesAsync(deepMode: true);
+        await UpsertPreferencesAsync(depth: ReasoningDepth.High);
 
         var preferences = await ReadPreferencesAsync();
 
         preferences.Should().NotBeNull();
-        preferences!.DeepMode.Should().BeTrue();
+        preferences!.Depth.Should().Be(ReasoningDepth.High);
     }
 
     [Fact]
@@ -70,19 +70,19 @@ public class PreferencesReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     public async Task Read_WithEntityId_Existing_ReturnsScopedValue()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(deepMode: true, entityId: roomId.ToString());
+        await UpsertPreferencesAsync(depth: ReasoningDepth.High, entityId: roomId.ToString());
 
         var preferences = await ReadPreferencesAsync(roomId.ToString());
 
         preferences.Should().NotBeNull();
-        preferences!.DeepMode.Should().BeTrue();
+        preferences!.Depth.Should().Be(ReasoningDepth.High);
     }
 
     [Fact]
     public async Task Read_Global_NotAffectedByScoped()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(deepMode: true, entityId: roomId.ToString());
+        await UpsertPreferencesAsync(depth: ReasoningDepth.High, entityId: roomId.ToString());
 
         var global = await ReadPreferencesAsync();
 
@@ -93,7 +93,7 @@ public class PreferencesReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     public async Task Read_WithEntityId_NotAffectedByGlobal()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(deepMode: true);
+        await UpsertPreferencesAsync(depth: ReasoningDepth.High);
 
         var scoped = await ReadPreferencesAsync(roomId.ToString());
 
@@ -104,17 +104,17 @@ public class PreferencesReadTests(AspireAppFixture fixture) : BaseTest(fixture)
     public async Task Read_GlobalAndScoped_StoreDifferentValues()
     {
         var roomId = await CreateRoomAsync();
-        await UpsertPreferencesAsync(deepMode: true);
-        await UpsertPreferencesAsync(deepMode: false, entityId: roomId.ToString());
+        await UpsertPreferencesAsync(depth: ReasoningDepth.High);
+        await UpsertPreferencesAsync(depth: ReasoningDepth.None, entityId: roomId.ToString());
 
         var global = await ReadPreferencesAsync();
         var scoped = await ReadPreferencesAsync(roomId.ToString());
 
         global.Should().NotBeNull();
-        global!.DeepMode.Should().BeTrue();
+        global!.Depth.Should().Be(ReasoningDepth.High);
 
         scoped.Should().NotBeNull();
-        scoped!.DeepMode.Should().BeFalse();
+        scoped!.Depth.Should().Be(ReasoningDepth.None);
     }
 
     [Fact]

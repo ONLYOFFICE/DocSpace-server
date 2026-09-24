@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The setup TFA code parameters.
+/// The secret to enrol in an authenticator application, in both of the forms an application can take it.
 /// </summary>
 /// <example>
 /// {
@@ -46,19 +46,23 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class TfaSetupCodeDto
 {
     /// <summary>
-    /// The account for which the setup code is generated.
+    /// The label the authenticator application will list the credential under, which is the caller's own email
+    /// address. It identifies the entry to a person, and no application checks it.
     /// </summary>
     /// <example>john.doe@onlyoffice.com</example>
     public string Account { get; private set; }
 
     /// <summary>
-    /// The manual entry key.
+    /// The secret in the base32 form that is typed into an application by hand. It describes the very same
+    /// credential as `qrCodeSetupImageUrl`, and repeating the call hands back the same value for the account until
+    /// the credential is reset.
     /// </summary>
     /// <example>JBSWY3DPEHPK3PXP</example>
     public string ManualEntryKey { get; private set; }
 
     /// <summary>
-    /// The QR-code setup image URL (base64-encoded PNG image).
+    /// The same secret as a scannable image, given as a `data:image/png;base64,` URL that can be rendered
+    /// directly - it is not a link to fetch.
     /// </summary>
     /// <example>data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAAAAAA6fptVAAAACklEQVR4nGMAAgAABAABiCEmiQAAAABJRU5ErkJggg==</example>
     public string QrCodeSetupImageUrl { get; private set; }

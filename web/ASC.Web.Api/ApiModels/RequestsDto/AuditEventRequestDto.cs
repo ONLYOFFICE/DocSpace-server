@@ -34,68 +34,79 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for filtering and retrieving audit event records.
+/// The filters that narrow the portal audit trail, and the window of the page returned from it.
 /// </summary>
 public class AuditEventRequestDto
 {
     /// <summary>
-    /// The ID of the user who triggered the audit event.
+    /// The user who performed the action, given by portal user ID. Leave it at the empty GUID to keep the events of
+    /// every user.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000001</example>
     [FromQuery(Name = "userId")]
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// The location where the audit event occurred.
+    /// The module the recorded action belongs to, spelled as `GET api/2.0/security/audit/types` lists it under
+    /// `moduleTypes`. `GET api/2.0/security/audit/mappers` shows which module records which action. The default
+    /// value keeps every module.
     /// </summary>
     /// <example>Files</example>
     [FromQuery(Name = "moduleType")]
     public LocationType LocationType { get; set; }
 
     /// <summary>
-    /// The type of action performed in the audit event (e.g., Create, Update, Delete).
+    /// The kind of change the action made, spelled as `GET api/2.0/security/audit/types` lists it under
+    /// `actionTypes`. The default value keeps every kind.
     /// </summary>
     /// <example>Create</example>
     [FromQuery(Name = "actionType")]
     public ActionType ActionType { get; set; }
 
     /// <summary>
-    /// The specific action that occurred within the audit event.
+    /// The exact action recorded, spelled as the `messageAction` of `GET api/2.0/security/audit/mappers`. Naming
+    /// one narrows the answer to that single action and overrides `moduleType` and `actionType`, which stop
+    /// narrowing anything once it is set.
     /// </summary>
     /// <example>FileCreated</example>
     [FromQuery(Name = "action")]
     public MessageAction Action { get; set; }
 
     /// <summary>
-    /// The type of audit entry (e.g., Folder, User, File).
+    /// The kind of object the action was performed on, spelled as `GET api/2.0/security/audit/types` lists it under
+    /// `entryTypes`. Pair it with `target` to filter by object without pinning a single action.
     /// </summary>
     /// <example>File</example>
     [FromQuery(Name = "entryType")]
     public EntryType EntryType { get; set; }
 
     /// <summary>
-    /// The target object affected by the audit event (e.g., document ID, user account).
+    /// The object the action was performed on, as the audit trail recorded it - a file name, a user account, a room
+    /// title. It is matched in full and exactly as stored, so it narrows the answer only when `action` or
+    /// `entryType` is set as well.
     /// </summary>
     /// <example>document.docx</example>
     [FromQuery(Name = "target")]
     public string Target { get; set; }
 
     /// <summary>
-    /// The starting date and time for filtering audit events.
+    /// The earliest moment an event may have been recorded at, read as a UTC instant. The `date` of the events that
+    /// come back is in the portal time zone instead, so the two do not line up on a portal that is not on UTC.
     /// </summary>
     /// <example>2024-01-01T00:00:00Z</example>
     [FromQuery(Name = "from")]
     public ApiDateTime From { get; set; }
 
     /// <summary>
-    /// The ending date and time for filtering audit events.
+    /// The latest moment an event may have been recorded at, read as a UTC instant in the same way as `from`.
     /// </summary>
     /// <example>2024-01-31T23:59:59Z</example>
     [FromQuery(Name = "to")]
     public ApiDateTime To { get; set; }
 
     /// <summary>
-    /// The maximum number of audit event records to retrieve.
+    /// How many events one page may hold. The maximum is also the default, so a client that wants shorter pages has
+    /// to ask for them; a full page means there may be further matches beyond it.
     /// </summary>
     /// <example>100</example>
     [FromQuery(Name = "count")]
@@ -103,7 +114,8 @@ public class AuditEventRequestDto
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
-    /// The index of the first audit event record to retrieve in a paged query.
+    /// How many matching events to skip before the page begins, counting from the newest. Advance it by `count` to
+    /// walk backwards through the trail.
     /// </summary>
     /// <example>0</example>
     [FromQuery(Name = "startIndex")]

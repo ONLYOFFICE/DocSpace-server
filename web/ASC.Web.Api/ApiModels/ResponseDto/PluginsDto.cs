@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModel.ResponseDto;
 
 /// <summary>
-/// The plugins parameters.
+/// What the installation allows to be done with web plugins.
 /// </summary>
 /// <example>
 /// {
@@ -46,19 +46,24 @@ namespace ASC.Web.Api.ApiModel.ResponseDto;
 public class PluginsDto
 {
     /// <summary>
-    /// Specifies if the plugins are enabled or not.
+    /// Whether web plugins run on this portal at all. While it is `false` the operations under
+    /// `api/2.0/settings/webplugins` are of no use, whatever the other two flags say. All three are `false`
+    /// unless the installation switched plugins on in its configuration.
     /// </summary>
     /// <example>true</example>
     public bool Enabled { get; set; }
 
     /// <summary>
-    /// Specifies if the plugins can be uploaded or not.
+    /// Whether an administrator may add a plugin of their own through
+    /// `POST api/2.0/settings/webplugins`. While it is `false` only the plugins that ship with the installation
+    /// are available.
     /// </summary>
     /// <example>true</example>
     public bool Upload { get; set; }
 
     /// <summary>
-    /// Specifies if the plugins can be deleted or not.
+    /// Whether an added plugin may be removed again through `DELETE api/2.0/settings/webplugins/{name}`. The
+    /// plugins that ship with the installation cannot be removed regardless of this flag.
     /// </summary>
     /// <example>true</example>
     public bool Delete { get; set; }

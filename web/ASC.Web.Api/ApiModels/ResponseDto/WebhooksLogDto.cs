@@ -34,93 +34,107 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The webhook log parameters.
+/// One delivery attempt of a webhook: what was sent where, and what came back.
 /// </summary>
 /// <example>
 /// {
-///   "configName": "example value",
-///   "trigger": 0,
+///   "id": 1,
+///   "configName": "Room activity",
+///   "trigger": 128,
 ///   "creationTime": "2024-01-15T10:30:00Z",
-///   "method": "example value",
-///   "route": "example value",
-///   "requestHeaders": "example value",
-///   "requestPayload": "example value",
-///   "responseHeaders": "example value",
-///   "responsePayload": "example value",
-///   "status": 1,
+///   "method": "POST",
+///   "route": "https://example.com/hooks/docspace",
+///   "requestHeaders": "{\"x-docspace-signature\":\"9f86d081884c7d65\"}",
+///   "requestPayload": "{\"id\":42,\"title\":\"report.docx\"}",
+///   "responseHeaders": "{\"content-type\":\"application/json\"}",
+///   "responsePayload": "{\"ok\":true}",
+///   "status": 200,
 ///   "delivery": "2024-01-15T10:30:00Z"
 /// }
 /// </example>
 public class WebhooksLogDto
 {
     /// <summary>
-    /// The webhook log ID.
+    /// The identifier of this attempt, which is what the `eventId` filter of
+    /// `GET api/2.0/settings/webhooks/log` picks one record by and what
+    /// `PUT api/2.0/settings/webhook/{id}/retry` re-sends. A retry produces a new record with a new identifier
+    /// and leaves this one as it is.
     /// </summary>
     /// <example>1</example>
     public required int Id { get; set; }
 
     /// <summary>
-    /// The webhook configuration name.
+    /// The name of the subscription the attempt belongs to. It is the name as it stands now, so it follows a
+    /// later rename of the subscription rather than recording what it was called at the time.
     /// </summary>
-    /// <example>Example Name</example>
+    /// <example>Room activity</example>
     public string ConfigName { get; set; }
 
     /// <summary>
-    /// The webhook trigger type.
+    /// The event that caused the attempt, as a single bit rather than a mask - a delivery is always for one
+    /// event, even though a subscription covers several.
     /// </summary>
-    /// <example>0</example>
+    /// <example>128</example>
     public WebhookTrigger Trigger { get; set; }
 
     /// <summary>
-    /// The webhook creation time.
+    /// When the attempt was queued, as a UTC instant - unlike the dates of the subscription itself, which come
+    /// in the portal time zone. Records come back newest first by this moment.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     public DateTime CreationTime { get; set; }
 
     /// <summary>
-    /// The webhook method.
+    /// The HTTP method the delivery was sent with, which is `POST` for every webhook the portal sends.
     /// </summary>
-    /// <example>example value</example>
+    /// <example>POST</example>
     public string Method { get; set; }
 
     /// <summary>
-    /// The webhook route.
+    /// The address the delivery was sent to, which is the subscription's URL as it stood at the time - so an
+    /// older record can name an address the subscription no longer uses.
     /// </summary>
-    /// <example>example value</example>
+    /// <example>https://example.com/hooks/docspace</example>
     public string Route { get; set; }
 
     /// <summary>
-    /// The webhook request headers.
+    /// The headers the portal sent, serialised as one string, including the signature header a receiver verifies
+    /// the payload with.
     /// </summary>
-    /// <example>example value</example>
+    /// <example>{"x-docspace-signature":"9f86d081884c7d65"}</example>
     public string RequestHeaders { get; set; }
 
     /// <summary>
-    /// The webhook request payload.
+    /// The body the portal sent, which is the event payload as JSON text. It is stored as it was sent, so it
+    /// still describes the entity as it looked at the time of the event.
     /// </summary>
-    /// <example>example value</example>
+    /// <example>{"id":42,"title":"report.docx"}</example>
     public string RequestPayload { get; set; }
 
     /// <summary>
-    /// The webhook response headers.
+    /// The headers the target answered with, serialised the same way as `requestHeaders`. It is empty while the
+    /// attempt is still on its way and on an attempt that never reached the target.
     /// </summary>
-    /// <example>example value</example>
+    /// <example>{"content-type":"application/json"}</example>
     public string ResponseHeaders { get; set; }
 
     /// <summary>
-    /// The webhook response payload.
+    /// The body the target answered with, truncated for storage. Empty under the same conditions as
+    /// `responseHeaders`, and also for a target that answers with no body at all.
     /// </summary>
-    /// <example>example value</example>
+    /// <example>{"ok":true}</example>
     public string ResponsePayload { get; set; }
 
     /// <summary>
-    /// The webhook status.
+    /// The HTTP status code the target answered. It is `0` while the attempt is still on its way and on one that
+    /// never reached the target, so `0` is not a failure code - it is the absence of an answer.
     /// </summary>
-    /// <example>1</example>
+    /// <example>200</example>
     public int Status { get; set; }
 
     /// <summary>
-    /// The webhook delivery time.
+    /// When the answer came back, as a UTC instant like `creationTime`. It is empty while the attempt is still on
+    /// its way, which together with `status` is how a pending record is told from a finished one.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     public DateTime? Delivery { get; set; }
