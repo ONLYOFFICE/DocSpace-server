@@ -183,6 +183,7 @@ public class OperationsReportBuilder(
                 operation.SourceId = sourceId;
                 operation.SourceType = sourceType;
                 operation.SourceTitle = sourceTitle;
+                operation.TokenUsage = WalletServiceDescriptionManager.GetTokenUsage(operation.Metadata);
             }
 
             yield return report.Collection;

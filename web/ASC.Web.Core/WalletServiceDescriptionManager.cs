@@ -164,6 +164,45 @@ public class WalletServiceDescriptionManager
     }
 
     /// <summary>
+    /// Reads the tokens an AI operation consumed from its metadata. Returns <c>null</c> when the metadata
+    /// carries no token counts at all, so a non-AI operation has no usage rather than an all-zero one.
+    /// </summary>
+    public static OperationTokenUsage GetTokenUsage(Dictionary<string, string> metadata)
+    {
+        if (metadata == null)
+        {
+            return null;
+        }
+
+        var found = false;
+
+        var usage = new OperationTokenUsage
+        {
+            TotalTokens = ReadTokens(BillingClient.MetadataTotalTokens),
+            PromptTokens = ReadTokens(BillingClient.MetadataPromptTokens),
+            CompletionTokens = ReadTokens(BillingClient.MetadataCompletionTokens),
+            CachedTokens = ReadTokens(BillingClient.MetadataCachedTokens),
+            CacheWriteTokens = ReadTokens(BillingClient.MetadataCacheWriteTokens),
+            ReasoningTokens = ReadTokens(BillingClient.MetadataReasoningTokens),
+            ImageTokens = ReadTokens(BillingClient.MetadataImageTokens)
+        };
+
+        return found ? usage : null;
+
+        long ReadTokens(string key)
+        {
+            if (!metadata.TryGetValue(key, out var value) ||
+                !long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var tokens))
+            {
+                return 0;
+            }
+
+            found = true;
+            return tokens;
+        }
+    }
+
+    /// <summary>
     /// Returns the localized name of the source type, or the raw value for an unknown one.
     /// </summary>
     public static string GetSourceTypeTitle(string sourceType)

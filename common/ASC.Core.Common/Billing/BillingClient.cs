@@ -48,6 +48,13 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
     public const string MetadataSourceId = "source_id";
     public const string MetadataSourceType = "source_type";
     public const string MetadataSourceTitle = "source_title";
+    public const string MetadataTotalTokens = "total_tokens";
+    public const string MetadataPromptTokens = "prompt_tokens";
+    public const string MetadataCompletionTokens = "completion_tokens";
+    public const string MetadataCachedTokens = "cached_tokens";
+    public const string MetadataCacheWriteTokens = "cache_write_tokens";
+    public const string MetadataReasoningTokens = "reasoning_tokens";
+    public const string MetadataImageTokens = "image_tokens";
 
     public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
 
