@@ -682,6 +682,7 @@ public class SecurityController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / CSP")]
     [SwaggerResponse(200, "The allowed domains and the full policy header the portal serves", typeof(CspDto))]
+    [SwaggerResponse(304, "The CSP settings have not changed since the `Last-Modified` value sent back in `If-Modified-Since`; the body is empty")]
     [AllowAnonymous]
     [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName)]
     [HttpGet("csp")]

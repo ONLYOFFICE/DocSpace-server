@@ -154,6 +154,7 @@ public class PortalController(
     /// <path>api/2.0/portal/users/{userID}</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "The account of this portal, in the internal user format", typeof(UserInfo))]
+    [SwaggerResponse(403, "The caller is not allowed to view this account; a user or a guest gets it for any ID but their own, whether the account exists or not")]
     [SwaggerResponse(404, "No account with this ID exists on the portal, or the ID belongs to a system account")]
     [HttpGet("users/{userID:guid}")]
     public async Task<UserInfo> GetUserById(UserIDRequestDto inDto)
@@ -192,6 +193,8 @@ public class PortalController(
     /// <path>api/2.0/portal/users/invite/{employeeType}</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "The invitation URL to hand to the invited person, or an empty string when the caller may not invite that role", typeof(string))]
+    [SwaggerResponse(400, "The `employeeType` in the path is not one of the known roles")]
+    [SwaggerResponse(403, "Inviting members is disabled for the portal")]
     [HttpGet("users/invite/{employeeType}")]
     [Obsolete("Use CRUD /api/2.0/portal/users/invitationlink instead")]
     public async Task<string> GetInvitationLink(InvitationLinkRequestDto inDto)
@@ -228,10 +231,10 @@ public class PortalController(
     /// (`GET api/2.0/settings/invitationsettings`), `employeeType` has to be `DocSpaceAdmin`, `RoomAdmin` or `User`,
     /// and `expiration`, when given, has to lie in the future and is read in the portal time zone. The caller needs
     /// the right to add users of that role, only the portal owner may create the DocSpace administrator link, and a
-    /// link for a paying role additionally needs a free paid seat in the portal quota. The call is mutating and not
-    /// idempotent. The answer carries the `id` needed to update or delete the link, the shortened `url`,
-    /// `maxUseCount` and `currentUseCount`, `expiration` in the portal time zone - empty for a link that never
-    /// expires - and `isExpired`.
+    /// link for a paying role is refused while the portal payment is overdue or the portal quota has no free paid
+    /// seat left. The call is mutating and not idempotent. The answer carries the `id` needed to update or delete the
+    /// link, the shortened `url`, `maxUseCount` and `currentUseCount`, `expiration` in the portal time zone - empty
+    /// for a link that never expires - and `isExpired`.
     /// </remarks>
     /// <summary>
     /// Create an invitation link
@@ -239,6 +242,9 @@ public class PortalController(
     /// <path>api/2.0/portal/users/invitationlink</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "The invitation link as it was created, with the `id` to address it later and the `url` to share", typeof(InvitationLinkDto))]
+    [SwaggerResponse(400, "The request body cannot be read, the role is not `DocSpaceAdmin`, `RoomAdmin` or `User`, the use limit is outside 1-1000, the deadline is in the past, or the role already has a link")]
+    [SwaggerResponse(402, "The link is for a paying role, and the portal payment is overdue or the portal quota has no free paid seat left")]
+    [SwaggerResponse(403, "Inviting members is disabled for the portal, the caller has no right to add users of that role, or a non-owner asks for the DocSpace administrator link")]
     [HttpPost("users/invitationlink")]
     public async Task<InvitationLinkDto> CreateInvitationLink(InvitationLinkCreateRequestDto inDto)
     {
@@ -298,13 +304,13 @@ public class PortalController(
     /// already been used. Inviting members has to be enabled for the portal
     /// (`GET api/2.0/settings/invitationsettings`) and `employeeType` has to be `DocSpaceAdmin`, `RoomAdmin` or
     /// `User`; the caller needs the right to add users of that role, only the portal owner may read the DocSpace
-    /// administrator link, and a link for a paying role is shown only while the portal quota still has a free paid
-    /// seat. The call is read-only and idempotent, but the `url` it returns is signed for the calling account, so two
-    /// administrators are handed two different URLs for one and the same link. A role that has no link yet is
-    /// answered with an empty body and 200 rather than a 404 - create the link with
-    /// `POST api/2.0/portal/users/invitationlink`. `expiration` is in the portal time zone and empty for a link
-    /// without a deadline, `isExpired` says whether that deadline has passed, and `currentUseCount` counts how many
-    /// accounts have already joined through the link.
+    /// administrator link, and for a paying role (`DocSpaceAdmin` or `RoomAdmin`) the call is refused while the
+    /// portal payment is overdue or the portal quota has no free paid seat left. The call is read-only and
+    /// idempotent, but the `url` it returns is signed for the calling account, so two administrators are handed two
+    /// different URLs for one and the same link. A role that has no link yet is answered with an empty body and 200
+    /// rather than a 404 - create the link with `POST api/2.0/portal/users/invitationlink`. `expiration` is in the
+    /// portal time zone and empty for a link without a deadline, `isExpired` says whether that deadline has passed,
+    /// and `currentUseCount` counts how many accounts have already joined through the link.
     /// </remarks>
     /// <summary>
     /// Get an invitation link by role
@@ -312,6 +318,9 @@ public class PortalController(
     /// <path>api/2.0/portal/users/invitationlink/{employeeType}</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "The invitation link of that role, or an empty body when the portal has no link for it", typeof(InvitationLinkDto))]
+    [SwaggerResponse(400, "The role is not `DocSpaceAdmin`, `RoomAdmin` or `User`")]
+    [SwaggerResponse(402, "The role is a paying one, and the portal payment is overdue or the portal quota has no free paid seat left, whether or not the role has a link")]
+    [SwaggerResponse(403, "Inviting members is disabled for the portal, the caller has no right to add users of that role, or a non-owner asks for the DocSpace administrator link")]
     [HttpGet("users/invitationlink/{employeeType}")]
     public async Task<InvitationLinkDto> GetInvitationLinkByEmployeeType(InvitationLinkRequestDto inDto)
     {
@@ -369,6 +378,9 @@ public class PortalController(
     /// <path>api/2.0/portal/users/invitationlink</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "The invitation link as it now stands, with the deadline and the use limit that were applied", typeof(InvitationLinkDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `id`, the use limit is outside 1-1000 or lower than the number of uses the link already has, or the deadline is in the past")]
+    [SwaggerResponse(403, "Inviting members is disabled for the portal, the caller has no right to add users of the link's role, or a non-owner tries to change the DocSpace administrator link")]
+    [SwaggerResponse(404, "No invitation link with this ID exists on the portal")]
     [HttpPut("users/invitationlink")]
     public async Task<InvitationLinkDto> UpdateInvitationLink(InvitationLinkUpdateRequestDto inDto)
     {
@@ -436,6 +448,9 @@ public class PortalController(
     /// <path>api/2.0/portal/users/invitationlink</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "The invitation link is deleted and its URL no longer lets anyone join the portal", typeof(string))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `id`, or the `id` is not a GUID")]
+    [SwaggerResponse(403, "Inviting members is disabled for the portal, the caller has no right to add users of the link's role, or a non-owner tries to delete the DocSpace administrator link")]
+    [SwaggerResponse(404, "No invitation link with this ID exists on the portal")]
     [HttpDelete("users/invitationlink")]
     public async Task DeleteInvitationLink(InvitationLinkDeleteRequestDto inDto)
     {
@@ -520,6 +535,7 @@ public class PortalController(
     /// <path>api/2.0/portal/usedspace</path>
     [Tags("Portal / Quota")]
     [SwaggerResponse(200, "The space the portal content occupies, in gigabytes rounded to two decimals", typeof(double))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("usedspace")]
     public async Task<double> GetPortalUsedSpace()
     {
@@ -549,6 +565,7 @@ public class PortalController(
     /// <path>api/2.0/portal/userscount</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "The number of accounts of this portal that are in the active state", typeof(long))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("userscount")]
     public async Task<long> GetPortalUsersCount()
     {
@@ -821,6 +838,7 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/present/mark</path>
     [Tags("Portal / Users")]
+    [SwaggerResponse(200, "The request was accepted; a storage error is only logged, so the flag may still be unsaved")]
     [HttpPost("present/mark")]
     public async Task MarkGiftMessageAsRead()
     {
@@ -1003,6 +1021,9 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "The letter with the deactivation and reactivation links was queued for delivery to the portal owner")]
+    [SwaggerResponse(403, "The caller is not the portal owner or has no portal-settings right")]
+    [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be deactivated")]
     [AllowNotPayment]
     [HttpPost("suspend")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -1040,6 +1061,9 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/delete</path>
     [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "The letter with the removal link was queued for delivery to the portal owner")]
+    [SwaggerResponse(403, "The caller is not the portal owner or has no portal-settings right")]
+    [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be removed")]
     [AllowNotPayment]
     [HttpPost("delete")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -1078,6 +1102,7 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/continue</path>
     [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "The portal is active again")]
     [AllowSuspended]
     [HttpPut("continue")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalContinue")]
@@ -1109,6 +1134,9 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "The portal is suspended and its content is kept")]
+    [SwaggerResponse(403, "The account the confirmation link was issued for is not the portal owner")]
+    [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be deactivated")]
     [HttpPut("suspend")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalSuspend")]
     public async Task SuspendPortal()
@@ -1142,6 +1170,8 @@ public class PortalController(
     /// <path>api/2.0/portal/delete</path>
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "The absolute URL of the feedback form to send the owner of the removed portal to", typeof(string))]
+    [SwaggerResponse(403, "The account the confirmation link was issued for is not the portal owner")]
+    [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be removed")]
     [AllowNotPayment]
     [HttpDelete("delete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalRemove")]

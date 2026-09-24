@@ -72,6 +72,8 @@ public class LicenseController(
     /// <path>api/2.0/settings/license/refresh</path>
     [Tags("Settings / License")]
     [SwaggerResponse(200, "`true` when the license file was re-read and the portal quota and tariff rewritten from it, `false` on an installation that has no license path configured", typeof(bool))]
+    [SwaggerResponse(400, "The license file does not start until a later date")]
+    [SwaggerResponse(402, "No license file is on disk, the file cannot be read as a license or carries no customer id or signature, it was issued for the other edition, or the editing service does not confirm it")]
     [HttpGet("refresh")]
     [AllowNotPayment]
     public async Task<bool> RefreshLicense()
@@ -257,7 +259,8 @@ public class LicenseController(
     [SwaggerResponse(200, "A localized confirmation that the file was staged, carrying the date support and updates ended when the license is already overdue", typeof(string))]
     [SwaggerResponse(400, "The request carried no license file, or the license does not start until a later date")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or a confirmation link was used after the setup wizard had already been completed")]
-    [SwaggerResponse(405, "The installation has no license path configured, so it cannot be given a license file")]
+    [SwaggerResponse(415, "The installation has no license path configured, so it cannot be given a license file")]
+    [SwaggerResponse(500, "The file cannot be read as a license, carries no customer id or signature, or was issued for the other edition")]
     [AllowNotPayment]
     [HttpPost("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard, Administrators")]

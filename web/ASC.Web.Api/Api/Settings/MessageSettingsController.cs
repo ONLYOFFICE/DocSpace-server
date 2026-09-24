@@ -75,6 +75,7 @@ public class MessageSettingsController(
     /// <path>api/2.0/settings/messagesettings</path>
     [Tags("Settings / Messages")]
     [SwaggerResponse(200, "A localized message confirming that the administrator message setting has been saved", typeof(string))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPost("messagesettings")]
     public async Task<string> EnableAdminMessageSettings(TurnOnAdminMessageSettingsRequestDto inDto)
     {
@@ -105,6 +106,7 @@ public class MessageSettingsController(
     /// <path>api/2.0/settings/cookiesettings</path>
     [Tags("Settings / Cookies")]
     [SwaggerResponse(200, "The authentication session lifetime of the portal in minutes together with the flag that says whether that limit is applied", typeof(CookieSettingsDto))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("cookiesettings")]
     public async Task<CookieSettingsDto> GetCookieSettings()
     {
@@ -137,6 +139,7 @@ public class MessageSettingsController(
     [Tags("Settings / Cookies")]
     [SwaggerResponse(200, "A localized message confirming that the session lifetime has been saved", typeof(string))]
     [SwaggerResponse(402, "The installation hides the cookie lifetime section, or the portal's payment has lapsed")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPut("cookiesettings")]
     public async Task<string> UpdateCookieSettings(CookieSettingsRequestsDto inDto)
     {
@@ -175,8 +178,10 @@ public class MessageSettingsController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Messages")]
     [SwaggerResponse(200, "A localized message confirming that the message has been queued for the portal administrators", typeof(string))]
-    [SwaggerResponse(400, "The email address is malformed, or the message is empty once its markup is stripped")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `email` or `message`, the email address is malformed or longer than 255 characters, or the message is longer than 255 characters or empty once its markup is stripped")]
+    [SwaggerResponse(403, "The caller is not signed in, the installation has a CAPTCHA configured, and `recaptchaResponse` is missing or not accepted")]
     [SwaggerResponse(429, "Too many contact attempts came from the same address within the rate-limit window")]
+    [SwaggerResponse(500, "The contact form is switched off and the portal's payment has not lapsed")]
     [AllowAnonymous, AllowNotPayment]
     [HttpPost("sendadmmail")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -242,10 +247,11 @@ public class MessageSettingsController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Messages")]
     [SwaggerResponse(200, "A localized message confirming that the invitation with the join link has been sent", typeof(string))]
-    [SwaggerResponse(400, "The email address is malformed or internationalized, lies outside the trusted domains, or already belongs to a member of the portal")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `email`, the email address is malformed, internationalized or longer than 255 characters, lies outside the trusted domains, or already belongs to a member of the portal")]
     [SwaggerResponse(403, "The portal is not accepting requests while it is being restored, transferred or encrypted")]
     [SwaggerResponse(405, "The portal publishes no trusted-domain policy, so it has nothing to join")]
     [SwaggerResponse(429, "Too many invitation requests came from the same network address")]
+    [SwaggerResponse(500, "Eleven invitation requests from the same network address have already been counted, each less than two minutes after the one before")]
     [AllowAnonymous]
     [HttpPost("sendjoininvite")]
     public async Task<string> SendJoinInviteMail(AdminMessageBaseSettingsRequestsDto inDto)

@@ -73,6 +73,7 @@ public class SecurityController(
     /// <collection>list</collection>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "The access configuration of every module identifier asked about: the enabled flag, the allowed groups, the allowed users the caller may see, and the sub-module flag", typeof(IAsyncEnumerable<SecurityDto>))]
+    [SwaggerResponse(400, "An `ids` value is not a GUID")]
     [HttpGet("")]
     public async IAsyncEnumerable<SecurityDto> GetWebItemSettingsSecurityInfo(SecuritySettingsRequestDto inDto)
     {
@@ -197,6 +198,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/password</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "The portal password policy: the minimum length, the uppercase, digit and special-symbol requirements, and the regular expressions a client can validate against", typeof(PasswordSettingsDto))]
+    [SwaggerResponse(304, "The password policy has not changed since the `Last-Modified` value sent back in `If-Modified-Since`; the body is empty")]
     [HttpGet("password")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Authenticated")]
@@ -224,7 +226,8 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/password</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "The password policy as it was stored, including the regular expressions a client can validate against", typeof(PasswordSettingsDto))]
-    [SwaggerResponse(400, "The requested minimum length is outside the range the installation allows")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `minLength`, or the minimum length is outside the range the installation allows")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPut("password")]
     public async Task<PasswordSettingsDto> UpdatePasswordSettings(PasswordSettingsRequestsDto inDto)
     {
@@ -268,6 +271,7 @@ public class SecurityController(
     /// <collection>list</collection>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "The resulting access configuration of the module, as a single-entry list", typeof(IEnumerable<SecurityDto>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `id`, or the `id` is not a GUID")]
     [SwaggerResponse(403, "Per-module access cannot be configured on an open portal, or the caller lacks the portal-settings right of a DocSpace administrator")]
     [HttpPut("")]
     public async Task<IEnumerable<SecurityDto>> SetWebItemSecurity(WebItemSecurityRequestsDto inDto)
@@ -328,6 +332,7 @@ public class SecurityController(
     /// <collection>list</collection>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "The resulting access configuration of every module listed in the request", typeof(IEnumerable<SecurityDto>))]
+    [SwaggerResponse(400, "The request body cannot be read, or a `key` in `items` is not a GUID")]
     [SwaggerResponse(403, "Per-module access cannot be configured on an open portal, or the caller lacks the portal-settings right of a DocSpace administrator")]
     [HttpPut("access")]
     public async Task<IEnumerable<SecurityDto>> SetAccessToWebItems(WebItemsSecurityRequestsDto inDto)
@@ -388,6 +393,7 @@ public class SecurityController(
     /// <collection>list</collection>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "The users who administer the module asked about, or the portal-wide administrators when the all-zero identifier is used", typeof(IAsyncEnumerable<EmployeeDto>))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("administrator/{productid:guid}")]
     public async IAsyncEnumerable<EmployeeDto> GetProductAdministrators(ProductIdRequestDto inDto)
     {
@@ -419,6 +425,8 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/administrator</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "The module and the user asked about together with the flag that says whether that user administers the module", typeof(ProductAdministratorDto))]
+    [SwaggerResponse(400, "The `productid` or the `userid` is not a GUID")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("administrator")]
     public async Task<ProductAdministratorDto> GetIsProductAdministrator(UserProductIdsRequestDto inDto)
     {
@@ -445,8 +453,9 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/administrator</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "The module, the user and the administrator flag as they were stored", typeof(ProductAdministratorDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `productId` or `userId`")]
     [SwaggerResponse(402, "The portal plan does not offer product administrators, or no paid seat is left for the member being promoted")]
-    [SwaggerResponse(403, "Only the portal owner can grant or revoke the portal-wide administrator role")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or is not the portal owner and grants the portal-wide administrator role or takes a role away from a DocSpace administrator")]
     [HttpPut("administrator")]
     public async Task<ProductAdministratorDto> SetProductAdministrator(SecurityRequestsDto inDto)
     {
@@ -501,6 +510,8 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
     [SwaggerResponse(200, "The brute-force protection settings as they were stored, with the flag that says whether they match the shipped defaults", typeof(LoginSettingsDto))]
+    [SwaggerResponse(400, "The request body cannot be read, or `attemptCount`, `checkPeriod` or `blockTime` is missing or outside 1-9999")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPut("loginSettings")]
     public async Task<LoginSettingsDto> UpdateLoginSettings(LoginSettingsRequestDto inDto)
     {
@@ -541,6 +552,8 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
     [SwaggerResponse(200, "The brute-force protection settings of the portal: the tolerated attempts, the counting window and the block in seconds, and whether they match the shipped defaults", typeof(LoginSettingsDto))]
+    [SwaggerResponse(304, "The brute-force protection settings have not changed since the `Last-Modified` value sent back in `If-Modified-Since`; the body is empty")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("loginSettings")]
     public async Task<LoginSettingsDto> GetLoginSettings()
     {
@@ -570,6 +583,7 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/loginsettings</path>
     [Tags("Settings / Login settings")]
     [SwaggerResponse(200, "The brute-force protection settings restored to the shipped defaults", typeof(LoginSettingsDto))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpDelete("loginSettings")]
     public async Task<LoginSettingsDto> SetDefaultLoginSettings()
     {

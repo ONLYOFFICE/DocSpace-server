@@ -66,6 +66,8 @@ public class SsoController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / SSO")]
     [SwaggerResponse(200, "The current portal SSO settings; an anonymous caller gets only the hidden-login-form flag", typeof(SsoSettingsV2))]
+    [SwaggerResponse(402, "The caller is signed in, the portal is a cloud one, and its pricing plan has no single sign-on option or the SSO section is not enabled for it")]
+    [SwaggerResponse(403, "The caller is signed in and has no portal-settings right")]
     [HttpGet("")]
     [AllowAnonymous, AllowNotPayment]
     public async Task<SsoSettingsV2> GetSsoSettingsV2()
@@ -120,6 +122,8 @@ public class SsoController(
     /// <path>api/2.0/settings/ssov2/default</path>
     [Tags("Settings / SSO")]
     [SwaggerResponse(200, "The built-in SSO configuration a portal starts from", typeof(SsoSettingsV2))]
+    [SwaggerResponse(402, "The portal is a cloud one, and its pricing plan has no single sign-on option or the SSO section is not enabled for it")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("default")]
     public async Task<SsoSettingsV2> GetDefaultSsoSettingsV2()
     {
@@ -171,6 +175,9 @@ public class SsoController(
     [Tags("Settings / SSO")]
     [SwaggerResponse(200, "The SSO settings as they were stored, with the login label and the user type normalised", typeof(SsoSettingsV2))]
     [SwaggerResponse(400, "The serialized settings are empty or do not contain an SSO configuration object")]
+    [SwaggerResponse(402, "The portal is a cloud one, and its pricing plan has no single sign-on option or the SSO section is not enabled for it")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
+    [SwaggerResponse(500, "The IdP entity ID is empty, the SSO URL is missing or the SSO or SLO URL is not an absolute HTTP or HTTPS address, or the first name, last name or email attribute mapping is empty")]
     [HttpPost("")]
     public async Task<SsoSettingsV2> SaveSsoSettingsV2(SsoSettingsRequestsDto inDto)
     {
@@ -269,6 +276,8 @@ public class SsoController(
     /// <path>api/2.0/settings/ssov2</path>
     [Tags("Settings / SSO")]
     [SwaggerResponse(200, "The default SSO configuration that is now in effect", typeof(SsoSettingsV2))]
+    [SwaggerResponse(402, "The portal is a cloud one, and its pricing plan has no single sign-on option or the SSO section is not enabled for it")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpDelete("")]
     public async Task<SsoSettingsV2> ResetSsoSettingsV2()
     {

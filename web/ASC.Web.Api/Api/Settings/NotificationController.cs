@@ -58,6 +58,7 @@ public class NotificationController(
     /// <path>api/2.0/settings/notification/{type}</path>
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "The notification kind that was asked for together with the flag that says whether it is switched on for the calling user", typeof(NotificationSettingsDto))]
+    [SwaggerResponse(400, "The `type` is not one of the notification kinds 0-3")]
     [HttpGet("{type}")]
     public async Task<NotificationSettingsDto> GetNotificationSettings(NotificationTypeRequestsDto inDto)
     {
@@ -83,6 +84,7 @@ public class NotificationController(
     /// <path>api/2.0/settings/notification</path>
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "The notification kind and state as they were sent in the request", typeof(NotificationSettingsDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `type`, or the `type` is sent as a string instead of a number")]
     [HttpPost("")]
     public async Task<NotificationSettingsDto> SetNotificationSettings(NotificationSettingsRequestsDto inDto)
     {
