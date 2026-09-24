@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>تم تحديث إعدادات AI للمستخدم</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>ملف تعريف الذكاء الاصطناعي المعين لوكيل الذكاء الاصطناعي للإجراء: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>ملف تعريف الذكاء الاصطناعي المعين للإجراء: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>تم إنشاء ملف تعريف نموذج الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>تم حذف ملف تعريف نموذج الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>تم إلغاء تعيين ملف تعريف الذكاء الاصطناعي من الإجراء: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>تم تحديث ملف تعريف نموذج الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>الملفات [{0}]. تم وضع علامة مقروء</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>الملفات [{0}]. لم يتم حفظ الملف. تجاوزت حصة التخزين للبوابة.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>الملفات [{0}]. حفظ الملف يتجاوز حصة تخزين البوابة.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>المجلدات [{0}]. تم وضع علامة مقروء</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>تم إنشاء مفتاح تشفير الغرفة الخاصة {0}</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>تم حذف مفتاح تشفير الغرفة الخاصة {0}</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>تم تحديث مفتاح تشفير الغرفة الخاصة {0}</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>تم اكتشاف تسجيل دخول مشبوه: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>تم تحديث خادم MCP {0} لوكيل الذكاء الاصطناعي</value>
+  </data>
 </root>

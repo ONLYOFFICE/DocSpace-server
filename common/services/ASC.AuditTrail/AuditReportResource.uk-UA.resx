@@ -259,13 +259,13 @@
     <value>Параметри настроюваної навігації оновлено</value>
   </data>
   <data name="CustomQuotaPerAiAgentChanged" xml:space="preserve">
-    <value>Агенти AI [{0}]. Установлена квота пам'яті для агентів AI : {1}</value>
+    <value>AI-агенти [{0}]. Установлена квота пам'яті для AI-агентів : {1}</value>
   </data>
   <data name="CustomQuotaPerAiAgentDefault" xml:space="preserve">
-    <value>Агенти AI [{0}]. Установлена квота пам'яті за замовчуванням для агентів AI: {1}</value>
+    <value>AI-агенти [{0}]. Установлена квота пам'яті за замовчуванням для AI-агентів : {1}</value>
   </data>
   <data name="CustomQuotaPerAiAgentDisabled" xml:space="preserve">
-    <value>Агенти AI [{0}]. Вимкнута квота пам'яті для агентів AI</value>
+    <value>AI-агенти [{0}]. Вимкнута квота пам'яті для AI-агентів</value>
   </data>
   <data name="CustomQuotaPerRoomChanged" xml:space="preserve">
     <value>Кімнати [{0}]. Установлена налаштовувана квота пам'яті для кімнат: {1}</value>
@@ -1211,5 +1211,50 @@
   </data>
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>Налаштування AI користувача оновлено</value>
+  </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Профіль AI призначено AI-агенту для дії: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Профіль AI призначено для дії: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Профіль AI-моделі створено: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Профіль AI-моделі видалено: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Профіль AI від'єднано від дії: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Профіль AI-моделі оновлено: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Файли [{0}]. Позначено як прочитані</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Файли [{0}]. Файл не збережено. Квоту сховища порталу перевищено.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Файли [{0}]. Збереження файлу перевищує квоту сховища порталу.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Папки [{0}]. Позначено як прочитані</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Ключ шифрування приватної кімнати {0} створено</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Ключ шифрування приватної кімнати {0} видалено</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Ключ шифрування приватної кімнати {0} оновлено</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Виявлено підозрілий вхід: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>MCP-сервер {0} AI-агента оновлено</value>
   </data>
 </root>

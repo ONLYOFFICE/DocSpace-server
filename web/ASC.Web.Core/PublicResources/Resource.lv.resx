@@ -1482,4 +1482,58 @@
   <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
     <value>Veidlapa</value>
   </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Uzņēmums</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Ģenerēšanas datums</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Periods</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Ziņojums</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Kopā</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Aktīvs</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Piekļuve beidzas</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Lietotāja tips</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>Lietotāja ID</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Redaktori</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Dokumentu redaktori ar pilnām atļaujām</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Atlikušais</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Lietotāja kvota</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Abonementa limits</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Tiešraides skatītājs</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Tikai lasāmo dokumentu skatītāji</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Ārējs</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Iekšējs</value>
+  </data>
 </root>

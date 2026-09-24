@@ -59,5 +59,6 @@ public class AppDto
     /// application falls back to its own defaults, and it also survives the application being switched off.
     /// </summary>
     /// <example>{"theme":"dark","language":"en"}</example>
+    [SwaggerAnyJsonValue]
     public JsonElement? Settings { get; set; }
 }

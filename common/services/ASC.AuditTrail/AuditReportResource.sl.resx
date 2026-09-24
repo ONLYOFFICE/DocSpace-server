@@ -1212,4 +1212,19 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>Nastavitve AI uporabnika so bile posodobljene</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Profil AI je bil dodeljen AI agentu za dejanje: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Profil AI je bil dodeljen dejanju: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Profil modela AI je bil ustvarjen: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Profil modela AI je bil izbrisan: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Profil AI je bil odstranjen iz dejanja: {0}</value>
+  </data>
 </root>

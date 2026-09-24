@@ -1482,4 +1482,58 @@
   <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
     <value>Biểu mẫu</value>
   </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Công ty</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Ngày tạo</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Kỳ</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Báo cáo</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Tổng cộng</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Giới hạn đăng ký</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Còn lại</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Đang hoạt động</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Quyền truy cập hết hạn</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Loại người dùng</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>ID người dùng</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Trình soạn thảo</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Trình soạn thảo tài liệu với đầy đủ quyền</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Hạn mức người dùng</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Người xem trực tiếp</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Người xem tài liệu chỉ đọc</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Bên ngoài</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Nội bộ</value>
+  </data>
 </root>
