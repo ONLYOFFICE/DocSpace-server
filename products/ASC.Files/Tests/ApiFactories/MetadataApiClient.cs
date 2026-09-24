@@ -197,11 +197,24 @@ public class MetadataApiClient(HttpClient client)
 
     private async Task SetValuesAsync(string entryKind, int entryId, IEnumerable<MetadataValuePayload> values, CancellationToken cancellationToken)
     {
-        var body = new { values = values.ToList() };
-
-        using var response = await PutAsync($"api/2.0/files/metadata/{entryKind}/{entryId}/values", body, cancellationToken);
+        using var response = await SetValuesResponseAsync(entryKind, entryId, values, cancellationToken);
 
         response.EnsureSuccessStatusCode();
+    }
+
+    /// <summary>
+    /// Sets the values of the folder. Returns the raw response so the error cases can be asserted on the status code.
+    /// </summary>
+    public Task<HttpResponseMessage> SetFolderValuesResponseAsync(int folderId, IEnumerable<MetadataValuePayload> values, CancellationToken cancellationToken)
+    {
+        return SetValuesResponseAsync("folder", folderId, values, cancellationToken);
+    }
+
+    private Task<HttpResponseMessage> SetValuesResponseAsync(string entryKind, int entryId, IEnumerable<MetadataValuePayload> values, CancellationToken cancellationToken)
+    {
+        var body = new { values = values.ToList() };
+
+        return PutAsync($"api/2.0/files/metadata/{entryKind}/{entryId}/values", body, cancellationToken);
     }
 
     /// <summary>

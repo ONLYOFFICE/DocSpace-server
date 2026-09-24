@@ -709,7 +709,8 @@ internal class FileDao(
 
                         await filesDbContext.SaveChangesAsync();
 
-                        if (isNew)
+                        // without a template there is no link to inherit: the tenants without metadata skip the two lookups
+                        if (isNew && await metadataTemplatesCache.HasTemplatesAsync())
                         {
                             metadataInherited = await filesDbContext.ApplyMetadataCascadeLinksAsync(tenantId, file.Id, FileEntryType.File, file.ParentId, file.CreateBy);
                         }
@@ -1485,7 +1486,7 @@ internal class FileDao(
                     needDeleteVectors = await context.MarkVectorizationDeletedAsync(tenantId, fileId) > 0;
                 }
 
-                if (toFolderId != trashId)
+                if (toFolderId != trashId && await metadataTemplatesCache.HasTemplatesAsync())
                 {
                     // stamped inside the transaction, otherwise a failure right after the commit
                     // would leave the moved file without the metadata inherited at the destination
@@ -1579,7 +1580,7 @@ internal class FileDao(
 
             await context.UpdateFilesFolderIdAsync(tenantId, ids, parents, toFolderId);
 
-            if (toFolderId != trashId)
+            if (toFolderId != trashId && await metadataTemplatesCache.HasTemplatesAsync())
             {
                 // the same stamping the single-file move does: the batch is the regular path inside a room,
                 // so without it the moved files would never inherit the cascade of the destination

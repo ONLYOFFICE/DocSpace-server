@@ -71,7 +71,10 @@ public static class DbFilesMetadataTemplateExtension
                 entity.ToTable("files_metadata_template")
                     .HasCharSet("utf8");
 
+                // unique: the name check in the service is a check-then-insert, so two concurrent creates would otherwise
+                // both pass it; the system template takes part too, so its name is reserved
                 entity.HasIndex(e => new { e.TenantId, e.Name })
+                    .IsUnique()
                     .HasDatabaseName("tenant_id_name");
 
                 entity.Property(e => e.Id).HasColumnName("id");
@@ -126,6 +129,7 @@ public static class DbFilesMetadataTemplateExtension
                 entity.ToTable("files_metadata_template");
 
                 entity.HasIndex(e => new { e.TenantId, e.Name })
+                    .IsUnique()
                     .HasDatabaseName("idx_files_metadata_template_tenant_id_name");
 
                 entity.Property(e => e.Id).HasColumnName("id");

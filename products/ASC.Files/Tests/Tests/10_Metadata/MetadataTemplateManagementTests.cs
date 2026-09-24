@@ -254,6 +254,68 @@ public class MetadataTemplateManagementTests(AspireAppFixture fixture) : BaseTes
     }
 
 
+    [Fact]
+    public async Task SetValues_WithTheSameFieldTwice_ReturnsBadRequest()
+    {
+        var api = await ArrangeAsync();
+        var suffix = Suffix();
+        var template = await api.CreateTemplateAsync("Twice " + suffix, [new MetadataFieldPayload { Name = "Client", Type = StringType }], TestContext.Current.CancellationToken);
+        var room = await CreateCustomRoom($"Twice {suffix}");
+        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+
+        var fieldId = template.Field("Client").Id;
+
+        using var response = await api.SetFolderValuesResponseAsync(room.Id,
+        [
+            new MetadataValuePayload { FieldId = fieldId, StringValue = "ACME" },
+            new MetadataValuePayload { FieldId = fieldId, StringValue = "Globex" }
+        ], TestContext.Current.CancellationToken);
+
+        // two rows with one key in a single write: rejected up front, not left to the database as a server error
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest, "a field is listed twice");
+    }
+
+    [Fact]
+    public async Task AssignFolderTemplates_WithAnEmptyListAndCascade_AssignsNothing()
+    {
+        var api = await ArrangeAsync();
+        var room = await CreateCustomRoom($"Empty {Suffix()}");
+
+        // nothing to assign: the answer is a completed operation, not a pass over the room
+        var operation = await api.AssignFolderTemplatesWithStatusAsync(room.Id, [], cascade: true, TestContext.Current.CancellationToken);
+
+        operation.IsCompleted.Should().BeTrue();
+        operation.Error.Should().BeNullOrEmpty();
+        (await api.GetFolderMetadataAsync(room.Id, TestContext.Current.CancellationToken)).Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task CreateTemplate_ConcurrentlyWithTheSameName_CreatesOnlyOne()
+    {
+        var api = await ArrangeAsync();
+        var name = "Race " + Suffix();
+
+        // the name check is a check-then-insert, so the parallel creates all pass it; the unique index must stop all but one
+        var responses = await Task.WhenAll(Enumerable.Range(0, 5)
+            .Select(_ => api.CreateTemplateResponseAsync(name, [new MetadataFieldPayload { Name = "Client", Type = StringType }], TestContext.Current.CancellationToken)));
+
+        try
+        {
+            responses.Count(r => r.StatusCode == HttpStatusCode.OK).Should().Be(1, "only one template with the name may exist");
+            responses.Where(r => r.StatusCode != HttpStatusCode.OK).Should().OnlyContain(r => r.StatusCode == HttpStatusCode.BadRequest, "a collision is a client error, not a server one");
+
+            var templates = await api.GetTemplatesAsync(TestContext.Current.CancellationToken);
+            templates.Count(t => t.Name == name).Should().Be(1);
+        }
+        finally
+        {
+            foreach (var response in responses)
+            {
+                response.Dispose();
+            }
+        }
+    }
+
     [Theory]
     [InlineData(EmployeeType.RoomAdmin)]
     [InlineData(EmployeeType.User)]

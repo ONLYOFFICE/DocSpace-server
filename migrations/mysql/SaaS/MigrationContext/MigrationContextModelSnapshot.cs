@@ -4857,6 +4857,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("TenantId", "Name")
+                        .IsUnique()
                         .HasDatabaseName("tenant_id_name");
 
                     b.ToTable("files_metadata_template", (string)null);

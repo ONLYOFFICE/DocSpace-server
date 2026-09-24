@@ -357,9 +357,26 @@ public partial class FilesDbContext
             }
         }
 
-        if (changed.Count > 0)
+        if (changed.Count == 0)
+        {
+            return changed;
+        }
+
+        try
         {
             await SaveChangesAsync();
+        }
+        catch (DbUpdateException e) when (MetadataDao.IsDuplicateKey(e))
+        {
+            // the cascade pass over the destination's subtree is not serialized against the saves and the moves into it, and
+            // it inserts the same link and value keys; when its batch wins the race, the pass has stamped this very entry, so the
+            // stamping here is dropped instead of failing the caller's operation. EF rolled the failed save back to its savepoint,
+            // so the caller's transaction is intact; the rows are only detached, not re-read: under REPEATABLE READ the
+            // transaction's snapshot would still miss what the pass committed. The caller refreshes the index from the database
+            foreach (var entry in ChangeTracker.Entries().Where(x => x.Entity is DbFilesMetadataLink or DbFilesMetadataValue).ToList())
+            {
+                entry.State = EntityState.Detached;
+            }
         }
 
         return changed;

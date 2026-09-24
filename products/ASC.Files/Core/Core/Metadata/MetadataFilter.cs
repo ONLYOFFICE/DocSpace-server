@@ -274,8 +274,17 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
                 break;
 
             case MetadataFieldType.Number:
-                condition.NumberFrom = ParseNumber(request.From ?? request.Value, field);
-                condition.NumberTo = ParseNumber(request.To ?? request.Value, field);
+                // a single value is an exact match, a range is given by its bounds; the two forms do not mix, or "from" with
+                // a stray "value" used to become the range [from, value] and silently answered with nothing
+                var hasBounds = !string.IsNullOrEmpty(request.From) || !string.IsNullOrEmpty(request.To);
+
+                if (hasBounds && !string.IsNullOrEmpty(request.Value))
+                {
+                    throw new ArgumentException($@"The condition for the field '{field.Name}' takes either a value or a range, not both");
+                }
+
+                condition.NumberFrom = ParseNumber(hasBounds ? request.From : request.Value, field);
+                condition.NumberTo = ParseNumber(hasBounds ? request.To : request.Value, field);
 
                 if (condition.NumberFrom == null && condition.NumberTo == null)
                 {

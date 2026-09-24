@@ -153,7 +153,8 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             migrationBuilder.CreateIndex(
                 name: "tenant_id_name",
                 table: "files_metadata_template",
-                columns: new[] { "tenant_id", "name" });
+                columns: new[] { "tenant_id", "name" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "field_id_option_id",

@@ -71,6 +71,12 @@ public interface IMetadataDao<T>
     IAsyncEnumerable<MetadataTemplateLink> GetLinksAsync(IEnumerable<T> fileIds, IEnumerable<T> folderIds);
     IAsyncEnumerable<int> GetCascadeTemplateIdsForAncestorsAsync(T folderId);
     Task DeleteLinksAsync(T entryId, FileEntryType entryType, int? templateId = null);
+
+    /// <summary>
+    /// Removes the template from the entry together with the values of the template's fields, in one transaction.
+    /// </summary>
+    Task DeleteLinkWithValuesAsync(T entryId, FileEntryType entryType, int templateId);
+
     Task ConvertCascadeLinksToDirectAsync(int sourceFolderId, int? templateId = null);
 
     Task SetValuesAsync(T entryId, FileEntryType entryType, IEnumerable<MetadataValue> values);

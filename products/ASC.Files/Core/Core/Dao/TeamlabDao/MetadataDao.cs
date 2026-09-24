@@ -583,6 +583,35 @@ internal class MetadataDao(
         }
     }
 
+    public async Task DeleteLinkWithValuesAsync(int entryId, FileEntryType entryType, int templateId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            await context.DeleteMetadataLinkAsync(tenantId, entryId, entryType, templateId);
+
+            var fieldIds = await context.MetadataFields
+                .Where(f => f.TenantId == tenantId && f.TemplateId == templateId)
+                .Select(f => f.Id)
+                .ToListAsync();
+
+            if (fieldIds.Count > 0)
+            {
+                await context.DeleteMetadataValuesByFieldsAsync(tenantId, entryId, entryType, fieldIds);
+            }
+
+            await tx.CommitAsync();
+        });
+    }
+
     public async Task ConvertCascadeLinksToDirectAsync(int sourceFolderId, int? templateId = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -943,7 +972,7 @@ internal class MetadataDao(
     /// The collision is told by the provider's error code, not by the message: MySQL localizes the message
     /// with <c>lc_messages</c>, so a self-hosted server in another language would never match the English text.
     /// </summary>
-    private static bool IsDuplicateKey(DbUpdateException exception)
+    internal static bool IsDuplicateKey(DbUpdateException exception)
     {
         return exception.InnerException switch
         {

@@ -84,7 +84,18 @@ public class MetadataService(
             PrepareField(field);
         }
 
-        var template = await metadataDao.SaveTemplateWithFieldsAsync(new MetadataTemplate { Name = name, Visible = visible }, fieldsList);
+        MetadataTemplate template;
+
+        try
+        {
+            template = await metadataDao.SaveTemplateWithFieldsAsync(new MetadataTemplate { Name = name, Visible = visible }, fieldsList);
+        }
+        catch (DbUpdateException e) when (MetadataDao.IsDuplicateKey(e))
+        {
+            // the name check above is a check-then-insert: a concurrent create with the same name passes it too and
+            // is stopped by the unique index instead, which is answered the way the check answers
+            throw new ArgumentException($@"Template with name '{name}' already exists", nameof(name));
+        }
 
         filesMessageService.Send(MessageAction.MetadataTemplateCreated, template.Name);
 
@@ -109,7 +120,17 @@ public class MetadataService(
         template.Name = string.IsNullOrEmpty(name) ? template.Name : name;
         template.Visible = visible ?? template.Visible;
 
-        var saved = await metadataDao.SaveTemplateAsync(template);
+        MetadataTemplate saved;
+
+        try
+        {
+            saved = await metadataDao.SaveTemplateAsync(template);
+        }
+        catch (DbUpdateException e) when (MetadataDao.IsDuplicateKey(e))
+        {
+            throw new ArgumentException($@"Template with name '{name}' already exists", nameof(name));
+        }
+
         saved.Fields = template.Fields;
 
         filesMessageService.Send(MessageAction.MetadataTemplateUpdated, saved.Name);
@@ -264,7 +285,16 @@ public class MetadataService(
                     return [];
                 }
 
-                systemTemplate = await metadataDao.SaveTemplateAsync(new MetadataTemplate { Name = SystemTemplateName, Visible = true, IsSystem = true });
+                try
+                {
+                    systemTemplate = await metadataDao.SaveTemplateAsync(new MetadataTemplate { Name = SystemTemplateName, Visible = true, IsSystem = true });
+                }
+                catch (DbUpdateException e) when (MetadataDao.IsDuplicateKey(e))
+                {
+                    // the name is reserved on template creation, so only a template created before the reservation can hold it;
+                    // answered as a client error naming the cause instead of a 500 on every custom field write of the tenant
+                    throw new ArgumentException($@"The custom fields are unavailable: a template named '{SystemTemplateName}' already exists", nameof(updates));
+                }
             }
 
             // two fields with one name should not exist, but the fields used to be renamed without the lock: the first one
@@ -430,6 +460,13 @@ public class MetadataService(
 
         var templateIdsList = templateIds.Distinct().ToList();
 
+        // nothing to assign: an empty list must neither claim an assignment in the audit nor, with the cascade on,
+        // enqueue a pass that walks and re-indexes the whole subtree for no template
+        if (templateIdsList.Count == 0)
+        {
+            return null;
+        }
+
         foreach (var templateId in templateIdsList)
         {
             _ = await GetUserTemplateAsync(metadataDao, templateId, withFields: false);
@@ -475,9 +512,7 @@ public class MetadataService(
         var link = await metadataDao.GetLinksAsync(folderId, FileEntryType.Folder)
             .FirstOrDefaultAsync(l => l.TemplateId == templateId);
 
-        await UnassignTemplateAsync(folderId, FileEntryType.Folder, templateId);
-
-        await NotifyUpdateAsync(entry);
+        await UnassignTemplateAsync(metadataDao, entry, templateId);
 
         if (link is { Cascade: true })
         {
@@ -502,17 +537,22 @@ public class MetadataService(
     {
         var entry = await DemandEntryAccessAsync(entryId, entryType, edit: true);
 
-        var metadataDao = daoFactory.GetMetadataDao<int>();
+        await UnassignTemplateAsync(daoFactory.GetMetadataDao<int>(), entry, templateId);
+    }
+
+    /// <summary>
+    /// The unassignment itself, for an entry whose edit access is already checked by the caller.
+    /// </summary>
+    private async Task UnassignTemplateAsync(IMetadataDao<int> metadataDao, FileEntry<int> entry, int templateId)
+    {
+        var entryId = entry.Id;
+        var entryType = entry.FileEntryType;
 
         _ = await GetUserTemplateAsync(metadataDao, templateId, withFields: false);
 
-        await metadataDao.DeleteLinksAsync(entryId, entryType, templateId);
-
-        var fieldIds = await metadataDao.GetFieldsAsync(templateId).Select(f => f.Id).ToListAsync();
-        if (fieldIds.Count > 0)
-        {
-            await metadataDao.DeleteValuesAsync(entryId, entryType, fieldIds);
-        }
+        // the link and the values go in one transaction: a failure between two separate deletes would leave values without
+        // their template, invisible in the UI yet still matching the metadata filters
+        await metadataDao.DeleteLinkWithValuesAsync(entryId, entryType, templateId);
 
         await filesMessageService.SendAsync(MessageAction.MetadataTemplateUnassigned, entry, entry.Title);
 
@@ -528,6 +568,13 @@ public class MetadataService(
         var metadataDao = daoFactory.GetMetadataDao<int>();
 
         var valuesList = values.ToList();
+
+        // one value per field: the DAO replaces the rows of a field with the rows of its value, so a second value for
+        // the same field would be a second row with the same key in one change tracker, which EF rejects with a 500
+        if (valuesList.Select(v => v.FieldId).Distinct().Count() != valuesList.Count)
+        {
+            throw new ArgumentException(@"A field is listed more than once", nameof(values));
+        }
 
         var fields = await metadataDao.GetFieldsAsync(valuesList.Select(v => v.FieldId).Distinct()).ToDictionaryAsync(f => f.Id);
 
@@ -858,8 +905,16 @@ public class MetadataService(
 
     private async Task CheckTemplateNameIsFreeAsync(IMetadataDao<int> metadataDao, string name, int exceptTemplateId)
     {
-        // the system template is not visible, so its name is not taken from the users' point of view
-        var exists = await metadataDao.GetTemplatesAsync(includeSystem: false)
+        // the name of the system template is reserved even before the tenant has one: the name is unique per tenant in the
+        // database, so a user template taking it first would make the creation of the system template (the first custom
+        // field write) fail with a duplicate key for every entry of the tenant
+        if (name.Equals(SystemTemplateName, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException($@"Template name '{name}' is reserved", nameof(name));
+        }
+
+        // the system template counts too: the name is unique per tenant in the database, so its name is reserved
+        var exists = await metadataDao.GetTemplatesAsync()
             .AnyAsync(t => t.Id != exceptTemplateId && t.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
 
         if (exists)

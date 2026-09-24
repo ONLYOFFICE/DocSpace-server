@@ -823,7 +823,11 @@ internal class FolderDao(
             await filesDbContext.AddRangeAsync(treeToAdd);
             await filesDbContext.SaveChangesAsync();
 
-            metadataInherited = await filesDbContext.ApplyMetadataCascadeLinksAsync(tenantId, folder.Id, FileEntryType.Folder, folder.ParentId, folder.CreateBy);
+            // without a template there is no link to inherit: the tenants without metadata skip the two lookups
+            if (await metadataTemplatesCache.HasTemplatesAsync())
+            {
+                metadataInherited = await filesDbContext.ApplyMetadataCascadeLinksAsync(tenantId, folder.Id, FileEntryType.Folder, folder.ParentId, folder.CreateBy);
+            }
         }
 
         if (isNew)
@@ -1258,7 +1262,11 @@ internal class FolderDao(
             if (!trashId.Equals(toFolderId))
             {
                 await SetCustomOrder(context, folderId, toFolderId);
-                movedFolderInherited = await context.ApplyMetadataCascadeLinksAsync(tenantId, folderId, FileEntryType.Folder, toFolderId, currentAccount);
+
+                if (await metadataTemplatesCache.HasTemplatesAsync())
+                {
+                    movedFolderInherited = await context.ApplyMetadataCascadeLinksAsync(tenantId, folderId, FileEntryType.Folder, toFolderId, currentAccount);
+                }
             }
             else
             {

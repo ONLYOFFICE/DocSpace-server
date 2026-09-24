@@ -215,16 +215,33 @@ public class MetadataCustomFieldsTests(AspireAppFixture fixture) : BaseTest(fixt
     }
 
     [Fact]
-    public async Task CreateTemplate_NamedSystem_IsAllowed()
+    public async Task CreateTemplate_NamedSystem_ReturnsBadRequest()
     {
         var api = await ArrangeAsync();
         var room = await CreateCustomRoom($"Named {Suffix()}");
 
-        // the hidden template is called "System" inside, but the name is not taken from the users' point of view
+        // the hidden template is called "System": the name is unique per tenant, so it is reserved once the custom fields exist
         await api.SetFolderCustomFieldAsync(room.Id, "Project code", "A-42", TestContext.Current.CancellationToken);
-        var template = await api.CreateTemplateAsync("System", [new MetadataFieldPayload { Name = "Client", Type = 0 }], TestContext.Current.CancellationToken);
+        using var response = await api.CreateTemplateResponseAsync("System", [new MetadataFieldPayload { Name = "Client", Type = 0 }], TestContext.Current.CancellationToken);
 
-        template.Name.Should().Be("System");
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest, "the name belongs to the hidden template");
+    }
+
+    [Fact]
+    public async Task CreateTemplate_NamedSystem_BeforeAnyCustomField_ReturnsBadRequest_AndCustomFieldsStillWork()
+    {
+        var api = await ArrangeAsync();
+        var room = await CreateCustomRoom($"Reserved {Suffix()}");
+
+        // the name is reserved before the hidden template exists: taken first by a user template, it would make the
+        // first custom field write of the tenant fail on the unique name for good
+        using var response = await api.CreateTemplateResponseAsync("system", [new MetadataFieldPayload { Name = "Client", Type = 0 }], TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest, "the name is reserved for the hidden template");
+
+        var fields = await api.SetFolderCustomFieldAsync(room.Id, "Project code", "A-42", TestContext.Current.CancellationToken);
+
+        fields.Should().ContainSingle(f => f.Name == "Project code" && f.Value == "A-42");
     }
 
     [Fact]

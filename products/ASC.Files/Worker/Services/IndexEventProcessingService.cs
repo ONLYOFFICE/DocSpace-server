@@ -179,6 +179,13 @@ public class IndexEventProcessingService(
     {
         const int batchSize = 1000;
 
+        // without a template there are no values, so there is no document to rebuild: the walk is skipped for the
+        // tenants without metadata, which are most of them, and a folder move is a frequent operation
+        if (!await serviceProvider.GetRequiredService<MetadataTemplatesCache>().HasTemplatesAsync())
+        {
+            return;
+        }
+
         var metadataIndexHelper = serviceProvider.GetRequiredService<MetadataIndexHelper>();
 
         var subtreeFolderIds = await filesDbContext.Tree

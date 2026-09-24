@@ -188,6 +188,18 @@ public class FoldersMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fix
         content.FolderIds().Should().Equal(data.NestedFolderId);
     }
 
+    [Fact]
+    public async Task Folders_FilteredByNumberRangeWithAValue_ReturnsBadRequest()
+    {
+        var data = await ArrangeAsync();
+
+        // "from" together with "value" used to become the range [from, value] and answered an empty 200
+        using var response = await data.Api.GetFolderContentResponseAsync(data.RoomId, data.TemplateId, [data.RangeWithValue(AmountField, from: 10, value: 5)],
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest, "a number condition takes either a value or a range");
+    }
+
     #endregion
 
     #region Index consistency
@@ -444,6 +456,17 @@ public class FoldersMetadataSearchTests(AspireAppFixture fixture) : BaseTest(fix
                 op = "range",
                 from = from?.ToString(CultureInfo.InvariantCulture),
                 to = to?.ToString(CultureInfo.InvariantCulture)
+            };
+        }
+
+        public object RangeWithValue(string fieldName, long from, long value)
+        {
+            return new
+            {
+                fieldId = template.Field(fieldName).Id,
+                op = "range",
+                from = from.ToString(CultureInfo.InvariantCulture),
+                value = value.ToString(CultureInfo.InvariantCulture)
             };
         }
 
