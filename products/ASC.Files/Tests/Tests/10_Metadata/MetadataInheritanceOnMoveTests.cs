@@ -313,7 +313,7 @@ public class MetadataInheritanceOnMoveTests(AspireAppFixture fixture) : BaseTest
         }
     }
 
-    private static async Task<List<EntryMetadataResponse>> PollMetadataAsync(MetadataApiClient api, int entryId, Func<List<EntryMetadataResponse>, bool> until, TimeSpan? timeout = null, bool isFolder = false)
+    private static async Task<List<EntryTemplateResponse>> PollMetadataAsync(MetadataApiClient api, int entryId, Func<List<EntryTemplateResponse>, bool> until, TimeSpan? timeout = null, bool isFolder = false)
     {
         var deadline = DateTime.UtcNow.Add(timeout ?? TimeSpan.FromSeconds(15));
 
@@ -350,11 +350,11 @@ public class MetadataInheritanceOnMoveTests(AspireAppFixture fixture) : BaseTest
         /// <summary>
         /// The string value of the template field on the entry, or <c>null</c> when the template or the value is absent.
         /// </summary>
-        public string? ValueOf(List<EntryMetadataResponse> metadata, string fieldName)
+        public string? ValueOf(List<EntryTemplateResponse> metadata, string fieldName)
         {
             var fieldId = template.Field(fieldName).Id;
 
-            return metadata.FirstOrDefault(e => e.Template.Id == TemplateId)?.Values.FirstOrDefault(v => v.FieldId == fieldId)?.StringValue;
+            return metadata.FirstOrDefault(e => e.Id == TemplateId)?.Fields.FirstOrDefault(f => f.Id == fieldId)?.Value?.StringValue;
         }
     }
 

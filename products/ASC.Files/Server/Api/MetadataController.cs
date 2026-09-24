@@ -272,37 +272,37 @@ public class MetadataController(
     }
 
     /// <summary>
-    /// Sets the metadata field values on the file and returns every value the file holds for its templates.
+    /// Sets the metadata field values on the file and returns its metadata: the assigned templates with the values of their fields, and the custom fields.
     /// </summary>
     /// <path>api/2.0/files/metadata/file/{fileId}/values</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "All the metadata values of the file", typeof(List<MetadataValueDto>))]
+    [SwaggerResponse(200, "The metadata of the file after the write: the assigned templates with the values of their fields, and the custom fields", typeof(EntryMetadataDto))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "File not found")]
     [SwaggerResponse(400, "A value does not match the field type, or the field belongs to a template the file does not have")]
     [HttpPut("metadata/file/{fileId:int}/values")]
-    public async Task<List<MetadataValueDto>> SetFileValues(SetFileMetadataValuesRequestDto<int> inDto)
+    public async Task<EntryMetadataDto> SetFileValues(SetFileMetadataValuesRequestDto<int> inDto)
     {
-        var values = await metadataService.SetValuesAsync(inDto.FileId, FileEntryType.File, inDto.Set.Values.Select(ToValue));
+        var metadata = await metadataService.SetValuesAsync(inDto.FileId, FileEntryType.File, inDto.Set.Values.Select(ToValue));
 
-        return values.Select(metadataDtoHelper.Get).ToList();
+        return metadataDtoHelper.Get(metadata);
     }
 
     /// <summary>
-    /// Sets the metadata field values on the folder and returns every value the folder holds for its templates.
+    /// Sets the metadata field values on the folder and returns its metadata: the assigned templates with the values of their fields, and the custom fields.
     /// </summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/values</path>
     [Tags("Files / Metadata")]
-    [SwaggerResponse(200, "All the metadata values of the folder", typeof(List<MetadataValueDto>))]
+    [SwaggerResponse(200, "The metadata of the folder after the write: the assigned templates with the values of their fields, and the custom fields", typeof(EntryMetadataDto))]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Folder not found")]
     [SwaggerResponse(400, "A value does not match the field type, or the field belongs to a template the folder does not have")]
     [HttpPut("metadata/folder/{folderId:int}/values")]
-    public async Task<List<MetadataValueDto>> SetFolderValues(SetFolderMetadataValuesRequestDto<int> inDto)
+    public async Task<EntryMetadataDto> SetFolderValues(SetFolderMetadataValuesRequestDto<int> inDto)
     {
-        var values = await metadataService.SetValuesAsync(inDto.FolderId, FileEntryType.Folder, inDto.Set.Values.Select(ToValue));
+        var metadata = await metadataService.SetValuesAsync(inDto.FolderId, FileEntryType.Folder, inDto.Set.Values.Select(ToValue));
 
-        return values.Select(metadataDtoHelper.Get).ToList();
+        return metadataDtoHelper.Get(metadata);
     }
 
     /// <summary>

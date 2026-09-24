@@ -177,13 +177,13 @@ public class MetadataApiClient(HttpClient client)
     }
 
     /// <summary>
-    /// Sets the values on the folder and returns the values the endpoint answers with.
+    /// Sets the values on the folder and returns the entry metadata the endpoint answers with.
     /// </summary>
-    public async Task<List<MetadataValueResponse>> SetFolderValuesWithResultAsync(int folderId, IEnumerable<MetadataValuePayload> values, CancellationToken cancellationToken)
+    public async Task<EntryMetadataSetResponse> SetFolderValuesWithResultAsync(int folderId, IEnumerable<MetadataValuePayload> values, CancellationToken cancellationToken)
     {
         using var response = await PutAsync($"api/2.0/files/metadata/folder/{folderId}/values", new { values = values.ToList() }, cancellationToken);
 
-        return await ReadAsync<List<MetadataValueResponse>>(response, cancellationToken);
+        return await ReadAsync<EntryMetadataSetResponse>(response, cancellationToken);
     }
 
     private async Task AssignTemplatesAsync(string entryKind, int entryId, IEnumerable<int> templateIds, bool cascade, int conflictResolveType, CancellationToken cancellationToken)
@@ -257,12 +257,12 @@ public class MetadataApiClient(HttpClient client)
     /// <summary>
     /// The templates assigned to the folder with their values; the custom fields come from <see cref="GetFolderCustomFieldsAsync"/>.
     /// </summary>
-    public async Task<List<EntryMetadataResponse>> GetFolderMetadataAsync(int folderId, CancellationToken cancellationToken)
+    public async Task<List<EntryTemplateResponse>> GetFolderMetadataAsync(int folderId, CancellationToken cancellationToken)
     {
         return (await GetEntryMetadataAsync("folder", folderId, cancellationToken)).Templates;
     }
 
-    public async Task<List<EntryMetadataResponse>> GetFileMetadataAsync(int fileId, CancellationToken cancellationToken)
+    public async Task<List<EntryTemplateResponse>> GetFileMetadataAsync(int fileId, CancellationToken cancellationToken)
     {
         return (await GetEntryMetadataAsync("file", fileId, cancellationToken)).Templates;
     }
@@ -546,10 +546,35 @@ public class MetadataValuePayload
     public List<Guid>? OptionIds { get; init; }
 }
 
-public class EntryMetadataResponse
+/// <summary>
+/// A template assigned to an entry: every field of the template, each carrying its value on the entry (null when unset).
+/// </summary>
+public class EntryTemplateResponse
 {
-    public MetadataTemplateResponse Template { get; init; } = new();
-    public List<MetadataValueResponse> Values { get; init; } = [];
+    public int Id { get; init; }
+    public string Name { get; init; } = "";
+    public bool Visible { get; init; }
+    public List<EntryFieldResponse> Fields { get; init; } = [];
+
+    public EntryFieldResponse Field(string name)
+    {
+        return Fields.Single(f => f.Name == name);
+    }
+
+    /// <summary>
+    /// The fields holding a value on the entry.
+    /// </summary>
+    public IEnumerable<EntryFieldResponse> SetFields => Fields.Where(f => f.Value != null);
+}
+
+public class EntryFieldResponse
+{
+    public int Id { get; init; }
+    public string Name { get; init; } = "";
+    public int Type { get; init; }
+    public List<MetadataFieldOptionResponse> Options { get; init; } = [];
+    public int Order { get; init; }
+    public MetadataValueResponse? Value { get; init; }
 }
 
 /// <summary>
@@ -557,7 +582,7 @@ public class EntryMetadataResponse
 /// </summary>
 public class EntryMetadataSetResponse
 {
-    public List<EntryMetadataResponse> Templates { get; init; } = [];
+    public List<EntryTemplateResponse> Templates { get; init; } = [];
     public List<CustomFieldValueResponse> CustomFields { get; init; } = [];
 }
 
@@ -571,7 +596,6 @@ public class CustomFieldValueResponse
 
 public class MetadataValueResponse
 {
-    public int FieldId { get; init; }
     public string? StringValue { get; init; }
     public long? NumberValue { get; init; }
     public DateTimeOffset? DateValue { get; init; }

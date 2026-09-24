@@ -248,9 +248,12 @@ public class MetadataTemplateManagementTests(AspireAppFixture fixture) : BaseTes
 
         var result = await api.SetFolderValuesWithResultAsync(room.Id, [new MetadataValuePayload { FieldId = template.Field("Amount").Id, NumberValue = 7 }], TestContext.Current.CancellationToken);
 
-        // the answer is the state of the entry, so the client needs no second request; the custom fields have their own answer
-        result.Select(v => v.FieldId).Should().BeEquivalentTo([template.Field("Client").Id, template.Field("Amount").Id]);
-        result.Single(v => v.FieldId == template.Field("Amount").Id).NumberValue.Should().Be(7);
+        // the answer is the state of the entry in the shape of the read, so the client needs no second request
+        var stored = result.Templates.Should().ContainSingle().Which;
+        stored.Id.Should().Be(template.Id);
+        stored.Field("Client").Value!.StringValue.Should().Be("ACME", "a value written earlier is part of the answer, not only the values of this write");
+        stored.Field("Amount").Value!.NumberValue.Should().Be(7);
+        result.CustomFields.Should().ContainSingle().Which.Name.Should().Be("Project code");
     }
 
 

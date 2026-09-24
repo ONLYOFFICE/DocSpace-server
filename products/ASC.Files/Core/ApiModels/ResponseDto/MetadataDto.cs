@@ -132,23 +132,22 @@ public class MetadataFieldOptionDto
 }
 
 /// <summary>
-/// The metadata field value of an entry.
+/// The value of a metadata field on an entry. Exactly one of the value properties is set, the one matching the field type:
+/// <c>stringValue</c> for a string field, <c>numberValue</c> for a number field, <c>dateValue</c> for a date field,
+/// <c>optionIds</c> for a single or multiple choice field.
 /// </summary>
 public class MetadataValueDto
 {
     /// <summary>
-    /// The field ID.
-    /// </summary>
-    public int FieldId { get; set; }
-
-    /// <summary>
     /// The string value.
     /// </summary>
+    /// <example>ACME Corp</example>
     public string StringValue { get; set; }
 
     /// <summary>
     /// The number value.
     /// </summary>
+    /// <example>150000</example>
     public long? NumberValue { get; set; }
 
     /// <summary>
@@ -163,19 +162,71 @@ public class MetadataValueDto
 }
 
 /// <summary>
-/// A metadata template assigned to an entry with the values of its fields.
+/// A metadata template assigned to an entry: the template with every field of it, each field carrying its value on the entry.
 /// </summary>
-public class TemplateMetadataDto
+public class EntryTemplateDto
 {
     /// <summary>
-    /// The metadata template.
+    /// The template ID.
     /// </summary>
-    public MetadataTemplateDto Template { get; set; }
+    /// <example>3</example>
+    public int Id { get; set; }
 
     /// <summary>
-    /// The metadata field values.
+    /// The template name.
     /// </summary>
-    public List<MetadataValueDto> Values { get; set; }
+    /// <example>Project</example>
+    public string Name { get; set; }
+
+    /// <summary>
+    /// Specifies if the template is visible in the UI pickers.
+    /// </summary>
+    /// <example>true</example>
+    public bool Visible { get; set; }
+
+    /// <summary>
+    /// The template fields with their values on the entry.
+    /// </summary>
+    public List<EntryFieldDto> Fields { get; set; }
+}
+
+/// <summary>
+/// A metadata template field with its value on the entry.
+/// </summary>
+public class EntryFieldDto
+{
+    /// <summary>
+    /// The field ID.
+    /// </summary>
+    /// <example>9</example>
+    public int Id { get; set; }
+
+    /// <summary>
+    /// The field name.
+    /// </summary>
+    /// <example>Customer</example>
+    public string Name { get; set; }
+
+    /// <summary>
+    /// The field type.
+    /// </summary>
+    public MetadataFieldType Type { get; set; }
+
+    /// <summary>
+    /// The choice options of the field.
+    /// </summary>
+    public List<MetadataFieldOptionDto> Options { get; set; }
+
+    /// <summary>
+    /// The field display order inside the template.
+    /// </summary>
+    /// <example>0</example>
+    public int Order { get; set; }
+
+    /// <summary>
+    /// The value of the field on the entry, or <c>null</c> when the entry holds no value for it.
+    /// </summary>
+    public MetadataValueDto Value { get; set; }
 }
 
 /// <summary>
@@ -203,9 +254,9 @@ public class CustomFieldValueDto
 public class EntryMetadataDto
 {
     /// <summary>
-    /// The assigned metadata templates with the values of their fields.
+    /// The assigned metadata templates, each field carrying its value on the entry.
     /// </summary>
-    public List<TemplateMetadataDto> Templates { get; set; }
+    public List<EntryTemplateDto> Templates { get; set; }
 
     /// <summary>
     /// The custom fields with their values.
@@ -274,7 +325,6 @@ public class MetadataDtoHelper(ApiDateTimeHelper apiDateTimeHelper)
     {
         return new MetadataValueDto
         {
-            FieldId = value.FieldId,
             StringValue = value.StringValue,
             NumberValue = value.NumberValue,
             DateValue = value.DateValue.HasValue ? apiDateTimeHelper.Get(value.DateValue.Value) : null,
@@ -282,12 +332,30 @@ public class MetadataDtoHelper(ApiDateTimeHelper apiDateTimeHelper)
         };
     }
 
-    public TemplateMetadataDto Get(TemplateMetadata metadata)
+    public EntryTemplateDto Get(TemplateMetadata metadata)
     {
-        return new TemplateMetadataDto
+        // the value is placed inside its field: a client used to join a separate values list to the template fields by id
+        var values = (metadata.Values ?? []).ToDictionary(v => v.FieldId);
+
+        return new EntryTemplateDto
         {
-            Template = Get(metadata.Template),
-            Values = metadata.Values?.Select(Get).ToList()
+            Id = metadata.Template.Id,
+            Name = metadata.Template.Name,
+            Visible = metadata.Template.Visible,
+            Fields = (metadata.Template.Fields ?? []).Select(f => Get(f, values.GetValueOrDefault(f.Id))).ToList()
+        };
+    }
+
+    public EntryFieldDto Get(MetadataField field, MetadataValue value)
+    {
+        return new EntryFieldDto
+        {
+            Id = field.Id,
+            Name = field.Name,
+            Type = field.Type,
+            Options = field.Options?.Select(o => new MetadataFieldOptionDto { Id = o.Id, Value = o.Value }).ToList(),
+            Order = field.Order,
+            Value = value == null ? null : Get(value)
         };
     }
 

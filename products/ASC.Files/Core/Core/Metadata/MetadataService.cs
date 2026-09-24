@@ -382,8 +382,14 @@ public class MetadataService(
     {
         await DemandEntryAccessAsync(entryId, entryType, edit: false);
 
-        var metadataDao = daoFactory.GetMetadataDao<int>();
+        return await LoadEntryMetadataAsync(daoFactory.GetMetadataDao<int>(), entryId, entryType);
+    }
 
+    /// <summary>
+    /// The metadata of an entry the caller has already been granted access to: the assigned templates with the values and the custom fields.
+    /// </summary>
+    private static async Task<EntryMetadata> LoadEntryMetadataAsync(IMetadataDao<int> metadataDao, int entryId, FileEntryType entryType)
+    {
         var templateIds = await metadataDao.GetLinksAsync(entryId, entryType)
             .Select(l => l.TemplateId)
             .ToListAsync();
@@ -561,7 +567,7 @@ public class MetadataService(
         await metadataIndexHelper.IndexEntriesAsync(entryType, [entryId]);
     }
 
-    public async Task<List<MetadataValue>> SetValuesAsync(int entryId, FileEntryType entryType, IEnumerable<MetadataValue> values)
+    public async Task<EntryMetadata> SetValuesAsync(int entryId, FileEntryType entryType, IEnumerable<MetadataValue> values)
     {
         var entry = await DemandEntryAccessAsync(entryId, entryType, edit: true);
 
@@ -615,26 +621,9 @@ public class MetadataService(
 
         await metadataIndexHelper.IndexEntriesAsync(entryType, [entryId]);
 
-        // the answer is the state of the entry, not an echo of the request: the same rule the custom fields follow,
-        // so a client needs no second request after a write
-        return await GetTemplateValuesAsync(metadataDao, entryId, entryType, systemTemplate);
-    }
-
-    /// <summary>
-    /// Every value the entry holds for the fields of its templates. The custom fields are left out: they have their own answer.
-    /// </summary>
-    private static async Task<List<MetadataValue>> GetTemplateValuesAsync(IMetadataDao<int> metadataDao, int entryId, FileEntryType entryType, MetadataTemplate systemTemplate)
-    {
-        var values = await metadataDao.GetValuesAsync(entryId, entryType).ToListAsync();
-
-        if (systemTemplate == null || values.Count == 0)
-        {
-            return values;
-        }
-
-        var customFieldIds = await metadataDao.GetFieldsAsync(systemTemplate.Id).Select(f => f.Id).ToHashSetAsync();
-
-        return values.Where(v => !customFieldIds.Contains(v.FieldId)).ToList();
+        // the answer is the state of the entry, not an echo of the request, and it is the same shape the read gives:
+        // a client needs no second request after a write
+        return await LoadEntryMetadataAsync(metadataDao, entryId, entryType);
     }
 
     /// <summary>

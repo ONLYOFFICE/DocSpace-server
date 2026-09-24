@@ -65,7 +65,7 @@ public class MetadataDateValuesTests(AspireAppFixture fixture) : BaseTest(fixtur
             TestContext.Current.CancellationToken);
 
         var stored = await api.GetFolderMetadataAsync(room.Id, TestContext.Current.CancellationToken);
-        stored.Single(m => m.Template.Id == template.Id).Values.Single().DateValue!.Value.UtcDateTime
+        stored.Single(m => m.Id == template.Id).Field(SignedField).Value!.DateValue!.Value.UtcDateTime
             .Should().Be(new DateTime(2026, 1, 15, 0, 0, 0, DateTimeKind.Utc));
 
         var condition = new { fieldId = template.Field(SignedField).Id, from = "2026-01-15", to = "2026-01-15" };

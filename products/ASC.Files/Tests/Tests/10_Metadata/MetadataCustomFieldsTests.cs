@@ -191,8 +191,8 @@ public class MetadataCustomFieldsTests(AspireAppFixture fixture) : BaseTest(fixt
         await api.SetFolderCustomFieldAsync(room.Id, "Client", "Globex", TestContext.Current.CancellationToken);
 
         var templates = await api.GetFolderMetadataAsync(room.Id, TestContext.Current.CancellationToken);
-        templates.Should().ContainSingle().Which.Template.Id.Should().Be(template.Id, "the hidden template of the custom fields must not appear among the templates");
-        templates.Single().Values.Single().StringValue.Should().Be("ACME", "a custom field with the same name as a template field is a different field");
+        templates.Should().ContainSingle().Which.Id.Should().Be(template.Id, "the hidden template of the custom fields must not appear among the templates");
+        templates.Single().Field("Client").Value!.StringValue.Should().Be("ACME", "a custom field with the same name as a template field is a different field");
 
         var customFields = await api.GetFolderCustomFieldsAsync(room.Id, TestContext.Current.CancellationToken);
         customFields.Should().ContainSingle().Which.Should().BeEquivalentTo(new { Name = "Client", Value = "Globex" });

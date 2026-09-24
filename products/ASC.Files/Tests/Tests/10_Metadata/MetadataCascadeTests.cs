@@ -166,7 +166,7 @@ public class MetadataCascadeTests(AspireAppFixture fixture) : BaseTest(fixture)
         await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: true, TestContext.Current.CancellationToken, conflictResolveType: 1);
 
         var bareMetadata = await PollMetadataAsync(api, bare.Id, FileEntryType.File, m => ValueOf(m, template.Id, departmentFieldId) == "Legal");
-        bareMetadata.Should().Contain(e => e.Template.Id == template.Id, "the template is linked even where the folder has nothing to give for a field");
+        bareMetadata.Should().Contain(e => e.Id == template.Id, "the template is linked even where the folder has nothing to give for a field");
         ValueOf(bareMetadata, template.Id, clientFieldId).Should().BeNull("an empty folder field stays empty on the entry");
 
         // only the filled fields of the folder travel down: an empty one never touches the entry's own value, Overwrite or not
@@ -179,8 +179,8 @@ public class MetadataCascadeTests(AspireAppFixture fixture) : BaseTest(fixture)
 
         await api.AssignFolderTemplatesAsync(room.Id, [empty.Id], cascade: true, TestContext.Current.CancellationToken);
 
-        var emptyLinked = await PollMetadataAsync(api, bare.Id, FileEntryType.File, m => m.Any(e => e.Template.Id == empty.Id));
-        emptyLinked.Should().ContainSingle(e => e.Template.Id == empty.Id).Which.Values.Should().BeEmpty("an empty instance is linked without values");
+        var emptyLinked = await PollMetadataAsync(api, bare.Id, FileEntryType.File, m => m.Any(e => e.Id == empty.Id));
+        emptyLinked.Should().ContainSingle(e => e.Id == empty.Id).Which.SetFields.Should().BeEmpty("an empty instance is linked without values");
     }
 
     [Fact]
@@ -252,17 +252,17 @@ public class MetadataCascadeTests(AspireAppFixture fixture) : BaseTest(fixture)
         await api.UnassignFolderTemplateAsync(room.Id, template.Id, TestContext.Current.CancellationToken);
 
         var roomMetadata = await api.GetFolderMetadataAsync(room.Id, TestContext.Current.CancellationToken);
-        roomMetadata.Should().NotContain(m => m.Template.Id == template.Id, "the template is gone from the room itself");
+        roomMetadata.Should().NotContain(m => m.Id == template.Id, "the template is gone from the room itself");
 
         var fileMetadata = await api.GetFileMetadataAsync(file.Id, TestContext.Current.CancellationToken);
-        fileMetadata.Should().Contain(m => m.Template.Id == template.Id, "the file keeps the template as a direct assignment");
+        fileMetadata.Should().Contain(m => m.Id == template.Id, "the file keeps the template as a direct assignment");
         ValueOf(fileMetadata, template.Id, clientFieldId).Should().Be("ACME", "the inherited value stays on the file");
 
         // there is no bulk rollback: the previously cascaded instance is removed entry by entry, values included
         await api.UnassignFileTemplateAsync(file.Id, template.Id, TestContext.Current.CancellationToken);
 
         var removed = await api.GetFileMetadataAsync(file.Id, TestContext.Current.CancellationToken);
-        removed.Should().NotContain(m => m.Template.Id == template.Id, "the per-entry unassign removes the template with its values");
+        removed.Should().NotContain(m => m.Id == template.Id, "the per-entry unassign removes the template with its values");
     }
 
     [Fact]
@@ -302,7 +302,7 @@ public class MetadataCascadeTests(AspireAppFixture fixture) : BaseTest(fixture)
         var copy = await FindFileAsync(api, room.Id, file.Title);
 
         var copyMetadata = await api.GetFileMetadataAsync(copy.Id, TestContext.Current.CancellationToken);
-        copyMetadata.Should().NotContain(m => m.Template.Id == template.Id, "a copy carries the direct assignments only, and the file's link is inherited from the nested folder");
+        copyMetadata.Should().NotContain(m => m.Id == template.Id, "a copy carries the direct assignments only, and the file's link is inherited from the nested folder");
 
         var fileMetadata = await api.GetFileMetadataAsync(file.Id, TestContext.Current.CancellationToken);
         ValueOf(fileMetadata, template.Id, clientFieldId).Should().Be("Nested", "the file itself keeps the template inherited from the nested folder");
@@ -335,13 +335,13 @@ public class MetadataCascadeTests(AspireAppFixture fixture) : BaseTest(fixture)
         // the copy is created first (and inherits the room's cascade), the source metadata is copied afterwards:
         // the second step used to wipe every value of the copy, the inherited ones included
         var metadata = await PollMetadataAsync(api, copy.Id, FileEntryType.File,
-            m => m.Any(e => e.Template.Id == own.Id) && m.Any(e => e.Template.Id == inherited.Id && e.Values.Count > 0));
+            m => m.Any(e => e.Id == own.Id) && m.Any(e => e.Id == inherited.Id && e.SetFields.Any()));
 
-        var ownValues = metadata.Single(e => e.Template.Id == own.Id).Values;
-        ownValues.Should().ContainSingle().Which.StringValue.Should().Be("ACME", "the copied value must follow the copy");
+        var ownValues = metadata.Single(e => e.Id == own.Id).SetFields;
+        ownValues.Should().ContainSingle().Which.Value!.StringValue.Should().Be("ACME", "the copied value must follow the copy");
 
-        var inheritedValues = metadata.Single(e => e.Template.Id == inherited.Id).Values;
-        inheritedValues.Should().ContainSingle().Which.StringValue.Should().Be("Legal", "the value inherited from the cascading room must survive the copy");
+        var inheritedValues = metadata.Single(e => e.Id == inherited.Id).SetFields;
+        inheritedValues.Should().ContainSingle().Which.Value!.StringValue.Should().Be("Legal", "the value inherited from the cascading room must survive the copy");
     }
 
     private async Task<MetadataApiClient> ArrangeAsync()
@@ -429,12 +429,12 @@ public class MetadataCascadeTests(AspireAppFixture fixture) : BaseTest(fixture)
 
     private static async Task<List<int>> PollTemplatesAsync(MetadataApiClient api, int entryId, FileEntryType entryType, int[] expected)
     {
-        var metadata = await PollMetadataAsync(api, entryId, entryType, m => expected.All(id => m.Any(e => e.Template.Id == id)), TimeSpan.FromSeconds(30));
+        var metadata = await PollMetadataAsync(api, entryId, entryType, m => expected.All(id => m.Any(e => e.Id == id)), TimeSpan.FromSeconds(30));
 
-        return metadata.Select(e => e.Template.Id).ToList();
+        return metadata.Select(e => e.Id).ToList();
     }
 
-    private static async Task<List<EntryMetadataResponse>> PollMetadataAsync(MetadataApiClient api, int entryId, FileEntryType entryType, Func<List<EntryMetadataResponse>, bool> until, TimeSpan? timeout = null)
+    private static async Task<List<EntryTemplateResponse>> PollMetadataAsync(MetadataApiClient api, int entryId, FileEntryType entryType, Func<List<EntryTemplateResponse>, bool> until, TimeSpan? timeout = null)
     {
         var deadline = DateTime.UtcNow.Add(timeout ?? TimeSpan.FromSeconds(15));
 
@@ -453,9 +453,9 @@ public class MetadataCascadeTests(AspireAppFixture fixture) : BaseTest(fixture)
         }
     }
 
-    private static string? ValueOf(List<EntryMetadataResponse> metadata, int templateId, int fieldId)
+    private static string? ValueOf(List<EntryTemplateResponse> metadata, int templateId, int fieldId)
     {
-        return metadata.FirstOrDefault(e => e.Template.Id == templateId)?.Values.FirstOrDefault(v => v.FieldId == fieldId)?.StringValue;
+        return metadata.FirstOrDefault(e => e.Id == templateId)?.Fields.FirstOrDefault(f => f.Id == fieldId)?.Value?.StringValue;
     }
 
     /// <summary>
