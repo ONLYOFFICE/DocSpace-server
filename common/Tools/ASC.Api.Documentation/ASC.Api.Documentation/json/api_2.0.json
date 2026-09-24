@@ -7812,7 +7812,7 @@
         "operationId": "sendSuspendInstructions",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The deactivation letter has been handed to the mail service and the request is recorded in the audit trail; the portal itself is still active and the response carries no content",
             "headers": {
               "X-RateLimit-Limit": {
                 "description": "Rate limit: 5 requests per 15 minutes per user/IP.",
@@ -7935,7 +7935,7 @@
         "operationId": "suspendPortal",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The portal is now suspended, its users can no longer work in it and its content is kept; the response carries no content",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -8025,7 +8025,7 @@
         "operationId": "sendDeleteInstructions",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The removal letter has been handed to the mail service; nothing about the portal has changed yet and the response carries no content",
             "headers": {
               "X-RateLimit-Limit": {
                 "description": "Rate limit: 5 requests per 15 minutes per user/IP.",
@@ -8245,7 +8245,7 @@
         "operationId": "continuePortal",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The portal is active again and its users can sign in; the response carries no content",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -9143,7 +9143,7 @@
         "operationId": "markGiftMessageAsRead",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The gift message is marked as read for the calling user; the same answer is returned when saving the flag failed, because the error is only written to the portal log. The response carries no content",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"

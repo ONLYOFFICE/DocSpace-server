@@ -2138,7 +2138,7 @@
         },
         "responses": {
           "200": {
-            "description": "The created file",
+            "description": "The file created in the folder: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -5219,7 +5219,7 @@
         },
         "responses": {
           "200": {
-            "description": "The created file",
+            "description": "The file created in My documents: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -7810,7 +7810,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The folder",
+            "description": "The folder itself - its title, its parent, the moments it was created and changed, the access the caller has to it, how many items in it are new for them, and the room settings when the folder is a room; nothing about the items it holds",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -10791,7 +10791,7 @@
         },
         "responses": {
           "200": {
-            "description": "The stored file",
+            "description": "The stored file with its id and the title it was actually saved under; a `version` above 1 means the content was added to a file that already carried this name instead of creating a new one",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -21031,7 +21031,7 @@
         },
         "responses": {
           "200": {
-            "description": "Status",
+            "description": "The state of the template creation just queued: `isCompleted` is still false, so the job has to be polled for its result",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -21138,7 +21138,7 @@
         "operationId": "getRoomTemplateCreatingStatus",
         "responses": {
           "200": {
-            "description": "Status",
+            "description": "The state of the caller's latest template creation, or an empty body when this account has started none",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -21252,7 +21252,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Ok",
+            "description": "True when the template is shared with everyone, false when only its owner and the accounts it was shared with can reach it",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -21369,7 +21369,7 @@
         },
         "responses": {
           "200": {
-            "description": "Ok",
+            "description": "The recipient list of the template has been rewritten to match the requested access; nothing is returned",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -26859,7 +26859,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The room group no longer exists; the body is empty and the rooms it gathered are left as they were",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
