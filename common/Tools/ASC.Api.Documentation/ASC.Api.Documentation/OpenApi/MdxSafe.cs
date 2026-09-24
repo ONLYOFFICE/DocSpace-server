@@ -79,7 +79,7 @@ internal static class MdxSafe
             escaped[i] = fenced || IsMarker(line) ? line : Escape(line);
         }
 
-        await File.WriteAllLinesAsync(path, escaped, cancellationToken);
+        await TextFile.WriteLinesAsync(path, escaped, cancellationToken);
     }
 
     /// <summary>
