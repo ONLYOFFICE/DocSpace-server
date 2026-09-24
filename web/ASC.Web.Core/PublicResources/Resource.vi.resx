@@ -1536,4 +1536,22 @@
   <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
     <value>Nội bộ</value>
   </data>
+  <data name="AccountingCustomerOperationPromptTokens" xml:space="preserve">
+    <value>Yêu cầu</value>
+  </data>
+  <data name="AccountingCustomerOperationCachedTokens" xml:space="preserve">
+    <value>Bộ nhớ đệm</value>
+  </data>
+  <data name="AccountingCustomerOperationCacheWriteTokens" xml:space="preserve">
+    <value>Ghi vào bộ nhớ đệm</value>
+  </data>
+  <data name="AccountingCustomerOperationCompletionTokens" xml:space="preserve">
+    <value>Phản hồi</value>
+  </data>
+  <data name="AccountingCustomerOperationReasoningTokens" xml:space="preserve">
+    <value>Suy luận</value>
+  </data>
+  <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
+    <value>Hình ảnh</value>
+  </data>
 </root>

@@ -1536,4 +1536,22 @@
   <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
     <value>Բաժանորդագրության սահմանաչափ</value>
   </data>
+  <data name="AccountingCustomerOperationPromptTokens" xml:space="preserve">
+    <value>Հարցում</value>
+  </data>
+  <data name="AccountingCustomerOperationCachedTokens" xml:space="preserve">
+    <value>Քեշավորում</value>
+  </data>
+  <data name="AccountingCustomerOperationCacheWriteTokens" xml:space="preserve">
+    <value>Գրանցում քեշում</value>
+  </data>
+  <data name="AccountingCustomerOperationCompletionTokens" xml:space="preserve">
+    <value>Պատասխան</value>
+  </data>
+  <data name="AccountingCustomerOperationReasoningTokens" xml:space="preserve">
+    <value>Դատողություն</value>
+  </data>
+  <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
+    <value>Պատկեր</value>
+  </data>
 </root>

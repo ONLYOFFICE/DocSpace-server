@@ -1536,4 +1536,22 @@
   <data name="AccountingReportTitle" xml:space="preserve">
     <value>报告</value>
   </data>
+  <data name="AccountingCustomerOperationPromptTokens" xml:space="preserve">
+    <value>提示</value>
+  </data>
+  <data name="AccountingCustomerOperationCachedTokens" xml:space="preserve">
+    <value>缓存</value>
+  </data>
+  <data name="AccountingCustomerOperationCacheWriteTokens" xml:space="preserve">
+    <value>缓存写入</value>
+  </data>
+  <data name="AccountingCustomerOperationCompletionTokens" xml:space="preserve">
+    <value>响应</value>
+  </data>
+  <data name="AccountingCustomerOperationReasoningTokens" xml:space="preserve">
+    <value>推理</value>
+  </data>
+  <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
+    <value>图片</value>
+  </data>
 </root>

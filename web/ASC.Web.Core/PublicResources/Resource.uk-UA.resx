@@ -1542,4 +1542,22 @@
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>Автентифікація користувача не вдалася</value>
   </data>
+  <data name="AccountingCustomerOperationPromptTokens" xml:space="preserve">
+    <value>Запит</value>
+  </data>
+  <data name="AccountingCustomerOperationCachedTokens" xml:space="preserve">
+    <value>Кешування</value>
+  </data>
+  <data name="AccountingCustomerOperationCacheWriteTokens" xml:space="preserve">
+    <value>Запис у кеш</value>
+  </data>
+  <data name="AccountingCustomerOperationCompletionTokens" xml:space="preserve">
+    <value>Відповідь</value>
+  </data>
+  <data name="AccountingCustomerOperationReasoningTokens" xml:space="preserve">
+    <value>Міркування</value>
+  </data>
+  <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
+    <value>Зображення</value>
+  </data>
 </root>

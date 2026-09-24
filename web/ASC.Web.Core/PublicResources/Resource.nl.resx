@@ -1536,4 +1536,22 @@
   <data name="AccountingReportTitle" xml:space="preserve">
     <value>Rapport</value>
   </data>
+  <data name="AccountingCustomerOperationPromptTokens" xml:space="preserve">
+    <value>Verzoek</value>
+  </data>
+  <data name="AccountingCustomerOperationCachedTokens" xml:space="preserve">
+    <value>Caching</value>
+  </data>
+  <data name="AccountingCustomerOperationCacheWriteTokens" xml:space="preserve">
+    <value>Schrijven naar cache</value>
+  </data>
+  <data name="AccountingCustomerOperationCompletionTokens" xml:space="preserve">
+    <value>Antwoord</value>
+  </data>
+  <data name="AccountingCustomerOperationReasoningTokens" xml:space="preserve">
+    <value>Redenering</value>
+  </data>
+  <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
+    <value>Afbeelding</value>
+  </data>
 </root>

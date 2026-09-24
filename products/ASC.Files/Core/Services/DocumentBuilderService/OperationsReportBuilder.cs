@@ -49,24 +49,40 @@ public class OperationsReportBuilder(
 {
     protected override async Task<DocumentBuilderInputData> BuildCoreAsync(RenderContext context, CustomerOperationsReportTaskData taskData)
     {
+        var tenantWalletService = taskData.ServiceName is { Count: 1 }
+            ? await GetTenantWalletServiceAsync(taskData.ServiceName.First())
+            : null;
+
+        var addSourceColumns = tenantWalletService is TenantWalletService.AITools or TenantWalletService.AISearch;
+
+        // AI search is billed by results, not tokens, so only AI tools get the token columns.
+        var addTokenColumns = tenantWalletService is TenantWalletService.AITools;
+
         var columns = new List<ReportColumn>
         {
             new(Resource.AccountingCustomerOperationDate),
             new(Resource.AccountingCustomerOperationType),
             new(Resource.AccountingCustomerOperationDetails),
             new(Resource.AccountingCustomerOperationContact),
-            new(Resource.AccountingCustomerOperationQuantity, "right"),
-            new(Resource.AccountingCustomerOperationServiceUnit),
-            new(Resource.AccountingCustomerOperationCredit, "right", Sum: true),
-            new(Resource.AccountingCustomerOperationDebit, "right", Sum: true),
-            new(Resource.AccountingCustomerOperationCurrency, Currency: true)
+            new(Resource.AccountingCustomerOperationQuantity, "right")
         };
 
-        var tenantWalletService = taskData.ServiceName is { Count: 1 }
-            ? await GetTenantWalletServiceAsync(taskData.ServiceName.First())
-            : null;
+        if (addTokenColumns)
+        {
+            // The breakdown of the quantity, which for AI operations already is the total tokens.
+            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationPromptTokens, "right"));
+            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationCachedTokens, "right"));
+            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationCacheWriteTokens, "right"));
+            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationCompletionTokens, "right"));
+            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationReasoningTokens, "right"));
+            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationImageTokens, "right"));
+        }
 
-        var addSourceColumns = tenantWalletService is TenantWalletService.AITools or TenantWalletService.AISearch;
+        columns.Add(new ReportColumn(Resource.AccountingCustomerOperationServiceUnit));
+        columns.Add(new ReportColumn(Resource.AccountingCustomerOperationCredit, "right", Sum: true));
+        columns.Add(new ReportColumn(Resource.AccountingCustomerOperationDebit, "right", Sum: true));
+        columns.Add(new ReportColumn(Resource.AccountingCustomerOperationCurrency, Currency: true));
+
         if (addSourceColumns)
         {
             columns.Add(new ReportColumn(Resource.AccountingCustomerOperationSourceType));
@@ -119,7 +135,7 @@ public class OperationsReportBuilder(
                         continue;
                     }
 
-                    await writer.WriteAsync(SerializeOperations(records, dateFormat, context.Options, addSourceColumns));
+                    await writer.WriteAsync(SerializeOperations(records, dateFormat, context.Options, addSourceColumns, addTokenColumns));
                 }
             },
             pivot);
@@ -197,7 +213,7 @@ public class OperationsReportBuilder(
         }
     }
 
-    private static string SerializeOperations(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions, bool addSourceColumns)
+    private static string SerializeOperations(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions, bool addSourceColumns, bool addTokenColumns)
     {
         var sb = new StringBuilder();
 
@@ -209,12 +225,24 @@ public class OperationsReportBuilder(
                 new(record.Description, "@"),
                 new(record.Details, "@"),
                 new(record.ParticipantDisplayName, "@"),
-                new(record.Quantity.ToString(CultureInfo.InvariantCulture), CountFormat, "right"),
-                new(record.ServiceUnit, "@"),
-                new(record.Credit.ToString(CultureInfo.InvariantCulture), MoneyFormat, "right"),
-                new(record.Debit.ToString(CultureInfo.InvariantCulture), MoneyFormat, "right"),
-                new(record.Currency, "@")
+                new(record.Quantity.ToString(CultureInfo.InvariantCulture), CountFormat, "right")
             };
+
+            if (addTokenColumns)
+            {
+                var tokenUsage = record.TokenUsage;
+                properties.Add(TokensValue(tokenUsage?.PromptTokens));
+                properties.Add(TokensValue(tokenUsage?.CachedTokens));
+                properties.Add(TokensValue(tokenUsage?.CacheWriteTokens));
+                properties.Add(TokensValue(tokenUsage?.CompletionTokens));
+                properties.Add(TokensValue(tokenUsage?.ReasoningTokens));
+                properties.Add(TokensValue(tokenUsage?.ImageTokens));
+            }
+
+            properties.Add(new PropertyValue(record.ServiceUnit, "@"));
+            properties.Add(new PropertyValue(record.Credit.ToString(CultureInfo.InvariantCulture), MoneyFormat, "right"));
+            properties.Add(new PropertyValue(record.Debit.ToString(CultureInfo.InvariantCulture), MoneyFormat, "right"));
+            properties.Add(new PropertyValue(record.Currency, "@"));
 
             if (addSourceColumns)
             {
@@ -227,5 +255,11 @@ public class OperationsReportBuilder(
         }
 
         return sb.ToString();
+    }
+
+    // An operation recorded without token counts leaves the cell empty rather than showing 0.
+    private static PropertyValue TokensValue(long? tokens)
+    {
+        return new PropertyValue(tokens?.ToString(CultureInfo.InvariantCulture), CountFormat, "right");
     }
 }
