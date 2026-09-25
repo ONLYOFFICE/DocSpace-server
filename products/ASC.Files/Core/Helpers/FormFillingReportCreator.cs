@@ -44,7 +44,8 @@ public class FormFillingReportCreator(
     AuthContext authContext,
     IEventBus eventBus,
     FactoryIndexerForm factoryIndexerForm,
-    FactoryIndexerFormMetadata factoryIndexerFormMetadata)
+    FactoryIndexerFormMetadata factoryIndexerFormMetadata,
+    CoreBaseSettings coreBaseSettings)
 {
     private static readonly HashSet<string> _checkboxOffStates =
         new(StringComparer.OrdinalIgnoreCase) { "off", "false", "0", "no", "n", "unchecked" };
@@ -96,7 +97,7 @@ public class FormFillingReportCreator(
         var normalizedMeta = NormalizeMetadata(parsed.MetaData).ToList();
         var columnDefinitions = BuildColumnDefinitions(normalizedMeta).ToList();
         var culture = tenantManager.GetCurrentTenant().GetCulture();
-        var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId, culture);
+        var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId, culture, coreBaseSettings.EnabledCultures);
 
         await externalDatabaseClient.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
 
@@ -202,7 +203,7 @@ public class FormFillingReportCreator(
                     .ToList()
             };
 
-            var rowData = BuildRowData(filteredData, normalizedMeta, item.Id, culture, item.CreateOn);
+            var rowData = BuildRowData(filteredData, normalizedMeta, item.Id, culture, coreBaseSettings.EnabledCultures, item.CreateOn);
 
             try
             {
@@ -565,7 +566,7 @@ public class FormFillingReportCreator(
     private static bool HasTimeComponent(string format) =>
         !string.IsNullOrEmpty(format) && (format.Contains('H') || format.Contains('h'));
 
-    private static Dictionary<string, object> BuildRowData(SubmitFormsData data, IEnumerable<FormMetadata> metaData, int formId, CultureInfo culture, DateTime? createdOn = null)
+    private static Dictionary<string, object> BuildRowData(SubmitFormsData data, IEnumerable<FormMetadata> metaData, int formId, CultureInfo culture, IReadOnlyList<CultureInfo> enabledCultures, DateTime? createdOn = null)
     {
         var result = new Dictionary<string, object>
         {
@@ -582,7 +583,7 @@ public class FormFillingReportCreator(
             {
                 continue;
             }
-            result[column] = ConvertFieldValue(item.Value, meta, culture) ?? DBNull.Value;
+            result[column] = ConvertFieldValue(item.Value, meta, culture, enabledCultures) ?? DBNull.Value;
         }
 
         return result;
@@ -621,7 +622,7 @@ public class FormFillingReportCreator(
         return name.ToLower();
     }
 
-    private static object ConvertFieldValue(string value, FormMetadata meta, CultureInfo culture)
+    private static object ConvertFieldValue(string value, FormMetadata meta, CultureInfo culture, IReadOnlyList<CultureInfo> enabledCultures)
     {
         if (string.IsNullOrEmpty(value))
         {
@@ -631,7 +632,7 @@ public class FormFillingReportCreator(
         return meta.Type switch
         {
             "checkBox" => ParseCheckbox(value),
-            "dateTime" => ParseDate(value, meta.Format, culture),
+            "dateTime" => ParseDate(value, meta.Format, culture, enabledCultures),
             "comboBox" or "dropDownList" or "radio" => NormalizeEnumValue(value, meta.PossibleValues),
             _ => value
         };
@@ -649,30 +650,50 @@ public class FormFillingReportCreator(
         return options.FirstOrDefault(o => string.Equals(o, value, StringComparison.OrdinalIgnoreCase)) ?? value;
     }
 
-    private static DateTime? ParseDate(string value, string format, CultureInfo culture)
+    private static DateTime? ParseDate(string value, string format, CultureInfo culture, IReadOnlyList<CultureInfo> enabledCultures)
     {
-        if (string.IsNullOrWhiteSpace(format))
+        if (string.IsNullOrWhiteSpace(value))
         {
-            return DateTime.TryParse(value, culture, DateTimeStyles.None, out var d)
-                || DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out d)
-                ? d : null;
+            return null;
         }
 
-        var dotNetFormat = format
-            .Replace("DD", "dd")
-            .Replace("YYYY", "yyyy")
-            .Replace("YY", "yy")
-            .Replace("mm", "MM");
-
-        if (DateTime.TryParseExact(value, dotNetFormat, culture, DateTimeStyles.None, out var dt)
-            || DateTime.TryParseExact(value, dotNetFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+        // The field's mask disambiguates day/month order, so try it first.
+        if (!string.IsNullOrWhiteSpace(format))
         {
-            return dt;
+            var dotNetFormat = format
+                .Replace("DD", "dd")
+                .Replace("YYYY", "yyyy")
+                .Replace("YY", "yy")
+                .Replace("mm", "MM");
+
+            if (DateTime.TryParseExact(value, dotNetFormat, culture, DateTimeStyles.AllowWhiteSpaces, out var dt)
+                || DateTime.TryParseExact(value, dotNetFormat, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out dt))
+            {
+                return dt;
+            }
         }
 
-        return DateTime.TryParse(value, culture, DateTimeStyles.None, out var fallback)
-            || DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out fallback)
-            ? fallback : null;
+        // Numeric dates stop at portal culture and invariant to avoid a day/month swap.
+        if (DateTime.TryParse(value, culture, DateTimeStyles.AllowWhiteSpaces, out var parsed)
+            || DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out parsed))
+        {
+            return parsed;
+        }
+
+        // A localized month name is in the filler's language, not the portal's: retry against the
+        // portal's enabled languages. Month spellings differ, so no cross-language mix-up.
+        if (value.Any(char.IsLetter))
+        {
+            foreach (var enabled in enabledCultures)
+            {
+                if (DateTime.TryParse(value, enabled, DateTimeStyles.AllowWhiteSpaces, out var localized))
+                {
+                    return localized;
+                }
+            }
+        }
+
+        return null;
     }
 
     public class BoolToStringConverter : JsonConverter<string>

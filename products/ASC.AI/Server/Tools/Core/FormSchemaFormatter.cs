@@ -33,31 +33,25 @@
 
 namespace ASC.AI.Tools.Core;
 
-public class ToolContext
+/// <summary>
+/// Renders submission-table columns for the prompts the model sees. Shared so the tools and the
+/// pre-analysis cannot describe the same schema differently.
+/// </summary>
+public static class FormSchemaFormatter
 {
-    public JsonElement? FolderId { get; init; }
-    public int FormId { get; init; }
+    /// <summary>Renders a column as <c>col_status "Status" (String) [approved/pending]</c>.</summary>
+    public static string FormatColumn(DbColumnDefinition column, int maxEnumValues = int.MaxValue)
+    {
+        var label = column.Label is not null && column.Label != column.Name ? $" \"{column.Label}\"" : string.Empty;
+        var desc = $"{column.Name}{label} ({column.Type})";
 
-    /// <summary>The attachment the form was attached under; keys the per-attachment analyze intent.</summary>
-    public string? AttachmentId { get; init; }
+        if (column.EnumValues is not { Count: > 0 } values)
+        {
+            return desc;
+        }
 
-    /// <summary>Set by the ASC.AI.Chat form-analysis sub-agent so the form-data tools are emitted for it
-    /// only, and never for the main chat agent.</summary>
-    public bool FormSubAgent { get; init; }
-}
-
-public class ResolvedToolContext
-{
-    public IFolder? Folder { get; init; }
-    public FileEntry? Form { get; init; }
-
-    /// <summary>
-    /// True when the user launched form-response analysis for <see cref="Form"/> (resolved server-side
-    /// from the attach intent). Gates the form-data tools.
-    /// </summary>
-    public bool Analyze { get; init; }
-
-    /// <summary>True when the request comes from the form-analysis sub-agent (which runs the form-data
-    /// tools on the FormAnalysis model), so the tools are withheld from the main chat agent.</summary>
-    public bool FormSubAgent { get; init; }
+        return values.Count <= maxEnumValues
+            ? $"{desc} [{string.Join("/", values)}]"
+            : $"{desc} [{string.Join("/", values.Take(maxEnumValues))}/...]";
+    }
 }
