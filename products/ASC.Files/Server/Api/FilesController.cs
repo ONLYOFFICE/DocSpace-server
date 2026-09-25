@@ -324,7 +324,7 @@ public abstract class FilesController<T>(
     /// </summary>
     /// <path>api/2.0/files/{folderId}/file</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "The created file", typeof(FileDto<int>))]
+    [SwaggerResponse(200, "The file created in the folder: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
     [HttpPost("{folderId}/file")]
     public async Task<FileDto<T>> CreateFile(CreateFileRequestDto<T> inDto)
     {
@@ -1226,7 +1226,7 @@ public class FilesControllerCommon(
     /// </summary>
     /// <path>api/2.0/files/@my/file</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "The created file", typeof(FileDto<int>))]
+    [SwaggerResponse(200, "The file created in My documents: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
     [HttpPost("@my/file")]
     public async Task<FileDto<int>> CreateFileInMyDocuments(CreateFile<JsonElement> inDto)
     {

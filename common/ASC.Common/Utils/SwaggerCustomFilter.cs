@@ -53,6 +53,17 @@ public class SwaggerSchemaCustomAttribute : SwaggerSchemaAttribute
     public object Example { get; set; }
 }
 
+/// <summary>
+/// Marks a <see cref="JsonElement"/> property that carries an arbitrary JSON document, stored and returned verbatim.
+/// </summary>
+/// <remarks>
+/// Without it a <see cref="JsonElement"/> is documented as "integer or string", since that is what it carries almost
+/// everywhere in this API: an id that is either a number or a third-party string. A property marked with this
+/// attribute is documented by the empty schema instead - any JSON value, objects, arrays and null included.
+/// </remarks>
+[AttributeUsage(AttributeTargets.Property)]
+public class SwaggerAnyJsonValueAttribute : Attribute;
+
 public class SwaggerSchemaCustomFilter : ISchemaFilter
 {
     public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
@@ -71,6 +82,14 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
 
         if (context.MemberInfo is not PropertyInfo propertyInfo)
         {
+            return;
+        }
+
+        if (propertyInfo.GetCustomAttribute<SwaggerAnyJsonValueAttribute>() != null)
+        {
+            // The empty schema: no type at all, so a nullable property does not end up as `type: null`.
+            openApiSchema.Type = null;
+            openApiSchema.OneOf = null;
             return;
         }
 

@@ -24,6 +24,7 @@ import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.*;
 import io.swagger.v3.oas.models.security.*;
 import io.swagger.v3.oas.models.servers.*;
+import io.swagger.v3.oas.models.tags.*;
 
 import java.time.*;
 import java.time.format.*;
@@ -52,6 +53,7 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
     private static final String TITLE = "x-title";
     private static final String MODEL_ANCHOR = "x-model-anchor";
     private static final String HAS_PROPERTIES = "x-has-properties";
+    private static final String SECTION_TITLE = "sectionTitle";
     private static final String ENUM_DOC = "x-enum-doc";
     private static final String RETURN_MODEL_ANCHOR = "x-return-model-anchor";
 
@@ -414,7 +416,14 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
             apiTemplateFiles.clear();
             modelTemplateFiles.clear();
             supportingFiles.clear();
-            supportingFiles.add(new SupportingFile("service.mustache", "", documentName + ".md"));
+
+            // The models are rendered once, into a document that is cut into a page per model:
+            // a schema is exchanged by six endpoints on average, and printing it on each of them
+            // buried the endpoint's own documentation under types the reader had already read.
+            boolean modelsOnly = Boolean.parseBoolean(String.valueOf(additionalProperties.get("modelsOnly")));
+
+            supportingFiles.add(new SupportingFile(
+                    modelsOnly ? "models.mustache" : "service.mustache", "", documentName + ".md"));
         }
 
         // The page heading and the server URL are not fixed up here: they are written into the
@@ -459,9 +468,43 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
         return results;
     }
 
+    /**
+     * The heading a group of operations is printed under. A document holds one section of the
+     * API, so its groups are that section's sub-tags: "Files / Folders" prints as "Folders", and
+     * a tag without sub-tags prints as it stands.
+     * <p>
+     * The generated class name is not used for this: "FilesFoldersApi" is this generator's own
+     * bookkeeping, and the page is read by people who only ever see the tags.
+     */
+    private static String sectionTitle(OperationsMap results) {
+        for (CodegenOperation operation : results.getOperations().getOperation()) {
+            if (operation.tags == null) {
+                continue;
+            }
+
+            for (Tag tag : operation.tags) {
+                String name = tag.getName();
+
+                if (name == null || name.isEmpty()) {
+                    continue;
+                }
+
+                int separator = name.indexOf('/');
+
+                return separator < 0 ? name.trim() : name.substring(separator + 1).trim();
+            }
+        }
+
+        // An operation reaches a page only through a tag, so this is unreachable short of a
+        // document that states none - and then the class name is all there is to head it with.
+        return String.valueOf(results.get("classname"));
+    }
+
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
         OperationsMap results = super.postProcessOperationsWithModels(objs, allModels);
+
+        results.put(SECTION_TITLE, sectionTitle(results));
 
         if (allModels != null) {
             for (ModelMap modelMap : allModels) {
@@ -530,6 +573,7 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
                 operation.vendorExtensions.put(RETURN_MODEL_DOC, operation.returnBaseType);
                 operation.vendorExtensions.put(RETURN_MODEL_ANCHOR, documentedModels.get(operation.returnBaseType));
             }
+
         }
 
         return results;

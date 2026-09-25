@@ -145,7 +145,7 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
     path: "/text-to-docx",
     tag: "Export",
     operationId: "aiExportTextToDocx",
-    summary: "Start markdown → docx export",
+    summary: "Start markdown export",
     hasBody: true,
   },
   {

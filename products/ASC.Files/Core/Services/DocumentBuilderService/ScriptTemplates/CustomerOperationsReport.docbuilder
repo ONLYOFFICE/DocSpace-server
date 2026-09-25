@@ -457,6 +457,16 @@ function writePivot(headerRowIndex, colCount, detailColumnLengths) {
 
     writeImg(pivotWorksheet);
 
+    // Freeze the header block now, before the pivot goes in and while the sheet has never been
+    // scrolled. Inserting the pivot parks the sheet's stored scroll position on the pivot's own
+    // first row, and that position is only recomputed during a scroll - which never happens again,
+    // because once a pane is frozen the rows above it are already on screen. Freezing first makes
+    // the recomputation run with the pane in place, and it then pins the stored row back to the
+    // first one. Freeze afterwards and the header block becomes unreachable and reads as missing.
+    // pivotRowIndex is the pivot's own header row: the pivot has no column fields, so that is the
+    // only row above its values.
+    pivotWorksheet.GetFreezePanes().FreezeRows(pivotRowIndex);
+
     var sourceRange = oWorksheet.GetRange("A" + headerRowIndex + ":" + toColumnName(colCount) + (headerRowIndex + values.length));
 
     var pivotTable = insertPivot(sourceRange, pivotWorksheet.GetRange("A" + pivotRowIndex));
@@ -505,10 +515,6 @@ function writePivot(headerRowIndex, colCount, detailColumnLengths) {
 
     setPivotColumnWidths(pivotWorksheet, pivot, columnLengths);
     stylePivot(pivotWorksheet, pivotTable);
-
-    // Hold the header block and the pivot's own header in view, the way the detail sheet holds
-    // everything above its data rows.
-    pivotWorksheet.GetFreezePanes().FreezeRows(getPivotFirstDataRow(pivotTable) - 1);
 
     pivotWorksheet.GetRange("A1").Select();
 }
