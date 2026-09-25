@@ -65,6 +65,7 @@ import {
   DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
 } from "../tools/httpToolsAdapter.js";
 import { systemToolsSource } from "../tools/systemTools.js";
+import { formAnalysisSubAgent } from "../tools/formAnalysisSubAgent.js";
 import { primeSourceMeta, safeGetAgentInstruction } from "../storage/docspaceFilesApi.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
@@ -338,10 +339,13 @@ const engine = new AIEngine({
   // tools run silently. Compose all three — before customToolsSource was
   // wired in, the custom-server registry was pure configuration and its
   // tools never reached the model (Bugs 82989 / 82990).
+  // formAnalysisSubAgent adds the `analyze_form` delegating tool; its serverType is silent
+  // (absent from systemServerTypes), so it runs without UI approval.
   toolsAdapter: composeToolsAdapters(
     systemToolsSource,
     customToolsSource,
     toolsAdapter,
+    formAnalysisSubAgent,
   ),
   // Approval-required server types: the MCP servers (host-configured and
   // custom — the latter resolved per request, see primeCustomServers) plus
@@ -544,13 +548,16 @@ function tapStream<T>(
   return observeChatStream(route, logStreamErrors(route, iter), dialect);
 }
 
-// A user message must carry some non-whitespace text before a stream is
-// opened. `content` is either a plain string or an array of parts; text
-// lives on `{ type: "text", text }` parts (and bare string parts), mirroring
-// the engine's own text extraction. Attachment-only parts (file/image) do
-// not count — an empty prompt otherwise reaches the provider and streams
-// back nothing (Bug 82720).
-function hasNonEmptyText(userMessage: unknown): boolean {
+// A user message must carry something for the model before a stream is
+// opened: non-whitespace text, or at least one attachment. `content` is
+// either a plain string or an array of parts; text lives on
+// `{ type: "text", text }` parts (and bare string parts), mirroring the
+// engine's own text extraction, attachments on `file` / `image` parts. A
+// truly empty prompt otherwise reaches the provider and streams back
+// nothing (Bug 82720). An attachment-only message is a valid prompt — the
+// composer sends one since ai-chat 0.5.115 (a dropped file with no text),
+// and the engine builds the provider request from the attachment alone.
+function hasPromptContent(userMessage: unknown): boolean {
   if (!isObject(userMessage)) {
     return false;
   }
@@ -568,9 +575,14 @@ function hasNonEmptyText(userMessage: unknown): boolean {
       }
       continue;
     }
+    if (!isObject(part)) {
+      continue;
+    }
+    if (part["type"] === "file" || part["type"] === "image") {
+      return true;
+    }
     if (
-      isObject(part)
-      && part["type"] === "text"
+      part["type"] === "text"
       && typeof part["text"] === "string"
       && part["text"].trim().length > 0
     ) {
@@ -699,11 +711,12 @@ export const aiController = {
     // (approval gating) before the tools adapter fires.
     await primeCustomServers(contextScopeOf(req.body));
     // Reject an empty prompt before opening the stream: a user message with
-    // no non-whitespace text otherwise reaches the provider and streams back
-    // nothing (Bug 82720).
-    if (!hasNonEmptyText(req.body.userMessage)) {
+    // neither non-whitespace text nor an attachment otherwise reaches the
+    // provider and streams back nothing (Bug 82720). A file-only message
+    // passes — the composer sends one when a file is dropped with no text.
+    if (!hasPromptContent(req.body.userMessage)) {
       res.status(400).json({
-        error: "userMessage must contain non-empty text content",
+        error: "userMessage must contain non-empty text content or an attachment",
       });
       return;
     }

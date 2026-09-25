@@ -46,38 +46,42 @@ internal static class MarkdownBundle
 
     public static async Task WriteAsync(
         string bundleDirectory,
+        string stagingDirectory,
         string siteUrl,
         string title,
-        IReadOnlyList<AggregateDocument> aggregates,
+        IReadOnlyList<SectionDocument> sections,
         IReadOnlyList<OperationDocument> operations,
+        IReadOnlyList<ModelDocument> models,
         CancellationToken cancellationToken = default)
     {
-        // The path under the static root mirrors the site's own URLs: an operation page lives at
-        // /docspace/api-backend/usage-api/<slug>/, so its Markdown is that path with `.md`.
+        // The path under the static root mirrors the site's own URLs: an endpoint page lives at
+        // /docspace/api-backend/usage-api/<section>/<sub-section>/<slug>/, so its Markdown is that
+        // path with `.md`. Sections and sub-sections are named the way the API states them, which
+        // is also what the site's sidebar reads.
         var root = Path.Combine(bundleDirectory, StaticDirectory);
         var aggregateDirectory = Path.Combine(root, "docspace", "api-backend");
-        var operationDirectory = Path.Combine(aggregateDirectory, "usage-api");
-
-        Directory.CreateDirectory(operationDirectory);
-
-        foreach (var aggregate in aggregates)
-        {
-            File.Copy(aggregate.Path, Path.Combine(aggregateDirectory, aggregate.FileName), overwrite: true);
-        }
-
-        foreach (var operation in operations)
-        {
-            File.Copy(operation.Path, Path.Combine(operationDirectory, operation.FileName), overwrite: true);
-        }
+        var usageDirectory = Path.Combine(aggregateDirectory, "usage-api");
 
         // An endpoint dropped from the API has to disappear from the bundle too, or it keeps being
-        // served - and read - as though it were still part of the contract.
-        Prune(aggregateDirectory, aggregates.Select(aggregate => aggregate.FileName));
-        Prune(operationDirectory, operations.Select(operation => operation.FileName));
+        // served - and read - as though it were still part of the contract. The documents are
+        // written in full on every run, so the tree is replaced rather than pruned: a renamed
+        // section leaves behind a directory, and a re-filed endpoint a copy in two places.
+        if (Directory.Exists(usageDirectory))
+        {
+            Directory.Delete(usageDirectory, recursive: true);
+        }
 
-        await File.WriteAllTextAsync(
+        Directory.CreateDirectory(aggregateDirectory);
+
+        Copy(stagingDirectory, usageDirectory);
+
+        // Earlier layouts published the section references beside `usage-api` rather than inside
+        // it; nothing writes there now, and what is left is served alongside what replaced it.
+        Prune(aggregateDirectory);
+
+        await TextFile.WriteAsync(
             Path.Combine(root, IndexFile),
-            BuildIndex(siteUrl, title, aggregates, operations),
+            BuildIndex(siteUrl, title, sections, operations, models),
             cancellationToken);
     }
 
@@ -88,10 +92,11 @@ internal static class MarkdownBundle
     private static string BuildIndex(
         string siteUrl,
         string title,
-        IReadOnlyList<AggregateDocument> aggregates,
-        IReadOnlyList<OperationDocument> operations)
+        IReadOnlyList<SectionDocument> sections,
+        IReadOnlyList<OperationDocument> operations,
+        IReadOnlyList<ModelDocument> models)
     {
-        var baseUrl = siteUrl.TrimEnd('/');
+        var baseUrl = $"{siteUrl.TrimEnd('/')}/docspace/api-backend/usage-api/";
         var index = new StringBuilder();
 
         index.Append("# ").AppendLine(title);
@@ -100,53 +105,130 @@ internal static class MarkdownBundle
             "> The ONLYOFFICE DocSpace HTTP API. Every page of the reference is available as Markdown at its own address, with `.md` appended.");
         index.AppendLine();
 
-        index.AppendLine("## Full references");
+        index.AppendLine("## Sections");
         index.AppendLine();
-        index.AppendLine("One document per service, each carrying every endpoint of that service and the models it uses.");
+        index.AppendLine("One page per section, listing its endpoints. Each endpoint has a page of its own, and every type they exchange has one too.");
         index.AppendLine();
 
-        foreach (var aggregate in aggregates)
+        foreach (var section in sections)
         {
             index
-                .Append("- [").Append(aggregate.Title).Append("](")
-                .Append(baseUrl).Append("/docspace/api-backend/").Append(aggregate.FileName).AppendLine(")");
+                .Append("- [").Append(section.Title).Append("](")
+                .Append(baseUrl).Append(Url(section.RelativePath)).AppendLine(")");
+        }
+
+        index.AppendLine();
+        index.AppendLine("## Models");
+        index.AppendLine();
+        index.AppendLine("The types the endpoints take and return.");
+        index.AppendLine();
+
+        foreach (var model in models)
+        {
+            index
+                .Append("- [").Append(model.Title).Append("](")
+                .Append(baseUrl).Append("models/").Append(model.FileName).AppendLine(")");
         }
 
         index.AppendLine();
         index.AppendLine("## Endpoints");
-        index.AppendLine();
 
-        foreach (var operation in operations)
+        var titles = sections.ToDictionary(
+            section => section.Name,
+            section => section.Title,
+            StringComparer.Ordinal);
+
+        foreach (var section in operations.GroupBy(operation => operation.Section, StringComparer.Ordinal))
         {
-            index
-                .Append("- [").Append(string.IsNullOrEmpty(operation.Summary) ? operation.OperationId : operation.Summary)
-                .Append("](").Append(baseUrl).Append("/docspace/api-backend/usage-api/").Append(operation.FileName).Append(')');
-
-            if (!string.IsNullOrEmpty(operation.Endpoint))
-            {
-                index.Append(": ").Append(operation.Endpoint);
-            }
-
             index.AppendLine();
+            index.Append("### ").AppendLine(titles.TryGetValue(section.Key, out var heading) ? heading : section.Key);
+
+            foreach (var group in section.GroupBy(operation => operation.Group, StringComparer.Ordinal))
+            {
+                index.AppendLine();
+
+                if (group.Key.Length > 0)
+                {
+                    index.Append("#### ").AppendLine(group.Key);
+                    index.AppendLine();
+                }
+
+                foreach (var operation in group)
+                {
+                    index
+                        .Append("- [").Append(string.IsNullOrEmpty(operation.Summary) ? operation.OperationId : operation.Summary)
+                        .Append("](").Append(baseUrl).Append(Url(section.Key)).Append('/');
+
+                    if (group.Key.Length > 0)
+                    {
+                        index.Append(Url(group.Key)).Append('/');
+                    }
+
+                    index.Append(operation.FileName).Append(')');
+
+                    if (!string.IsNullOrEmpty(operation.Endpoint))
+                    {
+                        index.Append(": ").Append(operation.Endpoint);
+                    }
+
+                    index.AppendLine();
+                }
+            }
         }
 
         return index.ToString();
     }
 
-    private static void Prune(string directory, IEnumerable<string> expected)
-    {
-        var keep = new HashSet<string>(expected, StringComparer.OrdinalIgnoreCase);
+    /// <summary>
+    /// A path as it reads in a URL. Sections are named the way the API states them, and those
+    /// names carry spaces.
+    /// </summary>
+    private static string Url(string path) =>
+        string.Join('/', path.Replace('\\', '/').Split('/').Select(Uri.EscapeDataString));
 
-        foreach (var path in Directory.EnumerateFiles(directory, "*.md"))
+    private static void Copy(string source, string destination)
+    {
+        Directory.CreateDirectory(destination);
+
+        foreach (var path in Directory.EnumerateFiles(source))
         {
-            if (!keep.Contains(Path.GetFileName(path)))
-            {
-                File.Delete(path);
-            }
+            File.Copy(path, Path.Combine(destination, Path.GetFileName(path)));
+        }
+
+        foreach (var path in Directory.EnumerateDirectories(source))
+        {
+            Copy(path, Path.Combine(destination, Path.GetFileName(path)));
         }
     }
 
-    internal sealed record AggregateDocument(string FileName, string Title, string Path);
+    private static void Prune(string directory)
+    {
+        foreach (var path in Directory.EnumerateFiles(directory, "*.md"))
+        {
+            File.Delete(path);
+        }
+    }
 
-    internal sealed record OperationDocument(string FileName, string OperationId, string Endpoint, string Summary, string Path);
+    /// <summary>
+    /// A section's index page: the name it is published under, its heading, and where the page
+    /// sits inside `usage-api`.
+    /// </summary>
+    internal sealed record SectionDocument(string Name, string Title, string RelativePath);
+
+    /// <summary>
+    /// One published model: its title, and the page it is documented on.
+    /// </summary>
+    internal sealed record ModelDocument(string Title, string FileName);
+
+    /// <summary>
+    /// One published endpoint. <paramref name="Group"/> is the sub-section it is filed under,
+    /// empty when its tag is the section itself.
+    /// </summary>
+    internal sealed record OperationDocument(
+        string Section,
+        string Group,
+        string FileName,
+        string OperationId,
+        string Endpoint,
+        string Summary);
 }

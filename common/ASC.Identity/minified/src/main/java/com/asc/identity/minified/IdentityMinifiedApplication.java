@@ -73,7 +73,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
       "com.asc.common",
       "com.asc.identity.minified"
     },
-    exclude = {GrpcServerSecurityAutoConfiguration.class, GrpcServerMetricAutoConfiguration.class, GrpcClientMetricAutoConfiguration.class})
+    exclude = {
+      GrpcServerSecurityAutoConfiguration.class,
+      GrpcServerMetricAutoConfiguration.class,
+      GrpcClientMetricAutoConfiguration.class
+    })
 public class IdentityMinifiedApplication {
   /**
    * The main method serves as the entry point for the combined Identity Service application.

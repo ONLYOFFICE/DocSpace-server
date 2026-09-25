@@ -51,11 +51,12 @@ public class OFormRequestManager(
         try
         {
             using var httpClient = httpClientFactory.CreateClient();
-            using var response = await httpClient.GetAsync($"{_configuration.Domain.TrimEnd('/')}/{_configuration.Path.Trim('/')}/{id}?populate[file_oform][fields]=url&populate[file_oform][fields]=name&populate[file_oform][fields]=ext&populate[file_oform][filters][url][$endsWith]={ext}");
+            using var response = await httpClient.GetAsync($"{_configuration.Domain.TrimEnd('/')}/{_configuration.Path.Trim('/')}?filters[id][$eq]={id}&populate[file_oform][fields]=url&populate[file_oform][fields]=name&populate[file_oform][fields]=ext&populate[file_oform][filters][url][$endsWith]={ext}");
             var data = JsonSerializer.Deserialize<OFromRequestData>(await response.Content.ReadAsStringAsync(), _options);
 
-            var file = data.Data.Attributes.File.Data.FirstOrDefault(f => f.Attributes.Ext == ext);
-            var streamResponse = await httpClient.GetAsync(file?.Attributes.Url);
+            var file = GetFile(data, ext) ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+
+            var streamResponse = await httpClient.GetAsync(file.Url);
             return await streamResponse.Content.ReadAsStreamAsync();
         }
         catch (Exception e)
@@ -63,5 +64,20 @@ public class OFormRequestManager(
             logger.ErrorWithException(e);
             throw;
         }
+    }
+
+    private static OFromFileAttribute GetFile(OFromRequestData data, string ext)
+    {
+        var form = data?.Data?.FirstOrDefault();
+        if (form == null)
+        {
+            return null;
+        }
+
+        // Strapi v5 keeps the files right on the form, v4 wraps them into
+        // "attributes" and every file into a "data" envelope of its own.
+        var files = form.Files ?? form.Attributes?.File?.Data?.Select(f => f.Attributes);
+
+        return files?.FirstOrDefault(f => f?.Ext == ext);
     }
 }

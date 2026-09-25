@@ -270,8 +270,11 @@ public class FolderDtoHelper(
     UserManager userManager,
     IUrlShortener urlShortener,
     FileSharing fileSharing,
-    EntryStatusManager entryStatusManager)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener)
+    EntryStatusManager entryStatusManager,
+    ExternalDatabaseClient externalDatabaseClient,
+    IFusionCache fusionCache,
+    ILogger<FileEntryDtoHelper> logger)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, fusionCache, tenantManager, logger)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
 
@@ -401,7 +404,7 @@ public class FolderDtoHelper(
         result.Lifetime = folder.SettingsLifetime.MapToDto();
         result.AvailableShareRights = (await _fileSecurity.GetAccesses(folder)).ToDictionary(r => r.Key, r => r.Value.Select(v => v.ToStringFast()));
 
-        if (folder.FolderType is FolderType.Knowledge or FolderType.ResultStorage)
+        if (folder.FolderType is FolderType.Knowledge or FolderType.ChatOutputs)
         {
             result.Type = folder.FolderType;
         }
@@ -499,6 +502,7 @@ public class FolderDtoHelper(
                 .FirstOrDefaultAsync();
 
             var canUpdateXlsx = false;
+            var canAnalyze = false;
             if (completedForm != null)
             {
                 var completedFormProperties = await fileDao.GetProperties(completedForm.Id);
@@ -508,11 +512,17 @@ public class FolderDtoHelper(
                     result.OriginalFormId = originalFormId;
                     var originalForm = await fileDao.GetFileAsync(originalFormId);
                     canUpdateXlsx = originalForm != null && await _fileSecurity.CanUpdateXlsxAsync(originalForm);
+                    if (canUpdateXlsx)
+                    {
+                        // Responses can be analysed only when the form's submissions table really exists in the external database.
+                        var originalFormProperties = await fileDao.GetProperties(originalFormId);
+                        canAnalyze = await FormHasExternalDbTableAsync(originalFormProperties?.FormFilling?.ExternalDbTableName);
+                    }
                 }
             }
 
             result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = canUpdateXlsx;
-            result.Security[FileSecurity.FilesSecurityActions.AnalyzeResponses] = canUpdateXlsx;
+            result.Security[FileSecurity.FilesSecurityActions.AnalyzeResponses] = canAnalyze;
         }
         else
         {

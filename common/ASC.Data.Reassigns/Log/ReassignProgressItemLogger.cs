@@ -36,4 +36,7 @@ internal static partial class ReassignProgressItemLogger
 {
     [LoggerMessage(LogLevel.Error, "RemoveProgressItem")]
     public static partial void ErrorRemoveProgressItem(this ILogger logger, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "Could not delete the OAuth clients of user {userId}, deleting the profile anyway")]
+    public static partial void WarningDeleteClients(this ILogger logger, Guid userId, Exception exception);
 }

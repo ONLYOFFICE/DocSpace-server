@@ -35,26 +35,124 @@
 namespace ASC.Api.Documentation;
 
 /// <summary>
-/// Cuts a rendered service document into one document per operation, and strips the markers it
-/// cut on out of the service document afterwards.
+/// Cuts a rendered section document into one document per operation, and leaves the section
+/// document holding only what is not on a page of its own: its heading, the tables of endpoints
+/// and the authorization schemes.
 /// </summary>
 /// <remarks>
-/// The operations are delimited by comments the template emits (`&lt;!--op:id--&gt;`) rather than
-/// found by matching heading levels: the slicer would otherwise silently mis-cut the moment the
-/// template's headings move, and a documentation page that is quietly wrong is worse than a build
-/// that fails. The markers never reach either output.
+/// The operations are delimited by comments the template emits (`&lt;!--op:id|anchor--&gt;`) rather
+/// than found by matching heading levels: the slicer would otherwise silently mis-cut the moment
+/// the template's headings move, and a documentation page that is quietly wrong is worse than a
+/// build that fails. The markers never reach either output.
 /// </remarks>
 internal static class MarkdownSlicer
 {
     private const string OperationMarkerPrefix = "<!--op:";
-    private const string OperationMarkerSuffix = "-->";
+    private const string ModelMarkerPrefix = "<!--model:";
+    private const string MarkerSuffix = "-->";
     private const string OperationsEndMarker = "<!--/ops-->";
+    private const string ModelsEndMarker = "<!--/models-->";
+
+    /// <summary>
+    /// A link to a model. The fragment is prefixed, which is what tells it apart from the
+    /// operation and authorization fragments of the same document.
+    /// </summary>
+    private static readonly Regex _modelFragment = new(@"\]\(#(model-[a-z0-9_-]+)\)", RegexOptions.Compiled);
+
+    /// <summary>
+    /// A fragment of the section document that an endpoint's page has to be sent to. Model
+    /// fragments are prefixed and are left out: the models are printed on the page itself.
+    /// </summary>
+    private static readonly Regex _sectionFragment = new(@"\]\(#(?!model-)", RegexOptions.Compiled);
+
+    /// <summary>
+    /// Cuts the models document into a page per model. The pages are siblings, so a property that
+    /// names another model links straight to it.
+    /// </summary>
+    /// <remarks>
+    /// Every marker is read before anything is written, because a model's page cannot be written
+    /// until it is known where the models it points at will be.
+    /// </remarks>
+    public static async Task<IReadOnlyList<SlicedModel>> SliceModelsAsync(
+        string documentPath,
+        string outputDirectory,
+        CancellationToken cancellationToken = default)
+    {
+        var lines = await File.ReadAllLinesAsync(documentPath, cancellationToken);
+
+        Directory.CreateDirectory(outputDirectory);
+
+        var cuts = new List<(Marker Marker, List<string> Body)>();
+        Marker? marker = null;
+        var body = new List<string>();
+
+        foreach (var line in lines)
+        {
+            if (line.StartsWith(ModelMarkerPrefix, StringComparison.Ordinal))
+            {
+                if (marker != null)
+                {
+                    cuts.Add((marker, body));
+                }
+
+                marker = Marker.Parse(line, ModelMarkerPrefix);
+                body = [];
+                continue;
+            }
+
+            if (line.StartsWith(ModelsEndMarker, StringComparison.Ordinal))
+            {
+                if (marker != null)
+                {
+                    cuts.Add((marker, body));
+                }
+
+                marker = null;
+                body = [];
+                continue;
+            }
+
+            if (marker != null)
+            {
+                body.Add(line);
+            }
+        }
+
+        var results = new List<SlicedModel>();
+        var pages = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        foreach (var (found, _) in cuts)
+        {
+            var fileName = $"{Slug(found.Name)}.md";
+            var path = Path.Combine(outputDirectory, fileName);
+
+            // Two titles that differ only in case or punctuation would overwrite each other, and
+            // the page that survived would be documenting the wrong type.
+            if (pages.TryGetValue(found.Anchor, out var owner) || results.Any(model => model.FileName == fileName))
+            {
+                throw new Exception($"'{found.Name}' and '{owner}' both publish as {fileName}");
+            }
+
+            pages[found.Anchor] = path;
+            results.Add(new SlicedModel(found.Anchor, found.Name, fileName, path));
+        }
+
+        foreach (var ((found, content), model) in cuts.Zip(results))
+        {
+            await TextFile.WriteAsync(
+                model.Path,
+                BuildDocument(Trim(content), model.Path, model.Path, pages.GetValueOrDefault),
+                cancellationToken);
+        }
+
+        return results;
+    }
 
     public static async Task<IReadOnlyList<SlicedOperation>> SliceAsync(
         string documentPath,
-        string documentName,
         string outputDirectory,
-        string modelLinkBase,
+        Func<string, string?> modelPage,
+        Func<string, string> groupOf,
         CancellationToken cancellationToken = default)
     {
         var lines = await File.ReadAllLinesAsync(documentPath, cancellationToken);
@@ -62,70 +160,168 @@ internal static class MarkdownSlicer
         Directory.CreateDirectory(outputDirectory);
 
         var results = new List<SlicedOperation>();
-        var reference = $"{modelLinkBase}{documentName}.md";
+        var index = new List<string>();
 
-        string? operationId = null;
+        Marker? marker = null;
         var body = new List<string>();
 
         foreach (var line in lines)
         {
             if (line.StartsWith(OperationMarkerPrefix, StringComparison.Ordinal))
             {
-                await WriteAsync(results, operationId, body, outputDirectory, reference, cancellationToken);
+                await WriteAsync(
+                    results,
+                    marker,
+                    body,
+                    outputDirectory,
+                    documentPath,
+                    modelPage,
+                    groupOf,
+                    cancellationToken);
 
-                operationId = line[OperationMarkerPrefix.Length..^OperationMarkerSuffix.Length];
+                marker = Marker.Parse(line, OperationMarkerPrefix);
                 body.Clear();
                 continue;
             }
 
             if (line.StartsWith(OperationsEndMarker, StringComparison.Ordinal))
             {
-                await WriteAsync(results, operationId, body, outputDirectory, reference, cancellationToken);
+                await WriteAsync(
+                    results,
+                    marker,
+                    body,
+                    outputDirectory,
+                    documentPath,
+                    modelPage,
+                    groupOf,
+                    cancellationToken);
 
-                operationId = null;
+                marker = null;
                 body.Clear();
                 continue;
             }
 
-            if (operationId != null)
+            if (marker != null)
             {
                 body.Add(line);
             }
+            else
+            {
+                index.Add(line);
+            }
         }
 
-        // The markers exist to be cut on, not to be read - the service document is rewritten
-        // without them so that neither output carries the scaffolding.
-        await File.WriteAllLinesAsync(
+        // What is left is the section index: the endpoints are on pages of their own now, so the
+        // fragments the tables point at are no longer in this document and have to be sent to
+        // those pages instead.
+        await TextFile.WriteLinesAsync(
             documentPath,
-            lines.Where(line => !line.StartsWith(OperationMarkerPrefix, StringComparison.Ordinal)
-                && !line.StartsWith(OperationsEndMarker, StringComparison.Ordinal)),
+            Link(index, results, documentPath, modelPage),
             cancellationToken);
 
         return results;
     }
 
+    /// <summary>
+    /// Sends the index's endpoint links to the pages the endpoints were cut into. Anchors that
+    /// belong to no endpoint - the authorization schemes - are left as the in-document fragments
+    /// they still are.
+    /// </summary>
+    private static IEnumerable<string> Link(
+        List<string> index,
+        List<SlicedOperation> operations,
+        string documentPath,
+        Func<string, string?> modelPage)
+    {
+        var pages = operations.ToDictionary(
+            operation => $"](#{operation.Anchor})",
+            operation => $"]({Relative(documentPath, operation.Path)})",
+            StringComparer.Ordinal);
+
+        var blank = false;
+
+        foreach (var line in index)
+        {
+            var linked = line;
+
+            if (linked.Contains("](#", StringComparison.Ordinal))
+            {
+                foreach (var (fragment, page) in pages)
+                {
+                    linked = linked.Replace(fragment, page, StringComparison.Ordinal);
+                }
+
+                linked = LinkModels(linked, documentPath, modelPage);
+            }
+
+            // Cutting the endpoints out leaves the blank lines that separated them behind, one
+            // run of them per endpoint.
+            if (linked.Length == 0)
+            {
+                if (blank)
+                {
+                    continue;
+                }
+
+                blank = true;
+            }
+            else
+            {
+                blank = false;
+            }
+
+            yield return linked;
+        }
+    }
+
     private static async Task WriteAsync(
         List<SlicedOperation> results,
-        string? operationId,
+        Marker? marker,
         List<string> body,
         string outputDirectory,
-        string reference,
+        string documentPath,
+        Func<string, string?> modelPage,
+        Func<string, string> groupOf,
         CancellationToken cancellationToken)
     {
-        if (operationId == null)
+        if (marker == null)
         {
             return;
         }
 
-        var fileName = $"{Slug(operationId)}.md";
-        var path = Path.Combine(outputDirectory, fileName);
+        var group = groupOf(marker.Name);
+        var directory = group.Length > 0 ? Path.Combine(outputDirectory, group) : outputDirectory;
+
+        Directory.CreateDirectory(directory);
+
+        var fileName = $"{Slug(marker.Name)}.md";
+        var path = Path.Combine(directory, fileName);
 
         var trimmed = Trim(body);
 
-        await File.WriteAllTextAsync(path, BuildDocument(trimmed, reference), cancellationToken);
+        await TextFile.WriteAsync(
+            path,
+            BuildDocument(trimmed, path, documentPath, modelPage),
+            cancellationToken);
 
-        results.Add(new SlicedOperation(operationId, fileName, path, Endpoint(trimmed), Summary(trimmed)));
+        results.Add(new SlicedOperation(
+            marker.Name,
+            marker.Anchor,
+            group,
+            fileName,
+            path,
+            Endpoint(trimmed),
+            Summary(trimmed)));
     }
+
+    /// <summary>
+    /// How one document reaches another from where it is written. Measured rather than assembled
+    /// from a configured prefix: an operation of a section with sub-sections sits one level deeper
+    /// than one without, and the staging tree is laid out like the published one, so what is
+    /// measured here holds after the bundle is assembled.
+    /// </summary>
+    private static string Relative(string from, string to) =>
+        Path.GetRelativePath(Path.GetDirectoryName(from)!, to).Replace('\\', '/');
 
     /// <summary>
     /// The `METHOD /path` line the template prints under the signature, without its backticks.
@@ -173,30 +369,53 @@ internal static class MarkdownSlicer
     private static bool IsEndpoint(string line) =>
         line.StartsWith('`') && line.EndsWith('`') && line.Contains(" /", StringComparison.Ordinal);
 
-    private static string BuildDocument(List<string> trimmed, string reference)
+    /// <summary>
+    /// In the section document an operation is a third-level heading under its sub-section; on its
+    /// own it is the document, so everything moves up two levels.
+    /// </summary>
+    /// <remarks>
+    /// The models the endpoint exchanges are printed on the page itself, so their fragments stay
+    /// as they are. The authorization schemes are not - they are the same handful for the whole
+    /// section and are documented once, on the section's own page.
+    /// </remarks>
+    private static string BuildDocument(
+        List<string> trimmed,
+        string path,
+        string documentPath,
+        Func<string, string?> modelPage)
     {
-        // In the service document an operation is a third-level heading under its class; on its
-        // own it is the document, so everything moves up two levels.
-        var content = trimmed.Select(Promote).ToList();
+        var section = Relative(path, documentPath);
 
-        // Models keep living in the service document: inlining them here would repeat the same
-        // DTO across hundreds of documents. The in-document fragments they are written as have to
-        // become links back to it, or they resolve to nothing.
-        var hasModelLinks = content.Any(line => line.Contains("](#", StringComparison.Ordinal));
+        var content = trimmed.Select(line => _sectionFragment.Replace(
+            LinkModels(Promote(line), path, modelPage),
+            $"]({section}#"));
 
-        content = [.. content.Select(line => line.Replace("](#", $"]({reference}#", StringComparison.Ordinal))];
-
-        if (hasModelLinks)
-        {
-            content.Insert(1, string.Empty);
-            content.Insert(2, $"Referenced types are defined in the [full reference]({reference}).");
-        }
-
-        return string.Join(Environment.NewLine, content) + Environment.NewLine;
+        return string.Join('\n', content) + '\n';
     }
+
+    /// <summary>
+    /// Sends the links to the types a page names to the pages those types are documented on.
+    /// </summary>
+    /// <remarks>
+    /// A fragment nothing claims is left alone rather than pointed at a page that does not exist:
+    /// it then fails the site build as the broken anchor it is, which is where such a thing
+    /// belongs.
+    /// </remarks>
+    private static string LinkModels(string line, string path, Func<string, string?> modelPage) =>
+        _modelFragment.Replace(line, match =>
+        {
+            var page = modelPage(match.Groups[1].Value);
+
+            return page == null ? match.Value : $"]({Relative(path, page)})";
+        });
 
     private static string Promote(string line)
     {
+        if (line.StartsWith("##### ", StringComparison.Ordinal))
+        {
+            return string.Concat("### ", line.AsSpan("##### ".Length));
+        }
+
         if (line.StartsWith("#### ", StringComparison.Ordinal))
         {
             return string.Concat("## ", line.AsSpan("#### ".Length));
@@ -284,8 +503,37 @@ internal static class MarkdownSlicer
         return string.Join('-', words);
     }
 
+    /// <summary>
+    /// What the template states about an operation where it cut: its id, and the fragment the
+    /// section's tables link to it by.
+    /// </summary>
+    private sealed record Marker(string Name, string Anchor)
+    {
+        public static Marker Parse(string line, string prefix)
+        {
+            var content = line[prefix.Length..^MarkerSuffix.Length];
+            var separator = content.IndexOf('|', StringComparison.Ordinal);
+
+            return separator < 0
+                ? new Marker(content, string.Empty)
+                : new Marker(content[..separator], content[(separator + 1)..]);
+        }
+    }
+
+    /// <summary>
+    /// One published model: the fragment the rest of the documentation links it by, its title,
+    /// and where its page was written.
+    /// </summary>
+    internal sealed record SlicedModel(string Anchor, string Title, string FileName, string Path);
+
+    /// <summary>
+    /// One published operation. <paramref name="Group"/> is the sub-section it was filed under,
+    /// empty when its tag is the section itself.
+    /// </summary>
     internal sealed record SlicedOperation(
         string OperationId,
+        string Anchor,
+        string Group,
         string FileName,
         string Path,
         string Endpoint,

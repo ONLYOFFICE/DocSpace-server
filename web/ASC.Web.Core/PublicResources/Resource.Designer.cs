@@ -160,7 +160,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Web search.
+        ///   Looks up a localized string similar to AI search.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_ai_search {
             get {
@@ -484,6 +484,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Total spent.
+        /// </summary>
+        public static string AccountingCustomerOperationsReportSummaryDebit {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationsReportSummaryDebit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Summary by user.
+        /// </summary>
+        public static string AccountingCustomerOperationsReportSummarySheetName {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationsReportSummarySheetName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Type.
         /// </summary>
         public static string AccountingCustomerOperationType {
@@ -718,7 +736,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable the application to sign in to the portal using an Apple ID account..
+        ///   Looks up a localized string similar to Sign in to your workspace with an Apple ID account.
         /// </summary>
         public static string ConsumersAppleIdDescription {
             get {
@@ -853,7 +871,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable the application to manage Box files and folders..
+        ///   Looks up a localized string similar to Manage Box files and folders.
         /// </summary>
         public static string ConsumersBoxDescription {
             get {
@@ -1033,7 +1051,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable the application to manage Dropbox files and folders..
+        ///   Looks up a localized string similar to Manage Dropbox files and folders.
         /// </summary>
         public static string ConsumersDropBoxDescription {
             get {
@@ -1114,7 +1132,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Store form results in an external database such as MySQL or SQLite..
+        ///   Looks up a localized string similar to Store form results in an external database like MySQL or SQLite.
         /// </summary>
         public static string ConsumersExternalDbDescription {
             get {
@@ -1186,7 +1204,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a Facebook account..
+        ///   Looks up a localized string similar to Sign in to your workspace with a Facebook account.
         /// </summary>
         public static string ConsumersFacebookDescription {
             get {
@@ -1348,7 +1366,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Connect the project to sign in to the portal using a Google account and manage Google Drive files and folders..
+        ///   Looks up a localized string similar to Sign in to your workspace with a Google account and manage Google Drive files and folders.
         /// </summary>
         public static string ConsumersGoogleDescription {
             get {
@@ -1375,7 +1393,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a LinkedIn account..
+        ///   Looks up a localized string similar to Sign in to your workspace with a LinkedIn account.
         /// </summary>
         public static string ConsumersLinkedInDescription {
             get {
@@ -1537,7 +1555,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a Nextcloud account..
+        ///   Looks up a localized string similar to Sign in to your workspace with a Nextcloud account.
         /// </summary>
         public static string ConsumersNextcloudDescription {
             get {
@@ -1816,7 +1834,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable the application to manage OneDrive files and folders..
+        ///   Looks up a localized string similar to Manage OneDrive files and folders.
         /// </summary>
         public static string ConsumersSkyDriveDescription {
             get {
@@ -1915,7 +1933,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Connect Telegram account to receive portal notifications via Telegram..
+        ///   Looks up a localized string similar to Receive notifications via Telegram.
         /// </summary>
         public static string ConsumersTelegramDescription {
             get {
@@ -2014,7 +2032,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a X account..
+        ///   Looks up a localized string similar to Sign in to your workspace with a X account.
         /// </summary>
         public static string ConsumersTwitterDescription {
             get {
@@ -2131,7 +2149,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a WeChat account..
+        ///   Looks up a localized string similar to Sign in to your workspace with a WeChat account.
         /// </summary>
         public static string ConsumersWeixinDescription {
             get {
@@ -2311,7 +2329,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable the application to sign in to the portal using a Zoom account..
+        ///   Looks up a localized string similar to Sign in to your workspace with a Zoom account.
         /// </summary>
         public static string ConsumersZoomDescription {
             get {
@@ -2419,7 +2437,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DocsCloud Quota Report ({0}).
+        ///   Looks up a localized string similar to Docs Connect Quota Report ({0}).
         /// </summary>
         public static string DocsCloudQuotaReportName {
             get {

@@ -109,6 +109,7 @@ public partial class SettingsController(
 
         var tenant = tenantManager.GetCurrentTenant();
         var quota = await tenantManager.GetCurrentTenantQuotaAsync();
+        var isDocSpaceAdmin = authContext.IsAuthenticated && await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID);
 
         var settings = new SettingsDto
         {
@@ -132,7 +133,7 @@ public partial class SettingsController(
                 IosPackageId = configuration["deeplink:iospackageid"] ?? ""
             },
             LogoText = await tenantLogoManager.GetLogoTextAsync(),
-            ExternalResources = externalResourceSettings.GetCultureSpecificExternalResources(whiteLabelSettings: additionalWhiteLabelSettings)
+            ExternalResources = externalResourceSettings.GetCultureSpecificExternalResources(whiteLabelSettings: additionalWhiteLabelSettings, isDocSpaceAdmin: isDocSpaceAdmin)
         };
 
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != Guid.Empty)
@@ -159,7 +160,7 @@ public partial class SettingsController(
             settings.DisplayBanners = coreBaseSettings.Standalone ? !(await settingsManager.LoadAsync<TenantBannerSettings>()).Hidden : true;
             settings.AiEnabled = (await settingsManager.LoadAsync<TenantAiAccessSettings>()).Enabled;
 
-            if (await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID))
+            if (isDocSpaceAdmin)
             {
                 settings.WalletLowBalance = (await settingsManager.LoadAsync<TenantWalletSettings>()).LowBalanceNotified;
             }

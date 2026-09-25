@@ -2138,7 +2138,7 @@
         },
         "responses": {
           "200": {
-            "description": "The created file",
+            "description": "The file created in the folder: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -5219,7 +5219,7 @@
         },
         "responses": {
           "200": {
-            "description": "The created file",
+            "description": "The file created in My documents: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -7810,7 +7810,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The folder",
+            "description": "The folder itself - its title, its parent, the moments it was created and changed, the access the caller has to it, how many items in it are new for them, and the room settings when the folder is a room; nothing about the items it holds",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -8253,13 +8253,13 @@
                       "RoomTemplates",
                       "AiRoom",
                       "Knowledge",
-                      "ResultStorage",
+                      "ChatOutputs",
                       "AiAgents",
                       "DefaultTemplates",
                       "Forms"
                     ],
                     "type": "string",
-                    "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms]"
+                    "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms]"
                   },
                   {
                     "examples": [
@@ -8298,7 +8298,7 @@
                       36
                     ],
                     "type": "integer",
-                    "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates, 36 - Forms]",
+                    "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms]",
                     "x-enum-varnames": [
                       "DEFAULT",
                       "COMMON",
@@ -8326,7 +8326,7 @@
                       "RoomTemplates",
                       "AiRoom",
                       "Knowledge",
-                      "ResultStorage",
+                      "ChatOutputs",
                       "AiAgents",
                       "DefaultTemplates",
                       "Forms"
@@ -10791,7 +10791,7 @@
         },
         "responses": {
           "200": {
-            "description": "The stored file",
+            "description": "The stored file with its id and the title it was actually saved under; a `version` above 1 means the content was added to a file that already carried this name instead of creating a new one",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -12373,13 +12373,13 @@
                       "RoomTemplates",
                       "AiRoom",
                       "Knowledge",
-                      "ResultStorage",
+                      "ChatOutputs",
                       "AiAgents",
                       "DefaultTemplates",
                       "Forms"
                     ],
                     "type": "string",
-                    "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms]"
+                    "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms]"
                   },
                   {
                     "examples": [
@@ -12418,7 +12418,7 @@
                       36
                     ],
                     "type": "integer",
-                    "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates, 36 - Forms]",
+                    "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms]",
                     "x-enum-varnames": [
                       "DEFAULT",
                       "COMMON",
@@ -12446,7 +12446,7 @@
                       "RoomTemplates",
                       "AiRoom",
                       "Knowledge",
-                      "ResultStorage",
+                      "ChatOutputs",
                       "AiAgents",
                       "DefaultTemplates",
                       "Forms"
@@ -21031,7 +21031,7 @@
         },
         "responses": {
           "200": {
-            "description": "Status",
+            "description": "The state of the template creation just queued: `isCompleted` is still false, so the job has to be polled for its result",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -21138,7 +21138,7 @@
         "operationId": "getRoomTemplateCreatingStatus",
         "responses": {
           "200": {
-            "description": "Status",
+            "description": "The state of the caller's latest template creation, or an empty body when this account has started none",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -21252,7 +21252,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Ok",
+            "description": "True when the template is shared with everyone, false when only its owner and the accounts it was shared with can reach it",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -21369,7 +21369,7 @@
         },
         "responses": {
           "200": {
-            "description": "Ok",
+            "description": "The recipient list of the template has been rewritten to match the requested access; nothing is returned",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -26868,7 +26868,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "The room group no longer exists; the body is empty and the rooms it gathered are left as they were",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -33304,7 +33304,7 @@
                   "null",
                   "boolean"
                 ],
-                "description": "Whether the PDF is a fillable form rather than a plain document. When the stored classification does not say,\r\nthe portal opens the file to find out, so the answer is reliable for a PDF and null for anything else."
+                "description": "Whether the file is a PDF, and so offered as a fillable form. It is null for any other file type."
               },
               "customFilterEnabled": {
                 "examples": [
@@ -37898,13 +37898,13 @@
               "RoomTemplates",
               "AiRoom",
               "Knowledge",
-              "ResultStorage",
+              "ChatOutputs",
               "AiAgents",
               "DefaultTemplates",
               "Forms"
             ],
             "type": "string",
-            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ResultStorage - Result storage, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms]"
+            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms]"
           },
           {
             "examples": [
@@ -37943,7 +37943,7 @@
               36
             ],
             "type": "integer",
-            "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Result storage, 34 - AI Agents, 35 - Default Templates, 36 - Forms]",
+            "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms]",
             "x-enum-varnames": [
               "DEFAULT",
               "COMMON",
@@ -37971,7 +37971,7 @@
               "RoomTemplates",
               "AiRoom",
               "Knowledge",
-              "ResultStorage",
+              "ChatOutputs",
               "AiAgents",
               "DefaultTemplates",
               "Forms"

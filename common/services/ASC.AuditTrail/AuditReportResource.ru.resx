@@ -1224,4 +1224,37 @@
   <data name="FolderMarkedAsRead" xml:space="preserve">
     <value>Папки [{0}]. Отмечены как прочитанные</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Профиль ИИ назначен ИИ-агенту для действия: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Профиль ИИ назначен для действия: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Профиль ИИ-модели создан: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Профиль ИИ-модели удалён: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Профиль ИИ удалён из действия: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Профиль ИИ-модели обновлён: {0}</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Ключ шифрования приватной комнаты {0} создан</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Ключ шифрования приватной комнаты {0} удалён</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Ключ шифрования приватной комнаты {0} обновлён</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Обнаружен подозрительный вход: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>MCP-сервер {0} ИИ-агента обновлён</value>
+  </data>
 </root>

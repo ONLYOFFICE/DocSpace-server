@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.5.3">
+<Project Sdk="Aspire.AppHost.Sdk/13.5.4">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -9,6 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Aspire.Hosting.AppHost" />
         <PackageReference Include="Aspire.Hosting.JavaScript" />
         <PackageReference Include="Aspire.Hosting.MySql" />
         <PackageReference Include="Aspire.Hosting.RabbitMQ" />

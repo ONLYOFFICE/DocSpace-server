@@ -124,6 +124,10 @@ export const DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE =
 export const WEB_SEARCH_TYPE = "web-search";
 export const IMAGE_GENERATION_TYPE = "image-generation";
 
+// Group key for the form-analysis sub-agent's single delegating tool
+// (`analyze_form`). Kept out of `systemServerTypes` so the tool runs silently.
+export const FORM_ANALYSIS_TYPE = "form-analysis";
+
 // Host-preconfigured MCP servers from the shared `appsettings.json`
 // (`ai.mcp`), with the Aspire endpoint override applied per entry.
 // Malformed entries (missing id / name / endpoint) are dropped so a bad

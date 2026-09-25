@@ -1173,23 +1173,23 @@ public class FileSecurity(
             action = FilesSecurityActions.Read;
         }
 
-        if (file != null && action == FilesSecurityActions.FillForms && !file.IsForm)
-        {
-            return false;
-        }
-
-        if (file != null && action == FilesSecurityActions.Edit && file.Category == (int)FilterType.Pdf && file.IsCompletedForm)
+        if (file != null && action == FilesSecurityActions.FillForms && !file.IsPdf)
         {
             return false;
         }
 
         var room = parentFolders.FirstOrDefault(r => r.IsRoom);
 
+        if (file is { IsCompletedForm: true } && action == FilesSecurityActions.Edit)
+        {
+            return false;
+        }
+
         if (room is { FolderType: FolderType.VirtualDataRoom })
         {
             var hasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
 
-            if (file != null && !hasFullAccess && !await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
+            if (file != null && !hasFullAccess && !file.IsPdf)
             {
                 var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
                 if (shareRecord is { Share: FileShare.FillForms })
@@ -1380,7 +1380,7 @@ public class FileSecurity(
                 }
             }
 
-            if (folder.FolderType == FolderType.ResultStorage
+            if (folder.FolderType == FolderType.ChatOutputs
                 && action is FilesSecurityActions.Rename or FilesSecurityActions.Delete or FilesSecurityActions.Copy or FilesSecurityActions.Move or FilesSecurityActions.Duplicate)
             {
                 return false;
@@ -1533,7 +1533,7 @@ public class FileSecurity(
             }
         }
 
-        if (file == null || !await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory) || (file is { IsForm: true } && e.RootFolderType != FolderType.VirtualRooms))
+        if (file is not { IsPdf: true } || e.RootFolderType != FolderType.VirtualRooms)
         {
             switch (action)
             {
@@ -1693,7 +1693,7 @@ public class FileSecurity(
                     FilesSecurityActions.SubmitToFormGallery or
                     FilesSecurityActions.CopyLink or
                                      FilesSecurityActions.OpenForm
-                    && await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
+                    && file is { IsPdf: true })
                 {
 
                     if (action == FilesSecurityActions.FillForms)
@@ -1811,7 +1811,7 @@ public class FileSecurity(
                             return false;
                     }
                 }
-                else if (file is not { IsForm: true } && action is FilesSecurityActions.OpenForm)
+                else if (file is not { IsPdf: true } && action is FilesSecurityActions.OpenForm)
                 {
                     return false;
                 }
@@ -3492,7 +3492,7 @@ public class FileSecurity(
 
             foreach (var s in shares)
             {
-                if (s is FileShare.Restrict || (s is FileShare.Read && !file.IsForm))
+                if (s is FileShare.Restrict or FileShare.Read)
                 {
                     sharesToAdd.Add(s);
                     continue;
@@ -3515,11 +3515,11 @@ public class FileSecurity(
 
                 switch (s)
                 {
-                    case FileShare.Editing when (file.IsForm && parentRoomType != FolderType.FillingFormsRoom || !file.IsForm) && canEdit:
-                    case FileShare.FillForms when file.IsForm && DocSpaceHelper.IsFillFormsRoom(parentRoomType):
-                    case FileShare.CustomFilter when !file.IsForm && canCustomFiltering:
-                    case FileShare.Comment when !file.IsForm && canComment:
-                    case FileShare.Review when !file.IsForm && canReview:
+                    case FileShare.Editing when (file.IsPdf && parentRoomType != FolderType.FillingFormsRoom || !file.IsPdf) && canEdit:
+                    case FileShare.FillForms when file.IsPdf && DocSpaceHelper.IsFillFormsRoom(parentRoomType):
+                    case FileShare.CustomFilter when canCustomFiltering:
+                    case FileShare.Comment when canComment:
+                    case FileShare.Review when canReview:
                     case FileShare.ReadWrite:
                         sharesToAdd.Add(s);
                         break;

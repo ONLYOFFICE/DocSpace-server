@@ -260,6 +260,7 @@ public class GroupsController(
     /// </summary>
     /// <path>api/2.0/files/group/{id}</path>
     [Tags("Rooms / Groups")]
+    [SwaggerResponse(200, "The room group no longer exists; the body is empty and the rooms it gathered are left as they were")]
     [HttpDelete("{id:int}")]
     public async Task DeleteRoomGroup(RoomGroupIdRequestDto inDto)
     {

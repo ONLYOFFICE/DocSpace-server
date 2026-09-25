@@ -44,7 +44,13 @@ public class OFromData
     public int Id { get; set; }
 
     /// <summary>
-    /// The form data attributes.
+    /// The form data attributes. Strapi v4 only: v5 returns a flat entity.
     /// </summary>
     public OFormDataAttributes Attributes { get; set; }
+
+    /// <summary>
+    /// The form files. Strapi v5 only: v4 nests them into the attributes.
+    /// </summary>
+    [JsonPropertyName("file_oform")]
+    public IEnumerable<OFromFileAttribute> Files { get; set; }
 }

@@ -35,6 +35,7 @@ import type { StorageAdapter } from "@onlyoffice/ai-chat/core";
 
 import { HttpAttachmentsStorage } from "./attachmentsStorage.js";
 import { HttpAssignmentsStorage } from "./assignmentsStorage.js";
+import { HttpFormAnalysisStorage } from "./formAnalysisStorage.js";
 import { HttpMcpServersStorage } from "./mcpServersStorage.js";
 import { HttpMessagesStorage } from "./messagesStorage.js";
 import { HttpPreferencesStorage } from "./preferencesStorage.js";
@@ -57,6 +58,7 @@ export class HttpStorageAdapter implements StorageAdapter {
   public toolPrefs = new HttpToolPrefsStorage();
   public webSearch = new HttpWebSearchStorage();
   public attachments = new HttpAttachmentsStorage();
+  public formAnalysis = new HttpFormAnalysisStorage();
 
   async init(): Promise<void> {
     // No-op: every storage is HTTP-backed; nothing to initialize locally.

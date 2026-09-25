@@ -18,7 +18,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn)
-                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("ASC.AI.Core.Database.Legacy.DbMcpServer", b =>
@@ -1738,7 +1738,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6504977c-75af-4691-9099-084d3ddeea04",
                             Action = "new feed",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1746,7 +1746,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6a598c74-91ae-437d-a5f4-ad339bd11bb2",
                             Action = "new post",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1754,7 +1754,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "853b6eb9-73ee-438d-9b09-8ffeedf36234",
                             Action = "new topic in forum",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1762,7 +1762,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "9d51954f-db9b-4aed-94e3-ed70b914e101",
                             Action = "new photo uploaded",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1770,7 +1770,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "28b10049-dd20-4f54-b986-873bc14ccfc7",
                             Action = "new bookmark created",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1778,7 +1778,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "742cf945-cbbc-4a57-82d6-1600a12cf8ca",
                             Action = "new wiki page",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1786,7 +1786,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "37620ae5-c40b-45ce-855a-39dd7d76a1fa",
                             Action = "BirthdayReminder",
                             Recipient = "abef62db-11a8-4673-9d32-ef1d8af19dc0",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1794,7 +1794,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6fe286a4-479e-4c25-a8d9-0156e332b0c0",
                             Action = "sharedocument",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender|telegram.sender"
+                            Sender = "email.sender|telegram.sender"
                         },
                         new
                         {
@@ -1802,7 +1802,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6fe286a4-479e-4c25-a8d9-0156e332b0c0",
                             Action = "sharefolder",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender|telegram.sender"
+                            Sender = "email.sender|telegram.sender"
                         },
                         new
                         {
@@ -1810,7 +1810,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6fe286a4-479e-4c25-a8d9-0156e332b0c0",
                             Action = "updatedocument",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender|telegram.sender"
+                            Sender = "email.sender|telegram.sender"
                         },
                         new
                         {
@@ -1818,7 +1818,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6045b68c-2c2e-42db-9e53-c272e814c4ad",
                             Action = "invitetoproject",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1826,7 +1826,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6045b68c-2c2e-42db-9e53-c272e814c4ad",
                             Action = "milestonedeadline",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1834,7 +1834,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6045b68c-2c2e-42db-9e53-c272e814c4ad",
                             Action = "newcommentformessage",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1842,7 +1842,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6045b68c-2c2e-42db-9e53-c272e814c4ad",
                             Action = "newcommentformilestone",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1850,7 +1850,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6045b68c-2c2e-42db-9e53-c272e814c4ad",
                             Action = "newcommentfortask",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1858,7 +1858,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6045b68c-2c2e-42db-9e53-c272e814c4ad",
                             Action = "projectcreaterequest",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1866,7 +1866,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6045b68c-2c2e-42db-9e53-c272e814c4ad",
                             Action = "projecteditrequest",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1874,7 +1874,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6045b68c-2c2e-42db-9e53-c272e814c4ad",
                             Action = "removefromproject",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1882,7 +1882,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6045b68c-2c2e-42db-9e53-c272e814c4ad",
                             Action = "responsibleforproject",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1890,7 +1890,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6045b68c-2c2e-42db-9e53-c272e814c4ad",
                             Action = "responsiblefortask",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1898,7 +1898,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "6045b68c-2c2e-42db-9e53-c272e814c4ad",
                             Action = "taskclosed",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1906,7 +1906,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "40650da3-f7c1-424c-8c89-b9c115472e08",
                             Action = "calendar_sharing",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1914,7 +1914,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "40650da3-f7c1-424c-8c89-b9c115472e08",
                             Action = "event_alert",
                             Recipient = "c5cc67d1-c3e8-43c0-a3ad-3928ae3e5b5e",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1930,7 +1930,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "13ff36fb-0272-4887-b416-74f52b0d0b02",
                             Action = "SetAccess",
                             Recipient = "abef62db-11a8-4673-9d32-ef1d8af19dc0",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1938,7 +1938,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "13ff36fb-0272-4887-b416-74f52b0d0b02",
                             Action = "ResponsibleForTask",
                             Recipient = "abef62db-11a8-4673-9d32-ef1d8af19dc0",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1946,7 +1946,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "13ff36fb-0272-4887-b416-74f52b0d0b02",
                             Action = "AddRelationshipEvent",
                             Recipient = "abef62db-11a8-4673-9d32-ef1d8af19dc0",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1954,7 +1954,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "13ff36fb-0272-4887-b416-74f52b0d0b02",
                             Action = "ExportCompleted",
                             Recipient = "abef62db-11a8-4673-9d32-ef1d8af19dc0",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1962,7 +1962,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "13ff36fb-0272-4887-b416-74f52b0d0b02",
                             Action = "CreateNewContact",
                             Recipient = "abef62db-11a8-4673-9d32-ef1d8af19dc0",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {
@@ -1970,7 +1970,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                             Source = "13ff36fb-0272-4887-b416-74f52b0d0b02",
                             Action = "ResponsibleForOpportunity",
                             Recipient = "abef62db-11a8-4673-9d32-ef1d8af19dc0",
-                            Sender = "email.sender|messanger.sender"
+                            Sender = "email.sender"
                         },
                         new
                         {

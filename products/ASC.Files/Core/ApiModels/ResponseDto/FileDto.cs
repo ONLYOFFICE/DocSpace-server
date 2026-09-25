@@ -190,8 +190,7 @@ public class FileDto<T> : FileEntryDto<T>
     public FormFillingStatus FormFillingStatus { get; set; } = FormFillingStatus.None;
 
     /// <summary>
-    /// Whether the PDF is a fillable form rather than a plain document. When the stored classification does not say,
-    /// the portal opens the file to find out, so the answer is reliable for a PDF and null for anything else.
+    /// Whether the file is a PDF, and so offered as a fillable form. It is null for any other file type.
     /// </summary>
     /// <example>true</example>
     public bool? IsForm { get; set; }
@@ -320,14 +319,17 @@ public class FileDtoHelper(
     FileDateTime fileDateTime,
     ExternalShare externalShare,
     BreadCrumbsManager breadCrumbsManager,
-    FileChecker fileChecker,
     SecurityContext securityContext,
     UserManager userManager,
     IUrlShortener urlShortener,
     FileSharing fileSharing,
     AiAccessibility aiAccessibility,
-    FileTrackerHelper fileTracker)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener)
+    ExternalDatabaseClient externalDatabaseClient,
+    IFusionCache fusionCache,
+    TenantManager tenantManager,
+    FileTrackerHelper fileTracker,
+    ILogger<FileEntryDtoHelper> logger)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, fusionCache, tenantManager, logger)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
 
@@ -589,11 +591,7 @@ public class FileDtoHelper(
                 _ = await _fileSecurity.SetSecurity(new[] { currentRoom }.ToAsyncEnumerable()).ToListAsync();
             }
 
-            result.IsForm = file.IsForm;
-            if (fileType == FileType.Pdf && !file.IsForm && (FilterType)file.Category == FilterType.None)
-            {
-                result.IsForm = await fileChecker.IsFormPDFFile(file);
-            }
+            result.IsForm = file.IsPdf;
 
             if (DocSpaceHelper.IsFormsFillingSystemFolder(currentFolder.FolderType))
             {
@@ -626,6 +624,12 @@ public class FileDtoHelper(
 
             result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx] = isOriginalForm
                 && (result.Security[FileSecurity.FilesSecurityActions.Edit] || file.Access == FileShare.ContentCreator);
+
+            // The original form's responses can be analysed only when the user may update its report and the
+            // form's submissions table actually exists in the external database.
+            result.Security[FileSecurity.FilesSecurityActions.AnalyzeResponses] =
+                result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx]
+                && await FormHasExternalDbTableAsync(formFilling.ExternalDbTableName);
 
             if (isOriginalForm && formFilling.ResultsFolderId is int resultsFolderId)
             {

@@ -601,4 +601,10 @@
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>Інструкція AI-агента не може перевищувати {0} символів</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Недійсний ідентифікатор папки</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Ця дія доступна лише в приватній кімнаті</value>
+  </data>
 </root>
