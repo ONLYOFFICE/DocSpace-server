@@ -688,10 +688,12 @@ public class PaymentController(
 
     /// <remarks>
     /// Lists every service the portal may pay for out of its wallet - extra administrators, disk storage, backup, AI
-    /// tools, AI search and Docs Connect - with the price of a unit, the unit it is sold in and whether the portal has
+    /// tools, AI search, Docs Connect and Business tools - with the price of a unit, the unit it is sold in and whether the portal has
     /// it switched on. Nothing has to be called first, the caller needs the permission to edit the portal settings,
     /// and the call is read-only. Services that are variants of one another are folded together: the visible one
-    /// carries the rest in its `innerServices`, so a client renders one card per group. The AI services are left out
+    /// carries the rest in its `innerServices`, so a client renders one card per group. Business tools bundles the
+    /// paid plan features: its first feature, named after the service, is the card, and the bundled features follow
+    /// it; on a paid plan that already has them the service comes with `includedInTariff`. The AI services are left out
     /// entirely when AI is not enabled for the portal. This is the catalogue and not the state of the portal - what
     /// is actually running is `GET api/2.0/portal/payment/activeservices`, one service on its own is
     /// `GET api/2.0/portal/payment/walletservice`, and switching one on or off is
@@ -716,7 +718,7 @@ public class PaymentController(
     /// <remarks>
     /// Returns one wallet service by name, for a client that already knows which service it needs and does not want
     /// the whole catalogue. `service` is the name of the service - `Storage`, `Backup`, `AITools`, `Admin`,
-    /// `DocsCloud`, `DocsCloudDevPack` or `AISearch` - and a name this installation does not sell answers 404.
+    /// `DocsCloud`, `DocsCloudDevPack`, `AISearch` or `BusinessTools` - and a name this installation does not sell answers 404.
     /// Nothing has to be called first, the caller needs the permission to edit the portal settings, and the call is
     /// read-only. The answer has the same shape as one item of `GET api/2.0/portal/payment/walletservices` - the
     /// price of a unit, the unit, the limits the service grants and its service name - except that the variants of a
@@ -746,6 +748,7 @@ public class PaymentController(
         var quotaDto = await tariffHelper.ToQuotaDtoAsync(quota, false);
         var walletServiceDto = quotaDto.MapToWalletServiceDto();
         walletServiceDto.ServiceName = quota.ServiceName;
+        walletServiceDto.IncludedInTariff = QuotaHelper.IsIncludedInTariff(quota, await tenantManager.GetCurrentTenantQuotaAsync());
         return walletServiceDto;
     }
 

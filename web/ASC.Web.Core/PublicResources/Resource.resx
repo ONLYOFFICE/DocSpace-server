@@ -150,6 +150,9 @@
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Backup</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_business-tools" xml:space="preserve">
+    <value>Business tools</value>
+  </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>Chat</value>
   </data>
@@ -176,6 +179,9 @@
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
     <value>Backup</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_business-tools" xml:space="preserve">
+    <value>Subscription</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Tokens</value>
@@ -1227,6 +1233,12 @@
   <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
     <value>Additional backup</value>
   </data>
+  <data name="TariffsFeature_businesstools_wallet" xml:space="preserve">
+    <value>Business tools</value>
+  </data>
+  <data name="TariffsFeature_businesstools_wallet_price_count" xml:space="preserve">
+    <value>Get LDAP, SSO, audit trail, customization, third-party storage, data restore, statistics and free backups. Renewed monthly from your Wallet, can be cancelled from the next period.</value>
+  </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Branding &amp; customization</value>
   </data>
@@ -1322,6 +1334,12 @@
   </data>
   <data name="Tariffs_adminyear" xml:space="preserve">
     <value>Business</value>
+  </data>
+  <data name="Tariffs_businesstools" xml:space="preserve">
+    <value>Business tools</value>
+  </data>
+  <data name="Tariffs_free" xml:space="preserve">
+    <value>Free</value>
   </data>
   <data name="Tariffs_nonprofit" xml:space="preserve">
     <value>Non-profit</value>

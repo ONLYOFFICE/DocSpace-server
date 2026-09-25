@@ -58,6 +58,14 @@ public class WalletServiceDto : QuotaDto
     /// </summary>
     /// <example>backup</example>
     public string ServiceName { get; set; }
+
+    /// <summary>
+    /// Whether the plan the portal is on already includes everything this service would add, so the service is to be
+    /// shown as switched on and can be neither bought nor cancelled. It is `true` only for Business tools on a portal
+    /// whose plan is not the free one, and `false` for every other service.
+    /// </summary>
+    /// <example>false</example>
+    public bool IncludedInTariff { get; set; }
 }
 
 /// <summary>

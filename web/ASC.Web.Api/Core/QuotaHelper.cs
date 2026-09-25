@@ -94,6 +94,7 @@ public class QuotaHelper(
             var quotaDto = await ToQuotaDto(quota, userType, false, enabledWalletServices, currentQuota);
             var walletServiceDto = quotaDto.MapToWalletServiceDto();
             walletServiceDto.ServiceName = quota.ServiceName;
+            walletServiceDto.IncludedInTariff = IsIncludedInTariff(quota, currentQuota);
 
             if (quota.Visible)
             {
@@ -115,6 +116,12 @@ public class QuotaHelper(
         }
 
         return dict.Values;
+    }
+
+    // Business tools sells the paid features of a plan to the free plan, so a paid plan already includes them
+    public static bool IsIncludedInTariff(TenantQuota quota, TenantQuota currentQuota)
+    {
+        return quota.TenantId == (int)TenantWalletService.BusinessTools && currentQuota is { Free: false };
     }
 
     private async Task<QuotaDto> ToQuotaDto(TenantQuota quota, EmployeeType employeeType, bool getUsed = false, List<TenantWalletService> enabledWalletServices = null, TenantQuota currentQuota = null)
@@ -163,6 +170,14 @@ public class QuotaHelper(
     {
         var assembly = GetType().Assembly;
 
+        // A wallet service that bundles several features (Business tools) carries a hidden feature named after the
+        // service itself: that one is the card of the service with the wallet wording and image, while the bundled
+        // features are listed with their plain plan wording and no image.
+        var featureNames = quota.Features.Split(',').Select(f => f.Split(':')[0]).ToHashSet();
+        var marker = quota.Wallet && quota.Additional && featureNames.Contains(quota.Name)
+            ? quota.TenantQuotaFeatures.FirstOrDefault(f => f.Name == quota.Name)
+            : null;
+
         foreach (var feature in quota.TenantQuotaFeatures.
                     Where(r =>
                         {
@@ -176,6 +191,11 @@ public class QuotaHelper(
                                 return false;
                             }
 
+                            if (marker != null)
+                            {
+                                return r == marker || (r.Visible && featureNames.Contains(r.Name));
+                            }
+
                             if (quota.Additional && !quota.Features.Contains(r.Name))
                             {
                                 return false;
@@ -183,16 +203,18 @@ public class QuotaHelper(
 
                             return r.Visible;
                         })
-                    .OrderBy(r => r.Order))
+                    .OrderBy(r => r == marker ? 0 : 1)
+                    .ThenBy(r => r.Order))
         {
-            var featureName = $"{feature.Name}{(quota.Wallet && quota.Additional ? "_wallet" : "")}";
+            var isBundled = marker != null && feature != marker;
+            var featureName = $"{feature.Name}{(quota.Wallet && quota.Additional && !isBundled ? "_wallet" : "")}";
 
             var result = new TenantQuotaFeatureDto
             {
                 Title = Resource.ResourceManager.GetString($"TariffsFeature_{featureName}") ?? ""
             };
 
-            if (feature.Paid)
+            if (feature.Paid && !isBundled)
             {
                 result.PriceTitle = Resource.ResourceManager.GetString($"TariffsFeature_{featureName}_price_count");
             }
@@ -263,7 +285,7 @@ public class QuotaHelper(
                     };
                 }
             }
-            else
+            else if (!isBundled)
             {
                 var img = assembly.GetManifestResourceStream($"{assembly.GetName().Name}.img.{featureName}.svg");
 

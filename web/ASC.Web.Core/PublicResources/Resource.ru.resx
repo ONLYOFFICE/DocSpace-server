@@ -150,6 +150,9 @@
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Резервное копирование</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_business-tools" xml:space="preserve">
+    <value>Бизнес-инструменты</value>
+  </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Векторизация</value>
   </data>
@@ -161,6 +164,9 @@
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
     <value>Резервное копирование</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_business-tools" xml:space="preserve">
+    <value>Подписка</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Токены</value>
@@ -1191,6 +1197,12 @@
   <data name="TariffsFeature_backup_wallet_additional" xml:space="preserve">
     <value>Дополнительное резервное копирование</value>
   </data>
+  <data name="TariffsFeature_businesstools_wallet" xml:space="preserve">
+    <value>Бизнес-инструменты</value>
+  </data>
+  <data name="TariffsFeature_businesstools_wallet_price_count" xml:space="preserve">
+    <value>LDAP, SSO, журнал аудита, кастомизация, сторонние хранилища, восстановление данных, статистика и бесплатные резервные копии. Продлевается ежемесячно из кошелька, отключается со следующего периода.</value>
+  </data>
   <data name="TariffsFeature_customization" xml:space="preserve">
     <value>Брендинг и кастомизация</value>
   </data>
@@ -1286,6 +1298,12 @@
   </data>
   <data name="Tariffs_adminyear" xml:space="preserve">
     <value>Business</value>
+  </data>
+  <data name="Tariffs_businesstools" xml:space="preserve">
+    <value>Business tools</value>
+  </data>
+  <data name="Tariffs_free" xml:space="preserve">
+    <value>Free</value>
   </data>
   <data name="Tariffs_nonprofit" xml:space="preserve">
     <value>Некоммерческий</value>

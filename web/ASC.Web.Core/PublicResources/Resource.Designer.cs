@@ -187,6 +187,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Business tools.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceDesc_business_tools {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceDesc_business-tools", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Chat.
         /// </summary>
         public static string AccountingCustomerOperationServiceDesc_chat {
@@ -318,6 +327,15 @@ namespace ASC.Web.Core.PublicResources {
         public static string AccountingCustomerOperationServiceUOM_backup {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_backup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Subscription.
+        /// </summary>
+        public static string AccountingCustomerOperationServiceUOM_business_tools {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationServiceUOM_business-tools", resourceCulture);
             }
         }
         
@@ -3841,6 +3859,24 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Business tools.
+        /// </summary>
+        public static string Tariffs_businesstools {
+            get {
+                return ResourceManager.GetString("Tariffs_businesstools", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Free.
+        /// </summary>
+        public static string Tariffs_free {
+            get {
+                return ResourceManager.GetString("Tariffs_free", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Non-profit.
         /// </summary>
         public static string Tariffs_nonprofit {
@@ -3936,6 +3972,24 @@ namespace ASC.Web.Core.PublicResources {
         public static string TariffsFeature_backup_wallet_price_count {
             get {
                 return ResourceManager.GetString("TariffsFeature_backup_wallet_price_count", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Business tools.
+        /// </summary>
+        public static string TariffsFeature_businesstools_wallet {
+            get {
+                return ResourceManager.GetString("TariffsFeature_businesstools_wallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Get LDAP, SSO, audit trail, customization, third-party storage, data restore, statistics and free backups. Renewed monthly from your Wallet, can be cancelled from the next period..
+        /// </summary>
+        public static string TariffsFeature_businesstools_wallet_price_count {
+            get {
+                return ResourceManager.GetString("TariffsFeature_businesstools_wallet_price_count", resourceCulture);
             }
         }
         
