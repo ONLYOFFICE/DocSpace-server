@@ -31,33 +31,26 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Tools.Core;
+namespace ASC.AI.Api;
 
-public class ToolContext
+// Internal: consumed by ASC.NewAi, which runs the model call for a form's starter questions. This side
+// serves the submission schema to generate from and the shared question cache.
+[Scope]
+[ApiEndpoint("ai", Internal = true)]
+[AiFeature]
+[ApiExplorerSettings(IgnoreApi = true)]
+public class FormAnalysisController(AttachmentsStorageService attachmentsStorageService) : ControllerBase
 {
-    public JsonElement? FolderId { get; init; }
-    public int FormId { get; init; }
+    [HttpGet("form-analysis/{id}")]
+    public async Task<FormAnalysisDto> ReadAsync(FormAnalysisRequestDto inDto)
+    {
+        return await attachmentsStorageService.GetFormAnalysisAsync(inDto.Id);
+    }
 
-    /// <summary>The attachment the form was attached under; keys the per-attachment analyze intent.</summary>
-    public string? AttachmentId { get; init; }
-
-    /// <summary>Set by the ASC.AI.Chat form-analysis sub-agent so the form-data tools are emitted for it
-    /// only, and never for the main chat agent.</summary>
-    public bool FormSubAgent { get; init; }
-}
-
-public class ResolvedToolContext
-{
-    public IFolder? Folder { get; init; }
-    public FileEntry? Form { get; init; }
-
-    /// <summary>
-    /// True when the user launched form-response analysis for <see cref="Form"/> (resolved server-side
-    /// from the attach intent). Gates the form-data tools.
-    /// </summary>
-    public bool Analyze { get; init; }
-
-    /// <summary>True when the request comes from the form-analysis sub-agent (which runs the form-data
-    /// tools on the FormAnalysis model), so the tools are withheld from the main chat agent.</summary>
-    public bool FormSubAgent { get; init; }
+    [HttpPost("form-analysis/{id}/questions")]
+    public async Task<IActionResult> SaveQuestionsAsync(SaveFormQuestionsRequestDto inDto)
+    {
+        await attachmentsStorageService.SaveFormQuestionsAsync(inDto.Id, inDto.Body.Questions);
+        return NoContent();
+    }
 }

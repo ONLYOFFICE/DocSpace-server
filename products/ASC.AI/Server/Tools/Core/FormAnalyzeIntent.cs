@@ -33,31 +33,31 @@
 
 namespace ASC.AI.Tools.Core;
 
-public class ToolContext
+/// <summary>
+/// Remembers that a specific attachment was created to analyse a form ("Analyze responses"). Keyed by
+/// attachment id, so re-attaching the same form in another chat does not inherit the launch.
+/// </summary>
+[Scope]
+public class FormAnalyzeIntent(
+    TenantManager tenantManager,
+    IFusionCache fusionCache)
 {
-    public JsonElement? FolderId { get; init; }
-    public int FormId { get; init; }
+    // Long enough to span a chat conversation; matches the starter-questions cache so a long analysis
+    // chat keeps its form-data tools for as long as its questions stay cached.
+    private static readonly TimeSpan _duration = TimeSpan.FromHours(12);
 
-    /// <summary>The attachment the form was attached under; keys the per-attachment analyze intent.</summary>
-    public string? AttachmentId { get; init; }
+    public async Task SetAsync(Guid attachmentId)
+    {
+        await fusionCache.SetAsync(GetCacheKey(attachmentId), true, opt => opt.SetDuration(_duration));
+    }
 
-    /// <summary>Set by the ASC.AI.Chat form-analysis sub-agent so the form-data tools are emitted for it
-    /// only, and never for the main chat agent.</summary>
-    public bool FormSubAgent { get; init; }
-}
+    public async Task<bool> GetAsync(Guid attachmentId)
+    {
+        return (await fusionCache.TryGetAsync<bool>(GetCacheKey(attachmentId))).GetValueOrDefault();
+    }
 
-public class ResolvedToolContext
-{
-    public IFolder? Folder { get; init; }
-    public FileEntry? Form { get; init; }
-
-    /// <summary>
-    /// True when the user launched form-response analysis for <see cref="Form"/> (resolved server-side
-    /// from the attach intent). Gates the form-data tools.
-    /// </summary>
-    public bool Analyze { get; init; }
-
-    /// <summary>True when the request comes from the form-analysis sub-agent (which runs the form-data
-    /// tools on the FormAnalysis model), so the tools are withheld from the main chat agent.</summary>
-    public bool FormSubAgent { get; init; }
+    private string GetCacheKey(Guid attachmentId)
+    {
+        return $"ai:form:analyze:{tenantManager.GetCurrentTenantId()}:{attachmentId}";
+    }
 }
