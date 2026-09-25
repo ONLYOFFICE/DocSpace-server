@@ -130,4 +130,104 @@ public class TenantQuotaOperatorTests
         combined.CountRoomAdmin.Should().Be(3);    // base features preserved
         combined.Wallet.Should().BeFalse();        // identity stays the non-wallet base plan
     }
+
+    // The free base plan every new portal is registered on.
+    private static TenantQuota FreePlan() => new(-19)
+    {
+        Name = "free",
+        Features = "free,oauth,total_size:2147483648,manager:10000,room:10000,automationapi",
+        Price = 0m,
+        Wallet = false,
+        Additional = false,
+        Visible = false
+    };
+
+    // The Business tools wallet subscription: wallet + additional, sold one unit at a time.
+    private static TenantQuota BusinessToolsWalletAddon() => new((int)TenantWalletService.BusinessTools)
+    {
+        Name = "businesstools",
+        Features = "businesstools,sms2fa,audit,ldap,sso,customization,thirdparty,restore,contentsearch,file_size:1024,statistic,free_backup:2:fixed",
+        Price = 99m,
+        Wallet = true,
+        Additional = true,
+        Visible = true
+    };
+
+    [Fact]
+    public void Add_FreePlanThenBusinessTools_KeepsFreeIdentity_AddsPaidFeatures()
+    {
+        TenantQuota? combined = null;
+        combined += FreePlan();
+        combined += BusinessToolsWalletAddon();
+
+        combined.Name.Should().Be("free");
+        combined.Free.Should().BeTrue();           // the portal stays on the free plan
+        combined.Price.Should().Be(0m);            // additional wallet add-on price is excluded
+        combined.CountRoomAdmin.Should().Be(10000);
+        combined.CountRoom.Should().Be(10000);
+        combined.MaxTotalSize.Should().Be(2147483648);
+
+        combined.BusinessTools.Should().BeTrue();
+        combined.Sms2Fa.Should().BeTrue();
+        combined.Audit.Should().BeTrue();
+        combined.Ldap.Should().BeTrue();
+        combined.Sso.Should().BeTrue();
+        combined.Customization.Should().BeTrue();
+        combined.ThirdParty.Should().BeTrue();
+        combined.Restore.Should().BeTrue();
+        combined.ContentSearch.Should().BeTrue();
+        combined.Statistic.Should().BeTrue();
+        combined.CountFreeBackup.Should().Be(2);   // a fixed count of an add-on reaches the portal
+    }
+
+    [Fact]
+    public void Add_ExpiredBusinessTools_IsIgnored()
+    {
+        var businessTools = BusinessToolsWalletAddon();
+        businessTools.DueDate = DateTime.UtcNow.AddDays(-1);
+
+        TenantQuota? combined = null;
+        combined += FreePlan();
+        combined += businessTools;
+
+        combined.BusinessTools.Should().BeFalse();
+        combined.Audit.Should().BeFalse();
+        combined.CountFreeBackup.Should().Be(0);
+    }
+
+    [Fact]
+    public void Add_FixedCount_TakesMaximumInsteadOfSum()
+    {
+        var first = new TenantQuota(1) { Features = "free_backup:2:fixed" };
+        var second = new TenantQuota(2) { Features = "free_backup:2:fixed", Wallet = true, Additional = true };
+
+        TenantQuota? combined = null;
+        combined += first;
+        combined += second;
+
+        combined.CountFreeBackup.Should().Be(2);
+    }
+
+    [Fact]
+    public void Multiply_FixedCount_IsNotScaled()
+    {
+        var businessTools = BusinessToolsWalletAddon();
+
+        businessTools *= 3;
+
+        businessTools.CountFreeBackup.Should().Be(2);
+    }
+
+    [Fact]
+    public void CountFreeBackup_Setter_RoundTrips()
+    {
+        var quota = new TenantQuota(1) { CountFreeBackup = 3 };
+
+        quota.CountFreeBackup.Should().Be(3);
+        quota.Features.Should().Be("free_backup:3:fixed");
+
+        quota.CountFreeBackup = 0;
+
+        quota.Features.Should().BeEmpty();
+    }
 }

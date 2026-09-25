@@ -70,7 +70,11 @@ public class TenantQuotaFeature<T>(TenantQuota tenantQuota, string name, T @defa
 
             return result;
         }
-        set => tenantQuota.ReplaceFeature(Name, value, Default);
+        set
+        {
+            var isDefault = EqualityComparer<T>.Default.Equals(value, default) || EqualityComparer<T>.Default.Equals(value, Default);
+            tenantQuota.ReplaceFeature(Name, isDefault ? null : Format(value));
+        }
     }
 
     public T Default { get; } = @default;
@@ -79,6 +83,12 @@ public class TenantQuotaFeature<T>(TenantQuota tenantQuota, string name, T @defa
     {
         result = default;
         return false;
+    }
+
+    // the feature entry as it is stored in the quota features string; must round-trip through TryParse
+    protected virtual string Format(T value)
+    {
+        return value is bool ? Name : $"{Name}:{value}";
     }
 }
 
@@ -122,6 +132,11 @@ public class TenantQuotaFeatureFixedCount(TenantQuota tenantQuota, string name) 
         result = 0;
         var parts = s.Split([':'], 3, StringSplitOptions.RemoveEmptyEntries);
         return parts.Length == 3 && parts[2] == "fixed" && int.TryParse(parts[1], out result);
+    }
+
+    protected override string Format(int value)
+    {
+        return $"{Name}:{value}:fixed";
     }
 
     protected internal override void Multiply(int quantity)

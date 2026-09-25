@@ -364,6 +364,30 @@ public class TenantQuota
         set => _automationApiFeature.Value = value;
     }
 
+    private readonly TenantQuotaFeatureFlag _businessToolsFeature;
+
+    /// <summary>
+    /// Specifies if the Business tools wallet subscription is active or not.
+    /// </summary>
+    /// <example>true</example>
+    public bool BusinessTools
+    {
+        get => _businessToolsFeature.Value;
+        set => _businessToolsFeature.Value = value;
+    }
+
+    private readonly TenantQuotaFeatureFlag _sms2FaFeature;
+
+    /// <summary>
+    /// Specifies if the two-factor authentication via SMS is available or not.
+    /// </summary>
+    /// <example>true</example>
+    public bool Sms2Fa
+    {
+        get => _sms2FaFeature.Value;
+        set => _sms2FaFeature.Value = value;
+    }
+
     private readonly TenantQuotaFeatureFlag _customFeature;
 
     /// <summary>
@@ -569,6 +593,8 @@ public class TenantQuota
         _countDocsCloud = new CountDocsCloudFeature(this) { Order = 13 };
         _docsCloudDevPack = new TenantQuotaFeatureFlag(this, "docsclouddevpack") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _docsCloudTrial = new TenantQuotaFeatureFlag(this, "docscloudtrial") { EmployeeType = EmployeeType.DocSpaceAdmin };
+        _businessToolsFeature = new TenantQuotaFeatureFlag(this, "businesstools", true) { Visible = false, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _sms2FaFeature = new TenantQuotaFeatureFlag(this, "sms2fa") { Visible = false };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -604,7 +630,9 @@ public class TenantQuota
             _aiSearch,
             _countDocsCloud,
             _docsCloudDevPack,
-            _docsCloudTrial
+            _docsCloudTrial,
+            _businessToolsFeature,
+            _sms2FaFeature
         };
     }
 
@@ -759,6 +787,16 @@ public class TenantQuota
                     }
                 }
             }
+            else if (f is TenantQuotaFeatureFixedCount fixedCount)
+            {
+                // a fixed count is not a per-unit capacity, so an add-on raises it rather than adding to it
+                var newValue = quota.GetFeature<int>(f.Name).Value;
+
+                if (newValue > fixedCount.Value)
+                {
+                    fixedCount.Value = newValue;
+                }
+            }
             else if (f is TenantQuotaFeatureFlag flag)
             {
                 flag.Value |= quota.GetFeature<bool>(f.Name).Value;
@@ -787,14 +825,14 @@ public class TenantQuota
         return _featuresList.Find(f => string.Equals(f.Split(':')[0], $"{name}", StringComparison.OrdinalIgnoreCase));
     }
 
-    internal void ReplaceFeature<T>(string name, T value, T defaultValue)
+    internal void ReplaceFeature(string name, string feature)
     {
         var featureValue = GetFeature(name);
         _featuresList.Remove(featureValue);
 
-        if (!EqualityComparer<T>.Default.Equals(value, default) && !EqualityComparer<T>.Default.Equals(value, defaultValue))
+        if (feature != null)
         {
-            _featuresList.Add(value is bool ? $"{name}" : $"{name}:{value}");
+            _featuresList.Add(feature);
         }
     }
 }
