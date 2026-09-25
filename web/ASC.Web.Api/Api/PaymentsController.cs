@@ -91,7 +91,8 @@ public class PaymentController(
     /// single-purpose - it carries the caller's e-mail, the language of the request and the currency of the request
     /// region, and it redirects to `successUrl` or `backUrl` when the buyer finishes or cancels. Exactly one product
     /// per call is accepted and its quantity has to be greater than zero; yearly and wallet products are refused, and
-    /// wallet services are bought with `PUT api/2.0/portal/payment/updatewallet` instead.
+    /// wallet services are bought with `PUT api/2.0/portal/payment/updatewallet` instead. A portal on the free plan
+    /// cannot buy a plan here at all: it gets the paid features with the Business tools wallet service.
     /// </remarks>
     /// <summary>
     /// Get the payment page URL
@@ -99,7 +100,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/url</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The absolute URL of the checkout page to open, or an empty result when the portal already has a paid plan", typeof(Uri))]
-    [SwaggerResponse(400, "`quantity` holds more than one product, a quantity that is not greater than zero, or a product that is not a monthly plan")]
+    [SwaggerResponse(400, "`quantity` holds more than one product, a quantity that is not greater than zero, or a product that is not a monthly plan, or the portal is on the free plan, which is not sold plans")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [HttpPut("url")]
     public async Task<Uri> GetPaymentUrl(PaymentUrlRequestDto inDto)
@@ -131,10 +132,10 @@ public class PaymentController(
             .ToList();
 
         // Only monthly tariff available for purchase.
-        if (monthQuotas.All(q => q.Name != inDto.Quantity.First().Key))
-        {
-            throw new ArgumentException("Only monthly product can be purchased per transaction");
-        }
+        var quota = monthQuotas.FirstOrDefault(q => q.Name == inDto.Quantity.First().Key)
+            ?? throw new ArgumentException("Only monthly product can be purchased per transaction");
+
+        DemandCompatibleWithPlan(quota, await tenantManager.GetCurrentTenantQuotaAsync());
 
         var currency = await regionHelper.GetCurrencyFromRequestAsync();
 
@@ -155,7 +156,8 @@ public class PaymentController(
     /// lets the payment provider bill the difference against the payment method already on file. The portal must have
     /// a billing customer and a plan bought through `PUT api/2.0/portal/payment/url`, and while the portal is on a
     /// priced plan the product name in `quantity` has to be that same plan, which `GET api/2.0/portal/payment/quota`
-    /// reports, because a subscription is changed here and not swapped. Only the payer - the portal user whose e-mail
+    /// reports, because a subscription is changed here and not swapped; a portal on the free plan is not sold plans
+    /// at all and gets the paid features with the Business tools wallet service. Only the payer - the portal user whose e-mail
     /// is the billing customer's e-mail - may call it. The call is mutating and charges money, and it is guarded
     /// against a double submission: once the new quantity is in effect, repeating the same request fails with 400
     /// because that quantity is already set. The result is `true` when the provider accepted the change and `false`
@@ -169,7 +171,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/update</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "`true` when the provider accepted the new quantity, `false` when it declined it", typeof(bool))]
-    [SwaggerResponse(400, "The product is not the plan currently paid, or the quantity is already the one in effect")]
+    [SwaggerResponse(400, "The product is not the plan currently paid, the portal is on the free plan, which is not sold plans, or the quantity is already the one in effect")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer yet")]
     [HttpPut("update")]
@@ -191,6 +193,8 @@ public class PaymentController(
         {
             throw new ArgumentException("Invalid product");
         }
+
+        DemandCompatibleWithPlan(quota, currentQuota);
 
         var tariff = await tariffService.GetTariffAsync(tenant.Id);
 
@@ -214,7 +218,10 @@ public class PaymentController(
     /// caller has to be a DocSpace administrator; a service that is an add-on to the plan also needs the plan itself
     /// to be paid, otherwise the answer is 402. Minimum quantities apply - disk storage starts at 100 units, the
     /// Docs Connect Dev Pack at 10, and the administrators may not be fewer than the portal already has - and in
-    /// the `Add` form they are checked only while the portal does not hold that service yet. Asking for the Docs Connect
+    /// the `Add` form they are checked only while the portal does not hold that service yet. Business tools, which adds
+    /// the paid features to the free plan, is sold one unit at a time: `Add` takes exactly 1 and is refused while it is
+    /// active, and `Set` takes 1 to keep it or 0 to cancel it from the next period. It is refused on a plan that already
+    /// includes those features, and the administrators plan is in turn not sold to a portal on the free plan. Asking for the Docs Connect
     /// plan in the `Set` form while Docs Connect Dev Pack is active schedules the reversion to it at the next period,
     /// while the upgrade in the other direction is not done here at all: use
     /// `POST api/2.0/settings/docscloud/switchtodevpack`. The result is `true` when the change was accepted; the call
@@ -227,7 +234,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/updatewallet</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "`true` when the purchase or the scheduled change was accepted, `false` when the provider declined it", typeof(bool))]
-    [SwaggerResponse(400, "The quantity type is not `Set` or `Add`, the product is not a wallet service, the quantity is below the minimum for it, or that service is already set")]
+    [SwaggerResponse(400, "The quantity type is not `Set` or `Add`, the product is not a wallet service, the quantity is below the minimum for it or is not 1 for Business tools, that service is already set, or the service does not fit the plan - Business tools on a plan that already includes it, or the administrators plan on the free plan")]
     [SwaggerResponse(402, "The plan of the portal is not paid and the requested service is an add-on to it")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no sub-account in the accounting currency")]
@@ -256,6 +263,8 @@ public class PaymentController(
             throw new BillingException("Tariff is not paid");
         }
 
+        DemandCompatibleWithPlan(quota, await tenantManager.GetCurrentTenantQuotaAsync());
+
         var minValue = quota.TenantId switch
         {
             (int)TenantWalletService.Storage => configuration.GetValue<int?>("core:accounting:minStorageQuantity") ?? 100,
@@ -276,6 +285,12 @@ public class PaymentController(
         if (inDto.ProductQuantityType is ProductQuantityType.Set)
         {
             if (productQty.HasValue && productQty.Value != 0 && productQty.Value < minValue)
+            {
+                throw new ArgumentException("Invalid quantity");
+            }
+
+            // Business tools is either kept (1) or cancelled from the next period (0), never scaled
+            if (quota.TenantId == (int)TenantWalletService.BusinessTools && productQty is not (null or 0 or 1))
             {
                 throw new ArgumentException("Invalid quantity");
             }
@@ -327,6 +342,16 @@ public class PaymentController(
             throw new ArgumentException("Invalid quantity");
         }
 
+        if (quota.TenantId == (int)TenantWalletService.BusinessTools)
+        {
+            DemandSingleUnit(productQty);
+
+            if (hasActiveWalletQuota)
+            {
+                throw new ArgumentException("Quota is already set");
+            }
+        }
+
         // TODO: support other currencies
         var defaultCurrency = tariffService.GetSupportedAccountingCurrencies().First();
 
@@ -340,8 +365,10 @@ public class PaymentController(
     /// <remarks>
     /// Prices a wallet-service purchase without making it: it returns what buying the requested number of units would
     /// cost right now, so a client can show the amount before asking for a confirmation. Only `productQuantityType`
-    /// `Add` (1) is accepted, the quantity must be greater than zero, and the portal needs a billing customer whose
-    /// wallet has a sub-account in the accounting currency. The caller has to be a DocSpace administrator. Nothing is
+    /// `Add` (1) is accepted, the quantity must be greater than zero - exactly 1 for Business tools - and the portal
+    /// needs a billing customer whose wallet has a sub-account in the accounting currency. A service that does not fit
+    /// the plan is refused the same way the purchase would refuse it: Business tools on a plan that already includes
+    /// its features, the administrators plan on the free plan. The caller has to be a DocSpace administrator. Nothing is
     /// bought, charged or written down - the call is read-only and may be repeated - and the purchase itself is
     /// `PUT api/2.0/portal/payment/updatewallet`. The answer carries the amount with its currency, the quantity it
     /// was computed for and the identifier of the calculation. It is the price of this moment and is not held: it can
@@ -353,7 +380,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/calculatewallet</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The amount the purchase would cost, its currency and the quantity it was calculated for", typeof(PaymentCalculation))]
-    [SwaggerResponse(400, "The quantity type is not `Add`, the quantity is not greater than zero, or the product is not a wallet service")]
+    [SwaggerResponse(400, "The quantity type is not `Add`, the quantity is not greater than zero or is not 1 for Business tools, the product is not a wallet service, or the service does not fit the plan of the portal")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no sub-account in the accounting currency")]
     [HttpPut("calculatewallet")]
@@ -372,11 +399,18 @@ public class PaymentController(
         var productName = product.Key;
         var productQty = product.Value;
 
-        await paymentHelper.GetQuotaByProductNameAsync(productName, wallet: true);
+        var quota = await paymentHelper.GetQuotaByProductNameAsync(productName, wallet: true);
 
         if (productQty is null or <= 0)
         {
             throw new ArgumentException("Invalid quantity");
+        }
+
+        DemandCompatibleWithPlan(quota, await tenantManager.GetCurrentTenantQuotaAsync());
+
+        if (quota.TenantId == (int)TenantWalletService.BusinessTools)
+        {
+            DemandSingleUnit(productQty);
         }
 
         // TODO: support other currencies
@@ -429,8 +463,8 @@ public class PaymentController(
     /// credited to the wallet, the wallet is topped up from the payment method on file if that credit does not cover
     /// the purchase, and the requested number of administrators is then bought as a wallet service. The portal needs
     /// a billing customer with a payment method set and a plan in the paid state, `quantity` has to name the
-    /// administrators wallet product, and the number asked for may not be below the administrators the portal already
-    /// has - read the credit that will be carried over from `GET api/2.0/portal/payment/subscription/balance` first.
+    /// administrators wallet product, which is not sold to a portal on the free plan, and the number asked for may not
+    /// be below the administrators the portal already has - read the credit that will be carried over from `GET api/2.0/portal/payment/subscription/balance` first.
     /// Only the payer may call it. The call is mutating, spends money and cannot be undone: the subscription is ended
     /// before the purchase is attempted, so a failure in the second half leaves the portal on the wallet with the
     /// money credited but the administrators unbought, and a repeat would then buy them a second time. It is limited
@@ -442,7 +476,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/subscription/movetowallet</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "`true` when the balance was moved to the wallet and the administrators were bought", typeof(bool))]
-    [SwaggerResponse(400, "`quantity` does not name the administrators wallet product, or the number asked for is below the administrators the portal already has")]
+    [SwaggerResponse(400, "`quantity` does not name the administrators wallet product, the portal is on the free plan, which is not sold the administrators plan, or the number asked for is below the administrators the portal already has")]
     [SwaggerResponse(402, "The plan of the portal is not paid, the balance could not be moved, or the wallet is still short of the price after the top-up")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, the portal has no billing service configured, or the customer has no payment method set")]
     [SwaggerResponse(404, "This portal has no billing customer, its paid plan has no subscription, or the price of the administrators product is unknown")]
@@ -469,6 +503,8 @@ public class PaymentController(
         {
             throw new ArgumentException("Invalid product");
         }
+
+        DemandCompatibleWithPlan(quota, await tenantManager.GetCurrentTenantQuotaAsync());
 
         if (productQty <= 0)
         {
@@ -1720,7 +1756,8 @@ public class PaymentController(
     /// already on changes nothing. It is written to the portal audit trail, and switching AI tools notifies the
     /// portal clients so the AI features appear or disappear for them without a reload. The whole updated set of
     /// switched-on services comes back. Switching a service on does not buy it - its units are still bought with
-    /// `PUT api/2.0/portal/payment/updatewallet`.
+    /// `PUT api/2.0/portal/payment/updatewallet`. Business tools cannot be switched here at all: it is a
+    /// subscription, bought and cancelled through that same operation.
     /// </remarks>
     /// <summary>
     /// Switch a wallet service
@@ -1728,6 +1765,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/servicestate</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The whole set of wallet services switched on for the portal after the change", typeof(TenantWalletServiceSettings))]
+    [SwaggerResponse(400, "`service` is Business tools, which is a subscription and is not switched")]
     [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, the portal has no billing service configured, or AI search was switched on while AI tools is off")]
     [SwaggerResponse(404, "This portal has no billing customer yet")]
     [HttpPost("servicestate")]
@@ -1829,5 +1867,29 @@ public class PaymentController(
         await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
         return await paymentHelper.SetRestrictedAiModelsAsync(inDto.Models);
+    }
+
+    // The paid features are sold in two ways that exclude each other: a portal on the free plan buys them as the
+    // Business tools subscription, while the paid primary plans (the administrators wallet plan and the older
+    // subscriptions) already include them and are left to the portals that are on them.
+    private static void DemandCompatibleWithPlan(TenantQuota quota, TenantQuota currentQuota)
+    {
+        if (quota.TenantId == (int)TenantWalletService.BusinessTools && !currentQuota.Free)
+        {
+            throw new ArgumentException("Business tools are already included in the tariff");
+        }
+
+        if (!quota.Additional && currentQuota.Free)
+        {
+            throw new ArgumentException("Paid plans are not available on the free tariff");
+        }
+    }
+
+    private static void DemandSingleUnit(int? quantity)
+    {
+        if (quantity != 1)
+        {
+            throw new ArgumentException("Invalid quantity");
+        }
     }
 }

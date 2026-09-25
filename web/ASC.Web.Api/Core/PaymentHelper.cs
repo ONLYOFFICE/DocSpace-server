@@ -402,6 +402,12 @@ public class PaymentHelper(
 
     public async Task<TenantWalletServiceSettings> ChangeWalletServiceStateAsync(TenantWalletService service, bool enabled)
     {
+        // Business tools is a subscription: it is bought and cancelled through the wallet quantity, not switched
+        if (service == TenantWalletService.BusinessTools)
+        {
+            throw new ArgumentException("Invalid service");
+        }
+
         var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>();
 
         settings.EnabledServices ??= [];
