@@ -70,6 +70,11 @@ export function getArray(obj: JsonObject, key: string): unknown[] | undefined {
   return Array.isArray(v) ? v : undefined;
 }
 
+// Non-object entries are dropped so one malformed element cannot cost the caller the whole list.
+export function getObjectArray(obj: JsonObject, key: string): JsonObject[] | undefined {
+  return getArray(obj, key)?.filter(isObject);
+}
+
 export function asString(v: unknown): string | undefined {
   return typeof v === "string" ? v : undefined;
 }

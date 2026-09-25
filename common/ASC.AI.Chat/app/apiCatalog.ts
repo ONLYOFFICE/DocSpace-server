@@ -42,6 +42,7 @@ import {
   DEFAULT_TOOLS_ROUTES,
   DEFAULT_WEB_SEARCH_ROUTES,
 } from "@onlyoffice/ai-chat/core";
+import type { RouteSpec } from "@onlyoffice/ai-chat/core";
 import type { EngineDoc, CustomRouteDoc } from "./openapi.js";
 
 // Declarative catalog of the service's HTTP surface, decoupled from the
@@ -62,8 +63,17 @@ import type { EngineDoc, CustomRouteDoc } from "./openapi.js";
 const {
   saveImage: _saveImage,
   saveImagesMany: _saveImagesMany,
-  ...ATTACHMENTS_ROUTES
+  ...BASE_ATTACHMENTS_ROUTES
 } = DEFAULT_ATTACHMENTS_ROUTES;
+
+// NewAi-only long-poll for an attached form's starter questions (the questions
+// are no longer inlined in save-files-many). Added to the attachments group so
+// it registers via `bindEngine` and documents exactly like the engine's own
+// routes — id in the body, like `get`/`save-files-many`.
+const ATTACHMENTS_ROUTES: Readonly<Record<string, RouteSpec>> = {
+  ...BASE_ATTACHMENTS_ROUTES,
+  getSuggestedQuestions: { method: "POST", path: "attachments/suggested-questions" },
+};
 
 // Engine groups backed by an `@onlyoffice/ai-chat` service. `name` is the
 // controller key used in `routes.ts`; `tag`/`description` drive the docs.

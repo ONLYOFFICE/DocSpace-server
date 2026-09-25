@@ -65,6 +65,7 @@ import {
   DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
 } from "../tools/httpToolsAdapter.js";
 import { systemToolsSource } from "../tools/systemTools.js";
+import { formAnalysisSubAgent } from "../tools/formAnalysisSubAgent.js";
 import { primeSourceMeta, safeGetAgentInstruction } from "../storage/docspaceFilesApi.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
@@ -338,10 +339,13 @@ const engine = new AIEngine({
   // tools run silently. Compose all three — before customToolsSource was
   // wired in, the custom-server registry was pure configuration and its
   // tools never reached the model (Bugs 82989 / 82990).
+  // formAnalysisSubAgent adds the `analyze_form` delegating tool; its serverType is silent
+  // (absent from systemServerTypes), so it runs without UI approval.
   toolsAdapter: composeToolsAdapters(
     systemToolsSource,
     customToolsSource,
     toolsAdapter,
+    formAnalysisSubAgent,
   ),
   // Approval-required server types: the MCP servers (host-configured and
   // custom — the latter resolved per request, see primeCustomServers) plus

@@ -369,7 +369,11 @@ public class FileEntryDtoHelper(
     IDaoFactory daoFactory,
     ExternalShare externalShare,
     FileSharing fileSharing,
-    IUrlShortener urlShortener)
+    IUrlShortener urlShortener,
+    ExternalDatabaseClient externalDatabaseClient,
+    IFusionCache fusionCache,
+    TenantManager tenantManager,
+    ILogger<FileEntryDtoHelper> logger)
 {
     protected readonly FileSecurity _fileSecurity = fileSecurity;
     protected readonly GlobalFolderHelper _globalFolderHelper = globalFolderHelper;
@@ -377,6 +381,33 @@ public class FileEntryDtoHelper(
     protected readonly ExternalShare _externalShare = externalShare;
     protected readonly IUrlShortener _urlShortener = urlShortener;
     protected readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
+    private static readonly TimeSpan _formTableCacheDuration = TimeSpan.FromMinutes(1);
+
+    // Live check that a form's submissions table really exists in the external database: FormFilling.ExternalDbTableName
+    // is stored on export but never cleared, so it can outlive a reset/dropped/disabled external DB. A transient
+    // failure must not break the entry DTO — hide the action instead.
+    protected async Task<bool> FormHasExternalDbTableAsync(string tableName)
+    {
+        if (string.IsNullOrEmpty(tableName) || !externalDatabaseClient.IsEnabled())
+        {
+            return false;
+        }
+
+        try
+        {
+            var cacheKey = $"files:form:table:{tenantManager.GetCurrentTenantId()}:{tableName}";
+
+            return await fusionCache.GetOrSetAsync(
+                cacheKey,
+                async _ => await externalDatabaseClient.TableExistsAsync(tableName),
+                opt => opt.SetDuration(_formTableCacheDuration));
+        }
+        catch (Exception e)
+        {
+            logger.WarnFormTableCheckFailed(e, tableName);
+            return false;
+        }
+    }
 
     protected async Task<T> GetAsync<T, TId>(FileEntry<TId> entry) where T : FileEntryDto<TId>, new()
     {
@@ -549,4 +580,10 @@ public class FileEntryDtoHelper(
 
         return default;
     }
+}
+
+internal static partial class FileEntryDtoHelperLogger
+{
+    [LoggerMessage(LogLevel.Warning, "Failed to check the form submission table {tableName} in the external database")]
+    public static partial void WarnFormTableCheckFailed(this ILogger<FileEntryDtoHelper> logger, Exception exception, string tableName);
 }

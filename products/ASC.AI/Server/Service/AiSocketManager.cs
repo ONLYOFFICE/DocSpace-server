@@ -31,33 +31,24 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Tools.Core;
+namespace ASC.AI.Service;
 
-public class ToolContext
+[Scope]
+public class AiSocketManager(
+    ITariffService tariffService,
+    TenantManager tenantManager,
+    ChannelWriter<SocketData> channelWriter,
+    MachinePseudoKeys machinePseudoKeys,
+    IConfiguration configuration)
+    : SocketServiceClient(tariffService, tenantManager, channelWriter, machinePseudoKeys, configuration)
 {
-    public JsonElement? FolderId { get; init; }
-    public int FormId { get; init; }
+    protected override string Hub => "files";
 
-    /// <summary>The attachment the form was attached under; keys the per-attachment analyze intent.</summary>
-    public string? AttachmentId { get; init; }
+    // Push a form's generated starter questions to the per-attachment room the client joined.
+    public async Task SendFormQuestionsAsync(Guid attachmentId, IReadOnlyList<FormQuestionDto> questions)
+    {
+        var room = $"{_tenantManager.GetCurrentTenantId()}-form-analysis-{attachmentId}";
 
-    /// <summary>Set by the ASC.AI.Chat form-analysis sub-agent so the form-data tools are emitted for it
-    /// only, and never for the main chat agent.</summary>
-    public bool FormSubAgent { get; init; }
-}
-
-public class ResolvedToolContext
-{
-    public IFolder? Folder { get; init; }
-    public FileEntry? Form { get; init; }
-
-    /// <summary>
-    /// True when the user launched form-response analysis for <see cref="Form"/> (resolved server-side
-    /// from the attach intent). Gates the form-data tools.
-    /// </summary>
-    public bool Analyze { get; init; }
-
-    /// <summary>True when the request comes from the form-analysis sub-agent (which runs the form-data
-    /// tools on the FormAnalysis model), so the tools are withheld from the main chat agent.</summary>
-    public bool FormSubAgent { get; init; }
+        await MakeRequest("form-suggested-questions", new { room, attachmentId, questions });
+    }
 }

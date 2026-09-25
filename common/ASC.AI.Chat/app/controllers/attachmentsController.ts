@@ -35,6 +35,8 @@ import { AttachmentsEngine } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { isObject, parseInt10 } from "../narrow.js";
+import { setAnalyzeEntryIds } from "../requestContext.js";
+import { getSuggestedQuestions } from "../forms/suggestedQuestions.js";
 
 const engine = new AttachmentsEngine({ storage });
 
@@ -152,6 +154,7 @@ export const attachmentsController = {
       return;
     }
     const inputs: FileInput[] = [];
+    const analyzeEntryIds: string[] = [];
     for (let i = 0; i < list.length; i++) {
       const parsed = parseFileInput(list[i]);
       if (!parsed.ok) {
@@ -159,7 +162,15 @@ export const attachmentsController = {
         return;
       }
       inputs.push(parsed.value);
+      // The client marks the analysis subject per file with `analyzeOnly` (its `path` is
+      // the DocSpace entry id). Collect those so createMany tells the backend which forms
+      // to analyse; other fields on the raw input are ignored.
+      const raw = list[i];
+      if (isObject(raw) && raw.analyzeOnly === true && typeof raw.path === "string") {
+        analyzeEntryIds.push(raw.path);
+      }
     }
+    setAnalyzeEntryIds(analyzeEntryIds);
     const result = await engine.saveFilesMany(
       inputs,
       args.entityId as string | undefined,
@@ -195,6 +206,18 @@ export const attachmentsController = {
       return;
     }
     const result = await engine.getMany(args.ids as string[]);
+    res.json(result);
+  }),
+
+  // Long-poll for a form's starter questions by the attachment id it was attached under; the client polls
+  // on `status` ("ready" | "pending" | "unavailable"). The model call runs here — see forms/suggestedQuestions.
+  getSuggestedQuestions: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["id"] as const);
+    if (typeof args.id !== "string" || args.id.length === 0) {
+      res.status(400).json({ error: "id is required" });
+      return;
+    }
+    const result = await getSuggestedQuestions(args.id);
     res.json(result);
   }),
 
