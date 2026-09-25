@@ -79,8 +79,9 @@ public class DocsCloudController(
     [SwaggerResponse(200, "Boolean value: true if the trial subscription is activated, false if the billing service declines it", typeof(bool))]
     [SwaggerResponse(400, "The portal already has a Docs Connect trial, Docs Connect or Docs Connect Dev Pack subscription")]
     [SwaggerResponse(402, "The portal tariff is delayed or not paid, so the trial cannot be started")]
-    [SwaggerResponse(403, "The caller is not allowed to edit the portal settings, or the billing service is not configured")]
+    [SwaggerResponse(403, "The caller is not allowed to edit the portal settings, the billing service is not configured, or the trial was granted but the address of the assigned Docs Connect server would push the Content Security Policy header over its size limit")]
     [SwaggerResponse(404, "The Docs Connect trial quota is not available on this installation")]
+    [SwaggerResponse(500, "The trial was granted, but reading the Docs Connect tenant afterwards failed: the Docs Connect service is not configured on this installation, has no tenant for the portal yet, is unreachable, or answered with an error")]
     [HttpPost("trial")]
     public async Task<bool> StartDocsCloudTrial()
     {
@@ -147,7 +148,7 @@ public class DocsCloudController(
     /// <path>api/2.0/settings/docscloud/switchtodevpack</path>
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "Boolean value: true if the subscription is switched to Docs Connect Dev Pack, false if the billing service declines it", typeof(bool))]
-    [SwaggerResponse(400, "The quantity is below the allowed minimum, the portal has no active Docs Connect subscription, or it already has a Docs Connect Dev Pack subscription")]
+    [SwaggerResponse(400, "The request body cannot be read, the quantity is below the allowed minimum, the portal has no active Docs Connect subscription, or it already has a Docs Connect Dev Pack subscription")]
     [SwaggerResponse(402, "The portal tariff is delayed or not paid, so the subscription cannot be switched")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the billing service is not configured")]
     [SwaggerResponse(404, "The portal is not registered as a billing customer, or the Docs Connect and Docs Connect Dev Pack wallet products are not configured on this installation")]
@@ -188,7 +189,7 @@ public class DocsCloudController(
     /// <path>api/2.0/settings/docscloud/calculatedevpack</path>
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "The cost of switching to Docs Connect Dev Pack for the requested quantity, or an empty result if the billing service could not price it", typeof(PaymentCalculation))]
-    [SwaggerResponse(400, "The quantity is below the allowed minimum, the portal has no active Docs Connect subscription, or it already has a Docs Connect Dev Pack subscription")]
+    [SwaggerResponse(400, "The request body cannot be read, the quantity is below the allowed minimum, the portal has no active Docs Connect subscription, or it already has a Docs Connect Dev Pack subscription")]
     [SwaggerResponse(402, "The portal tariff is delayed or not paid, so the switch cannot be priced")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the billing service is not configured")]
     [SwaggerResponse(404, "The portal is not registered as a billing customer, or the Docs Connect and Docs Connect Dev Pack wallet products are not configured on this installation")]
@@ -226,6 +227,7 @@ public class DocsCloudController(
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "The Docs Connect tenant of the portal, or an empty result if no Docs Connect tenant is assigned to it", typeof(DocsCloudTenant))]
     [SwaggerResponse(403, "The caller is not allowed to edit the portal settings")]
+    [SwaggerResponse(500, "The Docs Connect service is not configured on this installation, is unreachable, or answered with an error other than not found")]
     [HttpGet("tenant")]
     public async Task<DocsCloudTenant> GetTenant(bool refresh = false)
     {
@@ -259,6 +261,7 @@ public class DocsCloudController(
     [SwaggerResponse(200, "The Docs Connect license and server information of the portal, with the user limits of the license and the usage statistics for the current period", typeof(DocsCloudTenantInfo))]
     [SwaggerResponse(400, "The portal has no activated Docs Connect tenant, so there is no license information to return")]
     [SwaggerResponse(403, "The caller is not allowed to edit the portal settings")]
+    [SwaggerResponse(500, "The Docs Connect service is not configured on this installation, is unreachable, or answered with an error other than not found")]
     [HttpGet("tenant/info")]
     public async Task<DocsCloudTenantInfo> GetTenantInfo(bool refresh = false)
     {
@@ -310,6 +313,7 @@ public class DocsCloudController(
     [SwaggerResponse(200, "The configuration of the Docs Connect tenant of the portal, with its security, server, WOPI and IP filter settings", typeof(DocsCloudConfig))]
     [SwaggerResponse(400, "The portal has no activated Docs Connect tenant, so there is no configuration to return")]
     [SwaggerResponse(403, "The caller is not allowed to edit the portal settings")]
+    [SwaggerResponse(500, "The Docs Connect service is not configured on this installation, is unreachable, or answered with an error other than not found")]
     [HttpGet("tenant/config")]
     public async Task<DocsCloudConfig> GetTenantConfig(bool refresh = false)
     {
@@ -341,8 +345,9 @@ public class DocsCloudController(
     /// <path>api/2.0/settings/docscloud/tenant/config</path>
     [Tags("Settings / DocsCloud")]
     [SwaggerResponse(200, "The configuration of the Docs Connect tenant as Docs Connect stored it after the update", typeof(DocsCloudConfig))]
-    [SwaggerResponse(400, "A text field is longer than 255 characters, the file size limit is outside 0-209715200 bytes, or the portal has no activated Docs Connect tenant")]
+    [SwaggerResponse(400, "The request body cannot be read, a text field is longer than 255 characters, the file size limit is outside 0-209715200 bytes, or the portal has no activated Docs Connect tenant")]
     [SwaggerResponse(403, "The caller is not allowed to edit the portal settings")]
+    [SwaggerResponse(500, "The Docs Connect service is not configured on this installation, is unreachable, or answered with an error other than not found, including a rejection of the new values")]
     [HttpPut("tenant/config")]
     public async Task<DocsCloudConfig> UpdateTenantConfig(DocsCloudConfig inDto)
     {
@@ -376,6 +381,7 @@ public class DocsCloudController(
     [SwaggerResponse(200, "The editor and viewer users of the Docs Connect tenant of the portal, with the expiration date of each entry", typeof(DocsCloudQuota))]
     [SwaggerResponse(400, "The portal has no activated Docs Connect tenant, so there is no user quota to return")]
     [SwaggerResponse(403, "The caller is not allowed to edit the portal settings")]
+    [SwaggerResponse(500, "The Docs Connect service is not configured on this installation, is unreachable, or answered with an error other than not found")]
     [HttpGet("tenant/quota")]
     public async Task<DocsCloudQuota> GetTenantQuota(bool refresh = false)
     {
@@ -525,6 +531,7 @@ public class DocsCloudController(
     [SwaggerResponse(200, "The number of active Docs Connect users of the portal and the date the count starts from", typeof(DocsCloudUsage))]
     [SwaggerResponse(400, "The portal has no activated Docs Connect tenant, so there is no usage information to return")]
     [SwaggerResponse(403, "The caller is not allowed to edit the portal settings")]
+    [SwaggerResponse(500, "The Docs Connect service is not configured on this installation, is unreachable, or answered with an error other than not found")]
     [HttpGet("tenant/usage")]
     public async Task<DocsCloudUsage> GetTenantUsage(bool refresh = false)
     {

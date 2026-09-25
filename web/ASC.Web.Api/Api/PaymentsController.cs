@@ -99,7 +99,8 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/url</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The absolute URL of the checkout page to open, or an empty result when the portal already has a paid plan", typeof(Uri))]
-    [SwaggerResponse(400, "`quantity` holds more than one product, a quantity that is not greater than zero, or a product that is not a monthly plan")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `backUrl`, `successUrl` or `quantity`, `backUrl` or `successUrl` does not start with `http://`, `https://` or `ftp://` or is longer than 255 characters, or `quantity` does not hold exactly one product, holds a quantity that is not greater than zero, or a product that is not a monthly plan")]
+    [SwaggerResponse(402, "The portal already has more administrators, users, rooms or AI agents, or stores more data, than the plan in the requested quantity allows")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [HttpPut("url")]
     public async Task<Uri> GetPaymentUrl(PaymentUrlRequestDto inDto)
@@ -169,7 +170,8 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/update</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "`true` when the provider accepted the new quantity, `false` when it declined it", typeof(bool))]
-    [SwaggerResponse(400, "The product is not the plan currently paid, or the quantity is already the one in effect")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, the product is not a subscription plan or not the plan currently paid, or the quantity is already the one in effect")]
+    [SwaggerResponse(402, "The portal already has more administrators, users, rooms or AI agents, or stores more data, than the plan in the new quantity allows")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer yet")]
     [HttpPut("update")]
@@ -227,10 +229,10 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/updatewallet</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "`true` when the purchase or the scheduled change was accepted, `false` when the provider declined it", typeof(bool))]
-    [SwaggerResponse(400, "The quantity type is not `Set` or `Add`, the product is not a wallet service, the quantity is below the minimum for it, or that service is already set")]
-    [SwaggerResponse(402, "The plan of the portal is not paid and the requested service is an add-on to it")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, `productQuantityType` is sent as a string instead of a number, the quantity type is not `Set` or `Add`, the product is not a wallet service, the quantity is below the minimum for it or is empty or zero where a purchase needs one, or that service is already set")]
+    [SwaggerResponse(402, "The plan of the portal is not paid and the requested service is an add-on to it, or in the `Add` form the billing service declines the purchase, answers with an error or cannot be reached")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
-    [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no sub-account in the accounting currency")]
+    [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no balance or no sub-account in the accounting currency")]
     [HttpPut("updatewallet")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> UpdateWalletPayment(WalletQuantityRequestDto inDto)
@@ -353,9 +355,9 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/calculatewallet</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The amount the purchase would cost, its currency and the quantity it was calculated for", typeof(PaymentCalculation))]
-    [SwaggerResponse(400, "The quantity type is not `Add`, the quantity is not greater than zero, or the product is not a wallet service")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, `productQuantityType` is sent as a string instead of a number, the quantity type is not `Add`, the quantity is not greater than zero, or the product is not a wallet service")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
-    [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no sub-account in the accounting currency")]
+    [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no balance or no sub-account in the accounting currency")]
     [HttpPut("calculatewallet")]
     public async Task<PaymentCalculation> CalculateWalletPayment(WalletQuantityRequestDto inDto)
     {
@@ -409,7 +411,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The unused balance of the current subscription period with its period boundaries and currencies", typeof(SubscriptionBalanceInfo))]
     [SwaggerResponse(400, "The plan currently paid is a wallet product or has no product identifier")]
-    [SwaggerResponse(402, "The plan of the portal is not in the paid state")]
+    [SwaggerResponse(402, "The plan of the portal is not in the paid state, or the billing service answers with an error or cannot be reached")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer, or its paid plan has no subscription")]
     [HttpGet("subscription/balance")]
@@ -442,10 +444,10 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/subscription/movetowallet</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "`true` when the balance was moved to the wallet and the administrators were bought", typeof(bool))]
-    [SwaggerResponse(400, "`quantity` does not name the administrators wallet product, or the number asked for is below the administrators the portal already has")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product or does not name the administrators wallet product, the number asked for is not greater than zero or is below the administrators the portal already has, or the plan currently paid is a wallet product or has no product identifier")]
     [SwaggerResponse(402, "The plan of the portal is not paid, the balance could not be moved, or the wallet is still short of the price after the top-up")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, the portal has no billing service configured, or the customer has no payment method set")]
-    [SwaggerResponse(404, "This portal has no billing customer, its paid plan has no subscription, or the price of the administrators product is unknown")]
+    [SwaggerResponse(404, "This portal has no billing customer, its paid plan has no subscription, the price of the administrators product is unknown, or after the move its wallet has no balance or no sub-account in the accounting currency")]
     [HttpPost("subscription/movetowallet")]
     [EnableRateLimiting(RateLimiterPolicy.PaymentsApi)]
     public async Task<bool> MoveSubscriptionToWallet(QuantityRequestDto inDto)
@@ -532,6 +534,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/account</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The portal-relative address of the billing account page, or an empty result when the portal has no billing customer", typeof(string))]
+    [SwaggerResponse(400, "`backUrl` does not start with `http://`, `https://` or `ftp://`, or is longer than 255 characters")]
     [SwaggerResponse(403, "The caller is neither the payer nor the portal owner, or the portal has no billing service configured")]
     [HttpGet("account")]
     public async Task<string> GetPaymentAccount(PaymentAccountRequestDto inDto)
@@ -693,6 +696,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/walletservice</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The wallet service with its price, unit and the limits it grants", typeof(WalletServiceDto))]
+    [SwaggerResponse(400, "`service` is sent empty, or is neither the name nor the number of a wallet service")]
     [SwaggerResponse(403, "The caller may not edit the portal settings")]
     [SwaggerResponse(404, "This installation does not sell a wallet service under that name")]
     [HttpGet("walletservice")]
@@ -796,6 +800,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/checkoutsetupurl</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The absolute URL of the payment method setup page, or an empty result when the portal already has a payment method", typeof(Uri))]
+    [SwaggerResponse(400, "`backUrl` or `successUrl` is missing, does not start with `http://`, `https://` or `ftp://`, or is longer than 255 characters")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator or, once a billing customer exists, not its payer; or the portal has no billing service configured")]
     [HttpGet("checkoutsetupurl")]
     public async Task<Uri> GetCheckoutSetupUrl(CheckoutSetupUrlRequestsDto inDto)
@@ -1172,7 +1177,9 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/activeservices</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The wallet services active on the portal, with their limits and usage where those are known", typeof(IEnumerable<ActiveServiceDto>))]
+    [SwaggerResponse(400, "The portal has an active Docs Connect subscription that the Docs Connect service does not know")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
+    [SwaggerResponse(500, "The portal has an active Docs Connect subscription, and the Docs Connect service answers with an error or cannot be reached")]
     [HttpGet("activeservices")]
     public async Task<List<ActiveServiceDto>> GetActiveServices()
     {
@@ -1584,7 +1591,9 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/accounting/prices/{serviceName}</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The list of the service prices", typeof(List<ServicePriceInfo>))]
-    [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(400, "The `serviceName` is longer than 255 characters")]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
+    [SwaggerResponse(500, "The accounting service answers the price request with an error or cannot be reached")]
     [HttpGet("accounting/prices/{serviceName}")]
     public async Task<List<ServicePriceInfo>> GetAccountingServicePrices(ServicePricesRequestDto inDto)
     {
@@ -1643,6 +1652,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/topupsettings</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The automatic top-up settings as they were stored", typeof(TenantWalletSettings))]
+    [SwaggerResponse(400, "The request body cannot be read, or `settings` is sent with `minBalance` outside 5-1000 or `upToBalance` outside 6-5000, including when either of them is left out")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no balance yet")]
     [HttpPost("topupsettings")]
@@ -1728,7 +1738,8 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/servicestate</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The whole set of wallet services switched on for the portal after the change", typeof(TenantWalletServiceSettings))]
-    [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, the portal has no billing service configured, or AI search was switched on while AI tools is off")]
+    [SwaggerResponse(400, "The request body cannot be read, including a `service` name that is not a wallet service")]
+    [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, the portal has no billing service configured, AI tools or AI search was switched on while AI is disabled for the portal, or AI search was switched on while AI tools is off")]
     [SwaggerResponse(404, "This portal has no billing customer yet")]
     [HttpPost("servicestate")]
     public async Task<TenantWalletServiceSettings> ChangeTenantWalletServiceState(ChangeWalletServiceStateRequestDto inDto)
@@ -1761,6 +1772,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The prices of the chat, embedding and image models and of the web search providers, with the currency they are in", typeof(AiPricesDto))]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the installation has no billing service or no AI gateway configured")]
+    [SwaggerResponse(500, "The AI gateway answers with an error or cannot be reached")]
     [HttpGet("ai-prices")]
     public async Task<AiPricesDto> GetAiPrices()
     {
@@ -1785,7 +1797,9 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/ai-model/restrictions</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The identifiers of the AI chat models barred on this portal, empty when none is", typeof(RestrictedModelsResponse))]
+    [SwaggerResponse(402, "AI tools is on for the portal, but the billing service reports no customer for it or fails to answer")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
+    [SwaggerResponse(500, "The AI gateway answers with an error or cannot be reached")]
     [HttpGet("ai-model/restrictions")]
     public async Task<RestrictedModelsResponse> GetRestrictedAiModels()
     {
@@ -1817,8 +1831,10 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/ai-model/restrictions</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The set of barred AI chat models as it was stored", typeof(RestrictedModelsResponse))]
+    [SwaggerResponse(400, "The request body cannot be read, or `models` is missing or `null`")]
     [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the installation has no billing service or no AI gateway configured")]
     [SwaggerResponse(404, "This portal has no billing customer yet")]
+    [SwaggerResponse(500, "The AI gateway answers with an error or cannot be reached")]
     [HttpPut("ai-model/restrictions")]
     public async Task<RestrictedModelsResponse> SetRestrictedAiModels(SetRestrictedAiModelsRequestDto inDto)
     {

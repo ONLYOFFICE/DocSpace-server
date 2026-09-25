@@ -136,6 +136,9 @@ public class TfaappController(
     /// <path>api/2.0/settings/tfaapp/validate</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "`true` when the code completed a first activation and backup codes were generated, `false` when an application was already linked", typeof(bool))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `code`, or the code matches neither the authenticator application nor an unused backup code")]
+    [SwaggerResponse(403, "The account the confirmation link was issued for has used up the portal's login attempt limit for TFA codes")]
+    [SwaggerResponse(500, "The code is `null`, empty or consists of whitespace only")]
     [HttpPost("tfaapp/validate")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "TfaActivation,TfaAuth")]
@@ -226,6 +229,8 @@ public class TfaappController(
     /// <path>api/2.0/settings/tfaapp</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "`true` when the SMS or the authenticator method was switched on, `false` when TFA was turned off", typeof(bool))]
+    [SwaggerResponse(400, "The request body cannot be read, `type` is `null`, an empty string or a string that is neither a number nor built from the names `None`, `Sms` and `App`, or a `trustedIps` entry is not a single address, an inclusive range or a CIDR block")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or names the owner's account in `id` or `mandatoryUsers` while `id` is not the caller's own")]
     [SwaggerResponse(405, "The requested method is not enabled on this portal, or the SMS method has no configured provider")]
     [HttpPut("tfaapp")]
     public async Task<bool> UpdateTfaSettings(TfaRequestsDto inDto)
@@ -343,7 +348,8 @@ public class TfaappController(
     /// <path>api/2.0/settings/tfaappwithlink</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "The caller's own confirmation link, or an empty string when TFA was turned off or the caller is exempt", typeof(string))]
-    [SwaggerResponse(403, "The caller is neither the portal owner nor a DocSpace administrator, or is placing the owner under the policy")]
+    [SwaggerResponse(400, "The request body cannot be read, `type` is `null`, an empty string or a string that is neither a number nor built from the names `None`, `Sms` and `App`, or a `trustedIps` entry is not a single address, an inclusive range or a CIDR block")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or names the owner's account in `id` or `mandatoryUsers` while `id` is not the caller's own")]
     [SwaggerResponse(405, "The requested method is not enabled on this portal, or the SMS method has no configured provider")]
     [HttpPut("tfaappwithlink")]
     public async Task<string> UpdateTfaSettingsLink(TfaRequestsDto inDto)
@@ -366,11 +372,10 @@ public class TfaappController(
     /// `GET api/2.0/settings/tfaapp/confirm` or from the login flow; an ordinary bearer token is refused. The
     /// authenticator method has to be enabled on the portal and be its current policy, and the account must have no
     /// application linked yet: for an already-linked account the call answers 405, so reset the credential first with
-    /// `PUT api/2.0/settings/tfaappnewapp`. Accounts flagged as outsiders are refused. Repeating the call is safe and
-    /// hands back the same secret for the account, so the QR code and the manual key always describe one and the same
-    /// credential. `qrCodeSetupImageUrl` is a base64 `data:` URL of a PNG image, and `account` is the label the
-    /// application will show. Finish the setup by sending a code from the application to
-    /// `POST api/2.0/settings/tfaapp/validate`.
+    /// `PUT api/2.0/settings/tfaappnewapp`. Repeating the call is safe and hands back the same secret for the
+    /// account, so the QR code and the manual key always describe one and the same credential. `qrCodeSetupImageUrl`
+    /// is a base64 `data:` URL of a PNG image, and `account` is the label the application will show. Finish the setup
+    /// by sending a code from the application to `POST api/2.0/settings/tfaapp/validate`.
     /// </remarks>
     /// <summary>Generate the TFA setup code</summary>
     /// <path>api/2.0/settings/tfaapp/setup</path>
@@ -407,11 +412,10 @@ public class TfaappController(
     /// access to their authenticator. Any authenticated member may call it, always for their own account: there is no
     /// way to read someone else's codes. The authenticator method has to be enabled on the portal and an application
     /// has to be linked to the account already, otherwise the call answers 405; link one through
-    /// `GET api/2.0/settings/tfaapp/confirm` and `POST api/2.0/settings/tfaapp/validate`. Accounts flagged as
-    /// outsiders are refused. This is a read-only, idempotent call: the codes are generated once, when the
-    /// application is first linked, and the whole set is replaced by `PUT api/2.0/settings/tfaappnewcodes`. The
-    /// default configuration issues five codes of six characters, and a portal may be configured for a different
-    /// number and length.
+    /// `GET api/2.0/settings/tfaapp/confirm` and `POST api/2.0/settings/tfaapp/validate`. This is a read-only,
+    /// idempotent call: the codes are generated once, when the application is first linked, and the whole set is
+    /// replaced by `PUT api/2.0/settings/tfaappnewcodes`. The default configuration issues five codes of six
+    /// characters, and a portal may be configured for a different number and length.
     /// </remarks>
     /// <summary>Get the TFA backup codes</summary>
     /// <path>api/2.0/settings/tfaappcodes</path>
@@ -449,13 +453,12 @@ public class TfaappController(
     /// previous codes have been spent or may have leaked: the whole old set stops being accepted the moment this call
     /// succeeds, so store the new codes before leaving the response. Any authenticated member may call it, always for
     /// their own account. The authenticator method has to be enabled on the portal and an application has to be
-    /// linked to the account already, otherwise the call answers 405, and accounts flagged as outsiders are refused.
-    /// The call mutates state and is not idempotent: every invocation issues another set and discards the one before
-    /// it, so a retry after a timeout returns codes different from those the first attempt generated. The codes come
-    /// back unused, five of them of six characters with the default configuration, and a portal may be configured for
-    /// a different number and length. Read the current set without changing it through
-    /// `GET api/2.0/settings/tfaappcodes`. The authenticator secret itself is untouched, so the linked application
-    /// keeps working.
+    /// linked to the account already, otherwise the call answers 405. The call mutates state and is not idempotent:
+    /// every invocation issues another set and discards the one before it, so a retry after a timeout returns codes
+    /// different from those the first attempt generated. The codes come back unused, five of them of six characters
+    /// with the default configuration, and a portal may be configured for a different number and length. Read the
+    /// current set without changing it through `GET api/2.0/settings/tfaappcodes`. The authenticator secret itself is
+    /// untouched, so the linked application keeps working.
     /// </remarks>
     /// <summary>Regenerate the TFA backup codes</summary>
     /// <path>api/2.0/settings/tfaappnewcodes</path>
@@ -496,17 +499,19 @@ public class TfaappController(
     /// caller's own ID resets their own credential and returns the activation link they should follow next; passing
     /// another member's ID is allowed for the portal owner only, and every other caller, a DocSpace administrator
     /// included, is refused. The account has to have an application linked and the authenticator method has to be
-    /// enabled on the portal, otherwise the call answers 405. The call is destructive: the account's backup codes are
-    /// dropped together with the credential and all of its sessions are signed out. For another member the portal
-    /// also emails them that their TFA was reset, and the answer is then an empty string. The portal-wide policy is
-    /// not touched, so TFA stays required and the account sets up an application again through
-    /// `GET api/2.0/settings/tfaapp/confirm`; lift the requirement for everyone with `PUT api/2.0/settings/tfaapp`.
+    /// enabled on the portal, otherwise the call answers 405, and a terminated account is refused. The call is
+    /// destructive: the account's backup codes are dropped together with the credential and all of its sessions are
+    /// signed out. For another member the portal also emails them that their TFA was reset, and the answer is then an
+    /// empty string. The portal-wide policy is not touched, so TFA stays required and the account sets up an
+    /// application again through `GET api/2.0/settings/tfaapp/confirm`; lift the requirement for everyone with
+    /// `PUT api/2.0/settings/tfaapp`.
     /// </remarks>
     /// <summary>Unlink the TFA application</summary>
     /// <path>api/2.0/settings/tfaappnewapp</path>
     [Tags("Settings / TFA settings")]
     [SwaggerResponse(200, "The activation link when the caller reset their own application, or an empty string when another member's was reset", typeof(string))]
-    [SwaggerResponse(403, "The caller is not the portal owner, or the account cannot be resolved from `id`")]
+    [SwaggerResponse(400, "The request body cannot be read, `type` is `null`, an empty string or a string that is neither a number nor built from the names `None`, `Sms` and `App`, or a `trustedIps` entry is not a single address, an inclusive range or a CIDR block, although this call reads only `id`")]
+    [SwaggerResponse(403, "The caller is not the portal owner, the account cannot be resolved from `id`, or the account is terminated")]
     [SwaggerResponse(405, "The authenticator method is not enabled on this portal, or the account has no application linked")]
     [HttpPut("tfaappnewapp")]
     public async Task<string> UnlinkTfaApp(TfaRequestsDto inDto)

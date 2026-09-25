@@ -468,6 +468,7 @@ public class AuthenticationController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
     [SwaggerResponse(200, "Whether the confirmation link may be used, with the room and the email it was issued for when it is an invitation", typeof(ConfirmDto))]
+    [SwaggerResponse(400, "The request body cannot be read, `email` is sent but empty or not a valid email address, or `type` or `emplType` is sent as a string instead of a number")]
     [SwaggerResponse(403, "The portal's IP restrictions do not allow this address to check an invitation link")]
     [AllowNotPayment, AllowSuspended, AllowAnonymous]
     [HttpPost("confirm")]

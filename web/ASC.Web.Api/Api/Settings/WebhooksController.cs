@@ -105,8 +105,9 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "The created webhook subscription, without its secret key", typeof(WebhooksConfigDto))]
-    [SwaggerResponse(400, "The target URL is unusable or unreachable, or the secret key or a trigger flag was rejected")]
+    [SwaggerResponse(400, "The request body cannot be read, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, `triggers` is sent as a string instead of a number, the target URL is unusable or answers the HEAD request with a non-success code, or the secret key or a trigger flag was rejected")]
     [SwaggerResponse(403, "The caller is a `Guest`, or a non-admin caller while the developer tools are restricted")]
+    [SwaggerResponse(500, "The target URL gives no answer to the HEAD request: the connection fails or times out, or the certificate is not valid while `ssl` is `true`")]
     [HttpPost("webhook")]
     public async Task<WebhooksConfigDto> CreateWebhook(CreateWebhooksConfigRequestsDto inDto)
     {
@@ -140,9 +141,10 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "The updated webhook subscription, without its secret key", typeof(WebhooksConfigDto))]
-    [SwaggerResponse(400, "The target URL is unusable or unreachable, or the secret key or a trigger flag was rejected")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `id`, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, `triggers` is sent as a string instead of a number, the target URL is unusable or answers the HEAD request with a non-success code, or the secret key or a trigger flag was rejected")]
     [SwaggerResponse(403, "The subscription belongs to another member, or the caller may not use webhooks at all")]
     [SwaggerResponse(404, "No webhook subscription with this ID exists in the portal")]
+    [SwaggerResponse(500, "The target URL gives no answer to the HEAD request: the connection fails or times out, or the certificate is not valid while `ssl` is `true`")]
     [HttpPut("webhook")]
     public async Task<WebhooksConfigDto> UpdateWebhook(UpdateWebhooksConfigRequestsDto inDto)
     {
@@ -201,9 +203,10 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook/enable</path>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "The webhook subscription in its new state, without its secret key", typeof(WebhooksConfigDto))]
-    [SwaggerResponse(400, "The saved target no longer answers, or the saved secret no longer passes the password rules")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `id`, `name` or `uri` is missing or empty, `name` or `secretKey` is longer than 50 characters or `targetId` longer than 255, `triggers` is sent as a string instead of a number, although this call reads only `id` and `enabled`, or on switching on the saved target answers the HEAD request with a non-success code or the saved secret no longer passes the password rules")]
     [SwaggerResponse(403, "The subscription belongs to another member, or the caller may not use webhooks at all")]
     [SwaggerResponse(404, "No webhook subscription with this ID exists in the portal")]
+    [SwaggerResponse(500, "On switching on, the saved target URL gives no answer to the HEAD request: the connection fails or times out, or the certificate is not valid while the subscription has `ssl` set")]
     [HttpPut("webhook/enable")]
     public async Task<WebhooksConfigDto> EnableWebhook(UpdateWebhooksConfigRequestsDto inDto)
     {
@@ -300,6 +303,7 @@ public class WebhooksController(
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
     [SwaggerResponse(200, "The matching delivery records, newest first, with the total count reported beside them", typeof(IAsyncEnumerable<WebhooksLogDto>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100")]
     [SwaggerResponse(403, "The caller is a `Guest`, or a non-admin caller while the developer tools are restricted")]
     [HttpGet("webhooks/log")]
     public async IAsyncEnumerable<WebhooksLogDto> GetWebhooksLogs(WebhookLogsRequestDto inDto)

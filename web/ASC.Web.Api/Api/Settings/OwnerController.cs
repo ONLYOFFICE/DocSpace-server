@@ -72,7 +72,7 @@ public class OwnerController(
     /// <path>api/2.0/settings/owner</path>
     [Tags("Settings / Owner")]
     [SwaggerResponse(200, "The outcome of the request: `status` 1 with the address the instructions were sent to, or `status` 0 with a localized refusal when the transfer cannot be started", typeof(OwnerChangeInstructionsDto))]
-    [SwaggerResponse(400, "The portal owner's own email address has not been confirmed yet, so no instructions can be sent")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `ownerId`, or the portal owner's own email address has not been confirmed yet, so no instructions can be sent")]
     [SwaggerResponse(403, "The caller does not hold the portal-settings right of a DocSpace administrator, or the user named as the new owner is a guest")]
     [HttpPost("")]
     public async Task<OwnerChangeInstructionsDto> SendOwnerChangeInstructions(OwnerIdSettingsRequestDto inDto)
@@ -128,8 +128,10 @@ public class OwnerController(
     /// <path>api/2.0/settings/owner</path>
     [Tags("Settings / Owner")]
     [SwaggerResponse(200, "The portal owner has been changed to the user named in the request")]
-    [SwaggerResponse(400, "The user named as the new owner cannot be found in this portal, is a guest, or is not active")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `ownerId`")]
+    [SwaggerResponse(402, "The user named as the new owner is a regular user, and promoting them to DocSpace administrator needs a paid seat the portal has run out of")]
     [SwaggerResponse(409, "The new owner could not be given DocSpace administrator rights, so the transfer was not applied")]
+    [SwaggerResponse(500, "The user named as the new owner cannot be found in this portal, is a guest, or is not active, or the email address the confirmation link was issued for no longer belongs to the portal owner")]
     [HttpPut("")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalOwnerChange")]
     public async Task UpdatePortalOwner(OwnerIdSettingsRequestDto inDto)

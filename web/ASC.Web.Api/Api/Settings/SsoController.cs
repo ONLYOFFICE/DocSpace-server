@@ -177,7 +177,7 @@ public class SsoController(
     [SwaggerResponse(400, "The serialized settings are empty or do not contain an SSO configuration object")]
     [SwaggerResponse(402, "The portal is a cloud one, and its pricing plan has no single sign-on option or the SSO section is not enabled for it")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
-    [SwaggerResponse(500, "The IdP entity ID is empty, the SSO URL is missing or the SSO or SLO URL is not an absolute HTTP or HTTPS address, or the first name, last name or email attribute mapping is empty")]
+    [SwaggerResponse(500, "The serialized settings are not valid JSON, have a value of the wrong type or lack the `idpSettings` or `fieldMapping` object, the IdP entity ID is empty, the SSO URL is missing or the SSO or SLO URL is not an absolute HTTP or HTTPS address, or the first name, last name or email attribute mapping is empty")]
     [HttpPost("")]
     public async Task<SsoSettingsV2> SaveSsoSettingsV2(SsoSettingsRequestsDto inDto)
     {

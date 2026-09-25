@@ -227,7 +227,7 @@ public class MigrationController(
     /// <path>api/2.0/migration/migrate</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "The import has been queued; the response carries no content and the progress is read from `GET api/2.0/migration/status`")]
-    [SwaggerResponse(400, "The request body is missing or could not be read as a parse result")]
+    [SwaggerResponse(400, "The request body is missing or could not be read as a parse result, including an unknown `userType` name, or a user in `users`, `withoutEmailUsers` or `existUsers` has an `email` that is empty or not a valid address")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or is not the portal owner and asked to import a user as `DocSpaceAdmin` who is not an administrator of this portal yet")]
     [HttpPost("migrate")]
     public async Task StartMigration(MigrationApiInfo info)
@@ -324,7 +324,9 @@ public class MigrationController(
     /// <path>api/2.0/migration/finish</path>
     [Tags("Migration")]
     [SwaggerResponse(200, "The activation emails have been sent if they were asked for and the clean-up has been queued. The response carries no content")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `isSendWelcomeEmail`")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
+    [SwaggerResponse(500, "`isSendWelcomeEmail` is true and the portal holds no import that has reached the user step: no job at all, only a parse pass, or an import still running or stopped before that step")]
     [HttpPost("finish")]
     public async Task FinishMigration(FinishDto inDto)
     {

@@ -407,8 +407,10 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/roomquotasettings</path>
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Saved default per-room storage quota settings", typeof(TenantRoomQuotaSettings))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `defaultQuota`")]
     [SwaggerResponse(402, "The portal's pricing plan does not include the statistics feature required for room quotas")]
-    [SwaggerResponse(403, "The caller has no portal-settings right")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or `defaultQuota` is not a JSON number")]
+    [SwaggerResponse(500, "The `defaultQuota` is not a whole number within the 64-bit range, or exceeds the portal's total storage quota or, on a Standalone installation with a portal-wide quota enabled, that quota")]
     [HttpPost("roomquotasettings")]
     public async Task<TenantRoomQuotaSettings> SaveRoomQuotaSettings(QuotaSettingsRequestsDto inDto)
     {
@@ -472,8 +474,10 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/aiagentquotasettings</path>
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Saved default AI agent storage quota settings", typeof(TenantAiAgentQuotaSettings))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `defaultQuota`")]
     [SwaggerResponse(402, "The portal's pricing plan does not include the statistics feature required for AI agent quotas")]
-    [SwaggerResponse(403, "The caller has no portal-settings right")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or `defaultQuota` is not a JSON number")]
+    [SwaggerResponse(500, "The `defaultQuota` is not a whole number within the 64-bit range, or exceeds the portal's total storage quota or, on a Standalone installation with a portal-wide quota enabled, that quota")]
     [HttpPost("aiagentquotasettings")]
     public async Task<TenantAiAgentQuotaSettings> SaveAiAgentQuotaSettings(QuotaSettingsRequestsDto inDto)
     {
@@ -536,6 +540,7 @@ public partial class SettingsController(
     [SwaggerResponse(200, "Saved deep link handling settings", typeof(TenantDeepLinkSettings))]
     [SwaggerResponse(400, "The handling mode is not one of the supported deep link handling values")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
+    [SwaggerResponse(500, "The request body has no `deepLinkSettings`")]
     [HttpPost("deeplink")]
     public async Task<TenantDeepLinkSettings> ConfigureDeepLink(DeepLinkConfigurationRequestsDto inDto)
     {
@@ -592,6 +597,7 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/tenantquotasettings</path>
     [Tags("Settings / Quota")]
     [SwaggerResponse(200, "Saved tenant storage quota settings", typeof(TenantQuotaSettings))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `tenantId`")]
     [SwaggerResponse(402, "The portal's pricing plan does not include the statistics feature required for tenant quotas")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [SwaggerResponse(415, "The portal is not a Standalone installation")]
@@ -737,6 +743,7 @@ public partial class SettingsController(
     [SwaggerResponse(402, "This option is not available under the portal's current pricing plan")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [SwaggerResponse(415, "The portal is not a Standalone installation, so a custom domain cannot be mapped")]
+    [SwaggerResponse(500, "The installation hides the DNS settings section, or the domain name is not a valid host name, lies under the portal's base domain, has a length outside the allowed range, is reserved, or is already the alias or mapped domain of a portal, this one included")]
     [HttpPut("dns")]
     public async Task<string> SaveDnsSettings(DnsSettingsRequestsDto inDto)
     {
@@ -817,9 +824,10 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/wizard/complete</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Resulting wizard settings, including the completed flag", typeof(WizardSettings))]
-    [SwaggerResponse(400, "The email address is malformed, or the password is empty")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `email` or `passwordHash`, the email address is empty or malformed, or the license's start date is in the future")]
     [SwaggerResponse(402, "The supplied license is missing, invalid, expired, or its user quota does not cover the portal")]
     [SwaggerResponse(403, "The account the confirmation link was issued for has no portal-settings right")]
+    [SwaggerResponse(500, "The wizard is already completed, the AMI instance ID does not match, the email address fails the portal's check, the password is empty, or the license is missing, unreadable, rejected by validation or of the wrong type")]
     [AllowNotPayment]
     [HttpPut("wizard/complete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
@@ -1240,9 +1248,9 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/authservice</path>
     [Tags("Settings / Authorization")]
     [SwaggerResponse(200, "Whether the provider's keys actually changed", typeof(bool))]
-    [SwaggerResponse(400, "The submitted keys failed the provider's own validation")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `name` or `props`, a key has no `name` or `value` or a `value` longer than 4000 characters, or the submitted keys failed the provider's own validation")]
     [SwaggerResponse(402, "The provider is a paid option not covered by the portal's current pricing plan")]
-    [SwaggerResponse(403, "The caller has no portal-settings right, or the keys of this provider cannot be set")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or the provider is unknown or its keys cannot be set")]
     [HttpPost("authservice")]
     public async Task<bool> SaveAuthKeys(AuthServiceRequestsDto inDto)
     {
