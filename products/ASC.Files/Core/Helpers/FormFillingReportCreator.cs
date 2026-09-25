@@ -39,6 +39,7 @@ public class FormFillingReportCreator(
     ExportToXLSX exportToXLSX,
     ExternalDatabaseClient externalDatabaseClient,
     IDaoFactory daoFactory,
+    SocketManager socketManager,
     IHttpClientFactory clientFactory,
     TenantManager tenantManager,
     AuthContext authContext,
@@ -107,6 +108,12 @@ public class FormFillingReportCreator(
         {
             properties.FormFilling.ExternalDbTableName = tableName;
             await fileDao.SaveProperties(originalFormId, properties);
+
+            var originalForm = await fileDao.GetFileAsync(originalFormId);
+            if (originalForm != null)
+            {
+                await socketManager.UpdateFileAsync(originalForm);
+            }
         }
     }
 
