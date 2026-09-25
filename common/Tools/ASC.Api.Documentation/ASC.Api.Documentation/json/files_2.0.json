@@ -28804,6 +28804,15 @@
               ],
               "type": "boolean"
             }
+          },
+          {
+            "name": "searchArea",
+            "in": "query",
+            "description": "The section to list the groups of: Active for Rooms and Forms for Forms. Active when omitted.",
+            "schema": {
+              "$ref": "#/components/schemas/SearchArea"
+            },
+            "example": "Active"
           }
         ],
         "responses": {
@@ -43617,6 +43626,10 @@
             "description": "The account that created the group and the only one able to read, change or delete it; for any other member of\r\nthe portal the group does not exist.",
             "format": "uuid"
           },
+          "searchArea": {
+            "description": "The section the group belongs to, which categorizes it within the application's structure. This property determines\r\nwhich area of the interface the group is associated with and affects how its rooms are filtered and displayed.\r\nCommon values include Active for standard rooms, Forms for form-based rooms, Archive for archived content, and\r\nTemplates for template rooms. The search area ensures that when retrieving a group, only rooms that belong to\r\nthe specified section are included in the results, maintaining proper organizational boundaries within the system.",
+            "$ref": "#/components/schemas/SearchArea"
+          },
           "rooms": {
             "examples": [
               [
@@ -43699,6 +43712,10 @@
               ]
             },
             "description": "The rooms to gather in the group, each given as a number for a room stored in the portal or as a string for a\r\nroom on a connected third-party account. Every identifier has to name a room the caller can read; repeats are\r\ncollapsed, and an element of any other shape - a decimal number, a number sent as a string, null - is refused."
+          },
+          "searchArea": {
+            "description": "The section the group belongs to: Active for Rooms and Forms for Forms. Active when omitted.",
+            "$ref": "#/components/schemas/SearchArea"
           }
         },
         "description": "The name, the icon and the rooms of a room group to create."
@@ -44549,8 +44566,8 @@
             ]
           }
         ],
-        "description": "The search area.",
-        "x-enum-type": "integer"
+        "description": "The search area. Serialized by name (\"Active\", \"Forms\", ...) so that request bodies and\r\nresponses carry the section as the same readable word the query string already accepts.",
+        "x-enum-type": "string"
       },
       "SecurityInfoRequestDto": {
         "type": "object",
