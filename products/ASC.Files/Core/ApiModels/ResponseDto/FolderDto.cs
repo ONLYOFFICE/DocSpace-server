@@ -277,6 +277,7 @@ public class FolderDtoHelper(
     : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, fusionCache, tenantManager, logger)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
+    private readonly TenantManager _tenantManager = tenantManager;
 
     public async Task<FolderDto<T>> GetAsync<T>(
         Folder<T> folder,
@@ -334,7 +335,7 @@ public class FolderDtoHelper(
 
             result.UsedSpace = folder.Counter;
 
-            if ((await tenantManager.GetCurrentTenantQuotaAsync()).Statistic &&
+            if ((await _tenantManager.GetCurrentTenantQuotaAsync()).Statistic &&
                     ((result.Security.TryGetValue(FileSecurity.FilesSecurityActions.EditRoom, out var canEdit) && canEdit) ||
                      (result.RootFolderType is FolderType.Archive or FolderType.TRASH && result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete) ||
                      (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Create, out var canCreate) && canCreate)))
