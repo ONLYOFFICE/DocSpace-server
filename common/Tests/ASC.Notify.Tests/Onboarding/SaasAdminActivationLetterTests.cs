@@ -75,10 +75,10 @@ public class SaasAdminActivationLetterTests : LetterTestBase<SaasAdminActivation
             .And.Contain($"Your {logoText} address")
             .And.Contain("Your login")
             .And.Contain("we recommend changing the automatically generated password")
-            .And.Contain("Your current tariff plan is STARTUP")
+            .And.Contain("Your current tariff plan is FREE")
             .And.Contain("Docs, Files, Rooms, Forms, AI agents")
-            .And.Contain("3 admins")
-            .And.Contain("Up to 12 rooms")
+            .And.Contain("Unlimited number of admins")
+            .And.Contain("Unlimited number of rooms")
             .And.Contain("Unlimited number of users and guests")
             .And.Contain("2 GB disk space")
             .And.Contain("Enjoy your private document collaboration infrastructure!");
