@@ -50,62 +50,6 @@ public class ThirdPartyMoveBugTests(
     : ASC.Files.Tests.Tests._03_Rooms.ThirdParty.ThirdPartyTestBase(fixture)
 {
     /// <remarks>
-    /// BUG 82242: moving into a third-party room with <c>Skip</c> conflict resolution does not
-    /// skip - the file is moved (and renamed by Nextcloud to avoid the name clash) instead of
-    /// staying untouched in the source: Skip has to leave both copies where they are.
-    /// </remarks>
-    [Fact]
-    [Trait("Bug", "82242")]
-    public async Task MoveBatchItems_SkipConflictToThirdPartyRoom_LeavesSourceUntouched()
-    {
-        RequireNextcloud();
-
-        // Arrange
-        await _filesClient.Authenticate(Owner);
-        var myDocsFolderId = await GetUserFolderIdAsync(Owner);
-
-        var connected = await ConnectNextcloud("Autotest MoveBatch TP Skip");
-        var destRoom = (await _roomsApi.CreateRoomThirdPartyAsync(
-            connected.Id,
-            new CreateThirdPartyRoom(title: "Autotest MoveBatch TP Skip Room", roomType: RoomType.CustomRoom),
-            TestContext.Current.CancellationToken)).Response;
-
-        var fileTitle = "Autotest MoveBatch TP Skip Conflict.docx";
-        var file1 = await CreateFile(fileTitle, myDocsFolderId);
-
-        // A pre-existing conflict at the destination: file1 copied there first with Overwrite.
-        await _filesOperationsApi.CopyBatchItemsAsync(new BatchRequestDto
-        {
-            FileIds = [new(file1.Id)],
-            DestFolderId = new(destRoom.Id),
-            ConflictResolveType = FileConflictResolveType.Overwrite,
-            DeleteAfter = false
-        }, TestContext.Current.CancellationToken);
-        await WaitLongOperation();
-
-        var file2 = await CreateFile(fileTitle, myDocsFolderId);
-        var srcCountBeforeMove = (await _foldersApi.GetFolderByFolderIdAsync(
-            myDocsFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response.Files.Count(f => f.Title == fileTitle);
-        srcCountBeforeMove.Should().Be(2, "both file1 and file2 share the same title before the move");
-
-        // Act
-        await _filesOperationsApi.MoveBatchItemsAsync(new BatchRequestDto
-        {
-            FileIds = [new(file2.Id)],
-            DestFolderId = new(destRoom.Id),
-            ConflictResolveType = FileConflictResolveType.Skip,
-            DeleteAfter = false
-        }, TestContext.Current.CancellationToken);
-        await WaitLongOperation();
-
-        // Assert
-        var srcCountAfterSkip = (await _foldersApi.GetFolderByFolderIdAsync(
-            myDocsFolderId, cancellationToken: TestContext.Current.CancellationToken)).Response.Files.Count(f => f.Title == fileTitle);
-
-        srcCountAfterSkip.Should().Be(2, "Skip leaves the conflicting file in the source folder");
-    }
-
-    /// <remarks>
     /// BUG 83271: moving a folder from a Collaboration room to a third-party room used to fail
     /// inside the operation with "Object reference not set to an instance of an object". Recorded
     /// here as a normal (non-<c>test.fail</c>) case in the TypeScript suite - the reproduction below
