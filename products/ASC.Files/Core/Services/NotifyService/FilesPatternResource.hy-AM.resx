@@ -299,9 +299,9 @@ $Message</value>
     <value>${LetterLogoText} ծանուցում։</value>
   </data>
   <data name="pattern_AgentRemoved" xml:space="preserve">
-    <value>h1. ${__AuthorName}-ը ջնջել է ԱԲ գործակալ
+    <value>h1. $__AuthorName-ը ջնջել է ԱԲ գործակալ
 
-${__AuthorName}-ը ջնջել է ԱԲ գործակալը. $RoomTitle</value>
+$__AuthorName-ը ջնջել է ԱԲ գործակալը. $RoomTitle</value>
   </data>
   <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
     <value>Ձեր դերը "$RoomTitle" ԱԲ գործակալում փոխվել է "$RoomRole"-ի</value>

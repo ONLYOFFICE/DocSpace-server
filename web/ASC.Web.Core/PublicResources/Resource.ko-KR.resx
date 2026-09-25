@@ -177,6 +177,12 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>거래 내역</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>총 사용액</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>사용자별 요약</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>전형</value>
   </data>
@@ -1475,5 +1481,59 @@
   </data>
   <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
     <value>양식</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>회사</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>생성 날짜</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>기간</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>외부</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>내부</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>읽기 전용 문서 뷰어</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>라이브 뷰어</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>사용자 ID</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>편집자</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>전체 권한을 가진 문서 편집자</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>사용자 할당량</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>활성</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>액세스 만료</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>사용자 유형</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>구독 한도</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>남은</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>보고서</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>합계</value>
   </data>
 </root>

@@ -65,7 +65,7 @@ public class SocketManager(
 
     public async Task CreateFileAsync<T>(File<T> file, IEnumerable<Guid> users = null)
     {
-        if (users == null && file.IsForm)
+        if (users == null && file.IsPdf)
         {
             users = await GetRecipientListForForm(file);
         }

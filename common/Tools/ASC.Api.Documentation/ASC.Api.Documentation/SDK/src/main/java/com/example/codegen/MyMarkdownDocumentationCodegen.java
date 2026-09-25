@@ -25,6 +25,7 @@ import io.swagger.v3.oas.models.parameters.*;
 import io.swagger.v3.oas.models.security.*;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.servers.*;
+import io.swagger.v3.oas.models.tags.*;
 
 import java.time.*;
 import java.time.format.*;
@@ -53,6 +54,7 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
     private static final String TITLE = "x-title";
     private static final String MODEL_ANCHOR = "x-model-anchor";
     private static final String HAS_PROPERTIES = "x-has-properties";
+    private static final String SECTION_TITLE = "sectionTitle";
     private static final String ENUM_DOC = "x-enum-doc";
     private static final String RETURN_MODEL_ANCHOR = "x-return-model-anchor";
 
@@ -125,15 +127,53 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
     /**
      * Descriptions end up inside Markdown tables, where an unescaped pipe starts a new cell and
      * a newline ends the row - either one silently mangles the table from that point on.
+     * <p>
+     * The break is written closed, because the pages are compiled as MDX, where an unclosed tag
+     * is an error rather than a line break.
      */
     private static String tableText(String text) {
         if (text == null) {
             return null;
         }
 
-        return text.replace("|", "\\|")
-                .replaceAll("\\r\\n|\\r|\\n", "<br>")
+        return text
+                .replace("|", "\\|")
+                .replaceAll("\\r\\n|\\r|\\n", "<br/>")
                 .trim();
+    }
+
+    /**
+     * A note's value, printed as a code span. These are literals the document states rather than
+     * prose, and read as markup as soon as they are printed as prose: a domain regex such as
+     * `[a-z0-9]([a-z0-9-])` is a Markdown link, and a JSON example is an MDX expression.
+     * <p>
+     * A line break becomes a space rather than a tag, because a tag inside a code span prints as
+     * its own source.
+     */
+    private static String codeText(String text) {
+        if (text == null) {
+            return null;
+        }
+
+        String value = text
+                .replaceAll("\\r\\n|\\r|\\n", " ")
+                .replace("|", "\\|")
+                .trim();
+
+        // A code span is fenced by a longer run of backticks than any run inside it, and one that
+        // starts or ends with a backtick needs a space to keep its own text off the fence.
+        int longest = 0;
+        int run = 0;
+
+        for (int i = 0; i < value.length(); i++) {
+            run = value.charAt(i) == '`' ? run + 1 : 0;
+            longest = Math.max(longest, run);
+        }
+
+        String fence = "`".repeat(longest + 1);
+        String padding = value.startsWith("`") || value.endsWith("`") ? " " : "";
+
+        return fence + padding + value + padding + fence;
     }
 
     /**
@@ -158,10 +198,10 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
         notes.add(required ? "[required]" : "[optional]");
 
         if (isStated(example)) {
-            notes.add("[example: " + tableText(example) + "]");
+            notes.add("[example: " + codeText(example) + "]");
         }
         if (isStated(defaultValue)) {
-            notes.add("[default to " + tableText(defaultValue) + "]");
+            notes.add("[default to " + codeText(defaultValue) + "]");
         }
         Object rawValues = allowableValues == null ? null : allowableValues.get("values");
         if (rawValues instanceof List) {
@@ -169,9 +209,9 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
             if (!values.isEmpty()) {
                 StringJoiner joiner = new StringJoiner(", ");
                 for (Object value : values) {
-                    joiner.add(String.valueOf(value));
+                    joiner.add(codeText(String.valueOf(value)));
                 }
-                notes.add("[enum: " + tableText(joiner.toString()) + "]");
+                notes.add("[enum: " + joiner + "]");
             }
         }
         if (isStated(minimum)) {
@@ -187,7 +227,7 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
             notes.add("[maxLength: " + maxLength + "]");
         }
         if (isStated(pattern)) {
-            notes.add("[pattern: " + tableText(pattern) + "]");
+            notes.add("[pattern: " + codeText(pattern) + "]");
         }
         if (nullable) {
             notes.add("[nullable]");
@@ -377,7 +417,14 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
             apiTemplateFiles.clear();
             modelTemplateFiles.clear();
             supportingFiles.clear();
-            supportingFiles.add(new SupportingFile("service.mustache", "", documentName + ".md"));
+
+            // The models are rendered once, into a document that is cut into a page per model:
+            // a schema is exchanged by six endpoints on average, and printing it on each of them
+            // buried the endpoint's own documentation under types the reader had already read.
+            boolean modelsOnly = Boolean.parseBoolean(String.valueOf(additionalProperties.get("modelsOnly")));
+
+            supportingFiles.add(new SupportingFile(
+                    modelsOnly ? "models.mustache" : "service.mustache", "", documentName + ".md"));
         }
 
         // The page heading and the server URL are not fixed up here: they are written into the
@@ -422,9 +469,43 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
         return results;
     }
 
+    /**
+     * The heading a group of operations is printed under. A document holds one section of the
+     * API, so its groups are that section's sub-tags: "Files / Folders" prints as "Folders", and
+     * a tag without sub-tags prints as it stands.
+     * <p>
+     * The generated class name is not used for this: "FilesFoldersApi" is this generator's own
+     * bookkeeping, and the page is read by people who only ever see the tags.
+     */
+    private static String sectionTitle(OperationsMap results) {
+        for (CodegenOperation operation : results.getOperations().getOperation()) {
+            if (operation.tags == null) {
+                continue;
+            }
+
+            for (Tag tag : operation.tags) {
+                String name = tag.getName();
+
+                if (name == null || name.isEmpty()) {
+                    continue;
+                }
+
+                int separator = name.indexOf('/');
+
+                return separator < 0 ? name.trim() : name.substring(separator + 1).trim();
+            }
+        }
+
+        // An operation reaches a page only through a tag, so this is unreachable short of a
+        // document that states none - and then the class name is all there is to head it with.
+        return String.valueOf(results.get("classname"));
+    }
+
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
         OperationsMap results = super.postProcessOperationsWithModels(objs, allModels);
+
+        results.put(SECTION_TITLE, sectionTitle(results));
 
         if (allModels != null) {
             for (ModelMap modelMap : allModels) {
@@ -446,6 +527,7 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
             if (variant instanceof CodegenOperation) {
                 markOperation((CodegenOperation) variant);
             }
+
         }
 
         return results;

@@ -244,6 +244,8 @@ internal class FileDao(
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
             case FilterType.DiagramsOnly:
+            case FilterType.PdfForm:
+            case FilterType.Pdf:
                 query = query.Where(r => r.Category == (int)filterType);
                 break;
             case FilterType.ByExtension:
@@ -730,7 +732,7 @@ internal class FileDao(
                             var fileProp = await fileDao.GetProperties(file.Id);
                             var extension = FileUtility.GetFileExtension(file.Title);
 
-                            if (file.IsForm || (extension is ".csv" or ".xlsx" && fileProp != null && Equals(fileProp.FormFilling.ResultsFolderId, file.ParentId)))
+                            if (file.IsPdf || (extension is ".csv" or ".xlsx" && fileProp != null && Equals(fileProp.FormFilling.ResultsFolderId, file.ParentId)))
                             {
                                 var properties = fileProp ?? new EntryProperties<int> { FormFilling = new FormFillingProperties<int>() };
                                 if (!properties.FormFilling.StartFilling)

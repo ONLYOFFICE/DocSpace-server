@@ -177,6 +177,12 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>取引履歴</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>合計支出額</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>ユーザー別サマリー</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>種類</value>
   </data>
@@ -1475,5 +1481,59 @@
   </data>
   <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
     <value>フォーム</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>レポート</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>生成日</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>会社</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>期間</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>合計</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>アクティブ</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>アクセス有効期限</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>ユーザータイプ</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>ユーザーID</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>編集者</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>完全な権限を持つドキュメント編集者</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>ユーザー容量</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>ライブビューアー</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>読み取り専用ドキュメントビューアー</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>外部</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>内部</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>残り</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>サブスクリプション制限</value>
   </data>
 </root>

@@ -116,6 +116,12 @@ public class KnowledgeSearchToolFactory(
 
     public async Task<ToolBundle> BuildAsync(ResolvedToolContext context)
     {
+        // The form-analysis sub-agent gets only the form-data tools.
+        if (context.FormSubAgent)
+        {
+            return ToolBundle.Empty;
+        }
+
         if (context.Folder is not Folder<int> { IsAgent: true } agent ||
             !await aiAccessibility.IsVectorizationEnabledAsync() ||
             !await fileSecurity.CanUseAiAsync(agent))

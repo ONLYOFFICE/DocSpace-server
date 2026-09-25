@@ -177,6 +177,12 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>История транзакций</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Всего израсходовано</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Сводка по пользователям</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Тип</value>
   </data>
@@ -1495,7 +1501,7 @@
     <value>ID пользователя</value>
   </data>
   <data name="AccountingReportTotal" xml:space="preserve">
-    <value>Общий</value>
+    <value>Итого</value>
   </data>
   <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
     <value>Тип источника</value>
@@ -1520,5 +1526,14 @@
   </data>
   <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
     <value>Форма</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Отчёт</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Осталось</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Лимит подписки</value>
   </data>
 </root>

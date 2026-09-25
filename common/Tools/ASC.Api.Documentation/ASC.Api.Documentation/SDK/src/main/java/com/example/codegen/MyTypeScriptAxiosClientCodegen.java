@@ -104,6 +104,8 @@ public class MyTypeScriptAxiosClientCodegen extends TypeScriptAxiosClientCodegen
 
     @Override
     public ModelsMap postProcessModels(ModelsMap objs) {
+        addOneOfImports(objs);
+
         super.postProcessModels(objs);
 
         for (ModelMap mo : objs.getModels()) {
@@ -137,6 +139,42 @@ public class MyTypeScriptAxiosClientCodegen extends TypeScriptAxiosClientCodegen
         }
         
         return objs;
+    }
+
+    /**
+     * The stock typescript-axios model template prints the import block outside the model context,
+     * where the hasOneOf flag set by the parent generator is not visible. A model built from a plain
+     * oneOf of $refs therefore renders the union type without importing its members, and the members
+     * only reach the import list when some property happens to use them. Registering them as regular
+     * model imports here makes the template emit them: the parent postProcessModels fills in the
+     * class, filename and tsImport keys for every entry of the import list.
+     */
+    private void addOneOfImports(ModelsMap objs) {
+        for (ModelMap mo : objs.getModels()) {
+            CodegenModel model = mo.getModel();
+
+            if (model.oneOf == null || model.oneOf.isEmpty()) {
+                continue;
+            }
+
+            for (String oneOfType : model.oneOf) {
+                if (languageSpecificPrimitives.contains(oneOfType)
+                        || oneOfType.equals(model.classname)
+                        || !oneOfType.matches("[A-Za-z_][A-Za-z0-9_]*")) {
+                    continue;
+                }
+
+                String modelImport = toModelImport(oneOfType);
+                boolean alreadyImported = objs.getImports().stream()
+                        .anyMatch(im -> modelImport.equals(im.get("import")));
+
+                if (!alreadyImported) {
+                    Map<String, String> item = new HashMap<>();
+                    item.put("import", modelImport);
+                    objs.getImports().add(item);
+                }
+            }
+        }
     }
 
     // The third-party twin of a generic action (see ThirdPartyVariants): the string-id shape the document

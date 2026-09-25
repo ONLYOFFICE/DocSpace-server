@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>Օգտատիրոջ ԱԲ կարգավորումները թարմացվել են</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>AI պրոֆիլը նշանակված է AI գործակալին գործողության համար՝ {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>ԱԲ պրոֆիլը նշանակված է գործողության համար՝ {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>ԱԲ մոդելի պրոֆիլը ստեղծված է՝ {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>ԱԲ մոդելի պրոֆիլը ջնջված է՝ {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>ԱԲ պրոֆիլը հանված է գործողությունից՝ {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>ԱԲ մոդելի պրոֆիլը թարմացված է՝ {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Ֆայլեր [{0}]։ Նշված է որպես կարդացած</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Ֆայլեր [{0}]։ Ֆայլը չի պահպանվել։ Պորտալի պահպանման քվոտան գերազանցված է։</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Ֆայլեր [{0}]։ Ֆայլի պահպանումը գերազանցում է պորտալի պահպանման քվոտան։</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Թղթապանակներ [{0}]։ Նշված է որպես կարդացած</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Մասնավոր սենյակի գաղտնագրման բանալին {0} ստեղծված է</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Մասնավոր սենյակի գաղտնագրման բանալին {0} ջնջված է</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Մասնավոր սենյակի գաղտնագրման բանալին {0} թարմացված է</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Հայտնաբերվել է կասկածելի մուտք՝ {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>ԱԲ գործակալի MCP սերվերը {0} թարմացված է</value>
+  </data>
 </root>
