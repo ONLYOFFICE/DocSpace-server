@@ -90,6 +90,7 @@ public class FoldersControllerInternal(
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "One page of the folder history, the most recent record first", typeof(IAsyncEnumerable<HistoryDto>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, or `fromDate` or `toDate` is not a date and time ending in `Z` or a UTC offset")]
     [SwaggerResponse(403, "The caller may not read this folder")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpGet("folder/{folderId:int}/log")]
@@ -116,6 +117,8 @@ public class FoldersControllerInternal(
     /// <path>api/2.0/files/folder/{folderId}/log/report</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The queued report task", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(400, "The `format` is neither `Xlsx` nor `Csv`, or `from` or `to` is not a date and time")]
+    [SwaggerResponse(402, "The portal's pricing plan has no audit option, or the login history and audit trail section is not enabled")]
     [SwaggerResponse(403, "The caller may not export the history of this folder")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("folder/{folderId:int}/log/report")]
@@ -163,6 +166,7 @@ public class FoldersControllerInternal(
     /// passed to the operation that started the report.</param>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The state of the report task, or nothing when there is none", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(402, "The portal's pricing plan has no audit option, or the login history and audit trail section is not enabled")]
     [SwaggerResponse(403, "The caller may not export the history of this folder")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpGet("folder/{folderId:int}/log/report")]
@@ -196,6 +200,7 @@ public class FoldersControllerInternal(
     /// was passed to the operation that started the report.</param>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The request to stop the report was accepted")]
+    [SwaggerResponse(402, "The portal's pricing plan has no audit option, or the login history and audit trail section is not enabled")]
     [SwaggerResponse(403, "The caller may not export the history of this folder")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpDelete("folder/{folderId:int}/log/report")]
@@ -253,7 +258,7 @@ public class FoldersControllerInternal(
     /// <path>api/2.0/files/folder/{folderId}/xlsx</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The queued report task together with the form the answers belong to", typeof(XlsxReportResponseDto))]
-    [SwaggerResponse(403, "The folder is not a completed-forms folder, or the caller may not maintain the form")]
+    [SwaggerResponse(403, "The folder is not a completed-forms folder, the room of the submitted copy is not a form-filling room, the caller may not maintain the form, or the filling of the form is not started")]
     [SwaggerResponse(404, "The folder, the submitted copy or the original form was not found")]
     [HttpPost("folder/{folderId:int}/xlsx")]
     public async Task<XlsxReportResponseDto> GenerateXlsxByFolder(FolderIdRequestDto<int> inDto)
@@ -329,6 +334,9 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The folder that was created", typeof(FolderDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty, blank or longer than 165 characters")]
+    [SwaggerResponse(403, "The caller may not create content in the parent folder, or the parent does not exist, lies in the archive or is a section root that holds only rooms")]
+    [SwaggerResponse(404, "The parent folder id is a string that is not the id of a folder in a known third-party storage")]
     [HttpPost("folder/{folderId}")]
     public async Task<FolderDto<T>> CreateFolder(CreateFolderRequestDto<T> inDto)
     {
@@ -356,6 +364,8 @@ public abstract class FoldersController<T>(
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The file operations of the caller, including the deletion just queued", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [SwaggerResponse(403, "The caller may not delete the folder, or the folder is a room and `immediately` is not set")]
+    [SwaggerResponse(404, "The folder does not exist")]
     [HttpDelete("folder/{folderId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFolder(DeleteFolder<T> inDto)
     {
@@ -384,6 +394,9 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}/order</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The folder with the position it now holds", typeof(FolderDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read, or `order` is below 1 or is neither a number nor a dotted path ending in one")]
+    [SwaggerResponse(403, "The caller may not reorder this folder")]
+    [SwaggerResponse(404, "The folder does not exist")]
     [HttpPut("folder/{folderId}/order")]
     public async Task<FolderDto<T>> SetFolderOrder(OrderFolderRequestDto<T> inDto)
     {
@@ -412,8 +425,10 @@ public abstract class FoldersController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "One page of the folder contents, with the folder itself and the chain of its parents", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(403, "The caller may not read this folder")]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number or is negative, the `userIdOrGroupId` or `sharedBy` is not a GUID, the `roomId` is not a number while the folder id is one, `excludeSubject` or `withSubFolders` is not a boolean, or the `filterType`, `folderType`, `applyFilterOption`, `searchArea`, `sortOrder` or `location` is not one of the known values")]
+    [SwaggerResponse(403, "The caller may not read this folder, the folder lies inside Trash, or an anonymous caller asks for a folder that does not exist")]
     [SwaggerResponse(404, "The folder does not exist")]
+    [SwaggerResponse(500, "The folder lies in a third-party storage that cannot deliver it")]
     [AllowAnonymous]
     [HttpGet("{folderId}")]
     public async Task<FolderContentDto<T>> GetFolderByFolderId(GetFolderRequestDto<T> inDto)
@@ -446,6 +461,9 @@ public abstract class FoldersController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The folder", typeof(FolderDto<int>))]
+    [SwaggerResponse(401, "An anonymous caller has no external link that grants access to the folder")]
+    [SwaggerResponse(403, "The caller may not read this folder")]
+    [SwaggerResponse(404, "The folder does not exist")]
     [AllowAnonymous]
     [HttpGet("folder/{folderId}")]
     public async Task<FolderDto<T>> GetFolderInfo(FolderIdRequestDto<T> inDto)
@@ -473,6 +491,7 @@ public abstract class FoldersController<T>(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The chain of folders leading to the folder, the section root first", typeof(IAsyncEnumerable<FileEntryBaseDto>))]
     [SwaggerResponse(403, "The caller may not read this folder")]
+    [SwaggerResponse(404, "The folder does not exist")]
     [HttpGet("folder/{folderId}/path")]
     public async IAsyncEnumerable<FileEntryBaseDto> GetFolderPath(FolderIdRequestDto<T> inDto)
     {
@@ -515,6 +534,7 @@ public abstract class FoldersController<T>(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The direct subfolders of the folder, ordered by title", typeof(IAsyncEnumerable<FileEntryBaseDto>))]
     [SwaggerResponse(403, "The caller may not read this folder")]
+    [SwaggerResponse(404, "The folder does not exist")]
     [HttpGet("{folderId}/subfolders")]
     public async IAsyncEnumerable<FileEntryBaseDto> GetFolders(FolderIdRequestDto<T> inDto)
     {
@@ -542,7 +562,8 @@ public abstract class FoldersController<T>(
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The entries of the folder that are new for the caller", typeof(IAsyncEnumerable<FileEntryBaseDto>))]
-    [SwaggerResponse(403, "The caller may not read this folder")]
+    [SwaggerResponse(403, "The caller may not read this folder, or the folder lies inside Trash")]
+    [SwaggerResponse(404, "The folder does not exist")]
     [HttpGet("{folderId}/news")]
     public async IAsyncEnumerable<FileEntryBaseDto> GetNewFolderItems(FolderIdRequestDto<T> inDto)
     {
@@ -572,7 +593,9 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The folder with its new title", typeof(FolderDto<int>))]
-    [SwaggerResponse(403, "The caller may not rename this folder")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty, blank or longer than 165 characters")]
+    [SwaggerResponse(403, "The caller may not rename this folder, or the folder lies in Trash or in the archive")]
+    [SwaggerResponse(404, "The folder does not exist")]
     [HttpPut("folder/{folderId}")]
     public async Task<FolderDto<T>> RenameFolder(CreateFolderRequestDto<T> inDto)
     {
@@ -597,6 +620,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/filesusedspace</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The space taken by documents in each section, in bytes", typeof(FilesStatisticsResultDto))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("filesusedspace")]
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
@@ -624,8 +648,9 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{id}/link</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The primary external link of the folder", typeof(FileShareDto))]
-    [SwaggerResponse(403, "The caller may not manage the links of this folder")]
-    [SwaggerResponse(404, "The folder does not exist")]
+    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead")]
+    [SwaggerResponse(403, "The caller may not manage the links of this folder, the access level is not available for links to this folder, the link limit is reached, or the admin restricts external links to public rooms")]
+    [SwaggerResponse(404, "The folder does not exist, or its primary link was revoked")]
     [HttpPost("folder/{id}/link")]
     public async Task<FileShareDto> CreateFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
     {
@@ -662,6 +687,8 @@ public abstract class FoldersController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The primary external link of the folder", typeof(FileShareDto))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, or the `startIndex` is not a number")]
+    [SwaggerResponse(401, "An anonymous caller has no external link")]
     [SwaggerResponse(403, "The caller may not manage the links of this folder")]
     [SwaggerResponse(404, "The folder does not exist, or its primary link was revoked")]
     [AllowAnonymous]
@@ -692,6 +719,9 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{id}/links</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The link as it now stands, or nothing when it was revoked", typeof(FileShareDto))]
+    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead")]
+    [SwaggerResponse(403, "The caller may not manage the links of this folder, the access level is not available for links to this folder, the link limit is reached, or the admin's restriction on external links forbids the change")]
+    [SwaggerResponse(404, "The folder does not exist")]
     [HttpPut("folder/{id}/links")]
     public async Task<FileShareDto> SetFolderPrimaryExternalLink(FolderLinkRequestDto<T> inDto)
     {
@@ -740,6 +770,7 @@ public abstract class FoldersController<T>(
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The external links of the folder the caller may manage", typeof(IAsyncEnumerable<FileShareDto>))]
+    [SwaggerResponse(404, "The folder does not exist")]
     [HttpGet("folder/{id}/links")]
     public async IAsyncEnumerable<FileShareDto> GetFolderLinks(GetFolderLinksRequestDto<T> inDto)
     {
@@ -799,6 +830,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@favorites</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Favorites\" section with one page of the entries the caller marked as favorite", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number or is negative, the `userIdOrGroupId` is not a GUID, or the `filterType` or `sortOrder` is not one of the known values")]
     [SwaggerResponse(403, "The caller is not allowed to read the \"Favorites\" section")]
     [SwaggerResponse(404, "The \"Favorites\" section could not be resolved for this account")]
     [HttpGet("@favorites")]
@@ -824,6 +856,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@my</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"My documents\" section with one page of its contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number or is negative, the `userIdOrGroupId` is not a GUID, or the `filterType`, `applyFilterOption` or `sortOrder` is not one of the known values")]
     [SwaggerResponse(403, "The caller is not allowed to read the \"My documents\" section")]
     [SwaggerResponse(404, "This account has no personal section")]
     [HttpGet("@my")]
@@ -863,6 +896,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/recent</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Recent\" section with one page of the files the caller opened lately", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number or is negative, the `userIdOrGroupId` is not a GUID, `excludeSubject` is not a boolean, or the `filterType`, `applyFilterOption`, `searchArea` or `sortOrder` is not one of the known values")]
     [SwaggerResponse(403, "The caller is not allowed to read the \"Recent\" section")]
     [SwaggerResponse(404, "The \"Recent\" section could not be resolved for this account")]
     [HttpGet("@recent")]
@@ -890,6 +924,7 @@ public class FoldersControllerCommon(
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The sections available to the caller, each with one page of its content", typeof(IAsyncEnumerable<FolderContentDto<int>>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number or is negative, the `userIdOrGroupId` is not a GUID, `withoutTrash` is not a boolean, or the `filterType` or `sortOrder` is not one of the known values")]
     [SwaggerResponse(403, "The caller is not allowed to read one of the sections")]
     [SwaggerResponse(404, "One of the sections could not be resolved for this account")]
     [HttpGet("@root")]
@@ -951,6 +986,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@trash</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Trash\" section with one page of the entries the caller deleted", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number or is negative, the `userIdOrGroupId` is not a GUID, or the `filterType`, `applyFilterOption` or `sortOrder` is not one of the known values")]
     [SwaggerResponse(403, "The caller is not allowed to read the \"Trash\" section")]
     [SwaggerResponse(404, "This account has no \"Trash\" section")]
     [HttpGet("@trash")]
@@ -974,6 +1010,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@forms</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Forms\" section with one page of the form-filling rooms available to the caller", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number or is negative, the `userIdOrGroupId` is not a GUID, or the `filterType` or `sortOrder` is not one of the known values")]
     [SwaggerResponse(403, "The caller is not allowed to read the \"Forms\" section")]
     [SwaggerResponse(404, "The \"Forms\" section could not be resolved for this account")]
     [HttpGet("@forms")]

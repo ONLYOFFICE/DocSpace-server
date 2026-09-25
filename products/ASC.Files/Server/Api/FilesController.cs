@@ -97,6 +97,7 @@ public class FilesControllerInternal(
     /// <collection>list</collection>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The activity entries of the file, newest first", typeof(IAsyncEnumerable<HistoryDto>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, or `fromDate` or `toDate` is not a date and time ending in `Z` or a UTC offset")]
     [SwaggerResponse(403, "The caller has no read access to the file")]
     [SwaggerResponse(404, "No file with this identifier exists")]
     [HttpGet("file/{fileId:int}/log")]
@@ -191,7 +192,11 @@ public abstract class FilesController<T>(
     /// <collection>list</collection>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The versions of the file after the change", typeof(IAsyncEnumerable<FileDto<int>>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `version`")]
+    [SwaggerResponse(402, "Completing the current version needs more space than the room or user storage quota leaves")]
     [SwaggerResponse(403, "The caller may not change the version history of the file")]
+    [SwaggerResponse(404, "The file id, or the requested version of it, resolves to nothing")]
+    [SwaggerResponse(500, "The file is locked by somebody else, or, when the current version is completed, the file is encrypted, another update of it is in progress, or storing the new version fails")]
     [HttpPut("file/{fileId}/history")]
     public IAsyncEnumerable<FileDto<T>> ChangeVersionHistory(ChangeHistoryRequestDto<T> inDto)
     {
@@ -217,6 +222,8 @@ public abstract class FilesController<T>(
     /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The conversion entry of the file, or an empty list when the portal has none", typeof(IAsyncEnumerable<ConversationResultDto>))]
+    [SwaggerResponse(403, "The caller cannot read the file, or, with `start=true`, may not convert it")]
+    [SwaggerResponse(404, "The file id is neither a number nor the id of a file in a known third-party storage")]
     [HttpGet("file/{fileId}/checkconversion")]
     public IAsyncEnumerable<ConversationResultDto> CheckConversionStatus(CheckConversionStatusRequestDto<T> inDto)
     {
@@ -245,6 +252,9 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{fileId}/presigneduri</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The download address of the current file version", typeof(string))]
+    [SwaggerResponse(400, "The file is a PDF form in a form-filling room whose filling has not started, and the caller may only fill forms there")]
+    [SwaggerResponse(403, "The caller cannot read the file")]
+    [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpGet("file/{fileId}/presigneduri")]
     public async Task<string> GetPresignedUri(FileIdRequestDto<T> inDto)
     {
@@ -268,6 +278,9 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{fileId}/isformpdf</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "True when the file is a PDF form made in the editors, false otherwise", typeof(bool))]
+    [SwaggerResponse(403, "The caller cannot read the file")]
+    [SwaggerResponse(404, "The file id resolves to nothing")]
+    [SwaggerResponse(500, "The file is a PDF form in a form-filling room whose filling has not started, and the caller may only fill forms there")]
     [HttpGet("file/{fileId}/isformpdf")]
     public async Task<bool> isFormPDF(FileIdRequestDto<T> inDto)
     {
@@ -292,9 +305,12 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{fileId}/copyas</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The copy that was created", typeof(FileEntryBaseDto))]
-    [SwaggerResponse(400, "The content cannot be converted into the format of the new title")]
-    [SwaggerResponse(403, "The caller may not read the file or may not create files in the destination folder")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `destTitle` or `destFolderId`, or the new title is empty while the source file has no extension")]
+    [SwaggerResponse(402, "The copy does not fit into the storage quota of the portal, the room or the user, or the converted content exceeds the maximum upload size")]
+    [SwaggerResponse(403, "The caller may not read the file, the destination folder does not exist, or the caller may not create files in it")]
     [SwaggerResponse(404, "The file or the destination folder does not exist")]
+    [SwaggerResponse(415, "The installation filters uploads and does not accept the format of the new title")]
+    [SwaggerResponse(500, "The document service fails to convert the content, `destFolderId` is a fraction or outside the 32-bit range, or the file is a PDF form in a form-filling room whose filling has not started and the caller may only fill forms there")]
     [HttpPost("file/{fileId}/copyas")]
     public async Task<FileEntryBaseDto> CopyFileAs(CopyAsRequestDto<T> inDto)
     {
@@ -325,6 +341,11 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/{folderId}/file</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created file", typeof(FileDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
+    [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
+    [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, or the form gallery has no file of the title's format")]
+    [SwaggerResponse(404, "The folder id or `templateId` is a string that is not the id of an item in a known third-party storage")]
+    [SwaggerResponse(500, "`templateId` is a fraction, a number outside the 32-bit range or a numeric string, the form gallery does not know `formId` or cannot be reached, or the folder id is 0 and the caller is a guest without My documents")]
     [HttpPost("{folderId}/file")]
     public async Task<FileDto<T>> CreateFile(CreateFileRequestDto<T> inDto)
     {
@@ -349,7 +370,10 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/{folderId}/html</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created or updated HTML file", typeof(FileDto<int>))]
-    [SwaggerResponse(403, "The caller may not create files in this folder")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
+    [SwaggerResponse(402, "The content exceeds the maximum upload size, or the file does not fit into the storage quota of the portal, the room or the user")]
+    [SwaggerResponse(403, "The caller may not create files in this folder, or the folder is a section where files cannot be created")]
+    [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("{folderId}/html")]
     public async Task<FileDto<T>> CreateHtmlFile(CreateTextOrHtmlFileRequestDto<T> inDto)
     {
@@ -374,6 +398,10 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/{folderId}/text</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created or updated text file", typeof(FileDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
+    [SwaggerResponse(402, "The content exceeds the maximum upload size, or the file does not fit into the storage quota of the portal, the room or the user")]
+    [SwaggerResponse(403, "The caller may not create files in this folder, or the folder is a section where files cannot be created")]
+    [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("{folderId}/text")]
     public async Task<FileDto<T>> CreateTextFile(CreateTextOrHtmlFileRequestDto<T> inDto)
     {
@@ -400,6 +428,8 @@ public abstract class FilesController<T>(
     /// <collection>list</collection>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file operations of the caller, including the deletion just queued", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [SwaggerResponse(403, "The caller may not delete the file, or the file is locked by somebody else or open in an editing session")]
+    [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpDelete("file/{fileId}")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFile(DeleteRequestDto<T> inDto)
     {
@@ -430,6 +460,9 @@ public abstract class FilesController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The result of the completed form-filling session", typeof(FillingFormResultDto<int>))]
+    [SwaggerResponse(400, "The `fillingSessionId` is missing or empty")]
+    [SwaggerResponse(404, "No completed form-filling session with this identifier is remembered")]
+    [SwaggerResponse(500, "The original form of the filled copy has been deleted")]
     [AllowAnonymous]
     [HttpGet("file/fillresult")]
     public async Task<FillingFormResultDto<T>> GetFillResult(GetFillResultRequestDto inDto)
@@ -463,6 +496,8 @@ public abstract class FilesController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The addresses and keys the editor needs to show the changes", typeof(EditHistoryDataDto))]
+    [SwaggerResponse(403, "The caller may not read the history of the file, as with an anonymous caller, read-only or commenting access, or a file in a third-party storage")]
+    [SwaggerResponse(404, "The file id, or the requested version of it, resolves to nothing")]
     [AllowAnonymous]
     [HttpGet("file/{fileId}/edit/diff")]
     public async Task<EditHistoryDataDto> GetEditDiffUrl(EditDiffUrlRequestDto<T> inDto)
@@ -559,6 +594,8 @@ public abstract class FilesController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The editing revisions of the file, oldest first", typeof(IAsyncEnumerable<EditHistoryDto>))]
+    [SwaggerResponse(403, "The caller may not read the history of the file, as with an anonymous caller, read-only or commenting access, or a file in a third-party storage")]
+    [SwaggerResponse(404, "The file id resolves to nothing")]
     [AllowAnonymous]
     [HttpGet("file/{fileId}/edit/history")]
     public IAsyncEnumerable<EditHistoryDto> GetEditHistory(FileIdRequestDto<T> inDto)
@@ -584,6 +621,9 @@ public abstract class FilesController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file as it is stored, with the state it has for the caller", typeof(FileDto<int>))]
+    [SwaggerResponse(401, "An anonymous caller has no external link")]
+    [SwaggerResponse(403, "The caller cannot read the file")]
+    [SwaggerResponse(404, "The file id, or the requested version of it, resolves to nothing, or the file is a PDF form in a form-filling room whose filling has not started and the caller may only fill forms there")]
     [AllowAnonymous]
     [HttpGet("file/{fileId}")]
     public async Task<FileDto<T>> GetFileInfo(FileInfoRequestDto<T> inDto)
@@ -612,6 +652,8 @@ public abstract class FilesController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Every stored version of the file, newest first", typeof(IAsyncEnumerable<FileDto<int>>))]
+    [SwaggerResponse(403, "The caller may not read the history of the file, or the file id resolves to nothing")]
+    [SwaggerResponse(404, "The file id is neither a number nor the id of a file in a known third-party storage")]
     [AllowAnonymous]
     [HttpGet("file/{fileId}/history")]
     public IAsyncEnumerable<FileDto<T>> GetFileVersionInfo(FileIdRequestDto<T> inDto)
@@ -637,6 +679,8 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{fileId}/lock</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file with its lock state as it now stands", typeof(FileDto<int>))]
+    [SwaggerResponse(403, "The caller may not lock or unlock the file")]
+    [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpPut("file/{fileId}/lock")]
     public async Task<FileDto<T>> LockFile(LockFileRequestDto<T> inDto)
     {
@@ -661,6 +705,9 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{fileId}/customfilter</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The spreadsheet with its Custom Filter state as it now stands", typeof(FileDto<int>))]
+    [SwaggerResponse(400, "The file is not in a format that supports the Custom Filter mode")]
+    [SwaggerResponse(403, "The caller may not use the Custom Filter mode on the file, or somebody else switched the mode on and the caller is neither a room manager nor a DocSpace admin")]
+    [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpPut("file/{fileId}/customfilter")]
     public async Task<FileDto<T>> SetCustomFilterTag(FileCustomFilterRequestDto<T> inDto)
     {
@@ -690,7 +737,10 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The editing revisions of the file after the restore", typeof(IAsyncEnumerable<EditHistoryDto>))]
     [SwaggerResponse(400, "The version is missing or is already the current one")]
-    [SwaggerResponse(403, "The caller may not change the version history of the file")]
+    [SwaggerResponse(402, "The restored content does not fit into the storage quota")]
+    [SwaggerResponse(403, "The caller may not change the version history of the file, or, with `url`, may not edit the file or the file is locked by somebody else or being edited")]
+    [SwaggerResponse(404, "Without `url`, the file id or the requested version resolves to nothing")]
+    [SwaggerResponse(500, "The file is locked by somebody else or being edited, another restore of it is in progress, or storing the new version fails; with `url`, also when the file or the version does not exist or the address cannot be fetched")]
     [AllowAnonymous]
     [HttpPost("file/{fileId}/restoreversion")]
     public IAsyncEnumerable<EditHistoryDto> RestoreFileVersion(RestoreVersionRequestDto<T> inDto)
@@ -744,6 +794,9 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{fileId}/comment</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The comment as it was stored", typeof(string))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `version`, the version is below 1 or does not exist, or the comment is longer than 255 characters")]
+    [SwaggerResponse(403, "The caller may not change the version history of the file, or the file is locked by somebody else")]
+    [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpPut("file/{fileId}/comment")]
     public async Task<string> UpdateFileComment(UpdateCommentRequestDto<T> inDto)
     {
@@ -769,7 +822,12 @@ public abstract class FilesController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file after the rename, the restore, or both", typeof(FileDto<int>))]
-    [SwaggerResponse(403, "The caller may not rename the file or change its version")]
+    [SwaggerResponse(400, "The title is longer than 165 characters, or `lastVersion` is the current version")]
+    [SwaggerResponse(401, "An anonymous caller has no external link")]
+    [SwaggerResponse(402, "Restoring `lastVersion` needs more space than the room or user storage quota leaves")]
+    [SwaggerResponse(403, "The caller may not read or rename the file or change its version")]
+    [SwaggerResponse(404, "The file id, or `lastVersion` of it, resolves to nothing, or the file is a PDF form in a form-filling room whose filling has not started and the caller may only fill forms there")]
+    [SwaggerResponse(500, "The file is locked by somebody else, a third-party file is renamed while it is being edited, or restoring `lastVersion` fails because the file is being edited, another update of it is in progress or the new version cannot be stored")]
     [AllowAnonymous]
     [HttpPut("file/{fileId}")]
     public async Task<FileDto<T>> UpdateFile(UpdateFileRequestDto<T> inDto)
@@ -814,7 +872,8 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{id}/link</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The primary external link of the file", typeof(FileShareDto))]
-    [SwaggerResponse(403, "The caller may not share the file")]
+    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead")]
+    [SwaggerResponse(403, "The caller may not share the file, the access level is not available for links to this file, the link limit is reached, or the admin restricts external links to public rooms")]
     [SwaggerResponse(404, "The file does not exist, or its primary link was revoked")]
     [HttpPost("file/{id}/link")]
     public async Task<FileShareDto> CreateFilePrimaryExternalLink(FileLinkRequestDto<T> inDto)
@@ -851,6 +910,8 @@ public abstract class FilesController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The primary external link of the file", typeof(FileShareDto))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, or the `startIndex` is not a number")]
+    [SwaggerResponse(401, "An anonymous caller has no external link")]
     [SwaggerResponse(403, "The caller may not share the file")]
     [SwaggerResponse(404, "The file does not exist, or its primary link was revoked")]
     [AllowAnonymous]
@@ -881,6 +942,9 @@ public abstract class FilesController<T>(
     /// <collection>list</collection>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The external links of the file", typeof(IAsyncEnumerable<FileShareDto>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, or the `startIndex` is not a number")]
+    [SwaggerResponse(403, "The caller cannot read the file")]
+    [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpGet("file/{id}/links")]
     public async IAsyncEnumerable<FileShareDto> GetFileLinks(FilePrimaryIdRequestDto<T> inDto)
     {
@@ -915,6 +979,9 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{id}/links</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The link as it now stands, or nothing when it was revoked", typeof(FileShareDto))]
+    [SwaggerResponse(400, "The title or password is longer than 255 characters, the password does not meet the portal password policy, or `expirationDate` lies more than 10 years ahead")]
+    [SwaggerResponse(403, "The caller may not share the file, the access level is not available for links to this file, the link limit is reached, or the admin's restriction on external links forbids the change")]
+    [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpPut("file/{id}/links")]
     public async Task<FileShareDto> SetFileExternalLink(FileLinkRequestDto<T> inDto)
     {
@@ -951,6 +1018,7 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/{fileId}/order</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file with the position it now holds", typeof(FileDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read, or `order` is below 1 or is neither a number nor a dotted path ending in one")]
     [SwaggerResponse(403, "The caller may not reorder this file")]
     [SwaggerResponse(404, "The file does not exist")]
     [HttpPut("{fileId}/order")]
@@ -980,6 +1048,9 @@ public abstract class FilesController<T>(
     /// <collection>list</collection>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The files and folders that were moved, with the positions they now hold", typeof(IAsyncEnumerable<FileEntryDto<int>>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `items`, an item has no `entryId` or `entryType`, an `order` is below 1 or is neither a number nor a dotted path ending in one, or an `entryType` is sent as a string instead of a number")]
+    [SwaggerResponse(403, "The caller may not administer the room of an entry, or an entry lies outside any room")]
+    [SwaggerResponse(404, "An entry does not exist or is sent with the wrong `entryType`")]
     [HttpPut("order")]
     public IAsyncEnumerable<FileEntryDto<T>> SetFilesOrder(OrdersRequestDto<T> inDto)
     {
@@ -1008,7 +1079,11 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{id}/saveaspdf</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The PDF file that was created", typeof(FileDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `folderId` or `title`")]
+    [SwaggerResponse(402, "The PDF does not fit into the storage quota of the portal, the room or the user")]
+    [SwaggerResponse(403, "The caller cannot read the source file or may not create files in the destination folder")]
     [SwaggerResponse(404, "The source file or the destination folder does not exist")]
+    [SwaggerResponse(500, "The document service fails to convert the file to PDF, or the converted file cannot be downloaded")]
     [HttpPost("file/{id}/saveaspdf")]
     public async Task<FileDto<T>> SaveFileAsPdf(SaveAsPdfRequestDto<T> inDto)
     {
@@ -1033,7 +1108,9 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{fileId}/formrolemapping</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The roles were stored and the filling was started or reset")]
-    [SwaggerResponse(403, "The caller may not start or reset the filling of this form")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `formId` or `roles`, or `roles` is null")]
+    [SwaggerResponse(403, "The caller may not start or reset the filling of this form, or the file is not a PDF or lies outside a room")]
+    [SwaggerResponse(500, "No file with the `formId` exists")]
     // The handler reads the id from the body (`formId`), not from the route, so nothing binds this
     // placeholder; the client sends the same value in both places.
     [SwaggerPathParameter("fileId", "The form the role mapping belongs to. Send the same value as the `formId` of the request body, which is the one the handler reads.")]
@@ -1062,7 +1139,7 @@ public abstract class FilesController<T>(
     /// <collection>list</collection>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The roles of the form with the state of each", typeof(IEnumerable<FormRoleDto>))]
-    [SwaggerResponse(403, "The caller has no read access to the form")]
+    [SwaggerResponse(403, "The caller has no read access to the form, or the file is not a PDF")]
     [SwaggerResponse(404, "No file with this identifier exists")]
     [HttpGet("file/{fileId}/formroles")]
     public IAsyncEnumerable<FormRoleDto> GetAllFormRoles(FileIdRequestDto<T> inDto)
@@ -1089,7 +1166,9 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{fileId}/manageformfilling</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The action was applied to the form")]
-    [SwaggerResponse(403, "The caller may not start, stop or resume the filling of this form")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `formId`, or `action` is sent as a string instead of a number")]
+    [SwaggerResponse(403, "The form does not exist, is not a PDF or lies outside a room, the caller may not start or stop its filling, or `action` is not one of the known values")]
+    [SwaggerResponse(500, "The form has no filling properties yet, as when a filling that was never started is resumed, or the form lies in a third-party storage")]
     // Same shape as formrolemapping above: the id travels in the body, the route placeholder is
     // unbound, and the client fills both with the same value.
     [SwaggerPathParameter("fileId", "The form the action applies to. Send the same value as the `formId` of the request body, which is the one the handler reads.")]
@@ -1117,7 +1196,7 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{fileId}/submissions</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The submissions collected for the form, with the description of its fields", typeof(FormSubmissionsDto))]
-    [SwaggerResponse(403, "The caller has no read access to the form")]
+    [SwaggerResponse(403, "The form does not exist or is not a PDF, the caller has no read access to it, its filling has not started, it is a copy rather than the original form, or it lies outside the room its filling was started in")]
     [HttpGet("file/{fileId}/submissions")]
     public Task<FormSubmissionsDto> GetFormSubmissions(FileIdRequestDto<int> inDto)
     {
@@ -1144,7 +1223,7 @@ public abstract class FilesController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The key pairs of the caller and the file keys issued to them", typeof(FileEncryptionInfoDto))]
     [SwaggerResponse(400, "The file cannot carry encryption keys")]
-    [SwaggerResponse(403, "The caller has no read access to the file")]
+    [SwaggerResponse(403, "The file does not exist, or the caller has no read access to it")]
     [SwaggerResponse(404, "The file does not exist")]
     [HttpGet("{fileId}/access")]
     public async Task<FileEncryptionInfoDto> GetEncryptionInfoAsync(T fileId)
@@ -1190,7 +1269,7 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/{fileId}/access</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file keys were stored")]
-    [SwaggerResponse(403, "The caller may not issue keys for this file, or the file is not in a private room")]
+    [SwaggerResponse(403, "The file does not exist, the caller may not issue keys for it, the file is not in a private room, or a recipient has no read access to it")]
     [SwaggerResponse(404, "The file does not exist")]
     [HttpPut("{fileId}/access")]
     public async Task SetEncryptionInfoAsync(AccessRequestDto<T> inDto)
@@ -1227,6 +1306,11 @@ public class FilesControllerCommon(
     /// <path>api/2.0/files/@my/file</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created file", typeof(FileDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
+    [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
+    [SwaggerResponse(403, "The template does not exist or cannot be read, or the form gallery has no file of the title's format")]
+    [SwaggerResponse(404, "`templateId` is a string that is not the id of a file in a known third-party storage")]
+    [SwaggerResponse(500, "`templateId` is a fraction, a number outside the 32-bit range or a numeric string, the form gallery does not know `formId` or cannot be reached, or the caller is a guest, who has no My documents")]
     [HttpPost("@my/file")]
     public async Task<FileDto<int>> CreateFileInMyDocuments(CreateFile<JsonElement> inDto)
     {
@@ -1267,7 +1351,10 @@ public class FilesControllerCommon(
     /// <path>api/2.0/files/@my/html</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created or updated HTML file", typeof(FileDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
+    [SwaggerResponse(402, "The content exceeds the maximum upload size, or the file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller may not create a file in this section")]
+    [SwaggerResponse(404, "The caller is a guest, who has no My documents")]
     [HttpPost("@my/html")]
     public async Task<FileDto<int>> CreateHtmlFileInMyDocuments(CreateTextOrHtmlFile inDto)
     {
@@ -1306,6 +1393,10 @@ public class FilesControllerCommon(
     /// <path>api/2.0/files/@my/text</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The created or updated text file", typeof(FileDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `content`, or the title is empty, blank or longer than 165 characters")]
+    [SwaggerResponse(402, "The content exceeds the maximum upload size, or the file does not fit into the storage quota of the portal, the room or the user")]
+    [SwaggerResponse(403, "The caller may not create a file in this section")]
+    [SwaggerResponse(404, "The caller is a guest, who has no My documents")]
     [HttpPost("@my/text")]
     public async Task<FileDto<int>> CreateTextFileInMyDocuments(CreateTextOrHtmlFile inDto)
     {
@@ -1332,6 +1423,7 @@ public class FilesControllerCommon(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file ids from the request, echoed back", typeof(IEnumerable<JsonElement>))]
+    [SwaggerResponse(401, "An anonymous caller has no external link")]
     [AllowAnonymous]
     [HttpPost("thumbnails")]
     public async Task<IEnumerable<JsonElement>> CreateThumbnails(BaseBatchRequestDto inDto)

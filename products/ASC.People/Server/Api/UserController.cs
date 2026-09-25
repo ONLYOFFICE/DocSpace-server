@@ -753,8 +753,9 @@ public class UserController(
     /// <path>api/2.0/people/{userid}</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The profile as it was just before it was deleted", typeof(EmployeeFullDto))]
-    [SwaggerResponse(403, "The account is not disabled, is a system or an LDAP account, or the caller may not delete a DocSpace administrator")]
+    [SwaggerResponse(403, "The account is not disabled, is a system or an LDAP account, the caller may not delete a DocSpace administrator, or the OAuth service refused to remove the OAuth clients of the account")]
     [SwaggerResponse(404, "No user has the specified ID")]
+    [SwaggerResponse(500, "A reassignment of the data of the account has not finished yet, or the OAuth service cannot be reached")]
     [HttpDelete("{userid}")]
     public async Task<EmployeeFullDto> DeleteMember(GetMemberByIdRequestDto inDto)
     {
@@ -1066,7 +1067,9 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The full profiles of the matching accounts", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "The `status` in the route is not one of the known values, or `query` is missing")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
+    [SwaggerResponse(500, "The `filterBy` is `group` and the `filterValue` is not a GUID")]
     [HttpGet("status/{status}/search")]
     public async IAsyncEnumerable<EmployeeFullDto> SearchUsersByStatus(AdvancedSearchDto inDto)
     {
@@ -1114,7 +1117,9 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "A page of active accounts, with their full profiles", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, or the `sortOrder` is not one of the known values")]
     [SwaggerResponse(403, "The caller is a member or a guest")]
+    [SwaggerResponse(500, "The `filterBy` is `group` and the `filterValue` is not a GUID")]
     [HttpGet]
     public IAsyncEnumerable<EmployeeFullDto> GetAllProfiles(GetAllProfilesRequestDto inDto)
     {
@@ -1300,7 +1305,9 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / User status")]
     [SwaggerResponse(200, "A page of accounts in the requested state, with their full profiles", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "The `status` in the route or the `sortOrder` is not one of the known values, the `count` is outside 1-100 or not a number, or the `startIndex` is not a number")]
     [SwaggerResponse(403, "The caller is a member or a guest")]
+    [SwaggerResponse(500, "The `filterBy` is `group` and the `filterValue` is not a GUID")]
     [HttpGet("status/{status}")]
     public IAsyncEnumerable<EmployeeFullDto> GetByStatus(GetByStatusRequestDto inDto)
     {
@@ -1349,6 +1356,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "A page of matching accounts, with their full profiles", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, the `groupId` or `inviterId` is not a GUID, `isAdministrator`, `withoutGroup`, `excludeGroup` or `invitedByMe` is not a boolean, or the `employeeStatus`, `activationStatus`, `employeeType`, `employeeTypes`, `payments`, `accountLoginType`, `quotaFilter`, `area` or `sortOrder` is not one of the known values")]
     [SwaggerResponse(403, "The caller is a member or a guest")]
     [AllowNotPayment]
     [HttpGet("filter")]
@@ -1489,6 +1497,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "A page of matching accounts, with their short profiles", typeof(IAsyncEnumerable<EmployeeDto>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, the `groupId` or `inviterId` is not a GUID, `isAdministrator`, `withoutGroup`, `excludeGroup` or `invitedByMe` is not a boolean, or the `employeeStatus`, `activationStatus`, `employeeType`, `employeeTypes`, `payments`, `accountLoginType`, `quotaFilter`, `area` or `sortOrder` is not one of the known values")]
     [SwaggerResponse(403, "The caller is a member or a guest")]
     [HttpGet("simple/filter")]
     public async IAsyncEnumerable<EmployeeDto> GetSimpleByFilter(SimpleByFilterRequestDto inDto)
@@ -1549,7 +1558,8 @@ public class UserController(
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Every account that was asked for, including the ones that were skipped", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The userIds field is missing")]
-    [SwaggerResponse(403, "No permissions to perform this action, or one of the listed accounts is not disabled")]
+    [SwaggerResponse(403, "No permissions to perform this action, one of the listed accounts is not disabled, or the OAuth service refused to remove the OAuth clients of an account")]
+    [SwaggerResponse(500, "A reassignment of the data of one of the listed accounts has not finished yet, or the OAuth service cannot be reached")]
     [HttpPut("delete", Order = -1)]
     public async IAsyncEnumerable<EmployeeFullDto> RemoveUsers(UpdateMembersRequestDto inDto)
     {
@@ -1629,6 +1639,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The targeted accounts the caller is allowed to see", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "The request body cannot be read, or `userIds` is missing while `resendAll` is false")]
     [SwaggerResponse(403, "A member or a guest asked for resendAll, or listed an account other than their own")]
     [AllowNotPayment]
     [HttpPut("invite")]
@@ -1807,6 +1818,7 @@ public class UserController(
     /// <path>api/2.0/people/theme</path>
     [Tags("People / Theme")]
     [SwaggerResponse(200, "The interface theme that was stored", typeof(DarkThemeSettings))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `theme`, or the `theme` is not one of the known values")]
     [HttpPut("theme")]
     public async Task<DarkThemeSettings> ChangePortalTheme(DarkThemeSettingsRequestDto inDto)
     {
@@ -2003,7 +2015,8 @@ public class UserController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Password")]
     [SwaggerResponse(200, "The message stating that the recovery link was sent to the address", typeof(string))]
-    [SwaggerResponse(403, "The CAPTCHA was not passed, or an authenticated caller may not ask for that account")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `email`, the email is not a valid address or is longer than 255 characters, or `recaptchaType` is sent as a string instead of a number")]
+    [SwaggerResponse(403, "The CAPTCHA was not passed, an authenticated caller may not ask for that account, or, for an authenticated caller, the account does not exist, is disabled, comes from LDAP or SSO, or has an auto-generated email")]
     [AllowNotPayment]
     [AllowAnonymous]
     [HttpPost("password")]
@@ -2540,6 +2553,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / User type")]
     [SwaggerResponse(200, "The converted users with their detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "The `type` in the route is not one of the known values, or the request body cannot be read or has no `userIds`")]
     [SwaggerResponse(402, "The tariff or the paid-user quota does not allow one more paid user")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("type/{type}")]
@@ -2712,6 +2726,7 @@ public class UserController(
     /// <path>api/2.0/people/type/terminate</path>
     [Tags("People / User type")]
     [SwaggerResponse(200, "The state of the cancelled user type change, or an empty body when nothing was queued for the user", typeof(TaskProgressResponseDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `userId`")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("type/terminate")]
     public async Task<TaskProgressResponseDto> TerminateUserTypeUpdate(TerminateRequestDto inDto)
@@ -3212,6 +3227,7 @@ public class UserControllerAdditional<T>(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The matching accounts, each with its access state for the room", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, the `inviterId` is not a GUID, `excludeShared`, `includeShared` or `invitedByMe` is not a boolean, or the `employeeStatus`, `activationStatus`, `area` or `employeeTypes` is not one of the known values")]
     [SwaggerResponse(403, "The caller is a guest or cannot read the room")]
     [SwaggerResponse(404, "No room has the specified ID")]
     [HttpGet("room/{id}")]
@@ -3245,6 +3261,7 @@ public class UserControllerAdditional<T>(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The matching accounts, each with its access state for the folder", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, the `inviterId` is not a GUID, `excludeShared`, `includeShared` or `invitedByMe` is not a boolean, or the `employeeStatus`, `activationStatus`, `area` or `employeeTypes` is not one of the known values")]
     [SwaggerResponse(403, "The caller is a guest or cannot read the folder")]
     [SwaggerResponse(404, "No folder has the specified ID")]
     [HttpGet("folder/{id}")]
@@ -3278,6 +3295,7 @@ public class UserControllerAdditional<T>(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The matching accounts, each with its access state for the file", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, the `inviterId` is not a GUID, `excludeShared`, `includeShared` or `invitedByMe` is not a boolean, or the `employeeStatus`, `activationStatus`, `area` or `employeeTypes` is not one of the known values")]
     [SwaggerResponse(403, "The caller is a guest or cannot read the file")]
     [SwaggerResponse(404, "No file has the specified ID")]
     [HttpGet("file/{id}")]

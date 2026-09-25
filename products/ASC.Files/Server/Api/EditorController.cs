@@ -120,7 +120,10 @@ public abstract class EditorController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file is saved and the stored version is returned", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The file id cannot be resolved to a storage that could accept the content")]
+    [SwaggerResponse(402, "The content does not fit into the portal's storage quota, even with the overshoot allowed for editor saves")]
     [SwaggerResponse(403, "The caller cannot edit the file, or it is locked, in Trash, or open in somebody else's editing session")]
+    [SwaggerResponse(404, "The file id resolves to nothing")]
+    [SwaggerResponse(500, "The file lies in a third-party storage in another format and the document service fails to convert the content")]
     [HttpPut("{fileId}/saveediting")]
     public async Task<FileDto<T>> SaveEditingFileFromForm(SaveEditingRequestDto<T> inDto)
     {
@@ -147,7 +150,11 @@ public abstract class EditorController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The document key of the editing session", typeof(string))]
-    [SwaggerResponse(403, "The caller cannot edit the file, or the file is already being edited and the session was claimed alone")]
+    [SwaggerResponse(401, "An anonymous caller who may not edit the file claims the session with `editingAlone=true`")]
+    [SwaggerResponse(403, "The caller cannot edit the file, the file is locked or in Trash, somebody is already editing it and the session was claimed alone, or the document service did not accept the tracking request")]
+    [SwaggerResponse(404, "The file id resolves to nothing")]
+    [SwaggerResponse(415, "The file is in a format the editors can neither edit nor open for viewing")]
+    [SwaggerResponse(500, "The file lies in a third-party storage that cannot deliver it, or, with `editingAlone=true`, the file is locked by somebody else or lies in Trash")]
     [AllowAnonymous]
     [HttpPost("{fileId}/startedit")]
     public async Task<string> StartEditFile(StartEditRequestDto<T> inDto)
@@ -173,6 +180,7 @@ public abstract class EditorController<T>(
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The form file, with the filling properties now stored on it", typeof(FileDto<int>))]
     [SwaggerResponse(403, "The caller holds only form-filling access on the room, or no access to it at all")]
+    [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpPut("{fileId}/startfilling")]
     public async Task<FileDto<T>> StartFillingFile(StartFillingRequestDto<T> inDto)
     {
@@ -201,7 +209,10 @@ public abstract class EditorController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The session was refreshed or closed", typeof(ItemKeyValuePair<bool, string>))]
-    [SwaggerResponse(403, "The document key does not match the revision being edited")]
+    [SwaggerResponse(401, "An anonymous caller has no external link, or refreshes the session through a link that does not grant editing")]
+    [SwaggerResponse(403, "The document key does not match the revision being edited, or the caller has none of the editing rights on the file")]
+    [SwaggerResponse(404, "The file id resolves to nothing")]
+    [SwaggerResponse(500, "The session is refreshed while the file is locked by somebody else or lies in Trash")]
     [AllowAnonymous]
     [HttpGet("{fileId}/trackeditfile")]
     public async Task<ItemKeyValuePair<bool, string>> TrackEditFile(TrackEditFileRequestDto<T> inDto)
@@ -231,7 +242,10 @@ public abstract class EditorController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The editor configuration for the requested file and mode", typeof(ConfigurationDto<int>))]
-    [SwaggerResponse(403, "The caller cannot read the file, or asked for a past version without access to the file history")]
+    [SwaggerResponse(403, "The caller cannot read the file, asked for a past version without access to the file history, or the file is in Trash")]
+    [SwaggerResponse(404, "The file id, or the requested version of it, resolves to nothing")]
+    [SwaggerResponse(415, "The file is in a format the editors can neither edit nor open for viewing")]
+    [SwaggerResponse(500, "The file lies in a third-party storage that cannot deliver it")]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("{fileId}/openedit")]
@@ -388,6 +402,8 @@ public abstract class EditorController<T>(
     /// <path>api/2.0/files/file/{fileId}/presigned</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The download address of the file with its signature token", typeof(DocumentService.FileLink))]
+    [SwaggerResponse(403, "The caller cannot read the file")]
+    [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpGet("{fileId}/presigned")]
     public async Task<DocumentService.FileLink> GetPresignedFileUri(FileIdRequestDto<T> inDto)
     {
@@ -412,6 +428,8 @@ public abstract class EditorController<T>(
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The portal members who can read the file, ordered by display name", typeof(List<MentionWrapper>))]
+    [SwaggerResponse(403, "The caller cannot read the file")]
+    [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpGet("{fileId}/sharedusers")]
     public Task<List<MentionWrapper>> GetSharedUsers(FileIdRequestDto<T> inDto)
     {
@@ -456,6 +474,9 @@ public abstract class EditorController<T>(
     /// <path>api/2.0/files/file/referencedata</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The reference descriptor, or the same object with the error text set when nothing resolved", typeof(FileReference))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `fileKey` or `instanceId`")]
+    [SwaggerResponse(403, "The caller cannot read the source file, its folder or the referenced file")]
+    [SwaggerResponse(500, "`fileKey` is empty or not a number while `instanceId` names this portal")]
     [HttpPost("referencedata")]
     public async Task<FileReference> GetReferenceData(GetReferenceDataDto<T> inDto)
     {
@@ -479,6 +500,7 @@ public abstract class EditorController<T>(
     /// <collection>list</collection>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The users the file is shared with, ordered by display name", typeof(List<MentionWrapper>))]
+    [SwaggerResponse(403, "The caller is a guest, or the file id resolves to nothing")]
     [HttpGet("{fileId}/protectusers")]
     public async Task<List<MentionWrapper>> GetProtectedFileUsers(FileIdRequestDto<T> inDto)
     {
@@ -574,8 +596,9 @@ public class EditorController(FilesLinkUtility filesLinkUtility,
     /// <path>api/2.0/files/docservice</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The settings are stored and the Document Server answered the verification requests", typeof(DocServiceUrlDto))]
-    [SwaggerResponse(400, "An address cannot be parsed or carries a query string, the signature secret is sent without its header, or an http address is given for a portal served over https")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `docServiceUrl`, an address cannot be parsed or carries a query string, the signature secret is sent without its header, or an http address is given for a portal served over https")]
     [SwaggerResponse(403, "The caller is not the portal owner or a DocSpace administrator")]
+    [SwaggerResponse(500, "The Document Server fails one of the verification requests at the new settings, which are then rolled back")]
     //[SwaggerResponse(503, "Unable to establish a connection with the Document Server")]
     [HttpPut("docservice")]
     public async Task<DocServiceUrlDto> CheckDocServiceUrl(CheckDocServiceUrlRequestDto inDto)

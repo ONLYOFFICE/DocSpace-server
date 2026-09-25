@@ -71,7 +71,13 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The editor address to open, with an optional notice fragment", typeof(string))]
-    [SwaggerResponse(403, "The caller cannot open the form, or asked for a past revision without history access")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `version`")]
+    [SwaggerResponse(401, "An anonymous caller has no external link")]
+    [SwaggerResponse(402, "The personal draft does not fit into the storage quota of the portal or the room")]
+    [SwaggerResponse(403, "The caller cannot open the form, asked for a past revision without history access, the form is in Trash, or the caller may fill the form but not the folder it lies in")]
+    [SwaggerResponse(404, "The file id, or the requested version of it, resolves to nothing")]
+    [SwaggerResponse(415, "The file is in a format the editors can neither edit nor open for viewing")]
+    [SwaggerResponse(500, "The file lies in a third-party storage that cannot deliver it")]
     [AllowAnonymous]
     [HttpPost("masterform/{fileId}/checkfillformdraft")]
     public async Task<string> CheckFillFormDraft(CheckFillFormDraftRequestDto<T> inDto)
