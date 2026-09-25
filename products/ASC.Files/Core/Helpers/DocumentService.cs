@@ -74,6 +74,7 @@ public static class DocumentService
     /// </summary>
     private const string OperationClaim = "operation";
     private const string ConverterOperation = "converter";
+    private const string DocbuilderOperation = "docbuilder";
 
     private static readonly JsonSerializerOptions _tokenSettings = new()
     {
@@ -309,6 +310,13 @@ public static class DocumentService
 
         try
         {
+            // A document service that is down answers through its own proxy, with an html error page that would
+            // otherwise be saved as the converted document.
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"answered {(int)response.StatusCode} {response.StatusCode}");
+            }
+
             // A failure comes back as the ordinary json error answer, a success as the document itself.
             if (IsJson(response))
             {
@@ -500,6 +508,83 @@ public static class DocumentService
             dataResponse = await response.Content.ReadAsStringAsync();
         }
 
+        return ParseDocbuilderResponse(dataResponse);
+    }
+
+    /// <summary>
+    /// Runs a document builder script that is uploaded with the request instead of being fetched from an address,
+    /// which is what lets a portal behind a private network hand the document service a script it could not reach on
+    /// its own.
+    /// </summary>
+    /// <param name="docbuilderUrl">Url to the document builder service that accepts an uploaded script</param>
+    /// <param name="script">The script content</param>
+    /// <param name="scriptFileName">The name the script is uploaded under</param>
+    /// <param name="body">The request parameters, as the document service expects them</param>
+    /// <param name="signatureSecret">Secret key to generate the token</param>
+    /// <param name="sslVerification">Enable SSL verification</param>
+    /// <param name="clientFactory"></param>
+    public static Task<(string DocBuilderKey, Dictionary<string, string> Urls)> DocbuilderRequestFromFileAsync(
+        string docbuilderUrl,
+        Stream script,
+        string scriptFileName,
+        BuilderFromFileBody body,
+        string signatureSecret,
+        bool sslVerification,
+        IHttpClientFactory clientFactory)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(docbuilderUrl);
+        ArgumentNullException.ThrowIfNull(script);
+        ArgumentNullException.ThrowIfNull(body);
+
+        return InternalDocbuilderRequestFromFileAsync(docbuilderUrl, script, scriptFileName, body, signatureSecret, sslVerification, clientFactory);
+    }
+
+    private static async Task<(string DocBuilderKey, Dictionary<string, string> Urls)> InternalDocbuilderRequestFromFileAsync(
+        string docbuilderUrl,
+        Stream script,
+        string scriptFileName,
+        BuilderFromFileBody body,
+        string signatureSecret,
+        bool sslVerification,
+        IHttpClientFactory clientFactory)
+    {
+        if (!string.IsNullOrEmpty(body.Key))
+        {
+            docbuilderUrl = FilesLinkUtility.AddQueryString(docbuilderUrl, new Dictionary<string, string> {
+                { FilesLinkUtility.ShardKey, body.Key }
+            });
+        }
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, docbuilderUrl);
+        var httpClient = clientFactory.CreateClient(GetHttpClientName(sslVerification));
+
+        using var content = BuildFromFileContent(body, DocbuilderOperation, signatureSecret, script, scriptFileName);
+        request.Content = content;
+
+        string dataResponse;
+
+        using (var response = await httpClient.SendAsync(request))
+        {
+            // A document service that is down answers through its own proxy, with an html error page that would
+            // otherwise reach the json reader and be reported as a stray character.
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"answered {(int)response.StatusCode} {response.StatusCode}");
+            }
+
+            dataResponse = await response.Content.ReadAsStringAsync();
+        }
+
+        return ParseDocbuilderResponse(dataResponse);
+    }
+
+    /// <summary>
+    /// Reads the answer of the document builder service: reports the error it names, and hands back the request key
+    /// together with the produced files once the build has ended. The urls stay null while it is still running, which
+    /// is what a caller polls on.
+    /// </summary>
+    private static (string DocBuilderKey, Dictionary<string, string> Urls) ParseDocbuilderResponse(string dataResponse)
+    {
         if (string.IsNullOrEmpty(dataResponse))
         {
             throw new Exception("Invalid response");
@@ -536,7 +621,7 @@ public static class DocumentService
     /// sends them unsigned as the json "params" part instead. The document itself is always a separate part, so the
     /// document service never has to fetch the source on its own.
     /// </summary>
-    private static MultipartFormDataContent BuildFromFileContent(ConvertFromFileBody body, string operation, string signatureSecret, Stream file, string fileName)
+    private static MultipartFormDataContent BuildFromFileContent(FromFileBody body, string operation, string signatureSecret, Stream file, string fileName)
     {
         var content = new MultipartFormDataContent();
 
@@ -558,7 +643,7 @@ public static class DocumentService
     /// Signs the parameters as the document service wants them for an uploaded source: the payload is the parameters
     /// themselves, with the claim that says which endpoint the token may be spent on.
     /// </summary>
-    private static string EncodeFromFileToken(ConvertFromFileBody body, string operation, string signatureSecret)
+    private static string EncodeFromFileToken(FromFileBody body, string operation, string signatureSecret)
     {
         var payload = JsonSerializer.SerializeToNode(body, _tokenSettings).AsObject();
 
@@ -1025,27 +1110,40 @@ public static class DocumentService
     }
 
     /// <summary>
-    /// The conversion parameters without the address of the source document: the shape of the "params"
-    /// part of a multipart conversion request, where the document travels as a separate part.
+    /// The parameters shared by every request that uploads its source with the request: whether the document service
+    /// answers straight away or is polled, the key that identifies the request, and the signature.
     /// </summary>
-    [DebuggerDisplay("{Title} from {FileType} to {OutputType} ({Key})")]
-    public class ConvertFromFileBody
+    public abstract class FromFileBody
     {
         /// <summary>
-        /// Specifies whether the conversion is asynchronous or not.
+        /// Specifies whether the request to the document service is asynchronous or not.
         /// </summary>
         public bool Async { get; set; }
 
         /// <summary>
-        /// The document identifier used to unambiguously identify the document file.
+        /// The request identifier used to unambiguously identify the request.
         /// </summary>
         public string Key { get; set; }
 
         /// <summary>
-        /// The encrypted signature added to the ONLYOFFICE Docs config in the form of a token.
+        /// The encrypted signature added to the config in the form of a token.
         /// </summary>
         public string Token { get; set; }
+    }
 
+    /// <summary>
+    /// The document builder parameters without the address of the script: the shape of the "params" part of a
+    /// multipart document builder request, where the script travels as a separate part.
+    /// </summary>
+    public class BuilderFromFileBody : FromFileBody;
+
+    /// <summary>
+    /// The conversion parameters without the address of the source document: the shape of the "params"
+    /// part of a multipart conversion request, where the document travels as a separate part.
+    /// </summary>
+    [DebuggerDisplay("{Title} from {FileType} to {OutputType} ({Key})")]
+    public class ConvertFromFileBody : FromFileBody
+    {
         /// <summary>
         /// The type of the document file to be converted.
         /// </summary>

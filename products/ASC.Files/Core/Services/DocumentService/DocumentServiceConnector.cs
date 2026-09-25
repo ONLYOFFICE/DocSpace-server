@@ -213,6 +213,32 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
         }
     }
 
+    /// <summary>
+    /// Runs a document builder script by uploading it to the document service, instead of publishing it to the portal
+    /// temporary storage and handing over an address for it to fetch.
+    /// </summary>
+    public async Task<(string BuilderKey, Dictionary<string, string> Urls)> DocbuilderRequestFromFileAsync(Stream script,
+                                           string scriptFileName,
+                                           BuilderFromFileBody body)
+    {
+        logger.DebugDocServiceBuilderRequestKey(body.Key, body.Async);
+        try
+        {
+            return await ASC.Files.Core.Helpers.DocumentService.DocbuilderRequestFromFileAsync(
+                filesLinkUtility.DocServiceDocbuilderUrl + FromFileSuffix,
+                script,
+                scriptFileName,
+                body,
+                filesLinkUtility.DocServiceSignatureSecret,
+                await filesLinkUtility.GetDocServiceSslVerificationAsync(),
+                clientFactory);
+        }
+        catch (Exception ex)
+        {
+            throw CustomizeError(ex);
+        }
+    }
+
     public async Task<string> GetVersionAsync()
     {
         logger.DebugDocServiceRequestVersion();

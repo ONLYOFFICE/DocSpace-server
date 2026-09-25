@@ -129,5 +129,6 @@ global using Swashbuckle.AspNetCore.Annotations;
 global using ZiggyCreatures.Caching.Fusion;
 
 global using ConvertFromFileBody = ASC.Files.Core.Helpers.DocumentService.ConvertFromFileBody;
+global using DocumentBuilderScriptRunner = ASC.Files.Core.Services.DocumentBuilderService.DocumentBuilderScriptRunner;
 global using FileShare = ASC.Files.Core.Security.FileShare;
 global using SecurityContext = ASC.Core.SecurityContext;
