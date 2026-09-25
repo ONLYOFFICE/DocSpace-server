@@ -68,6 +68,8 @@ public class ThirdPartyController(OAuth20TokenHelper oAuth20TokenHelper) : Contr
     /// <path>api/2.0/thirdparty/{provider}</path>
     [Tags("ThirdParty")]
     [SwaggerResponse(200, "The consent URL of the provider, ready to be opened in a browser; empty when the requested provider is not one of the seven this operation supports", typeof(string))]
+    [SwaggerResponse(400, "The `provider` in the path is not one of the known login providers")]
+    [SwaggerResponse(500, "The provider is one of the seven supported ones but is not registered among the installation's authorization consumers")]
     [HttpGet("{provider}")]
     public string GetThirdPartyCode(ConfirmationCodeUrlRequestDto inDto)
     {

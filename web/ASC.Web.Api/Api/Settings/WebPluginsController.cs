@@ -63,8 +63,8 @@ public class WebPluginsController(
     /// <path>api/2.0/settings/webplugins</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "The installed web plugin, enabled, with the `url` its script is served from", typeof(WebPluginDto))]
-    [SwaggerResponse(400, "The uploaded package is missing, of the wrong type, too large, or its manifest is rejected")]
-    [SwaggerResponse(403, "Web plugins or plugin uploads are switched off for the installation, or `system` was requested outside a standalone installation")]
+    [SwaggerResponse(400, "The uploaded package is missing, more than one file was sent, the package is of the wrong type, empty or too large, the archive or its manifest is rejected, or the portal already holds the maximum number of plugins")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, the request is not a form, web plugins or plugin uploads are switched off for the installation, `system` was requested outside a standalone installation, or the domains the plugin declares would push the Content Security Policy header over its size limit")]
     [HttpPost("")]
     public async Task<WebPluginDto> AddWebPluginFromFile(WebPluginFromFileRequestDto inDto)
     {
@@ -151,6 +151,7 @@ public class WebPluginsController(
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "The requested web plugin with the state the portal stored for it", typeof(WebPluginDto))]
     [SwaggerResponse(403, "Web plugins are switched off for the installation")]
+    [SwaggerResponse(404, "No web plugin with this manifest name is available in the portal")]
     [HttpGet("{name}")]
     public async Task<WebPluginDto> GetWebPlugin(WebPluginNameRequestDto inDto)
     {
@@ -180,7 +181,9 @@ public class WebPluginsController(
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "The state and the settings of the web plugin are saved for the portal")]
-    [SwaggerResponse(403, "Web plugins are switched off for the installation, or the caller may not edit the portal settings")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `settings`, or `settings` is longer than 255 characters")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, web plugins are switched off for the installation, or switching the plugin on would push the Content Security Policy header over its size limit")]
+    [SwaggerResponse(404, "No web plugin with this manifest name is available in the portal")]
     [HttpPut("{name}")]
     public async Task UpdateWebPlugin(WebPluginRequestsDto inDto)
     {
@@ -213,6 +216,7 @@ public class WebPluginsController(
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "The web plugin and the files of its package are removed from the portal")]
     [SwaggerResponse(403, "Web plugins or plugin deletion are switched off, the caller may not edit the portal settings, or the plugin is installation-wide outside a standalone installation")]
+    [SwaggerResponse(404, "No web plugin with this manifest name is available in the portal, or the files of its package are missing from storage")]
     [HttpDelete("{name}")]
     public async Task DeleteWebPlugin(WebPluginNameRequestDto inDto)
     {

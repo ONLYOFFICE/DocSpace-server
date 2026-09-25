@@ -99,7 +99,7 @@ public class ReassignController(
     /// <path>api/2.0/people/reassign/start</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "The state of the queued reassignment", typeof(TaskProgressResponseDto))]
-    [SwaggerResponse(400, "The destination user is not an active room or DocSpace admin, or the source user is a system account, the portal owner, the caller, or is not disabled")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `fromUserId` or `toUserId`, the destination user does not exist or is not an active room or DocSpace admin, or the source user does not exist, is a system account, the portal owner, the caller, is not disabled, or is a DocSpace or People administrator while the caller is not the portal owner")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("start")]
     public async Task<TaskProgressResponseDto> StartReassign(StartReassignRequestDto inDto)
@@ -150,6 +150,7 @@ public class ReassignController(
     /// <path>api/2.0/people/reassign/terminate</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "The state of the cancelled reassignment, or an empty body when nothing was queued for the user", typeof(TaskProgressResponseDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `userId`")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("terminate")]
     public async Task<TaskProgressResponseDto> TerminateReassign(TerminateRequestDto inDto)
@@ -192,6 +193,7 @@ public class ReassignController(
     /// <path>api/2.0/people/reassign/necessary</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "True if the data of the user has to be reassigned before the removal or the type change", typeof(bool))]
+    [SwaggerResponse(400, "The `userId` is not a GUID, or the `type` is not one of the known values")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("necessary")]
     public async Task<bool> NecessaryReassign([FromQuery] NecessaryReassignDto inDto)

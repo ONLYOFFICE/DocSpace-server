@@ -154,8 +154,9 @@ public class ThirdpartyController(
     /// <path>api/2.0/people/thirdparty/linkaccount</path>
     [Tags("People / Third-party accounts")]
     [SwaggerResponse(200, "The third-party identity is linked to the calling profile. No content is returned")]
-    [SwaggerResponse(400, "The third-party identity is already linked to a portal profile")]
+    [SwaggerResponse(400, "The third-party identity is already linked to a portal profile, or `serializedProfile` is missing, empty or was issued by another portal")]
     [SwaggerResponse(403, "The portal tariff does not include third-party authorization")]
+    [SwaggerResponse(500, "The `serializedProfile` value is not one the login flow produced, or the provider authorization ended with an error other than a cancellation")]
     [HttpPut("linkaccount")]
     public async Task LinkThirdPartyAccount(LinkAccountRequestDto inDto)
     {
@@ -203,7 +204,9 @@ public class ThirdpartyController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Third-party accounts")]
     [SwaggerResponse(200, "The profile linked to the third-party identity, or an empty body when the authorization was cancelled or the profile could not be created", typeof(EmployeeDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `key` or `serializedProfile`, `serializedProfile` is empty or was issued by another portal, or `employeeType` is an unknown name")]
     [SwaggerResponse(403, "The invitation link is invalid or has expired, or the email already belongs to a profile that has not been activated yet")]
+    [SwaggerResponse(500, "The `serializedProfile` value is not one the login flow produced, the provider authorization ended with an error other than a cancellation, or the identity has no email and the provider cannot generate one")]
     [AllowAnonymous]
     [HttpPost("signup")]
     public async Task<EmployeeDto> SignupThirdPartyAccount(SignupAccountRequestDto inDto)

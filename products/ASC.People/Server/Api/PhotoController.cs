@@ -78,8 +78,8 @@ public class PhotoController(
     /// <path>api/2.0/people/{userid}/photo/thumbnails</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "The URLs of the rebuilt photo sizes", typeof(ThumbnailsDataDto))]
-    [SwaggerResponse(403, "The ID in the route is not the calling account, or the account may not edit its own profile")]
-    [SwaggerResponse(404, "No user has the specified ID")]
+    [SwaggerResponse(403, "The ID in the route is not the calling account, the account may not edit its own profile, or `x` equals the width of the image or `y` its height")]
+    [SwaggerResponse(404, "No user has the specified ID, or no temporary file has the name given in `tmpFile`")]
     [HttpPost("{userid}/photo/thumbnails")]
     public async Task<ThumbnailsDataDto> CreateMemberPhotoThumbnails(ThumbnailsRequestDto inDto)
     {
@@ -216,9 +216,10 @@ public class PhotoController(
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "The URLs of the photo sizes built from the downloaded image", typeof(ThumbnailsDataDto))]
-    [SwaggerResponse(400, "The files field is empty")]
-    [SwaggerResponse(403, "The ID in the route is not the calling account, the account may not edit its own profile, or the URL was refused or could not be downloaded")]
+    [SwaggerResponse(400, "The request body cannot be read, or the files field is empty")]
+    [SwaggerResponse(403, "The ID in the route is not the calling account, the account may not edit its own profile, the URL was refused, or the server behind it answered with an error status")]
     [SwaggerResponse(404, "No user has the specified ID")]
+    [SwaggerResponse(500, "The URL could not be reached within 10 seconds, or the downloaded file is empty, is not an image the portal can read, or exceeds the portal limit on image size")]
     [HttpPut("{userid}/photo")]
     public async Task<ThumbnailsDataDto> UpdateMemberPhoto(UpdatePhotoMemberRequestDto inDto)
     {
@@ -272,6 +273,7 @@ public class PhotoController(
     /// <path>api/2.0/people/{userid}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "The upload result: on success the photo URLs or the temporary file name in data, and on failure success set to false with the reason in message", typeof(FileUploadResultDto))]
+    [SwaggerResponse(400, "The `Autosave` form field is not a boolean")]
     [HttpPost("{userid}/photo")]
     public async Task<FileUploadResultDto> UploadMemberPhoto(UploadMemberPhotoRequestDto inDto)
     {
