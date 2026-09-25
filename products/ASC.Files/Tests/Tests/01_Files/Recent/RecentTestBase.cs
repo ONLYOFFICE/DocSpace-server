@@ -102,7 +102,7 @@ public abstract class RecentTestBase(AspireAppFixture fixture) : RoomsPermission
     /// the room's ordinary integer folder id, so it is parsed back for use with the rest of the
     /// (integer-keyed) Files API - the same cast the TypeScript suite makes explicitly.
     /// </summary>
-    protected async Task<int> CreateThirdPartyRoomAsync(string customerTitle, string roomTitle)
+    protected async Task<string> CreateThirdPartyRoomAsync(string customerTitle, string roomTitle)
     {
         var connection = await _thirdPartyApi.SaveThirdPartyAsync(
             new ThirdPartyRequestDto(
@@ -118,6 +118,6 @@ public abstract class RecentTestBase(AspireAppFixture fixture) : RoomsPermission
             new CreateThirdPartyRoom(title: roomTitle, roomType: RoomType.CustomRoom),
             TestContext.Current.CancellationToken);
 
-        return int.Parse(room.Response.Id);
+        return room.Response.Id;
     }
 }

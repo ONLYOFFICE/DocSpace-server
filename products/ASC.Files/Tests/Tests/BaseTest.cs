@@ -210,6 +210,13 @@ public class BaseTest(
         Timing.Write($"createFile({fileName})", sw.ElapsedMilliseconds);
         return result;
     }
+    protected async Task<ThirdPartyFileDto> CreateFile(string fileName, string folderId)
+    {
+        var sw = Stopwatch.StartNew();
+        var result = (await _filesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
+        Timing.Write($"createFile({fileName})", sw.ElapsedMilliseconds);
+        return result;
+    }
 
     protected async Task<FolderDto> CreateFolder(string folderName, FolderType folderType, User user)
     {

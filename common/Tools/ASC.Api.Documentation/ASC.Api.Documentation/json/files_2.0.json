@@ -2557,7 +2557,7 @@
           ],
           "responses": {
             "200": {
-              "description": "The created file",
+              "description": "The file created in the folder: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built",
               "headers": {
                 "X-RateLimit-Limit": {
                   "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -8897,7 +8897,7 @@
           ],
           "responses": {
             "200": {
-              "description": "The folder",
+              "description": "The folder itself - its title, its parent, the moments it was created and changed, the access the caller has to it, how many items in it are new for them, and the room settings when the folder is a room; nothing about the items it holds",
               "headers": {
                 "X-RateLimit-Limit": {
                   "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -12212,7 +12212,7 @@
           ],
           "responses": {
             "200": {
-              "description": "The stored file",
+              "description": "The stored file with its id and the title it was actually saved under; a `version` above 1 means the content was added to a file that already carried this name instead of creating a new one",
               "headers": {
                 "X-RateLimit-Limit": {
                   "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -46027,7 +46027,7 @@
                   "null",
                   "boolean"
                 ],
-                "description": "Whether the PDF is a fillable form rather than a plain document. When the stored classification does not say,\r\nthe portal opens the file to find out, so the answer is reliable for a PDF and null for anything else."
+                "description": "Whether the file is a PDF, and so offered as a fillable form. It is null for any other file type."
               },
               "customFilterEnabled": {
                 "examples": [

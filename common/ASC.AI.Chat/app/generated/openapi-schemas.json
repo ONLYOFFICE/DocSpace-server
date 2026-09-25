@@ -174,7 +174,8 @@
         "TextAnalyze",
         "ImageGeneration",
         "OCR",
-        "Vision"
+        "Vision",
+        "FormAnalysis"
       ],
       "description": "The AI action a request or an assignment applies to. Each action has its own assignment slot; `Default` is the profile used when an action's own slot is empty."
     },
@@ -4010,7 +4011,7 @@
         },
         "current": {
           "description": "The folder or section the page was read from, with its own title, type and access rights. It describes the\r\ncontainer, not the entries, and is filled in even when the page is empty.",
-          "$ref": "#/components/schemas/AiFolderDtoInteger"
+          "$ref": "#/components/schemas/AiFolderDto"
         },
         "pathParts": {
           "examples": [

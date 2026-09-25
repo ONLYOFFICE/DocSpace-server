@@ -866,7 +866,7 @@
           {
             "name": "actionType",
             "in": "query",
-            "description": "The AI action the request applies to - one of \"Default\", \"Chat\", \"Code\", \"Summarization\", \"Translation\", \"TextAnalyze\", \"ImageGeneration\", \"OCR\", \"Vision\".",
+            "description": "The AI action the request applies to - one of \"Default\", \"Chat\", \"Code\", \"Summarization\", \"Translation\", \"TextAnalyze\", \"ImageGeneration\", \"OCR\", \"Vision\", \"FormAnalysis\".",
             "required": true,
             "schema": {
               "type": "string",
@@ -961,7 +961,7 @@
           {
             "name": "actionType",
             "in": "query",
-            "description": "The AI action the request applies to - one of \"Default\", \"Chat\", \"Code\", \"Summarization\", \"Translation\", \"TextAnalyze\", \"ImageGeneration\", \"OCR\", \"Vision\".",
+            "description": "The AI action the request applies to - one of \"Default\", \"Chat\", \"Code\", \"Summarization\", \"Translation\", \"TextAnalyze\", \"ImageGeneration\", \"OCR\", \"Vision\", \"FormAnalysis\".",
             "required": true,
             "schema": {
               "type": "string",
@@ -1323,7 +1323,7 @@
           {
             "name": "actionType",
             "in": "query",
-            "description": "The AI action the request applies to - one of \"Default\", \"Chat\", \"Code\", \"Summarization\", \"Translation\", \"TextAnalyze\", \"ImageGeneration\", \"OCR\", \"Vision\".",
+            "description": "The AI action the request applies to - one of \"Default\", \"Chat\", \"Code\", \"Summarization\", \"Translation\", \"TextAnalyze\", \"ImageGeneration\", \"OCR\", \"Vision\", \"FormAnalysis\".",
             "required": true,
             "schema": {
               "type": "string",
@@ -2222,6 +2222,78 @@
                   "threadId"
                 ],
                 "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/attachments/suggested-questions": {
+      "post": {
+        "tags": [
+          "AI / Attachments"
+        ],
+        "operationId": "aiAttachmentsGetSuggestedQuestions",
+        "summary": "Get suggested questions",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
               }
             }
           }
@@ -10522,7 +10594,8 @@
           "TextAnalyze",
           "ImageGeneration",
           "OCR",
-          "Vision"
+          "Vision",
+          "FormAnalysis"
         ],
         "description": "The AI action a request or an assignment applies to. Each action has its own assignment slot; `Default` is the profile used when an action's own slot is empty."
       },
