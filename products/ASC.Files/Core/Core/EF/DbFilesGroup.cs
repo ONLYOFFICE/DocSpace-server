@@ -42,6 +42,13 @@ public class DbFilesGroup : BaseEntity
     [MaxLength(50)]
     public string Icon { get; set; }
 
+    /// <summary>
+    /// The kind of room the group gathers, which is what puts it in one section or the other:
+    /// <see cref="FolderType.FillingFormsRoom"/> for a group of the Forms section, and
+    /// <see cref="FolderType.DEFAULT"/> - no particular kind - for a group of the Rooms section.
+    /// </summary>
+    public FolderType FolderType { get; set; }
+
     public Guid UserId { get; set; }
 
     public DbTenant Tenant { get; set; }
@@ -93,6 +100,11 @@ public static class DbFilesGroupExtension
                 .HasColumnType("varchar")
                 .HasCharSet("utf8")
                 .UseCollation("utf8_general_ci");
+
+            entity.Property(e => e.FolderType)
+                .HasColumnName("folder_type")
+                .HasColumnType("int")
+                .HasDefaultValue(FolderType.DEFAULT);
         });
     }
 
@@ -122,6 +134,11 @@ public static class DbFilesGroupExtension
             entity.Property(e => e.Icon)
                 .HasColumnName("icon")
                 .HasColumnType("varchar(50)");
+
+            entity.Property(e => e.FolderType)
+                .HasColumnName("folder_type")
+                .HasColumnType("integer")
+                .HasDefaultValue(FolderType.DEFAULT);
         });
     }
 }

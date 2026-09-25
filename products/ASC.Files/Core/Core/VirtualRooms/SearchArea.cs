@@ -34,8 +34,10 @@
 namespace ASC.Files.Core.VirtualRooms;
 
 /// <summary>
-/// The search area.
+/// The search area. Serialized by name ("Active", "Forms", ...) so that request bodies and
+/// responses carry the section as the same readable word the query string already accepts.
 /// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<SearchArea>))]
 public enum SearchArea
 {
     [Description("Active")]
@@ -67,4 +69,25 @@ public enum SearchArea
 
     [Description("Form templates")]
     FormTemplates
+}
+
+/// <summary>
+/// Helpers that relate a search area to the rooms the corresponding section shows.
+/// </summary>
+public static class SearchAreaExtensions
+{
+    /// <summary>
+    /// Whether a room of the given folder type belongs to the section the search area stands for.
+    /// FillingFormsRoom rooms are surfaced in the Forms section, every other room in Rooms; areas
+    /// that do not take part in the split accept any room.
+    /// </summary>
+    public static bool MatchesRoomType(this SearchArea searchArea, FolderType folderType)
+    {
+        return searchArea switch
+        {
+            SearchArea.Active or SearchArea.Templates => folderType != FolderType.FillingFormsRoom,
+            SearchArea.Forms or SearchArea.FormTemplates => folderType == FolderType.FillingFormsRoom,
+            _ => true
+        };
+    }
 }

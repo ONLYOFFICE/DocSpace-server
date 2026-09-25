@@ -65,4 +65,10 @@ public class RoomGroupRequestDto
     /// <example>[12, 15, "folder-123-abc"]</example>
     [Required]
     public List<JsonElement> Rooms { get; set; }
+
+    /// <summary>
+    /// The section the group belongs to: Active for Rooms and Forms for Forms. Active when omitted.
+    /// </summary>
+    /// <example>Active</example>
+    public SearchArea? SearchArea { get; set; }
 }
