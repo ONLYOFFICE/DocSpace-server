@@ -36,7 +36,7 @@ namespace ASC.Web.Api.Tests.Tests._04_Portal.Quota;
 /// <summary>
 /// GET /api/2.0/portal/quota/right — the cheapest quota that would still cover the portal's
 /// current usage. On a freshly registered portal the current quota is already the free
-/// "startup" plan, so the recommended quota is that same plan and the comparison against the
+/// "free" plan, so the recommended quota is that same plan and the comparison against the
 /// current quota degenerates to equality rather than a strict downgrade. The TypeScript source
 /// upgrades the tariff first (through the real payments.teamlab.info billing service, which is
 /// not configured in this environment) precisely so that a cheaper plan is recommendable; the

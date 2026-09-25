@@ -35,7 +35,7 @@ namespace ASC.Web.Api.Tests.Tests._04_Portal.Quota;
 
 /// <summary>
 /// GET /api/2.0/portal/quota — the current portal quota. A freshly registered portal always
-/// starts on the free "startup" plan, so the values here are the fixed defaults of that plan
+/// starts on the "free" plan, so the values here are the fixed defaults of that plan
 /// rather than something the test computes. Billing is not configured in this environment
 /// (payment.url is empty), so the "paid portal" variant of this suite in the TypeScript source
 /// — which upgrades the tariff through the real payments.teamlab.info billing service before
@@ -46,12 +46,12 @@ public class PortalQuotaTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    // Commented out for now: these assert the SaaS "startup" tariff seed data, which this
+    // Commented out for now: these assert the SaaS "free" tariff seed data, which this
     // integration host (standalone by base-domain, no billing) does not have — the portal runs
     // on the single "default" quota. Re-enable on a SaaS-seeded environment.
     /*
     [Fact]
-    public async Task GetPortalQuota_Owner_ReturnsFreeStartupQuota()
+    public async Task GetPortalQuota_Owner_ReturnsFreeQuota()
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
@@ -60,11 +60,11 @@ public class PortalQuotaTests(
         var quota = await _portalQuotaApi.GetPortalQuotaAsync(TestContext.Current.CancellationToken);
 
         // Assert
-        AssertFreeStartupQuota(quota);
+        AssertFreeQuota(quota);
     }
 
     [Fact]
-    public async Task GetPortalQuota_DocSpaceAdmin_ReturnsFreeStartupQuota()
+    public async Task GetPortalQuota_DocSpaceAdmin_ReturnsFreeQuota()
     {
         // Arrange
         var admin = await InviteContact(EmployeeType.DocSpaceAdmin);
@@ -74,23 +74,23 @@ public class PortalQuotaTests(
         var quota = await _portalQuotaApi.GetPortalQuotaAsync(TestContext.Current.CancellationToken);
 
         // Assert
-        AssertFreeStartupQuota(quota);
+        AssertFreeQuota(quota);
     }
 
-    private static void AssertFreeStartupQuota(TenantQuotaWrapper quota)
+    private static void AssertFreeQuota(TenantQuotaWrapper quota)
     {
         quota.StatusCode.Should().Be(200);
 
         var response = quota.Response;
         response.Should().NotBeNull();
-        response.Name.Should().Be("startup");
+        response.Name.Should().Be("free");
         response.Price.Should().Be(0);
         response.Visible.Should().BeFalse();
         response.Wallet.Should().BeFalse();
         response.Features.Should().NotBeNullOrEmpty();
         response.MaxTotalSize.Should().Be(2147483648);
-        response.CountRoomAdmin.Should().Be(3);
-        response.CountRoom.Should().Be(12);
+        response.CountRoomAdmin.Should().Be(10000);
+        response.CountRoom.Should().Be(10000);
         response.NonProfit.Should().BeFalse();
         response.Trial.Should().BeFalse();
         response.Free.Should().BeTrue();

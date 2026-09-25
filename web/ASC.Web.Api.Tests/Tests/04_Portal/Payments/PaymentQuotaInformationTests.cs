@@ -36,18 +36,18 @@ namespace ASC.Web.Api.Tests.Tests._04_Portal.Payments;
 /// <summary>
 /// GET /api/2.0/portal/payment/quota — the current portal quota. The action only denies Guests
 /// explicitly (<c>IsGuestAsync</c>); it never calls <c>PaymentHelper.DemandConfigured</c>, so it
-/// answers the same free "Startup" plan here as it would in production before any tariff is set.
+/// answers the same "Free" plan here as it would in production before any tariff is set.
 /// </summary>
 [Trait("Category", "Portal")]
 public class PaymentQuotaInformationTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    // Commented out for now: these assert the SaaS "Startup" plan (id -3) seed data, which this
+    // Commented out for now: these assert the SaaS "Free" plan (id -19) seed data, which this
     // standalone-style integration host does not have. Re-enable on a SaaS-seeded environment.
     /*
     [Fact]
-    public async Task GetQuotaPaymentInformation_Owner_ReturnsStartupQuota()
+    public async Task GetQuotaPaymentInformation_Owner_ReturnsFreeQuota()
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
@@ -57,8 +57,8 @@ public class PaymentQuotaInformationTests(
 
         // Assert
         quota.StatusCode.Should().Be(200);
-        quota.Response!.Id.Should().Be(-3);
-        quota.Response.Title.Should().Be("Startup");
+        quota.Response!.Id.Should().Be(-19);
+        quota.Response.Title.Should().Be("Free");
         quota.Response.Price!.Value.Should().Be(0);
         quota.Response.Free.Should().BeTrue();
         quota.Response.Trial.Should().BeFalse();
@@ -67,7 +67,7 @@ public class PaymentQuotaInformationTests(
     }
 
     [Fact]
-    public async Task GetQuotaPaymentInformation_DocSpaceAdmin_ReturnsStartupQuota()
+    public async Task GetQuotaPaymentInformation_DocSpaceAdmin_ReturnsFreeQuota()
     {
         // Arrange
         var admin = await InviteContact(EmployeeType.DocSpaceAdmin);
@@ -78,8 +78,8 @@ public class PaymentQuotaInformationTests(
 
         // Assert
         quota.StatusCode.Should().Be(200);
-        quota.Response!.Id.Should().Be(-3);
-        quota.Response.Title.Should().Be("Startup");
+        quota.Response!.Id.Should().Be(-19);
+        quota.Response.Title.Should().Be("Free");
     }
     */
 
