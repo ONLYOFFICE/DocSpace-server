@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -243,6 +243,30 @@ public class RoomGroupSearchAreaTests(
         info.Name.Should().Be("Immutable Area Group Renamed");
 
         (await ListGroups(SearchArea.Forms)).Select(g => g.Id).Should().NotContain(group.Id);
+    }
+
+    [Fact]
+    public async Task Update_RemovingEveryRoom_KeepsTheGroupInForms()
+    {
+        // Arrange
+        var room = await CreateFillingFormsRoom("Emptied Forms Room " + Guid.NewGuid().ToString()[..8]);
+        var group = await CreateRoomGroup("Emptied Forms Group", [room.Id], searchArea: SearchArea.Forms);
+
+        // Act - the group keeps its name and icon, so it must keep its section too
+        var updated = (await _roomGroupsApi.UpdateRoomGroupAsync(
+            group.Id,
+            new UpdateRoomGroupRequest(roomsToRemove: [new DuplicateRequestDtoAllOfFileIds(room.Id)]),
+            TestContext.Current.CancellationToken)).Response;
+
+        // Assert
+        updated.SearchArea.Should().Be(SearchArea.Forms);
+        updated.TotalRooms.Should().Be(0);
+
+        var info = (await _roomGroupsApi.GetRoomGroupInfoAsync(group.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
+        info.SearchArea.Should().Be(SearchArea.Forms);
+
+        (await ListGroups(SearchArea.Forms)).Select(g => g.Id).Should().Contain(group.Id);
+        (await ListGroups(SearchArea.Active)).Select(g => g.Id).Should().NotContain(group.Id);
     }
 
     [Fact]

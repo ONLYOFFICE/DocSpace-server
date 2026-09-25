@@ -82,7 +82,8 @@ public class GroupsController(
         {
             Name = name,
             UserID = authContext.CurrentAccount.ID,
-            Icon = inDto.Icon
+            Icon = inDto.Icon,
+            FolderType = searchArea.ToFolderType()
         });
 
         await AddRoomsToGroupAsync(intIds, stringIds, group);
@@ -92,7 +93,7 @@ public class GroupsController(
             throw new InvalidOperationException("Some of the rooms could not be added to the group.");
         }
 
-        return await roomGroupDtoHelper.GetAsync(group, true, searchArea);
+        return await roomGroupDtoHelper.GetAsync(group, true);
     }
 
     /// <remarks>
@@ -148,7 +149,6 @@ public class GroupsController(
         }
 
         var group = await fileStorageService.GetGroupInfoAsync(inDto.Id);
-        var searchArea = await fileStorageService.GetGroupSearchAreaAsync(group.Id);
 
         if (update.GroupName != null)
         {
@@ -161,7 +161,7 @@ public class GroupsController(
         if (update.RoomsToAdd is { Count: > 0 })
         {
             var (addInt, addString) = ParseRoomIds(update.RoomsToAdd);
-            var (intIds, stringIds, anyRejected) = await fileStorageService.ResolveGroupRoomsAsync(addInt, addString, searchArea);
+            var (intIds, stringIds, anyRejected) = await fileStorageService.ResolveGroupRoomsAsync(addInt, addString, group.FolderType.ToSearchArea());
 
             await AddRoomsToGroupAsync(intIds, stringIds, group);
             rejected |= anyRejected;
@@ -181,7 +181,7 @@ public class GroupsController(
             throw new InvalidOperationException("Some of the rooms could not be applied to the group.");
         }
 
-        return await roomGroupDtoHelper.GetAsync(group, true, searchArea);
+        return await roomGroupDtoHelper.GetAsync(group, true);
     }
 
     /// <remarks>
@@ -231,15 +231,9 @@ public class GroupsController(
     {
         var searchArea = ValidateSearchArea(inDto.SearchArea);
 
-        await foreach (var group in fileStorageService.GetGroupsAsync())
+        await foreach (var group in fileStorageService.GetGroupsAsync(searchArea))
         {
-            var dto = await roomGroupDtoHelper.GetAsync(group, inDto.IncludeMembers, searchArea);
-
-            // a group none of whose rooms live in this section is not part of it
-            if (dto != null)
-            {
-                yield return dto;
-            }
+            yield return await roomGroupDtoHelper.GetAsync(group, inDto.IncludeMembers);
         }
     }
 

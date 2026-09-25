@@ -99,12 +99,11 @@ public class RoomGroupDto
 public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory daoFactory)
 {
     /// <summary>
-    /// Builds the response for one group. <paramref name="searchArea"/> is the section the group is
-    /// being looked at from: its rooms are then limited to that section, and a group that has no room
-    /// there at all is not part of it - <c>null</c> is returned so the listing can skip it. When no
-    /// section is given, the group's own one is derived from its rooms.
+    /// Builds the response for one group. The section comes from the group itself, and the rooms are
+    /// limited to it: a room of the other section is invisible here even if it is still referenced,
+    /// which can only happen to a group that predates the split.
     /// </summary>
-    public async Task<RoomGroupDto> GetAsync(RoomGroup group, bool includeMembers, SearchArea? searchArea = null)
+    public async Task<RoomGroupDto> GetAsync(RoomGroup group, bool includeMembers)
     {
         var roomGroupDao = daoFactory.GetRoomGroupDao<int>();
         var roomGroupRefs = await roomGroupDao.GetRoomsByGroupAsync(group.Id).ToListAsync();
@@ -124,26 +123,7 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
             }
         }
 
-        var internalFoldersTask = GetFoldersAsync(fInt).ToListAsync().AsTask();
-        var thirdPartyFoldersTask = GetFoldersAsync(fString).ToListAsync().AsTask();
-
-        await Task.WhenAll(internalFoldersTask, thirdPartyFoldersTask);
-
-        var internalFolders = internalFoldersTask.Result;
-        var thirdPartyFolders = thirdPartyFoldersTask.Result;
-
-        List<FolderType> roomTypes =
-        [
-            .. internalFolders.Select(r => r.FolderType),
-            .. thirdPartyFolders.Select(r => r.FolderType)
-        ];
-
-        if (searchArea.HasValue && !RoomGroupArea.BelongsTo(roomTypes, searchArea.Value))
-        {
-            return null;
-        }
-
-        var area = searchArea ?? RoomGroupArea.Derive(roomTypes);
+        var area = group.FolderType.ToSearchArea();
 
         var result = new RoomGroupDto
         {
@@ -153,8 +133,8 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
             SearchArea = area
         };
 
-        var internalRoomsTask = MapAsync(internalFolders, area).ToListAsync().AsTask();
-        var thirdPartyRoomsTask = MapAsync(thirdPartyFolders, area).ToListAsync().AsTask();
+        var internalRoomsTask = GetRoomsAsync(fInt, area).ToListAsync().AsTask();
+        var thirdPartyRoomsTask = GetRoomsAsync(fString, area).ToListAsync().AsTask();
 
         await Task.WhenAll(internalRoomsTask, thirdPartyRoomsTask);
 
@@ -188,14 +168,11 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
 
         return result;
 
-        IAsyncEnumerable<Folder<T>> GetFoldersAsync<T>(IEnumerable<T> folders)
+        async IAsyncEnumerable<FileEntryBaseDto> GetRoomsAsync<T>(IEnumerable<T> roomIds, SearchArea roomArea)
         {
-            return daoFactory.GetFolderDao<T>().GetFoldersAsync(folders);
-        }
+            var folderDao = daoFactory.GetFolderDao<T>();
 
-        async IAsyncEnumerable<FileEntryBaseDto> MapAsync<T>(IEnumerable<Folder<T>> folders, SearchArea roomArea)
-        {
-            foreach (var folder in folders)
+            await foreach (var folder in folderDao.GetFoldersAsync(roomIds))
             {
                 // an archived room leaves its groups; the reference is kept so that unarchiving restores the membership
                 if (folder.RootFolderType == FolderType.Archive)

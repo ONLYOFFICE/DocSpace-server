@@ -39,37 +39,37 @@ public class RoomGroup
     public string Name { get; set; }
     public string Icon { get; set; }
     public Guid UserID { get; set; }
+
+    /// <summary>
+    /// The kind of room the group gathers - see <see cref="RoomGroupArea"/> for how it maps onto the
+    /// section the group is shown in.
+    /// </summary>
+    public FolderType FolderType { get; set; }
 }
 
 /// <summary>
-/// The Rooms / Forms split as the groups see it. A group does not store the section it belongs to:
-/// exactly like the room listings, the section is derived from the rooms themselves, so a group of
-/// form-filling rooms is a Forms group and everything else is a Rooms group. Archived rooms still
-/// count here - a room leaves the listing when it is archived, not the group.
+/// The Rooms / Forms split as the groups see it. A group is dedicated to one kind of room and stored
+/// as such: a group of form-filling rooms belongs to the Forms section, every other group to Rooms.
+/// The section survives an empty group, which is why it is stored rather than derived from the rooms
+/// still in it.
 /// </summary>
 public static class RoomGroupArea
 {
     /// <summary>
-    /// The section a group is shown in when the caller did not ask for one. A group is a Forms group
-    /// only when every room it references is a form-filling room; a group with no rooms left, and a
-    /// mixed group inherited from before the split, stay in Rooms.
+    /// The room kind a group of the given section gathers. Only the two sections that were split own
+    /// groups; Rooms is not tied to one kind of room, so it is stored as no kind at all.
     /// </summary>
-    public static SearchArea Derive(IReadOnlyCollection<FolderType> roomTypes)
+    public static FolderType ToFolderType(this SearchArea searchArea)
     {
-        return roomTypes.Count > 0 && roomTypes.All(t => t == FolderType.FillingFormsRoom)
-            ? SearchArea.Forms
-            : SearchArea.Active;
+        return searchArea == SearchArea.Forms ? FolderType.FillingFormsRoom : FolderType.DEFAULT;
     }
 
     /// <summary>
-    /// Whether the group takes part in the given section: it does when at least one of its rooms
-    /// belongs there. A group that has no rooms at all belongs to Rooms, the default section.
+    /// The section a group of the given room kind is shown in.
     /// </summary>
-    public static bool BelongsTo(IReadOnlyCollection<FolderType> roomTypes, SearchArea searchArea)
+    public static SearchArea ToSearchArea(this FolderType folderType)
     {
-        return roomTypes.Count == 0
-            ? searchArea == SearchArea.Active
-            : roomTypes.Any(t => searchArea.MatchesRoomType(t));
+        return folderType == FolderType.FillingFormsRoom ? SearchArea.Forms : SearchArea.Active;
     }
 }
 

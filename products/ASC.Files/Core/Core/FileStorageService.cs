@@ -5976,35 +5976,9 @@ public class FileStorageService //: IFileStorageService
         return (available, notFound, denied, wrongArea);
     }
 
-    /// <summary>
-    /// The section an existing group belongs to. Nothing is stored: the section is derived from the
-    /// rooms the group references, the same way the room listings themselves are split.
-    /// </summary>
-    public async Task<SearchArea> GetGroupSearchAreaAsync(int groupId)
+    public IAsyncEnumerable<RoomGroup> GetGroupsAsync(SearchArea searchArea)
     {
-        var refs = await daoFactory.GetRoomGroupDao<int>().GetRoomsByGroupAsync(groupId).ToListAsync();
-
-        var internalTypesTask = RoomTypesAsync(refs.Where(r => r.InternalRoomId.HasValue).Select(r => r.InternalRoomId.Value).ToList());
-        var thirdpartyTypesTask = RoomTypesAsync(refs.Where(r => r.ThirdpartyRoomId != null).Select(r => r.ThirdpartyRoomId).ToList());
-
-        await Task.WhenAll(internalTypesTask, thirdpartyTypesTask);
-
-        return RoomGroupArea.Derive([.. internalTypesTask.Result, .. thirdpartyTypesTask.Result]);
-
-        async Task<List<FolderType>> RoomTypesAsync<T>(List<T> roomIds)
-        {
-            if (roomIds.Count == 0)
-            {
-                return [];
-            }
-
-            return await daoFactory.GetFolderDao<T>().GetFoldersAsync(roomIds).Select(r => r.FolderType).ToListAsync();
-        }
-    }
-
-    public IAsyncEnumerable<RoomGroup> GetGroupsAsync()
-    {
-        return daoFactory.GetRoomGroupDao<int>().GetGroupsAsync();
+        return daoFactory.GetRoomGroupDao<int>().GetGroupsAsync(searchArea.ToFolderType());
     }
 
     public async Task AddRoomToGroupAsync<T>(T roomId, int groupId)
