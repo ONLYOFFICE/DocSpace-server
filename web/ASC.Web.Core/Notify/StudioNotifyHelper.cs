@@ -45,7 +45,8 @@ public class StudioNotifyHelper(
     TenantExtra tenantExtra,
     WebImageSupplier webImageSupplier,
     IConfiguration configuration,
-    ILogger<StudioNotifyHelper> logger)
+    ILogger<StudioNotifyHelper> logger,
+    ITariffService tariffService)
 {
     public string SiteLink => commonLinkUtility.GetSiteLink();
 
@@ -128,7 +129,7 @@ public class StudioNotifyHelper(
         {
             var tenant = tenantManager.GetCurrentTenant();
             var tariff = await tenantManager.GetTenantQuotaAsync(tenant.Id);
-            if (tariff.Free || tariff.Trial)
+            if ((tariff.Free || tariff.Trial) && !await tariffService.HasActivePaidWalletSubscriptionAsync(tenant.Id))
             {
                 var spamEmailSettings = await settingsManager.LoadAsync<SpamEmailSettings>();
                 var sended = spamEmailSettings.MailsSended;

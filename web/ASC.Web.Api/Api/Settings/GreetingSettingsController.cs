@@ -41,7 +41,8 @@ public class GreetingSettingsController(
     PermissionContext permissionContext,
     WebItemManager webItemManager,
     IFusionCache fusionCache,
-    CoreBaseSettings coreBaseSettings)
+    CoreBaseSettings coreBaseSettings,
+    ITariffService tariffService)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
@@ -95,7 +96,7 @@ public class GreetingSettingsController(
     /// The new caption takes effect at once for every user of the portal and the change is written to the audit
     /// trail; repeating the call with the same title leaves the portal in the same state. A missing `title` or one
     /// longer than 255 characters is rejected as an invalid request before the handler runs. On a cloud portal with a
-    /// free or trial plan the title is also matched against the character rule configured for the installation and a
+    /// free or trial plan and no active wallet subscription the title is also matched against the character rule configured for the installation and a
     /// title that breaks it is refused, while a paid cloud plan and a server installation apply no character check.
     /// An empty `title` clears the greeting: the portal falls back to the built-in default caption and
     /// `GET api/2.0/settings/greetingsettings/isdefault` starts answering `true`. What comes back is a localized
@@ -115,7 +116,7 @@ public class GreetingSettingsController(
         if (!coreBaseSettings.Standalone)
         {
             var quota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
-            if (quota.Free || quota.Trial)
+            if ((quota.Free || quota.Trial) && !await tariffService.HasActivePaidWalletSubscriptionAsync(tenant.Id))
             {
                 try
                 {

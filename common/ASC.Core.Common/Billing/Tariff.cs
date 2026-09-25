@@ -142,6 +142,13 @@ public class Tariff
             && t.Quotas.TrueForAll(Quotas.Contains)
             && t.CustomerId == CustomerId;
     }
+
+    // A portal on the free plan still pays when it holds a wallet subscription (Business tools, storage, ...);
+    // pay-per-use services have no tariff row and do not count.
+    public bool HasActiveWalletSubscription()
+    {
+        return Quotas.Exists(q => q is { Wallet: true, Additional: true, State: QuotaState.Active });
+    }
 }
 
 /// <summary>

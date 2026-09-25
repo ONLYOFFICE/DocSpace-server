@@ -70,4 +70,6 @@ public interface ITariffService
     Task<List<ServicePriceInfo>> GetAccountingServicePricesAsync(string serviceName, bool active = false);
 
     Task<bool> IsFreeTariffAsync(Tariff tariff);
+
+    Task<bool> HasActivePaidWalletSubscriptionAsync(int tenantId);
 }

@@ -1249,6 +1249,11 @@ public class TariffService(
         return freeTariff != null;
     }
 
+    public async Task<bool> HasActivePaidWalletSubscriptionAsync(int tenantId)
+    {
+        return (await GetTariffAsync(tenantId)).HasActiveWalletSubscription();
+    }
+
     public int GetPaymentDelay()
     {
         return PaymentDelay;

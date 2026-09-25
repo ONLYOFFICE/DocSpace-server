@@ -1180,7 +1180,8 @@ public class PortalController(
         await cspSettingsHelper.RemoveFromCacheAsync(tenantDomain);
         await cspSettingsHelper.UpdateBaseDomainAsync();
 
-        if (!coreBaseSettings.Standalone && !quota.Free && tariff.State >= TariffState.Paid)
+        if (!coreBaseSettings.Standalone && tariff.State >= TariffState.Paid &&
+            (!quota.Free || tariff.HasActiveWalletSubscription()))
         {
             var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
             await studioNotifyService.SendMsgPaidPortalDeletedToSupportAsync(tenantDomain, owner, customerInfo);

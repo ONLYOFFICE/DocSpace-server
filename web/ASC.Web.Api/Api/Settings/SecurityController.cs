@@ -51,7 +51,8 @@ public class SecurityController(
     EmployeeDtoHelper employeeWrapperHelper,
     IFusionCache fusionCache,
     PasswordSettingsConverter passwordSettingsConverter,
-    PasswordSettingsManager passwordSettingsManager)
+    PasswordSettingsManager passwordSettingsManager,
+    ITariffService tariffService)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     /// <remarks>
@@ -432,7 +433,7 @@ public class SecurityController(
     /// `administrator` flag; the all-zero product GUID targets the DocSpace administrator role, which covers the
     /// whole portal. The caller needs the portal-settings right of a DocSpace administrator, and granting the
     /// portal-wide role additionally requires being the portal owner - anyone else is refused with 403. A free cloud
-    /// plan does not offer the option at all and answers 402, as does a promotion for which no paid seat is left,
+    /// plan without an active wallet subscription does not offer the option at all and answers 402, as does a promotion for which no paid seat is left,
     /// since promoting a guest or a plain member turns them into a paid one. Taking the portal-wide role away also
     /// removes the member from every product group. The change is immediate, portal-wide, recorded in the audit
     /// trail, and sending the same body twice changes nothing further; it never creates a user, so invite the member
@@ -453,7 +454,8 @@ public class SecurityController(
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var isStartup = !coreBaseSettings.CustomMode && tenantExtra.Saas &&
-                        (await tenantManager.GetCurrentTenantQuotaAsync()).Free;
+                        (await tenantManager.GetCurrentTenantQuotaAsync()).Free &&
+                        !await tariffService.HasActivePaidWalletSubscriptionAsync(tenantManager.GetCurrentTenantId());
         if (isStartup)
         {
             throw new BillingException(Resource.ErrorNotAllowedOption);
