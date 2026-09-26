@@ -38,6 +38,7 @@ import com.asc.registration.service.ports.input.service.ScopeApplicationService;
 import com.asc.registration.service.transfer.response.ScopeResponse;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -59,7 +60,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Controller class for managing OAuth2 scopes. */
 @Tag(
-    name = "Scope Management",
+    name = "OAuth 2.0 / Scope Management",
     description = "APIs for retrieving OAuth2 scopes and their permissions")
 @Slf4j
 @RestController
@@ -83,10 +84,13 @@ public class ScopeQueryController {
   @Operation(
       summary = "List available OAuth2 scopes",
       description =
-          "Retrieves a list of all available OAuth2 scopes for the specified tenant. "
-              + "The scopes define the permissions that can be requested by OAuth2 clients. "
-              + "The list is ordered alphabetically, with the 'openid' scope always appearing first.",
-      tags = {"Scope Management"},
+          "Retrieves a list of all available OAuth2 scopes for the specified tenant. The scopes "
+              + "define the permissions that can be requested by OAuth2 clients. The list is "
+              + "ordered alphabetically, with the 'openid' scope always appearing first. It is a "
+              + "read-only catalogue that does not depend on which clients exist: a valid portal "
+              + "signature is the only requirement, with no role restriction, and every caller of "
+              + "the portal sees the same list.",
+      tags = {"OAuth 2.0 / Scope Management"},
       security = @SecurityRequirement(name = "x-signature"),
       responses = {
         @ApiResponse(
@@ -95,30 +99,34 @@ public class ScopeQueryController {
             content =
                 @Content(
                     mediaType = MediaType.APPLICATION_JSON_VALUE,
-                    schema =
-                        @Schema(
-                            implementation = ScopeResponse.class,
-                            type = "array",
-                            description = "List of OAuth2 scopes"),
+                    array =
+                        @ArraySchema(
+                            schema = @Schema(implementation = ScopeResponse.class),
+                            arraySchema = @Schema(description = "List of OAuth2 scopes")),
                     examples =
                         @ExampleObject(
                             value =
                                 """
                     [
                       {
-                        "name": "scope_name",
-                        "type": "scope_type",
-                        "group": "scope_group"
+                        "name": "files:read",
+                        "type": "read",
+                        "group": "files"
+                      },
+                      {
+                        "name": "openid",
+                        "type": "openid",
+                        "group": "openid"
                       }
                     ]
                     """))),
         @ApiResponse(
-            responseCode = "400",
-            description = "Invalid request parameters",
-            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
-        @ApiResponse(
             responseCode = "403",
             description = "Insufficient permissions to list scopes",
+            content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
+        @ApiResponse(
+            responseCode = "406",
+            description = "The Accept header does not allow application/json",
             content = @Content(schema = @Schema(implementation = ProblemDetail.class))),
         @ApiResponse(
             responseCode = "429",

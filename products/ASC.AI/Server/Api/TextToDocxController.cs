@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.AI.Core.MdTextToDocx;
-
 namespace ASC.AI.Api;
 
 [Scope]
@@ -46,11 +44,11 @@ public class TextToDocxController(MdToDocxTaskPublisher mdToDocxTaskPublisher) :
     {
         if (inDto.FolderId.ValueKind == JsonValueKind.Number)
         {
-            await mdToDocxTaskPublisher.PublishAsync(inDto.Title, inDto.Content, inDto.FolderId.GetInt32());
+            await mdToDocxTaskPublisher.PublishAsync(inDto.Title, inDto.Content, inDto.FolderId.GetInt32(), inDto.Format);
         }
         else
         {
-            await mdToDocxTaskPublisher.PublishAsync(inDto.Title, inDto.Content, inDto.FolderId.GetString());
+            await mdToDocxTaskPublisher.PublishAsync(inDto.Title, inDto.Content, inDto.FolderId.GetString(), inDto.Format);
         }
 
         return NoContent();

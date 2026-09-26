@@ -34,7 +34,7 @@
 namespace ASC.Core.Common.EF.Model.Ai.Legacy;
 
 /// <summary>
-/// Legacy `ai_providers_default` row. Schema-only: the pre-ASC.NewAi chat stack is gone and nothing reads this. Registered in MigrationContext so the table survives.
+/// Legacy `ai_providers_default` row. Schema-only: the pre-ASC.AI.Chat chat stack is gone and nothing reads this. Registered in MigrationContext so the table survives.
 /// </summary>
 public class DbDefaultAiProvider : BaseEntity
 {

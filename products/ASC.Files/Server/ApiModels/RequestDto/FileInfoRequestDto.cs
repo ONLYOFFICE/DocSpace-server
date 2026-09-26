@@ -34,19 +34,20 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The file information request parameters.
+/// The query that reads one file.
 /// </summary>
 public class FileInfoRequestDto<T>
 {
     /// <summary>
-    /// The file ID.
+    /// The file to read.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The file version.
+    /// The version to read, as reported by `GET api/2.0/files/file/{fileId}/history`; -1, the default, reads the
+    /// current version.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "version")]

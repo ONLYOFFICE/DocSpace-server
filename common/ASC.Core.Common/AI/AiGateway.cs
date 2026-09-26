@@ -69,26 +69,31 @@ public class AiGateway(
 
     public bool Configured => aiGatewayConfiguration.Configured;
 
+    public async Task<bool> IsAiAccessEnabledAsync()
+    {
+        var settings = await settingsManager.LoadAsync<TenantAiAccessSettings>(tenantManager.GetCurrentTenantId());
+        return settings.Enabled;
+    }
+
     public async Task<bool> IsAiEnabledAsync()
     {
-        if (!Configured)
-        {
-            return false;
-        }
-
-        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantManager.GetCurrentTenantId());
-        return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AITools);
+        return await IsWalletServiceEnabledAsync(TenantWalletService.AITools);
     }
 
     public async Task<bool> IsSearchEnabledAsync()
     {
-        if (!Configured)
+        return await IsWalletServiceEnabledAsync(TenantWalletService.AISearch);
+    }
+
+    private async Task<bool> IsWalletServiceEnabledAsync(TenantWalletService service)
+    {
+        if (!Configured || !await IsAiAccessEnabledAsync())
         {
             return false;
         }
 
         var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantManager.GetCurrentTenantId());
-        return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.AISearch);
+        return settings.EnabledServices != null && settings.EnabledServices.Contains(service);
     }
 
     public async Task<string> GetKeyAsync(bool allowEmpty = false)
@@ -307,6 +312,27 @@ public record AiChatPrice
     /// </summary>
     /// <example>0.00001</example>
     public decimal Completion { get; init; }
+
+    /// <summary>
+    /// The price of a single prompt token read from the cache, if the model supports prompt caching.
+    /// </summary>
+    /// <example>0.0000002</example>
+    [JsonPropertyName("prompt_cache_read")]
+    public decimal? PromptCacheRead { get; init; }
+
+    /// <summary>
+    /// The price of a single prompt token written to the cache, if the model supports prompt caching.
+    /// </summary>
+    /// <example>0.0000025</example>
+    [JsonPropertyName("prompt_cache_write")]
+    public decimal? PromptCacheWrite { get; init; }
+
+    /// <summary>
+    /// The price of a single prompt token written to the cache with a one-hour lifetime, if the model supports it.
+    /// </summary>
+    /// <example>0.000004</example>
+    [JsonPropertyName("prompt_cache_write_1h")]
+    public decimal? PromptCacheWrite1H { get; init; }
 }
 
 /// <summary>
@@ -436,6 +462,20 @@ public class ModelTierJsonConverter : JsonConverter<ModelTier?>
     }
 }
 
+public record ModelReasoning
+{
+    public bool Mandatory { get; init; }
+
+    [JsonPropertyName("default_enabled")]
+    public bool DefaultEnabled { get; init; } = true;
+
+    [JsonPropertyName("supported_efforts")]
+    public IEnumerable<string> SupportedEfforts { get; init; } = [];
+
+    [JsonPropertyName("default_effort")]
+    public string DefaultEffort { get; init; }
+}
+
 public record Model
 {
     public required string Id { get; init; }
@@ -447,6 +487,8 @@ public record Model
     public ModelTier? Tier { get; init; }
 
     public int? Rank { get; init; }
+
+    public ModelReasoning Reasoning { get; init; }
 
     [JsonPropertyName("revision_id")]
     public required Guid RevisionId { get; init; }

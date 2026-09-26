@@ -1033,13 +1033,13 @@ public class FileSecurity(
 
         await foreach (var entry in entries)
         {
-            if (entry.Security != null && entry.SecurityByUsers != null && entry.SecurityByUsers.TryGetValue(userId, out _))
+            if (entry.Security != null && entry.SecurityByUsers.TryGetValue(userId, out _))
             {
                 yield return entry;
                 continue;
             }
 
-            var security = new Dictionary<FilesSecurityActions, bool>();
+            var security = new ConcurrentDictionary<FilesSecurityActions, bool>();
             var parentFolders = await GetFileParentFolders(entry.ParentId);
             var shares = await PreloadEntrySharesAsync(entry, userId, isDocSpaceAdmin);
 
@@ -1048,11 +1048,7 @@ public class FileSecurity(
                 security[action] = await FilterEntryAsync(entry, action, userId, shares, isOutsider, isGuest, isAuthenticated, isDocSpaceAdmin, isUser, parentFolders, cachedFileDao);
             }
 
-            entry.Security = security;
-
-            entry.SecurityByUsers ??= new Dictionary<Guid, IDictionary<FilesSecurityActions, bool>>();
-
-            entry.SecurityByUsers.TryAdd(userId, security);
+            entry.Security = entry.SecurityByUsers.GetOrAdd(userId, security);
 
             yield return entry;
         }
@@ -1099,7 +1095,7 @@ public class FileSecurity(
             return false;
         }
 
-        if (entry.SecurityByUsers != null && entry.SecurityByUsers.TryGetValue(userId, out var sec) && sec.TryGetValue(action, out var result))
+        if (entry.SecurityByUsers.TryGetValue(userId, out var sec) && sec.TryGetValue(action, out var result))
         {
             return result;
         }
@@ -1177,23 +1173,23 @@ public class FileSecurity(
             action = FilesSecurityActions.Read;
         }
 
-        if (file != null && action == FilesSecurityActions.FillForms && !file.IsForm)
-        {
-            return false;
-        }
-
-        if (file != null && action == FilesSecurityActions.Edit && file.Category == (int)FilterType.Pdf && file.IsCompletedForm)
+        if (file != null && action == FilesSecurityActions.FillForms && !file.IsPdf)
         {
             return false;
         }
 
         var room = parentFolders.FirstOrDefault(r => r.IsRoom);
 
+        if (file is { IsCompletedForm: true } && action == FilesSecurityActions.Edit)
+        {
+            return false;
+        }
+
         if (room is { FolderType: FolderType.VirtualDataRoom })
         {
             var hasFullAccess = await HasFullAccessAsync(e, userId, isGuest, isRoom, isUser);
 
-            if (file != null && !hasFullAccess && !await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
+            if (file != null && !hasFullAccess && !file.IsPdf)
             {
                 var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
                 if (shareRecord is { Share: FileShare.FillForms })
@@ -1384,7 +1380,7 @@ public class FileSecurity(
                 }
             }
 
-            if (folder.FolderType == FolderType.ResultStorage
+            if (folder.FolderType == FolderType.ChatOutputs
                 && action is FilesSecurityActions.Rename or FilesSecurityActions.Delete or FilesSecurityActions.Copy or FilesSecurityActions.Move or FilesSecurityActions.Duplicate)
             {
                 return false;
@@ -1537,7 +1533,7 @@ public class FileSecurity(
             }
         }
 
-        if (file == null || !await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory) || (file is { IsForm: true } && e.RootFolderType != FolderType.VirtualRooms))
+        if (file is not { IsPdf: true } || e.RootFolderType != FolderType.VirtualRooms)
         {
             switch (action)
             {
@@ -1615,7 +1611,14 @@ public class FileSecurity(
             case FolderType.VirtualRooms:
             case FolderType.AiAgents:
             case FolderType.Forms:
-                if (isDocSpaceAdmin && folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge))
+                // The administrator bypass below does not extend to end-to-end encrypted rooms.
+                // Membership there means holding a key, so an administrator who was never invited
+                // cannot read anything in one and must not be handed access to it by role alone. This
+                // skips the bypass rather than denying outright: an administrator who *was* invited
+                // falls through to the ordinary share-based checks and keeps their access.
+                var inPrivateRoom = isRoom ? folder is { SettingsPrivate: true } : room is { SettingsPrivate: true };
+
+                if (isDocSpaceAdmin && !inPrivateRoom && folder is not { FolderType: FolderType.Knowledge} && !parentFolders.Any(p => p.FolderType is FolderType.Knowledge))
                 {
                     if (action == FilesSecurityActions.Download)
                     {
@@ -1640,9 +1643,26 @@ public class FileSecurity(
                         }
                     }
 
-                    if (action is FilesSecurityActions.Duplicate or FilesSecurityActions.Copy && isRoom && !folder.SettingsDenyDownload)
+                    if (action is FilesSecurityActions.Duplicate or FilesSecurityActions.Copy)
                     {
-                        return true;
+                        // an administrator may duplicate a whole room, so they must be able to copy
+                        // its content as well - otherwise the recursive copy of the room stops on the
+                        // first file inside it. The gate is the same as for Download: whichever room
+                        // the entry belongs to must not deny downloading.
+                        if (isRoom)
+                        {
+                            if (!folder.SettingsDenyDownload)
+                            {
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            if (room is not { SettingsDenyDownload: true })
+                            {
+                                return true;
+                            }
+                        }
                     }
 
                     switch (action)
@@ -1673,7 +1693,7 @@ public class FileSecurity(
                     FilesSecurityActions.SubmitToFormGallery or
                     FilesSecurityActions.CopyLink or
                                      FilesSecurityActions.OpenForm
-                    && await DocSpaceHelper.IsFormOrCompletedForm(file, daoFactory))
+                    && file is { IsPdf: true })
                 {
 
                     if (action == FilesSecurityActions.FillForms)
@@ -1791,7 +1811,7 @@ public class FileSecurity(
                             return false;
                     }
                 }
-                else if (file is not { IsForm: true } && action is FilesSecurityActions.OpenForm)
+                else if (file is not { IsPdf: true } && action is FilesSecurityActions.OpenForm)
                 {
                     return false;
                 }
@@ -2803,14 +2823,7 @@ public class FileSecurity(
             return true;
         }
 
-        return searchArea switch
-        {
-            SearchArea.Active => room.FolderType != FolderType.FillingFormsRoom,
-            SearchArea.Forms => room.FolderType == FolderType.FillingFormsRoom,
-            SearchArea.Templates => room.FolderType != FolderType.FillingFormsRoom,
-            SearchArea.FormTemplates => room.FolderType == FolderType.FillingFormsRoom,
-            _ => true
-        };
+        return searchArea.MatchesRoomType(room.FolderType);
     }
 
     private async Task<List<FileEntry>> GetAllVirtualRoomsAsync(
@@ -2851,11 +2864,18 @@ public class FileSecurity(
             _ => new[] { await globalFolder.GetFolderVirtualRoomsAsync(daoFactory), await globalFolder.GetFolderArchiveAsync(daoFactory) }
         };
 
+        var currentUserId = authContext.CurrentAccount.ID;
+
         var roomsEntries = storageFilter == StorageFilter.ThirdParty ?
             [] :
             await folderDao.GetRoomsAsync(rootFoldersIds, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectOwnerId, subjectEntries, quotaFilter, groupId, privacyFilter, metadataFilter)
                 .Where(r => withSubfolders || r.IsRoom)
                 .Where(r => MatchesFormsSplit(r, searchArea))
+                // This is the administrator's view, which otherwise lists every room in the portal.
+                // That bypass does not extend to end-to-end encrypted rooms: membership there means
+                // holding a key, so an administrator who was never invited cannot read anything in one
+                // and has no business seeing it listed either.
+                .Where(r => !r.SettingsPrivate || r.CreateBy == currentUserId || internalRecords.ContainsKey(r.Id))
                 .ToListAsync();
 
         // the metadata values are stored for the internal entries only, so a provider based room can never
@@ -3486,7 +3506,7 @@ public class FileSecurity(
 
             foreach (var s in shares)
             {
-                if (s is FileShare.Restrict || (s is FileShare.Read && !file.IsForm))
+                if (s is FileShare.Restrict or FileShare.Read)
                 {
                     sharesToAdd.Add(s);
                     continue;
@@ -3509,11 +3529,11 @@ public class FileSecurity(
 
                 switch (s)
                 {
-                    case FileShare.Editing when (file.IsForm && parentRoomType != FolderType.FillingFormsRoom || !file.IsForm) && canEdit:
-                    case FileShare.FillForms when file.IsForm && DocSpaceHelper.IsFillFormsRoom(parentRoomType):
-                    case FileShare.CustomFilter when !file.IsForm && canCustomFiltering:
-                    case FileShare.Comment when !file.IsForm && canComment:
-                    case FileShare.Review when !file.IsForm && canReview:
+                    case FileShare.Editing when (file.IsPdf && parentRoomType != FolderType.FillingFormsRoom || !file.IsPdf) && canEdit:
+                    case FileShare.FillForms when file.IsPdf && DocSpaceHelper.IsFillFormsRoom(parentRoomType):
+                    case FileShare.CustomFilter when canCustomFiltering:
+                    case FileShare.Comment when canComment:
+                    case FileShare.Review when canReview:
                     case FileShare.ReadWrite:
                         sharesToAdd.Add(s);
                         break;

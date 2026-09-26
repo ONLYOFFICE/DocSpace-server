@@ -10,7 +10,7 @@ Do NOT suggest or implement caching via `Interlocked`, static `ConcurrentDiction
 
 ## Two FusionCache instances — don't mix them up
 - **Default `IFusionCache`** (inject directly): L1 memory + **L2 Redis** + backplane. Distributed — visible to all nodes. Used by `SettingsManager`, `FileTrackerHelper`, `CspSettingsHelper`.
-- **Named `"memory"`** (inject `IFusionCacheProvider`, call `.GetMemoryCache()`): **L1-only** (no Redis reads/writes), but still wired to the Redis backplane so `Remove`/`RemoveByTagAsync` invalidate across nodes. Used by most `Cached*Service` classes in `common/ASC.Core.Common/Caching/`.
+- **Named `"memory"`** (inject `IFusionCacheProvider`, call `.GetMemoryCache()`): **L1-only** (no Redis reads/writes), wired to the Redis backplane **but with `SkipBackplaneNotifications = true` by default** — a factory fill or a plain `SetAsync` stays local. An L1-only cache that notified on every fill made every other process evict and re-read the same key from the DB (tenant -1 settings like `BaseDomain` were re-read ~2.7k times per service per test run, 2026-09-03). Invalidations that other nodes must see go through `CacheExtention.RemoveAndNotifyAsync` / `RemoveByTagAndNotifyAsync` — **never call bare `RemoveAsync`/`RemoveByTagAsync` on the memory cache**, they would only clear the local node. Used by most `Cached*Service` classes in `common/ASC.Core.Common/Caching/`.
 - Registration: `common/ASC.Api.Core/Extensions/ServiceCollectionExtension.cs` (`AddHybridCache`, `AddMemoryCache(connection)`). Note: no-arg `services.AddMemoryCache()` is Microsoft's `IMemoryCache` — a different thing.
 
 ## Rules

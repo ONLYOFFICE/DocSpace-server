@@ -86,7 +86,7 @@ public class ProjectConfigurator(
         ConfigureForwardedHeadersNetworks(project);
 
         // Map the dev HTTPS host to the default standalone tenant.
-        project.WithEnvironment("CORE__LOCAL_ADDRESSES", Constants.AppHostHttpsHost);
+        project.WithEnvironment("CORE__LOCAL_ADDRESSES", $"{Constants.AppHostHttpsHost},{Constants.HostDockerInternal}");
 
         // Every launch profile points $STORAGE_ROOT/log__dir at <root>/Data and <root>/Logs, and the
         // integration tests reuse those very profiles. Redirect them into a `test` subfolder so a test
@@ -182,7 +182,7 @@ public class ProjectConfigurator(
 
         ConfigureForwardedHeadersNetworks(resourceBuilder);
 
-        resourceBuilder.WithEnvironment("CORE__LOCAL_ADDRESSES", Constants.AppHostHttpsHost);
+        resourceBuilder.WithEnvironment("CORE__LOCAL_ADDRESSES", $"{Constants.AppHostHttpsHost},{Constants.HostDockerInternal}");
 
         AddBaseBind(resourceBuilder);
 
@@ -311,11 +311,11 @@ public class ProjectConfigurator(
         return this;
     }
 
-    public ProjectConfigurator AddNewAi()
+    public ProjectConfigurator AddAiChat()
     {
-        var name = "onlyoffice-newAi";
-        var path = Path.Combine("..", "ASC.NewAi");
-        var port = Constants.NewAiPort;
+        var name = "onlyoffice-aiChat";
+        var path = Path.Combine("..", "ASC.AI.Chat");
+        var port = Constants.AiChatPort;
 
         if (isDocker)
         {
@@ -323,11 +323,11 @@ public class ProjectConfigurator(
                 .AddDockerfile(name, path)
                 .WithImageTag("dev")
                 .WithEnvironment("log:dir", "/logs")
-                .WithEnvironment("log:name", "newAi")
+                .WithEnvironment("log:name", "aiChat")
                 .WithEnvironment("API_HOST", new UriBuilder(Uri.UriSchemeHttp, Constants.OpenRestyContainer, Constants.RestyPort).ToString())
                 .WithEnvironment("AI_SERVICE_URL", new UriBuilder(Uri.UriSchemeHttp, GetProjectName<ASC_AI>(), Constants.AiPort).ToString())
                 .WithEnvironment("app:appsettings", "/buildtools/config")
-                // `__` form, not `:` — NewAi's nconf would otherwise nest a
+                // `__` form, not `:` — AI.Chat's nconf would otherwise nest a
                 // `:`-keyed var and turn the `ai.mcp` array into an object.
                 .WithEnvironment("AI__MCP__0__ENDPOINT", new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort).ToString() + "mcp")
                 .WithHttpEndpoint(port, port, isProxied: false)
@@ -346,7 +346,7 @@ public class ProjectConfigurator(
             var resourceBuilder = builder.AddJavaScriptApp(name, path, "dev")
                 .WithYarn()
                 .WithEnvironment("NODE_ENV", "development")
-                // `__` form, not `:` — NewAi's nconf would otherwise nest a
+                // `__` form, not `:` — AI.Chat's nconf would otherwise nest a
                 // `:`-keyed var and turn the `ai.mcp` array into an object.
                 .WithEnvironment("AI__MCP__0__ENDPOINT", new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort) + "mcp")
                 .WithHttpEndpoint(targetPort: port)

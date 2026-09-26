@@ -131,20 +131,20 @@ dotnet build common/Tools/ASC.Api.Documentation/ASC.Api.Documentation.slnx -t:Re
   (or on the `<Properties Name="MSBuild">` block inside the slnx) means a build that silently emits
   nothing the moment either condition changes.
 - `-t:Rebuild` (not a plain build) — forces the document tool to re-run.
-- One document is not .NET: the `EmitNewAiOpenApi` target in the tool's csproj runs
-  `yarn install --immutable` + `yarn openapi` in the Node service under `common/ASC.NewAi`, writing
+- One document is not .NET: the `EmitAiChatOpenApi` target in the tool's csproj runs
+  `yarn install --immutable` + `yarn openapi` in the Node service under `common/ASC.AI.Chat`, writing
   into the same documents directory. That emitter reads the AI service's document from there, so
   `ASC.AI` must build first — the slnx `BuildDependency` guarantees the order. Yarn
   peer-dependency warnings are normal and not a failure.
 
   That yarn step also rewrites a **tracked** file of its own outside the documents directory —
-  `common/ASC.NewAi/app/generated/openapi-schemas.json` — so stage A shows up in
+  `common/ASC.AI.Chat/app/generated/openapi-schemas.json` — so stage A shows up in
   `git status` in two places, not one. Expected, not a stray edit.
 - **The yarn step is the one part not proven OS-neutral.** The tool's csproj builds its working
-  directory as `$(MSBuildProjectDirectory)\..\..\..\ASC.NewAi` — backslashes — and hands it to `Exec`.
+  directory as `$(MSBuildProjectDirectory)\..\..\..\ASC.AI.Chat` — backslashes — and hands it to `Exec`.
   Stage A is only verified on Windows. If it fails on Linux/macOS with a path that looks like one
   mashed-together segment, that is the cause, and the fix belongs in the csproj, not here: do not
-  work around it by running yarn by hand, because then `newai_2.0.json` is emitted outside the
+  work around it by running yarn by hand, because then `aichat_2.0.json` is emitted outside the
   build and nothing guarantees `ASC.AI` ran first.
 - **The build does not render the Markdown API reference.** It only emits the `json/*.json`
   documents. The reference is produced by the `Markdown` command in stage B like any other target,
@@ -283,6 +283,37 @@ So a `CSharp`/`TypeScript` run touches up to **four** indexes: the language's ow
 reporting. These destinations are the tool's business and can change: re-read them out of the matching `Commands/Generate<Lang>SdkCommand.cs` (`CopyPackages`)
 instead of trusting this table if anything looks off.
 
+## Consumers keep building against the old SDK until the NuGet cache is dropped
+
+The repo consumes the C# SDK as the **package** `DocSpace.API.SDK`, version-pinned in
+`Directory.Packages.props` and served from the `.nuget/packages` source — not as a project reference
+to `sdk/docspace-api-sdk-csharp`. A generation run rewrites the `.nupkg` **under the same version
+number**, and NuGet, seeing a version it already has, never re-extracts it: every consumer keeps
+compiling against the stale copy in `~/.nuget/packages/docspace.api.sdk/<ver>/`.
+
+This fails silently. The generator exits 0, the SDK sources on disk are correct, the consumer builds
+clean — and still behaves as if nothing was regenerated. Verified: after `data` stopped being
+required on `HistoryDto`, the integration tests went on throwing
+`Required property 'data' not found in JSON` until the cache entry was removed.
+
+So whenever a `CSharp` run is meant to change behaviour a consumer in this repo depends on, finish
+the job:
+
+```bash
+rm -rf ~/.nuget/packages/docspace.api.sdk/<version>      # the version from Directory.Packages.props
+dotnet restore <consumer csproj>
+dotnet build <consumer csproj>
+```
+
+Then confirm the new binary really is in place before reporting success — the source tree is not
+evidence, the extracted package is:
+
+```bash
+strings ~/.nuget/packages/docspace.api.sdk/<version>/lib/<tfm>/DocSpace.API.SDK.dll | grep '<something your change removed or added>'
+```
+
+None of this applies when the version number was bumped: a new version is a new cache entry.
+
 ## Failure modes
 
 - `Duplicate operationId '...'`, `Duplicate path and method`, `Component conflict in ...`,
@@ -301,6 +332,8 @@ instead of trusting this table if anything looks off.
 - Sources regenerated but the SDK's package was not refreshed, exit code still 0 — `openapi-generator-cli`
   was called directly instead of the tool, so that language's post-generation steps never ran. Rerun
   the language through the tool.
+- Everything regenerated and green, but a consumer in this repo still behaves as before the change —
+  the stale NuGet cache entry, see the section above. Nothing in the logs hints at it.
 
 Known-harmless noise, do not chase it and do not report it as a failure:
 

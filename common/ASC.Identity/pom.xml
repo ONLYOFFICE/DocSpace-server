@@ -193,7 +193,18 @@
     </dependencyManagement>
 
     <dependencies>
+        <!-- Spring Web -->
+        <dependency>
+          <groupId>org.springframework</groupId>
+          <artifactId>spring-web</artifactId>
+        </dependency>
+
         <!-- Utility Dependencies -->
+        <dependency>
+          <groupId>org.springdoc</groupId>
+          <artifactId>springdoc-openapi-starter-webmvc-api</artifactId>
+          <version>${springdoc.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -210,12 +221,6 @@
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
-        </dependency>
-
-        <!-- Spring Web -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
         </dependency>
 
         <!-- Testing Dependencies -->

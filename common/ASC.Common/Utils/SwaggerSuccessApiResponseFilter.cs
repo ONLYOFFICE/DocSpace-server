@@ -1,34 +1,34 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using Microsoft.OpenApi;
@@ -74,7 +74,16 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         var isPrimitive = schema.Type != null && schema.Type != JsonSchemaType.Array && schema.Type != JsonSchemaType.Object;
         string responseSchemaKey = null;
         OpenApiSchema responseSchema = null;
-        if (isPrimitive)
+        if (IsNullableAnyValue(schema))
+        {
+            // A nullable type with no schema of its own - `JsonElement?`, `object?` - comes out of the generator as
+            // `type: null` alone, which claims the payload is always null. It is any JSON value, null included.
+            responseSchemaKey = "JsonValueWrapper";
+            responseSchema = CreateSuccessApiResponseSchema(new OpenApiSchema(),
+                ("The successful API response containing an arbitrary JSON value.",
+                 "The JSON value returned by the operation, or null when there is none."));
+        }
+        else if (isPrimitive)
         {
             var typeName = GetPrimitiveTypeName(schema);
             var primitiveDescriptions = GetPrimitiveDescriptions(typeName);
@@ -199,7 +208,7 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
 
         return responseSchema;
     }
-    
+
     // The wrapper name normally drops the payload's `Dto` marker - `FileDto` becomes `FileWrapper`, the
     // flattened generic `FileDtoInteger` becomes `FileIntegerWrapper`. But `components/schemas` is shared
     // with real C# classes and several of them are already called `*Wrapper`
@@ -274,33 +283,46 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
         return stripped;
     }
 
+    private static bool IsNullableAnyValue(IOpenApiSchema schema)
+    {
+        return schema is OpenApiSchema
+        {
+            Type: JsonSchemaType.Null,
+            Items: null,
+            Properties: null or { Count: 0 },
+            OneOf: null or { Count: 0 },
+            AnyOf: null or { Count: 0 },
+            AllOf: null or { Count: 0 }
+        };
+    }
+
     private static string GetPrimitiveTypeName(IOpenApiSchema primitiveSchema)
     {
         if ((primitiveSchema.Type & JsonSchemaType.String) == JsonSchemaType.String)
         {
             return "String";
         }
-        
+
         if ((primitiveSchema.Type & JsonSchemaType.Boolean) == JsonSchemaType.Boolean)
         {
             return "Boolean";
         }
-        
+
         if ((primitiveSchema.Type & JsonSchemaType.Integer) == JsonSchemaType.Integer && primitiveSchema.Format == "int32")
         {
             return "Int32";
         }
-        
+
         if ((primitiveSchema.Type & JsonSchemaType.Integer) == JsonSchemaType.Integer && primitiveSchema.Format == "int64")
         {
             return "Int64";
         }
-        
+
         if ((primitiveSchema.Type & JsonSchemaType.Number) == JsonSchemaType.Number && primitiveSchema.Format == "float")
         {
             return "Float";
         }
-        
+
         if ((primitiveSchema.Type & JsonSchemaType.Number) == JsonSchemaType.Number && primitiveSchema.Format == "double")
         {
             return "Double";

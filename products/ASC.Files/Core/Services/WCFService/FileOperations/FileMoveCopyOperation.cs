@@ -720,7 +720,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
             {
                 if (toFolder.RootFolderType == FolderType.VirtualRooms)
                 {
-                    if (toParentFolders.Any(folder => folder.FolderType == FolderType.FillingFormsRoom) && !file.IsForm)
+                    if (toParentFolders.Any(folder => folder.FolderType == FolderType.FillingFormsRoom) && !file.IsPdf)
                     {
                         Err = _copy ? FilesCommonResource.ErrorMessage_UploadToFormRoom : FilesCommonResource.ErrorMessage_MoveToFormRoom;
                         continue;
@@ -753,7 +753,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                                 await webhookManager.PublishAsync(WebhookTrigger.FileCopied, newFile);
 
                                 needToMark.Add(newFile);
-                                if (newFile.IsForm && _toFillOut)
+                                if (newFile.IsPdf && _toFillOut)
                                 {
                                     var properties = await fileDao.GetProperties(newFile.Id) ?? new EntryProperties<TTo> { FormFilling = new FormFillingProperties<TTo>() };
                                     properties.CopyToFillOut = true;
@@ -850,7 +850,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                                     }
                                 }
 
-                                if (newFile.IsForm && _toFillOut)
+                                if (newFile.IsPdf && _toFillOut)
                                 {
                                     var properties = await fileDao.GetProperties(newFile.Id) ?? new EntryProperties<TTo> { FormFilling = new FormFillingProperties<TTo>() };
                                     properties.CopyToFillOut = true;
@@ -859,7 +859,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
 
                                 await socketManager.CreateFileAsync(newFile);
 
-                                if (file.IsForm)
+                                if (file.IsPdf)
                                 {
                                     var toRoom = toParentFolders.FirstOrDefault(folder => folder.FolderType is FolderType.FillingFormsRoom or FolderType.VirtualDataRoom);
                                     var fromRoom = await DocSpaceHelper.GetParentRoom(file, FolderDao);
@@ -963,7 +963,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
                                 await linkDao.DeleteAllLinkAsync(newFile.Id);
 
                                 needToMark.Add(newFile);
-                                if (newFile.IsForm && _toFillOut)
+                                if (newFile.IsPdf && _toFillOut)
                                 {
                                     var properties = await fileDao.GetProperties(newFile.Id) ?? new EntryProperties<TTo> { FormFilling = new FormFillingProperties<TTo>() };
                                     properties.CopyToFillOut = true;
@@ -1107,7 +1107,7 @@ internal class FileMoveCopyOperation<T> : FileOperation<FileMoveCopyOperationDat
             CancellationToken.ThrowIfCancellationRequested();
 
             if (!filesByIds.TryGetValue(fileId, out var file) ||
-                file.IsForm ||
+                file.IsPdf ||
                 file.Encrypted ||
                 file.ProviderEntry ||
                 file.RootFolderType is FolderType.Privacy or FolderType.TRASH ||

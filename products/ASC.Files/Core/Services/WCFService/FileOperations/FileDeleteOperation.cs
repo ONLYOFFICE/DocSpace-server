@@ -411,7 +411,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
 
                         if (folder.ParentRoomType == FolderType.VirtualDataRoom)
                         {
-                            var tasks = files.Where(file => file.IsForm).Select(async file =>
+                            var tasks = files.Where(file => file.IsPdf).Select(async file =>
                             {
                                 await FileDao.SaveProperties(file.Id, null);
                                 await FileDao.DeleteFormRolesAsync(file.Id);
@@ -707,7 +707,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
                 {
                     await LinkDao.DeleteAllLinkAsync(file.Id);
                     await FileDao.SaveProperties(file.Id, null);
-                    if (file.IsForm)
+                    if (file.IsPdf)
                     {
                         await FileDao.DeleteFormRolesAsync(file.Id);
                     }
@@ -821,7 +821,7 @@ internal class FileDeleteOperation<T> : FileOperation<FileDeleteOperationData<T>
             {
                 await LinkDao.DeleteAllLinkAsync(file.Id);
                 await FileDao.SaveProperties(file.Id, null);
-                if (file.IsForm)
+                if (file.IsPdf)
                 {
                     await FileDao.DeleteFormRolesAsync(file.Id);
                 }

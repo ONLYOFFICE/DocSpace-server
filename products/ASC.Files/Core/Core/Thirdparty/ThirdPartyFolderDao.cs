@@ -122,7 +122,7 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             rooms = rooms.Where(x => x.Title.Contains(searchText, StringComparison.OrdinalIgnoreCase));
         }
 
-        var filesDbContext = await dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
         rooms = FilterByTags(rooms, withoutTags, tags, filesDbContext);
 
         await foreach (var room in rooms)
@@ -291,7 +291,9 @@ internal class ThirdPartyFolderDao<TFile, TFolder, TItem>(
             await storage.DeleteItemAsync(folder);
         }
 
-        await _providerInfo.CacheResetAsync(dao.GetId(folder), true);
+        // The deleted entry is a folder: with isFile the reset dropped the file tag and left the
+        // cached folder in place, so every other process kept serving it until the entry expired.
+        await _providerInfo.CacheResetAsync(dao.GetId(folder), false);
         var parentFolderId = dao.GetParentFolderId(folder);
         if (parentFolderId != null)
         {

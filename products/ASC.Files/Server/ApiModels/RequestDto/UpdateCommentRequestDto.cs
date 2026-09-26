@@ -34,7 +34,7 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters for updating a comment.
+/// The comment to store on one version of a file.
 /// </summary>
 public class UpdateComment
 {
@@ -42,14 +42,16 @@ public class UpdateComment
     public const int MaxCommentLength = 255;
 
     /// <summary>
-    /// The comment version.
+    /// The version the comment belongs to, as reported by `GET api/2.0/files/file/{fileId}/edit/history`. A version
+    /// that does not exist is rejected as an invalid request.
     /// </summary>
     /// <example>1</example>
     [Range(1, int.MaxValue)]
     public required int Version { get; set; }
 
     /// <summary>
-    /// The comment text.
+    /// The note that explains what changed in that version, as the version history shows it. An empty text clears the
+    /// note, and a longer one is cut rather than refused, so read the stored text from the answer.
     /// </summary>
     /// <example>This is a comment</example>
     [StringLength(MaxCommentLength)]
@@ -57,20 +59,21 @@ public class UpdateComment
 }
 
 /// <summary>
-/// The request parameters for updating a comment.
+/// The request that replaces the comment on one version of a file.
 /// </summary>
 public class UpdateCommentRequestDto<T>
 {
     /// <summary>
-    /// The file ID where the comment is located.
+    /// The file whose version comment is replaced.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The parameters for updating a comment.
+    /// The version and the comment to store on it.
     /// </summary>
+    /// <example>{"version": 1, "comment": "Prices updated for Q3"}</example>
     [FromBody]
     public required UpdateComment File { get; set; }
 }

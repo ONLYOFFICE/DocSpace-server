@@ -144,7 +144,15 @@ public class RenewSubscriptionService(
             owner = await userManager.GetUsersAsync(tenant.OwnerId);
 
             var customerInfo = await tariffService.GetCustomerInfoAsync(data.TenantId);
-            if (!string.IsNullOrEmpty(customerInfo?.Email))
+            if (customerInfo == null)
+            {
+                // The renewal cannot be paid without knowing the payment method, and ExecuteTaskAsync has
+                // already advanced the due-date window past this row, so there will be no second attempt.
+                // Fail loudly so the owner is notified instead of the subscription lapsing unnoticed.
+                throw new BillingException("Customer could not be found");
+            }
+
+            if (!string.IsNullOrEmpty(customerInfo.Email))
             {
                 payer = await userManager.GetUserByEmailAsync(customerInfo.Email);
             }
@@ -233,7 +241,11 @@ public class RenewSubscriptionService(
                 var coreSettings = scope.ServiceProvider.GetRequiredService<CoreSettings>();
                 var siteName = tenant.GetTenantDomain(coreSettings);
 
-                if (!await tariffService.EnsureWalletBalanceAsync(data.TenantId, requiredAmount, defaultCurrency, null, siteName, true, metadata))
+                // A delayed payment method is topped up manually, so the renewal is paid from whatever the
+                // wallet already holds; if that is not enough the customer is notified instead.
+                var allowTopUp = !customerInfo.IsDelayedPaymentMethod;
+
+                if (!await tariffService.EnsureWalletBalanceAsync(data.TenantId, requiredAmount, defaultCurrency, null, siteName, true, metadata, allowTopUp))
                 {
                     throw new BillingException("Insufficient balance");
                 }

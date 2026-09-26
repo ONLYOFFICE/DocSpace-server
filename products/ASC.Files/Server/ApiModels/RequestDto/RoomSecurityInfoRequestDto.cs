@@ -39,21 +39,23 @@ namespace ASC.Files.ApiModels.RequestDto;
 public class RoomSecurityInfoRequestDto<T>
 {
     /// <summary>
-    /// The room ID.
+    /// The room whose access list is read, named by the identifier that `GET api/2.0/files/rooms` reports for it.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// The filter type of the access rights.
+    /// What kind of access entries to list. The default covers accounts and groups and leaves the sharing links of
+    /// the room out; those are read with `GET api/2.0/files/rooms/{id}/links`.
     /// </summary>
-    /// <example>1</example>
+    /// <example>0</example>
     [FromQuery(Name = "filterType")]
     public ShareFilterType FilterType { get; set; } = ShareFilterType.UserOrGroup;
 
     /// <summary>
-    /// The number of items to be retrieved or processed.
+    /// How many entries to return in one answer. The total number of matching entries comes back in the response
+    /// headers, so it is what tells the caller whether another page is needed.
     /// </summary>
     /// <example>25</example>
     [FromQuery(Name = "count")]
@@ -61,16 +63,18 @@ public class RoomSecurityInfoRequestDto<T>
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
-    /// The starting index of the items to retrieve in a paginated request.
+    /// How many matching entries to skip before the page starts. Together with the page size it walks the list, which
+    /// is ordered by role and then by name and is therefore stable between calls.
     /// </summary>
     /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
-    /// The text filter value used for filtering room security information.
+    /// Keeps only the entries whose displayed name contains this text. An invitation that has not been accepted yet
+    /// is listed under the email address it was sent to, so that is what has to be searched for.
     /// </summary>
-    /// <example>Sample filter</example>
+    /// <example>Smith</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }

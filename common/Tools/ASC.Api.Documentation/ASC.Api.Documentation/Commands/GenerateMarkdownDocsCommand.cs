@@ -34,18 +34,24 @@
 namespace ASC.Api.Documentation.Commands;
 
 /// <summary>
-/// Renders the Markdown API reference next to the per-service `json/*.json` documents, one
-/// self-contained document per service rather than a page per tag and per model.
+/// Renders the Markdown API reference: one document per section of the API, one document for
+/// every model they exchange, and one document per operation.
 /// </summary>
 /// <remarks>
-/// The joined document is split back into per-service sub-documents first (see
+/// The joined document is split into per-section sub-documents first (see
 /// <see cref="OpenapiSplitter"/>) and the `my-markdown` generator is then run once per
-/// sub-document, because a supporting-file template cannot tell which service it is
-/// rendering and the generator's `apis` filter does not match tags containing spaces.
+/// sub-document, because a supporting-file template cannot tell which section it is rendering
+/// and the generator's `apis` filter does not match tags containing spaces.
 /// </remarks>
 public class GenerateMarkdownDocsCommand : SdkCommandBase
 {
     protected override string Name => "Markdown";
+
+    /// <summary>
+    /// The directory the model pages are published in, and the name of the document they are cut
+    /// from. Models are shared across sections, so they are published once, beside them all.
+    /// </summary>
+    private const string ModelsDirectory = "models";
 
     private static readonly JsonSerializerOptions _writeOptions = new()
     {
@@ -53,101 +59,156 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
-    public override async Task<int> ExecuteAsync(
+    protected override async Task<int> ExecuteAsync(
         CommandContext context,
         NoArgumentsCommandSettings settings,
         CancellationToken cancellationToken)
     {
         var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
-        var (joinedDocument, sourceDocuments) = ReadDocumentPaths(configuration);
+        var joinedDocument = ReadJoinedDocument(configuration);
         var markdown = ReadMarkdownSettings(configuration);
         var splitDirectory = Path.Combine(WorkingDirectory, "json", "split");
         var outputDirectory = ReadOutputDirectory();
         var operationsDirectory = Path.Combine(outputDirectory, markdown.OperationsDirectory);
 
-        var documents = await OpenapiSplitter.SplitAsync(
+        var sections = await OpenapiSplitter.SplitBySectionAsync(
             joinedDocument,
-            sourceDocuments,
             splitDirectory,
+            MarkdownSettings.NameFor,
             cancellationToken);
 
-        // Nothing removes what the generator no longer produces, so a service dropped from the
-        // join or renamed would leave its document behind looking current - and it would be
-        // committed as if it were still generated.
-        RemoveStale(outputDirectory, "*.md", documents.Select(document => $"{document.Name}.md"));
-        RemoveStale(splitDirectory, "*.json", documents.Select(document => $"{document.Name}.json"));
+        // Nothing removes what the generator no longer produces, so a section dropped from the
+        // API or renamed would leave its document behind looking current - and it would be
+        // committed as if it were still generated. The pages are written in full on every run, so
+        // the whole tree goes rather than being pruned file by file: a sub-section that lost its
+        // last endpoint leaves a directory behind, not a file.
+        RemoveStale(outputDirectory, "*.md", []);
+        RemoveStale(
+            splitDirectory,
+            "*.json",
+            [.. sections.Select(section => $"{section.Name}.json"), $"{ModelsDirectory}.json"]);
 
-        var operations = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        var aggregateDocuments = new List<MarkdownBundle.AggregateDocument>();
+        if (Directory.Exists(operationsDirectory))
+        {
+            Directory.Delete(operationsDirectory, recursive: true);
+        }
+
+        var published = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var sectionDocuments = new List<MarkdownBundle.SectionDocument>();
         var operationDocuments = new List<MarkdownBundle.OperationDocument>();
 
-        foreach (var document in documents)
+        // Before the sections, because what the endpoints link their types to has to be known by
+        // the time those links are written.
+        var models = await RenderModelsAsync(
+            joinedDocument,
+            splitDirectory,
+            outputDirectory,
+            operationsDirectory,
+            markdown,
+            cancellationToken);
+
+        if (models == null)
         {
-            AnsiConsole.MarkupLine($"Rendering [green]{Markup.Escape(document.Name)}.md[/]");
+            return 1;
+        }
+
+        var modelPages = models.ToDictionary(model => model.Anchor, model => model.Path, StringComparer.Ordinal);
+
+        AnsiConsole.MarkupLine($"Cut [green]{models.Count}[/] model pages");
+
+        foreach (var document in sections)
+        {
+            AnsiConsole.MarkupLine($"Rendering [green]{Markup.Escape(document.Section)}[/]");
 
             await ApplyPresentationAsync(document, markdown, cancellationToken);
 
-            var exitCode = await RunGeneratorAsync(
-                BuildArguments(document, markdown),
-                cancellationToken);
+            var exitCode = await RunGeneratorAsync(BuildArguments(document, markdown), cancellationToken);
 
             if (exitCode != 0)
             {
                 return exitCode;
             }
 
+            // The section's own page is the index of the directory its endpoints are in, which is
+            // what makes the directory a section rather than a bag of pages: Docusaurus takes the
+            // page named after the folder as that folder's own.
+            var sectionDirectory = Path.Combine(operationsDirectory, document.Name);
+            var documentPath = Publish(outputDirectory, document.Name, sectionDirectory);
+
+            // Before the document is cut up, so that the section page and every endpoint page cut
+            // out of it carry the same escaping.
+            await MdxSafe.ApplyAsync(documentPath, cancellationToken);
+
+            var groups = ReadGroups(document);
+
             var sliced = await MarkdownSlicer.SliceAsync(
-                Path.Combine(outputDirectory, $"{document.Name}.md"),
-                document.Name,
-                operationsDirectory,
-                markdown.ModelLinkBase,
+                documentPath,
+                sectionDirectory,
+                modelPages.GetValueOrDefault,
+                operationId => MarkdownSettings.NameFor(groups.GetValueOrDefault(operationId, string.Empty)),
                 cancellationToken);
+
+            await WriteCategoryAsync(sectionDirectory, document.Section, cancellationToken);
+
+            foreach (var label in groups.Values.Distinct(StringComparer.Ordinal))
+            {
+                if (label.Length > 0)
+                {
+                    await WriteCategoryAsync(
+                        Path.Combine(sectionDirectory, MarkdownSettings.NameFor(label)),
+                        label,
+                        cancellationToken);
+                }
+            }
+
+            sectionDocuments.Add(new MarkdownBundle.SectionDocument(
+                document.Name,
+                markdown.TitleFor(document.Section),
+                $"{document.Name}/{document.Name}.md"));
 
             foreach (var operation in sliced)
             {
-                // All services publish into one directory, mirroring how the site puts every
-                // operation under a single section. The joiner already rejects duplicate operation
-                // ids, so a collision here means two ids differing only in case or punctuation -
-                // silently overwriting one of them would drop an endpoint from the documentation.
-                if (operations.TryGetValue(operation.FileName, out var owner))
+                // Every sub-section publishes into a directory of its own, so a collision here is
+                // two operation ids of one sub-section differing only in case or punctuation. The
+                // joiner already rejects duplicate ids, and silently overwriting one of these
+                // would drop an endpoint from the documentation.
+                var key = Path.Combine(document.Name, operation.Group, operation.FileName);
+
+                if (published.TryGetValue(key, out var owner))
                 {
                     throw new Exception(
-                        $"'{operation.OperationId}' and '{owner}' both publish as {operation.FileName}");
+                        $"'{operation.OperationId}' and '{owner}' both publish as {key}");
                 }
 
-                operations[operation.FileName] = operation.OperationId;
+                published[key] = operation.OperationId;
 
                 operationDocuments.Add(new MarkdownBundle.OperationDocument(
+                    document.Name,
+                    operation.Group,
                     operation.FileName,
                     operation.OperationId,
                     operation.Endpoint,
-                    operation.Summary,
-                    operation.Path));
+                    operation.Summary));
             }
 
-            aggregateDocuments.Add(new MarkdownBundle.AggregateDocument(
-                $"{document.Name}.md",
-                markdown.TitleFor(document.Name),
-                Path.Combine(outputDirectory, $"{document.Name}.md")));
-
-            AnsiConsole.MarkupLine($"  sliced into [green]{sliced.Count}[/] operation documents");
+            AnsiConsole.MarkupLine($"  cut into [green]{sliced.Count}[/] endpoint pages");
         }
-
-        RemoveStale(operationsDirectory, "*.md", operations.Keys);
 
         if (!string.IsNullOrWhiteSpace(markdown.BundleDirectory))
         {
             await MarkdownBundle.WriteAsync(
                 markdown.BundleDirectory,
+                operationsDirectory,
                 markdown.SiteUrl ?? string.Empty,
                 markdown.IndexTitle,
-                aggregateDocuments,
+                sectionDocuments,
                 operationDocuments,
+                [.. models.Select(model => new MarkdownBundle.ModelDocument(model.Title, model.FileName))],
                 cancellationToken);
 
             AnsiConsole.MarkupLine(
-                $"Bundled [green]{aggregateDocuments.Count}[/] references and [green]{operationDocuments.Count}[/] operations for publishing");
+                $"Bundled [green]{sectionDocuments.Count}[/] sections, [green]{operationDocuments.Count}[/] endpoints and [green]{models.Count}[/] models for publishing");
 
             // Only once the bundle holds a complete copy: until then these directories are the
             // only place the work exists, and a failed run is far easier to diagnose with them
@@ -212,7 +273,7 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
         // The joined document titles every service "Api", and the heading comes from info.title.
         if (root["info"] is JsonObject info)
         {
-            info["title"] = settings.TitleFor(document.Name);
+            info["title"] = settings.TitleFor(document.Section);
         }
 
         OpenApiServer.ApplyBaseUrlDefault(root, settings.ServerUrl);
@@ -267,7 +328,6 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
             ReadBundleDirectory(section),
             section["siteUrl"],
             section["indexTitle"] ?? "ONLYOFFICE DocSpace API",
-            section["modelLinkBase"] ?? "../",
             titles);
     }
 
@@ -314,42 +374,176 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
     }
 
     /// <summary>
-    /// Reads the same paths the joiner works with: the joined document it produces and the
-    /// per-service documents it consumes. Relative paths resolve against the current directory,
-    /// matching <see cref="JoinSettings"/>.
+    /// The joined document the joiner produced. Relative paths resolve against the current
+    /// directory, matching <see cref="JoinSettings"/>.
     /// </summary>
-    private static (string JoinedDocument, IReadOnlyList<string> SourceDocuments) ReadDocumentPaths(
-        IConfiguration configuration)
+    private static string ReadJoinedDocument(IConfiguration configuration)
     {
-        var joinedParts = configuration.GetSection("pathToFile").Get<string[]>();
-        if (joinedParts == null || joinedParts.Length == 0)
+        var parts = configuration.GetSection("pathToFile").Get<string[]>();
+
+        if (parts == null || parts.Length == 0)
         {
             throw new Exception("File path not specified. Configure 'pathToFile' in appsettings.json");
         }
 
-        var sourceDocuments = new List<string>();
-
-        foreach (var child in configuration.GetSection("join").GetChildren())
-        {
-            var parts = child.Get<string[]>();
-            if (parts is { Length: > 0 })
-            {
-                sourceDocuments.Add(Path.GetFullPath(Path.Combine(parts)));
-            }
-        }
-
-        if (sourceDocuments.Count == 0)
-        {
-            throw new Exception("No source documents specified. Configure 'join' in appsettings.json");
-        }
-
-        return (Path.GetFullPath(Path.Combine(joinedParts)), sourceDocuments);
+        return Path.GetFullPath(Path.Combine(parts));
     }
 
     /// <summary>
-    /// Titles are keyed by the split document name, so a service added to the join without a title
-    /// falls back to that name rather than silently inheriting another service's heading.
+    /// Renders every model of the API and cuts it into a page per model. Null when the generator
+    /// refused the document, which the caller reports as the failure it is.
     /// </summary>
+    private async Task<IReadOnlyList<MarkdownSlicer.SlicedModel>?> RenderModelsAsync(
+        string joinedDocument,
+        string splitDirectory,
+        string outputDirectory,
+        string operationsDirectory,
+        MarkdownSettings markdown,
+        CancellationToken cancellationToken)
+    {
+        var document = await OpenapiSplitter.WholeAsync(
+            joinedDocument,
+            splitDirectory,
+            ModelsDirectory,
+            cancellationToken);
+
+        AnsiConsole.MarkupLine($"Rendering [green]{ModelsDirectory}[/]");
+
+        await ApplyPresentationAsync(document, markdown, cancellationToken);
+
+        var arguments = BuildArguments(document, markdown);
+        arguments.Add("--additional-properties");
+        arguments.Add("modelsOnly=true");
+
+        if (await RunGeneratorAsync(arguments, cancellationToken) != 0)
+        {
+            return null;
+        }
+
+        var documentPath = Path.Combine(outputDirectory, $"{ModelsDirectory}.md");
+
+        await MdxSafe.ApplyAsync(documentPath, cancellationToken);
+
+        var directory = Path.Combine(operationsDirectory, ModelsDirectory);
+        var models = await MarkdownSlicer.SliceModelsAsync(documentPath, directory, cancellationToken);
+
+        await WriteCategoryAsync(directory, "Models", cancellationToken);
+
+        // The document exists to be cut up; what is left of it is the heading and the markers.
+        File.Delete(documentPath);
+
+        return models;
+    }
+
+    /// <summary>
+    /// Moves the rendered document to where it is published, under the name it is published as.
+    /// </summary>
+    /// <remarks>
+    /// The generator names its output after `documentName`, which travels as a command-line
+    /// option: openapi-generator-cli is an npm shim that re-spawns java through a shell, and a
+    /// value containing a space arrives there as two arguments - so it is rendered under a name
+    /// without spaces and moved here, where nothing is parsing a command line.
+    /// </remarks>
+    private static string Publish(string renderedIn, string rendered, string directory)
+    {
+        Directory.CreateDirectory(directory);
+
+        var from = Path.Combine(renderedIn, $"{rendered}.md");
+        var to = Path.Combine(directory, $"{rendered}.md");
+
+        File.Move(from, to, overwrite: true);
+
+        return to;
+    }
+
+    /// <summary>
+    /// Writes the label a directory is listed under.
+    /// </summary>
+    /// <remarks>
+    /// The directories are named for the URL they become, so their names are not what a reader
+    /// should be shown: `third-party-integration` is a path, "Third-party integration" is what the
+    /// API calls that group of endpoints. Docusaurus reads the label from this file; anything else
+    /// reading the tree gets the same answer from it.
+    /// </remarks>
+    private static async Task WriteCategoryAsync(string directory, string label, CancellationToken cancellationToken)
+    {
+        Directory.CreateDirectory(directory);
+
+        var category = new JsonObject { ["label"] = label };
+
+        await TextFile.WriteAsync(
+            Path.Combine(directory, "_category_.json"),
+            category.ToJsonString(_writeOptions),
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// The sub-section each operation of a document belongs to, as its tag's `x-displayName`
+    /// states it - empty when the tag is the section itself and there is no sub-section to file
+    /// the operation under.
+    /// </summary>
+    private static Dictionary<string, string> ReadGroups(OpenapiSplitter.SplitDocument document)
+    {
+        var groups = new Dictionary<string, string>(StringComparer.Ordinal);
+        var root = JsonNode.Parse(File.ReadAllText(document.Path))?.AsObject();
+
+        if (root?["paths"] is not JsonObject paths)
+        {
+            return groups;
+        }
+
+        var displayNames = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        foreach (var tag in root["tags"] as JsonArray ?? [])
+        {
+            var name = tag?["name"]?.ToString();
+            var displayName = tag?["x-displayName"]?.ToString();
+
+            if (!string.IsNullOrEmpty(name) && !string.IsNullOrWhiteSpace(displayName))
+            {
+                displayNames[name] = displayName;
+            }
+        }
+
+        foreach (var path in paths)
+        {
+            if (path.Value is not JsonObject methods)
+            {
+                continue;
+            }
+
+            foreach (var method in methods)
+            {
+                var operationId = method.Value?["operationId"]?.ToString();
+                var tag = (method.Value?["tags"] as JsonArray)?.FirstOrDefault()?.ToString();
+
+                if (string.IsNullOrEmpty(operationId) || string.IsNullOrEmpty(tag))
+                {
+                    continue;
+                }
+
+                // A tag that is the section itself has no sub-section to name, and a directory
+                // repeating the section it is already inside would only add a level to click
+                // through.
+                groups[operationId] = string.Equals(tag, document.Section, StringComparison.Ordinal)
+                    ? string.Empty
+                    : displayNames.GetValueOrDefault(tag, Subsection(tag));
+            }
+        }
+
+        return groups;
+    }
+
+    /// <summary>
+    /// What a tag states after the separator, for a document that names no `x-displayName`.
+    /// </summary>
+    private static string Subsection(string tag)
+    {
+        var separator = tag.IndexOf('/', StringComparison.Ordinal);
+
+        return separator < 0 ? tag.Trim() : tag[(separator + 1)..].Trim();
+    }
+
     /// <summary>
     /// Where the publishable bundle is assembled. Relative to the current directory, matching the
     /// other paths in the configuration.
@@ -368,10 +562,38 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
         string? BundleDirectory,
         string? SiteUrl,
         string IndexTitle,
-        string ModelLinkBase,
         IReadOnlyDictionary<string, string> Titles)
     {
-        public string TitleFor(string documentName) =>
-            Titles.TryGetValue(documentName, out var title) ? title : documentName;
+        /// <summary>
+        /// Titles are keyed by the published document name, so a section added to the API without
+        /// a title is headed by its own tag rather than silently inheriting another's heading.
+        /// </summary>
+        public string TitleFor(string section) => Titles.TryGetValue(section, out var title) ? title : section;
+
+        /// <summary>
+        /// What a section is rendered as before it is published under its own name. Only the
+        /// generator ever sees this, and it reaches the generator through a command line, so it
+        /// carries neither spaces nor anything else a shell would take apart.
+        /// </summary>
+        public static string NameFor(string section) => Slugify(section);
+
+        private static string Slugify(string section)
+        {
+            var slug = new StringBuilder(section.Length);
+
+            foreach (var character in section)
+            {
+                if (char.IsAsciiLetterOrDigit(character))
+                {
+                    slug.Append(char.ToLowerInvariant(character));
+                }
+                else if (slug.Length > 0 && slug[^1] != '-')
+                {
+                    slug.Append('-');
+                }
+            }
+
+            return slug.ToString().TrimEnd('-');
+        }
     }
 }

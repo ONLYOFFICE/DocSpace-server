@@ -74,6 +74,8 @@ try
     
     builder.Host.ConfigureContainer<ContainerBuilder>(startup.ConfigureContainer);
 
+    builder.Services.SkipBackgroundServicesForDocumentGeneration();
+
     var app = builder.Build();
 
     startup.Configure(app, app.Environment);

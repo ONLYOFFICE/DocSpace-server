@@ -128,7 +128,9 @@ public class DefaultTemplateSettingsHelper(IServiceProvider serviceProvider,
         {
             if (Path.GetExtension(title) != extension)
             {
-                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_NotSupportedFormat);
+                // A payload whose extension contradicts the declared one is a malformed request, not
+                // an access decision - InvalidOperationException would answer 403 here.
+                throw new ArgumentException(FilesCommonResource.ErrorMessage_NotSupportedFormat, nameof(title));
             }
 
             var settings = await GetSettingsAsync();

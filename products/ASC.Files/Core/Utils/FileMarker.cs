@@ -51,7 +51,7 @@ public class FileMarkerCache(IFusionCacheProvider cacheProvider)
 
     public async Task RemoveAsync(string key)
     {
-        await _cache.RemoveAsync(key);
+        await _cache.RemoveAndNotifyAsync(key);
     }
 }
 
@@ -545,18 +545,16 @@ public class FileMarker(
             var room = await DocSpaceHelper.GetParentRoom(fileEntry, folderDao);
             var file = await fileDao.GetFileAsync(fileEntry.Id);
 
-            if (file.IsForm && room.FolderType == FolderType.VirtualDataRoom)
+            if (file is { IsPdf: true } && room is { FolderType: FolderType.VirtualDataRoom })
             {
                 var allRoleUserIds = await fileDao.GetFormRoles(file.Id).Where(r => r.UserId != authContext.CurrentAccount.ID).Select(r => r.UserId).ToListAsync();
-                if (allRoleUserIds.Count == 0)
+                if (allRoleUserIds.Count > 0)
                 {
+                    taskData.UserIDs = allRoleUserIds;
+                    var markerHelper = serviceProvider.GetService<FileMarkerHelper<T>>();
+                    await markerHelper.Add(taskData);
                     return;
                 }
-
-                taskData.UserIDs = allRoleUserIds;
-                var markerHelper = serviceProvider.GetService<FileMarkerHelper<T>>();
-                await markerHelper.Add(taskData);
-                return;
             }
         }
         var fileMarkerHelper = serviceProvider.GetService<FileMarkerHelper<T>>();
@@ -696,7 +694,11 @@ public class FileMarker(
 
         if (removeTags.Count > 0)
         {
-            await tagDao.RemoveTagsAsync(removeTags);
+            // Detach the links, do not delete the tag rows. A "new" tag is one row per user, shared by
+            // every entry that user has marked, and RemoveTagsAsync resolves it by (owner, name, type)
+            // and deletes the row together with all of its links - so clearing one section's marks
+            // cleared the user's marks everywhere.
+            await tagDao.RemoveTagLinksAsync(removeTags);
         }
 
         var socketManager = serviceProvider.GetRequiredService<SocketManager>();

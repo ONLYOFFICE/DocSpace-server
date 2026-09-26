@@ -65,7 +65,7 @@ public class FileUploader(
         var dao = daoFactory.GetFileDao<T>();
         file = await dao.SaveFileAsync(file, data);
 
-        if (file.IsForm)
+        if (file.IsPdf)
         {
             await StopFormFillingIfNeededAsync(file.Id, dao);
         }
@@ -321,10 +321,6 @@ public class FileUploader(
 
             if (isFirstChunk)
             {
-                var folderDao = daoFactory.GetFolderDao<T>();
-                var currentFolder = await folderDao.GetFolderAsync(uploadSession.File.FolderIdDisplay);
-                var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(currentFolder);
-
                 var memoryStream = new MemoryStream();
                 await stream.CopyToAsync(memoryStream);
 
@@ -341,15 +337,6 @@ public class FileUploader(
 
                 uploadSession.File.Category = isForm ? (int)FilterType.PdfForm : (int)FilterType.Pdf;
 
-                if (int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1)
-                {
-                    var currentRoom = await folderDao.GetFolderAsync(roomId);
-                    if (currentRoom.FolderType == FolderType.FillingFormsRoom && !isForm)//
-                    {
-                        throw new InvalidOperationException(FilesCommonResource.ErrorMessage_UploadToFormRoom);
-                    }
-                }
-
                 var cloneStreamForSave = await tempStream.CloneMemoryStream(memoryStream);
                 try
                 {
@@ -361,7 +348,7 @@ public class FileUploader(
                     await cloneStreamForSave.DisposeAsync();
                 }
 
-                if (!uploadSession.UseChunks && uploadSession.File?.IsForm == true)
+                if (!uploadSession.UseChunks && uploadSession.File?.IsPdf == true)
                 {
                     await StopFormFillingIfNeededAsync(uploadSession.File.Id, dao);
                 }
@@ -383,7 +370,7 @@ public class FileUploader(
 
         uploadSession.File = await dao.FinalizeUploadSessionAsync(uploadSession);
 
-        if (uploadSession.File.IsForm)
+        if (uploadSession.File.IsPdf)
         {
             await StopFormFillingIfNeededAsync(uploadSession.File.Id, dao);
         }
@@ -406,6 +393,14 @@ public class FileUploader(
     public async Task AbortUploadAsync<T>(string uploadId)
     {
         var uploadSession = await chunkedUploadSessionHolder.GetSessionAsync<T>(uploadId);
+
+        // The endpoint used to check nothing at all: any authenticated caller who knew a session id
+        // could abort somebody else's upload, whatever access they had to the room it was going into.
+        // A session belongs to whoever opened it (set in CreateUploadSessionAsync).
+        if (uploadSession.UserId != authContext.CurrentAccount.ID)
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
 
         await daoFactory.GetFileDao<T>().AbortUploadSessionAsync(uploadSession);
 

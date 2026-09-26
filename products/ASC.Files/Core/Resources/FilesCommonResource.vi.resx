@@ -601,4 +601,10 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>Hướng dẫn của tác nhân AI không được dài hơn {0} ký tự</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>ID thư mục không hợp lệ</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Hành động này chỉ khả dụng trong phòng riêng tư</value>
+  </data>
 </root>

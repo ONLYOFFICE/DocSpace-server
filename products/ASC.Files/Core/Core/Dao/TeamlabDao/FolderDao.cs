@@ -375,7 +375,7 @@ internal class FolderDao(
             yield break;
         }
 
-        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var currentUserId = _authContext.CurrentAccount.ID;
         var tenantId = _tenantManager.GetCurrentTenantId();
 
@@ -406,7 +406,7 @@ internal class FolderDao(
 
     public async Task<int> GetSharedFoldersCountAsync(int parentId)
     {
-        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = GetSharedFoldersQuery(parentId, filesDbContext);
 
@@ -415,7 +415,7 @@ internal class FolderDao(
 
     public async IAsyncEnumerable<Folder<int>> GetSharedFoldersAsync(int parentId, int offset = 0, int count = -1)
     {
-        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
         var q = GetSharedFoldersQuery(parentId, filesDbContext);
 
