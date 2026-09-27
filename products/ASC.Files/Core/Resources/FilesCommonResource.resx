@@ -240,6 +240,9 @@
   <data name="DocuSignStatusVoided" xml:space="preserve">
     <value>Voided</value>
   </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>The room already contains the .ai folder</value>
+  </data>
   <data name="ErrorMessage_BadRequest" xml:space="preserve">
     <value>Bad request.</value>
   </data>

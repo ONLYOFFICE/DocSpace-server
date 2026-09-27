@@ -1144,6 +1144,11 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
 
+        if (!isRoom && !parent.ProviderEntry)
+        {
+            await ThrowIfAppsFolderExistsAsync(folderDao, parent.Id, title);
+        }
+
         if (isRoom && privacy)
         {
             await encryptionLoginProvider.ThrowIfKeysAreNotSetAsync(authContext.CurrentAccount.ID);
@@ -1286,6 +1291,19 @@ public class FileStorageService //: IFileStorageService
         catch (Exception e)
         {
             throw GenerateException(e);
+        }
+    }
+
+    private static async Task ThrowIfAppsFolderExistsAsync<T>(IFolderDao<T> folderDao, T parentId, string title, T folderId = default)
+    {
+        if (!string.Equals(Global.ReplaceInvalidCharsAndTruncate(title), FileConstant.AiFolderTitle, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (await folderDao.GetFoldersAsync(parentId, FolderType.Ai).AnyAsync(f => !EqualityComparer<T>.Default.Equals(f.Id, folderId)))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_AppsFolderExists);
         }
     }
 
@@ -1682,6 +1700,11 @@ public class FileStorageService //: IFileStorageService
 
         if (!string.Equals(folder.Title, title, StringComparison.Ordinal))
         {
+            if (!folder.IsRoom && !folder.ProviderEntry)
+            {
+                await ThrowIfAppsFolderExistsAsync(folderDao, folder.ParentId, title, folder.Id);
+            }
+
             var oldTitle = folder.Title;
             T newFolderId = default;
 
