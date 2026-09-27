@@ -2184,7 +2184,7 @@ public class FileSecurity(
                             if (folder is
                                 {
                                     RootFolderType: FolderType.VirtualRooms,
-                                    FolderType: FolderType.DEFAULT or FolderType.FormFillingFolderDone or FolderType.FormFillingFolderInProgress
+                                    FolderType: FolderType.DEFAULT or FolderType.Ai or FolderType.FormFillingFolderDone or FolderType.FormFillingFolderInProgress
                                 })
                             {
                                 return true;

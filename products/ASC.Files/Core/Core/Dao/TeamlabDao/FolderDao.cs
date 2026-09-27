@@ -571,7 +571,7 @@ internal class FolderDao(
 
     private async Task PublishFolderIndexEventAsync(Folder<int> folder)
     {
-        if (folder.FolderType is FolderType.DEFAULT or FolderType.BUNCH || folder.IsRoom)
+        if (folder.FolderType is FolderType.DEFAULT or FolderType.Ai or FolderType.BUNCH || folder.IsRoom)
         {
             await eventBus.PublishAsync(new FolderIndexIntegrationEvent(folder.CreateBy, _tenantManager.GetCurrentTenantId())
             {
@@ -1047,7 +1047,7 @@ internal class FolderDao(
             var folder = await GetFolderAsync(folderId);
             var oldParentId = folder.ParentId;
 
-            if (folder.FolderType is not (FolderType.DEFAULT or FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone) &&
+            if (folder.FolderType is not (FolderType.DEFAULT or FolderType.Ai or FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone) &&
                 !folder.IsRoom)
             {
                 throw new ArgumentException("It is forbidden to move the System folder.", nameof(folderId));

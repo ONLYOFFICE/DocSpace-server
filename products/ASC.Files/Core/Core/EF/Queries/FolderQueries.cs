@@ -829,7 +829,7 @@ static file class FolderQueries
                     .Where(f =>
                         f.TenantId == tenantId &&
                         f.CreateBy == ownerId &&
-                        f.FolderType == FolderType.DEFAULT)
+                        (f.FolderType == FolderType.DEFAULT || f.FolderType == FolderType.Ai))
                     .Select(f => new FolderReassignInfo
                     {
                         FolderId = f.Id,

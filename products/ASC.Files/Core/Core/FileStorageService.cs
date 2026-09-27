@@ -562,7 +562,7 @@ public class FileStorageService //: IFileStorageService
         // that was new in it up to this moment stops being new for the caller, synchronously, so the
         // very next news read already reflects the visit. Section roots (Rooms, Archive, Recent, ...)
         // are only containers - opening them must not consume the per-room badges.
-        if (parent.IsRoom || parent.FolderType == FolderType.DEFAULT)
+        if (parent.IsRoom || parent.FolderType is FolderType.DEFAULT or FolderType.Ai)
         {
             await fileMarker.RemoveMarkAsNewAsync(parent);
         }
