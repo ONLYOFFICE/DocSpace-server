@@ -148,7 +148,7 @@ public class ReassignProgressItem : DistributedTaskProgress
 
             if (_deleteProfile)
             {
-                await client.DeleteClientsAsync(FromUser);
+                await DeleteClientsAsync(client, logger, FromUser);
                 await DeleteUserProfile(userManager, userPhotoManager, messageService, displayUserSettingsHelper, socketManager, webhookManager, groupFullDtoHelper);
             }
 
@@ -179,6 +179,22 @@ public class ReassignProgressItem : DistributedTaskProgress
     public object Clone()
     {
         return MemberwiseClone();
+    }
+
+    /// <summary>
+    /// Removing the user's OAuth clients is cleanup: an unreachable identity service must not leave
+    /// the profile undeleted after the data has already been transferred.
+    /// </summary>
+    internal static async Task DeleteClientsAsync(IdentityClient client, ILogger logger, Guid userId)
+    {
+        try
+        {
+            await client.DeleteClientsAsync(userId);
+        }
+        catch (Exception ex)
+        {
+            logger.WarningDeleteClients(userId, ex);
+        }
     }
 
     private async Task SetPercentageAndCheckCancellationAsync(double percentage, bool publish)

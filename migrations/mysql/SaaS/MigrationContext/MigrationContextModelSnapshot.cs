@@ -4599,6 +4599,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("FolderType")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0)
+                        .HasColumnName("folder_type");
+
                     b.Property<string>("Icon")
                         .HasMaxLength(50)
                         .HasColumnType("varchar")

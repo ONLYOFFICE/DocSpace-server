@@ -114,6 +114,7 @@ public class DocumentServiceLicense(ICache cache,
                     !string.IsNullOrEmpty(license.ResourceKey) &&
                     commandResponse.License.ResourceKey != license.ResourceKey)
                 {
+                    errorMsg = $"Resource key mismatch: expected {license.ResourceKey}, got {commandResponse.License.ResourceKey}";
                     return null; // Resource key mismatch. Possibly cached result
                 }
 
@@ -121,6 +122,7 @@ public class DocumentServiceLicense(ICache cache,
                     !string.IsNullOrEmpty(license.CustomerId) &&
                     commandResponse.License.CustomerId != license.CustomerId)
                 {
+                    errorMsg = $"Customer id mismatch: expected {license.CustomerId}, got {commandResponse.License.CustomerId}";
                     return null; // Customer id mismatch. Possibly cached result
                 }
             }

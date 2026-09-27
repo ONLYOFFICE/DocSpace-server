@@ -821,6 +821,7 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/present/mark</path>
     [Tags("Portal / Users")]
+    [SwaggerResponse(200, "The gift message is marked as read for the calling user; the same answer is returned when saving the flag failed, because the error is only written to the portal log. The response carries no content")]
     [HttpPost("present/mark")]
     public async Task MarkGiftMessageAsRead()
     {
@@ -1003,6 +1004,7 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "The deactivation letter has been handed to the mail service and the request is recorded in the audit trail; the portal itself is still active and the response carries no content")]
     [AllowNotPayment]
     [HttpPost("suspend")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -1040,6 +1042,7 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/delete</path>
     [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "The removal letter has been handed to the mail service; nothing about the portal has changed yet and the response carries no content")]
     [AllowNotPayment]
     [HttpPost("delete")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -1078,6 +1081,7 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/continue</path>
     [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "The portal is active again and its users can sign in; the response carries no content")]
     [AllowSuspended]
     [HttpPut("continue")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalContinue")]
@@ -1109,6 +1113,7 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "The portal is now suspended, its users can no longer work in it and its content is kept; the response carries no content")]
     [HttpPut("suspend")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalSuspend")]
     public async Task SuspendPortal()

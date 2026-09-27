@@ -181,7 +181,7 @@ const INTEGER_QUERY_PARAMS = new Set(["limit", "startIndex", "count"]);
 // parameter belongs in one of these two tables.
 const PARAM_DOCS: Readonly<Record<string, string>> = {
   actionType:
-    'The AI action the request applies to - one of "Default", "Chat", "Code", "Summarization", "Translation", "TextAnalyze", "ImageGeneration", "OCR", "Vision".',
+    'The AI action the request applies to - one of "Default", "Chat", "Code", "Summarization", "Translation", "TextAnalyze", "ImageGeneration", "OCR", "Vision", "FormAnalysis".',
   count: "The maximum number of items to return in one page.",
   cursor:
     "The keyset pagination cursor: the JSON-encoded sort key of the last item already received. Omit for the first page.",

@@ -1482,9 +1482,6 @@
   <data name="ConsumersNextcloudBaseUrl" xml:space="preserve">
     <value>Введіть URL-адресу екземпляра Nextcloud.</value>
   </data>
-  <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Надайте програмі можливість входити на портал за допомогою облікового запису Nextcloud.</value>
-  </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Надайте програмі можливість входити на портал за допомогою облікового запису Nextcloud.</value>
   </data>

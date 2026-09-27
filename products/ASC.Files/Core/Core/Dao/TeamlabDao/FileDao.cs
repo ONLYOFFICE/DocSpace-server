@@ -244,6 +244,8 @@ internal class FileDao(
             case FilterType.ArchiveOnly:
             case FilterType.MediaOnly:
             case FilterType.DiagramsOnly:
+            case FilterType.PdfForm:
+            case FilterType.Pdf:
                 query = query.Where(r => r.Category == (int)filterType);
                 break;
             case FilterType.ByExtension:
