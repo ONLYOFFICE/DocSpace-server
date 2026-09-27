@@ -1309,6 +1309,26 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
+    public async Task<Folder<int>> GetRoomAiFolderAsync(int roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var room = await folderDao.GetFolderAsync(roomId);
+
+        if (room is not { IsRoom: true })
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (!await fileSecurity.CanReadAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
+        }
+
+        var aiFolder = await folderDao.GetFoldersAsync(roomId, FolderType.Ai).FirstOrDefaultAsync();
+
+        return aiFolder ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+    }
+
     public async Task<Folder<T>> FolderQuotaChangeAsync<T>(T folderId, long quota)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
