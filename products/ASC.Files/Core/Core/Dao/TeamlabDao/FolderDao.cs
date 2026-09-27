@@ -581,6 +581,25 @@ internal class FolderDao(
         }
     }
 
+    private static async ValueTask<FolderType> ResolveFolderTypeAsync(FilesDbContext filesDbContext, int tenantId, int parentId, string title, FolderType folderType)
+    {
+        if (folderType is not (FolderType.DEFAULT or FolderType.Ai))
+        {
+            return folderType;
+        }
+
+        if (!string.Equals(title, FileConstant.AiFolderTitle, StringComparison.Ordinal))
+        {
+            return FolderType.DEFAULT;
+        }
+
+        var parentFolderType = await filesDbContext.FolderTypeByIdAsync(tenantId, parentId);
+
+        return parentFolderType is FolderType.CustomRoom or FolderType.PublicRoom or FolderType.VirtualDataRoom or FolderType.EditingRoom
+            ? FolderType.Ai
+            : FolderType.DEFAULT;
+    }
+
     private async Task<int> InternalSaveFolderToDbAsync(FilesDbContext filesDbContext, Folder<int> folder)
     {
         folder.Title = Global.ReplaceInvalidCharsAndTruncate(folder.Title);
@@ -605,9 +624,11 @@ internal class FolderDao(
         if (toUpdate != null)
         {
             toUpdate.Title = folder.Title;
+            toUpdate.FolderType = await ResolveFolderTypeAsync(filesDbContext, tenantId, toUpdate.ParentId, toUpdate.Title, toUpdate.FolderType);
             toUpdate.CreateBy = folder.CreateBy;
             toUpdate.ModifiedOn = _tenantUtil.DateTimeToUtc(folder.ModifiedOn);
             toUpdate.ModifiedBy = folder.ModifiedBy;
+            folder.FolderType = toUpdate.FolderType;
 
             if (toUpdate.FolderType.IsRoom())
             {
@@ -651,6 +672,7 @@ internal class FolderDao(
         else
         {
             isNew = true;
+            folder.FolderType = await ResolveFolderTypeAsync(filesDbContext, tenantId, folder.ParentId, folder.Title, folder.FolderType);
             var newFolder = new DbFolder
             {
                 Id = 0,
@@ -1074,7 +1096,12 @@ internal class FolderDao(
                 }
             }
 
-            await filesDbContext.UpdateFoldersAsync(tenantId, folderId, toFolderId, currentAccount);
+            var trashId = await trashIdTask;
+            var folderType = toFolderId == trashId
+                ? folder.FolderType
+                : await ResolveFolderTypeAsync(filesDbContext, tenantId, toFolderId, folder.Title, folder.FolderType);
+
+            await filesDbContext.UpdateFoldersAsync(tenantId, folderId, toFolderId, folderType, currentAccount);
             var subfolders = await filesDbContext.SubfolderAsync(folderId).ToDictionaryAsync(r => r.FolderId, r => r.Level);
 
             await filesDbContext.DeleteTreesBySubfoldersDictionaryAsync(subfolders.Select(r => r.Key));
@@ -1089,7 +1116,6 @@ internal class FolderDao(
                 }
             }
 
-            var trashId = await trashIdTask;
             var tagDao = daoFactory.GetTagDao<int>();
             var toFolder = await GetFolderAsync(toFolderId);
             var (roomId, _, _) = await GetParentRoomInfoFromFileEntryAsync(folder);
@@ -1447,6 +1473,7 @@ internal class FolderDao(
         var toUpdate = await filesDbContext.FolderAsync(tenantId, folder.Id);
 
         toUpdate.Title = Global.ReplaceInvalidCharsAndTruncate(newTitle);
+        toUpdate.FolderType = await ResolveFolderTypeAsync(filesDbContext, tenantId, toUpdate.ParentId, toUpdate.Title, toUpdate.FolderType);
         toUpdate.ModifiedOn = DateTime.UtcNow;
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
         filesDbContext.Update(toUpdate);

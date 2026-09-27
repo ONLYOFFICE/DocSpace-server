@@ -102,6 +102,12 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public Task<FolderType> FolderTypeByIdAsync(int tenantId, int id)
+    {
+        return FolderQueries.FolderTypeByIdAsync(this, tenantId, id);
+    }
+
+    [PreCompileQuery]
     public Task<DbFolderQuery> DbFolderQueryWithSharedAsync(int tenantId, int folderId)
     {
         return FolderQueries.DbFolderQueryWithSharedAsync(this, tenantId, folderId);
@@ -288,9 +294,9 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
-    public Task<int> UpdateFoldersAsync(int tenantId, int folderId, int parentId, Guid modifiedBy)
+    public Task<int> UpdateFoldersAsync(int tenantId, int folderId, int parentId, FolderType folderType, Guid modifiedBy)
     {
-        return FolderQueries.UpdateFoldersAsync(this, tenantId, folderId, parentId, modifiedBy);
+        return FolderQueries.UpdateFoldersAsync(this, tenantId, folderId, parentId, folderType, modifiedBy);
     }
 
     [PreCompileQuery]
@@ -590,6 +596,15 @@ static file class FolderQueries
                     .Select(r => r.ParentId)
                     .FirstOrDefault());
 
+    public static readonly Func<FilesDbContext, int, int, Task<FolderType>> FolderTypeByIdAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int id) =>
+                ctx.Folders
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.Id == id)
+                    .Select(r => r.FolderType)
+                    .FirstOrDefault());
+
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, IAsyncEnumerable<DbFolder>> DbFoldersForDeleteAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (FilesDbContext ctx, int tenantId, IEnumerable<int> subfolders) =>
@@ -677,13 +692,14 @@ static file class FolderQueries
                     .Where(r => r.EntryType == (byte)FileEntryType.Folder)
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, int, int, Guid, Task<int>> UpdateFoldersAsync =
-        (FilesDbContext ctx, int tenantId, int folderId, int parentId, Guid modifiedBy) =>
+    public static readonly Func<FilesDbContext, int, int, int, FolderType, Guid, Task<int>> UpdateFoldersAsync =
+        (FilesDbContext ctx, int tenantId, int folderId, int parentId, FolderType folderType, Guid modifiedBy) =>
             ctx.Folders
                 .Where(r => r.TenantId == tenantId)
                 .Where(r => r.Id == folderId)
                 .ExecuteUpdateAsync(toUpdate => toUpdate
                     .SetProperty(p => p.ParentId, parentId)
+                    .SetProperty(p => p.FolderType, folderType)
                     .SetProperty(p => p.ModifiedOn, DateTime.UtcNow)
                     .SetProperty(p => p.ModifiedBy, modifiedBy)
                 );
