@@ -3412,7 +3412,7 @@ public class FileStorageService //: IFileStorageService
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
             }
 
-            if (fileInfo.StartConvert && fileConverter.MustConvert(file))
+            if (fileInfo.StartConvert && await fileConverter.MustConvertAsync(file))
             {
                 try
                 {

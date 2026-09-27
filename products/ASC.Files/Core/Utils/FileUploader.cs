@@ -75,7 +75,7 @@ public class FileUploader(
 
         await fileMarker.MarkAsNewAsync(file);
 
-        if (fileConverter.EnableAsUploaded && fileConverter.MustConvert(file))
+        if (fileConverter.EnableAsUploaded && await fileConverter.MustConvertAsync(file))
         {
             await fileConverter.ExecAsynchronouslyAsync(file, deleteConvertStatus, !createNewIfExist);
         }

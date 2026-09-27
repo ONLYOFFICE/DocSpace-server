@@ -285,6 +285,18 @@ public class FileConverter(
         return fileUtility.ExtsMustConvert.Contains(ext);
     }
 
+    public async ValueTask<bool> MustConvertAsync<T>(File<T> file)
+    {
+        if (!MustConvert(file))
+        {
+            return false;
+        }
+
+        var folderDao = daoFactory.GetFolderDao<T>();
+
+        return !await folderDao.GetParentFoldersAsync(file.ParentId).AnyAsync(f => f.FolderType == FolderType.Ai);
+    }
+
     private Dictionary<string, string> GetHttpHeaders()
     {
         var request = httpContextAccessor?.HttpContext?.Request;
