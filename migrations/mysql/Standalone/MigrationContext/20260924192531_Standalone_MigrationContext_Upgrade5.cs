@@ -44,7 +44,10 @@ public partial class MigrationContext_Upgrade5 : Migration
     {
         // add missing primary and foreign keys to identity client dependency tables:
         // the tables have no key, so duplicates are dropped by copying into a keyed table,
-        // and the old table is dropped together with its foreign keys, whatever they are named
+        // and the old table is dropped together with its foreign keys, whatever they are named.
+        // Group Replication rejects any DML that touches a table without a primary key, even as
+        // the source of INSERT ... SELECT, so each old table first gets a surrogate key; it is
+        // added in a single statement because sql_require_primary_key rejects a keyless step
 
         migrationBuilder.CreateTable(
             name: "identity_client_authentication_methods_new",
@@ -57,6 +60,9 @@ public partial class MigrationContext_Upgrade5 : Migration
             {
                 table.PrimaryKey("PRIMARY", x => new { x.client_id, x.authentication_method });
             });
+
+        migrationBuilder.Sql(
+            "ALTER TABLE identity_client_authentication_methods ADD COLUMN migration_row_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY;");
 
         migrationBuilder.Sql(@"
             INSERT IGNORE INTO identity_client_authentication_methods_new (client_id, authentication_method)
@@ -90,6 +96,9 @@ public partial class MigrationContext_Upgrade5 : Migration
                 table.PrimaryKey("PRIMARY", x => new { x.client_id, x.redirect_uri });
             });
 
+        migrationBuilder.Sql(
+            "ALTER TABLE identity_client_redirect_uris ADD COLUMN migration_row_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY;");
+
         migrationBuilder.Sql(@"
             INSERT IGNORE INTO identity_client_redirect_uris_new (client_id, redirect_uri)
             SELECT client_id, redirect_uri FROM identity_client_redirect_uris;");
@@ -121,6 +130,9 @@ public partial class MigrationContext_Upgrade5 : Migration
             {
                 table.PrimaryKey("PRIMARY", x => new { x.client_id, x.allowed_origin });
             });
+
+        migrationBuilder.Sql(
+            "ALTER TABLE identity_client_allowed_origins ADD COLUMN migration_row_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY;");
 
         migrationBuilder.Sql(@"
             INSERT IGNORE INTO identity_client_allowed_origins_new (client_id, allowed_origin)
@@ -158,6 +170,9 @@ public partial class MigrationContext_Upgrade5 : Migration
             table: "identity_client_scopes_new",
             column: "scope_name");
 
+        migrationBuilder.Sql(
+            "ALTER TABLE identity_client_scopes ADD COLUMN migration_row_id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY;");
+
         migrationBuilder.Sql(@"
             INSERT IGNORE INTO identity_client_scopes_new (client_id, scope_name)
             SELECT client_id, scope_name FROM identity_client_scopes;");
@@ -189,7 +204,6 @@ public partial class MigrationContext_Upgrade5 : Migration
     /// <inheritdoc />
     protected override void Down(MigrationBuilder migrationBuilder)
     {
-        // restore the keyless tables with the names, types and indexes created by MigrationContext_Upgrade33
         migrationBuilder.CreateTable(
             name: "identity_client_authentication_methods_old",
             columns: table => new
