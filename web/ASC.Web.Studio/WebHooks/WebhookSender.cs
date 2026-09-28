@@ -188,17 +188,17 @@ public class WebhookSender(
 
                 responsePayload = e.Message;
 
-                entry.Config.LastFailureContent = e.Message;
-                entry.Config.LastFailureOn = DateTime.UtcNow;
-
-                var lastSuccessOn = entry.Config.LastSuccessOn ?? entry.Config.CreatedOn;
-
-                if (lastSuccessOn.HasValue && entry.Config.LastFailureOn - lastSuccessOn.Value > TimeSpan.FromDays(settings.TrustedDaysCount ?? 3))
-                {
-                    entry.Config.Enabled = false;
-                }
+                RegisterDeliveryFailure(entry.Config, e.Message);
 
                 logger.WarningWithException(e);
+            }
+            catch (OperationCanceledException)
+            {
+                responsePayload = $"The target did not answer within {_requestTimeout.TotalSeconds:0} seconds";
+
+                RegisterDeliveryFailure(entry.Config, responsePayload);
+
+                logger.WarningRequestTimeout(entry.Id, _requestTimeout);
             }
             catch (Exception e)
             {
@@ -254,6 +254,19 @@ public class WebhookSender(
         var jitter = 0.9 + Random.Shared.NextDouble() * 0.2;
 
         return DateTime.UtcNow + intervals[attempts - 1] * jitter;
+    }
+
+    private void RegisterDeliveryFailure(DbWebhooksConfig config, string message)
+    {
+        config.LastFailureContent = message;
+        config.LastFailureOn = DateTime.UtcNow;
+
+        var lastSuccessOn = config.LastSuccessOn ?? config.CreatedOn;
+
+        if (lastSuccessOn.HasValue && config.LastFailureOn - lastSuccessOn.Value > TimeSpan.FromDays(settings.TrustedDaysCount ?? 3))
+        {
+            config.Enabled = false;
+        }
     }
 
     private static async Task DisableWebhook(UrlValidationResult validationResult, DbWebhooksLog entry, DbWorker dbWorker,
