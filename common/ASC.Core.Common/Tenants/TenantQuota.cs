@@ -593,7 +593,7 @@ public class TenantQuota
         _countDocsCloud = new CountDocsCloudFeature(this) { Order = 13 };
         _docsCloudDevPack = new TenantQuotaFeatureFlag(this, "docsclouddevpack") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _docsCloudTrial = new TenantQuotaFeatureFlag(this, "docscloudtrial") { EmployeeType = EmployeeType.DocSpaceAdmin };
-        _businessToolsFeature = new TenantQuotaFeatureFlag(this, "businesstools", true) { Visible = false, EmployeeType = EmployeeType.DocSpaceAdmin };
+        _businessToolsFeature = new TenantQuotaFeatureFlag(this, "businesstools", true) { Order = 14, EmployeeType = EmployeeType.DocSpaceAdmin };
         _sms2FaFeature = new TenantQuotaFeatureFlag(this, "sms2fa") { Visible = false };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>

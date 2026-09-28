@@ -170,7 +170,7 @@ public class QuotaHelper(
     {
         var assembly = GetType().Assembly;
 
-        // A wallet service that bundles several features (Business tools) carries a hidden feature named after the
+        // A wallet service that bundles several features (Business tools) carries a feature named after the
         // service itself: that one is the card of the service with the wallet wording and image, while the bundled
         // features are listed with their plain plan wording and no image.
         var featureNames = quota.Features.Split(',').Select(f => f.Split(':')[0]).ToHashSet();
@@ -193,7 +193,7 @@ public class QuotaHelper(
 
                             if (marker != null)
                             {
-                                return r == marker || (r.Visible && featureNames.Contains(r.Name));
+                                return r.Visible && featureNames.Contains(r.Name);
                             }
 
                             if (quota.Additional && !quota.Features.Contains(r.Name))
