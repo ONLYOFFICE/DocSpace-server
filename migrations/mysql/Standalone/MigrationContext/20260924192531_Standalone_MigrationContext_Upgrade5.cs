@@ -43,20 +43,20 @@ public partial class MigrationContext_Upgrade5 : Migration
     protected override void Up(MigrationBuilder migrationBuilder)
     {
         // add missing primary and foreign keys to identity client dependency tables:
-        // the tables have no key, so duplicates are dropped by copying into a keyed table,
+        // the tables have no key, so duplicates are dropped by copying into a keyed table;
+        // the copy is created with LIKE so client_id keeps the charset and collation the existing
+        // foreign key to identity_clients was declared with (they differ between installations),
         // and the old table is dropped together with its foreign keys, whatever they are named
+        migrationBuilder.Sql("CREATE TABLE identity_client_authentication_methods_new LIKE identity_client_authentication_methods;");
 
-        migrationBuilder.CreateTable(
-            name: "identity_client_authentication_methods_new",
-            columns: table => new
-            {
-                client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false),
-                authentication_method = table.Column<string>(type: "enum('client_secret_post','none')", nullable: false)
-            },
-            constraints: table =>
-            {
-                table.PrimaryKey("PRIMARY", x => new { x.client_id, x.authentication_method });
-            });
+        migrationBuilder.DropIndex(
+            name: "idx_client_authentication_methods_client_id",
+            table: "identity_client_authentication_methods_new");
+
+        migrationBuilder.AddPrimaryKey(
+            name: "PRIMARY",
+            table: "identity_client_authentication_methods_new",
+            columns: ["client_id", "authentication_method"]);
 
         migrationBuilder.Sql(@"
             INSERT IGNORE INTO identity_client_authentication_methods_new (client_id, authentication_method)
@@ -77,18 +77,28 @@ public partial class MigrationContext_Upgrade5 : Migration
             principalColumn: "client_id",
             onDelete: ReferentialAction.Cascade);
 
-        migrationBuilder.CreateTable(
-            name: "identity_client_redirect_uris_new",
-            columns: table => new
-            {
-                client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false),
-                redirect_uri = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false, collation: "utf8mb4_0900_bin")
-                    .Annotation("MySql:CharSet", "utf8mb4")
-            },
-            constraints: table =>
-            {
-                table.PrimaryKey("PRIMARY", x => new { x.client_id, x.redirect_uri });
-            });
+        migrationBuilder.Sql("CREATE TABLE identity_client_redirect_uris_new LIKE identity_client_redirect_uris;");
+
+        migrationBuilder.DropIndex(
+            name: "idx_identity_client_redirect_uris_client_id",
+            table: "identity_client_redirect_uris_new");
+
+        migrationBuilder.AlterColumn<string>(
+            name: "redirect_uri",
+            table: "identity_client_redirect_uris_new",
+            type: "varchar(255)",
+            maxLength: 255,
+            nullable: false,
+            collation: "utf8mb4_0900_bin",
+            oldClrType: typeof(string),
+            oldType: "tinytext")
+            .Annotation("MySql:CharSet", "utf8mb4")
+            .OldAnnotation("MySql:CharSet", "utf8mb4");
+
+        migrationBuilder.AddPrimaryKey(
+            name: "PRIMARY",
+            table: "identity_client_redirect_uris_new",
+            columns: ["client_id", "redirect_uri"]);
 
         migrationBuilder.Sql(@"
             INSERT IGNORE INTO identity_client_redirect_uris_new (client_id, redirect_uri)
@@ -109,18 +119,28 @@ public partial class MigrationContext_Upgrade5 : Migration
             principalColumn: "client_id",
             onDelete: ReferentialAction.Cascade);
 
-        migrationBuilder.CreateTable(
-            name: "identity_client_allowed_origins_new",
-            columns: table => new
-            {
-                client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false),
-                allowed_origin = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false, collation: "utf8mb4_0900_bin")
-                    .Annotation("MySql:CharSet", "utf8mb4")
-            },
-            constraints: table =>
-            {
-                table.PrimaryKey("PRIMARY", x => new { x.client_id, x.allowed_origin });
-            });
+        migrationBuilder.Sql("CREATE TABLE identity_client_allowed_origins_new LIKE identity_client_allowed_origins;");
+
+        migrationBuilder.DropIndex(
+            name: "idx_identity_client_allowed_origins_client_id",
+            table: "identity_client_allowed_origins_new");
+
+        migrationBuilder.AlterColumn<string>(
+            name: "allowed_origin",
+            table: "identity_client_allowed_origins_new",
+            type: "varchar(255)",
+            maxLength: 255,
+            nullable: false,
+            collation: "utf8mb4_0900_bin",
+            oldClrType: typeof(string),
+            oldType: "tinytext")
+            .Annotation("MySql:CharSet", "utf8mb4")
+            .OldAnnotation("MySql:CharSet", "utf8mb4");
+
+        migrationBuilder.AddPrimaryKey(
+            name: "PRIMARY",
+            table: "identity_client_allowed_origins_new",
+            columns: ["client_id", "allowed_origin"]);
 
         migrationBuilder.Sql(@"
             INSERT IGNORE INTO identity_client_allowed_origins_new (client_id, allowed_origin)
@@ -141,22 +161,16 @@ public partial class MigrationContext_Upgrade5 : Migration
             principalColumn: "client_id",
             onDelete: ReferentialAction.Cascade);
 
-        migrationBuilder.CreateTable(
-            name: "identity_client_scopes_new",
-            columns: table => new
-            {
-                client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false),
-                scope_name = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
-            },
-            constraints: table =>
-            {
-                table.PrimaryKey("PRIMARY", x => new { x.client_id, x.scope_name });
-            });
+        migrationBuilder.Sql("CREATE TABLE identity_client_scopes_new LIKE identity_client_scopes;");
 
-        migrationBuilder.CreateIndex(
-            name: "idx_identity_client_scopes_scope_name",
+        migrationBuilder.DropIndex(
+            name: "idx_identity_client_scopes_client_id",
+            table: "identity_client_scopes_new");
+
+        migrationBuilder.AddPrimaryKey(
+            name: "PRIMARY",
             table: "identity_client_scopes_new",
-            column: "scope_name");
+            columns: ["client_id", "scope_name"]);
 
         migrationBuilder.Sql(@"
             INSERT IGNORE INTO identity_client_scopes_new (client_id, scope_name)
@@ -189,17 +203,12 @@ public partial class MigrationContext_Upgrade5 : Migration
     /// <inheritdoc />
     protected override void Down(MigrationBuilder migrationBuilder)
     {
-        // restore the keyless tables with the names, types and indexes created by MigrationContext_Upgrade33
-        migrationBuilder.CreateTable(
-            name: "identity_client_authentication_methods_old",
-            columns: table => new
-            {
-                client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
-                    .Annotation("MySql:CharSet", "utf8mb4"),
-                authentication_method = table.Column<string>(type: "enum('client_secret_post','none')", nullable: false)
-                    .Annotation("MySql:CharSet", "utf8mb4")
-            })
-            .Annotation("MySql:CharSet", "utf8mb4");
+        // restore the keyless tables with the types, indexes and foreign key names of MigrationContext_Upgrade33
+        migrationBuilder.Sql("CREATE TABLE identity_client_authentication_methods_old LIKE identity_client_authentication_methods;");
+
+        migrationBuilder.DropPrimaryKey(
+            name: "PRIMARY",
+            table: "identity_client_authentication_methods_old");
 
         migrationBuilder.CreateIndex(
             name: "idx_client_authentication_methods_client_id",
@@ -225,16 +234,23 @@ public partial class MigrationContext_Upgrade5 : Migration
             principalColumn: "client_id",
             onDelete: ReferentialAction.Cascade);
 
-        migrationBuilder.CreateTable(
-            name: "identity_client_redirect_uris_old",
-            columns: table => new
-            {
-                client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
-                    .Annotation("MySql:CharSet", "utf8mb4"),
-                redirect_uri = table.Column<string>(type: "tinytext", nullable: false)
-                    .Annotation("MySql:CharSet", "utf8mb4")
-            })
-            .Annotation("MySql:CharSet", "utf8mb4");
+        migrationBuilder.Sql("CREATE TABLE identity_client_redirect_uris_old LIKE identity_client_redirect_uris;");
+
+        migrationBuilder.DropPrimaryKey(
+            name: "PRIMARY",
+            table: "identity_client_redirect_uris_old");
+
+        migrationBuilder.AlterColumn<string>(
+            name: "redirect_uri",
+            table: "identity_client_redirect_uris_old",
+            type: "tinytext",
+            nullable: false,
+            oldClrType: typeof(string),
+            oldType: "varchar(255)",
+            oldMaxLength: 255,
+            oldCollation: "utf8mb4_0900_bin")
+            .Annotation("MySql:CharSet", "utf8mb4")
+            .OldAnnotation("MySql:CharSet", "utf8mb4");
 
         migrationBuilder.CreateIndex(
             name: "idx_identity_client_redirect_uris_client_id",
@@ -260,16 +276,23 @@ public partial class MigrationContext_Upgrade5 : Migration
             principalColumn: "client_id",
             onDelete: ReferentialAction.Cascade);
 
-        migrationBuilder.CreateTable(
-            name: "identity_client_allowed_origins_old",
-            columns: table => new
-            {
-                client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
-                    .Annotation("MySql:CharSet", "utf8mb4"),
-                allowed_origin = table.Column<string>(type: "tinytext", nullable: false)
-                    .Annotation("MySql:CharSet", "utf8mb4")
-            })
-            .Annotation("MySql:CharSet", "utf8mb4");
+        migrationBuilder.Sql("CREATE TABLE identity_client_allowed_origins_old LIKE identity_client_allowed_origins;");
+
+        migrationBuilder.DropPrimaryKey(
+            name: "PRIMARY",
+            table: "identity_client_allowed_origins_old");
+
+        migrationBuilder.AlterColumn<string>(
+            name: "allowed_origin",
+            table: "identity_client_allowed_origins_old",
+            type: "tinytext",
+            nullable: false,
+            oldClrType: typeof(string),
+            oldType: "varchar(255)",
+            oldMaxLength: 255,
+            oldCollation: "utf8mb4_0900_bin")
+            .Annotation("MySql:CharSet", "utf8mb4")
+            .OldAnnotation("MySql:CharSet", "utf8mb4");
 
         migrationBuilder.CreateIndex(
             name: "idx_identity_client_allowed_origins_client_id",
@@ -295,26 +318,16 @@ public partial class MigrationContext_Upgrade5 : Migration
             principalColumn: "client_id",
             onDelete: ReferentialAction.Cascade);
 
-        migrationBuilder.CreateTable(
-            name: "identity_client_scopes_old",
-            columns: table => new
-            {
-                client_id = table.Column<string>(type: "varchar(36)", maxLength: 36, nullable: false)
-                    .Annotation("MySql:CharSet", "utf8mb4"),
-                scope_name = table.Column<string>(type: "varchar(255)", nullable: false)
-                    .Annotation("MySql:CharSet", "utf8mb4")
-            })
-            .Annotation("MySql:CharSet", "utf8mb4");
+        migrationBuilder.Sql("CREATE TABLE identity_client_scopes_old LIKE identity_client_scopes;");
+
+        migrationBuilder.DropPrimaryKey(
+            name: "PRIMARY",
+            table: "identity_client_scopes_old");
 
         migrationBuilder.CreateIndex(
             name: "idx_identity_client_scopes_client_id",
             table: "identity_client_scopes_old",
             column: "client_id");
-
-        migrationBuilder.CreateIndex(
-            name: "idx_identity_client_scopes_scope_name",
-            table: "identity_client_scopes_old",
-            column: "scope_name");
 
         migrationBuilder.Sql(@"
             INSERT INTO identity_client_scopes_old (client_id, scope_name)
