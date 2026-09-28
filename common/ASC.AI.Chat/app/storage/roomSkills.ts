@@ -79,6 +79,15 @@ const MAX_SKILL_BYTES = 1024 * 1024;
 
 const MARKDOWN_EXTENSION = ".md";
 
+const CONDITIONAL_HEADERS = new Set([
+  "if-none-match",
+  "if-modified-since",
+  "if-match",
+  "if-unmodified-since",
+  "if-range",
+  "range",
+]);
+
 interface AiFolderFile {
   id: string;
   title: string;
@@ -184,7 +193,14 @@ export async function readFileText(fileId: string): Promise<string> {
   const url = resolveAbsoluteUrl(downloadUrl);
   const { signal, cancel } = withTimeout(undefined);
   try {
-    const res = await fetch(url, { headers: getForwardedHeaders(), signal });
+    // The caller's conditional headers describe the widget's request, not this
+    // file: relayed, they could turn the download into a bodiless 304.
+    const headers = Object.fromEntries(
+      Object.entries(getForwardedHeaders()).filter(
+        ([name]) => !CONDITIONAL_HEADERS.has(name.toLowerCase()),
+      ),
+    );
+    const res = await fetch(url, { headers, signal });
     if (!res.ok) {
       throw new DocspaceApiHttpError(res.status, res.statusText, url);
     }
@@ -200,38 +216,67 @@ export interface SkillFrontmatter {
   description?: string;
 }
 
+const FRONTMATTER_KEYS = new Set(["name", "description"]);
+
+function unquote(value: string): string {
+  if (
+    value.length >= 2 &&
+    ((value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'")))
+  ) {
+    return value.slice(1, -1);
+  }
+  return value;
+}
+
 /**
- * The `name` and `description` of an Agent Skills file's YAML frontmatter —
- * the block between the opening and closing `---` lines. Only flat
- * `key: value` lines are read; a value keeps its inner text, minus a pair of
- * surrounding quotes. A file without frontmatter yields nothing.
+ * The `name` and `description` of an Agent Skills file's YAML frontmatter,
+ * the block between the opening and closing `---` lines. Only the flat
+ * top-level keys are read: `key: value` on one line (a pair of surrounding
+ * quotes is dropped), or a block scalar (`key: >` folded into one line,
+ * `key: |` kept line by line) made of the indented lines that follow. A
+ * file without frontmatter yields nothing.
  */
 export function parseSkillFrontmatter(text: string): SkillFrontmatter {
-  const source = text.replace(/^﻿/, "");
+  const source = text.replace(/^\uFEFF/, "");
   const match = /^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/.exec(source);
   if (!match) {
     return {};
   }
+  const lines = (match[1] ?? "").split(/\r?\n/);
   const result: SkillFrontmatter = {};
-  for (const line of (match[1] ?? "").split(/\r?\n/)) {
-    const pair = /^([A-Za-z_][\w-]*)\s*:\s*(.*)$/.exec(line);
+  for (let i = 0; i < lines.length; i += 1) {
+    const pair = /^([A-Za-z_][\w-]*)\s*:\s*(.*)$/.exec(lines[i] ?? "");
     if (!pair) {
       continue;
     }
     const key = (pair[1] ?? "").toLowerCase();
-    if (key !== "name" && key !== "description") {
-      continue;
+    const inline = (pair[2] ?? "").trim();
+    const block = /^([>|])[+-]?$/.exec(inline);
+    let value: string;
+    if (block) {
+      // The scalar is the run of indented lines below; blank lines belong to
+      // it as long as an indented line follows.
+      const body: string[] = [];
+      let j = i + 1;
+      for (; j < lines.length; j += 1) {
+        const line = lines[j] ?? "";
+        if (/^\s+\S/.test(line)) {
+          body.push(line.trim());
+        } else if (line.trim() === "" && lines.slice(j + 1).some((l) => /^\s+\S/.test(l))) {
+          body.push("");
+        } else {
+          break;
+        }
+      }
+      i = j - 1;
+      value =
+        block[1] === ">" ? body.join(" ").replace(/ {2,}/g, " ").trim() : body.join("\n").trim();
+    } else {
+      value = unquote(inline);
     }
-    let value = (pair[2] ?? "").trim();
-    if (
-      value.length >= 2 &&
-      ((value.startsWith('"') && value.endsWith('"')) ||
-        (value.startsWith("'") && value.endsWith("'")))
-    ) {
-      value = value.slice(1, -1);
-    }
-    if (value) {
-      result[key] = value;
+    if (FRONTMATTER_KEYS.has(key) && value) {
+      result[key as "name" | "description"] = value;
     }
   }
   return result;
