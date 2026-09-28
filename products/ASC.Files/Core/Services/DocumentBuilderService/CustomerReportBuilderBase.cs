@@ -257,4 +257,17 @@ public abstract class CustomerReportBuilderBase(
     }
 
     protected sealed record PropertyValue(string Value, string Format, ReportColumnAlign? Halign = null);
+
+    // A money cell: the amount at full precision. Every number in the report is right-aligned.
+    protected static PropertyValue MoneyValue(decimal? amount)
+    {
+        return new PropertyValue(amount?.ToString(CultureInfo.InvariantCulture), MoneyFormat, ReportColumnAlign.Right);
+    }
+
+    // A whole-number cell: quantities and token counts. A count that was never recorded leaves the
+    // cell empty rather than showing 0.
+    protected static PropertyValue CountValue(long? count)
+    {
+        return new PropertyValue(count?.ToString(CultureInfo.InvariantCulture), CountFormat, ReportColumnAlign.Right);
+    }
 }

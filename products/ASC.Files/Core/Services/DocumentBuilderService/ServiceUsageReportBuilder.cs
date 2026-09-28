@@ -139,9 +139,9 @@ public class ServiceUsageReportBuilder(
             var properties = new List<PropertyValue>
             {
                 new(title, "@"),
-                new(record.TotalQuantity.ToString(CultureInfo.InvariantCulture), CountFormat, ReportColumnAlign.Right),
+                CountValue(record.TotalQuantity),
                 new(serviceUnit, "@"),
-                new(record.TotalAmount.ToString(CultureInfo.InvariantCulture), MoneyFormat, ReportColumnAlign.Right),
+                MoneyValue(record.TotalAmount),
                 new(record.Currency, "@")
             };
 

@@ -91,7 +91,7 @@ public class MonthlyUsageReportBuilder(
             var properties = new List<PropertyValue>
             {
                 new(month, "@"),
-                new(record.TotalAmount.ToString(CultureInfo.InvariantCulture), MoneyFormat, ReportColumnAlign.Right),
+                MoneyValue(record.TotalAmount),
                 new(record.Currency, "@")
             };
 

@@ -236,19 +236,19 @@ public class OperationsReportBuilder(
                 new(record.Description, "@"),
                 new(record.Details, "@"),
                 new(record.ParticipantDisplayName, "@"),
-                new(record.Quantity.ToString(CultureInfo.InvariantCulture), CountFormat, ReportColumnAlign.Right)
+                CountValue(record.Quantity)
             };
 
             if (tokenColumns != null)
             {
                 // One value per token column even when the operation carries no token counts at all,
                 // or every column after this block would shift left by six.
-                properties.AddRange(tokenColumns.Select(x => TokensValue(x.Tokens(record.TokenUsage))));
+                properties.AddRange(tokenColumns.Select(x => CountValue(x.Tokens(record.TokenUsage))));
             }
 
             properties.Add(new PropertyValue(record.ServiceUnit, "@"));
-            properties.Add(new PropertyValue(record.Credit.ToString(CultureInfo.InvariantCulture), MoneyFormat, ReportColumnAlign.Right));
-            properties.Add(new PropertyValue(record.Debit.ToString(CultureInfo.InvariantCulture), MoneyFormat, ReportColumnAlign.Right));
+            properties.Add(MoneyValue(record.Credit));
+            properties.Add(MoneyValue(record.Debit));
             properties.Add(new PropertyValue(record.Currency, "@"));
 
             if (addSourceColumns)
@@ -262,11 +262,5 @@ public class OperationsReportBuilder(
         }
 
         return sb.ToString();
-    }
-
-    // An operation recorded without token counts leaves the cell empty rather than showing 0.
-    private static PropertyValue TokensValue(long? tokens)
-    {
-        return new PropertyValue(tokens?.ToString(CultureInfo.InvariantCulture), CountFormat, ReportColumnAlign.Right);
     }
 }
