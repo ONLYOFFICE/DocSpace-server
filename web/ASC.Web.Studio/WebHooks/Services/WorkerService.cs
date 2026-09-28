@@ -39,11 +39,14 @@ public class WorkerService(
     ILogger<WorkerService> logger,
     Settings settings,
     IEventBus eventBus,
-    ConcurrentQueue<WebhookRequestIntegrationEvent> concurrentQueue)
+    IServiceScopeFactory scopeFactory,
+    WorkerSignal signal)
     : BackgroundService
 {
-    private readonly int? _threadCount = settings.ThreadCount;
+    private readonly int _threadCount = settings.ThreadCount ?? 10;
     private readonly TimeSpan _waitingPeriod = TimeSpan.FromSeconds(5);
+    private const int BatchWaves = 5;
+    private readonly TimeSpan _lease = TimeSpan.FromMinutes(10);
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -51,47 +54,47 @@ public class WorkerService(
 
         stoppingToken.Register(eventBus.Unsubscribe<WebhookRequestIntegrationEvent, WebhookRequestIntegrationEventHandler>);
 
+        var batchSize = _threadCount * BatchWaves;
+        var parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = _threadCount, CancellationToken = stoppingToken };
+
         while (!stoppingToken.IsCancellationRequested)
         {
-            var queueSize = concurrentQueue.Count;
+            var claimed = 0;
 
-            if (queueSize == 0) // change to "<= threadCount"
+            try
+            {
+                List<(int TenantId, int Id)> entries;
+
+                await using (var scope = scopeFactory.CreateAsyncScope())
+                {
+                    var dbWorker = scope.ServiceProvider.GetRequiredService<DbWorker>();
+                    entries = await dbWorker.ClaimDueJournalEntriesAsync(batchSize, _lease);
+                }
+
+                claimed = entries.Count;
+
+                if (claimed > 0)
+                {
+                    await Parallel.ForEachAsync(entries, parallelOptions, async (entry, token) => await webhookSender.Send(entry.TenantId, entry.Id, token));
+
+                    logger.DebugProcedureFinish();
+                }
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                return;
+            }
+            catch (Exception e)
+            {
+                logger.ErrorWithException(e);
+            }
+
+            if (claimed < batchSize)
             {
                 logger.TraceProcedure(_waitingPeriod);
 
-                await Task.Delay(_waitingPeriod, stoppingToken);
-
-                continue;
+                await signal.WaitAsync(_waitingPeriod, stoppingToken);
             }
-
-            var tasks = new List<Task>(queueSize);
-            var counter = 0;
-
-            for (var i = 0; i < queueSize; i++)
-            {
-                if (stoppingToken.IsCancellationRequested)
-                {
-                    return;
-                }
-
-                if (!concurrentQueue.TryDequeue(out var entry))
-                {
-                    break;
-                }
-
-                tasks.Add(webhookSender.Send(entry, stoppingToken));
-                counter++;
-
-                if (counter >= _threadCount)
-                {
-                    await Task.WhenAll(tasks);
-                    tasks.Clear();
-                    counter = 0;
-                }
-            }
-
-            await Task.WhenAll(tasks);
-            logger.DebugProcedureFinish();
         }
     }
 }

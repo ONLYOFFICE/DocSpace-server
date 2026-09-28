@@ -31,8 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using System.Threading.Channels;
-
 using ASC.Common.Threading;
 using ASC.MessagingSystem;
 using ASC.MessagingSystem.Data;
@@ -52,7 +50,6 @@ public static class WebStudioServiceExtensions
         services.RegisterQuotaFeature();
         services.AddHttpClient();
         services.AddHostedService<WorkerService>();
-        services.TryAddSingleton(new ConcurrentQueue<WebhookRequestIntegrationEvent>());
 
         services.AddSingleton(Channel.CreateUnbounded<EventData>());
         services.AddSingleton(svc => svc.GetRequiredService<Channel<EventData>>().Reader);
@@ -67,7 +64,7 @@ public static class WebStudioServiceExtensions
         services.AddActivePassiveHostedService<TopUpWalletService>(configuration);
         services.AddActivePassiveHostedService<RenewSubscriptionService>(configuration);
 
-        services.AddWebhookSenderHttpClient(configuration);
+        services.AddWebhookSenderHttpClient();
 
         return services;
     }

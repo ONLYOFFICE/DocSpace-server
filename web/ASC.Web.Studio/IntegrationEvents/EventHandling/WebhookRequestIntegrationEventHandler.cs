@@ -36,7 +36,7 @@ namespace ASC.Web.Studio.IntegrationEvents.EventHandling;
 [Scope]
 public class WebhookRequestIntegrationEventHandler(
     ILogger<WebhookRequestIntegrationEventHandler> logger,
-    ConcurrentQueue<WebhookRequestIntegrationEvent> concurrentQueue) : IIntegrationEventHandler<WebhookRequestIntegrationEvent>
+    WorkerSignal workerSignal) : IIntegrationEventHandler<WebhookRequestIntegrationEvent>
 {
     public async Task Handle(WebhookRequestIntegrationEvent @event)
     {
@@ -44,7 +44,7 @@ public class WebhookRequestIntegrationEventHandler(
         {
             logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-            concurrentQueue.Enqueue(@event);
+            workerSignal.Notify();
 
             await Task.CompletedTask;
         }
