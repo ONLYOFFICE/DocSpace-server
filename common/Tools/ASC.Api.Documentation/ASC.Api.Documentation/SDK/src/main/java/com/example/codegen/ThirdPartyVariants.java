@@ -26,6 +26,7 @@ import io.swagger.v3.oas.models.servers.Server;
 
 import org.openapitools.codegen.CodegenOperation;
 import org.openapitools.codegen.CodegenParameter;
+import org.openapitools.codegen.CodegenResponse;
 import org.openapitools.codegen.DefaultCodegen;
 import org.openapitools.codegen.model.OperationsMap;
 
@@ -42,6 +43,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.BinaryOperator;
 
 /**
  * The third-party twin of a generic controller action.
@@ -165,11 +167,118 @@ final class ThirdPartyVariants {
         for (CodegenOperation op : objs.getOperations().getOperation()) {
             Object attached = op.vendorExtensions.get(VARIANT_OPERATION);
             if (attached instanceof CodegenOperation) {
-                variants.add((CodegenOperation) attached);
+                CodegenOperation variant = (CodegenOperation) attached;
+                variants.add(variant);
+                // Some generators (python) rebuild the file's imports from the operations' own sets
+                // in postProcessOperationsWithModels, so the twin's models join the operation's set too.
+                op.imports.addAll(variant.imports);
             }
         }
 
         addImports(codegen, objs, variants);
+    }
+
+    /** On a parameter of the original whose type differs in the twin: the union of both types. */
+    static final String UNION_TYPE = "x-thirdparty-union-type";
+
+    /** On such a parameter: the twin's type alone. */
+    static final String VARIANT_TYPE = "x-thirdparty-variant-type";
+
+    /** On the original operation when its answer differs and a parameter tells the two apart. */
+    static final String OVERLOAD = "x-thirdparty-overload";
+
+    /** On the original operation: the twin's return type, and the union of both. */
+    static final String RETURN_TYPE_VARIANT = "x-thirdparty-return-type-variant";
+    static final String RETURN_TYPE_UNION = "x-thirdparty-return-type-union";
+
+    /**
+     * On the original operation and on each of its responses whose type differs: the name of the
+     * parameter whose runtime type says which shape the call is - the string-id path parameter.
+     */
+    static final String DISPATCH_PARAM = "x-thirdparty-dispatch-param";
+
+    /** On a response of the original whose type differs in the twin: the twin's response type. */
+    static final String DATATYPE_VARIANT = "x-thirdparty-datatype-variant";
+
+    /**
+     * For a language that renders the twin inside the operation's own method: marks on the original
+     * what differs, so that the template can type the parameters as a union, declare the answer as a
+     * union or as overloads, and pick the response model at run time by the id's type.
+     *
+     * @param union how the language spells the union of two types: {@code (a, b) -> a + " | " + b}.
+     */
+    static void markUnions(CodegenOperation op, BinaryOperator<String> union) {
+        Object attached = op.vendorExtensions.get(VARIANT_OPERATION);
+        if (!(attached instanceof CodegenOperation)) {
+            return;
+        }
+
+        CodegenOperation variant = (CodegenOperation) attached;
+        Map<String, CodegenParameter> variantParams = new LinkedHashMap<>();
+        CodegenParameter variantBody = null;
+        for (CodegenParameter parameter : variant.allParams) {
+            variantParams.put(parameter.paramName, parameter);
+            if (parameter.isBodyParam) {
+                // The entry of allParams, not variant.bodyParam: the generator keeps those as separate
+                // copies, and the "changed" mark sits on the entry.
+                variantBody = parameter;
+            }
+        }
+
+        String dispatch = null;
+        boolean anyChanged = false;
+        for (CodegenParameter parameter : op.allParams) {
+            CodegenParameter twin = parameter.isBodyParam ? variantBody : variantParams.get(parameter.paramName);
+            if (twin == null || !twin.vendorExtensions.containsKey(CHANGED)
+                    || Objects.equals(parameter.dataType, twin.dataType)) {
+                continue;
+            }
+
+            parameter.vendorExtensions.put(UNION_TYPE, union.apply(parameter.dataType, twin.dataType));
+            parameter.vendorExtensions.put(VARIANT_TYPE, twin.dataType);
+            anyChanged = true;
+            if (dispatch == null && parameter.isPathParam) {
+                dispatch = parameter.paramName;
+            }
+        }
+
+        if (!anyChanged) {
+            return;
+        }
+
+        if (dispatch == null) {
+            dispatch = op.allParams.stream()
+                .filter(p -> p.vendorExtensions.containsKey(UNION_TYPE))
+                .map(p -> p.paramName)
+                .findFirst()
+                .orElse(null);
+        }
+        op.vendorExtensions.put(DISPATCH_PARAM, dispatch);
+
+        boolean returnChanged = variant.vendorExtensions.containsKey(RETURN_CHANGED)
+            && !Objects.equals(op.returnType, variant.returnType);
+        if (returnChanged) {
+            String original = op.returnType == null ? "" : op.returnType;
+            String twin = variant.returnType == null ? "" : variant.returnType;
+            op.vendorExtensions.put(OVERLOAD, true);
+            op.vendorExtensions.put(RETURN_TYPE_VARIANT, twin);
+            op.vendorExtensions.put(RETURN_TYPE_UNION, union.apply(original, twin));
+        }
+
+        // The responses: the template deserializes by the type named on the response, so the twin's
+        // type and the dispatching parameter are put right there, where the template can see them.
+        Map<String, CodegenResponse> variantResponses = new LinkedHashMap<>();
+        for (CodegenResponse response : variant.responses) {
+            variantResponses.put(response.code, response);
+        }
+        for (CodegenResponse response : op.responses) {
+            CodegenResponse twin = variantResponses.get(response.code);
+            if (twin == null || twin.dataType == null || Objects.equals(response.dataType, twin.dataType)) {
+                continue;
+            }
+            response.vendorExtensions.put(DATATYPE_VARIANT, twin.dataType);
+            response.vendorExtensions.put(DISPATCH_PARAM, dispatch);
+        }
     }
 
     /**

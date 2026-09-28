@@ -83,7 +83,7 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
     @Override
     public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List<Server> servers) {
         CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);
-        ThirdPartyVariants.attach(this, op, path, httpMethod, operation, servers, ThirdPartyVariants.Naming.SIBLING);
+        ThirdPartyVariants.attach(this, op, path, httpMethod, operation, servers, ThirdPartyVariants.Naming.OVERLOAD);
         return op;
     }
 
@@ -96,9 +96,15 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
 
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
-        ThirdPartyVariants.insert(this, objs);
+        // PHP has neither overloads nor generics, so the twin stays attached: the docblocks carry
+        // int|string and the union of the answers, and the response model is picked at run time
+        // by the id's type (see ThirdPartyVariants.markUnions).
+        ThirdPartyVariants.addAttachedImports(this, objs);
 
         super.postProcessOperationsWithModels(objs, allModels);
+        for (CodegenOperation op : objs.getOperations().getOperation()) {
+            ThirdPartyVariants.markUnions(op, (a, b) -> a + "|" + b);
+        }
 
         if (objs != null && objs.getOperations() != null) {
             OperationMap operationMap = objs.getOperations();
