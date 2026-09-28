@@ -20,7 +20,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
             migrationBuilder.InsertData(
                 table: "tenants_quota",
                 columns: new[] { "tenant", "additional", "description", "features", "name", "price", "product_id", "service_group", "service_name", "visible", "wallet" },
-                values: new object[] { -19, true, null, "businesstools,sms2fa,audit,ldap,sso,customization,thirdparty,restore,contentsearch,file_size:1024,statistic,free_backup:2:fixed", "businesstools", 99m, "1020", null, "business-tools", true, true });
+                values: new object[] { -19, true, null, "businesstools,audit,ldap,sso,customization,thirdparty,restore,contentsearch,file_size:1024,statistic,free_backup:2:fixed", "businesstools", 99m, "1020", null, "business-tools", true, true });
         }
 
         /// <inheritdoc />

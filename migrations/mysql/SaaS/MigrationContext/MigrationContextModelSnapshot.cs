@@ -1636,7 +1636,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -19,
                             Additional = true,
-                            Features = "businesstools,sms2fa,audit,ldap,sso,customization,thirdparty,restore,contentsearch,file_size:1024,statistic,free_backup:2:fixed",
+                            Features = "businesstools,audit,ldap,sso,customization,thirdparty,restore,contentsearch,file_size:1024,statistic,free_backup:2:fixed",
                             Name = "businesstools",
                             Price = 99m,
                             ProductId = "1020",

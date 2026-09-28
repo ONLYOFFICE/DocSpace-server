@@ -376,18 +376,6 @@ public class TenantQuota
         set => _businessToolsFeature.Value = value;
     }
 
-    private readonly TenantQuotaFeatureFlag _sms2FaFeature;
-
-    /// <summary>
-    /// Specifies if the two-factor authentication via SMS is available or not.
-    /// </summary>
-    /// <example>true</example>
-    public bool Sms2Fa
-    {
-        get => _sms2FaFeature.Value;
-        set => _sms2FaFeature.Value = value;
-    }
-
     private readonly TenantQuotaFeatureFlag _customFeature;
 
     /// <summary>
@@ -594,7 +582,6 @@ public class TenantQuota
         _docsCloudDevPack = new TenantQuotaFeatureFlag(this, "docsclouddevpack") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _docsCloudTrial = new TenantQuotaFeatureFlag(this, "docscloudtrial") { EmployeeType = EmployeeType.DocSpaceAdmin };
         _businessToolsFeature = new TenantQuotaFeatureFlag(this, "businesstools", true) { Order = 14, EmployeeType = EmployeeType.DocSpaceAdmin };
-        _sms2FaFeature = new TenantQuotaFeatureFlag(this, "sms2fa") { Visible = false };
 
         TenantQuotaFeatures = new List<TenantQuotaFeature>
         {
@@ -631,8 +618,7 @@ public class TenantQuota
             _countDocsCloud,
             _docsCloudDevPack,
             _docsCloudTrial,
-            _businessToolsFeature,
-            _sms2FaFeature
+            _businessToolsFeature
         };
     }
 

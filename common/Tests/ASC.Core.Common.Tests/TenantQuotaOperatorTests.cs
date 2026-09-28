@@ -146,7 +146,7 @@ public class TenantQuotaOperatorTests
     private static TenantQuota BusinessToolsWalletAddon() => new((int)TenantWalletService.BusinessTools)
     {
         Name = "businesstools",
-        Features = "businesstools,sms2fa,audit,ldap,sso,customization,thirdparty,restore,contentsearch,file_size:1024,statistic,free_backup:2:fixed",
+        Features = "businesstools,audit,ldap,sso,customization,thirdparty,restore,contentsearch,file_size:1024,statistic,free_backup:2:fixed",
         Price = 99m,
         Wallet = true,
         Additional = true,
@@ -168,7 +168,6 @@ public class TenantQuotaOperatorTests
         combined.MaxTotalSize.Should().Be(2147483648);
 
         combined.BusinessTools.Should().BeTrue();
-        combined.Sms2Fa.Should().BeTrue();
         combined.Audit.Should().BeTrue();
         combined.Ldap.Should().BeTrue();
         combined.Sso.Should().BeTrue();

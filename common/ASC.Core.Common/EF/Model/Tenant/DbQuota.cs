@@ -294,7 +294,7 @@ public static class DbQuotaExtension
                     TenantId = -19,
                     Name = "businesstools",
                     Description = null,
-                    Features = "businesstools,sms2fa,audit,ldap,sso,customization,thirdparty,restore,contentsearch,file_size:1024,statistic,free_backup:2:fixed",
+                    Features = "businesstools,audit,ldap,sso,customization,thirdparty,restore,contentsearch,file_size:1024,statistic,free_backup:2:fixed",
                     Price = 99,
                     ProductId = "1020",
                     ServiceName = "business-tools",

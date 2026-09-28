@@ -62,7 +62,7 @@ public class StudioSmsNotificationSettingsHelper(IHttpContextAccessor httpContex
     {
         var quota = await tenantManager.GetCurrentTenantQuotaAsync();
         return coreBaseSettings.Standalone
-                || quota.Sms2Fa
+                || quota.BusinessTools
                 || ((!quota.Trial || setupInfo.SmsTrial)
                     && !quota.NonProfit
                     && !quota.Free);
