@@ -97,6 +97,9 @@ public abstract class SecurityController<T>(
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The accounts and groups that hold rights on the file, the owner first", typeof(IAsyncEnumerable<FileShareDto>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, or the `startIndex` is not a number")]
+    [SwaggerResponse(403, "The caller is a guest or may not read the file")]
+    [SwaggerResponse(404, "The file does not exist")]
     [HttpGet("file/{id}/share")]
     public async IAsyncEnumerable<FileShareDto> GetFileSecurityInfo(FilePrimaryIdRequestDto<T> inDto)
     {
@@ -137,6 +140,9 @@ public abstract class SecurityController<T>(
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The accounts and groups that hold rights on the folder, the owner first", typeof(IAsyncEnumerable<FileShareDto>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, or the `startIndex` is not a number")]
+    [SwaggerResponse(403, "The caller is a guest or may not read the folder")]
+    [SwaggerResponse(404, "The folder does not exist")]
     [HttpGet("folder/{id}/share")]
     public async IAsyncEnumerable<FileShareDto> GetFolderSecurityInfo(FolderPrimaryIdRequestDto<T> inDto)
     {
@@ -176,6 +182,8 @@ public abstract class SecurityController<T>(
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The rights the listed subjects hold on the file after the change", typeof(IAsyncEnumerable<FileShareDto>))]
+    [SwaggerResponse(400, "The request body cannot be read, an `email` in `share` is malformed or longer than 255 characters, `share` invites more addresses by email than the portal allows at once, or `sharingMessage` is longer than 255 characters")]
+    [SwaggerResponse(403, "The caller may not change the sharing of the file, or a listed subject cannot be given the requested access on it")]
     [HttpPut("file/{id}/share")]
     public IAsyncEnumerable<FileShareDto> SetFileSecurityInfo(FileSecurityInfoSimpleRequestDto<T> inDto)
     {
@@ -208,6 +216,8 @@ public abstract class SecurityController<T>(
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The rights the listed subjects hold on the folder after the change", typeof(IAsyncEnumerable<FileShareDto>))]
+    [SwaggerResponse(400, "The request body cannot be read, an `email` in `share` is malformed or longer than 255 characters, `share` invites more addresses by email than the portal allows at once, or `sharingMessage` is longer than 255 characters")]
+    [SwaggerResponse(403, "The caller may not change the sharing of the folder, a listed subject cannot be given the requested access on it, or the folder is a private room and a listed account has not set up its encryption keys")]
     [HttpPut("folder/{id}/share")]
     public IAsyncEnumerable<FileShareDto> SetFolderSecurityInfo(FolderSecurityInfoSimpleRequestDto<T> inDto)
     {
@@ -241,6 +251,8 @@ public abstract class SecurityController<T>(
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The keys of the members who can open the file, the private half only for the caller", typeof(List<EncryptionKeyDto>))]
     [SwaggerResponse(403, "The caller may not read the file")]
+    [SwaggerResponse(404, "The file does not exist")]
+    [SwaggerResponse(415, "The file lies neither in a private room nor in the encrypted section")]
     [HttpGet("file/{fileId}/publickeys")]
     public async Task<List<EncryptionKeyDto>> GetEncryptionAccess(FileIdRequestDto<T> inDto)
     {
@@ -295,6 +307,8 @@ public abstract class SecurityController<T>(
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The members of the group with the access each of them has on the folder", typeof(IAsyncEnumerable<GroupMemberSecurityRequestDto>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, or the `startIndex` is not a number")]
+    [SwaggerResponse(403, "The caller is a guest")]
     [HttpGet("folder/{folderId}/group/{groupId:guid}/share")]
     public async IAsyncEnumerable<GroupMemberSecurityRequestDto> GetGroupsMembersWithFolderSecurity(GroupMemberSecurityFolderRequestDto<T> inDto)
     {
@@ -344,6 +358,8 @@ public abstract class SecurityController<T>(
     /// <path>api/2.0/files/file/{fileId}/group/{groupId}/share</path>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The members of the group with the access each of them has on the file", typeof(IAsyncEnumerable<GroupMemberSecurityRequestDto>))]
+    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, or the `startIndex` is not a number")]
+    [SwaggerResponse(403, "The caller is a guest")]
     [HttpGet("file/{fileId}/group/{groupId:guid}/share")]
     public async IAsyncEnumerable<GroupMemberSecurityRequestDto> GetGroupsMembersWithFileSecurity(GroupMemberSecurityFileRequestDto<T> inDto)
     {
@@ -403,6 +419,9 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The rooms and files whose owner has been changed, as folder and file objects", typeof(IAsyncEnumerable<FileEntryBaseDto>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `userId`")]
+    [SwaggerResponse(403, "The new owner is not an active account allowed to manage rooms or has not set up encryption keys for a listed private room, the caller may not change the owner of a listed entry, a listed folder lies outside the rooms and common sections, or a listed file is locked, being edited or lies outside the common section")]
+    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPost("owner")]
     public async IAsyncEnumerable<FileEntryBaseDto> ChangeFileOwner(ChangeOwnerRequestDto inDto)
     {
@@ -437,6 +456,8 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The merged sharing rights of the listed files and folders, one record per account or group", typeof(IAsyncEnumerable<FileShareDto>))]
+    [SwaggerResponse(403, "The caller may not read one of the listed files or folders")]
+    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPost("share")]
     public async IAsyncEnumerable<FileShareDto> GetSecurityInfo(BaseBatchRequestDto inDto)
     {
@@ -469,6 +490,8 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/share</path>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "Always true: the accounts and groups that had access to the listed entries no longer have it", typeof(bool))]
+    [SwaggerResponse(403, "The caller may not change the access of a listed entry and may not drop it from their own list either, because it was shared with them directly or they cannot read it")]
+    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpDelete("share")]
     public async Task<bool> RemoveSecurityInfo(BaseBatchRequestDto inDto)
     {
@@ -500,6 +523,9 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The rights of the listed accounts and groups on every entry that was processed", typeof(IAsyncEnumerable<FileShareDto>))]
+    [SwaggerResponse(400, "The request body cannot be read, an `email` in `share` is malformed or longer than 255 characters, `share` invites more addresses by email than the portal allows at once, or `sharingMessage` is longer than 255 characters")]
+    [SwaggerResponse(403, "The caller may not change the sharing of a listed entry, a listed subject cannot be given the requested access on it, or a listed private room has an account in `share` that has not set up its encryption keys")]
+    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPut("share")]
     public async IAsyncEnumerable<FileShareDto> SetSecurityInfo(SecurityInfoRequestDto inDto)
     {
@@ -569,6 +595,7 @@ public class SecurityControllerCommon(FileStorageService fileStorageService,
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The entry the token points at, with the status the link reached after the password was checked", typeof(ExternalShareDto))]
+    [SwaggerResponse(403, "Too many attempts were made for this link from the calling address, and the block has not expired yet")]
     [SwaggerResponse(429, "Too many requests")]
     [AllowAnonymous]
     [HttpPost("share/{key}/password")]

@@ -61,6 +61,9 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// <path>api/2.0/files/roomtemplate</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `roomId`, `title` is empty or longer than 400 characters, `color` is longer than 6 or `cover` longer than 50 characters, or `logo` has no `tmpFile` or a position or size outside 0-1280")]
+    [SwaggerResponse(403, "The source room is archived, the caller cannot edit it, or `quota` is set while the storage quota for rooms (for an AI agent, for agents) is turned off")]
+    [SwaggerResponse(404, "No room with `roomId` exists in the Rooms section")]
     [HttpPost("")]
     public async Task<RoomTemplateStatusDto> CreateRoomTemplate(RoomTemplateDto dto)
     {
@@ -173,6 +176,9 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// <path>api/2.0/files/roomtemplate/{id}/public</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Ok", typeof(bool))]
+    [SwaggerResponse(400, "`id` is not a number or is less than 1")]
+    [SwaggerResponse(403, "The caller has no read access to the template")]
+    [SwaggerResponse(404, "`id` does not identify a room template")]
     [HttpGet("{id}/public")]
     public async Task<bool> GetPublicSettings(PublicDto inDto)
     {
@@ -198,6 +204,9 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// <path>api/2.0/files/roomtemplate/public</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `id`, or `id` is less than 1")]
+    [SwaggerResponse(403, "The caller is not allowed to change who the template is shared with")]
+    [SwaggerResponse(404, "`id` does not identify a room template")]
     [HttpPut("public")]
     public async Task SetPublicSettings(SetPublicDto inDto)
     {

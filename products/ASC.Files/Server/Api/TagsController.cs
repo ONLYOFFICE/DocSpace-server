@@ -68,8 +68,10 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/file/{fileId}/recent</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The file as it stands after the entry was recorded", typeof(FileDto<int>))]
+    [SwaggerResponse(400, "A third-party file identifier refers to a storage account that is not connected")]
     [SwaggerResponse(403, "The calling account cannot read this file")]
     [SwaggerResponse(404, "No file answers to this identifier")]
+    [SwaggerResponse(500, "A third-party file identifier carries a storage account number beyond the 32-bit range")]
     [HttpPost("file/{fileId}/recent")]
     public async Task<FileDto<T>> AddFileToRecent(FileIdRequestDto<T> inDto)
     {
@@ -96,7 +98,10 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/favorites/{fileId}</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Echo of the requested state, which does not prove that the mark was changed", typeof(bool))]
+    [SwaggerResponse(400, "`favorite` is not a boolean, or a third-party file identifier refers to a storage account that is not connected")]
     [SwaggerResponse(403, "Changing the favorite mark is refused for the caller")]
+    [SwaggerResponse(404, "A third-party file identifier names a storage type the portal does not know")]
+    [SwaggerResponse(500, "A third-party file identifier carries a storage account number beyond the 32-bit range")]
     [HttpGet("favorites/{fileId}")]
     public async Task<bool> ToggleFileFavorite(ToggleFileFavoriteRequestDto<T> inDto)
     {
@@ -125,7 +130,10 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/favorites</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Always true: the request was understood, which does not mean that anything was marked", typeof(bool))]
+    [SwaggerResponse(400, "The request body cannot be read, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(403, "Marking favorites is refused for the caller")]
+    [SwaggerResponse(404, "A third-party identifier names a storage type the portal does not know")]
+    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer, or a third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPost("favorites")]
     public async Task<bool> AddFavorites(BaseBatchRequestDto inDto)
     {
@@ -153,6 +161,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/templates</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Always true: the request was understood, which does not mean that anything was added", typeof(bool))]
+    [SwaggerResponse(403, "The caller is a guest")]
     [HttpPost("templates")]
     public async Task<bool> AddTemplates(TemplatesRequestDto inDto)
     {
@@ -178,6 +187,9 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/favorites</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Always true: the marks named in the request are gone or were never there", typeof(bool))]
+    [SwaggerResponse(400, "The request body cannot be read, or a third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(404, "A third-party identifier names a storage type the portal does not know")]
+    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer, or a third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpDelete("favorites")]
     [Consumes("application/json")]
     public async Task<bool> DeleteFavoritesFromBody([FromBody] BaseBatchRequestDto inDto)
@@ -200,6 +212,9 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/favorites</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Always true: the marks named in the query are gone or were never there", typeof(bool))]
+    [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(404, "A third-party identifier names a storage type the portal does not know")]
+    [SwaggerResponse(500, "An id contains a double quote, a control character or a backslash that does not start a JSON escape, or a third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpDelete("favorites")]
     public async Task<bool> DeleteFavoritesFromQuery([FromQuery][ModelBinder(BinderType = typeof(BaseBatchModelBinder))] BaseBatchRequestDto inDto)
     {
@@ -221,6 +236,7 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/templates</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Always true: the files named in the array are no longer templates of the caller", typeof(bool))]
+    [SwaggerResponse(403, "The caller is a guest")]
     [HttpDelete("templates")]
     public async Task<bool> DeleteTemplates(DeleteTemplateFilesRequestDto inDto)
     {
@@ -244,6 +260,9 @@ public class TagsControllerCommon(FileStorageService fileStorageService,
     /// <path>api/2.0/files/recent</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Empty answer: the listed entries no longer appear in the Recent section")]
+    [SwaggerResponse(400, "The request body cannot be read, or a third-party folder identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(404, "A third-party folder identifier names a storage type the portal does not know")]
+    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer, or a third-party folder identifier carries a storage account number beyond the 32-bit range")]
     [HttpDelete("recent")]
     public async Task<NoContentResult> DeleteRecent(BaseBatchRequestDto inDto)
     {
