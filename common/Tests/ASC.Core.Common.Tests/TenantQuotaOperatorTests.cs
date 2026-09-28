@@ -131,10 +131,10 @@ public class TenantQuotaOperatorTests
         combined.Wallet.Should().BeFalse();        // identity stays the non-wallet base plan
     }
 
-    // The free base plan every new portal is registered on.
-    private static TenantQuota FreePlan() => new(-19)
+    // The free startup plan every new portal is registered on.
+    private static TenantQuota StartupPlan() => new(-3)
     {
-        Name = "free",
+        Name = "startup",
         Features = "free,oauth,total_size:2147483648,manager:10000,room:10000,automationapi",
         Price = 0m,
         Wallet = false,
@@ -154,13 +154,13 @@ public class TenantQuotaOperatorTests
     };
 
     [Fact]
-    public void Add_FreePlanThenBusinessTools_KeepsFreeIdentity_AddsPaidFeatures()
+    public void Add_StartupPlanThenBusinessTools_KeepsFreeIdentity_AddsPaidFeatures()
     {
         TenantQuota? combined = null;
-        combined += FreePlan();
+        combined += StartupPlan();
         combined += BusinessToolsWalletAddon();
 
-        combined.Name.Should().Be("free");
+        combined.Name.Should().Be("startup");
         combined.Free.Should().BeTrue();           // the portal stays on the free plan
         combined.Price.Should().Be(0m);            // additional wallet add-on price is excluded
         combined.CountRoomAdmin.Should().Be(10000);
@@ -187,7 +187,7 @@ public class TenantQuotaOperatorTests
         businessTools.DueDate = DateTime.UtcNow.AddDays(-1);
 
         TenantQuota? combined = null;
-        combined += FreePlan();
+        combined += StartupPlan();
         combined += businessTools;
 
         combined.BusinessTools.Should().BeFalse();

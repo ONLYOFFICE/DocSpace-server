@@ -41,7 +41,7 @@ public class TariffWalletSubscriptionTests
     public void HasActiveWalletSubscription_ActiveWalletAddon_ReturnsTrue()
     {
         var tariff = TariffOf(
-            new ASC.Core.Billing.Quota(-19, 1),
+            new ASC.Core.Billing.Quota(-3, 1),
             new ASC.Core.Billing.Quota((int)TenantWalletService.BusinessTools, 1, true, true, DateTime.UtcNow.AddDays(10), null));
 
         tariff.HasActiveWalletSubscription().Should().BeTrue();
@@ -51,7 +51,7 @@ public class TariffWalletSubscriptionTests
     public void HasActiveWalletSubscription_ExpiredWalletAddon_ReturnsFalse()
     {
         var tariff = TariffOf(
-            new ASC.Core.Billing.Quota(-19, 1),
+            new ASC.Core.Billing.Quota(-3, 1),
             new ASC.Core.Billing.Quota((int)TenantWalletService.BusinessTools, 1, true, true, DateTime.UtcNow.AddDays(-1), null));
 
         tariff.HasActiveWalletSubscription().Should().BeFalse();
@@ -67,8 +67,8 @@ public class TariffWalletSubscriptionTests
     }
 
     [Fact]
-    public void HasActiveWalletSubscription_FreePlanOnly_ReturnsFalse()
+    public void HasActiveWalletSubscription_StartupPlanOnly_ReturnsFalse()
     {
-        TariffOf(new ASC.Core.Billing.Quota(-19, 1)).HasActiveWalletSubscription().Should().BeFalse();
+        TariffOf(new ASC.Core.Billing.Quota(-3, 1)).HasActiveWalletSubscription().Should().BeFalse();
     }
 }

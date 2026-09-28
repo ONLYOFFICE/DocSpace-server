@@ -61,5 +61,5 @@ public enum TenantWalletService
     AISearch = -18,
 
     [Description("BusinessTools")]
-    BusinessTools = -20
+    BusinessTools = -19
 }

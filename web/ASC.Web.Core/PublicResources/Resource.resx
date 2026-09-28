@@ -1338,9 +1338,6 @@
   <data name="Tariffs_businesstools" xml:space="preserve">
     <value>Business tools</value>
   </data>
-  <data name="Tariffs_free" xml:space="preserve">
-    <value>Free</value>
-  </data>
   <data name="Tariffs_nonprofit" xml:space="preserve">
     <value>Non-profit</value>
   </data>

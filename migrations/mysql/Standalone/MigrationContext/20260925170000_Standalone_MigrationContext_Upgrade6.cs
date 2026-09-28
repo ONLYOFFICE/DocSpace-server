@@ -42,16 +42,13 @@ public partial class MigrationContext_Upgrade6 : Migration
     /// <inheritdoc />
     protected override void Up(MigrationBuilder migrationBuilder)
     {
-        // the SaaS migration moved startup portals to the free plan; the free plan is SaaS-only, so move them back
-        migrationBuilder.Sql("UPDATE tenants_tariffrow SET quota = -3 WHERE quota = -19;");
-
-        // remove free and businesstools: SaaS-only quotas
+        // remove businesstools: a SaaS-only wallet service
         migrationBuilder.DeleteData(
             table: "tenants_quota",
             keyColumn: "tenant",
             keyValues:
             [
-                -19, -20
+                -19
             ]);
     }
 

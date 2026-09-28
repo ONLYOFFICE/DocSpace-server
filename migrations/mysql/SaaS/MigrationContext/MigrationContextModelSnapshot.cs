@@ -1456,7 +1456,7 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         {
                             TenantId = -3,
                             Additional = false,
-                            Features = "free,oauth,total_size:2147483648,manager:3,room:12,automationapi",
+                            Features = "free,oauth,total_size:2147483648,manager:10000,room:10000,automationapi",
                             Name = "startup",
                             Price = 0m,
                             Visible = false,
@@ -1635,16 +1635,6 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         new
                         {
                             TenantId = -19,
-                            Additional = false,
-                            Features = "free,oauth,total_size:2147483648,manager:10000,room:10000,automationapi",
-                            Name = "free",
-                            Price = 0m,
-                            Visible = false,
-                            Wallet = false
-                        },
-                        new
-                        {
-                            TenantId = -20,
                             Additional = true,
                             Features = "businesstools,sms2fa,audit,ldap,sso,customization,thirdparty,restore,contentsearch,file_size:1024,statistic,free_backup:2:fixed",
                             Name = "businesstools",

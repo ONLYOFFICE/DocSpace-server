@@ -3868,15 +3868,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Free.
-        /// </summary>
-        public static string Tariffs_free {
-            get {
-                return ResourceManager.GetString("Tariffs_free", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Non-profit.
         /// </summary>
         public static string Tariffs_nonprofit {

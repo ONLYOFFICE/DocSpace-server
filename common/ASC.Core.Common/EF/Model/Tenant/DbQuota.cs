@@ -102,7 +102,7 @@ public static class DbQuotaExtension
                     TenantId = -3,
                     Name = "startup",
                     Description = null,
-                    Features = "free,oauth,total_size:2147483648,manager:3,room:12,automationapi",
+                    Features = "free,oauth,total_size:2147483648,manager:10000,room:10000,automationapi",
                     Price = 0,
                     ProductId = null,
                     Visible = false
@@ -292,20 +292,6 @@ public static class DbQuotaExtension
                 new DbQuota
                 {
                     TenantId = -19,
-                    Name = "free",
-                    Description = null,
-                    Features = "free,oauth,total_size:2147483648,manager:10000,room:10000,automationapi",
-                    Price = 0,
-                    ProductId = null,
-                    ServiceName = null,
-                    ServiceGroup = null,
-                    Visible = false,
-                    Wallet = false,
-                    Additional = false
-                },
-                new DbQuota
-                {
-                    TenantId = -20,
                     Name = "businesstools",
                     Description = null,
                     Features = "businesstools,sms2fa,audit,ldap,sso,customization,thirdparty,restore,contentsearch,file_size:1024,statistic,free_backup:2:fixed",
