@@ -126,18 +126,35 @@ public class WebhooksLogDto
     public string ResponsePayload { get; set; }
 
     /// <summary>
-    /// The HTTP status code the target answered. It is `0` while the attempt is still on its way and on one that
-    /// never reached the target, so `0` is not a failure code - it is the absence of an answer.
+    /// The HTTP status code the target answered on the latest attempt. It is `0` while the first attempt is still
+    /// on its way and on one that never reached the target, so `0` is not a failure code - it is the absence of an
+    /// answer. While `nextAttemptOn` is set it is the status of the failed attempt that caused the retry.
     /// </summary>
     /// <example>200</example>
     public int Status { get; set; }
 
     /// <summary>
-    /// When the answer came back, as a UTC instant like `creationTime`. It is empty while the attempt is still on
-    /// its way, which together with `status` is how a pending record is told from a finished one.
+    /// When the successful answer came back, as a UTC instant like `creationTime`. It stays empty until an attempt
+    /// succeeds, and for good once the portal has given up retrying.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     public DateTime? Delivery { get; set; }
+
+    /// <summary>
+    /// How many times the portal has tried to deliver this record so far. A failed attempt is retried with
+    /// growing pauses, about 1 minute, 5 minutes, 30 minutes, 2, 5 and 10 hours, all of them under the same
+    /// record and the same `x-docspace-event-id` header, so a receiver can drop a delivery it has already
+    /// processed.
+    /// </summary>
+    /// <example>1</example>
+    public int Attempts { get; set; }
+
+    /// <summary>
+    /// When the next attempt is due, as a UTC instant like `creationTime`. It is empty once the record is
+    /// delivered, once the retries run out, and once the subscription is disabled or removed.
+    /// </summary>
+    /// <example>2024-01-15T10:35:00Z</example>
+    public DateTime? NextAttemptOn { get; set; }
 }
 
 [Scope]

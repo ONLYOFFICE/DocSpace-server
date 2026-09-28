@@ -37,4 +37,13 @@ internal static partial class WebhookSenderLogger
 {
     [LoggerMessage(LogLevel.Debug, "Response: {response}")]
     public static partial void DebugResponse(this ILogger logger, HttpResponseMessage response);
+
+    [LoggerMessage(LogLevel.Debug, "Webhook log {logId}: attempt {attempts} failed, next attempt at {nextAttemptOn}")]
+    public static partial void DebugRetryScheduled(this ILogger<WebhookSender> logger, int logId, int attempts, DateTime nextAttemptOn);
+
+    [LoggerMessage(LogLevel.Warning, "Webhook log {logId}: giving up after {attempts} attempts")]
+    public static partial void WarningDeliveryGivenUp(this ILogger<WebhookSender> logger, int logId, int attempts);
+
+    [LoggerMessage(LogLevel.Error, "Failed to send webhook tenant: {tenantId}, log: {logId}")]
+    public static partial void ErrorFailedToSend(this ILogger<WebhookSender> logger, int tenantId, int logId, Exception exception);
 }

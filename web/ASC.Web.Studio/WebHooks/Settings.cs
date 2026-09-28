@@ -44,13 +44,23 @@ public class Settings
     {
         var cfg = configuration.GetSection("webhooks").Get<Settings>();
 
-        RepeatCount = cfg.RepeatCount ?? 5;
+        RetryIntervals = cfg.RetryIntervals is { Length: > 0 } ? cfg.RetryIntervals : _defaultRetryIntervals;
         ThreadCount = cfg.ThreadCount ?? 10;
         TrustedDaysCount = cfg.TrustedDaysCount ?? 3;
         Blacklist = cfg.Blacklist ?? [];
     }
 
-    public int? RepeatCount { get; init; }
+    private static readonly TimeSpan[] _defaultRetryIntervals =
+    [
+        TimeSpan.FromMinutes(1),
+        TimeSpan.FromMinutes(5),
+        TimeSpan.FromMinutes(30),
+        TimeSpan.FromHours(2),
+        TimeSpan.FromHours(5),
+        TimeSpan.FromHours(10)
+    ];
+
+    public TimeSpan[] RetryIntervals { get; init; }
     public int? ThreadCount { get; init; }
     public int? TrustedDaysCount { get; init; }
     public string[] Blacklist { get; init; }
