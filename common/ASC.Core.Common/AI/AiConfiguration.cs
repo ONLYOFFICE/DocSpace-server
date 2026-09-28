@@ -39,6 +39,7 @@ public class AiConfiguration
 {
     public int MaxImageSize { get; private set; }
     public string? RecommendedModelForForms { get; private set; }
+    public FormAnalysisModel? FormAnalysisModel { get; private set; }
     public static readonly FrozenSet<string> SupportedImageFormats =
         ((HashSet<string>)[".jpeg", ".jpg", ".gif", ".webp", ".png"])
         .ToFrozenSet(StringComparer.OrdinalIgnoreCase);
@@ -50,5 +51,21 @@ public class AiConfiguration
 
         MaxImageSize = maxImgSize > 0 ? maxImgSize : 0;
         RecommendedModelForForms = section["recommendedModelForForms"];
+
+        var formAnalysis = section.GetSection("formAnalysisModel");
+        var modelId = formAnalysis["id"];
+        if (!string.IsNullOrEmpty(modelId))
+        {
+            FormAnalysisModel = new FormAnalysisModel(
+                modelId,
+                Guid.TryParse(formAnalysis["revisionId"], out var revisionId) ? revisionId : null);
+        }
     }
 }
+
+/// <summary>
+/// The gateway model that serves form analysis unless a portal admin assigns another one.
+/// </summary>
+/// <param name="Id">The gateway model identifier, e.g. <c>qwen/qwen3.5-122b-a10b</c>.</param>
+/// <param name="RevisionId">The gateway <c>revision_id</c> of that model; assignments store revision ids, not model ids.</param>
+public record FormAnalysisModel(string Id, Guid? RevisionId);

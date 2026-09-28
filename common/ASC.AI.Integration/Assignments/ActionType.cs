@@ -56,5 +56,6 @@ public enum ActionType
     TextAnalyze,
     ImageGeneration,
     OCR,
-    Vision
+    Vision,
+    FormAnalysis
 }

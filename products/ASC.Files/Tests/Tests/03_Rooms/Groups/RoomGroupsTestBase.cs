@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -65,11 +65,15 @@ public abstract class RoomGroupsTestBase(
         return ids;
     }
 
-    /// <summary>Creates a room group with a default valid icon unless overridden and returns the created DTO.</summary>
-    protected async Task<RoomGroupDto> CreateRoomGroup(string name, IEnumerable<int> rooms, string icon = "star")
+    /// <summary>
+    /// Creates a room group with a default valid icon unless overridden and returns the created DTO.
+    /// <paramref name="searchArea"/> is the section the group belongs to - omitted, the server defaults
+    /// it to <see cref="SearchArea.Active"/>, the Rooms section.
+    /// </summary>
+    protected async Task<RoomGroupDto> CreateRoomGroup(string name, IEnumerable<int> rooms, string icon = "star", SearchArea? searchArea = null)
     {
         var created = await _roomGroupsApi.AddRoomGroupAsync(
-            new RoomGroupRequestDto(name, icon, [.. rooms.Select(r => new DuplicateRequestDtoAllOfFileIds(r))]),
+            new RoomGroupRequestDto(name, icon, [.. rooms.Select(r => new DuplicateRequestDtoAllOfFileIds(r))], searchArea),
             cancellationToken: TestContext.Current.CancellationToken);
 
         return created.Response;

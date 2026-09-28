@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -63,9 +63,10 @@ internal class RoomGroupDao<T>(
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
         var tenantId = _tenantManager.GetCurrentTenantId();
 
+        // the section a group belongs to is fixed when it is created and never moves afterwards
         var entity = groupInfo.Id != 0
             ? await dbContext.GroupForUpdateAsync(tenantId, groupInfo.Id)
-            : new DbFilesGroup { TenantId = tenantId, UserId = groupInfo.UserID };
+            : new DbFilesGroup { TenantId = tenantId, UserId = groupInfo.UserID, FolderType = groupInfo.FolderType };
 
         entity.Name = groupInfo.Name;
         entity.Icon = groupInfo.Icon;
@@ -105,13 +106,13 @@ internal class RoomGroupDao<T>(
         await dbContext.SaveChangesAsync();
     }
 
-    public async IAsyncEnumerable<RoomGroup> GetGroupsAsync()
+    public async IAsyncEnumerable<RoomGroup> GetGroupsAsync(FolderType folderType)
     {
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
         var tenantId = _tenantManager.GetCurrentTenantId();
 
         var query = GetGroupQuery(dbContext, tenantId)
-            .Where(r => r.UserId == _authContext.CurrentAccount.ID)
+            .Where(r => r.UserId == _authContext.CurrentAccount.ID && r.FolderType == folderType)
             .AsAsyncEnumerable();
 
         await foreach (var item in query)
