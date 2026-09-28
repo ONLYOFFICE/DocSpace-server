@@ -51,7 +51,7 @@ public class MonthlyUsageReportBuilder(
         var columns = new List<ReportColumn>
         {
             new(Resource.AccountingCustomerOperationMonth),
-            new(Resource.AccountingCustomerOperationDebit, "right", Sum: true),
+            new(Resource.AccountingCustomerOperationDebit, ReportColumnAlign.Right, Sum: true),
             new(Resource.AccountingCustomerOperationCurrency, Currency: true)
         };
 
@@ -91,7 +91,7 @@ public class MonthlyUsageReportBuilder(
             var properties = new List<PropertyValue>
             {
                 new(month, "@"),
-                new(record.TotalAmount.ToString(CultureInfo.InvariantCulture), MoneyFormat, "right"),
+                new(record.TotalAmount.ToString(CultureInfo.InvariantCulture), MoneyFormat, ReportColumnAlign.Right),
                 new(record.Currency, "@")
             };
 
