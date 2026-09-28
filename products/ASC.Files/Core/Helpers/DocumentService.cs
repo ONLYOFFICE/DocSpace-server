@@ -627,7 +627,7 @@ public static class DocumentService
 
         if (string.IsNullOrEmpty(signatureSecret))
         {
-            content.Add(new StringContent(JsonSerializer.Serialize(body, _bodySettings), Encoding.UTF8, "application/json"), "params");
+            content.Add(new StringContent(JsonSerializer.Serialize(body, body.GetType(), _bodySettings), Encoding.UTF8, "application/json"), "params");
         }
         else
         {
@@ -641,11 +641,12 @@ public static class DocumentService
 
     /// <summary>
     /// Signs the parameters as the document service wants them for an uploaded source: the payload is the parameters
-    /// themselves, with the claim that says which endpoint the token may be spent on.
+    /// themselves, with the claim that says which endpoint the token may be spent on. Both here and in the unsigned
+    /// case the runtime type is passed explicitly, or only the parameters this base type declares would be written.
     /// </summary>
     private static string EncodeFromFileToken(FromFileBody body, string operation, string signatureSecret)
     {
-        var payload = JsonSerializer.SerializeToNode(body, _tokenSettings).AsObject();
+        var payload = JsonSerializer.SerializeToNode(body, body.GetType(), _tokenSettings).AsObject();
 
         payload[OperationClaim] = operation;
 

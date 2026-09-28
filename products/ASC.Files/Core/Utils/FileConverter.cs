@@ -728,9 +728,24 @@ public class FileConverter(
 
         // The format, the name and the caching key belong to the file, not to the request, so they are always taken
         // from it: a caller-supplied key would serve a stale result out of the document service cache.
+        if (string.IsNullOrEmpty(body.OutputType))
+        {
+            throw new ArgumentException("Extension for conversion is not known", nameof(body));
+        }
+
         body.FileType = FileUtility.GetFileExtension(file.Title).TrimStart('.');
         body.Title = file.Title;
         body.Key = await documentServiceHelper.GetDocKeyAsync(file);
+
+        // No room watermark is drawn in: the result stays in the portal, where the room draws its own over whatever
+        // is shown, so a mark burnt into the file here would be the second one. Every conversion that saves its
+        // result back into the portal leaves the watermark alone for the same reason.
+        var toExtension = "." + body.OutputType.Trim('.');
+
+        if (!await EnableConvertAsync(file, toExtension, false))
+        {
+            throw new ArgumentException($"A {FileUtility.GetFileExtension(file.Title)} file cannot be converted to {toExtension}", nameof(body));
+        }
 
         await using var source = await daoFactory.GetFileDao<T>().GetFileStreamAsync(file);
 

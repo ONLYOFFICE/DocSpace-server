@@ -41,6 +41,7 @@ namespace ASC.Files.Core.Services.DocumentBuilderService;
 /// </summary>
 [Scope]
 public class DocumentBuilderScriptRunner(
+    ILogger<DocumentBuilderScriptRunner> logger,
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
     PathProvider pathProvider,
@@ -194,6 +195,8 @@ public class DocumentBuilderScriptRunner(
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
             }
 
+            logger.DebugScriptOpensFile(fileId);
+
             prepared.Remove(id.Index, id.Length).Insert(id.Index, await GetBuilderUrlAsync(fileDao, file));
 
             if (match.Groups["method"].Value == "OpenFile")
@@ -264,6 +267,8 @@ public class DocumentBuilderScriptRunner(
         {
             throw new ArgumentException("The script produced no file. It has to save one with SaveFile");
         }
+
+        logger.InformationScriptProducedFiles(urls.Count);
 
         return urls;
     }
