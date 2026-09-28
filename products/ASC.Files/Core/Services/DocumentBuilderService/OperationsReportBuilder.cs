@@ -56,7 +56,7 @@ public class OperationsReportBuilder(
         var addSourceColumns = tenantWalletService is TenantWalletService.AITools or TenantWalletService.AISearch;
 
         // AI search is billed by results, not tokens, so only AI tools get the token columns.
-        var addTokenColumns = tenantWalletService is TenantWalletService.AITools;
+        var tokenColumns = tenantWalletService is TenantWalletService.AITools ? GetTokenColumns() : null;
 
         var columns = new List<ReportColumn>
         {
@@ -67,15 +67,10 @@ public class OperationsReportBuilder(
             new(Resource.AccountingCustomerOperationQuantity, ReportColumnAlign.Right)
         };
 
-        if (addTokenColumns)
+        if (tokenColumns != null)
         {
             // The breakdown of the quantity, which for AI operations already is the total tokens.
-            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationPromptTokens, ReportColumnAlign.Right));
-            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationCachedTokens, ReportColumnAlign.Right));
-            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationCacheWriteTokens, ReportColumnAlign.Right));
-            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationCompletionTokens, ReportColumnAlign.Right));
-            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationReasoningTokens, ReportColumnAlign.Right));
-            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationImageTokens, ReportColumnAlign.Right));
+            columns.AddRange(tokenColumns.Select(x => new ReportColumn(x.Header, ReportColumnAlign.Right)));
         }
 
         columns.Add(new ReportColumn(Resource.AccountingCustomerOperationServiceUnit));
@@ -135,7 +130,7 @@ public class OperationsReportBuilder(
                         continue;
                     }
 
-                    await writer.WriteAsync(SerializeOperations(records, dateFormat, context.Options, addSourceColumns, addTokenColumns));
+                    await writer.WriteAsync(SerializeOperations(records, dateFormat, context.Options, addSourceColumns, tokenColumns));
                 }
             },
             pivot);
@@ -213,7 +208,23 @@ public class OperationsReportBuilder(
         }
     }
 
-    private static string SerializeOperations(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions, bool addSourceColumns, bool addTokenColumns)
+    // The token breakdown, as the header each column carries and the count it reads. Declared once so
+    // that the header row and the data rows cannot fall out of step: a column added, removed or
+    // reordered here moves both at the same time.
+    private static List<(string Header, Func<OperationTokenUsage, long?> Tokens)> GetTokenColumns()
+    {
+        return
+        [
+            (Resource.AccountingCustomerOperationPromptTokens, x => x?.PromptTokens),
+            (Resource.AccountingCustomerOperationCachedTokens, x => x?.CachedTokens),
+            (Resource.AccountingCustomerOperationCacheWriteTokens, x => x?.CacheWriteTokens),
+            (Resource.AccountingCustomerOperationCompletionTokens, x => x?.CompletionTokens),
+            (Resource.AccountingCustomerOperationReasoningTokens, x => x?.ReasoningTokens),
+            (Resource.AccountingCustomerOperationImageTokens, x => x?.ImageTokens)
+        ];
+    }
+
+    private static string SerializeOperations(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions, bool addSourceColumns, List<(string Header, Func<OperationTokenUsage, long?> Tokens)> tokenColumns)
     {
         var sb = new StringBuilder();
 
@@ -228,15 +239,11 @@ public class OperationsReportBuilder(
                 new(record.Quantity.ToString(CultureInfo.InvariantCulture), CountFormat, ReportColumnAlign.Right)
             };
 
-            if (addTokenColumns)
+            if (tokenColumns != null)
             {
-                var tokenUsage = record.TokenUsage;
-                properties.Add(TokensValue(tokenUsage?.PromptTokens));
-                properties.Add(TokensValue(tokenUsage?.CachedTokens));
-                properties.Add(TokensValue(tokenUsage?.CacheWriteTokens));
-                properties.Add(TokensValue(tokenUsage?.CompletionTokens));
-                properties.Add(TokensValue(tokenUsage?.ReasoningTokens));
-                properties.Add(TokensValue(tokenUsage?.ImageTokens));
+                // One value per token column even when the operation carries no token counts at all,
+                // or every column after this block would shift left by six.
+                properties.AddRange(tokenColumns.Select(x => TokensValue(x.Tokens(record.TokenUsage))));
             }
 
             properties.Add(new PropertyValue(record.ServiceUnit, "@"));
