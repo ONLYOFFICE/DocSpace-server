@@ -204,6 +204,8 @@ public partial class MigrationContext_Upgrade5 : Migration
     /// <inheritdoc />
     protected override void Down(MigrationBuilder migrationBuilder)
     {
+        // restore the keyless tables with the names, types and indexes created by MigrationContext_Upgrade33;
+        // this cannot run under Group Replication, which rejects writes to tables without a primary key
         migrationBuilder.CreateTable(
             name: "identity_client_authentication_methods_old",
             columns: table => new
