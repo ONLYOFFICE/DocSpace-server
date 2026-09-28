@@ -56,6 +56,11 @@
       "x-displayName": "Attachments"
     },
     {
+      "name": "AI / Context",
+      "description": "Rooms connected to the chat as context and the skills of their .ai folder.",
+      "x-displayName": "Context"
+    },
+    {
       "name": "AI / Editor tools",
       "description": "DocSpace tool catalog and execution for the editor AI plugin.",
       "x-displayName": "Editor tools"
@@ -119,6 +124,7 @@
         "AI / AI",
         "AI / Assignments",
         "AI / Attachments",
+        "AI / Context",
         "AI / Editor tools",
         "AI / Export",
         "AI / OpenAI passthrough",
@@ -866,7 +872,7 @@
           {
             "name": "actionType",
             "in": "query",
-            "description": "The AI action the request applies to - one of \"Default\", \"Chat\", \"Code\", \"Summarization\", \"Translation\", \"TextAnalyze\", \"ImageGeneration\", \"OCR\", \"Vision\".",
+            "description": "The AI action the request applies to - one of \"Default\", \"Chat\", \"Code\", \"Summarization\", \"Translation\", \"TextAnalyze\", \"ImageGeneration\", \"OCR\", \"Vision\", \"FormAnalysis\".",
             "required": true,
             "schema": {
               "type": "string",
@@ -961,7 +967,7 @@
           {
             "name": "actionType",
             "in": "query",
-            "description": "The AI action the request applies to - one of \"Default\", \"Chat\", \"Code\", \"Summarization\", \"Translation\", \"TextAnalyze\", \"ImageGeneration\", \"OCR\", \"Vision\".",
+            "description": "The AI action the request applies to - one of \"Default\", \"Chat\", \"Code\", \"Summarization\", \"Translation\", \"TextAnalyze\", \"ImageGeneration\", \"OCR\", \"Vision\", \"FormAnalysis\".",
             "required": true,
             "schema": {
               "type": "string",
@@ -1323,7 +1329,7 @@
           {
             "name": "actionType",
             "in": "query",
-            "description": "The AI action the request applies to - one of \"Default\", \"Chat\", \"Code\", \"Summarization\", \"Translation\", \"TextAnalyze\", \"ImageGeneration\", \"OCR\", \"Vision\".",
+            "description": "The AI action the request applies to - one of \"Default\", \"Chat\", \"Code\", \"Summarization\", \"Translation\", \"TextAnalyze\", \"ImageGeneration\", \"OCR\", \"Vision\", \"FormAnalysis\".",
             "required": true,
             "schema": {
               "type": "string",
@@ -2226,6 +2232,275 @@
             }
           }
         }
+      }
+    },
+    "/api/2.0/ai/attachments/suggested-questions": {
+      "post": {
+        "tags": [
+          "AI / Attachments"
+        ],
+        "operationId": "aiAttachmentsGetSuggestedQuestions",
+        "summary": "Get suggested questions",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/context/get-context-folders": {
+      "get": {
+        "tags": [
+          "AI / Context"
+        ],
+        "operationId": "aiContextGetContextFolders",
+        "summary": "Get context folders",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/context/get-room-skills": {
+      "get": {
+        "tags": [
+          "AI / Context"
+        ],
+        "operationId": "aiContextGetRoomSkills",
+        "summary": "Get room skills",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "cloud",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "roomId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/context/get-room-skill": {
+      "get": {
+        "tags": [
+          "AI / Context"
+        ],
+        "operationId": "aiContextGetRoomSkill",
+        "summary": "Get room skill",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "cloud",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "roomId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skillId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
       }
     },
     "/api/2.0/ai/preferences/get-deep-mode": {
