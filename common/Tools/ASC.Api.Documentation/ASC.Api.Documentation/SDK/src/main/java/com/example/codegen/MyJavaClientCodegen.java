@@ -92,6 +92,7 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
     public void postProcess() {
         super.postProcess();
         StaleOutput.delete(this);
+        LineEndings.normalize(this);
     }
 
     @Override

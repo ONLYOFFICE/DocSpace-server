@@ -127,6 +127,7 @@ public class MyGoClientCodegen extends GoClientCodegen {
         // Models and api files live in the output root here, named model-*.go and api-*.go (see the
         // toModelFilename / toApiFilename overrides below), so only those are swept there.
         StaleOutput.delete(this, name -> name.startsWith("model-") || name.startsWith("api-"));
+        LineEndings.normalize(this);
     }
 
     @Override

@@ -227,6 +227,7 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
     public void postProcess() {
         super.postProcess();
         StaleOutput.delete(this);
+        LineEndings.normalize(this);
     }
 
     @Override

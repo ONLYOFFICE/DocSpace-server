@@ -152,6 +152,27 @@ final class ThirdPartyVariants {
     }
 
     /**
+     * Gives the api file the imports of the variants that stay attached to their operations - for a
+     * language that renders the twin inside the operation's own method, as overload signatures, rather
+     * than as an operation of its own. Call it first thing in {@code postProcessOperationsWithModels}.
+     */
+    static void addAttachedImports(DefaultCodegen codegen, OperationsMap objs) {
+        if (objs == null || objs.getOperations() == null || objs.getOperations().getOperation() == null) {
+            return;
+        }
+
+        List<CodegenOperation> variants = new ArrayList<>();
+        for (CodegenOperation op : objs.getOperations().getOperation()) {
+            Object attached = op.vendorExtensions.get(VARIANT_OPERATION);
+            if (attached instanceof CodegenOperation) {
+                variants.add((CodegenOperation) attached);
+            }
+        }
+
+        addImports(codegen, objs, variants);
+    }
+
+    /**
      * The variant as a full Operation: the original with the pieces named by the extension swapped in.
      */
     private static Operation build(Operation operation, Map<?, ?> overrides, Naming naming) {

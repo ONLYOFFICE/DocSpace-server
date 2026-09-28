@@ -96,6 +96,7 @@ public class MyPythonClientCodegen extends PythonClientCodegen {
     public void postProcess() {
         super.postProcess();
         StaleOutput.delete(this);
+        LineEndings.normalize(this);
     }
 
     @Override

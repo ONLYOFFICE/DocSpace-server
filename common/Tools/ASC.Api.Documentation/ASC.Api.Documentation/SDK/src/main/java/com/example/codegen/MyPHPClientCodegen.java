@@ -91,6 +91,7 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
     public void postProcess() {
         super.postProcess();
         StaleOutput.delete(this);
+        LineEndings.normalize(this);
     }
 
     @Override

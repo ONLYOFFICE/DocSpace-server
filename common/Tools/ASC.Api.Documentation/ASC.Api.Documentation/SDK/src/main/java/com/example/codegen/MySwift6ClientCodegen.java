@@ -84,6 +84,7 @@ public class MySwift6ClientCodegen extends Swift6ClientCodegen {
     public void postProcess() {
         super.postProcess();
         StaleOutput.delete(this);
+        LineEndings.normalize(this);
     }
 
     @Override
