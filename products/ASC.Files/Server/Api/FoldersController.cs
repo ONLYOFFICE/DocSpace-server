@@ -589,7 +589,8 @@ public abstract class FoldersController<T>(
     /// Trash is emptied. Only a caller who may change portal settings, that is the owner and the portal
     /// administrators, is allowed here; a room administrator, an ordinary member and a guest are all refused. The
     /// call is read-only, takes no parameters and answers with the sections in a fixed order. The quota of the portal
-    /// as a whole, storage outside documents included, is not part of this answer.
+    /// as a whole, storage outside documents included, is not part of this answer. A hosted portal needs the storage
+    /// statistics feature of its plan (Business tools on the free plan), otherwise the answer is 402.
     /// </remarks>
     /// <summary>
     /// Get used space of files
@@ -597,6 +598,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/filesusedspace</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The space taken by documents in each section, in bytes", typeof(FilesStatisticsResultDto))]
+    [SwaggerResponse(402, "The tariff of a hosted portal does not include the storage statistics feature")]
     [HttpGet("filesusedspace")]
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {

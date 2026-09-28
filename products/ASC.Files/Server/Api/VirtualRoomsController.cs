@@ -96,6 +96,7 @@ public class VirtualRoomsInternalController(
     /// <path>api/2.0/files/rooms</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The created room with its id, type, settings, logo and tags", typeof(FolderDto<int>))]
+    [SwaggerResponse(402, "A custom quota was given, and the tariff of a hosted portal does not include the storage statistics feature, which per-room limits need")]
     [HttpPost("")]
     public async Task<FolderDto<int>> CreateRoom(CreateRoomRequestDto inDto)
     {
@@ -422,6 +423,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room as it is after the update", typeof(FolderDto<int>))]
+    [SwaggerResponse(402, "The quota was changed, and the tariff of a hosted portal does not include the storage statistics feature, which per-room limits need")]
     [HttpPut("{id}")]
     public async Task<FolderDto<T>> UpdateRoom(UpdateRoomRequestDto<T> inDto)
     {
@@ -446,6 +448,7 @@ public abstract class VirtualRoomsController<T>(
     /// <collection>list</collection>
     [Tags("Files / Quota")]
     [SwaggerResponse(200, "The rooms as they are after the new limit was applied", typeof(IAsyncEnumerable<FolderDto<int>>))]
+    [SwaggerResponse(402, "The tariff of a hosted portal does not include the storage statistics feature, which per-room limits need")]
     [HttpPut("roomquota")]
     public async IAsyncEnumerable<FolderDto<int>> UpdateRoomsQuota(UpdateRoomsQuotaRequestDto<T> inDto)
     {
@@ -485,6 +488,7 @@ public abstract class VirtualRoomsController<T>(
     /// <collection>list</collection>
     [Tags("Files / Quota")]
     [SwaggerResponse(200, "The rooms as they are after the default limit was restored", typeof(IAsyncEnumerable<FolderDto<int>>))]
+    [SwaggerResponse(402, "The tariff of a hosted portal does not include the storage statistics feature, which per-room limits need")]
     [HttpPut("resetquota")]
     public async IAsyncEnumerable<FolderDto<int>> ResetRoomQuota(UpdateRoomsRoomIdsRequestDto<T> inDto)
     {

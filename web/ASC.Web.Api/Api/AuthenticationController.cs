@@ -640,7 +640,9 @@ public class AuthenticationController(
                 ldapLocalization.Init(Resource.ResourceManager);
                 ldapUserManager.Init(ldapLocalization);
 
-                if (ldapSettings.EnableLdapAuthentication)
+                // without the paid LDAP feature the directory is not asked at all: its users would be refused anyway
+                if (ldapSettings.EnableLdapAuthentication
+                    && (coreBaseSettings.Standalone || (await tenantManager.GetCurrentTenantQuotaAsync()).Ldap))
                 {
                     user = await ldapUserManager.TryGetAndSyncLdapUserInfo(inDto.UserName, inDto.Password);
                 }

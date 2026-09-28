@@ -1154,6 +1154,13 @@ public class FileStorageService //: IFileStorageService
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenantId);
         var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
 
+        // per-entity limits are managed with the storage statistics feature (Business tools on the free plan)
+        if (quota is not null and not TenantEntityQuotaSettings.DefaultQuotaValue
+            && !coreBaseSettings.Standalone && tenantSpaceQuota is { Statistic: false })
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+
         if (maxTotalSize < quota)
         {
             throw new InvalidOperationException(Resource.RoomQuotaGreaterPortalError);
@@ -1296,6 +1303,12 @@ public class FileStorageService //: IFileStorageService
         var tenantSpaceQuota = await tenantManager.GetTenantQuotaAsync(tenantId);
         var maxTotalSize = tenantSpaceQuota?.MaxTotalSize ?? -1;
 
+        // per-entity limits are managed with the storage statistics feature (Business tools on the free plan)
+        if (!coreBaseSettings.Standalone && tenantSpaceQuota is { Statistic: false })
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+
         if (maxTotalSize < quota)
         {
             throw new InvalidOperationException(Resource.RoomQuotaGreaterPortalError);
@@ -1435,6 +1448,12 @@ public class FileStorageService //: IFileStorageService
                                 !string.IsNullOrEmpty(updateData.Title);
 
         var quotaChanged = folder.SettingsQuota != updateData.Quota && updateData.Quota != null;
+
+        // per-entity limits are managed with the storage statistics feature (Business tools on the free plan)
+        if (quotaChanged && !coreBaseSettings.Standalone && tenantSpaceQuota is { Statistic: false })
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
         var indexingChanged = updateData.Indexing.HasValue && folder.SettingsIndexing != updateData.Indexing;
         var denyDownloadChanged = updateData.DenyDownload.HasValue && folder.SettingsDenyDownload != updateData.DenyDownload;
         var lifetimeChanged = updateData.Lifetime != null;
@@ -3543,6 +3562,12 @@ public class FileStorageService //: IFileStorageService
 
     public async Task<FilesStatisticsResultDto> GetFilesUsedSpace()
     {
+        // the storage statistics are a paid feature (Business tools on the free plan)
+        if (!coreBaseSettings.Standalone && !(await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
+
         var folderDao = daoFactory.GetFolderDao<int>();
         return await folderDao.GetFilesUsedSpace();
     }

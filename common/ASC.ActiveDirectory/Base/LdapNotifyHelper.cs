@@ -109,6 +109,18 @@ public class LdapNotifyService(IServiceScopeFactory serviceScopeFactory,
             return;
         }
 
+        // the sync belongs to the paid LDAP feature: it is skipped, not unregistered, while the plan lacks it,
+        // so it resumes on its own once the feature is back (Business tools bought again)
+        var coreBaseSettings = scope.ServiceProvider.GetRequiredService<CoreBaseSettings>();
+        if (!coreBaseSettings.Standalone)
+        {
+            var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+            if (!(await tenantManager.GetTenantQuotaAsync(tenant.Id)).Ldap)
+            {
+                return;
+            }
+        }
+
         await ldapSaveSyncOperation.RunJobAsync(ldapSettings, tenant, LdapOperationType.Sync);
     }
 }

@@ -1117,17 +1117,20 @@ public partial class SettingsController(
     /// Owner or DocSpaceAdmin (the EditPortalSettings permission). `id` identifies the module by the same GUID the
     /// portal's module catalog uses; a module that does not exist, or one that does not report space usage at all,
     /// returns an empty list rather than an error. This is a read-only, idempotent call, and the list is not
-    /// paginated. Sizes are already formatted as display strings (for example `1.5 GB`), not raw byte counts.
+    /// paginated. Sizes are already formatted as display strings (for example `1.5 GB`), not raw byte counts. A hosted
+    /// portal needs the storage statistics feature of its plan (Business tools on the free plan), otherwise the
+    /// answer is 402.
     /// </remarks>
     /// <summary>Get the space usage statistics</summary>
     /// <path>api/2.0/settings/statistics/spaceusage/{id}</path>
     /// <collection>list</collection>
     [Tags("Settings / Statistics")]
     [SwaggerResponse(200, "Per-category space usage statistics for the requested module", typeof(List<UsageSpaceStatItemDto>))]
+    [SwaggerResponse(402, "The tariff of a hosted portal does not include the storage statistics feature")]
     [HttpGet("statistics/spaceusage/{id:guid}")]
     public async Task<List<UsageSpaceStatItemDto>> GetSpaceUsageStatistics(IdRequestDto<Guid> inDto)
     {
-        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        await DemandStatisticPermissionAsync();
 
         var webitem = (await webItemManagerSecurity.GetItemsAsync(WebZoneType.All, ItemAvailableState.All))
                                    .FirstOrDefault(item =>

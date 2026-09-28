@@ -203,6 +203,7 @@ public class AgentsController(
     /// <collection>list</collection>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
+    [SwaggerResponse(402, "The tariff of a hosted portal does not include the storage statistics feature, which per-agent limits need")]
     [HttpPut("agents/agentquota")]
     public async IAsyncEnumerable<FolderDto<int>> UpdateAgentsQuota(UpdateRoomsQuotaRequestDto<int> inDto)
     {
@@ -237,6 +238,7 @@ public class AgentsController(
     /// <collection>list</collection>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "List of AI agents with the detailed information", typeof(IAsyncEnumerable<FolderDto<int>>))]
+    [SwaggerResponse(402, "The tariff of a hosted portal does not include the storage statistics feature, which per-agent limits need")]
     [HttpPut("agents/resetquota")]
     public async IAsyncEnumerable<FolderDto<int>> ResetAgentsQuota(UpdateRoomsRoomIdsRequestDto<int> inDto)
     {

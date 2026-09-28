@@ -2778,7 +2778,8 @@ public class UserController(
     /// answer holds the ones that were reached.
     /// Setting a limit does not free any space and does not delete anything: an account already over its new limit
     /// simply cannot add more.
-    /// Use `PUT api/2.0/people/resetquota` to return accounts to the portal default.
+    /// Use `PUT api/2.0/people/resetquota` to return accounts to the portal default. A hosted portal needs the
+    /// storage statistics feature of its plan (Business tools on the free plan), otherwise the answer is 402.
     /// </remarks>
     /// <summary>
     /// Change a user quota limit
@@ -2788,6 +2789,7 @@ public class UserController(
     [Tags("People / Quota")]
     [SwaggerResponse(200, "The accounts whose limit was changed", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The value is not a whole number of bytes, or it exceeds the storage the portal allows")]
+    [SwaggerResponse(402, "The tariff of a hosted portal does not include the storage statistics feature")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("userquota")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserQuota(UpdateMembersQuotaRequestDto inDto)
@@ -2798,6 +2800,11 @@ public class UserController(
         }
 
         await _permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+        if (!coreBaseSettings.Standalone
+            && !(await tenantManager.GetCurrentTenantQuotaAsync()).Statistic)
+        {
+            throw new BillingException(Resource.ErrorNotAllowedOption);
+        }
 
         var users = await inDto.UserIds.ToAsyncEnumerable()
             .Where(userId => !_userManager.IsSystemUser(userId))
