@@ -39,6 +39,7 @@ public class FormFillingReportCreator(
     ExportToXLSX exportToXLSX,
     ExternalDatabaseClient externalDatabaseClient,
     IDaoFactory daoFactory,
+    SocketManager socketManager,
     IHttpClientFactory clientFactory,
     TenantManager tenantManager,
     AuthContext authContext,
@@ -107,6 +108,12 @@ public class FormFillingReportCreator(
         {
             properties.FormFilling.ExternalDbTableName = tableName;
             await fileDao.SaveProperties(originalFormId, properties);
+
+            var originalForm = await fileDao.GetFileAsync(originalFormId);
+            if (originalForm != null)
+            {
+                await socketManager.UpdateFileAsync(originalForm);
+            }
         }
     }
 
@@ -657,17 +664,15 @@ public class FormFillingReportCreator(
             return null;
         }
 
-        // The field's mask disambiguates day/month order, so try it first.
         if (!string.IsNullOrWhiteSpace(format))
         {
             var dotNetFormat = format
                 .Replace("DD", "dd")
                 .Replace("YYYY", "yyyy")
-                .Replace("YY", "yy")
-                .Replace("mm", "MM");
+                .Replace("YY", "yy");
 
-            if (DateTime.TryParseExact(value, dotNetFormat, culture, DateTimeStyles.AllowWhiteSpaces, out var dt)
-                || DateTime.TryParseExact(value, dotNetFormat, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out dt))
+            if (DateTime.TryParseExact(value, dotNetFormat, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out var dt)
+                || DateTime.TryParseExact(value, dotNetFormat, culture, DateTimeStyles.AllowWhiteSpaces, out dt))
             {
                 return dt;
             }
