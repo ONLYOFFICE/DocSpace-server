@@ -219,7 +219,7 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
     @Override
     public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List<Server> servers) {
         CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);
-        ThirdPartyVariants.attach(this, op, path, httpMethod, operation, servers, ThirdPartyVariants.Naming.SIBLING);
+        ThirdPartyVariants.attach(this, op, path, httpMethod, operation, servers, ThirdPartyVariants.Naming.OVERLOAD);
         return op;
     }
 
@@ -232,9 +232,14 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
 
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
-        ThirdPartyVariants.insert(this, objs);
+        // Ruby is dynamic, so the twin stays attached: one method, [Integer, String] in the docs, and
+        // the response model picked at run time by the id's class (see ThirdPartyVariants.markUnions).
+        ThirdPartyVariants.addAttachedImports(this, objs);
 
         super.postProcessOperationsWithModels(objs, allModels);
+        for (CodegenOperation op : objs.getOperations().getOperation()) {
+            ThirdPartyVariants.markUnions(op, (a, b) -> a + ", " + b);
+        }
 
         if (objs == null || objs.getOperations() == null) {
             return objs;

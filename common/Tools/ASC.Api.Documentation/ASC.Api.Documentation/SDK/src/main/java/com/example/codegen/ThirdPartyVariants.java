@@ -234,8 +234,20 @@ final class ThirdPartyVariants {
                 continue;
             }
 
-            parameter.vendorExtensions.put(UNION_TYPE, union.apply(parameter.dataType, twin.dataType));
+            String unionType = union.apply(parameter.dataType, twin.dataType);
+            parameter.vendorExtensions.put(UNION_TYPE, unionType);
             parameter.vendorExtensions.put(VARIANT_TYPE, twin.dataType);
+            // The generator keeps copies of a parameter in the per-kind lists (pathParams, queryParams,
+            // bodyParams, requiredParams ...), and a template reads whichever fits; mark them all.
+            for (List<CodegenParameter> list : List.of(op.pathParams, op.queryParams, op.headerParams, op.cookieParams,
+                    op.bodyParams, op.formParams, op.requiredParams, op.optionalParams)) {
+                for (CodegenParameter copy : list) {
+                    if (copy != parameter && Objects.equals(copy.paramName, parameter.paramName)) {
+                        copy.vendorExtensions.put(UNION_TYPE, unionType);
+                        copy.vendorExtensions.put(VARIANT_TYPE, twin.dataType);
+                    }
+                }
+            }
             anyChanged = true;
             if (dispatch == null && parameter.isPathParam) {
                 dispatch = parameter.paramName;

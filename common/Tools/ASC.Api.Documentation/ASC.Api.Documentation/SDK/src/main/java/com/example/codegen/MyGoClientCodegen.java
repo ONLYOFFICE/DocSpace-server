@@ -22,6 +22,7 @@ import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.oas.models.headers.*;
 import org.openapitools.codegen.CodegenOperation;
+import org.openapitools.codegen.CodegenParameter;
 import org.openapitools.codegen.model.ModelMap;
 
 public class MyGoClientCodegen extends GoClientCodegen {
@@ -117,7 +118,7 @@ public class MyGoClientCodegen extends GoClientCodegen {
     @Override
     public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List<Server> servers) {
         CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);
-        ThirdPartyVariants.attach(this, op, path, httpMethod, operation, servers, ThirdPartyVariants.Naming.SIBLING);
+        ThirdPartyVariants.attach(this, op, path, httpMethod, operation, servers, ThirdPartyVariants.Naming.OVERLOAD);
         return op;
     }
 
@@ -132,9 +133,40 @@ public class MyGoClientCodegen extends GoClientCodegen {
 
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
-        ThirdPartyVariants.insert(this, objs);
+        // Go has neither overloads nor unions, so the twin stays attached: an id that differs is taken
+        // as interface{} (int32 or string), a body that differs gets a second setter, and where the
+        // answer differs the request gets ExecuteThirdParty() next to Execute() - the same request,
+        // decoded into the third-party model. The template renders the execute function once per shape.
+        ThirdPartyVariants.addAttachedImports(this, objs);
 
         super.postProcessOperationsWithModels(objs, allModels);
+        for (CodegenOperation op : objs.getOperations().getOperation()) {
+            ThirdPartyVariants.markUnions(op, (a, b) -> "interface{}");
+
+            // The twin's execute function is rendered against the original's request struct, so the
+            // twin's body parameter has to carry the field's name (saveAsPdf, not thirdPartySaveAsPdf).
+            Object attached = op.vendorExtensions.get(ThirdPartyVariants.VARIANT_OPERATION);
+            if (attached instanceof CodegenOperation) {
+                CodegenOperation variant = (CodegenOperation) attached;
+                // The base class turns "POST" into "Post" (http.MethodPost) for the listed operations
+                // only; the twin, rendered through the same execute partial, takes it from the original.
+                variant.httpMethod = op.httpMethod;
+                CodegenParameter body = op.allParams.stream().filter(p -> p.isBodyParam).findFirst().orElse(null);
+                if (body != null) {
+                    for (CodegenParameter parameter : variant.allParams) {
+                        if (parameter.isBodyParam) {
+                            parameter.paramName = body.paramName;
+                        }
+                    }
+                    if (variant.bodyParam != null) {
+                        variant.bodyParam.paramName = body.paramName;
+                    }
+                    for (CodegenParameter parameter : variant.bodyParams) {
+                        parameter.paramName = body.paramName;
+                    }
+                }
+            }
+        }
 
         if (objs != null && objs.getOperations() != null) {
             OperationMap operationMap = objs.getOperations();
