@@ -1206,13 +1206,38 @@ public class TariffService(
         if (currenTariff != null)
         {
             var currentQuota = await GetTenantQuotaFromTariffAsync(currenTariff);
-
-            var free = updatedQuota.Free;
-            if (currentQuota.Free != free)
+            if (currentQuota == null)
             {
-                var freeFeatureName = updatedQuota.GetFeature<FreeFeature>().Name;
+                return;
+            }
 
-                _ = quotaSocketManager.ChangeQuotaFeatureValueAsync(freeFeatureName, free);
+            // a wallet subscription bought or expired (Business tools) switches whole sets of features at once, so
+            // every visible flag and fixed limit that differs is pushed (and `free`, which is hidden but was always
+            // pushed); both quotas list their features in the same order
+            for (var i = 0; i < updatedQuota.TenantQuotaFeatures.Count; i++)
+            {
+                switch (updatedQuota.TenantQuotaFeatures[i], currentQuota.TenantQuotaFeatures[i])
+                {
+                    // wallet service flags are switched in the portal settings, not by the tariff
+                    case (WalletFeatureFlag, _):
+                        break;
+                    case (TenantQuotaFeatureFlag updatedFlag, TenantQuotaFeatureFlag currentFlag)
+                        when (updatedFlag.Visible || updatedFlag is FreeFeature) && updatedFlag.Value != currentFlag.Value:
+                        _ = quotaSocketManager.ChangeQuotaFeatureValueAsync(updatedFlag.Name, updatedFlag.Value);
+                        break;
+                    case (TenantQuotaFeatureFixedCount updatedCount, TenantQuotaFeatureFixedCount currentCount)
+                        when updatedCount.Visible && updatedCount.Value != currentCount.Value:
+                        _ = quotaSocketManager.ChangeQuotaFeatureValueAsync(updatedCount.Name, updatedCount.Value);
+                        break;
+                }
+            }
+
+            if (updatedQuota.MaxFileSize != currentQuota.MaxFileSize)
+            {
+                var maxFileSize = updatedQuota.MaxFileSize == long.MaxValue ? -1 : updatedQuota.MaxFileSize;
+                var maxFileSizeFeatureName = updatedQuota.GetFeature<MaxFileSizeFeature>().Name;
+
+                _ = quotaSocketManager.ChangeQuotaFeatureValueAsync(maxFileSizeFeatureName, maxFileSize);
             }
         }
     }
