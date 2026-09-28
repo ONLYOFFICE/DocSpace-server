@@ -429,6 +429,7 @@ public class SetMetadataValues
     /// <summary>
     /// The metadata field values. An empty value clears the field.
     /// </summary>
+    [Required]
     public required List<MetadataValueRequest> Values { get; set; }
 }
 
@@ -479,6 +480,7 @@ public class SetCustomFields
     /// The custom fields to set on the entry. A listed field gets the value, a null or empty value removes the field
     /// from the entry, the fields not listed are left alone. A name the portal has not seen yet creates the field.
     /// </summary>
+    [Required]
     public required List<CustomFieldRequest> Fields { get; set; }
 }
 
@@ -555,15 +557,17 @@ public class FolderMetadataSearch
     public FilterType? FilterType { get; set; }
 
     /// <summary>
-    /// The number of entries to return.
+    /// The number of entries to return, from 1 to 100.
     /// </summary>
     /// <example>25</example>
+    [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
     /// The zero-based index of the first entry to return.
     /// </summary>
     /// <example>0</example>
+    [Range(0, int.MaxValue)]
     public int StartIndex { get; set; }
 
     /// <summary>
@@ -613,15 +617,17 @@ public class RoomsMetadataSearchRequestDto
     public IEnumerable<RoomType> Type { get; set; }
 
     /// <summary>
-    /// The number of rooms to return.
+    /// The number of rooms to return, from 1 to 100.
     /// </summary>
     /// <example>25</example>
+    [Range(1, ApiContext.MaxCount)]
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
     /// The zero-based index of the first room to return.
     /// </summary>
     /// <example>0</example>
+    [Range(0, int.MaxValue)]
     public int StartIndex { get; set; }
 
     /// <summary>

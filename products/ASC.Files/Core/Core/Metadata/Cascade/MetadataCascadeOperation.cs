@@ -48,7 +48,17 @@ public class MetadataCascadeOperation : DistributedTaskProgress
     private int _processed;
     private int _total;
     private MetadataIndexHelper _metadataIndexHelper;
+    private MetadataEntryNotifier _metadataEntryNotifier;
     private readonly IServiceProvider _serviceProvider;
+
+    /// <summary>
+    /// The (source folder, template) pairs the pass wrote links for, and the fields of the templates as the pass read
+    /// them (their template and their type): what the reconciliation after the pass checks against the state the
+    /// templates, the fields and the sources are in by then.
+    /// </summary>
+    private readonly HashSet<(int SourceFolderId, int TemplateId)> _appliedSources = [];
+    private readonly Dictionary<int, int> _fieldTemplates = [];
+    private readonly Dictionary<int, MetadataFieldType> _fieldTypes = [];
 
     public int TenantId { get; set; }
     public int FolderId { get; set; }
@@ -65,6 +75,13 @@ public class MetadataCascadeOperation : DistributedTaskProgress
     /// a request with another mode must not be folded into a running operation.
     /// </summary>
     public MetadataConflictResolveType Conflict { get; set; }
+
+    /// <summary>
+    /// Whether the pass holds the run lock and is about to read the folder's values. Public so the queue keeps it: the
+    /// worker folds a repeated request into a queued pass only while this is false (see <see cref="MetadataCascadeWorker.StartAsync"/>),
+    /// a pass past this point carries the values of the request that enqueued it.
+    /// </summary>
+    public bool Started { get; set; }
 
     public MetadataCascadeOperation()
     {
@@ -96,6 +113,7 @@ public class MetadataCascadeOperation : DistributedTaskProgress
         var distributedLockProvider = scope.ServiceProvider.GetService<IDistributedLockProvider>();
         var logger = scope.ServiceProvider.GetService<ILogger<MetadataCascadeOperation>>();
         _metadataIndexHelper = scope.ServiceProvider.GetService<MetadataIndexHelper>();
+        _metadataEntryNotifier = scope.ServiceProvider.GetService<MetadataEntryNotifier>();
 
         try
         {
@@ -103,6 +121,12 @@ public class MetadataCascadeOperation : DistributedTaskProgress
             // would otherwise both read "no link yet" for the same entry and both insert it, failing a whole batch
             await using (await distributedLockProvider.TryAcquireFairLockAsync($"lock_metadata_cascade_run_{TenantId}", _runLockTimeout))
             {
+                // published before anything is read: a request arriving from now on gets a pass of its own
+                Started = true;
+                await PublishChanges();
+
+                CancellationToken.ThrowIfCancellationRequested();
+
                 await tenantManager.SetCurrentTenantAsync(TenantId);
                 await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
 
@@ -116,13 +140,22 @@ public class MetadataCascadeOperation : DistributedTaskProgress
                     throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
                 }
 
-                if (Mode == MetadataCascadeMode.Stamp)
+                try
                 {
-                    await StampAsync(metadataDao, folder);
+                    if (Mode == MetadataCascadeMode.Stamp)
+                    {
+                        await StampAsync(metadataDao, folder);
+                    }
+                    else
+                    {
+                        await AssignAsync(metadataDao, folder);
+                    }
                 }
-                else
+                finally
                 {
-                    await AssignAsync(metadataDao, folder);
+                    // a failed or cancelled pass has written its batches all the same, so what they wrote for a template
+                    // or a field that changed under the pass is settled whichever way the pass ended
+                    await ReconcileAsync(metadataDao, logger);
                 }
 
                 await socketManager.UpdateFolderAsync(folder);
@@ -290,6 +323,14 @@ public class MetadataCascadeOperation : DistributedTaskProgress
         }
     }
 
+    /// <summary>
+    /// Writes the links and the values batch by batch. The templates, the fields and the values were read once, at the
+    /// start of the pass, and the pass may wait for the run lock and then run for a long time: before every batch the
+    /// source folder is asked which of the templates it still cascades, and the fields of the values are asked whether
+    /// they still exist with the type the pass read, so a template deleted or un-cascaded in the meantime (the deletion
+    /// drops the folder's link as well) and a field deleted or re-typed stop being written from the next batch on. The
+    /// batch in flight at that moment is caught by <see cref="ReconcileAsync"/>.
+    /// </summary>
     private async Task ApplyToSubtreeAsync(
         IMetadataDao<int> metadataDao,
         IReadOnlyCollection<int> subfolderIds,
@@ -300,9 +341,10 @@ public class MetadataCascadeOperation : DistributedTaskProgress
     {
         foreach (var batch in subfolderIds.Chunk(BatchSize))
         {
-            await metadataDao.ApplyCascadeBatchAsync(batch, FileEntryType.Folder, templateIds, sourceFolderId, values, conflict);
-            await _metadataIndexHelper.IndexEntriesAsync(FileEntryType.Folder, batch);
-            await ReportProgressAsync(batch.Length);
+            if (!await ApplyBatchAsync(metadataDao, batch, FileEntryType.Folder, templateIds, sourceFolderId, values, conflict))
+            {
+                return;
+            }
         }
 
         var parentFolderIds = subfolderIds.Append(FolderId).ToList();
@@ -313,14 +355,156 @@ public class MetadataCascadeOperation : DistributedTaskProgress
 
             foreach (var batch in fileIds.Chunk(BatchSize))
             {
-                await metadataDao.ApplyCascadeBatchAsync(batch, FileEntryType.File, templateIds, sourceFolderId, values, conflict);
-                await _metadataIndexHelper.IndexEntriesAsync(FileEntryType.File, batch);
-                await ReportProgressAsync(batch.Length);
+                if (!await ApplyBatchAsync(metadataDao, batch, FileEntryType.File, templateIds, sourceFolderId, values, conflict))
+                {
+                    return;
+                }
             }
         }
     }
 
-    private static async Task<Dictionary<int, int>> GetFieldTemplatesAsync(IMetadataDao<int> metadataDao, IEnumerable<int> templateIds)
+    /// <summary>
+    /// Writes one batch for the templates the source folder still cascades. False when none is left, so the caller
+    /// stops walking the subtree.
+    /// </summary>
+    private async Task<bool> ApplyBatchAsync(
+        IMetadataDao<int> metadataDao,
+        int[] batch,
+        FileEntryType entryType,
+        IReadOnlyCollection<int> templateIds,
+        int sourceFolderId,
+        IReadOnlyCollection<MetadataValue> values,
+        MetadataConflictResolveType conflict)
+    {
+        CancellationToken.ThrowIfCancellationRequested();
+
+        var activeTemplateIds = await metadataDao.GetLinksAsync(sourceFolderId, FileEntryType.Folder)
+            .Where(l => l.Cascade && templateIds.Contains(l.TemplateId))
+            .Select(l => l.TemplateId)
+            .ToListAsync();
+
+        if (activeTemplateIds.Count == 0)
+        {
+            return false;
+        }
+
+        var activeValues = values.Where(v => activeTemplateIds.Contains(_fieldTemplates[v.FieldId])).ToList();
+
+        if (activeValues.Count > 0)
+        {
+            var liveFields = await metadataDao.GetFieldsAsync(activeValues.Select(v => v.FieldId).Distinct()).ToDictionaryAsync(f => f.Id);
+
+            activeValues.RemoveAll(v => !liveFields.TryGetValue(v.FieldId, out var field) || !SameKind(field.Type, _fieldTypes[v.FieldId]));
+        }
+
+        foreach (var templateId in activeTemplateIds)
+        {
+            _appliedSources.Add((sourceFolderId, templateId));
+        }
+
+        var changed = await metadataDao.ApplyCascadeBatchAsync(batch, entryType, activeTemplateIds, sourceFolderId, activeValues, conflict);
+
+        await _metadataIndexHelper.IndexEntriesAsync(entryType, batch);
+
+        // the entries the pass changed are open in nobody's request: the clients viewing their folders re-read them
+        await _metadataEntryNotifier.NotifyUpdatedAsync(entryType, changed);
+
+        await ReportProgressAsync(batch.Length);
+
+        return true;
+    }
+
+    /// <summary>
+    /// Settles what the pass wrote for a template or a field that changed under it. A batch could be in flight when
+    /// the template was deleted (no foreign key rejects its rows, and nothing else would ever remove them), when a field
+    /// was deleted or re-typed (the deletion removed the values it saw, the re-typing was allowed because it saw none),
+    /// or when the source folder stopped cascading the template (the un-cascade converted the inherited links it saw,
+    /// not the ones written after it). Runs whichever way the pass ended; its own failure is logged, not thrown, so it
+    /// never hides the error of the pass.
+    /// </summary>
+    private async Task ReconcileAsync(IMetadataDao<int> metadataDao, ILogger<MetadataCascadeOperation> logger)
+    {
+        try
+        {
+            foreach (var templateGroup in _appliedSources.GroupBy(s => s.TemplateId))
+            {
+                var templateId = templateGroup.Key;
+                var fieldIds = _fieldTemplates.Where(f => f.Value == templateId).Select(f => f.Key).ToList();
+
+                if (await metadataDao.GetTemplateAsync(templateId, withFields: false) == null)
+                {
+                    // the entries holding the late rows were not known to the deletion, which told the clients about its own
+                    var orphanedLinks = await metadataDao.GetLinksByTemplateAsync(templateId);
+
+                    await metadataDao.DeleteOrphanedTemplateRowsAsync(templateId, fieldIds);
+
+                    await _metadataEntryNotifier.NotifyUpdatedAsync(orphanedLinks.Select(l => ((int)l.EntryId, l.EntryType)));
+
+                    continue;
+                }
+
+                await ReconcileFieldsAsync(metadataDao, fieldIds);
+
+                foreach (var sourceFolderId in templateGroup.Select(s => s.SourceFolderId))
+                {
+                    var stillCascades = await metadataDao.GetLinksAsync(sourceFolderId, FileEntryType.Folder)
+                        .AnyAsync(l => l.Cascade && l.TemplateId == templateId);
+
+                    if (!stillCascades)
+                    {
+                        await metadataDao.ConvertCascadeLinksToDirectAsync(sourceFolderId, templateId);
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            logger.ErrorMetadataCascade(e);
+        }
+    }
+
+    /// <summary>
+    /// The values the pass wrote for a field that is gone or holds another type by now are removed: they carry the type
+    /// the pass read, which the field no longer has, and the field's own deletion could not see them.
+    /// </summary>
+    private async Task ReconcileFieldsAsync(IMetadataDao<int> metadataDao, IReadOnlyCollection<int> fieldIds)
+    {
+        if (fieldIds.Count == 0)
+        {
+            return;
+        }
+
+        var liveFields = await metadataDao.GetFieldsAsync(fieldIds).ToDictionaryAsync(f => f.Id);
+
+        foreach (var fieldId in fieldIds)
+        {
+            var writtenType = _fieldTypes[fieldId];
+
+            if (liveFields.TryGetValue(fieldId, out var field) && SameKind(field.Type, writtenType))
+            {
+                continue;
+            }
+
+            var entries = await metadataDao.DeleteValuesWrittenAsAsync(fieldId, writtenType);
+
+            await _metadataEntryNotifier.NotifyUpdatedAsync(entries.Select(v => ((int)v.EntryId, v.EntryType)));
+        }
+    }
+
+    /// <summary>
+    /// Whether a value written for one type is still a value of the other: the two choice types share the option rows,
+    /// every other pair keeps its own column.
+    /// </summary>
+    private static bool SameKind(MetadataFieldType a, MetadataFieldType b)
+    {
+        return a == b || (a is MetadataFieldType.SingleChoice or MetadataFieldType.MultiChoice && b is MetadataFieldType.SingleChoice or MetadataFieldType.MultiChoice);
+    }
+
+    /// <summary>
+    /// The fields of the templates as the pass reads them, kept for the whole pass: the batches filter their values by
+    /// them and the reconciliation compares them with the fields as they are by the end.
+    /// </summary>
+    private async Task<Dictionary<int, int>> GetFieldTemplatesAsync(IMetadataDao<int> metadataDao, IEnumerable<int> templateIds)
     {
         var fieldTemplates = new Dictionary<int, int>();
 
@@ -329,6 +513,8 @@ public class MetadataCascadeOperation : DistributedTaskProgress
             await foreach (var field in metadataDao.GetFieldsAsync(templateId))
             {
                 fieldTemplates[field.Id] = templateId;
+                _fieldTemplates[field.Id] = templateId;
+                _fieldTypes[field.Id] = field.Type;
             }
         }
 

@@ -284,7 +284,7 @@ public abstract class BaseIndexer<T>(Client client,
                 if (runBulk)
                 {
                     var portion1 = portion.ToList();
-                    await client.Instance.BulkAsync(r => r.IndexMany(portion1, GetMeta).SourceExcludes("attachments"));
+                    LogBulkErrors(await client.Instance.BulkAsync(r => r.IndexMany(portion1, GetMeta).SourceExcludes("attachments")));
                     for (var j = portionStart; j < i; j++)
                     {
                         if (data[j] is ISearchItemDocument { Document: not null } doc)
@@ -312,7 +312,25 @@ public abstract class BaseIndexer<T>(Client client,
                 await BeforeIndexAsync(item);
             }
 
-            await client.Instance.BulkAsync(r => r.IndexMany(data, GetMeta));
+            LogBulkErrors(await client.Instance.BulkAsync(r => r.IndexMany(data, GetMeta)));
+        }
+    }
+
+    /// <summary>
+    /// A bulk request answers 200 even when some of its documents were refused (a keyword term over the 32766 byte
+    /// limit, a mapping conflict): the refusal is per item, in the body. It used to be dropped unread, so a document
+    /// that never made it into the index left no trace anywhere.
+    /// </summary>
+    private void LogBulkErrors(BulkResponse response)
+    {
+        if (!response.Errors)
+        {
+            return;
+        }
+
+        foreach (var item in response.ItemsWithErrors)
+        {
+            _logger.ErrorBulkItem(IndexName, item.Id, item.Error?.Reason);
         }
     }
 

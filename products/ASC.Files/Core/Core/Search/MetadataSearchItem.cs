@@ -61,10 +61,13 @@ public abstract class MetadataSearchItemBase : ISearchItem
 {
     public int Id { get; set; }
     public int TenantId { get; set; }
-    public int ParentId { get; set; }
 
-    [Nested]
-    public List<DbFolderTree> Folders { get; set; }
+    /// <summary>
+    /// The parent of the entry at the time the document was written. Informational: the document is never scoped by
+    /// the place of the entry in the tree, the listing that consults the index narrows its own SQL query to the folder,
+    /// so a move does not invalidate the document and a lost refresh cannot hide the entry.
+    /// </summary>
+    public int ParentId { get; set; }
 
     [Nested]
     public List<MetadataFieldValueSearch> Values { get; set; }
@@ -182,26 +185,42 @@ public static class MetadataSearchHelper
 
         return;
 
+        // the ids the pass is cut into: the indexer walks the pairs of adjacent ids it gets, so these are the batch
+        // boundaries, one per QueryLimit entries, the way the file indexer cuts its pass. Every id used to be returned,
+        // which made a batch of one entry and a bulk request per entry
         List<int> GetIds(DateTime lastIndexed)
         {
             using var filesDbContext = dbContextFactory.CreateDbContext();
 
-            return filesDbContext.MetadataValues
-                .Where(r => r.EntryType == entryType && r.ModifiedOn >= lastIndexed)
-                .Select(r => r.EntryId)
-                .Distinct()
-                .OrderBy(r => r)
-                .ToList();
+            var ids = new List<int>();
+            var start = 0;
+
+            while (true)
+            {
+                var id = EntryIds(filesDbContext, entryType, lastIndexed)
+                    .Where(r => r >= start)
+                    .OrderBy(r => r)
+                    .Skip(BaseIndexer<TDoc>.QueryLimit)
+                    .FirstOrDefault();
+
+                if (id == 0)
+                {
+                    break;
+                }
+
+                ids.Add(id);
+                start = id;
+            }
+
+            return ids;
         }
 
         List<TDoc> GetData(long start, long stop, DateTime lastIndexed)
         {
             using var filesDbContext = dbContextFactory.CreateDbContext();
 
-            var entryIds = filesDbContext.MetadataValues
-                .Where(r => r.EntryType == entryType && r.ModifiedOn >= lastIndexed && r.EntryId >= start && r.EntryId <= stop)
-                .Select(r => r.EntryId)
-                .Distinct()
+            var entryIds = EntryIds(filesDbContext, entryType, lastIndexed)
+                .Where(r => r >= start && r <= stop)
                 .ToList();
 
             return BuildDocsAsync<TDoc>(filesDbContext, entryType, entryIds, tenantId: null).GetAwaiter().GetResult();
@@ -211,10 +230,7 @@ public static class MetadataSearchHelper
         {
             using var filesDbContext = dbContextFactory.CreateDbContext();
 
-            var query = filesDbContext.MetadataValues
-                .Where(r => r.EntryType == entryType && r.ModifiedOn >= lastIndexed)
-                .Select(r => r.EntryId)
-                .Distinct();
+            var query = EntryIds(filesDbContext, entryType, lastIndexed);
 
             var count = query.Count();
             var minId = count > 0 ? query.Min() : 0;
@@ -222,6 +238,20 @@ public static class MetadataSearchHelper
 
             return (count, maxId, minId);
         }
+    }
+
+    /// <summary>
+    /// The entries the pass covers: those with a value written since the last pass, of the active tenants only, the
+    /// way the file indexer selects. A suspended or removed tenant is not searched, so its values are not indexed.
+    /// </summary>
+    private static IQueryable<int> EntryIds(FilesDbContext filesDbContext, FileEntryType entryType, DateTime lastIndexed)
+    {
+        return filesDbContext.MetadataValues
+            .Where(r => r.EntryType == entryType && r.ModifiedOn >= lastIndexed)
+            .Join(filesDbContext.Tenants, r => r.TenantId, t => t.Id, (r, t) => new { Row = r, Tenant = t })
+            .Where(r => r.Tenant.Status == TenantStatus.Active)
+            .Select(r => r.Row.EntryId)
+            .Distinct();
     }
 
     public static async Task<List<TDoc>> BuildDocsAsync<TDoc>(FilesDbContext filesDbContext, FileEntryType entryType, IReadOnlyCollection<int> entryIds, int? tenantId)
@@ -286,16 +316,6 @@ public static class MetadataSearchHelper
                 .ToDictionary(g => g.Key, g => g.First().ParentId);
         }
 
-        // the doc is scoped by the ancestor chain: for files - the ancestors of the parent folder,
-        // for folders - the ancestors of the folder itself
-        var treeRootIds = entryType == FileEntryType.File ? parents.Values.Distinct().ToList() : ids;
-
-        var trees = (await filesDbContext.Tree
-                .Where(t => treeRootIds.Contains(t.FolderId))
-                .ToListAsync())
-            .GroupBy(t => t.FolderId)
-            .ToDictionary(g => g.Key, g => g.ToList());
-
         var docs = new List<TDoc>();
 
         foreach (var entryGroup in rows.GroupBy(r => new { r.TenantId, r.EntryId }))
@@ -340,14 +360,11 @@ public static class MetadataSearchHelper
                 }
             }
 
-            var treeRootId = entryType == FileEntryType.File ? parentId : entryGroup.Key.EntryId;
-
             docs.Add(new TDoc
             {
                 Id = entryGroup.Key.EntryId,
                 TenantId = entryGroup.Key.TenantId,
                 ParentId = parentId,
-                Folders = trees.TryGetValue(treeRootId, out var tree) ? tree : [],
                 Values = values,
                 GlobalText = globalTextParts.Count > 0 ? string.Join(' ', globalTextParts) : null
             });
@@ -367,24 +384,9 @@ public class MetadataIndexHelper(
 {
     /// <summary>
     /// Rebuilds the metadata documents of the entries. An entry without values loses its document.
-    /// Use it after the values of the entries changed.
+    /// Use it after the values of the entries changed; a move needs nothing, the document is not scoped by the tree.
     /// </summary>
-    public Task IndexEntriesAsync(FileEntryType entryType, IReadOnlyCollection<int> entryIds)
-    {
-        return IndexEntriesAsync(entryType, entryIds, removeMissing: true);
-    }
-
-    /// <summary>
-    /// Rebuilds the metadata documents of the entries that have values and leaves the others alone.
-    /// Use it when the entries themselves changed (moved, re-parented) but their values did not: the document
-    /// carries the ancestor chain of the entry, which goes stale otherwise.
-    /// </summary>
-    public Task RefreshEntriesAsync(FileEntryType entryType, IReadOnlyCollection<int> entryIds)
-    {
-        return IndexEntriesAsync(entryType, entryIds, removeMissing: false);
-    }
-
-    private async Task IndexEntriesAsync(FileEntryType entryType, IReadOnlyCollection<int> entryIds, bool removeMissing)
+    public async Task IndexEntriesAsync(FileEntryType entryType, IReadOnlyCollection<int> entryIds)
     {
         if (entryIds.Count == 0)
         {
@@ -399,11 +401,11 @@ public class MetadataIndexHelper(
 
             if (entryType == FileEntryType.File)
             {
-                await IndexAsync(filesDbContext, fileIndexer, FileEntryType.File, entryIds, tenantId, removeMissing);
+                await IndexAsync(filesDbContext, fileIndexer, FileEntryType.File, entryIds, tenantId);
             }
             else
             {
-                await IndexAsync(filesDbContext, folderIndexer, FileEntryType.Folder, entryIds, tenantId, removeMissing);
+                await IndexAsync(filesDbContext, folderIndexer, FileEntryType.Folder, entryIds, tenantId);
             }
         }
         catch (Exception e)
@@ -412,7 +414,7 @@ public class MetadataIndexHelper(
         }
     }
 
-    private static async Task IndexAsync<TDoc>(FilesDbContext filesDbContext, FactoryIndexer<TDoc> indexer, FileEntryType entryType, IReadOnlyCollection<int> entryIds, int tenantId, bool removeMissing)
+    private static async Task IndexAsync<TDoc>(FilesDbContext filesDbContext, FactoryIndexer<TDoc> indexer, FileEntryType entryType, IReadOnlyCollection<int> entryIds, int tenantId)
         where TDoc : MetadataSearchItemBase, new()
     {
         var docs = await MetadataSearchHelper.BuildDocsAsync<TDoc>(filesDbContext, entryType, entryIds, tenantId);
@@ -420,11 +422,6 @@ public class MetadataIndexHelper(
         if (docs.Count > 0)
         {
             await indexer.Index(docs);
-        }
-
-        if (!removeMissing)
-        {
-            return;
         }
 
         var missingIds = entryIds.Except(docs.Select(d => d.Id)).ToArray();

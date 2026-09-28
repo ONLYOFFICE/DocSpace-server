@@ -115,7 +115,6 @@ public class FolderContentDtoHelper(
     BreadCrumbsManager breadCrumbsManager,
     AiAccessibility accessibility,
     IDaoFactory daoFactory,
-    MetadataTemplatesCache metadataTemplatesCache,
     FolderContentDtoHelperSettings settings)
 {
 
@@ -224,7 +223,8 @@ public class FolderContentDtoHelper(
             result.Current.RootRoomType = DocSpaceHelper.MapToRoomType(folderItems.ParentRoom.FolderType);
         }
 
-        await SetAssignedMetadataTemplatesAsync(result);
+        // one round trip for the whole page, files and folders together
+        await fileWrapperHelper.SetAssignedMetadataTemplatesAsync([.. (result.Files ?? []).OfType<FileEntryDto<int>>(), .. (result.Folders ?? []).OfType<FileEntryDto<int>>()]);
 
         return result;
 
@@ -302,46 +302,6 @@ public class FolderContentDtoHelper(
             {
                 folder.ChatSettings = settings;
             }
-        }
-    }
-
-    private async Task SetAssignedMetadataTemplatesAsync<T>(FolderContentDto<T> result)
-    {
-        var fileDtos = (result.Files ?? []).OfType<FileEntryDto<int>>().ToList();
-        var folderDtos = (result.Folders ?? []).OfType<FileEntryDto<int>>().ToList();
-
-        if (fileDtos.Count == 0 && folderDtos.Count == 0)
-        {
-            return;
-        }
-
-        // a tenant without templates has no links either: the listing is the hottest read path, so it does not pay
-        // the link query for metadata that cannot be there
-        if (!await metadataTemplatesCache.HasTemplatesAsync())
-        {
-            return;
-        }
-
-        // one round trip for the whole page: the listing is the hottest read path, and it used to ask for the files and the folders separately
-        var links = await daoFactory.GetMetadataDao<int>()
-            .GetLinksAsync(fileDtos.Select(f => f.Id), folderDtos.Select(f => f.Id))
-            .ToListAsync();
-
-        if (links.Count == 0)
-        {
-            return;
-        }
-
-        var byEntry = links.ToLookup(l => (l.EntryType, (int)l.EntryId), l => l.TemplateId);
-
-        foreach (var dto in fileDtos.Where(dto => byEntry.Contains((FileEntryType.File, dto.Id))))
-        {
-            dto.AssignedMetadataTemplates = byEntry[(FileEntryType.File, dto.Id)].Distinct().ToList();
-        }
-
-        foreach (var dto in folderDtos.Where(dto => byEntry.Contains((FileEntryType.Folder, dto.Id))))
-        {
-            dto.AssignedMetadataTemplates = byEntry[(FileEntryType.Folder, dto.Id)].Distinct().ToList();
         }
     }
 

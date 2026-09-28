@@ -612,6 +612,51 @@ internal class MetadataDao(
         });
     }
 
+    public async Task DeleteOrphanedTemplateRowsAsync(int templateId, IEnumerable<int> fieldIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var fieldIdsList = fieldIds.ToList();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        if (fieldIdsList.Count > 0)
+        {
+            await filesDbContext.MetadataValues
+                .Where(r => r.TenantId == tenantId && fieldIdsList.Contains(r.FieldId))
+                .ExecuteDeleteAsync();
+        }
+
+        await filesDbContext.MetadataLinks
+            .Where(r => r.TenantId == tenantId && r.TemplateId == templateId)
+            .ExecuteDeleteAsync();
+    }
+
+    public async Task<List<MetadataValue>> DeleteValuesWrittenAsAsync(int fieldId, MetadataFieldType type)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var rows = filesDbContext.MetadataValues.Where(r => r.TenantId == tenantId && r.FieldId == fieldId);
+
+        rows = type switch
+        {
+            MetadataFieldType.String => rows.Where(r => r.ValueString != null),
+            MetadataFieldType.Number => rows.Where(r => r.ValueNumber != null),
+            MetadataFieldType.Date => rows.Where(r => r.ValueDate != null),
+            _ => rows.Where(r => r.OptionId != "")
+        };
+
+        var entries = await rows
+            .Select(r => new MetadataValue { FieldId = r.FieldId, EntryId = r.EntryId, EntryType = r.EntryType })
+            .Distinct()
+            .ToListAsync();
+
+        await rows.ExecuteDeleteAsync();
+
+        return entries;
+    }
+
     public async Task ConvertCascadeLinksToDirectAsync(int sourceFolderId, int? templateId = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -771,11 +816,11 @@ internal class MetadataDao(
         }
     }
 
-    public async Task ApplyCascadeBatchAsync(IReadOnlyCollection<int> entryIds, FileEntryType entryType, IReadOnlyCollection<int> templateIds, int sourceFolderId, IReadOnlyCollection<MetadataValue> values, MetadataConflictResolveType conflict)
+    public async Task<List<int>> ApplyCascadeBatchAsync(IReadOnlyCollection<int> entryIds, FileEntryType entryType, IReadOnlyCollection<int> templateIds, int sourceFolderId, IReadOnlyCollection<MetadataValue> values, MetadataConflictResolveType conflict)
     {
         if (entryIds.Count == 0)
         {
-            return;
+            return [];
         }
 
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -786,8 +831,13 @@ internal class MetadataDao(
 
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
+        var changed = new HashSet<int>();
+
         await RetryOnDuplicateKeyAsync(() => strategy.ExecuteAsync(async () =>
         {
+            // a retried attempt starts over, so does its record of what it wrote
+            changed.Clear();
+
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await context.Database.BeginTransactionAsync();
 
@@ -814,6 +864,8 @@ internal class MetadataDao(
                 {
                     if (!existingLinkSet.Contains((entryId, templateId)))
                     {
+                        changed.Add(entryId);
+
                         await context.MetadataLinks.AddAsync(new DbFilesMetadataLink
                         {
                             TenantId = tenantId,
@@ -857,6 +909,8 @@ internal class MetadataDao(
                             continue;
                         }
 
+                        changed.Add(entryId);
+
                         foreach (var row in ToDbValues(value, tenantId, entryId, entryType, userId, now))
                         {
                             await context.MetadataValues.AddAsync(row);
@@ -868,6 +922,8 @@ internal class MetadataDao(
             await context.SaveChangesAsync();
             await tx.CommitAsync();
         }));
+
+        return changed.ToList();
     }
 
     public async Task<List<MetadataTemplateLink>> GetCascadeLinksByFoldersAsync(IEnumerable<int> folderIds)

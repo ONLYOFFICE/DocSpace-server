@@ -291,106 +291,74 @@ public class MetadataOperationDto
 }
 
 [Scope]
-public class MetadataDtoHelper(ApiDateTimeHelper apiDateTimeHelper)
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public partial class MetadataDtoMapper(ApiDateTimeHelper apiDateTimeHelper)
 {
-    public MetadataTemplateDto Get(MetadataTemplate template)
-    {
-        return new MetadataTemplateDto
-        {
-            Id = template.Id,
-            Name = template.Name,
-            Visible = template.Visible,
-            CreateBy = template.CreateBy,
-            CreateOn = apiDateTimeHelper.Get(template.CreateOn),
-            ModifiedBy = template.ModifiedBy,
-            ModifiedOn = apiDateTimeHelper.Get(template.ModifiedOn),
-            Fields = template.Fields?.Select(Get).ToList()
-        };
-    }
+    public partial MetadataTemplateDto Map(MetadataTemplate source);
 
-    public MetadataFieldDto Get(MetadataField field)
-    {
-        return new MetadataFieldDto
-        {
-            Id = field.Id,
-            TemplateId = field.TemplateId,
-            Name = field.Name,
-            Type = field.Type,
-            Options = field.Options?.Select(o => new MetadataFieldOptionDto { Id = o.Id, Value = o.Value }).ToList(),
-            Order = field.Order
-        };
-    }
+    public partial MetadataFieldDto Map(MetadataField source);
 
-    public MetadataValueDto Get(MetadataValue value)
-    {
-        return new MetadataValueDto
-        {
-            StringValue = value.StringValue,
-            NumberValue = value.NumberValue,
-            DateValue = value.DateValue.HasValue ? apiDateTimeHelper.Get(value.DateValue.Value) : null,
-            OptionIds = value.OptionIds
-        };
-    }
+    public partial MetadataFieldOptionDto Map(MetadataFieldOption source);
 
-    public EntryTemplateDto Get(TemplateMetadata metadata)
+    public partial MetadataValueDto Map(MetadataValue source);
+
+    [MapProperty("Field.Name", nameof(CustomFieldValueDto.Name))]
+    public partial CustomFieldValueDto Map(CustomFieldValue source);
+
+    public partial EntryMetadataDto Map(EntryMetadata source);
+
+    /// <summary>
+    /// The value is placed inside its field: a client used to join a separate values list to the template fields by id.
+    /// </summary>
+    public EntryTemplateDto Map(TemplateMetadata source)
     {
-        // the value is placed inside its field: a client used to join a separate values list to the template fields by id
-        var values = (metadata.Values ?? []).ToDictionary(v => v.FieldId);
+        var values = (source.Values ?? []).ToDictionary(v => v.FieldId);
 
         return new EntryTemplateDto
         {
-            Id = metadata.Template.Id,
-            Name = metadata.Template.Name,
-            Visible = metadata.Template.Visible,
-            Fields = (metadata.Template.Fields ?? []).Select(f => Get(f, values.GetValueOrDefault(f.Id))).ToList()
+            Id = source.Template.Id,
+            Name = source.Template.Name,
+            Visible = source.Template.Visible,
+            Fields = (source.Template.Fields ?? []).Select(f => Map(f, values.GetValueOrDefault(f.Id))).ToList()
         };
     }
 
-    public EntryFieldDto Get(MetadataField field, MetadataValue value)
+    public EntryFieldDto Map(MetadataField field, MetadataValue value)
     {
-        return new EntryFieldDto
-        {
-            Id = field.Id,
-            Name = field.Name,
-            Type = field.Type,
-            Options = field.Options?.Select(o => new MetadataFieldOptionDto { Id = o.Id, Value = o.Value }).ToList(),
-            Order = field.Order,
-            Value = value == null ? null : Get(value)
-        };
-    }
+        var result = MapEntryField(field);
 
-    public static CustomFieldValueDto Get(CustomFieldValue customField)
-    {
-        return new CustomFieldValueDto
-        {
-            Name = customField.Field.Name,
-            Value = customField.Value
-        };
-    }
+        result.Value = value == null ? null : Map(value);
 
-    public EntryMetadataDto Get(EntryMetadata metadata)
-    {
-        return new EntryMetadataDto
-        {
-            Templates = metadata.Templates.Select(Get).ToList(),
-            CustomFields = metadata.CustomFields.Select(Get).ToList()
-        };
+        return result;
     }
 
     /// <summary>
     /// A missing operation means the folder has nothing running and nothing recent to report. That is answered as a
     /// completed operation without an ID, so a caller never gets a null body with a 200.
     /// </summary>
-    public MetadataOperationDto Get(MetadataCascadeOperation operation)
+    public MetadataOperationDto Map(MetadataCascadeOperation source)
     {
-        return operation == null
+        return source == null
             ? new MetadataOperationDto { Progress = 100, IsCompleted = true }
             : new MetadataOperationDto
             {
-                Id = operation.Id,
-                Progress = operation.Percentage,
-                IsCompleted = operation.IsCompleted,
-                Error = operation.Exception?.Message
+                Id = source.Id,
+                Progress = source.Percentage,
+                IsCompleted = source.IsCompleted,
+                Error = source.Exception?.Message
             };
+    }
+
+    [MapperIgnoreTarget(nameof(EntryFieldDto.Value))]
+    private partial EntryFieldDto MapEntryField(MetadataField source);
+
+    private ApiDateTime MapDate(DateTime source)
+    {
+        return apiDateTimeHelper.Get(source);
+    }
+
+    private ApiDateTime MapDate(DateTime? source)
+    {
+        return source.HasValue ? apiDateTimeHelper.Get(source.Value) : null;
     }
 }

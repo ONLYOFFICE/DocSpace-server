@@ -199,7 +199,7 @@ internal class FileDao(
             query = query.Where(r => !filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && excludeParentsIds.Contains(r.ParentId)));
         }
 
-        query = await ApplyMetadataFilterAsync(query, filesDbContext, metadataFilter, MetadataSearchScope.None);
+        query = await ApplyMetadataFilterAsync(query, filesDbContext, metadataFilter);
 
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
@@ -1520,8 +1520,7 @@ internal class FileDao(
                 await metadataIndexHelper.IndexEntriesAsync(FileEntryType.File, [fileId]);
             }
 
-            // the worker refreshes the search documents of the file, the metadata one included: the ancestor
-            // chain stored in them is stale after a move
+            // the worker refreshes the search document of the file: the ancestor chain stored in it is stale after a move
             await eventBus.PublishAsync(new FileIndexIntegrationEvent(file.CreateBy, tenantId)
             {
                 FileId = fileId,
@@ -2478,7 +2477,7 @@ internal class FileDao(
         var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId, folderType);
 
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
-        q = await ApplyMetadataFilterAsync(q, filesDbContext, metadataFilter, MetadataSearchScope.None);
+        q = await ApplyMetadataFilterAsync(q, filesDbContext, metadataFilter);
 
         q = orderBy == null
             ? q
@@ -3014,7 +3013,7 @@ internal class FileDao(
                     // the string values of the system template take part in the general text search: the files matched by
                     // them are united with the files matched by their own fields
                     q = await MetadataSearchQuery.ApplyTextSearchAsync(q, filesDbContext, tenantId, FileEntryType.File, factoryIndexerFileMetadata, searchIds, searchText, GetSearchText(searchText),
-                        MetadataSearchScope.For(parentId, withSubfolders), await metadataTemplatesCache.HasSystemTemplateAsync(), r => r.Id);
+                        await metadataTemplatesCache.HasSystemTemplateAsync(), r => r.Id);
                 }
                 else
                 {
@@ -3052,9 +3051,7 @@ internal class FileDao(
             }
         }
 
-        // scoped by the ancestor chain stored in the metadata document; the document is refreshed when the file
-        // is moved (see IndexEventProcessingService), so the scope stays valid and keeps the id list per folder
-        q = await ApplyMetadataFilterAsync(q, filesDbContext, metadataFilter, MetadataSearchScope.For(parentId, withSubfolders));
+        q = await ApplyMetadataFilterAsync(q, filesDbContext, metadataFilter);
 
         q = orderBy == null
             ? q
@@ -3222,25 +3219,22 @@ internal class FileDao(
     }
 
     /// <summary>
-    /// Narrows a file query by the structured metadata filter, see <see cref="MetadataSearchQuery.ApplyFilterAsync{TRow, TDoc}"/>.
+    /// Narrows a file query by the structured metadata filter, see <see cref="MetadataSearchQuery.ApplyFilterAsync{TRow, TDoc}"/>:
+    /// the index is asked tenant-wide and the id list is intersected with the query, which is already limited to the
+    /// folder, the section tags or the share records.
     /// </summary>
-    /// <remarks>
-    /// The listings that are already limited to a set of files (the tags of the "Recent" and "Favorites" sections,
-    /// the share records of the "Shared with me" section) pass <see cref="MetadataSearchScope.None"/>: the index is
-    /// asked tenant-wide and the id list is intersected with the listing's own query.
-    /// </remarks>
-    private Task<IQueryable<DbFile>> ApplyMetadataFilterAsync(IQueryable<DbFile> q, FilesDbContext filesDbContext, MetadataFilter metadataFilter, MetadataSearchScope scope)
+    private Task<IQueryable<DbFile>> ApplyMetadataFilterAsync(IQueryable<DbFile> q, FilesDbContext filesDbContext, MetadataFilter metadataFilter)
     {
-        return MetadataSearchQuery.ApplyFilterAsync(q, filesDbContext, _tenantManager.GetCurrentTenantId(), FileEntryType.File, factoryIndexerFileMetadata, metadataFilter, scope, r => r.Id);
+        return MetadataSearchQuery.ApplyFilterAsync(q, filesDbContext, _tenantManager.GetCurrentTenantId(), FileEntryType.File, factoryIndexerFileMetadata, metadataFilter, r => r.Id);
     }
 
     /// <summary>
     /// The same narrowing for the projections that carry the file as <see cref="IQueryResult{T}.Entry"/> (the tag listings).
     /// </summary>
-    private Task<IQueryable<T>> ApplyMetadataFilterAsync<T>(IQueryable<T> q, FilesDbContext filesDbContext, MetadataFilter metadataFilter, MetadataSearchScope scope)
+    private Task<IQueryable<T>> ApplyMetadataFilterAsync<T>(IQueryable<T> q, FilesDbContext filesDbContext, MetadataFilter metadataFilter)
         where T : IQueryResult<DbFile>
     {
-        return MetadataSearchQuery.ApplyFilterAsync(q, filesDbContext, _tenantManager.GetCurrentTenantId(), FileEntryType.File, factoryIndexerFileMetadata, metadataFilter, scope, r => r.Entry.Id);
+        return MetadataSearchQuery.ApplyFilterAsync(q, filesDbContext, _tenantManager.GetCurrentTenantId(), FileEntryType.File, factoryIndexerFileMetadata, metadataFilter, r => r.Entry.Id);
     }
 
     private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId, List<FolderType> folderType)

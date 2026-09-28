@@ -109,6 +109,36 @@ public class MetadataApiClient(HttpClient client)
         return await ReadAsync<MetadataFieldResponse>(response, cancellationToken);
     }
 
+    /// <summary>
+    /// Adds a field to a template with an arbitrary body. Returns the raw response so the error cases can be asserted on the status code.
+    /// </summary>
+    public Task<HttpResponseMessage> CreateFieldResponseAsync(int templateId, object body, CancellationToken cancellationToken)
+    {
+        return PostAsync($"api/2.0/files/metadata/templates/{templateId}/fields", body, cancellationToken);
+    }
+
+    public async Task<MetadataFieldResponse> CreateFieldAsync(int templateId, MetadataFieldPayload field, CancellationToken cancellationToken)
+    {
+        using var response = await CreateFieldResponseAsync(templateId, field, cancellationToken);
+
+        return await ReadAsync<MetadataFieldResponse>(response, cancellationToken);
+    }
+
+    /// <summary>
+    /// Deletes a template. Returns the raw response so the error cases can be asserted on the status code.
+    /// </summary>
+    public Task<HttpResponseMessage> DeleteTemplateResponseAsync(int templateId, CancellationToken cancellationToken)
+    {
+        return client.DeleteAsync($"api/2.0/files/metadata/templates/{templateId}", cancellationToken);
+    }
+
+    public async Task DeleteTemplateAsync(int templateId, CancellationToken cancellationToken)
+    {
+        using var response = await DeleteTemplateResponseAsync(templateId, cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+    }
+
     #endregion
 
     #region Assignment and values
@@ -218,6 +248,22 @@ public class MetadataApiClient(HttpClient client)
     }
 
     /// <summary>
+    /// Sets the values of the folder with an arbitrary body, for the shapes the typed payload cannot express (a null list).
+    /// </summary>
+    public Task<HttpResponseMessage> SetFolderValuesResponseAsync(int folderId, object body, CancellationToken cancellationToken)
+    {
+        return PutAsync($"api/2.0/files/metadata/folder/{folderId}/values", body, cancellationToken);
+    }
+
+    /// <summary>
+    /// Sets the custom fields of the folder with an arbitrary body, for the shapes the typed payload cannot express (a null list).
+    /// </summary>
+    public Task<HttpResponseMessage> SetFolderCustomFieldsResponseAsync(int folderId, object body, CancellationToken cancellationToken)
+    {
+        return PutAsync($"api/2.0/files/metadata/folder/{folderId}/customFields", body, cancellationToken);
+    }
+
+    /// <summary>
     /// Sets the custom fields of the folder by name. Returns the raw response so the error cases can be asserted on the status code.
     /// </summary>
     public Task<HttpResponseMessage> SetFolderCustomFieldsResponseAsync(int folderId, IEnumerable<CustomFieldPayload> fields, CancellationToken cancellationToken)
@@ -275,6 +321,25 @@ public class MetadataApiClient(HttpClient client)
     public async Task<List<CustomFieldValueResponse>> GetFileCustomFieldsAsync(int fileId, CancellationToken cancellationToken)
     {
         return (await GetEntryMetadataAsync("file", fileId, cancellationToken)).CustomFields;
+    }
+
+    /// <summary>
+    /// The file as the info endpoint reports it: the row a client re-reads after a socket event. Read raw because the
+    /// generated FileDtoInteger/FolderDtoInteger of the SDK have no assignedMetadataTemplates yet, the property the
+    /// assertion needs: an SDK gap to close with the next regeneration, not a preference.
+    /// </summary>
+    public async Task<RoomEntryResponse> GetFileInfoAsync(int fileId, CancellationToken cancellationToken)
+    {
+        using var response = await client.GetAsync($"api/2.0/files/file/{fileId}", cancellationToken);
+
+        return await ReadAsync<RoomEntryResponse>(response, cancellationToken);
+    }
+
+    public async Task<RoomEntryResponse> GetFolderInfoAsync(int folderId, CancellationToken cancellationToken)
+    {
+        using var response = await client.GetAsync($"api/2.0/files/folder/{folderId}", cancellationToken);
+
+        return await ReadAsync<RoomEntryResponse>(response, cancellationToken);
     }
 
     private async Task<EntryMetadataSetResponse> GetEntryMetadataAsync(string entryKind, int entryId, CancellationToken cancellationToken)

@@ -34,50 +34,6 @@
 namespace ASC.Web.Files.Core.Search;
 
 /// <summary>
-/// The way the metadata search is narrowed to a part of the folder tree.
-/// </summary>
-public enum MetadataSearchScopeType
-{
-    /// <summary>
-    /// The whole tenant. The caller is expected to intersect the result with its own entry set.
-    /// </summary>
-    None = 0,
-
-    /// <summary>
-    /// The direct children of the folder.
-    /// </summary>
-    Parent = 1,
-
-    /// <summary>
-    /// The whole subtree of the folder.
-    /// </summary>
-    Subtree = 2
-}
-
-/// <summary>
-/// The scope of the metadata search.
-/// </summary>
-public readonly record struct MetadataSearchScope(MetadataSearchScopeType Type, int ParentId)
-{
-    public static readonly MetadataSearchScope None = new(MetadataSearchScopeType.None, 0);
-
-    public static MetadataSearchScope Parent(int parentId)
-    {
-        return new MetadataSearchScope(MetadataSearchScopeType.Parent, parentId);
-    }
-
-    public static MetadataSearchScope Subtree(int parentId)
-    {
-        return new MetadataSearchScope(MetadataSearchScopeType.Subtree, parentId);
-    }
-
-    public static MetadataSearchScope For(int parentId, bool withSubfolders)
-    {
-        return withSubfolders ? Subtree(parentId) : Parent(parentId);
-    }
-}
-
-/// <summary>
 /// Builds the metadata search queries shared by the files and the folders listings:
 /// the OpenSearch selectors over the metadata indexes and their SQL counterparts.
 /// </summary>
@@ -89,10 +45,10 @@ public static class MetadataSearchQuery
     /// result reached <see cref="BaseIndexer{T}.QueryLimit"/>: a capped id list intersected with the caller's query
     /// would silently drop matches instead of returning them.
     /// </summary>
-    public static Task<(bool Success, List<int> Ids)> TrySelectMetadataIdsAsync<TDoc>(FactoryIndexer<TDoc> indexer, MetadataFilter metadataFilter, MetadataSearchScope scope)
+    public static Task<(bool Success, List<int> Ids)> TrySelectMetadataIdsAsync<TDoc>(FactoryIndexer<TDoc> indexer, MetadataFilter metadataFilter)
         where TDoc : MetadataSearchItemBase
     {
-        var selector = BuildSelector<TDoc>(metadataFilter, scope);
+        var selector = BuildSelector<TDoc>(metadataFilter);
 
         return TrySelectIdsAsync(indexer, s => selector(s));
     }
@@ -100,10 +56,10 @@ public static class MetadataSearchQuery
     /// <summary>
     /// Selects the identifiers of the entries whose system template values match the free text, see <see cref="TrySelectMetadataIdsAsync{TDoc}"/> for the failure rule.
     /// </summary>
-    public static Task<(bool Success, List<int> Ids)> TrySelectGlobalTextIdsAsync<TDoc>(FactoryIndexer<TDoc> indexer, string searchText, MetadataSearchScope scope)
+    public static Task<(bool Success, List<int> Ids)> TrySelectGlobalTextIdsAsync<TDoc>(FactoryIndexer<TDoc> indexer, string searchText)
         where TDoc : MetadataSearchItemBase
     {
-        var selector = BuildGlobalTextSelector<TDoc>(searchText, scope);
+        var selector = BuildGlobalTextSelector<TDoc>(searchText);
 
         return TrySelectIdsAsync(indexer, s => selector(s));
     }
@@ -125,6 +81,9 @@ public static class MetadataSearchQuery
     /// removed value is never reconciled — the database is the truth, the index only keeps the work small. When the
     /// index is not there or overflows, the same conditions filter the query on their own. The selector names the
     /// entry identifier of a row: the file or the folder itself, or the entry carried by a tag projection.
+    /// The index is asked tenant-wide, never by the place of the entry in the tree: the query is already narrowed
+    /// to the folder, the section or the share records by the caller, and a document scoped by the ancestor chain
+    /// went stale on every move and hid the entry until the chain was refreshed, which a dropped event never did.
     /// </summary>
     public static async Task<IQueryable<TRow>> ApplyFilterAsync<TRow, TDoc>(
         IQueryable<TRow> query,
@@ -133,7 +92,6 @@ public static class MetadataSearchQuery
         FileEntryType entryType,
         FactoryIndexer<TDoc> indexer,
         MetadataFilter metadataFilter,
-        MetadataSearchScope scope,
         Expression<Func<TRow, int>> idSelector)
         where TDoc : MetadataSearchItemBase
     {
@@ -154,7 +112,7 @@ public static class MetadataSearchQuery
             return query;
         }
 
-        var (success, candidateIds) = await TrySelectMetadataIdsAsync(indexer, metadataFilter, scope);
+        var (success, candidateIds) = await TrySelectMetadataIdsAsync(indexer, metadataFilter);
 
         if (success)
         {
@@ -188,7 +146,6 @@ public static class MetadataSearchQuery
         List<int> titleIds,
         string searchText,
         string lowerText,
-        MetadataSearchScope scope,
         bool hasSystemTemplate,
         Expression<Func<TRow, int>> idSelector)
         where TDoc : MetadataSearchItemBase
@@ -198,7 +155,7 @@ public static class MetadataSearchQuery
             return WhereId(query, idSelector, id => titleIds.Contains(id));
         }
 
-        var (success, globalTextIds) = await TrySelectGlobalTextIdsAsync(indexer, searchText, scope);
+        var (success, globalTextIds) = await TrySelectGlobalTextIdsAsync(indexer, searchText);
 
         // the metadata index is not there yet (it is created by the first full indexing pass) or it is overflowing:
         // the global metadata part of the search comes from the database alone; with the index it is narrowed to
@@ -226,13 +183,11 @@ public static class MetadataSearchQuery
     /// Builds the OpenSearch selector for the structured metadata filter. All conditions are combined with AND,
     /// the options within a single choice condition are combined with OR.
     /// </summary>
-    public static Func<Selector<TDoc>, Selector<TDoc>> BuildSelector<TDoc>(MetadataFilter metadataFilter, MetadataSearchScope scope)
+    public static Func<Selector<TDoc>, Selector<TDoc>> BuildSelector<TDoc>(MetadataFilter metadataFilter)
         where TDoc : MetadataSearchItemBase
     {
         return s =>
         {
-            ApplyScope(s, scope);
-
             foreach (var condition in metadataFilter.Conditions)
             {
                 switch (condition.FieldType)
@@ -302,13 +257,11 @@ public static class MetadataSearchQuery
     /// <summary>
     /// Builds the OpenSearch selector for the free text search over the globally visible system template fields.
     /// </summary>
-    public static Func<Selector<TDoc>, Selector<TDoc>> BuildGlobalTextSelector<TDoc>(string searchText, MetadataSearchScope scope)
+    public static Func<Selector<TDoc>, Selector<TDoc>> BuildGlobalTextSelector<TDoc>(string searchText)
         where TDoc : MetadataSearchItemBase
     {
         return s =>
         {
-            ApplyScope(s, scope);
-
             s.Match(r => r.GlobalText, searchText);
 
             s.Limit(0, BaseIndexer<TDoc>.QueryLimit);
@@ -440,22 +393,6 @@ public static class MetadataSearchQuery
         protected override Expression VisitParameter(ParameterExpression node)
         {
             return node == parameter ? replacement : base.VisitParameter(node);
-        }
-    }
-
-    private static void ApplyScope<TDoc>(Selector<TDoc> s, MetadataSearchScope scope) where TDoc : MetadataSearchItemBase
-    {
-        switch (scope.Type)
-        {
-            case MetadataSearchScopeType.Parent:
-                s.Where(r => r.ParentId, scope.ParentId);
-                break;
-            case MetadataSearchScopeType.Subtree:
-                s.In(r => r.Folders.Select(a => a.ParentId), new[] { scope.ParentId });
-                break;
-            case MetadataSearchScopeType.None:
-            default:
-                break;
         }
     }
 }

@@ -133,6 +133,12 @@ public static class MetadataFilterOperators
 [Scope]
 public class MetadataFilterHelper(IDaoFactory daoFactory)
 {
+    /// <summary>
+    /// The most conditions one filter may carry. Every condition is a nested query in the index and a correlated
+    /// existence check in SQL, so an unbounded list is an unbounded query; a UI filter names a handful of fields.
+    /// </summary>
+    public const int MaxConditions = 20;
+
     private static readonly JsonSerializerOptions _jsonOptions = new(JsonSerializerDefaults.Web);
 
     /// <summary>
@@ -170,6 +176,11 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
         if (requests.Count == 0)
         {
             return templateId.HasValue ? new MetadataFilter { TemplateId = templateId } : null;
+        }
+
+        if (requests.Count > MaxConditions)
+        {
+            throw new ArgumentException($@"A metadata filter cannot have more than {MaxConditions} conditions", nameof(conditions));
         }
 
         await ResolveCustomFieldNamesAsync(metadataDao, requests);
@@ -259,6 +270,13 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
                     throw new ArgumentException($@"The condition for the field '{field.Name}' requires a value");
                 }
 
+                // no stored value is longer than the write limit, so a longer condition cannot match anything and is
+                // refused instead of being sent to the index and the database as is
+                if (request.Value.Length > MetadataService.MaxStringValueLength)
+                {
+                    throw new ArgumentException($@"The value for the field '{field.Name}' cannot be longer than {MetadataService.MaxStringValueLength} characters");
+                }
+
                 condition.StringValue = request.Value.ToLowerInvariant();
                 break;
 
@@ -306,8 +324,11 @@ public class MetadataFilterHelper(IDaoFactory daoFactory)
                     throw new ArgumentException($@"The field '{field.Name}' does not contain the specified option");
                 }
 
-                condition.OptionIds = request.OptionIds;
+                // the same option repeated is one option, so a long list of one id costs one term
+                condition.OptionIds = request.OptionIds.Distinct().ToList();
                 break;
+            default:
+                throw new ArgumentException($@"The field '{field.Name}' has an unknown type");
         }
 
         return condition;

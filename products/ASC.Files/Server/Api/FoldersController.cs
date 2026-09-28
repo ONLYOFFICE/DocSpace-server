@@ -493,7 +493,12 @@ public abstract class FoldersController<T>(
     {
         var folder = (await fileStorageService.GetFolderAsync(inDto.FolderId)).NotFoundIfNull("Folder not found");
 
-        return await _folderDtoHelper.GetAsync(folder, contextFolder: folder);
+        var result = await _folderDtoHelper.GetAsync(folder, contextFolder: folder);
+
+        // the row a client re-reads after a socket event carries the same metadata the listing shows
+        await _folderDtoHelper.SetAssignedMetadataTemplatesAsync(result);
+
+        return result;
     }
 
     /// <remarks>

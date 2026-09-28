@@ -92,11 +92,29 @@ public interface IMetadataDao<T>
 
     IAsyncEnumerable<int> GetSubtreeFolderIdsAsync(int rootFolderId);
     IAsyncEnumerable<int> GetFileIdsByParentFoldersAsync(IEnumerable<int> folderIds);
-    Task ApplyCascadeBatchAsync(IReadOnlyCollection<int> entryIds, FileEntryType entryType, IReadOnlyCollection<int> templateIds, int sourceFolderId, IReadOnlyCollection<MetadataValue> values, MetadataConflictResolveType conflict);
+    /// <summary>
+    /// Writes the links and the values of the cascade to the batch. Returns the entries that got a link or a value
+    /// written, so the caller can tell them apart from the entries the batch left as they were.
+    /// </summary>
+    Task<List<int>> ApplyCascadeBatchAsync(IReadOnlyCollection<int> entryIds, FileEntryType entryType, IReadOnlyCollection<int> templateIds, int sourceFolderId, IReadOnlyCollection<MetadataValue> values, MetadataConflictResolveType conflict);
     Task<List<MetadataTemplateLink>> GetCascadeLinksByFoldersAsync(IEnumerable<int> folderIds);
     Task<List<MetadataTemplateLink>> GetCascadeLinksInSubtreeAsync(int rootFolderId, IEnumerable<int> templateIds);
     Task<List<int>> GetFolderIdsInSubtreesAsync(IEnumerable<int> rootFolderIds);
     Task<Dictionary<int, int>> GetAncestorLevelsAsync(int folderId);
     Task<List<MetadataTemplateLink>> GetLinksByTemplateAsync(int templateId);
     Task<List<MetadataValue>> GetValueEntriesAsync(int fieldId);
+
+    /// <summary>
+    /// Removes the links of the template and the values of its fields that were written after the template itself
+    /// was deleted: a cascade pass holds the template and its fields in memory and keeps inserting for them until it
+    /// notices the deletion, and no foreign key rejects those rows.
+    /// </summary>
+    Task DeleteOrphanedTemplateRowsAsync(int templateId, IEnumerable<int> fieldIds);
+
+    /// <summary>
+    /// Removes the values of the field that carry a value of the given type and returns the entries they belonged to.
+    /// For a field deleted or re-typed while a cascade pass was writing it: the rows the pass wrote after the change
+    /// carry the type it captured, the rows written for the new type do not and stay.
+    /// </summary>
+    Task<List<MetadataValue>> DeleteValuesWrittenAsAsync(int fieldId, MetadataFieldType type);
 }

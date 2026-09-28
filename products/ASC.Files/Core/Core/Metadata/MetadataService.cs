@@ -44,7 +44,8 @@ public class MetadataService(
     IDistributedLockProvider distributedLockProvider,
     MetadataCascadeWorker cascadeWorker,
     FilesMessageService filesMessageService,
-    MetadataIndexHelper metadataIndexHelper)
+    MetadataIndexHelper metadataIndexHelper,
+    MetadataEntryNotifier metadataEntryNotifier)
 {
     public const string SystemTemplateName = "System";
 
@@ -54,7 +55,17 @@ public class MetadataService(
     /// </summary>
     public const int MaxCustomFieldsPerEntry = 50;
 
-    private const int MaxCustomFieldNameLength = 255;
+    /// <summary>
+    /// The longest name of a template, of a field and of a custom field: the width of the name columns.
+    /// </summary>
+    public const int MaxNameLength = 255;
+
+    /// <summary>
+    /// The longest string value, the custom fields included. The value column is unbounded, but the index stores the
+    /// value as a keyword term, which OpenSearch caps at 32766 bytes: a longer value would fail the whole document of
+    /// the entry and silently drop it from every metadata filter. 8000 characters stay under the cap in any encoding.
+    /// </summary>
+    public const int MaxStringValueLength = 8000;
 
     /// <summary>
     /// The assignment of a template is a check-then-insert on the link table; two concurrent assignments of the same
@@ -69,20 +80,22 @@ public class MetadataService(
     {
         await DemandTemplateManagementAsync();
 
-        ArgumentException.ThrowIfNullOrEmpty(name);
+        ValidateName(name, "template");
 
         var metadataDao = daoFactory.GetMetadataDao<int>();
 
         await CheckTemplateNameIsFreeAsync(metadataDao, name, 0);
 
-        var fieldsList = fields?.ToList();
+        var fieldsList = fields?.ToList() ?? [];
 
         // the whole batch is validated before anything is persisted, and the template is saved together with its fields
         // in one transaction, otherwise an invalid field or a failed write would leave an orphan template behind
-        foreach (var field in fieldsList ?? [])
+        foreach (var field in fieldsList)
         {
             PrepareField(field);
         }
+
+        CheckFieldNamesAreUnique(fieldsList.Select(f => f.Name));
 
         MetadataTemplate template;
 
@@ -112,9 +125,14 @@ public class MetadataService(
         // template, and the saved copy the DAO returns carries no fields
         var template = await GetUserTemplateAsync(metadataDao, templateId, withFields: true);
 
-        if (!string.IsNullOrEmpty(name) && !name.Equals(template.Name, StringComparison.OrdinalIgnoreCase))
+        if (!string.IsNullOrEmpty(name))
         {
-            await CheckTemplateNameIsFreeAsync(metadataDao, name, templateId);
+            ValidateName(name, "template");
+
+            if (!name.Equals(template.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                await CheckTemplateNameIsFreeAsync(metadataDao, name, templateId);
+            }
         }
 
         template.Name = string.IsNullOrEmpty(name) ? template.Name : name;
@@ -152,7 +170,8 @@ public class MetadataService(
 
         filesMessageService.Send(MessageAction.MetadataTemplateDeleted, template.Name);
 
-        await ReindexEntriesAsync(affectedLinks.Select(l => ((int)l.EntryId, l.EntryType)));
+        // the template is gone from every entry it was assigned to, and nobody asked for those entries in this request
+        await EntriesChangedAsync(affectedLinks.Select(l => ((int)l.EntryId, l.EntryType)));
     }
 
     public async Task<MetadataTemplate> GetTemplateAsync(int templateId)
@@ -179,7 +198,11 @@ public class MetadataService(
 
         field.TemplateId = templateId;
 
-        var saved = await CreateFieldInternalAsync(metadataDao, field);
+        PrepareField(field);
+
+        await CheckFieldNameIsFreeAsync(metadataDao, templateId, field.Name, 0);
+
+        var saved = await metadataDao.SaveFieldAsync(field);
 
         filesMessageService.Send(MessageAction.MetadataFieldCreated, saved.Name);
 
@@ -197,6 +220,13 @@ public class MetadataService(
 
         if (!string.IsNullOrEmpty(update.Name))
         {
+            ValidateName(update.Name, "field");
+
+            if (!update.Name.Equals(field.Name, StringComparison.OrdinalIgnoreCase))
+            {
+                await CheckFieldNameIsFreeAsync(metadataDao, templateId, update.Name, fieldId);
+            }
+
             field.Name = update.Name;
         }
 
@@ -658,6 +688,11 @@ public class MetadataService(
                     throw new ArgumentException($@"The field '{field.Name}' accepts a string value only", nameof(value));
                 }
 
+                if (value.StringValue?.Length > MaxStringValueLength)
+                {
+                    throw new ArgumentException($@"The value of the field '{field.Name}' cannot be longer than {MaxStringValueLength} characters", nameof(value));
+                }
+
                 break;
             case MetadataFieldType.Date:
                 if (value.DateValue == null || !string.IsNullOrEmpty(value.StringValue) || value.NumberValue != null || value.OptionIds is { Count: > 0 })
@@ -693,6 +728,8 @@ public class MetadataService(
                 }
 
                 break;
+            default:
+                throw new ArgumentException($@"The field '{field.Name}' has an unknown type", nameof(value));
         }
     }
 
@@ -766,9 +803,14 @@ public class MetadataService(
                 throw new ArgumentException(@"The custom field name cannot be empty", nameof(updates));
             }
 
-            if (name.Length > MaxCustomFieldNameLength)
+            if (name.Length > MaxNameLength)
             {
-                throw new ArgumentException($@"The custom field name cannot be longer than {MaxCustomFieldNameLength} characters", nameof(updates));
+                throw new ArgumentException($@"The custom field name cannot be longer than {MaxNameLength} characters", nameof(updates));
+            }
+
+            if (update.Value?.Length > MaxStringValueLength)
+            {
+                throw new ArgumentException($@"The value of the custom field '{name}' cannot be longer than {MaxStringValueLength} characters", nameof(updates));
             }
 
             // the name is the key of the field, so the same field twice in one request has no single meaning
@@ -807,7 +849,7 @@ public class MetadataService(
 
         filesMessageService.Send(MessageAction.MetadataFieldDeleted, field.Name);
 
-        await ReindexEntriesAsync(affectedValues.Select(v => ((int)v.EntryId, v.EntryType)));
+        await EntriesChangedAsync(affectedValues.Select(v => ((int)v.EntryId, v.EntryType)));
     }
 
     /// <summary>
@@ -825,13 +867,6 @@ public class MetadataService(
         return field;
     }
 
-    private static async Task<MetadataField> CreateFieldInternalAsync(IMetadataDao<int> metadataDao, MetadataField field)
-    {
-        PrepareField(field);
-
-        return await metadataDao.SaveFieldAsync(field);
-    }
-
     private static void PrepareField(MetadataField field)
     {
         field.Options = WithGeneratedOptionIds(field.Options);
@@ -846,7 +881,14 @@ public class MetadataService(
 
     private static void ValidateField(MetadataField field)
     {
-        ArgumentException.ThrowIfNullOrEmpty(field.Name);
+        ValidateName(field.Name, "field");
+
+        // the type arrives as a number and the serializer accepts any integer for an enum: an unknown type would be
+        // stored, and a value of such a field would pass ValidateValue, which knows only the declared types
+        if (!Enum.IsDefined(field.Type))
+        {
+            throw new ArgumentException($@"Unknown field type {(int)field.Type}", nameof(field));
+        }
 
         var isChoice = field.Type is MetadataFieldType.SingleChoice or MetadataFieldType.MultiChoice;
 
@@ -892,6 +934,52 @@ public class MetadataService(
         }
     }
 
+    /// <summary>
+    /// A name is the key the users tell the templates and the fields apart by, so it is neither blank nor longer than
+    /// its column: an over-long one used to reach the database and come back as a server error on MySQL, while
+    /// PostgreSQL, whose column has no length, stored it as it was.
+    /// </summary>
+    private static void ValidateName(string name, string what)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException($@"The {what} name cannot be empty", nameof(name));
+        }
+
+        if (name.Length > MaxNameLength)
+        {
+            throw new ArgumentException($@"The {what} name cannot be longer than {MaxNameLength} characters", nameof(name));
+        }
+    }
+
+    /// <summary>
+    /// The fields of a template are told apart by name in the UI and in the filters, so two fields of one template
+    /// cannot share a name, whatever the case.
+    /// </summary>
+    private static void CheckFieldNamesAreUnique(IEnumerable<string> names)
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var name in names)
+        {
+            if (!seen.Add(name))
+            {
+                throw new ArgumentException($@"The field '{name}' is listed more than once", nameof(names));
+            }
+        }
+    }
+
+    private static async Task CheckFieldNameIsFreeAsync(IMetadataDao<int> metadataDao, int templateId, string name, int exceptFieldId)
+    {
+        var exists = await metadataDao.GetFieldsAsync(templateId)
+            .AnyAsync(f => f.Id != exceptFieldId && f.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+        if (exists)
+        {
+            throw new ArgumentException($@"Field with name '{name}' already exists in the template", nameof(name));
+        }
+    }
+
     private async Task CheckTemplateNameIsFreeAsync(IMetadataDao<int> metadataDao, string name, int exceptTemplateId)
     {
         // the name of the system template is reserved even before the tenant has one: the name is unique per tenant in the
@@ -919,15 +1007,23 @@ public class MetadataService(
         return values.Where(v => fieldIds.Contains(v.FieldId)).ToList();
     }
 
-    private async Task ReindexEntriesAsync(IEnumerable<(int EntryId, FileEntryType EntryType)> entries)
+    /// <summary>
+    /// What follows a change of the metadata of entries nobody holds in this request: their search documents are
+    /// rebuilt and the clients viewing them are told to re-read them.
+    /// </summary>
+    private async Task EntriesChangedAsync(IEnumerable<(int EntryId, FileEntryType EntryType)> entries)
     {
-        foreach (var group in entries.GroupBy(e => e.EntryType))
+        var entriesList = entries.ToList();
+
+        foreach (var group in entriesList.GroupBy(e => e.EntryType))
         {
             foreach (var batch in group.Select(e => e.EntryId).Distinct().Chunk(1000))
             {
                 await metadataIndexHelper.IndexEntriesAsync(group.Key, batch);
             }
         }
+
+        await metadataEntryNotifier.NotifyUpdatedAsync(entriesList);
     }
 
     private async Task NotifyUpdateAsync(FileEntry<int> entry)

@@ -42,10 +42,13 @@ public class MetadataCascadeWorker(
     private readonly DistributedTaskQueue<MetadataCascadeOperation> _queue = queueFactory.CreateQueue<MetadataCascadeOperation>();
 
     /// <summary>
-    /// Enqueues a cascade operation for the folder. A running operation is reused only when it propagates the very
-    /// same templates in the same mode with the same conflict rule; any other request gets its own operation, otherwise
-    /// the templates (or the Overwrite) of the second request would silently never reach the subtree. The operations
-    /// of a tenant run one after another (see <see cref="MetadataCascadeOperation.DoJob"/>). Completed operations are dropped.
+    /// Enqueues a cascade operation for the folder. A queued operation is reused only when it propagates the very
+    /// same templates in the same mode with the same conflict rule and has not started yet: an operation reads the
+    /// folder's values once it holds the run lock, so one that is already past that point carries the values of an
+    /// earlier request, and folding a later request into it would silently keep the edited values from the subtree.
+    /// Any other request gets its own operation, otherwise the templates (or the Overwrite) of the second request
+    /// would never reach the subtree. The operations of a tenant run one after another (see
+    /// <see cref="MetadataCascadeOperation.DoJob"/>). Completed operations are dropped.
     /// </summary>
     public async Task<string> StartAsync(int tenantId, Guid userId, int folderId, IEnumerable<int> templateIds, MetadataConflictResolveType conflict, MetadataCascadeMode mode)
     {
@@ -60,11 +63,11 @@ public class MetadataCascadeWorker(
                 await _queue.DequeueTask(completed.Id);
             }
 
-            var running = folderTasks.FirstOrDefault(t => !t.IsCompleted && t.Conflict == conflict && t.TemplateIds.SequenceEqual(requestedTemplateIds));
+            var pending = folderTasks.FirstOrDefault(t => !t.IsCompleted && !t.Started && t.Conflict == conflict && t.TemplateIds.SequenceEqual(requestedTemplateIds));
 
-            if (running != null)
+            if (pending != null)
             {
-                return running.Id;
+                return pending.Id;
             }
 
             var item = serviceProvider.GetService<MetadataCascadeOperation>();

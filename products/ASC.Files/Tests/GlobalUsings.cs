@@ -86,6 +86,7 @@ global using MetadataField = ASC.Files.Core.MetadataField;
 global using MetadataFieldOption = ASC.Files.Core.MetadataFieldOption;
 global using MetadataFieldType = ASC.Files.Core.MetadataFieldType;
 global using MetadataFilterCondition = ASC.Files.Core.MetadataFilterCondition;
+global using MetadataFilterHelper = ASC.Files.Core.MetadataFilterHelper;
 global using MetadataSearchQuery = ASC.Web.Files.Core.Search.MetadataSearchQuery;
 global using MetadataService = ASC.Files.Core.MetadataService;
 global using MetadataValue = ASC.Files.Core.MetadataValue;

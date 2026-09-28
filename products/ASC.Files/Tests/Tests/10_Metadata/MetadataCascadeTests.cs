@@ -229,6 +229,39 @@ public class MetadataCascadeTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
+    public async Task Cascade_RequestedAgainWithEditedValues_PushesTheEditedValuesToTheWholeSubtree()
+    {
+        var api = await ArrangeAsync();
+        var suffix = Suffix();
+
+        var template = await api.CreateTemplateAsync("Edited " + suffix, [new MetadataFieldPayload { Name = ClientField, Type = 0 }], TestContext.Current.CancellationToken);
+        var clientFieldId = template.Field(ClientField).Id;
+
+        var room = await CreateCustomRoom($"Edited {suffix}");
+        var files = new List<int>();
+
+        for (var i = 0; i < 20; i++)
+        {
+            files.Add((await CreateFile($"doc-{i}-{suffix}.docx", room.Id)).Id);
+        }
+
+        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+        await api.SetFolderValuesAsync(room.Id, [new MetadataValuePayload { FieldId = clientFieldId, StringValue = "v1" }], TestContext.Current.CancellationToken);
+        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: true, TestContext.Current.CancellationToken, conflictResolveType: 1);
+
+        // the same request right after an edit: the worker used to fold it into the pass still running with the same
+        // template and mode, and that pass had already read "v1", so the edit never reached the subtree
+        await api.SetFolderValuesAsync(room.Id, [new MetadataValuePayload { FieldId = clientFieldId, StringValue = "v2" }], TestContext.Current.CancellationToken);
+        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: true, TestContext.Current.CancellationToken, conflictResolveType: 1);
+
+        foreach (var fileId in files)
+        {
+            var metadata = await PollMetadataAsync(api, fileId, FileEntryType.File, m => ValueOf(m, template.Id, clientFieldId) == "v2");
+            ValueOf(metadata, template.Id, clientFieldId).Should().Be("v2", "the second request carries the edited value and must reach every file");
+        }
+    }
+
+    [Fact]
     public async Task Uncascade_LeavesTheSubtreeTemplatesAsDirectAssignments()
     {
         var api = await ArrangeAsync();
