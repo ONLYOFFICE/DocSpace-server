@@ -31,7 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.Core;
 using ASC.Core.Common.Security;
 using ASC.MessagingSystem.Core;
 using ASC.MessagingSystem.EF.Model;
@@ -44,7 +43,6 @@ public class WebhookSender(
     ILogger<WebhookSender> logger,
     IServiceScopeFactory scopeFactory,
     IHttpClientFactory clientFactory,
-    ResiliencePipelineProvider<string> resiliencePipelineProvider,
     Settings settings,
     IUrlValidator urlValidator)
 {
@@ -61,12 +59,10 @@ public class WebhookSender(
 
     public const string WebhookHttpClient = "webhookHttpClient";
     public const string WebhookHttpClientSslIgnore = "webhookHttpClientSslIgnore";
-    public const string WebhookResiliencePipeline = "webhookResiliencePipeline";
 
-    public static ResiliencePropertyKey<int> RetryCountPropKey = new("retryCount");
-    public static ResiliencePropertyKey<string> ErrorMessagePropKey = new("errorMessage");
+    private static readonly TimeSpan _requestTimeout = TimeSpan.FromSeconds(30);
 
-    public async Task Send(WebhookRequestIntegrationEvent webhookRequest, CancellationToken cancellationToken)
+    public async Task Send(int tenantId, int webhookLogId, CancellationToken cancellationToken)
     {
         try
         {
@@ -75,43 +71,62 @@ public class WebhookSender(
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
 
-            await tenantManager.SetCurrentTenantAsync(webhookRequest.TenantId);
+            await tenantManager.SetCurrentTenantAsync(tenantId);
 
-            var entry = await dbWorker.ReadJournal(webhookRequest.TenantId, webhookRequest.WebhookLogId);
+            var entry = await dbWorker.ReadJournal(tenantId, webhookLogId);
             if (entry == null)
             {
+                await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId);
                 return;
             }
 
-            // Validate URL using centralized UrlValidator (SSRF protection)
+            if (entry.Attempts > 0 && !entry.Config.Enabled)
+            {
+                await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId);
+                return;
+            }
+
             var validationResult = await urlValidator.ValidateAsync(entry.Config.Uri, new UrlValidationOptions
             {
                 RequireHttps = entry.Config.SSL
             });
             if (!validationResult.IsValid)
             {
+                await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId);
                 await DisableWebhook(validationResult, entry, dbWorker, messageService);
                 return;
             }
 
             var webhookPayload = JsonSerializer.Deserialize<WebhookPayload<object, object>>(entry.RequestPayload, _jsonSerializerOptions);
 
-            // trying to send an old webhook
             if (webhookPayload?.Event == null || webhookPayload?.Webhook == null)
             {
-                webhookPayload = new WebhookPayload<object, object>(WebhookTrigger.All, entry.Config, entry.RequestPayload, null, webhookRequest.CreateBy);
+                webhookPayload = new WebhookPayload<object, object>(WebhookTrigger.All, entry.Config, entry.RequestPayload, null, entry.Uid);
             }
 
             webhookPayload.Event.Id = entry.Id;
-            webhookPayload.Webhook.LastFailureOn = null;
-            webhookPayload.Webhook.LastFailureContent = null;
-            webhookPayload.Webhook.LastSuccessOn = null;
-            webhookPayload.Webhook.RetryCount = 0;
-            webhookPayload.Webhook.RetryOn = null;
 
+            if (entry.Attempts > 0)
+            {
+                webhookPayload.Webhook.LastFailureOn = webhookPayload.Webhook.RetryOn ?? webhookPayload.Event.CreateOn;
+                webhookPayload.Webhook.LastFailureContent = entry.ResponsePayload;
+                webhookPayload.Webhook.LastSuccessOn = entry.Config.LastSuccessOn;
+                webhookPayload.Webhook.RetryCount = entry.Attempts;
+                webhookPayload.Webhook.RetryOn = webhookPayload.GetShortUtcNow();
+            }
+            else
+            {
+                webhookPayload.Webhook.LastFailureOn = null;
+                webhookPayload.Webhook.LastFailureContent = null;
+                webhookPayload.Webhook.LastSuccessOn = null;
+                webhookPayload.Webhook.RetryCount = 0;
+                webhookPayload.Webhook.RetryOn = null;
+            }
+
+            var attempts = entry.Attempts + 1;
             var status = 0;
+            var succeeded = false;
             DateTime? delivery = null;
-            var requestDate = webhookPayload.GetShortUtcNow();
             string responsePayload;
             string responseHeaders = null;
             var requestPayload = JsonSerializer.Serialize(webhookPayload, _jsonSerializerOptions);
@@ -120,59 +135,41 @@ public class WebhookSender(
             var httpClientName = entry.Config.SSL ? WebhookHttpClient : WebhookHttpClientSslIgnore;
             var httpClient = clientFactory.CreateClient(httpClientName);
 
-            var context = ResilienceContextPool.Shared.Get(cancellationToken);
-
             try
             {
-                context.Properties.Set(RetryCountPropKey, 0);
-                context.Properties.Set(ErrorMessagePropKey, "");
+                using var request = new HttpRequestMessage(HttpMethod.Post, validationResult.ParsedUri);
+                request.Options.Set(UrlValidator.PinnedIpKey, validationResult.ResolvedAddresses[0]);
 
-                var pipeline = resiliencePipelineProvider.GetPipeline<HttpResponseMessage>(WebhookResiliencePipeline);
+                request.Headers.Add("Accept", "*/*");
 
-                var response = await pipeline.ExecuteAsync(async context =>
-                {
-                    var request = new HttpRequestMessage(HttpMethod.Post, validationResult.ParsedUri);
-                    request.Options.Set(UrlValidator.PinnedIpKey, validationResult.ResolvedAddresses[0]);
+                request.Headers.Add(EventIdHeader, entry.Id.ToString(CultureInfo.InvariantCulture));
+                request.Headers.Add(EventTimestampHeader, $"{webhookPayload.Event.CreateOn:s}Z");
 
-                    var retryCount = context.Properties.GetValue(RetryCountPropKey, 0);
+                request.Headers.Add(SignatureHeader, $"sha256={GetSecretHash(entry.Config.SecretKey, requestPayload)}");
 
-                    if (retryCount > 0)
-                    {
-                        webhookPayload.Webhook.LastFailureOn = webhookPayload.Webhook.RetryOn ?? requestDate;
-                        webhookPayload.Webhook.LastFailureContent = context.Properties.GetValue(ErrorMessagePropKey, "");
-                        webhookPayload.Webhook.LastSuccessOn = entry.Config.LastSuccessOn;
+                request.Content = new StringContent(requestPayload, Encoding.UTF8, "application/json");
 
-                        webhookPayload.Webhook.RetryCount = retryCount;
-                        webhookPayload.Webhook.RetryOn = webhookPayload.GetShortUtcNow();
+                requestHeaders = JsonSerializer.Serialize(request.Headers.ToDictionary(r => r.Key, v => v.Value), _jsonSerializerOptions);
 
-                        requestPayload = JsonSerializer.Serialize(webhookPayload, _jsonSerializerOptions);
-                    }
+                using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                timeoutCts.CancelAfter(_requestTimeout);
 
-                    request.Headers.Add("Accept", "*/*");
+                using var response = await httpClient.SendAsync(request, timeoutCts.Token);
 
-                    request.Headers.Add(EventIdHeader, entry.Id.ToString(CultureInfo.InvariantCulture));
-                    request.Headers.Add(EventTimestampHeader, $"{webhookPayload.Event.CreateOn:s}Z");
-
-                    request.Headers.Add(SignatureHeader, $"sha256={GetSecretHash(entry.Config.SecretKey, requestPayload)}");
-
-                    request.Content = new StringContent(requestPayload, Encoding.UTF8, "application/json");
-
-                    requestHeaders = JsonSerializer.Serialize(request.Headers.ToDictionary(r => r.Key, v => v.Value), _jsonSerializerOptions);
-
-                    var response = await httpClient.SendAsync(request, cancellationToken);
-
-                    response.EnsureSuccessStatusCode();
-
-                    return response;
-                }, context);
+                response.EnsureSuccessStatusCode();
 
                 status = (int)response.StatusCode;
                 responseHeaders = JsonSerializer.Serialize(response.Headers.ToDictionary(r => r.Key, v => v.Value), _jsonSerializerOptions);
-                responsePayload = await response.Content.ReadAsStringAsync(cancellationToken);
+                responsePayload = await response.Content.ReadAsStringAsync(timeoutCts.Token);
 
                 entry.Config.LastSuccessOn = delivery = DateTime.UtcNow;
+                succeeded = true;
 
                 logger.DebugResponse(response);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
             }
             catch (HttpRequestException e)
             {
@@ -183,6 +180,7 @@ public class WebhookSender(
 
                 if (e.StatusCode == HttpStatusCode.Gone)
                 {
+                    await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId);
                     await dbWorker.RemoveWebhookConfigAsync(entry.ConfigId);
                     messageService.SendHeadersMessage(MessageAction.WebhookDeleted, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (HTTP status 410)");
                     return;
@@ -212,14 +210,21 @@ public class WebhookSender(
                 status = (int)HttpStatusCode.InternalServerError;
                 logger.ErrorWithException(e);
             }
-            finally
-            {
-                ResilienceContextPool.Shared.Return(context);
-            }
 
             var configDisabled = !entry.Config.Enabled;
 
-            await dbWorker.UpdateWebhookJournal(entry.Id, entry.TenantId, status, delivery, requestPayload, requestHeaders, responsePayload, responseHeaders);
+            var nextAttemptOn = succeeded || configDisabled ? null : GetNextAttemptOn(attempts);
+
+            if (nextAttemptOn.HasValue)
+            {
+                logger.DebugRetryScheduled(entry.Id, attempts, nextAttemptOn.Value);
+            }
+            else if (!succeeded)
+            {
+                logger.WarningDeliveryGivenUp(entry.Id, attempts);
+            }
+
+            await dbWorker.UpdateWebhookJournal(entry.Id, entry.TenantId, status, delivery, requestPayload, requestHeaders, responsePayload, responseHeaders, attempts, nextAttemptOn);
             await dbWorker.UpdateWebhookConfig(entry.Config, configDisabled);
 
             if (configDisabled)
@@ -227,11 +232,28 @@ public class WebhookSender(
                 messageService.SendHeadersMessage(MessageAction.WebhookUpdated, MessageTarget.Create(entry.ConfigId), null, $"{entry.Config.Name} (more than {settings.TrustedDaysCount} days without success)");
             }
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception e)
         {
-            logger.Error($"Failed to send webhook tenant: {webhookRequest.TenantId}, user: {webhookRequest.CreateBy}, log: {webhookRequest.WebhookLogId}");
-            logger.ErrorWithException(e);
+            logger.ErrorFailedToSend(tenantId, webhookLogId, e);
         }
+    }
+
+    private DateTime? GetNextAttemptOn(int attempts)
+    {
+        var intervals = settings.RetryIntervals;
+
+        if (attempts > intervals.Length)
+        {
+            return null;
+        }
+
+        var jitter = 0.9 + Random.Shared.NextDouble() * 0.2;
+
+        return DateTime.UtcNow + intervals[attempts - 1] * jitter;
     }
 
     private static async Task DisableWebhook(UrlValidationResult validationResult, DbWebhooksLog entry, DbWorker dbWorker,
@@ -270,10 +292,9 @@ public class WebhookSender(
 
 public static class WebhookSenderExtension
 {
-    public static void AddWebhookSenderHttpClient(this IServiceCollection services, IConfiguration configuration)
+    public static void AddWebhookSenderHttpClient(this IServiceCollection services)
     {
         var lifeTime = TimeSpan.FromMinutes(5);
-        var repeatCount = Convert.ToInt32(configuration["webhooks:repeatcount"] ?? "5");
 
         services.AddHttpClient(WebhookSender.WebhookHttpClient)
             .SetHandlerLifetime(lifeTime)
@@ -295,25 +316,5 @@ public static class WebhookSenderExtension
                 handler.SslOptions.RemoteCertificateValidationCallback = (_, _, _, _) => true;
                 return handler;
             });
-
-        services.AddResiliencePipeline<string, HttpResponseMessage>(WebhookSender.WebhookResiliencePipeline, pipelineBuilder =>
-        {
-            pipelineBuilder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
-            {
-                MaxRetryAttempts = repeatCount,
-                Delay = TimeSpan.FromSeconds(1),
-                BackoffType = DelayBackoffType.Exponential,
-                ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
-                        .Handle<HttpRequestException>()
-                        .Handle<TaskCanceledException>()
-                        .HandleResult(response => !response.IsSuccessStatusCode),
-                OnRetry = args =>
-                {
-                    args.Context.Properties.Set(WebhookSender.RetryCountPropKey, args.AttemptNumber + 1);
-                    args.Context.Properties.Set(WebhookSender.ErrorMessagePropKey, args.Outcome.Exception?.Message);
-                    return ValueTask.CompletedTask;
-                }
-            });
-        });
     }
 }

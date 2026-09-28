@@ -157,6 +157,9 @@ public class WebhookPublisher(
 
     private async Task<DbWebhooksLog> PublishAsync(DbWebhooksLog webhookLog)
     {
+        webhookLog.Attempts = 0;
+        webhookLog.NextAttemptOn = webhookLog.CreationTime;
+
         var newWebhooksLog = await dbWorker.WriteToJournal(webhookLog);
 
         var @event = new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, newWebhooksLog.TenantId, newWebhooksLog.Id);

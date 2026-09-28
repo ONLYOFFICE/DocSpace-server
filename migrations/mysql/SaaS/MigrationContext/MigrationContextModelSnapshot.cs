@@ -6625,6 +6625,12 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("Attempts")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0)
+                        .HasColumnName("attempts");
+
                     b.Property<int>("ConfigId")
                         .HasColumnType("int")
                         .HasColumnName("config_id");
@@ -6636,6 +6642,10 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                     b.Property<DateTime?>("Delivery")
                         .HasColumnType("datetime")
                         .HasColumnName("delivery");
+
+                    b.Property<DateTime?>("NextAttemptOn")
+                        .HasColumnType("datetime")
+                        .HasColumnName("next_attempt_on");
 
                     b.Property<string>("RequestHeaders")
                         .HasColumnType("json")
@@ -6685,6 +6695,9 @@ namespace ASC.Migrations.MySql.SaaS.Migrations
                         .HasName("PRIMARY");
 
                     b.HasIndex("ConfigId");
+
+                    b.HasIndex("NextAttemptOn")
+                        .HasDatabaseName("next_attempt_on");
 
                     b.HasIndex("TenantId")
                         .HasDatabaseName("tenant_id");

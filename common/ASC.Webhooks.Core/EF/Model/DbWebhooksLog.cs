@@ -48,6 +48,8 @@ public class DbWebhooksLog
     public int TenantId { get; set; }
     public Guid Uid { get; set; }
     public DateTime? Delivery { get; set; }
+    public int Attempts { get; set; }
+    public DateTime? NextAttemptOn { get; set; }
     public DbWebhooksConfig Config { get; set; }
     public DbTenant Tenant { get; set; }
 }
@@ -79,6 +81,9 @@ public static class WebhooksPayloadExtension
 
                 entity.HasIndex(e => e.TenantId)
                     .HasDatabaseName("tenant_id");
+
+                entity.HasIndex(e => e.NextAttemptOn)
+                    .HasDatabaseName("next_attempt_on");
 
                 entity.Property(e => e.Id)
                     .HasColumnType("int")
@@ -140,6 +145,15 @@ public static class WebhooksPayloadExtension
                 entity.Property(e => e.Status)
                     .HasColumnType("int")
                     .HasColumnName("status");
+
+                entity.Property(e => e.Attempts)
+                    .HasColumnType("int")
+                    .HasColumnName("attempts")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.NextAttemptOn)
+                    .HasColumnType("datetime")
+                    .HasColumnName("next_attempt_on");
             });
         }
 
@@ -200,9 +214,19 @@ public static class WebhooksPayloadExtension
                 entity.Property(e => e.Status)
                     .HasColumnName("status");
 
+                entity.Property(e => e.Attempts)
+                    .HasColumnName("attempts")
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.NextAttemptOn)
+                    .HasColumnName("next_attempt_on");
+
                 // Add indexes (PostgreSQL-specific naming)
                 entity.HasIndex(e => e.TenantId)
                     .HasDatabaseName("ix_webhooks_logs_tenant_id");
+
+                entity.HasIndex(e => e.NextAttemptOn)
+                    .HasDatabaseName("ix_webhooks_logs_next_attempt_on");
 
                 // Relationships (optional depending upon requirements)
                 entity.HasOne(e => e.Config)
