@@ -150,7 +150,7 @@ internal class MetadataDao(
                 Name = field.Name,
                 Type = field.Type,
                 Options = SerializeOptions(field.Options),
-                Order = field.Order,
+                Order = field.Order ?? 0,
                 CreateBy = userId,
                 CreateOn = now,
                 ModifiedBy = userId,
@@ -165,8 +165,9 @@ internal class MetadataDao(
 
             await tx.CommitAsync();
 
+            // the same order a read gives, so the answer of the creation and the template read afterwards agree
             var result = ToTemplate(dbTemplate);
-            result.Fields.AddRange(dbFields.Select(ToField));
+            result.Fields.AddRange(dbFields.OrderBy(f => f.Order).ThenBy(f => f.Id).Select(ToField));
 
             return result;
         });
@@ -193,6 +194,7 @@ internal class MetadataDao(
             template.Fields = await Query(filesDbContext.MetadataFields)
                 .Where(r => r.TemplateId == templateId)
                 .OrderBy(r => r.Order)
+                .ThenBy(r => r.Id)
                 .Select(r => ToField(r))
                 .ToListAsync();
         }
@@ -227,6 +229,7 @@ internal class MetadataDao(
             var fields = await Query(filesDbContext.MetadataFields)
                 .Where(r => templateIds.Contains(r.TemplateId))
                 .OrderBy(r => r.Order)
+                .ThenBy(r => r.Id)
                 .ToListAsync();
 
             fieldsByTemplate = fields
@@ -322,7 +325,7 @@ internal class MetadataDao(
                 Name = field.Name,
                 Type = field.Type,
                 Options = SerializeOptions(field.Options),
-                Order = field.Order,
+                Order = field.Order ?? 0,
                 CreateBy = userId,
                 CreateOn = now,
                 ModifiedBy = userId,
@@ -342,7 +345,7 @@ internal class MetadataDao(
             dbField.Name = field.Name;
             dbField.Type = field.Type;
             dbField.Options = SerializeOptions(field.Options);
-            dbField.Order = field.Order;
+            dbField.Order = field.Order ?? dbField.Order;
             dbField.ModifiedBy = userId;
             dbField.ModifiedOn = now;
 
@@ -371,6 +374,7 @@ internal class MetadataDao(
         var fields = Query(filesDbContext.MetadataFields)
             .Where(r => r.TemplateId == templateId)
             .OrderBy(r => r.Order)
+            .ThenBy(r => r.Id)
             .AsAsyncEnumerable();
 
         await foreach (var field in fields)

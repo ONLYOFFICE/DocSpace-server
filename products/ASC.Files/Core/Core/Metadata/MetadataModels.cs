@@ -59,7 +59,12 @@ public class MetadataField
     public string Name { get; set; }
     public MetadataFieldType Type { get; set; }
     public List<MetadataFieldOption> Options { get; set; }
-    public int Order { get; set; }
+
+    /// <summary>
+    /// The display position inside the template. Null on a field being created means "after the last one"; a stored
+    /// field always has it.
+    /// </summary>
+    public int? Order { get; set; }
     public Guid CreateBy { get; set; }
     public DateTime CreateOn { get; set; }
     public Guid ModifiedBy { get; set; }

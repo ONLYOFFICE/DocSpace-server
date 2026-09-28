@@ -66,7 +66,8 @@ public class MetadataController(
     /// create templates. The template name must be unique on the portal regardless of case, at most 255 characters, and the
     /// name `System` is reserved. Every field needs a name unique within the template and a type from the published set; a
     /// choice field requires at least one option and the options must be unique, a field of another type takes no options.
-    /// The template and its fields are stored together: an invalid field rejects the whole request and nothing is created.
+    /// A field without `order` is placed after the fields that have one, in the order of the request. The template and
+    /// its fields are stored together: an invalid field rejects the whole request and nothing is created.
     /// The answer is the created template with its fields and the generated option identifiers, which the values written
     /// with `PUT api/2.0/files/metadata/file/{fileId}/values` refer to. A name already in use or an invalid field is
     /// answered with 400; the request of a member who is not a DocSpace admin with 403.
@@ -151,10 +152,11 @@ public class MetadataController(
     /// <remarks>
     /// Adds a field to an existing metadata template. Only a DocSpace admin can change templates. The field name must be
     /// unique within the template regardless of case and at most 255 characters, the type must be one of the published ones,
-    /// a choice field needs at least one option and unique option values, a field of another type takes no options. The
-    /// entries the template is already assigned to get the field without a value: nothing is written on them and no cascade
-    /// runs. The answer is the created field with its generated option identifiers. A template that does not exist is
-    /// answered with 404, an invalid field with 400.
+    /// a choice field needs at least one option and unique option values, a field of another type takes no options. A
+    /// field without `order` is placed after the last field of the template. The entries the template is already
+    /// assigned to get the field without a value: nothing is written on them and no cascade runs. The answer is the
+    /// created field with its generated option identifiers. A template that does not exist is answered with 404, an
+    /// invalid field with 400.
     /// </remarks>
     /// <summary>Add a metadata field</summary>
     /// <path>api/2.0/files/metadata/templates/{templateId}/fields</path>
@@ -506,7 +508,7 @@ public class MetadataController(
             Name = request.Name,
             Type = request.Type,
             Options = request.Options?.Select(o => new MetadataFieldOption(o.Id ?? Guid.Empty, o.Value)).ToList(),
-            Order = request.Order ?? 0
+            Order = request.Order
         };
     }
 

@@ -97,6 +97,8 @@ public class MetadataService(
 
         CheckFieldNamesAreUnique(fieldsList.Select(f => f.Name));
 
+        AppendFieldsWithoutOrder(fieldsList, []);
+
         MetadataTemplate template;
 
         try
@@ -200,7 +202,11 @@ public class MetadataService(
 
         PrepareField(field);
 
-        await CheckFieldNameIsFreeAsync(metadataDao, templateId, field.Name, 0);
+        var existingFields = await metadataDao.GetFieldsAsync(templateId).ToListAsync();
+
+        CheckFieldNameIsFree(existingFields, field.Name, 0);
+
+        AppendFieldsWithoutOrder([field], existingFields);
 
         var saved = await metadataDao.SaveFieldAsync(field);
 
@@ -224,7 +230,7 @@ public class MetadataService(
 
             if (!update.Name.Equals(field.Name, StringComparison.OrdinalIgnoreCase))
             {
-                await CheckFieldNameIsFreeAsync(metadataDao, templateId, update.Name, fieldId);
+                CheckFieldNameIsFree(await metadataDao.GetFieldsAsync(templateId).ToListAsync(), update.Name, fieldId);
             }
 
             field.Name = update.Name;
@@ -969,14 +975,30 @@ public class MetadataService(
         }
     }
 
-    private static async Task CheckFieldNameIsFreeAsync(IMetadataDao<int> metadataDao, int templateId, string name, int exceptFieldId)
+    private static void CheckFieldNameIsFree(IEnumerable<MetadataField> templateFields, string name, int exceptFieldId)
     {
-        var exists = await metadataDao.GetFieldsAsync(templateId)
-            .AnyAsync(f => f.Id != exceptFieldId && f.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
-
-        if (exists)
+        if (templateFields.Any(f => f.Id != exceptFieldId && f.Name.Equals(name, StringComparison.OrdinalIgnoreCase)))
         {
             throw new ArgumentException($@"Field with name '{name}' already exists in the template", nameof(name));
+        }
+    }
+
+    /// <summary>
+    /// A field sent without a position goes after the last one: after the fields the template already has and after
+    /// the fields of the same request that name a position, in the order of the request. The position used to default
+    /// to zero, which put every such field first and left equal positions to the database to order.
+    /// </summary>
+    private static void AppendFieldsWithoutOrder(IReadOnlyCollection<MetadataField> fields, IReadOnlyCollection<MetadataField> templateFields)
+    {
+        var next = templateFields.Concat(fields)
+            .Where(f => f.Order.HasValue)
+            .Select(f => f.Order.Value)
+            .DefaultIfEmpty(-1)
+            .Max() + 1;
+
+        foreach (var field in fields.Where(f => !f.Order.HasValue))
+        {
+            field.Order = next++;
         }
     }
 

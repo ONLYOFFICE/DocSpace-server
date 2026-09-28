@@ -595,6 +595,11 @@ public class MetadataFieldPayload
     public int Type { get; init; }
 
     public List<MetadataFieldOptionPayload>? Options { get; init; }
+
+    /// <summary>
+    /// The display position; left out, the field goes after the last one.
+    /// </summary>
+    public int? Order { get; init; }
 }
 
 public class MetadataFieldOptionPayload
@@ -694,6 +699,7 @@ public class MetadataFieldResponse
     public string Name { get; init; } = "";
     public int Type { get; init; }
     public List<MetadataFieldOptionResponse> Options { get; init; } = [];
+    public int Order { get; init; }
 
     public Guid Option(string value)
     {

@@ -55,8 +55,10 @@ public class MetadataFieldRequest
     public List<MetadataFieldOptionRequest> Options { get; set; }
 
     /// <summary>
-    /// The field display order inside the template.
+    /// The display position of the field inside the template: the fields are shown by it ascending, and equal positions
+    /// keep the order of creation.
     /// </summary>
+    /// <example>1</example>
     public int? Order { get; set; }
 }
 
@@ -82,8 +84,9 @@ public class UpdateMetadataFieldRequest
     public List<MetadataFieldOptionRequest> Options { get; set; }
 
     /// <summary>
-    /// The new field display order inside the template.
+    /// The new display position of the field inside the template: the fields are shown by it ascending.
     /// </summary>
+    /// <example>1</example>
     public int? Order { get; set; }
 }
 
