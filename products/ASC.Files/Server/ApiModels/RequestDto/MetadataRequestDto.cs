@@ -47,11 +47,13 @@ public class MetadataFieldRequest
     /// <summary>
     /// The field type.
     /// </summary>
+    /// <example>0</example>
     public MetadataFieldType Type { get; set; }
 
     /// <summary>
     /// The choice options of the field.
     /// </summary>
+    /// <example>[{"value": "Red"}, {"value": "Green"}]</example>
     public List<MetadataFieldOptionRequest> Options { get; set; }
 
     /// <summary>
@@ -76,11 +78,13 @@ public class UpdateMetadataFieldRequest
     /// <summary>
     /// The new field type. The type can be changed only while the field has no values.
     /// </summary>
+    /// <example>2</example>
     public MetadataFieldType? Type { get; set; }
 
     /// <summary>
     /// The new choice options of the field. The options in use cannot be removed.
     /// </summary>
+    /// <example>[{"id": "4f1e2d3c-5b6a-4788-99aa-0c1d2e3f4a55", "value": "Red"}, {"value": "Green"}]</example>
     public List<MetadataFieldOptionRequest> Options { get; set; }
 
     /// <summary>
@@ -98,6 +102,7 @@ public class MetadataFieldOptionRequest
     /// <summary>
     /// The option ID. Omit it for a new option.
     /// </summary>
+    /// <example>4f1e2d3c-5b6a-4788-99aa-0c1d2e3f4a55</example>
     public Guid? Id { get; set; }
 
     /// <summary>
@@ -115,6 +120,7 @@ public class GetMetadataTemplatesRequestDto
     /// <summary>
     /// Filters the templates by their visibility.
     /// </summary>
+    /// <example>true</example>
     [FromQuery(Name = "visible")]
     public bool? Visible { get; set; }
 }
@@ -133,11 +139,13 @@ public class CreateMetadataTemplateRequestDto
     /// <summary>
     /// Specifies if the template is visible in the UI pickers.
     /// </summary>
+    /// <example>true</example>
     public bool Visible { get; set; } = true;
 
     /// <summary>
     /// The template metadata fields.
     /// </summary>
+    /// <example>[{"name": "Contract number", "type": 0}, {"name": "Signed on", "type": 1}]</example>
     public List<MetadataFieldRequest> Fields { get; set; }
 }
 
@@ -187,6 +195,7 @@ public class UpdateMetadataTemplate
     /// <summary>
     /// Specifies if the template is visible in the UI pickers.
     /// </summary>
+    /// <example>true</example>
     public bool? Visible { get; set; }
 }
 
@@ -301,16 +310,19 @@ public class AssignMetadataTemplates
     /// <summary>
     /// The metadata template IDs.
     /// </summary>
+    /// <example>[1, 2]</example>
     public required List<int> TemplateIds { get; set; }
 
     /// <summary>
     /// Specifies if the templates are propagated to the folder sub-entries.
     /// </summary>
+    /// <example>true</example>
     public bool Cascade { get; set; }
 
     /// <summary>
     /// The conflict resolve type for the cascade assignment.
     /// </summary>
+    /// <example>0</example>
     public MetadataConflictResolveType ConflictResolveType { get; set; } = MetadataConflictResolveType.Skip;
 }
 
@@ -368,21 +380,25 @@ public class MetadataValueRequest
     /// <summary>
     /// The string value.
     /// </summary>
+    /// <example>ACME Corp</example>
     public string StringValue { get; set; }
 
     /// <summary>
     /// The number value.
     /// </summary>
+    /// <example>150000</example>
     public long? NumberValue { get; set; }
 
     /// <summary>
     /// The date value. A value without a time zone offset is treated as UTC, the same way the metadata filters treat their date bounds.
     /// </summary>
+    /// <example>2026-06-01T00:00:00Z</example>
     public DateTime? DateValue { get; set; }
 
     /// <summary>
     /// The selected choice option IDs.
     /// </summary>
+    /// <example>["4f1e2d3c-5b6a-4788-99aa-0c1d2e3f4a55"]</example>
     public List<Guid> OptionIds { get; set; }
 }
 
@@ -432,6 +448,7 @@ public class SetMetadataValues
     /// <summary>
     /// The metadata field values. An empty value clears the field.
     /// </summary>
+    /// <example>[{"fieldId": 1, "stringValue": "ACME Corp"}, {"fieldId": 2, "numberValue": 150000}]</example>
     [Required]
     public required List<MetadataValueRequest> Values { get; set; }
 }
@@ -483,6 +500,7 @@ public class SetCustomFields
     /// The custom fields to set on the entry. A listed field gets the value, a null or empty value removes the field
     /// from the entry, the fields not listed are left alone. A name the portal has not seen yet creates the field.
     /// </summary>
+    /// <example>[{"name": "Project code", "value": "A-42"}, {"name": "Client", "value": null}]</example>
     [Required]
     public required List<CustomFieldRequest> Fields { get; set; }
 }
@@ -540,6 +558,7 @@ public class FolderMetadataSearch
     /// <summary>
     /// The metadata filter conditions, combined with AND. A custom field is addressed by its name instead of the field ID.
     /// </summary>
+    /// <example>[{"fieldId": 1, "op": "eq", "value": "ACME"}, {"name": "Client", "op": "eq", "value": "ACME"}]</example>
     public List<MetadataFilterConditionRequest> MetadataFilters { get; set; }
 
     /// <summary>
@@ -557,6 +576,7 @@ public class FolderMetadataSearch
     /// <summary>
     /// The filter type.
     /// </summary>
+    /// <example>0</example>
     public FilterType? FilterType { get; set; }
 
     /// <summary>
@@ -582,6 +602,7 @@ public class FolderMetadataSearch
     /// <summary>
     /// The sort order.
     /// </summary>
+    /// <example>0</example>
     public SortOrder SortOrder { get; set; }
 }
 
@@ -601,6 +622,7 @@ public class RoomsMetadataSearchRequestDto
     /// <summary>
     /// The metadata filter conditions, combined with AND. A custom field is addressed by its name instead of the field ID.
     /// </summary>
+    /// <example>[{"fieldId": 1, "op": "eq", "value": "ACME"}, {"name": "Client", "op": "eq", "value": "ACME"}]</example>
     public List<MetadataFilterConditionRequest> MetadataFilters { get; set; }
 
     /// <summary>
@@ -612,11 +634,13 @@ public class RoomsMetadataSearchRequestDto
     /// <summary>
     /// The section to search in: the active rooms (the default), the archive or the templates.
     /// </summary>
+    /// <example>Active</example>
     public SearchArea? SearchArea { get; set; }
 
     /// <summary>
     /// The room types to search among.
     /// </summary>
+    /// <example>[5]</example>
     public IEnumerable<RoomType> Type { get; set; }
 
     /// <summary>
@@ -642,5 +666,6 @@ public class RoomsMetadataSearchRequestDto
     /// <summary>
     /// The sort order.
     /// </summary>
+    /// <example>0</example>
     public SortOrder SortOrder { get; set; }
 }

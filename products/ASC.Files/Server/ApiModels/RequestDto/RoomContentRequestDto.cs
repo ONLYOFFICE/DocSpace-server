@@ -195,6 +195,7 @@ public class RoomContentRequestDto
     /// A custom field is addressed by its name instead of the fieldId: {"name":"Client","op":"eq","value":"ACME"}.
     /// The same filter is taken as a typed request body by POST api/2.0/files/rooms/search.
     /// </summary>
+    /// <example>[{"fieldId":1,"op":"eq","value":"ACME"}]</example>
     [FromQuery(Name = "metadataFilters")]
     public string MetadataFilters { get; set; }
 }

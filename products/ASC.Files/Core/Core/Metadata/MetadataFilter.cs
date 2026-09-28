@@ -83,6 +83,7 @@ public class MetadataFilterConditionRequest
     /// The name of a custom field, for the conditions on the custom fields, which have no identifier outside. Either the
     /// field ID or the name is given; the name is matched without regard to case.
     /// </summary>
+    /// <example>Client</example>
     public string Name { get; set; }
 
     /// <summary>
@@ -101,17 +102,20 @@ public class MetadataFilterConditionRequest
     /// <summary>
     /// The inclusive lower bound of a range. A date given without a time ("2026-06-01") is the start of that day (UTC).
     /// </summary>
+    /// <example>2026-01-01</example>
     public string From { get; set; }
 
     /// <summary>
     /// The inclusive upper bound of a range. A date given without a time ("2026-06-30") covers the whole day (UTC);
     /// a value with a time is an instant and is taken as is.
     /// </summary>
+    /// <example>2026-06-30</example>
     public string To { get; set; }
 
     /// <summary>
     /// The options any of which the choice field must hold.
     /// </summary>
+    /// <example>["4f1e2d3c-5b6a-4788-99aa-0c1d2e3f4a55"]</example>
     public List<Guid> OptionIds { get; set; }
 }
 

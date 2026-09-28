@@ -214,6 +214,7 @@ public class GetFolderRequestDto<T>
     /// A custom field is addressed by its name instead of the fieldId: {"name":"Client","op":"eq","value":"ACME"}.
     /// The same filter is taken as a typed request body by POST api/2.0/files/{folderId}/search.
     /// </summary>
+    /// <example>[{"fieldId":1,"op":"eq","value":"ACME"}]</example>
     [FromQuery(Name = "metadataFilters")]
     public string MetadataFilters { get; set; }
 }
@@ -303,6 +304,7 @@ public class GetFavoritesFolderRequestDto : GetCommonFolderRequestDto
     /// e.g. [{"fieldId":1,"op":"eq","value":"ACME"},{"fieldId":2,"op":"range","from":"2026-01-01","to":"2026-06-30"},{"fieldId":3,"op":"in","optionIds":["..."]}].
     /// The range bounds are inclusive; a date-only bound covers the whole day. A custom field is addressed by its name instead of the fieldId: {"name":"Client","op":"eq","value":"ACME"}.
     /// </summary>
+    /// <example>[{"fieldId":1,"op":"eq","value":"ACME"}]</example>
     [FromQuery(Name = "metadataFilters")]
     public string MetadataFilters { get; set; }
 }
@@ -568,6 +570,7 @@ public class GetRecentFolderRequestDto
     /// e.g. [{"fieldId":1,"op":"eq","value":"ACME"},{"fieldId":2,"op":"range","from":"2026-01-01","to":"2026-06-30"},{"fieldId":3,"op":"in","optionIds":["..."]}].
     /// The range bounds are inclusive; a date-only bound covers the whole day. A custom field is addressed by its name instead of the fieldId: {"name":"Client","op":"eq","value":"ACME"}.
     /// </summary>
+    /// <example>[{"fieldId":1,"op":"eq","value":"ACME"}]</example>
     [FromQuery(Name = "metadataFilters")]
     public string MetadataFilters { get; set; }
 }

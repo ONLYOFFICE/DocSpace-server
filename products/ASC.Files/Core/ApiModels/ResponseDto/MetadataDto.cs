@@ -41,21 +41,25 @@ public class MetadataTemplateDto
     /// <summary>
     /// The template ID.
     /// </summary>
+    /// <example>3</example>
     public int Id { get; set; }
 
     /// <summary>
     /// The template name.
     /// </summary>
+    /// <example>Contracts</example>
     public string Name { get; set; }
 
     /// <summary>
     /// Specifies if the template is visible in the UI pickers.
     /// </summary>
+    /// <example>true</example>
     public bool Visible { get; set; }
 
     /// <summary>
     /// The user who created the template.
     /// </summary>
+    /// <example>9a7d5f3e-1c2b-4e8a-9f60-3b7c2d1e5a44</example>
     public Guid CreateBy { get; set; }
 
     /// <summary>
@@ -66,6 +70,7 @@ public class MetadataTemplateDto
     /// <summary>
     /// The user who modified the template last.
     /// </summary>
+    /// <example>9a7d5f3e-1c2b-4e8a-9f60-3b7c2d1e5a44</example>
     public Guid ModifiedBy { get; set; }
 
     /// <summary>
@@ -76,6 +81,7 @@ public class MetadataTemplateDto
     /// <summary>
     /// The template metadata fields.
     /// </summary>
+    /// <example>[{"id": 9, "templateId": 3, "name": "Customer", "type": 0, "order": 0}]</example>
     public List<MetadataFieldDto> Fields { get; set; }
 }
 
@@ -87,31 +93,37 @@ public class MetadataFieldDto
     /// <summary>
     /// The field ID.
     /// </summary>
+    /// <example>9</example>
     public int Id { get; set; }
 
     /// <summary>
     /// The ID of the template the field belongs to.
     /// </summary>
+    /// <example>3</example>
     public int TemplateId { get; set; }
 
     /// <summary>
     /// The field name.
     /// </summary>
+    /// <example>Customer</example>
     public string Name { get; set; }
 
     /// <summary>
     /// The field type.
     /// </summary>
+    /// <example>0</example>
     public MetadataFieldType Type { get; set; }
 
     /// <summary>
     /// The choice options of the field.
     /// </summary>
+    /// <example>[{"id": "4f1e2d3c-5b6a-4788-99aa-0c1d2e3f4a55", "value": "Red"}]</example>
     public List<MetadataFieldOptionDto> Options { get; set; }
 
     /// <summary>
     /// The field display order inside the template.
     /// </summary>
+    /// <example>0</example>
     public int Order { get; set; }
 }
 
@@ -123,11 +135,13 @@ public class MetadataFieldOptionDto
     /// <summary>
     /// The option ID.
     /// </summary>
+    /// <example>4f1e2d3c-5b6a-4788-99aa-0c1d2e3f4a55</example>
     public Guid Id { get; set; }
 
     /// <summary>
     /// The option value.
     /// </summary>
+    /// <example>Red</example>
     public string Value { get; set; }
 }
 
@@ -158,6 +172,7 @@ public class MetadataValueDto
     /// <summary>
     /// The selected choice option IDs.
     /// </summary>
+    /// <example>["4f1e2d3c-5b6a-4788-99aa-0c1d2e3f4a55"]</example>
     public List<Guid> OptionIds { get; set; }
 }
 
@@ -187,6 +202,7 @@ public class EntryTemplateDto
     /// <summary>
     /// The template fields with their values on the entry.
     /// </summary>
+    /// <example>[{"id": 9, "name": "Customer", "type": 0, "order": 0, "value": {"stringValue": "ACME Corp"}}]</example>
     public List<EntryFieldDto> Fields { get; set; }
 }
 
@@ -210,11 +226,13 @@ public class EntryFieldDto
     /// <summary>
     /// The field type.
     /// </summary>
+    /// <example>0</example>
     public MetadataFieldType Type { get; set; }
 
     /// <summary>
     /// The choice options of the field.
     /// </summary>
+    /// <example>[{"id": "4f1e2d3c-5b6a-4788-99aa-0c1d2e3f4a55", "value": "Red"}]</example>
     public List<MetadataFieldOptionDto> Options { get; set; }
 
     /// <summary>
@@ -256,11 +274,13 @@ public class EntryMetadataDto
     /// <summary>
     /// The assigned metadata templates, each field carrying its value on the entry.
     /// </summary>
+    /// <example>[{"id": 3, "name": "Contracts", "visible": true, "fields": []}]</example>
     public List<EntryTemplateDto> Templates { get; set; }
 
     /// <summary>
     /// The custom fields with their values.
     /// </summary>
+    /// <example>[{"name": "Project code", "value": "A-42"}]</example>
     public List<CustomFieldValueDto> CustomFields { get; set; }
 }
 
@@ -272,21 +292,25 @@ public class MetadataOperationDto
     /// <summary>
     /// The operation ID.
     /// </summary>
+    /// <example>a1f4c9b2-3d8e-4f77-9b16-2c5de8f0a913</example>
     public string Id { get; set; }
 
     /// <summary>
     /// The operation progress percentage.
     /// </summary>
+    /// <example>100</example>
     public double Progress { get; set; }
 
     /// <summary>
     /// Specifies if the operation is completed.
     /// </summary>
+    /// <example>true</example>
     public bool IsCompleted { get; set; }
 
     /// <summary>
     /// The operation error message.
     /// </summary>
+    /// <example>Folder not found.</example>
     public string Error { get; set; }
 }
 
