@@ -195,6 +195,12 @@ public class OperationDto
     /// <example>123</example>
     public string SourceId { get; set; }
     /// <summary>
+    /// The tokens an AI operation consumed, broken down by kind - prompt, completion, cache reads and writes,
+    /// reasoning, images. It is `null` on any movement that is not an AI charge, and on an AI charge the billing
+    /// service recorded without token counts.
+    /// </summary>
+    public OperationTokenUsage TokenUsage { get; set; }
+    /// <summary>
     /// What kind of movement this is - a payment, a charge, a refund, a correction. It is what the `type` filter
     /// matches on, and `Unknown` covers a movement the billing service reported under a kind this build does not
     /// recognise.
@@ -223,6 +229,7 @@ public class OperationDto
         SourceType = sourceType;
         SourceTitle = sourceTitle;
         SourceId = sourceId;
+        TokenUsage = WalletServiceDescriptionManager.GetTokenUsage(operation.Metadata);
         Type = operation.Type;
     }
 }

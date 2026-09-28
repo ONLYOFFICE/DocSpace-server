@@ -981,10 +981,63 @@ public class Operation
     public string SourceTitle { get; set; }
 
     /// <summary>
+    /// Tokens consumed by the AI operation, broken down by kind.
+    /// </summary>
+    public OperationTokenUsage TokenUsage { get; set; }
+
+    /// <summary>
     /// Metadata of the operation.
     /// </summary>
     /// <example>{}</example>
     public Dictionary<string, string> Metadata { get; set; }
+}
+
+/// <summary>
+/// Tokens an AI operation consumed, as recorded in the operation metadata. A kind the provider did not report is `0`.
+/// </summary>
+public class OperationTokenUsage
+{
+    /// <summary>
+    /// All tokens of the request: prompt plus completion.
+    /// </summary>
+    /// <example>20747</example>
+    public long TotalTokens { get; set; }
+
+    /// <summary>
+    /// Tokens sent to the model, cached ones included.
+    /// </summary>
+    /// <example>19332</example>
+    public long PromptTokens { get; set; }
+
+    /// <summary>
+    /// Tokens the model generated, reasoning ones included.
+    /// </summary>
+    /// <example>1415</example>
+    public long CompletionTokens { get; set; }
+
+    /// <summary>
+    /// Part of the prompt tokens read from the provider cache.
+    /// </summary>
+    /// <example>19226</example>
+    public long CachedTokens { get; set; }
+
+    /// <summary>
+    /// Part of the prompt tokens written to the provider cache.
+    /// </summary>
+    /// <example>104</example>
+    public long CacheWriteTokens { get; set; }
+
+    /// <summary>
+    /// Part of the completion tokens the model spent on reasoning.
+    /// </summary>
+    /// <example>68</example>
+    public long ReasoningTokens { get; set; }
+
+    /// <summary>
+    /// Tokens spent on images.
+    /// </summary>
+    /// <example>0</example>
+    public long ImageTokens { get; set; }
 }
 
 /// <summary>
