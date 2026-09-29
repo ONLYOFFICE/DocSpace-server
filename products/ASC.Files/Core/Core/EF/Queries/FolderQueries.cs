@@ -108,6 +108,12 @@ public partial class FilesDbContext
     }
 
     [PreCompileQuery]
+    public Task<bool> AiFolderExistsAsync(int tenantId, int parentId, int exceptFolderId)
+    {
+        return FolderQueries.AiFolderExistsAsync(this, tenantId, parentId, exceptFolderId);
+    }
+
+    [PreCompileQuery]
     public Task<DbFolderQuery> DbFolderQueryWithSharedAsync(int tenantId, int folderId)
     {
         return FolderQueries.DbFolderQueryWithSharedAsync(this, tenantId, folderId);
@@ -604,6 +610,15 @@ static file class FolderQueries
                     .Where(r => r.Id == id)
                     .Select(r => r.FolderType)
                     .FirstOrDefault());
+
+    public static readonly Func<FilesDbContext, int, int, int, Task<bool>> AiFolderExistsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (FilesDbContext ctx, int tenantId, int parentId, int exceptFolderId) =>
+                ctx.Folders
+                    .Where(r => r.TenantId == tenantId)
+                    .Where(r => r.ParentId == parentId)
+                    .Where(r => r.Title == FileConstant.AiFolderTitle)
+                    .Any(r => r.FolderType == FolderType.Ai && r.Id != exceptFolderId));
 
     public static readonly Func<FilesDbContext, int, IEnumerable<int>, IAsyncEnumerable<DbFolder>> DbFoldersForDeleteAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
