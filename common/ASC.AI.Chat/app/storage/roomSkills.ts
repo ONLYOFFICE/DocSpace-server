@@ -207,7 +207,9 @@ export async function readFileText(fileId: string): Promise<string> {
     if (!res.ok) {
       throw new DocspaceApiHttpError(res.status, res.statusText, url);
     }
-    return readTextCapped(res, MAX_SKILL_BYTES);
+    // Awaited here, not returned as a promise: the finally below cancels the
+    // timeout signal, and that must happen after the body has been read.
+    return await readTextCapped(res, MAX_SKILL_BYTES);
   } finally {
     cancel();
   }
