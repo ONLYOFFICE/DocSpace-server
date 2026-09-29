@@ -31,7 +31,9 @@ function addReportTable(worksheet, range) {
     return worksheet.AddListObject("xlSrcRange", range, undefined, "xlYes", undefined, getReportTableStyleName());
 }
 
-function createReportTableStyle() {
+// firstColumnFill is optional: the fill of a first column that a report's table switches on with
+// SetShowTableStyleFirstColumn. Only the room index shows one, so the other reports leave it out.
+function createReportTableStyle(firstColumnFill) {
     if (!reportTableStyleSupported) {
         return;
     }
@@ -72,6 +74,10 @@ function createReportTableStyle() {
     // Only the second stripe is filled, so the first data row stays clear and the banding starts the
     // way the hand-painted table started.
     elements.GetItem("xlRowStripe2").SetFillColor(stripeFillColor);
+
+    if (firstColumnFill) {
+        elements.GetItem("xlFirstColumn").SetFillColor(firstColumnFill);
+    }
 
     // The pivot's grand total row, closing the summary the way the total row closes the detail sheet.
     elements.GetItem("xlTotalRow").GetFont().SetBold(true);

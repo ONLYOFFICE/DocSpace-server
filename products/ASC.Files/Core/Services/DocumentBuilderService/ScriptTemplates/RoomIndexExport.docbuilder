@@ -242,14 +242,8 @@ function writeImg() {
 
 customizeWorksheet();
 
-createReportTableStyle();
-
-// The index column carries a grey of its own. Only this report shows it, so the element is added to
-// the shared style here rather than declared with it, and only this report's table switches it on.
-if (reportTableStyleSupported) {
-    Api.GetActiveWorkbook().GetTableStyles().GetItem(REPORT_TABLE_STYLE_NAME)
-       .GetTableStyleElements().GetItem("xlFirstColumn").SetFillColor(defaultBgColorGray);
-}
+// The index column carries a grey of its own, which only this report's table switches on.
+createReportTableStyle(defaultBgColorGray);
 
 writeImg();
 

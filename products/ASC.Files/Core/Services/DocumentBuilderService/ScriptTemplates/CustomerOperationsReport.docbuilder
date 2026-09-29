@@ -480,9 +480,11 @@ function writePivot(headerRowIndex, colCount, detailColumnLengths) {
     pivotTable.SetRowAxisLayout("Tabular", false);
     pivotTable.SetGrandTotalName(inputData.resources.total);
 
-    // The editor refits the pivot's columns to their content on every update, which would undo the
-    // widths setPivotColumnWidths() hands it below and shrink them again the next time the reader
-    // moves a field or refreshes. Switched off before the first update, so the widths set here stay.
+    // The editor refits the pivot's columns to their content every time the pivot is laid out again -
+    // which each of the calls above already did, and which the reader's next field move or refresh
+    // would do once more, shrinking the widths setPivotColumnWidths() hands it below. Switched off
+    // before those widths are set, so they stay. A builder older than 10.0 has no such switch, and
+    // there the widths last only until the pivot is next laid out.
     if (typeof pivotTable.SetHasAutoFormat === "function") {
         pivotTable.SetHasAutoFormat(false);
     }

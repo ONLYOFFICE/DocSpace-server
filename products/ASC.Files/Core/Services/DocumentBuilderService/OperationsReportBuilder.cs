@@ -243,7 +243,10 @@ public class OperationsReportBuilder(
             {
                 // One value per token column even when the operation carries no token counts at all,
                 // or every column after this block would shift left by six.
-                properties.AddRange(tokenColumns.Select(x => CountValue(x.Tokens(record.TokenUsage))));
+                foreach (var tokenColumn in tokenColumns)
+                {
+                    properties.Add(CountValue(tokenColumn.Tokens(record.TokenUsage)));
+                }
             }
 
             properties.Add(new PropertyValue(record.ServiceUnit, "@"));
