@@ -52,7 +52,7 @@ public class AccessToDevToolsSetPermissionsTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _securityAccessToDevToolsApi.SetTenantDevToolsAccessSettingsAsync(
-                new TenantDevToolsAccessSettingsDto(true), TestContext.Current.CancellationToken));
+                new TenantDevToolsAccessSettingsRequestDto(true), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(401);
@@ -71,7 +71,7 @@ public class AccessToDevToolsSetPermissionsTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _securityAccessToDevToolsApi.SetTenantDevToolsAccessSettingsAsync(
-                new TenantDevToolsAccessSettingsDto(true), TestContext.Current.CancellationToken));
+                new TenantDevToolsAccessSettingsRequestDto(true), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);

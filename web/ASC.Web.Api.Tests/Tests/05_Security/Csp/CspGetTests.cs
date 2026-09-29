@@ -49,7 +49,7 @@ public class CspGetTests(
         // Arrange
         var domain = $"https://{Guid.NewGuid():N}.example.com";
         await _webApiClient.Authenticate(Owner);
-        await _cspApi.ConfigureCspAsync(new CspRequestsDto([domain]), TestContext.Current.CancellationToken);
+        await _cspApi.ConfigureCspAsync(new CspRequestDto([domain]), TestContext.Current.CancellationToken);
 
         // Act
         var response = await _cspApi.GetCspSettingsWithHttpInfoAsync(TestContext.Current.CancellationToken);
@@ -70,7 +70,7 @@ public class CspGetTests(
         // Arrange
         var domain = $"https://{Guid.NewGuid():N}.example.com";
         await _webApiClient.Authenticate(Owner);
-        await _cspApi.ConfigureCspAsync(new CspRequestsDto([domain]), TestContext.Current.CancellationToken);
+        await _cspApi.ConfigureCspAsync(new CspRequestDto([domain]), TestContext.Current.CancellationToken);
 
         var member = await InviteMember(employeeType);
         await _webApiClient.Authenticate(member);
@@ -90,7 +90,7 @@ public class CspGetTests(
         // Arrange
         var domain = $"https://{Guid.NewGuid():N}.example.com";
         await _webApiClient.Authenticate(Owner);
-        await _cspApi.ConfigureCspAsync(new CspRequestsDto([domain]), TestContext.Current.CancellationToken);
+        await _cspApi.ConfigureCspAsync(new CspRequestDto([domain]), TestContext.Current.CancellationToken);
 
         await _webApiClient.Authenticate(null);
 

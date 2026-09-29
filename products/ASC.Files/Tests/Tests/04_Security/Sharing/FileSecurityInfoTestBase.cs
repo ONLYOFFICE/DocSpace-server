@@ -45,7 +45,7 @@ public abstract class FileSecurityInfoTestBase(AspireAppFixture fixture) : Shari
     {
         var results = (await _filesApi.DeleteFileAsync(
             fileId,
-            new Delete { Immediately = immediately },
+            new DeleteFileRequest { Immediately = immediately },
             true,
             TestContext.Current.CancellationToken)).Response;
 

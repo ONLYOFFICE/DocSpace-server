@@ -59,7 +59,7 @@ public class UpdateWebPluginTests(
         // throws client-side on a null `settings` (a required, non-nullable parameter), so an
         // empty JSON object is used instead — the disabled-prefix bug being asserted here is
         // unrelated to what `settings` contains.
-        var request = new WebPluginRequests(enabled: false, settings: "{}");
+        var request = new WebPluginRequest(enabled: false, settings: "{}");
 
         // Act
         var result = await _webpluginsApi.UpdateWebPluginWithHttpInfoAsync(

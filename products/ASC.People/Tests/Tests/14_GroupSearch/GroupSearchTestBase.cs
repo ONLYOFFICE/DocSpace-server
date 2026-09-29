@@ -63,7 +63,7 @@ public abstract class GroupSearchTestBase(AspireAppFixture fixture) : BaseTest(f
         await _filesClient.Authenticate(actor ?? Owner);
 
         var file = await _filesApi.CreateFileInMyDocumentsAsync(
-            new CreateFileJsonElement(title ?? "Autotest File " + Guid.NewGuid().ToString()[..8]),
+            new CreateFileRequest(title ?? "Autotest File " + Guid.NewGuid().ToString()[..8]),
             TestContext.Current.CancellationToken);
 
         return file.Response.Id;
@@ -76,7 +76,7 @@ public abstract class GroupSearchTestBase(AspireAppFixture fixture) : BaseTest(f
         var myDocs = await _foldersApi.GetMyFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
         var folder = await _foldersApi.CreateFolderAsync(
             myDocs.Response.Current.Id,
-            new CreateFolder(title ?? "Autotest Folder " + Guid.NewGuid().ToString()[..8]),
+            new CreateFolderRequest(title ?? "Autotest Folder " + Guid.NewGuid().ToString()[..8]),
             TestContext.Current.CancellationToken);
 
         return folder.Response.Id;

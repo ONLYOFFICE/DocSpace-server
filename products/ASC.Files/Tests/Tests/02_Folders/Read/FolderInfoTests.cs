@@ -116,7 +116,7 @@ public class FolderInfoTests(
     {
         var folder = await CreateFolderInMy("Autotest Folder For Info After Delete", Owner);
 
-        var operation = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder(deleteAfter: true, immediately: true), TestContext.Current.CancellationToken)).Response;
+        var operation = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest(deleteAfter: true, immediately: true), TestContext.Current.CancellationToken)).Response;
         await WaitLongOperation(operation.FirstOrDefault()?.Id);
 
         var exception = await Assert.ThrowsAsync<ApiException>(

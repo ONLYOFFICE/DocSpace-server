@@ -49,7 +49,7 @@ public class FileCreateVariantsTests(
         await _filesClient.Authenticate(Owner);
 
         var result = (await _filesApi.CreateFileInMyDocumentsAsync(
-            new CreateFileJsonElement("Autotest Document"), TestContext.Current.CancellationToken)).Response;
+            new CreateFileRequest("Autotest Document"), TestContext.Current.CancellationToken)).Response;
 
         result.Title.Should().Be("Autotest Document.docx");
         result.Id.Should().BeGreaterThan(0);
@@ -61,7 +61,7 @@ public class FileCreateVariantsTests(
         await _filesClient.Authenticate(Owner);
 
         var result = (await _filesApi.CreateFileInMyDocumentsAsync(
-            new CreateFileJsonElement("Autotest Document.docx"), TestContext.Current.CancellationToken)).Response;
+            new CreateFileRequest("Autotest Document.docx"), TestContext.Current.CancellationToken)).Response;
 
         result.Title.Should().Be("Autotest Document.docx");
         result.Id.Should().BeGreaterThan(0);
@@ -73,7 +73,7 @@ public class FileCreateVariantsTests(
         await _filesClient.Authenticate(Owner);
 
         var result = (await _filesApi.CreateFileInMyDocumentsAsync(
-            new CreateFileJsonElement("Autotest Document.txt"), TestContext.Current.CancellationToken)).Response;
+            new CreateFileRequest("Autotest Document.txt"), TestContext.Current.CancellationToken)).Response;
 
         result.Title.Should().Be("Autotest Document.docx");
         result.Id.Should().BeGreaterThan(0);
@@ -92,7 +92,7 @@ public class FileCreateVariantsTests(
         await _filesClient.Authenticate(Owner);
 
         var result = (await _filesApi.CreateFileInMyDocumentsAsync(
-            new CreateFileJsonElement("Autotest Document.md", enableExternalExt: false), TestContext.Current.CancellationToken)).Response;
+            new CreateFileRequest("Autotest Document.md", enableExternalExt: false), TestContext.Current.CancellationToken)).Response;
 
         result.Title.Should().Be("Autotest Document.md");
         result.Id.Should().BeGreaterThan(0);
@@ -106,7 +106,7 @@ public class FileCreateVariantsTests(
         var room = await CreateCustomRoom("Autotest Room For File Creation " + Guid.NewGuid().ToString()[..8]);
 
         var result = (await _filesApi.CreateFileAsync(
-            room.Id, new CreateFileJsonElement("Autotest Document"), TestContext.Current.CancellationToken)).Response;
+            room.Id, new CreateFileRequest("Autotest Document"), TestContext.Current.CancellationToken)).Response;
 
         result.Title.Should().Be("Autotest Document.docx");
         result.FolderId.Should().Be(room.Id);

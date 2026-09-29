@@ -65,9 +65,9 @@ public class CopyFileAsTests(
         var sourceFile = await CreateFileInMy("Autotest Source File.docx", Owner);
         var destRoom = await CreateCustomRoom("Autotest Room For Copy");
 
-        var copyRequest = new CopyAsJsonElement(
+        var copyRequest = new CopyAsRequest(
             destTitle: "Autotest Copied File.docx",
-            destFolderId: new CopyAsJsonElementDestFolderId(destRoom.Id));
+            destFolderId: new CopyAsRequestDestFolderId(destRoom.Id));
 
         // Act
         var copied = (await _filesApi.CopyFileAsAsync(sourceFile.Id, copyRequest, TestContext.Current.CancellationToken)).Response;

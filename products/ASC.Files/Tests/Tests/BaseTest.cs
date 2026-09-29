@@ -206,14 +206,14 @@ public class BaseTest(
     protected async Task<FileDto> CreateFile(string fileName, int folderId)
     {
         var sw = Stopwatch.StartNew();
-        var result = (await _filesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
+        var result = (await _filesApi.CreateFileAsync(folderId, new CreateFileRequest(fileName))).Response;
         Timing.Write($"createFile({fileName})", sw.ElapsedMilliseconds);
         return result;
     }
     protected async Task<ThirdPartyFileDto> CreateFile(string fileName, string folderId)
     {
         var sw = Stopwatch.StartNew();
-        var result = (await _filesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
+        var result = (await _filesApi.CreateFileAsync(folderId, new CreateFileRequest(fileName))).Response;
         Timing.Write($"createFile({fileName})", sw.ElapsedMilliseconds);
         return result;
     }

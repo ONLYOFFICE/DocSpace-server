@@ -47,7 +47,7 @@ public class TfaSettingsUpdateTests(
     {
         // Act
         var result = await _tfaSettingsApi.UpdateTfaSettingsAsync(
-            new TfaRequestsDto(TfaRequestsDtoType.App), TestContext.Current.CancellationToken);
+            new TfaRequestDto(TfaType.App), TestContext.Current.CancellationToken);
 
         // Assert
         result.Response.Should().BeTrue();
@@ -58,7 +58,7 @@ public class TfaSettingsUpdateTests(
     {
         // Act
         var result = await _tfaSettingsApi.UpdateTfaSettingsWithHttpInfoAsync(
-            new TfaRequestsDto(TfaRequestsDtoType.None), TestContext.Current.CancellationToken);
+            new TfaRequestDto(TfaType.None), TestContext.Current.CancellationToken);
 
         // Assert
         result.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -73,7 +73,7 @@ public class TfaSettingsUpdateTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _tfaSettingsApi.UpdateTfaSettingsAsync(
-                new TfaRequestsDto(TfaRequestsDtoType.Sms), TestContext.Current.CancellationToken));
+                new TfaRequestDto(TfaType.Sms), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(405);
@@ -87,7 +87,7 @@ public class TfaSettingsUpdateTests(
     {
         // Act
         var result = await _tfaSettingsApi.UpdateTfaSettingsAsync(
-            new TfaRequestsDto((TfaRequestsDtoType)99), TestContext.Current.CancellationToken);
+            new TfaRequestDto((TfaType)99), TestContext.Current.CancellationToken);
 
         // Assert
         result.Response.Should().BeFalse();
@@ -98,7 +98,7 @@ public class TfaSettingsUpdateTests(
     {
         // Act
         var result = await _tfaSettingsApi.UpdateTfaSettingsAsync(
-            new TfaRequestsDto(TfaRequestsDtoType.None, mandatoryUsers: [Guid.Empty]), TestContext.Current.CancellationToken);
+            new TfaRequestDto(TfaType.None, mandatoryUsers: [Guid.Empty]), TestContext.Current.CancellationToken);
 
         // Assert
         result.Response.Should().BeFalse();
@@ -109,7 +109,7 @@ public class TfaSettingsUpdateTests(
     {
         // Act
         var result = await _tfaSettingsApi.UpdateTfaSettingsAsync(
-            new TfaRequestsDto(TfaRequestsDtoType.None, mandatoryGroups: [Guid.Empty]), TestContext.Current.CancellationToken);
+            new TfaRequestDto(TfaType.None, mandatoryGroups: [Guid.Empty]), TestContext.Current.CancellationToken);
 
         // Assert
         result.Response.Should().BeFalse();
@@ -144,14 +144,14 @@ public class TfaSettingsUpdateTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _tfaSettingsApi.UpdateTfaSettingsAsync(
-                new TfaRequestsDto(TfaRequestsDtoType.App, trustedIps: ["not-an-ip"]), TestContext.Current.CancellationToken));
+                new TfaRequestDto(TfaType.App, trustedIps: ["not-an-ip"]), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(400);
 
         await _webApiClient.Authenticate(null);
         var login = await _authenticationApi.AuthenticateMeAsync(
-            new AuthRequestsDto(userName: Owner.Email, password: Owner.Password), TestContext.Current.CancellationToken);
+            new AuthRequestDto(userName: Owner.Email, password: Owner.Password), TestContext.Current.CancellationToken);
 
         login.Response.Should().NotBeNull();
         login.Response.Token.Should().NotBeNullOrEmpty();
@@ -167,7 +167,7 @@ public class TfaSettingsUpdateTests(
         // Act
         await _webApiClient.Authenticate(null);
         var login = await _authenticationApi.AuthenticateMeAsync(
-            new AuthRequestsDto(userName: mandatory.Email, password: mandatory.Password), TestContext.Current.CancellationToken);
+            new AuthRequestDto(userName: mandatory.Email, password: mandatory.Password), TestContext.Current.CancellationToken);
 
         // Assert
         login.Response.Tfa.Should().BeTrue();
@@ -183,7 +183,7 @@ public class TfaSettingsUpdateTests(
 
         // Act
         var result = await _tfaSettingsApi.UpdateTfaSettingsAsync(
-            new TfaRequestsDto(TfaRequestsDtoType.App), TestContext.Current.CancellationToken);
+            new TfaRequestDto(TfaType.App), TestContext.Current.CancellationToken);
 
         // Assert
         result.Response.Should().BeTrue();
@@ -198,7 +198,7 @@ public class TfaSettingsUpdateTests(
 
         // Act
         var result = await _tfaSettingsApi.UpdateTfaSettingsWithHttpInfoAsync(
-            new TfaRequestsDto(TfaRequestsDtoType.None), TestContext.Current.CancellationToken);
+            new TfaRequestDto(TfaType.None), TestContext.Current.CancellationToken);
 
         // Assert
         result.StatusCode.Should().Be(HttpStatusCode.OK);

@@ -48,13 +48,12 @@ public class ColorThemeDeleteTests(
         // Arrange
         await _webApiClient.Authenticate(Owner);
 
-        var theme = new CustomColorThemesSettingsItem(
-            name: "Theme To Delete",
-            main: new CustomColorThemesSettingsColorItem("#0F4071", "#5299E0"),
-            text: new CustomColorThemesSettingsColorItem("#FFFFFF", "#FFFFFF"));
+        var theme = new CustomColorThemeRequestDto(
+            main: new ColorThemeColorsRequestDto("#0F4071", "#5299E0"),
+            text: new ColorThemeColorsRequestDto("#FFFFFF", "#FFFFFF"));
 
         var created = await _commonSettingsApi.SavePortalColorThemeAsync(
-            new CustomColorThemesSettingsRequestsDto(theme), TestContext.Current.CancellationToken);
+            new CustomColorThemesSettingsRequestDto(theme), TestContext.Current.CancellationToken);
 
         var themeId = created.Response.Themes.Max(t => t.Id);
         var countBefore = created.Response.Themes.Count;
@@ -74,13 +73,12 @@ public class ColorThemeDeleteTests(
         // Arrange
         await _webApiClient.Authenticate(Owner);
 
-        var theme = new CustomColorThemesSettingsItem(
-            name: "Theme To Delete",
-            main: new CustomColorThemesSettingsColorItem("#333333", "#666666"),
-            text: new CustomColorThemesSettingsColorItem("#FFFFFF", "#FFFFFF"));
+        var theme = new CustomColorThemeRequestDto(
+            main: new ColorThemeColorsRequestDto("#333333", "#666666"),
+            text: new ColorThemeColorsRequestDto("#FFFFFF", "#FFFFFF"));
 
         var created = await _commonSettingsApi.SavePortalColorThemeAsync(
-            new CustomColorThemesSettingsRequestsDto(theme), TestContext.Current.CancellationToken);
+            new CustomColorThemesSettingsRequestDto(theme), TestContext.Current.CancellationToken);
 
         var themeId = created.Response.Themes.Max(t => t.Id);
 

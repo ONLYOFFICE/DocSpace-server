@@ -59,7 +59,7 @@ public class AccessToDevToolsSetTests(
 
         // Act
         var result = await _securityAccessToDevToolsApi.SetTenantDevToolsAccessSettingsAsync(
-            new TenantDevToolsAccessSettingsDto(true), TestContext.Current.CancellationToken);
+            new TenantDevToolsAccessSettingsRequestDto(true), TestContext.Current.CancellationToken);
 
         // Assert
         result.Response.LimitedAccessForUsers.Should().BeTrue();
@@ -75,7 +75,7 @@ public class AccessToDevToolsSetTests(
 
         // Act
         var result = await _securityAccessToDevToolsApi.SetTenantDevToolsAccessSettingsAsync(
-            new TenantDevToolsAccessSettingsDto(false), TestContext.Current.CancellationToken);
+            new TenantDevToolsAccessSettingsRequestDto(false), TestContext.Current.CancellationToken);
 
         // Assert
         result.Response.LimitedAccessForUsers.Should().BeFalse();
@@ -92,7 +92,7 @@ public class AccessToDevToolsSetTests(
 
         // Act
         var result = await _securityAccessToDevToolsApi.SetTenantDevToolsAccessSettingsWithHttpInfoAsync(
-            new TenantDevToolsAccessSettingsDto(true), TestContext.Current.CancellationToken);
+            new TenantDevToolsAccessSettingsRequestDto(true), TestContext.Current.CancellationToken);
 
         // Assert
         result.StatusCode.Should().Be(HttpStatusCode.OK);

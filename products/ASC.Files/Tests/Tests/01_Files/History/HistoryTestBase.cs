@@ -53,6 +53,6 @@ public abstract class HistoryTestBase(
     /// <summary>Bumps a file to a second version, which several history assertions need.</summary>
     protected async Task BumpToSecondVersion(int fileId)
     {
-        await _filesApi.UpdateFileAsync(fileId, new UpdateFile { LastVersion = 2 }, TestContext.Current.CancellationToken);
+        await _filesApi.UpdateFileAsync(fileId, new UpdateFileRequest { LastVersion = 2 }, TestContext.Current.CancellationToken);
     }
 }

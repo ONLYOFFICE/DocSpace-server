@@ -45,17 +45,17 @@ internal static class AuthorizationTestData
     /// A fresh S3 authorization service payload with unique key values, so a test can assert the
     /// values it saved are exactly the ones it reads back.
     /// </summary>
-    public static AuthServiceRequestsDto CreateS3AuthService()
+    public static AuthServiceDto CreateS3AuthService()
     {
         var accessKey = Initializer.Faker.Random.AlphaNumeric(20);
         var secretKey = Initializer.Faker.Random.AlphaNumeric(40);
 
-        return new AuthServiceRequestsDto(
+        return new AuthServiceDto(
             name: "s3",
             props:
             [
-                new AuthKey(name: "acesskey", value: accessKey),
-                new AuthKey(name: "secretaccesskey", value: secretKey)
+                new AuthKeyDto(name: "acesskey", value: accessKey),
+                new AuthKeyDto(name: "secretaccesskey", value: secretKey)
             ]);
     }
 
@@ -64,9 +64,9 @@ internal static class AuthorizationTestData
     /// <c>TestExternalDatabaseConnection</c> always resolves with <c>success: false</c> without
     /// depending on a real database being reachable from the portal host.
     /// </summary>
-    public static ExternalDatabaseSettings CreateInvalidMysqlSettings()
+    public static ExternalDatabaseConnectionRequestDto CreateInvalidMysqlSettings()
     {
-        return new ExternalDatabaseSettings(
+        return new ExternalDatabaseConnectionRequestDto(
             databaseType: "mysql",
             dbHost: "invalid-host",
             dbPort: 3306,

@@ -143,7 +143,7 @@ public abstract class UsedSpaceTestBase(
     {
         var results = (await _filesApi.DeleteFileAsync(
             fileId,
-            new Delete { Immediately = immediately },
+            new DeleteFileRequest { Immediately = immediately },
             true,
             TestContext.Current.CancellationToken)).Response;
 
@@ -154,7 +154,7 @@ public abstract class UsedSpaceTestBase(
     {
         var results = (await _foldersApi.DeleteFolderAsync(
             folderId,
-            new DeleteFolder { Immediately = immediately },
+            new DeleteFolderRequest { Immediately = immediately },
             TestContext.Current.CancellationToken)).Response;
 
         await WaitForCompletionAsync(results);

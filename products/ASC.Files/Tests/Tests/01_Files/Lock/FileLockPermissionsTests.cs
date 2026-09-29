@@ -62,7 +62,7 @@ public class FileLockPermissionsTests(
 
         // Act
         await _filesClient.Authenticate(admin);
-        var result = (await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.LockFileAsync(file.Id, new LockFileRequest(true), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         result.Id.Should().Be(file.Id);
@@ -85,7 +85,7 @@ public class FileLockPermissionsTests(
 
         // Act: the room manager locks a file created (and owned) by the room's owner.
         await _filesClient.Authenticate(roomManager);
-        var result = (await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.LockFileAsync(file.Id, new LockFileRequest(true), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         result.Id.Should().Be(file.Id);
@@ -109,7 +109,7 @@ public class FileLockPermissionsTests(
         var file = await CreateFile("Autotest User Own Lock File.docx", room.Id);
 
         // Act
-        var result = (await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.LockFileAsync(file.Id, new LockFileRequest(true), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         result.Id.Should().Be(file.Id);
@@ -129,7 +129,7 @@ public class FileLockPermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken));
+            async () => await _filesApi.LockFileAsync(file.Id, new LockFileRequest(true), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
     }
@@ -151,7 +151,7 @@ public class FileLockPermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(guest);
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken));
+            async () => await _filesApi.LockFileAsync(file.Id, new LockFileRequest(true), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
     }
@@ -167,7 +167,7 @@ public class FileLockPermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(null);
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken));
+            async () => await _filesApi.LockFileAsync(file.Id, new LockFileRequest(true), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(401);
     }
@@ -192,11 +192,11 @@ public class FileLockPermissionsTests(
 
         await _filesClient.Authenticate(user);
         var file = await CreateFile("Autotest Cross-user Lock File.docx", room.Id);
-        await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken);
+        await _filesApi.LockFileAsync(file.Id, new LockFileRequest(true), TestContext.Current.CancellationToken);
 
         // Act: a room manager unlocks a file that a content creator locked.
         await _filesClient.Authenticate(roomManager);
-        var result = (await _filesApi.LockFileAsync(file.Id, new LockFileParameters(false), TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.LockFileAsync(file.Id, new LockFileRequest(false), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         result.Id.Should().Be(file.Id);
@@ -220,12 +220,12 @@ public class FileLockPermissionsTests(
         var file = await CreateFile("Autotest Creator Unlock File.docx", room.Id);
 
         await _filesClient.Authenticate(Owner);
-        await _filesApi.LockFileAsync(file.Id, new LockFileParameters(true), TestContext.Current.CancellationToken);
+        await _filesApi.LockFileAsync(file.Id, new LockFileRequest(true), TestContext.Current.CancellationToken);
 
         // Act & Assert: the file's own creator cannot unlock it once the portal owner has locked it.
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.LockFileAsync(file.Id, new LockFileParameters(false), TestContext.Current.CancellationToken));
+            async () => await _filesApi.LockFileAsync(file.Id, new LockFileRequest(false), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
     }

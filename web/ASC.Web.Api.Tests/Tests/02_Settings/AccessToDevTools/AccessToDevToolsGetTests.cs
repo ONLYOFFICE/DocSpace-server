@@ -92,7 +92,7 @@ public class AccessToDevToolsGetTests(
         await _webApiClient.Authenticate(Owner);
         var securityApi = CreateSecurityAccessToDevToolsApi();
         await securityApi.SetTenantDevToolsAccessSettingsAsync(
-            new TenantDevToolsAccessSettingsDto(true), TestContext.Current.CancellationToken);
+            new TenantDevToolsAccessSettingsRequestDto(true), TestContext.Current.CancellationToken);
 
         // Act
         var result = await _accessToDevToolsApi.GetTenantAccessDevToolsSettingsAsync(TestContext.Current.CancellationToken);
@@ -109,7 +109,7 @@ public class AccessToDevToolsGetTests(
         await _webApiClient.Authenticate(Owner);
         var securityApi = CreateSecurityAccessToDevToolsApi();
         await securityApi.SetTenantDevToolsAccessSettingsAsync(
-            new TenantDevToolsAccessSettingsDto(false), TestContext.Current.CancellationToken);
+            new TenantDevToolsAccessSettingsRequestDto(false), TestContext.Current.CancellationToken);
 
         // Act
         var result = await _accessToDevToolsApi.GetTenantAccessDevToolsSettingsAsync(TestContext.Current.CancellationToken);
@@ -128,7 +128,7 @@ public class AccessToDevToolsGetTests(
         await _webApiClient.Authenticate(Owner);
         var securityApi = CreateSecurityAccessToDevToolsApi();
         await securityApi.SetTenantDevToolsAccessSettingsAsync(
-            new TenantDevToolsAccessSettingsDto(true), TestContext.Current.CancellationToken);
+            new TenantDevToolsAccessSettingsRequestDto(true), TestContext.Current.CancellationToken);
 
         // Act
         await _webApiClient.Authenticate(admin);

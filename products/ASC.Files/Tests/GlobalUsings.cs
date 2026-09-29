@@ -69,7 +69,7 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Xunit;
 
 global using ApiDateTime = DocSpace.API.SDK.Model.ApiDateTime;
-global using CreateFolder = DocSpace.API.SDK.Model.CreateFolder;
+global using CreateFolder = DocSpace.API.SDK.Model.CreateFolderRequest;
 global using CreateRoomRequestDto = DocSpace.API.SDK.Model.CreateRoomRequestDto;
 global using ExternalShareRequestParam = DocSpace.API.SDK.Model.ExternalShareRequestParam;
 global using FileLinkRequest = DocSpace.API.SDK.Model.FileLinkRequest;

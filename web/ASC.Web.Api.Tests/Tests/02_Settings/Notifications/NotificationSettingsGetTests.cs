@@ -50,7 +50,7 @@ public class NotificationSettingsGetTests(
         await AuthenticateAsAsync(actor);
 
         await _notificationsApi.SetNotificationSettingsAsync(
-            new NotificationSettingsRequestsDto(type, true), TestContext.Current.CancellationToken);
+            new NotificationSettingsRequestDto(type, true), TestContext.Current.CancellationToken);
 
         // Act
         var settings = await _notificationsApi.GetNotificationSettingsWithHttpInfoAsync(type, TestContext.Current.CancellationToken);

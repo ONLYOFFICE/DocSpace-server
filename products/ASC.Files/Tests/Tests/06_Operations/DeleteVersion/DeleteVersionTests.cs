@@ -64,7 +64,7 @@ public class DeleteVersionTests(
         // Arrange
         await _filesClient.Authenticate(Owner);
         var file = await CreateFileWithSecondVersion("Autotest DelVer Multi File");
-        await _filesApi.UpdateFileAsync(file.Id, new UpdateFile { LastVersion = 3 }, TestContext.Current.CancellationToken);
+        await _filesApi.UpdateFileAsync(file.Id, new UpdateFileRequest { LastVersion = 3 }, TestContext.Current.CancellationToken);
 
         // Act
         var operation = await DeleteVersionsAndWait(file.Id, [1, 2]);
@@ -134,7 +134,7 @@ public class DeleteVersionTests(
         await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("Autotest DelVer CustomRoom");
         var file = await CreateFile("Autotest DelVer Room File", room.Id);
-        await _filesApi.UpdateFileAsync(file.Id, new UpdateFile { LastVersion = 2 }, TestContext.Current.CancellationToken);
+        await _filesApi.UpdateFileAsync(file.Id, new UpdateFileRequest { LastVersion = 2 }, TestContext.Current.CancellationToken);
 
         // Act
         var operation = await DeleteVersionsAndWait(file.Id, [1]);
@@ -154,7 +154,7 @@ public class DeleteVersionTests(
         await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("Autotest DelVer ArchivedRoom");
         var file = await CreateFile("Autotest DelVer Archived File", room.Id);
-        await _filesApi.UpdateFileAsync(file.Id, new UpdateFile { LastVersion = 2 }, TestContext.Current.CancellationToken);
+        await _filesApi.UpdateFileAsync(file.Id, new UpdateFileRequest { LastVersion = 2 }, TestContext.Current.CancellationToken);
 
         await ArchiveRoom(room.Id);
 

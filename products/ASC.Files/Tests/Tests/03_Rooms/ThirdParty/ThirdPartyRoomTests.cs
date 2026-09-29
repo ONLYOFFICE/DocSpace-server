@@ -58,7 +58,7 @@ public class ThirdPartyRoomTests(
         // Act
         var room = (await _roomsApi.CreateRoomThirdPartyAsync(
             connection.Id,
-            new CreateThirdPartyRoom(title: title, roomType: RoomType.CustomRoom),
+            new CreateThirdPartyRoomRequest(title: title, roomType: RoomType.CustomRoom),
             TestContext.Current.CancellationToken)).Response;
 
         // Assert
@@ -143,7 +143,7 @@ public class ThirdPartyRoomTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _roomsApi.CreateRoomThirdPartyAsync(
                 folderId,
-                new CreateThirdPartyRoom(title: UniqueTitle("TP Room Second"), roomType: RoomType.EditingRoom),
+                new CreateThirdPartyRoomRequest(title: UniqueTitle("TP Room Second"), roomType: RoomType.EditingRoom),
                 TestContext.Current.CancellationToken));
 
         // Assert

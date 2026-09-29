@@ -80,7 +80,7 @@ public class GetAuthServicesTests(
         AssertServicesAndS3Keys(services, s3AuthService);
     }
 
-    private static void AssertServicesAndS3Keys(AuthServiceRequestsArrayWrapper services, AuthServiceRequestsDto s3AuthService)
+    private static void AssertServicesAndS3Keys(AuthServiceArrayWrapper services, AuthServiceDto s3AuthService)
     {
         services.StatusCode.Should().Be(200);
         services.Response.Should().NotBeNullOrEmpty();

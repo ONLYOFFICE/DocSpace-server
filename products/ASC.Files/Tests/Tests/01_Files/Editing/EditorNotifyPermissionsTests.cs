@@ -55,8 +55,8 @@ public class EditorNotifyPermissionsTests(AspireAppFixture fixture) : EditingTes
 
         await _filesClient.Authenticate(viewer);
 
-        var request = new MentionMessageWrapper(
-            actionLink: new ActionLinkConfig(new ActionConfig(data: "nolimit", type: "comment")),
+        var request = new MentionMessageRequest(
+            actionLink: new ActionLinkRequest(new ActionLinkActionRequest(data: "nolimit", type: "comment")),
             emails: [Owner.Email],
             message: "test");
 
@@ -87,8 +87,8 @@ public class EditorNotifyPermissionsTests(AspireAppFixture fixture) : EditingTes
 
         await _filesClient.Authenticate(editor);
 
-        var request = new MentionMessageWrapper(
-            actionLink: new ActionLinkConfig(new ActionConfig(data: new string('a', 10000), type: "comment")),
+        var request = new MentionMessageRequest(
+            actionLink: new ActionLinkRequest(new ActionLinkActionRequest(data: new string('a', 10000), type: "comment")),
             emails: [editor.Email],
             message: "test");
 

@@ -50,7 +50,7 @@ public class EnableWebhookTests(
         var dto = WebhooksTestData.CreateWebhookDto(enabled: true);
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
 
-        var toggleRequest = new UpdateWebhooksConfigRequestsDto(created.Response.Id)
+        var toggleRequest = new UpdateWebhooksConfigRequestDto(created.Response.Id)
         {
             Name = dto.Name,
             Uri = dto.Uri,
@@ -82,7 +82,7 @@ public class EnableWebhookTests(
         var created = await _webhooksApi.CreateWebhookAsync(dto, TestContext.Current.CancellationToken);
 
         await _webApiClient.Authenticate(userA);
-        var toggleRequest = new UpdateWebhooksConfigRequestsDto(created.Response.Id)
+        var toggleRequest = new UpdateWebhooksConfigRequestDto(created.Response.Id)
         {
             Name = dto.Name,
             Uri = dto.Uri,

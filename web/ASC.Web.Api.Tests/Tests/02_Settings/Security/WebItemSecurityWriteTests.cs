@@ -51,7 +51,7 @@ public class WebItemSecurityWriteTests(
 
         // Act
         var result = await _securityApi.SetWebItemSecurityAsync(
-            new WebItemSecurityRequestsDto(id, false), TestContext.Current.CancellationToken);
+            new WebItemSecurityRequestDto(id, false), TestContext.Current.CancellationToken);
 
         // Assert
         result.StatusCode.Should().Be(200);
@@ -71,7 +71,7 @@ public class WebItemSecurityWriteTests(
 
         // Act
         var result = await _securityApi.SetWebItemSecurityAsync(
-            new WebItemSecurityRequestsDto(id, false), TestContext.Current.CancellationToken);
+            new WebItemSecurityRequestDto(id, false), TestContext.Current.CancellationToken);
 
         // Assert
         result.StatusCode.Should().Be(200);
@@ -90,7 +90,7 @@ public class WebItemSecurityWriteTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _securityApi.SetWebItemSecurityAsync(
-                new WebItemSecurityRequestsDto("not-a-guid", false), TestContext.Current.CancellationToken));
+                new WebItemSecurityRequestDto("not-a-guid", false), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(400);
@@ -109,7 +109,7 @@ public class WebItemSecurityWriteTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _securityApi.SetWebItemSecurityAsync(
-                new WebItemSecurityRequestsDto(Guid.NewGuid().ToString(), false), TestContext.Current.CancellationToken));
+                new WebItemSecurityRequestDto(Guid.NewGuid().ToString(), false), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);
@@ -124,7 +124,7 @@ public class WebItemSecurityWriteTests(
         var firstId = Guid.NewGuid().ToString();
         var secondId = Guid.NewGuid().ToString();
 
-        var request = new WebItemsSecurityRequestsDto(
+        var request = new WebItemsSecurityRequestDto(
         [
             new ItemKeyValuePairStringBoolean(firstId, false),
             new ItemKeyValuePairStringBoolean(secondId, true),
@@ -147,7 +147,7 @@ public class WebItemSecurityWriteTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var request = new WebItemsSecurityRequestsDto([new ItemKeyValuePairStringBoolean("not-a-guid", true)]);
+        var request = new WebItemsSecurityRequestDto([new ItemKeyValuePairStringBoolean("not-a-guid", true)]);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -163,7 +163,7 @@ public class WebItemSecurityWriteTests(
         // Arrange
         var user = await InviteMember(EmployeeType.User);
         await _webApiClient.Authenticate(user);
-        var request = new WebItemsSecurityRequestsDto([new ItemKeyValuePairStringBoolean(Guid.NewGuid().ToString(), true)]);
+        var request = new WebItemsSecurityRequestDto([new ItemKeyValuePairStringBoolean(Guid.NewGuid().ToString(), true)]);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(

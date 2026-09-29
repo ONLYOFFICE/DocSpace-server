@@ -59,7 +59,7 @@ public class ThirdPartyRoomCreationBugTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _roomsApi.CreateRoomThirdPartyAsync(
                 internalFolderId.ToString(),
-                new CreateThirdPartyRoom(title: "Autotest Internal Id As TP Id", roomType: RoomType.CustomRoom),
+                new CreateThirdPartyRoomRequest(title: "Autotest Internal Id As TP Id", roomType: RoomType.CustomRoom),
                 TestContext.Current.CancellationToken));
 
         // Assert
@@ -84,7 +84,7 @@ public class ThirdPartyRoomCreationBugTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _roomsApi.CreateRoomThirdPartyAsync(
                 "sbox-999999999",
-                new CreateThirdPartyRoom(title: "Autotest Bad Sbox Id", roomType: RoomType.CustomRoom),
+                new CreateThirdPartyRoomRequest(title: "Autotest Bad Sbox Id", roomType: RoomType.CustomRoom),
                 TestContext.Current.CancellationToken));
 
         // Assert
@@ -115,7 +115,7 @@ public class ThirdPartyRoomCreationBugTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _roomsApi.CreateRoomThirdPartyAsync(
                 connection.Id,
-                new CreateThirdPartyRoom(title: "Autotest User TP Room IDOR", roomType: RoomType.CustomRoom),
+                new CreateThirdPartyRoomRequest(title: "Autotest User TP Room IDOR", roomType: RoomType.CustomRoom),
                 TestContext.Current.CancellationToken));
 
         // Assert
@@ -145,7 +145,7 @@ public class ThirdPartyRoomCreationBugTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _roomsApi.CreateRoomThirdPartyAsync(
                 connection.Id,
-                new CreateThirdPartyRoom(title: "Autotest Guest TP Room", roomType: RoomType.CustomRoom),
+                new CreateThirdPartyRoomRequest(title: "Autotest Guest TP Room", roomType: RoomType.CustomRoom),
                 TestContext.Current.CancellationToken));
 
         // Assert
