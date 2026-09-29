@@ -1,6 +1,5 @@
 builder.CreateFile("xlsx");
 
-var defaultFontSize = 11;
 var defaultFontColorBlack = Api.CreateColorFromRGB(0, 0, 0);
 var defaultFontColorGray = Api.CreateColorFromRGB(127, 127, 127);
 var defaultBorderColorWhite = Api.CreateColorFromRGB(255, 255, 255);
@@ -23,6 +22,8 @@ var colors = {
     lightBgColor: Api.CreateColorFromRGB(inputData.themeColors.lightBgColor[0], inputData.themeColors.lightBgColor[1], inputData.themeColors.lightBgColor[2]),
     mainFontColor: Api.CreateColorFromRGB(inputData.themeColors.mainFontColor[0], inputData.themeColors.mainFontColor[1], inputData.themeColors.mainFontColor[2])
 };
+
+${reportTableStyle}
 
 function getMaxLineLength(text) {
     if (text == null) {
@@ -93,6 +94,8 @@ function prepareInfo() {
 }
 
 function prepareHeader() {
+    // The header keeps its colors of its own rather than taking them from the table style: a report
+    // with no rows creates no table at all, and the header would be left unpainted.
     var row = [];
     for (var i = 0; i < inputData.keys.length; i++) {
         row.push({
@@ -111,7 +114,6 @@ function prepareHeader() {
 function prepareData() {
     var table = [];
     for (var i = 0; i < values.length; i++) {
-        var bgColor = i % 2 == 0 ? null : colors.lightBgColor;
         var rowValues = [];
         for (var j = 0; j < values[i].length; j++) {
             var cell = values[i][j];
@@ -121,8 +123,7 @@ function prepareData() {
                 "halign": cell.halign,
                 valign: "center",
                 "format": cell.format,
-                "bgColor": bgColor,
-                "borderColor": defaultBorderColorWhite
+                "wrap": cell.wrap
             });
         }
         table.push({ height: 19.5, dataArray: rowValues });
@@ -145,12 +146,19 @@ function writeCell(position, data) {
         oWorksheet.SetHyperlink(position, data.url, "", data.value, data.value);
     } else if (data.value != null) {
         sRange.SetValue(data.value);
-        sRange.SetWrap(true);
+        sRange.SetWrap(data.wrap !== false);
     }
 
-    sRange.SetFontSize(data.fontSize || defaultFontSize);
+    if (data.fontSize) {
+        sRange.SetFontSize(data.fontSize);
+    }
+
+    // Set unconditionally: a value that merely looks like a URL is turned into a hyperlink by the
+    // editor and painted in its blue, and the reports have always shown their text in one color.
     sRange.SetFontColor(data.fontColor || defaultFontColorBlack);
-    sRange.SetBold(data.bold || false);
+    if (data.bold) {
+        sRange.SetBold(true);
+    }
     sRange.SetAlignHorizontal(data.halign || "left");
     sRange.SetAlignVertical(data.valign || "bottom");
 
@@ -213,6 +221,8 @@ function setColumnWidths() {
 
 customizeWorksheet();
 
+createReportTableStyle();
+
 writeImg();
 
 writeTable(prepareInfo());
@@ -231,7 +241,7 @@ freezePanes.FreezeRows(headerRowIndex);
 
 if (values.length > 0) {
     var formattedTableRange = "A" + headerRowIndex + ":" + toColumnName(colCount) + (headerRowIndex + values.length);
-    oWorksheet.FormatAsTable(formattedTableRange);
+    addReportTable(oWorksheet, formattedTableRange);
 }
 
 oWorksheet.GetRange("A1").Select();
