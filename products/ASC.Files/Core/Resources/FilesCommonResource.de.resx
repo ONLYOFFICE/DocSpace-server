@@ -601,4 +601,10 @@ Sicherheit durch garantierte 100%ige Kompatibilität mit docx, xslx und pptx For
   <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
     <value>Das Formular wurde geändert. Dieser Entwurf ist veraltet und kann nicht eingereicht werden.</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Ungültige Ordner-ID</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Diese Aktion ist nur in einem privaten Raum verfügbar</value>
+  </data>
 </root>

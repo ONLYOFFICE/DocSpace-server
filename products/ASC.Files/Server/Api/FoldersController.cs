@@ -445,7 +445,7 @@ public abstract class FoldersController<T>(
     /// <path>api/2.0/files/folder/{folderId}</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "The folder", typeof(FolderDto<int>))]
+    [SwaggerResponse(200, "The folder itself - its title, its parent, the moments it was created and changed, the access the caller has to it, how many items in it are new for them, and the room settings when the folder is a room; nothing about the items it holds", typeof(FolderDto<int>))]
     [AllowAnonymous]
     [HttpGet("folder/{folderId}")]
     public async Task<FolderDto<T>> GetFolderInfo(FolderIdRequestDto<T> inDto)

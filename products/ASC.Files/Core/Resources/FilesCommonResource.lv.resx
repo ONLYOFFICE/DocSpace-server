@@ -601,4 +601,10 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>MI aģenta instrukcija nevar būt garāka par {0} rakstzīmēm</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Nederīgs mapes ID</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Šī darbība ir pieejama tikai privātā telpā</value>
+  </data>
 </root>

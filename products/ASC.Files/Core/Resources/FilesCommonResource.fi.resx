@@ -601,4 +601,10 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>AI-agentin ohje ei voi olla pidempi kuin {0} merkkiä</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Virheellinen kansion tunnus</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Tämä toiminto on käytettävissä vain yksityisessä huoneessa</value>
+  </data>
 </root>

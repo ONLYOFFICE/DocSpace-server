@@ -601,4 +601,10 @@
   <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
     <value>表单已更改。此草稿已过时，无法提交。</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>文件夹 ID 无效</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>此操作仅在私人房间中可用</value>
+  </data>
 </root>

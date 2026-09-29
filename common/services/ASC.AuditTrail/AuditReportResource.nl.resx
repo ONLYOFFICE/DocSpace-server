@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>AI-instellingen van gebruiker bijgewerkt</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>AI-profiel toegewezen aan AI-agent voor actie: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>AI-profiel toegewezen aan actie: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>AI-modelprofiel aangemaakt: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>AI-modelprofiel verwijderd: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>AI-profiel ontkoppeld van actie: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>AI-modelprofiel bijgewerkt: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Bestanden [{0}]. Gemarkeerd als gelezen</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Bestanden [{0}]. Bestand niet opgeslagen. Opslagquotum voor portal overschreden.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Bestanden [{0}]. Opslaan van bestand overschrijdt het opslagquotum van de portal.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Mappen [{0}]. Gemarkeerd als gelezen</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Privékamer-versleutelingssleutel {0} aangemaakt</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Privékamer-versleutelingssleutel {0} verwijderd</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Privékamer-versleutelingssleutel {0} bijgewerkt</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Verdachte aanmelding gedetecteerd: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>MCP-server {0} van AI-agent bijgewerkt</value>
+  </data>
 </root>

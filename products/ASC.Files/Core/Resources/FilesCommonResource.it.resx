@@ -601,4 +601,10 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>L'istruzione di un agente IA non può essere più lunga di {0} caratteri</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>ID cartella non valido</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Questa azione è disponibile solo in una stanza privata</value>
+  </data>
 </root>

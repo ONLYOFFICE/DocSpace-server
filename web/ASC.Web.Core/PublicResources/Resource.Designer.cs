@@ -61,6 +61,33 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cached.
+        /// </summary>
+        public static string AccountingCustomerOperationCachedTokens {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationCachedTokens", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cache write.
+        /// </summary>
+        public static string AccountingCustomerOperationCacheWriteTokens {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationCacheWriteTokens", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Completion.
+        /// </summary>
+        public static string AccountingCustomerOperationCompletionTokens {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationCompletionTokens", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Contact.
         /// </summary>
         public static string AccountingCustomerOperationContact {
@@ -115,6 +142,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Image.
+        /// </summary>
+        public static string AccountingCustomerOperationImageTokens {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationImageTokens", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Month.
         /// </summary>
         public static string AccountingCustomerOperationMonth {
@@ -124,11 +160,29 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Prompt.
+        /// </summary>
+        public static string AccountingCustomerOperationPromptTokens {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationPromptTokens", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Quantity.
         /// </summary>
         public static string AccountingCustomerOperationQuantity {
             get {
                 return ResourceManager.GetString("AccountingCustomerOperationQuantity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reasoning.
+        /// </summary>
+        public static string AccountingCustomerOperationReasoningTokens {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationReasoningTokens", resourceCulture);
             }
         }
         

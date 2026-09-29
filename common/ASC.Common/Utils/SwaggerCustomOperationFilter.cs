@@ -110,8 +110,14 @@ public class SwaggerCustomOperationFilter : IOperationFilter
                 (parameter as OpenApiParameter)?.Explode = true;
             }
 
-        // Remove duplicate example from parameter level if it exists in schema
-        if (parameter is OpenApiParameter { Example: not null, Schema.Example: not null } openApiParameter)
+        // Remove duplicate example from parameter level if it exists in schema.
+        // At this point a schema may still carry the singular (obsolete) "example" that Swashbuckle
+        // fills in - OpenApi31SchemaDocumentFilter only normalises it to "examples" later - so both
+        // forms count as "the schema already has an example".
+#pragma warning disable CS0618 // Type or member is obsolete
+        if (parameter is OpenApiParameter { Example: not null, Schema: { } parameterSchema } openApiParameter
+            && (parameterSchema.Example != null || parameterSchema.Examples is { Count: > 0 }))
+#pragma warning restore CS0618
         {
             openApiParameter.Example = null;
         }

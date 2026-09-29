@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>Οι ρυθμίσεις AI του χρήστη ενημερώθηκαν</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Το προφίλ AI ανατέθηκε στον AI πράκτορα για ενέργεια: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Το προφίλ AI ανατέθηκε στην ενέργεια: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Το προφίλ μοντέλου AI δημιουργήθηκε: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Το προφίλ μοντέλου AI διαγράφηκε: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Το προφίλ AI αποσυνδέθηκε από την ενέργεια: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Το προφίλ μοντέλου AI ενημερώθηκε: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Αρχεία [{0}]. Επισημάνθηκαν ως αναγνωσμένα</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Αρχεία [{0}]. Το αρχείο δεν αποθηκεύτηκε. Η ποσόστωση αποθήκευσης της πύλης υπερβλήθηκε.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Αρχεία [{0}]. Η αποθήκευση του αρχείου υπερβαίνει την ποσόστωση αποθήκευσης της πύλης.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Φάκελοι [{0}]. Επισημάνθηκαν ως αναγνωσμένοι</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Το κλειδί κρυπτογράφησης ιδιωτικού δωματίου {0} δημιουργήθηκε</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Το κλειδί κρυπτογράφησης ιδιωτικού δωματίου {0} διαγράφηκε</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Το κλειδί κρυπτογράφησης ιδιωτικού δωματίου {0} ενημερώθηκε</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Εντοπίστηκε ύποπτη σύνδεση: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>Ο διακομιστής MCP {0} του AI πράκτορα ενημερώθηκε</value>
+  </data>
 </root>

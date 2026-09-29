@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>Configuración de IA del usuario actualizada</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Perfil de IA asignado al agente de IA para la acción: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Perfil de IA asignado a la acción: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Perfil de modelo de IA creado: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Perfil de modelo de IA eliminado: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Perfil de IA desasignado de la acción: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Perfil de modelo de IA actualizado: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Archivos [{0}]. Marcados como leídos</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Archivos [{0}]. El archivo no se guardó. Se superó la cuota de almacenamiento del portal.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Archivos [{0}]. Guardar el archivo supera la cuota de almacenamiento del portal.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Carpetas [{0}]. Marcadas como leídas</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Clave de cifrado de sala privada {0} creada</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Clave de cifrado de sala privada {0} eliminada</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Clave de cifrado de sala privada {0} actualizada</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Se detectó un inicio de sesión sospechoso: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>Servidor MCP {0} del agente de IA actualizado</value>
+  </data>
 </root>

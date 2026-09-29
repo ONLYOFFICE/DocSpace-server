@@ -36,6 +36,7 @@ namespace ASC.Core.Common.WhiteLabel;
 [Singleton]
 public class ExternalResourceSettingsHelper(IConfiguration configuration)
 {
+    public readonly ExternalResource AdminPanel = new(configuration.GetSection("externalresources:adminpanel").Get<Dictionary<string, CultureSpecificExternalResource>>() ?? []);
     public readonly ExternalResource Api = new(configuration.GetSection("externalresources:api").Get<Dictionary<string, CultureSpecificExternalResource>>() ?? []);
     public readonly ExternalResource Common = new(configuration.GetSection("externalresources:common").Get<Dictionary<string, CultureSpecificExternalResource>>() ?? []);
     public readonly ExternalResource Forum = new(configuration.GetSection("externalresources:forum").Get<Dictionary<string, CultureSpecificExternalResource>>() ?? []);

@@ -312,6 +312,27 @@ public record AiChatPrice
     /// </summary>
     /// <example>0.00001</example>
     public decimal Completion { get; init; }
+
+    /// <summary>
+    /// The price of a single prompt token read from the cache, if the model supports prompt caching.
+    /// </summary>
+    /// <example>0.0000002</example>
+    [JsonPropertyName("prompt_cache_read")]
+    public decimal? PromptCacheRead { get; init; }
+
+    /// <summary>
+    /// The price of a single prompt token written to the cache, if the model supports prompt caching.
+    /// </summary>
+    /// <example>0.0000025</example>
+    [JsonPropertyName("prompt_cache_write")]
+    public decimal? PromptCacheWrite { get; init; }
+
+    /// <summary>
+    /// The price of a single prompt token written to the cache with a one-hour lifetime, if the model supports it.
+    /// </summary>
+    /// <example>0.000004</example>
+    [JsonPropertyName("prompt_cache_write_1h")]
+    public decimal? PromptCacheWrite1H { get; init; }
 }
 
 /// <summary>

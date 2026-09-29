@@ -60,7 +60,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// <summary>Create a room template</summary>
     /// <path>api/2.0/files/roomtemplate</path>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
+    [SwaggerResponse(200, "The state of the template creation just queued: `isCompleted` is still false, so the job has to be polled for its result", typeof(RoomTemplateStatusDto))]
     [HttpPost("")]
     public async Task<RoomTemplateStatusDto> CreateRoomTemplate(RoomTemplateDto dto)
     {
@@ -131,7 +131,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// <summary>Get room template creation status</summary>
     /// <path>api/2.0/files/roomtemplate/status</path>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "Status", typeof(RoomTemplateStatusDto))]
+    [SwaggerResponse(200, "The state of the caller's latest template creation, or an empty body when this account has started none", typeof(RoomTemplateStatusDto))]
     [HttpGet("status")]
     public async Task<RoomTemplateStatusDto> GetRoomTemplateCreatingStatus()
     {
@@ -172,7 +172,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// <summary>Get room template public access</summary>
     /// <path>api/2.0/files/roomtemplate/{id}/public</path>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "Ok", typeof(bool))]
+    [SwaggerResponse(200, "True when the template is shared with everyone, false when only its owner and the accounts it was shared with can reach it", typeof(bool))]
     [HttpGet("{id}/public")]
     public async Task<bool> GetPublicSettings(PublicDto inDto)
     {
@@ -197,7 +197,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// <summary>Set room template public access</summary>
     /// <path>api/2.0/files/roomtemplate/public</path>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(200, "The recipient list of the template has been rewritten to match the requested access; nothing is returned")]
     [HttpPut("public")]
     public async Task SetPublicSettings(SetPublicDto inDto)
     {

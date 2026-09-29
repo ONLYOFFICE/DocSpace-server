@@ -42,7 +42,7 @@ public class AttachmentsStorageController(AttachmentsStorageService attachmentsS
     [HttpPost("attachments")]
     public async Task<List<AttachmentDto>> CreateManyAsync(CreateAttachmentsRequestDto inDto)
     {
-        return await attachmentsStorageService.CreateManyAsync(inDto.Body.EntryIds)
+        return await attachmentsStorageService.CreateManyAsync(inDto.Body.EntryIds, inDto.Body.AnalyzeEntryIds)
             .Select(AttachmentMapper.MapToDto)
             .ToListAsync();
     }

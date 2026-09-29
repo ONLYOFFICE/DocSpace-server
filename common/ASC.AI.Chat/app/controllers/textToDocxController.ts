@@ -35,15 +35,27 @@ import { asyncHandler } from "./_helpers.js";
 import { isObject } from "../narrow.js";
 import logger from "../log.js";
 
-// Proxy for the .NET md→docx export pipeline
+// Output formats the .NET side accepts, spelled as its `MdOutputFormat` enum
+// members (ASC.AI.Core.MdTextToDocx). Whitelisted here rather than forwarded
+// blindly so an unknown value is refused with a 400 naming the route, instead
+// of surfacing as a model-binding error from the internal endpoint.
+const OUTPUT_FORMATS = ["Docx", "Pdf", "Md"] as const;
+
+type OutputFormat = (typeof OUTPUT_FORMATS)[number];
+
+const isOutputFormat = (value: unknown): value is OutputFormat =>
+  OUTPUT_FORMATS.includes(value as OutputFormat);
+
+// Proxy for the .NET md export pipeline
 // (`POST internal/ai/text-to-docx/start`,
 // `TextToDocxController.PublishAsync`): validates the payload and forwards
 // it with the caller's credentials. The conversion itself is asynchronous —
-// the AI Worker converts the markdown via DocumentService and saves the
-// resulting .docx into the target folder (an agent room resolves to its
-// Result Storage subfolder); completion surfaces to the client as the
-// standard `s:modify-folder` create-file socket event. The source URL the
-// worker hands to DocumentService is rebased via ReplaceCommunityAddress
+// the AI Worker renders the markdown into the requested format via
+// DocumentService (`Md` is stored verbatim instead) and saves the file into
+// the target folder (an agent room resolves to its Result Storage
+// subfolder); completion surfaces to the client as the standard
+// `s:modify-folder` create-file socket event for every format. The source URL
+// the worker hands to DocumentService is rebased via ReplaceCommunityAddress
 // (`files.docservice.url.portal`) on the .NET side.
 export const textToDocxController = {
   start: asyncHandler(async (req, res) => {
@@ -64,8 +76,17 @@ export const textToDocxController = {
       return;
     }
 
+    // Optional: an absent format keeps the .NET default (`Docx`), which is
+    // what every caller written before the format existed relies on.
+    const rawFormat = body["format"];
+    if (rawFormat !== undefined && !isOutputFormat(rawFormat)) {
+      res.status(400).json({ error: `format must be one of ${OUTPUT_FORMATS.join(", ")}` });
+      return;
+    }
+    const format: OutputFormat | undefined = rawFormat;
+
     logger.info(
-      `textToDocx.start title="${title}" folderId=${folderId} contentLength=${content.length}`,
+      `textToDocx.start title="${title}" folderId=${folderId} format=${format ?? "Docx"} contentLength=${content.length}`,
     );
     // No `?origin=` override: forwarded Origin/X-Forwarded-Host/Referer are
     // client-controlled, and the .NET side would turn them into the task's
@@ -76,6 +97,7 @@ export const textToDocxController = {
       title,
       content,
       folderId,
+      ...(format ? { format } : {}),
     });
 
     // The publish is fire-and-forget on the .NET side (202-style semantics):

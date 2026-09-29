@@ -54,10 +54,15 @@ public class MdToDocxTaskPublisher(
     UserManager userManager,
     IEventBus eventBus)
 {
-    public async Task PublishAsync<T>(string title, string content, T folderId)
+    public async Task PublishAsync<T>(string title, string content, T folderId, MdOutputFormat format = MdOutputFormat.Docx)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
         var userId = authContext.CurrentAccount.ID;
+
+        if (!Enum.IsDefined(format))
+        {
+            throw new ArgumentException($@"Unsupported output format: {format}", nameof(format));
+        }
 
         var intFolderId = folderId is int id ? id : 0;
         var thirdpartyFolderId = folderId as string;
@@ -81,7 +86,8 @@ public class MdToDocxTaskPublisher(
             Content = content,
             FolderId = intFolderId,
             ThirdpartyFolderId = thirdpartyFolderId,
-            BaseUri = commonLinkUtility.ServerRootPath
+            BaseUri = commonLinkUtility.ServerRootPath,
+            Format = format
         };
 
         await eventBus.PublishAsync(new MdTextToDocxIntegrationEvent(userId, tenantId)

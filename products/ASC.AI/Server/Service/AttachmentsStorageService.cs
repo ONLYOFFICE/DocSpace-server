@@ -58,13 +58,25 @@ public class AttachmentsStorageService(
     ITextExtractor textExtractor,
     VectorizationGlobalSettings vectorizationGlobalSettings,
     ExternalDatabaseClient externalDatabaseClient,
+    FormSchemaProvider formSchemaProvider,
+    FormAnalyzeIntent formAnalyzeIntent,
+    IFusionCache fusionCache,
+    AiSocketManager aiSocketManager,
     ILogger<AttachmentsStorageService> logger,
     AiGateway gateway) : IntegrationServiceBase(userManager, authContext, daoFactory, fileSecurity, gateway)
 {
     private static readonly TimeSpan _downloadUrlExpiration = TimeSpan.FromHours(1);
+
+    // A form with hundreds of fields would blow the model's context and time budget.
+    private const int MaxPromptColumns = 60;
+    private const int MaxEnumValuesPerColumn = 10;
+
+    private static readonly TimeSpan _formQuestionsCacheDuration = TimeSpan.FromHours(12);
+    private static readonly FormAnalysisDto _unavailableFormAnalysis = new() { Status = "unavailable" };
+
     private static readonly EmployeeType[] _allowedTypes = [EmployeeType.DocSpaceAdmin, EmployeeType.RoomAdmin, EmployeeType.User];
 
-    public async IAsyncEnumerable<AttachmentResult> CreateManyAsync(HashSet<string> entryIds)
+    public async IAsyncEnumerable<AttachmentResult> CreateManyAsync(HashSet<string> entryIds, HashSet<string> analyzeEntryIds)
     {
         await AssertUserHasAccessAsync(_allowedTypes);
 
@@ -109,10 +121,24 @@ public class AttachmentsStorageService(
         var created = await storage.CreateManyAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, createParams);
         var index = 0;
 
+        // Only files the client marked analyzeOnly are analysed: for the rest nothing form-analysis runs
+        // (no external-DB probe, no model warm-up, no intent). Done before the loop, which is consumed
+        // lazily, so the model calls do not spread across the whole response.
+        var analyzeFiles = internalFiles.Where(f => analyzeEntryIds.Contains(f.Id.ToString())).ToList();
+        var analyses = await AnalyzeFormsAsync(analyzeFiles);
+
         foreach (var file in internalFiles)
         {
-            var canAnalyze = await CanAnalyzeFormAsync(file);
-            yield return await ToResultAsync(intDao, created[index++], file, canAnalyze);
+            var attachment = created[index++];
+            var analysis = analyses.GetValueOrDefault(file.Id);
+
+            // Remember the intent per attachment, so another chat that attaches the same form is isolated.
+            if (analysis is { CanAnalyze: true })
+            {
+                await formAnalyzeIntent.SetAsync(attachment.Id);
+            }
+
+            yield return await ToResultAsync(intDao, attachment, file, analysis);
         }
 
         foreach (var file in thirdpartyFiles)
@@ -128,7 +154,7 @@ public class AttachmentsStorageService(
         var attachment = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, id)
             ?? throw new ItemNotFoundException();
 
-        return await ToResultAsync(attachment);
+        return await ToResultAsync(attachment, withFormAnalysis: true);
     }
 
     public async IAsyncEnumerable<AttachmentResult> ReadManyByIdsAsync(HashSet<Guid> ids)
@@ -167,33 +193,177 @@ public class AttachmentsStorageService(
     }
 
     /// <summary>
-    /// Reports whether an attached file is a started filling-form whose submissions can be analysed by the
-    /// form-data tools. Returns false when the file is not such a form, no external forms database is
-    /// configured, or its submission table does not yet exist.
+    /// The attached files that are started filling-forms with an analysable submission table, and the
+    /// starter questions to offer for them. Anything else is absent from the result.
     /// </summary>
-    private async Task<bool> CanAnalyzeFormAsync(File<int> file)
+    private async Task<Dictionary<int, FormAnalysis>> AnalyzeFormsAsync(List<File<int>> files)
     {
-        if (file is not { IsPdf: true } || !externalDatabaseClient.IsEnabled())
+        if (!externalDatabaseClient.IsEnabled() || !files.Exists(f => f.IsPdf))
         {
-            return false;
+            return [];
         }
 
+        var analyses = await Task.WhenAll(files
+            .Where(f => f.IsPdf)
+            .Select(async file => (file.Id, Analysis: await AnalyzeFormAsync(file))));
+
+        return analyses.ToDictionary(pair => pair.Id, pair => pair.Analysis);
+    }
+
+    private async Task<FormAnalysis> AnalyzeFormAsync(File<int> file)
+    {
         try
         {
-            var properties = await DaoFactory.GetFileDao<int>().GetProperties(file.Id);
-            var formFilling = properties?.FormFilling;
-            if (formFilling?.StartFilling != true || formFilling.OriginalFormId != file.Id)
-            {
-                return false;
-            }
-
-            var tableName = FormFillingReportCreator.GetTableName(file.Id, file.Version);
-            return await externalDatabaseClient.TableExistsAsync(tableName);
+            return await formSchemaProvider.TryGetTableNameAsync(file) is null
+                ? FormAnalysis.None
+                : new FormAnalysis(true);
         }
         catch (Exception e)
         {
             logger.WarnFormAnalysisFailed(e, file.Id);
-            return false;
+            return FormAnalysis.None;
+        }
+    }
+
+    /// <summary>
+    /// The form starter-questions state for ASC.NewAi, which runs the model call: "unavailable" (not an
+    /// analysable launched form), "ready" (cached questions), or "generate" (the caller should generate
+    /// from the returned schema and post the result back with <see cref="SaveFormQuestionsAsync"/>).
+    /// </summary>
+    public async Task<FormAnalysisDto> GetFormAnalysisAsync(Guid attachmentId)
+    {
+        if (!externalDatabaseClient.IsEnabled() || !await formAnalyzeIntent.GetAsync(attachmentId))
+        {
+            return _unavailableFormAnalysis;
+        }
+
+        try
+        {
+            var file = await ResolveFormAsync(attachmentId);
+            if (file is null)
+            {
+                return _unavailableFormAnalysis;
+            }
+
+            var culture = CultureInfo.CurrentUICulture;
+
+            var cached = await fusionCache.TryGetAsync<List<FormQuestionDto>>(GetFormQuestionsCacheKey(tenantManager.GetCurrentTenantId(), file, culture));
+            if (cached is { HasValue: true, Value.Count: > 0 })
+            {
+                return new FormAnalysisDto { Status = "ready", Questions = cached.Value };
+            }
+
+            var schema = await formSchemaProvider.TryReadAsync(file);
+            if (schema is null || schema.RowCount == 0 || schema.Columns.Count == 0)
+            {
+                return _unavailableFormAnalysis;
+            }
+
+            return new FormAnalysisDto { Status = "generate", Schema = ToSchemaDto(file, schema, culture) };
+        }
+        catch (Exception e)
+        {
+            logger.WarnFormQuestionsFailed(e, attachmentId);
+            return _unavailableFormAnalysis;
+        }
+    }
+
+    /// <summary>Caches questions ASC.NewAi generated for the attachment's form, so later polls are instant.</summary>
+    public async Task SaveFormQuestionsAsync(Guid attachmentId, IReadOnlyList<FormQuestionDto> questions)
+    {
+        if (questions.Count == 0 || !await formAnalyzeIntent.GetAsync(attachmentId))
+        {
+            return;
+        }
+
+        try
+        {
+            var file = await ResolveFormAsync(attachmentId);
+            if (file is null)
+            {
+                return;
+            }
+
+            await fusionCache.SetAsync(
+                GetFormQuestionsCacheKey(tenantManager.GetCurrentTenantId(), file, CultureInfo.CurrentUICulture),
+                questions.ToList(),
+                opt => opt.SetDuration(_formQuestionsCacheDuration));
+
+            // Push to the chat client over the socket so the questions arrive without a long-poll.
+            await aiSocketManager.SendFormQuestionsAsync(attachmentId, questions);
+        }
+        catch (Exception e)
+        {
+            logger.WarnFormQuestionsFailed(e, attachmentId);
+        }
+    }
+
+    private async Task<File<int>?> ResolveFormAsync(Guid attachmentId)
+    {
+        var attachment = await storage.ReadByIdAsync(tenantManager.GetCurrentTenantId(), CurrentUserId, attachmentId);
+        if (attachment?.EntryId is not { } fileId)
+        {
+            return null;
+        }
+
+        var file = await DaoFactory.GetFileDao<int>().GetFileAsync(fileId);
+        return file is { IsPdf: true } && await FileSecurity.CanReadAsync(file) ? file : null;
+    }
+
+    private static FormSchemaDto ToSchemaDto(File<int> file, FormSchema schema, CultureInfo culture)
+    {
+        var columns = schema.Columns
+            .Take(MaxPromptColumns)
+            .Select(c => new FormColumnDto
+            {
+                Name = c.Name,
+                Label = c.Label is not null && c.Label != c.Name ? c.Label : null,
+                Type = c.Type.ToString(),
+                Values = c.EnumValues is { Count: > 0 } values ? values.Take(MaxEnumValuesPerColumn).ToList() : null
+            })
+            .ToList();
+
+        return new FormSchemaDto
+        {
+            Title = file.Title,
+            RowCount = schema.RowCount,
+            Columns = columns,
+            Culture = culture.Name,
+            CultureName = culture.EnglishName
+        };
+    }
+
+    private static string GetFormQuestionsCacheKey(int tenantId, File<int> file, CultureInfo culture)
+    {
+        return $"ai:form:preanalysis:{tenantId}:{file.Id}:{file.Version}:{culture.Name}";
+    }
+
+    /// <summary>
+    /// The analysable flag for a single read, from whether the form has a submission table. Batch reads
+    /// skip it: they hydrate whole threads, and a file lookup per attachment would not pay for itself.
+    /// The starter questions are fetched separately from the long-poll endpoint.
+    /// </summary>
+    private async Task<FormAnalysis?> ReadFormAnalysisAsync(Attachment attachment)
+    {
+        if (attachment.EntryId is not { } entryId || !externalDatabaseClient.IsEnabled())
+        {
+            return null;
+        }
+
+        try
+        {
+            var file = await DaoFactory.GetFileDao<int>().GetFileAsync(entryId);
+            if (file is not { IsPdf: true })
+            {
+                return null;
+            }
+
+            return await formSchemaProvider.TryGetTableNameAsync(file) is null ? null : new FormAnalysis(true);
+        }
+        catch (Exception e)
+        {
+            logger.WarnFormAnalysisFailed(e, entryId);
+            return null;
         }
     }
 
@@ -276,16 +446,16 @@ public class AttachmentsStorageService(
         };
     }
 
-    private static async Task<AttachmentResult> ToResultAsync<T>(IFileDao<T> fileDao, Attachment attachment, File<T> file, bool canAnalyze = false)
+    private static async Task<AttachmentResult> ToResultAsync<T>(IFileDao<T> fileDao, Attachment attachment, File<T> file, FormAnalysis? analysis = null)
     {
         var dataUrl = attachment.Kind == AttachmentKind.Image
             ? await fileDao.GetPreSignedUriAsync(file, _downloadUrlExpiration)
             : null;
 
-        return ToResult(attachment, dataUrl, file is File<string> thirdpartyFile ? thirdpartyFile.Id : null, canAnalyze);
+        return ToResult(attachment, dataUrl, file is File<string> thirdpartyFile ? thirdpartyFile.Id : null, analysis);
     }
 
-    private async Task<AttachmentResult> ToResultAsync(Attachment attachment)
+    private async Task<AttachmentResult> ToResultAsync(Attachment attachment, bool withFormAnalysis = false)
     {
         var thirdpartyEntryId = await ResolveThirdpartyEntryIdAsync(attachment.ThirdpartyEntryId);
 
@@ -293,7 +463,9 @@ public class AttachmentsStorageService(
             ? await GetDataUrlAsync(attachment.EntryId, thirdpartyEntryId)
             : null;
 
-        return ToResult(attachment, dataUrl, thirdpartyEntryId);
+        var analysis = withFormAnalysis ? await ReadFormAnalysisAsync(attachment) : null;
+
+        return ToResult(attachment, dataUrl, thirdpartyEntryId, analysis);
     }
 
     private async Task<string?> ResolveThirdpartyEntryIdAsync(string? hashId)
@@ -308,8 +480,10 @@ public class AttachmentsStorageService(
         return string.IsNullOrEmpty(entryId) ? null : entryId;
     }
 
-    private static AttachmentResult ToResult(Attachment attachment, string? dataUrl, string? thirdpartyEntryId, bool canAnalyze = false)
+    private static AttachmentResult ToResult(Attachment attachment, string? dataUrl, string? thirdpartyEntryId, FormAnalysis? analysis = null)
     {
+        analysis ??= FormAnalysis.None;
+
         return new AttachmentResult
         {
             Id = attachment.Id,
@@ -320,7 +494,7 @@ public class AttachmentsStorageService(
             EntryId = attachment.EntryId,
             ThirdpartyEntryId = thirdpartyEntryId,
             CreatedAt = attachment.CreatedAt,
-            CanAnalyze = canAnalyze
+            CanAnalyze = analysis.CanAnalyze
         };
     }
 
@@ -342,10 +516,18 @@ public class AttachmentsStorageService(
 
         return null;
     }
+
+    private sealed record FormAnalysis(bool CanAnalyze)
+    {
+        public static readonly FormAnalysis None = new(false);
+    }
 }
 
 internal static partial class AttachmentsStorageServiceLogger
 {
     [LoggerMessage(LogLevel.Warning, "Form analysis check failed for file {fileId}")]
     public static partial void WarnFormAnalysisFailed(this ILogger<AttachmentsStorageService> logger, Exception exception, int fileId);
+
+    [LoggerMessage(LogLevel.Warning, "Form starter-questions failed for attachment {attachmentId}")]
+    public static partial void WarnFormQuestionsFailed(this ILogger<AttachmentsStorageService> logger, Exception exception, Guid attachmentId);
 }

@@ -601,4 +601,10 @@
   <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
     <value>Η φόρμα έχει αλλάξει. Αυτό το προσχέδιο είναι παρωχημένο και δεν μπορεί να υποβληθεί.</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Μη έγκυρο αναγνωριστικό φακέλου</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Αυτή η ενέργεια είναι διαθέσιμη μόνο σε ιδιωτικό δωμάτιο</value>
+  </data>
 </root>

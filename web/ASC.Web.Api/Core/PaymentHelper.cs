@@ -480,7 +480,14 @@ public class PaymentHelper(
             Image = icons[m.OwnedBy.ToLower()],
             Alias = m.Alias,
             Provider = m.Provider,
-            Price = new AiChatPriceDto { Prompt = m.Price.Prompt, Completion = m.Price.Completion },
+            Price = new AiChatPriceDto
+            {
+                Prompt = m.Price.Prompt,
+                Completion = m.Price.Completion,
+                PromptCacheRead = m.Price.PromptCacheRead,
+                PromptCacheWrite = m.Price.PromptCacheWrite,
+                PromptCacheWrite1H = m.Price.PromptCacheWrite1H
+            },
             Link = m.Link
         }).ToList();
 

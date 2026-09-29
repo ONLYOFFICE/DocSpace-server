@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>Cilësimet AI të përdoruesit u përditësuan</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Profili i AI caktuar te agjenti i AI për veprim: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Profili i AI caktuar për veprim: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Profili i modelit AI u krijua: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Profili i modelit AI u fshi: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Profili i AI u hoq nga veprimi: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Profili i modelit AI u përditësua: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Skedarët [{0}]. Shënuar si të lexuar</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Skedarët [{0}]. Skedari nuk u ruajt. Kuota e ruajtjes për portalin u tejkalua.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Skedarët [{0}]. Ruajtja e skedarit tejkalon kuotën e ruajtjes së portalit.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Dosjet [{0}]. Shënuar si të lexuara</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Çelësi i enkriptimit të dhomës private {0} u krijua</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Çelësi i enkriptimit të dhomës private {0} u fshi</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Çelësi i enkriptimit të dhomës private {0} u përditësua</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>U zbulua hyrje e dyshimtë: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>Serveri MCP {0} i agjentit AI u përditësua</value>
+  </data>
 </root>

@@ -601,4 +601,10 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>AIエージェントの指示は{0}文字を超えることはできません</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>無効なフォルダーID</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>このアクションはプライベートルームでのみ利用可能です</value>
+  </data>
 </root>

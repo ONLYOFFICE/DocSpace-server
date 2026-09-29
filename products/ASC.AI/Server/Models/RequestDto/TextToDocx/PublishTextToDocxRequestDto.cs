@@ -38,4 +38,5 @@ public class PublishTextToDocxRequestDto
     public required string Title { get; init; }
     public required string Content { get; init; }
     public required JsonElement FolderId { get; init; }
+    public MdOutputFormat Format { get; init; }
 }

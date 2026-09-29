@@ -1380,7 +1380,7 @@ public class FileSecurity(
                 }
             }
 
-            if (folder.FolderType == FolderType.ResultStorage
+            if (folder.FolderType == FolderType.ChatOutputs
                 && action is FilesSecurityActions.Rename or FilesSecurityActions.Delete or FilesSecurityActions.Copy or FilesSecurityActions.Move or FilesSecurityActions.Duplicate)
             {
                 return false;
@@ -1653,8 +1653,8 @@ public class FileSecurity(
                         {
                             if (!folder.SettingsDenyDownload)
                             {
-                        return true;
-                    }
+                                return true;
+                            }
                         }
                         else
                         {
@@ -2820,14 +2820,7 @@ public class FileSecurity(
             return true;
         }
 
-        return searchArea switch
-        {
-            SearchArea.Active => room.FolderType != FolderType.FillingFormsRoom,
-            SearchArea.Forms => room.FolderType == FolderType.FillingFormsRoom,
-            SearchArea.Templates => room.FolderType != FolderType.FillingFormsRoom,
-            SearchArea.FormTemplates => room.FolderType == FolderType.FillingFormsRoom,
-            _ => true
-        };
+        return searchArea.MatchesRoomType(room.FolderType);
     }
 
     private async Task<List<FileEntry>> GetAllVirtualRoomsAsync(

@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>Käyttäjän AI-asetukset päivitetty</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>AI-profiili on määritetty AI-agentille toimintoa varten: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>AI-profiili on määritetty toimintoa varten: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>AI-malliprofiili on luotu: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>AI-malliprofiili on poistettu: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>AI-profiilin määritys toiminnosta on poistettu: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>AI-malliprofiili on päivitetty: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Tiedostot [{0}]. Merkitty luetuksi</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Tiedostot [{0}]. Tiedostoa ei tallennettu. Portaalin tallennuskiintiö on ylitetty.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Tiedostot [{0}]. Tiedoston tallentaminen ylittää portaalin tallennuskiintiön.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Kansiot [{0}]. Merkitty luetuksi</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Yksityisen huoneen salausavain {0} on luotu</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Yksityisen huoneen salausavain {0} on poistettu</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Yksityisen huoneen salausavain {0} on päivitetty</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Epäilyttävä kirjautuminen havaittu: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>AI-agentin MCP-palvelin {0} on päivitetty</value>
+  </data>
 </root>

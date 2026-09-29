@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>Lietotāja MI iestatījumi atjaunināti</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>AI profils piešķirts AI agentam darbībai: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>AI profils piešķirts darbībai: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>AI modeļa profils izveidots: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>AI modeļa profils dzēsts: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>AI profils noņemts no darbības: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>AI modeļa profils atjaunināts: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Faili [{0}]. Atzīmēti kā lasīti</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Faili [{0}]. Fails netika saglabāts. Portāla krātuves kvota ir pārsniegta.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Faili [{0}]. Faila saglabāšana pārsniedz portāla krātuves kvotu.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Mapes [{0}]. Atzīmētas kā lasītas</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Privātās telpas šifrēšanas atslēga {0} izveidota</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Privātās telpas šifrēšanas atslēga {0} dzēsta</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Privātās telpas šifrēšanas atslēga {0} atjaunināta</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Atklāta aizdomīga pieteikšanās: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>AI agenta MCP serveris {0} atjaunināts</value>
+  </data>
 </root>

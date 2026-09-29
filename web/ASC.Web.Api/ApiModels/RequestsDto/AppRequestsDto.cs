@@ -89,6 +89,7 @@ public class SetAppSettingsBody
     /// document rather than merging into it, and `null` drops it so the application falls back to its own defaults.
     /// </summary>
     /// <example>{}</example>
+    [SwaggerAnyJsonValue]
     public JsonElement Settings { get; set; }
 }
 

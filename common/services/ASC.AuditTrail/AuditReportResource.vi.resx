@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>Cài đặt AI của người dùng đã được cập nhật</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Hồ sơ AI được giao cho tác nhân AI để thực hiện hành động: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Hồ sơ AI được giao cho hành động: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Hồ sơ mô hình AI đã được tạo: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Hồ sơ mô hình AI đã bị xóa: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Hồ sơ AI đã bị hủy giao khỏi hành động: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Hồ sơ mô hình AI đã được cập nhật: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Tệp [{0}]. Đã đánh dấu là đã đọc</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Tệp [{0}]. Tệp chưa được lưu. Hạn mức lưu trữ của cổng thông tin đã vượt quá.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Tệp [{0}]. Lưu tệp vượt quá hạn mức lưu trữ của cổng thông tin.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Thư mục [{0}]. Đã đánh dấu là đã đọc</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Khóa mã hóa phòng riêng tư {0} đã được tạo</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Khóa mã hóa phòng riêng tư {0} đã bị xóa</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Khóa mã hóa phòng riêng tư {0} đã được cập nhật</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Đã phát hiện đăng nhập đáng ngờ: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>Máy chủ MCP {0} của tác nhân AI đã được cập nhật</value>
+  </data>
 </root>

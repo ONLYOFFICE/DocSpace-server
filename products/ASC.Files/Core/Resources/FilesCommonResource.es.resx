@@ -601,4 +601,10 @@
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>La instrucción de un agente de IA no puede tener más de {0} caracteres</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>ID de carpeta no válido</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Esta acción solo está disponible en una sala privada</value>
+  </data>
 </root>

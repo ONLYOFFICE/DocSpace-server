@@ -81,6 +81,7 @@ global using ASC.Security.Cryptography;
 global using ASC.Web.Core;
 global using ASC.Web.Core.Files;
 global using ASC.Web.Files.Classes;
+global using ASC.Web.Files.Helpers;
 global using ASC.Web.Files.Services.DocumentService;
 global using ASC.Web.Files.Services.WCFService;
 global using ASC.Web.Files.Services.WCFService.FileOperations;

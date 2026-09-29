@@ -64,6 +64,12 @@ public class EditorToolsFactory(
 
     public async Task<ToolBundle> BuildAsync(ResolvedToolContext context)
     {
+        // The form-analysis sub-agent gets only the form-data tools.
+        if (context.FormSubAgent)
+        {
+            return ToolBundle.Empty;
+        }
+
         var tenantQuota = await tenantManager.GetCurrentTenantQuotaAsync();
         if (!tenantQuota.AutomationApi)
         {
@@ -109,7 +115,7 @@ public class EditorToolsFactory(
         }
 
         var resultStorage = await daoFactory.GetFolderDao<int>()
-            .GetFoldersAsync(agent.Id, FolderType.ResultStorage)
+            .GetFoldersAsync(agent.Id, FolderType.ChatOutputs)
             .FirstOrDefaultAsync();
 
         return resultStorage is null ? null : CreateTarget(resultStorage);

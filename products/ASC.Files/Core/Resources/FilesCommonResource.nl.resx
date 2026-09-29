@@ -601,4 +601,10 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>De instructie van een AI-agent mag niet langer zijn dan {0} tekens</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Ongeldige map-ID</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Deze actie is alleen beschikbaar in een privékamer</value>
+  </data>
 </root>

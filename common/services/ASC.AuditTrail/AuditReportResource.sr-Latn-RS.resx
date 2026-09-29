@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>Podešavanja AI korisnika su ažurirana</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>AI profil dodeljen AI agentu za radnju: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>AI profil dodeljen radnji: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Profil AI modela je kreiran: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Profil AI modela je obrisan: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>AI profil je uklonjen iz radnje: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Profil AI modela je ažuriran: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Datoteke [{0}]. Označene kao pročitane</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Datoteke [{0}]. Datoteka nije sačuvana. Kvota skladištenja portala je prekoračena.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Datoteke [{0}]. Čuvanje datoteke prekoračuje kvotu skladištenja portala.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Fascikle [{0}]. Označene kao pročitane</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Ključ za šifrovanje privatne sobe {0} je kreiran</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Ključ za šifrovanje privatne sobe {0} je obrisan</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Ključ za šifrovanje privatne sobe {0} je ažuriran</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Otkrivena sumnjiva prijava: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>MCP server {0} AI agenta je ažuriran</value>
+  </data>
 </root>

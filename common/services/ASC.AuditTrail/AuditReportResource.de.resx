@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>KI-Einstellungen des Benutzers wurden aktualisiert</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>KI-Profil dem KI-Agenten für Aktion zugewiesen: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>KI-Profil der Aktion zugewiesen: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>KI-Modellprofil erstellt: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>KI-Modellprofil gelöscht: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>KI-Profil von Aktion entfernt: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>KI-Modellprofil aktualisiert: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Dateien [{0}]. Als gelesen markiert</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Dateien [{0}]. Datei nicht gespeichert. Speicherkontingent des Portals überschritten.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Dateien [{0}]. Das Speichern der Datei überschreitet das Speicherkontingent des Portals.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Ordner [{0}]. Als gelesen markiert</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Verschlüsselungsschlüssel für privaten Raum {0} erstellt</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Verschlüsselungsschlüssel für privaten Raum {0} gelöscht</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Verschlüsselungsschlüssel für privaten Raum {0} aktualisiert</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Verdächtiger Anmeldeversuch erkannt: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>MCP-Server {0} des KI-Agenten aktualisiert</value>
+  </data>
 </root>

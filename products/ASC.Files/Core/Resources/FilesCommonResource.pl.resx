@@ -601,4 +601,10 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>Instrukcja agenta AI nie może być dłuższa niż {0} znaków</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Nieprawidłowy identyfikator folderu</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Ta akcja jest dostępna tylko w prywatnym pokoju</value>
+  </data>
 </root>

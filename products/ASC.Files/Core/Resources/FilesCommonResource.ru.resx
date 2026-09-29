@@ -604,4 +604,7 @@
   <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
     <value>Это действие доступно только в приватной комнате</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Неверный идентификатор папки</value>
+  </data>
 </root>

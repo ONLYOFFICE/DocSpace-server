@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>사용자 AI 설정이 업데이트되었습니다</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>AI 에이전트에 작업용 AI 프로필이 할당되었습니다: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>작업에 AI 프로필이 할당되었습니다: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>AI 모델 프로필이 생성되었습니다: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>AI 모델 프로필이 삭제되었습니다: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>작업에서 AI 프로필 할당이 해제되었습니다: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>AI 모델 프로필이 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>파일 [{0}]. 읽음으로 표시됨</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>파일 [{0}]. 파일이 저장되지 않았습니다. 포털 저장 용량 한도를 초과했습니다.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>파일 [{0}]. 파일 저장이 포털 저장 용량 한도를 초과합니다.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>폴더 [{0}]. 읽음으로 표시됨</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>비공개 룸 암호화 키 {0}이(가) 생성되었습니다</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>비공개 룸 암호화 키 {0}이(가) 삭제되었습니다</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>비공개 룸 암호화 키 {0}이(가) 업데이트되었습니다</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>의심스러운 로그인이 감지되었습니다: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>AI 에이전트의 MCP 서버 {0}이(가) 업데이트되었습니다</value>
+  </data>
 </root>

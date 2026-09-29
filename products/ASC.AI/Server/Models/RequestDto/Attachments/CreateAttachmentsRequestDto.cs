@@ -42,4 +42,11 @@ public class CreateAttachmentsRequestDto
 public class CreateAttachmentsRequestBody
 {
     public required HashSet<string> EntryIds { get; init; }
+
+    /// <summary>
+    /// The entry ids attached for form-response analysis ("Analyze responses" — the client's per-file
+    /// analyzeOnly). Analysis tools and starter questions turn on only for these; the rest are plain
+    /// document attachments.
+    /// </summary>
+    public HashSet<string> AnalyzeEntryIds { get; init; } = [];
 }

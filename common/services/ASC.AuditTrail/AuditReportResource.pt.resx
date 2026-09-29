@@ -1212,4 +1212,49 @@
   <data name="UserUpdatedAiSettings" xml:space="preserve">
     <value>Definições de IA do utilizador atualizadas</value>
   </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Perfil de IA atribuído ao agente de IA para ação: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Perfil de IA atribuído à ação: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Perfil de modelo de IA criado: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Perfil de modelo de IA eliminado: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Perfil de IA removido da ação: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Perfil de modelo de IA atualizado: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Ficheiros [{0}]. Marcados como lidos</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Ficheiros [{0}]. Ficheiro não guardado. A quota de armazenamento do portal foi excedida.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Ficheiros [{0}]. Guardar o ficheiro excede a quota de armazenamento do portal.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Pastas [{0}]. Marcadas como lidas</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Chave de encriptação da sala privada {0} criada</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Chave de encriptação da sala privada {0} eliminada</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Chave de encriptação da sala privada {0} atualizada</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Início de sessão suspeito detetado: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>Servidor MCP {0} do agente de IA atualizado</value>
+  </data>
 </root>
