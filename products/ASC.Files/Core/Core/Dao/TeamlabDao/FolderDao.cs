@@ -1099,9 +1099,7 @@ internal class FolderDao(
             }
 
             var trashId = await trashIdTask;
-            var folderType = toFolderId == trashId
-                ? folder.FolderType
-                : await ResolveFolderTypeAsync(filesDbContext, tenantId, toFolderId, folder.Title, folder.FolderType);
+            var folderType = await ResolveFolderTypeAsync(filesDbContext, tenantId, toFolderId, folder.Title, folder.FolderType);
 
             await filesDbContext.UpdateFoldersAsync(tenantId, folderId, toFolderId, folderType, currentAccount);
             var subfolders = await filesDbContext.SubfolderAsync(folderId).ToDictionaryAsync(r => r.FolderId, r => r.Level);
