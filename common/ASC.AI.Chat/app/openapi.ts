@@ -558,20 +558,22 @@ const UNAUTHORIZED_RESPONSE: Json = jsonResponse(
 // direction, so do not "fill them in for symmetry":
 //   - 429 is never produced here. The service has no rate limiter; the status
 //     only appears when a passthrough operation relays a provider's answer.
-//   - 403 is almost never raised locally. For anything resolving an agent
-//     entity, a 403 from the Files API is deliberately turned into a 404
-//     (`storage/docspaceFilesApi.ts`, "don't reveal it"), so those operations
-//     declare 404 and say that it covers both cases.
+//   - 403 is rarely raised locally; the one local case is a room named by
+//     `entityId` that the caller cannot open, which the Files API answers
+//     with 403 and every operation relays as such (`assertEntityAccessible`,
+//     `resolveAgentEntityId`). 404 is reserved for an id that resolves to
+//     nothing.
 const ERROR_DESCRIPTIONS: Readonly<Record<string, string>> = {
   "400": "The request body or query is malformed, or a required value is missing.",
   "402":
     "The portal has no paid AI quota left, so the profile bound to this action cannot be dispatched. " +
     "`error` carries the portal's explanation in the caller's language.",
   "403":
-    "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+    "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one " +
+    "the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
   "404":
-    "The referenced object does not exist, or the caller cannot access it - the two are " +
-    "deliberately indistinguishable, so a room the caller may not open answers 404 rather than 403.",
+    "The referenced object does not exist: an unknown or deleted room named by `entityId`, or an " +
+    "object the caller cannot read - for those the two cases are deliberately indistinguishable.",
   "413": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
   "429": "Relayed verbatim from the AI provider, which is rate-limiting this portal's key.",
   "500": "Unhandled failure. The reason is logged server-side and never echoed back.",
