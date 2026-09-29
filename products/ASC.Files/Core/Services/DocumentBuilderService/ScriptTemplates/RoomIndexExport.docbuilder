@@ -244,8 +244,10 @@ createReportTableStyle();
 
 // The index column carries a grey of its own. Only this report shows it, so the element is added to
 // the shared style here rather than declared with it, and only this report's table switches it on.
-Api.GetActiveWorkbook().GetTableStyles().GetItem(REPORT_TABLE_STYLE_NAME)
-   .GetTableStyleElements().GetItem("xlFirstColumn").SetFillColor(defaultBgColorGray);
+if (reportTableStyleSupported) {
+    Api.GetActiveWorkbook().GetTableStyles().GetItem(REPORT_TABLE_STYLE_NAME)
+       .GetTableStyleElements().GetItem("xlFirstColumn").SetFillColor(defaultBgColorGray);
+}
 
 writeImg();
 
@@ -262,7 +264,7 @@ var formattedTableRange = toColumnName(currentColIndex) + (currentRowIndex) + ":
 
 writeTable(dataTable);
 
-oWorksheet.AddListObject("xlSrcRange", formattedTableRange, undefined, "xlYes", undefined, REPORT_TABLE_STYLE_NAME);
+oWorksheet.AddListObject("xlSrcRange", formattedTableRange, undefined, "xlYes", undefined, getReportTableStyleName());
 
 var listObjects = oWorksheet.GetListObjects();
 listObjects[listObjects.length - 1].SetShowTableStyleFirstColumn(true);

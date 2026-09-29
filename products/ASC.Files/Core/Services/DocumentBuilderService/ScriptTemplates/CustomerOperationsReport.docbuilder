@@ -461,7 +461,10 @@ function writePivot(headerRowIndex, colCount, detailColumnLengths) {
 
     // The same custom style the detail table wears, so the summary matches it - and keeps matching it
     // after a refresh, because the banding and the borders live in the workbook, not in the cells.
-    pivotTable.SetStyleName(REPORT_TABLE_STYLE_NAME);
+    // Left on the editor's default style where the report's own could not be declared.
+    if (reportTableStyleSupported) {
+        pivotTable.SetStyleName(REPORT_TABLE_STYLE_NAME);
+    }
     pivotTable.SetTableStyleRowStripes(true);
 
     // With more than one row field the pivot repeats every outer value as a subtotal row. Here the
@@ -478,7 +481,9 @@ function writePivot(headerRowIndex, colCount, detailColumnLengths) {
     // The editor refits the pivot's columns to their content on every update, which would undo the
     // widths setPivotColumnWidths() hands it below and shrink them again the next time the reader
     // moves a field or refreshes. Switched off before the first update, so the widths set here stay.
-    pivotTable.SetHasAutoFormat(false);
+    if (typeof pivotTable.SetHasAutoFormat === "function") {
+        pivotTable.SetHasAutoFormat(false);
+    }
 
     setPivotColumnWidths(pivotWorksheet, pivot, columnLengths);
     stylePivot(pivotWorksheet, pivotTable);
@@ -524,7 +529,7 @@ freezePanes.FreezeRows(headerRowIndex);
 
 if (values.length > 0) {
     var formattedTableRange = "A" + headerRowIndex + ":" + toColumnName(colCount) + (headerRowIndex + values.length);
-    oWorksheet.AddListObject("xlSrcRange", formattedTableRange, undefined, "xlYes", undefined, REPORT_TABLE_STYLE_NAME);
+    oWorksheet.AddListObject("xlSrcRange", formattedTableRange, undefined, "xlYes", undefined, getReportTableStyleName());
 }
 
 writePivot(headerRowIndex, colCount, columnMaxLengths);

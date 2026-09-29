@@ -191,11 +191,11 @@ var freezePanes = oWorksheet.GetFreezePanes();
 freezePanes.FreezeRows(HEADER_ROW);
 
 if (inputData.editors.users.length > 0) {
-    oWorksheet.AddListObject("xlSrcRange", editorsRange, undefined, "xlYes", undefined, REPORT_TABLE_STYLE_NAME);
+    oWorksheet.AddListObject("xlSrcRange", editorsRange, undefined, "xlYes", undefined, getReportTableStyleName());
 }
 
 if (inputData.viewers.users.length > 0) {
-    oWorksheet.AddListObject("xlSrcRange", viewersRange, undefined, "xlYes", undefined, REPORT_TABLE_STYLE_NAME);
+    oWorksheet.AddListObject("xlSrcRange", viewersRange, undefined, "xlYes", undefined, getReportTableStyleName());
 }
 
 oWorksheet.GetRange("A1").Select();

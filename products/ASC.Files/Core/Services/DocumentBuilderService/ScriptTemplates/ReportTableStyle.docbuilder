@@ -7,7 +7,21 @@
 // own colors: the scripts that use it keep theirs in different scopes.
 var REPORT_TABLE_STYLE_NAME = "ReportTableStyle";
 
+// Declaring a table style needs a 10.0 builder. An older document server still produces the report,
+// dressed in the editor's own default table look instead of the portal's colors.
+var reportTableStyleSupported = typeof Api.GetActiveWorkbook().GetTableStyles === "function";
+
+// The style to dress a table in, or nothing where it could not be declared: handing a table the name
+// of a style the workbook does not hold would leave it pointing at something that is not there.
+function getReportTableStyleName() {
+    return reportTableStyleSupported ? REPORT_TABLE_STYLE_NAME : undefined;
+}
+
 function createReportTableStyle() {
+    if (!reportTableStyleSupported) {
+        return;
+    }
+
     var themeColors = inputData.themeColors;
 
     var headerFontColor = Api.CreateColorFromRGB(themeColors.mainFontColor[0], themeColors.mainFontColor[1], themeColors.mainFontColor[2]);

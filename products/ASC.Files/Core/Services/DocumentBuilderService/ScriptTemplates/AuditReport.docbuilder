@@ -238,7 +238,7 @@ freezePanes.FreezeRows(headerRowIndex);
 
 if (values.length > 0) {
     var formattedTableRange = "A" + headerRowIndex + ":" + toColumnName(colCount) + (headerRowIndex + values.length);
-    oWorksheet.AddListObject("xlSrcRange", formattedTableRange, undefined, "xlYes", undefined, REPORT_TABLE_STYLE_NAME);
+    oWorksheet.AddListObject("xlSrcRange", formattedTableRange, undefined, "xlYes", undefined, getReportTableStyleName());
 }
 
 oWorksheet.GetRange("A1").Select();
