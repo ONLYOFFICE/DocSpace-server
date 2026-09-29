@@ -36,7 +36,7 @@ namespace ASC.Data.Backup.ApiModels;
 /// <summary>
 /// The request parameter that picks which restoring job to report on.
 /// </summary>
-public class RestoreDto
+public class RestoreProgressRequestDto
 {
     /// <summary>
     /// Which restoring job to look for, read as three states rather than as a flag: leave it out for

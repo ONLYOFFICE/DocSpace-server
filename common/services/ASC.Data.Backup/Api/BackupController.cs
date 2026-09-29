@@ -95,7 +95,7 @@ public class BackupController(
     [SwaggerResponse(402, "The portal subscription has expired or has not been paid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("getbackupschedule")]
-    public async Task<ScheduleDto> GetBackupSchedule(DumpDto dto)
+    public async Task<ScheduleDto> GetBackupSchedule(BackupDumpRequestDto dto)
     {
         if (dto.Dump)
         {
@@ -154,7 +154,7 @@ public class BackupController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "The target folder was not found")]
     [HttpPost("createbackupschedule")]
-    public async Task<bool> CreateBackupSchedule(BackupScheduleDto inDto)
+    public async Task<bool> CreateBackupSchedule(CreateBackupScheduleRequestDto inDto)
     {
         if (inDto.Dump)
         {
@@ -208,7 +208,7 @@ public class BackupController(
     [SwaggerResponse(402, "The portal subscription has expired or has not been paid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("deletebackupschedule")]
-    public async Task<bool> DeleteBackupSchedule(DumpDto dto)
+    public async Task<bool> DeleteBackupSchedule(BackupDumpRequestDto dto)
     {
         if (dto.Dump)
         {
@@ -249,7 +249,7 @@ public class BackupController(
     [SwaggerResponse(404, "The target folder or the backup quota was not found")]
     [AllowNotPayment]
     [HttpPost("startbackup")]
-    public async Task<BackupProgressDto> StartBackup(BackupDto inDto, [FromServices] TenantQuotaController quotaController)
+    public async Task<BackupProgressDto> StartBackup(StartBackupRequestDto inDto, [FromServices] TenantQuotaController quotaController)
     {
         await backupService.DemandPermissionsBackupAsync();
 
@@ -444,7 +444,7 @@ public class BackupController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [HttpGet("getbackupprogress")]
-    public async Task<BackupProgressDto> GetBackupProgress(DumpDto dto)
+    public async Task<BackupProgressDto> GetBackupProgress(BackupDumpRequestDto dto)
     {
         if (dto.Dump)
         {
@@ -476,7 +476,7 @@ public class BackupController(
     [SwaggerResponse(402, "The portal subscription has expired or has not been paid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("getbackuphistory")]
-    public async Task<List<BackupHistoryRecordDto>> GetBackupHistory(DumpDto dto)
+    public async Task<List<BackupHistoryRecordDto>> GetBackupHistory(BackupDumpRequestDto dto)
     {
         if (dto.Dump)
         {
@@ -503,7 +503,7 @@ public class BackupController(
     [SwaggerResponse(402, "The portal subscription has expired or has not been paid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("deletebackup/{id:guid}")]
-    public async Task<bool> DeleteBackup([FromRoute] DeleteBackupDto inDto)
+    public async Task<bool> DeleteBackup([FromRoute] DeleteBackupRequestDto inDto)
     {
         await backupService.DeleteBackupAsync(inDto.BackupId);
         return true;
@@ -526,7 +526,7 @@ public class BackupController(
     [SwaggerResponse(402, "The portal subscription has expired or has not been paid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("deletebackuphistory")]
-    public async Task<bool> DeleteBackupHistory(DumpDto dto)
+    public async Task<bool> DeleteBackupHistory(BackupDumpRequestDto dto)
     {
         if (dto.Dump)
         {
@@ -558,7 +558,7 @@ public class BackupController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "The backup record was not found, or the file it points to is missing")]
     [HttpPost("startrestore")]
-    public async Task<BackupProgressDto> StartBackupRestore(BackupRestoreDto inDto)
+    public async Task<BackupProgressDto> StartBackupRestore(StartBackupRestoreRequestDto inDto)
     {
         if (inDto.Dump)
         {
@@ -631,7 +631,7 @@ public class BackupController(
     [HttpGet("getrestoreprogress")]  //NOTE: this method doesn't check payment!!!
     [AllowAnonymous]
     [AllowNotPayment]
-    public async Task<BackupProgressDto> GetRestoreProgress(RestoreDto dto)
+    public async Task<BackupProgressDto> GetRestoreProgress(RestoreProgressRequestDto dto)
     {
         return (await backupService.GetRestoreProgressAsync(dto.Dump))?.Map();
     }
@@ -669,7 +669,7 @@ public class BackupController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [HttpGet("getbackupscount")]
-    public async Task<int> GetBackupsCountAsync(BackupsCountDto dto)
+    public async Task<int> GetBackupsCountAsync(BackupsCountRequestDto dto)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 
@@ -704,7 +704,7 @@ public class BackupController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [HttpGet("getbackupscountbypaid")]
-    public async Task<BackupsCountResultDto> GetBackupsCountsAsync(BackupsCountDto dto)
+    public async Task<BackupsCountResultDto> GetBackupsCountsAsync(BackupsCountRequestDto dto)
     {
         var tenantId = tenantManager.GetCurrentTenantId();
 

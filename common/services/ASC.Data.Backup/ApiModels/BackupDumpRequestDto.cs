@@ -34,15 +34,16 @@
 namespace ASC.Data.Backup.ApiModels;
 
 /// <summary>
-/// The request parameters for deleting one backup.
+/// The request parameter that switches an operation from one portal to the whole server.
 /// </summary>
-public class DeleteBackupDto
+public class BackupDumpRequestDto
 {
     /// <summary>
-    /// The ID of the backup to delete, taken from the route. It is the `id` of a record listed by
-    /// `GET api/2.0/backup/getbackuphistory`, which is also the `taskId` the backup was started with.
+    /// Applies the operation to the whole server rather than to the current portal, which requires the space
+    /// access permission and works on a standalone installation only. Server-wide backups and schedules are
+    /// kept apart from the ones of a portal, so the two values address different data.
     /// </summary>
-    /// <example>11111111-1111-1111-1111-111111111111</example>
-    [FromRoute(Name = "id")]
-    public required Guid BackupId { get; set; }
+    /// <example>false</example>
+    [FromQuery]
+    public bool Dump { get; set; }
 }

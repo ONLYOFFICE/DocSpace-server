@@ -40775,7 +40775,7 @@
         },
         "description": "The body of the conversion prompt switch: which of the two prompts to hide."
       },
-      "HistoryAction": {
+      "HistoryActionDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -40840,7 +40840,7 @@
         },
         "description": "The successful API response containing the list of HistoryDto objects."
       },
-      "HistoryData": {
+      "HistoryDataDto": {
         "type": "object",
         "properties": {
           "initiatorName": {
@@ -40858,22 +40858,22 @@
         "description": "The history data.",
         "x-derived": true,
         "x-derived-types": [
-          "EntryData",
-          "EntryOperationData",
-          "GroupHistoryData",
-          "LinkData",
-          "RenameEntryData",
-          "TagData",
-          "UserHistoryData",
-          "ChangeRoomOwnerHistoryData",
-          "UserFileUpdateData",
-          "FileData",
-          "FileOperationData",
-          "FileRenameData",
-          "LifeTimeHistoryData",
-          "FolderIndexChangedData",
-          "FileIndexChangedData",
-          "FileVersionRemovedData"
+          "EntryHistoryDataDto",
+          "EntryOperationHistoryDataDto",
+          "GroupHistoryDataDto",
+          "LinkHistoryDataDto",
+          "RenameEntryHistoryDataDto",
+          "TagHistoryDataDto",
+          "UserHistoryDataDto",
+          "ChangeRoomOwnerHistoryDataDto",
+          "UserFileUpdateHistoryDataDto",
+          "FileHistoryDataDto",
+          "FileOperationHistoryDataDto",
+          "FileRenameHistoryDataDto",
+          "LifeTimeHistoryDataDto",
+          "FolderIndexChangedHistoryDataDto",
+          "FileIndexChangedHistoryDataDto",
+          "FileVersionRemovedHistoryDataDto"
         ]
       },
       "HistoryDto": {
@@ -40895,7 +40895,7 @@
           },
           "action": {
             "description": "What happened - the kind of event the record stands for, such as a file being uploaded, renamed, moved or\r\nshared - with the key a client can key its own wording off.",
-            "$ref": "#/components/schemas/HistoryAction"
+            "$ref": "#/components/schemas/HistoryActionDto"
           },
           "initiator": {
             "description": "Who caused the event. For an event caused by a visitor following an external link only the name they gave is\r\nfilled in, the account fields staying empty.",
@@ -40907,7 +40907,7 @@
           },
           "data": {
             "description": "The history data. Absent for actions that carry no payload of their own - changing a room's\r\nlogo, icon colour or cover, whose interpreter returns no data (see\r\n`RoomLogoChangedInterpreter`). It used to be declared required, which put it in the\r\nOpenAPI document's required list while the null-dropping serializer left it out of the\r\nresponse, so a generated client threw on any history page holding one of those entries.",
-            "$ref": "#/components/schemas/HistoryData"
+            "$ref": "#/components/schemas/HistoryDataDto"
           },
           "related": {
             "examples": [

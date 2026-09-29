@@ -36,7 +36,7 @@ namespace ASC.Data.Backup.ApiModels;
 /// <summary>
 /// The request parameters for restoring a portal from a backup.
 /// </summary>
-public class BackupRestoreDto
+public class StartBackupRestoreRequestDto
 {
     /// <summary>
     /// The ID of the backup to restore from, as listed by `GET api/2.0/backup/getbackuphistory`. Send

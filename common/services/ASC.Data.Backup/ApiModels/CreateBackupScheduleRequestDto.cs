@@ -31,14 +31,12 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.Data.Backup.Services;
-
 namespace ASC.Data.Backup.ApiModels;
 
 /// <summary>
 /// The request parameters for setting the backup schedule.
 /// </summary>
-public class BackupScheduleDto
+public class CreateBackupScheduleRequestDto
 {
     /// <summary>
     /// The storage the scheduled archives are written to. It defaults to `Documents`, and it decides which
@@ -68,7 +66,7 @@ public class BackupScheduleDto
     /// default.
     /// </summary>
     /// <example>{"period": "EveryDay", "hour": 2}</example>
-    public Cron CronParams { get; set; }
+    public BackupCronRequest CronParams { get; set; }
 
     /// <summary>
     /// Schedules a backup of the whole server rather than of this one portal. It requires the space access
@@ -81,7 +79,7 @@ public class BackupScheduleDto
 /// <summary>
 /// The request parameters for the time the scheduled backup runs.
 /// </summary>
-public class Cron
+public class BackupCronRequest
 {
     /// <summary>
     /// How often the backup runs: `EveryDay`, `EveryWeek` or `EveryMonth`. It defaults to `EveryDay`.

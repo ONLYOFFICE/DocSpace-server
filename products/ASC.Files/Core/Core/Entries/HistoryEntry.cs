@@ -31,8 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using LinkData = ASC.Files.Core.Core.History.LinkData;
-
 namespace ASC.Files.Core.Core.Entries;
 
 /// <summary>
@@ -48,7 +46,7 @@ public record HistoryEntry
     /// <summary>
     /// The action performed on the file.
     /// </summary>
-    public HistoryAction Action { get; init; }
+    public HistoryActionDto Action { get; init; }
 
     /// <summary>
     /// The ID of the action initiator.
@@ -68,7 +66,7 @@ public record HistoryEntry
     /// <summary>
     /// The history data.
     /// </summary>
-    public HistoryData Data { get; init; }
+    public HistoryDataDto Data { get; init; }
 
     private static readonly HashSet<MessageAction> _gropedActions =
     [
@@ -114,57 +112,4 @@ public record HistoryEntry
 
         return _groupId = HashCode.Combine(Action.Id, InitiatorId, Date, Data?.GetId() ?? 0, Random.Shared.Next(int.MaxValue));
     }
-}
-
-/// <summary>
-/// The history data.
-/// </summary>
-[JsonDerivedType(typeof(EntryData))]
-[JsonDerivedType(typeof(EntryOperationData))]
-[JsonDerivedType(typeof(GroupHistoryData))]
-[JsonDerivedType(typeof(LinkData))]
-[JsonDerivedType(typeof(RenameEntryData))]
-[JsonDerivedType(typeof(TagData))]
-[JsonDerivedType(typeof(UserHistoryData))]
-[JsonDerivedType(typeof(ChangeRoomOwnerHistoryData))]
-[JsonDerivedType(typeof(UserFileUpdateData))]
-[JsonDerivedType(typeof(FileData))]
-[JsonDerivedType(typeof(FileOperationData))]
-[JsonDerivedType(typeof(FileRenameData))]
-[JsonDerivedType(typeof(LifeTimeHistoryData))]
-[JsonDerivedType(typeof(FolderIndexChangedData))]
-[JsonDerivedType(typeof(FileIndexChangedData))]
-[JsonDerivedType(typeof(FileVersionRemovedData))]
-public abstract record HistoryData
-{
-    /// <summary>
-    /// The history data ID.
-    /// </summary>
-    /// <example>0</example>
-    public virtual int GetId() => 0;
-
-    /// <summary>
-    /// The name of the action initiator.
-    /// </summary>
-    /// <example>John Doe</example>
-    public virtual string InitiatorName => null;
-}
-
-/// <summary>
-/// The action performed on the file.
-/// </summary>
-public record HistoryAction(MessageAction Id, string Key)
-{
-    /// <summary>
-    /// The action performed on the file.
-    /// </summary>
-    /// <example>FileUploaded</example>
-    public MessageAction Id { get; init; } = Id;
-    
-    
-    /// <summary>
-    /// The action performed on the file.
-    /// </summary>
-    /// <example>fileUploaded</example>   
-    public string Key { get; init; } = Key;
 }
