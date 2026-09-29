@@ -93,8 +93,9 @@ func main() {
 			return
 		}
 
-		// Files, folders, rooms, agents and forms share one payload shape.
-		// fileEntryType tells them apart: 1 folder, 2 file.
+		// Files, folders and rooms each have their own schema; they share the
+		// fields of FileEntryPayload, which is enough for a generic log line.
+		// Decode FilePayload / FolderPayload / RoomPayload for the rest.
 		var e sdk.FileEntryPayload
 		if json.Unmarshal(env.Payload, &e) == nil {
 			kind := "folder"

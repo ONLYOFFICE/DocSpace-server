@@ -98,8 +98,9 @@ fun main() {
             val user = moshi.adapter(UserPayload::class.java).fromJsonValue(payload)
             println("$trigger: ${user?.userName}")
         } else {
-            // Files, folders, rooms, agents and forms share one payload shape.
-            // fileEntryType tells them apart: 1 folder, 2 file.
+            // Files, folders and rooms each have their own schema; they share the
+            // fields of FileEntryPayload, which is enough for a generic log line.
+            // Decode FilePayload / FolderPayload / RoomPayload for the rest.
             val entry = moshi.adapter(FileEntryPayload::class.java).fromJsonValue(payload)
             val kind = if (entry?.fileEntryType == 2) "file" else "folder"
             println("$trigger: $kind \"${entry?.title}\"")

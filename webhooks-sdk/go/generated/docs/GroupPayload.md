@@ -6,10 +6,12 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | Pointer to **string** |  | [optional] 
 **Name** | Pointer to **string** |  | [optional] 
-**CategoryID** | Pointer to **string** |  | [optional] 
-**Parent** | Pointer to [**GroupPayload**](GroupPayload.md) |  | [optional] 
-**Sid** | Pointer to **string** | LDAP identifier. REVIEW. | [optional] 
-**Removed** | Pointer to **bool** |  | [optional] 
+**Parent** | Pointer to **string** |  | [optional] 
+**Category** | Pointer to **string** |  | [optional] 
+**IsLDAP** | Pointer to **bool** |  | [optional] 
+**IsSystem** | Pointer to **bool** |  | [optional] 
+**Manager** | Pointer to [**UserSummaryPayload**](UserSummaryPayload.md) |  | [optional] 
+**MembersCount** | Pointer to **int32** |  | [optional] 
 
 ## Methods
 
@@ -80,47 +82,22 @@ SetName sets Name field to given value.
 
 HasName returns a boolean if a field has been set.
 
-### GetCategoryID
-
-`func (o *GroupPayload) GetCategoryID() string`
-
-GetCategoryID returns the CategoryID field if non-nil, zero value otherwise.
-
-### GetCategoryIDOk
-
-`func (o *GroupPayload) GetCategoryIDOk() (*string, bool)`
-
-GetCategoryIDOk returns a tuple with the CategoryID field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetCategoryID
-
-`func (o *GroupPayload) SetCategoryID(v string)`
-
-SetCategoryID sets CategoryID field to given value.
-
-### HasCategoryID
-
-`func (o *GroupPayload) HasCategoryID() bool`
-
-HasCategoryID returns a boolean if a field has been set.
-
 ### GetParent
 
-`func (o *GroupPayload) GetParent() GroupPayload`
+`func (o *GroupPayload) GetParent() string`
 
 GetParent returns the Parent field if non-nil, zero value otherwise.
 
 ### GetParentOk
 
-`func (o *GroupPayload) GetParentOk() (*GroupPayload, bool)`
+`func (o *GroupPayload) GetParentOk() (*string, bool)`
 
 GetParentOk returns a tuple with the Parent field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetParent
 
-`func (o *GroupPayload) SetParent(v GroupPayload)`
+`func (o *GroupPayload) SetParent(v string)`
 
 SetParent sets Parent field to given value.
 
@@ -130,55 +107,130 @@ SetParent sets Parent field to given value.
 
 HasParent returns a boolean if a field has been set.
 
-### GetSid
+### GetCategory
 
-`func (o *GroupPayload) GetSid() string`
+`func (o *GroupPayload) GetCategory() string`
 
-GetSid returns the Sid field if non-nil, zero value otherwise.
+GetCategory returns the Category field if non-nil, zero value otherwise.
 
-### GetSidOk
+### GetCategoryOk
 
-`func (o *GroupPayload) GetSidOk() (*string, bool)`
+`func (o *GroupPayload) GetCategoryOk() (*string, bool)`
 
-GetSidOk returns a tuple with the Sid field if it's non-nil, zero value otherwise
+GetCategoryOk returns a tuple with the Category field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetSid
+### SetCategory
 
-`func (o *GroupPayload) SetSid(v string)`
+`func (o *GroupPayload) SetCategory(v string)`
 
-SetSid sets Sid field to given value.
+SetCategory sets Category field to given value.
 
-### HasSid
+### HasCategory
 
-`func (o *GroupPayload) HasSid() bool`
+`func (o *GroupPayload) HasCategory() bool`
 
-HasSid returns a boolean if a field has been set.
+HasCategory returns a boolean if a field has been set.
 
-### GetRemoved
+### GetIsLDAP
 
-`func (o *GroupPayload) GetRemoved() bool`
+`func (o *GroupPayload) GetIsLDAP() bool`
 
-GetRemoved returns the Removed field if non-nil, zero value otherwise.
+GetIsLDAP returns the IsLDAP field if non-nil, zero value otherwise.
 
-### GetRemovedOk
+### GetIsLDAPOk
 
-`func (o *GroupPayload) GetRemovedOk() (*bool, bool)`
+`func (o *GroupPayload) GetIsLDAPOk() (*bool, bool)`
 
-GetRemovedOk returns a tuple with the Removed field if it's non-nil, zero value otherwise
+GetIsLDAPOk returns a tuple with the IsLDAP field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetRemoved
+### SetIsLDAP
 
-`func (o *GroupPayload) SetRemoved(v bool)`
+`func (o *GroupPayload) SetIsLDAP(v bool)`
 
-SetRemoved sets Removed field to given value.
+SetIsLDAP sets IsLDAP field to given value.
 
-### HasRemoved
+### HasIsLDAP
 
-`func (o *GroupPayload) HasRemoved() bool`
+`func (o *GroupPayload) HasIsLDAP() bool`
 
-HasRemoved returns a boolean if a field has been set.
+HasIsLDAP returns a boolean if a field has been set.
+
+### GetIsSystem
+
+`func (o *GroupPayload) GetIsSystem() bool`
+
+GetIsSystem returns the IsSystem field if non-nil, zero value otherwise.
+
+### GetIsSystemOk
+
+`func (o *GroupPayload) GetIsSystemOk() (*bool, bool)`
+
+GetIsSystemOk returns a tuple with the IsSystem field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetIsSystem
+
+`func (o *GroupPayload) SetIsSystem(v bool)`
+
+SetIsSystem sets IsSystem field to given value.
+
+### HasIsSystem
+
+`func (o *GroupPayload) HasIsSystem() bool`
+
+HasIsSystem returns a boolean if a field has been set.
+
+### GetManager
+
+`func (o *GroupPayload) GetManager() UserSummaryPayload`
+
+GetManager returns the Manager field if non-nil, zero value otherwise.
+
+### GetManagerOk
+
+`func (o *GroupPayload) GetManagerOk() (*UserSummaryPayload, bool)`
+
+GetManagerOk returns a tuple with the Manager field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetManager
+
+`func (o *GroupPayload) SetManager(v UserSummaryPayload)`
+
+SetManager sets Manager field to given value.
+
+### HasManager
+
+`func (o *GroupPayload) HasManager() bool`
+
+HasManager returns a boolean if a field has been set.
+
+### GetMembersCount
+
+`func (o *GroupPayload) GetMembersCount() int32`
+
+GetMembersCount returns the MembersCount field if non-nil, zero value otherwise.
+
+### GetMembersCountOk
+
+`func (o *GroupPayload) GetMembersCountOk() (*int32, bool)`
+
+GetMembersCountOk returns a tuple with the MembersCount field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetMembersCount
+
+`func (o *GroupPayload) SetMembersCount(v int32)`
+
+SetMembersCount sets MembersCount field to given value.
+
+### HasMembersCount
+
+`func (o *GroupPayload) HasMembersCount() bool`
+
+HasMembersCount returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

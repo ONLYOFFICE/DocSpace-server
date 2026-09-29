@@ -2,9 +2,9 @@
 /* eslint-disable */
 /**
  * ONLYOFFICE DocSpace Webhooks
- * Wire contract for OUTBOUND DocSpace webhook deliveries.  This is a hand-maintained document. It is NOT the REST API spec and shares no schemas with it: webhook payloads are the internal domain entities (UserInfo, GroupInfo, File<T>, Folder<T>), not the controller DTOs.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender\'s options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+ * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto). They began as copies of the matching REST DTOs and are free to diverge from them.  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender\'s options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
  *
- * The version of the OpenAPI document: 0.1.0
+ * The version of the OpenAPI document: 1.0.0
  * 
  *
  * NOTE: This class is auto generated by OpenAPI Generator (https://openapi-generator.tech).
@@ -13,12 +13,37 @@
  */
 
 import { mapValues, parseDate, parseDateTime, serializeDate, serializeDateTime } from '../runtime';
+import type { GroupSummaryPayload } from './GroupSummaryPayload';
+import {
+    GroupSummaryPayloadFromJSON,
+    GroupSummaryPayloadFromJSONTyped,
+    GroupSummaryPayloadToJSON,
+    GroupSummaryPayloadToJSONTyped,
+} from './GroupSummaryPayload';
+import type { ContactPayload } from './ContactPayload';
+import {
+    ContactPayloadFromJSON,
+    ContactPayloadFromJSONTyped,
+    ContactPayloadToJSON,
+    ContactPayloadToJSONTyped,
+} from './ContactPayload';
+import type { UserSummaryPayload } from './UserSummaryPayload';
+import {
+    UserSummaryPayloadFromJSON,
+    UserSummaryPayloadFromJSONTyped,
+    UserSummaryPayloadToJSON,
+    UserSummaryPayloadToJSONTyped,
+} from './UserSummaryPayload';
+
 /**
- * ASC.Core.Common/Core/UserInfo.cs -- the domain entity, verbatim.
- * It carries NO [JsonIgnore] at all, so every public member below reaches
- * the wire. sid / ssoNameId / ssoSessionId / ldapQouta are null on portals
- * without LDAP or SSO and therefore invisible in most test captures; they
- * DO appear on LDAP/SSO tenants, and are flagged REVIEW below.
+ * ASC.Api.Core/Webhook/Payloads/UserWebhookDto.cs. A copy of the REST
+ * EmployeeFullDto, owned by the webhook contract and free to diverge from it.
+ * 
+ * Not carried, deliberately: sid / ssoNameId / ssoSessionId (LDAP and SAML
+ * identifiers, and a SAML SESSION id, all of which the domain entity used to
+ * put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme,
+ * isAnonim, and `shared`. `contacts` appears once, as a typed list, rather
+ * than twice in two shapes.
  * 
  * @export
  * @interface UserPayload
@@ -28,6 +53,10 @@ export interface UserPayload {
      * 
      */
     id?: string;
+    /**
+     * 
+     */
+    displayName?: string;
     /**
      * 
      */
@@ -47,31 +76,27 @@ export interface UserPayload {
     /**
      * 
      */
-    birthDate?: Date;
-    /**
-     * 
-     */
-    sex?: boolean;
+    contacts?: Array<ContactPayload>;
     /**
      * enum EmployeeStatus
      */
     status?: number;
     /**
-     * enum EmployeeActivationStatus (flags)
+     * enum EmployeeActivationStatus (flags), AutoGenerated masked off
      */
     activationStatus?: number;
     /**
      * 
      */
-    terminatedDate?: Date;
+    terminated?: Date;
+    /**
+     * Comma-separated group names, HTML-encoded.
+     */
+    department?: string;
     /**
      * 
      */
-    title?: string;
-    /**
-     * 
-     */
-    workFromDate?: Date;
+    groups?: Array<GroupSummaryPayload>;
     /**
      * 
      */
@@ -81,26 +106,37 @@ export interface UserPayload {
      */
     notes?: string;
     /**
-     * Flattened form of contactsList. BOTH are emitted -- the same data twice.
      * 
      */
-    contacts?: string;
+    isAdmin?: boolean;
     /**
      * 
      */
-    contactsList?: Array<string>;
+    isRoomAdmin?: boolean;
     /**
      * 
      */
-    removed?: boolean;
+    isOwner?: boolean;
     /**
      * 
      */
-    lastModified?: Date;
+    isVisitor?: boolean;
     /**
      * 
      */
-    tenantId?: number;
+    isCollaborator?: boolean;
+    /**
+     * 
+     */
+    isLDAP?: boolean;
+    /**
+     * 
+     */
+    isSSO?: boolean;
+    /**
+     * 
+     */
+    listAdminModules?: Array<string>;
     /**
      * 
      */
@@ -116,41 +152,51 @@ export interface UserPayload {
     /**
      * 
      */
-    createDate?: Date;
+    quotaLimit?: number;
     /**
      * 
      */
-    createdBy?: string;
+    usedSpace?: number;
     /**
      * 
      */
-    spam?: boolean;
+    isCustomQuota?: boolean;
     /**
-     * LDAP identifier. REVIEW.
-     */
-    sid?: string;
-    /**
-     * sic -- misspelled in the domain type, and misspelled on the wire. LDAP quota. REVIEW.
      * 
      */
-    ldapQouta?: number;
+    createdBy?: UserSummaryPayload;
     /**
-     * SAML identifier. REVIEW.
-     */
-    ssoNameId?: string;
-    /**
-     * SAML SESSION identifier. REVIEW -- should almost certainly not be on the wire.
      * 
      */
-    ssoSessionId?: string;
+    registrationDate?: Date;
     /**
-     * computed getter
+     * 
      */
-    readonly isActive?: boolean;
+    hasAvatar?: boolean;
     /**
-     * computed getter
+     * 
      */
-    readonly checkActivation?: boolean;
+    avatar?: string;
+    /**
+     * 
+     */
+    avatarOriginal?: string;
+    /**
+     * 
+     */
+    avatarMax?: string;
+    /**
+     * 
+     */
+    avatarMedium?: string;
+    /**
+     * 
+     */
+    avatarSmall?: string;
+    /**
+     * 
+     */
+    profileUrl?: string;
 }
 
 /**
@@ -171,36 +217,42 @@ export function UserPayloadFromJSONTyped(json: any, ignoreDiscriminator: boolean
     return {
         
         'id': json['id'] == null ? undefined : json['id'],
+        'displayName': json['displayName'] == null ? undefined : json['displayName'],
         'firstName': json['firstName'] == null ? undefined : json['firstName'],
         'lastName': json['lastName'] == null ? undefined : json['lastName'],
         'userName': json['userName'] == null ? undefined : json['userName'],
         'email': json['email'] == null ? undefined : json['email'],
-        'birthDate': json['birthDate'] == null ? undefined : (parseDateTime(json['birthDate'])),
-        'sex': json['sex'] == null ? undefined : json['sex'],
+        'contacts': json['contacts'] == null ? undefined : ((json['contacts'] as Array<any>).map(ContactPayloadFromJSON)),
         'status': json['status'] == null ? undefined : json['status'],
         'activationStatus': json['activationStatus'] == null ? undefined : json['activationStatus'],
-        'terminatedDate': json['terminatedDate'] == null ? undefined : (parseDateTime(json['terminatedDate'])),
-        'title': json['title'] == null ? undefined : json['title'],
-        'workFromDate': json['workFromDate'] == null ? undefined : (parseDateTime(json['workFromDate'])),
+        'terminated': json['terminated'] == null ? undefined : (parseDateTime(json['terminated'])),
+        'department': json['department'] == null ? undefined : json['department'],
+        'groups': json['groups'] == null ? undefined : ((json['groups'] as Array<any>).map(GroupSummaryPayloadFromJSON)),
         'location': json['location'] == null ? undefined : json['location'],
         'notes': json['notes'] == null ? undefined : json['notes'],
-        'contacts': json['contacts'] == null ? undefined : json['contacts'],
-        'contactsList': json['contactsList'] == null ? undefined : json['contactsList'],
-        'removed': json['removed'] == null ? undefined : json['removed'],
-        'lastModified': json['lastModified'] == null ? undefined : (parseDateTime(json['lastModified'])),
-        'tenantId': json['tenantId'] == null ? undefined : json['tenantId'],
+        'isAdmin': json['isAdmin'] == null ? undefined : json['isAdmin'],
+        'isRoomAdmin': json['isRoomAdmin'] == null ? undefined : json['isRoomAdmin'],
+        'isOwner': json['isOwner'] == null ? undefined : json['isOwner'],
+        'isVisitor': json['isVisitor'] == null ? undefined : json['isVisitor'],
+        'isCollaborator': json['isCollaborator'] == null ? undefined : json['isCollaborator'],
+        'isLDAP': json['isLDAP'] == null ? undefined : json['isLDAP'],
+        'isSSO': json['isSSO'] == null ? undefined : json['isSSO'],
+        'listAdminModules': json['listAdminModules'] == null ? undefined : json['listAdminModules'],
         'cultureName': json['cultureName'] == null ? undefined : json['cultureName'],
         'mobilePhone': json['mobilePhone'] == null ? undefined : json['mobilePhone'],
         'mobilePhoneActivationStatus': json['mobilePhoneActivationStatus'] == null ? undefined : json['mobilePhoneActivationStatus'],
-        'createDate': json['createDate'] == null ? undefined : (parseDateTime(json['createDate'])),
-        'createdBy': json['createdBy'] == null ? undefined : json['createdBy'],
-        'spam': json['spam'] == null ? undefined : json['spam'],
-        'sid': json['sid'] == null ? undefined : json['sid'],
-        'ldapQouta': json['ldapQouta'] == null ? undefined : json['ldapQouta'],
-        'ssoNameId': json['ssoNameId'] == null ? undefined : json['ssoNameId'],
-        'ssoSessionId': json['ssoSessionId'] == null ? undefined : json['ssoSessionId'],
-        'isActive': json['isActive'] == null ? undefined : json['isActive'],
-        'checkActivation': json['checkActivation'] == null ? undefined : json['checkActivation'],
+        'quotaLimit': json['quotaLimit'] == null ? undefined : json['quotaLimit'],
+        'usedSpace': json['usedSpace'] == null ? undefined : json['usedSpace'],
+        'isCustomQuota': json['isCustomQuota'] == null ? undefined : json['isCustomQuota'],
+        'createdBy': json['createdBy'] == null ? undefined : UserSummaryPayloadFromJSON(json['createdBy']),
+        'registrationDate': json['registrationDate'] == null ? undefined : (parseDateTime(json['registrationDate'])),
+        'hasAvatar': json['hasAvatar'] == null ? undefined : json['hasAvatar'],
+        'avatar': json['avatar'] == null ? undefined : json['avatar'],
+        'avatarOriginal': json['avatarOriginal'] == null ? undefined : json['avatarOriginal'],
+        'avatarMax': json['avatarMax'] == null ? undefined : json['avatarMax'],
+        'avatarMedium': json['avatarMedium'] == null ? undefined : json['avatarMedium'],
+        'avatarSmall': json['avatarSmall'] == null ? undefined : json['avatarSmall'],
+        'profileUrl': json['profileUrl'] == null ? undefined : json['profileUrl'],
     };
 }
 
@@ -208,7 +260,7 @@ export function UserPayloadToJSON(json: any): UserPayload {
     return UserPayloadToJSONTyped(json, false);
 }
 
-export function UserPayloadToJSONTyped(value?: Omit<UserPayload, 'isActive'|'checkActivation'> | null, ignoreDiscriminator: boolean = false): any {
+export function UserPayloadToJSONTyped(value?: UserPayload | null, ignoreDiscriminator: boolean = false): any {
     if (value == null) {
         return value;
     }
@@ -216,34 +268,42 @@ export function UserPayloadToJSONTyped(value?: Omit<UserPayload, 'isActive'|'che
     return {
         
         'id': value['id'],
+        'displayName': value['displayName'],
         'firstName': value['firstName'],
         'lastName': value['lastName'],
         'userName': value['userName'],
         'email': value['email'],
-        'birthDate': value['birthDate'] == null ? value['birthDate'] : serializeDateTime(value['birthDate']),
-        'sex': value['sex'],
+        'contacts': value['contacts'] == null ? undefined : ((value['contacts'] as Array<any>).map(ContactPayloadToJSON)),
         'status': value['status'],
         'activationStatus': value['activationStatus'],
-        'terminatedDate': value['terminatedDate'] == null ? value['terminatedDate'] : serializeDateTime(value['terminatedDate']),
-        'title': value['title'],
-        'workFromDate': value['workFromDate'] == null ? value['workFromDate'] : serializeDateTime(value['workFromDate']),
+        'terminated': value['terminated'] == null ? value['terminated'] : serializeDateTime(value['terminated']),
+        'department': value['department'],
+        'groups': value['groups'] == null ? undefined : ((value['groups'] as Array<any>).map(GroupSummaryPayloadToJSON)),
         'location': value['location'],
         'notes': value['notes'],
-        'contacts': value['contacts'],
-        'contactsList': value['contactsList'],
-        'removed': value['removed'],
-        'lastModified': value['lastModified'] == null ? value['lastModified'] : serializeDateTime(value['lastModified']),
-        'tenantId': value['tenantId'],
+        'isAdmin': value['isAdmin'],
+        'isRoomAdmin': value['isRoomAdmin'],
+        'isOwner': value['isOwner'],
+        'isVisitor': value['isVisitor'],
+        'isCollaborator': value['isCollaborator'],
+        'isLDAP': value['isLDAP'],
+        'isSSO': value['isSSO'],
+        'listAdminModules': value['listAdminModules'],
         'cultureName': value['cultureName'],
         'mobilePhone': value['mobilePhone'],
         'mobilePhoneActivationStatus': value['mobilePhoneActivationStatus'],
-        'createDate': value['createDate'] == null ? value['createDate'] : serializeDateTime(value['createDate']),
-        'createdBy': value['createdBy'],
-        'spam': value['spam'],
-        'sid': value['sid'],
-        'ldapQouta': value['ldapQouta'],
-        'ssoNameId': value['ssoNameId'],
-        'ssoSessionId': value['ssoSessionId'],
+        'quotaLimit': value['quotaLimit'],
+        'usedSpace': value['usedSpace'],
+        'isCustomQuota': value['isCustomQuota'],
+        'createdBy': UserSummaryPayloadToJSON(value['createdBy']),
+        'registrationDate': value['registrationDate'] == null ? value['registrationDate'] : serializeDateTime(value['registrationDate']),
+        'hasAvatar': value['hasAvatar'],
+        'avatar': value['avatar'],
+        'avatarOriginal': value['avatarOriginal'],
+        'avatarMax': value['avatarMax'],
+        'avatarMedium': value['avatarMedium'],
+        'avatarSmall': value['avatarSmall'],
+        'profileUrl': value['profileUrl'],
     };
 }
 

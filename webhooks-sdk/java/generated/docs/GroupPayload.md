@@ -2,7 +2,7 @@
 
 # GroupPayload
 
-ASC.Core.Common/Core/GroupInfo.cs. Note `ID` in C#; the camelCase policy lowercases the whole leading run, so it is \"id\" on the wire, while `CategoryID` becomes \"categoryID\". 
+ASC.Api.Core/Webhook/Payloads/GroupWebhookDto.cs. A copy of the REST GroupDto.  The member list is not carried - a group can hold thousands of users and each would be expanded into every group event. `membersCount` is the hint that the roster changed; read it from GET api/2.0/group/{id}. 
 
 ## Properties
 
@@ -10,10 +10,12 @@ ASC.Core.Common/Core/GroupInfo.cs. Note `ID` in C#; the camelCase policy lowerca
 |------------ | ------------- | ------------- | -------------|
 |**id** | **UUID** |  |  [optional] |
 |**name** | **String** |  |  [optional] |
-|**categoryID** | **UUID** |  |  [optional] |
-|**parent** | [**GroupPayload**](GroupPayload.md) |  |  [optional] |
-|**sid** | **String** | LDAP identifier. REVIEW. |  [optional] |
-|**removed** | **Boolean** |  |  [optional] |
+|**parent** | **UUID** |  |  [optional] |
+|**category** | **UUID** |  |  [optional] |
+|**isLDAP** | **Boolean** |  |  [optional] |
+|**isSystem** | **Boolean** |  |  [optional] |
+|**manager** | [**UserSummaryPayload**](UserSummaryPayload.md) |  |  [optional] |
+|**membersCount** | **Integer** |  |  [optional] |
 
 
 

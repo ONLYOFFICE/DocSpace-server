@@ -67,7 +67,7 @@ public class WebhookPublisher(
     }
 
 
-    public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, IWebhookAccessChecker<T> checker, T data)
+    public async Task<List<DbWebhooksConfig>> GetWebhookConfigsAsync<TSource>(WebhookTrigger trigger, IWebhookAccessChecker<TSource> checker, TSource source)
     {
         var result = new List<DbWebhooksConfig>();
 
@@ -82,14 +82,14 @@ public class WebhookPublisher(
 
             if (checker != null)
             {
-                if (!string.IsNullOrEmpty(config.TargetId) && !checker.CheckIsTarget(data, config.TargetId))
+                if (!string.IsNullOrEmpty(config.TargetId) && !checker.CheckIsTarget(source, config.TargetId))
                 {
                     continue;
                 }
 
                 if (config.CreatedBy.HasValue && authContext.CurrentAccount.ID != config.CreatedBy.Value)
                 {
-                    if (!await checker.CheckAccessAsync(data, config.CreatedBy.Value))
+                    if (!await checker.CheckAccessAsync(source, config.CreatedBy.Value))
                     {
                         continue;
                     }
@@ -102,27 +102,34 @@ public class WebhookPublisher(
         return result;
     }
 
-    public async Task PublishAsync<T1, T2>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, T1 data, T2 dataId)
+    public async Task PublishAsync<TPayload, TId>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, TPayload payload, TId dataId)
     {
         foreach (var config in webhookConfigs)
         {
-            _ = await PublishAsync(trigger, config, data, dataId);
+            _ = await PublishAsync(trigger, config, payload, dataId);
         }
     }
 
-    public async Task PublishAsync<T1, T2>(WebhookTrigger trigger, IWebhookAccessChecker<T1> checker, T1 data, T2 dataId)
+    public async Task PublishAsync<TSource, TPayload, TId>(WebhookTrigger trigger, IWebhookAccessChecker<TSource> checker, TSource source, Func<Task<TPayload>> payloadFactory, TId dataId)
     {
-        var webhookConfigs = await GetWebhookConfigsAsync(trigger, checker, data);
+        var webhookConfigs = await GetWebhookConfigsAsync(trigger, checker, source);
+
+        if (webhookConfigs.Count == 0)
+        {
+            return;
+        }
+
+        var payload = await payloadFactory();
 
         foreach (var config in webhookConfigs)
         {
-            _ = await PublishAsync(trigger, config, data, dataId);
+            _ = await PublishAsync(trigger, config, payload, dataId);
         }
     }
 
-    private async Task<DbWebhooksLog> PublishAsync<T1, T2>(WebhookTrigger trigger, DbWebhooksConfig webhookConfig, T1 data, T2 dataId)
+    private async Task<DbWebhooksLog> PublishAsync<TPayload, TId>(WebhookTrigger trigger, DbWebhooksConfig webhookConfig, TPayload data, TId dataId)
     {
-        var payload = new WebhookPayload<T1, T2>(trigger, webhookConfig, data, dataId, authContext.CurrentAccount.ID);
+        var payload = new WebhookPayload<TPayload, TId>(trigger, webhookConfig, data, dataId, authContext.CurrentAccount.ID);
 
         var payloadStr = JsonSerializer.Serialize(payload, _serializerOptions);
 

@@ -7,13 +7,13 @@
 
 import Foundation
 
-/** Files/Core/Utils/WebhookManager.cs -&gt; SubmittedFormData&lt;T&gt;. The ONLY trigger with a wrapper rather than a bare entry, and the only one whose &#x60;webhook.target.id&#x60; refers to a different entity (the original form) than the entry that changed. form.filled.out and form.stopped do NOT use this shape -- they send FilePayload.  */
+/** ASC.Files/Core/ApiModels/WebhookDto/FormSubmitWebhookDto.cs. The ONLY trigger with a wrapper rather than a bare entry, and the only one whose &#x60;webhook.target.id&#x60; refers to a different entity (the original form) than the entry that changed. form.filled.out and form.stopped do NOT use this shape -- they send FilePayload.  */
 public struct FormSubmitPayload: Sendable, Codable, Hashable {
 
-    public var originalForm: FileEntryPayload?
-    public var submittedForm: FileEntryPayload?
+    public var originalForm: FilePayload?
+    public var submittedForm: FilePayload?
 
-    public init(originalForm: FileEntryPayload? = nil, submittedForm: FileEntryPayload? = nil) {
+    public init(originalForm: FilePayload? = nil, submittedForm: FilePayload? = nil) {
         self.originalForm = originalForm
         self.submittedForm = submittedForm
     }

@@ -42,55 +42,55 @@ defaults — a property missing from the JSON means empty, `false` or zero, neve
 
 | Event | Payload |
 |---|---|
-| `file.created` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `file.uploaded` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `file.updated` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `file.trashed` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `file.deleted` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `file.restored` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `file.copied` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `file.moved` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `file.downloaded` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
+| `file.created` | [`FilePayload`](docs/FilePayload.md) |
+| `file.uploaded` | [`FilePayload`](docs/FilePayload.md) |
+| `file.updated` | [`FilePayload`](docs/FilePayload.md) |
+| `file.trashed` | [`FilePayload`](docs/FilePayload.md) |
+| `file.deleted` | [`FilePayload`](docs/FilePayload.md) |
+| `file.restored` | [`FilePayload`](docs/FilePayload.md) |
+| `file.copied` | [`FilePayload`](docs/FilePayload.md) |
+| `file.moved` | [`FilePayload`](docs/FilePayload.md) |
+| `file.downloaded` | [`FilePayload`](docs/FilePayload.md) |
 
 ## Folders
 
 | Event | Payload |
 |---|---|
-| `folder.created` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `folder.updated` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `folder.trashed` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `folder.deleted` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `folder.restored` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `folder.copied` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `folder.moved` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `folder.downloaded` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
+| `folder.created` | [`FolderPayload`](docs/FolderPayload.md) |
+| `folder.updated` | [`FolderPayload`](docs/FolderPayload.md) |
+| `folder.trashed` | [`FolderPayload`](docs/FolderPayload.md) |
+| `folder.deleted` | [`FolderPayload`](docs/FolderPayload.md) |
+| `folder.restored` | [`FolderPayload`](docs/FolderPayload.md) |
+| `folder.copied` | [`FolderPayload`](docs/FolderPayload.md) |
+| `folder.moved` | [`FolderPayload`](docs/FolderPayload.md) |
+| `folder.downloaded` | [`FolderPayload`](docs/FolderPayload.md) |
 
 ## Rooms
 
 | Event | Payload |
 |---|---|
-| `room.created` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `room.updated` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `room.archived` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `room.deleted` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `room.restored` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `room.copied` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
+| `room.created` | [`RoomPayload`](docs/RoomPayload.md) |
+| `room.updated` | [`RoomPayload`](docs/RoomPayload.md) |
+| `room.archived` | [`RoomPayload`](docs/RoomPayload.md) |
+| `room.deleted` | [`RoomPayload`](docs/RoomPayload.md) |
+| `room.restored` | [`RoomPayload`](docs/RoomPayload.md) |
+| `room.copied` | [`RoomPayload`](docs/RoomPayload.md) |
 
 ## Agents
 
 | Event | Payload |
 |---|---|
-| `agent.created` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `agent.updated` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `agent.deleted` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
+| `agent.created` | [`RoomPayload`](docs/RoomPayload.md) |
+| `agent.updated` | [`RoomPayload`](docs/RoomPayload.md) |
+| `agent.deleted` | [`RoomPayload`](docs/RoomPayload.md) |
 
 ## Forms
 
 | Event | Payload |
 |---|---|
 | `form.submit` | [`FormSubmitPayload`](docs/FormSubmitPayload.md) |
-| `form.filled.out` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
-| `form.stopped` | [`FileEntryPayload`](docs/FileEntryPayload.md) |
+| `form.filled.out` | [`FilePayload`](docs/FilePayload.md) |
+| `form.stopped` | [`FilePayload`](docs/FilePayload.md) |
 
 ## Events added later
 

@@ -69,8 +69,9 @@ def webhook():
         user = UserPayload.from_dict(envelope["payload"])
         app.logger.info("%s: %s <%s>", trigger, user.user_name, user.email)
     else:
-        # Files, folders, rooms, agents and forms share one payload shape.
-        # file_entry_type tells them apart: 1 folder, 2 file.
+        # Files, folders and rooms each have their own schema; they share the
+        # fields of FileEntryPayload, which is enough for a generic log line.
+        # Use FilePayload / FolderPayload / RoomPayload for the rest.
         entry = FileEntryPayload.from_dict(envelope["payload"])
         kind = "file" if entry.file_entry_type == 2 else "folder"
         app.logger.info("%s: %s %r", trigger, kind, entry.title)

@@ -1,8 +1,8 @@
 /*
  * ONLYOFFICE DocSpace Webhooks
- * Wire contract for OUTBOUND DocSpace webhook deliveries.  This is a hand-maintained document. It is NOT the REST API spec and shares no schemas with it: webhook payloads are the internal domain entities (UserInfo, GroupInfo, File<T>, Folder<T>), not the controller DTOs.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+ * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto). They began as copies of the matching REST DTOs and are free to diverge from them.  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
  *
- * The version of the OpenAPI document: 0.1.0
+ * The version of the OpenAPI document: 1.0.0
  * 
  *
  * NOTE: This class is auto generated by OpenAPI Generator (https://openapi-generator.tech).
@@ -19,7 +19,7 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import com.onlyoffice.docspace.webhooks.sdk.model.FileEntryPayload;
+import com.onlyoffice.docspace.webhooks.sdk.model.FilePayload;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -48,24 +48,24 @@ import java.util.Set;
 import com.onlyoffice.docspace.webhooks.sdk.JSON;
 
 /**
- * Files/Core/Utils/WebhookManager.cs -&gt; SubmittedFormData&lt;T&gt;. The ONLY trigger with a wrapper rather than a bare entry, and the only one whose &#x60;webhook.target.id&#x60; refers to a different entity (the original form) than the entry that changed. form.filled.out and form.stopped do NOT use this shape -- they send FilePayload. 
+ * ASC.Files/Core/ApiModels/WebhookDto/FormSubmitWebhookDto.cs. The ONLY trigger with a wrapper rather than a bare entry, and the only one whose &#x60;webhook.target.id&#x60; refers to a different entity (the original form) than the entry that changed. form.filled.out and form.stopped do NOT use this shape -- they send FilePayload. 
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.25.0")
 public class FormSubmitPayload {
   public static final String SERIALIZED_NAME_ORIGINAL_FORM = "originalForm";
   @SerializedName(SERIALIZED_NAME_ORIGINAL_FORM)
   @javax.annotation.Nullable
-  private FileEntryPayload originalForm;
+  private FilePayload originalForm;
 
   public static final String SERIALIZED_NAME_SUBMITTED_FORM = "submittedForm";
   @SerializedName(SERIALIZED_NAME_SUBMITTED_FORM)
   @javax.annotation.Nullable
-  private FileEntryPayload submittedForm;
+  private FilePayload submittedForm;
 
   public FormSubmitPayload() {
   }
 
-  public FormSubmitPayload originalForm(@javax.annotation.Nullable FileEntryPayload originalForm) {
+  public FormSubmitPayload originalForm(@javax.annotation.Nullable FilePayload originalForm) {
     this.originalForm = originalForm;
     return this;
   }
@@ -75,16 +75,16 @@ public class FormSubmitPayload {
    * @return originalForm
    */
   @javax.annotation.Nullable
-  public FileEntryPayload getOriginalForm() {
+  public FilePayload getOriginalForm() {
     return originalForm;
   }
 
-  public void setOriginalForm(@javax.annotation.Nullable FileEntryPayload originalForm) {
+  public void setOriginalForm(@javax.annotation.Nullable FilePayload originalForm) {
     this.originalForm = originalForm;
   }
 
 
-  public FormSubmitPayload submittedForm(@javax.annotation.Nullable FileEntryPayload submittedForm) {
+  public FormSubmitPayload submittedForm(@javax.annotation.Nullable FilePayload submittedForm) {
     this.submittedForm = submittedForm;
     return this;
   }
@@ -94,11 +94,11 @@ public class FormSubmitPayload {
    * @return submittedForm
    */
   @javax.annotation.Nullable
-  public FileEntryPayload getSubmittedForm() {
+  public FilePayload getSubmittedForm() {
     return submittedForm;
   }
 
-  public void setSubmittedForm(@javax.annotation.Nullable FileEntryPayload submittedForm) {
+  public void setSubmittedForm(@javax.annotation.Nullable FilePayload submittedForm) {
     this.submittedForm = submittedForm;
   }
 
@@ -175,11 +175,11 @@ public class FormSubmitPayload {
         JsonObject jsonObj = jsonElement.getAsJsonObject();
       // validate the optional field `originalForm`
       if (jsonObj.get("originalForm") != null && !jsonObj.get("originalForm").isJsonNull()) {
-        FileEntryPayload.validateJsonElement(jsonObj.get("originalForm"));
+        FilePayload.validateJsonElement(jsonObj.get("originalForm"));
       }
       // validate the optional field `submittedForm`
       if (jsonObj.get("submittedForm") != null && !jsonObj.get("submittedForm").isJsonNull()) {
-        FileEntryPayload.validateJsonElement(jsonObj.get("submittedForm"));
+        FilePayload.validateJsonElement(jsonObj.get("submittedForm"));
       }
   }
 

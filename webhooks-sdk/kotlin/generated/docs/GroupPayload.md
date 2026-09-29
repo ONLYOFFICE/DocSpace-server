@@ -6,10 +6,12 @@
 | ------------ | ------------- | ------------- | ------------- |
 | **id** | [**java.util.UUID**](java.util.UUID.md) |  |  [optional] |
 | **name** | **kotlin.String** |  |  [optional] |
-| **categoryID** | [**java.util.UUID**](java.util.UUID.md) |  |  [optional] |
-| **parent** | [**GroupPayload**](GroupPayload.md) |  |  [optional] |
-| **sid** | **kotlin.String** | LDAP identifier. REVIEW. |  [optional] |
-| **removed** | **kotlin.Boolean** |  |  [optional] |
+| **parent** | [**java.util.UUID**](java.util.UUID.md) |  |  [optional] |
+| **category** | [**java.util.UUID**](java.util.UUID.md) |  |  [optional] |
+| **isLDAP** | **kotlin.Boolean** |  |  [optional] |
+| **isSystem** | **kotlin.Boolean** |  |  [optional] |
+| **manager** | [**UserSummaryPayload**](UserSummaryPayload.md) |  |  [optional] |
+| **membersCount** | **kotlin.Int** |  |  [optional] |
 
 
 

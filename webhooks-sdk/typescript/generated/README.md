@@ -108,11 +108,17 @@ New events are added over time. `isKnownWebhook` returns false for one this buil
 
 ## Documentation for Models
 
+ - [ContactPayload](docs/ContactPayload.md)
  - [EntryId](docs/EntryId.md)
  - [FileEntryPayload](docs/FileEntryPayload.md)
+ - [FilePayload](docs/FilePayload.md)
+ - [FolderPayload](docs/FolderPayload.md)
  - [FormSubmitPayload](docs/FormSubmitPayload.md)
  - [GroupPayload](docs/GroupPayload.md)
+ - [GroupSummaryPayload](docs/GroupSummaryPayload.md)
+ - [RoomPayload](docs/RoomPayload.md)
  - [UserPayload](docs/UserPayload.md)
+ - [UserSummaryPayload](docs/UserSummaryPayload.md)
  - [WebhookConfigInfo](docs/WebhookConfigInfo.md)
  - [WebhookEnvelope](docs/WebhookEnvelope.md)
  - [WebhookEventInfo](docs/WebhookEventInfo.md)
