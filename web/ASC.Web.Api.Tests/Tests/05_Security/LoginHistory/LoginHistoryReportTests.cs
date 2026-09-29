@@ -122,4 +122,84 @@ public class LoginHistoryReportTests(
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
     }
+
+    // TODO: move the period cases below onto the SDK method once the SDK is regenerated with the
+    // `from`/`to` query parameters of this endpoint, and drop ReportPath. The pinned SDK predates
+    // them, which is the only reason these cases go over raw HTTP.
+    [Fact]
+    public async Task CreateLoginHistoryReport_WithPeriod_StartsReportGeneration()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var now = DateTime.UtcNow;
+
+        // Act
+        using var response = await _webApi.PostRawAsync(ReportPath(now.AddDays(-7), now), "{}", TestContext.Current.CancellationToken);
+        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        using var json = JsonDocument.Parse(body);
+        var id = json.RootElement.GetProperty("response").GetProperty("id").GetString();
+        id.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task CreateLoginHistoryReport_FromBeforeLifetime_StartsReportGeneration()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var now = DateTime.UtcNow;
+
+        // Act
+        using var response = await _webApi.PostRawAsync(ReportPath(now.AddYears(-10), null), "{}", TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
+
+    [Fact]
+    public async Task CreateLoginHistoryReport_PeriodEndsBeforeStart_ReturnsBadRequest()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var now = DateTime.UtcNow;
+
+        // Act
+        using var response = await _webApi.PostRawAsync(ReportPath(now.AddDays(-1), now.AddDays(-2)), "{}", TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task CreateLoginHistoryReport_PeriodOutsideLifetime_ReturnsBadRequest()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var now = DateTime.UtcNow;
+
+        // Act
+        using var response = await _webApi.PostRawAsync(ReportPath(null, now.AddYears(-10)), "{}", TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    private static string ReportPath(DateTime? from, DateTime? to)
+    {
+        var query = new List<string>();
+
+        if (from.HasValue)
+        {
+            query.Add("from=" + Uri.EscapeDataString(from.Value.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture)));
+        }
+
+        if (to.HasValue)
+        {
+            query.Add("to=" + Uri.EscapeDataString(to.Value.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture)));
+        }
+
+        return "api/2.0/security/audit/login/report?" + string.Join("&", query);
+    }
 }

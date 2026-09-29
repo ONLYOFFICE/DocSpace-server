@@ -36,7 +36,7 @@ using ASC.Files.Core.Services.DocumentBuilderService;
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The file format the queued audit report is built in.
+/// The file format the queued audit report is built in and the period it covers.
 /// </summary>
 public class AuditReportRequestDto
 {
@@ -48,4 +48,18 @@ public class AuditReportRequestDto
     /// <example>Xlsx</example>
     [FromQuery(Name = "format")]
     public AuditReportFormat Format { get; set; } = AuditReportFormat.Xlsx;
+
+    /// <summary>
+    /// The earliest moment a reported event may have been recorded at, read as a UTC instant.
+    /// </summary>
+    /// <example>2026-09-01T00:00:00Z</example>
+    [FromQuery(Name = "from")]
+    public ApiDateTime From { get; set; }
+
+    /// <summary>
+    /// The latest moment a reported event may have been recorded at, read as a UTC instant in the same way as `from`.
+    /// </summary>
+    /// <example>2026-09-30T23:59:59Z</example>
+    [FromQuery(Name = "to")]
+    public ApiDateTime To { get; set; }
 }

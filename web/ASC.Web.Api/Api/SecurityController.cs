@@ -304,17 +304,18 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Queues a report of the portal's login history and returns the state of the background job that builds it. The
-    /// report covers the period reaching from now back by the login history lifetime that
-    /// `GET api/2.0/security/audit/settings/lifetime` reports and is never filtered: the query parameters of
-    /// `GET api/2.0/security/audit/login/filter` do not apply here. The caller needs the portal-settings right of a
-    /// DocSpace administrator plus the audit option of the portal's pricing plan, otherwise the call is answered with
-    /// 402. The file is not ready when the response arrives - poll `GET api/2.0/security/audit/login/report` until
-    /// `isCompleted` is true, then take `resultFileUrl`, and treat a non-empty `error` as a failed build. The
-    /// finished file is saved to the caller's My documents section, as an XLSX workbook by default or as CSV when
-    /// `format=Csv`, in which case `resultFileId` stays empty and only the name and the URL identify it. One job runs
-    /// per caller and kind: calling again while the previous one is still building returns that job instead of
-    /// starting a second, and `DELETE api/2.0/security/audit/login/report` cancels it.
+    /// Queues a report of the portal's login history and returns the state of the background job that builds it. By
+    /// default the report covers the period reaching from now back by the login history lifetime that
+    /// `GET api/2.0/security/audit/settings/lifetime` reports; `from` and `to` narrow it, a `from` older than that
+    /// window is moved up to its start, a `to` in the future is moved back to now, and a period that ends before it
+    /// starts is answered with 400. No other filter of `GET api/2.0/security/audit/login/filter` applies here. The
+    /// caller needs the portal-settings right of a DocSpace administrator plus the audit option of the portal's pricing
+    /// plan, otherwise the call is answered with 402. The file is not ready when the response arrives - poll
+    /// `GET api/2.0/security/audit/login/report` until `isCompleted` is true, then take `resultFileUrl`, and treat a
+    /// non-empty `error` as a failed build. The finished file is saved to the caller's My documents section, as an XLSX
+    /// workbook by default or as CSV when `format=Csv`, in which case `resultFileId` stays empty and only the name and
+    /// the URL identify it. One job runs per caller and kind: calling again while the previous one is still building
+    /// returns that job instead of starting a second, and `DELETE api/2.0/security/audit/login/report` cancels it.
     /// </remarks>
     /// <summary>
     /// Start login history report
@@ -322,6 +323,7 @@ public class SecurityController(
     /// <path>api/2.0/security/audit/login/report</path>
     [Tags("Security / Login history")]
     [SwaggerResponse(200, "The state of the queued job that builds the login history report", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(400, "The requested period ends before it starts, or lies entirely outside the login history lifetime")]
     [SwaggerResponse(402, "The portal's pricing plan has no audit option, or the login history and audit trail section is not enabled")]
     [SwaggerResponse(403, "The caller does not have the portal-settings right of a DocSpace administrator")]
     [HttpPost("audit/login/report")]
@@ -331,12 +333,13 @@ public class SecurityController(
 
         await DemandAuditPermissionAsync();
 
+        inDto ??= new AuditReportRequestDto();
+
         var settings = await settingsManager.LoadAsync<TenantAuditSettings>(tenantManager.GetCurrentTenantId());
 
-        var to = DateTime.UtcNow;
-        var from = to.Subtract(TimeSpan.FromDays(settings.LoginHistoryLifeTime));
+        var (from, to) = ResolveReportPeriod(inDto.From, inDto.To, settings.LoginHistoryLifeTime);
 
-        return await StartAuditReportAsync(AuditReportKind.LoginHistory, (inDto ?? new AuditReportRequestDto()).Format, from, to);
+        return await StartAuditReportAsync(AuditReportKind.LoginHistory, inDto.Format, from, to);
     }
 
     /// <remarks>
@@ -400,17 +403,18 @@ public class SecurityController(
     }
 
     /// <remarks>
-    /// Queues a report of the portal's audit trail and returns the state of the background job that builds it. The
-    /// report covers the period reaching from now back by the audit trail lifetime that
-    /// `GET api/2.0/security/audit/settings/lifetime` reports and is never filtered: the query parameters of
-    /// `GET api/2.0/security/audit/events/filter` do not apply here. The caller needs the portal-settings right of a
-    /// DocSpace administrator plus the audit option of the portal's pricing plan, otherwise the call is answered with
-    /// 402. The file is not ready when the response arrives - poll `GET api/2.0/security/audit/events/report` until
-    /// `isCompleted` is true, then take `resultFileUrl`, and treat a non-empty `error` as a failed build. The
-    /// finished file is saved to the caller's My documents section, as an XLSX workbook by default or as CSV when
-    /// `format=Csv`, in which case `resultFileId` stays empty and only the name and the URL identify it. One job runs
-    /// per caller and kind: calling again while the previous one is still building returns that job instead of
-    /// starting a second, and `DELETE api/2.0/security/audit/events/report` cancels it.
+    /// Queues a report of the portal's audit trail and returns the state of the background job that builds it. By
+    /// default the report covers the period reaching from now back by the audit trail lifetime that
+    /// `GET api/2.0/security/audit/settings/lifetime` reports; `from` and `to` narrow it, a `from` older than that
+    /// window is moved up to its start, a `to` in the future is moved back to now, and a period that ends before it
+    /// starts is answered with 400. No other filter of `GET api/2.0/security/audit/events/filter` applies here. The
+    /// caller needs the portal-settings right of a DocSpace administrator plus the audit option of the portal's pricing
+    /// plan, otherwise the call is answered with 402. The file is not ready when the response arrives - poll
+    /// `GET api/2.0/security/audit/events/report` until `isCompleted` is true, then take `resultFileUrl`, and treat a
+    /// non-empty `error` as a failed build. The finished file is saved to the caller's My documents section, as an XLSX
+    /// workbook by default or as CSV when `format=Csv`, in which case `resultFileId` stays empty and only the name and
+    /// the URL identify it. One job runs per caller and kind: calling again while the previous one is still building
+    /// returns that job instead of starting a second, and `DELETE api/2.0/security/audit/events/report` cancels it.
     /// </remarks>
     /// <summary>
     /// Start audit trail report
@@ -418,6 +422,7 @@ public class SecurityController(
     /// <path>api/2.0/security/audit/events/report</path>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "The state of the queued job that builds the audit trail report", typeof(DocumentBuilderTaskDto))]
+    [SwaggerResponse(400, "The requested period ends before it starts, or lies entirely outside the audit trail lifetime")]
     [SwaggerResponse(402, "The portal's pricing plan has no audit option, or the login history and audit trail section is not enabled")]
     [SwaggerResponse(403, "The caller does not have the portal-settings right of a DocSpace administrator")]
     [HttpPost("audit/events/report")]
@@ -427,12 +432,13 @@ public class SecurityController(
 
         await DemandAuditPermissionAsync();
 
+        inDto ??= new AuditReportRequestDto();
+
         var settings = await settingsManager.LoadAsync<TenantAuditSettings>(tenantManager.GetCurrentTenantId());
 
-        var to = DateTime.UtcNow;
-        var from = to.Subtract(TimeSpan.FromDays(settings.AuditTrailLifeTime));
+        var (from, to) = ResolveReportPeriod(inDto.From, inDto.To, settings.AuditTrailLifeTime);
 
-        return await StartAuditReportAsync(AuditReportKind.AuditTrail, (inDto ?? new AuditReportRequestDto()).Format, from, to);
+        return await StartAuditReportAsync(AuditReportKind.AuditTrail, inDto.Format, from, to);
     }
 
     /// <remarks>
@@ -493,6 +499,24 @@ public class SecurityController(
         await DemandAuditPermissionAsync();
 
         await TerminateAuditReportAsync(AuditReportKind.AuditTrail);
+    }
+
+    // A report never reaches past the retention window: older events are purged anyway, and the
+    // window is what keeps an unbounded request from exporting everything the portal still holds.
+    private static (DateTime From, DateTime To) ResolveReportPeriod(DateTime? from, DateTime? to, int lifeTimeDays)
+    {
+        var now = DateTime.UtcNow;
+        var lowerBound = now.Subtract(TimeSpan.FromDays(lifeTimeDays));
+
+        var resolvedTo = to.HasValue && to.Value < now ? to.Value : now;
+        var resolvedFrom = from.HasValue && from.Value > lowerBound ? from.Value : lowerBound;
+
+        if (resolvedFrom > resolvedTo)
+        {
+            throw new ArgumentException("The report period ends before it starts or lies outside the retention window");
+        }
+
+        return (resolvedFrom, resolvedTo);
     }
 
     private async Task<DocumentBuilderTaskDto> StartAuditReportAsync(AuditReportKind kind, AuditReportFormat format, DateTime from, DateTime to)
