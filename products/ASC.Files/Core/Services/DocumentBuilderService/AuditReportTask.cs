@@ -36,6 +36,14 @@ namespace ASC.Files.Core.Services.DocumentBuilderService;
 [Transient]
 public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
 {
+    // Events are read and written in batches of this size: few enough round-trips for a long period, and
+    // small enough that no single query gets near the command timeout or holds much memory.
+    private const int BatchSize = 5000;
+
+    // Reading the events and serializing them is the first part of the job; the writers take the progress
+    // on from here.
+    private const int ReadProgressShare = 30;
+
     public AuditReportTask()
     {
     }
@@ -99,28 +107,31 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
             {
                 case AuditReportKind.LoginHistory:
                     {
-                        var events = await serviceProvider.GetService<LoginEventsRepository>()
-                            .GetByFilterAsync(fromDate: _data.From, to: _data.To);
+                        var repository = serviceProvider.GetService<LoginEventsRepository>();
+                        var total = await repository.GetCountByPeriodAsync(_data.From, _data.To);
+                        var batches = repository.GetBatchesByPeriodAsync(_data.From, _data.To, BatchSize, CancellationToken);
 
-                        await ProduceAsync(serviceProvider, events, AuditReportResource.LoginHistoryReportName,
+                        await ProduceAsync(serviceProvider, batches, total, AuditReportResource.LoginHistoryReportName,
                             _data.From?.ToShortDateString(), _data.To?.ToShortDateString(), userCulture);
                         break;
                     }
                 case AuditReportKind.FolderHistory:
                     {
-                        var events = await serviceProvider.GetService<HistoryService>()
-                            .GetFolderAuditEventsAsync(_data.FolderId.Value, _data.From, _data.To);
+                        var historyService = serviceProvider.GetService<HistoryService>();
+                        var total = await historyService.GetHistoryCountAsync(_data.FolderId.Value, FileEntryType.Folder, false, [], [], _data.From, _data.To);
+                        var batches = historyService.GetFolderAuditEventBatchesAsync(_data.FolderId.Value, _data.From, _data.To, BatchSize, CancellationToken);
 
-                        await ProduceAsync(serviceProvider, events, AuditReportResource.AuditTrailReportName,
+                        await ProduceAsync(serviceProvider, batches, total, AuditReportResource.AuditTrailReportName,
                             "room", _data.FolderId.Value.ToString(CultureInfo.InvariantCulture), userCulture);
                         break;
                     }
                 default:
                     {
-                        var events = await serviceProvider.GetService<AuditEventsRepository>()
-                            .GetByFilterAsync(from: _data.From, to: _data.To);
+                        var repository = serviceProvider.GetService<AuditEventsRepository>();
+                        var total = await repository.GetCountByPeriodAsync(_data.From, _data.To);
+                        var batches = repository.GetBatchesByPeriodAsync(_data.From, _data.To, BatchSize, CancellationToken);
 
-                        await ProduceAsync(serviceProvider, events, AuditReportResource.AuditTrailReportName,
+                        await ProduceAsync(serviceProvider, batches, total, AuditReportResource.AuditTrailReportName,
                             _data.From?.ToShortDateString(), _data.To?.ToShortDateString(), userCulture);
                         break;
                     }
@@ -147,7 +158,7 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
         }
     }
 
-    private async Task ProduceAsync<T>(IServiceProvider serviceProvider, IEnumerable<T> events, string reportNameFormat, string nameArg0, string nameArg1, CultureInfo culture) where T : BaseEvent
+    private async Task ProduceAsync<T>(IServiceProvider serviceProvider, IAsyncEnumerable<IReadOnlyList<T>> batches, int total, string reportNameFormat, string nameArg0, string nameArg1, CultureInfo culture) where T : BaseEvent
     {
         var isDocSpaceAdmin = await serviceProvider.GetService<UserManager>().IsDocSpaceAdminAsync(_userId);
 
@@ -156,17 +167,40 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
 
         // Writers are resolved from the per-execution scope: the tenant and user context they rely
         // on is only established above, inside this job's own scope.
+        var trackedBatches = TrackReadProgressAsync(batches, total);
+
         var result = _data.Format == AuditReportFormat.Csv
             ? await serviceProvider.GetRequiredService<AuditCsvReportWriter>()
-                .WriteAsync(events, descriptor, ReportProgressAsync)
+                .WriteAsync(trackedBatches, descriptor, ReportProgressAsync, CancellationToken)
             : await serviceProvider.GetRequiredService<AuditXlsxReportWriter>()
-                .WriteAsync(_userId, events, descriptor, ReportProgressAsync, CancellationToken);
+                .WriteAsync(_userId, trackedBatches, descriptor, ReportProgressAsync, CancellationToken);
 
         ResultFileId = result.FileId;
         ResultFileName = result.FileName;
         ResultFileUrl = result.FileUrl;
 
         SendDownloadedMessage(serviceProvider);
+    }
+
+    // Publishes the progress only when the percentage moves: a long period is read in hundreds of batches.
+    private async IAsyncEnumerable<IReadOnlyList<T>> TrackReadProgressAsync<T>(IAsyncEnumerable<IReadOnlyList<T>> batches, int total)
+    {
+        var read = 0L;
+        var reported = 0;
+
+        await foreach (var batch in batches)
+        {
+            yield return batch;
+
+            read += batch.Count;
+
+            var percentage = total > 0 ? (int)Math.Min(ReadProgressShare, read * ReadProgressShare / total) : ReadProgressShare;
+            if (percentage > reported)
+            {
+                reported = percentage;
+                await ReportProgressAsync(percentage);
+            }
+        }
     }
 
     private async Task ReportProgressAsync(int percentage)

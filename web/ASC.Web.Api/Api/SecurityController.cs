@@ -151,9 +151,9 @@ public class SecurityController(
     /// `GET api/2.0/security/audit/login/last` returns, and when the login history and audit trail section is
     /// disabled altogether the call is answered with 402. Omit a filter to match everything. `from` and `to` are read
     /// as UTC instants while `date` comes back in the portal time zone, `count` defaults to 100 and cannot exceed it,
-    /// `startIndex` skips events from the newest end, and the page window is applied to the log before the filters,
-    /// so a page can hold fewer items than `count` while older matches still exist. The operation is read-only; take
-    /// the values accepted by `action` from `GET api/2.0/security/audit/types`.
+    /// `startIndex` skips matching events from the newest end, and the filters are applied before the page window, so
+    /// a full page means there may be more matching events beyond it. The operation is read-only; take the values
+    /// accepted by `action` from `GET api/2.0/security/audit/types`.
     /// </remarks>
     /// <summary>
     /// Get filtered login events

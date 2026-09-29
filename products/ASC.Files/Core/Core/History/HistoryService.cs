@@ -182,19 +182,44 @@ public class HistoryService(
         return await messageDbContext.GetAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType, fromDate, toDate);
     }
 
-    public async Task<List<AuditEvent>> GetFolderAuditEventsAsync(int folderId, DateTime? fromDate, DateTime? toDate)
+    /// <summary>
+    /// Streams the history of a folder, newest first, in batches of at most <paramref name="batchSize"/>, each
+    /// read by a query of its own. The history is ordered by event id, which is unique, so paging it by offset
+    /// neither repeats nor skips an event.
+    /// </summary>
+    public async IAsyncEnumerable<IReadOnlyList<AuditEvent>> GetFolderAuditEventBatchesAsync(
+        int folderId,
+        DateTime? fromDate,
+        DateTime? toDate,
+        int batchSize,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var entry = await daoFactory.GetFolderDao<int>().GetFolderAsync(folderId)
             ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
 
-        var result = new List<AuditEvent>();
-
-        await foreach (var (dbEvent, _) in GetHistoryAsync(entry, 0, int.MaxValue, false, [], [], fromDate, toDate))
+        for (var offset = 0; ; offset += batchSize)
         {
-            result.Add(await ToAuditEventAsync(dbEvent));
-        }
+            cancellationToken.ThrowIfCancellationRequested();
 
-        return result;
+            var batch = new List<AuditEvent>();
+
+            await foreach (var (dbEvent, _) in GetHistoryAsync(entry, offset, batchSize, false, [], [], fromDate, toDate))
+            {
+                batch.Add(await ToAuditEventAsync(dbEvent));
+            }
+
+            if (batch.Count == 0)
+            {
+                yield break;
+            }
+
+            yield return batch;
+
+            if (batch.Count < batchSize)
+            {
+                yield break;
+            }
+        }
     }
 
     private async Task<AuditEvent> ToAuditEventAsync(DbAuditEvent dbEvent)

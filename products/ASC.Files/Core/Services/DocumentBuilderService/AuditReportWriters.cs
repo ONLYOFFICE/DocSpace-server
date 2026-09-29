@@ -110,7 +110,7 @@ public class AuditXlsxReportWriter(
 
     public async Task<AuditReportResult> WriteAsync<T>(
         Guid userId,
-        IEnumerable<T> events,
+        IAsyncEnumerable<IReadOnlyList<T>> batches,
         AuditReportDescriptor descriptor,
         Func<int, Task> onProgressAsync,
         CancellationToken cancellationToken) where T : BaseEvent
@@ -186,27 +186,30 @@ public class AuditXlsxReportWriter(
             {
                 await writer.WriteAsync(scriptParts[0]);
 
-                foreach (var @event in events)
+                await foreach (var batch in batches.WithCancellation(cancellationToken))
                 {
-                    var cells = new List<Cell>(props.Count);
-
-                    for (var i = 0; i < props.Count; i++)
+                    foreach (var @event in batch)
                     {
-                        var prop = props[i];
-                        var value = prop.GetValue(@event);
+                        var cells = new List<Cell>(props.Count);
 
-                        if (prop.PropertyType == typeof(DateTime))
+                        for (var i = 0; i < props.Count; i++)
                         {
-                            cells.Add(new Cell(((DateTime)value).ConvertNumerals("G"), dateFormat));
+                            var prop = props[i];
+                            var value = prop.GetValue(@event);
+
+                            if (prop.PropertyType == typeof(DateTime))
+                            {
+                                cells.Add(new Cell(((DateTime)value).ConvertNumerals("G"), dateFormat));
+                            }
+                            else
+                            {
+                                // force text format to stop formulas from executing in user-controlled values
+                                cells.Add(new Cell(value?.ToString(), "@", Wrap: wraps[i]));
+                            }
                         }
-                        else
-                        {
-                            // force text format to stop formulas from executing in user-controlled values
-                            cells.Add(new Cell(value?.ToString(), "@", Wrap: wraps[i]));
-                        }
+
+                        await writer.WriteAsync(JsonSerializer.Serialize(cells, _jsonOptions) + ",");
                     }
-
-                    await writer.WriteAsync(JsonSerializer.Serialize(cells, _jsonOptions) + ",");
                 }
 
                 await writer.WriteAsync(scriptParts[1]);
@@ -267,15 +270,22 @@ public class AuditCsvReportWriter(
     CsvFileUploader csvFileUploader)
 {
     public async Task<AuditReportResult> WriteAsync<T>(
-        IEnumerable<T> events,
+        IAsyncEnumerable<IReadOnlyList<T>> batches,
         AuditReportDescriptor descriptor,
-        Func<int, Task> onProgressAsync) where T : BaseEvent
+        Func<int, Task> onProgressAsync,
+        CancellationToken cancellationToken) where T : BaseEvent
     {
         var reportName = string.Format(descriptor.NameFormat + ".csv", descriptor.NameArg0, descriptor.NameArg1);
 
+        await using var stream = new MemoryStream();
+
+        // UTF-8 with a byte order mark, which is what lets spreadsheet applications read non-Latin text right.
+        await csvFileHelper.CreateLargeFileAsync(stream, batches, new BaseEventMap<T>(), encoding: Encoding.UTF8, cancellationToken: cancellationToken);
+
         await onProgressAsync(50);
 
-        await using var stream = csvFileHelper.CreateFile(events, new BaseEventMap<T>());
+        stream.Position = 0;
+
         var fileUrl = await csvFileUploader.UploadFile(stream, reportName);
 
         return new AuditReportResult(default, reportName, fileUrl);
