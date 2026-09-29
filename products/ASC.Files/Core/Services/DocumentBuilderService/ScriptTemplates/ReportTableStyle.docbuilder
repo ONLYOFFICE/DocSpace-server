@@ -9,12 +9,26 @@ var REPORT_TABLE_STYLE_NAME = "ReportTableStyle";
 
 // Declaring a table style needs a 10.0 builder. An older document server still produces the report,
 // dressed in the editor's own default table look instead of the portal's colors.
-var reportTableStyleSupported = typeof Api.GetActiveWorkbook().GetTableStyles === "function";
+// A builder older than 9.1 has no workbook object to ask in the first place.
+var reportTableStyleSupported = typeof Api.GetActiveWorkbook === "function"
+    && typeof Api.GetActiveWorkbook().GetTableStyles === "function";
 
 // The style to dress a table in, or nothing where it could not be declared: handing a table the name
 // of a style the workbook does not hold would leave it pointing at something that is not there.
 function getReportTableStyleName() {
     return reportTableStyleSupported ? REPORT_TABLE_STYLE_NAME : undefined;
+}
+
+// Turns the range into a table in the report's style and returns it. A builder older than 9.4.1 has
+// no AddListObject at all, only FormatAsTable, which gives the editor's default look and hands back
+// no table object - the caller gets null there and has nothing further to switch on.
+function addReportTable(worksheet, range) {
+    if (typeof worksheet.AddListObject !== "function") {
+        worksheet.FormatAsTable(range);
+        return null;
+    }
+
+    return worksheet.AddListObject("xlSrcRange", range, undefined, "xlYes", undefined, getReportTableStyleName());
 }
 
 function createReportTableStyle() {

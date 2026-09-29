@@ -191,11 +191,11 @@ var freezePanes = oWorksheet.GetFreezePanes();
 freezePanes.FreezeRows(HEADER_ROW);
 
 if (inputData.editors.users.length > 0) {
-    oWorksheet.AddListObject("xlSrcRange", editorsRange, undefined, "xlYes", undefined, getReportTableStyleName());
+    addReportTable(oWorksheet, editorsRange);
 }
 
 if (inputData.viewers.users.length > 0) {
-    oWorksheet.AddListObject("xlSrcRange", viewersRange, undefined, "xlYes", undefined, getReportTableStyleName());
+    addReportTable(oWorksheet, viewersRange);
 }
 
 oWorksheet.GetRange("A1").Select();

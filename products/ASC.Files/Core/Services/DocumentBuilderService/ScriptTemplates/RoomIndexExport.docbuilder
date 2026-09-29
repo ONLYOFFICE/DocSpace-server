@@ -266,10 +266,12 @@ var formattedTableRange = toColumnName(currentColIndex) + (currentRowIndex) + ":
 
 writeTable(dataTable);
 
-oWorksheet.AddListObject("xlSrcRange", formattedTableRange, undefined, "xlYes", undefined, getReportTableStyleName());
-
-var listObjects = oWorksheet.GetListObjects();
-listObjects[listObjects.length - 1].SetShowTableStyleFirstColumn(true);
+// The first column only carries the grey the report's own style gives it. On the editor's default
+// style the flag would turn the index column bold instead, so it is left off there.
+var listObject = addReportTable(oWorksheet, formattedTableRange);
+if (listObject && reportTableStyleSupported) {
+    listObject.SetShowTableStyleFirstColumn(true);
+}
 
 oWorksheet.GetRange(toColumnName(1) + 1).Select();
 
