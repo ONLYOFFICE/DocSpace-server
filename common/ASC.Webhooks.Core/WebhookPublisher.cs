@@ -149,17 +149,16 @@ public class WebhookPublisher(
 
     public async Task<DbWebhooksLog> RetryPublishAsync(DbWebhooksLog webhookLog)
     {
-        var webhooksLog = new DbWebhooksLog
-        {
-            TenantId = webhookLog.TenantId,
-            ConfigId = webhookLog.ConfigId,
-            Uid = authContext.CurrentAccount.ID,
-            Trigger = webhookLog.Trigger,
-            CreationTime = DateTime.UtcNow,
-            RequestPayload = webhookLog.RequestPayload
-        };
+        var reset = await dbWorker.ResetJournalAttemptsAsync(webhookLog.TenantId, webhookLog.Id);
 
-        return await PublishAsync(webhooksLog);
+        if (reset == null)
+        {
+            return null;
+        }
+
+        await eventBus.PublishAsync(new WebhookRequestIntegrationEvent(authContext.CurrentAccount.ID, reset.TenantId, reset.Id));
+
+        return reset;
     }
 
     private async Task<DbWebhooksLog> PublishAsync(DbWebhooksLog webhookLog)

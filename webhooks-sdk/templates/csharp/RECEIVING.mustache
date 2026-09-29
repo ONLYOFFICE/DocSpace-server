@@ -80,9 +80,15 @@ Sustained failures cost the subscription itself, not just the delivery:
 
 ## 5. Deduplicate on `event.id`
 
-It is stable across the server's automatic retries. It is **not** stable across
-a manual retry from the admin UI, which creates a new delivery record and
-therefore a new id — the same logical event arrives with a different key.
+It is stable across every resend of one delivery — the server's automatic retries
+and a manual retry from the admin UI alike, because a manual retry requeues the
+same delivery record rather than creating a new one. The same id always means the
+same logical event, so it is a sound idempotency key on its own.
+
+Note what that implies: a delivery you have already processed can arrive again at
+any time, days later, if an administrator presses retry. Keep the ids you have
+seen for longer than the retry budget, not just for the ~31 seconds the automatic
+retries span.
 
 ## Models
 
