@@ -72,10 +72,13 @@ const MAX_PAGES = 10;
 const READ_CONCURRENCY = 4;
 
 /**
- * Bytes of a skill file read at most. The widget caps a body at 64 KB before
- * it reaches the model; anything far beyond that is not a skill.
+ * Bytes of a skill file read at most. The widget cuts a body at 64 K
+ * characters before it reaches the model (`SKILL_BODY_CAP`), and a UTF-8
+ * character is at most four bytes, so this is the largest download the
+ * widget could still use in full; the rest of a longer file is never
+ * fetched.
  */
-const MAX_SKILL_BYTES = 1024 * 1024;
+const MAX_SKILL_BYTES = 4 * 64 * 1024;
 
 const MARKDOWN_EXTENSION = ".md";
 
@@ -204,11 +207,41 @@ export async function readFileText(fileId: string): Promise<string> {
     if (!res.ok) {
       throw new DocspaceApiHttpError(res.status, res.statusText, url);
     }
-    const bytes = new Uint8Array(await res.arrayBuffer());
-    return new TextDecoder("utf-8").decode(bytes.subarray(0, MAX_SKILL_BYTES));
+    return readTextCapped(res, MAX_SKILL_BYTES);
   } finally {
     cancel();
   }
+}
+
+/**
+ * The body decoded as UTF-8, at most `limit` bytes of it. The stream is
+ * cancelled once the limit is reached, so a file far larger than a skill
+ * costs neither the download nor the memory beyond that point.
+ */
+async function readTextCapped(res: Response, limit: number): Promise<string> {
+  if (!res.body) {
+    return "";
+  }
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder("utf-8");
+  let text = "";
+  let received = 0;
+  try {
+    while (received < limit) {
+      const { done, value } = await reader.read();
+      if (done) {
+        break;
+      }
+      const room = limit - received;
+      const chunk = value.length > room ? value.subarray(0, room) : value;
+      received += chunk.length;
+      text += decoder.decode(chunk, { stream: true });
+    }
+  } finally {
+    // Past the limit, or on an error: drop the rest of the download.
+    await reader.cancel().catch(() => undefined);
+  }
+  return text + decoder.decode();
 }
 
 export interface SkillFrontmatter {
