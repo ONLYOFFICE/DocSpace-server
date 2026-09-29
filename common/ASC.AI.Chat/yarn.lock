@@ -507,9 +507,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.6.0.tgz::locator=asc-ai-chat%40workspace%3A.":
-  version: 0.6.0
-  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.6.0.tgz#onlyoffice-ai-chat-0.6.0.tgz::hash=90ae48&locator=asc-ai-chat%40workspace%3A."
+"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.6.2.tgz::locator=asc-ai-chat%40workspace%3A.":
+  version: 0.6.2
+  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.6.2.tgz#onlyoffice-ai-chat-0.6.2.tgz::hash=cc1e19&locator=asc-ai-chat%40workspace%3A."
   dependencies:
     lodash.clonedeep: "npm:^4.5.0"
   peerDependencies:
@@ -605,7 +605,7 @@ __metadata:
       optional: true
     zustand:
       optional: true
-  checksum: 10/fef4cf93150240db9047606b521eb9a04baa345045f29286996ada35f55e7fdf2141c006cb2515f6988c7c813e6d82e346143f93572078602f5b4963e5f025ab
+  checksum: 10/8d0dc20015f69e3ea54e478c26fdc616f127cb912c981cd48ab33669172a9d20a562b46ea18bc6b764f386b3fd2b686af4db2fd70ca1f47e066974c85d0e2a8a
   languageName: node
   linkType: hard
 
@@ -1406,7 +1406,7 @@ __metadata:
     "@aws-sdk/client-cloudwatch-logs": "npm:^3.199.0"
     "@google/genai": "npm:^1.30.0"
     "@mistralai/mistralai": "npm:^1.11.0"
-    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-0.6.0.tgz"
+    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-0.6.2.tgz"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.222.0"
     "@opentelemetry/exporter-metrics-otlp-proto": "npm:^0.222.0"
