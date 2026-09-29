@@ -507,9 +507,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.5.139.tgz::locator=asc-ai-chat%40workspace%3A.":
-  version: 0.5.139
-  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.5.139.tgz#onlyoffice-ai-chat-0.5.139.tgz::hash=3cf470&locator=asc-ai-chat%40workspace%3A."
+"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.6.0.tgz::locator=asc-ai-chat%40workspace%3A.":
+  version: 0.6.0
+  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.6.0.tgz#onlyoffice-ai-chat-0.6.0.tgz::hash=90ae48&locator=asc-ai-chat%40workspace%3A."
   dependencies:
     lodash.clonedeep: "npm:^4.5.0"
   peerDependencies:
@@ -526,6 +526,7 @@ __metadata:
     "@radix-ui/react-slot": ^1.2.3
     "@radix-ui/react-switch": ^1.2.6
     "@radix-ui/react-tabs": ^1.1.13
+    "@radix-ui/react-toast": ^1.2.15
     "@radix-ui/react-tooltip": ^1.2.8
     assistant-stream: ^0.2.47
     class-variance-authority: ^0.7.1
@@ -570,6 +571,8 @@ __metadata:
       optional: true
     "@radix-ui/react-tabs":
       optional: true
+    "@radix-ui/react-toast":
+      optional: true
     "@radix-ui/react-tooltip":
       optional: true
     class-variance-authority:
@@ -602,7 +605,7 @@ __metadata:
       optional: true
     zustand:
       optional: true
-  checksum: 10/cdb77a1f82fbaa33e4f4773c175ef37fdea3f142663b8c4bb3352091e68897a6eb65f209f12b183e8183c39b523b4097e574f21f0cebed78dc43d35faa951890
+  checksum: 10/fef4cf93150240db9047606b521eb9a04baa345045f29286996ada35f55e7fdf2141c006cb2515f6988c7c813e6d82e346143f93572078602f5b4963e5f025ab
   languageName: node
   linkType: hard
 
@@ -1403,7 +1406,7 @@ __metadata:
     "@aws-sdk/client-cloudwatch-logs": "npm:^3.199.0"
     "@google/genai": "npm:^1.30.0"
     "@mistralai/mistralai": "npm:^1.11.0"
-    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-0.5.139.tgz"
+    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-0.6.0.tgz"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.222.0"
     "@opentelemetry/exporter-metrics-otlp-proto": "npm:^0.222.0"
