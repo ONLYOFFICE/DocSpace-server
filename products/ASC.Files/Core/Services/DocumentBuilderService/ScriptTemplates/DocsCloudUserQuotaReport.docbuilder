@@ -1,5 +1,6 @@
 builder.CreateFile("xlsx");
 
+var defaultFontColorBlack = Api.CreateColorFromRGB(0, 0, 0);
 var defaultFontColorGray = Api.CreateColorFromRGB(127, 127, 127);
 var defaultBorderColorWhite = Api.CreateColorFromRGB(255, 255, 255);
 
@@ -51,9 +52,9 @@ function writeCell(row, col, data) {
         sRange.SetValue(data.value);
     }
 
-    if (data.fontColor) {
-        sRange.SetFontColor(data.fontColor);
-    }
+    // Set unconditionally: an external user is shown by their raw identifier, and one that looks like
+    // an e-mail is turned into a hyperlink by the editor and painted in its blue.
+    sRange.SetFontColor(data.fontColor || defaultFontColorBlack);
     if (data.bold) {
         sRange.SetBold(true);
     }

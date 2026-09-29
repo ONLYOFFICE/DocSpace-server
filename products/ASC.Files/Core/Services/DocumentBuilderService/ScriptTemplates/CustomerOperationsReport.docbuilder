@@ -181,8 +181,9 @@ function prepareTotal(headerRowIndex) {
     var lastDataRow = headerRowIndex + values.length;
 
     // Continue the row banding: the total row is the next row after the data, so its fill
-    // follows the same alternation (data row index i is shaded when i is odd).
-    var totalBgColor = values.length % 2 == 0 ? null : colors.lightBgColor;
+    // follows the same alternation (data row index i is shaded when i is odd). Only the report's
+    // own style bands in that color; the editor's default one has no fill to continue.
+    var totalBgColor = reportTableStyleSupported && values.length % 2 != 0 ? colors.lightBgColor : null;
 
     var row = [];
     for (var i = 0; i < inputData.keys.length; i++) {
