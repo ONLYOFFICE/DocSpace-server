@@ -10,8 +10,6 @@ var MAX_COLUMN_WIDTH = 100;
 // cannot drift apart.
 var TABLE_ROW_HEIGHT = 19.5;
 
-// The one custom table style both report tables wear - see createReportTableStyle().
-var REPORT_TABLE_STYLE_NAME = "ReportTableStyle";
 
 // Reference-safe names the two sheets wear while the pivot is created - see insertPivot().
 var PIVOT_SOURCE_TEMP_SHEET_NAME = "PivotSource";
@@ -67,43 +65,7 @@ function customizeWorksheet() {
     oWorksheet.SetColumnWidth(6, 20);
 }
 
-// Declares the report's look once, as a workbook table style: the blue header, the alternating row
-// fill and the white cell borders. Both the detail table and the pivot reference it by name, so the
-// look survives a row inserted into the table or a refreshed pivot - neither of which the editor
-// would repaint if the colors sat on the cells.
-function createReportTableStyle() {
-    // Add throws on a name the workbook already has, so an existing style is reused and redefined.
-    var styles = Api.GetActiveWorkbook().GetTableStyles();
-    var style = styles.GetItem(REPORT_TABLE_STYLE_NAME) || styles.Add(REPORT_TABLE_STYLE_NAME);
-
-    // The style is used by a table and by a pivot, so it has to offer itself to both galleries.
-    style.SetShowAsAvailableTableStyle(true);
-    style.SetShowAsAvailablePivotTableStyle(true);
-
-    var elements = style.GetTableStyleElements();
-
-    var wholeTable = elements.GetItem("xlWholeTable");
-    wholeTable.GetFont().SetColor(defaultFontColorBlack);
-    wholeTable.SetBorders("Top", "Medium", defaultBorderColorWhite);
-    wholeTable.SetBorders("Bottom", "Medium", defaultBorderColorWhite);
-    wholeTable.SetBorders("Left", "Medium", defaultBorderColorWhite);
-    wholeTable.SetBorders("Right", "Medium", defaultBorderColorWhite);
-    wholeTable.SetBorders("InsideHorizontal", "Medium", defaultBorderColorWhite);
-    wholeTable.SetBorders("InsideVertical", "Medium", defaultBorderColorWhite);
-
-    var headerRow = elements.GetItem("xlHeaderRow");
-    var headerFont = headerRow.GetFont();
-    headerFont.SetBold(true);
-    headerFont.SetColor(colors.mainFontColor);
-    headerRow.SetFillColor(colors.mainBgColor);
-
-    // Only the second stripe is filled, so the first data row stays clear and the banding starts the
-    // way the hand-painted table started.
-    elements.GetItem("xlRowStripe2").SetFillColor(colors.lightBgColor);
-
-    // The pivot's grand total row, closing the summary the way the total row closes the detail sheet.
-    elements.GetItem("xlTotalRow").GetFont().SetBold(true);
-}
+${reportTableStyle}
 
 function prepareInfo() {
     return [
