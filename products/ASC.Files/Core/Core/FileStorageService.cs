@@ -1324,7 +1324,7 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
 
-        var aiFolder = await folderDao.GetFoldersAsync(roomId, FolderType.Ai).FirstOrDefaultAsync();
+        var aiFolder = await folderDao.GetFoldersAsync(roomId, FolderType.Ai).OrderBy(f => f.Id).FirstOrDefaultAsync();
 
         return aiFolder ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
     }
@@ -3434,7 +3434,7 @@ public class FileStorageService //: IFileStorageService
                 throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
             }
 
-            if (fileInfo.StartConvert && await fileConverter.MustConvertAsync(file))
+            if (fileInfo.StartConvert && fileConverter.MustConvert(file))
             {
                 try
                 {
