@@ -34,18 +34,6 @@
 namespace ASC.Web.Core.WhiteLabel;
 
 /// <summary>
-/// The additional white label settings wrapper.
-/// </summary>
-public class AdditionalWhiteLabelSettingsWrapper
-{
-    /// <summary>
-    /// The additional white label settings.
-    /// </summary>
-    /// <example>{"startDocsEnabled": true, "helpCenterEnabled": true, "feedbackAndSupportEnabled": true, "userForumEnabled": true, "videoGuidesEnabled": true, "licenseAgreementsEnabled": true}</example>
-    public AdditionalWhiteLabelSettings Settings { get; set; }
-}
-
-/// <summary>
 /// The additional white label settings.
 /// </summary>
 public class AdditionalWhiteLabelSettings : ISettings<AdditionalWhiteLabelSettings>

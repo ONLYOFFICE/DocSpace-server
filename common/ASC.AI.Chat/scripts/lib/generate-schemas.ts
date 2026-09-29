@@ -55,8 +55,18 @@ function isOperationScoped(name: string): boolean {
   return name.startsWith("Req_") || name.startsWith("Res_");
 }
 
+// The chat library spells some of its types with a type-parameter-style `T`
+// (`TProvider`, `TMCPItem`); a published name drops it. A name that already
+// carries the namespace keeps it as is, so `AiActionArgs` does not become
+// `AiAiActionArgs`.
 function namespacedName(name: string): string {
-  return isOperationScoped(name) ? name : `${SCHEMA_NAMESPACE}${name}`;
+  if (isOperationScoped(name)) {
+    return name;
+  }
+  const bare = name.replace(/^T(?=[A-Z])/, "");
+  return bare.startsWith(SCHEMA_NAMESPACE) && /^[A-Z]/.test(bare.slice(SCHEMA_NAMESPACE.length))
+    ? bare
+    : `${SCHEMA_NAMESPACE}${bare}`;
 }
 
 function rewriteRefs(node: unknown, rename: (name: string) => string): unknown {

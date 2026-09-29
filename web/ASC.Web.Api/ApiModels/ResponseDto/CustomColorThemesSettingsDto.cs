@@ -51,7 +51,7 @@ public class CustomColorThemesSettingsDto
     /// higher than the built-in ones.
     /// </summary>
     /// <example>[{"id": 1, "name": "Custom Theme"}]</example>
-    public IEnumerable<CustomColorThemesSettingsItem> Themes { get; set; }
+    public IEnumerable<CustomColorThemeDto> Themes { get; set; }
 
     /// <summary>
     /// The ID of the theme in `themes` that is currently applied to the whole portal. Deleting the applied theme
@@ -70,8 +70,59 @@ public class CustomColorThemesSettingsDto
 
     public CustomColorThemesSettingsDto(CustomColorThemesSettings customColorThemesSettings, int limit)
     {
-        Themes = customColorThemesSettings.Themes.OrderBy(r => r.Id);
+        Themes = customColorThemesSettings.Themes.OrderBy(r => r.Id).Select(r => r.Map());
         Selected = customColorThemesSettings.Selected;
         Limit = limit;
     }
+}
+/// <summary>
+/// One colour theme of the portal interface.
+/// </summary>
+public class CustomColorThemeDto
+{
+    /// <summary>
+    /// The theme id; the built-in themes have the lowest ids.
+    /// </summary>
+    /// <example>1</example>
+    public int Id { get; init; }
+
+    /// <summary>
+    /// The theme name; empty for a custom theme.
+    /// </summary>
+    /// <example>blue</example>
+    public string Name { get; init; }
+
+    /// <summary>
+    /// The accent and button colours of the interface.
+    /// </summary>
+    public ColorThemeColorsDto Main { get; init; }
+
+    /// <summary>
+    /// The colours of the text shown on the accent and on the buttons.
+    /// </summary>
+    public ColorThemeColorsDto Text { get; init; }
+}
+
+/// <summary>
+/// A pair of colours of a theme.
+/// </summary>
+public class ColorThemeColorsDto
+{
+    /// <summary>
+    /// The accent colour, as a hex code.
+    /// </summary>
+    /// <example>#4781D1</example>
+    public string Accent { get; init; }
+
+    /// <summary>
+    /// The button colour, as a hex code.
+    /// </summary>
+    /// <example>#5299E0</example>
+    public string Buttons { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public static partial class CustomColorThemeDtoMapper
+{
+    public static partial CustomColorThemeDto Map(this CustomColorThemesSettingsItem source);
 }

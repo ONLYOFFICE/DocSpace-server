@@ -31,55 +31,65 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Api.Settings.Smtp;
+namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The state of the background job that sends the portal SMTP test message.
+/// The confirmation link parameters to check.
 /// </summary>
-/// <example>
-/// {
-///   "completed": true,
-///   "id": "00000000-0000-0000-0000-000000000001",
-///   "error": "Connection timeout",
-///   "status": "InProgress",
-///   "percents": 1
-/// }
-/// </example>
-public class SmtpOperationStatusRequestsDto
+public class CheckConfirmRequestDto
 {
     /// <summary>
-    /// Whether the job has finished. This is the field to poll; the first answer that reports it true also discards
-    /// the job, so read `error` out of that same answer rather than calling again.
+    /// The email validation key.
     /// </summary>
-    /// <example>true</example>
-    public bool Completed { get; set; }
+    /// <example>abcdef123456</example>
+    public string Key { get; set; }
 
     /// <summary>
-    /// The identifier of the queued job. A portal only ever has one test job at a time, so it names the run rather
-    /// than selecting among several.
+    /// The user type.
     /// </summary>
-    /// <example>smtp-op-123</example>
-    public string Id { get; set; }
+    /// <example>0</example>
+    public EmployeeType? EmplType { get; set; }
 
     /// <summary>
-    /// Why the test failed. It stays empty while the job runs and also once the relay has accepted the message, so
-    /// an empty value on a finished job is what success looks like; an unreachable relay is reported here after a
-    /// 30-second connection timeout rather than as a failed request.
+    /// The email address.
     /// </summary>
-    /// <example>SMTP connection failed.</example>
-    public string Error { get; set; }
+    /// <example>user@example.com</example>
+    [EmailAddress]
+    public string Email { get; set; }
 
     /// <summary>
-    /// The step the job has reached, in words - `Connect to host` or `Send test message`, for instance. It is meant
-    /// to be shown to a person and is not a fixed set of values to branch on.
+    /// The encrypted email address.
     /// </summary>
-    /// <example>Completed</example>
-    public string Status { get; set; }
+    /// <example>user%40example.com</example>
+    public string EncEmail { get; set; }
 
     /// <summary>
-    /// How far the job has got, as a percentage climbing to 100. Reaching 100 says the job ran to the end, not that
-    /// the message was accepted - that is what an empty `error` says.
+    /// The user ID.
+    /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
+    public Guid? UiD { get; set; }
+
+    /// <summary>
+    /// The confirmation email type.
+    /// </summary>
+    /// <example>0</example>
+    public ConfirmType? Type { get; set; }
+
+    /// <summary>
+    /// Specifies whether it is the first time account access or not.
+    /// </summary>
+    /// <example>false</example>
+    public string First { get; set; }
+
+    /// <summary>
+    /// The room ID.
     /// </summary>
     /// <example>1</example>
-    public int Percents { get; set; }
+    public string RoomId { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public static partial class CheckConfirmRequestDtoMapper
+{
+    public static partial EmailValidationKeyModel Map(this CheckConfirmRequestDto source);
 }

@@ -102,14 +102,14 @@ public abstract class UploadController<T>(
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
     [Obsolete]
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "The created session, wrapped in the success envelope", typeof(ChunkedUploadSessionResponseWrapper<int>))]
+    [SwaggerResponse(200, "The created session, wrapped in the success envelope", typeof(ChunkedUploadSessionResultDto<int>))]
     [SwaggerResponse(403, "The caller cannot add content to the target folder")]
     [HttpPost("{folderId}/upload/create_session")]
-    public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateUploadSession(SessionRequestDto<T> inDto)
+    public async Task<ChunkedUploadSessionResultDto<T>> CreateUploadSession(SessionRequestDto<T> inDto)
     {
         var data =  await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.Session.FileName, inDto.Session.FileSize, inDto.Session.RelativePath, inDto.Session.Encrypted, inDto.Session.CreateOn, inDto.Session.CreateNewIfExist);
 
-        return new ChunkedUploadSessionResponseWrapper<T>
+        return new ChunkedUploadSessionResultDto<T>
         {
             Success = true,
             Data = data
@@ -133,9 +133,9 @@ public abstract class UploadController<T>(
     /// <summary>Create an upload session</summary>
     /// <path>api/2.0/files/{folderId}/session</path>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "The created upload session", typeof(ChunkedUploadSessionResponse<int>))]
+    [SwaggerResponse(200, "The created upload session", typeof(ChunkedUploadSessionDto<int>))]
     [HttpPost("{folderId}/session")]
-    public async Task<ChunkedUploadSessionResponse<T>> CreateUploadSessionInFolder(SessionRequestDto<T> inDto)
+    public async Task<ChunkedUploadSessionDto<T>> CreateUploadSessionInFolder(SessionRequestDto<T> inDto)
     {
         return await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.Session.FileName, inDto.Session.FileSize, inDto.Session.RelativePath, inDto.Session.Encrypted, inDto.Session.CreateOn, inDto.Session.CreateNewIfExist);
     }
@@ -166,7 +166,7 @@ public abstract class UploadController<T>(
     // [SwaggerResponse(200, "Information about created session")]
     // [SwaggerResponse(403, "You don't have enough permission to create")]
     // [HttpPut("{folderId}/session/initiate")]
-    // public async Task<ChunkedUploadSessionResponse<T>> InitiateUploadSession(InitiateSessionRequestDto<T> inDto)
+    // public async Task<ChunkedUploadSessionDto<T>> InitiateUploadSession(InitiateSessionRequestDto<T> inDto)
     // {
     //     var createdSession =  await fileUploader.InitiateUploadAsync(inDto.FolderId, inDto.FileId, inDto.FileName, inDto.FileSize, inDto.Encrypted);
     //     return await chunkedUploadSessionHelper.ToResponseObjectAsync(createdSession, true);
@@ -270,9 +270,9 @@ public abstract class UploadController<T>(
     /// <summary>Upload a numbered chunk</summary>
     /// <path>api/2.0/files/{folderId}/session/{sessionId}/upload</path>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "The session with its progress after the part was stored", typeof(ChunkedUploadSessionResponse<int>))]
+    [SwaggerResponse(200, "The session with its progress after the part was stored", typeof(ChunkedUploadSessionDto<int>))]
     [HttpPost("{folderId}/session/{sessionId}/upload")]
-    public async Task<ChunkedUploadSessionResponse<T>> UploadAsyncSession(UploadSessionAsyncRequestDto<T> inDto)
+    public async Task<ChunkedUploadSessionDto<T>> UploadAsyncSession(UploadSessionAsyncRequestDto<T> inDto)
     {
         var resumedSession = await fileUploader.UploadChunkAsync<T>(inDto.SessionId, inDto.File.OpenReadStream(), inDto.File.Length, inDto.ChunkNumber);
         await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
@@ -363,13 +363,13 @@ public abstract class UploadController<T>(
     /// <summary>Create the editing session</summary>
     /// <path>api/2.0/files/file/{fileId}/edit_session</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "The created editing session, wrapped in the success envelope", typeof(ChunkedUploadSessionResponseWrapper<int>))]
+    [SwaggerResponse(200, "The created editing session, wrapped in the success envelope", typeof(ChunkedUploadSessionResultDto<int>))]
     [SwaggerResponse(403, "The caller cannot edit this file")]
     [HttpPost("file/{fileId}/edit_session")]
-    public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateEditSession(CreateEditSessionRequestDto<T> inDto)
+    public async Task<ChunkedUploadSessionResultDto<T>> CreateEditSession(CreateEditSessionRequestDto<T> inDto)
     {
         var data = await filesControllerHelper.CreateEditSessionAsync(inDto.FileId, inDto.FileSize);
-        return new ChunkedUploadSessionResponseWrapper<T>
+        return new ChunkedUploadSessionResultDto<T>
         {
             Success = true,
             Data = data

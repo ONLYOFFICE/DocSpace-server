@@ -71,7 +71,7 @@ public class EditHistoryDto
     /// anonymous link, is reported as a guest.
     /// </summary>
     /// <example>{"id": "00000000-0000-0000-0000-000000000000", "name": "John Doe"}</example>
-    public EditHistoryAuthor User { get; set; }
+    public EditHistoryAuthorDto User { get; set; }
 
     /// <summary>
     /// When the revision was saved, written with the offset of the portal's time zone rather than as plain UTC. The
@@ -94,7 +94,7 @@ public class EditHistoryDto
     /// in a format the portal no longer reads, so an empty list is not proof that nothing changed.
     /// </summary>
     /// <example>[{"user": {"id": "123", "name": "John Doe"}, "created": "2021-01-01T00:00:00Z"}]</example>
-    public List<EditHistoryChangesWrapper> Changes { get; set; }
+    public List<EditHistoryChangesDto> Changes { get; set; }
 
     /// <summary>
     /// The build of the editing service that wrote the change record of this revision, taken from the record itself;
@@ -113,10 +113,10 @@ public partial class EditHistoryMapper(ApiDateTimeHelper apiDateTimeHelper, User
     {
         var result = Map(editHistory);
 
-        result.Changes = editHistory.Changes.Select(r => new EditHistoryChangesWrapper(r, apiDateTimeHelper)).ToList();
+        result.Changes = editHistory.Changes.Select(r => new EditHistoryChangesDto(r, apiDateTimeHelper)).ToList();
         result.ChangesHistory = editHistory.ChangesString;
         result.Created = apiDateTimeHelper.Get(editHistory.ModifiedOn);
-        result.User = new EditHistoryAuthor(userManager, displayUserSettingsHelper) { Id = editHistory.ModifiedBy.ToString() };
+        result.User = new EditHistoryAuthor(userManager, displayUserSettingsHelper) { Id = editHistory.ModifiedBy.ToString() }.Map();
 
         return result;
     }
@@ -131,13 +131,13 @@ public partial class EditHistoryMapper(ApiDateTimeHelper apiDateTimeHelper, User
 /// <summary>
 /// One single change inside a saved revision of a file.
 /// </summary>
-public class EditHistoryChangesWrapper(EditHistoryChanges historyChanges, ApiDateTimeHelper apiDateTimeHelper)
+public class EditHistoryChangesDto(EditHistoryChanges historyChanges, ApiDateTimeHelper apiDateTimeHelper)
 {
     /// <summary>
     /// The account that made this change, as the editing service reported it; an account it could not name is
     /// reported as a guest.
     /// </summary>
-    public EditHistoryAuthor User { get; set; } = historyChanges.Author;
+    public EditHistoryAuthorDto User { get; set; } = historyChanges.Author?.Map();
 
     /// <summary>
     /// When this change was made, written with the offset of the portal's time zone rather than as plain UTC.

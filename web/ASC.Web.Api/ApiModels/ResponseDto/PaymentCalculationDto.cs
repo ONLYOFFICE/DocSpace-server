@@ -31,45 +31,40 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.ApiModels.RequestDto;
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// How a folder is to be deleted.
+/// The parameters of the calculated payment amount.
 /// </summary>
-public class DeleteFolder
+public class PaymentCalculationDto
 {
     /// <summary>
-    /// Whether the deletion waits for the editing sessions on the contents to end: with true a folder somebody is
-    /// working in is removed once they are done, with false the deletion starts at once.
+    /// The operation unique identifier.
     /// </summary>
-    /// <example>false</example>
-    public bool DeleteAfter { get; set; }
+    /// <example>123456789</example>
+    public long OperationId { get; init; }
 
     /// <summary>
-    /// Whether the folder is discarded for good instead of being moved to the "Trash" section: with false it can be
-    /// restored from Trash, with true it cannot be recovered. Inside a room there is no Trash and the deletion is
-    /// final either way.
+    /// The calculated payment amount.
     /// </summary>
-    /// <example>false</example>
-    public bool Immediately { get; set; }
+    /// <example>10.0</example>
+    public decimal Amount { get; init; }
+
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol used for the payment calculation.
+    /// </summary>
+    /// <example>USD</example>
+    public string Currency { get; init; }
+
+    /// <summary>
+    /// The quantity associated with the payment calculation.
+    /// </summary>
+    /// <example>1</example>
+    public int Quantity { get; init; }
 }
 
-/// <summary>
-/// The request that deletes one folder.
-/// </summary>
-public class DeleteFolder<T>
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public static partial class PaymentCalculationDtoMapper
 {
-    /// <summary>
-    /// The folder to delete, together with everything it holds.
-    /// </summary>
-    /// <example>10</example>
-    [FromRoute(Name = "folderId")]
-    public required T FolderId { get; set; }
-
-    /// <summary>
-    /// How the deletion is to be carried out.
-    /// </summary>
-    /// <example>{"deleteAfter": false, "immediately": false}</example>
-    [FromBody]
-    public required DeleteFolder Delete { get; set; }
+    public static partial PaymentCalculationDto Map(this PaymentCalculation source);
 }

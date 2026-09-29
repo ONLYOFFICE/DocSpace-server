@@ -61,7 +61,7 @@ public class PhotoController(
     /// Crops the avatar of a profile to the rectangle given in the request and rebuilds all of its thumbnail sizes,
     /// which is the second step of changing an avatar by hand.
     /// It works in two modes: with `tmpFile` it takes the temporary image
-    /// `POST api/2.0/people/{userid}/photo` produced with `autosave` off, makes the cropped result the main photo and
+    /// `POST api/2.0/people/{userId}/photo` produced with `autosave` off, makes the cropped result the main photo and
     /// then discards the temporary file, and without `tmpFile` it re-crops the photo the profile already has.
     /// A caller may only do this to their own profile - the ID in the route has to be the calling account, and an
     /// administrator gets 403 for anybody else - and the account must be allowed to edit its own profile.
@@ -69,18 +69,18 @@ public class PhotoController(
     /// as often as needed.
     /// Passing `width` and `height` as 0 together with `tmpFile` keeps the whole uploaded image instead of cropping
     /// it.
-    /// The answer holds the URLs of every generated size, the same shape `GET api/2.0/people/{userid}/photo`
+    /// The answer holds the URLs of every generated size, the same shape `GET api/2.0/people/{userId}/photo`
     /// returns.
     /// </remarks>
     /// <summary>
     /// Create photo thumbnails
     /// </summary>
-    /// <path>api/2.0/people/{userid}/photo/thumbnails</path>
+    /// <path>api/2.0/people/{userId}/photo/thumbnails</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "The URLs of the rebuilt photo sizes", typeof(ThumbnailsDataDto))]
     [SwaggerResponse(403, "The ID in the route is not the calling account, or the account may not edit its own profile")]
     [SwaggerResponse(404, "No user has the specified ID")]
-    [HttpPost("{userid}/photo/thumbnails")]
+    [HttpPost("{userId}/photo/thumbnails")]
     public async Task<ThumbnailsDataDto> CreateMemberPhotoThumbnails(ThumbnailsRequestDto inDto)
     {
         var user = await GetUserInfoAsync(inDto.UserId);
@@ -130,7 +130,7 @@ public class PhotoController(
     /// A caller may only do this to their own profile - the ID in the route has to be the calling account, and an
     /// administrator gets 403 for anybody else - and the account must be allowed to edit its own profile.
     /// The removal is permanent and cannot be undone: the stored image and all of its sizes are deleted, and a new
-    /// avatar has to be uploaded through `POST api/2.0/people/{userid}/photo` to replace it.
+    /// avatar has to be uploaded through `POST api/2.0/people/{userId}/photo` to replace it.
     /// The call is idempotent, so removing an avatar from a profile that has none succeeds as well, and it raises a
     /// `UserUpdated` webhook.
     /// The answer still holds the URLs of every size, now pointing at the default image.
@@ -138,12 +138,12 @@ public class PhotoController(
     /// <summary>
     /// Delete a user photo
     /// </summary>
-    /// <path>api/2.0/people/{userid}/photo</path>
+    /// <path>api/2.0/people/{userId}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "The URLs of every photo size, now pointing at the default image", typeof(ThumbnailsDataDto))]
     [SwaggerResponse(403, "The ID in the route is not the calling account, or the account may not edit its own profile")]
     [SwaggerResponse(404, "No user has the specified ID")]
-    [HttpDelete("{userid}/photo")]
+    [HttpDelete("{userId}/photo")]
     public async Task<ThumbnailsDataDto> DeleteMemberPhoto(GetUserPhotoRequestDto inDto)
     {
         var user = await GetUserInfoAsync(inDto.UserId);
@@ -172,19 +172,19 @@ public class PhotoController(
     /// gets the URLs of the default placeholder image rather than an empty answer.
     /// The URLs are portal paths meant to be requested directly and may be replaced when the avatar changes, so they
     /// should not be stored for a long time.
-    /// To change the avatar use `POST api/2.0/people/{userid}/photo` for an uploaded file,
-    /// `PUT api/2.0/people/{userid}/photo` for one taken from a URL, and
-    /// `DELETE api/2.0/people/{userid}/photo` to drop it.
+    /// To change the avatar use `POST api/2.0/people/{userId}/photo` for an uploaded file,
+    /// `PUT api/2.0/people/{userId}/photo` for one taken from a URL, and
+    /// `DELETE api/2.0/people/{userId}/photo` to drop it.
     /// </remarks>
     /// <summary>
     /// Get a user photo
     /// </summary>
-    /// <path>api/2.0/people/{userid}/photo</path>
+    /// <path>api/2.0/people/{userId}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "The URLs of the photo in every size, or of the default image when the profile has no photo", typeof(ThumbnailsDataDto))]
     [SwaggerResponse(403, "The caller is not allowed to see the requested account")]
     [SwaggerResponse(404, "No user has the specified ID")]
-    [HttpGet("{userid}/photo")]
+    [HttpGet("{userId}/photo")]
     public async Task<ThumbnailsDataDto> GetMemberPhoto(GetUserPhotoRequestDto inDto)
     {
         var user = await GetUserInfoAsync(inDto.UserId);
@@ -205,21 +205,21 @@ public class PhotoController(
     /// The URL has to be absolute or relative to the portal, and it has to use HTTPS unless the request itself came
     /// over HTTP; an address the portal refuses to fetch, and a download that does not succeed, both answer 403.
     /// Passing the URL the profile already uses is a no-op, and an empty `files` is rejected with 400, so use
-    /// `DELETE api/2.0/people/{userid}/photo` to remove an avatar rather than sending an empty value.
+    /// `DELETE api/2.0/people/{userId}/photo` to remove an avatar rather than sending an empty value.
     /// The downloaded image replaces the stored avatar and all of its sizes at once, raises a `UserUpdated` webhook,
     /// and is subject to the portal limit on image size.
-    /// To send the bytes instead of a URL, upload the file through `POST api/2.0/people/{userid}/photo`.
+    /// To send the bytes instead of a URL, upload the file through `POST api/2.0/people/{userId}/photo`.
     /// </remarks>
     /// <summary>
     /// Update a user photo
     /// </summary>
-    /// <path>api/2.0/people/{userid}/photo</path>
+    /// <path>api/2.0/people/{userId}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "The URLs of the photo sizes built from the downloaded image", typeof(ThumbnailsDataDto))]
     [SwaggerResponse(400, "The files field is empty")]
     [SwaggerResponse(403, "The ID in the route is not the calling account, the account may not edit its own profile, or the URL was refused or could not be downloaded")]
     [SwaggerResponse(404, "No user has the specified ID")]
-    [HttpPut("{userid}/photo")]
+    [HttpPut("{userId}/photo")]
     public async Task<ThumbnailsDataDto> UpdateMemberPhoto(UpdatePhotoMemberRequestDto inDto)
     {
         var user = await GetUserInfoAsync(inDto.UserId);
@@ -256,7 +256,7 @@ public class PhotoController(
     /// URLs come back in `data`, each with a `hash` query parameter that changes whenever the avatar does, so a
     /// client can cache them safely.
     /// With `autosave` left false the image is only stored as a temporary file and `data` holds its name, which has
-    /// to be passed as `tmpFile` to `POST api/2.0/people/{userid}/photo/thumbnails` to choose the crop; nothing
+    /// to be passed as `tmpFile` to `POST api/2.0/people/{userId}/photo/thumbnails` to choose the crop; nothing
     /// changes on the profile until that second call succeeds.
     /// A caller may only do this to their own profile, the ID in the route has to be the calling account, and the
     /// image has to be a format the portal can read and stay within the portal limit on image size.
@@ -269,10 +269,10 @@ public class PhotoController(
     /// <summary>
     /// Upload a user photo
     /// </summary>
-    /// <path>api/2.0/people/{userid}/photo</path>
+    /// <path>api/2.0/people/{userId}/photo</path>
     [Tags("People / Photos")]
     [SwaggerResponse(200, "The upload result: on success the photo URLs or the temporary file name in data, and on failure success set to false with the reason in message", typeof(FileUploadResultDto))]
-    [HttpPost("{userid}/photo")]
+    [HttpPost("{userId}/photo")]
     public async Task<FileUploadResultDto> UploadMemberPhoto(UploadMemberPhotoRequestDto inDto)
     {
         var result = new FileUploadResultDto();

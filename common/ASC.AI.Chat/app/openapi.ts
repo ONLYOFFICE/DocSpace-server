@@ -1332,7 +1332,7 @@ const OPERATION_RESPONSE_SCHEMAS: Readonly<Record<string, Json>> = {
           "the custom MCP servers registered for this scope.",
         additionalProperties: {
           type: "array",
-          items: { $ref: "#/components/schemas/AiTMCPItem" },
+          items: { $ref: "#/components/schemas/AiMCPItem" },
         },
       },
       errors: {

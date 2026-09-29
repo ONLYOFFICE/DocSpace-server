@@ -63,7 +63,7 @@ public class GroupController(
     /// belongs to, and with `manager` set to true to keep only the groups it manages; order it with `sortBy` and
     /// `sortOrder`, and an unknown `sortBy` falls back to sorting by title.
     /// The entries carry no members - read `GET api/2.0/group/{id}` with `includeMembers` for one group, or
-    /// `GET api/2.0/group/user/{userid}` to find the groups of a single account.
+    /// `GET api/2.0/group/user/{userId}` to find the groups of a single account.
     /// </remarks>
     /// <summary>
     /// Get groups
@@ -136,12 +136,12 @@ public class GroupController(
     /// <summary>
     /// Get user groups
     /// </summary>
-    /// <path>api/2.0/group/user/{userid}</path>
+    /// <path>api/2.0/group/user/{userId}</path>
     /// <collection>list</collection>
     [Tags("Group")]
     [SwaggerResponse(200, "The groups the account belongs to, as ID and name pairs", typeof(IEnumerable<GroupSummaryDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpGet("user/{userid:guid}")]
+    [HttpGet("user/{userId:guid}")]
     public async Task<IEnumerable<GroupSummaryDto>> GetGroupByUserId(GetGroupByUserIdRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);

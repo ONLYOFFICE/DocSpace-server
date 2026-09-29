@@ -605,19 +605,19 @@ public class WhitelabelController(
     /// <path>api/2.0/settings/companywhitelabel</path>
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "The licensor details in effect, followed by the built-in ONLYOFFICE ones when they have been replaced", typeof(List<CompanyWhiteLabelSettings>))]
+    [SwaggerResponse(200, "The licensor details in effect, followed by the built-in ONLYOFFICE ones when they have been replaced", typeof(List<CompanyWhiteLabelSettingsDto>))]
     [HttpGet("companywhitelabel")]
-    public async Task<List<CompanyWhiteLabelSettings>> GetLicensorData()
+    public async Task<List<CompanyWhiteLabelSettingsDto>> GetLicensorData()
     {
-        var result = new List<CompanyWhiteLabelSettings>();
+        var result = new List<CompanyWhiteLabelSettingsDto>();
 
         var instance = await companyWhiteLabelSettingsHelper.InstanceAsync();
 
-        result.Add(instance);
+        result.Add(companyWhiteLabelSettingsDtoMapper.Map(instance));
 
         if (!companyWhiteLabelSettingsHelper.IsDefault(instance) && !instance.IsLicensor)
         {
-            result.Add(settingsManager.GetDefault<CompanyWhiteLabelSettings>());
+            result.Add(companyWhiteLabelSettingsDtoMapper.Map(settingsManager.GetDefault<CompanyWhiteLabelSettings>()));
         }
 
         return result;
@@ -642,35 +642,40 @@ public class WhitelabelController(
     [SwaggerResponse(400, "The request carries no settings object, or the email or the site is not a valid value")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the installation does not allow branding to be edited")]
     [HttpPost("rebranding/company")]
-    public async Task<bool> SaveCompanyWhiteLabelSettings(CompanyWhiteLabelSettingsWrapper wrapper)
+    public async Task<bool> SaveCompanyWhiteLabelSettings(CompanyWhiteLabelSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandRebrandingPermissionAsync();
 
-        ArgumentNullException.ThrowIfNull(wrapper?.Settings, "settings");
-        ArgumentNullException.ThrowIfNull(wrapper.Settings.Email, "email");
-        ArgumentNullException.ThrowIfNull(wrapper.Settings.Site, "site");
+        ArgumentNullException.ThrowIfNull(inDto?.Settings, "settings");
+        ArgumentNullException.ThrowIfNull(inDto.Settings.Email, "email");
+        ArgumentNullException.ThrowIfNull(inDto.Settings.Site, "site");
 
-        if (wrapper.Settings.Email.TestEmailPunyCode())
+        if (inDto.Settings.Email.TestEmailPunyCode())
         {
             throw new ArgumentException("email");
         }
 
-        if (wrapper.Settings.Site.TestUrlPunyCode())
+        if (inDto.Settings.Site.TestUrlPunyCode())
         {
             throw new ArgumentException("site");
         }
 
         var quota = await tenantManager.GetCurrentTenantQuotaAsync();
-        if (!quota.Branding)
+
+        var settings = new CompanyWhiteLabelSettings
         {
-            wrapper.Settings.HideAbout = false;
-        }
+            CompanyName = inDto.Settings.CompanyName,
+            Site = inDto.Settings.Site,
+            Email = inDto.Settings.Email,
+            Address = inDto.Settings.Address,
+            Phone = inDto.Settings.Phone,
+            HideAbout = quota.Branding && inDto.Settings.HideAbout,
+            IsLicensor = false
+        };
 
-        wrapper.Settings.IsLicensor = false;
-
-        await settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);
+        await settingsManager.SaveForDefaultTenantAsync(settings);
 
         messageService.Send(MessageAction.WhiteLabelCompanySettingsUpdated);
 
@@ -717,10 +722,10 @@ public class WhitelabelController(
     /// <summary>Delete the company white label settings</summary>
     /// <path>api/2.0/settings/rebranding/company</path>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "The built-in company details that are now in effect", typeof(CompanyWhiteLabelSettings))]
+    [SwaggerResponse(200, "The built-in company details that are now in effect", typeof(CompanyWhiteLabelSettingsDto))]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the installation does not allow branding to be edited")]
     [HttpDelete("rebranding/company")]
-    public async Task<CompanyWhiteLabelSettings> DeleteCompanyWhiteLabelSettings()
+    public async Task<CompanyWhiteLabelSettingsDto> DeleteCompanyWhiteLabelSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -732,7 +737,7 @@ public class WhitelabelController(
 
         messageService.Send(MessageAction.WhiteLabelCompanySettingsUpdated);
 
-        return defaultSettings;
+        return companyWhiteLabelSettingsDtoMapper.Map(defaultSettings);
     }
 
     #endregion
@@ -758,15 +763,25 @@ public class WhitelabelController(
     [SwaggerResponse(400, "The request carries no settings object")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the installation does not allow branding to be edited")]
     [HttpPost("rebranding/additional")]
-    public async Task<bool> SaveAdditionalWhiteLabelSettings(AdditionalWhiteLabelSettingsWrapper wrapper)
+    public async Task<bool> SaveAdditionalWhiteLabelSettings(AdditionalWhiteLabelSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandRebrandingPermissionAsync();
 
-        ArgumentNullException.ThrowIfNull(wrapper?.Settings, "settings");
+        ArgumentNullException.ThrowIfNull(inDto?.Settings, "settings");
 
-        await settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);
+        var settings = new AdditionalWhiteLabelSettings
+        {
+            StartDocsEnabled = inDto.Settings.StartDocsEnabled,
+            HelpCenterEnabled = inDto.Settings.HelpCenterEnabled,
+            FeedbackAndSupportEnabled = inDto.Settings.FeedbackAndSupportEnabled,
+            UserForumEnabled = inDto.Settings.UserForumEnabled,
+            VideoGuidesEnabled = inDto.Settings.VideoGuidesEnabled,
+            LicenseAgreementsEnabled = inDto.Settings.LicenseAgreementsEnabled
+        };
+
+        await settingsManager.SaveForDefaultTenantAsync(settings);
 
         messageService.Send(MessageAction.WhiteLabelAdditionalSettingsUpdated);
 
@@ -813,10 +828,10 @@ public class WhitelabelController(
     /// <summary>Delete the additional white label settings</summary>
     /// <path>api/2.0/settings/rebranding/additional</path>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "The built-in resource flags that are now in effect", typeof(AdditionalWhiteLabelSettings))]
+    [SwaggerResponse(200, "The built-in resource flags that are now in effect", typeof(AdditionalWhiteLabelSettingsDto))]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the installation does not allow branding to be edited")]
     [HttpDelete("rebranding/additional")]
-    public async Task<AdditionalWhiteLabelSettings> DeleteAdditionalWhiteLabelSettings()
+    public async Task<AdditionalWhiteLabelSettingsDto> DeleteAdditionalWhiteLabelSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -828,7 +843,7 @@ public class WhitelabelController(
 
         messageService.Send(MessageAction.WhiteLabelAdditionalSettingsUpdated);
 
-        return defaultSettings;
+        return additionalWhiteLabelSettingsMapper.Map(defaultSettings);
     }
 
     #endregion
@@ -846,15 +861,21 @@ public class WhitelabelController(
     [SwaggerResponse(403, "No permissions to perform this action")]
     [Tags("Settings / Rebranding")]
     [HttpPost("rebranding/mail")]
-    public async Task<bool> SaveMailWhiteLabelSettings(MailWhiteLabelSettingsWrapper wrapper)
+    public async Task<bool> SaveMailWhiteLabelSettings(MailWhiteLabelSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandRebrandingPermissionAsync();
 
-        ArgumentNullException.ThrowIfNull(wrapper?.Settings, "settings");
+        ArgumentNullException.ThrowIfNull(inDto?.Settings, "settings");
 
-        await settingsManager.SaveForDefaultTenantAsync(wrapper.Settings);
+        var settings = new MailWhiteLabelSettings
+        {
+            FooterEnabled = inDto.Settings.FooterEnabled,
+            FooterSocialEnabled = inDto.Settings.FooterSocialEnabled
+        };
+
+        await settingsManager.SaveForDefaultTenantAsync(settings);
 
         messageService.Send(MessageAction.WhiteLabelMailSettingsUpdated);
 
@@ -884,10 +905,10 @@ public class WhitelabelController(
     /// <path>api/2.0/settings/rebranding/mail</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "Default mail white label settings", typeof(MailWhiteLabelSettings))]
+    [SwaggerResponse(200, "Default mail white label settings", typeof(MailWhiteLabelSettingsDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpDelete("rebranding/mail")]
-    public async Task<MailWhiteLabelSettings> DeleteMailWhiteLabelSettings()
+    public async Task<MailWhiteLabelSettingsDto> DeleteMailWhiteLabelSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -899,7 +920,7 @@ public class WhitelabelController(
 
         messageService.Send(MessageAction.WhiteLabelMailSettingsUpdated);
 
-        return defaultSettings;
+        return defaultSettings.MapToDto();
     }
 
     #endregion

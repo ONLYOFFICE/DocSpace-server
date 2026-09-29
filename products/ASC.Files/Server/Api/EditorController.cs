@@ -49,7 +49,8 @@ public class EditorControllerInternal(
     ConfigurationConverter<int> configurationConverter,
     SecurityContext securityContext,
     IHttpContextAccessor httpContextAccessor,
-    EditorToolCallStateStore editorToolCallStateStore)
+    EditorToolCallStateStore editorToolCallStateStore,
+    MentionDtoHelper mentionDtoHelper)
     : EditorController<int>(
         fileStorageService,
         documentServiceHelper,
@@ -60,7 +61,8 @@ public class EditorControllerInternal(
         configurationConverter,
         securityContext,
         httpContextAccessor,
-        editorToolCallStateStore);
+        editorToolCallStateStore,
+        mentionDtoHelper);
 
 [ApiEndpoint(Template = "file")]
 public class EditorControllerThirdparty(
@@ -73,7 +75,8 @@ public class EditorControllerThirdparty(
     ConfigurationConverter<string> configurationConverter,
     SecurityContext securityContext,
     IHttpContextAccessor httpContextAccessor,
-    EditorToolCallStateStore editorToolCallStateStore)
+    EditorToolCallStateStore editorToolCallStateStore,
+    MentionDtoHelper mentionDtoHelper)
     : EditorController<string>(
         fileStorageService,
         documentServiceHelper,
@@ -84,7 +87,8 @@ public class EditorControllerThirdparty(
         configurationConverter,
         securityContext,
         httpContextAccessor,
-        editorToolCallStateStore);
+        editorToolCallStateStore,
+        mentionDtoHelper);
 
 public abstract class EditorController<T>(
     FileStorageService fileStorageService,
@@ -96,7 +100,8 @@ public abstract class EditorController<T>(
         ConfigurationConverter<T> configurationConverter,
         SecurityContext securityContext,
         IHttpContextAccessor httpContextAccessor,
-        EditorToolCallStateStore editorToolCallStateStore)
+        EditorToolCallStateStore editorToolCallStateStore,
+        MentionDtoHelper mentionDtoHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
 
@@ -317,7 +322,7 @@ public abstract class EditorController<T>(
         if (formOpenSetup != null)
         {
             // the editor needs an explicit null in user.roles to let the form be filled without role restrictions
-            result.EditorConfig.User ??= new UserConfig();
+            result.EditorConfig.User ??= new UserConfigDto();
 
             if (formOpenSetup.RootFolder.FolderType is FolderType.VirtualDataRoom)
             {
@@ -387,9 +392,9 @@ public abstract class EditorController<T>(
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}/presigned</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "The download address of the file with its signature token", typeof(DocumentService.FileLink))]
+    [SwaggerResponse(200, "The download address of the file with its signature token", typeof(FileLinkDto))]
     [HttpGet("{fileId}/presigned")]
-    public async Task<DocumentService.FileLink> GetPresignedFileUri(FileIdRequestDto<T> inDto)
+    public async Task<FileLinkDto> GetPresignedFileUri(FileIdRequestDto<T> inDto)
     {
         return await fileStorageService.GetPresignedUriAsync(inDto.FileId);
     }
@@ -411,16 +416,16 @@ public abstract class EditorController<T>(
     /// <path>api/2.0/files/file/{fileId}/sharedusers</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
-    [SwaggerResponse(200, "The portal members who can read the file, ordered by display name", typeof(List<MentionWrapper>))]
+    [SwaggerResponse(200, "The portal members who can read the file, ordered by display name", typeof(List<MentionDto>))]
     [HttpGet("{fileId}/sharedusers")]
-    public Task<List<MentionWrapper>> GetSharedUsers(FileIdRequestDto<T> inDto)
+    public async Task<List<MentionDto>> GetSharedUsers(FileIdRequestDto<T> inDto)
     {
         if (!securityContext.IsAuthenticated)
         {
-            return Task.FromResult<List<MentionWrapper>>(null);
+            return null;
         }
 
-        return fileStorageService.SharedUsersAsync(inDto.FileId);
+        return await mentionDtoHelper.GetAsync(await fileStorageService.SharedUsersAsync(inDto.FileId));
     }
 
     /// <remarks>
@@ -431,11 +436,11 @@ public abstract class EditorController<T>(
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "List of users with their access rights to the file", typeof(List<MentionWrapper>))]
+    [SwaggerResponse(200, "List of users with their access rights to the file", typeof(List<MentionDto>))]
     [HttpPost("infousers")]
-    public async Task<List<MentionWrapper>> GetInfoUsers(GetInfoUsersRequestDto inDto)
+    public async Task<List<MentionDto>> GetInfoUsers(GetInfoUsersRequestDto inDto)
     {
-        return await fileStorageService.GetInfoUsersAsync(inDto.UserIds);
+        return await mentionDtoHelper.GetAsync(await fileStorageService.GetInfoUsersAsync(inDto.UserIds));
     }
 
     /// <remarks>
@@ -455,9 +460,9 @@ public abstract class EditorController<T>(
     /// </summary>
     /// <path>api/2.0/files/file/referencedata</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "The reference descriptor, or the same object with the error text set when nothing resolved", typeof(FileReference))]
+    [SwaggerResponse(200, "The reference descriptor, or the same object with the error text set when nothing resolved", typeof(FileReferenceDto))]
     [HttpPost("referencedata")]
-    public async Task<FileReference> GetReferenceData(GetReferenceDataDto<T> inDto)
+    public async Task<FileReferenceDto> GetReferenceData(GetReferenceDataDto<T> inDto)
     {
         return await fileStorageService.GetReferenceDataAsync(inDto.FileKey, inDto.InstanceId, inDto.SourceFileId, inDto.Path, inDto.Link);
     }
@@ -478,11 +483,11 @@ public abstract class EditorController<T>(
     /// <path>api/2.0/files/file/{fileId}/protectusers</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "The users the file is shared with, ordered by display name", typeof(List<MentionWrapper>))]
+    [SwaggerResponse(200, "The users the file is shared with, ordered by display name", typeof(List<MentionDto>))]
     [HttpGet("{fileId}/protectusers")]
-    public async Task<List<MentionWrapper>> GetProtectedFileUsers(FileIdRequestDto<T> inDto)
+    public async Task<List<MentionDto>> GetProtectedFileUsers(FileIdRequestDto<T> inDto)
     {
-        return await fileStorageService.ProtectUsersAsync(inDto.FileId);
+        return await mentionDtoHelper.GetAsync(await fileStorageService.ProtectUsersAsync(inDto.FileId));
     }
 
     /// <remarks>

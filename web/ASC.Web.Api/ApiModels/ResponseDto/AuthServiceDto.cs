@@ -31,7 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Api.ApiModel.RequestsDto;
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
 /// One third-party authorization or storage provider and the keys the portal connects to it with.
@@ -47,7 +47,7 @@ namespace ASC.Web.Api.ApiModel.RequestsDto;
 ///   "props": []
 /// }
 /// </example>
-public class AuthServiceRequestsDto
+public class AuthServiceDto
 {
     /// <summary>
     /// The provider being configured, by its internal key such as `google` or `box`. Take it from the `name` of
@@ -101,25 +101,46 @@ public class AuthServiceRequestsDto
     /// values last saved, and a provider that forbids changes reports none at all.
     /// </summary>
     /// <example>[{"name": "key", "value": "value"}]</example>
-    public List<AuthKey> Props { get; set; }
+    public List<AuthKeyDto> Props { get; set; }
 
-    public static async Task<AuthServiceRequestsDto> From(Consumer consumer, string logoText)
+    public static async Task<AuthServiceDto> From(Consumer consumer, string logoText)
     {
-        var authService = await AuthService.From(consumer, logoText);
-        var result = new AuthServiceRequestsDto
+        var result = new AuthServiceDto
         {
-            Name = authService.Name,
-            Title = authService.Title,
-            Description = authService.Description,
-            Instruction = authService.Instruction,
-            CanSet = authService.CanSet,
-            Paid = authService.Paid
+            Name = consumer.Name,
+            Title = ConsumerExtension.GetResourceString(consumer.Name) ?? consumer.Name,
+            Description = ConsumerExtension.GetResourceString(consumer.Name + "Description")?.Replace("{LogoText}", logoText),
+            Instruction = ConsumerExtension.GetResourceString(consumer.Name + "Instruction")?.Replace("{LogoText}", logoText),
+            CanSet = consumer.CanSet,
+            Paid = consumer.Paid
         };
 
-        if (consumer.CanSet)
+        if (!consumer.CanSet)
         {
-            result.Props = authService.Props;
-            result.CanSet = authService.CanSet;
+            return result;
+        }
+
+        var metadataProvider = consumer as IConsumerKeyMetadataProvider;
+        var keys = metadataProvider != null
+            ? consumer.ManagedKeys.OrderBy(k => metadataProvider.GetKeyMetadata(k).Order)
+            : consumer.ManagedKeys;
+
+        result.Props = [];
+
+        foreach (var item in keys)
+        {
+            var meta = metadataProvider?.GetKeyMetadata(item);
+
+            result.Props.Add(new AuthKeyDto
+            {
+                Name = item,
+                Value = await consumer.GetAsync(item),
+                Title = ConsumerExtension.GetResourceString(item) ?? item,
+                Type = meta != null ? meta.Type : "text",
+                Options = meta?.Options,
+                DependsOn = meta?.DependsOn,
+                DependsOnValue = meta?.DependsOnValue
+            });
         }
 
         return result;

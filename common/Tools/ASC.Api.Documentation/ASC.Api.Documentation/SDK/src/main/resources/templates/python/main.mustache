@@ -4,7 +4,7 @@ from {{packageName}} import Configuration, ApiClient, AuthenticationApi, Folders
 from {{packageName}}.api.authentication.authentication_api import AuthenticationApi
 from {{packageName}}.api.backup.backup_api import BackupApi
 from {{packageName}}.api.files.folders_api import FoldersApi
-from {{packageName}}.models.auth_requests_dto import AuthRequestsDto
+from {{packageName}}.models.auth_request_dto import AuthRequestDto
 from {{packageName}}.models.create_folder import CreateFolder
 from {{packageName}}.models.delete_folder import DeleteFolder
 from {{packageName}}.models.backup_dto import BackupDto
@@ -20,7 +20,7 @@ def main():
     with ApiClient(config) as api_client:
         auth_instance = AuthenticationApi(api_client)
         
-        auth_request_data = AuthRequestsDto()
+        auth_request_data = AuthRequestDto()
         auth_request_data.password = "{{userPassword}}"
         auth_request_data.user_name = "{{userEmail}}"
         

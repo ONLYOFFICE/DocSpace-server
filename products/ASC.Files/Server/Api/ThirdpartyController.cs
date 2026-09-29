@@ -210,11 +210,11 @@ public class ThirdpartyController(
     /// <path>api/2.0/files/thirdparty</path>
     /// <collection>list</collection>
     [Tags("Files / Third-party integration")]
-    [SwaggerResponse(200, "The third-party accounts the caller has connected", typeof(IAsyncEnumerable<ThirdPartyParams>))]
+    [SwaggerResponse(200, "The third-party accounts the caller has connected", typeof(IAsyncEnumerable<ThirdPartyAccountDto>))]
     [HttpGet("thirdparty")]
-    public IAsyncEnumerable<ThirdPartyParams> GetThirdPartyAccounts()
+    public IAsyncEnumerable<ThirdPartyAccountDto> GetThirdPartyAccounts()
     {
-        return fileStorageService.GetThirdPartyAsync();
+        return fileStorageService.GetThirdPartyAsync().Select(r => r.Map());
     }
 
     /// <remarks>

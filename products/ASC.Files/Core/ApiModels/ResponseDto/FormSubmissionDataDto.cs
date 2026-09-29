@@ -31,93 +31,70 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Core.VirtualRooms;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The room logo information.
+/// The data of the separate form item.
 /// </summary>
-public class Logo
+public class FormsItemDataDto
 {
     /// <summary>
-    /// The original logo.
+    /// The form data key.
     /// </summary>
-    /// <example>https://portal.example.com/logo/original.png</example>
-    public required string Original { get; set; }
+    /// <example>first_name</example>
+    public string Key { get; init; }
 
     /// <summary>
-    /// The large logo.
+    /// The form data tag.
     /// </summary>
-    /// <example>https://portal.example.com/logo/large.png</example>
-    public required string Large { get; set; }
+    /// <example>personal_info</example>
+    public string Tag { get; init; }
 
     /// <summary>
-    /// The medium logo.
+    /// The form data value.
     /// </summary>
-    /// <example>https://portal.example.com/logo/medium.png</example>
-    public required string Medium { get; set; }
+    /// <example>John</example>
+    public string Value { get; init; }
 
     /// <summary>
-    /// The small logo.
+    /// The form data type.
     /// </summary>
-    /// <example>https://portal.example.com/logo/small.png</example>
-    public required string Small { get; set; }
-
-    /// <summary>
-    /// The logo color.
-    /// </summary>
-    /// <example>#4781D1</example>
-    public string Color { get; set; }
-
-    /// <summary>
-    /// The logo cover.
-    /// </summary>
-    /// <example>{"id": "default_cover", "data": "base64-image-data..."}</example>
-    public LogoCover Cover { get; set; }
-
-    public bool IsDefault()
-    {
-        return string.IsNullOrEmpty(Original);
-    }
+    /// <example>text</example>
+    public string Type { get; init; }
 }
 
 /// <summary>
-/// The logo cover information.
+/// The metadata of a single form field.
 /// </summary>
-public class LogoCover
+public class FormMetadataDto
 {
     /// <summary>
-    /// The logo cover ID.
+    /// The form field key.
     /// </summary>
-    /// <example>default_cover</example>
-    public required string Id { get; set; }
+    /// <example>name</example>
+    public string Key { get; init; }
 
     /// <summary>
-    /// The logo cover data.
+    /// The form field type.
     /// </summary>
-    /// <example>base64-image-data...</example>
-    public required string Data { get; set; }
+    /// <example>text</example>
+    public string Type { get; init; }
+
+    /// <summary>
+    /// The form field format.
+    /// </summary>
+    /// <example>date</example>
+    public string Format { get; init; }
+
+    /// <summary>
+    /// The list of possible values for the form field.
+    /// </summary>
+    /// <example>[]</example>
+    public List<string> PossibleValues { get; init; }
 }
 
-/// <summary>
-/// The logo cover information, with the cover data in every available size.
-/// </summary>
-public class MultiSizeLogoCover
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public static partial class FormMetadataDtoMapper
 {
-    /// <summary>
-    /// The logo cover ID.
-    /// </summary>
-    /// <example>default_cover</example>
-    public required string Id { get; set; }
-
-    /// <summary>
-    /// The logo cover data.
-    /// </summary>
-    /// <example>
-    /// {
-    ///   "small": "base64...",
-    ///   "medium": "base64...",
-    ///   "large": "base64..."
-    /// }
-    /// </example>
-    public required IReadOnlyDictionary<string, string> Data { get; init; }
+    public static partial FormMetadataDto Map(this FormMetadata source);
 }

@@ -60,7 +60,7 @@ public class EncryptionSettingsRequestsDto
     /// pass, since encryption and decryption are started by the same operation.
     /// </summary>
     /// <example>Enabled</example>
-    public EncryprtionStatus Status { get; set; }
+    public EncryptionStatus Status { get; set; }
 
     /// <summary>
     /// Whether the users were to be mailed before the portals went down for the pass.

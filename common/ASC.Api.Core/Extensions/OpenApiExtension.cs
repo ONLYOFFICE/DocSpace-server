@@ -74,6 +74,11 @@ public static class OpenApiExtension
 
             c.CustomSchemaIds(CustomSchemaId);
 
+            // Query models bound with [FromQuery] and no explicit Name surfaced their C# property names
+            // (`IsDark`, `ServiceName`, `Userid`). Binding is case-insensitive, so documenting the
+            // camelCase spelling every other parameter uses changes nothing on the wire.
+            c.DescribeAllParametersInCamelCase();
+
             var openApiInfo = new OpenApiInfo
             {
                 Title = "Api",
@@ -138,6 +143,7 @@ public static class OpenApiExtension
             c.OperationFilter<ContentTypeOperationFilter>();
             c.OperationFilter<AllowAnonymousFilter>();
             c.OperationFilter<ApiDateTimeParameterFilter>();
+            c.OperationFilter<FlattenObjectQueryParameterFilter>();
             c.OperationFilter<RateLimitOperationFilter>();
             c.DocumentFilter<RateLimitDocumentFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
@@ -580,6 +586,88 @@ public static class OpenApiExtension
                         Format = "date-time"
                     };
                 }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Spells a whole request model bound from the query string out as one query parameter per property.
+    /// </summary>
+    /// <remarks>
+    /// A model with a custom binder (<c>BatchModelBinder</c> behind <c>GET files/fileops/move</c>) is described
+    /// as a single object parameter named after the C# argument, <c>inDto</c>. Serialized as a form query it
+    /// already sends the flat <c>folderIds=..&amp;destFolderId=..</c> the binder reads, so the wire does not
+    /// change; what does is the SDK method, which no longer takes an argument called <c>inDto</c> and names
+    /// every field an agent has to fill instead.
+    /// </remarks>
+    private class FlattenObjectQueryParameterFilter : IOperationFilter
+    {
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            if (operation.Parameters is not { Count: > 0 } parameters)
+            {
+                return;
+            }
+
+            for (var i = parameters.Count - 1; i >= 0; i--)
+            {
+                if (parameters[i] is not OpenApiParameter { In: ParameterLocation.Query, Schema: OpenApiSchemaReference reference })
+                {
+                    continue;
+                }
+
+                var properties = new Dictionary<string, IOpenApiSchema>();
+                CollectProperties(reference.Reference.Id, context.SchemaRepository, properties);
+
+                if (properties.Count == 0)
+                {
+                    // An enum or any other schema without members of its own stays a single parameter.
+                    continue;
+                }
+
+                parameters.RemoveAt(i);
+
+                var index = i;
+                foreach (var (name, schema) in properties)
+                {
+                    parameters.Insert(index++, new OpenApiParameter
+                    {
+                        Name = name,
+                        In = ParameterLocation.Query,
+                        Description = schema.Description,
+                        Schema = schema
+                    });
+                }
+            }
+        }
+
+        private static void CollectProperties(string schemaId, SchemaRepository repository, Dictionary<string, IOpenApiSchema> properties)
+        {
+            if (!repository.Schemas.TryGetValue(schemaId, out var schema))
+            {
+                return;
+            }
+
+            foreach (var part in schema.AllOf ?? [])
+            {
+                if (part is OpenApiSchemaReference partReference)
+                {
+                    CollectProperties(partReference.Reference.Id, repository, properties);
+                }
+                else
+                {
+                    AddProperties(part, properties);
+                }
+            }
+
+            AddProperties(schema, properties);
+        }
+
+        private static void AddProperties(IOpenApiSchema schema, Dictionary<string, IOpenApiSchema> properties)
+        {
+            foreach (var (name, property) in schema.Properties ?? new Dictionary<string, IOpenApiSchema>())
+            {
+                properties.TryAdd(name, property);
             }
         }
     }

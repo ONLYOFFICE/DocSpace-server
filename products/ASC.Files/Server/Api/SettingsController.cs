@@ -529,11 +529,11 @@ public class SettingsController(
     /// <summary>Get the trash bin auto-clearing setting</summary>
     /// <path>api/2.0/files/settings/autocleanup</path>
     [Tags("Files / Settings")]
-    [SwaggerResponse(200, "The trash auto-clearing setting of the caller: the on/off flag and the interval", typeof(AutoCleanUpData))]
+    [SwaggerResponse(200, "The trash auto-clearing setting of the caller: the on/off flag and the interval", typeof(AutoCleanUpDataDto))]
     [HttpGet("settings/autocleanup")]
-    public async Task<AutoCleanUpData> GetAutomaticallyCleanUp()
+    public async Task<AutoCleanUpDataDto> GetAutomaticallyCleanUp()
     {
-        return await filesSettingsHelper.GetAutomaticallyCleanUp();
+        return (await filesSettingsHelper.GetAutomaticallyCleanUp())?.Map();
     }
 
     /// <remarks>
@@ -550,12 +550,12 @@ public class SettingsController(
     /// <summary>Update the trash bin auto-clearing setting</summary>
     /// <path>api/2.0/files/settings/autocleanup</path>
     [Tags("Files / Settings")]
-    [SwaggerResponse(200, "The trash auto-clearing setting that is now stored for the caller", typeof(AutoCleanUpData))]
+    [SwaggerResponse(200, "The trash auto-clearing setting that is now stored for the caller", typeof(AutoCleanUpDataDto))]
     [HttpPut("settings/autocleanup")]
-    public async Task<AutoCleanUpData> ChangeAutomaticallyCleanUp(AutoCleanupRequestDto inDto)
+    public async Task<AutoCleanUpDataDto> ChangeAutomaticallyCleanUp(AutoCleanupRequestDto inDto)
     {
         await filesSettingsHelper.SetAutomaticallyCleanUp(new AutoCleanUpData { IsAutoCleanUp = inDto.Set, Gap = inDto.Gap });
-        return await filesSettingsHelper.GetAutomaticallyCleanUp();
+        return (await filesSettingsHelper.GetAutomaticallyCleanUp())?.Map();
     }
 
     /// <remarks>

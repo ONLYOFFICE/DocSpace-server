@@ -352,12 +352,12 @@ public class PaymentController(
     /// </summary>
     /// <path>api/2.0/portal/payment/calculatewallet</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The amount the purchase would cost, its currency and the quantity it was calculated for", typeof(PaymentCalculation))]
+    [SwaggerResponse(200, "The amount the purchase would cost, its currency and the quantity it was calculated for", typeof(PaymentCalculationDto))]
     [SwaggerResponse(400, "The quantity type is not `Add`, the quantity is not greater than zero, or the product is not a wallet service")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no sub-account in the accounting currency")]
     [HttpPut("calculatewallet")]
-    public async Task<PaymentCalculation> CalculateWalletPayment(WalletQuantityRequestDto inDto)
+    public async Task<PaymentCalculationDto> CalculateWalletPayment(WalletQuantityRequestDto inDto)
     {
         paymentHelper.DemandConfigured();
 
@@ -388,7 +388,7 @@ public class PaymentController(
 
         var result = await tariffService.PaymentCalculateAsync(tenantId, quantity, inDto.ProductQuantityType, defaultCurrency);
 
-        return result;
+        return result?.Map();
     }
 
     /// <remarks>
@@ -407,13 +407,13 @@ public class PaymentController(
     /// </summary>
     /// <path>api/2.0/portal/payment/subscription/balance</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The unused balance of the current subscription period with its period boundaries and currencies", typeof(SubscriptionBalanceInfo))]
+    [SwaggerResponse(200, "The unused balance of the current subscription period with its period boundaries and currencies", typeof(SubscriptionBalanceDto))]
     [SwaggerResponse(400, "The plan currently paid is a wallet product or has no product identifier")]
     [SwaggerResponse(402, "The plan of the portal is not in the paid state")]
     [SwaggerResponse(403, "The caller is not the payer of this portal, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer, or its paid plan has no subscription")]
     [HttpGet("subscription/balance")]
-    public async Task<SubscriptionBalanceInfo> GetSubscriptionBalanceInfo()
+    public async Task<SubscriptionBalanceDto> GetSubscriptionBalanceInfo()
     {
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -421,7 +421,7 @@ public class PaymentController(
 
         var productId = await paymentHelper.GetCurrentSubscriptionProductIdAsync(tenant.Id);
 
-        return await tariffService.GetSubscriptionBalanceInfoAsync(tenant.Id, productId);
+        return (await tariffService.GetSubscriptionBalanceInfoAsync(tenant.Id, productId))?.Map();
     }
 
     /// <remarks>
@@ -946,10 +946,10 @@ public class PaymentController(
     /// </summary>
     /// <path>api/2.0/portal/payment/customer/balance</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The wallet account with its sub-account per currency, or an empty result when the portal has no billing customer", typeof(Balance))]
+    [SwaggerResponse(200, "The wallet account with its sub-account per currency, or an empty result when the portal has no billing customer", typeof(BalanceDto))]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [HttpGet("customer/balance")]
-    public async Task<Balance> GetCustomerBalance(PaymentInformationRequestDto inDto)
+    public async Task<BalanceDto> GetCustomerBalance(PaymentInformationRequestDto inDto)
     {
         paymentHelper.DemandConfigured();
 
@@ -963,7 +963,7 @@ public class PaymentController(
             return null;
         }
 
-        return await tariffService.GetCustomerBalanceAsync(tenant.Id, inDto.Refresh);
+        return (await tariffService.GetCustomerBalanceAsync(tenant.Id, inDto.Refresh))?.Map();
     }
 
     /// <remarks>
@@ -1583,16 +1583,18 @@ public class PaymentController(
     /// </remarks>
     /// <path>api/2.0/portal/payment/accounting/prices/{serviceName}</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The list of the service prices", typeof(List<ServicePriceInfo>))]
+    [SwaggerResponse(200, "The list of the service prices", typeof(List<ServicePriceDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("accounting/prices/{serviceName}")]
-    public async Task<List<ServicePriceInfo>> GetAccountingServicePrices(ServicePricesRequestDto inDto)
+    public async Task<List<ServicePriceDto>> GetAccountingServicePrices(ServicePricesRequestDto inDto)
     {
         paymentHelper.DemandConfigured();
 
         await paymentHelper.DemandAdminAsync();
 
-        return await tariffService.GetAccountingServicePricesAsync(inDto.ServiceName, inDto.Active);
+        var prices = await tariffService.GetAccountingServicePricesAsync(inDto.ServiceName, inDto.Active);
+
+        return prices?.Select(r => r.Map()).ToList();
     }
 
     /// <remarks>
@@ -1607,22 +1609,22 @@ public class PaymentController(
     /// cannot be sent straight back to it; supply real values instead. `lastModified` is
     /// `0001-01-01T00:00:00` until the settings are stored for the first time.
     /// `lowBalanceThreshold` and `lowBalanceNotified` are maintained by the portal itself: they are reported
-    /// here, but ignored when the settings are written.
+    /// here, but cannot be written.
     /// </remarks>
     /// <summary>
     /// Get the auto top-up settings
     /// </summary>
     /// <path>api/2.0/portal/payment/topupsettings</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The automatic top-up settings of the portal, or their defaults when it has never configured them", typeof(TenantWalletSettings))]
+    [SwaggerResponse(200, "The automatic top-up settings of the portal, or their defaults when it has never configured them", typeof(TenantWalletSettingsDto))]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [HttpGet("topupsettings")]
-    public async Task<TenantWalletSettings> GetTenantWalletSettings()
+    public async Task<TenantWalletSettingsDto> GetTenantWalletSettings()
     {
         await paymentHelper.DemandAdminAsync();
 
         var result = await settingsManager.LoadAsync<TenantWalletSettings>();
-        return result;
+        return result.Map();
     }
 
     /// <remarks>
@@ -1632,8 +1634,8 @@ public class PaymentController(
     /// has never had one answers 404, so top the wallet up once with `POST api/2.0/portal/payment/deposit` first -
     /// and only the payer may change the settings. The body replaces the stored settings as a whole and an omitted
     /// body resets them to the defaults; `minBalance` is accepted between 5 and 1000 and `upToBalance` between 6 and
-    /// 5000, while `lowBalanceThreshold` and `lowBalanceNotified` are ignored on the way in and kept as the portal
-    /// had them. The call is mutating and idempotent, it charges nothing by itself, it is written to the portal audit
+    /// 5000. The low-balance warning state (`lowBalanceThreshold`, `lowBalanceNotified`) is not part of the request:
+    /// the portal keeps it as it had it. The call is mutating and idempotent, it charges nothing by itself, it is written to the portal audit
     /// trail, and switching the top-up on also re-arms the low-balance warning. The settings as they were stored come
     /// back in the answer.
     /// </remarks>
@@ -1642,11 +1644,11 @@ public class PaymentController(
     /// </summary>
     /// <path>api/2.0/portal/payment/topupsettings</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The automatic top-up settings as they were stored", typeof(TenantWalletSettings))]
+    [SwaggerResponse(200, "The automatic top-up settings as they were stored", typeof(TenantWalletSettingsDto))]
     [SwaggerResponse(403, "The caller is not the payer of this portal, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no balance yet")]
     [HttpPost("topupsettings")]
-    public async Task<TenantWalletSettings> SetTenantWalletSettings(TenantWalletSettingsWrapper inDto)
+    public async Task<TenantWalletSettingsDto> SetTenantWalletSettings(TenantWalletSettingsRequestDto inDto)
     {
         var tenant = tenantManager.GetCurrentTenant();
 
@@ -1658,14 +1660,18 @@ public class PaymentController(
             throw new ItemNotFoundException("Balance could not be found");
         }
 
-        var settings = inDto?.Settings ?? new TenantWalletSettings();
-
-        // LowBalanceThreshold/LowBalanceNotified are internal-only: never trust them from client input,
-        // always recompute from what was previously persisted so a stale GET->POST round-trip can't
-        // resurrect an old value (e.g. permanently suppressing the low-balance notification)
+        // The request carries only what a payer chooses; the low-balance warning state is always carried over from
+        // what was stored, so a stale GET->POST round-trip cannot resurrect an old value.
         var existing = await settingsManager.LoadAsync<TenantWalletSettings>();
-        settings.LowBalanceThreshold = existing.LowBalanceThreshold;
-        settings.LowBalanceNotified = existing.LowBalanceNotified;
+        var settings = new TenantWalletSettings
+        {
+            Enabled = inDto?.Settings?.Enabled ?? false,
+            MinBalance = inDto?.Settings?.MinBalance ?? 0,
+            UpToBalance = inDto?.Settings?.UpToBalance ?? 0,
+            Currency = inDto?.Settings?.Currency,
+            LowBalanceThreshold = existing.LowBalanceThreshold,
+            LowBalanceNotified = existing.LowBalanceNotified
+        };
 
         if (settings.Enabled)
         {
@@ -1682,7 +1688,7 @@ public class PaymentController(
 
         messageService.Send(MessageAction.CustomerWalletTopUpSettingsUpdated);
 
-        return settings;
+        return settings.Map();
     }
 
     /// <remarks>
@@ -1699,16 +1705,18 @@ public class PaymentController(
     /// </summary>
     /// <path>api/2.0/portal/payment/servicessettings</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The wallet services switched on by hand for this portal", typeof(TenantWalletServiceSettings))]
+    [SwaggerResponse(200, "The wallet services switched on by hand for this portal", typeof(TenantWalletServiceSettingsDto))]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [HttpGet("servicessettings")]
-    public async Task<TenantWalletServiceSettings> GetTenantWalletServiceSettings()
+    public async Task<TenantWalletServiceSettingsDto> GetTenantWalletServiceSettings()
     {
         paymentHelper.DemandConfigured();
 
         await paymentHelper.DemandAdminAsync();
 
-        return await settingsManager.LoadAsync<TenantWalletServiceSettings>();
+        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>();
+
+        return settings.Map();
     }
 
     /// <remarks>
@@ -1727,11 +1735,11 @@ public class PaymentController(
     /// </summary>
     /// <path>api/2.0/portal/payment/servicestate</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The whole set of wallet services switched on for the portal after the change", typeof(TenantWalletServiceSettings))]
+    [SwaggerResponse(200, "The whole set of wallet services switched on for the portal after the change", typeof(TenantWalletServiceSettingsDto))]
     [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, the portal has no billing service configured, or AI search was switched on while AI tools is off")]
     [SwaggerResponse(404, "This portal has no billing customer yet")]
     [HttpPost("servicestate")]
-    public async Task<TenantWalletServiceSettings> ChangeTenantWalletServiceState(ChangeWalletServiceStateRequestDto inDto)
+    public async Task<TenantWalletServiceSettingsDto> ChangeTenantWalletServiceState(ChangeWalletServiceStateRequestDto inDto)
     {
         paymentHelper.DemandConfigured();
 
@@ -1739,7 +1747,9 @@ public class PaymentController(
 
         await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
-        return await paymentHelper.ChangeWalletServiceStateAsync(inDto.Service, inDto.Enabled);
+        var settings = await paymentHelper.ChangeWalletServiceStateAsync(inDto.Service, inDto.Enabled);
+
+        return settings.Map();
     }
 
     /// <remarks>
@@ -1784,19 +1794,19 @@ public class PaymentController(
     /// </summary>
     /// <path>api/2.0/portal/payment/ai-model/restrictions</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The identifiers of the AI chat models barred on this portal, empty when none is", typeof(RestrictedModelsResponse))]
+    [SwaggerResponse(200, "The identifiers of the AI chat models barred on this portal, empty when none is", typeof(RestrictedAiModelsDto))]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [HttpGet("ai-model/restrictions")]
-    public async Task<RestrictedModelsResponse> GetRestrictedAiModels()
+    public async Task<RestrictedAiModelsDto> GetRestrictedAiModels()
     {
         if (!tariffService.IsConfigured() || !await aiGateway.IsAiEnabledAsync())
         {
-            return new RestrictedModelsResponse { Models = [] };
+            return new RestrictedAiModelsDto { Models = [] };
         }
 
         await paymentHelper.DemandAdminAsync();
 
-        return await aiGateway.GetRestrictedModelsAsync();
+        return (await aiGateway.GetRestrictedModelsAsync())?.Map();
     }
 
     /// <remarks>
@@ -1816,11 +1826,11 @@ public class PaymentController(
     /// </summary>
     /// <path>api/2.0/portal/payment/ai-model/restrictions</path>
     [Tags("Portal / Payment")]
-    [SwaggerResponse(200, "The set of barred AI chat models as it was stored", typeof(RestrictedModelsResponse))]
+    [SwaggerResponse(200, "The set of barred AI chat models as it was stored", typeof(RestrictedAiModelsDto))]
     [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the installation has no billing service or no AI gateway configured")]
     [SwaggerResponse(404, "This portal has no billing customer yet")]
     [HttpPut("ai-model/restrictions")]
-    public async Task<RestrictedModelsResponse> SetRestrictedAiModels(SetRestrictedAiModelsRequestDto inDto)
+    public async Task<RestrictedAiModelsDto> SetRestrictedAiModels(SetRestrictedAiModelsRequestDto inDto)
     {
         paymentHelper.DemandAiGatewayConfiguration();
 
@@ -1828,6 +1838,6 @@ public class PaymentController(
 
         await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
-        return await paymentHelper.SetRestrictedAiModelsAsync(inDto.Models);
+        return (await paymentHelper.SetRestrictedAiModelsAsync(inDto.Models))?.Map();
     }
 }

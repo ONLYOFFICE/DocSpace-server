@@ -36,7 +36,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// <summary>
 /// The audit trail actions of one product, grouped by module.
 /// </summary>
-public class AuditTrailProductMapperDto
+public class AuditTrailProductDto
 {
     /// <summary>
     /// The product this branch of the tree belongs to, as the `productType` filter of this operation spells it and
@@ -49,13 +49,13 @@ public class AuditTrailProductMapperDto
     /// The locations inside the product. It is empty when `moduleType` was passed and this product has no module
     /// of that name, which is why a product can come back with nothing under it.
     /// </summary>
-    public IEnumerable<AuditTrailModuleMapperDto> Modules { get; set; }
+    public IEnumerable<AuditTrailModuleDto> Modules { get; set; }
 }
 
 /// <summary>
 /// The audit trail actions of one module.
 /// </summary>
-public class AuditTrailModuleMapperDto
+public class AuditTrailModuleDto
 {
     /// <summary>
     /// The location inside the product, as the `moduleType` filter of `GET api/2.0/security/audit/events/filter`
@@ -68,13 +68,13 @@ public class AuditTrailModuleMapperDto
     /// Every action this module can record. Each action appears under exactly one module, so this tree is where a
     /// caller learns which module a given action belongs to.
     /// </summary>
-    public IEnumerable<AuditTrailActionMapperDto> Actions { get; set; }
+    public IEnumerable<AuditTrailActionDto> Actions { get; set; }
 }
 
 /// <summary>
 /// One audit trail action, with the kind of change it stands for and the kind of object it applies to.
 /// </summary>
-public class AuditTrailActionMapperDto
+public class AuditTrailActionDto
 {
     /// <summary>
     /// The action name to send as the `action` filter of `GET api/2.0/security/audit/events/filter`, and the value

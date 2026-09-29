@@ -8,7 +8,7 @@ import {{packageName}}.apis.Files.FoldersApi
 import {{packageName}}.apis.Rooms.RoomsApi
 import {{packageName}}.apis.Backup.BackupApi
 
-import {{packageName}}.models.AuthRequestsDto
+import {{packageName}}.models.AuthRequestDto
 import {{packageName}}.models.CreateFolder
 import {{packageName}}.models.DeleteFolder
 import {{packageName}}.models.BackupDto
@@ -33,7 +33,7 @@ fun main() = runBlocking {
     // --- AUTH ---
     val authApi = apiClient.createService(AuthenticationApi::class.java)
 
-    val authDto = AuthRequestsDto(
+    val authDto = AuthRequestDto(
         userName = "example@onlyoffice.com",
         password = "11111111"
     )

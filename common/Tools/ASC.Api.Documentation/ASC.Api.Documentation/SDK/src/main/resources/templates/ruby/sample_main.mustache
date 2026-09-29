@@ -11,12 +11,12 @@ end
 
 begin
   auth_api = {{moduleName}}::Authentication::AuthenticationApi.new
-  auth_request = {{moduleName}}::AuthRequestsDto.new(
+  auth_request = {{moduleName}}::AuthRequestDto.new(
     user_name: 'example@onlyoffice.com',
     password: '11111111'
   )
 
-  auth_response = auth_api.authenticate_me(auth_requests_dto: auth_request)
+  auth_response = auth_api.authenticate_me(auth_request_dto: auth_request)
   token = auth_response.response.token
 
   {{moduleName}}.configure do |config|

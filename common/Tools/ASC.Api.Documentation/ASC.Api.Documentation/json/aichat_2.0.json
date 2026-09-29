@@ -210,7 +210,7 @@
                     "description": "The user turn to send."
                   },
                   "actionArgs": {
-                    "$ref": "#/components/schemas/AiAiActionArgs",
+                    "$ref": "#/components/schemas/AiActionArgs",
                     "description": "Per-request engine options: extra tools, reasoning, prompt override."
                   },
                   "entityId": {
@@ -309,7 +309,7 @@
                     "$ref": "#/components/schemas/AiThreadMessageLike"
                   },
                   "actionArgs": {
-                    "$ref": "#/components/schemas/AiAiActionArgs",
+                    "$ref": "#/components/schemas/AiActionArgs",
                     "description": "Per-request engine options: extra tools, reasoning, prompt override."
                   }
                 },
@@ -420,7 +420,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AiAiSendStreamBody"
+                "$ref": "#/components/schemas/AiSendStreamBody"
               }
             }
           }
@@ -512,7 +512,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AiAiSendStreamBody"
+                "$ref": "#/components/schemas/AiSendStreamBody"
               }
             }
           }
@@ -591,7 +591,7 @@
                     "description": "Target thread (must already exist)."
                   },
                   "actionArgs": {
-                    "$ref": "#/components/schemas/AiAiActionArgs",
+                    "$ref": "#/components/schemas/AiActionArgs",
                     "description": "Per-request engine options: extra tools, reasoning, prompt override."
                   },
                   "entityId": {
@@ -705,7 +705,7 @@
                     "description": "Snapshot of the assistant message at the time the tool call surfaced."
                   },
                   "actionArgs": {
-                    "$ref": "#/components/schemas/AiAiActionArgs",
+                    "$ref": "#/components/schemas/AiActionArgs",
                     "description": "Per-request engine options: extra tools, reasoning, prompt override."
                   },
                   "entityId": {
@@ -795,7 +795,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AiAiToolCallData"
+                "$ref": "#/components/schemas/AiToolCallData"
               }
             }
           }
@@ -2617,7 +2617,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiAiReasoningLevel"
+                  "$ref": "#/components/schemas/AiReasoningLevel"
                 }
               }
             }
@@ -2737,7 +2737,7 @@
                 "type": "object",
                 "properties": {
                   "value": {
-                    "$ref": "#/components/schemas/AiAiReasoningLevel",
+                    "$ref": "#/components/schemas/AiReasoningLevel",
                     "description": "New extended-thinking depth; `off` turns deep mode off."
                   },
                   "entityId": {
@@ -6471,7 +6471,7 @@
                       "additionalProperties": {
                         "type": "array",
                         "items": {
-                          "$ref": "#/components/schemas/AiTMCPItem"
+                          "$ref": "#/components/schemas/AiMCPItem"
                         }
                       }
                     },
@@ -8824,7 +8824,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiAiSettingsWrapper"
+                  "$ref": "#/components/schemas/AiSettingsWrapper"
                 }
               }
             }
@@ -9000,7 +9000,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiAiUserSettingsWrapper"
+                  "$ref": "#/components/schemas/AiUserSettingsWrapper"
                 }
               }
             }
@@ -9050,7 +9050,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiAiUserSettingsWrapper"
+                  "$ref": "#/components/schemas/AiUserSettingsWrapper"
                 }
               }
             }
@@ -10454,7 +10454,7 @@
         "additionalProperties": false,
         "description": "Error body — a single human-readable message."
       },
-      "AiAiReasoningLevel": {
+      "AiReasoningLevel": {
         "type": "string",
         "enum": [
           "off",
@@ -10465,13 +10465,13 @@
         ],
         "description": "Provider-neutral extended-thinking depth. `off` disables thinking where the model allows it."
       },
-      "AiAiActionArgs": {
+      "AiActionArgs": {
         "type": "object",
         "properties": {
           "tools": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AiTMCPItem"
+              "$ref": "#/components/schemas/AiMCPItem"
             },
             "description": "Extra tools offered to the model for this request.",
             "examples": [
@@ -10486,7 +10486,7 @@
             ]
           },
           "reasoningLevel": {
-            "$ref": "#/components/schemas/AiAiReasoningLevel",
+            "$ref": "#/components/schemas/AiReasoningLevel",
             "description": "Depth of extended thinking for the round; providers clamp it to what the model accepts."
           },
           "prompt": {
@@ -10519,7 +10519,7 @@
         },
         "additionalProperties": false
       },
-      "AiTMCPItem": {
+      "AiMCPItem": {
         "type": "object",
         "properties": {
           "name": {
@@ -10700,7 +10700,7 @@
         "additionalProperties": false,
         "description": "A single chat message as it travels on the wire."
       },
-      "AiAiSendStreamBody": {
+      "AiSendStreamBody": {
         "type": "object",
         "properties": {
           "threadId": {
@@ -10721,7 +10721,7 @@
             ]
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/AiAiActionArgs",
+            "$ref": "#/components/schemas/AiActionArgs",
             "description": "Per-request engine options: extra tools, reasoning, prompt override.",
             "examples": [
               {
@@ -11003,7 +11003,7 @@
         "additionalProperties": false,
         "description": "OpenAI streaming error envelope. When the upstream request fails mid-stream the OpenAI API emits a single `data:` line carrying an `error` object (no `choices`), then closes the stream — the official SDK turns this into a thrown `APIError`. Mirrors that shape so a host exposing an OpenAI-compatible endpoint stays wire-compatible."
       },
-      "AiAiToolCallData": {
+      "AiToolCallData": {
         "type": "object",
         "properties": {
           "threadId": {
@@ -11038,7 +11038,7 @@
             ]
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/AiAiActionArgs",
+            "$ref": "#/components/schemas/AiActionArgs",
             "description": "Per-request engine options: extra tools, reasoning, prompt override.",
             "examples": [
               {
@@ -11304,7 +11304,7 @@
             ]
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData",
+            "$ref": "#/components/schemas/AiErrorData",
             "description": "Why the assignment was rejected. Present on failure."
           }
         },
@@ -11312,7 +11312,7 @@
           "success"
         ]
       },
-      "AiTErrorData": {
+      "AiErrorData": {
         "type": "object",
         "properties": {
           "field": {
@@ -11356,7 +11356,7 @@
                   "$ref": "#/components/schemas/AiActionType"
                 },
                 "error": {
-                  "$ref": "#/components/schemas/AiTErrorData"
+                  "$ref": "#/components/schemas/AiErrorData"
                 }
               },
               "required": [
@@ -11636,7 +11636,7 @@
             "description": "The persisted profile. Present on success."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData",
+            "$ref": "#/components/schemas/AiErrorData",
             "description": "Why the profile was rejected - the name check or the provider credential check. Present on failure."
           }
         },
@@ -11746,7 +11746,7 @@
             "description": "The persisted prompt. Present on success."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData",
+            "$ref": "#/components/schemas/AiErrorData",
             "description": "Why the prompt was rejected. Present on failure."
           }
         },
@@ -11826,7 +11826,7 @@
             "description": "The persisted folder. Present on success."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData",
+            "$ref": "#/components/schemas/AiErrorData",
             "description": "Why the folder was rejected. Present on failure."
           }
         },
@@ -11994,7 +11994,7 @@
             ]
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData",
+            "$ref": "#/components/schemas/AiErrorData",
             "description": "Why the entry was rejected.",
             "examples": [
               "a prompt of that name already exists"
@@ -12034,7 +12034,7 @@
             ]
           },
           "provider": {
-            "$ref": "#/components/schemas/AiTProvider",
+            "$ref": "#/components/schemas/AiProvider",
             "description": "Provider configuration at the time of last message. Used for thread-level provider display."
           },
           "model": {
@@ -12055,7 +12055,7 @@
         "additionalProperties": false,
         "description": "Chat conversation metadata. Represents a single chat session (thread)."
       },
-      "AiTProvider": {
+      "AiProvider": {
         "type": "object",
         "properties": {
           "type": {
@@ -12138,7 +12138,7 @@
             ]
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData",
+            "$ref": "#/components/schemas/AiErrorData",
             "description": "Why the MCP server was rejected. Present on failure."
           }
         },
@@ -12166,7 +12166,7 @@
                   "type": "string"
                 },
                 "error": {
-                  "$ref": "#/components/schemas/AiTErrorData"
+                  "$ref": "#/components/schemas/AiErrorData"
                 }
               },
               "required": [
@@ -12249,7 +12249,7 @@
             "description": "The persisted web-search configuration. Present on success."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData",
+            "$ref": "#/components/schemas/AiErrorData",
             "description": "Why the configuration was rejected. Present on failure."
           }
         },
@@ -12257,12 +12257,12 @@
           "success"
         ]
       },
-      "AiAiUserSettingsWrapper": {
+      "AiUserSettingsWrapper": {
         "type": "object",
         "properties": {
           "response": {
             "description": "The AiUserSettingsDto object returned by the operation.",
-            "$ref": "#/components/schemas/AiAiUserSettingsDto"
+            "$ref": "#/components/schemas/AiUserSettingsDto"
           },
           "count": {
             "type": "integer",
@@ -12299,7 +12299,7 @@
         },
         "description": "The successful API response containing the AiUserSettingsDto object."
       },
-      "AiAiUserSettingsDto": {
+      "AiUserSettingsDto": {
         "type": "object",
         "properties": {
           "chatRecommendedModelVisible": {
@@ -12409,12 +12409,12 @@
         "description": "The embedding provider type used for document vectorization.",
         "x-enum-type": "integer"
       },
-      "AiAiSettingsWrapper": {
+      "AiSettingsWrapper": {
         "type": "object",
         "properties": {
           "response": {
             "description": "The AiSettingsDto object returned by the operation.",
-            "$ref": "#/components/schemas/AiAiSettingsDto"
+            "$ref": "#/components/schemas/AiSettingsDto"
           },
           "count": {
             "type": "integer",
@@ -12451,7 +12451,7 @@
         },
         "description": "The successful API response containing the AiSettingsDto object."
       },
-      "AiAiSettingsDto": {
+      "AiSettingsDto": {
         "required": [
           "embeddingModel"
         ],
@@ -12628,7 +12628,7 @@
               },
               "logo": {
                 "description": "The addresses of the room logo in four sizes, together with the colour and the built-in cover that are drawn\r\nwhen no logo was uploaded. A room without a logo answers with four empty addresses rather than with null, and\r\nthe field is null for a folder that is not a room.",
-                "$ref": "#/components/schemas/AiLogo"
+                "$ref": "#/components/schemas/AiLogoDto"
               },
               "pinned": {
                 "examples": [
@@ -13142,7 +13142,7 @@
         "description": "The room type.",
         "x-enum-type": "integer"
       },
-      "AiLogo": {
+      "AiLogoDto": {
         "required": [
           "large",
           "medium",
@@ -13203,12 +13203,12 @@
           },
           "cover": {
             "description": "The logo cover.",
-            "$ref": "#/components/schemas/AiLogoCover"
+            "$ref": "#/components/schemas/AiLogoCoverDto"
           }
         },
         "description": "The room logo information."
       },
-      "AiLogoCover": {
+      "AiLogoCoverDto": {
         "required": [
           "data",
           "id"

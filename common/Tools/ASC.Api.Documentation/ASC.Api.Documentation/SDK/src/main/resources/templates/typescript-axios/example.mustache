@@ -29,7 +29,7 @@ async function main() {
     const authApi = new AuthenticationApi(config, undefined, axiosInstance);
 
     const auth = await authApi.authenticateMe({
-        authRequestsDto: {userName: "example@onlyoffice.com", password: "11111111"}
+        authRequestDto: {userName: "example@onlyoffice.com", password: "11111111"}
     });
 
     const token = auth.data.response.token;

@@ -1001,7 +1001,7 @@ public class FileSharing(
         return [.. result];
     }
 
-    public async Task<List<AceShortWrapper>> GetSharedInfoShortFileAsync<T>(File<T> file)
+    public async Task<List<AceShortDto>> GetSharedInfoShortFileAsync<T>(File<T> file)
     {
         var aces = await GetSharedInfoAsync([file.Id], []);
         var inRoom = file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive;
@@ -1011,7 +1011,7 @@ public class FileSharing(
         [
             ..aces
                 .Where(aceWrapper => aceWrapper.Access != FileShare.Restrict && aceWrapper.SubjectType != SubjectType.InvitationLink)
-                .Select(aceWrapper => new AceShortWrapper(aceWrapper.SubjectName, FileShareExtensions.GetAccessString(aceWrapper.Access, inRoom, inAgent), aceWrapper.IsLink))
+                .Select(aceWrapper => new AceShortDto(aceWrapper.SubjectName, FileShareExtensions.GetAccessString(aceWrapper.Access, inRoom, inAgent), aceWrapper.IsLink))
         ];
     }
 

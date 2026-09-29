@@ -59,11 +59,11 @@ public class ReassignController(
     /// Use `PUT api/2.0/people/reassign/terminate` to cancel a job that is still running.
     /// </remarks>
     /// <summary>Get the reassignment progress</summary>
-    /// <path>api/2.0/people/reassign/progress/{userid}</path>
+    /// <path>api/2.0/people/reassign/progress/{userId}</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "The state of the queued reassignment, or an empty body when nothing is queued for the user", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpGet("progress/{userid:guid}")]
+    [HttpGet("progress/{userId:guid}")]
     public async Task<TaskProgressResponseDto> GetReassignProgress(UserIdRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
@@ -88,7 +88,7 @@ public class ReassignController(
     /// admin or DocSpace admin, so a guest, a system account or a disabled account is rejected.
     /// The caller needs the permission to edit users, cannot reassign their own data, and must be the portal owner to
     /// reassign the data of another DocSpace administrator or of a People module administrator.
-    /// The transfer does not finish within this call: poll `GET api/2.0/people/reassign/progress/{userid}` with the
+    /// The transfer does not finish within this call: poll `GET api/2.0/people/reassign/progress/{userId}` with the
     /// source user ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/reassign/terminate`.
     /// Pass `deleteProfile` as true to delete the source profile once the transfer succeeds, otherwise the emptied
     /// profile is kept.
@@ -180,7 +180,7 @@ public class ReassignController(
     /// <remarks>
     /// Reports whether the rooms and the shared files of a user have to be reassigned before that user can be removed
     /// or changed to the type passed in `type`.
-    /// Call it before `DELETE api/2.0/people/{userid}` or before a type change to find out whether
+    /// Call it before `DELETE api/2.0/people/{userId}` or before a type change to find out whether
     /// `POST api/2.0/people/reassign/start` has to run first.
     /// The caller needs the permission to add and remove users of the requested type, and must be the portal owner
     /// when the checked user is a DocSpace administrator.

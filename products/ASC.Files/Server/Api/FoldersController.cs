@@ -357,7 +357,7 @@ public abstract class FoldersController<T>(
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The file operations of the caller, including the deletion just queued", typeof(IAsyncEnumerable<FileOperationDto>))]
     [HttpDelete("folder/{folderId}")]
-    public async IAsyncEnumerable<FileOperationDto> DeleteFolder(DeleteFolder<T> inDto)
+    public async IAsyncEnumerable<FileOperationDto> DeleteFolder(DeleteFolderRequestDto<T> inDto)
     {
         await fileOperationsManager.Publish([inDto.FolderId], [], false, !inDto.Delete.DeleteAfter, inDto.Delete.Immediately);
 

@@ -46,7 +46,7 @@ public class IpRestrictionsDto
     /// a list without the caller address locks the remaining administrators out.
     /// </summary>
     /// <example>[{ "ip": "192.0.2.1", "forAdmin": false }]</example>
-    public required IEnumerable<IpRestrictionBase> IpRestrictions { get; set; }
+    public required IEnumerable<IpRestrictionEntryDto> IpRestrictions { get; set; }
 
     /// <summary>
     /// Whether the list is enforced. Leaving it out follows the list - on when addresses are sent, off when the list
@@ -54,4 +54,22 @@ public class IpRestrictionsDto
     /// </summary>
     /// <example>true</example>
     public bool? Enable { get; set; }
+}
+
+/// <summary>
+/// One allowed address.
+/// </summary>
+public class IpRestrictionEntryDto
+{
+    /// <summary>
+    /// The IPv4 or IPv6 address.
+    /// </summary>
+    /// <example>192.0.2.1</example>
+    public required string Ip { get; set; }
+
+    /// <summary>
+    /// Whether the address admits administrators only.
+    /// </summary>
+    /// <example>false</example>
+    public bool ForAdmin { get; set; }
 }

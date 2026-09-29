@@ -315,7 +315,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/STRINGArrayWrapper"
+                  "$ref": "#/components/schemas/StringArrayWrapper"
                 }
               }
             }
@@ -746,7 +746,7 @@
           "Group"
         ],
         "summary": "Get groups",
-        "description": "Returns the groups of the portal, one page at a time, with the summary information about each of them - the\r\nID, the name and the manager - but without the member list.\r\nThe caller needs the permission to read groups.\r\nThe call is read-only, and the number of groups that match the filters is reported in the total count of the\r\nresponse, so a client can page through them with `count` and `startIndex`.\r\nNarrow the result with `filterValue` on the group name, with `userId` to keep only the groups that account\r\nbelongs to, and with `manager` set to true to keep only the groups it manages; order it with `sortBy` and\r\n`sortOrder`, and an unknown `sortBy` falls back to sorting by title.\r\nThe entries carry no members - read `GET api/2.0/group/{id}` with `includeMembers` for one group, or\r\n`GET api/2.0/group/user/{userid}` to find the groups of a single account.",
+        "description": "Returns the groups of the portal, one page at a time, with the summary information about each of them - the\r\nID, the name and the manager - but without the member list.\r\nThe caller needs the permission to read groups.\r\nThe call is read-only, and the number of groups that match the filters is reported in the total count of the\r\nresponse, so a client can page through them with `count` and `startIndex`.\r\nNarrow the result with `filterValue` on the group name, with `userId` to keep only the groups that account\r\nbelongs to, and with `manager` set to true to keep only the groups it manages; order it with `sortBy` and\r\n`sortOrder`, and an unknown `sortBy` falls back to sorting by title.\r\nThe entries carry no members - read `GET api/2.0/group/{id}` with `includeMembers` for one group, or\r\n`GET api/2.0/group/user/{userId}` to find the groups of a single account.",
         "operationId": "getGroups",
         "parameters": [
           {
@@ -1428,7 +1428,7 @@
         ]
       }
     },
-    "/api/2.0/group/user/{userid}": {
+    "/api/2.0/group/user/{userId}": {
       "get": {
         "tags": [
           "Group"
@@ -1438,7 +1438,7 @@
         "operationId": "getGroupByUserId",
         "parameters": [
           {
-            "name": "userid",
+            "name": "userId",
             "in": "path",
             "description": "The ID of the account whose groups are listed, taken from the route. An ID that matches no account yields an\r\nempty list rather than 404.",
             "required": true,
@@ -2819,7 +2819,7 @@
         }
       }
     },
-    "/api/2.0/people/{userid}/email": {
+    "/api/2.0/people/{userId}/email": {
       "put": {
         "tags": [
           "People / Email"
@@ -2829,7 +2829,7 @@
         "operationId": "changeUserEmail",
         "parameters": [
           {
-            "name": "userid",
+            "name": "userId",
             "in": "path",
             "description": "The ID of the account whose address is set, taken from the route. It has to match the account the\r\nconfirmation token was issued for, and the account has to be active.",
             "required": true,
@@ -2993,7 +2993,7 @@
           "People / Email"
         ],
         "summary": "Send instructions to change email",
-        "description": "Starts changing the email address of an account, and what it actually does depends on who calls it.\r\nA caller acting on their own account only gets a confirmation letter sent to the new address, and the address\r\nstays unchanged until that link is followed, which lands on `PUT api/2.0/people/{userid}/email`.\r\nA DocSpace administrator acting on somebody else changes the address immediately instead: the account is\r\nmarked as not activated, every session of it is ended, and activation instructions are sent to the new\r\naddress - and passing the address the account already has is then rejected with 400.\r\nA caller who is not an administrator may only address their own account, nobody but the owner may change the\r\nowner's address, and only the owner may change the address of another DocSpace administrator.\r\nThe target has to be an account that is neither disabled nor a pending invitation, otherwise the operation\r\nanswers 404, and an address that already belongs to somebody answers 400.\r\nThe answer is a ready-to-display message naming the address the letter was sent to.",
+        "description": "Starts changing the email address of an account, and what it actually does depends on who calls it.\r\nA caller acting on their own account only gets a confirmation letter sent to the new address, and the address\r\nstays unchanged until that link is followed, which lands on `PUT api/2.0/people/{userId}/email`.\r\nA DocSpace administrator acting on somebody else changes the address immediately instead: the account is\r\nmarked as not activated, every session of it is ended, and activation instructions are sent to the new\r\naddress - and passing the address the account already has is then rejected with 400.\r\nA caller who is not an administrator may only address their own account, nobody but the owner may change the\r\nowner's address, and only the owner may change the address of another DocSpace administrator.\r\nThe target has to be an account that is neither disabled nor a pending invitation, otherwise the operation\r\nanswers 404, and an address that already belongs to somebody answers 400.\r\nThe answer is a ready-to-display message naming the address the letter was sent to.",
         "operationId": "sendEmailChangeInstructions",
         "requestBody": {
           "content": {
@@ -3142,7 +3142,7 @@
           "People / Profiles"
         ],
         "summary": "Get a profile by user email",
-        "description": "Returns the full profile of the account that owns an email address.\r\nPass the address either in plain text as `email` or, when it arrived inside an invitation link, encrypted as\r\n`encemail`; one of the two is required and a malformed or overlong address answers 400.\r\nThe caller has to be allowed to see that account - a guest, for instance, only sees the accounts it is\r\nrelated to - and an address that belongs to nobody answers 404.\r\nThe call is read-only, and `culture` changes nothing about the profile: it only picks the language of the\r\nerror message when the lookup fails.\r\nTo find out whether an address is taken without the right to see its owner, use\r\n`GET api/2.0/people/exists`, and to look an account up by its ID or user name use\r\n`GET api/2.0/people/{userid}`.",
+        "description": "Returns the full profile of the account that owns an email address.\r\nPass the address either in plain text as `email` or, when it arrived inside an invitation link, encrypted as\r\n`encemail`; one of the two is required and a malformed or overlong address answers 400.\r\nThe caller has to be allowed to see that account - a guest, for instance, only sees the accounts it is\r\nrelated to - and an address that belongs to nobody answers 404.\r\nThe call is read-only, and `culture` changes nothing about the profile: it only picks the language of the\r\nerror message when the lookup fails.\r\nTo find out whether an address is taken without the right to see its owner, use\r\n`GET api/2.0/people/exists`, and to look an account up by its ID or user name use\r\n`GET api/2.0/people/{userId}`.",
         "operationId": "getProfileByEmail",
         "parameters": [
           {
@@ -3286,7 +3286,7 @@
           "People / Guests"
         ],
         "summary": "Remove guest relations",
-        "description": "Removes the listed guests from the caller's own list of guests and withdraws the access the caller had\r\ngranted them.\r\nIt does not delete the accounts: each guest keeps its profile and any access other members gave it, and only\r\nthe link to the caller and the caller's own shares disappear.\r\nThe caller has to be a room admin or a DocSpace admin, and every listed account has to exist, be an active\r\nguest and be one of the caller's own guests - a single entry that is not rejects the whole call with 403 and\r\nchanges nothing.\r\nThe call returns no body; read `GET api/2.0/people/filter` with `area` set to `Guests` to see what is left.\r\nTo delete a guest account for good, disable it and then use `DELETE api/2.0/people/{userid}`.",
+        "description": "Removes the listed guests from the caller's own list of guests and withdraws the access the caller had\r\ngranted them.\r\nIt does not delete the accounts: each guest keeps its profile and any access other members gave it, and only\r\nthe link to the caller and the caller's own shares disappear.\r\nThe caller has to be a room admin or a DocSpace admin, and every listed account has to exist, be an active\r\nguest and be one of the caller's own guests - a single entry that is not rejects the whole call with 403 and\r\nchanges nothing.\r\nThe call returns no body; read `GET api/2.0/people/filter` with `area` set to `Guests` to see what is left.\r\nTo delete a guest account for good, disable it and then use `DELETE api/2.0/people/{userId}`.",
         "operationId": "deleteGuests",
         "requestBody": {
           "content": {
@@ -3392,7 +3392,7 @@
           "People / Guests"
         ],
         "summary": "Approve a guest sharing link",
-        "description": "Accepts a guest that another member shared, which links that guest to the calling account and makes it\r\nvisible in the caller's list of guests.\r\nEverything the operation needs comes from the confirmation token of the link produced by\r\n`GET api/2.0/people/guests/{userid}/share`: the request body is not read at all, so there is nothing to fill\r\nin, and an expired or already used token is answered with 401.\r\nThe caller has to be a room admin or a DocSpace admin; a member or a guest gets 403.\r\nThe account the token names has to exist and still be a guest, otherwise the operation answers 404 or 400.\r\nThe call is idempotent: a guest that is already linked to the caller is simply returned again.\r\nThe answer is the full profile of the guest.",
+        "description": "Accepts a guest that another member shared, which links that guest to the calling account and makes it\r\nvisible in the caller's list of guests.\r\nEverything the operation needs comes from the confirmation token of the link produced by\r\n`GET api/2.0/people/guests/{userId}/share`: the request body is not read at all, so there is nothing to fill\r\nin, and an expired or already used token is answered with 401.\r\nThe caller has to be a room admin or a DocSpace admin; a member or a guest gets 403.\r\nThe account the token names has to exist and still be a guest, otherwise the operation answers 404 or 400.\r\nThe call is idempotent: a guest that is already linked to the caller is simply returned again.\r\nThe answer is the full profile of the guest.",
         "operationId": "approveGuestShareLink",
         "requestBody": {
           "content": {
@@ -3502,7 +3502,7 @@
         ]
       }
     },
-    "/api/2.0/people/{userid}/password": {
+    "/api/2.0/people/{userId}/password": {
       "put": {
         "tags": [
           "People / Password"
@@ -3512,7 +3512,7 @@
         "operationId": "changeUserPassword",
         "parameters": [
           {
-            "name": "userid",
+            "name": "userId",
             "in": "path",
             "description": "The ID of the account whose password is set, taken from the route. It has to match the account the\r\nconfirmation token was issued for, and the account has to be active.",
             "required": true,
@@ -3676,7 +3676,7 @@
           "People / Password"
         ],
         "summary": "Remind a user password",
-        "description": "Emails a password recovery link to an address, and is the entry point of the recovery flow rather than the\r\noperation that changes anything.\r\nIt needs no authentication, which is how a person who cannot sign in uses it; when the portal has a CAPTCHA\r\nconfigured, an unauthenticated request has to pass it and answers 403 if it does not.\r\nAn unauthenticated caller always gets the same success message, whether or not the address belongs to an\r\naccount, so the answer cannot be used to find out which addresses are registered.\r\nAn authenticated caller does get told: a failure is answered with 403, and asking for somebody else requires\r\nDocSpace administrator rights, while the owner's password can be asked for by the owner alone and another\r\nadministrator's only by the owner.\r\nThe link that is sent leads to `PUT api/2.0/people/{userid}/password`, which is where the new password is\r\nset; no password is ever sent by email despite the wording of the message.\r\nRepeated calls are throttled.",
+        "description": "Emails a password recovery link to an address, and is the entry point of the recovery flow rather than the\r\noperation that changes anything.\r\nIt needs no authentication, which is how a person who cannot sign in uses it; when the portal has a CAPTCHA\r\nconfigured, an unauthenticated request has to pass it and answers 403 if it does not.\r\nAn unauthenticated caller always gets the same success message, whether or not the address belongs to an\r\naccount, so the answer cannot be used to find out which addresses are registered.\r\nAn authenticated caller does get told: a failure is answered with 403, and asking for somebody else requires\r\nDocSpace administrator rights, while the owner's password can be asked for by the owner alone and another\r\nadministrator's only by the owner.\r\nThe link that is sent leads to `PUT api/2.0/people/{userId}/password`, which is where the new password is\r\nset; no password is ever sent by email despite the wording of the message.\r\nRepeated calls are throttled.",
         "operationId": "sendUserPassword",
         "requestBody": {
           "content": {
@@ -3792,17 +3792,17 @@
         }
       }
     },
-    "/api/2.0/people/{userid}/photo/thumbnails": {
+    "/api/2.0/people/{userId}/photo/thumbnails": {
       "post": {
         "tags": [
           "People / Photos"
         ],
         "summary": "Create photo thumbnails",
-        "description": "Crops the avatar of a profile to the rectangle given in the request and rebuilds all of its thumbnail sizes,\r\nwhich is the second step of changing an avatar by hand.\r\nIt works in two modes: with `tmpFile` it takes the temporary image\r\n`POST api/2.0/people/{userid}/photo` produced with `autosave` off, makes the cropped result the main photo and\r\nthen discards the temporary file, and without `tmpFile` it re-crops the photo the profile already has.\r\nA caller may only do this to their own profile - the ID in the route has to be the calling account, and an\r\nadministrator gets 403 for anybody else - and the account must be allowed to edit its own profile.\r\nThe call replaces the stored photo, so the previous crop is lost, and it can be repeated with new coordinates\r\nas often as needed.\r\nPassing `width` and `height` as 0 together with `tmpFile` keeps the whole uploaded image instead of cropping\r\nit.\r\nThe answer holds the URLs of every generated size, the same shape `GET api/2.0/people/{userid}/photo`\r\nreturns.",
+        "description": "Crops the avatar of a profile to the rectangle given in the request and rebuilds all of its thumbnail sizes,\r\nwhich is the second step of changing an avatar by hand.\r\nIt works in two modes: with `tmpFile` it takes the temporary image\r\n`POST api/2.0/people/{userId}/photo` produced with `autosave` off, makes the cropped result the main photo and\r\nthen discards the temporary file, and without `tmpFile` it re-crops the photo the profile already has.\r\nA caller may only do this to their own profile - the ID in the route has to be the calling account, and an\r\nadministrator gets 403 for anybody else - and the account must be allowed to edit its own profile.\r\nThe call replaces the stored photo, so the previous crop is lost, and it can be repeated with new coordinates\r\nas often as needed.\r\nPassing `width` and `height` as 0 together with `tmpFile` keeps the whole uploaded image instead of cropping\r\nit.\r\nThe answer holds the URLs of every generated size, the same shape `GET api/2.0/people/{userId}/photo`\r\nreturns.",
         "operationId": "createMemberPhotoThumbnails",
         "parameters": [
           {
-            "name": "userid",
+            "name": "userId",
             "in": "path",
             "description": "The profile whose avatar is cropped, taken from the route. Either the ID of the account or its user name is\r\naccepted, and it has to be the calling account, because a profile photo can only be changed by its owner.",
             "required": true,
@@ -3931,17 +3931,17 @@
         ]
       }
     },
-    "/api/2.0/people/{userid}/photo": {
+    "/api/2.0/people/{userId}/photo": {
       "delete": {
         "tags": [
           "People / Photos"
         ],
         "summary": "Delete a user photo",
-        "description": "Removes the avatar of a profile, so that the profile falls back to the default placeholder image.\r\nA caller may only do this to their own profile - the ID in the route has to be the calling account, and an\r\nadministrator gets 403 for anybody else - and the account must be allowed to edit its own profile.\r\nThe removal is permanent and cannot be undone: the stored image and all of its sizes are deleted, and a new\r\navatar has to be uploaded through `POST api/2.0/people/{userid}/photo` to replace it.\r\nThe call is idempotent, so removing an avatar from a profile that has none succeeds as well, and it raises a\r\n`UserUpdated` webhook.\r\nThe answer still holds the URLs of every size, now pointing at the default image.",
+        "description": "Removes the avatar of a profile, so that the profile falls back to the default placeholder image.\r\nA caller may only do this to their own profile - the ID in the route has to be the calling account, and an\r\nadministrator gets 403 for anybody else - and the account must be allowed to edit its own profile.\r\nThe removal is permanent and cannot be undone: the stored image and all of its sizes are deleted, and a new\r\navatar has to be uploaded through `POST api/2.0/people/{userId}/photo` to replace it.\r\nThe call is idempotent, so removing an avatar from a profile that has none succeeds as well, and it raises a\r\n`UserUpdated` webhook.\r\nThe answer still holds the URLs of every size, now pointing at the default image.",
         "operationId": "deleteMemberPhoto",
         "parameters": [
           {
-            "name": "userid",
+            "name": "userId",
             "in": "path",
             "description": "The profile whose avatar the operation addresses, taken from the route. Either the ID of the account or its\r\nuser name is accepted. Reading a photo works for any account the caller may see, while deleting one only\r\nworks for the calling account itself.",
             "required": true,
@@ -4062,11 +4062,11 @@
           "People / Photos"
         ],
         "summary": "Get a user photo",
-        "description": "Returns the URLs of the avatar of a profile in every size the portal keeps: the original, the retina and the\r\nmaximum variants, and the big, medium and small thumbnails.\r\nUnlike the operations that change an avatar, this one may be called for another account, as long as the\r\ncaller is allowed to see that account - a guest, for instance, only sees the accounts it is related to.\r\nThe call is read-only and always answers with a full set of URLs: a profile that has no avatar of its own\r\ngets the URLs of the default placeholder image rather than an empty answer.\r\nThe URLs are portal paths meant to be requested directly and may be replaced when the avatar changes, so they\r\nshould not be stored for a long time.\r\nTo change the avatar use `POST api/2.0/people/{userid}/photo` for an uploaded file,\r\n`PUT api/2.0/people/{userid}/photo` for one taken from a URL, and\r\n`DELETE api/2.0/people/{userid}/photo` to drop it.",
+        "description": "Returns the URLs of the avatar of a profile in every size the portal keeps: the original, the retina and the\r\nmaximum variants, and the big, medium and small thumbnails.\r\nUnlike the operations that change an avatar, this one may be called for another account, as long as the\r\ncaller is allowed to see that account - a guest, for instance, only sees the accounts it is related to.\r\nThe call is read-only and always answers with a full set of URLs: a profile that has no avatar of its own\r\ngets the URLs of the default placeholder image rather than an empty answer.\r\nThe URLs are portal paths meant to be requested directly and may be replaced when the avatar changes, so they\r\nshould not be stored for a long time.\r\nTo change the avatar use `POST api/2.0/people/{userId}/photo` for an uploaded file,\r\n`PUT api/2.0/people/{userId}/photo` for one taken from a URL, and\r\n`DELETE api/2.0/people/{userId}/photo` to drop it.",
         "operationId": "getMemberPhoto",
         "parameters": [
           {
-            "name": "userid",
+            "name": "userId",
             "in": "path",
             "description": "The profile whose avatar the operation addresses, taken from the route. Either the ID of the account or its\r\nuser name is accepted. Reading a photo works for any account the caller may see, while deleting one only\r\nworks for the calling account itself.",
             "required": true,
@@ -4187,11 +4187,11 @@
           "People / Photos"
         ],
         "summary": "Update a user photo",
-        "description": "Sets the avatar of a profile from an image the portal downloads itself from the URL given in `files`, which is\r\nthe way to reuse a picture that is already published somewhere.\r\nA caller may only do this to their own profile - the ID in the route has to be the calling account, and an\r\nadministrator gets 403 for anybody else - and the account must be allowed to edit its own profile.\r\nThe URL has to be absolute or relative to the portal, and it has to use HTTPS unless the request itself came\r\nover HTTP; an address the portal refuses to fetch, and a download that does not succeed, both answer 403.\r\nPassing the URL the profile already uses is a no-op, and an empty `files` is rejected with 400, so use\r\n`DELETE api/2.0/people/{userid}/photo` to remove an avatar rather than sending an empty value.\r\nThe downloaded image replaces the stored avatar and all of its sizes at once, raises a `UserUpdated` webhook,\r\nand is subject to the portal limit on image size.\r\nTo send the bytes instead of a URL, upload the file through `POST api/2.0/people/{userid}/photo`.",
+        "description": "Sets the avatar of a profile from an image the portal downloads itself from the URL given in `files`, which is\r\nthe way to reuse a picture that is already published somewhere.\r\nA caller may only do this to their own profile - the ID in the route has to be the calling account, and an\r\nadministrator gets 403 for anybody else - and the account must be allowed to edit its own profile.\r\nThe URL has to be absolute or relative to the portal, and it has to use HTTPS unless the request itself came\r\nover HTTP; an address the portal refuses to fetch, and a download that does not succeed, both answer 403.\r\nPassing the URL the profile already uses is a no-op, and an empty `files` is rejected with 400, so use\r\n`DELETE api/2.0/people/{userId}/photo` to remove an avatar rather than sending an empty value.\r\nThe downloaded image replaces the stored avatar and all of its sizes at once, raises a `UserUpdated` webhook,\r\nand is subject to the portal limit on image size.\r\nTo send the bytes instead of a URL, upload the file through `POST api/2.0/people/{userId}/photo`.",
         "operationId": "updateMemberPhoto",
         "parameters": [
           {
-            "name": "userid",
+            "name": "userId",
             "in": "path",
             "description": "The profile whose avatar is replaced, taken from the route. Either the ID of the account or its user name is\r\naccepted, and it has to be the calling account, because a profile photo can only be changed by its owner.",
             "required": true,
@@ -4317,11 +4317,11 @@
           "People / Photos"
         ],
         "summary": "Upload a user photo",
-        "description": "Uploads an image as multipart form data and either makes it the avatar of a profile straight away or keeps it\r\nas a temporary file to be cropped afterwards.\r\nWith `autosave` set to true the image becomes the avatar immediately, all of its sizes are built and their\r\nURLs come back in `data`, each with a `hash` query parameter that changes whenever the avatar does, so a\r\nclient can cache them safely.\r\nWith `autosave` left false the image is only stored as a temporary file and `data` holds its name, which has\r\nto be passed as `tmpFile` to `POST api/2.0/people/{userid}/photo/thumbnails` to choose the crop; nothing\r\nchanges on the profile until that second call succeeds.\r\nA caller may only do this to their own profile, the ID in the route has to be the calling account, and the\r\nimage has to be a format the portal can read and stay within the portal limit on image size.\r\nThis operation reports every problem in the body instead of as a status code: it answers 200 with `success`\r\nset to false and a human-readable `message`, and it does so for a missing file, an unreadable format, an\r\noversized image and a rejected permission alike, so a client has to check `success` and must not rely on the\r\nstatus alone.\r\nA successful upload raises a `UserUpdated` webhook only in the `autosave` case.",
+        "description": "Uploads an image as multipart form data and either makes it the avatar of a profile straight away or keeps it\r\nas a temporary file to be cropped afterwards.\r\nWith `autosave` set to true the image becomes the avatar immediately, all of its sizes are built and their\r\nURLs come back in `data`, each with a `hash` query parameter that changes whenever the avatar does, so a\r\nclient can cache them safely.\r\nWith `autosave` left false the image is only stored as a temporary file and `data` holds its name, which has\r\nto be passed as `tmpFile` to `POST api/2.0/people/{userId}/photo/thumbnails` to choose the crop; nothing\r\nchanges on the profile until that second call succeeds.\r\nA caller may only do this to their own profile, the ID in the route has to be the calling account, and the\r\nimage has to be a format the portal can read and stay within the portal limit on image size.\r\nThis operation reports every problem in the body instead of as a status code: it answers 200 with `success`\r\nset to false and a human-readable `message`, and it does so for a missing file, an unreadable format, an\r\noversized image and a rejected permission alike, so a client has to check `success` and must not rely on the\r\nstatus alone.\r\nA successful upload raises a `UserUpdated` webhook only in the `autosave` case.",
         "operationId": "uploadMemberPhoto",
         "parameters": [
           {
-            "name": "userid",
+            "name": "userId",
             "in": "path",
             "description": "The profile whose avatar is uploaded, taken from the route. Either the ID of the account or its user name is\r\naccepted, and it has to be the calling account, because a profile photo can only be changed by its owner.",
             "required": true,
@@ -4338,31 +4338,31 @@
             "multipart/form-data": {
               "schema": {
                 "required": [
-                  "File"
+                  "file"
                 ],
                 "type": "object",
                 "properties": {
-                  "File": {
+                  "file": {
                     "examples": [
                       "photo.png"
                     ],
                     "description": "The image itself, sent as a multipart form field. It has to be a raster format the portal can read and stay\r\nwithin the portal limit on image size; sending no file makes the operation answer with `success` false rather\r\nthan an error status.",
                     "contentMediaType": "application/octet-stream"
                   },
-                  "Autosave": {
+                  "autosave": {
                     "examples": [
                       true
                     ],
                     "type": "boolean",
-                    "description": "Set it to true to make the uploaded image the avatar right away. With the default false the image is only\r\nstored as a temporary file whose name comes back in `data`, and it has to be passed to\r\n`POST api/2.0/people/{userid}/photo/thumbnails` to take effect."
+                    "description": "Set it to true to make the uploaded image the avatar right away. With the default false the image is only\r\nstored as a temporary file whose name comes back in `data`, and it has to be passed to\r\n`POST api/2.0/people/{userId}/photo/thumbnails` to take effect."
                   }
                 }
               },
               "encoding": {
-                "File": {
+                "file": {
                   "style": "form"
                 },
-                "Autosave": {
+                "autosave": {
                   "style": "form"
                 }
               }
@@ -5110,17 +5110,17 @@
         ]
       }
     },
-    "/api/2.0/people/{userid}": {
+    "/api/2.0/people/{userId}": {
       "delete": {
         "tags": [
           "People / Profiles"
         ],
         "summary": "Delete a user",
-        "description": "Deletes a portal profile and queues the erasure of the data behind it.\r\nThe account has to be disabled first - set the `Terminated` status through\r\n`PUT api/2.0/people/status/{status}`, otherwise the operation answers 403 - and it must not be a system\r\naccount or one imported from LDAP.\r\nThe caller needs the permission to add and remove users, and has to be the portal owner to delete a DocSpace\r\nadministrator.\r\nThe profile disappears at once, together with its avatar, its group memberships, its file shares and its\r\nOAuth clients, while the data it owned is erased by a queued job afterwards, which can be watched through\r\n`GET api/2.0/people/remove/progress/{userid}`.\r\nThe removal is permanent and cannot be undone, so hand the rooms and the shared files over first through\r\n`POST api/2.0/people/reassign/start` - an account whose reassignment has not finished cannot be deleted.\r\nThe call raises a `UserDeleted` webhook and answers with the profile as it was just before it was removed.\r\nTo delete several accounts at once use `PUT api/2.0/people/delete`.",
+        "description": "Deletes a portal profile and queues the erasure of the data behind it.\r\nThe account has to be disabled first - set the `Terminated` status through\r\n`PUT api/2.0/people/status/{status}`, otherwise the operation answers 403 - and it must not be a system\r\naccount or one imported from LDAP.\r\nThe caller needs the permission to add and remove users, and has to be the portal owner to delete a DocSpace\r\nadministrator.\r\nThe profile disappears at once, together with its avatar, its group memberships, its file shares and its\r\nOAuth clients, while the data it owned is erased by a queued job afterwards, which can be watched through\r\n`GET api/2.0/people/remove/progress/{userId}`.\r\nThe removal is permanent and cannot be undone, so hand the rooms and the shared files over first through\r\n`POST api/2.0/people/reassign/start` - an account whose reassignment has not finished cannot be deleted.\r\nThe call raises a `UserDeleted` webhook and answers with the profile as it was just before it was removed.\r\nTo delete several accounts at once use `PUT api/2.0/people/delete`.",
         "operationId": "deleteMember",
         "parameters": [
           {
-            "name": "userid",
+            "name": "userId",
             "in": "path",
             "description": "The user ID.",
             "required": true,
@@ -5245,7 +5245,7 @@
         "operationId": "getProfileByUserId",
         "parameters": [
           {
-            "name": "userid",
+            "name": "userId",
             "in": "path",
             "description": "The user ID.",
             "required": true,
@@ -5366,11 +5366,11 @@
           "People / Profiles"
         ],
         "summary": "Update a user",
-        "description": "Updates a portal profile, and which fields it accepts depends on whose profile it is - the two halves of this\r\noperation do not overlap.\r\nOn the caller's own profile it applies `firstName`, `lastName`, `location`, `comment`, `spam`, `contacts`,\r\n`department` and the avatar named in `files`, while `disable` and `isUser` are ignored; on somebody else's\r\nprofile only `disable` and `isUser` are applied and every descriptive field is ignored, so an administrator\r\ncannot rename another account through this operation.\r\nThe caller needs the permission to edit that profile, cannot touch the portal owner, and has to be the portal\r\nowner to touch another DocSpace administrator; on an account imported from LDAP or SSO the name and the\r\nlocation are silently left alone even on one's own profile.\r\nOmitted fields keep their current values, an unusable pair of names answers 400, and `disable` set to true\r\ngives the account the `Terminated` status and ends every session it has, which is the state\r\n`DELETE api/2.0/people/{userid}` then requires.\r\nThe `isUser` flag turns the account into a guest when true and back into a member when false, both of which\r\ncan answer 402 because either direction takes a seat; a request to make the portal owner, a DocSpace\r\nadministrator or a module administrator a guest is ignored without an error.\r\nA change raises a `UserUpdated` webhook and the answer holds the profile as it is afterwards, so read it\r\ninstead of assuming the request was applied.\r\nFor the language use `PUT api/2.0/people/{userid}/culture`, for the type\r\n`PUT api/2.0/people/type/{type}`, and for the status of several accounts at once\r\n`PUT api/2.0/people/status/{status}`.",
+        "description": "Updates a portal profile, and which fields it accepts depends on whose profile it is - the two halves of this\r\noperation do not overlap.\r\nOn the caller's own profile it applies `firstName`, `lastName`, `location`, `comment`, `spam`, `contacts`,\r\n`department` and the avatar named in `files`, while `disable` and `isUser` are ignored; on somebody else's\r\nprofile only `disable` and `isUser` are applied and every descriptive field is ignored, so an administrator\r\ncannot rename another account through this operation.\r\nThe caller needs the permission to edit that profile, cannot touch the portal owner, and has to be the portal\r\nowner to touch another DocSpace administrator; on an account imported from LDAP or SSO the name and the\r\nlocation are silently left alone even on one's own profile.\r\nOmitted fields keep their current values, an unusable pair of names answers 400, and `disable` set to true\r\ngives the account the `Terminated` status and ends every session it has, which is the state\r\n`DELETE api/2.0/people/{userId}` then requires.\r\nThe `isUser` flag turns the account into a guest when true and back into a member when false, both of which\r\ncan answer 402 because either direction takes a seat; a request to make the portal owner, a DocSpace\r\nadministrator or a module administrator a guest is ignored without an error.\r\nA change raises a `UserUpdated` webhook and the answer holds the profile as it is afterwards, so read it\r\ninstead of assuming the request was applied.\r\nFor the language use `PUT api/2.0/people/{userId}/culture`, for the type\r\n`PUT api/2.0/people/type/{type}`, and for the status of several accounts at once\r\n`PUT api/2.0/people/status/{status}`.",
         "operationId": "updateMember",
         "parameters": [
           {
-            "name": "userid",
+            "name": "userId",
             "in": "path",
             "description": "The user ID.",
             "required": true,
@@ -5501,7 +5501,7 @@
           "People / Profiles"
         ],
         "summary": "Close my own profile",
-        "description": "Closes the calling account at its owner's request: it does not erase the profile, it disables it, ends every\r\nsession it has and tells the portal administrators that the account asked to be removed.\r\nIt is the second step of the self-service removal - the first is `PUT api/2.0/people/self/delete`, which mails\r\nthe confirmation link - so the request has to carry the confirmation token from that link rather than an\r\nordinary session.\r\nIt always acts on the calling account and takes no parameters; the portal owner and an account imported from\r\nLDAP cannot close themselves and get 403.\r\nAfter the call the account has the `Terminated` status and can no longer sign in, but its rooms, files and\r\ngroup memberships are untouched, which is why an administrator still has to erase it through\r\n`DELETE api/2.0/people/{userid}` - that operation requires exactly this disabled state.\r\nThe step is reversible until then: re-enabling the account through `PUT api/2.0/people/status/{status}`\r\nrestores it.\r\nThe call raises a `UserUpdated` webhook, not a delete one, and answers with the profile in its new state.",
+        "description": "Closes the calling account at its owner's request: it does not erase the profile, it disables it, ends every\r\nsession it has and tells the portal administrators that the account asked to be removed.\r\nIt is the second step of the self-service removal - the first is `PUT api/2.0/people/self/delete`, which mails\r\nthe confirmation link - so the request has to carry the confirmation token from that link rather than an\r\nordinary session.\r\nIt always acts on the calling account and takes no parameters; the portal owner and an account imported from\r\nLDAP cannot close themselves and get 403.\r\nAfter the call the account has the `Terminated` status and can no longer sign in, but its rooms, files and\r\ngroup memberships are untouched, which is why an administrator still has to erase it through\r\n`DELETE api/2.0/people/{userId}` - that operation requires exactly this disabled state.\r\nThe step is reversible until then: re-enabling the account through `PUT api/2.0/people/status/{status}`\r\nrestores it.\r\nThe call raises a `UserUpdated` webhook, not a delete one, and answers with the profile in its new state.",
         "operationId": "deleteProfile",
         "responses": {
           "200": {
@@ -5602,7 +5602,7 @@
           "People / Profiles"
         ],
         "summary": "Get my profile",
-        "description": "Returns the profile of the account the request is authenticated as, together with the session details only\r\nthis operation reports.\r\nIt takes no parameters, needs no permission and always describes the caller, so it is the operation to call\r\nright after signing in to find out who the token belongs to and what that account may do.\r\nThe call is read-only and available on an unpaid portal.\r\nBeyond the ordinary profile fields it fills in four that stay empty everywhere else: `theme` with the\r\ninterface theme the account chose, `loginEventId` with the identifier of the current session,\r\n`hasPersonalFolder` with whether the account has a personal folder, and `authCookieLifetime` with the seconds\r\nthe session has left - the last one only when less than a day remains or the portal is configured to expose\r\nit, so an absent value means neither, not an endless session.\r\nTo read somebody else use `GET api/2.0/people/{userid}`, which reports none of these four.",
+        "description": "Returns the profile of the account the request is authenticated as, together with the session details only\r\nthis operation reports.\r\nIt takes no parameters, needs no permission and always describes the caller, so it is the operation to call\r\nright after signing in to find out who the token belongs to and what that account may do.\r\nThe call is read-only and available on an unpaid portal.\r\nBeyond the ordinary profile fields it fills in four that stay empty everywhere else: `theme` with the\r\ninterface theme the account chose, `loginEventId` with the identifier of the current session,\r\n`hasPersonalFolder` with whether the account has a personal folder, and `authCookieLifetime` with the seconds\r\nthe session has left - the last one only when less than a day remains or the portal is configured to expose\r\nit, so an absent value means neither, not an endless session.\r\nTo read somebody else use `GET api/2.0/people/{userId}`, which reports none of these four.",
         "operationId": "getSelfProfile",
         "responses": {
           "200": {
@@ -5837,7 +5837,7 @@
           "People / Profiles"
         ],
         "summary": "Delete users",
-        "description": "Deletes several portal profiles in one call and queues the erasure of the data behind each of them.\r\nEvery listed account has to be disabled already - set the `Terminated` status through\r\n`PUT api/2.0/people/status/{status}` first, because a single account that is still active rejects the whole\r\ncall with 403 - and the caller needs the permission to add and remove users.\r\nSystem and LDAP accounts are dropped from the list without an error, and so are the accounts the caller may\r\nnot delete: a room admin when the caller is not a DocSpace admin, and a DocSpace admin when the caller is not\r\nthe portal owner.\r\nThe answer lists every account that was asked for, including the ones that were skipped, so it is not proof\r\nthat an account was deleted - read `GET api/2.0/people/{userid}` for that, which then answers 404.\r\nThe removal is permanent and cannot be undone, and each deleted account raises a `UserDeleted` webhook while\r\nits data is erased by a queued job that can be watched through\r\n`GET api/2.0/people/remove/progress/{userid}`.\r\nHand the rooms and the shared files over first through `POST api/2.0/people/reassign/start` - an account with\r\nan unfinished reassignment cannot be deleted.",
+        "description": "Deletes several portal profiles in one call and queues the erasure of the data behind each of them.\r\nEvery listed account has to be disabled already - set the `Terminated` status through\r\n`PUT api/2.0/people/status/{status}` first, because a single account that is still active rejects the whole\r\ncall with 403 - and the caller needs the permission to add and remove users.\r\nSystem and LDAP accounts are dropped from the list without an error, and so are the accounts the caller may\r\nnot delete: a room admin when the caller is not a DocSpace admin, and a DocSpace admin when the caller is not\r\nthe portal owner.\r\nThe answer lists every account that was asked for, including the ones that were skipped, so it is not proof\r\nthat an account was deleted - read `GET api/2.0/people/{userId}` for that, which then answers 404.\r\nThe removal is permanent and cannot be undone, and each deleted account raises a `UserDeleted` webhook while\r\nits data is erased by a queued job that can be watched through\r\n`GET api/2.0/people/remove/progress/{userId}`.\r\nHand the rooms and the shared files over first through `POST api/2.0/people/reassign/start` - an account with\r\nan unfinished reassignment cannot be deleted.",
         "operationId": "removeUsers",
         "requestBody": {
           "content": {
@@ -5944,17 +5944,17 @@
         ]
       }
     },
-    "/api/2.0/people/{userid}/culture": {
+    "/api/2.0/people/{userId}/culture": {
       "put": {
         "tags": [
           "People / Profiles"
         ],
         "summary": "Update a user culture",
-        "description": "Changes the interface language of a profile, which decides the language of the portal for that account and of\r\nthe emails it receives.\r\nThe culture has to be one the portal has enabled, otherwise the operation answers 400; read the enabled list\r\nfrom the portal settings rather than guessing a code.\r\nA caller may only change their own language - the ID in the route has to be the calling account, and an\r\nadministrator gets 403 for anybody else - and the account must be allowed to edit its own profile.\r\nThe change takes effect immediately, raises a `UserUpdated` webhook, and answers with the profile carrying\r\nthe new `cultureName`.\r\nOther profile fields are not touched here; use `PUT api/2.0/people/{userid}` for those.",
+        "description": "Changes the interface language of a profile, which decides the language of the portal for that account and of\r\nthe emails it receives.\r\nThe culture has to be one the portal has enabled, otherwise the operation answers 400; read the enabled list\r\nfrom the portal settings rather than guessing a code.\r\nA caller may only change their own language - the ID in the route has to be the calling account, and an\r\nadministrator gets 403 for anybody else - and the account must be allowed to edit its own profile.\r\nThe change takes effect immediately, raises a `UserUpdated` webhook, and answers with the profile carrying\r\nthe new `cultureName`.\r\nOther profile fields are not touched here; use `PUT api/2.0/people/{userId}` for those.",
         "operationId": "updateMemberCulture",
         "parameters": [
           {
-            "name": "userid",
+            "name": "userId",
             "in": "path",
             "description": "The user ID.",
             "required": true,
@@ -5972,7 +5972,7 @@
             "application/json": {
               "schema": {
                 "description": "The culture name parameters.",
-                "$ref": "#/components/schemas/Culture"
+                "$ref": "#/components/schemas/UpdateMemberCultureRequest"
               }
             }
           }
@@ -6401,7 +6401,7 @@
             "in": "query",
             "description": "The part of the portal to search in: `All`, the default, searches members and guests together, `People`\r\nleaves the guests out, and `Guests` returns guests only - and for a caller who is not a DocSpace\r\nadministrator, only the guests that caller is related to.",
             "schema": {
-              "$ref": "#/components/schemas/Area"
+              "$ref": "#/components/schemas/AccountSearchArea"
             },
             "example": "All"
           },
@@ -6489,7 +6489,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IAccountEntryArrayWrapper"
+                  "$ref": "#/components/schemas/AccountEntryArrayWrapper"
                 }
               }
             }
@@ -6683,7 +6683,7 @@
             "in": "query",
             "description": "The part of the portal to search in: `All`, the default, searches members and guests together, `People`\r\nleaves the guests out, and `Guests` returns guests only - and for a caller who is not a DocSpace\r\nadministrator, only the guests that caller is related to.",
             "schema": {
-              "$ref": "#/components/schemas/Area"
+              "$ref": "#/components/schemas/AccountSearchArea"
             },
             "example": "All"
           },
@@ -6771,7 +6771,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IAccountEntryArrayWrapper"
+                  "$ref": "#/components/schemas/AccountEntryArrayWrapper"
                 }
               }
             }
@@ -6965,7 +6965,7 @@
             "in": "query",
             "description": "The part of the portal to search in: `All`, the default, searches members and guests together, `People`\r\nleaves the guests out, and `Guests` returns guests only - and for a caller who is not a DocSpace\r\nadministrator, only the guests that caller is related to.",
             "schema": {
-              "$ref": "#/components/schemas/Area"
+              "$ref": "#/components/schemas/AccountSearchArea"
             },
             "example": "All"
           },
@@ -7053,7 +7053,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IAccountEntryArrayWrapper"
+                  "$ref": "#/components/schemas/AccountEntryArrayWrapper"
                 }
               }
             }
@@ -7501,7 +7501,7 @@
             "in": "query",
             "description": "The part of the portal to search in: `All`, the default, searches members and guests together, `People`\r\nleaves the guests out, and `Guests` returns guests only. It also cancels the type filters that contradict\r\nit.",
             "schema": {
-              "$ref": "#/components/schemas/Area"
+              "$ref": "#/components/schemas/AccountSearchArea"
             },
             "example": "All"
           },
@@ -8134,7 +8134,7 @@
             "in": "query",
             "description": "The part of the portal to search in: `All`, the default, searches members and guests together, `People`\r\nleaves the guests out, and `Guests` returns guests only. It also cancels the type filters that contradict\r\nit.",
             "schema": {
-              "$ref": "#/components/schemas/Area"
+              "$ref": "#/components/schemas/AccountSearchArea"
             },
             "example": "All"
           },
@@ -8399,7 +8399,7 @@
             "in": "query",
             "description": "The part of the portal to search in: `All`, the default, searches members and guests together, `People`\r\nleaves the guests out, and `Guests` returns guests only - and for a caller who is not a DocSpace\r\nadministrator, only the guests that caller is related to.",
             "schema": {
-              "$ref": "#/components/schemas/Area"
+              "$ref": "#/components/schemas/AccountSearchArea"
             },
             "example": "All"
           },
@@ -8681,7 +8681,7 @@
             "in": "query",
             "description": "The part of the portal to search in: `All`, the default, searches members and guests together, `People`\r\nleaves the guests out, and `Guests` returns guests only - and for a caller who is not a DocSpace\r\nadministrator, only the guests that caller is related to.",
             "schema": {
-              "$ref": "#/components/schemas/Area"
+              "$ref": "#/components/schemas/AccountSearchArea"
             },
             "example": "All"
           },
@@ -8963,7 +8963,7 @@
             "in": "query",
             "description": "The part of the portal to search in: `All`, the default, searches members and guests together, `People`\r\nleaves the guests out, and `Guests` returns guests only - and for a caller who is not a DocSpace\r\nadministrator, only the guests that caller is related to.",
             "schema": {
-              "$ref": "#/components/schemas/Area"
+              "$ref": "#/components/schemas/AccountSearchArea"
             },
             "example": "All"
           },
@@ -9793,7 +9793,7 @@
         ]
       }
     },
-    "/api/2.0/people/reassign/progress/{userid}": {
+    "/api/2.0/people/reassign/progress/{userId}": {
       "get": {
         "tags": [
           "People / User data"
@@ -9803,7 +9803,7 @@
         "operationId": "getReassignProgress",
         "parameters": [
           {
-            "name": "userid",
+            "name": "userId",
             "in": "path",
             "description": "The ID of the user the operation applies to, taken from the route. For a progress operation it has to be the\r\nsame ID that was passed when the job was started.",
             "required": true,
@@ -9924,7 +9924,7 @@
           "People / User data"
         ],
         "summary": "Start the data reassignment",
-        "description": "Queues an asynchronous job that transfers the rooms and the shared files owned by one portal user to another.\r\nThe source user must already have the `Terminated` status - disable the account through\r\n`PUT api/2.0/people/status/{status}` before calling this - and the destination user must be an active room\r\nadmin or DocSpace admin, so a guest, a system account or a disabled account is rejected.\r\nThe caller needs the permission to edit users, cannot reassign their own data, and must be the portal owner to\r\nreassign the data of another DocSpace administrator or of a People module administrator.\r\nThe transfer does not finish within this call: poll `GET api/2.0/people/reassign/progress/{userid}` with the\r\nsource user ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/reassign/terminate`.\r\nPass `deleteProfile` as true to delete the source profile once the transfer succeeds, otherwise the emptied\r\nprofile is kept.\r\nUse `GET api/2.0/people/reassign/necessary` first to find out whether the user owns anything that has to be\r\nreassigned at all.",
+        "description": "Queues an asynchronous job that transfers the rooms and the shared files owned by one portal user to another.\r\nThe source user must already have the `Terminated` status - disable the account through\r\n`PUT api/2.0/people/status/{status}` before calling this - and the destination user must be an active room\r\nadmin or DocSpace admin, so a guest, a system account or a disabled account is rejected.\r\nThe caller needs the permission to edit users, cannot reassign their own data, and must be the portal owner to\r\nreassign the data of another DocSpace administrator or of a People module administrator.\r\nThe transfer does not finish within this call: poll `GET api/2.0/people/reassign/progress/{userId}` with the\r\nsource user ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/reassign/terminate`.\r\nPass `deleteProfile` as true to delete the source profile once the transfer succeeds, otherwise the emptied\r\nprofile is kept.\r\nUse `GET api/2.0/people/reassign/necessary` first to find out whether the user owns anything that has to be\r\nreassigned at all.",
         "operationId": "startReassign",
         "requestBody": {
           "content": {
@@ -10157,11 +10157,11 @@
           "People / User data"
         ],
         "summary": "Check data for reassignment need",
-        "description": "Reports whether the rooms and the shared files of a user have to be reassigned before that user can be removed\r\nor changed to the type passed in `type`.\r\nCall it before `DELETE api/2.0/people/{userid}` or before a type change to find out whether\r\n`POST api/2.0/people/reassign/start` has to run first.\r\nThe caller needs the permission to add and remove users of the requested type, and must be the portal owner\r\nwhen the checked user is a DocSpace administrator.\r\nThe call is read-only and answers true when the user owns at least one room, or - when `type` is `Guest` -\r\nwhen the user still has shared files.\r\nA false answer means the user can be removed or converted without a reassignment.",
+        "description": "Reports whether the rooms and the shared files of a user have to be reassigned before that user can be removed\r\nor changed to the type passed in `type`.\r\nCall it before `DELETE api/2.0/people/{userId}` or before a type change to find out whether\r\n`POST api/2.0/people/reassign/start` has to run first.\r\nThe caller needs the permission to add and remove users of the requested type, and must be the portal owner\r\nwhen the checked user is a DocSpace administrator.\r\nThe call is read-only and answers true when the user owns at least one room, or - when `type` is `Guest` -\r\nwhen the user still has shared files.\r\nA false answer means the user can be removed or converted without a reassignment.",
         "operationId": "necessaryReassign",
         "parameters": [
           {
-            "name": "UserId",
+            "name": "userId",
             "in": "query",
             "description": "The ID of the user whose rooms and shared files are checked.",
             "schema": {
@@ -10173,7 +10173,7 @@
             }
           },
           {
-            "name": "Type",
+            "name": "type",
             "in": "query",
             "description": "The type the user is about to be changed to, which decides what counts as data that has to be reassigned:\r\n`RoomAdmin`, `DocSpaceAdmin` and `User` are checked for owned rooms only, while `Guest` is also checked for\r\nfiles that are still shared. The default is `All`, which checks owned rooms only.",
             "schema": {
@@ -10284,7 +10284,7 @@
         ]
       }
     },
-    "/api/2.0/people/remove/progress/{userid}": {
+    "/api/2.0/people/remove/progress/{userId}": {
       "get": {
         "tags": [
           "People / User data"
@@ -10294,7 +10294,7 @@
         "operationId": "getRemoveProgress",
         "parameters": [
           {
-            "name": "userid",
+            "name": "userId",
             "in": "path",
             "description": "The ID of the user the operation applies to, taken from the route. For a progress operation it has to be the\r\nsame ID that was passed when the job was started.",
             "required": true,
@@ -10415,7 +10415,7 @@
           "People / User data"
         ],
         "summary": "Send the deletion instructions",
-        "description": "Emails the caller a confirmation link that lets them delete their own profile, and is the first step of the\r\nself-service profile removal.\r\nIt acts on the authenticated account only and takes no parameters, so it cannot be used to remove somebody\r\nelse - an administrator removes another user through `DELETE api/2.0/people/{userid}`.\r\nThe caller has to be a regular portal account: the portal owner and an account imported from LDAP are\r\nrejected, because neither can delete itself.\r\nThe call sends mail and does not change the profile; the deletion happens later, when the caller follows the\r\nemailed link and the client calls `DELETE api/2.0/people/@self` with the confirmation token from it.\r\nThe answer is a ready-to-display message naming the address the link was sent to, and the address is wrapped\r\nin bold HTML markup, so strip the markup before showing it outside a web page.\r\nRepeated calls are throttled, and each one sends a new link.",
+        "description": "Emails the caller a confirmation link that lets them delete their own profile, and is the first step of the\r\nself-service profile removal.\r\nIt acts on the authenticated account only and takes no parameters, so it cannot be used to remove somebody\r\nelse - an administrator removes another user through `DELETE api/2.0/people/{userId}`.\r\nThe caller has to be a regular portal account: the portal owner and an account imported from LDAP are\r\nrejected, because neither can delete itself.\r\nThe call sends mail and does not change the profile; the deletion happens later, when the caller follows the\r\nemailed link and the client calls `DELETE api/2.0/people/@self` with the confirmation token from it.\r\nThe answer is a ready-to-display message naming the address the link was sent to, and the address is wrapped\r\nin bold HTML markup, so strip the markup before showing it outside a web page.\r\nRepeated calls are throttled, and each one sends a new link.",
         "operationId": "sendInstructionsToDelete",
         "responses": {
           "200": {
@@ -10550,7 +10550,7 @@
           "People / User data"
         ],
         "summary": "Start the data deletion",
-        "description": "Queues an asynchronous job that erases the data of the user with the ID specified in the request.\r\nThe account must already have the `Terminated` status - disable it through\r\n`PUT api/2.0/people/status/{status}` first - and it cannot be the portal owner or the caller.\r\nThe caller needs the permission to edit users, has to be a DocSpace admin to erase the data of a room admin,\r\nand has to be the portal owner to erase the data of another DocSpace admin.\r\nThe erasure does not finish within this call: poll `GET api/2.0/people/remove/progress/{userid}` with the same\r\nuser ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/remove/terminate`.\r\nThis operation destroys the data and cannot be undone; to keep the rooms and the shared files of the account\r\ninstead, transfer them first through `POST api/2.0/people/reassign/start`.\r\nAn unknown ID and a rejected precondition both answer 400 and name the ID they rejected.",
+        "description": "Queues an asynchronous job that erases the data of the user with the ID specified in the request.\r\nThe account must already have the `Terminated` status - disable it through\r\n`PUT api/2.0/people/status/{status}` first - and it cannot be the portal owner or the caller.\r\nThe caller needs the permission to edit users, has to be a DocSpace admin to erase the data of a room admin,\r\nand has to be the portal owner to erase the data of another DocSpace admin.\r\nThe erasure does not finish within this call: poll `GET api/2.0/people/remove/progress/{userId}` with the same\r\nuser ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/remove/terminate`.\r\nThis operation destroys the data and cannot be undone; to keep the rooms and the shared files of the account\r\ninstead, transfer them first through `POST api/2.0/people/reassign/start`.\r\nAn unknown ID and a rejected precondition both answer 400 and name the ID they rejected.",
         "operationId": "startRemove",
         "requestBody": {
           "content": {
@@ -10663,7 +10663,7 @@
           "People / User data"
         ],
         "summary": "Terminate the data deletion",
-        "description": "Cancels the data deletion queued for the user with the ID specified in the request.\r\nThe caller needs the permission to edit users.\r\nThe operation is idempotent and returns no body: it drops the job from the queue, and doing so when nothing is\r\nqueued, or when the job has already finished, changes nothing and still answers 200.\r\nCancelling does not restore the data the job has already erased, and a cancelled job cannot be resumed - start\r\na new one through `POST api/2.0/people/remove/start`.\r\nTo find out whether the job is still running, read\r\n`GET api/2.0/people/remove/progress/{userid}` before and after this call.",
+        "description": "Cancels the data deletion queued for the user with the ID specified in the request.\r\nThe caller needs the permission to edit users.\r\nThe operation is idempotent and returns no body: it drops the job from the queue, and doing so when nothing is\r\nqueued, or when the job has already finished, changes nothing and still answers 200.\r\nCancelling does not restore the data the job has already erased, and a cancelled job cannot be resumed - start\r\na new one through `POST api/2.0/people/remove/start`.\r\nTo find out whether the job is still running, read\r\n`GET api/2.0/people/remove/progress/{userId}` before and after this call.",
         "operationId": "terminateRemove",
         "requestBody": {
           "content": {
@@ -11172,7 +11172,7 @@
           "People / User status"
         ],
         "summary": "Change a user status",
-        "description": "Enables or disables several portal accounts at once, which is the way to suspend somebody without deleting\r\nthem and to bring them back later.\r\nOnly `Active` and `Terminated` are accepted in the route; any other status answers 400.\r\nThe caller needs the permission to edit users, and the whole list is checked before anything is applied: a\r\nsystem account, an LDAP account, the portal owner, the caller themselves, or - unless the caller is the\r\nportal owner - a DocSpace administrator rejects the entire call with 403 and changes nothing.\r\nDisabling ends every session of the account and takes its seat back, while enabling takes a seat again and\r\ncan therefore answer 402 when the tariff or the user quota has none left; the accounts are then processed one\r\nby one, so a quota failure partway through leaves the earlier ones enabled.\r\nEnabling only affects accounts that were disabled, and an account that had never filled in its name comes\r\nback as `Pending` rather than `Active` when it still has an unused invitation, so read the `status` in the\r\nanswer instead of assuming it matches the request.\r\nEach changed account raises a `UserUpdated` webhook, and disabling is what\r\n`DELETE api/2.0/people/{userid}` requires before it will delete an account.",
+        "description": "Enables or disables several portal accounts at once, which is the way to suspend somebody without deleting\r\nthem and to bring them back later.\r\nOnly `Active` and `Terminated` are accepted in the route; any other status answers 400.\r\nThe caller needs the permission to edit users, and the whole list is checked before anything is applied: a\r\nsystem account, an LDAP account, the portal owner, the caller themselves, or - unless the caller is the\r\nportal owner - a DocSpace administrator rejects the entire call with 403 and changes nothing.\r\nDisabling ends every session of the account and takes its seat back, while enabling takes a seat again and\r\ncan therefore answer 402 when the tariff or the user quota has none left; the accounts are then processed one\r\nby one, so a quota failure partway through leaves the earlier ones enabled.\r\nEnabling only affects accounts that were disabled, and an account that had never filled in its name comes\r\nback as `Pending` rather than `Active` when it still has an unused invitation, so read the `status` in the\r\nanswer instead of assuming it matches the request.\r\nEach changed account raises a `UserUpdated` webhook, and disabling is what\r\n`DELETE api/2.0/people/{userId}` requires before it will delete an account.",
         "operationId": "updateUserStatus",
         "parameters": [
           {
@@ -11296,7 +11296,7 @@
         ]
       }
     },
-    "/api/2.0/people/activationstatus/{activationstatus}": {
+    "/api/2.0/people/activationstatus/{activationStatus}": {
       "put": {
         "tags": [
           "People / User status"
@@ -11306,7 +11306,7 @@
         "operationId": "updateUserActivationStatus",
         "parameters": [
           {
-            "name": "activationstatus",
+            "name": "activationStatus",
             "in": "path",
             "description": "The activation state to set on the calling account, taken from the route: `NotActivated`, `Activated`,\r\n`Pending` or `AutoGenerated`.",
             "required": true,
@@ -11566,7 +11566,7 @@
           "People / User type"
         ],
         "summary": "Start updating user type",
-        "description": "Queues an asynchronous job that converts one account to `Guest` or `User` and, in the same job, hands the\r\nrooms and the shared files of that account over to another administrator.\r\nOnly `Guest` and `User` are accepted here, because they are the types that cannot own rooms; for any other\r\ntype use `PUT api/2.0/people/type/{type}`, which converts immediately and transfers nothing.\r\nThe caller needs the permission to add and remove users of the requested type, has to be the portal owner to\r\nconvert a DocSpace administrator, and converting to `Guest` also requires the portal to allow inviting guests.\r\nThe account being converted has to be active and cannot be the caller, and the recipient - `reassignUserId`,\r\nor the caller when it is omitted - has to be an active room admin or DocSpace admin other than that account.\r\nThe conversion does not finish within this call: poll `GET api/2.0/people/type/progress/{userid}` with the\r\nconverted user ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/type/terminate`.\r\nA failure inside the running job is reported in the `error` field of the progress, not as a status code here.",
+        "description": "Queues an asynchronous job that converts one account to `Guest` or `User` and, in the same job, hands the\r\nrooms and the shared files of that account over to another administrator.\r\nOnly `Guest` and `User` are accepted here, because they are the types that cannot own rooms; for any other\r\ntype use `PUT api/2.0/people/type/{type}`, which converts immediately and transfers nothing.\r\nThe caller needs the permission to add and remove users of the requested type, has to be the portal owner to\r\nconvert a DocSpace administrator, and converting to `Guest` also requires the portal to allow inviting guests.\r\nThe account being converted has to be active and cannot be the caller, and the recipient - `reassignUserId`,\r\nor the caller when it is omitted - has to be an active room admin or DocSpace admin other than that account.\r\nThe conversion does not finish within this call: poll `GET api/2.0/people/type/progress/{userId}` with the\r\nconverted user ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/type/terminate`.\r\nA failure inside the running job is reported in the `error` field of the progress, not as a status code here.",
         "operationId": "startUserTypeUpdate",
         "requestBody": {
           "content": {
@@ -11673,7 +11673,7 @@
         ]
       }
     },
-    "/api/2.0/people/type/progress/{userid}": {
+    "/api/2.0/people/type/progress/{userId}": {
       "get": {
         "tags": [
           "People / User type"
@@ -11683,7 +11683,7 @@
         "operationId": "getUserTypeUpdateProgress",
         "parameters": [
           {
-            "name": "userid",
+            "name": "userId",
             "in": "path",
             "description": "The ID of the user the operation applies to, taken from the route. For a progress operation it has to be the\r\nsame ID that was passed when the job was started.",
             "required": true,
@@ -11918,7 +11918,7 @@
         ]
       }
     },
-    "/api/2.0/people/guests/{userid}/share": {
+    "/api/2.0/people/guests/{userId}/share": {
       "get": {
         "tags": [
           "Portal / Guests"
@@ -11928,7 +11928,7 @@
         "operationId": "getGuestSharingLink",
         "parameters": [
           {
-            "name": "userid",
+            "name": "userId",
             "in": "path",
             "description": "The ID of the guest to be handed over, taken from the route. The account has to exist, has to be a guest, and\r\nhas to be one the caller can see.",
             "required": true,
@@ -12042,6 +12042,69 @@
   },
   "components": {
     "schemas": {
+      "AccountEntryArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountEntryDto"
+            },
+            "description": "The list of AccountEntryDto objects returned by the operation."
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the list of AccountEntryDto objects."
+      },
+      "AccountEntryDto": {
+        "oneOf": [
+          {
+            "description": "The full list of user parameters.",
+            "$ref": "#/components/schemas/EmployeeFullDto"
+          },
+          {
+            "description": "The group parameters.",
+            "$ref": "#/components/schemas/GroupDto"
+          }
+        ],
+        "description": "One entry of an account search: either a user or a group.",
+        "x-derived": true,
+        "x-derived-types": [
+          "EmployeeFullDto",
+          "GroupDto"
+        ]
+      },
       "AccountInfoArrayWrapper": {
         "type": "object",
         "properties": {
@@ -12159,6 +12222,41 @@
           }
         ],
         "description": "The account login type.",
+        "x-enum-type": "integer"
+      },
+      "AccountSearchArea": {
+        "oneOf": [
+          {
+            "examples": [
+              "All"
+            ],
+            "enum": [
+              "All",
+              "People",
+              "Guests"
+            ],
+            "type": "string",
+            "description": "[All - All, People - People, Guests - Guests]"
+          },
+          {
+            "examples": [
+              0
+            ],
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "[0 - All, 1 - People, 2 - Guests]",
+            "x-enum-varnames": [
+              "All",
+              "People",
+              "Guests"
+            ]
+          }
+        ],
+        "description": "The area of the account entries.",
         "x-enum-type": "integer"
       },
       "ApiDateTime": {
@@ -12362,41 +12460,6 @@
         },
         "description": "The successful API response containing the ApiKeyResponseDto object."
       },
-      "Area": {
-        "oneOf": [
-          {
-            "examples": [
-              "All"
-            ],
-            "enum": [
-              "All",
-              "People",
-              "Guests"
-            ],
-            "type": "string",
-            "description": "[All - All, People - People, Guests - Guests]"
-          },
-          {
-            "examples": [
-              0
-            ],
-            "enum": [
-              0,
-              1,
-              2
-            ],
-            "type": "integer",
-            "description": "[0 - All, 1 - People, 2 - Guests]",
-            "x-enum-varnames": [
-              "All",
-              "People",
-              "Guests"
-            ]
-          }
-        ],
-        "description": "The area of the account entries.",
-        "x-enum-type": "integer"
-      },
       "BooleanWrapper": {
         "type": "object",
         "properties": {
@@ -12567,25 +12630,7 @@
         },
         "description": "The request parameters for creating a new API key."
       },
-      "Culture": {
-        "required": [
-          "cultureName"
-        ],
-        "type": "object",
-        "properties": {
-          "cultureName": {
-            "examples": [
-              "en-US"
-            ],
-            "maxLength": 85,
-            "minLength": 0,
-            "type": "string",
-            "description": "The user culture name (en-US, de, fr, es, ...)."
-          }
-        },
-        "description": "The culture name parameters."
-      },
-      "DarkThemeSettings": {
+      "DarkThemeSettingsDto": {
         "type": "object",
         "properties": {
           "theme": {
@@ -12601,7 +12646,7 @@
             "format": "date-time"
           }
         },
-        "description": "The theme parameters."
+        "description": "The interface theme the calling account has chosen."
       },
       "DarkThemeSettingsRequestDto": {
         "required": [
@@ -12655,8 +12700,8 @@
         "type": "object",
         "properties": {
           "response": {
-            "description": "The DarkThemeSettings object returned by the operation.",
-            "$ref": "#/components/schemas/DarkThemeSettings"
+            "description": "The DarkThemeSettingsDto object returned by the operation.",
+            "$ref": "#/components/schemas/DarkThemeSettingsDto"
           },
           "count": {
             "type": "integer",
@@ -12691,7 +12736,7 @@
             "format": "int32"
           }
         },
-        "description": "The successful API response containing the DarkThemeSettings object."
+        "description": "The successful API response containing the DarkThemeSettingsDto object."
       },
       "DistributedTaskStatus": {
         "oneOf": [
@@ -13553,7 +13598,7 @@
               }
             ],
             "type": "null",
-            "description": "The result of a successful upload, whose shape depends on `autosave`. With `autosave` on it holds the URLs of\r\nthe stored avatar in every size - `main`, `retina`, `max`, `big`, `medium` and `small` - each carrying a\r\n`hash` query parameter that changes with the avatar. With `autosave` off it holds the name of the temporary\r\nfile to pass to `POST api/2.0/people/{userid}/photo/thumbnails`. It is empty when the upload failed."
+            "description": "The result of a successful upload, whose shape depends on `autosave`. With `autosave` on it holds the URLs of\r\nthe stored avatar in every size - `main`, `retina`, `max`, `big`, `medium` and `small` - each carrying a\r\n`hash` query parameter that changes with the avatar. With `autosave` off it holds the name of the temporary\r\nfile to pass to `POST api/2.0/people/{userId}/photo/thumbnails`. It is empty when the upload failed."
           },
           "message": {
             "examples": [
@@ -13941,69 +13986,6 @@
           }
         },
         "description": "The successful API response containing the GroupDto object."
-      },
-      "IAccountEntryArrayWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/IAccountEntryDto"
-            },
-            "description": "The list of IAccountEntryDto objects returned by the operation."
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        },
-        "description": "The successful API response containing the list of IAccountEntryDto objects."
-      },
-      "IAccountEntryDto": {
-        "oneOf": [
-          {
-            "description": "The full list of user parameters.",
-            "$ref": "#/components/schemas/EmployeeFullDto"
-          },
-          {
-            "description": "The group parameters.",
-            "$ref": "#/components/schemas/GroupDto"
-          }
-        ],
-        "description": "One entry of an account search: either a user or a group.",
-        "x-derived": true,
-        "x-derived-types": [
-          "EmployeeFullDto",
-          "GroupDto"
-        ]
       },
       "InviteUsersRequestDto": {
         "required": [
@@ -14403,51 +14385,6 @@
         "description": "The type of CAPTCHA validation used.",
         "x-enum-type": "integer"
       },
-      "STRINGArrayWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "The response payload."
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        },
-        "description": "The successful API response."
-      },
       "SetManagerRequest": {
         "required": [
           "userId"
@@ -14569,7 +14506,7 @@
               false
             ],
             "type": "boolean",
-            "description": "Specifies whether to delete the source profile once the transfer succeeds. When false, which is the default,\r\nthe emptied profile is kept and can be deleted later through `DELETE api/2.0/people/{userid}`."
+            "description": "Specifies whether to delete the source profile once the transfer succeeds. When false, which is the default,\r\nthe emptied profile is kept and can be deleted later through `DELETE api/2.0/people/{userId}`."
           }
         },
         "description": "The request parameters for starting the reassignment process."
@@ -14602,6 +14539,51 @@
           }
         },
         "description": "The parameters for updating the type of the user or guest when reassigning rooms and shared files."
+      },
+      "StringArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The response payload."
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response."
       },
       "StringWrapper": {
         "type": "object",
@@ -15086,6 +15068,24 @@
         },
         "description": "The request for updating a group."
       },
+      "UpdateMemberCultureRequest": {
+        "required": [
+          "cultureName"
+        ],
+        "type": "object",
+        "properties": {
+          "cultureName": {
+            "examples": [
+              "en-US"
+            ],
+            "maxLength": 85,
+            "minLength": 0,
+            "type": "string",
+            "description": "The user culture name (en-US, de, fr, es, ...)."
+          }
+        },
+        "description": "The culture name parameters."
+      },
       "UpdateMemberRequestDto": {
         "type": "object",
         "properties": {
@@ -15097,7 +15097,7 @@
               "null",
               "string"
             ],
-            "description": "The account the change applies to. It is read from this body by `POST api/2.0/people/email`, while\r\n`PUT api/2.0/people/{userid}` takes the account from the route and ignores this field."
+            "description": "The account the change applies to. It is read from this body by `POST api/2.0/people/email`, while\r\n`PUT api/2.0/people/{userId}` takes the account from the route and ignores this field."
           },
           "disable": {
             "examples": [
@@ -15119,7 +15119,7 @@
               "null",
               "string"
             ],
-            "description": "The new email address, up to 255 characters. It is read only by `POST api/2.0/people/email`, which either\r\nmails a confirmation letter or, for an administrator acting on somebody else, applies the address at once;\r\n`PUT api/2.0/people/{userid}` ignores it.",
+            "description": "The new email address, up to 255 characters. It is read only by `POST api/2.0/people/email`, which either\r\nmails a confirmation letter or, for an administrator acting on somebody else, applies the address at once;\r\n`PUT api/2.0/people/{userId}` ignores it.",
             "format": "email"
           },
           "isUser": {

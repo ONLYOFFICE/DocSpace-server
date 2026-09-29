@@ -53,7 +53,7 @@ public class TfaRequestsDto
     /// </summary>
     /// <example>None</example>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public TfaRequestsDtoType Type { get; set; }
+    public TfaType Type { get; set; }
 
     /// <summary>
     /// The account the request concerns, by portal user ID. Naming the portal owner is refused unless it is the
@@ -92,7 +92,7 @@ public class TfaRequestsDto
 /// <summary>
 /// The two-factor method a portal can demand.
 /// </summary>
-public enum TfaRequestsDtoType
+public enum TfaType
 {
     /// <summary>No second factor is demanded; sending it also switches off whichever method was in force.</summary>
     [Description("None")]

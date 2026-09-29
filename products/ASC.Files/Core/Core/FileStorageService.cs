@@ -2641,10 +2641,10 @@ public class FileStorageService //: IFileStorageService
         }
     }
 
-    public async Task<FileLink> GetPresignedUriAsync<T>(T fileId)
+    public async Task<FileLinkDto> GetPresignedUriAsync<T>(T fileId)
     {
         var file = await GetFileAsync(fileId, -1);
-        var result = new FileLink { FileType = FileUtility.GetFileExtension(file.Title), Url = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file)) };
+        var result = new FileLinkDto { FileType = FileUtility.GetFileExtension(file.Title), Url = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file)) };
 
         result.Token = documentServiceHelper.GetSignature(result);
 
@@ -4682,7 +4682,7 @@ public class FileStorageService //: IFileStorageService
         return await SetExternalLinkAsync(entry.NotFoundIfNull(), linkId, share, title, expirationDate, password, denyDownload, primary, requiredAuth);
     }
 
-    public async Task<FileReference> GetReferenceDataAsync<T>(string fileId, string portalName, T sourceFileId, string path, string link)
+    public async Task<FileReferenceDto> GetReferenceDataAsync<T>(string fileId, string portalName, T sourceFileId, string path, string link)
     {
         File<T> file = null;
         var fileDao = daoFactory.GetFileDao<T>();
@@ -4697,7 +4697,7 @@ public class FileStorageService //: IFileStorageService
 
             if (source == null)
             {
-                return new FileReference { Error = FilesCommonResource.ErrorMessage_FileNotFound };
+                return new FileReferenceDto { Error = FilesCommonResource.ErrorMessage_FileNotFound };
             }
 
             if (!await fileSecurity.CanReadAsync(source))
@@ -4720,7 +4720,7 @@ public class FileStorageService //: IFileStorageService
         {
             if (!link.StartsWith(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath)))
             {
-                return new FileReference { Url = link };
+                return new FileReferenceDto { Url = link };
             }
 
             var start = commonLinkUtility.ServerRootPath + "/s/";
@@ -4754,7 +4754,7 @@ public class FileStorageService //: IFileStorageService
 
         if (file == null)
         {
-            return new FileReference { Error = FilesCommonResource.ErrorMessage_FileNotFound };
+            return new FileReferenceDto { Error = FilesCommonResource.ErrorMessage_FileNotFound };
         }
 
         if (!await fileSecurity.CanReadAsync(file))
@@ -4770,10 +4770,10 @@ public class FileStorageService //: IFileStorageService
 
         var docKey = await documentServiceHelper.GetDocKeyAsync(fileStable);
 
-        var fileReference = new FileReference
+        var fileReference = new FileReferenceDto
         {
             Path = file.Title,
-            ReferenceData = new FileReferenceData { FileKey = file.Id.ToString(), InstanceId = tenantManager.GetCurrentTenantId().ToString() },
+            ReferenceData = new FileReferenceDataDto { FileKey = file.Id.ToString(), InstanceId = tenantManager.GetCurrentTenantId().ToString() },
             Url = documentServiceConnector.ReplaceCommunityAddress(pathProvider.GetFileStreamUrl(file, lastVersion: true)),
             FileType = file.ConvertedExtension.Trim('.'),
             Key = docKey,
@@ -5069,7 +5069,7 @@ public class FileStorageService //: IFileStorageService
         return room;
     }
 
-    public async Task<List<AceShortWrapper>> SendEditorNotifyAsync<T>(T fileId, MentionMessageWrapper mentionMessage)
+    public async Task<List<AceShortDto>> SendEditorNotifyAsync<T>(T fileId, MentionMessageRequest mentionMessage)
     {
         ArgumentNullException.ThrowIfNull(mentionMessage?.Emails);
 
@@ -5120,7 +5120,7 @@ public class FileStorageService //: IFileStorageService
         var fileLink = filesLinkUtility.GetFileWebEditorUrl(file.Id);
         if (mentionMessage.ActionLink != null)
         {
-            fileLink += "&" + FilesLinkUtility.Anchor + "=" + HttpUtility.UrlEncode(ActionLinkConfig.Serialize(mentionMessage.ActionLink));
+            fileLink += "&" + FilesLinkUtility.Anchor + "=" + HttpUtility.UrlEncode(ActionLinkConfig.Serialize(mentionMessage.ActionLink.ToConfig()));
         }
 
         var message = (mentionMessage.Message ?? "").Trim();
@@ -5146,7 +5146,7 @@ public class FileStorageService //: IFileStorageService
         // ones who have no access at all, which is exactly what the caller needs to know before it
         // decides whether to share.
         var aces = await fileSharing.GetSharedInfoAsync(file);
-        var result = new List<AceShortWrapper>();
+        var result = new List<AceShortDto>();
 
         foreach (var recipientId in recipients)
         {
@@ -5157,7 +5157,7 @@ public class FileStorageService //: IFileStorageService
             // dialog in the editor, and "no access" only has a name in the plain set - RoleEnum_Restrict
             // does not exist, so the room format would answer null for exactly the case the caller
             // most needs to see.
-            result.Add(new AceShortWrapper(
+            result.Add(new AceShortDto(
                 ace?.SubjectName ?? recipient.DisplayUserName(displayUserSettingsHelper),
                 FileShareExtensions.GetAccessString(ace?.Access ?? FileShare.Restrict, false),
                 false));
@@ -5823,7 +5823,7 @@ public class FileStorageService //: IFileStorageService
 
         return new FormSubmissionsDto
         {
-            Metadata = metadata,
+            Metadata = metadata?.Select(r => r.Map()),
             Submissions = submissions.Cast<DbFormsItemDataSearch>().Select(r => r.MapToFormResultsDto())
         };
     }

@@ -51,6 +51,7 @@ global using System.Text.RegularExpressions;
 global using System.Web;
 global using System.Xml;
 
+global using ASC.Api.Core.Extensions;
 global using ASC.AuditTrail.Models;
 global using ASC.AuditTrail.Repositories;
 global using ASC.Common;

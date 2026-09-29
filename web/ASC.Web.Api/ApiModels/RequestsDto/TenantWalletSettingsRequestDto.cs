@@ -31,21 +31,50 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Core.Core;
+namespace ASC.Web.Api.Models;
 
 /// <summary>
-/// The "Complete &amp; Submit" button settings.
+/// The body of an automatic top-up settings change.
 /// </summary>
-public class SubmitForm
+public class TenantWalletSettingsRequestDto
 {
     /// <summary>
-    /// Specifies whether the "Complete  &amp; Submit" button will be displayed or hidden on the top toolbar.
+    /// The settings to store. They replace the stored ones as a whole, and a body without them resets automatic
+    /// top-up to its defaults.
+    /// </summary>
+    /// <example>{"enabled": true, "minBalance": 10, "upToBalance": 100, "currency": "USD"}</example>
+    public WalletTopUpSettingsRequestDto Settings { get; set; }
+}
+
+/// <summary>
+/// The part of the automatic top-up settings a payer chooses. The low-balance warning state is kept by the portal
+/// itself and cannot be set here.
+/// </summary>
+public class WalletTopUpSettingsRequestDto
+{
+    /// <summary>
+    /// Whether the payment method on file is charged automatically when the wallet balance runs low.
     /// </summary>
     /// <example>true</example>
-    public bool Visible { get; set; }
+    public bool Enabled { get; set; }
+
     /// <summary>
-    /// A message displayed after forms are submitted.
+    /// The balance below which a top-up is charged, in `currency`.
     /// </summary>
-    /// <example>Form submitted successfully</example>
-    public string ResultMessage { get; set; }
+    /// <example>10</example>
+    [Range(5, 1000)]
+    public int MinBalance { get; set; }
+
+    /// <summary>
+    /// The balance a top-up brings the wallet up to, in `currency`.
+    /// </summary>
+    /// <example>100</example>
+    [Range(6, 5000)]
+    public int UpToBalance { get; set; }
+
+    /// <summary>
+    /// The three-letter ISO 4217 code both amounts are expressed in; it has to be the currency of the wallet.
+    /// </summary>
+    /// <example>USD</example>
+    public string Currency { get; set; }
 }

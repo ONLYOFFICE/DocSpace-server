@@ -529,7 +529,7 @@ public class PaymentHelper(
             Embedding = embedding,
             Image = image,
             WebSearch = search,
-            Currency = aiPrices.Currency
+            Currency = aiPrices.Currency.Map()
         };
     }
 

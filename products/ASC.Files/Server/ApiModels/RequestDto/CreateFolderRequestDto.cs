@@ -36,7 +36,7 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The title a folder is created with or renamed to.
 /// </summary>
-public class CreateFolder : IValidatableObject
+public class CreateFolderRequest : IValidatableObject
 {
     /// <summary>
     /// The title the folder is given. It is trimmed before it is stored and may not be blank or consist of spaces
@@ -76,5 +76,5 @@ public class CreateFolderRequestDto<T>
     /// </summary>
     /// <example>{"title": "New Folder"}</example>
     [FromBody]
-    public required CreateFolder Folder { get; set; }
+    public required CreateFolderRequest Folder { get; set; }
 }

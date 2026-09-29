@@ -31,25 +31,60 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Api.ApiModel.RequestsDto;
+namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// One time zone the host offers, as its identifier and the label to show for it.
+/// The parameters a client hashes a password with before sending it.
 /// </summary>
-public class TimezonesRequestsDto
+public class PasswordHashSettingsDto
 {
     /// <summary>
-    /// The IANA identifier of the time zone. This is the value the portal time zone is set to, so pass it on
-    /// unchanged to `PUT api/2.0/settings/timeandlanguage`.
+    /// The length of the hash, in bytes.
     /// </summary>
-    /// <example>America/New_York</example>
-    public required string Id { get; set; }
+    /// <example>32</example>
+    public int Size { get; init; }
 
     /// <summary>
-    /// The label to show for the zone, carrying its UTC offset as it stood when the list was built. The offset is a
-    /// snapshot rather than a rule, so a zone observing daylight saving reads differently at other times of the
-    /// year; sort and match on `id` instead.
+    /// The number of PBKDF2 iterations.
     /// </summary>
-    /// <example>(UTC-05:00) Eastern Time (US and Canada)</example>
-    public required string DisplayName { get; set; }
+    /// <example>100000</example>
+    public int Iterations { get; init; }
+
+    /// <summary>
+    /// The salt the installation hashes passwords with.
+    /// </summary>
+    /// <example>random_salt_value</example>
+    public string Salt { get; init; }
+}
+
+/// <summary>
+/// The rules a portal name is checked against.
+/// </summary>
+public class DomainNameRulesDto
+{
+    /// <summary>
+    /// The pattern the portal name has to match.
+    /// </summary>
+    /// <example>^[a-z0-9]([a-z0-9-]){1,61}[a-z0-9]$</example>
+    public string Regex { get; init; }
+
+    /// <summary>
+    /// The shortest portal name accepted.
+    /// </summary>
+    /// <example>6</example>
+    public int MinLength { get; init; }
+
+    /// <summary>
+    /// The longest portal name accepted.
+    /// </summary>
+    /// <example>63</example>
+    public int MaxLength { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public static partial class PortalRulesDtoMapper
+{
+    public static partial PasswordHashSettingsDto Map(this PasswordHasher source);
+
+    public static partial DomainNameRulesDto Map(this TenantDomainValidator source);
 }

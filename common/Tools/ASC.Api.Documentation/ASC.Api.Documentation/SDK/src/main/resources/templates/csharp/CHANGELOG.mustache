@@ -5,18 +5,21 @@
 ### Added
 
 - Added the reworked AI API surface in `src/DocSpace.API.SDK/Api/AI/`: `AIApi`, `AssignmentsApi`, `AttachmentsApi`, `EditorToolsApi`, `ExportApi`, `OpenAIPassthroughApi`, `PreferencesApi`, `ProfilesApi`, `PromptsApi`, `ThreadsApi`, `ToolsApi`, `WebSearchApi`
-- Added per-user AI settings endpoints and the matching models `AiAiUserSettingsDto`, `AiAiUserSettingsWrapper`, `AiAiSettingsDto`, `AiAiSettingsWrapper`
+- Added per-user AI settings endpoints and the matching models `AiUserSettingsDto`, `AiUserSettingsWrapper`, `AiSettingsDto`, `AiSettingsWrapper`
 - Added the `AppsApi` (`Api/Apps/`), `PrivacyRoomApi` (`Api/Rooms/`) and `DocsCloudApi` (`Api/Settings/`) APIs
 
 ### Changed
 
 - Renamed the AI operations after their tag: `CreateAgent` → `AiAgentsCreate`, `GetAiSettings` → `AiSettingsGet`, `GetAiUserSettings` → `AiSettingsGetUser`, `SetAiUserSettings` → `AiSettingsSetUser`
 - The AI operations now use their own `Ai`-prefixed models (for example `AiFolderIntegerWrapper` instead of `FolderIntegerWrapper`), so they no longer share the models of the Files and Portal APIs
+- Renamed the models whose names did not say what they carry; the JSON sent and received is unchanged unless stated: a JSON body nested in a request takes a `Request` suffix (`Delete` → `DeleteFileRequest`, `CreateFolder` → `CreateFolderRequest`, `CreateFileJsonElement` → `CreateFileRequest`, `MentionMessageWrapper` → `MentionMessageRequest`), a body sent on its own a `RequestDto` suffix (`CspRequestsDto` → `CspRequestDto`), returned objects a `Dto` suffix (`AceShortWrapper` → `AceShortDto`, `TimezonesRequestsDto` → `TimezoneDto`, `IAccountEntryDto` → `AccountEntryDto`), and generic or internal names became specific (`Status` → `ExternalShareStatus`, `Options` → `DocumentOptionsDto`, `SsoSettingsV2` → `SsoSettingsDto`, `STRINGArrayWrapper` → `StringArrayWrapper`, `EncryprtionStatus` → `EncryptionStatus`, `AiTProvider` → `AiProvider`)
+- Settings, database entities and other server-side classes are no longer published as models: each endpoint that returned or accepted one now uses a dedicated model of the same shape (`TenantWalletSettings` → `TenantWalletSettingsDto`, `FireBaseUser` → `FirebaseDeviceDto`, `UserInfo` inside `MentionDto` → `EmployeeDto`, `UserInfo` → `PortalUserDto`, `TenantQuota` → `TenantQuotaDto`, `Balance` → `BalanceDto`, `DocsCloudConfig` → `DocsCloudConfigDto`, `BackupProgress` → `BackupProgressDto`, `CoEditingConfig` → `CoEditingConfigDto`, `Logo` → `LogoDto`, `ChunkedUploadSessionResponse` → `ChunkedUploadSessionDto`, `ThirdPartyParams` → `ThirdPartyAccountDto`); request models no longer carry the fields the server sets itself (`lastModified`, `lowBalanceNotified`)
+- The third-party accounts returned by `GET /api/2.0/files/thirdparty` no longer have the `auth_data` property; it was never filled in
 
 ### Removed
 
 - Removed the superseded AI API classes `ChatApi`, `MCPApi`, `MessagesApi` and `ProvidersApi` from `src/DocSpace.API.SDK/Api/AI/`
-- Removed the superseded AI settings models `AiSettingsDto`, `AiSettingsWrapper`, `AiUserSettingsDto`, `AiUserSettingsWrapper` and `SetAiUserSettingsRequestDto`, replaced by `AiAiSettingsDto`, `AiAiSettingsWrapper`, `AiAiUserSettingsDto` and `AiAiUserSettingsWrapper`
+- Removed the superseded AI settings model `SetAiUserSettingsRequestDto`; `AiSettingsDto`, `AiSettingsWrapper`, `AiUserSettingsDto` and `AiUserSettingsWrapper` keep their names but now describe the reworked AI settings
 
 ## 3.7.0
 

@@ -92,32 +92,6 @@ public class ActionLinkConfig
 }
 
 /// <summary>
-/// How co-editing is preset when the document opens, and whether the user may switch it afterwards.
-/// </summary>
-public class CoEditingConfig
-{
-    /// <summary>
-    /// Whether the user may switch between the two co-editing modes from the editor interface, or is held to the one
-    /// the portal preset.
-    /// </summary>
-    /// <example>true</example>
-    public bool Change { get; set; }
-
-    /// <summary>
-    /// Whether other participants see each change as it is typed. Left off, changes are exchanged only when a
-    /// participant saves, and the paragraph being edited is locked for the others meanwhile.
-    /// </summary>
-    /// <example>false</example>
-    public bool Fast { get; init; }
-
-    /// <summary>
-    /// The mode the two settings above amount to, as the editors name it.
-    /// </summary>
-    /// <example>Strict</example>
-    public CoEditingConfigMode Mode => Fast ? CoEditingConfigMode.Fast : CoEditingConfigMode.Strict;
-}
-
-/// <summary>
 /// The co-editing mode (fast or strict).
 /// </summary>
 [EnumExtensions]
@@ -216,7 +190,7 @@ public class DocumentConfig<T>(
     TenantManager tenantManager)
 {
     private string _fileUri;
-    private FileReferenceData _referenceData;
+    private FileReferenceDataDto _referenceData;
     public string GetFileType(File<T> file) => file.ConvertedExtension.Trim('.');
     public InfoConfig<T> Info { get; } = infoConfig;
     public bool IsLinkedForMe { get; set; }
@@ -227,14 +201,14 @@ public class DocumentConfig<T>(
         get => DocumentServiceConnector.GenerateRevisionId(field);
     } = string.Empty;
 
-    public PermissionsConfig Permissions { get; set; } = new();
+    public PermissionsConfigDto Permissions { get; set; } = new();
 
     public Options Options { get; set; }
     public string SharedLinkParam { get; set; }
     public string SharedLinkKey { get; set; }
-    public FileReferenceData GetReferenceData(File<T> file)
+    public FileReferenceDataDto GetReferenceData(File<T> file)
     {
-        return _referenceData ??= new FileReferenceData
+        return _referenceData ??= new FileReferenceDataDto
         {
             FileKey = file.Id.ToString(),
             InstanceId = tenantManager.GetCurrentTenantId().ToString()
@@ -271,8 +245,8 @@ public class EditorConfiguration<T>(
     FilesLinkUtility filesLinkUtility,
     FileUtility fileUtility,
     BaseCommonLinkUtility baseCommonLinkUtility,
-    PluginsConfig pluginsConfig,
-    EmbeddedConfig embeddedConfig,
+    PluginsConfigDto pluginsConfig,
+    EmbeddedConfigDto embeddedConfig,
     CustomizationConfig<T> customizationConfig,
     FilesSettingsHelper filesSettingsHelper,
     IDaoFactory daoFactory,
@@ -284,7 +258,7 @@ public class EditorConfiguration<T>(
     TariffService tariffService,
     TenantManager tenantManager)
 {
-    public PluginsConfig Plugins { get; } = pluginsConfig;
+    public PluginsConfigDto Plugins { get; } = pluginsConfig;
     public CustomizationConfig<T> Customization { get; } = customizationConfig;
     public List<EncryptionKeyDto> EncryptionKeys { get; set; }
 
@@ -296,8 +270,8 @@ public class EditorConfiguration<T>(
 
     private UserInfo UserInfo => field ??= userManager.GetUsers(authContext.CurrentAccount.ID);
 
-    private UserConfig _user;
-    public async Task<UserConfig> GetUserAsync()
+    private UserConfigDto _user;
+    public async Task<UserConfigDto> GetUserAsync()
     {
         if (_user != null || UserInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID))
         {
@@ -306,7 +280,7 @@ public class EditorConfiguration<T>(
 
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenantManager.GetCurrentTenantId());
 
-        _user = new UserConfig
+        _user = new UserConfigDto
         {
             Id = UserInfo.Id.ToString(),
             Name = UserInfo.DisplayUserName(false, displayUserSettingsHelper),
@@ -340,10 +314,10 @@ public class EditorConfiguration<T>(
         return externalShare.GetUrlWithShare(callbackUrl, key);
     }
 
-    public async Task<CoEditingConfig> GetCoEditingAsync()
+    public async Task<CoEditingConfigDto> GetCoEditingAsync()
     {
         return !ModeWrite && await GetUserAsync() == null
-            ? new CoEditingConfig
+            ? new CoEditingConfigDto
             {
                 Fast = false,
                 Change = false
@@ -393,12 +367,12 @@ public class EditorConfiguration<T>(
                + "&" + FilesLinkUtility.FileTitle + "=" + HttpUtility.UrlEncode(title);
     }
 
-    public EmbeddedConfig GetEmbedded(EditorType editorType)
+    public EmbeddedConfigDto GetEmbedded(EditorType editorType)
     {
         return editorType == EditorType.Embedded ? embeddedConfig : null;
     }
 
-    public async IAsyncEnumerable<RecentConfig> GetRecent(FileType fileType, T fileId)
+    public async IAsyncEnumerable<RecentConfigDto> GetRecent(FileType fileType, T fileId)
     {
         if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
@@ -440,7 +414,7 @@ public class EditorConfiguration<T>(
         }
     }
 
-    private async IAsyncEnumerable<RecentConfig> GetRecentConfigsAsync<TFile>(List<File<TFile>> files, IFolderDao<TFile> folderDao)
+    private async IAsyncEnumerable<RecentConfigDto> GetRecentConfigsAsync<TFile>(List<File<TFile>> files, IFolderDao<TFile> folderDao)
     {
         if (files.Count == 0)
         {
@@ -461,7 +435,7 @@ public class EditorConfiguration<T>(
 
             var webUrl = externalShare.GetUrlWithShare(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), requestToken);
 
-            yield return new RecentConfig
+            yield return new RecentConfigDto
             {
                 Folder = parentFolders.FirstOrDefault(r => Equals(file.ParentId, r.Id))?.Title,
                 Title = file.Title,
@@ -470,7 +444,7 @@ public class EditorConfiguration<T>(
         }
     }
 
-    public async Task<List<TemplatesConfig>> GetTemplates(FileType fileType, string title)
+    public async Task<List<TemplatesConfigDto>> GetTemplates(FileType fileType, string title)
     {
         if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
@@ -498,7 +472,7 @@ public class EditorConfiguration<T>(
         var files = await entryManager.GetTemplatesAsync(folderDao, fileDao, filter, false, Guid.Empty, string.Empty, null, false).ToListAsync();
         var listTemplates = from file in files
                             select
-                                new TemplatesConfig
+                                new TemplatesConfigDto
                                 {
                                     Image = baseCommonLinkUtility.GetFullAbsolutePath("skins/default/images/filetype/thumb/" + extension + ".png"),
                                     Title = file.Title,
@@ -565,7 +539,7 @@ public class InfoConfig<T>(
 
     public string GetOwner(File<T> file) => file.CreateByString;
 
-    public async Task<List<AceShortWrapper>> GetSharingSettings(File<T> file)
+    public async Task<List<AceShortDto>> GetSharingSettings(File<T> file)
     {
         if (Type == EditorType.Embedded || !await fileSharing.CanSetAccessAsync(file))
         {
@@ -585,73 +559,6 @@ public class InfoConfig<T>(
     public EditorType Type { get; set; } = EditorType.Desktop;
 
     public string GetUploaded(File<T> file) => file.CreateOnString;
-}
-
-/// <summary>
-/// The permissions configuration parameters.
-/// </summary>
-public class PermissionsConfig
-{
-    /// <summary>
-    /// Defines if the document can be commented or not.
-    /// </summary>
-    /// <example>true</example>
-    public bool Comment { get; set; } = true;
-
-    /// <summary>
-    /// Defines if the chat functionality is enabled in the document or not.
-    /// </summary>
-    /// <example>true</example>
-    public bool Chat { get; set; } = true;
-
-    /// <summary>
-    /// Defines if the document can be downloaded or only viewed or edited online.
-    /// </summary>
-    /// <example>true</example>
-    public bool Download { get; set; } = true;
-
-    /// <summary>
-    /// Defines if the document can be edited or only viewed.
-    /// </summary>
-    /// <example>true</example>
-    public bool Edit { get; set; } = true;
-
-    /// <summary>
-    /// Defines if the forms can be filled.
-    /// </summary>
-    /// <example>true</example>
-    public bool FillForms { get; set; } = true;
-
-    /// <summary>
-    /// Defines if the filter can be applied globally (true) affecting all the other users,
-    /// or locally (false), i.e. for the current user only.
-    /// </summary>
-    /// <example>true</example>
-    public bool ModifyFilter { get; set; } = true;
-
-    /// <summary>
-    /// Defines if the "Protection" tab on the toolbar and the "Protect" button in the left menu are displayedor hidden.
-    /// </summary>
-    /// <example>true</example>
-    public bool Protect { get; set; } = true;
-
-    /// <summary>
-    /// Defines if the document can be printed or not.
-    /// </summary>
-    /// <example>true</example>
-    public bool Print { get; set; } = true;
-
-    /// <summary>
-    /// Defines if the document can be reviewed or not.
-    /// </summary>
-    /// <example>true</example>
-    public bool Review { get; set; } = true;
-
-    /// <summary>
-    /// Defines if the content can be copied to the clipboard or not.
-    /// </summary>
-    /// <example>true</example>
-    public bool Copy { get; set; } = true;
 }
 
 /// <summary>
@@ -816,99 +723,6 @@ public class Run(string text, bool usedInHash = true)
     public string FontSize { get; set; } = "26";
 }
 
-/// <summary>
-/// The file reference parameters.
-/// </summary>
-public class FileReference
-{
-    /// <summary>
-    /// How this document is named when another spreadsheet refers to it. Send it back as it stands to resolve the
-    /// reference again.
-    /// </summary>
-    /// <example>{"fileKey": "512", "instanceId": "1"}</example>
-    public FileReferenceData ReferenceData { get; set; }
-
-    /// <summary>
-    /// Filled in when the reference resolved to nothing; the rest of the descriptor is then empty and must not be
-    /// handed to the editors.
-    /// </summary>
-    /// <example>File not found</example>
-    public string Error { get; set; }
-
-    /// <summary>
-    /// The title of the document the reference resolved to.
-    /// </summary>
-    /// <example>Budget 2026.xlsx</example>
-    public string Path { get; set; }
-
-    /// <summary>
-    /// Where the content is fetched from. It is addressed to the host the document service can reach, which on a
-    /// deployment with a private editor network is not the address a browser should follow.
-    /// </summary>
-    /// <example>https://portal.example.com/filehandler.ashx?action=download&amp;fileid=512</example>
-    [Url]
-    public string Url { get; set; }
-
-    /// <summary>
-    /// The format the content is in, without the leading dot.
-    /// </summary>
-    /// <example>xlsx</example>
-    public string FileType { get; set; }
-
-    /// <summary>
-    /// Identifies the exact revision to the editors: two clients that receive the same key read the same co-editing
-    /// session, and the key changes as soon as the document is saved.
-    /// </summary>
-    /// <example>1_512_3</example>
-    public string Key { get; set; }
-
-    /// <summary>
-    /// The address of the document in the portal web editor - the link to put in front of a person, unlike the
-    /// download address above.
-    /// </summary>
-    /// <example>https://portal.example.com/doceditor?fileid=512</example>
-    public string Link { get; set; }
-
-    /// <summary>
-    /// Signs this descriptor so that the editors can trust it. It stays empty on a portal that has no signature
-    /// secret configured for the document service.
-    /// </summary>
-    /// <example>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</example>
-    public string Token { get; set; }
-}
-
-/// <summary>
-/// The pair of values that names a document across portals, as it is written into a spreadsheet formula.
-/// </summary>
-public class FileReferenceData
-{
-    /// <summary>
-    /// The id of the document inside the portal named below.
-    /// </summary>
-    /// <example>512</example>
-    public string FileKey { get; set; }
-
-    /// <summary>
-    /// The portal the document lives in. A reference whose value is not this portal cannot be resolved by the file
-    /// key and falls back to the path or the link.
-    /// </summary>
-    /// <example>1</example>
-    public string InstanceId { get; set; }
-
-    /// <summary>
-    /// The room the document lies in. It is filled in only for a document opened in a virtual data room, and stays
-    /// empty everywhere else.
-    /// </summary>
-    /// <example>42</example>
-    public string RoomId { get; set; }
-
-    /// <summary>
-    /// Whether the caller may manage the room named above; it is only meaningful together with it.
-    /// </summary>
-    /// <example>true</example>
-    public bool CanEditRoom { get; set; }
-}
-
 #endregion Nested Classes
 
 /// <summary>
@@ -975,7 +789,7 @@ public class CustomizationConfig<T>(
 
     public CustomerConfig Customer { get; set; } = customerConfig;
 
-    public async Task<FeedbackConfig> GetFeedback()
+    public async Task<FeedbackConfigDto> GetFeedback()
     {
         if (coreBaseSettings.Standalone)
         {
@@ -989,7 +803,7 @@ public class CustomizationConfig<T>(
             return null;
         }
 
-        return new FeedbackConfig
+        return new FeedbackConfigDto
         {
             Url = link
         };
@@ -1002,11 +816,11 @@ public class CustomizationConfig<T>(
                && filesSettingsHelper.GetForcesave();
     }
 
-    public async Task<GobackConfig> GetGoBack(EditorType editorType, File<T> file)
+    public async Task<GobackConfigDto> GetGoBack(EditorType editorType, File<T> file)
     {
         if (GobackUrl != null)
         {
-            return new GobackConfig
+            return new GobackConfigDto
             {
                 Url = GobackUrl
             };
@@ -1021,7 +835,7 @@ public class CustomizationConfig<T>(
             if (shareRight != FileShare.Restrict && !string.IsNullOrEmpty(key))
             {
                 parent = await folderDao.GetFolderAsync(file.ParentId);
-                return new GobackConfig
+                return new GobackConfigDto
                 {
                     Url = pathProvider.GetFolderUrl(parent, key)
                 };
@@ -1053,7 +867,7 @@ public class CustomizationConfig<T>(
                     url = pathProvider.GetFolderUrl(await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderShareAsync<T>()), key);
                 }
 
-                return new GobackConfig
+                return new GobackConfigDto
                 {
                     Url = url
                 };
@@ -1074,7 +888,7 @@ public class CustomizationConfig<T>(
                 parent = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderShareAsync<T>());
             }
 
-            return new GobackConfig
+            return new GobackConfigDto
             {
                 Url = pathProvider.GetFolderUrl(parent, key)
             };
@@ -1095,29 +909,29 @@ public class CustomizationConfig<T>(
                && await fileSharing.CanSetAccessAsync(file);
     }
 
-    public ReviewConfig GetReview(bool modeWrite)
+    public ReviewConfigDto GetReview(bool modeWrite)
     {
-        return modeWrite ? null : new ReviewConfig { ReviewDisplayEnum = ReviewDisplayEnum.Markup };
+        return modeWrite ? null : new ReviewConfigDto { ReviewDisplayEnum = ReviewDisplayEnum.Markup };
     }
 
-    public async Task<SubmitForm> GetSubmitForm(File<T> file)
+    public async Task<SubmitFormDto> GetSubmitForm(File<T> file)
     {
         if (!file.IsPdf)
         {
             return null;
         }
         var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
-        return new SubmitForm
+        return new SubmitFormDto
         {
             Visible = file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormAsync(file, authContext.CurrentAccount.ID) && properties is { FormFilling.StartFilling: true } or { FormFilling.CollectFillForm: true },
             ResultMessage = ""
         };
     }
 
-    public async Task<AIConfig> GetAIConfigAsync()
+    public async Task<AiConfigDto> GetAIConfigAsync()
     {
         var settings = await settingsManager.LoadAsync<TenantAiAccessSettings>();
-        return new AIConfig
+        return new AiConfigDto
         {
             Disabled = !settings.Enabled
         };
@@ -1152,102 +966,9 @@ public class CustomizationConfig<T>(
 /// The addresses the framed viewer needs. It is reported for the embedded layout only.
 /// </summary>
 
-[Transient]
-public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility)
-{
-    /// <summary>
-    /// The page to put into the frame. It is empty when the opening carries no external share key, since a framed
-    /// viewer cannot authenticate a portal member.
-    /// </summary>
-    /// <example>https://portal.example.com/products/files/doceditor?action=embedded&amp;share=HkQd9nT2</example>
-    public string EmbedUrl
-    {
-        get => field ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null);
-        set;
-    }
-
-    /// <summary>
-    /// Where the download button of the framed viewer leads.
-    /// </summary>
-    /// <example>https://portal.example.com/filehandler.ashx?action=download&amp;share=HkQd9nT2</example>
-    public string SaveUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath + "?" + FilesLinkUtility.Action + "=download" + ShareLinkParam);
-
-    /// <summary>
-    /// The query fragment carrying the external share key, ampersand included, out of which the addresses around it
-    /// are built.
-    /// </summary>
-    /// <example>&amp;fileid=512&amp;share=HkQd9nT2</example>
-    public string ShareLinkParam { get; set; }
-
-    /// <summary>
-    /// The address behind the share button of the framed viewer, the document opened full-screen for reading. It is
-    /// empty when the opening carries no external share key.
-    /// </summary>
-    /// <example>https://portal.example.com/products/files/doceditor?action=view&amp;share=HkQd9nT2</example>
-    public string ShareUrl
-    {
-        get => field ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null);
-        set;
-    }
-
-    /// <summary>
-    /// Where the framed viewer puts its toolbar. The portal always asks for the top.
-    /// </summary>
-    /// <example>top</example>
-    public string ToolbarDocked => "top";
-}
-
-/// <summary>
-/// The settings for the "Feedback &amp; Support" menu button.
-/// </summary>
-public class FeedbackConfig
-{
-    /// <summary>
-    /// The absolute URL to the website address which will be opened when clicking the "Feedback &amp; Support" menu button.
-    /// </summary>
-    /// <example>https://portal.example.com/support</example>
-    public string Url { get; set; }
-
-    /// <summary>
-    /// Whether the support button is shown. The portal always asks for it to be shown.
-    /// </summary>
-    /// <example>true</example>
-    public bool Visible => true;
-}
-
-/// <summary>
-/// The settings for the "Open file location" menu button and upper right corner button.
-/// </summary>
-public class GobackConfig
-{
-    /// <summary>
-    /// Where the user is taken when they leave the document, normally the folder or the room it lies in. It is empty
-    /// when there is nowhere to return to, as in a framed opening.
-    /// </summary>
-    /// <example>https://portal.example.com/rooms/shared/42</example>
-    public string Url { get; set; }
-}
-
 /// <summary>
 /// How tracked changes are displayed when the document opens.
 /// </summary>
-
-public class ReviewConfig
-{
-    /// <summary>
-    /// How the editors render tracked changes at first: with the markup, in a simplified markup, as the final text,
-    /// or as the original text. A session that may not write opens on the final text.
-    /// </summary>
-    /// <example>original</example>
-    public string ReviewDisplay { get; private set; }
-
-    /// <summary>
-    /// Sets the review display value using enum representation.
-    /// This property is ignored during JSON serialization.
-    /// </summary>
-    [JsonIgnore]
-    public ReviewDisplayEnum ReviewDisplayEnum { set => ReviewDisplay = value.ToStringLowerFast(); }
-}
 
 [EnumExtensions]
 public enum ReviewDisplayEnum
@@ -1309,151 +1030,16 @@ public class LogoConfig(
 /// Which editor add-ons the portal connects. It currently connects none.
 /// </summary>
 
-[Transient]
-public class PluginsConfig
-// ConsumerFactory consumerFactory,
-// BaseCommonLinkUtility baseCommonLinkUtility,
-// CoreBaseSettings coreBaseSettings,
-// TenantManager tenantManager)
-{
-    // private readonly BaseCommonLinkUtility _baseCommonLinkUtility = baseCommonLinkUtility;
-    //
-    // private readonly ConsumerFactory _consumerFactory = consumerFactory;
-    //
-    // private readonly CoreBaseSettings _coreBaseSettings = coreBaseSettings;
-    // private readonly TenantManager _tenantManager = tenantManager;
-
-    /// <summary>
-    /// The array of absolute URLs to the plugin configuration files.
-    /// </summary>
-    /// <example>
-    /// [
-    ///   "https://portal.example.com/ThirdParty/plugin/easybib/config.json",
-    ///   "https://portal.example.com/ThirdParty/plugin/wordpress/config.json"
-    /// ]
-    /// </example>
-    public string[] PluginsData =>
-        //var plugins = new List<string>();
-        //if (_coreBaseSettings.Standalone || !_tenantManager.GetCurrentTenantQuota().Free)
-        //{
-        //    var easyBibHelper = _consumerFactory.Get<EasyBibHelper>();
-        //    if (!string.IsNullOrEmpty(easyBibHelper.AppKey))
-        //    {
-        //        plugins.Add(_baseCommonLinkUtility.GetFullAbsolutePath("ThirdParty/plugin/easybib/config.json"));
-        //    }
-        //    var wordpressLoginProvider = _consumerFactory.Get<WordpressLoginProvider>();
-        //    if (!string.IsNullOrEmpty(wordpressLoginProvider.ClientID) &&
-        //        !string.IsNullOrEmpty(wordpressLoginProvider.ClientSecret) &&
-        //        !string.IsNullOrEmpty(wordpressLoginProvider.RedirectUri))
-        //    {
-        //        plugins.Add(_baseCommonLinkUtility.GetFullAbsolutePath("ThirdParty/plugin/wordpress/config.json"));
-        //    }
-        //}
-        //return plugins.ToArray();
-        [];
-}
-
 /// <summary>
 /// One entry of the recent-documents list the editor offers.
 /// </summary>
-
-public class RecentConfig
-{
-    /// <summary>
-    /// The folder shown next to the entry, as a readable name rather than an id.
-    /// </summary>
-    /// <example>My documents</example>
-    public string Folder { get; set; }
-
-    /// <summary>
-    /// The name shown for the entry.
-    /// </summary>
-    /// <example>Report 2026.docx</example>
-    public string Title { get; set; }
-
-    /// <summary>
-    /// Where the entry opens.
-    /// </summary>
-    /// <example>https://portal.example.com/doceditor?fileid=512</example>
-    [Url]
-    public string Url { get; set; }
-}
 
 /// <summary>
 /// One creation template offered in the editor. The portal no longer offers any, so this never appears in an editor
 /// configuration.
 /// </summary>
 
-public class TemplatesConfig
-{
-    /// <summary>
-    /// The absolute URL to the image for template.
-    /// </summary>
-    /// <example>https://portal.example.com/templates/template1.png</example>
-    public string Image { get; set; }
-
-    /// <summary>
-    /// The template title that will be displayed in the "Create New..." menu option.
-    /// </summary>
-    /// <example>Blank Document</example>
-    public string Title { get; set; }
-
-    /// <summary>
-    /// The absolute URL to the document where it will be created and available after creation.
-    /// </summary>
-    /// <example>https://portal.example.com/editor/new?template=blank</example>
-    [Url]
-    public string Url { get; set; }
-}
-
 /// <summary>
 /// The account the editors attribute the changes of this session to.
 /// </summary>
 
-public class UserConfig
-{
-    /// <summary>
-    /// The account the changes are recorded under. Two sessions carrying the same value are taken by the editors for
-    /// the same person.
-    /// </summary>
-    /// <example>9924256b-447c-4f19-9dbd-8ad8c39e8ff5</example>
-    public string Id { get; set; }
-
-    /// <summary>
-    /// The name shown next to the changes and in the list of participants.
-    /// </summary>
-    /// <example>John Doe</example>
-    public string Name { get; set; }
-
-    /// <summary>
-    /// An absolute address of the avatar shown for this participant.
-    /// </summary>
-    /// <example>https://portal.example.com/storage/userphotos/9924256b_medium.png</example>
-    public string Image { get; set; }
-
-    /// <summary>
-    /// The filling roles this participant holds in the form being filled out. It is set only for a form in a virtual
-    /// data room, where the role decides which fields open for them.
-    /// </summary>
-    /// <example>["Manager"]</example>
-    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
-    public List<string> Roles { get; set; }
-
-    /// <summary>
-    /// Identifies the paying customer this participant belongs to, on deployments where the editors are licensed per
-    /// customer.
-    /// </summary>
-    /// <example>cust_001</example>
-    public string CustomerId { get; set; }
-}
-
-public class AIConfig
-{
-    /// <summary>
-    /// Indicates whether the AI feature is disabled.
-    /// </summary>
-    /// <example>
-    /// true
-    /// </example>
-    public bool Disabled { get; set; }
-}

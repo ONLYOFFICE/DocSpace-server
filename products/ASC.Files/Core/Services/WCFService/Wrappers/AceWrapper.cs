@@ -174,7 +174,7 @@ public static partial class RoomInvitationMapper
 /// level, rather than an access record with identifiers. Entries that deny access and invitation links are left out,
 /// so the list names only the subjects and links that can currently open the document.
 /// </summary>
-public class AceShortWrapper(string subjectName, string permission, bool isLink)
+public class AceShortDto(string subjectName, string permission, bool isLink)
 {
     /// <summary>
     /// Who or what the line stands for, as a display string: the display name of a member, the name of a group, or

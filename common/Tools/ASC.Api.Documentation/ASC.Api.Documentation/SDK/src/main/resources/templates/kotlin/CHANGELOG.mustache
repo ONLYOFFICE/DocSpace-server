@@ -5,9 +5,15 @@
 ### Added
 
 - Added the reworked AI API surface in `apis/AI/`: `AIAIApi`, `AIAgentsApi`, `AIAssignmentsApi`, `AIAttachmentsApi`, `AIEditorToolsApi`, `AIExportApi`, `AIOpenAIPassthroughApi`, `AIPreferencesApi`, `AIProfilesApi`, `AIPromptsApi`, `AISettingsApi`, `AIThreadsApi`, `AIToolsApi`, `AIVectorizationApi`, `AIWebSearchApi`
-- Added per-user AI settings endpoints and the matching models `AiAiUserSettingsDto`, `AiAiUserSettingsWrapper`, `AiAiSettingsDto`, `AiAiSettingsWrapper`
+- Added per-user AI settings endpoints and the matching models `AiUserSettingsDto`, `AiUserSettingsWrapper`, `AiSettingsDto`, `AiSettingsWrapper`
 - Added a runnable usage sample in `samples/sample.kt`: authentication, the "My documents" folder lookup, folder create/rename/delete, the room listing and a backup run with progress polling
 - Added `ValueEnumJsonAdapterFactory` to `infrastructure/Serializer.kt`, so value-backed enums also accept the numeric JSON form the API returns (for example `fileEntryType`, which previously failed with `JsonDataException: Expected one of [1, 2] but was 2`)
+
+### Changed
+
+- Renamed the models whose names did not say what they carry; the JSON sent and received is unchanged unless stated: a JSON body nested in a request takes a `Request` suffix (`Delete` → `DeleteFileRequest`, `CreateFolder` → `CreateFolderRequest`, `CreateFileJsonElement` → `CreateFileRequest`, `MentionMessageWrapper` → `MentionMessageRequest`), a body sent on its own a `RequestDto` suffix (`CspRequestsDto` → `CspRequestDto`), returned objects a `Dto` suffix (`AceShortWrapper` → `AceShortDto`, `TimezonesRequestsDto` → `TimezoneDto`, `IAccountEntryDto` → `AccountEntryDto`), and generic or internal names became specific (`Status` → `ExternalShareStatus`, `Options` → `DocumentOptionsDto`, `SsoSettingsV2` → `SsoSettingsDto`, `STRINGArrayWrapper` → `StringArrayWrapper`, `EncryprtionStatus` → `EncryptionStatus`, `AiTProvider` → `AiProvider`)
+- Settings, database entities and other server-side classes are no longer published as models: each endpoint that returned or accepted one now uses a dedicated model of the same shape (`TenantWalletSettings` → `TenantWalletSettingsDto`, `FireBaseUser` → `FirebaseDeviceDto`, `UserInfo` inside `MentionDto` → `EmployeeDto`, `UserInfo` → `PortalUserDto`, `TenantQuota` → `TenantQuotaDto`, `Balance` → `BalanceDto`, `DocsCloudConfig` → `DocsCloudConfigDto`, `BackupProgress` → `BackupProgressDto`, `CoEditingConfig` → `CoEditingConfigDto`, `Logo` → `LogoDto`, `ChunkedUploadSessionResponse` → `ChunkedUploadSessionDto`, `ThirdPartyParams` → `ThirdPartyAccountDto`); request models no longer carry the fields the server sets itself (`lastModified`, `lowBalanceNotified`)
+- The third-party accounts returned by `GET /api/2.0/files/thirdparty` no longer have the `auth_data` property; it was never filled in
 
 ### Fixed
 

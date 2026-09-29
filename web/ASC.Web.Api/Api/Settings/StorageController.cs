@@ -233,17 +233,17 @@ public class StorageController(
 
         settings.NotifyUsers = notifyUsers;
 
-        if (settings.Status == EncryprtionStatus.Decrypted)
+        if (settings.Status == EncryptionStatus.Decrypted)
         {
-            settings.Status = EncryprtionStatus.EncryptionStarted;
+            settings.Status = EncryptionStatus.EncryptionStarted;
             settings.Password = encryptionSettingsHelper.GeneratePassword(32, 16);
         }
-        else if (settings.Status == EncryprtionStatus.Encrypted)
+        else if (settings.Status == EncryptionStatus.Encrypted)
         {
-            settings.Status = EncryprtionStatus.DecryptionStarted;
+            settings.Status = EncryptionStatus.DecryptionStarted;
         }
 
-        messageService.Send(settings.Status == EncryprtionStatus.EncryptionStarted ? MessageAction.StartStorageEncryption : MessageAction.StartStorageDecryption);
+        messageService.Send(settings.Status == EncryptionStatus.EncryptionStarted ? MessageAction.StartStorageEncryption : MessageAction.StartStorageDecryption);
 
         var serverRootPath = commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/');
 
@@ -253,7 +253,7 @@ public class StorageController(
 
             if (notifyUsers)
             {
-                if (settings.Status == EncryprtionStatus.EncryptionStarted)
+                if (settings.Status == EncryptionStatus.EncryptionStarted)
                 {
                     await studioNotifyService.SendStorageEncryptionStartAsync(serverRootPath);
                 }
@@ -287,8 +287,7 @@ public class StorageController(
     /// <remarks>
     /// Returns the encryption state of the installation storage: the status, which is one of decrypted, encryption
     /// started, encrypted or decryption started, and the flag saying whether users are mailed when an encryption run
-    /// begins. The password is deliberately blanked out, so the field always comes back empty even on an encrypted
-    /// installation. The caller is expected to have the permission to edit portal settings, which in practice means
+    /// begins. The encryption password is never returned. The caller is expected to have the permission to edit portal settings, which in practice means
     /// the portal owner or a DocSpace admin, on a server installation with an unrestricted access space; on any other
     /// installation, and whenever the check fails, the operation answers with an empty body instead of an error. An
     /// empty answer is therefore not proof that encryption is off, only that the settings cannot be read in this
@@ -301,11 +300,11 @@ public class StorageController(
     /// </summary>
     /// <path>api/2.0/settings/encryption/settings</path>
     [Tags("Settings / Encryption")]
-    [SwaggerResponse(200, "The encryption status and the notify-users flag, with the password blanked out; empty where encryption settings cannot be read", typeof(EncryptionSettings))]
+    [SwaggerResponse(200, "The encryption status and the notify-users flag; empty where encryption settings cannot be read", typeof(EncryptionSettingsDto))]
     [SwaggerResponse(403, "The caller may not edit portal settings")]
     [SwaggerResponse(405, "Storage encryption is not available on this installation")]
     [HttpGet("encryption/settings")]
-    public async Task<EncryptionSettings> GetStorageEncryptionSettings()
+    public async Task<EncryptionSettingsDto> GetStorageEncryptionSettings()
     {
         try
         {
@@ -325,9 +324,7 @@ public class StorageController(
 
             var settings = await encryptionSettingsHelper.LoadAsync();
 
-            settings.Password = string.Empty; // Don't show password
-
-            return settings;
+            return settings.Map();
         }
         catch (Exception e)
         {
@@ -395,11 +392,11 @@ public class StorageController(
     /// </summary>
     /// <path>api/2.0/settings/storage</path>
     [Tags("Settings / Storage")]
-    [SwaggerResponse(200, "The saved storage configuration; migration of the portal data to it has been started", typeof(StorageSettings))]
+    [SwaggerResponse(200, "The saved storage configuration; migration of the portal data to it has been started", typeof(StorageSettingsDto))]
     [SwaggerResponse(400, "The requested storage module is not configured on this installation")]
     [SwaggerResponse(403, "The caller may not edit portal settings, or this installation does not allow changing the storage")]
     [HttpPut("storage")]
-    public async Task<StorageSettings> UpdateStorage(StorageRequestsDto inDto)
+    public async Task<StorageSettingsDto> UpdateStorage(StorageRequestsDto inDto)
     {
         try
         {
@@ -416,14 +413,14 @@ public class StorageController(
             var settings = await settingsManager.LoadAsync<StorageSettings>();
             if (settings.Module == inDto.Module)
             {
-                return settings;
+                return settings.Map();
             }
 
             settings.Module = inDto.Module;
             settings.Props = inDto.Props.ToDictionary(r => r.Key, b => b.Value);
 
             await StartMigrateAsync(settings);
-            return settings;
+            return settings.Map();
         }
         catch (Exception e)
         {
@@ -533,11 +530,11 @@ public class StorageController(
     /// </summary>
     /// <path>api/2.0/settings/storage/cdn</path>
     [Tags("Settings / Storage")]
-    [SwaggerResponse(200, "The saved CDN configuration; the upload of the static content has been handed to the storage service", typeof(CdnStorageSettings))]
+    [SwaggerResponse(200, "The saved CDN configuration; the upload of the static content has been handed to the storage service", typeof(StorageSettingsDto))]
     [SwaggerResponse(400, "The requested CDN module is not configured on this installation")]
     [SwaggerResponse(403, "The caller may not edit portal settings, or this installation does not allow changing the storage")]
     [HttpPut("storage/cdn")]
-    public async Task<CdnStorageSettings> UpdateCdnStorage(StorageRequestsDto inDto)
+    public async Task<StorageSettingsDto> UpdateCdnStorage(StorageRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -552,7 +549,7 @@ public class StorageController(
         var settings = await settingsManager.LoadAsync<CdnStorageSettings>();
         if (settings.Module == inDto.Module)
         {
-            return settings;
+            return settings.Map();
         }
 
         settings.Module = inDto.Module;
@@ -569,7 +566,7 @@ public class StorageController(
             throw;
         }
 
-        return settings;
+        return settings.Map();
     }
 
     /// <remarks>

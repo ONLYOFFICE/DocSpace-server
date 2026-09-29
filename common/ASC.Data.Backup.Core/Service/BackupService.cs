@@ -199,13 +199,13 @@ public class BackupService(
         }
     }
 
-    public async Task<List<BackupHistoryRecord>> GetBackupHistoryAsync(bool dump)
+    public async Task<List<BackupRecord>> GetBackupHistoryAsync(bool dump)
     {
         await DemandPermissionsBackupAsync();
 
         var tenantId = dump ? -1 : tenantManager.GetCurrentTenantId();
 
-        var backupHistory = new List<BackupHistoryRecord>();
+        var backupHistory = new List<BackupRecord>();
         foreach (var record in await backupRepository.GetBackupRecordsByTenantIdAsync(tenantId))
         {
             var storage = await backupStorageFactory.GetBackupStorageAsync(record);
@@ -216,14 +216,7 @@ public class BackupService(
 
             if (await storage.IsExistsAsync(record.StoragePath))
             {
-                backupHistory.Add(new BackupHistoryRecord
-                {
-                    Id = record.Id,
-                    FileName = record.Name,
-                    StorageType = record.StorageType,
-                    CreatedOn = record.CreatedOn,
-                    ExpiresOn = record.ExpiresOn
-                });
+                backupHistory.Add(record);
             }
             else
             {
@@ -452,39 +445,13 @@ public class BackupService(
         return Path.Combine(folder, $"{tenantId}-{BackupFileName}");
     }
 
-    public async Task<ScheduleDto> GetScheduleAsync(bool? dump)
+    public async Task<ScheduleResponse> GetScheduleAsync(bool? dump)
     {
         await DemandPermissionsBackupAsync();
-        ScheduleResponse response;
-        if (dump.HasValue && dump.Value)
-        {
-            response = await InnerGetScheduleAsync(-1, dump);
-        }
-        else
-        {
-            response = await InnerGetScheduleAsync(tenantManager.GetCurrentTenantId(), dump);
-        }
-        if (response == null)
-        {
-            return null;
-        }
 
-        var schedule = new ScheduleDto
-        {
-            StorageType = response.StorageType,
-            StorageParams = response.StorageParams ?? new Dictionary<string, string>(),
-            CronParams = new CronParams(response.Cron),
-            BackupsStored = response.NumberOfBackupsStored.NullIfDefault(),
-            LastBackupTime = response.LastBackupTime,
-            Dump = response.Dump
-        };
-
-        if (response.StorageType != BackupStorageType.ThirdPartyConsumer)
-        {
-            schedule.StorageParams["folderId"] = response.StorageBasePath;
-        }
-
-        return schedule;
+        return dump.HasValue && dump.Value
+            ? await InnerGetScheduleAsync(-1, dump)
+            : await InnerGetScheduleAsync(tenantManager.GetCurrentTenantId(), dump);
     }
 
     public async Task<Session> OpenCustomerSessionForBackupAsync(int tenantId)
@@ -686,53 +653,6 @@ public class BackupService(
 
         return backupQuota == null ? throw new ItemNotFoundException("Backup quota not found") : backupQuota.GetPaymentId();
     }
-}
-
-/// <summary>
-/// The backup schedule of a portal.
-/// </summary>
-public class ScheduleDto
-{
-    /// <summary>
-    /// The storage the scheduled archives are written to, reported as a number rather than as the name the
-    /// schedule was created with.
-    /// </summary>
-    /// <example>0</example>
-    public required BackupStorageType StorageType { get; set; }
-
-    /// <summary>
-    /// The settings of the storage, as an object keyed by parameter name - not as the array of key and value
-    /// pairs the schedule was created with, so it cannot be sent back unchanged. For every storage type
-    /// except `ThirdPartyConsumer` the `folderId` key is built from the stored base path.
-    /// </summary>
-    /// <example>{"folderId": "1234"}</example>
-    public required Dictionary<string, string> StorageParams { get; set; }
-
-    /// <summary>
-    /// When the backup runs, read back from the stored cron expression. `day` is 0 for a daily schedule,
-    /// because a daily one has no day.
-    /// </summary>
-    /// <example>{"period": 0, "hour": 2, "day": 0}</example>
-    public required CronParams CronParams { get; init; }
-
-    /// <summary>
-    /// The number of scheduled copies kept. It is null, not 0, when the schedule keeps an unlimited number.
-    /// </summary>
-    /// <example>5</example>
-    public int? BackupsStored { get; init; }
-
-    /// <summary>
-    /// The date and time the schedule last ran at. It is `0001-01-01T00:00:00` until the schedule has run
-    /// for the first time.
-    /// </summary>
-    /// <example>2026-01-01T00:00:00Z</example>
-    public required DateTime LastBackupTime { get; set; }
-
-    /// <summary>
-    /// Specifies whether this schedule backs up the whole server instead of one portal.
-    /// </summary>
-    /// <example>false</example>
-    public required bool Dump { get; set; }
 }
 
 /// <summary>

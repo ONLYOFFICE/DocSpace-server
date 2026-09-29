@@ -41,7 +41,7 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 /// System.Text.Json writes instance members only, so returning the holders themselves put six
 /// empty objects on the wire; an instance property per constant is what carries the values.
 /// </remarks>
-public class SsoSettingsV2ConstantsDto
+public class SsoSettingsConstantsDto
 {
     /// <summary>
     /// The values the `nameIdFormat` of the identity provider settings accepts. The built-in configuration uses

@@ -67,7 +67,7 @@
             }
           },
           {
-            "name": "DownloadUri",
+            "name": "downloadUri",
             "in": "query",
             "description": "An address the document service saved the document at. This operation does not fetch the content from it - the\r\ncontent always comes from the request body - and reads it only for the extension, when no file extension is\r\ngiven.",
             "schema": {
@@ -84,21 +84,21 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "FileExtension": {
+                  "fileExtension": {
                     "examples": [
                       ".txt"
                     ],
                     "type": "string",
                     "description": "The format the submitted content is in, with the leading dot, as in `.docx`. When it differs from the format\r\nthe file is stored in, the portal converts the content before saving it. Left empty, the extension is read off\r\nthe download address, and failing that the stored format is assumed."
                   },
-                  "File": {
+                  "file": {
                     "examples": [
                       "binary file data"
                     ],
                     "description": "The edited content, sent as the `File` part of a `multipart/form-data` body. When the part is missing the raw\r\nrequest body is saved as the content instead, so an empty body empties the file.",
                     "contentMediaType": "application/octet-stream"
                   },
-                  "Forcesave": {
+                  "forcesave": {
                     "examples": [
                       false
                     ],
@@ -108,13 +108,13 @@
                 }
               },
               "encoding": {
-                "FileExtension": {
+                "fileExtension": {
                   "style": "form"
                 },
-                "File": {
+                "file": {
                   "style": "form"
                 },
-                "Forcesave": {
+                "forcesave": {
                   "style": "form"
                 }
               }
@@ -284,7 +284,7 @@
             "application/json": {
               "schema": {
                 "description": "The session options. The body is required even when it only carries the default, so send an empty object to\r\nopen an ordinary co-editing session.",
-                "$ref": "#/components/schemas/StartEdit"
+                "$ref": "#/components/schemas/StartEditRequest"
               }
             }
           },
@@ -1161,7 +1161,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MentionWrapperArrayWrapper"
+                  "$ref": "#/components/schemas/MentionArrayWrapper"
                 }
               }
             }
@@ -1710,7 +1710,7 @@
             "application/json": {
               "schema": {
                 "description": "The change to make to the revision group.",
-                "$ref": "#/components/schemas/ChangeHistory"
+                "$ref": "#/components/schemas/ChangeHistoryRequest"
               }
             }
           },
@@ -2288,7 +2288,7 @@
             "application/json": {
               "schema": {
                 "description": "The title, the destination and the conversion options of the copy.",
-                "$ref": "#/components/schemas/CopyAsJsonElement"
+                "$ref": "#/components/schemas/CopyAsRequest"
               }
             }
           },
@@ -2437,7 +2437,7 @@
             "application/json": {
               "schema": {
                 "description": "The title of the new file and the source of its content.",
-                "$ref": "#/components/schemas/CreateFileJsonElement"
+                "$ref": "#/components/schemas/CreateFileRequest"
               }
             }
           },
@@ -2610,7 +2610,7 @@
             "application/json": {
               "schema": {
                 "description": "The title, the content and the collision behaviour of the new file.",
-                "$ref": "#/components/schemas/CreateTextOrHtmlFile"
+                "$ref": "#/components/schemas/CreateTextOrHtmlFileRequest"
               }
             }
           },
@@ -2786,7 +2786,7 @@
             "application/json": {
               "schema": {
                 "description": "The title, the content and the collision behaviour of the new file.",
-                "$ref": "#/components/schemas/CreateTextOrHtmlFile"
+                "$ref": "#/components/schemas/CreateTextOrHtmlFileRequest"
               }
             }
           },
@@ -2953,7 +2953,7 @@
             }
           },
           {
-            "name": "ReturnSingleOperation",
+            "name": "returnSingleOperation",
             "in": "query",
             "description": "Which operations the answer carries: `true` returns the operation this call started and nothing else, `false`\r\nreturns every operation of the same kind that the caller has running or unread. When nothing was queued, which\r\nhappens for an empty selection, `true` falls back to the full list.",
             "schema": {
@@ -2970,7 +2970,7 @@
             "application/json": {
               "schema": {
                 "description": "When and how the file is deleted.",
-                "$ref": "#/components/schemas/Delete"
+                "$ref": "#/components/schemas/DeleteFileRequest"
               }
             }
           },
@@ -3256,7 +3256,7 @@
             "application/json": {
               "schema": {
                 "description": "The new title and the version to restore.",
-                "$ref": "#/components/schemas/UpdateFile"
+                "$ref": "#/components/schemas/UpdateFileRequest"
               }
             }
           },
@@ -3708,7 +3708,7 @@
             "application/json": {
               "schema": {
                 "description": "The lock state to reach.",
-                "$ref": "#/components/schemas/LockFileParameters"
+                "$ref": "#/components/schemas/LockFileRequest"
               }
             }
           },
@@ -3881,7 +3881,7 @@
             "application/json": {
               "schema": {
                 "description": "The Custom Filter state to reach.",
-                "$ref": "#/components/schemas/CustomFilterParameters"
+                "$ref": "#/components/schemas/CustomFilterRequest"
               }
             }
           },
@@ -5076,7 +5076,7 @@
             "application/json": {
               "schema": {
                 "description": "The destination folder and the name of the PDF.",
-                "$ref": "#/components/schemas/SaveAsPdf"
+                "$ref": "#/components/schemas/SaveAsPdfRequest"
               }
             }
           },
@@ -5203,7 +5203,7 @@
               "application/json": {
                 "schema": {
                   "description": "The destination folder and the name of the PDF.",
-                  "$ref": "#/components/schemas/ThirdPartySaveAsPdf"
+                  "$ref": "#/components/schemas/ThirdPartySaveAsPdfRequest"
                 }
               }
             },
@@ -6055,7 +6055,7 @@
             "application/json": {
               "schema": {
                 "description": "The parameters of a file that the portal creates from a template or a blank document.",
-                "$ref": "#/components/schemas/CreateFileJsonElement"
+                "$ref": "#/components/schemas/CreateFileRequest"
               }
             }
           }
@@ -6172,7 +6172,7 @@
             "application/json": {
               "schema": {
                 "description": "The parameters of a text or HTML file created from content sent in the request.",
-                "$ref": "#/components/schemas/CreateTextOrHtmlFile"
+                "$ref": "#/components/schemas/CreateTextOrHtmlFileRequest"
               }
             }
           }
@@ -6292,7 +6292,7 @@
             "application/json": {
               "schema": {
                 "description": "The parameters of a text or HTML file created from content sent in the request.",
-                "$ref": "#/components/schemas/CreateTextOrHtmlFile"
+                "$ref": "#/components/schemas/CreateTextOrHtmlFileRequest"
               }
             }
           }
@@ -6509,7 +6509,7 @@
             "application/json": {
               "schema": {
                 "description": "The revision of the form to open and what the caller intends to do with it.",
-                "$ref": "#/components/schemas/CheckFillFormDraft"
+                "$ref": "#/components/schemas/CheckFillFormDraftRequest"
               }
             }
           },
@@ -7559,7 +7559,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChunkedUploadSessionResponseWrapperWrapper"
+                  "$ref": "#/components/schemas/ChunkedUploadSessionResultWrapper"
                 }
               }
             }
@@ -7674,7 +7674,7 @@
               "content": {
                 "application/json": {
                   "schema": {
-                    "$ref": "#/components/schemas/ThirdPartyChunkedUploadSessionResponseWrapperWrapper"
+                    "$ref": "#/components/schemas/ThirdPartyChunkedUploadSessionResultWrapper"
                   }
                 }
               }
@@ -8503,7 +8503,7 @@
             "application/json": {
               "schema": {
                 "description": "The title carried by the request body.",
-                "$ref": "#/components/schemas/CreateFolder"
+                "$ref": "#/components/schemas/CreateFolderRequest"
               }
             }
           },
@@ -8674,7 +8674,7 @@
             "application/json": {
               "schema": {
                 "description": "How the deletion is to be carried out.",
-                "$ref": "#/components/schemas/DeleteFolder"
+                "$ref": "#/components/schemas/DeleteFolderRequest"
               }
             }
           },
@@ -8948,7 +8948,7 @@
             "application/json": {
               "schema": {
                 "description": "The title carried by the request body.",
-                "$ref": "#/components/schemas/CreateFolder"
+                "$ref": "#/components/schemas/CreateFolderRequest"
               }
             }
           },
@@ -9592,11 +9592,11 @@
             }
           },
           {
-            "name": "Location",
+            "name": "location",
             "in": "query",
             "description": "Where the entries of a tag-based listing have to live to be kept: `Room` keeps what lies in a room,\r\n`Documents` what lies in a personal section, and `Link` what was reached through an external link that is\r\nstill valid. It shapes the \"Favorites\" and \"Recent\" listings and does nothing in an ordinary folder.",
             "schema": {
-              "$ref": "#/components/schemas/Location"
+              "$ref": "#/components/schemas/RequestLocation"
             },
             "example": 1
           }
@@ -11866,7 +11866,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/STRINGArrayWrapper"
+                  "$ref": "#/components/schemas/StringArrayWrapper"
                 }
               }
             }
@@ -11993,99 +11993,99 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "InsertFile.File": {
+                  "insertFile.file": {
                     "examples": [
                       "binary file data"
                     ],
                     "description": "The content to store, sent as a `multipart/form-data` part. The same content may instead be sent as the raw\r\nrequest body, which is what a client that cannot build a form does; when both are present the form part wins.",
                     "contentMediaType": "application/octet-stream"
                   },
-                  "InsertFile.Title": {
+                  "insertFile.title": {
                     "examples": [
                       "Quarterly report.docx"
                     ],
                     "type": "string",
                     "description": "The name to store the file under, extension included. It wins over the name of the uploaded part, which is the\r\nreason to choose this operation over the plain upload, and it is the only name available when the content\r\narrives as a raw body. Characters a title cannot hold are replaced with underscores and the name is cut to 170\r\ncharacters before the file is stored."
                   },
-                  "InsertFile.CreateNewIfExist": {
+                  "insertFile.createNewIfExist": {
                     "examples": [
                       true
                     ],
                     "type": "boolean",
                     "description": "Settles the clash with a file already carrying that title: left out, the content is written as the next\r\nversion of that file; set to true, both survive and the new one gets a numeric suffix in its title."
                   },
-                  "InsertFile.KeepConvertStatus": {
+                  "insertFile.keepConvertStatus": {
                     "examples": [
                       true
                     ],
                     "type": "boolean",
                     "description": "Decides whether the outcome of the background conversion outlives the conversion itself. True keeps the queue\r\nrecord, so `GET api/2.0/files/file/{fileId}/checkconversion` can still report the result or the error; left\r\nout, the record is cleared the moment the conversion ends and that call finds nothing."
                   },
-                  "InsertFile.Stream.CanRead": {
+                  "insertFile.stream.canRead": {
                     "type": "boolean"
                   },
-                  "InsertFile.Stream.CanWrite": {
+                  "insertFile.stream.canWrite": {
                     "type": "boolean"
                   },
-                  "InsertFile.Stream.CanSeek": {
+                  "insertFile.stream.canSeek": {
                     "type": "boolean"
                   },
-                  "InsertFile.Stream.CanTimeout": {
+                  "insertFile.stream.canTimeout": {
                     "type": "boolean"
                   },
-                  "InsertFile.Stream.Length": {
+                  "insertFile.stream.length": {
                     "type": "integer",
                     "format": "int64"
                   },
-                  "InsertFile.Stream.Position": {
+                  "insertFile.stream.position": {
                     "type": "integer",
                     "format": "int64"
                   },
-                  "InsertFile.Stream.ReadTimeout": {
+                  "insertFile.stream.readTimeout": {
                     "type": "integer",
                     "format": "int32"
                   },
-                  "InsertFile.Stream.WriteTimeout": {
+                  "insertFile.stream.writeTimeout": {
                     "type": "integer",
                     "format": "int32"
                   }
                 }
               },
               "encoding": {
-                "InsertFile.File": {
+                "insertFile.file": {
                   "style": "form"
                 },
-                "InsertFile.Title": {
+                "insertFile.title": {
                   "style": "form"
                 },
-                "InsertFile.CreateNewIfExist": {
+                "insertFile.createNewIfExist": {
                   "style": "form"
                 },
-                "InsertFile.KeepConvertStatus": {
+                "insertFile.keepConvertStatus": {
                   "style": "form"
                 },
-                "InsertFile.Stream.CanRead": {
+                "insertFile.stream.canRead": {
                   "style": "form"
                 },
-                "InsertFile.Stream.CanWrite": {
+                "insertFile.stream.canWrite": {
                   "style": "form"
                 },
-                "InsertFile.Stream.CanSeek": {
+                "insertFile.stream.canSeek": {
                   "style": "form"
                 },
-                "InsertFile.Stream.CanTimeout": {
+                "insertFile.stream.canTimeout": {
                   "style": "form"
                 },
-                "InsertFile.Stream.Length": {
+                "insertFile.stream.length": {
                   "style": "form"
                 },
-                "InsertFile.Stream.Position": {
+                "insertFile.stream.position": {
                   "style": "form"
                 },
-                "InsertFile.Stream.ReadTimeout": {
+                "insertFile.stream.readTimeout": {
                   "style": "form"
                 },
-                "InsertFile.Stream.WriteTimeout": {
+                "insertFile.stream.writeTimeout": {
                   "style": "form"
                 }
               }
@@ -12298,7 +12298,7 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "File": {
+                  "file": {
                     "examples": [
                       "binary file data"
                     ],
@@ -12308,7 +12308,7 @@
                 }
               },
               "encoding": {
-                "File": {
+                "file": {
                   "style": "form"
                 }
               }
@@ -12473,99 +12473,99 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "File": {
+                  "file": {
                     "examples": [
                       "binary file data"
                     ],
                     "description": "The content to store, sent as a `multipart/form-data` part. The same content may instead be sent as the raw\r\nrequest body, which is what a client that cannot build a form does; when both are present the form part wins.",
                     "contentMediaType": "application/octet-stream"
                   },
-                  "Title": {
+                  "title": {
                     "examples": [
                       "Quarterly report.docx"
                     ],
                     "type": "string",
                     "description": "The name to store the file under, extension included. It wins over the name of the uploaded part, which is the\r\nreason to choose this operation over the plain upload, and it is the only name available when the content\r\narrives as a raw body. Characters a title cannot hold are replaced with underscores and the name is cut to 170\r\ncharacters before the file is stored."
                   },
-                  "CreateNewIfExist": {
+                  "createNewIfExist": {
                     "examples": [
                       true
                     ],
                     "type": "boolean",
                     "description": "Settles the clash with a file already carrying that title: left out, the content is written as the next\r\nversion of that file; set to true, both survive and the new one gets a numeric suffix in its title."
                   },
-                  "KeepConvertStatus": {
+                  "keepConvertStatus": {
                     "examples": [
                       true
                     ],
                     "type": "boolean",
                     "description": "Decides whether the outcome of the background conversion outlives the conversion itself. True keeps the queue\r\nrecord, so `GET api/2.0/files/file/{fileId}/checkconversion` can still report the result or the error; left\r\nout, the record is cleared the moment the conversion ends and that call finds nothing."
                   },
-                  "Stream.CanRead": {
+                  "stream.canRead": {
                     "type": "boolean"
                   },
-                  "Stream.CanWrite": {
+                  "stream.canWrite": {
                     "type": "boolean"
                   },
-                  "Stream.CanSeek": {
+                  "stream.canSeek": {
                     "type": "boolean"
                   },
-                  "Stream.CanTimeout": {
+                  "stream.canTimeout": {
                     "type": "boolean"
                   },
-                  "Stream.Length": {
+                  "stream.length": {
                     "type": "integer",
                     "format": "int64"
                   },
-                  "Stream.Position": {
+                  "stream.position": {
                     "type": "integer",
                     "format": "int64"
                   },
-                  "Stream.ReadTimeout": {
+                  "stream.readTimeout": {
                     "type": "integer",
                     "format": "int32"
                   },
-                  "Stream.WriteTimeout": {
+                  "stream.writeTimeout": {
                     "type": "integer",
                     "format": "int32"
                   }
                 }
               },
               "encoding": {
-                "File": {
+                "file": {
                   "style": "form"
                 },
-                "Title": {
+                "title": {
                   "style": "form"
                 },
-                "CreateNewIfExist": {
+                "createNewIfExist": {
                   "style": "form"
                 },
-                "KeepConvertStatus": {
+                "keepConvertStatus": {
                   "style": "form"
                 },
-                "Stream.CanRead": {
+                "stream.canRead": {
                   "style": "form"
                 },
-                "Stream.CanWrite": {
+                "stream.canWrite": {
                   "style": "form"
                 },
-                "Stream.CanSeek": {
+                "stream.canSeek": {
                   "style": "form"
                 },
-                "Stream.CanTimeout": {
+                "stream.canTimeout": {
                   "style": "form"
                 },
-                "Stream.Length": {
+                "stream.length": {
                   "style": "form"
                 },
-                "Stream.Position": {
+                "stream.position": {
                   "style": "form"
                 },
-                "Stream.ReadTimeout": {
+                "stream.readTimeout": {
                   "style": "form"
                 },
-                "Stream.WriteTimeout": {
+                "stream.writeTimeout": {
                   "style": "form"
                 }
               }
@@ -12726,7 +12726,7 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "File": {
+                  "file": {
                     "examples": [
                       "binary file data"
                     ],
@@ -12736,7 +12736,7 @@
                 }
               },
               "encoding": {
-                "File": {
+                "file": {
                   "style": "form"
                 }
               }
@@ -13184,7 +13184,7 @@
             "application/json": {
               "schema": {
                 "description": "The version and the comment to store on it.",
-                "$ref": "#/components/schemas/UpdateComment"
+                "$ref": "#/components/schemas/UpdateCommentRequest"
               }
             }
           },
@@ -13759,7 +13759,7 @@
         "operationId": "emptyTrash",
         "parameters": [
           {
-            "name": "Single",
+            "name": "single",
             "in": "query",
             "description": "Which operations the answer carries: `true` returns the operation this call started and nothing else, `false`\r\nreturns every delete operation that the caller has running or unread.",
             "schema": {
@@ -14425,12 +14425,155 @@
         "operationId": "checkMoveOrCopyBatchItems",
         "parameters": [
           {
-            "name": "inDto",
+            "name": "returnSingleOperation",
             "in": "query",
-            "description": "The files and folders to move or copy, the folder they go to, and the way name clashes are settled.",
+            "description": "Which operations the answer carries: `true` returns the operation this call started and nothing else, `false`\r\nreturns every operation of the same kind that the caller has running or unread. When nothing was queued, which\r\nhappens for an empty selection, `true` falls back to the full list.",
             "schema": {
-              "description": "The files and folders to move or copy, the folder they go to, and the way name clashes are settled.",
-              "$ref": "#/components/schemas/BatchRequestDto"
+              "examples": [
+                false
+              ],
+              "type": "boolean",
+              "description": "Which operations the answer carries: `true` returns the operation this call started and nothing else, `false`\r\nreturns every operation of the same kind that the caller has running or unread. When nothing was queued, which\r\nhappens for an empty selection, `true` falls back to the full list."
+            }
+          },
+          {
+            "name": "folderIds",
+            "in": "query",
+            "description": "The folders to move or copy, by id. A number addresses a folder stored in the portal itself, a string\r\naddresses a folder on a connected third-party account, and both kinds may be sent in one list.",
+            "schema": {
+              "examples": [
+                [
+                  1,
+                  2,
+                  3
+                ]
+              ],
+              "type": [
+                "null",
+                "array"
+              ],
+              "items": {
+                "anyOf": [
+                  {
+                    "examples": [
+                      1234
+                    ],
+                    "type": "integer"
+                  },
+                  {
+                    "examples": [
+                      "some text"
+                    ],
+                    "type": "string"
+                  }
+                ]
+              },
+              "description": "The folders to move or copy, by id. A number addresses a folder stored in the portal itself, a string\r\naddresses a folder on a connected third-party account, and both kinds may be sent in one list."
+            }
+          },
+          {
+            "name": "fileIds",
+            "in": "query",
+            "description": "The files to move or copy, by id. A number addresses a file stored in the portal itself, a string addresses a\r\nfile on a connected third-party account, and both kinds may be sent in one list.",
+            "schema": {
+              "examples": [
+                [
+                  1,
+                  2,
+                  3
+                ]
+              ],
+              "type": [
+                "null",
+                "array"
+              ],
+              "items": {
+                "anyOf": [
+                  {
+                    "examples": [
+                      1234
+                    ],
+                    "type": "integer"
+                  },
+                  {
+                    "examples": [
+                      "some text"
+                    ],
+                    "type": "string"
+                  }
+                ]
+              },
+              "description": "The files to move or copy, by id. A number addresses a file stored in the portal itself, a string addresses a\r\nfile on a connected third-party account, and both kinds may be sent in one list."
+            }
+          },
+          {
+            "name": "destFolderId",
+            "in": "query",
+            "description": "The folder the items go to, by id — a number for a folder stored in the portal itself, a string for a folder\r\non a connected third-party account. Take it from a folder listing such as `GET api/2.0/files/@root`; the\r\ncaller has to be allowed to create items in it, and the id of a room addresses the root of that room.",
+            "schema": {
+              "examples": [
+                1
+              ],
+              "oneOf": [
+                {
+                  "examples": [
+                    1234
+                  ],
+                  "type": "integer"
+                },
+                {
+                  "examples": [
+                    "some text"
+                  ],
+                  "type": "string"
+                }
+              ],
+              "description": "The folder the items go to, by id — a number for a folder stored in the portal itself, a string for a folder\r\non a connected third-party account. Take it from a folder listing such as `GET api/2.0/files/@root`; the\r\ncaller has to be allowed to create items in it, and the id of a room addresses the root of that room."
+            }
+          },
+          {
+            "name": "conflictResolveType",
+            "in": "query",
+            "description": "What happens to an item whose name is already taken in the destination folder: `skip` leaves it where it is,\r\n`overwrite` replaces the entry at the destination, and `duplicate` places it beside that entry under a name\r\nwith a numeric suffix. `GET api/2.0/files/fileops/move` reports which items would clash.",
+            "schema": {
+              "description": "What happens to an item whose name is already taken in the destination folder: `skip` leaves it where it is,\r\n`overwrite` replaces the entry at the destination, and `duplicate` places it beside that entry under a name\r\nwith a numeric suffix. `GET api/2.0/files/fileops/move` reports which items would clash.",
+              "$ref": "#/components/schemas/FileConflictResolveType"
+            }
+          },
+          {
+            "name": "deleteAfter",
+            "in": "query",
+            "description": "Whether the finished operation is still reported: `false` keeps its final record readable through\r\n`GET api/2.0/files/fileops` until it has been read once, `true` drops the record as soon as the work is done.\r\nIt deletes nothing: a move takes the sources away in any case, and a copy always leaves them.",
+            "schema": {
+              "examples": [
+                false
+              ],
+              "type": "boolean",
+              "description": "Whether the finished operation is still reported: `false` keeps its final record readable through\r\n`GET api/2.0/files/fileops` until it has been read once, `true` drops the record as soon as the work is done.\r\nIt deletes nothing: a move takes the sources away in any case, and a copy always leaves them."
+            }
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "description": "What is taken from a listed folder: `false` moves or copies the folder itself, `true` takes only what it\r\ncontains, so its files and subfolders land in the destination and the folder is not recreated there.",
+            "schema": {
+              "examples": [
+                false
+              ],
+              "type": "boolean",
+              "description": "What is taken from a listed folder: `false` moves or copies the folder itself, `true` takes only what it\r\ncontains, so its files and subfolders land in the destination and the folder is not recreated there."
+            }
+          },
+          {
+            "name": "toFillOut",
+            "in": "query",
+            "description": "Marks every copied PDF form as a draft prepared for filling, which is how such a copy reports its filling\r\nstatus in a virtual data room. Files that are not forms are left unaffected.",
+            "schema": {
+              "examples": [
+                false
+              ],
+              "type": "boolean",
+              "description": "Marks every copied PDF form as a draft prepared for filling, which is how such a copy reports its filling\r\nstatus in a virtual data room. Files that are not forms are left unaffected."
             }
           }
         ],
@@ -14666,12 +14809,155 @@
         "operationId": "checkMoveOrCopyDestFolder",
         "parameters": [
           {
-            "name": "inDto",
+            "name": "returnSingleOperation",
             "in": "query",
-            "description": "The files and folders to move or copy, the folder they go to, and the way name clashes are settled.",
+            "description": "Which operations the answer carries: `true` returns the operation this call started and nothing else, `false`\r\nreturns every operation of the same kind that the caller has running or unread. When nothing was queued, which\r\nhappens for an empty selection, `true` falls back to the full list.",
             "schema": {
-              "description": "The files and folders to move or copy, the folder they go to, and the way name clashes are settled.",
-              "$ref": "#/components/schemas/BatchRequestDto"
+              "examples": [
+                false
+              ],
+              "type": "boolean",
+              "description": "Which operations the answer carries: `true` returns the operation this call started and nothing else, `false`\r\nreturns every operation of the same kind that the caller has running or unread. When nothing was queued, which\r\nhappens for an empty selection, `true` falls back to the full list."
+            }
+          },
+          {
+            "name": "folderIds",
+            "in": "query",
+            "description": "The folders to move or copy, by id. A number addresses a folder stored in the portal itself, a string\r\naddresses a folder on a connected third-party account, and both kinds may be sent in one list.",
+            "schema": {
+              "examples": [
+                [
+                  1,
+                  2,
+                  3
+                ]
+              ],
+              "type": [
+                "null",
+                "array"
+              ],
+              "items": {
+                "anyOf": [
+                  {
+                    "examples": [
+                      1234
+                    ],
+                    "type": "integer"
+                  },
+                  {
+                    "examples": [
+                      "some text"
+                    ],
+                    "type": "string"
+                  }
+                ]
+              },
+              "description": "The folders to move or copy, by id. A number addresses a folder stored in the portal itself, a string\r\naddresses a folder on a connected third-party account, and both kinds may be sent in one list."
+            }
+          },
+          {
+            "name": "fileIds",
+            "in": "query",
+            "description": "The files to move or copy, by id. A number addresses a file stored in the portal itself, a string addresses a\r\nfile on a connected third-party account, and both kinds may be sent in one list.",
+            "schema": {
+              "examples": [
+                [
+                  1,
+                  2,
+                  3
+                ]
+              ],
+              "type": [
+                "null",
+                "array"
+              ],
+              "items": {
+                "anyOf": [
+                  {
+                    "examples": [
+                      1234
+                    ],
+                    "type": "integer"
+                  },
+                  {
+                    "examples": [
+                      "some text"
+                    ],
+                    "type": "string"
+                  }
+                ]
+              },
+              "description": "The files to move or copy, by id. A number addresses a file stored in the portal itself, a string addresses a\r\nfile on a connected third-party account, and both kinds may be sent in one list."
+            }
+          },
+          {
+            "name": "destFolderId",
+            "in": "query",
+            "description": "The folder the items go to, by id — a number for a folder stored in the portal itself, a string for a folder\r\non a connected third-party account. Take it from a folder listing such as `GET api/2.0/files/@root`; the\r\ncaller has to be allowed to create items in it, and the id of a room addresses the root of that room.",
+            "schema": {
+              "examples": [
+                1
+              ],
+              "oneOf": [
+                {
+                  "examples": [
+                    1234
+                  ],
+                  "type": "integer"
+                },
+                {
+                  "examples": [
+                    "some text"
+                  ],
+                  "type": "string"
+                }
+              ],
+              "description": "The folder the items go to, by id — a number for a folder stored in the portal itself, a string for a folder\r\non a connected third-party account. Take it from a folder listing such as `GET api/2.0/files/@root`; the\r\ncaller has to be allowed to create items in it, and the id of a room addresses the root of that room."
+            }
+          },
+          {
+            "name": "conflictResolveType",
+            "in": "query",
+            "description": "What happens to an item whose name is already taken in the destination folder: `skip` leaves it where it is,\r\n`overwrite` replaces the entry at the destination, and `duplicate` places it beside that entry under a name\r\nwith a numeric suffix. `GET api/2.0/files/fileops/move` reports which items would clash.",
+            "schema": {
+              "description": "What happens to an item whose name is already taken in the destination folder: `skip` leaves it where it is,\r\n`overwrite` replaces the entry at the destination, and `duplicate` places it beside that entry under a name\r\nwith a numeric suffix. `GET api/2.0/files/fileops/move` reports which items would clash.",
+              "$ref": "#/components/schemas/FileConflictResolveType"
+            }
+          },
+          {
+            "name": "deleteAfter",
+            "in": "query",
+            "description": "Whether the finished operation is still reported: `false` keeps its final record readable through\r\n`GET api/2.0/files/fileops` until it has been read once, `true` drops the record as soon as the work is done.\r\nIt deletes nothing: a move takes the sources away in any case, and a copy always leaves them.",
+            "schema": {
+              "examples": [
+                false
+              ],
+              "type": "boolean",
+              "description": "Whether the finished operation is still reported: `false` keeps its final record readable through\r\n`GET api/2.0/files/fileops` until it has been read once, `true` drops the record as soon as the work is done.\r\nIt deletes nothing: a move takes the sources away in any case, and a copy always leaves them."
+            }
+          },
+          {
+            "name": "content",
+            "in": "query",
+            "description": "What is taken from a listed folder: `false` moves or copies the folder itself, `true` takes only what it\r\ncontains, so its files and subfolders land in the destination and the folder is not recreated there.",
+            "schema": {
+              "examples": [
+                false
+              ],
+              "type": "boolean",
+              "description": "What is taken from a listed folder: `false` moves or copies the folder itself, `true` takes only what it\r\ncontains, so its files and subfolders land in the destination and the folder is not recreated there."
+            }
+          },
+          {
+            "name": "toFillOut",
+            "in": "query",
+            "description": "Marks every copied PDF form as a draft prepared for filling, which is how such a copy reports its filling\r\nstatus in a virtual data room. Files that are not forms are left unaffected.",
+            "schema": {
+              "examples": [
+                false
+              ],
+              "type": "boolean",
+              "description": "Marks every copied PDF form as a draft prepared for filling, which is how such a copy reports its filling\r\nstatus in a virtual data room. Files that are not forms are left unaffected."
             }
           }
         ],
@@ -15152,7 +15438,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChunkedUploadSessionResponseWrapperWrapper"
+                  "$ref": "#/components/schemas/ChunkedUploadSessionResultWrapper"
                 }
               }
             }
@@ -15268,7 +15554,7 @@
               "content": {
                 "application/json": {
                   "schema": {
-                    "$ref": "#/components/schemas/ThirdPartyChunkedUploadSessionResponseWrapperWrapper"
+                    "$ref": "#/components/schemas/ThirdPartyChunkedUploadSessionResultWrapper"
                   }
                 }
               }
@@ -15329,7 +15615,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChunkedUploadSessionResponseResponseWrapper"
+                  "$ref": "#/components/schemas/ChunkedUploadSessionWrapper"
                 }
               }
             }
@@ -15441,7 +15727,7 @@
               "content": {
                 "application/json": {
                   "schema": {
-                    "$ref": "#/components/schemas/ThirdPartyChunkedUploadSessionResponseResponseWrapper"
+                    "$ref": "#/components/schemas/ThirdPartyChunkedUploadSessionWrapper"
                   }
                 }
               }
@@ -15632,7 +15918,7 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "File": {
+                  "file": {
                     "examples": [
                       "binary file data"
                     ],
@@ -15642,7 +15928,7 @@
                 }
               },
               "encoding": {
-                "File": {
+                "file": {
                   "style": "form"
                 }
               }
@@ -15822,7 +16108,7 @@
             }
           },
           {
-            "name": "ChunkNumber",
+            "name": "chunkNumber",
             "in": "query",
             "description": "The position of this part in the file, counted from 1. Sending the same number again replaces that part\r\ninstead of adding one, which is how a failed part is retried; leaving the number out makes the server count\r\nthe parts itself.",
             "schema": {
@@ -15840,7 +16126,7 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "File": {
+                  "file": {
                     "examples": [
                       "binary file data"
                     ],
@@ -15850,7 +16136,7 @@
                 }
               },
               "encoding": {
-                "File": {
+                "file": {
                   "style": "form"
                 }
               }
@@ -15874,7 +16160,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChunkedUploadSessionResponseResponseWrapper"
+                  "$ref": "#/components/schemas/ChunkedUploadSessionWrapper"
                 }
               }
             }
@@ -15986,7 +16272,7 @@
               "content": {
                 "application/json": {
                   "schema": {
-                    "$ref": "#/components/schemas/ThirdPartyChunkedUploadSessionResponseResponseWrapper"
+                    "$ref": "#/components/schemas/ThirdPartyChunkedUploadSessionWrapper"
                   }
                 }
               }
@@ -16740,7 +17026,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ThirdPartyParamsArrayWrapper"
+                  "$ref": "#/components/schemas/ThirdPartyAccountArrayWrapper"
                 }
               }
             }
@@ -19772,7 +20058,7 @@
         "operationId": "uploadDefaultTemplate",
         "parameters": [
           {
-            "name": "FileExtension",
+            "name": "fileExtension",
             "in": "query",
             "description": "The extension the uploaded blank is set for, written in lower case with the leading dot, and travelling in the\r\nquery string rather than in the form. It must match the extension of the uploaded file name. Only the\r\nextensions the portal's built-in template set covers are accepted, and\r\n`GET api/2.0/files/settings/defaulttemplate` returns exactly that list; an extension outside it leaves the\r\nsettings unchanged instead of failing.",
             "required": true,
@@ -19789,11 +20075,11 @@
             "multipart/form-data": {
               "schema": {
                 "required": [
-                  "File"
+                  "file"
                 ],
                 "type": "object",
                 "properties": {
-                  "File": {
+                  "file": {
                     "examples": [
                       "binary file data"
                     ],
@@ -19803,7 +20089,7 @@
                 }
               },
               "encoding": {
-                "File": {
+                "file": {
                   "style": "form"
                 }
               }
@@ -20062,7 +20348,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/MentionWrapperArrayWrapper"
+                  "$ref": "#/components/schemas/MentionArrayWrapper"
                 }
               }
             }
@@ -20954,7 +21240,7 @@
             "application/json": {
               "schema": {
                 "description": "The notification to send.",
-                "$ref": "#/components/schemas/MentionMessageWrapper"
+                "$ref": "#/components/schemas/MentionMessageRequest"
               }
             }
           }
@@ -21002,7 +21288,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AceShortWrapperArrayWrapper"
+                  "$ref": "#/components/schemas/AceShortArrayWrapper"
                 }
               }
             }
@@ -21198,7 +21484,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GroupMemberSecurityRequestArrayWrapper"
+                  "$ref": "#/components/schemas/GroupMemberSecurityArrayWrapper"
                 }
               }
             }
@@ -21386,7 +21672,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GroupMemberSecurityRequestArrayWrapper"
+                  "$ref": "#/components/schemas/GroupMemberSecurityArrayWrapper"
                 }
               }
             }
@@ -27401,7 +27687,7 @@
             "application/json": {
               "schema": {
                 "description": "The settings of the room to be created out of the folder.",
-                "$ref": "#/components/schemas/CreateThirdPartyRoom"
+                "$ref": "#/components/schemas/CreateThirdPartyRoomRequest"
               }
             }
           },
@@ -27808,7 +28094,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/STRINGArrayWrapper"
+                  "$ref": "#/components/schemas/StringArrayWrapper"
                 }
               }
             }
@@ -28147,7 +28433,7 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "FormCollection": {
+                  "formCollection": {
                     "examples": [
                       "multipart/form-data"
                     ],
@@ -28161,7 +28447,7 @@
                 }
               },
               "encoding": {
-                "FormCollection": {
+                "formCollection": {
                   "style": "form"
                 }
               }
@@ -29966,18 +30252,6 @@
   },
   "components": {
     "schemas": {
-      "AIConfig": {
-        "type": "object",
-        "properties": {
-          "disabled": {
-            "examples": [
-              true
-            ],
-            "type": "boolean",
-            "description": "Indicates whether the AI feature is disabled."
-          }
-        }
-      },
       "AccessRequestKeyDto": {
         "type": "object",
         "properties": {
@@ -30010,48 +30284,15 @@
         },
         "description": "The file key issued to one account."
       },
-      "AceShortWrapper": {
-        "type": "object",
-        "properties": {
-          "user": {
-            "examples": [
-              "John Doe"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "Who or what the line stands for, as a display string: the display name of a member, the name of a group, or\r\nthe title given to a shared link when `isLink` is true. It is empty when the subject has no name to show - a\r\nshared link that was never given a title, for instance."
-          },
-          "permissions": {
-            "examples": [
-              "Read Only"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The access level of that subject as a localized label, not a code: inside a room it usually names the role the\r\nsubject holds there (\"Viewer\", \"Editor\", \"Room Manager\"), while outside a room it names the access itself\r\n(\"Read Only\", \"Full Access\"). The wording comes from the portal resources and is translated for the current\r\nlanguage, so show it to a person rather than compare it in code."
-          },
-          "isLink": {
-            "examples": [
-              false
-            ],
-            "type": "boolean",
-            "description": "Whether the line stands for a shared link instead of a member or a group. Clients use it to draw a link badge\r\nwhere they would otherwise draw an avatar."
-          }
-        },
-        "description": "One line of a document sharing list in display form: who the document is shared with and the label of their access\r\nlevel, rather than an access record with identifiers. Entries that deny access and invitation links are left out,\r\nso the list names only the subjects and links that can currently open the document."
-      },
-      "AceShortWrapperArrayWrapper": {
+      "AceShortArrayWrapper": {
         "type": "object",
         "properties": {
           "response": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AceShortWrapper"
+              "$ref": "#/components/schemas/AceShortDto"
             },
-            "description": "The list of AceShortWrapper objects returned by the operation."
+            "description": "The list of AceShortDto objects returned by the operation."
           },
           "count": {
             "type": "integer",
@@ -30086,9 +30327,42 @@
             "format": "int32"
           }
         },
-        "description": "The successful API response containing the list of AceShortWrapper objects."
+        "description": "The successful API response containing the list of AceShortDto objects."
       },
-      "ActionConfig": {
+      "AceShortDto": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "examples": [
+              "John Doe"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Who or what the line stands for, as a display string: the display name of a member, the name of a group, or\r\nthe title given to a shared link when `isLink` is true. It is empty when the subject has no name to show - a\r\nshared link that was never given a title, for instance."
+          },
+          "permissions": {
+            "examples": [
+              "Read Only"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The access level of that subject as a localized label, not a code: inside a room it usually names the role the\r\nsubject holds there (\"Viewer\", \"Editor\", \"Room Manager\"), while outside a room it names the access itself\r\n(\"Read Only\", \"Full Access\"). The wording comes from the portal resources and is translated for the current\r\nlanguage, so show it to a person rather than compare it in code."
+          },
+          "isLink": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "description": "Whether the line stands for a shared link instead of a member or a group. Clients use it to draw a link badge\r\nwhere they would otherwise draw an avatar."
+          }
+        },
+        "description": "One line of a document sharing list in display form: who the document is shared with and the label of their access\r\nlevel, rather than an access record with identifiers. Entries that deny access and invitation links are left out,\r\nso the list names only the subjects and links that can currently open the document."
+      },
+      "ActionLinkActionRequest": {
         "type": "object",
         "properties": {
           "data": {
@@ -30101,7 +30375,7 @@
               "null",
               "string"
             ],
-            "description": "The anchor value produced by the editor, opaque to the portal: it names the comment, the mention or the\r\nplace the document is scrolled to."
+            "description": "The data of the action, such as the bookmark or comment it points at."
           },
           "type": {
             "examples": [
@@ -30113,20 +30387,32 @@
               "null",
               "string"
             ],
-            "description": "What the anchor points at, as the editor names it - a comment thread, for instance."
+            "description": "The type of the action."
           }
         },
-        "description": "An anchor inside a document, as the editor writes it."
+        "description": "An editor action, as the editor reports it."
       },
-      "ActionLinkConfig": {
+      "ActionLinkRequest": {
         "type": "object",
         "properties": {
           "action": {
-            "description": "The anchor itself. It is passed on to the editor unchanged, so it has to be the value the editor produced for\r\nthe comment or the mention it points at.",
-            "$ref": "#/components/schemas/ActionConfig"
+            "description": "The editor action that points at the place.",
+            "$ref": "#/components/schemas/ActionLinkActionRequest"
           }
         },
-        "description": "The place inside a document that a link should open at."
+        "description": "The place in the document a link opens at."
+      },
+      "AiConfigDto": {
+        "type": "object",
+        "properties": {
+          "disabled": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Indicates whether the AI feature is disabled."
+          }
+        }
       },
       "AnonymousConfigDto": {
         "required": [
@@ -30296,68 +30582,7 @@
         "description": "The output file format of an audit report.",
         "x-enum-type": "integer"
       },
-      "AuthData": {
-        "type": "object",
-        "properties": {
-          "login": {
-            "examples": [
-              "user@example.com"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The account name at the storage service."
-          },
-          "password": {
-            "examples": [
-              "p@ssw0rd!"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The password of the account at the storage service."
-          },
-          "rawToken": {
-            "examples": [
-              "{\"access_token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\"expires_in\":3600}"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The token of the account, kept as the raw JSON document the storage service issued it in."
-          },
-          "url": {
-            "examples": [
-              "https://cloud.example.com/remote.php/dav/files/admin/"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The address of the storage server the account lives on.",
-            "format": "uri"
-          },
-          "provider": {
-            "examples": [
-              "WebDav"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The storage service the credentials belong to, as the provider key the account was connected with."
-          },
-          "token": {
-            "description": "The same token as in `rawToken`, parsed into its OAuth 2.0 fields.",
-            "$ref": "#/components/schemas/OAuth20Token"
-          }
-        },
-        "description": "The credentials of a third-party storage account. The portal takes them when an account is connected and does not\r\ngive them back afterwards."
-      },
-      "AutoCleanUpData": {
+      "AutoCleanUpDataDto": {
         "type": "object",
         "properties": {
           "isAutoCleanUp": {
@@ -30378,8 +30603,8 @@
         "type": "object",
         "properties": {
           "response": {
-            "description": "The AutoCleanUpData object returned by the operation.",
-            "$ref": "#/components/schemas/AutoCleanUpData"
+            "description": "The AutoCleanUpDataDto object returned by the operation.",
+            "$ref": "#/components/schemas/AutoCleanUpDataDto"
           },
           "count": {
             "type": "integer",
@@ -30414,7 +30639,7 @@
             "format": "int32"
           }
         },
-        "description": "The successful API response containing the AutoCleanUpData object."
+        "description": "The successful API response containing the AutoCleanUpDataDto object."
       },
       "AutoCleanupRequestDto": {
         "type": "object",
@@ -30688,7 +30913,7 @@
         },
         "description": "The successful API response containing the boolean value."
       },
-      "ChangeHistory": {
+      "ChangeHistoryRequest": {
         "required": [
           "version"
         ],
@@ -31084,7 +31309,7 @@
         },
         "description": "The ONLYOFFICE Docs connection settings to store and verify."
       },
-      "CheckFillFormDraft": {
+      "CheckFillFormDraftRequest": {
         "required": [
           "version"
         ],
@@ -31150,7 +31375,7 @@
         },
         "description": "The names to test against the files the folder already holds."
       },
-      "ChunkedUploadSessionResponse": {
+      "ChunkedUploadSessionDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -31218,49 +31443,7 @@
         },
         "description": "The reserved chunked upload: where the parts are sent, how much was declared and when the reservation lapses. No\r\ncontent of the file is described here."
       },
-      "ChunkedUploadSessionResponseResponseWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "description": "The ChunkedUploadSessionResponse object returned by the operation.",
-            "$ref": "#/components/schemas/ChunkedUploadSessionResponse"
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        },
-        "description": "The successful API response containing the ChunkedUploadSessionResponse object."
-      },
-      "ChunkedUploadSessionResponseWrapper": {
+      "ChunkedUploadSessionResultDto": {
         "type": "object",
         "properties": {
           "success": {
@@ -31272,17 +31455,17 @@
           },
           "data": {
             "description": "The reserved upload itself, in the same shape the newer session operations answer with directly.",
-            "$ref": "#/components/schemas/ChunkedUploadSessionResponse"
+            "$ref": "#/components/schemas/ChunkedUploadSessionDto"
           }
         },
         "description": "The reserved chunked upload wrapped in the envelope the two older session operations answer with."
       },
-      "ChunkedUploadSessionResponseWrapperWrapper": {
+      "ChunkedUploadSessionResultWrapper": {
         "type": "object",
         "properties": {
           "response": {
-            "description": "The ChunkedUploadSessionResponseWrapper object returned by the operation.",
-            "$ref": "#/components/schemas/ChunkedUploadSessionResponseWrapper"
+            "description": "The ChunkedUploadSessionResultDto object returned by the operation.",
+            "$ref": "#/components/schemas/ChunkedUploadSessionResultDto"
           },
           "count": {
             "type": "integer",
@@ -31317,9 +31500,51 @@
             "format": "int32"
           }
         },
-        "description": "The successful API response containing the ChunkedUploadSessionResponseWrapper object."
+        "description": "The successful API response containing the ChunkedUploadSessionResultDto object."
       },
-      "CoEditingConfig": {
+      "ChunkedUploadSessionWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "description": "The ChunkedUploadSessionDto object returned by the operation.",
+            "$ref": "#/components/schemas/ChunkedUploadSessionDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the ChunkedUploadSessionDto object."
+      },
+      "CoEditingConfigDto": {
         "type": "object",
         "properties": {
           "change": {
@@ -31684,7 +31909,7 @@
         },
         "description": "The progress of one file conversion, together with the converted file once it exists."
       },
-      "CopyAsJsonElement": {
+      "CopyAsRequest": {
         "required": [
           "destFolderId",
           "destTitle"
@@ -31850,7 +32075,7 @@
         },
         "description": "One drawing of the built-in gallery of room covers."
       },
-      "CreateFileJsonElement": {
+      "CreateFileRequest": {
         "required": [
           "title"
         ],
@@ -31906,7 +32131,7 @@
         },
         "description": "The parameters of a file that the portal creates from a template or a blank document."
       },
-      "CreateFolder": {
+      "CreateFolderRequest": {
         "required": [
           "title"
         ],
@@ -32231,7 +32456,7 @@
         },
         "description": "The parameters for adding a custom tag to the portal catalog of room tags."
       },
-      "CreateTextOrHtmlFile": {
+      "CreateTextOrHtmlFileRequest": {
         "required": [
           "title"
         ],
@@ -32269,7 +32494,7 @@
         },
         "description": "The parameters of a text or HTML file created from content sent in the request."
       },
-      "CreateThirdPartyRoom": {
+      "CreateThirdPartyRoomRequest": {
         "required": [
           "roomType",
           "title"
@@ -32361,7 +32586,7 @@
         },
         "description": "The room to be created out of a folder of a connected third-party storage account."
       },
-      "CustomFilterParameters": {
+      "CustomFilterRequest": {
         "type": "object",
         "properties": {
           "enabled": {
@@ -32460,7 +32685,7 @@
           },
           "feedback": {
             "description": "The support link the editor offers behind its feedback button.",
-            "$ref": "#/components/schemas/FeedbackConfig"
+            "$ref": "#/components/schemas/FeedbackConfigDto"
           },
           "forcesave": {
             "examples": [
@@ -32474,11 +32699,11 @@
           },
           "goback": {
             "description": "Where the editor returns the user to when they leave the document. It is empty when there is nowhere to go\r\nback to, as in an embedded opening.",
-            "$ref": "#/components/schemas/GobackConfig"
+            "$ref": "#/components/schemas/GobackConfigDto"
           },
           "review": {
             "description": "How tracked changes are displayed when the document opens; it depends on whether this session may write.",
-            "$ref": "#/components/schemas/ReviewConfig"
+            "$ref": "#/components/schemas/ReviewConfigDto"
           },
           "logo": {
             "description": "The logo the editor shows, in the variants the current layout and file type need.",
@@ -32493,7 +32718,7 @@
           },
           "submitForm": {
             "description": "The submit button of a form: whether it is shown and what it says.",
-            "$ref": "#/components/schemas/SubmitForm"
+            "$ref": "#/components/schemas/SubmitFormDto"
           },
           "startFillingForm": {
             "description": "The button that starts filling out the form. It is empty when this opening offers no such button.",
@@ -32501,7 +32726,7 @@
           },
           "ai": {
             "description": "The AI configuration settings.",
-            "$ref": "#/components/schemas/AIConfig"
+            "$ref": "#/components/schemas/AiConfigDto"
           }
         },
         "description": "How the editor interface is dressed: branding, the buttons that lead back into the portal, and the behaviour of\r\nreview, mentions and form submission."
@@ -32787,26 +33012,6 @@
         },
         "description": "The successful API response containing the DefaultTemplateSettingsDto object."
       },
-      "Delete": {
-        "type": "object",
-        "properties": {
-          "deleteAfter": {
-            "examples": [
-              false
-            ],
-            "type": "boolean",
-            "description": "When to delete: `true` waits until the editing session on the file has ended, `false` deletes at once, pulling\r\nthe file away from whoever is working on it."
-          },
-          "immediately": {
-            "examples": [
-              false
-            ],
-            "type": "boolean",
-            "description": "Where the file goes: `false` moves it to Trash, from where it can be restored, `true` deletes it for good.\r\nInside a room, where there is no Trash, deletion is always final."
-          }
-        },
-        "description": "The parameters of a single file deletion."
-      },
       "DeleteBatchRequestDto": {
         "allOf": [
           {
@@ -32894,7 +33099,27 @@
         ],
         "description": "The files and folders to delete, and how final the deletion is."
       },
-      "DeleteFolder": {
+      "DeleteFileRequest": {
+        "type": "object",
+        "properties": {
+          "deleteAfter": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "description": "When to delete: `true` waits until the editing session on the file has ended, `false` deletes at once, pulling\r\nthe file away from whoever is working on it."
+          },
+          "immediately": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "description": "Where the file goes: `false` moves it to Trash, from where it can be restored, `true` deletes it for good.\r\nInside a room, where there is no Trash, deletion is always final."
+          }
+        },
+        "description": "The parameters of a single file deletion."
+      },
+      "DeleteFolderRequest": {
         "type": "object",
         "properties": {
           "deleteAfter": {
@@ -33334,7 +33559,7 @@
           },
           "permissions": {
             "description": "What this caller may do inside the editor - edit, comment, review, fill, download, print, copy and chat.",
-            "$ref": "#/components/schemas/PermissionsConfig"
+            "$ref": "#/components/schemas/PermissionsConfigDto"
           },
           "sharedLinkParam": {
             "examples": [
@@ -33358,7 +33583,7 @@
           },
           "referenceData": {
             "description": "How another spreadsheet names this document in a formula. Pass it to `POST api/2.0/files/file/referencedata`\r\nto resolve such a reference.",
-            "$ref": "#/components/schemas/FileReferenceData"
+            "$ref": "#/components/schemas/FileReferenceDataDto"
           },
           "title": {
             "examples": [
@@ -33390,10 +33615,20 @@
           },
           "options": {
             "description": "Extra instructions for the editors, currently the watermark to draw over the document. It is empty when the\r\nroom sets no watermark.",
-            "$ref": "#/components/schemas/Options"
+            "$ref": "#/components/schemas/DocumentOptionsDto"
           }
         },
         "description": "The document itself as the editors address it: what to fetch, under which revision key, and what this caller may\r\ndo with it."
+      },
+      "DocumentOptionsDto": {
+        "type": "object",
+        "properties": {
+          "watermark_on_draw": {
+            "description": "The document watermark parameters.",
+            "$ref": "#/components/schemas/WatermarkOnDrawDto"
+          }
+        },
+        "description": "The document options the editor applies when it opens the file."
       },
       "DownloadRequestDto": {
         "allOf": [
@@ -33698,7 +33933,7 @@
         },
         "description": "The successful API response containing the list of EditHistoryDto objects."
       },
-      "EditHistoryAuthor": {
+      "EditHistoryAuthorDto": {
         "required": [
           "id"
         ],
@@ -33727,12 +33962,12 @@
         },
         "description": "The person a saved revision of a file, or one single change in it, is attributed to."
       },
-      "EditHistoryChangesWrapper": {
+      "EditHistoryChangesDto": {
         "type": "object",
         "properties": {
           "user": {
             "description": "The account that made this change, as the editing service reported it; an account it could not name is\r\nreported as a guest.",
-            "$ref": "#/components/schemas/EditHistoryAuthor"
+            "$ref": "#/components/schemas/EditHistoryAuthorDto"
           },
           "created": {
             "description": "When this change was made, written with the offset of the portal's time zone rather than as plain UTC.",
@@ -33783,7 +34018,7 @@
           },
           "previous": {
             "description": "The revision this one is compared against. It arrives together with `changesUrl`, and when the revision shown\r\nis the first one the file ever had, it points at the blank template the file was created from instead of at an\r\nearlier revision.",
-            "$ref": "#/components/schemas/EditHistoryUrl"
+            "$ref": "#/components/schemas/EditHistoryUrlDto"
           },
           "token": {
             "examples": [
@@ -33908,7 +34143,7 @@
           },
           "user": {
             "description": "The account that saved the revision. A revision saved by an account that no longer exists, or through an\r\nanonymous link, is reported as a guest.",
-            "$ref": "#/components/schemas/EditHistoryAuthor"
+            "$ref": "#/components/schemas/EditHistoryAuthorDto"
           },
           "created": {
             "description": "When the revision was saved, written with the offset of the portal's time zone rather than as plain UTC. The\r\ntimes of one history are consistent with each other, so order and display the revisions by them.",
@@ -33942,7 +34177,7 @@
             ],
             "items": {
               "description": "One single change inside a saved revision of a file.",
-              "$ref": "#/components/schemas/EditHistoryChangesWrapper"
+              "$ref": "#/components/schemas/EditHistoryChangesDto"
             },
             "description": "The single changes this revision introduced - who made each of them and when - taken from the stored change\r\nrecord. It comes back empty both for a revision whose changes were never recorded and for one whose record is\r\nin a format the portal no longer reads, so an empty list is not proof that nothing changed."
           },
@@ -33959,7 +34194,7 @@
         },
         "description": "One saved revision of a file, as the editing service recorded it."
       },
-      "EditHistoryUrl": {
+      "EditHistoryUrlDto": {
         "type": "object",
         "properties": {
           "key": {
@@ -34016,7 +34251,7 @@
           },
           "coEditing": {
             "description": "How co-editing starts out for this session and whether the user may switch it in the interface.",
-            "$ref": "#/components/schemas/CoEditingConfig"
+            "$ref": "#/components/schemas/CoEditingConfigDto"
           },
           "createUrl": {
             "examples": [
@@ -34034,7 +34269,7 @@
           },
           "embedded": {
             "description": "The addresses the framed viewer needs. It is filled in only for the embedded layout.",
-            "$ref": "#/components/schemas/EmbeddedConfig"
+            "$ref": "#/components/schemas/EmbeddedConfigDto"
           },
           "encryptionKeys": {
             "type": [
@@ -34076,7 +34311,7 @@
           },
           "plugins": {
             "description": "Which editor plugins are offered. The portal currently offers none, so the list inside comes back empty.",
-            "$ref": "#/components/schemas/PluginsConfig"
+            "$ref": "#/components/schemas/PluginsConfigDto"
           },
           "recent": {
             "examples": [
@@ -34087,8 +34322,7 @@
               "array"
             ],
             "items": {
-              "description": "One entry of the recent-documents list the editor offers.",
-              "$ref": "#/components/schemas/RecentConfig"
+              "$ref": "#/components/schemas/RecentConfigDto"
             },
             "description": "The documents offered in the editor's recent list. It is left out altogether when there is nothing to offer."
           },
@@ -34101,14 +34335,13 @@
               "array"
             ],
             "items": {
-              "description": "One creation template offered in the editor. The portal no longer offers any, so this never appears in an editor\r\nconfiguration.",
-              "$ref": "#/components/schemas/TemplatesConfig"
+              "$ref": "#/components/schemas/TemplatesConfigDto"
             },
             "description": "Always empty: the portal no longer passes creation templates through the editor configuration."
           },
           "user": {
             "description": "The account the editors attribute changes to. It is empty for an anonymous session opened through an external\r\nlink, and the editors then ask for a name themselves.",
-            "$ref": "#/components/schemas/UserConfig"
+            "$ref": "#/components/schemas/UserConfigDto"
           }
         },
         "description": "How the editors behave for this opening: the mode, the language, the interface, and who is editing."
@@ -34213,7 +34446,7 @@
         },
         "description": "The email invitation parameters."
       },
-      "EmbeddedConfig": {
+      "EmbeddedConfigDto": {
         "type": "object",
         "properties": {
           "embedUrl": {
@@ -34268,8 +34501,7 @@
             "description": "Where the framed viewer puts its toolbar. The portal always asks for the top.",
             "readOnly": true
           }
-        },
-        "description": "The addresses the framed viewer needs. It is reported for the embedded layout only."
+        }
       },
       "EmployeeActivationStatus": {
         "oneOf": [
@@ -35113,7 +35345,7 @@
         "properties": {
           "status": {
             "description": "How validating the link went. It is the first field to read: a refused link is reported here with the answer\r\nstill arriving as a success. A link that resolved describes both the entry and the link, one that is waiting\r\nfor its password describes only the entry, and one that failed outright leaves the rest of the object empty.",
-            "$ref": "#/components/schemas/Status"
+            "$ref": "#/components/schemas/ExternalShareStatus"
           },
           "id": {
             "examples": [
@@ -35228,6 +35460,50 @@
           }
         },
         "description": "The password that unlocks a protected external share link."
+      },
+      "ExternalShareStatus": {
+        "oneOf": [
+          {
+            "examples": [
+              "Ok"
+            ],
+            "enum": [
+              "Ok",
+              "Invalid",
+              "Expired",
+              "RequiredPassword",
+              "InvalidPassword",
+              "ExternalAccessDenied"
+            ],
+            "type": "string",
+            "description": "[Ok - Ok, Invalid - Invalid, Expired - Expired, RequiredPassword - Required password, InvalidPassword - Invalid password, ExternalAccessDenied - External access denied]"
+          },
+          {
+            "examples": [
+              0
+            ],
+            "enum": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5
+            ],
+            "type": "integer",
+            "description": "[0 - Ok, 1 - Invalid, 2 - Expired, 3 - Required password, 4 - Invalid password, 5 - External access denied]",
+            "x-enum-varnames": [
+              "Ok",
+              "Invalid",
+              "Expired",
+              "RequiredPassword",
+              "InvalidPassword",
+              "ExternalAccessDenied"
+            ]
+          }
+        ],
+        "description": "The external data status.",
+        "x-enum-type": "integer"
       },
       "ExternalShareWrapper": {
         "type": "object",
@@ -35395,7 +35671,7 @@
         },
         "description": "The successful API response containing the ExternalSharingSettingsDto object."
       },
-      "FeedbackConfig": {
+      "FeedbackConfigDto": {
         "type": "object",
         "properties": {
           "url": {
@@ -35842,7 +36118,7 @@
               },
               "dimensions": {
                 "description": "The pixel size of the picture, measured by reading the stored file rather than taken from any stored metadata.\r\nNull for anything that is not a picture the portal can show, and also when the file could not be read.",
-                "$ref": "#/components/schemas/Size"
+                "$ref": "#/components/schemas/ImageSizeDto"
               }
             }
           }
@@ -35894,7 +36170,7 @@
             ],
             "items": {
               "description": "The encrypted file key issued to one user.",
-              "$ref": "#/components/schemas/FileKeys"
+              "$ref": "#/components/schemas/FileKeysDto"
             },
             "description": "The keys of this file that were issued to the calling account, each naming the public key it was encrypted for\r\nso that the client can pick the matching private half. An empty list means the file has not been shared with\r\nthis account rather than that the file is unencrypted."
           }
@@ -36609,7 +36885,7 @@
         "description": "The file entry type.",
         "x-enum-type": "integer"
       },
-      "FileKeys": {
+      "FileKeysDto": {
         "type": "object",
         "properties": {
           "userId": {
@@ -36665,7 +36941,7 @@
         },
         "description": "The encrypted file key issued to one user."
       },
-      "FileLink": {
+      "FileLinkDto": {
         "required": [
           "filetype",
           "url"
@@ -36777,8 +37053,8 @@
         "type": "object",
         "properties": {
           "response": {
-            "description": "The FileLink object returned by the operation.",
-            "$ref": "#/components/schemas/FileLink"
+            "description": "The FileLinkDto object returned by the operation.",
+            "$ref": "#/components/schemas/FileLinkDto"
           },
           "count": {
             "type": "integer",
@@ -36813,7 +37089,7 @@
             "format": "int32"
           }
         },
-        "description": "The successful API response containing the FileLink object."
+        "description": "The successful API response containing the FileLinkDto object."
       },
       "FileOperationArrayWrapper": {
         "type": "object",
@@ -37081,12 +37357,55 @@
         },
         "description": "The successful API response containing the FileOperationDto object."
       },
-      "FileReference": {
+      "FileReferenceDataDto": {
+        "type": "object",
+        "properties": {
+          "fileKey": {
+            "examples": [
+              "512"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The id of the document inside the portal named below."
+          },
+          "instanceId": {
+            "examples": [
+              "1"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The portal the document lives in. A reference whose value is not this portal cannot be resolved by the file\r\nkey and falls back to the path or the link."
+          },
+          "roomId": {
+            "examples": [
+              "42"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The room the document lies in. It is filled in only for a document opened in a virtual data room, and stays\r\nempty everywhere else."
+          },
+          "canEditRoom": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Whether the caller may manage the room named above; it is only meaningful together with it."
+          }
+        },
+        "description": "The pair of values that names a document across portals, as it is written into a spreadsheet formula."
+      },
+      "FileReferenceDto": {
         "type": "object",
         "properties": {
           "referenceData": {
             "description": "How this document is named when another spreadsheet refers to it. Send it back as it stands to resolve the\r\nreference again.",
-            "$ref": "#/components/schemas/FileReferenceData"
+            "$ref": "#/components/schemas/FileReferenceDataDto"
           },
           "error": {
             "examples": [
@@ -37162,55 +37481,12 @@
         },
         "description": "The file reference parameters."
       },
-      "FileReferenceData": {
-        "type": "object",
-        "properties": {
-          "fileKey": {
-            "examples": [
-              "512"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The id of the document inside the portal named below."
-          },
-          "instanceId": {
-            "examples": [
-              "1"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The portal the document lives in. A reference whose value is not this portal cannot be resolved by the file\r\nkey and falls back to the path or the link."
-          },
-          "roomId": {
-            "examples": [
-              "42"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The room the document lies in. It is filled in only for a document opened in a virtual data room, and stays\r\nempty everywhere else."
-          },
-          "canEditRoom": {
-            "examples": [
-              true
-            ],
-            "type": "boolean",
-            "description": "Whether the caller may manage the room named above; it is only meaningful together with it."
-          }
-        },
-        "description": "The pair of values that names a document across portals, as it is written into a spreadsheet formula."
-      },
       "FileReferenceWrapper": {
         "type": "object",
         "properties": {
           "response": {
-            "description": "The FileReference object returned by the operation.",
-            "$ref": "#/components/schemas/FileReference"
+            "description": "The FileReferenceDto object returned by the operation.",
+            "$ref": "#/components/schemas/FileReferenceDto"
           },
           "count": {
             "type": "integer",
@@ -37245,7 +37521,7 @@
             "format": "int32"
           }
         },
-        "description": "The successful API response containing the FileReference object."
+        "description": "The successful API response containing the FileReferenceDto object."
       },
       "FileShare": {
         "oneOf": [
@@ -38446,7 +38722,7 @@
           },
           "defaultOrder": {
             "description": "The ordering the listing operations fall back to when a request names none. It follows the last order the\r\ncaller asked a listing for, so it changes on its own as the account is used.",
-            "$ref": "#/components/schemas/OrderBy"
+            "$ref": "#/components/schemas/OrderByDto"
           },
           "forcesave": {
             "examples": [
@@ -38492,7 +38768,7 @@
           },
           "automaticallyCleanUp": {
             "description": "The trash auto-clearing setting of the caller, the same pair `GET api/2.0/files/settings/autocleanup` returns.",
-            "$ref": "#/components/schemas/AutoCleanUpData"
+            "$ref": "#/components/schemas/AutoCleanUpDataDto"
           },
           "canSearchByContent": {
             "examples": [
@@ -39278,7 +39554,7 @@
               },
               "logo": {
                 "description": "The addresses of the room logo in four sizes, together with the colour and the built-in cover that are drawn\r\nwhen no logo was uploaded. A room without a logo answers with four empty addresses rather than with null, and\r\nthe field is null for a folder that is not a room.",
-                "$ref": "#/components/schemas/Logo"
+                "$ref": "#/components/schemas/LogoDto"
               },
               "pinned": {
                 "examples": [
@@ -39738,7 +40014,7 @@
         "description": "The form filling status.",
         "x-enum-type": "integer"
       },
-      "FormMetadata": {
+      "FormMetadataDto": {
         "type": "object",
         "properties": {
           "key": {
@@ -39813,85 +40089,12 @@
             ],
             "items": {
               "description": "The data of the separate form item.",
-              "$ref": "#/components/schemas/FormsItemData"
+              "$ref": "#/components/schemas/FormsItemDataDto"
             },
             "description": "The values that were entered into this copy, one entry per field, preceded by an entry keyed `FormNumber` that\r\ncarries the number of the copy and is what the submissions are ordered by. Fields holding a picture or a\r\nsignature are left out of the record, so a field missing here was not necessarily left blank."
           }
         },
         "description": "One completed copy of a form, with the values that were entered into it."
-      },
-      "FormRole": {
-        "type": "object",
-        "properties": {
-          "roomId": {
-            "examples": [
-              1
-            ],
-            "type": "integer",
-            "description": "The room ID.",
-            "format": "int32"
-          },
-          "roleName": {
-            "examples": [
-              "Manager"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The role name."
-          },
-          "roleColor": {
-            "examples": [
-              "#4781D1"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The role color."
-          },
-          "userId": {
-            "examples": [
-              "00000000-0000-0000-0000-000000000000"
-            ],
-            "type": "string",
-            "description": "The user ID.",
-            "format": "uuid"
-          },
-          "sequence": {
-            "examples": [
-              12
-            ],
-            "type": "integer",
-            "description": "The role sequence.",
-            "format": "int32"
-          },
-          "submitted": {
-            "examples": [
-              false
-            ],
-            "type": "boolean",
-            "description": "Specifies if the role was submitted or not."
-          },
-          "openedAt": {
-            "examples": [
-              "2026-01-01T10:00:00Z"
-            ],
-            "type": "string",
-            "description": "The date and time when the role was opened.",
-            "format": "date-time"
-          },
-          "submissionDate": {
-            "examples": [
-              "2026-01-01T10:00:00Z"
-            ],
-            "type": "string",
-            "description": "The date and time when the role was submitted.",
-            "format": "date-time"
-          }
-        },
-        "description": "The form role."
       },
       "FormRoleArrayWrapper": {
         "type": "object",
@@ -40012,6 +40215,79 @@
         },
         "description": "One role of a PDF form, with the state the turn of that role is in."
       },
+      "FormRoleRequest": {
+        "type": "object",
+        "properties": {
+          "roomId": {
+            "examples": [
+              1
+            ],
+            "type": "integer",
+            "description": "The room ID.",
+            "format": "int32"
+          },
+          "roleName": {
+            "examples": [
+              "Manager"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The role name."
+          },
+          "roleColor": {
+            "examples": [
+              "#4781D1"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The role color."
+          },
+          "userId": {
+            "examples": [
+              "00000000-0000-0000-0000-000000000000"
+            ],
+            "type": "string",
+            "description": "The user ID.",
+            "format": "uuid"
+          },
+          "sequence": {
+            "examples": [
+              12
+            ],
+            "type": "integer",
+            "description": "The role sequence.",
+            "format": "int32"
+          },
+          "submitted": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "description": "Specifies if the role was submitted or not."
+          },
+          "openedAt": {
+            "examples": [
+              "2026-01-01T10:00:00Z"
+            ],
+            "type": "string",
+            "description": "The date and time when the role was opened.",
+            "format": "date-time"
+          },
+          "submissionDate": {
+            "examples": [
+              "2026-01-01T10:00:00Z"
+            ],
+            "type": "string",
+            "description": "The date and time when the role was submitted.",
+            "format": "date-time"
+          }
+        },
+        "description": "The form role."
+      },
       "FormSubmissionsDto": {
         "type": "object",
         "properties": {
@@ -40025,7 +40301,7 @@
             ],
             "items": {
               "description": "The metadata of a single form field.",
-              "$ref": "#/components/schemas/FormMetadata"
+              "$ref": "#/components/schemas/FormMetadataDto"
             },
             "description": "Describes the fields of the form version that is being filled - the key each value is stored under, the type\r\nand format of the field and, where the field offers a fixed set of answers, those answers - in the order the\r\nfields are laid out, which is the order to build a results table in. It comes back empty when the portal holds\r\nno indexed description of that version."
           },
@@ -40133,7 +40409,7 @@
         },
         "description": "The successful API response containing the list of FormsItemDto objects."
       },
-      "FormsItemData": {
+      "FormsItemDataDto": {
         "type": "object",
         "properties": {
           "key": {
@@ -40331,7 +40607,7 @@
         },
         "description": "The body of a spreadsheet reference request: the source spreadsheet, and the three ways of naming the document it\r\nrefers to, which are tried in the order they are described."
       },
-      "GobackConfig": {
+      "GobackConfigDto": {
         "type": "object",
         "properties": {
           "url": {
@@ -40347,15 +40623,15 @@
         },
         "description": "The settings for the \"Open file location\" menu button and upper right corner button."
       },
-      "GroupMemberSecurityRequestArrayWrapper": {
+      "GroupMemberSecurityArrayWrapper": {
         "type": "object",
         "properties": {
           "response": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/GroupMemberSecurityRequestDto"
+              "$ref": "#/components/schemas/GroupMemberSecurityDto"
             },
-            "description": "The list of GroupMemberSecurityRequestDto objects returned by the operation."
+            "description": "The list of GroupMemberSecurityDto objects returned by the operation."
           },
           "count": {
             "type": "integer",
@@ -40390,9 +40666,9 @@
             "format": "int32"
           }
         },
-        "description": "The successful API response containing the list of GroupMemberSecurityRequestDto objects."
+        "description": "The successful API response containing the list of GroupMemberSecurityDto objects."
       },
-      "GroupMemberSecurityRequestDto": {
+      "GroupMemberSecurityDto": {
         "required": [
           "canEditAccess",
           "groupAccess",
@@ -40717,6 +40993,28 @@
         },
         "description": "The icon to set on a room group."
       },
+      "ImageSizeDto": {
+        "type": "object",
+        "properties": {
+          "height": {
+            "examples": [
+              1080
+            ],
+            "type": "integer",
+            "description": "The height of the image in pixels, read from the stored file rather than from any display setting.",
+            "format": "int32"
+          },
+          "width": {
+            "examples": [
+              1920
+            ],
+            "type": "integer",
+            "description": "The width of the image in pixels, read from the stored file rather than from any display setting.",
+            "format": "int32"
+          }
+        },
+        "description": "A pixel size measured on the image itself."
+      },
       "InfoConfigDto": {
         "type": "object",
         "properties": {
@@ -40760,7 +41058,7 @@
             ],
             "items": {
               "description": "One line of a document sharing list in display form: who the document is shared with and the label of their access\r\nlevel, rather than an access record with identifiers. Entries that deny access and invitation links are left out,\r\nso the list names only the subjects and links that can currently open the document.",
-              "$ref": "#/components/schemas/AceShortWrapper"
+              "$ref": "#/components/schemas/AceShortDto"
             },
             "description": "Who the document is shared with, as the information panel lists it. An empty list means it is shared with\r\nnobody beyond its owner."
           },
@@ -40872,42 +41170,7 @@
         "description": "The job a sharing link does.",
         "x-enum-type": "integer"
       },
-      "Location": {
-        "oneOf": [
-          {
-            "examples": [
-              "Room"
-            ],
-            "enum": [
-              "Room",
-              "Documents",
-              "Link"
-            ],
-            "type": "string",
-            "description": "[Room - Room, Documents - Documents, Link - Link]"
-          },
-          {
-            "examples": [
-              1
-            ],
-            "enum": [
-              1,
-              2,
-              3
-            ],
-            "type": "integer",
-            "description": "[1 - Room, 2 - Documents, 3 - Link]",
-            "x-enum-varnames": [
-              "Room",
-              "Documents",
-              "Link"
-            ]
-          }
-        ],
-        "description": "The location context of the request.",
-        "x-enum-type": "integer"
-      },
-      "LockFileParameters": {
+      "LockFileRequest": {
         "type": "object",
         "properties": {
           "lockFile": {
@@ -40919,72 +41182,6 @@
           }
         },
         "description": "The lock state a file is to be put into."
-      },
-      "Logo": {
-        "required": [
-          "large",
-          "medium",
-          "original",
-          "small"
-        ],
-        "type": "object",
-        "properties": {
-          "original": {
-            "examples": [
-              "https://portal.example.com/logo/original.png"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The original logo."
-          },
-          "large": {
-            "examples": [
-              "https://portal.example.com/logo/large.png"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The large logo."
-          },
-          "medium": {
-            "examples": [
-              "https://portal.example.com/logo/medium.png"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The medium logo."
-          },
-          "small": {
-            "examples": [
-              "https://portal.example.com/logo/small.png"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The small logo."
-          },
-          "color": {
-            "examples": [
-              "#4781D1"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The logo color."
-          },
-          "cover": {
-            "description": "The logo cover.",
-            "$ref": "#/components/schemas/LogoCover"
-          }
-        },
-        "description": "The room logo information."
       },
       "LogoConfigDto": {
         "type": "object",
@@ -41049,7 +41246,7 @@
         },
         "description": "The logo the editor shows, resolved for the file type and the layout of this opening."
       },
-      "LogoCover": {
+      "LogoCoverDto": {
         "required": [
           "data",
           "id"
@@ -41078,6 +41275,72 @@
           }
         },
         "description": "The logo cover information."
+      },
+      "LogoDto": {
+        "required": [
+          "large",
+          "medium",
+          "original",
+          "small"
+        ],
+        "type": "object",
+        "properties": {
+          "original": {
+            "examples": [
+              "https://portal.example.com/logo/original.png"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The original logo."
+          },
+          "large": {
+            "examples": [
+              "https://portal.example.com/logo/large.png"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The large logo."
+          },
+          "medium": {
+            "examples": [
+              "https://portal.example.com/logo/medium.png"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The medium logo."
+          },
+          "small": {
+            "examples": [
+              "https://portal.example.com/logo/small.png"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The small logo."
+          },
+          "color": {
+            "examples": [
+              "#4781D1"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The logo color."
+          },
+          "cover": {
+            "description": "The logo cover.",
+            "$ref": "#/components/schemas/LogoCoverDto"
+          }
+        },
+        "description": "The room logo information."
       },
       "LogoRequest": {
         "required": [
@@ -41157,116 +41420,15 @@
         },
         "description": "The action to apply to the filling of a PDF form."
       },
-      "MentionMessageWrapper": {
-        "type": "object",
-        "properties": {
-          "actionLink": {
-            "description": "The place in the document the notification link should open at, as the editor reports it when the mention is\r\nmade. Left out, the link opens the file at its beginning.",
-            "$ref": "#/components/schemas/ActionLinkConfig"
-          },
-          "emails": {
-            "examples": [
-              [
-                "user1@example.com",
-                "user2@example.com"
-              ]
-            ],
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string"
-            },
-            "description": "The addresses to notify. Only an address that belongs to a portal account receives a mail; an unknown address\r\nis skipped, and the answer then carries the access list of the file so that the client can invite its owner."
-          },
-          "message": {
-            "examples": [
-              "Please take a look at the second paragraph"
-            ],
-            "maxLength": 255,
-            "minLength": 0,
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The note shown next to the link in the mail. Only its first 200 characters are sent, and a value longer than\r\nthe field allows is refused."
-          }
-        },
-        "description": "The mention notification to send: what to say, whom to tell and where in the document the mention sits."
-      },
-      "MentionWrapper": {
-        "type": "object",
-        "properties": {
-          "user": {
-            "description": "The account itself, in the shape the people listings use.",
-            "$ref": "#/components/schemas/UserInfo"
-          },
-          "email": {
-            "examples": [
-              "user@example.com"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "Where a mention notification for this user is delivered.",
-            "format": "email",
-            "readOnly": true
-          },
-          "id": {
-            "examples": [
-              "user_0001"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The account id as text, the same value the account object carries; it is what identifies the user in a sharing\r\nrequest built from this list.",
-            "readOnly": true
-          },
-          "image": {
-            "examples": [
-              "https://portal.example.com/avatar/user_0001.png"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "An absolute address of the medium-sized avatar. A generated default avatar is reported when the user never\r\nuploaded one, so the field is never empty.",
-            "readOnly": true
-          },
-          "hasAccess": {
-            "examples": [
-              true
-            ],
-            "type": "boolean",
-            "description": "Not filled in by the operations that return this list: it always comes back false. Whether a user can already\r\nopen the document has to be read from the sharing settings of the file.",
-            "readOnly": true
-          },
-          "name": {
-            "examples": [
-              "John Doe"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The name to display, assembled the way the portal is configured to show names.",
-            "readOnly": true
-          }
-        },
-        "description": "A user the editor may offer: to be mentioned in a comment, or to be picked when protecting a document."
-      },
-      "MentionWrapperArrayWrapper": {
+      "MentionArrayWrapper": {
         "type": "object",
         "properties": {
           "response": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/MentionWrapper"
+              "$ref": "#/components/schemas/MentionDto"
             },
-            "description": "The list of MentionWrapper objects returned by the operation."
+            "description": "The list of MentionDto objects returned by the operation."
           },
           "count": {
             "type": "integer",
@@ -41301,7 +41463,109 @@
             "format": "int32"
           }
         },
-        "description": "The successful API response containing the list of MentionWrapper objects."
+        "description": "The successful API response containing the list of MentionDto objects."
+      },
+      "MentionDto": {
+        "required": [
+          "email",
+          "id",
+          "image",
+          "name",
+          "user"
+        ],
+        "type": "object",
+        "properties": {
+          "user": {
+            "description": "The account itself, in the shape the people listings use: the display name, the avatars and the profile link.",
+            "$ref": "#/components/schemas/EmployeeDto"
+          },
+          "email": {
+            "examples": [
+              "user@example.com"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Where a mention notification for this user is delivered."
+          },
+          "id": {
+            "examples": [
+              "00000000-0000-0000-0000-000000000000"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The account id as text, the same value the account object carries; it is what identifies the user in a sharing\r\nrequest built from this list."
+          },
+          "image": {
+            "examples": [
+              "https://portal.example.com/avatar/user_0001.png"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "An absolute address of the medium-sized avatar. A generated default avatar is reported when the user never\r\nuploaded one, so the field is never empty."
+          },
+          "hasAccess": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "description": "Not filled in by the operations that return this list: it always comes back false. Whether a user can already\r\nopen the document has to be read from the sharing settings of the file."
+          },
+          "name": {
+            "examples": [
+              "John Doe"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The name to display, assembled the way the portal is configured to show names."
+          }
+        },
+        "description": "A portal member the editor can offer when the author types a mention: who they are, where the notification goes\r\nand how to show them in the suggestion list."
+      },
+      "MentionMessageRequest": {
+        "type": "object",
+        "properties": {
+          "actionLink": {
+            "description": "The place in the document the notification link should open at, as the editor reports it when the mention is\r\nmade. Left out, the link opens the file at its beginning.",
+            "$ref": "#/components/schemas/ActionLinkRequest"
+          },
+          "emails": {
+            "examples": [
+              [
+                "user1@example.com",
+                "user2@example.com"
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "The addresses to notify. Only an address that belongs to a portal account receives a mail; an unknown address\r\nis skipped, and the answer then carries the access list of the file so that the client can invite its owner."
+          },
+          "message": {
+            "examples": [
+              "Please take a look at the second paragraph"
+            ],
+            "maxLength": 255,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The note shown next to the link in the mail. Only its first 200 characters are sent, and a value longer than\r\nthe field allows is refused."
+          }
+        },
+        "description": "The mention notification to send: what to say, whom to tell and where in the document the mention sits."
       },
       "MessageAction": {
         "oneOf": [
@@ -42541,7 +42805,7 @@
         },
         "description": "The successful API response containing the Module object."
       },
-      "MultiSizeLogoCover": {
+      "MultiSizeLogoCoverDto": {
         "required": [
           "data",
           "id"
@@ -42721,87 +42985,6 @@
         },
         "description": "The successful API response containing the list of NewItemsDtoRoomNewItemsDto objects."
       },
-      "OAuth20Token": {
-        "type": "object",
-        "properties": {
-          "access_token": {
-            "examples": [
-              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The token sent to the provider with every request made on behalf of the account."
-          },
-          "refresh_token": {
-            "examples": [
-              "def50200a1b2c3d4e5f6..."
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The token used to obtain a new access token when the current one expires. A provider that issues no refresh\r\ntoken leaves it empty, and the account then has to be connected again to keep working."
-          },
-          "expires_in": {
-            "examples": [
-              3600
-            ],
-            "type": "integer",
-            "description": "How long the access token stays usable, in seconds counted from `timestamp`. Zero means the provider did not\r\nsay, and the token is then treated as expired.",
-            "format": "int64"
-          },
-          "client_id": {
-            "examples": [
-              "my-client-id"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The OAuth 2.0 client ID of the application the token was issued to."
-          },
-          "client_secret": {
-            "examples": [
-              "my-client-secret"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The client secret of the application the token was issued to, needed when the token is refreshed."
-          },
-          "redirect_uri": {
-            "examples": [
-              "https://app.example.com/callback"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The redirect URL the authorization code behind this token was obtained with; providers require the same value\r\nagain when the token is refreshed.",
-            "format": "uri"
-          },
-          "timestamp": {
-            "examples": [
-              "2026-01-01T00:00:00Z"
-            ],
-            "type": "string",
-            "description": "When the token was issued, in UTC. This is the point `expires_in` is counted from.",
-            "format": "date-time"
-          },
-          "isExpired": {
-            "examples": [
-              false
-            ],
-            "type": "boolean",
-            "description": "Whether the access token can no longer be used and has to be refreshed. It is also true when the provider did\r\nnot say how long the token lives.",
-            "readOnly": true
-          }
-        },
-        "description": "The OAuth 2.0 token issued by a third-party provider."
-      },
       "ObjectArrayWrapper": {
         "type": "object",
         "properties": {
@@ -42847,17 +43030,7 @@
         },
         "description": "The successful API response."
       },
-      "Options": {
-        "type": "object",
-        "properties": {
-          "watermark_on_draw": {
-            "description": "The document watermark parameters.",
-            "$ref": "#/components/schemas/WatermarkOnDraw"
-          }
-        },
-        "description": "The document options."
-      },
-      "OrderBy": {
+      "OrderByDto": {
         "type": "object",
         "properties": {
           "is_asc": {
@@ -42957,45 +43130,7 @@
         },
         "description": "The request that moves several files and folders to given positions."
       },
-      "Paragraph": {
-        "type": "object",
-        "properties": {
-          "align": {
-            "examples": [
-              2
-            ],
-            "type": "integer",
-            "description": "The paragraph align.",
-            "format": "int32"
-          },
-          "runs": {
-            "examples": [
-              [
-                {
-                  "fill": [
-                    124,
-                    124,
-                    124
-                  ],
-                  "text": "CONFIDENTIAL",
-                  "fontSize": 26
-                }
-              ]
-            ],
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "description": "The text run parameters.",
-              "$ref": "#/components/schemas/Run"
-            },
-            "description": "The list of text runs from the paragraph."
-          }
-        },
-        "description": "The paragraph parameters."
-      },
-      "PermissionsConfig": {
+      "PermissionsConfigDto": {
         "type": "object",
         "properties": {
           "comment": {
@@ -43071,7 +43206,7 @@
         },
         "description": "The permissions configuration parameters."
       },
-      "PluginsConfig": {
+      "PluginsConfigDto": {
         "type": "object",
         "properties": {
           "pluginsData": {
@@ -43091,8 +43226,7 @@
             "description": "The array of absolute URLs to the plugin configuration files.",
             "readOnly": true
           }
-        },
-        "description": "Which editor add-ons the portal connects. It currently connects none."
+        }
       },
       "ProviderArrayWrapper": {
         "type": "object",
@@ -43332,7 +43466,7 @@
         "description": "The quota scope.",
         "x-enum-type": "integer"
       },
-      "RecentConfig": {
+      "RecentConfigDto": {
         "type": "object",
         "properties": {
           "folder": {
@@ -43366,10 +43500,44 @@
             "description": "Where the entry opens.",
             "format": "uri"
           }
-        },
-        "description": "One entry of the recent-documents list the editor offers."
+        }
       },
-      "ReviewConfig": {
+      "RequestLocation": {
+        "oneOf": [
+          {
+            "examples": [
+              "Room"
+            ],
+            "enum": [
+              "Room",
+              "Documents",
+              "Link"
+            ],
+            "type": "string",
+            "description": "[Room - Room, Documents - Documents, Link - Link]"
+          },
+          {
+            "examples": [
+              1
+            ],
+            "enum": [
+              1,
+              2,
+              3
+            ],
+            "type": "integer",
+            "description": "[1 - Room, 2 - Documents, 3 - Link]",
+            "x-enum-varnames": [
+              "Room",
+              "Documents",
+              "Link"
+            ]
+          }
+        ],
+        "description": "The location context of the request.",
+        "x-enum-type": "integer"
+      },
+      "ReviewConfigDto": {
         "type": "object",
         "properties": {
           "reviewDisplay": {
@@ -43383,8 +43551,7 @@
             "description": "How the editors render tracked changes at first: with the markup, in a simplified markup, as the final text,\r\nor as the original text. A session that may not write opens on the final text.",
             "readOnly": true
           }
-        },
-        "description": "How tracked changes are displayed when the document opens."
+        }
       },
       "RoomDataLifetimeDto": {
         "type": "object",
@@ -43616,7 +43783,7 @@
           },
           "icon": {
             "description": "The built-in cover chosen for the group, carrying the cover identifier and its rendering in each available\r\nsize. Null when the group has no icon, either because it was never given one or because the icon was cleared\r\nby setting it to an empty value.",
-            "$ref": "#/components/schemas/MultiSizeLogoCover"
+            "$ref": "#/components/schemas/MultiSizeLogoCoverDto"
           },
           "userId": {
             "examples": [
@@ -44359,96 +44526,7 @@
         "description": "The room type.",
         "x-enum-type": "integer"
       },
-      "Run": {
-        "type": "object",
-        "properties": {
-          "fill": {
-            "examples": [
-              [
-                124,
-                124,
-                124
-              ]
-            ],
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "description": "The fill color of the text run in RGB format."
-          },
-          "text": {
-            "examples": [
-              "CONFIDENTIAL"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The run text."
-          },
-          "font-size": {
-            "examples": [
-              "26"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The font size of the text run in points."
-          }
-        },
-        "description": "The text run parameters."
-      },
-      "STRINGArrayWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "The response payload."
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        },
-        "description": "The successful API response."
-      },
-      "SaveAsPdf": {
+      "SaveAsPdfRequest": {
         "required": [
           "folderId",
           "title"
@@ -44506,7 +44584,7 @@
             ],
             "items": {
               "description": "The form role.",
-              "$ref": "#/components/schemas/FormRole"
+              "$ref": "#/components/schemas/FormRoleRequest"
             },
             "description": "The roles with the account taking each of them and the sequence number that decides the turn: the same number\r\nmeans the roles may be filled in parallel, different ones make a queue. The whole set is replaced on every\r\ncall, and an empty set resets the filling."
           }
@@ -44860,28 +44938,6 @@
         "description": "The filter type of the access rights.",
         "x-enum-type": "integer"
       },
-      "Size": {
-        "type": "object",
-        "properties": {
-          "height": {
-            "examples": [
-              1080
-            ],
-            "type": "integer",
-            "description": "The height of the image in pixels, read from the stored file rather than from any display setting.",
-            "format": "int32"
-          },
-          "width": {
-            "examples": [
-              1920
-            ],
-            "type": "integer",
-            "description": "The width of the image in pixels, read from the stored file rather than from any display setting.",
-            "format": "int32"
-          }
-        },
-        "description": "A pixel size measured on the image itself."
-      },
       "SortOrder": {
         "oneOf": [
           {
@@ -44979,7 +45035,7 @@
         "description": "The parameters by which the files will be sorted.",
         "x-enum-type": "integer"
       },
-      "StartEdit": {
+      "StartEditRequest": {
         "type": "object",
         "properties": {
           "editingAlone": {
@@ -45046,50 +45102,6 @@
         "description": "The start filling mode.",
         "x-enum-type": "integer"
       },
-      "Status": {
-        "oneOf": [
-          {
-            "examples": [
-              "Ok"
-            ],
-            "enum": [
-              "Ok",
-              "Invalid",
-              "Expired",
-              "RequiredPassword",
-              "InvalidPassword",
-              "ExternalAccessDenied"
-            ],
-            "type": "string",
-            "description": "[Ok - Ok, Invalid - Invalid, Expired - Expired, RequiredPassword - Required password, InvalidPassword - Invalid password, ExternalAccessDenied - External access denied]"
-          },
-          {
-            "examples": [
-              0
-            ],
-            "enum": [
-              0,
-              1,
-              2,
-              3,
-              4,
-              5
-            ],
-            "type": "integer",
-            "description": "[0 - Ok, 1 - Invalid, 2 - Expired, 3 - Required password, 4 - Invalid password, 5 - External access denied]",
-            "x-enum-varnames": [
-              "Ok",
-              "Invalid",
-              "Expired",
-              "RequiredPassword",
-              "InvalidPassword",
-              "ExternalAccessDenied"
-            ]
-          }
-        ],
-        "description": "The external data status.",
-        "x-enum-type": "integer"
-      },
       "StorageFilter": {
         "oneOf": [
           {
@@ -45124,6 +45136,51 @@
         ],
         "description": "The storage kind to filter the entries by.",
         "x-enum-type": "integer"
+      },
+      "StringArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The response payload."
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response."
       },
       "StringWrapper": {
         "type": "object",
@@ -45208,7 +45265,7 @@
         "description": "The subject type of the access right.",
         "x-enum-type": "integer"
       },
-      "SubmitForm": {
+      "SubmitFormDto": {
         "type": "object",
         "properties": {
           "visible": {
@@ -45231,7 +45288,7 @@
         },
         "description": "The \"Complete & Submit\" button settings."
       },
-      "TemplatesConfig": {
+      "TemplatesConfigDto": {
         "type": "object",
         "properties": {
           "image": {
@@ -45265,8 +45322,7 @@
             "description": "The absolute URL to the document where it will be created and available after creation.",
             "format": "uri"
           }
-        },
-        "description": "One creation template offered in the editor. The portal no longer offers any, so this never appears in an editor\r\nconfiguration."
+        }
       },
       "TemplatesRequestDto": {
         "type": "object",
@@ -45291,6 +45347,102 @@
           }
         },
         "description": "The files to put on the personal template list of the calling account."
+      },
+      "ThirdPartyAccountArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ThirdPartyAccountDto"
+            },
+            "description": "The list of ThirdPartyAccountDto objects returned by the operation."
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the list of ThirdPartyAccountDto objects."
+      },
+      "ThirdPartyAccountDto": {
+        "type": "object",
+        "properties": {
+          "corporate": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "description": "Whether the account is attached to the legacy Common section, which is the case only for accounts inherited\r\nfrom an older portal."
+          },
+          "roomsStorage": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Whether the account is attached to the Rooms section, room templates and the archive counted in. This is where\r\n`POST api/2.0/files/thirdparty` puts every account it connects."
+          },
+          "customer_title": {
+            "examples": [
+              "Nextcloud storage"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The name the account is shown under in the portal, as it was saved when the account was connected."
+          },
+          "provider_id": {
+            "examples": [
+              12
+            ],
+            "type": [
+              "null",
+              "integer"
+            ],
+            "description": "The account ID to send to `DELETE api/2.0/files/thirdparty/{providerId}`, or as `providerId` to\r\nre-authenticate the account.",
+            "format": "int32"
+          },
+          "provider_key": {
+            "examples": [
+              "WebDav"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The storage service behind the account. `WebDav` stands for every WebDAV preset, so it does not tell which of\r\nthem was chosen when the account was connected."
+          }
+        },
+        "description": "A third-party storage account the caller has connected."
       },
       "ThirdPartyBackupRequestDto": {
         "type": "object",
@@ -45423,7 +45575,7 @@
         },
         "description": "The parameters of one file conversion."
       },
-      "ThirdPartyChunkedUploadSessionResponse": {
+      "ThirdPartyChunkedUploadSessionDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -45490,49 +45642,7 @@
         },
         "description": "The reserved chunked upload: where the parts are sent, how much was declared and when the reservation lapses. No\r\ncontent of the file is described here."
       },
-      "ThirdPartyChunkedUploadSessionResponseResponseWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "description": "The ThirdPartyChunkedUploadSessionResponse object returned by the operation.",
-            "$ref": "#/components/schemas/ThirdPartyChunkedUploadSessionResponse"
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        },
-        "description": "The successful API response containing the ThirdPartyChunkedUploadSessionResponse object."
-      },
-      "ThirdPartyChunkedUploadSessionResponseWrapper": {
+      "ThirdPartyChunkedUploadSessionResultDto": {
         "type": "object",
         "properties": {
           "success": {
@@ -45544,17 +45654,17 @@
           },
           "data": {
             "description": "The reserved upload itself, in the same shape the newer session operations answer with directly.",
-            "$ref": "#/components/schemas/ThirdPartyChunkedUploadSessionResponse"
+            "$ref": "#/components/schemas/ThirdPartyChunkedUploadSessionDto"
           }
         },
         "description": "The reserved chunked upload wrapped in the envelope the two older session operations answer with."
       },
-      "ThirdPartyChunkedUploadSessionResponseWrapperWrapper": {
+      "ThirdPartyChunkedUploadSessionResultWrapper": {
         "type": "object",
         "properties": {
           "response": {
-            "description": "The ThirdPartyChunkedUploadSessionResponseWrapper object returned by the operation.",
-            "$ref": "#/components/schemas/ThirdPartyChunkedUploadSessionResponseWrapper"
+            "description": "The ThirdPartyChunkedUploadSessionResultDto object returned by the operation.",
+            "$ref": "#/components/schemas/ThirdPartyChunkedUploadSessionResultDto"
           },
           "count": {
             "type": "integer",
@@ -45589,7 +45699,49 @@
             "format": "int32"
           }
         },
-        "description": "The successful API response containing the ThirdPartyChunkedUploadSessionResponseWrapper object."
+        "description": "The successful API response containing the ThirdPartyChunkedUploadSessionResultDto object."
+      },
+      "ThirdPartyChunkedUploadSessionWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "description": "The ThirdPartyChunkedUploadSessionDto object returned by the operation.",
+            "$ref": "#/components/schemas/ThirdPartyChunkedUploadSessionDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the ThirdPartyChunkedUploadSessionDto object."
       },
       "ThirdPartyConfigurationDto": {
         "required": [
@@ -46192,7 +46344,7 @@
               },
               "dimensions": {
                 "description": "The pixel size of the picture, measured by reading the stored file rather than taken from any stored metadata.\r\nNull for anything that is not a picture the portal can show, and also when the file could not be read.",
-                "$ref": "#/components/schemas/Size"
+                "$ref": "#/components/schemas/ImageSizeDto"
               }
             }
           }
@@ -46855,7 +47007,7 @@
               },
               "logo": {
                 "description": "The addresses of the room logo in four sizes, together with the colour and the built-in cover that are drawn\r\nwhen no logo was uploaded. A room without a logo answers with four empty addresses rather than with null, and\r\nthe field is null for a folder that is not a room.",
-                "$ref": "#/components/schemas/Logo"
+                "$ref": "#/components/schemas/LogoDto"
               },
               "pinned": {
                 "examples": [
@@ -47050,106 +47202,6 @@
         },
         "description": "The successful API response containing the ThirdPartyFolderDto object."
       },
-      "ThirdPartyParams": {
-        "type": "object",
-        "properties": {
-          "auth_data": {
-            "description": "The stored credentials of the account. They are not filled in here: the portal does not give back credentials\r\nonce an account is saved.",
-            "$ref": "#/components/schemas/AuthData"
-          },
-          "corporate": {
-            "examples": [
-              false
-            ],
-            "type": "boolean",
-            "description": "Whether the account is attached to the legacy Common section, which is the case only for accounts inherited\r\nfrom an older portal."
-          },
-          "roomsStorage": {
-            "examples": [
-              true
-            ],
-            "type": "boolean",
-            "description": "Whether the account is attached to the Rooms section, room templates and the archive counted in. This is where\r\n`POST api/2.0/files/thirdparty` puts every account it connects."
-          },
-          "customer_title": {
-            "examples": [
-              "Nextcloud storage"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The name the account is shown under in the portal, as it was saved when the account was connected."
-          },
-          "provider_id": {
-            "examples": [
-              12
-            ],
-            "type": [
-              "null",
-              "integer"
-            ],
-            "description": "The account ID to send to `DELETE api/2.0/files/thirdparty/{providerId}`, or as `providerId` to\r\nre-authenticate the account.",
-            "format": "int32"
-          },
-          "provider_key": {
-            "examples": [
-              "WebDav"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The storage service behind the account. `WebDav` stands for every WebDAV preset, so it does not tell which of\r\nthem was chosen when the account was connected."
-          }
-        },
-        "description": "A third-party storage account connected to the portal."
-      },
-      "ThirdPartyParamsArrayWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ThirdPartyParams"
-            },
-            "description": "The list of ThirdPartyParams objects returned by the operation."
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        },
-        "description": "The successful API response containing the list of ThirdPartyParams objects."
-      },
       "ThirdPartyRequestDto": {
         "required": [
           "customerTitle",
@@ -47231,7 +47283,7 @@
         },
         "description": "The credentials and the title of a third-party storage account to connect or to re-authenticate."
       },
-      "ThirdPartySaveAsPdf": {
+      "ThirdPartySaveAsPdfRequest": {
         "required": [
           "folderId",
           "title"
@@ -47409,7 +47461,7 @@
         "description": "The file thumbnail status.",
         "x-enum-type": "integer"
       },
-      "UpdateComment": {
+      "UpdateCommentRequest": {
         "required": [
           "version"
         ],
@@ -47440,7 +47492,7 @@
         },
         "description": "The comment to store on one version of a file."
       },
-      "UpdateFile": {
+      "UpdateFileRequest": {
         "type": "object",
         "properties": {
           "title": {
@@ -47955,7 +48007,7 @@
         },
         "description": "The successful API response containing the UploadSessionResponseDto object."
       },
-      "UserConfig": {
+      "UserConfigDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -48013,300 +48065,7 @@
             ],
             "description": "Identifies the paying customer this participant belongs to, on deployments where the editors are licensed per\r\ncustomer."
           }
-        },
-        "description": "The account the editors attribute the changes of this session to."
-      },
-      "UserInfo": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "examples": [
-              "00000000-0000-0000-0000-000000000000"
-            ],
-            "type": "string",
-            "description": "The user ID.",
-            "format": "uuid"
-          },
-          "firstName": {
-            "examples": [
-              "John"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The user's first name."
-          },
-          "lastName": {
-            "examples": [
-              "Doe"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The user's last name."
-          },
-          "userName": {
-            "examples": [
-              "johndoe"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The user username."
-          },
-          "birthDate": {
-            "examples": [
-              "1990-01-01T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The user birthday.",
-            "format": "date-time"
-          },
-          "sex": {
-            "examples": [
-              true
-            ],
-            "type": [
-              "null",
-              "boolean"
-            ],
-            "description": "The user sex (male or female)."
-          },
-          "status": {
-            "description": "The user status.",
-            "$ref": "#/components/schemas/EmployeeStatus"
-          },
-          "activationStatus": {
-            "description": "The user activation status.",
-            "$ref": "#/components/schemas/EmployeeActivationStatus"
-          },
-          "terminatedDate": {
-            "examples": [
-              "2025-12-31T23:59:59Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The date and time when the user account was terminated.",
-            "format": "date-time"
-          },
-          "title": {
-            "examples": [
-              "Manager"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The user title."
-          },
-          "workFromDate": {
-            "examples": [
-              "2020-01-15T00:00:00Z"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The user registration date.",
-            "format": "date-time"
-          },
-          "email": {
-            "examples": [
-              "john.doe@example.com"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The user email address.",
-            "format": "email"
-          },
-          "contacts": {
-            "examples": [
-              "skype:johndoe|telegram:@johndoe"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The list of user contacts in the string format."
-          },
-          "contactsList": {
-            "examples": [
-              [
-                "skype:johndoe",
-                "telegram:@johndoe"
-              ]
-            ],
-            "type": [
-              "null",
-              "array"
-            ],
-            "items": {
-              "type": "string"
-            },
-            "description": "The list of user contacts."
-          },
-          "location": {
-            "examples": [
-              "New York, USA"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The user location."
-          },
-          "notes": {
-            "examples": [
-              "Additional information about the user"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The user notes."
-          },
-          "removed": {
-            "examples": [
-              false
-            ],
-            "type": "boolean",
-            "description": "Specifies if the user account was removed or not."
-          },
-          "lastModified": {
-            "examples": [
-              "2025-02-08T10:30:00Z"
-            ],
-            "type": "string",
-            "description": "The date and time when the user account was last modified.",
-            "format": "date-time"
-          },
-          "tenantId": {
-            "examples": [
-              1
-            ],
-            "type": "integer",
-            "description": "The tenant ID.",
-            "format": "int32"
-          },
-          "isActive": {
-            "examples": [
-              true
-            ],
-            "type": "boolean",
-            "description": "Specifies if the user is active or not.",
-            "readOnly": true
-          },
-          "cultureName": {
-            "examples": [
-              "en-US"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The user culture code."
-          },
-          "mobilePhone": {
-            "examples": [
-              "+1234567890"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The user mobile phone."
-          },
-          "mobilePhoneActivationStatus": {
-            "description": "The user mobile phone activation status.",
-            "$ref": "#/components/schemas/MobilePhoneActivationStatus"
-          },
-          "sid": {
-            "examples": [
-              "S-1-5-21-3623811015-3361044348-30300820-1013"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The LDAP user identifier."
-          },
-          "ldapQouta": {
-            "examples": [
-              1073741824
-            ],
-            "type": "integer",
-            "description": "The LDAP user quota attribute.",
-            "format": "int64"
-          },
-          "ssoNameId": {
-            "examples": [
-              "johndoe@example.com"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The SSO SAML user identifier."
-          },
-          "ssoSessionId": {
-            "examples": [
-              "_1a2b3c4d5e6f7g8h9i0j"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The SSO SAML user session identifier."
-          },
-          "createDate": {
-            "examples": [
-              "2020-01-15T00:00:00Z"
-            ],
-            "type": "string",
-            "description": "The date and time when the user account was created.",
-            "format": "date-time"
-          },
-          "createdBy": {
-            "examples": [
-              "00000000-0000-0000-0000-000000000000"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The ID of the user who created the current user account.",
-            "format": "uuid"
-          },
-          "spam": {
-            "examples": [
-              false
-            ],
-            "type": [
-              "null",
-              "boolean"
-            ],
-            "description": "Specifies if tips, updates and offers are allowed to be sent to the user or not."
-          },
-          "checkActivation": {
-            "examples": [
-              false
-            ],
-            "type": "boolean",
-            "description": "Indicates whether the activation status of the employee or recipient is unchecked or inactive.\r\nDepending on the context, this property evaluates the activation or eligibility status accordingly.",
-            "readOnly": true
-          }
-        },
-        "description": "The user information."
+        }
       },
       "UserInvitation": {
         "type": "object",
@@ -48482,7 +48241,7 @@
         },
         "description": "The watermark drawn over the documents of a room while they are viewed and printed."
       },
-      "WatermarkOnDraw": {
+      "WatermarkOnDrawDto": {
         "type": "object",
         "properties": {
           "width": {
@@ -48570,13 +48329,51 @@
               "array"
             ],
             "items": {
-              "description": "The paragraph parameters.",
-              "$ref": "#/components/schemas/Paragraph"
+              "description": "One paragraph of the watermark text.",
+              "$ref": "#/components/schemas/WatermarkParagraphDto"
             },
             "description": "The list of paragraphs of the watermark."
           }
         },
-        "description": "The document watermark parameters."
+        "description": "The watermark the editor draws over every page."
+      },
+      "WatermarkParagraphDto": {
+        "type": "object",
+        "properties": {
+          "align": {
+            "examples": [
+              2
+            ],
+            "type": "integer",
+            "description": "The paragraph align.",
+            "format": "int32"
+          },
+          "runs": {
+            "examples": [
+              [
+                {
+                  "fill": [
+                    124,
+                    124,
+                    124
+                  ],
+                  "text": "CONFIDENTIAL",
+                  "fontSize": 26
+                }
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "description": "A run of watermark text with its own colour and size.",
+              "$ref": "#/components/schemas/WatermarkTextRunDto"
+            },
+            "description": "The list of text runs from the paragraph."
+          }
+        },
+        "description": "One paragraph of the watermark text."
       },
       "WatermarkRequestDto": {
         "type": "object",
@@ -48651,6 +48448,50 @@
           }
         },
         "description": "The watermark drawn over the documents of a room."
+      },
+      "WatermarkTextRunDto": {
+        "type": "object",
+        "properties": {
+          "fill": {
+            "examples": [
+              [
+                124,
+                124,
+                124
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "The fill color of the text run in RGB format."
+          },
+          "text": {
+            "examples": [
+              "CONFIDENTIAL"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The run text."
+          },
+          "font-size": {
+            "examples": [
+              "26"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The font size of the text run in points."
+          }
+        },
+        "description": "A run of watermark text with its own colour and size."
       },
       "XlsxReportResponseDto": {
         "type": "object",

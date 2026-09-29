@@ -22,13 +22,13 @@ func main() {
 	client := docspace_api_sdk.NewAPIClient(cfg)
 	ctx := context.Background()
 
-	authRequest := docspace_api_sdk.NewAuthRequestsDtoWithDefaults()
+	authRequest := docspace_api_sdk.NewAuthRequestDtoWithDefaults()
 	authRequest.SetUserName("example@onlyoffice.com")
 	authRequest.SetPassword("11111111")
 
 	authResponse, _, err := client.AuthenticationAPI.
 		AuthenticateMe(ctx).
-		AuthRequestsDto(*authRequest).
+		AuthRequestDto(*authRequest).
 		Execute()
 	if err != nil {
 		log.Fatalf("authentication failed: %v", err)

@@ -51,5 +51,5 @@ public class SaveFormRoleMappingDto<T>
     /// call, and an empty set resets the filling.
     /// </summary>
     /// <example>[{"roleName": "Approver", "userId": "00000000-0000-0000-0000-000000000000"}]</example>
-    public required IEnumerable<FormRole> Roles { get; set; }
+    public required IEnumerable<FormRoleRequest> Roles { get; set; }
 }

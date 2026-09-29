@@ -7,7 +7,7 @@ use OpenAPI\Client\Api\Authentication\AuthenticationApi;
 use OpenAPI\Client\Api\Files\FoldersApi;
 use OpenAPI\Client\Api\Rooms\RoomsApi;
 use OpenAPI\Client\Api\Backup\BackupApi;
-use OpenAPI\Client\Model\AuthRequestsDto;
+use OpenAPI\Client\Model\AuthRequestDto;
 use OpenAPI\Client\Model\CreateFolder;
 use OpenAPI\Client\Model\DeleteFolder;
 use OpenAPI\Client\Model\BackupDto;
@@ -24,7 +24,7 @@ function main(): void
     // --- AUTH ---
     $authApi = new AuthenticationApi(null, $config);
 
-    $authDto = new AuthRequestsDto();
+    $authDto = new AuthRequestDto();
     $authDto->setUserName("example@onlyoffice.com");
     $authDto->setPassword("11111111");
 

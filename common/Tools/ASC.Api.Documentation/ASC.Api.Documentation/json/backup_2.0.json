@@ -54,7 +54,7 @@
         "operationId": "getBackupSchedule",
         "parameters": [
           {
-            "name": "Dump",
+            "name": "dump",
             "in": "query",
             "description": "Applies the operation to the whole server rather than to the current portal, which requires the space\r\naccess permission and works on a standalone installation only. Server-wide backups and schedules are\r\nkept apart from the ones of a portal, so the two values address different data.",
             "schema": {
@@ -299,7 +299,7 @@
         "operationId": "deleteBackupSchedule",
         "parameters": [
           {
-            "name": "Dump",
+            "name": "dump",
             "in": "query",
             "description": "Applies the operation to the whole server rather than to the current portal, which requires the space\r\naccess permission and works on a standalone installation only. Server-wide backups and schedules are\r\nkept apart from the ones of a portal, so the two values address different data.",
             "schema": {
@@ -644,7 +644,7 @@
         "operationId": "getBackupProgress",
         "parameters": [
           {
-            "name": "Dump",
+            "name": "dump",
             "in": "query",
             "description": "Applies the operation to the whole server rather than to the current portal, which requires the space\r\naccess permission and works on a standalone installation only. Server-wide backups and schedules are\r\nkept apart from the ones of a portal, so the two values address different data.",
             "schema": {
@@ -767,7 +767,7 @@
         "operationId": "getBackupHistory",
         "parameters": [
           {
-            "name": "Dump",
+            "name": "dump",
             "in": "query",
             "description": "Applies the operation to the whole server rather than to the current portal, which requires the space\r\naccess permission and works on a standalone installation only. Server-wide backups and schedules are\r\nkept apart from the ones of a portal, so the two values address different data.",
             "schema": {
@@ -1021,7 +1021,7 @@
         "operationId": "deleteBackupHistory",
         "parameters": [
           {
-            "name": "Dump",
+            "name": "dump",
             "in": "query",
             "description": "Applies the operation to the whole server rather than to the current portal, which requires the space\r\naccess permission and works on a standalone installation only. Server-wide backups and schedules are\r\nkept apart from the ones of a portal, so the two values address different data.",
             "schema": {
@@ -1273,7 +1273,7 @@
         "operationId": "getRestoreProgress",
         "parameters": [
           {
-            "name": "Dump",
+            "name": "dump",
             "in": "query",
             "description": "Which restoring job to look for, read as three states rather than as a flag: leave it out for\r\nwhichever job concerns this portal, including a server-wide one, send false for the job of this\r\nportal alone, and send true for the server-wide job. On a portal that is not a standalone\r\ninstallation the value is forced to false.",
             "schema": {
@@ -1769,7 +1769,52 @@
         },
         "description": "The request parameters for starting a backup."
       },
-      "BackupHistoryRecord": {
+      "BackupHistoryRecordArrayWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BackupHistoryRecordDto"
+            },
+            "description": "The list of BackupHistoryRecordDto objects returned by the operation."
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the list of BackupHistoryRecordDto objects."
+      },
+      "BackupHistoryRecordDto": {
         "required": [
           "createdOn",
           "expiresOn",
@@ -1820,51 +1865,6 @@
         },
         "description": "One stored backup of a portal."
       },
-      "BackupHistoryRecordArrayWrapper": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BackupHistoryRecord"
-            },
-            "description": "The list of BackupHistoryRecord objects returned by the operation."
-          },
-          "count": {
-            "type": "integer",
-            "description": "The total number of items in the response",
-            "format": "int32"
-          },
-          "links": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "href": {
-                  "type": "string",
-                  "description": "URL of the link"
-                },
-                "action": {
-                  "type": "string",
-                  "description": "Action associated with the link"
-                }
-              }
-            },
-            "description": "List of links related to the response"
-          },
-          "status": {
-            "type": "integer",
-            "description": "HTTP status code of the response",
-            "format": "int32"
-          },
-          "statusCode": {
-            "type": "integer",
-            "description": "HTTP status code of the response (duplicate of status)",
-            "format": "int32"
-          }
-        },
-        "description": "The successful API response containing the list of BackupHistoryRecord objects."
-      },
       "BackupPeriod": {
         "oneOf": [
           {
@@ -1900,7 +1900,7 @@
         "description": "How often a scheduled backup runs. `EveryWeek` and `EveryMonth` also need the day to be given, while\r\n`EveryDay` does not.",
         "x-enum-type": "integer"
       },
-      "BackupProgress": {
+      "BackupProgressDto": {
         "type": "object",
         "properties": {
           "isCompleted": {
@@ -2016,8 +2016,8 @@
         "type": "object",
         "properties": {
           "response": {
-            "description": "The BackupProgress object returned by the operation.",
-            "$ref": "#/components/schemas/BackupProgress"
+            "description": "The BackupProgressDto object returned by the operation.",
+            "$ref": "#/components/schemas/BackupProgressDto"
           },
           "count": {
             "type": "integer",
@@ -2052,7 +2052,7 @@
             "format": "int32"
           }
         },
-        "description": "The successful API response containing the BackupProgress object."
+        "description": "The successful API response containing the BackupProgressDto object."
       },
       "BackupRestoreDto": {
         "required": [
@@ -2395,7 +2395,7 @@
         },
         "description": "The request parameters for the time the scheduled backup runs."
       },
-      "CronParams": {
+      "CronParamsDto": {
         "type": "object",
         "properties": {
           "period": {
@@ -2591,7 +2591,7 @@
           },
           "cronParams": {
             "description": "When the backup runs, read back from the stored cron expression. `day` is 0 for a daily schedule,\r\nbecause a daily one has no day.",
-            "$ref": "#/components/schemas/CronParams"
+            "$ref": "#/components/schemas/CronParamsDto"
           },
           "backupsStored": {
             "examples": [

@@ -59,11 +59,13 @@ public class PushController(
     /// <summary>Register a push device</summary>
     /// <path>api/2.0/settings/push/docregisterdevice</path>
     [Tags("Security / Firebase")]
-    [SwaggerResponse(200, "The stored device registration of the calling user, with the Firebase token, the `doc` application and the subscription state as they are kept", typeof(FireBaseUser))]
+    [SwaggerResponse(200, "The stored device registration of the calling user, with the Firebase token, the `doc` application and the subscription state as they are kept", typeof(FirebaseDeviceDto))]
     [HttpPost("docregisterdevice")]
-    public async Task<FireBaseUser> DocRegisterPusnNotificationDevice(FirebaseRequestsDto inDto)
+    public async Task<FirebaseDeviceDto> DocRegisterPusnNotificationDevice(FirebaseRequestsDto inDto)
     {
-        return await firebaseHelper.RegisterUserDeviceAsync(inDto.FirebaseDeviceToken, inDto.IsSubscribed, PushConstants.PushDocAppName);
+        var device = await firebaseHelper.RegisterUserDeviceAsync(inDto.FirebaseDeviceToken, inDto.IsSubscribed, PushConstants.PushDocAppName);
+
+        return device?.Map();
     }
 
     /// <remarks>
@@ -83,10 +85,12 @@ public class PushController(
     /// <summary>Set push subscription</summary>
     /// <path>api/2.0/settings/push/docsubscribe</path>
     [Tags("Security / Firebase")]
-    [SwaggerResponse(200, "The device registration as it stands after the change, or an empty response when no registration of the calling user carries the token that was sent", typeof(FireBaseUser))]
+    [SwaggerResponse(200, "The device registration as it stands after the change, or an empty response when no registration of the calling user carries the token that was sent", typeof(FirebaseDeviceDto))]
     [HttpPut("docsubscribe")]
-    public async Task<FireBaseUser> SubscribeDocumentsPushNotification(FirebaseRequestsDto inDto)
+    public async Task<FirebaseDeviceDto> SubscribeDocumentsPushNotification(FirebaseRequestsDto inDto)
     {
-        return await firebaseHelper.UpdateUserAsync(inDto.FirebaseDeviceToken, inDto.IsSubscribed, PushConstants.PushDocAppName);
+        var device = await firebaseHelper.UpdateUserAsync(inDto.FirebaseDeviceToken, inDto.IsSubscribed, PushConstants.PushDocAppName);
+
+        return device?.Map();
     }
 }
