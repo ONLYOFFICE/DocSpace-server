@@ -1,6 +1,5 @@
 builder.CreateFile("xlsx");
 
-var defaultFontSize = 11;
 var defaultFontColorBlack = Api.CreateColorFromRGB(0, 0, 0);
 var defaultFontColorGray = Api.CreateColorFromRGB(127, 127, 127);
 var defaultBorderColorWhite = Api.CreateColorFromRGB(255, 255, 255);
@@ -65,6 +64,8 @@ function customizeWorksheet() {
     oWorksheet.SetColumnWidth(6, 20);
 }
 
+${reportTableStyle}
+
 function prepareInfo() {
     return [
         {
@@ -103,6 +104,8 @@ function prepareInfo() {
 }
 
 function prepareHeader() {
+    // The header keeps its colors of its own rather than taking them from the table style: a report
+    // with no rows creates no table at all, and the header would be left unpainted.
     var row = [];
     for (var i = 0; i < inputData.keys.length; i++) {
         row.push({
@@ -121,7 +124,6 @@ function prepareHeader() {
 function prepareData() {
     var table = [];
     for (var i = 0; i < values.length; i++) {
-        var bgColor = i % 2 == 0 ? null : colors.lightBgColor;
         var rowValues = [];
         for (var j = 0; j < values[i].length; j++) {
             var cell = values[i][j];
@@ -130,9 +132,7 @@ function prepareData() {
                 "url": cell.url,
                 "halign": cell.halign,
                 valign: "center",
-                "format": cell.format,
-                "bgColor": bgColor,
-                "borderColor": defaultBorderColorWhite
+                "format": cell.format
             });
         }
         table.push({ height: TABLE_ROW_HEIGHT, dataArray: rowValues });
@@ -180,8 +180,9 @@ function prepareTotal(headerRowIndex) {
     var lastDataRow = headerRowIndex + values.length;
 
     // Continue the row banding: the total row is the next row after the data, so its fill
-    // follows the same alternation (data row index i is shaded when i is odd).
-    var totalBgColor = values.length % 2 == 0 ? null : colors.lightBgColor;
+    // follows the same alternation (data row index i is shaded when i is odd). Only the report's
+    // own style bands in that color; the editor's default one has no fill to continue.
+    var totalBgColor = reportTableStyleSupported && values.length % 2 != 0 ? colors.lightBgColor : null;
 
     var row = [];
     for (var i = 0; i < inputData.keys.length; i++) {
@@ -228,12 +229,19 @@ function writeCell(worksheet, position, data) {
         worksheet.SetHyperlink(position, data.url, "", data.value, data.value);
     } else if (data.value != null) {
         sRange.SetValue(data.value);
-        sRange.SetWrap(true);
+        sRange.SetWrap(data.wrap !== false);
     }
 
-    sRange.SetFontSize(data.fontSize || defaultFontSize);
+    if (data.fontSize) {
+        sRange.SetFontSize(data.fontSize);
+    }
+
+    // Set unconditionally: a value that merely looks like a URL is turned into a hyperlink by the
+    // editor and painted in its blue, and the reports have always shown their text in one color.
     sRange.SetFontColor(data.fontColor || defaultFontColorBlack);
-    sRange.SetBold(data.bold || false);
+    if (data.bold) {
+        sRange.SetBold(true);
+    }
     sRange.SetAlignHorizontal(data.halign || "left");
     sRange.SetAlignVertical(data.valign || "bottom");
 
@@ -321,16 +329,8 @@ function getSourceColumnLength(fieldName) {
     return maxLength;
 }
 
-// First row of the pivot's values. Everything between the pivot's top row and this one is header:
-// one row normally, two once a column field splits the totals per currency.
-function getPivotFirstDataRow(pivotTable) {
-    var dataBody = pivotTable.GetDataBodyRange();
-    return dataBody != null ? dataBody.GetRow() : pivotTable.GetTableRange1().GetRow() + 1;
-}
-
-// Dresses the summary sheet in the detail table's colors: the blue header, the alternating row
-// fill and the white cell borders. The pivot is laid out by the editor, so its rows are found
-// through the pivot itself rather than counted while writing.
+// The pivot wears the report's table style; what a style cannot carry is set here - the row height
+// that keeps the two sheets aligned, and the vertical centring every cell of the detail table has.
 function stylePivot(pivotWorksheet, pivotTable) {
     var tableRange = pivotTable.GetTableRange1();
     if (tableRange == null) {
@@ -339,31 +339,7 @@ function stylePivot(pivotWorksheet, pivotTable) {
 
     var firstRow = tableRange.GetRow();
     var lastRow = firstRow + tableRange.GetRowsCount() - 1;
-    var firstColumn = toColumnName(tableRange.GetCol());
     var lastColumn = toColumnName(tableRange.GetCol() + tableRange.GetColumnsCount() - 1);
-
-    function rowRange(from, to) {
-        return pivotWorksheet.GetRange(firstColumn + from + ":" + lastColumn + to);
-    }
-
-    var firstDataRow = getPivotFirstDataRow(pivotTable);
-
-    var headerRange = rowRange(firstRow, firstDataRow - 1);
-    headerRange.SetFontSize(defaultFontSize);
-    headerRange.SetBold(true);
-    headerRange.SetFontColor(colors.mainFontColor);
-    headerRange.SetFillColor(colors.mainBgColor);
-
-    // Band the body the way the detail table bands its rows: the first row under the header stays
-    // clear, the next is filled, and so on down to the grand total.
-    for (var row = firstDataRow; row <= lastRow; row++) {
-        var bodyRange = rowRange(row, row);
-        bodyRange.SetFontSize(defaultFontSize);
-        bodyRange.SetFontColor(defaultFontColorBlack);
-        if ((row - firstDataRow) % 2 != 0) {
-            bodyRange.SetFillColor(colors.lightBgColor);
-        }
-    }
 
     // The pivot leaves its rows at the sheet default, which is shorter than the rows the detail
     // table writes, so the two tables would not line up.
@@ -371,21 +347,9 @@ function stylePivot(pivotWorksheet, pivotTable) {
         pivotWorksheet.GetRange("A" + row).SetRowHeight(TABLE_ROW_HEIGHT);
     }
 
-    // The grand total closes the summary the way the total row closes the detail table.
-    rowRange(lastRow, lastRow).SetBold(true);
-
-    var wholeRange = rowRange(firstRow, lastRow);
-
-    // The pivot leaves its cells sitting on the bottom of the row, which shows now that the rows are
-    // as tall as the detail table's. Every cell the detail table writes is vertically centred.
-    wholeRange.SetAlignVertical("center");
-
-    wholeRange.SetBorders("Top", "Medium", defaultBorderColorWhite);
-    wholeRange.SetBorders("Bottom", "Medium", defaultBorderColorWhite);
-    wholeRange.SetBorders("Left", "Medium", defaultBorderColorWhite);
-    wholeRange.SetBorders("Right", "Medium", defaultBorderColorWhite);
-    wholeRange.SetBorders("InsideVertical", "Medium", defaultBorderColorWhite);
-    wholeRange.SetBorders("InsideHorizontal", "Medium", defaultBorderColorWhite);
+    // With rows that tall the pivot's own cells would sit on the bottom edge. Alignment is not part
+    // of a table style, so it stays here.
+    pivotWorksheet.GetRange(toColumnName(tableRange.GetCol()) + firstRow + ":" + lastColumn + lastRow).SetAlignVertical("center");
 }
 
 // The pivot sizes none of its own columns. columnLengths arrives seeded with the detail sheet's,
@@ -496,9 +460,13 @@ function writePivot(headerRowIndex, colCount, detailColumnLengths) {
         pivotTable.SetRowGrand(false);
     }
 
-    // Drop the built-in pivot style: it paints the grand total row on its own, which breaks the
-    // row banding stylePivot() applies. With no style the sheet wears only the report's colors.
-    pivotTable.SetStyleName("None");
+    // The same custom style the detail table wears, so the summary matches it - and keeps matching it
+    // after a refresh, because the banding and the borders live in the workbook, not in the cells.
+    // Left on the editor's default style where the report's own could not be declared.
+    if (reportTableStyleSupported) {
+        pivotTable.SetStyleName(REPORT_TABLE_STYLE_NAME);
+    }
+    pivotTable.SetTableStyleRowStripes(true);
 
     // With more than one row field the pivot repeats every outer value as a subtotal row. Here the
     // outer field is the participant and the inner one only splits their spending by currency, so
@@ -511,7 +479,18 @@ function writePivot(headerRowIndex, colCount, detailColumnLengths) {
     pivotTable.SetRowAxisLayout("Tabular", false);
     pivotTable.SetGrandTotalName(inputData.resources.total);
 
-    pivotTable.Update();
+    // No Update() here. Every call above lays the pivot out on the spot, so GetTableRange1() already
+    // reports its final range for stylePivot() below. Update() only re-reads the source range, which
+    // has not changed since the pivot was inserted, and would lay the pivot out once more for nothing.
+
+    // The editor refits the pivot's columns to their content every time the pivot is laid out again -
+    // which each of the calls above already did, and which the reader's next field move or refresh
+    // would do once more, shrinking the widths setPivotColumnWidths() hands it below. Switched off
+    // before those widths are set, so they stay. A builder older than 10.0 has no such switch, and
+    // there the widths last only until the pivot is next laid out.
+    if (typeof pivotTable.SetHasAutoFormat === "function") {
+        pivotTable.SetHasAutoFormat(false);
+    }
 
     setPivotColumnWidths(pivotWorksheet, pivot, columnLengths);
     stylePivot(pivotWorksheet, pivotTable);
@@ -529,6 +508,8 @@ function setColumnWidths(worksheet, columnLengths) {
 }
 
 customizeWorksheet();
+
+createReportTableStyle();
 
 var columnMaxLengths = {};
 
@@ -555,7 +536,7 @@ freezePanes.FreezeRows(headerRowIndex);
 
 if (values.length > 0) {
     var formattedTableRange = "A" + headerRowIndex + ":" + toColumnName(colCount) + (headerRowIndex + values.length);
-    oWorksheet.FormatAsTable(formattedTableRange);
+    addReportTable(oWorksheet, formattedTableRange);
 }
 
 writePivot(headerRowIndex, colCount, columnMaxLengths);

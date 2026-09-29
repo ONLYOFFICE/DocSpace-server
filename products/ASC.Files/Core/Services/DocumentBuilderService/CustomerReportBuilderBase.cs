@@ -51,9 +51,18 @@ public sealed record RenderContext(
     JsonSerializerOptions Options,
     ReportHeader Header);
 
+/// Horizontal alignment of a report cell. The document builder expects these as the lowercase
+/// strings it passes to SetAlignHorizontal, which is what the camel-case enum converter on
+/// <see cref="CustomerReportBuilderBase"/>'s serializer options writes.
+public enum ReportColumnAlign
+{
+    Left,
+    Right
+}
+
 /// A single report column: its localized header, horizontal alignment, and whether it participates
 /// in the total row (summed, or the currency echoed next to the sums).
-public sealed record ReportColumn(string Header, string Align = "left", bool Sum = false, bool Currency = false);
+public sealed record ReportColumn(string Header, ReportColumnAlign Align = ReportColumnAlign.Left, bool Sum = false, bool Currency = false);
 
 /// One value column of the summary pivot: the source column, the aggregate function applied to it,
 /// the caption shown above it and the number format of the aggregated value.
@@ -102,7 +111,10 @@ public abstract class CustomerReportBuilderBase(
     private static readonly JsonSerializerOptions _jsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        // The script reads the alignments as the lowercase strings it hands to SetAlignHorizontal,
+        // so ReportColumnAlign has to reach it by name rather than by its numeric value.
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
     };
 
     public async Task<DocumentBuilderInputData> BuildAsync(Guid userId, CustomerOperationsReportTaskData data)
@@ -244,5 +256,18 @@ public abstract class CustomerReportBuilderBase(
         return new DocumentBuilderInputData(scriptFilePath, tempFileName, outputFileName);
     }
 
-    protected sealed record PropertyValue(string Value, string Format, string Halign = null);
+    protected sealed record PropertyValue(string Value, string Format, ReportColumnAlign? Halign = null);
+
+    // A money cell: the amount at full precision. Every number in the report is right-aligned.
+    protected static PropertyValue MoneyValue(decimal? amount)
+    {
+        return new PropertyValue(amount?.ToString(CultureInfo.InvariantCulture), MoneyFormat, ReportColumnAlign.Right);
+    }
+
+    // A whole-number cell: quantities and token counts. A count that was never recorded leaves the
+    // cell empty rather than showing 0.
+    protected static PropertyValue CountValue(long? count)
+    {
+        return new PropertyValue(count?.ToString(CultureInfo.InvariantCulture), CountFormat, ReportColumnAlign.Right);
+    }
 }
