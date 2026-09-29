@@ -71,8 +71,9 @@ if (str_starts_with($trigger, 'user.')) {
     $user = ObjectSerializer::deserialize($envelope->payload, UserPayload::class);
     error_log(sprintf('%s: %s', $trigger, $user->getUserName()));
 } else {
-    // Files, folders, rooms, agents and forms share one payload shape.
-    // fileEntryType tells them apart: 1 folder, 2 file.
+    // Files, folders and rooms each have their own schema; they share the fields
+    // of FileEntryPayload, which is enough for a generic log line. Deserialize
+    // FilePayload / FolderPayload / RoomPayload for the rest.
     $entry = ObjectSerializer::deserialize($envelope->payload, FileEntryPayload::class);
     $kind = $entry->getFileEntryType() === 2 ? 'file' : 'folder';
     error_log(sprintf('%s: %s "%s"', $trigger, $kind, $entry->getTitle()));
@@ -99,11 +100,17 @@ New events are added over time. Treat an unfamiliar `event.trigger` as something
 
 ## Documentation for Models
 
+ - [ContactPayload](docs/Model/ContactPayload.md)
  - [EntryId](docs/Model/EntryId.md)
  - [FileEntryPayload](docs/Model/FileEntryPayload.md)
+ - [FilePayload](docs/Model/FilePayload.md)
+ - [FolderPayload](docs/Model/FolderPayload.md)
  - [FormSubmitPayload](docs/Model/FormSubmitPayload.md)
  - [GroupPayload](docs/Model/GroupPayload.md)
+ - [GroupSummaryPayload](docs/Model/GroupSummaryPayload.md)
+ - [RoomPayload](docs/Model/RoomPayload.md)
  - [UserPayload](docs/Model/UserPayload.md)
+ - [UserSummaryPayload](docs/Model/UserSummaryPayload.md)
  - [WebhookConfigInfo](docs/Model/WebhookConfigInfo.md)
  - [WebhookEnvelope](docs/Model/WebhookEnvelope.md)
  - [WebhookEventInfo](docs/Model/WebhookEventInfo.md)

@@ -39,7 +39,8 @@ namespace ASC.Web.Files.Utils;
 public class WebhookManager(
     IDaoFactory daoFactory,
     IWebhookPublisher webhookPublisher,
-    IServiceProvider serviceProvider)
+    IServiceProvider serviceProvider,
+    FileEntryWebhookDtoHelper fileEntryWebhookDtoHelper)
 {
     public async Task<IEnumerable<DbWebhooksConfig>> GetWebhookConfigsAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
     {
@@ -51,7 +52,9 @@ public class WebhookManager(
 
     public async Task PublishAsync<T>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, FileEntry<T> fileEntry)
     {
-        await webhookPublisher.PublishAsync(trigger, webhookConfigs, fileEntry, fileEntry.Id);
+        var payload = await fileEntryWebhookDtoHelper.GetAsync(fileEntry);
+
+        await webhookPublisher.PublishAsync(trigger, webhookConfigs, payload, fileEntry.Id);
     }
 
     public async Task PublishAsync<T>(WebhookTrigger trigger, FileEntry<T> fileEntry)
@@ -66,14 +69,23 @@ public class WebhookManager(
                 return;
             }
 
-            await webhookPublisher.PublishAsync(trigger, formChecker, formData, formData.OriginalForm.Id);
+            await webhookPublisher.PublishAsync(trigger, formChecker, formData, () => GetFormSubmitPayloadAsync(formData), formData.OriginalForm.Id);
             return;
         }
 
         var checker =  serviceProvider.GetService<WebhookFileEntryAccessChecker<T>>();
         var pureFileEntry = await GetPureFileEntry(fileEntry) ?? fileEntry;
 
-        await webhookPublisher.PublishAsync(trigger, checker, pureFileEntry, pureFileEntry.Id);
+        await webhookPublisher.PublishAsync(trigger, checker, pureFileEntry, () => fileEntryWebhookDtoHelper.GetAsync(pureFileEntry), pureFileEntry.Id);
+    }
+
+    private async Task<FormSubmitWebhookDto<T>> GetFormSubmitPayloadAsync<T>(SubmittedFormData<T> formData)
+    {
+        return new FormSubmitWebhookDto<T>
+        {
+            OriginalForm = await fileEntryWebhookDtoHelper.GetFileAsync(formData.OriginalForm),
+            SubmittedForm = await fileEntryWebhookDtoHelper.GetFileAsync(formData.SubmittedForm)
+        };
     }
 
     private async Task<FileEntry<T>> GetPureFileEntry<T>(FileEntry<T> fileEntry)
@@ -121,8 +133,8 @@ public class WebhookFileEntryAccessChecker<T>(FileSecurity fileSecurity) : IWebh
 
 public class SubmittedFormData<T>
 {
-    public FileEntry<T> OriginalForm { get; set; }
-    public FileEntry<T> SubmittedForm { get; set; }
+    public File<T> OriginalForm { get; set; }
+    public File<T> SubmittedForm { get; set; }
 }
 
 [Scope(GenericArguments = [typeof(int)])]

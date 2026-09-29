@@ -3,9 +3,9 @@
 """
     ONLYOFFICE DocSpace Webhooks
 
-    Wire contract for OUTBOUND DocSpace webhook deliveries.  This is a hand-maintained document. It is NOT the REST API spec and shares no schemas with it: webhook payloads are the internal domain entities (UserInfo, GroupInfo, File<T>, Folder<T>), not the controller DTOs.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+    Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto). They began as copies of the matching REST DTOs and are free to diverge from them.  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
 
-    The version of the OpenAPI document: 0.1.0
+    The version of the OpenAPI document: 1.0.0
     Generated by OpenAPI Generator (https://openapi-generator.tech)
 
     Do not edit the class manually.
@@ -20,51 +20,36 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
-from uuid import UUID
 from docspace_webhooks_sdk.models.entry_id import EntryId
+from docspace_webhooks_sdk.models.user_summary_payload import UserSummaryPayload
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
 class FileEntryPayload(BaseModel):
     """
-    The payload for EVERY file, folder, room, agent and form trigger.  There is deliberately no File- or Folder-specific schema. WebhookManager calls PublishAsync<T1,T2> with a static parameter type of FileEntry<T>, so T1 binds to the abstract base and System.Text.Json serializes by DECLARED type. File<T> and Folder<T> members -- pureTitle, version, contentLength, folderType, filesCount, isRoom -- therefore never reach the wire, however the entry was published.  One consequence worth internalising: `title` IS present, even for files. File<T> hides Title behind [JsonIgnore] and exposes pureTitle instead, but that override is invisible here because the base declaration is what gets serialized.  Verified against a captured production delivery: all 14 keys of a real file.created payload are members of this schema and nothing else. (Files/Core/Core/Entries/FileEntry.cs; [JsonIgnore] members excluded.) 
+    ASC.Files/Core/ApiModels/WebhookDto/FileEntryWebhookDto.cs. What FilePayload, FolderPayload and RoomPayload have in common.  This schema is never sent on its own -- unlike the previous contract, where every file, folder, room, agent and form trigger sent exactly this and nothing else. The old payload was typed as the abstract FileEntry<T> at the publish site, so System.Text.Json serialized by DECLARED type and every File<T> and Folder<T> member was silently dropped: version, contentLength, fileType, folderType, filesCount, roomType never reached a receiver. That is fixed; the subtypes below carry their own fields.  Not carried, deliberately: access, security, securityByUsers, availableShareRights, shareSettings, canShare, shared, sharedForUser, sharedExternal, parentShared, isFavorite, requestToken, external, shareRecord. Those answer \"what may the caller see\", and a delivery has no caller - who receives it is decided by WebhookFileEntryAccessChecker against the subscription owner. Putting one user's permission matrix on the wire was both meaningless to the receiver and a disclosure. 
     """ # noqa: E501
     id: Optional[EntryId] = None
     parent_id: Optional[EntryId] = Field(default=None, alias="parentId")
-    root_id: Optional[EntryId] = Field(default=None, alias="rootId")
-    origin_id: Optional[EntryId] = Field(default=None, alias="originId")
-    origin_room_id: Optional[EntryId] = Field(default=None, alias="originRoomId")
-    folder_id_display: Optional[EntryId] = Field(default=None, alias="folderIdDisplay")
-    mutable_id: Optional[StrictBool] = Field(default=None, alias="mutableId")
-    title: Optional[StrictStr] = Field(default=None, description="The entry name, e.g. \"321.xlsx\". Present for files as well as folders: File<T> overrides Title with [JsonIgnore] and exposes pureTitle instead, but that override is never reached because the base declaration is what gets serialized. ")
-    is_new: Optional[StrictBool] = Field(default=None, description="Declared abstract on FileEntry; omitted when false.", alias="isNew")
-    create_by: Optional[UUID] = Field(default=None, alias="createBy")
-    create_on: Optional[datetime] = Field(default=None, alias="createOn")
-    modified_by: Optional[UUID] = Field(default=None, alias="modifiedBy")
-    modified_on: Optional[datetime] = Field(default=None, alias="modifiedOn")
-    shared_by: Optional[UUID] = Field(default=None, alias="sharedBy")
-    root_create_by: Optional[UUID] = Field(default=None, alias="rootCreateBy")
-    parent_room_created_by: Optional[UUID] = Field(default=None, alias="parentRoomCreatedBy")
+    root_folder_id: Optional[EntryId] = Field(default=None, alias="rootFolderId")
+    title: Optional[StrictStr] = None
+    file_entry_type: Optional[StrictInt] = Field(default=None, description="1 folder, 2 file. Present on every entry payload.", alias="fileEntryType")
+    created: Optional[datetime] = None
+    created_by: Optional[UserSummaryPayload] = Field(default=None, alias="createdBy")
+    updated: Optional[datetime] = None
+    updated_by: Optional[UserSummaryPayload] = Field(default=None, alias="updatedBy")
     root_folder_type: Optional[StrictInt] = Field(default=None, description="enum FolderType", alias="rootFolderType")
     parent_room_type: Optional[StrictInt] = Field(default=None, description="enum FolderType", alias="parentRoomType")
-    file_entry_type: Optional[StrictInt] = Field(default=None, description="enum FileEntryType -- 1 folder, 2 file. The ONLY way to tell a folder from a file: no subtype-specific fields are ever sent. ", alias="fileEntryType")
-    access: Optional[StrictInt] = Field(default=None, description="enum FileShare")
-    shared: Optional[StrictBool] = None
-    shared_for_user: Optional[StrictBool] = Field(default=None, alias="sharedForUser")
-    shared_external: Optional[StrictBool] = Field(default=None, alias="sharedExternal")
-    parent_shared: Optional[StrictBool] = Field(default=None, alias="parentShared")
-    provider_id: Optional[StrictInt] = Field(default=None, alias="providerId")
-    provider_key: Optional[StrictStr] = Field(default=None, alias="providerKey")
+    origin_id: Optional[EntryId] = Field(default=None, alias="originId")
+    origin_room_id: Optional[EntryId] = Field(default=None, alias="originRoomId")
     origin_title: Optional[StrictStr] = Field(default=None, alias="originTitle")
     origin_room_title: Optional[StrictStr] = Field(default=None, alias="originRoomTitle")
-    order: Optional[StrictInt] = None
-    error: Optional[StrictStr] = None
-    tags: Optional[List[Dict[str, Any]]] = Field(default=None, description="TODO: expand Tag.")
-    share_record: Optional[Dict[str, Any]] = Field(default=None, description="TODO: expand FileShareRecord<T>.", alias="shareRecord")
-    security: Optional[Dict[str, StrictBool]] = Field(default=None, description="Caller-relative permission map (enum FilesSecurityActions -> bool). Internal ACL state on the wire. REVIEW. ")
-    security_by_users: Optional[Dict[str, Dict[str, StrictBool]]] = Field(default=None, description="Per-user permission map. Initialised non-null, so it is emitted as {} rather than omitted. REVIEW. ", alias="securityByUsers")
-    __properties: ClassVar[List[str]] = ["id", "parentId", "rootId", "originId", "originRoomId", "folderIdDisplay", "mutableId", "title", "isNew", "createBy", "createOn", "modifiedBy", "modifiedOn", "sharedBy", "rootCreateBy", "parentRoomCreatedBy", "rootFolderType", "parentRoomType", "fileEntryType", "access", "shared", "sharedForUser", "sharedExternal", "parentShared", "providerId", "providerKey", "originTitle", "originRoomTitle", "order", "error", "tags", "shareRecord", "security", "securityByUsers"]
+    provider_item: Optional[StrictBool] = Field(default=None, alias="providerItem")
+    provider_key: Optional[StrictStr] = Field(default=None, alias="providerKey")
+    provider_id: Optional[StrictInt] = Field(default=None, alias="providerId")
+    order: Optional[StrictInt] = Field(default=None, description="Position within an indexed room.")
+    __properties: ClassVar[List[str]] = ["id", "parentId", "rootFolderId", "title", "fileEntryType", "created", "createdBy", "updated", "updatedBy", "rootFolderType", "parentRoomType", "originId", "originRoomId", "originTitle", "originRoomTitle", "providerItem", "providerKey", "providerId", "order"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -111,18 +96,21 @@ class FileEntryPayload(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of parent_id
         if self.parent_id:
             _dict['parentId'] = self.parent_id.to_dict()
-        # override the default output from pydantic by calling `to_dict()` of root_id
-        if self.root_id:
-            _dict['rootId'] = self.root_id.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of root_folder_id
+        if self.root_folder_id:
+            _dict['rootFolderId'] = self.root_folder_id.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of created_by
+        if self.created_by:
+            _dict['createdBy'] = self.created_by.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of updated_by
+        if self.updated_by:
+            _dict['updatedBy'] = self.updated_by.to_dict()
         # override the default output from pydantic by calling `to_dict()` of origin_id
         if self.origin_id:
             _dict['originId'] = self.origin_id.to_dict()
         # override the default output from pydantic by calling `to_dict()` of origin_room_id
         if self.origin_room_id:
             _dict['originRoomId'] = self.origin_room_id.to_dict()
-        # override the default output from pydantic by calling `to_dict()` of folder_id_display
-        if self.folder_id_display:
-            _dict['folderIdDisplay'] = self.folder_id_display.to_dict()
         return _dict
 
     @classmethod
@@ -137,38 +125,23 @@ class FileEntryPayload(BaseModel):
         _obj = cls.model_validate({
             "id": EntryId.from_dict(obj["id"]) if obj.get("id") is not None else None,
             "parentId": EntryId.from_dict(obj["parentId"]) if obj.get("parentId") is not None else None,
-            "rootId": EntryId.from_dict(obj["rootId"]) if obj.get("rootId") is not None else None,
-            "originId": EntryId.from_dict(obj["originId"]) if obj.get("originId") is not None else None,
-            "originRoomId": EntryId.from_dict(obj["originRoomId"]) if obj.get("originRoomId") is not None else None,
-            "folderIdDisplay": EntryId.from_dict(obj["folderIdDisplay"]) if obj.get("folderIdDisplay") is not None else None,
-            "mutableId": obj.get("mutableId"),
+            "rootFolderId": EntryId.from_dict(obj["rootFolderId"]) if obj.get("rootFolderId") is not None else None,
             "title": obj.get("title"),
-            "isNew": obj.get("isNew"),
-            "createBy": obj.get("createBy"),
-            "createOn": obj.get("createOn"),
-            "modifiedBy": obj.get("modifiedBy"),
-            "modifiedOn": obj.get("modifiedOn"),
-            "sharedBy": obj.get("sharedBy"),
-            "rootCreateBy": obj.get("rootCreateBy"),
-            "parentRoomCreatedBy": obj.get("parentRoomCreatedBy"),
+            "fileEntryType": obj.get("fileEntryType"),
+            "created": obj.get("created"),
+            "createdBy": UserSummaryPayload.from_dict(obj["createdBy"]) if obj.get("createdBy") is not None else None,
+            "updated": obj.get("updated"),
+            "updatedBy": UserSummaryPayload.from_dict(obj["updatedBy"]) if obj.get("updatedBy") is not None else None,
             "rootFolderType": obj.get("rootFolderType"),
             "parentRoomType": obj.get("parentRoomType"),
-            "fileEntryType": obj.get("fileEntryType"),
-            "access": obj.get("access"),
-            "shared": obj.get("shared"),
-            "sharedForUser": obj.get("sharedForUser"),
-            "sharedExternal": obj.get("sharedExternal"),
-            "parentShared": obj.get("parentShared"),
-            "providerId": obj.get("providerId"),
-            "providerKey": obj.get("providerKey"),
+            "originId": EntryId.from_dict(obj["originId"]) if obj.get("originId") is not None else None,
+            "originRoomId": EntryId.from_dict(obj["originRoomId"]) if obj.get("originRoomId") is not None else None,
             "originTitle": obj.get("originTitle"),
             "originRoomTitle": obj.get("originRoomTitle"),
-            "order": obj.get("order"),
-            "error": obj.get("error"),
-            "tags": obj.get("tags"),
-            "shareRecord": obj.get("shareRecord"),
-            "security": obj.get("security"),
-            "securityByUsers": obj.get("securityByUsers")
+            "providerItem": obj.get("providerItem"),
+            "providerKey": obj.get("providerKey"),
+            "providerId": obj.get("providerId"),
+            "order": obj.get("order")
         })
         return _obj
 

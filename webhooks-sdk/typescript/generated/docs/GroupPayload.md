@@ -1,7 +1,7 @@
 
 # GroupPayload
 
-ASC.Core.Common/Core/GroupInfo.cs. Note `ID` in C#; the camelCase policy lowercases the whole leading run, so it is \"id\" on the wire, while `CategoryID` becomes \"categoryID\". 
+ASC.Api.Core/Webhook/Payloads/GroupWebhookDto.cs. A copy of the REST GroupDto.  The member list is not carried - a group can hold thousands of users and each would be expanded into every group event. `membersCount` is the hint that the roster changed; read it from GET api/2.0/group/{id}. 
 
 ## Properties
 
@@ -9,10 +9,12 @@ Name | Type
 ------------ | -------------
 `id` | string
 `name` | string
-`categoryID` | string
-`parent` | [GroupPayload](GroupPayload.md)
-`sid` | string
-`removed` | boolean
+`parent` | string
+`category` | string
+`isLDAP` | boolean
+`isSystem` | boolean
+`manager` | [UserSummaryPayload](UserSummaryPayload.md)
+`membersCount` | number
 
 ## Example
 
@@ -23,10 +25,12 @@ import type { GroupPayload } from ''
 const example = {
   "id": null,
   "name": null,
-  "categoryID": null,
   "parent": null,
-  "sid": null,
-  "removed": null,
+  "category": null,
+  "isLDAP": null,
+  "isSystem": null,
+  "manager": null,
+  "membersCount": null,
 } satisfies GroupPayload
 
 console.log(example)

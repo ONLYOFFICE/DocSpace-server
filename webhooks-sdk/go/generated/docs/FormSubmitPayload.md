@@ -4,8 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**OriginalForm** | Pointer to [**FileEntryPayload**](FileEntryPayload.md) |  | [optional] 
-**SubmittedForm** | Pointer to [**FileEntryPayload**](FileEntryPayload.md) |  | [optional] 
+**OriginalForm** | Pointer to [**FilePayload**](FilePayload.md) |  | [optional] 
+**SubmittedForm** | Pointer to [**FilePayload**](FilePayload.md) |  | [optional] 
 
 ## Methods
 
@@ -28,20 +28,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetOriginalForm
 
-`func (o *FormSubmitPayload) GetOriginalForm() FileEntryPayload`
+`func (o *FormSubmitPayload) GetOriginalForm() FilePayload`
 
 GetOriginalForm returns the OriginalForm field if non-nil, zero value otherwise.
 
 ### GetOriginalFormOk
 
-`func (o *FormSubmitPayload) GetOriginalFormOk() (*FileEntryPayload, bool)`
+`func (o *FormSubmitPayload) GetOriginalFormOk() (*FilePayload, bool)`
 
 GetOriginalFormOk returns a tuple with the OriginalForm field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetOriginalForm
 
-`func (o *FormSubmitPayload) SetOriginalForm(v FileEntryPayload)`
+`func (o *FormSubmitPayload) SetOriginalForm(v FilePayload)`
 
 SetOriginalForm sets OriginalForm field to given value.
 
@@ -53,20 +53,20 @@ HasOriginalForm returns a boolean if a field has been set.
 
 ### GetSubmittedForm
 
-`func (o *FormSubmitPayload) GetSubmittedForm() FileEntryPayload`
+`func (o *FormSubmitPayload) GetSubmittedForm() FilePayload`
 
 GetSubmittedForm returns the SubmittedForm field if non-nil, zero value otherwise.
 
 ### GetSubmittedFormOk
 
-`func (o *FormSubmitPayload) GetSubmittedFormOk() (*FileEntryPayload, bool)`
+`func (o *FormSubmitPayload) GetSubmittedFormOk() (*FilePayload, bool)`
 
 GetSubmittedFormOk returns a tuple with the SubmittedForm field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetSubmittedForm
 
-`func (o *FormSubmitPayload) SetSubmittedForm(v FileEntryPayload)`
+`func (o *FormSubmitPayload) SetSubmittedForm(v FilePayload)`
 
 SetSubmittedForm sets SubmittedForm field to given value.
 

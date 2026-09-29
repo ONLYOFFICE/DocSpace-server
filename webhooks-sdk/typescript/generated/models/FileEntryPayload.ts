@@ -2,9 +2,9 @@
 /* eslint-disable */
 /**
  * ONLYOFFICE DocSpace Webhooks
- * Wire contract for OUTBOUND DocSpace webhook deliveries.  This is a hand-maintained document. It is NOT the REST API spec and shares no schemas with it: webhook payloads are the internal domain entities (UserInfo, GroupInfo, File<T>, Folder<T>), not the controller DTOs.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender\'s options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+ * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto). They began as copies of the matching REST DTOs and are free to diverge from them.  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender\'s options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
  *
- * The version of the OpenAPI document: 0.1.0
+ * The version of the OpenAPI document: 1.0.0
  * 
  *
  * NOTE: This class is auto generated by OpenAPI Generator (https://openapi-generator.tech).
@@ -20,25 +20,33 @@ import {
     EntryIdToJSON,
     EntryIdToJSONTyped,
 } from './EntryId';
+import type { UserSummaryPayload } from './UserSummaryPayload';
+import {
+    UserSummaryPayloadFromJSON,
+    UserSummaryPayloadFromJSONTyped,
+    UserSummaryPayloadToJSON,
+    UserSummaryPayloadToJSONTyped,
+} from './UserSummaryPayload';
 
 /**
- * The payload for EVERY file, folder, room, agent and form trigger.
+ * ASC.Files/Core/ApiModels/WebhookDto/FileEntryWebhookDto.cs. What
+ * FilePayload, FolderPayload and RoomPayload have in common.
  * 
- * There is deliberately no File- or Folder-specific schema. WebhookManager
- * calls PublishAsync<T1,T2> with a static parameter type of FileEntry<T>,
- * so T1 binds to the abstract base and System.Text.Json serializes by
- * DECLARED type. File<T> and Folder<T> members -- pureTitle, version,
- * contentLength, folderType, filesCount, isRoom -- therefore never reach
- * the wire, however the entry was published.
+ * This schema is never sent on its own -- unlike the previous contract,
+ * where every file, folder, room, agent and form trigger sent exactly this
+ * and nothing else. The old payload was typed as the abstract FileEntry<T>
+ * at the publish site, so System.Text.Json serialized by DECLARED type and
+ * every File<T> and Folder<T> member was silently dropped: version,
+ * contentLength, fileType, folderType, filesCount, roomType never reached a
+ * receiver. That is fixed; the subtypes below carry their own fields.
  * 
- * One consequence worth internalising: `title` IS present, even for files.
- * File<T> hides Title behind [JsonIgnore] and exposes pureTitle instead,
- * but that override is invisible here because the base declaration is what
- * gets serialized.
- * 
- * Verified against a captured production delivery: all 14 keys of a real
- * file.created payload are members of this schema and nothing else.
- * (Files/Core/Core/Entries/FileEntry.cs; [JsonIgnore] members excluded.)
+ * Not carried, deliberately: access, security, securityByUsers,
+ * availableShareRights, shareSettings, canShare, shared, sharedForUser,
+ * sharedExternal, parentShared, isFavorite, requestToken, external,
+ * shareRecord. Those answer "what may the caller see", and a delivery has no
+ * caller - who receives it is decided by WebhookFileEntryAccessChecker
+ * against the subscription owner. Putting one user's permission matrix on
+ * the wire was both meaningless to the receiver and a disclosure.
  * 
  * @export
  * @interface FileEntryPayload
@@ -55,7 +63,39 @@ export interface FileEntryPayload {
     /**
      * 
      */
-    rootId?: EntryId;
+    rootFolderId?: EntryId;
+    /**
+     * 
+     */
+    title?: string;
+    /**
+     * 1 folder, 2 file. Present on every entry payload.
+     */
+    fileEntryType?: number;
+    /**
+     * 
+     */
+    created?: Date;
+    /**
+     * 
+     */
+    createdBy?: UserSummaryPayload;
+    /**
+     * 
+     */
+    updated?: Date;
+    /**
+     * 
+     */
+    updatedBy?: UserSummaryPayload;
+    /**
+     * enum FolderType
+     */
+    rootFolderType?: number;
+    /**
+     * enum FolderType
+     */
+    parentRoomType?: number;
     /**
      * 
      */
@@ -67,92 +107,6 @@ export interface FileEntryPayload {
     /**
      * 
      */
-    folderIdDisplay?: EntryId;
-    /**
-     * 
-     */
-    mutableId?: boolean;
-    /**
-     * The entry name, e.g. "321.xlsx". Present for files as well as folders: File<T> overrides Title with [JsonIgnore] and exposes pureTitle instead, but that override is never reached because the base declaration is what gets serialized.
-     * 
-     */
-    title?: string;
-    /**
-     * Declared abstract on FileEntry; omitted when false.
-     */
-    isNew?: boolean;
-    /**
-     * 
-     */
-    createBy?: string;
-    /**
-     * 
-     */
-    createOn?: Date;
-    /**
-     * 
-     */
-    modifiedBy?: string;
-    /**
-     * 
-     */
-    modifiedOn?: Date;
-    /**
-     * 
-     */
-    sharedBy?: string;
-    /**
-     * 
-     */
-    rootCreateBy?: string;
-    /**
-     * 
-     */
-    parentRoomCreatedBy?: string;
-    /**
-     * enum FolderType
-     */
-    rootFolderType?: number;
-    /**
-     * enum FolderType
-     */
-    parentRoomType?: number;
-    /**
-     * enum FileEntryType -- 1 folder, 2 file. The ONLY way to tell a folder from a file: no subtype-specific fields are ever sent.
-     * 
-     */
-    fileEntryType?: number;
-    /**
-     * enum FileShare
-     */
-    access?: number;
-    /**
-     * 
-     */
-    shared?: boolean;
-    /**
-     * 
-     */
-    sharedForUser?: boolean;
-    /**
-     * 
-     */
-    sharedExternal?: boolean;
-    /**
-     * 
-     */
-    parentShared?: boolean;
-    /**
-     * 
-     */
-    providerId?: number;
-    /**
-     * 
-     */
-    providerKey?: string;
-    /**
-     * 
-     */
     originTitle?: string;
     /**
      * 
@@ -161,29 +115,19 @@ export interface FileEntryPayload {
     /**
      * 
      */
+    providerItem?: boolean;
+    /**
+     * 
+     */
+    providerKey?: string;
+    /**
+     * 
+     */
+    providerId?: number;
+    /**
+     * Position within an indexed room.
+     */
     order?: number;
-    /**
-     * 
-     */
-    error?: string;
-    /**
-     * TODO: expand Tag.
-     */
-    tags?: Array<{ [key: string]: any; }>;
-    /**
-     * TODO: expand FileShareRecord<T>.
-     */
-    shareRecord?: { [key: string]: any; };
-    /**
-     * Caller-relative permission map (enum FilesSecurityActions -> bool). Internal ACL state on the wire. REVIEW.
-     * 
-     */
-    security?: { [key: string]: boolean; };
-    /**
-     * Per-user permission map. Initialised non-null, so it is emitted as {} rather than omitted. REVIEW.
-     * 
-     */
-    securityByUsers?: { [key: string]: { [key: string]: boolean; }; };
 }
 
 /**
@@ -205,38 +149,23 @@ export function FileEntryPayloadFromJSONTyped(json: any, ignoreDiscriminator: bo
         
         'id': json['id'] == null ? undefined : EntryIdFromJSON(json['id']),
         'parentId': json['parentId'] == null ? undefined : EntryIdFromJSON(json['parentId']),
-        'rootId': json['rootId'] == null ? undefined : EntryIdFromJSON(json['rootId']),
-        'originId': json['originId'] == null ? undefined : EntryIdFromJSON(json['originId']),
-        'originRoomId': json['originRoomId'] == null ? undefined : EntryIdFromJSON(json['originRoomId']),
-        'folderIdDisplay': json['folderIdDisplay'] == null ? undefined : EntryIdFromJSON(json['folderIdDisplay']),
-        'mutableId': json['mutableId'] == null ? undefined : json['mutableId'],
+        'rootFolderId': json['rootFolderId'] == null ? undefined : EntryIdFromJSON(json['rootFolderId']),
         'title': json['title'] == null ? undefined : json['title'],
-        'isNew': json['isNew'] == null ? undefined : json['isNew'],
-        'createBy': json['createBy'] == null ? undefined : json['createBy'],
-        'createOn': json['createOn'] == null ? undefined : (parseDateTime(json['createOn'])),
-        'modifiedBy': json['modifiedBy'] == null ? undefined : json['modifiedBy'],
-        'modifiedOn': json['modifiedOn'] == null ? undefined : (parseDateTime(json['modifiedOn'])),
-        'sharedBy': json['sharedBy'] == null ? undefined : json['sharedBy'],
-        'rootCreateBy': json['rootCreateBy'] == null ? undefined : json['rootCreateBy'],
-        'parentRoomCreatedBy': json['parentRoomCreatedBy'] == null ? undefined : json['parentRoomCreatedBy'],
+        'fileEntryType': json['fileEntryType'] == null ? undefined : json['fileEntryType'],
+        'created': json['created'] == null ? undefined : (parseDateTime(json['created'])),
+        'createdBy': json['createdBy'] == null ? undefined : UserSummaryPayloadFromJSON(json['createdBy']),
+        'updated': json['updated'] == null ? undefined : (parseDateTime(json['updated'])),
+        'updatedBy': json['updatedBy'] == null ? undefined : UserSummaryPayloadFromJSON(json['updatedBy']),
         'rootFolderType': json['rootFolderType'] == null ? undefined : json['rootFolderType'],
         'parentRoomType': json['parentRoomType'] == null ? undefined : json['parentRoomType'],
-        'fileEntryType': json['fileEntryType'] == null ? undefined : json['fileEntryType'],
-        'access': json['access'] == null ? undefined : json['access'],
-        'shared': json['shared'] == null ? undefined : json['shared'],
-        'sharedForUser': json['sharedForUser'] == null ? undefined : json['sharedForUser'],
-        'sharedExternal': json['sharedExternal'] == null ? undefined : json['sharedExternal'],
-        'parentShared': json['parentShared'] == null ? undefined : json['parentShared'],
-        'providerId': json['providerId'] == null ? undefined : json['providerId'],
-        'providerKey': json['providerKey'] == null ? undefined : json['providerKey'],
+        'originId': json['originId'] == null ? undefined : EntryIdFromJSON(json['originId']),
+        'originRoomId': json['originRoomId'] == null ? undefined : EntryIdFromJSON(json['originRoomId']),
         'originTitle': json['originTitle'] == null ? undefined : json['originTitle'],
         'originRoomTitle': json['originRoomTitle'] == null ? undefined : json['originRoomTitle'],
+        'providerItem': json['providerItem'] == null ? undefined : json['providerItem'],
+        'providerKey': json['providerKey'] == null ? undefined : json['providerKey'],
+        'providerId': json['providerId'] == null ? undefined : json['providerId'],
         'order': json['order'] == null ? undefined : json['order'],
-        'error': json['error'] == null ? undefined : json['error'],
-        'tags': json['tags'] == null ? undefined : json['tags'],
-        'shareRecord': json['shareRecord'] == null ? undefined : json['shareRecord'],
-        'security': json['security'] == null ? undefined : json['security'],
-        'securityByUsers': json['securityByUsers'] == null ? undefined : json['securityByUsers'],
     };
 }
 
@@ -253,38 +182,23 @@ export function FileEntryPayloadToJSONTyped(value?: FileEntryPayload | null, ign
         
         'id': EntryIdToJSON(value['id']),
         'parentId': EntryIdToJSON(value['parentId']),
-        'rootId': EntryIdToJSON(value['rootId']),
-        'originId': EntryIdToJSON(value['originId']),
-        'originRoomId': EntryIdToJSON(value['originRoomId']),
-        'folderIdDisplay': EntryIdToJSON(value['folderIdDisplay']),
-        'mutableId': value['mutableId'],
+        'rootFolderId': EntryIdToJSON(value['rootFolderId']),
         'title': value['title'],
-        'isNew': value['isNew'],
-        'createBy': value['createBy'],
-        'createOn': value['createOn'] == null ? value['createOn'] : serializeDateTime(value['createOn']),
-        'modifiedBy': value['modifiedBy'],
-        'modifiedOn': value['modifiedOn'] == null ? value['modifiedOn'] : serializeDateTime(value['modifiedOn']),
-        'sharedBy': value['sharedBy'],
-        'rootCreateBy': value['rootCreateBy'],
-        'parentRoomCreatedBy': value['parentRoomCreatedBy'],
+        'fileEntryType': value['fileEntryType'],
+        'created': value['created'] == null ? value['created'] : serializeDateTime(value['created']),
+        'createdBy': UserSummaryPayloadToJSON(value['createdBy']),
+        'updated': value['updated'] == null ? value['updated'] : serializeDateTime(value['updated']),
+        'updatedBy': UserSummaryPayloadToJSON(value['updatedBy']),
         'rootFolderType': value['rootFolderType'],
         'parentRoomType': value['parentRoomType'],
-        'fileEntryType': value['fileEntryType'],
-        'access': value['access'],
-        'shared': value['shared'],
-        'sharedForUser': value['sharedForUser'],
-        'sharedExternal': value['sharedExternal'],
-        'parentShared': value['parentShared'],
-        'providerId': value['providerId'],
-        'providerKey': value['providerKey'],
+        'originId': EntryIdToJSON(value['originId']),
+        'originRoomId': EntryIdToJSON(value['originRoomId']),
         'originTitle': value['originTitle'],
         'originRoomTitle': value['originRoomTitle'],
+        'providerItem': value['providerItem'],
+        'providerKey': value['providerKey'],
+        'providerId': value['providerId'],
         'order': value['order'],
-        'error': value['error'],
-        'tags': value['tags'],
-        'shareRecord': value['shareRecord'],
-        'security': value['security'],
-        'securityByUsers': value['securityByUsers'],
     };
 }
 

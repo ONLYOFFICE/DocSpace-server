@@ -16,7 +16,7 @@ Java 17+
 <dependency>
   <groupId>com.onlyoffice</groupId>
   <artifactId>docspace-webhooks-sdk</artifactId>
-  <version>0.1.0</version>
+  <version>1.0.0</version>
 </dependency>
 ```
 
@@ -96,8 +96,10 @@ public class WebhookReceiver {
                     UserPayload user = UserPayload.fromJson(payload);
                     System.out.printf("%s: %s%n", trigger, user.getUserName());
                 } else {
-                    // Files, folders, rooms, agents and forms share one payload
-                    // shape. fileEntryType tells them apart: 1 folder, 2 file.
+                    // Files, folders and rooms each have their own schema; they
+                    // share the fields of FileEntryPayload, which is enough for a
+                    // generic log line. Parse FilePayload / FolderPayload /
+                    // RoomPayload for the rest.
                     FileEntryPayload entry = FileEntryPayload.fromJson(payload);
                     String kind = Integer.valueOf(2).equals(entry.getFileEntryType())
                             ? "file" : "folder";
@@ -133,11 +135,17 @@ New events are added over time. Treat an unfamiliar `event.trigger` as something
 
 ## Documentation for Models
 
+ - [ContactPayload](docs/ContactPayload.md)
  - [EntryId](docs/EntryId.md)
  - [FileEntryPayload](docs/FileEntryPayload.md)
+ - [FilePayload](docs/FilePayload.md)
+ - [FolderPayload](docs/FolderPayload.md)
  - [FormSubmitPayload](docs/FormSubmitPayload.md)
  - [GroupPayload](docs/GroupPayload.md)
+ - [GroupSummaryPayload](docs/GroupSummaryPayload.md)
+ - [RoomPayload](docs/RoomPayload.md)
  - [UserPayload](docs/UserPayload.md)
+ - [UserSummaryPayload](docs/UserSummaryPayload.md)
  - [WebhookConfigInfo](docs/WebhookConfigInfo.md)
  - [WebhookEnvelope](docs/WebhookEnvelope.md)
  - [WebhookEventInfo](docs/WebhookEventInfo.md)

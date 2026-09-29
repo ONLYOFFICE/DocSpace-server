@@ -1,9 +1,9 @@
 /*
  * ONLYOFFICE DocSpace Webhooks
  *
- * Wire contract for OUTBOUND DocSpace webhook deliveries.  This is a hand-maintained document. It is NOT the REST API spec and shares no schemas with it: webhook payloads are the internal domain entities (UserInfo, GroupInfo, File<T>, Folder<T>), not the controller DTOs.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" - - it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely - - dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+ * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto). They began as copies of the matching REST DTOs and are free to diverge from them.  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" - - it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely - - dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
  *
- * The version of the OpenAPI document: 0.1.0
+ * The version of the OpenAPI document: 1.0.0
  * Generated by: https://github.com/openapitools/openapi-generator.git
  */
 
@@ -27,7 +27,7 @@ using OpenAPIDateConverter = DocSpace.Webhooks.SDK.Client.OpenAPIDateConverter;
 namespace DocSpace.Webhooks.SDK.Model
 {
     /// <summary>
-    /// ASC.Core.Common/Core/UserInfo.cs - - the domain entity, verbatim. It carries NO [JsonIgnore] at all, so every public member below reaches the wire. sid / ssoNameId / ssoSessionId / ldapQouta are null on portals without LDAP or SSO and therefore invisible in most test captures; they DO appear on LDAP/SSO tenants, and are flagged REVIEW below. 
+    /// ASC.Api.Core/Webhook/Payloads/UserWebhookDto.cs. A copy of the REST EmployeeFullDto, owned by the webhook contract and free to diverge from it.  Not carried, deliberately: sid / ssoNameId / ssoSessionId (LDAP and SAML identifiers, and a SAML SESSION id, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim, and &#x60;shared&#x60;. &#x60;contacts&#x60; appears once, as a typed list, rather than twice in two shapes. 
     /// </summary>
     [DataContract(Name = "UserPayload")]
     public partial class UserPayload : IValidatableObject
@@ -36,65 +36,81 @@ namespace DocSpace.Webhooks.SDK.Model
         /// Initializes a new instance of the <see cref="UserPayload" /> class.
         /// </summary>
         /// <param name="id">id.</param>
+        /// <param name="displayName">displayName.</param>
         /// <param name="firstName">firstName.</param>
         /// <param name="lastName">lastName.</param>
         /// <param name="userName">userName.</param>
         /// <param name="email">email.</param>
-        /// <param name="birthDate">birthDate.</param>
-        /// <param name="sex">sex.</param>
+        /// <param name="contacts">contacts.</param>
         /// <param name="status">enum EmployeeStatus.</param>
-        /// <param name="activationStatus">enum EmployeeActivationStatus (flags).</param>
-        /// <param name="terminatedDate">terminatedDate.</param>
-        /// <param name="title">title.</param>
-        /// <param name="workFromDate">workFromDate.</param>
+        /// <param name="activationStatus">enum EmployeeActivationStatus (flags), AutoGenerated masked off.</param>
+        /// <param name="terminated">terminated.</param>
+        /// <param name="department">Comma-separated group names, HTML-encoded..</param>
+        /// <param name="groups">groups.</param>
         /// <param name="location">location.</param>
         /// <param name="notes">notes.</param>
-        /// <param name="contacts">Flattened form of contactsList. BOTH are emitted - - the same data twice. .</param>
-        /// <param name="contactsList">contactsList.</param>
-        /// <param name="removed">removed.</param>
-        /// <param name="lastModified">lastModified.</param>
-        /// <param name="tenantId">tenantId.</param>
+        /// <param name="isAdmin">isAdmin.</param>
+        /// <param name="isRoomAdmin">isRoomAdmin.</param>
+        /// <param name="isOwner">isOwner.</param>
+        /// <param name="isVisitor">isVisitor.</param>
+        /// <param name="isCollaborator">isCollaborator.</param>
+        /// <param name="isLDAP">isLDAP.</param>
+        /// <param name="isSSO">isSSO.</param>
+        /// <param name="listAdminModules">listAdminModules.</param>
         /// <param name="cultureName">cultureName.</param>
         /// <param name="mobilePhone">mobilePhone.</param>
         /// <param name="mobilePhoneActivationStatus">enum MobilePhoneActivationStatus.</param>
-        /// <param name="createDate">createDate.</param>
+        /// <param name="quotaLimit">quotaLimit.</param>
+        /// <param name="usedSpace">usedSpace.</param>
+        /// <param name="isCustomQuota">isCustomQuota.</param>
         /// <param name="createdBy">createdBy.</param>
-        /// <param name="spam">spam.</param>
-        /// <param name="sid">LDAP identifier. REVIEW..</param>
-        /// <param name="ldapQouta">sic - - misspelled in the domain type, and misspelled on the wire. LDAP quota. REVIEW. .</param>
-        /// <param name="ssoNameId">SAML identifier. REVIEW..</param>
-        /// <param name="ssoSessionId">SAML SESSION identifier. REVIEW - - should almost certainly not be on the wire. .</param>
-        public UserPayload(Guid id = default, string firstName = default, string lastName = default, string userName = default, string email = default, DateTime birthDate = default, bool sex = default, int status = default, int activationStatus = default, DateTime terminatedDate = default, string title = default, DateTime workFromDate = default, string location = default, string notes = default, string contacts = default, List<string> contactsList = default, bool removed = default, DateTime lastModified = default, int tenantId = default, string cultureName = default, string mobilePhone = default, int mobilePhoneActivationStatus = default, DateTime createDate = default, Guid createdBy = default, bool spam = default, string sid = default, long ldapQouta = default, string ssoNameId = default, string ssoSessionId = default)
+        /// <param name="registrationDate">registrationDate.</param>
+        /// <param name="hasAvatar">hasAvatar.</param>
+        /// <param name="avatar">avatar.</param>
+        /// <param name="avatarOriginal">avatarOriginal.</param>
+        /// <param name="avatarMax">avatarMax.</param>
+        /// <param name="avatarMedium">avatarMedium.</param>
+        /// <param name="avatarSmall">avatarSmall.</param>
+        /// <param name="profileUrl">profileUrl.</param>
+        public UserPayload(Guid id = default, string displayName = default, string firstName = default, string lastName = default, string userName = default, string email = default, List<ContactPayload> contacts = default, int status = default, int activationStatus = default, DateTime terminated = default, string department = default, List<GroupSummaryPayload> groups = default, string location = default, string notes = default, bool isAdmin = default, bool isRoomAdmin = default, bool isOwner = default, bool isVisitor = default, bool isCollaborator = default, bool isLDAP = default, bool isSSO = default, List<string> listAdminModules = default, string cultureName = default, string mobilePhone = default, int mobilePhoneActivationStatus = default, long quotaLimit = default, decimal usedSpace = default, bool isCustomQuota = default, UserSummaryPayload createdBy = default, DateTime registrationDate = default, bool hasAvatar = default, string avatar = default, string avatarOriginal = default, string avatarMax = default, string avatarMedium = default, string avatarSmall = default, string profileUrl = default)
         {
             this.Id = id;
+            this.DisplayName = displayName;
             this.FirstName = firstName;
             this.LastName = lastName;
             this.UserName = userName;
             this.Email = email;
-            this.BirthDate = birthDate;
-            this.Sex = sex;
+            this.Contacts = contacts;
             this.Status = status;
             this.ActivationStatus = activationStatus;
-            this.TerminatedDate = terminatedDate;
-            this.Title = title;
-            this.WorkFromDate = workFromDate;
+            this.Terminated = terminated;
+            this.Department = department;
+            this.Groups = groups;
             this.Location = location;
             this.Notes = notes;
-            this.Contacts = contacts;
-            this.ContactsList = contactsList;
-            this.Removed = removed;
-            this.LastModified = lastModified;
-            this.TenantId = tenantId;
+            this.IsAdmin = isAdmin;
+            this.IsRoomAdmin = isRoomAdmin;
+            this.IsOwner = isOwner;
+            this.IsVisitor = isVisitor;
+            this.IsCollaborator = isCollaborator;
+            this.IsLDAP = isLDAP;
+            this.IsSSO = isSSO;
+            this.ListAdminModules = listAdminModules;
             this.CultureName = cultureName;
             this.MobilePhone = mobilePhone;
             this.MobilePhoneActivationStatus = mobilePhoneActivationStatus;
-            this.CreateDate = createDate;
+            this.QuotaLimit = quotaLimit;
+            this.UsedSpace = usedSpace;
+            this.IsCustomQuota = isCustomQuota;
             this.CreatedBy = createdBy;
-            this.Spam = spam;
-            this.Sid = sid;
-            this.LdapQouta = ldapQouta;
-            this.SsoNameId = ssoNameId;
-            this.SsoSessionId = ssoSessionId;
+            this.RegistrationDate = registrationDate;
+            this.HasAvatar = hasAvatar;
+            this.Avatar = avatar;
+            this.AvatarOriginal = avatarOriginal;
+            this.AvatarMax = avatarMax;
+            this.AvatarMedium = avatarMedium;
+            this.AvatarSmall = avatarSmall;
+            this.ProfileUrl = profileUrl;
         }
 
         /// <summary>
@@ -102,6 +118,12 @@ namespace DocSpace.Webhooks.SDK.Model
         /// </summary>
         [DataMember(Name = "id", EmitDefaultValue = false)]
         public Guid Id { get; set; }
+
+        /// <summary>
+        /// Gets or Sets DisplayName
+        /// </summary>
+        [DataMember(Name = "displayName", EmitDefaultValue = false)]
+        public string DisplayName { get; set; }
 
         /// <summary>
         /// Gets or Sets FirstName
@@ -128,16 +150,10 @@ namespace DocSpace.Webhooks.SDK.Model
         public string Email { get; set; }
 
         /// <summary>
-        /// Gets or Sets BirthDate
+        /// Gets or Sets Contacts
         /// </summary>
-        [DataMember(Name = "birthDate", EmitDefaultValue = false)]
-        public DateTime BirthDate { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Sex
-        /// </summary>
-        [DataMember(Name = "sex", EmitDefaultValue = true)]
-        public bool Sex { get; set; }
+        [DataMember(Name = "contacts", EmitDefaultValue = false)]
+        public List<ContactPayload> Contacts { get; set; }
 
         /// <summary>
         /// enum EmployeeStatus
@@ -147,29 +163,30 @@ namespace DocSpace.Webhooks.SDK.Model
         public int Status { get; set; }
 
         /// <summary>
-        /// enum EmployeeActivationStatus (flags)
+        /// enum EmployeeActivationStatus (flags), AutoGenerated masked off
         /// </summary>
-        /// <value>enum EmployeeActivationStatus (flags)</value>
+        /// <value>enum EmployeeActivationStatus (flags), AutoGenerated masked off</value>
         [DataMember(Name = "activationStatus", EmitDefaultValue = false)]
         public int ActivationStatus { get; set; }
 
         /// <summary>
-        /// Gets or Sets TerminatedDate
+        /// Gets or Sets Terminated
         /// </summary>
-        [DataMember(Name = "terminatedDate", EmitDefaultValue = false)]
-        public DateTime TerminatedDate { get; set; }
+        [DataMember(Name = "terminated", EmitDefaultValue = false)]
+        public DateTime Terminated { get; set; }
 
         /// <summary>
-        /// Gets or Sets Title
+        /// Comma-separated group names, HTML-encoded.
         /// </summary>
-        [DataMember(Name = "title", EmitDefaultValue = false)]
-        public string Title { get; set; }
+        /// <value>Comma-separated group names, HTML-encoded.</value>
+        [DataMember(Name = "department", EmitDefaultValue = false)]
+        public string Department { get; set; }
 
         /// <summary>
-        /// Gets or Sets WorkFromDate
+        /// Gets or Sets Groups
         /// </summary>
-        [DataMember(Name = "workFromDate", EmitDefaultValue = false)]
-        public DateTime WorkFromDate { get; set; }
+        [DataMember(Name = "groups", EmitDefaultValue = false)]
+        public List<GroupSummaryPayload> Groups { get; set; }
 
         /// <summary>
         /// Gets or Sets Location
@@ -184,35 +201,52 @@ namespace DocSpace.Webhooks.SDK.Model
         public string Notes { get; set; }
 
         /// <summary>
-        /// Flattened form of contactsList. BOTH are emitted - - the same data twice. 
+        /// Gets or Sets IsAdmin
         /// </summary>
-        /// <value>Flattened form of contactsList. BOTH are emitted - - the same data twice. </value>
-        [DataMember(Name = "contacts", EmitDefaultValue = false)]
-        public string Contacts { get; set; }
+        [DataMember(Name = "isAdmin", EmitDefaultValue = true)]
+        public bool IsAdmin { get; set; }
 
         /// <summary>
-        /// Gets or Sets ContactsList
+        /// Gets or Sets IsRoomAdmin
         /// </summary>
-        [DataMember(Name = "contactsList", EmitDefaultValue = false)]
-        public List<string> ContactsList { get; set; }
+        [DataMember(Name = "isRoomAdmin", EmitDefaultValue = true)]
+        public bool IsRoomAdmin { get; set; }
 
         /// <summary>
-        /// Gets or Sets Removed
+        /// Gets or Sets IsOwner
         /// </summary>
-        [DataMember(Name = "removed", EmitDefaultValue = true)]
-        public bool Removed { get; set; }
+        [DataMember(Name = "isOwner", EmitDefaultValue = true)]
+        public bool IsOwner { get; set; }
 
         /// <summary>
-        /// Gets or Sets LastModified
+        /// Gets or Sets IsVisitor
         /// </summary>
-        [DataMember(Name = "lastModified", EmitDefaultValue = false)]
-        public DateTime LastModified { get; set; }
+        [DataMember(Name = "isVisitor", EmitDefaultValue = true)]
+        public bool IsVisitor { get; set; }
 
         /// <summary>
-        /// Gets or Sets TenantId
+        /// Gets or Sets IsCollaborator
         /// </summary>
-        [DataMember(Name = "tenantId", EmitDefaultValue = false)]
-        public int TenantId { get; set; }
+        [DataMember(Name = "isCollaborator", EmitDefaultValue = true)]
+        public bool IsCollaborator { get; set; }
+
+        /// <summary>
+        /// Gets or Sets IsLDAP
+        /// </summary>
+        [DataMember(Name = "isLDAP", EmitDefaultValue = true)]
+        public bool IsLDAP { get; set; }
+
+        /// <summary>
+        /// Gets or Sets IsSSO
+        /// </summary>
+        [DataMember(Name = "isSSO", EmitDefaultValue = true)]
+        public bool IsSSO { get; set; }
+
+        /// <summary>
+        /// Gets or Sets ListAdminModules
+        /// </summary>
+        [DataMember(Name = "listAdminModules", EmitDefaultValue = false)]
+        public List<string> ListAdminModules { get; set; }
 
         /// <summary>
         /// Gets or Sets CultureName
@@ -234,81 +268,77 @@ namespace DocSpace.Webhooks.SDK.Model
         public int MobilePhoneActivationStatus { get; set; }
 
         /// <summary>
-        /// Gets or Sets CreateDate
+        /// Gets or Sets QuotaLimit
         /// </summary>
-        [DataMember(Name = "createDate", EmitDefaultValue = false)]
-        public DateTime CreateDate { get; set; }
+        [DataMember(Name = "quotaLimit", EmitDefaultValue = false)]
+        public long QuotaLimit { get; set; }
+
+        /// <summary>
+        /// Gets or Sets UsedSpace
+        /// </summary>
+        [DataMember(Name = "usedSpace", EmitDefaultValue = false)]
+        public decimal UsedSpace { get; set; }
+
+        /// <summary>
+        /// Gets or Sets IsCustomQuota
+        /// </summary>
+        [DataMember(Name = "isCustomQuota", EmitDefaultValue = true)]
+        public bool IsCustomQuota { get; set; }
 
         /// <summary>
         /// Gets or Sets CreatedBy
         /// </summary>
         [DataMember(Name = "createdBy", EmitDefaultValue = false)]
-        public Guid CreatedBy { get; set; }
+        public UserSummaryPayload CreatedBy { get; set; }
 
         /// <summary>
-        /// Gets or Sets Spam
+        /// Gets or Sets RegistrationDate
         /// </summary>
-        [DataMember(Name = "spam", EmitDefaultValue = true)]
-        public bool Spam { get; set; }
+        [DataMember(Name = "registrationDate", EmitDefaultValue = false)]
+        public DateTime RegistrationDate { get; set; }
 
         /// <summary>
-        /// LDAP identifier. REVIEW.
+        /// Gets or Sets HasAvatar
         /// </summary>
-        /// <value>LDAP identifier. REVIEW.</value>
-        [DataMember(Name = "sid", EmitDefaultValue = false)]
-        public string Sid { get; set; }
+        [DataMember(Name = "hasAvatar", EmitDefaultValue = true)]
+        public bool HasAvatar { get; set; }
 
         /// <summary>
-        /// sic - - misspelled in the domain type, and misspelled on the wire. LDAP quota. REVIEW. 
+        /// Gets or Sets Avatar
         /// </summary>
-        /// <value>sic - - misspelled in the domain type, and misspelled on the wire. LDAP quota. REVIEW. </value>
-        [DataMember(Name = "ldapQouta", EmitDefaultValue = false)]
-        public long LdapQouta { get; set; }
+        [DataMember(Name = "avatar", EmitDefaultValue = false)]
+        public string Avatar { get; set; }
 
         /// <summary>
-        /// SAML identifier. REVIEW.
+        /// Gets or Sets AvatarOriginal
         /// </summary>
-        /// <value>SAML identifier. REVIEW.</value>
-        [DataMember(Name = "ssoNameId", EmitDefaultValue = false)]
-        public string SsoNameId { get; set; }
+        [DataMember(Name = "avatarOriginal", EmitDefaultValue = false)]
+        public string AvatarOriginal { get; set; }
 
         /// <summary>
-        /// SAML SESSION identifier. REVIEW - - should almost certainly not be on the wire. 
+        /// Gets or Sets AvatarMax
         /// </summary>
-        /// <value>SAML SESSION identifier. REVIEW - - should almost certainly not be on the wire. </value>
-        [DataMember(Name = "ssoSessionId", EmitDefaultValue = false)]
-        public string SsoSessionId { get; set; }
+        [DataMember(Name = "avatarMax", EmitDefaultValue = false)]
+        public string AvatarMax { get; set; }
 
         /// <summary>
-        /// computed getter
+        /// Gets or Sets AvatarMedium
         /// </summary>
-        /// <value>computed getter</value>
-        [DataMember(Name = "isActive", EmitDefaultValue = true)]
-        public bool IsActive { get; private set; }
+        [DataMember(Name = "avatarMedium", EmitDefaultValue = false)]
+        public string AvatarMedium { get; set; }
 
         /// <summary>
-        /// Returns false as IsActive should not be serialized given that it's read-only.
+        /// Gets or Sets AvatarSmall
         /// </summary>
-        /// <returns>false (boolean)</returns>
-        public bool ShouldSerializeIsActive()
-        {
-            return false;
-        }
-        /// <summary>
-        /// computed getter
-        /// </summary>
-        /// <value>computed getter</value>
-        [DataMember(Name = "checkActivation", EmitDefaultValue = true)]
-        public bool CheckActivation { get; private set; }
+        [DataMember(Name = "avatarSmall", EmitDefaultValue = false)]
+        public string AvatarSmall { get; set; }
 
         /// <summary>
-        /// Returns false as CheckActivation should not be serialized given that it's read-only.
+        /// Gets or Sets ProfileUrl
         /// </summary>
-        /// <returns>false (boolean)</returns>
-        public bool ShouldSerializeCheckActivation()
-        {
-            return false;
-        }
+        [DataMember(Name = "profileUrl", EmitDefaultValue = false)]
+        public string ProfileUrl { get; set; }
+
         /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
@@ -318,36 +348,42 @@ namespace DocSpace.Webhooks.SDK.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class UserPayload {\n");
             sb.Append("  Id: ").Append(Id).Append("\n");
+            sb.Append("  DisplayName: ").Append(DisplayName).Append("\n");
             sb.Append("  FirstName: ").Append(FirstName).Append("\n");
             sb.Append("  LastName: ").Append(LastName).Append("\n");
             sb.Append("  UserName: ").Append(UserName).Append("\n");
             sb.Append("  Email: ").Append(Email).Append("\n");
-            sb.Append("  BirthDate: ").Append(BirthDate).Append("\n");
-            sb.Append("  Sex: ").Append(Sex).Append("\n");
+            sb.Append("  Contacts: ").Append(Contacts).Append("\n");
             sb.Append("  Status: ").Append(Status).Append("\n");
             sb.Append("  ActivationStatus: ").Append(ActivationStatus).Append("\n");
-            sb.Append("  TerminatedDate: ").Append(TerminatedDate).Append("\n");
-            sb.Append("  Title: ").Append(Title).Append("\n");
-            sb.Append("  WorkFromDate: ").Append(WorkFromDate).Append("\n");
+            sb.Append("  Terminated: ").Append(Terminated).Append("\n");
+            sb.Append("  Department: ").Append(Department).Append("\n");
+            sb.Append("  Groups: ").Append(Groups).Append("\n");
             sb.Append("  Location: ").Append(Location).Append("\n");
             sb.Append("  Notes: ").Append(Notes).Append("\n");
-            sb.Append("  Contacts: ").Append(Contacts).Append("\n");
-            sb.Append("  ContactsList: ").Append(ContactsList).Append("\n");
-            sb.Append("  Removed: ").Append(Removed).Append("\n");
-            sb.Append("  LastModified: ").Append(LastModified).Append("\n");
-            sb.Append("  TenantId: ").Append(TenantId).Append("\n");
+            sb.Append("  IsAdmin: ").Append(IsAdmin).Append("\n");
+            sb.Append("  IsRoomAdmin: ").Append(IsRoomAdmin).Append("\n");
+            sb.Append("  IsOwner: ").Append(IsOwner).Append("\n");
+            sb.Append("  IsVisitor: ").Append(IsVisitor).Append("\n");
+            sb.Append("  IsCollaborator: ").Append(IsCollaborator).Append("\n");
+            sb.Append("  IsLDAP: ").Append(IsLDAP).Append("\n");
+            sb.Append("  IsSSO: ").Append(IsSSO).Append("\n");
+            sb.Append("  ListAdminModules: ").Append(ListAdminModules).Append("\n");
             sb.Append("  CultureName: ").Append(CultureName).Append("\n");
             sb.Append("  MobilePhone: ").Append(MobilePhone).Append("\n");
             sb.Append("  MobilePhoneActivationStatus: ").Append(MobilePhoneActivationStatus).Append("\n");
-            sb.Append("  CreateDate: ").Append(CreateDate).Append("\n");
+            sb.Append("  QuotaLimit: ").Append(QuotaLimit).Append("\n");
+            sb.Append("  UsedSpace: ").Append(UsedSpace).Append("\n");
+            sb.Append("  IsCustomQuota: ").Append(IsCustomQuota).Append("\n");
             sb.Append("  CreatedBy: ").Append(CreatedBy).Append("\n");
-            sb.Append("  Spam: ").Append(Spam).Append("\n");
-            sb.Append("  Sid: ").Append(Sid).Append("\n");
-            sb.Append("  LdapQouta: ").Append(LdapQouta).Append("\n");
-            sb.Append("  SsoNameId: ").Append(SsoNameId).Append("\n");
-            sb.Append("  SsoSessionId: ").Append(SsoSessionId).Append("\n");
-            sb.Append("  IsActive: ").Append(IsActive).Append("\n");
-            sb.Append("  CheckActivation: ").Append(CheckActivation).Append("\n");
+            sb.Append("  RegistrationDate: ").Append(RegistrationDate).Append("\n");
+            sb.Append("  HasAvatar: ").Append(HasAvatar).Append("\n");
+            sb.Append("  Avatar: ").Append(Avatar).Append("\n");
+            sb.Append("  AvatarOriginal: ").Append(AvatarOriginal).Append("\n");
+            sb.Append("  AvatarMax: ").Append(AvatarMax).Append("\n");
+            sb.Append("  AvatarMedium: ").Append(AvatarMedium).Append("\n");
+            sb.Append("  AvatarSmall: ").Append(AvatarSmall).Append("\n");
+            sb.Append("  ProfileUrl: ").Append(ProfileUrl).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }

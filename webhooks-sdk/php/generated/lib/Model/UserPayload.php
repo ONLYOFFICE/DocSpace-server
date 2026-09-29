@@ -13,9 +13,9 @@
 /**
  * ONLYOFFICE DocSpace Webhooks
  *
- * Wire contract for OUTBOUND DocSpace webhook deliveries.  This is a hand-maintained document. It is NOT the REST API spec and shares no schemas with it: webhook payloads are the internal domain entities (UserInfo, GroupInfo, File<T>, Folder<T>), not the controller DTOs.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free.
+ * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto). They began as copies of the matching REST DTOs and are free to diverge from them.  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free.
  *
- * The version of the OpenAPI document: 0.1.0
+ * The version of the OpenAPI document: 1.0.0
  * Generated by: https://openapi-generator.tech
  * Generator version: 7.25.0
  */
@@ -35,7 +35,7 @@ use \OnlyOffice\DocSpace\Webhooks\Sdk\ObjectSerializer;
  * UserPayload Class Doc Comment
  *
  * @category Class
- * @description ASC.Core.Common/Core/UserInfo.cs -- the domain entity, verbatim. It carries NO [JsonIgnore] at all, so every public member below reaches the wire. sid / ssoNameId / ssoSessionId / ldapQouta are null on portals without LDAP or SSO and therefore invisible in most test captures; they DO appear on LDAP/SSO tenants, and are flagged REVIEW below.
+ * @description ASC.Api.Core/Webhook/Payloads/UserWebhookDto.cs. A copy of the REST EmployeeFullDto, owned by the webhook contract and free to diverge from it.  Not carried, deliberately: sid / ssoNameId / ssoSessionId (LDAP and SAML identifiers, and a SAML SESSION id, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim, and &#x60;shared&#x60;. &#x60;contacts&#x60; appears once, as a typed list, rather than twice in two shapes.
  * @package  OnlyOffice\DocSpace\Webhooks\Sdk
  * @author   OpenAPI Generator team
  * @link     https://openapi-generator.tech
@@ -59,36 +59,42 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
      */
     protected static $openAPITypes = [
         'id' => 'string',
+        'display_name' => 'string',
         'first_name' => 'string',
         'last_name' => 'string',
         'user_name' => 'string',
         'email' => 'string',
-        'birth_date' => '\DateTime',
-        'sex' => 'bool',
+        'contacts' => '\OnlyOffice\DocSpace\Webhooks\Sdk\Model\ContactPayload[]',
         'status' => 'int',
         'activation_status' => 'int',
-        'terminated_date' => '\DateTime',
-        'title' => 'string',
-        'work_from_date' => '\DateTime',
+        'terminated' => '\DateTime',
+        'department' => 'string',
+        'groups' => '\OnlyOffice\DocSpace\Webhooks\Sdk\Model\GroupSummaryPayload[]',
         'location' => 'string',
         'notes' => 'string',
-        'contacts' => 'string',
-        'contacts_list' => 'string[]',
-        'removed' => 'bool',
-        'last_modified' => '\DateTime',
-        'tenant_id' => 'int',
+        'is_admin' => 'bool',
+        'is_room_admin' => 'bool',
+        'is_owner' => 'bool',
+        'is_visitor' => 'bool',
+        'is_collaborator' => 'bool',
+        'is_ldap' => 'bool',
+        'is_sso' => 'bool',
+        'list_admin_modules' => 'string[]',
         'culture_name' => 'string',
         'mobile_phone' => 'string',
         'mobile_phone_activation_status' => 'int',
-        'create_date' => '\DateTime',
-        'created_by' => 'string',
-        'spam' => 'bool',
-        'sid' => 'string',
-        'ldap_qouta' => 'int',
-        'sso_name_id' => 'string',
-        'sso_session_id' => 'string',
-        'is_active' => 'bool',
-        'check_activation' => 'bool'
+        'quota_limit' => 'int',
+        'used_space' => 'float',
+        'is_custom_quota' => 'bool',
+        'created_by' => '\OnlyOffice\DocSpace\Webhooks\Sdk\Model\UserSummaryPayload',
+        'registration_date' => '\DateTime',
+        'has_avatar' => 'bool',
+        'avatar' => 'string',
+        'avatar_original' => 'string',
+        'avatar_max' => 'string',
+        'avatar_medium' => 'string',
+        'avatar_small' => 'string',
+        'profile_url' => 'string'
     ];
 
     /**
@@ -100,36 +106,42 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
      */
     protected static $openAPIFormats = [
         'id' => 'uuid',
+        'display_name' => null,
         'first_name' => null,
         'last_name' => null,
         'user_name' => null,
         'email' => 'email',
-        'birth_date' => 'date-time',
-        'sex' => null,
+        'contacts' => null,
         'status' => null,
         'activation_status' => null,
-        'terminated_date' => 'date-time',
-        'title' => null,
-        'work_from_date' => 'date-time',
+        'terminated' => 'date-time',
+        'department' => null,
+        'groups' => null,
         'location' => null,
         'notes' => null,
-        'contacts' => null,
-        'contacts_list' => null,
-        'removed' => null,
-        'last_modified' => 'date-time',
-        'tenant_id' => null,
+        'is_admin' => null,
+        'is_room_admin' => null,
+        'is_owner' => null,
+        'is_visitor' => null,
+        'is_collaborator' => null,
+        'is_ldap' => null,
+        'is_sso' => null,
+        'list_admin_modules' => null,
         'culture_name' => null,
         'mobile_phone' => null,
         'mobile_phone_activation_status' => null,
-        'create_date' => 'date-time',
-        'created_by' => 'uuid',
-        'spam' => null,
-        'sid' => null,
-        'ldap_qouta' => 'int64',
-        'sso_name_id' => null,
-        'sso_session_id' => null,
-        'is_active' => null,
-        'check_activation' => null
+        'quota_limit' => 'int64',
+        'used_space' => null,
+        'is_custom_quota' => null,
+        'created_by' => null,
+        'registration_date' => 'date-time',
+        'has_avatar' => null,
+        'avatar' => null,
+        'avatar_original' => null,
+        'avatar_max' => null,
+        'avatar_medium' => null,
+        'avatar_small' => null,
+        'profile_url' => null
     ];
 
     /**
@@ -139,36 +151,42 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
      */
     protected static array $openAPINullables = [
         'id' => false,
+        'display_name' => false,
         'first_name' => false,
         'last_name' => false,
         'user_name' => false,
         'email' => false,
-        'birth_date' => false,
-        'sex' => false,
+        'contacts' => false,
         'status' => false,
         'activation_status' => false,
-        'terminated_date' => false,
-        'title' => false,
-        'work_from_date' => false,
+        'terminated' => false,
+        'department' => false,
+        'groups' => false,
         'location' => false,
         'notes' => false,
-        'contacts' => false,
-        'contacts_list' => false,
-        'removed' => false,
-        'last_modified' => false,
-        'tenant_id' => false,
+        'is_admin' => false,
+        'is_room_admin' => false,
+        'is_owner' => false,
+        'is_visitor' => false,
+        'is_collaborator' => false,
+        'is_ldap' => false,
+        'is_sso' => false,
+        'list_admin_modules' => false,
         'culture_name' => false,
         'mobile_phone' => false,
         'mobile_phone_activation_status' => false,
-        'create_date' => false,
+        'quota_limit' => false,
+        'used_space' => false,
+        'is_custom_quota' => false,
         'created_by' => false,
-        'spam' => false,
-        'sid' => false,
-        'ldap_qouta' => false,
-        'sso_name_id' => false,
-        'sso_session_id' => false,
-        'is_active' => false,
-        'check_activation' => false
+        'registration_date' => false,
+        'has_avatar' => false,
+        'avatar' => false,
+        'avatar_original' => false,
+        'avatar_max' => false,
+        'avatar_medium' => false,
+        'avatar_small' => false,
+        'profile_url' => false
     ];
 
     /**
@@ -258,36 +276,42 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
      */
     protected static $attributeMap = [
         'id' => 'id',
+        'display_name' => 'displayName',
         'first_name' => 'firstName',
         'last_name' => 'lastName',
         'user_name' => 'userName',
         'email' => 'email',
-        'birth_date' => 'birthDate',
-        'sex' => 'sex',
+        'contacts' => 'contacts',
         'status' => 'status',
         'activation_status' => 'activationStatus',
-        'terminated_date' => 'terminatedDate',
-        'title' => 'title',
-        'work_from_date' => 'workFromDate',
+        'terminated' => 'terminated',
+        'department' => 'department',
+        'groups' => 'groups',
         'location' => 'location',
         'notes' => 'notes',
-        'contacts' => 'contacts',
-        'contacts_list' => 'contactsList',
-        'removed' => 'removed',
-        'last_modified' => 'lastModified',
-        'tenant_id' => 'tenantId',
+        'is_admin' => 'isAdmin',
+        'is_room_admin' => 'isRoomAdmin',
+        'is_owner' => 'isOwner',
+        'is_visitor' => 'isVisitor',
+        'is_collaborator' => 'isCollaborator',
+        'is_ldap' => 'isLDAP',
+        'is_sso' => 'isSSO',
+        'list_admin_modules' => 'listAdminModules',
         'culture_name' => 'cultureName',
         'mobile_phone' => 'mobilePhone',
         'mobile_phone_activation_status' => 'mobilePhoneActivationStatus',
-        'create_date' => 'createDate',
+        'quota_limit' => 'quotaLimit',
+        'used_space' => 'usedSpace',
+        'is_custom_quota' => 'isCustomQuota',
         'created_by' => 'createdBy',
-        'spam' => 'spam',
-        'sid' => 'sid',
-        'ldap_qouta' => 'ldapQouta',
-        'sso_name_id' => 'ssoNameId',
-        'sso_session_id' => 'ssoSessionId',
-        'is_active' => 'isActive',
-        'check_activation' => 'checkActivation'
+        'registration_date' => 'registrationDate',
+        'has_avatar' => 'hasAvatar',
+        'avatar' => 'avatar',
+        'avatar_original' => 'avatarOriginal',
+        'avatar_max' => 'avatarMax',
+        'avatar_medium' => 'avatarMedium',
+        'avatar_small' => 'avatarSmall',
+        'profile_url' => 'profileUrl'
     ];
 
     /**
@@ -297,36 +321,42 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
      */
     protected static $setters = [
         'id' => 'setId',
+        'display_name' => 'setDisplayName',
         'first_name' => 'setFirstName',
         'last_name' => 'setLastName',
         'user_name' => 'setUserName',
         'email' => 'setEmail',
-        'birth_date' => 'setBirthDate',
-        'sex' => 'setSex',
+        'contacts' => 'setContacts',
         'status' => 'setStatus',
         'activation_status' => 'setActivationStatus',
-        'terminated_date' => 'setTerminatedDate',
-        'title' => 'setTitle',
-        'work_from_date' => 'setWorkFromDate',
+        'terminated' => 'setTerminated',
+        'department' => 'setDepartment',
+        'groups' => 'setGroups',
         'location' => 'setLocation',
         'notes' => 'setNotes',
-        'contacts' => 'setContacts',
-        'contacts_list' => 'setContactsList',
-        'removed' => 'setRemoved',
-        'last_modified' => 'setLastModified',
-        'tenant_id' => 'setTenantId',
+        'is_admin' => 'setIsAdmin',
+        'is_room_admin' => 'setIsRoomAdmin',
+        'is_owner' => 'setIsOwner',
+        'is_visitor' => 'setIsVisitor',
+        'is_collaborator' => 'setIsCollaborator',
+        'is_ldap' => 'setIsLdap',
+        'is_sso' => 'setIsSso',
+        'list_admin_modules' => 'setListAdminModules',
         'culture_name' => 'setCultureName',
         'mobile_phone' => 'setMobilePhone',
         'mobile_phone_activation_status' => 'setMobilePhoneActivationStatus',
-        'create_date' => 'setCreateDate',
+        'quota_limit' => 'setQuotaLimit',
+        'used_space' => 'setUsedSpace',
+        'is_custom_quota' => 'setIsCustomQuota',
         'created_by' => 'setCreatedBy',
-        'spam' => 'setSpam',
-        'sid' => 'setSid',
-        'ldap_qouta' => 'setLdapQouta',
-        'sso_name_id' => 'setSsoNameId',
-        'sso_session_id' => 'setSsoSessionId',
-        'is_active' => 'setIsActive',
-        'check_activation' => 'setCheckActivation'
+        'registration_date' => 'setRegistrationDate',
+        'has_avatar' => 'setHasAvatar',
+        'avatar' => 'setAvatar',
+        'avatar_original' => 'setAvatarOriginal',
+        'avatar_max' => 'setAvatarMax',
+        'avatar_medium' => 'setAvatarMedium',
+        'avatar_small' => 'setAvatarSmall',
+        'profile_url' => 'setProfileUrl'
     ];
 
     /**
@@ -336,36 +366,42 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
      */
     protected static $getters = [
         'id' => 'getId',
+        'display_name' => 'getDisplayName',
         'first_name' => 'getFirstName',
         'last_name' => 'getLastName',
         'user_name' => 'getUserName',
         'email' => 'getEmail',
-        'birth_date' => 'getBirthDate',
-        'sex' => 'getSex',
+        'contacts' => 'getContacts',
         'status' => 'getStatus',
         'activation_status' => 'getActivationStatus',
-        'terminated_date' => 'getTerminatedDate',
-        'title' => 'getTitle',
-        'work_from_date' => 'getWorkFromDate',
+        'terminated' => 'getTerminated',
+        'department' => 'getDepartment',
+        'groups' => 'getGroups',
         'location' => 'getLocation',
         'notes' => 'getNotes',
-        'contacts' => 'getContacts',
-        'contacts_list' => 'getContactsList',
-        'removed' => 'getRemoved',
-        'last_modified' => 'getLastModified',
-        'tenant_id' => 'getTenantId',
+        'is_admin' => 'getIsAdmin',
+        'is_room_admin' => 'getIsRoomAdmin',
+        'is_owner' => 'getIsOwner',
+        'is_visitor' => 'getIsVisitor',
+        'is_collaborator' => 'getIsCollaborator',
+        'is_ldap' => 'getIsLdap',
+        'is_sso' => 'getIsSso',
+        'list_admin_modules' => 'getListAdminModules',
         'culture_name' => 'getCultureName',
         'mobile_phone' => 'getMobilePhone',
         'mobile_phone_activation_status' => 'getMobilePhoneActivationStatus',
-        'create_date' => 'getCreateDate',
+        'quota_limit' => 'getQuotaLimit',
+        'used_space' => 'getUsedSpace',
+        'is_custom_quota' => 'getIsCustomQuota',
         'created_by' => 'getCreatedBy',
-        'spam' => 'getSpam',
-        'sid' => 'getSid',
-        'ldap_qouta' => 'getLdapQouta',
-        'sso_name_id' => 'getSsoNameId',
-        'sso_session_id' => 'getSsoSessionId',
-        'is_active' => 'getIsActive',
-        'check_activation' => 'getCheckActivation'
+        'registration_date' => 'getRegistrationDate',
+        'has_avatar' => 'getHasAvatar',
+        'avatar' => 'getAvatar',
+        'avatar_original' => 'getAvatarOriginal',
+        'avatar_max' => 'getAvatarMax',
+        'avatar_medium' => 'getAvatarMedium',
+        'avatar_small' => 'getAvatarSmall',
+        'profile_url' => 'getProfileUrl'
     ];
 
     /**
@@ -426,36 +462,42 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     public function __construct(?array $data = null)
     {
         $this->setIfExists('id', $data ?? [], null);
+        $this->setIfExists('display_name', $data ?? [], null);
         $this->setIfExists('first_name', $data ?? [], null);
         $this->setIfExists('last_name', $data ?? [], null);
         $this->setIfExists('user_name', $data ?? [], null);
         $this->setIfExists('email', $data ?? [], null);
-        $this->setIfExists('birth_date', $data ?? [], null);
-        $this->setIfExists('sex', $data ?? [], null);
+        $this->setIfExists('contacts', $data ?? [], null);
         $this->setIfExists('status', $data ?? [], null);
         $this->setIfExists('activation_status', $data ?? [], null);
-        $this->setIfExists('terminated_date', $data ?? [], null);
-        $this->setIfExists('title', $data ?? [], null);
-        $this->setIfExists('work_from_date', $data ?? [], null);
+        $this->setIfExists('terminated', $data ?? [], null);
+        $this->setIfExists('department', $data ?? [], null);
+        $this->setIfExists('groups', $data ?? [], null);
         $this->setIfExists('location', $data ?? [], null);
         $this->setIfExists('notes', $data ?? [], null);
-        $this->setIfExists('contacts', $data ?? [], null);
-        $this->setIfExists('contacts_list', $data ?? [], null);
-        $this->setIfExists('removed', $data ?? [], null);
-        $this->setIfExists('last_modified', $data ?? [], null);
-        $this->setIfExists('tenant_id', $data ?? [], null);
+        $this->setIfExists('is_admin', $data ?? [], null);
+        $this->setIfExists('is_room_admin', $data ?? [], null);
+        $this->setIfExists('is_owner', $data ?? [], null);
+        $this->setIfExists('is_visitor', $data ?? [], null);
+        $this->setIfExists('is_collaborator', $data ?? [], null);
+        $this->setIfExists('is_ldap', $data ?? [], null);
+        $this->setIfExists('is_sso', $data ?? [], null);
+        $this->setIfExists('list_admin_modules', $data ?? [], null);
         $this->setIfExists('culture_name', $data ?? [], null);
         $this->setIfExists('mobile_phone', $data ?? [], null);
         $this->setIfExists('mobile_phone_activation_status', $data ?? [], null);
-        $this->setIfExists('create_date', $data ?? [], null);
+        $this->setIfExists('quota_limit', $data ?? [], null);
+        $this->setIfExists('used_space', $data ?? [], null);
+        $this->setIfExists('is_custom_quota', $data ?? [], null);
         $this->setIfExists('created_by', $data ?? [], null);
-        $this->setIfExists('spam', $data ?? [], null);
-        $this->setIfExists('sid', $data ?? [], null);
-        $this->setIfExists('ldap_qouta', $data ?? [], null);
-        $this->setIfExists('sso_name_id', $data ?? [], null);
-        $this->setIfExists('sso_session_id', $data ?? [], null);
-        $this->setIfExists('is_active', $data ?? [], null);
-        $this->setIfExists('check_activation', $data ?? [], null);
+        $this->setIfExists('registration_date', $data ?? [], null);
+        $this->setIfExists('has_avatar', $data ?? [], null);
+        $this->setIfExists('avatar', $data ?? [], null);
+        $this->setIfExists('avatar_original', $data ?? [], null);
+        $this->setIfExists('avatar_max', $data ?? [], null);
+        $this->setIfExists('avatar_medium', $data ?? [], null);
+        $this->setIfExists('avatar_small', $data ?? [], null);
+        $this->setIfExists('profile_url', $data ?? [], null);
     }
 
     /**
@@ -523,6 +565,33 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
             throw new \InvalidArgumentException('non-nullable id cannot be null');
         }
         $this->container['id'] = $id;
+
+        return $this;
+    }
+
+    /**
+     * Gets display_name
+     *
+     * @return string|null
+     */
+    public function getDisplayName()
+    {
+        return $this->container['display_name'];
+    }
+
+    /**
+     * Sets display_name
+     *
+     * @param string|null $display_name display_name
+     *
+     * @return self
+     */
+    public function setDisplayName($display_name)
+    {
+        if (is_null($display_name)) {
+            throw new \InvalidArgumentException('non-nullable display_name cannot be null');
+        }
+        $this->container['display_name'] = $display_name;
 
         return $this;
     }
@@ -636,55 +705,28 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Gets birth_date
+     * Gets contacts
      *
-     * @return \DateTime|null
+     * @return \OnlyOffice\DocSpace\Webhooks\Sdk\Model\ContactPayload[]|null
      */
-    public function getBirthDate()
+    public function getContacts()
     {
-        return $this->container['birth_date'];
+        return $this->container['contacts'];
     }
 
     /**
-     * Sets birth_date
+     * Sets contacts
      *
-     * @param \DateTime|null $birth_date birth_date
+     * @param \OnlyOffice\DocSpace\Webhooks\Sdk\Model\ContactPayload[]|null $contacts contacts
      *
      * @return self
      */
-    public function setBirthDate($birth_date)
+    public function setContacts($contacts)
     {
-        if (is_null($birth_date)) {
-            throw new \InvalidArgumentException('non-nullable birth_date cannot be null');
+        if (is_null($contacts)) {
+            throw new \InvalidArgumentException('non-nullable contacts cannot be null');
         }
-        $this->container['birth_date'] = $birth_date;
-
-        return $this;
-    }
-
-    /**
-     * Gets sex
-     *
-     * @return bool|null
-     */
-    public function getSex()
-    {
-        return $this->container['sex'];
-    }
-
-    /**
-     * Sets sex
-     *
-     * @param bool|null $sex sex
-     *
-     * @return self
-     */
-    public function setSex($sex)
-    {
-        if (is_null($sex)) {
-            throw new \InvalidArgumentException('non-nullable sex cannot be null');
-        }
-        $this->container['sex'] = $sex;
+        $this->container['contacts'] = $contacts;
 
         return $this;
     }
@@ -729,7 +771,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets activation_status
      *
-     * @param int|null $activation_status enum EmployeeActivationStatus (flags)
+     * @param int|null $activation_status enum EmployeeActivationStatus (flags), AutoGenerated masked off
      *
      * @return self
      */
@@ -744,82 +786,82 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Gets terminated_date
+     * Gets terminated
      *
      * @return \DateTime|null
      */
-    public function getTerminatedDate()
+    public function getTerminated()
     {
-        return $this->container['terminated_date'];
+        return $this->container['terminated'];
     }
 
     /**
-     * Sets terminated_date
+     * Sets terminated
      *
-     * @param \DateTime|null $terminated_date terminated_date
+     * @param \DateTime|null $terminated terminated
      *
      * @return self
      */
-    public function setTerminatedDate($terminated_date)
+    public function setTerminated($terminated)
     {
-        if (is_null($terminated_date)) {
-            throw new \InvalidArgumentException('non-nullable terminated_date cannot be null');
+        if (is_null($terminated)) {
+            throw new \InvalidArgumentException('non-nullable terminated cannot be null');
         }
-        $this->container['terminated_date'] = $terminated_date;
+        $this->container['terminated'] = $terminated;
 
         return $this;
     }
 
     /**
-     * Gets title
+     * Gets department
      *
      * @return string|null
      */
-    public function getTitle()
+    public function getDepartment()
     {
-        return $this->container['title'];
+        return $this->container['department'];
     }
 
     /**
-     * Sets title
+     * Sets department
      *
-     * @param string|null $title title
+     * @param string|null $department Comma-separated group names, HTML-encoded.
      *
      * @return self
      */
-    public function setTitle($title)
+    public function setDepartment($department)
     {
-        if (is_null($title)) {
-            throw new \InvalidArgumentException('non-nullable title cannot be null');
+        if (is_null($department)) {
+            throw new \InvalidArgumentException('non-nullable department cannot be null');
         }
-        $this->container['title'] = $title;
+        $this->container['department'] = $department;
 
         return $this;
     }
 
     /**
-     * Gets work_from_date
+     * Gets groups
      *
-     * @return \DateTime|null
+     * @return \OnlyOffice\DocSpace\Webhooks\Sdk\Model\GroupSummaryPayload[]|null
      */
-    public function getWorkFromDate()
+    public function getGroups()
     {
-        return $this->container['work_from_date'];
+        return $this->container['groups'];
     }
 
     /**
-     * Sets work_from_date
+     * Sets groups
      *
-     * @param \DateTime|null $work_from_date work_from_date
+     * @param \OnlyOffice\DocSpace\Webhooks\Sdk\Model\GroupSummaryPayload[]|null $groups groups
      *
      * @return self
      */
-    public function setWorkFromDate($work_from_date)
+    public function setGroups($groups)
     {
-        if (is_null($work_from_date)) {
-            throw new \InvalidArgumentException('non-nullable work_from_date cannot be null');
+        if (is_null($groups)) {
+            throw new \InvalidArgumentException('non-nullable groups cannot be null');
         }
-        $this->container['work_from_date'] = $work_from_date;
+        $this->container['groups'] = $groups;
 
         return $this;
     }
@@ -879,136 +921,217 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Gets contacts
-     *
-     * @return string|null
-     */
-    public function getContacts()
-    {
-        return $this->container['contacts'];
-    }
-
-    /**
-     * Sets contacts
-     *
-     * @param string|null $contacts Flattened form of contactsList. BOTH are emitted -- the same data twice.
-     *
-     * @return self
-     */
-    public function setContacts($contacts)
-    {
-        if (is_null($contacts)) {
-            throw new \InvalidArgumentException('non-nullable contacts cannot be null');
-        }
-        $this->container['contacts'] = $contacts;
-
-        return $this;
-    }
-
-    /**
-     * Gets contacts_list
-     *
-     * @return string[]|null
-     */
-    public function getContactsList()
-    {
-        return $this->container['contacts_list'];
-    }
-
-    /**
-     * Sets contacts_list
-     *
-     * @param string[]|null $contacts_list contacts_list
-     *
-     * @return self
-     */
-    public function setContactsList($contacts_list)
-    {
-        if (is_null($contacts_list)) {
-            throw new \InvalidArgumentException('non-nullable contacts_list cannot be null');
-        }
-        $this->container['contacts_list'] = $contacts_list;
-
-        return $this;
-    }
-
-    /**
-     * Gets removed
+     * Gets is_admin
      *
      * @return bool|null
      */
-    public function getRemoved()
+    public function getIsAdmin()
     {
-        return $this->container['removed'];
+        return $this->container['is_admin'];
     }
 
     /**
-     * Sets removed
+     * Sets is_admin
      *
-     * @param bool|null $removed removed
+     * @param bool|null $is_admin is_admin
      *
      * @return self
      */
-    public function setRemoved($removed)
+    public function setIsAdmin($is_admin)
     {
-        if (is_null($removed)) {
-            throw new \InvalidArgumentException('non-nullable removed cannot be null');
+        if (is_null($is_admin)) {
+            throw new \InvalidArgumentException('non-nullable is_admin cannot be null');
         }
-        $this->container['removed'] = $removed;
+        $this->container['is_admin'] = $is_admin;
 
         return $this;
     }
 
     /**
-     * Gets last_modified
+     * Gets is_room_admin
      *
-     * @return \DateTime|null
+     * @return bool|null
      */
-    public function getLastModified()
+    public function getIsRoomAdmin()
     {
-        return $this->container['last_modified'];
+        return $this->container['is_room_admin'];
     }
 
     /**
-     * Sets last_modified
+     * Sets is_room_admin
      *
-     * @param \DateTime|null $last_modified last_modified
+     * @param bool|null $is_room_admin is_room_admin
      *
      * @return self
      */
-    public function setLastModified($last_modified)
+    public function setIsRoomAdmin($is_room_admin)
     {
-        if (is_null($last_modified)) {
-            throw new \InvalidArgumentException('non-nullable last_modified cannot be null');
+        if (is_null($is_room_admin)) {
+            throw new \InvalidArgumentException('non-nullable is_room_admin cannot be null');
         }
-        $this->container['last_modified'] = $last_modified;
+        $this->container['is_room_admin'] = $is_room_admin;
 
         return $this;
     }
 
     /**
-     * Gets tenant_id
+     * Gets is_owner
      *
-     * @return int|null
+     * @return bool|null
      */
-    public function getTenantId()
+    public function getIsOwner()
     {
-        return $this->container['tenant_id'];
+        return $this->container['is_owner'];
     }
 
     /**
-     * Sets tenant_id
+     * Sets is_owner
      *
-     * @param int|null $tenant_id tenant_id
+     * @param bool|null $is_owner is_owner
      *
      * @return self
      */
-    public function setTenantId($tenant_id)
+    public function setIsOwner($is_owner)
     {
-        if (is_null($tenant_id)) {
-            throw new \InvalidArgumentException('non-nullable tenant_id cannot be null');
+        if (is_null($is_owner)) {
+            throw new \InvalidArgumentException('non-nullable is_owner cannot be null');
         }
-        $this->container['tenant_id'] = $tenant_id;
+        $this->container['is_owner'] = $is_owner;
+
+        return $this;
+    }
+
+    /**
+     * Gets is_visitor
+     *
+     * @return bool|null
+     */
+    public function getIsVisitor()
+    {
+        return $this->container['is_visitor'];
+    }
+
+    /**
+     * Sets is_visitor
+     *
+     * @param bool|null $is_visitor is_visitor
+     *
+     * @return self
+     */
+    public function setIsVisitor($is_visitor)
+    {
+        if (is_null($is_visitor)) {
+            throw new \InvalidArgumentException('non-nullable is_visitor cannot be null');
+        }
+        $this->container['is_visitor'] = $is_visitor;
+
+        return $this;
+    }
+
+    /**
+     * Gets is_collaborator
+     *
+     * @return bool|null
+     */
+    public function getIsCollaborator()
+    {
+        return $this->container['is_collaborator'];
+    }
+
+    /**
+     * Sets is_collaborator
+     *
+     * @param bool|null $is_collaborator is_collaborator
+     *
+     * @return self
+     */
+    public function setIsCollaborator($is_collaborator)
+    {
+        if (is_null($is_collaborator)) {
+            throw new \InvalidArgumentException('non-nullable is_collaborator cannot be null');
+        }
+        $this->container['is_collaborator'] = $is_collaborator;
+
+        return $this;
+    }
+
+    /**
+     * Gets is_ldap
+     *
+     * @return bool|null
+     */
+    public function getIsLdap()
+    {
+        return $this->container['is_ldap'];
+    }
+
+    /**
+     * Sets is_ldap
+     *
+     * @param bool|null $is_ldap is_ldap
+     *
+     * @return self
+     */
+    public function setIsLdap($is_ldap)
+    {
+        if (is_null($is_ldap)) {
+            throw new \InvalidArgumentException('non-nullable is_ldap cannot be null');
+        }
+        $this->container['is_ldap'] = $is_ldap;
+
+        return $this;
+    }
+
+    /**
+     * Gets is_sso
+     *
+     * @return bool|null
+     */
+    public function getIsSso()
+    {
+        return $this->container['is_sso'];
+    }
+
+    /**
+     * Sets is_sso
+     *
+     * @param bool|null $is_sso is_sso
+     *
+     * @return self
+     */
+    public function setIsSso($is_sso)
+    {
+        if (is_null($is_sso)) {
+            throw new \InvalidArgumentException('non-nullable is_sso cannot be null');
+        }
+        $this->container['is_sso'] = $is_sso;
+
+        return $this;
+    }
+
+    /**
+     * Gets list_admin_modules
+     *
+     * @return string[]|null
+     */
+    public function getListAdminModules()
+    {
+        return $this->container['list_admin_modules'];
+    }
+
+    /**
+     * Sets list_admin_modules
+     *
+     * @param string[]|null $list_admin_modules list_admin_modules
+     *
+     * @return self
+     */
+    public function setListAdminModules($list_admin_modules)
+    {
+        if (is_null($list_admin_modules)) {
+            throw new \InvalidArgumentException('non-nullable list_admin_modules cannot be null');
+        }
+        $this->container['list_admin_modules'] = $list_admin_modules;
 
         return $this;
     }
@@ -1095,28 +1218,82 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Gets create_date
+     * Gets quota_limit
      *
-     * @return \DateTime|null
+     * @return int|null
      */
-    public function getCreateDate()
+    public function getQuotaLimit()
     {
-        return $this->container['create_date'];
+        return $this->container['quota_limit'];
     }
 
     /**
-     * Sets create_date
+     * Sets quota_limit
      *
-     * @param \DateTime|null $create_date create_date
+     * @param int|null $quota_limit quota_limit
      *
      * @return self
      */
-    public function setCreateDate($create_date)
+    public function setQuotaLimit($quota_limit)
     {
-        if (is_null($create_date)) {
-            throw new \InvalidArgumentException('non-nullable create_date cannot be null');
+        if (is_null($quota_limit)) {
+            throw new \InvalidArgumentException('non-nullable quota_limit cannot be null');
         }
-        $this->container['create_date'] = $create_date;
+        $this->container['quota_limit'] = $quota_limit;
+
+        return $this;
+    }
+
+    /**
+     * Gets used_space
+     *
+     * @return float|null
+     */
+    public function getUsedSpace()
+    {
+        return $this->container['used_space'];
+    }
+
+    /**
+     * Sets used_space
+     *
+     * @param float|null $used_space used_space
+     *
+     * @return self
+     */
+    public function setUsedSpace($used_space)
+    {
+        if (is_null($used_space)) {
+            throw new \InvalidArgumentException('non-nullable used_space cannot be null');
+        }
+        $this->container['used_space'] = $used_space;
+
+        return $this;
+    }
+
+    /**
+     * Gets is_custom_quota
+     *
+     * @return bool|null
+     */
+    public function getIsCustomQuota()
+    {
+        return $this->container['is_custom_quota'];
+    }
+
+    /**
+     * Sets is_custom_quota
+     *
+     * @param bool|null $is_custom_quota is_custom_quota
+     *
+     * @return self
+     */
+    public function setIsCustomQuota($is_custom_quota)
+    {
+        if (is_null($is_custom_quota)) {
+            throw new \InvalidArgumentException('non-nullable is_custom_quota cannot be null');
+        }
+        $this->container['is_custom_quota'] = $is_custom_quota;
 
         return $this;
     }
@@ -1124,7 +1301,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Gets created_by
      *
-     * @return string|null
+     * @return \OnlyOffice\DocSpace\Webhooks\Sdk\Model\UserSummaryPayload|null
      */
     public function getCreatedBy()
     {
@@ -1134,7 +1311,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets created_by
      *
-     * @param string|null $created_by created_by
+     * @param \OnlyOffice\DocSpace\Webhooks\Sdk\Model\UserSummaryPayload|null $created_by created_by
      *
      * @return self
      */
@@ -1149,190 +1326,217 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Gets spam
+     * Gets registration_date
+     *
+     * @return \DateTime|null
+     */
+    public function getRegistrationDate()
+    {
+        return $this->container['registration_date'];
+    }
+
+    /**
+     * Sets registration_date
+     *
+     * @param \DateTime|null $registration_date registration_date
+     *
+     * @return self
+     */
+    public function setRegistrationDate($registration_date)
+    {
+        if (is_null($registration_date)) {
+            throw new \InvalidArgumentException('non-nullable registration_date cannot be null');
+        }
+        $this->container['registration_date'] = $registration_date;
+
+        return $this;
+    }
+
+    /**
+     * Gets has_avatar
      *
      * @return bool|null
      */
-    public function getSpam()
+    public function getHasAvatar()
     {
-        return $this->container['spam'];
+        return $this->container['has_avatar'];
     }
 
     /**
-     * Sets spam
+     * Sets has_avatar
      *
-     * @param bool|null $spam spam
+     * @param bool|null $has_avatar has_avatar
      *
      * @return self
      */
-    public function setSpam($spam)
+    public function setHasAvatar($has_avatar)
     {
-        if (is_null($spam)) {
-            throw new \InvalidArgumentException('non-nullable spam cannot be null');
+        if (is_null($has_avatar)) {
+            throw new \InvalidArgumentException('non-nullable has_avatar cannot be null');
         }
-        $this->container['spam'] = $spam;
+        $this->container['has_avatar'] = $has_avatar;
 
         return $this;
     }
 
     /**
-     * Gets sid
+     * Gets avatar
      *
      * @return string|null
      */
-    public function getSid()
+    public function getAvatar()
     {
-        return $this->container['sid'];
+        return $this->container['avatar'];
     }
 
     /**
-     * Sets sid
+     * Sets avatar
      *
-     * @param string|null $sid LDAP identifier. REVIEW.
+     * @param string|null $avatar avatar
      *
      * @return self
      */
-    public function setSid($sid)
+    public function setAvatar($avatar)
     {
-        if (is_null($sid)) {
-            throw new \InvalidArgumentException('non-nullable sid cannot be null');
+        if (is_null($avatar)) {
+            throw new \InvalidArgumentException('non-nullable avatar cannot be null');
         }
-        $this->container['sid'] = $sid;
+        $this->container['avatar'] = $avatar;
 
         return $this;
     }
 
     /**
-     * Gets ldap_qouta
-     *
-     * @return int|null
-     */
-    public function getLdapQouta()
-    {
-        return $this->container['ldap_qouta'];
-    }
-
-    /**
-     * Sets ldap_qouta
-     *
-     * @param int|null $ldap_qouta sic -- misspelled in the domain type, and misspelled on the wire. LDAP quota. REVIEW.
-     *
-     * @return self
-     */
-    public function setLdapQouta($ldap_qouta)
-    {
-        if (is_null($ldap_qouta)) {
-            throw new \InvalidArgumentException('non-nullable ldap_qouta cannot be null');
-        }
-        $this->container['ldap_qouta'] = $ldap_qouta;
-
-        return $this;
-    }
-
-    /**
-     * Gets sso_name_id
+     * Gets avatar_original
      *
      * @return string|null
      */
-    public function getSsoNameId()
+    public function getAvatarOriginal()
     {
-        return $this->container['sso_name_id'];
+        return $this->container['avatar_original'];
     }
 
     /**
-     * Sets sso_name_id
+     * Sets avatar_original
      *
-     * @param string|null $sso_name_id SAML identifier. REVIEW.
+     * @param string|null $avatar_original avatar_original
      *
      * @return self
      */
-    public function setSsoNameId($sso_name_id)
+    public function setAvatarOriginal($avatar_original)
     {
-        if (is_null($sso_name_id)) {
-            throw new \InvalidArgumentException('non-nullable sso_name_id cannot be null');
+        if (is_null($avatar_original)) {
+            throw new \InvalidArgumentException('non-nullable avatar_original cannot be null');
         }
-        $this->container['sso_name_id'] = $sso_name_id;
+        $this->container['avatar_original'] = $avatar_original;
 
         return $this;
     }
 
     /**
-     * Gets sso_session_id
+     * Gets avatar_max
      *
      * @return string|null
      */
-    public function getSsoSessionId()
+    public function getAvatarMax()
     {
-        return $this->container['sso_session_id'];
+        return $this->container['avatar_max'];
     }
 
     /**
-     * Sets sso_session_id
+     * Sets avatar_max
      *
-     * @param string|null $sso_session_id SAML SESSION identifier. REVIEW -- should almost certainly not be on the wire.
+     * @param string|null $avatar_max avatar_max
      *
      * @return self
      */
-    public function setSsoSessionId($sso_session_id)
+    public function setAvatarMax($avatar_max)
     {
-        if (is_null($sso_session_id)) {
-            throw new \InvalidArgumentException('non-nullable sso_session_id cannot be null');
+        if (is_null($avatar_max)) {
+            throw new \InvalidArgumentException('non-nullable avatar_max cannot be null');
         }
-        $this->container['sso_session_id'] = $sso_session_id;
+        $this->container['avatar_max'] = $avatar_max;
 
         return $this;
     }
 
     /**
-     * Gets is_active
+     * Gets avatar_medium
      *
-     * @return bool|null
+     * @return string|null
      */
-    public function getIsActive()
+    public function getAvatarMedium()
     {
-        return $this->container['is_active'];
+        return $this->container['avatar_medium'];
     }
 
     /**
-     * Sets is_active
+     * Sets avatar_medium
      *
-     * @param bool|null $is_active computed getter
+     * @param string|null $avatar_medium avatar_medium
      *
      * @return self
      */
-    public function setIsActive($is_active)
+    public function setAvatarMedium($avatar_medium)
     {
-        if (is_null($is_active)) {
-            throw new \InvalidArgumentException('non-nullable is_active cannot be null');
+        if (is_null($avatar_medium)) {
+            throw new \InvalidArgumentException('non-nullable avatar_medium cannot be null');
         }
-        $this->container['is_active'] = $is_active;
+        $this->container['avatar_medium'] = $avatar_medium;
 
         return $this;
     }
 
     /**
-     * Gets check_activation
+     * Gets avatar_small
      *
-     * @return bool|null
+     * @return string|null
      */
-    public function getCheckActivation()
+    public function getAvatarSmall()
     {
-        return $this->container['check_activation'];
+        return $this->container['avatar_small'];
     }
 
     /**
-     * Sets check_activation
+     * Sets avatar_small
      *
-     * @param bool|null $check_activation computed getter
+     * @param string|null $avatar_small avatar_small
      *
      * @return self
      */
-    public function setCheckActivation($check_activation)
+    public function setAvatarSmall($avatar_small)
     {
-        if (is_null($check_activation)) {
-            throw new \InvalidArgumentException('non-nullable check_activation cannot be null');
+        if (is_null($avatar_small)) {
+            throw new \InvalidArgumentException('non-nullable avatar_small cannot be null');
         }
-        $this->container['check_activation'] = $check_activation;
+        $this->container['avatar_small'] = $avatar_small;
+
+        return $this;
+    }
+
+    /**
+     * Gets profile_url
+     *
+     * @return string|null
+     */
+    public function getProfileUrl()
+    {
+        return $this->container['profile_url'];
+    }
+
+    /**
+     * Sets profile_url
+     *
+     * @param string|null $profile_url profile_url
+     *
+     * @return self
+     */
+    public function setProfileUrl($profile_url)
+    {
+        if (is_null($profile_url)) {
+            throw new \InvalidArgumentException('non-nullable profile_url cannot be null');
+        }
+        $this->container['profile_url'] = $profile_url;
 
         return $this;
     }

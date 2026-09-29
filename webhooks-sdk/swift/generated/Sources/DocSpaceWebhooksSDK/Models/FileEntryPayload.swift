@@ -7,126 +7,75 @@
 
 import Foundation
 
-/** The payload for EVERY file, folder, room, agent and form trigger.  There is deliberately no File- or Folder-specific schema. WebhookManager calls PublishAsync&lt;T1,T2&gt; with a static parameter type of FileEntry&lt;T&gt;, so T1 binds to the abstract base and System.Text.Json serializes by DECLARED type. File&lt;T&gt; and Folder&lt;T&gt; members -- pureTitle, version, contentLength, folderType, filesCount, isRoom -- therefore never reach the wire, however the entry was published.  One consequence worth internalising: &#x60;title&#x60; IS present, even for files. File&lt;T&gt; hides Title behind [JsonIgnore] and exposes pureTitle instead, but that override is invisible here because the base declaration is what gets serialized.  Verified against a captured production delivery: all 14 keys of a real file.created payload are members of this schema and nothing else. (Files/Core/Core/Entries/FileEntry.cs; [JsonIgnore] members excluded.)  */
+/** ASC.Files/Core/ApiModels/WebhookDto/FileEntryWebhookDto.cs. What FilePayload, FolderPayload and RoomPayload have in common.  This schema is never sent on its own -- unlike the previous contract, where every file, folder, room, agent and form trigger sent exactly this and nothing else. The old payload was typed as the abstract FileEntry&lt;T&gt; at the publish site, so System.Text.Json serialized by DECLARED type and every File&lt;T&gt; and Folder&lt;T&gt; member was silently dropped: version, contentLength, fileType, folderType, filesCount, roomType never reached a receiver. That is fixed; the subtypes below carry their own fields.  Not carried, deliberately: access, security, securityByUsers, availableShareRights, shareSettings, canShare, shared, sharedForUser, sharedExternal, parentShared, isFavorite, requestToken, external, shareRecord. Those answer \&quot;what may the caller see\&quot;, and a delivery has no caller - who receives it is decided by WebhookFileEntryAccessChecker against the subscription owner. Putting one user&#39;s permission matrix on the wire was both meaningless to the receiver and a disclosure.  */
 public struct FileEntryPayload: Sendable, Codable, Hashable {
 
     public var id: EntryId?
     public var parentId: EntryId?
-    public var rootId: EntryId?
-    public var originId: EntryId?
-    public var originRoomId: EntryId?
-    public var folderIdDisplay: EntryId?
-    public var mutableId: Bool?
-    /** The entry name, e.g. \"321.xlsx\". Present for files as well as folders: File<T> overrides Title with [JsonIgnore] and exposes pureTitle instead, but that override is never reached because the base declaration is what gets serialized.  */
+    public var rootFolderId: EntryId?
     public var title: String?
-    /** Declared abstract on FileEntry; omitted when false. */
-    public var isNew: Bool?
-    public var createBy: UUID?
-    public var createOn: Date?
-    public var modifiedBy: UUID?
-    public var modifiedOn: Date?
-    public var sharedBy: UUID?
-    public var rootCreateBy: UUID?
-    public var parentRoomCreatedBy: UUID?
+    /** 1 folder, 2 file. Present on every entry payload. */
+    public var fileEntryType: Int?
+    public var created: Date?
+    public var createdBy: UserSummaryPayload?
+    public var updated: Date?
+    public var updatedBy: UserSummaryPayload?
     /** enum FolderType */
     public var rootFolderType: Int?
     /** enum FolderType */
     public var parentRoomType: Int?
-    /** enum FileEntryType -- 1 folder, 2 file. The ONLY way to tell a folder from a file: no subtype-specific fields are ever sent.  */
-    public var fileEntryType: Int?
-    /** enum FileShare */
-    public var access: Int?
-    public var shared: Bool?
-    public var sharedForUser: Bool?
-    public var sharedExternal: Bool?
-    public var parentShared: Bool?
-    public var providerId: Int?
-    public var providerKey: String?
+    public var originId: EntryId?
+    public var originRoomId: EntryId?
     public var originTitle: String?
     public var originRoomTitle: String?
+    public var providerItem: Bool?
+    public var providerKey: String?
+    public var providerId: Int?
+    /** Position within an indexed room. */
     public var order: Int?
-    public var error: String?
-    /** TODO: expand Tag. */
-    public var tags: [[String: JSONValue]]?
-    /** TODO: expand FileShareRecord<T>. */
-    public var shareRecord: [String: JSONValue]?
-    /** Caller-relative permission map (enum FilesSecurityActions -> bool). Internal ACL state on the wire. REVIEW.  */
-    public var security: [String: Bool]?
-    /** Per-user permission map. Initialised non-null, so it is emitted as {} rather than omitted. REVIEW.  */
-    public var securityByUsers: [String: [String: Bool]]?
 
-    public init(id: EntryId? = nil, parentId: EntryId? = nil, rootId: EntryId? = nil, originId: EntryId? = nil, originRoomId: EntryId? = nil, folderIdDisplay: EntryId? = nil, mutableId: Bool? = nil, title: String? = nil, isNew: Bool? = nil, createBy: UUID? = nil, createOn: Date? = nil, modifiedBy: UUID? = nil, modifiedOn: Date? = nil, sharedBy: UUID? = nil, rootCreateBy: UUID? = nil, parentRoomCreatedBy: UUID? = nil, rootFolderType: Int? = nil, parentRoomType: Int? = nil, fileEntryType: Int? = nil, access: Int? = nil, shared: Bool? = nil, sharedForUser: Bool? = nil, sharedExternal: Bool? = nil, parentShared: Bool? = nil, providerId: Int? = nil, providerKey: String? = nil, originTitle: String? = nil, originRoomTitle: String? = nil, order: Int? = nil, error: String? = nil, tags: [[String: JSONValue]]? = nil, shareRecord: [String: JSONValue]? = nil, security: [String: Bool]? = nil, securityByUsers: [String: [String: Bool]]? = nil) {
+    public init(id: EntryId? = nil, parentId: EntryId? = nil, rootFolderId: EntryId? = nil, title: String? = nil, fileEntryType: Int? = nil, created: Date? = nil, createdBy: UserSummaryPayload? = nil, updated: Date? = nil, updatedBy: UserSummaryPayload? = nil, rootFolderType: Int? = nil, parentRoomType: Int? = nil, originId: EntryId? = nil, originRoomId: EntryId? = nil, originTitle: String? = nil, originRoomTitle: String? = nil, providerItem: Bool? = nil, providerKey: String? = nil, providerId: Int? = nil, order: Int? = nil) {
         self.id = id
         self.parentId = parentId
-        self.rootId = rootId
-        self.originId = originId
-        self.originRoomId = originRoomId
-        self.folderIdDisplay = folderIdDisplay
-        self.mutableId = mutableId
+        self.rootFolderId = rootFolderId
         self.title = title
-        self.isNew = isNew
-        self.createBy = createBy
-        self.createOn = createOn
-        self.modifiedBy = modifiedBy
-        self.modifiedOn = modifiedOn
-        self.sharedBy = sharedBy
-        self.rootCreateBy = rootCreateBy
-        self.parentRoomCreatedBy = parentRoomCreatedBy
+        self.fileEntryType = fileEntryType
+        self.created = created
+        self.createdBy = createdBy
+        self.updated = updated
+        self.updatedBy = updatedBy
         self.rootFolderType = rootFolderType
         self.parentRoomType = parentRoomType
-        self.fileEntryType = fileEntryType
-        self.access = access
-        self.shared = shared
-        self.sharedForUser = sharedForUser
-        self.sharedExternal = sharedExternal
-        self.parentShared = parentShared
-        self.providerId = providerId
-        self.providerKey = providerKey
+        self.originId = originId
+        self.originRoomId = originRoomId
         self.originTitle = originTitle
         self.originRoomTitle = originRoomTitle
+        self.providerItem = providerItem
+        self.providerKey = providerKey
+        self.providerId = providerId
         self.order = order
-        self.error = error
-        self.tags = tags
-        self.shareRecord = shareRecord
-        self.security = security
-        self.securityByUsers = securityByUsers
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case id
         case parentId
-        case rootId
-        case originId
-        case originRoomId
-        case folderIdDisplay
-        case mutableId
+        case rootFolderId
         case title
-        case isNew
-        case createBy
-        case createOn
-        case modifiedBy
-        case modifiedOn
-        case sharedBy
-        case rootCreateBy
-        case parentRoomCreatedBy
+        case fileEntryType
+        case created
+        case createdBy
+        case updated
+        case updatedBy
         case rootFolderType
         case parentRoomType
-        case fileEntryType
-        case access
-        case shared
-        case sharedForUser
-        case sharedExternal
-        case parentShared
-        case providerId
-        case providerKey
+        case originId
+        case originRoomId
         case originTitle
         case originRoomTitle
+        case providerItem
+        case providerKey
+        case providerId
         case order
-        case error
-        case tags
-        case shareRecord
-        case security
-        case securityByUsers
     }
 
     // Encodable protocol methods
@@ -135,38 +84,23 @@ public struct FileEntryPayload: Sendable, Codable, Hashable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(id, forKey: .id)
         try container.encodeIfPresent(parentId, forKey: .parentId)
-        try container.encodeIfPresent(rootId, forKey: .rootId)
-        try container.encodeIfPresent(originId, forKey: .originId)
-        try container.encodeIfPresent(originRoomId, forKey: .originRoomId)
-        try container.encodeIfPresent(folderIdDisplay, forKey: .folderIdDisplay)
-        try container.encodeIfPresent(mutableId, forKey: .mutableId)
+        try container.encodeIfPresent(rootFolderId, forKey: .rootFolderId)
         try container.encodeIfPresent(title, forKey: .title)
-        try container.encodeIfPresent(isNew, forKey: .isNew)
-        try container.encodeIfPresent(createBy, forKey: .createBy)
-        try container.encodeIfPresent(createOn, forKey: .createOn)
-        try container.encodeIfPresent(modifiedBy, forKey: .modifiedBy)
-        try container.encodeIfPresent(modifiedOn, forKey: .modifiedOn)
-        try container.encodeIfPresent(sharedBy, forKey: .sharedBy)
-        try container.encodeIfPresent(rootCreateBy, forKey: .rootCreateBy)
-        try container.encodeIfPresent(parentRoomCreatedBy, forKey: .parentRoomCreatedBy)
+        try container.encodeIfPresent(fileEntryType, forKey: .fileEntryType)
+        try container.encodeIfPresent(created, forKey: .created)
+        try container.encodeIfPresent(createdBy, forKey: .createdBy)
+        try container.encodeIfPresent(updated, forKey: .updated)
+        try container.encodeIfPresent(updatedBy, forKey: .updatedBy)
         try container.encodeIfPresent(rootFolderType, forKey: .rootFolderType)
         try container.encodeIfPresent(parentRoomType, forKey: .parentRoomType)
-        try container.encodeIfPresent(fileEntryType, forKey: .fileEntryType)
-        try container.encodeIfPresent(access, forKey: .access)
-        try container.encodeIfPresent(shared, forKey: .shared)
-        try container.encodeIfPresent(sharedForUser, forKey: .sharedForUser)
-        try container.encodeIfPresent(sharedExternal, forKey: .sharedExternal)
-        try container.encodeIfPresent(parentShared, forKey: .parentShared)
-        try container.encodeIfPresent(providerId, forKey: .providerId)
-        try container.encodeIfPresent(providerKey, forKey: .providerKey)
+        try container.encodeIfPresent(originId, forKey: .originId)
+        try container.encodeIfPresent(originRoomId, forKey: .originRoomId)
         try container.encodeIfPresent(originTitle, forKey: .originTitle)
         try container.encodeIfPresent(originRoomTitle, forKey: .originRoomTitle)
+        try container.encodeIfPresent(providerItem, forKey: .providerItem)
+        try container.encodeIfPresent(providerKey, forKey: .providerKey)
+        try container.encodeIfPresent(providerId, forKey: .providerId)
         try container.encodeIfPresent(order, forKey: .order)
-        try container.encodeIfPresent(error, forKey: .error)
-        try container.encodeIfPresent(tags, forKey: .tags)
-        try container.encodeIfPresent(shareRecord, forKey: .shareRecord)
-        try container.encodeIfPresent(security, forKey: .security)
-        try container.encodeIfPresent(securityByUsers, forKey: .securityByUsers)
     }
 }
 

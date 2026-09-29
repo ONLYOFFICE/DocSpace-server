@@ -1,9 +1,9 @@
 =begin
 #ONLYOFFICE DocSpace Webhooks
 
-#Wire contract for OUTBOUND DocSpace webhook deliveries.  This is a hand-maintained document. It is NOT the REST API spec and shares no schemas with it: webhook payloads are the internal domain entities (UserInfo, GroupInfo, File<T>, Folder<T>), not the controller DTOs.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+#Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto). They began as copies of the matching REST DTOs and are free to diverge from them.  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
 
-The version of the OpenAPI document: 0.1.0
+The version of the OpenAPI document: 1.0.0
 
 Generated by: https://openapi-generator.tech
 Generator version: 7.25.0
@@ -14,9 +14,11 @@ require 'date'
 require 'time'
 
 module DocspaceWebhooksSdk
-  # ASC.Core.Common/Core/UserInfo.cs -- the domain entity, verbatim. It carries NO [JsonIgnore] at all, so every public member below reaches the wire. sid / ssoNameId / ssoSessionId / ldapQouta are null on portals without LDAP or SSO and therefore invisible in most test captures; they DO appear on LDAP/SSO tenants, and are flagged REVIEW below. 
+  # ASC.Api.Core/Webhook/Payloads/UserWebhookDto.cs. A copy of the REST EmployeeFullDto, owned by the webhook contract and free to diverge from it.  Not carried, deliberately: sid / ssoNameId / ssoSessionId (LDAP and SAML identifiers, and a SAML SESSION id, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim, and `shared`. `contacts` appears once, as a typed list, rather than twice in two shapes. 
   class UserPayload < ApiModelBase
     attr_accessor :id
+
+    attr_accessor :display_name
 
     attr_accessor :first_name
 
@@ -26,36 +28,40 @@ module DocspaceWebhooksSdk
 
     attr_accessor :email
 
-    attr_accessor :birth_date
-
-    attr_accessor :sex
+    attr_accessor :contacts
 
     # enum EmployeeStatus
     attr_accessor :status
 
-    # enum EmployeeActivationStatus (flags)
+    # enum EmployeeActivationStatus (flags), AutoGenerated masked off
     attr_accessor :activation_status
 
-    attr_accessor :terminated_date
+    attr_accessor :terminated
 
-    attr_accessor :title
+    # Comma-separated group names, HTML-encoded.
+    attr_accessor :department
 
-    attr_accessor :work_from_date
+    attr_accessor :groups
 
     attr_accessor :location
 
     attr_accessor :notes
 
-    # Flattened form of contactsList. BOTH are emitted -- the same data twice. 
-    attr_accessor :contacts
+    attr_accessor :is_admin
 
-    attr_accessor :contacts_list
+    attr_accessor :is_room_admin
 
-    attr_accessor :removed
+    attr_accessor :is_owner
 
-    attr_accessor :last_modified
+    attr_accessor :is_visitor
 
-    attr_accessor :tenant_id
+    attr_accessor :is_collaborator
+
+    attr_accessor :is_ldap
+
+    attr_accessor :is_sso
+
+    attr_accessor :list_admin_modules
 
     attr_accessor :culture_name
 
@@ -64,64 +70,70 @@ module DocspaceWebhooksSdk
     # enum MobilePhoneActivationStatus
     attr_accessor :mobile_phone_activation_status
 
-    attr_accessor :create_date
+    attr_accessor :quota_limit
+
+    attr_accessor :used_space
+
+    attr_accessor :is_custom_quota
 
     attr_accessor :created_by
 
-    attr_accessor :spam
+    attr_accessor :registration_date
 
-    # LDAP identifier. REVIEW.
-    attr_accessor :sid
+    attr_accessor :has_avatar
 
-    # sic -- misspelled in the domain type, and misspelled on the wire. LDAP quota. REVIEW. 
-    attr_accessor :ldap_qouta
+    attr_accessor :avatar
 
-    # SAML identifier. REVIEW.
-    attr_accessor :sso_name_id
+    attr_accessor :avatar_original
 
-    # SAML SESSION identifier. REVIEW -- should almost certainly not be on the wire. 
-    attr_accessor :sso_session_id
+    attr_accessor :avatar_max
 
-    # computed getter
-    attr_accessor :is_active
+    attr_accessor :avatar_medium
 
-    # computed getter
-    attr_accessor :check_activation
+    attr_accessor :avatar_small
+
+    attr_accessor :profile_url
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
         :'id' => :'id',
+        :'display_name' => :'displayName',
         :'first_name' => :'firstName',
         :'last_name' => :'lastName',
         :'user_name' => :'userName',
         :'email' => :'email',
-        :'birth_date' => :'birthDate',
-        :'sex' => :'sex',
+        :'contacts' => :'contacts',
         :'status' => :'status',
         :'activation_status' => :'activationStatus',
-        :'terminated_date' => :'terminatedDate',
-        :'title' => :'title',
-        :'work_from_date' => :'workFromDate',
+        :'terminated' => :'terminated',
+        :'department' => :'department',
+        :'groups' => :'groups',
         :'location' => :'location',
         :'notes' => :'notes',
-        :'contacts' => :'contacts',
-        :'contacts_list' => :'contactsList',
-        :'removed' => :'removed',
-        :'last_modified' => :'lastModified',
-        :'tenant_id' => :'tenantId',
+        :'is_admin' => :'isAdmin',
+        :'is_room_admin' => :'isRoomAdmin',
+        :'is_owner' => :'isOwner',
+        :'is_visitor' => :'isVisitor',
+        :'is_collaborator' => :'isCollaborator',
+        :'is_ldap' => :'isLDAP',
+        :'is_sso' => :'isSSO',
+        :'list_admin_modules' => :'listAdminModules',
         :'culture_name' => :'cultureName',
         :'mobile_phone' => :'mobilePhone',
         :'mobile_phone_activation_status' => :'mobilePhoneActivationStatus',
-        :'create_date' => :'createDate',
+        :'quota_limit' => :'quotaLimit',
+        :'used_space' => :'usedSpace',
+        :'is_custom_quota' => :'isCustomQuota',
         :'created_by' => :'createdBy',
-        :'spam' => :'spam',
-        :'sid' => :'sid',
-        :'ldap_qouta' => :'ldapQouta',
-        :'sso_name_id' => :'ssoNameId',
-        :'sso_session_id' => :'ssoSessionId',
-        :'is_active' => :'isActive',
-        :'check_activation' => :'checkActivation'
+        :'registration_date' => :'registrationDate',
+        :'has_avatar' => :'hasAvatar',
+        :'avatar' => :'avatar',
+        :'avatar_original' => :'avatarOriginal',
+        :'avatar_max' => :'avatarMax',
+        :'avatar_medium' => :'avatarMedium',
+        :'avatar_small' => :'avatarSmall',
+        :'profile_url' => :'profileUrl'
       }
     end
 
@@ -139,36 +151,42 @@ module DocspaceWebhooksSdk
     def self.openapi_types
       {
         :'id' => :'String',
+        :'display_name' => :'String',
         :'first_name' => :'String',
         :'last_name' => :'String',
         :'user_name' => :'String',
         :'email' => :'String',
-        :'birth_date' => :'Time',
-        :'sex' => :'Boolean',
+        :'contacts' => :'Array<ContactPayload>',
         :'status' => :'Integer',
         :'activation_status' => :'Integer',
-        :'terminated_date' => :'Time',
-        :'title' => :'String',
-        :'work_from_date' => :'Time',
+        :'terminated' => :'Time',
+        :'department' => :'String',
+        :'groups' => :'Array<GroupSummaryPayload>',
         :'location' => :'String',
         :'notes' => :'String',
-        :'contacts' => :'String',
-        :'contacts_list' => :'Array<String>',
-        :'removed' => :'Boolean',
-        :'last_modified' => :'Time',
-        :'tenant_id' => :'Integer',
+        :'is_admin' => :'Boolean',
+        :'is_room_admin' => :'Boolean',
+        :'is_owner' => :'Boolean',
+        :'is_visitor' => :'Boolean',
+        :'is_collaborator' => :'Boolean',
+        :'is_ldap' => :'Boolean',
+        :'is_sso' => :'Boolean',
+        :'list_admin_modules' => :'Array<String>',
         :'culture_name' => :'String',
         :'mobile_phone' => :'String',
         :'mobile_phone_activation_status' => :'Integer',
-        :'create_date' => :'Time',
-        :'created_by' => :'String',
-        :'spam' => :'Boolean',
-        :'sid' => :'String',
-        :'ldap_qouta' => :'Integer',
-        :'sso_name_id' => :'String',
-        :'sso_session_id' => :'String',
-        :'is_active' => :'Boolean',
-        :'check_activation' => :'Boolean'
+        :'quota_limit' => :'Integer',
+        :'used_space' => :'Float',
+        :'is_custom_quota' => :'Boolean',
+        :'created_by' => :'UserSummaryPayload',
+        :'registration_date' => :'Time',
+        :'has_avatar' => :'Boolean',
+        :'avatar' => :'String',
+        :'avatar_original' => :'String',
+        :'avatar_max' => :'String',
+        :'avatar_medium' => :'String',
+        :'avatar_small' => :'String',
+        :'profile_url' => :'String'
       }
     end
 
@@ -198,6 +216,10 @@ module DocspaceWebhooksSdk
         self.id = attributes[:'id']
       end
 
+      if attributes.key?(:'display_name')
+        self.display_name = attributes[:'display_name']
+      end
+
       if attributes.key?(:'first_name')
         self.first_name = attributes[:'first_name']
       end
@@ -214,12 +236,10 @@ module DocspaceWebhooksSdk
         self.email = attributes[:'email']
       end
 
-      if attributes.key?(:'birth_date')
-        self.birth_date = attributes[:'birth_date']
-      end
-
-      if attributes.key?(:'sex')
-        self.sex = attributes[:'sex']
+      if attributes.key?(:'contacts')
+        if (value = attributes[:'contacts']).is_a?(Array)
+          self.contacts = value
+        end
       end
 
       if attributes.key?(:'status')
@@ -230,16 +250,18 @@ module DocspaceWebhooksSdk
         self.activation_status = attributes[:'activation_status']
       end
 
-      if attributes.key?(:'terminated_date')
-        self.terminated_date = attributes[:'terminated_date']
+      if attributes.key?(:'terminated')
+        self.terminated = attributes[:'terminated']
       end
 
-      if attributes.key?(:'title')
-        self.title = attributes[:'title']
+      if attributes.key?(:'department')
+        self.department = attributes[:'department']
       end
 
-      if attributes.key?(:'work_from_date')
-        self.work_from_date = attributes[:'work_from_date']
+      if attributes.key?(:'groups')
+        if (value = attributes[:'groups']).is_a?(Array)
+          self.groups = value
+        end
       end
 
       if attributes.key?(:'location')
@@ -250,26 +272,38 @@ module DocspaceWebhooksSdk
         self.notes = attributes[:'notes']
       end
 
-      if attributes.key?(:'contacts')
-        self.contacts = attributes[:'contacts']
+      if attributes.key?(:'is_admin')
+        self.is_admin = attributes[:'is_admin']
       end
 
-      if attributes.key?(:'contacts_list')
-        if (value = attributes[:'contacts_list']).is_a?(Array)
-          self.contacts_list = value
+      if attributes.key?(:'is_room_admin')
+        self.is_room_admin = attributes[:'is_room_admin']
+      end
+
+      if attributes.key?(:'is_owner')
+        self.is_owner = attributes[:'is_owner']
+      end
+
+      if attributes.key?(:'is_visitor')
+        self.is_visitor = attributes[:'is_visitor']
+      end
+
+      if attributes.key?(:'is_collaborator')
+        self.is_collaborator = attributes[:'is_collaborator']
+      end
+
+      if attributes.key?(:'is_ldap')
+        self.is_ldap = attributes[:'is_ldap']
+      end
+
+      if attributes.key?(:'is_sso')
+        self.is_sso = attributes[:'is_sso']
+      end
+
+      if attributes.key?(:'list_admin_modules')
+        if (value = attributes[:'list_admin_modules']).is_a?(Array)
+          self.list_admin_modules = value
         end
-      end
-
-      if attributes.key?(:'removed')
-        self.removed = attributes[:'removed']
-      end
-
-      if attributes.key?(:'last_modified')
-        self.last_modified = attributes[:'last_modified']
-      end
-
-      if attributes.key?(:'tenant_id')
-        self.tenant_id = attributes[:'tenant_id']
       end
 
       if attributes.key?(:'culture_name')
@@ -284,40 +318,52 @@ module DocspaceWebhooksSdk
         self.mobile_phone_activation_status = attributes[:'mobile_phone_activation_status']
       end
 
-      if attributes.key?(:'create_date')
-        self.create_date = attributes[:'create_date']
+      if attributes.key?(:'quota_limit')
+        self.quota_limit = attributes[:'quota_limit']
+      end
+
+      if attributes.key?(:'used_space')
+        self.used_space = attributes[:'used_space']
+      end
+
+      if attributes.key?(:'is_custom_quota')
+        self.is_custom_quota = attributes[:'is_custom_quota']
       end
 
       if attributes.key?(:'created_by')
         self.created_by = attributes[:'created_by']
       end
 
-      if attributes.key?(:'spam')
-        self.spam = attributes[:'spam']
+      if attributes.key?(:'registration_date')
+        self.registration_date = attributes[:'registration_date']
       end
 
-      if attributes.key?(:'sid')
-        self.sid = attributes[:'sid']
+      if attributes.key?(:'has_avatar')
+        self.has_avatar = attributes[:'has_avatar']
       end
 
-      if attributes.key?(:'ldap_qouta')
-        self.ldap_qouta = attributes[:'ldap_qouta']
+      if attributes.key?(:'avatar')
+        self.avatar = attributes[:'avatar']
       end
 
-      if attributes.key?(:'sso_name_id')
-        self.sso_name_id = attributes[:'sso_name_id']
+      if attributes.key?(:'avatar_original')
+        self.avatar_original = attributes[:'avatar_original']
       end
 
-      if attributes.key?(:'sso_session_id')
-        self.sso_session_id = attributes[:'sso_session_id']
+      if attributes.key?(:'avatar_max')
+        self.avatar_max = attributes[:'avatar_max']
       end
 
-      if attributes.key?(:'is_active')
-        self.is_active = attributes[:'is_active']
+      if attributes.key?(:'avatar_medium')
+        self.avatar_medium = attributes[:'avatar_medium']
       end
 
-      if attributes.key?(:'check_activation')
-        self.check_activation = attributes[:'check_activation']
+      if attributes.key?(:'avatar_small')
+        self.avatar_small = attributes[:'avatar_small']
+      end
+
+      if attributes.key?(:'profile_url')
+        self.profile_url = attributes[:'profile_url']
       end
     end
 
@@ -342,36 +388,42 @@ module DocspaceWebhooksSdk
       return true if self.equal?(o)
       self.class == o.class &&
           id == o.id &&
+          display_name == o.display_name &&
           first_name == o.first_name &&
           last_name == o.last_name &&
           user_name == o.user_name &&
           email == o.email &&
-          birth_date == o.birth_date &&
-          sex == o.sex &&
+          contacts == o.contacts &&
           status == o.status &&
           activation_status == o.activation_status &&
-          terminated_date == o.terminated_date &&
-          title == o.title &&
-          work_from_date == o.work_from_date &&
+          terminated == o.terminated &&
+          department == o.department &&
+          groups == o.groups &&
           location == o.location &&
           notes == o.notes &&
-          contacts == o.contacts &&
-          contacts_list == o.contacts_list &&
-          removed == o.removed &&
-          last_modified == o.last_modified &&
-          tenant_id == o.tenant_id &&
+          is_admin == o.is_admin &&
+          is_room_admin == o.is_room_admin &&
+          is_owner == o.is_owner &&
+          is_visitor == o.is_visitor &&
+          is_collaborator == o.is_collaborator &&
+          is_ldap == o.is_ldap &&
+          is_sso == o.is_sso &&
+          list_admin_modules == o.list_admin_modules &&
           culture_name == o.culture_name &&
           mobile_phone == o.mobile_phone &&
           mobile_phone_activation_status == o.mobile_phone_activation_status &&
-          create_date == o.create_date &&
+          quota_limit == o.quota_limit &&
+          used_space == o.used_space &&
+          is_custom_quota == o.is_custom_quota &&
           created_by == o.created_by &&
-          spam == o.spam &&
-          sid == o.sid &&
-          ldap_qouta == o.ldap_qouta &&
-          sso_name_id == o.sso_name_id &&
-          sso_session_id == o.sso_session_id &&
-          is_active == o.is_active &&
-          check_activation == o.check_activation
+          registration_date == o.registration_date &&
+          has_avatar == o.has_avatar &&
+          avatar == o.avatar &&
+          avatar_original == o.avatar_original &&
+          avatar_max == o.avatar_max &&
+          avatar_medium == o.avatar_medium &&
+          avatar_small == o.avatar_small &&
+          profile_url == o.profile_url
     end
 
     # @see the `==` method
@@ -383,7 +435,7 @@ module DocspaceWebhooksSdk
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, first_name, last_name, user_name, email, birth_date, sex, status, activation_status, terminated_date, title, work_from_date, location, notes, contacts, contacts_list, removed, last_modified, tenant_id, culture_name, mobile_phone, mobile_phone_activation_status, create_date, created_by, spam, sid, ldap_qouta, sso_name_id, sso_session_id, is_active, check_activation].hash
+      [id, display_name, first_name, last_name, user_name, email, contacts, status, activation_status, terminated, department, groups, location, notes, is_admin, is_room_admin, is_owner, is_visitor, is_collaborator, is_ldap, is_sso, list_admin_modules, culture_name, mobile_phone, mobile_phone_activation_status, quota_limit, used_space, is_custom_quota, created_by, registration_date, has_avatar, avatar, avatar_original, avatar_max, avatar_medium, avatar_small, profile_url].hash
     end
 
     # Builds the object from hash

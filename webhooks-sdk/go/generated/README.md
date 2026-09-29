@@ -93,8 +93,9 @@ func main() {
 			return
 		}
 
-		// Files, folders, rooms, agents and forms share one payload shape.
-		// fileEntryType tells them apart: 1 folder, 2 file.
+		// Files, folders and rooms each have their own schema; they share the
+		// fields of FileEntryPayload, which is enough for a generic log line.
+		// Decode FilePayload / FolderPayload / RoomPayload for the rest.
 		var e sdk.FileEntryPayload
 		if json.Unmarshal(env.Payload, &e) == nil {
 			kind := "folder"
@@ -127,11 +128,17 @@ New events are added over time. Treat an unfamiliar `event.trigger` as something
 
 ## Documentation for Models
 
+ - [ContactPayload](docs/ContactPayload.md)
  - [EntryId](docs/EntryId.md)
  - [FileEntryPayload](docs/FileEntryPayload.md)
+ - [FilePayload](docs/FilePayload.md)
+ - [FolderPayload](docs/FolderPayload.md)
  - [FormSubmitPayload](docs/FormSubmitPayload.md)
  - [GroupPayload](docs/GroupPayload.md)
+ - [GroupSummaryPayload](docs/GroupSummaryPayload.md)
+ - [RoomPayload](docs/RoomPayload.md)
  - [UserPayload](docs/UserPayload.md)
+ - [UserSummaryPayload](docs/UserSummaryPayload.md)
  - [WebhookConfigInfo](docs/WebhookConfigInfo.md)
  - [WebhookEnvelope](docs/WebhookEnvelope.md)
  - [WebhookEventInfo](docs/WebhookEventInfo.md)

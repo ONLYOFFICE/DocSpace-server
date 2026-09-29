@@ -1,43 +1,49 @@
 
 # UserPayload
 
-ASC.Core.Common/Core/UserInfo.cs -- the domain entity, verbatim. It carries NO [JsonIgnore] at all, so every public member below reaches the wire. sid / ssoNameId / ssoSessionId / ldapQouta are null on portals without LDAP or SSO and therefore invisible in most test captures; they DO appear on LDAP/SSO tenants, and are flagged REVIEW below. 
+ASC.Api.Core/Webhook/Payloads/UserWebhookDto.cs. A copy of the REST EmployeeFullDto, owned by the webhook contract and free to diverge from it.  Not carried, deliberately: sid / ssoNameId / ssoSessionId (LDAP and SAML identifiers, and a SAML SESSION id, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim, and `shared`. `contacts` appears once, as a typed list, rather than twice in two shapes. 
 
 ## Properties
 
 Name | Type
 ------------ | -------------
 `id` | string
+`displayName` | string
 `firstName` | string
 `lastName` | string
 `userName` | string
 `email` | string
-`birthDate` | Date
-`sex` | boolean
+`contacts` | [Array&lt;ContactPayload&gt;](ContactPayload.md)
 `status` | number
 `activationStatus` | number
-`terminatedDate` | Date
-`title` | string
-`workFromDate` | Date
+`terminated` | Date
+`department` | string
+`groups` | [Array&lt;GroupSummaryPayload&gt;](GroupSummaryPayload.md)
 `location` | string
 `notes` | string
-`contacts` | string
-`contactsList` | Array&lt;string&gt;
-`removed` | boolean
-`lastModified` | Date
-`tenantId` | number
+`isAdmin` | boolean
+`isRoomAdmin` | boolean
+`isOwner` | boolean
+`isVisitor` | boolean
+`isCollaborator` | boolean
+`isLDAP` | boolean
+`isSSO` | boolean
+`listAdminModules` | Array&lt;string&gt;
 `cultureName` | string
 `mobilePhone` | string
 `mobilePhoneActivationStatus` | number
-`createDate` | Date
-`createdBy` | string
-`spam` | boolean
-`sid` | string
-`ldapQouta` | number
-`ssoNameId` | string
-`ssoSessionId` | string
-`isActive` | boolean
-`checkActivation` | boolean
+`quotaLimit` | number
+`usedSpace` | number
+`isCustomQuota` | boolean
+`createdBy` | [UserSummaryPayload](UserSummaryPayload.md)
+`registrationDate` | Date
+`hasAvatar` | boolean
+`avatar` | string
+`avatarOriginal` | string
+`avatarMax` | string
+`avatarMedium` | string
+`avatarSmall` | string
+`profileUrl` | string
 
 ## Example
 
@@ -47,36 +53,42 @@ import type { UserPayload } from ''
 // TODO: Update the object below with actual values
 const example = {
   "id": null,
+  "displayName": null,
   "firstName": null,
   "lastName": null,
   "userName": null,
   "email": null,
-  "birthDate": null,
-  "sex": null,
+  "contacts": null,
   "status": null,
   "activationStatus": null,
-  "terminatedDate": null,
-  "title": null,
-  "workFromDate": null,
+  "terminated": null,
+  "department": null,
+  "groups": null,
   "location": null,
   "notes": null,
-  "contacts": null,
-  "contactsList": null,
-  "removed": null,
-  "lastModified": null,
-  "tenantId": null,
+  "isAdmin": null,
+  "isRoomAdmin": null,
+  "isOwner": null,
+  "isVisitor": null,
+  "isCollaborator": null,
+  "isLDAP": null,
+  "isSSO": null,
+  "listAdminModules": null,
   "cultureName": null,
   "mobilePhone": null,
   "mobilePhoneActivationStatus": null,
-  "createDate": null,
+  "quotaLimit": null,
+  "usedSpace": null,
+  "isCustomQuota": null,
   "createdBy": null,
-  "spam": null,
-  "sid": null,
-  "ldapQouta": null,
-  "ssoNameId": null,
-  "ssoSessionId": null,
-  "isActive": null,
-  "checkActivation": null,
+  "registrationDate": null,
+  "hasAvatar": null,
+  "avatar": null,
+  "avatarOriginal": null,
+  "avatarMax": null,
+  "avatarMedium": null,
+  "avatarSmall": null,
+  "profileUrl": null,
 } satisfies UserPayload
 
 console.log(example)

@@ -39,16 +39,18 @@ namespace ASC.Api.Core.Webhook;
 public class UserWebhookManager(
     IWebhookPublisher webhookPublisher,
     WebhookGroupAccessChecker webhookGroupAccessChecker,
-    WebhookUserAccessChecker webhookUserAccessChecker)
+    WebhookUserAccessChecker webhookUserAccessChecker,
+    UserWebhookDtoHelper userWebhookDtoHelper,
+    GroupWebhookDtoHelper groupWebhookDtoHelper)
 {
     public async Task PublishAsync(WebhookTrigger trigger, UserInfo userInfo)
     {
-        await webhookPublisher.PublishAsync(trigger, webhookUserAccessChecker, userInfo, userInfo.Id);
+        await webhookPublisher.PublishAsync(trigger, webhookUserAccessChecker, userInfo, () => userWebhookDtoHelper.GetAsync(userInfo), userInfo.Id);
     }
 
     public async Task PublishAsync(WebhookTrigger trigger, ASC.Core.Users.GroupInfo groupInfo)
     {
-        await webhookPublisher.PublishAsync(trigger, webhookGroupAccessChecker, groupInfo, groupInfo.ID);
+        await webhookPublisher.PublishAsync(trigger, webhookGroupAccessChecker, groupInfo, () => groupWebhookDtoHelper.GetAsync(groupInfo), groupInfo.ID);
     }
 }
 

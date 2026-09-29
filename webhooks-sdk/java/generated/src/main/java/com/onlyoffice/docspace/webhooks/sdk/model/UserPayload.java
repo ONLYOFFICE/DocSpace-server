@@ -1,8 +1,8 @@
 /*
  * ONLYOFFICE DocSpace Webhooks
- * Wire contract for OUTBOUND DocSpace webhook deliveries.  This is a hand-maintained document. It is NOT the REST API spec and shares no schemas with it: webhook payloads are the internal domain entities (UserInfo, GroupInfo, File<T>, Folder<T>), not the controller DTOs.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+ * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto). They began as copies of the matching REST DTOs and are free to diverge from them.  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
  *
- * The version of the OpenAPI document: 0.1.0
+ * The version of the OpenAPI document: 1.0.0
  * 
  *
  * NOTE: This class is auto generated by OpenAPI Generator (https://openapi-generator.tech).
@@ -19,7 +19,11 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import com.onlyoffice.docspace.webhooks.sdk.model.ContactPayload;
+import com.onlyoffice.docspace.webhooks.sdk.model.GroupSummaryPayload;
+import com.onlyoffice.docspace.webhooks.sdk.model.UserSummaryPayload;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,7 +55,7 @@ import java.util.Set;
 import com.onlyoffice.docspace.webhooks.sdk.JSON;
 
 /**
- * ASC.Core.Common/Core/UserInfo.cs -- the domain entity, verbatim. It carries NO [JsonIgnore] at all, so every public member below reaches the wire. sid / ssoNameId / ssoSessionId / ldapQouta are null on portals without LDAP or SSO and therefore invisible in most test captures; they DO appear on LDAP/SSO tenants, and are flagged REVIEW below. 
+ * ASC.Api.Core/Webhook/Payloads/UserWebhookDto.cs. A copy of the REST EmployeeFullDto, owned by the webhook contract and free to diverge from it.  Not carried, deliberately: sid / ssoNameId / ssoSessionId (LDAP and SAML identifiers, and a SAML SESSION id, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim, and &#x60;shared&#x60;. &#x60;contacts&#x60; appears once, as a typed list, rather than twice in two shapes. 
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.25.0")
 public class UserPayload {
@@ -59,6 +63,11 @@ public class UserPayload {
   @SerializedName(SERIALIZED_NAME_ID)
   @javax.annotation.Nullable
   private UUID id;
+
+  public static final String SERIALIZED_NAME_DISPLAY_NAME = "displayName";
+  @SerializedName(SERIALIZED_NAME_DISPLAY_NAME)
+  @javax.annotation.Nullable
+  private String displayName;
 
   public static final String SERIALIZED_NAME_FIRST_NAME = "firstName";
   @SerializedName(SERIALIZED_NAME_FIRST_NAME)
@@ -80,15 +89,10 @@ public class UserPayload {
   @javax.annotation.Nullable
   private String email;
 
-  public static final String SERIALIZED_NAME_BIRTH_DATE = "birthDate";
-  @SerializedName(SERIALIZED_NAME_BIRTH_DATE)
+  public static final String SERIALIZED_NAME_CONTACTS = "contacts";
+  @SerializedName(SERIALIZED_NAME_CONTACTS)
   @javax.annotation.Nullable
-  private OffsetDateTime birthDate;
-
-  public static final String SERIALIZED_NAME_SEX = "sex";
-  @SerializedName(SERIALIZED_NAME_SEX)
-  @javax.annotation.Nullable
-  private Boolean sex;
+  private List<ContactPayload> contacts = new ArrayList<>();
 
   public static final String SERIALIZED_NAME_STATUS = "status";
   @SerializedName(SERIALIZED_NAME_STATUS)
@@ -100,20 +104,20 @@ public class UserPayload {
   @javax.annotation.Nullable
   private Integer activationStatus;
 
-  public static final String SERIALIZED_NAME_TERMINATED_DATE = "terminatedDate";
-  @SerializedName(SERIALIZED_NAME_TERMINATED_DATE)
+  public static final String SERIALIZED_NAME_TERMINATED = "terminated";
+  @SerializedName(SERIALIZED_NAME_TERMINATED)
   @javax.annotation.Nullable
-  private OffsetDateTime terminatedDate;
+  private OffsetDateTime terminated;
 
-  public static final String SERIALIZED_NAME_TITLE = "title";
-  @SerializedName(SERIALIZED_NAME_TITLE)
+  public static final String SERIALIZED_NAME_DEPARTMENT = "department";
+  @SerializedName(SERIALIZED_NAME_DEPARTMENT)
   @javax.annotation.Nullable
-  private String title;
+  private String department;
 
-  public static final String SERIALIZED_NAME_WORK_FROM_DATE = "workFromDate";
-  @SerializedName(SERIALIZED_NAME_WORK_FROM_DATE)
+  public static final String SERIALIZED_NAME_GROUPS = "groups";
+  @SerializedName(SERIALIZED_NAME_GROUPS)
   @javax.annotation.Nullable
-  private OffsetDateTime workFromDate;
+  private List<GroupSummaryPayload> groups = new ArrayList<>();
 
   public static final String SERIALIZED_NAME_LOCATION = "location";
   @SerializedName(SERIALIZED_NAME_LOCATION)
@@ -125,30 +129,45 @@ public class UserPayload {
   @javax.annotation.Nullable
   private String notes;
 
-  public static final String SERIALIZED_NAME_CONTACTS = "contacts";
-  @SerializedName(SERIALIZED_NAME_CONTACTS)
+  public static final String SERIALIZED_NAME_IS_ADMIN = "isAdmin";
+  @SerializedName(SERIALIZED_NAME_IS_ADMIN)
   @javax.annotation.Nullable
-  private String contacts;
+  private Boolean isAdmin;
 
-  public static final String SERIALIZED_NAME_CONTACTS_LIST = "contactsList";
-  @SerializedName(SERIALIZED_NAME_CONTACTS_LIST)
+  public static final String SERIALIZED_NAME_IS_ROOM_ADMIN = "isRoomAdmin";
+  @SerializedName(SERIALIZED_NAME_IS_ROOM_ADMIN)
   @javax.annotation.Nullable
-  private List<String> contactsList = new ArrayList<>();
+  private Boolean isRoomAdmin;
 
-  public static final String SERIALIZED_NAME_REMOVED = "removed";
-  @SerializedName(SERIALIZED_NAME_REMOVED)
+  public static final String SERIALIZED_NAME_IS_OWNER = "isOwner";
+  @SerializedName(SERIALIZED_NAME_IS_OWNER)
   @javax.annotation.Nullable
-  private Boolean removed;
+  private Boolean isOwner;
 
-  public static final String SERIALIZED_NAME_LAST_MODIFIED = "lastModified";
-  @SerializedName(SERIALIZED_NAME_LAST_MODIFIED)
+  public static final String SERIALIZED_NAME_IS_VISITOR = "isVisitor";
+  @SerializedName(SERIALIZED_NAME_IS_VISITOR)
   @javax.annotation.Nullable
-  private OffsetDateTime lastModified;
+  private Boolean isVisitor;
 
-  public static final String SERIALIZED_NAME_TENANT_ID = "tenantId";
-  @SerializedName(SERIALIZED_NAME_TENANT_ID)
+  public static final String SERIALIZED_NAME_IS_COLLABORATOR = "isCollaborator";
+  @SerializedName(SERIALIZED_NAME_IS_COLLABORATOR)
   @javax.annotation.Nullable
-  private Integer tenantId;
+  private Boolean isCollaborator;
+
+  public static final String SERIALIZED_NAME_IS_L_D_A_P = "isLDAP";
+  @SerializedName(SERIALIZED_NAME_IS_L_D_A_P)
+  @javax.annotation.Nullable
+  private Boolean isLDAP;
+
+  public static final String SERIALIZED_NAME_IS_S_S_O = "isSSO";
+  @SerializedName(SERIALIZED_NAME_IS_S_S_O)
+  @javax.annotation.Nullable
+  private Boolean isSSO;
+
+  public static final String SERIALIZED_NAME_LIST_ADMIN_MODULES = "listAdminModules";
+  @SerializedName(SERIALIZED_NAME_LIST_ADMIN_MODULES)
+  @javax.annotation.Nullable
+  private List<String> listAdminModules = new ArrayList<>();
 
   public static final String SERIALIZED_NAME_CULTURE_NAME = "cultureName";
   @SerializedName(SERIALIZED_NAME_CULTURE_NAME)
@@ -165,61 +184,67 @@ public class UserPayload {
   @javax.annotation.Nullable
   private Integer mobilePhoneActivationStatus;
 
-  public static final String SERIALIZED_NAME_CREATE_DATE = "createDate";
-  @SerializedName(SERIALIZED_NAME_CREATE_DATE)
+  public static final String SERIALIZED_NAME_QUOTA_LIMIT = "quotaLimit";
+  @SerializedName(SERIALIZED_NAME_QUOTA_LIMIT)
   @javax.annotation.Nullable
-  private OffsetDateTime createDate;
+  private Long quotaLimit;
+
+  public static final String SERIALIZED_NAME_USED_SPACE = "usedSpace";
+  @SerializedName(SERIALIZED_NAME_USED_SPACE)
+  @javax.annotation.Nullable
+  private BigDecimal usedSpace;
+
+  public static final String SERIALIZED_NAME_IS_CUSTOM_QUOTA = "isCustomQuota";
+  @SerializedName(SERIALIZED_NAME_IS_CUSTOM_QUOTA)
+  @javax.annotation.Nullable
+  private Boolean isCustomQuota;
 
   public static final String SERIALIZED_NAME_CREATED_BY = "createdBy";
   @SerializedName(SERIALIZED_NAME_CREATED_BY)
   @javax.annotation.Nullable
-  private UUID createdBy;
+  private UserSummaryPayload createdBy;
 
-  public static final String SERIALIZED_NAME_SPAM = "spam";
-  @SerializedName(SERIALIZED_NAME_SPAM)
+  public static final String SERIALIZED_NAME_REGISTRATION_DATE = "registrationDate";
+  @SerializedName(SERIALIZED_NAME_REGISTRATION_DATE)
   @javax.annotation.Nullable
-  private Boolean spam;
+  private OffsetDateTime registrationDate;
 
-  public static final String SERIALIZED_NAME_SID = "sid";
-  @SerializedName(SERIALIZED_NAME_SID)
+  public static final String SERIALIZED_NAME_HAS_AVATAR = "hasAvatar";
+  @SerializedName(SERIALIZED_NAME_HAS_AVATAR)
   @javax.annotation.Nullable
-  private String sid;
+  private Boolean hasAvatar;
 
-  public static final String SERIALIZED_NAME_LDAP_QOUTA = "ldapQouta";
-  @SerializedName(SERIALIZED_NAME_LDAP_QOUTA)
+  public static final String SERIALIZED_NAME_AVATAR = "avatar";
+  @SerializedName(SERIALIZED_NAME_AVATAR)
   @javax.annotation.Nullable
-  private Long ldapQouta;
+  private String avatar;
 
-  public static final String SERIALIZED_NAME_SSO_NAME_ID = "ssoNameId";
-  @SerializedName(SERIALIZED_NAME_SSO_NAME_ID)
+  public static final String SERIALIZED_NAME_AVATAR_ORIGINAL = "avatarOriginal";
+  @SerializedName(SERIALIZED_NAME_AVATAR_ORIGINAL)
   @javax.annotation.Nullable
-  private String ssoNameId;
+  private String avatarOriginal;
 
-  public static final String SERIALIZED_NAME_SSO_SESSION_ID = "ssoSessionId";
-  @SerializedName(SERIALIZED_NAME_SSO_SESSION_ID)
+  public static final String SERIALIZED_NAME_AVATAR_MAX = "avatarMax";
+  @SerializedName(SERIALIZED_NAME_AVATAR_MAX)
   @javax.annotation.Nullable
-  private String ssoSessionId;
+  private String avatarMax;
 
-  public static final String SERIALIZED_NAME_IS_ACTIVE = "isActive";
-  @SerializedName(SERIALIZED_NAME_IS_ACTIVE)
+  public static final String SERIALIZED_NAME_AVATAR_MEDIUM = "avatarMedium";
+  @SerializedName(SERIALIZED_NAME_AVATAR_MEDIUM)
   @javax.annotation.Nullable
-  private Boolean isActive;
+  private String avatarMedium;
 
-  public static final String SERIALIZED_NAME_CHECK_ACTIVATION = "checkActivation";
-  @SerializedName(SERIALIZED_NAME_CHECK_ACTIVATION)
+  public static final String SERIALIZED_NAME_AVATAR_SMALL = "avatarSmall";
+  @SerializedName(SERIALIZED_NAME_AVATAR_SMALL)
   @javax.annotation.Nullable
-  private Boolean checkActivation;
+  private String avatarSmall;
+
+  public static final String SERIALIZED_NAME_PROFILE_URL = "profileUrl";
+  @SerializedName(SERIALIZED_NAME_PROFILE_URL)
+  @javax.annotation.Nullable
+  private String profileUrl;
 
   public UserPayload() {
-  }
-
-  public UserPayload(
-     Boolean isActive, 
-     Boolean checkActivation
-  ) {
-    this();
-    this.isActive = isActive;
-    this.checkActivation = checkActivation;
   }
 
   public UserPayload id(@javax.annotation.Nullable UUID id) {
@@ -238,6 +263,25 @@ public class UserPayload {
 
   public void setId(@javax.annotation.Nullable UUID id) {
     this.id = id;
+  }
+
+
+  public UserPayload displayName(@javax.annotation.Nullable String displayName) {
+    this.displayName = displayName;
+    return this;
+  }
+
+  /**
+   * Get displayName
+   * @return displayName
+   */
+  @javax.annotation.Nullable
+  public String getDisplayName() {
+    return displayName;
+  }
+
+  public void setDisplayName(@javax.annotation.Nullable String displayName) {
+    this.displayName = displayName;
   }
 
 
@@ -317,41 +361,30 @@ public class UserPayload {
   }
 
 
-  public UserPayload birthDate(@javax.annotation.Nullable OffsetDateTime birthDate) {
-    this.birthDate = birthDate;
+  public UserPayload contacts(@javax.annotation.Nullable List<ContactPayload> contacts) {
+    this.contacts = contacts;
+    return this;
+  }
+
+  public UserPayload addContactsItem(ContactPayload contactsItem) {
+    if (this.contacts == null) {
+      this.contacts = new ArrayList<>();
+    }
+    this.contacts.add(contactsItem);
     return this;
   }
 
   /**
-   * Get birthDate
-   * @return birthDate
+   * Get contacts
+   * @return contacts
    */
   @javax.annotation.Nullable
-  public OffsetDateTime getBirthDate() {
-    return birthDate;
+  public List<ContactPayload> getContacts() {
+    return contacts;
   }
 
-  public void setBirthDate(@javax.annotation.Nullable OffsetDateTime birthDate) {
-    this.birthDate = birthDate;
-  }
-
-
-  public UserPayload sex(@javax.annotation.Nullable Boolean sex) {
-    this.sex = sex;
-    return this;
-  }
-
-  /**
-   * Get sex
-   * @return sex
-   */
-  @javax.annotation.Nullable
-  public Boolean getSex() {
-    return sex;
-  }
-
-  public void setSex(@javax.annotation.Nullable Boolean sex) {
-    this.sex = sex;
+  public void setContacts(@javax.annotation.Nullable List<ContactPayload> contacts) {
+    this.contacts = contacts;
   }
 
 
@@ -380,7 +413,7 @@ public class UserPayload {
   }
 
   /**
-   * enum EmployeeActivationStatus (flags)
+   * enum EmployeeActivationStatus (flags), AutoGenerated masked off
    * @return activationStatus
    */
   @javax.annotation.Nullable
@@ -393,60 +426,68 @@ public class UserPayload {
   }
 
 
-  public UserPayload terminatedDate(@javax.annotation.Nullable OffsetDateTime terminatedDate) {
-    this.terminatedDate = terminatedDate;
+  public UserPayload terminated(@javax.annotation.Nullable OffsetDateTime terminated) {
+    this.terminated = terminated;
     return this;
   }
 
   /**
-   * Get terminatedDate
-   * @return terminatedDate
+   * Get terminated
+   * @return terminated
    */
   @javax.annotation.Nullable
-  public OffsetDateTime getTerminatedDate() {
-    return terminatedDate;
+  public OffsetDateTime getTerminated() {
+    return terminated;
   }
 
-  public void setTerminatedDate(@javax.annotation.Nullable OffsetDateTime terminatedDate) {
-    this.terminatedDate = terminatedDate;
+  public void setTerminated(@javax.annotation.Nullable OffsetDateTime terminated) {
+    this.terminated = terminated;
   }
 
 
-  public UserPayload title(@javax.annotation.Nullable String title) {
-    this.title = title;
+  public UserPayload department(@javax.annotation.Nullable String department) {
+    this.department = department;
     return this;
   }
 
   /**
-   * Get title
-   * @return title
+   * Comma-separated group names, HTML-encoded.
+   * @return department
    */
   @javax.annotation.Nullable
-  public String getTitle() {
-    return title;
+  public String getDepartment() {
+    return department;
   }
 
-  public void setTitle(@javax.annotation.Nullable String title) {
-    this.title = title;
+  public void setDepartment(@javax.annotation.Nullable String department) {
+    this.department = department;
   }
 
 
-  public UserPayload workFromDate(@javax.annotation.Nullable OffsetDateTime workFromDate) {
-    this.workFromDate = workFromDate;
+  public UserPayload groups(@javax.annotation.Nullable List<GroupSummaryPayload> groups) {
+    this.groups = groups;
+    return this;
+  }
+
+  public UserPayload addGroupsItem(GroupSummaryPayload groupsItem) {
+    if (this.groups == null) {
+      this.groups = new ArrayList<>();
+    }
+    this.groups.add(groupsItem);
     return this;
   }
 
   /**
-   * Get workFromDate
-   * @return workFromDate
+   * Get groups
+   * @return groups
    */
   @javax.annotation.Nullable
-  public OffsetDateTime getWorkFromDate() {
-    return workFromDate;
+  public List<GroupSummaryPayload> getGroups() {
+    return groups;
   }
 
-  public void setWorkFromDate(@javax.annotation.Nullable OffsetDateTime workFromDate) {
-    this.workFromDate = workFromDate;
+  public void setGroups(@javax.annotation.Nullable List<GroupSummaryPayload> groups) {
+    this.groups = groups;
   }
 
 
@@ -488,106 +529,163 @@ public class UserPayload {
   }
 
 
-  public UserPayload contacts(@javax.annotation.Nullable String contacts) {
-    this.contacts = contacts;
+  public UserPayload isAdmin(@javax.annotation.Nullable Boolean isAdmin) {
+    this.isAdmin = isAdmin;
     return this;
   }
 
   /**
-   * Flattened form of contactsList. BOTH are emitted -- the same data twice. 
-   * @return contacts
+   * Get isAdmin
+   * @return isAdmin
    */
   @javax.annotation.Nullable
-  public String getContacts() {
-    return contacts;
+  public Boolean getIsAdmin() {
+    return isAdmin;
   }
 
-  public void setContacts(@javax.annotation.Nullable String contacts) {
-    this.contacts = contacts;
+  public void setIsAdmin(@javax.annotation.Nullable Boolean isAdmin) {
+    this.isAdmin = isAdmin;
   }
 
 
-  public UserPayload contactsList(@javax.annotation.Nullable List<String> contactsList) {
-    this.contactsList = contactsList;
+  public UserPayload isRoomAdmin(@javax.annotation.Nullable Boolean isRoomAdmin) {
+    this.isRoomAdmin = isRoomAdmin;
     return this;
   }
 
-  public UserPayload addContactsListItem(String contactsListItem) {
-    if (this.contactsList == null) {
-      this.contactsList = new ArrayList<>();
+  /**
+   * Get isRoomAdmin
+   * @return isRoomAdmin
+   */
+  @javax.annotation.Nullable
+  public Boolean getIsRoomAdmin() {
+    return isRoomAdmin;
+  }
+
+  public void setIsRoomAdmin(@javax.annotation.Nullable Boolean isRoomAdmin) {
+    this.isRoomAdmin = isRoomAdmin;
+  }
+
+
+  public UserPayload isOwner(@javax.annotation.Nullable Boolean isOwner) {
+    this.isOwner = isOwner;
+    return this;
+  }
+
+  /**
+   * Get isOwner
+   * @return isOwner
+   */
+  @javax.annotation.Nullable
+  public Boolean getIsOwner() {
+    return isOwner;
+  }
+
+  public void setIsOwner(@javax.annotation.Nullable Boolean isOwner) {
+    this.isOwner = isOwner;
+  }
+
+
+  public UserPayload isVisitor(@javax.annotation.Nullable Boolean isVisitor) {
+    this.isVisitor = isVisitor;
+    return this;
+  }
+
+  /**
+   * Get isVisitor
+   * @return isVisitor
+   */
+  @javax.annotation.Nullable
+  public Boolean getIsVisitor() {
+    return isVisitor;
+  }
+
+  public void setIsVisitor(@javax.annotation.Nullable Boolean isVisitor) {
+    this.isVisitor = isVisitor;
+  }
+
+
+  public UserPayload isCollaborator(@javax.annotation.Nullable Boolean isCollaborator) {
+    this.isCollaborator = isCollaborator;
+    return this;
+  }
+
+  /**
+   * Get isCollaborator
+   * @return isCollaborator
+   */
+  @javax.annotation.Nullable
+  public Boolean getIsCollaborator() {
+    return isCollaborator;
+  }
+
+  public void setIsCollaborator(@javax.annotation.Nullable Boolean isCollaborator) {
+    this.isCollaborator = isCollaborator;
+  }
+
+
+  public UserPayload isLDAP(@javax.annotation.Nullable Boolean isLDAP) {
+    this.isLDAP = isLDAP;
+    return this;
+  }
+
+  /**
+   * Get isLDAP
+   * @return isLDAP
+   */
+  @javax.annotation.Nullable
+  public Boolean getIsLDAP() {
+    return isLDAP;
+  }
+
+  public void setIsLDAP(@javax.annotation.Nullable Boolean isLDAP) {
+    this.isLDAP = isLDAP;
+  }
+
+
+  public UserPayload isSSO(@javax.annotation.Nullable Boolean isSSO) {
+    this.isSSO = isSSO;
+    return this;
+  }
+
+  /**
+   * Get isSSO
+   * @return isSSO
+   */
+  @javax.annotation.Nullable
+  public Boolean getIsSSO() {
+    return isSSO;
+  }
+
+  public void setIsSSO(@javax.annotation.Nullable Boolean isSSO) {
+    this.isSSO = isSSO;
+  }
+
+
+  public UserPayload listAdminModules(@javax.annotation.Nullable List<String> listAdminModules) {
+    this.listAdminModules = listAdminModules;
+    return this;
+  }
+
+  public UserPayload addListAdminModulesItem(String listAdminModulesItem) {
+    if (this.listAdminModules == null) {
+      this.listAdminModules = new ArrayList<>();
     }
-    this.contactsList.add(contactsListItem);
+    this.listAdminModules.add(listAdminModulesItem);
     return this;
   }
 
   /**
-   * Get contactsList
-   * @return contactsList
+   * Get listAdminModules
+   * @return listAdminModules
    */
   @javax.annotation.Nullable
-  public List<String> getContactsList() {
-    return contactsList;
+  public List<String> getListAdminModules() {
+    return listAdminModules;
   }
 
-  public void setContactsList(@javax.annotation.Nullable List<String> contactsList) {
-    this.contactsList = contactsList;
-  }
-
-
-  public UserPayload removed(@javax.annotation.Nullable Boolean removed) {
-    this.removed = removed;
-    return this;
-  }
-
-  /**
-   * Get removed
-   * @return removed
-   */
-  @javax.annotation.Nullable
-  public Boolean getRemoved() {
-    return removed;
-  }
-
-  public void setRemoved(@javax.annotation.Nullable Boolean removed) {
-    this.removed = removed;
-  }
-
-
-  public UserPayload lastModified(@javax.annotation.Nullable OffsetDateTime lastModified) {
-    this.lastModified = lastModified;
-    return this;
-  }
-
-  /**
-   * Get lastModified
-   * @return lastModified
-   */
-  @javax.annotation.Nullable
-  public OffsetDateTime getLastModified() {
-    return lastModified;
-  }
-
-  public void setLastModified(@javax.annotation.Nullable OffsetDateTime lastModified) {
-    this.lastModified = lastModified;
-  }
-
-
-  public UserPayload tenantId(@javax.annotation.Nullable Integer tenantId) {
-    this.tenantId = tenantId;
-    return this;
-  }
-
-  /**
-   * Get tenantId
-   * @return tenantId
-   */
-  @javax.annotation.Nullable
-  public Integer getTenantId() {
-    return tenantId;
-  }
-
-  public void setTenantId(@javax.annotation.Nullable Integer tenantId) {
-    this.tenantId = tenantId;
+  public void setListAdminModules(@javax.annotation.Nullable List<String> listAdminModules) {
+    this.listAdminModules = listAdminModules;
   }
 
 
@@ -648,26 +746,64 @@ public class UserPayload {
   }
 
 
-  public UserPayload createDate(@javax.annotation.Nullable OffsetDateTime createDate) {
-    this.createDate = createDate;
+  public UserPayload quotaLimit(@javax.annotation.Nullable Long quotaLimit) {
+    this.quotaLimit = quotaLimit;
     return this;
   }
 
   /**
-   * Get createDate
-   * @return createDate
+   * Get quotaLimit
+   * @return quotaLimit
    */
   @javax.annotation.Nullable
-  public OffsetDateTime getCreateDate() {
-    return createDate;
+  public Long getQuotaLimit() {
+    return quotaLimit;
   }
 
-  public void setCreateDate(@javax.annotation.Nullable OffsetDateTime createDate) {
-    this.createDate = createDate;
+  public void setQuotaLimit(@javax.annotation.Nullable Long quotaLimit) {
+    this.quotaLimit = quotaLimit;
   }
 
 
-  public UserPayload createdBy(@javax.annotation.Nullable UUID createdBy) {
+  public UserPayload usedSpace(@javax.annotation.Nullable BigDecimal usedSpace) {
+    this.usedSpace = usedSpace;
+    return this;
+  }
+
+  /**
+   * Get usedSpace
+   * @return usedSpace
+   */
+  @javax.annotation.Nullable
+  public BigDecimal getUsedSpace() {
+    return usedSpace;
+  }
+
+  public void setUsedSpace(@javax.annotation.Nullable BigDecimal usedSpace) {
+    this.usedSpace = usedSpace;
+  }
+
+
+  public UserPayload isCustomQuota(@javax.annotation.Nullable Boolean isCustomQuota) {
+    this.isCustomQuota = isCustomQuota;
+    return this;
+  }
+
+  /**
+   * Get isCustomQuota
+   * @return isCustomQuota
+   */
+  @javax.annotation.Nullable
+  public Boolean getIsCustomQuota() {
+    return isCustomQuota;
+  }
+
+  public void setIsCustomQuota(@javax.annotation.Nullable Boolean isCustomQuota) {
+    this.isCustomQuota = isCustomQuota;
+  }
+
+
+  public UserPayload createdBy(@javax.annotation.Nullable UserSummaryPayload createdBy) {
     this.createdBy = createdBy;
     return this;
   }
@@ -677,130 +813,165 @@ public class UserPayload {
    * @return createdBy
    */
   @javax.annotation.Nullable
-  public UUID getCreatedBy() {
+  public UserSummaryPayload getCreatedBy() {
     return createdBy;
   }
 
-  public void setCreatedBy(@javax.annotation.Nullable UUID createdBy) {
+  public void setCreatedBy(@javax.annotation.Nullable UserSummaryPayload createdBy) {
     this.createdBy = createdBy;
   }
 
 
-  public UserPayload spam(@javax.annotation.Nullable Boolean spam) {
-    this.spam = spam;
+  public UserPayload registrationDate(@javax.annotation.Nullable OffsetDateTime registrationDate) {
+    this.registrationDate = registrationDate;
     return this;
   }
 
   /**
-   * Get spam
-   * @return spam
+   * Get registrationDate
+   * @return registrationDate
    */
   @javax.annotation.Nullable
-  public Boolean getSpam() {
-    return spam;
+  public OffsetDateTime getRegistrationDate() {
+    return registrationDate;
   }
 
-  public void setSpam(@javax.annotation.Nullable Boolean spam) {
-    this.spam = spam;
+  public void setRegistrationDate(@javax.annotation.Nullable OffsetDateTime registrationDate) {
+    this.registrationDate = registrationDate;
   }
 
 
-  public UserPayload sid(@javax.annotation.Nullable String sid) {
-    this.sid = sid;
+  public UserPayload hasAvatar(@javax.annotation.Nullable Boolean hasAvatar) {
+    this.hasAvatar = hasAvatar;
     return this;
   }
 
   /**
-   * LDAP identifier. REVIEW.
-   * @return sid
+   * Get hasAvatar
+   * @return hasAvatar
    */
   @javax.annotation.Nullable
-  public String getSid() {
-    return sid;
+  public Boolean getHasAvatar() {
+    return hasAvatar;
   }
 
-  public void setSid(@javax.annotation.Nullable String sid) {
-    this.sid = sid;
+  public void setHasAvatar(@javax.annotation.Nullable Boolean hasAvatar) {
+    this.hasAvatar = hasAvatar;
   }
 
 
-  public UserPayload ldapQouta(@javax.annotation.Nullable Long ldapQouta) {
-    this.ldapQouta = ldapQouta;
+  public UserPayload avatar(@javax.annotation.Nullable String avatar) {
+    this.avatar = avatar;
     return this;
   }
 
   /**
-   * sic -- misspelled in the domain type, and misspelled on the wire. LDAP quota. REVIEW. 
-   * @return ldapQouta
+   * Get avatar
+   * @return avatar
    */
   @javax.annotation.Nullable
-  public Long getLdapQouta() {
-    return ldapQouta;
+  public String getAvatar() {
+    return avatar;
   }
 
-  public void setLdapQouta(@javax.annotation.Nullable Long ldapQouta) {
-    this.ldapQouta = ldapQouta;
+  public void setAvatar(@javax.annotation.Nullable String avatar) {
+    this.avatar = avatar;
   }
 
 
-  public UserPayload ssoNameId(@javax.annotation.Nullable String ssoNameId) {
-    this.ssoNameId = ssoNameId;
+  public UserPayload avatarOriginal(@javax.annotation.Nullable String avatarOriginal) {
+    this.avatarOriginal = avatarOriginal;
     return this;
   }
 
   /**
-   * SAML identifier. REVIEW.
-   * @return ssoNameId
+   * Get avatarOriginal
+   * @return avatarOriginal
    */
   @javax.annotation.Nullable
-  public String getSsoNameId() {
-    return ssoNameId;
+  public String getAvatarOriginal() {
+    return avatarOriginal;
   }
 
-  public void setSsoNameId(@javax.annotation.Nullable String ssoNameId) {
-    this.ssoNameId = ssoNameId;
+  public void setAvatarOriginal(@javax.annotation.Nullable String avatarOriginal) {
+    this.avatarOriginal = avatarOriginal;
   }
 
 
-  public UserPayload ssoSessionId(@javax.annotation.Nullable String ssoSessionId) {
-    this.ssoSessionId = ssoSessionId;
+  public UserPayload avatarMax(@javax.annotation.Nullable String avatarMax) {
+    this.avatarMax = avatarMax;
     return this;
   }
 
   /**
-   * SAML SESSION identifier. REVIEW -- should almost certainly not be on the wire. 
-   * @return ssoSessionId
+   * Get avatarMax
+   * @return avatarMax
    */
   @javax.annotation.Nullable
-  public String getSsoSessionId() {
-    return ssoSessionId;
+  public String getAvatarMax() {
+    return avatarMax;
   }
 
-  public void setSsoSessionId(@javax.annotation.Nullable String ssoSessionId) {
-    this.ssoSessionId = ssoSessionId;
+  public void setAvatarMax(@javax.annotation.Nullable String avatarMax) {
+    this.avatarMax = avatarMax;
   }
 
+
+  public UserPayload avatarMedium(@javax.annotation.Nullable String avatarMedium) {
+    this.avatarMedium = avatarMedium;
+    return this;
+  }
 
   /**
-   * computed getter
-   * @return isActive
+   * Get avatarMedium
+   * @return avatarMedium
    */
   @javax.annotation.Nullable
-  public Boolean getIsActive() {
-    return isActive;
+  public String getAvatarMedium() {
+    return avatarMedium;
+  }
+
+  public void setAvatarMedium(@javax.annotation.Nullable String avatarMedium) {
+    this.avatarMedium = avatarMedium;
   }
 
 
+  public UserPayload avatarSmall(@javax.annotation.Nullable String avatarSmall) {
+    this.avatarSmall = avatarSmall;
+    return this;
+  }
 
   /**
-   * computed getter
-   * @return checkActivation
+   * Get avatarSmall
+   * @return avatarSmall
    */
   @javax.annotation.Nullable
-  public Boolean getCheckActivation() {
-    return checkActivation;
+  public String getAvatarSmall() {
+    return avatarSmall;
   }
 
+  public void setAvatarSmall(@javax.annotation.Nullable String avatarSmall) {
+    this.avatarSmall = avatarSmall;
+  }
+
+
+  public UserPayload profileUrl(@javax.annotation.Nullable String profileUrl) {
+    this.profileUrl = profileUrl;
+    return this;
+  }
+
+  /**
+   * Get profileUrl
+   * @return profileUrl
+   */
+  @javax.annotation.Nullable
+  public String getProfileUrl() {
+    return profileUrl;
+  }
+
+  public void setProfileUrl(@javax.annotation.Nullable String profileUrl) {
+    this.profileUrl = profileUrl;
+  }
 
 
 
@@ -814,41 +985,47 @@ public class UserPayload {
     }
     UserPayload userPayload = (UserPayload) o;
     return Objects.equals(this.id, userPayload.id) &&
+        Objects.equals(this.displayName, userPayload.displayName) &&
         Objects.equals(this.firstName, userPayload.firstName) &&
         Objects.equals(this.lastName, userPayload.lastName) &&
         Objects.equals(this.userName, userPayload.userName) &&
         Objects.equals(this.email, userPayload.email) &&
-        Objects.equals(this.birthDate, userPayload.birthDate) &&
-        Objects.equals(this.sex, userPayload.sex) &&
+        Objects.equals(this.contacts, userPayload.contacts) &&
         Objects.equals(this.status, userPayload.status) &&
         Objects.equals(this.activationStatus, userPayload.activationStatus) &&
-        Objects.equals(this.terminatedDate, userPayload.terminatedDate) &&
-        Objects.equals(this.title, userPayload.title) &&
-        Objects.equals(this.workFromDate, userPayload.workFromDate) &&
+        Objects.equals(this.terminated, userPayload.terminated) &&
+        Objects.equals(this.department, userPayload.department) &&
+        Objects.equals(this.groups, userPayload.groups) &&
         Objects.equals(this.location, userPayload.location) &&
         Objects.equals(this.notes, userPayload.notes) &&
-        Objects.equals(this.contacts, userPayload.contacts) &&
-        Objects.equals(this.contactsList, userPayload.contactsList) &&
-        Objects.equals(this.removed, userPayload.removed) &&
-        Objects.equals(this.lastModified, userPayload.lastModified) &&
-        Objects.equals(this.tenantId, userPayload.tenantId) &&
+        Objects.equals(this.isAdmin, userPayload.isAdmin) &&
+        Objects.equals(this.isRoomAdmin, userPayload.isRoomAdmin) &&
+        Objects.equals(this.isOwner, userPayload.isOwner) &&
+        Objects.equals(this.isVisitor, userPayload.isVisitor) &&
+        Objects.equals(this.isCollaborator, userPayload.isCollaborator) &&
+        Objects.equals(this.isLDAP, userPayload.isLDAP) &&
+        Objects.equals(this.isSSO, userPayload.isSSO) &&
+        Objects.equals(this.listAdminModules, userPayload.listAdminModules) &&
         Objects.equals(this.cultureName, userPayload.cultureName) &&
         Objects.equals(this.mobilePhone, userPayload.mobilePhone) &&
         Objects.equals(this.mobilePhoneActivationStatus, userPayload.mobilePhoneActivationStatus) &&
-        Objects.equals(this.createDate, userPayload.createDate) &&
+        Objects.equals(this.quotaLimit, userPayload.quotaLimit) &&
+        Objects.equals(this.usedSpace, userPayload.usedSpace) &&
+        Objects.equals(this.isCustomQuota, userPayload.isCustomQuota) &&
         Objects.equals(this.createdBy, userPayload.createdBy) &&
-        Objects.equals(this.spam, userPayload.spam) &&
-        Objects.equals(this.sid, userPayload.sid) &&
-        Objects.equals(this.ldapQouta, userPayload.ldapQouta) &&
-        Objects.equals(this.ssoNameId, userPayload.ssoNameId) &&
-        Objects.equals(this.ssoSessionId, userPayload.ssoSessionId) &&
-        Objects.equals(this.isActive, userPayload.isActive) &&
-        Objects.equals(this.checkActivation, userPayload.checkActivation);
+        Objects.equals(this.registrationDate, userPayload.registrationDate) &&
+        Objects.equals(this.hasAvatar, userPayload.hasAvatar) &&
+        Objects.equals(this.avatar, userPayload.avatar) &&
+        Objects.equals(this.avatarOriginal, userPayload.avatarOriginal) &&
+        Objects.equals(this.avatarMax, userPayload.avatarMax) &&
+        Objects.equals(this.avatarMedium, userPayload.avatarMedium) &&
+        Objects.equals(this.avatarSmall, userPayload.avatarSmall) &&
+        Objects.equals(this.profileUrl, userPayload.profileUrl);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, firstName, lastName, userName, email, birthDate, sex, status, activationStatus, terminatedDate, title, workFromDate, location, notes, contacts, contactsList, removed, lastModified, tenantId, cultureName, mobilePhone, mobilePhoneActivationStatus, createDate, createdBy, spam, sid, ldapQouta, ssoNameId, ssoSessionId, isActive, checkActivation);
+    return Objects.hash(id, displayName, firstName, lastName, userName, email, contacts, status, activationStatus, terminated, department, groups, location, notes, isAdmin, isRoomAdmin, isOwner, isVisitor, isCollaborator, isLDAP, isSSO, listAdminModules, cultureName, mobilePhone, mobilePhoneActivationStatus, quotaLimit, usedSpace, isCustomQuota, createdBy, registrationDate, hasAvatar, avatar, avatarOriginal, avatarMax, avatarMedium, avatarSmall, profileUrl);
   }
 
   @Override
@@ -856,36 +1033,42 @@ public class UserPayload {
     StringBuilder sb = new StringBuilder();
     sb.append("class UserPayload {\n");
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
+    sb.append("    displayName: ").append(toIndentedString(displayName)).append("\n");
     sb.append("    firstName: ").append(toIndentedString(firstName)).append("\n");
     sb.append("    lastName: ").append(toIndentedString(lastName)).append("\n");
     sb.append("    userName: ").append(toIndentedString(userName)).append("\n");
     sb.append("    email: ").append(toIndentedString(email)).append("\n");
-    sb.append("    birthDate: ").append(toIndentedString(birthDate)).append("\n");
-    sb.append("    sex: ").append(toIndentedString(sex)).append("\n");
+    sb.append("    contacts: ").append(toIndentedString(contacts)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
     sb.append("    activationStatus: ").append(toIndentedString(activationStatus)).append("\n");
-    sb.append("    terminatedDate: ").append(toIndentedString(terminatedDate)).append("\n");
-    sb.append("    title: ").append(toIndentedString(title)).append("\n");
-    sb.append("    workFromDate: ").append(toIndentedString(workFromDate)).append("\n");
+    sb.append("    terminated: ").append(toIndentedString(terminated)).append("\n");
+    sb.append("    department: ").append(toIndentedString(department)).append("\n");
+    sb.append("    groups: ").append(toIndentedString(groups)).append("\n");
     sb.append("    location: ").append(toIndentedString(location)).append("\n");
     sb.append("    notes: ").append(toIndentedString(notes)).append("\n");
-    sb.append("    contacts: ").append(toIndentedString(contacts)).append("\n");
-    sb.append("    contactsList: ").append(toIndentedString(contactsList)).append("\n");
-    sb.append("    removed: ").append(toIndentedString(removed)).append("\n");
-    sb.append("    lastModified: ").append(toIndentedString(lastModified)).append("\n");
-    sb.append("    tenantId: ").append(toIndentedString(tenantId)).append("\n");
+    sb.append("    isAdmin: ").append(toIndentedString(isAdmin)).append("\n");
+    sb.append("    isRoomAdmin: ").append(toIndentedString(isRoomAdmin)).append("\n");
+    sb.append("    isOwner: ").append(toIndentedString(isOwner)).append("\n");
+    sb.append("    isVisitor: ").append(toIndentedString(isVisitor)).append("\n");
+    sb.append("    isCollaborator: ").append(toIndentedString(isCollaborator)).append("\n");
+    sb.append("    isLDAP: ").append(toIndentedString(isLDAP)).append("\n");
+    sb.append("    isSSO: ").append(toIndentedString(isSSO)).append("\n");
+    sb.append("    listAdminModules: ").append(toIndentedString(listAdminModules)).append("\n");
     sb.append("    cultureName: ").append(toIndentedString(cultureName)).append("\n");
     sb.append("    mobilePhone: ").append(toIndentedString(mobilePhone)).append("\n");
     sb.append("    mobilePhoneActivationStatus: ").append(toIndentedString(mobilePhoneActivationStatus)).append("\n");
-    sb.append("    createDate: ").append(toIndentedString(createDate)).append("\n");
+    sb.append("    quotaLimit: ").append(toIndentedString(quotaLimit)).append("\n");
+    sb.append("    usedSpace: ").append(toIndentedString(usedSpace)).append("\n");
+    sb.append("    isCustomQuota: ").append(toIndentedString(isCustomQuota)).append("\n");
     sb.append("    createdBy: ").append(toIndentedString(createdBy)).append("\n");
-    sb.append("    spam: ").append(toIndentedString(spam)).append("\n");
-    sb.append("    sid: ").append(toIndentedString(sid)).append("\n");
-    sb.append("    ldapQouta: ").append(toIndentedString(ldapQouta)).append("\n");
-    sb.append("    ssoNameId: ").append(toIndentedString(ssoNameId)).append("\n");
-    sb.append("    ssoSessionId: ").append(toIndentedString(ssoSessionId)).append("\n");
-    sb.append("    isActive: ").append(toIndentedString(isActive)).append("\n");
-    sb.append("    checkActivation: ").append(toIndentedString(checkActivation)).append("\n");
+    sb.append("    registrationDate: ").append(toIndentedString(registrationDate)).append("\n");
+    sb.append("    hasAvatar: ").append(toIndentedString(hasAvatar)).append("\n");
+    sb.append("    avatar: ").append(toIndentedString(avatar)).append("\n");
+    sb.append("    avatarOriginal: ").append(toIndentedString(avatarOriginal)).append("\n");
+    sb.append("    avatarMax: ").append(toIndentedString(avatarMax)).append("\n");
+    sb.append("    avatarMedium: ").append(toIndentedString(avatarMedium)).append("\n");
+    sb.append("    avatarSmall: ").append(toIndentedString(avatarSmall)).append("\n");
+    sb.append("    profileUrl: ").append(toIndentedString(profileUrl)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -904,7 +1087,7 @@ public class UserPayload {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "firstName", "lastName", "userName", "email", "birthDate", "sex", "status", "activationStatus", "terminatedDate", "title", "workFromDate", "location", "notes", "contacts", "contactsList", "removed", "lastModified", "tenantId", "cultureName", "mobilePhone", "mobilePhoneActivationStatus", "createDate", "createdBy", "spam", "sid", "ldapQouta", "ssoNameId", "ssoSessionId", "isActive", "checkActivation"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "displayName", "firstName", "lastName", "userName", "email", "contacts", "status", "activationStatus", "terminated", "department", "groups", "location", "notes", "isAdmin", "isRoomAdmin", "isOwner", "isVisitor", "isCollaborator", "isLDAP", "isSSO", "listAdminModules", "cultureName", "mobilePhone", "mobilePhoneActivationStatus", "quotaLimit", "usedSpace", "isCustomQuota", "createdBy", "registrationDate", "hasAvatar", "avatar", "avatarOriginal", "avatarMax", "avatarMedium", "avatarSmall", "profileUrl"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(0);
@@ -934,6 +1117,9 @@ public class UserPayload {
       if ((jsonObj.get("id") != null && !jsonObj.get("id").isJsonNull()) && !jsonObj.get("id").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `id` to be a primitive type in the JSON string but got `%s`", jsonObj.get("id").toString()));
       }
+      if ((jsonObj.get("displayName") != null && !jsonObj.get("displayName").isJsonNull()) && !jsonObj.get("displayName").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `displayName` to be a primitive type in the JSON string but got `%s`", jsonObj.get("displayName").toString()));
+      }
       if ((jsonObj.get("firstName") != null && !jsonObj.get("firstName").isJsonNull()) && !jsonObj.get("firstName").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `firstName` to be a primitive type in the JSON string but got `%s`", jsonObj.get("firstName").toString()));
       }
@@ -946,8 +1132,36 @@ public class UserPayload {
       if ((jsonObj.get("email") != null && !jsonObj.get("email").isJsonNull()) && !jsonObj.get("email").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `email` to be a primitive type in the JSON string but got `%s`", jsonObj.get("email").toString()));
       }
-      if ((jsonObj.get("title") != null && !jsonObj.get("title").isJsonNull()) && !jsonObj.get("title").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `title` to be a primitive type in the JSON string but got `%s`", jsonObj.get("title").toString()));
+      if (jsonObj.get("contacts") != null && !jsonObj.get("contacts").isJsonNull()) {
+        JsonArray jsonArraycontacts = jsonObj.getAsJsonArray("contacts");
+        if (jsonArraycontacts != null) {
+          // ensure the json data is an array
+          if (!jsonObj.get("contacts").isJsonArray()) {
+            throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `contacts` to be an array in the JSON string but got `%s`", jsonObj.get("contacts").toString()));
+          }
+
+          // validate the optional field `contacts` (array)
+          for (int i = 0; i < jsonArraycontacts.size(); i++) {
+            ContactPayload.validateJsonElement(jsonArraycontacts.get(i));
+          };
+        }
+      }
+      if ((jsonObj.get("department") != null && !jsonObj.get("department").isJsonNull()) && !jsonObj.get("department").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `department` to be a primitive type in the JSON string but got `%s`", jsonObj.get("department").toString()));
+      }
+      if (jsonObj.get("groups") != null && !jsonObj.get("groups").isJsonNull()) {
+        JsonArray jsonArraygroups = jsonObj.getAsJsonArray("groups");
+        if (jsonArraygroups != null) {
+          // ensure the json data is an array
+          if (!jsonObj.get("groups").isJsonArray()) {
+            throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `groups` to be an array in the JSON string but got `%s`", jsonObj.get("groups").toString()));
+          }
+
+          // validate the optional field `groups` (array)
+          for (int i = 0; i < jsonArraygroups.size(); i++) {
+            GroupSummaryPayload.validateJsonElement(jsonArraygroups.get(i));
+          };
+        }
       }
       if ((jsonObj.get("location") != null && !jsonObj.get("location").isJsonNull()) && !jsonObj.get("location").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `location` to be a primitive type in the JSON string but got `%s`", jsonObj.get("location").toString()));
@@ -955,12 +1169,9 @@ public class UserPayload {
       if ((jsonObj.get("notes") != null && !jsonObj.get("notes").isJsonNull()) && !jsonObj.get("notes").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `notes` to be a primitive type in the JSON string but got `%s`", jsonObj.get("notes").toString()));
       }
-      if ((jsonObj.get("contacts") != null && !jsonObj.get("contacts").isJsonNull()) && !jsonObj.get("contacts").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `contacts` to be a primitive type in the JSON string but got `%s`", jsonObj.get("contacts").toString()));
-      }
       // ensure the optional json data is an array if present
-      if (jsonObj.get("contactsList") != null && !jsonObj.get("contactsList").isJsonNull() && !jsonObj.get("contactsList").isJsonArray()) {
-        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `contactsList` to be an array in the JSON string but got `%s`", jsonObj.get("contactsList").toString()));
+      if (jsonObj.get("listAdminModules") != null && !jsonObj.get("listAdminModules").isJsonNull() && !jsonObj.get("listAdminModules").isJsonArray()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `listAdminModules` to be an array in the JSON string but got `%s`", jsonObj.get("listAdminModules").toString()));
       }
       if ((jsonObj.get("cultureName") != null && !jsonObj.get("cultureName").isJsonNull()) && !jsonObj.get("cultureName").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `cultureName` to be a primitive type in the JSON string but got `%s`", jsonObj.get("cultureName").toString()));
@@ -968,17 +1179,27 @@ public class UserPayload {
       if ((jsonObj.get("mobilePhone") != null && !jsonObj.get("mobilePhone").isJsonNull()) && !jsonObj.get("mobilePhone").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `mobilePhone` to be a primitive type in the JSON string but got `%s`", jsonObj.get("mobilePhone").toString()));
       }
-      if ((jsonObj.get("createdBy") != null && !jsonObj.get("createdBy").isJsonNull()) && !jsonObj.get("createdBy").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `createdBy` to be a primitive type in the JSON string but got `%s`", jsonObj.get("createdBy").toString()));
+      // validate the optional field `createdBy`
+      if (jsonObj.get("createdBy") != null && !jsonObj.get("createdBy").isJsonNull()) {
+        UserSummaryPayload.validateJsonElement(jsonObj.get("createdBy"));
       }
-      if ((jsonObj.get("sid") != null && !jsonObj.get("sid").isJsonNull()) && !jsonObj.get("sid").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `sid` to be a primitive type in the JSON string but got `%s`", jsonObj.get("sid").toString()));
+      if ((jsonObj.get("avatar") != null && !jsonObj.get("avatar").isJsonNull()) && !jsonObj.get("avatar").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `avatar` to be a primitive type in the JSON string but got `%s`", jsonObj.get("avatar").toString()));
       }
-      if ((jsonObj.get("ssoNameId") != null && !jsonObj.get("ssoNameId").isJsonNull()) && !jsonObj.get("ssoNameId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `ssoNameId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("ssoNameId").toString()));
+      if ((jsonObj.get("avatarOriginal") != null && !jsonObj.get("avatarOriginal").isJsonNull()) && !jsonObj.get("avatarOriginal").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `avatarOriginal` to be a primitive type in the JSON string but got `%s`", jsonObj.get("avatarOriginal").toString()));
       }
-      if ((jsonObj.get("ssoSessionId") != null && !jsonObj.get("ssoSessionId").isJsonNull()) && !jsonObj.get("ssoSessionId").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `ssoSessionId` to be a primitive type in the JSON string but got `%s`", jsonObj.get("ssoSessionId").toString()));
+      if ((jsonObj.get("avatarMax") != null && !jsonObj.get("avatarMax").isJsonNull()) && !jsonObj.get("avatarMax").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `avatarMax` to be a primitive type in the JSON string but got `%s`", jsonObj.get("avatarMax").toString()));
+      }
+      if ((jsonObj.get("avatarMedium") != null && !jsonObj.get("avatarMedium").isJsonNull()) && !jsonObj.get("avatarMedium").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `avatarMedium` to be a primitive type in the JSON string but got `%s`", jsonObj.get("avatarMedium").toString()));
+      }
+      if ((jsonObj.get("avatarSmall") != null && !jsonObj.get("avatarSmall").isJsonNull()) && !jsonObj.get("avatarSmall").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `avatarSmall` to be a primitive type in the JSON string but got `%s`", jsonObj.get("avatarSmall").toString()));
+      }
+      if ((jsonObj.get("profileUrl") != null && !jsonObj.get("profileUrl").isJsonNull()) && !jsonObj.get("profileUrl").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `profileUrl` to be a primitive type in the JSON string but got `%s`", jsonObj.get("profileUrl").toString()));
       }
   }
 

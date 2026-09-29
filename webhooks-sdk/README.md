@@ -4,10 +4,6 @@ Client-side libraries for **receiving** DocSpace webhooks: payload models for ev
 trigger, plus (in progress) a runtime that verifies the signature and narrows the
 payload to the right type.
 
-This is not the DocSpace REST API SDK. It shares no schemas with it — see
-*The payloads are domain entities* below, which is the single most important thing
-to understand before working here.
-
 ## Layout
 
 ```
@@ -181,43 +177,23 @@ models-only webhook generation has none of that, and is not a command the tool
 offers. If webhook SDKs ever need packaging and publishing, the right move is to add
 first-class commands to that tool — not to wire packaging into this script.
 
-## The payloads are domain entities
+## The payloads are webhook-owned DTOs
 
-DocSpace publishes webhooks with the **internal domain objects**, not the API DTOs:
+Each trigger carries a DTO that belongs to the webhook contract:
 
-| Trigger family | Payload | Serialized as |
+| Trigger family | Payload | Built from |
 |---|---|---|
-| `user.*` | `UserPayload` | `UserInfo` |
-| `group.*` | `GroupPayload` | `GroupInfo` |
-| `file.*`, `folder.*`, `room.*`, `agent.*`, `form.filled.out`, `form.stopped` | `FileEntryPayload` | `FileEntry<T>` |
-| `form.submit` | `FormSubmitPayload` | `SubmittedFormData<T>` |
+| `user.*` | `UserPayload` | `UserWebhookDto` |
+| `group.*` | `GroupPayload` | `GroupWebhookDto` |
+| `file.*`, `form.filled.out`, `form.stopped` | `FilePayload` | `FileWebhookDto<T>` |
+| `folder.*` | `FolderPayload` | `FolderWebhookDto<T>` |
+| `room.*`, `agent.*` | `RoomPayload` | `RoomWebhookDto<T>` |
+| `form.submit` | `FormSubmitPayload` | `FormSubmitWebhookDto<T>` |
 
-**There is one payload shape for files and folders alike, and it is the abstract
-base.** `WebhookManager` calls `PublishAsync<T1,T2>` with a static parameter type
-of `FileEntry<T>`, so `T1` binds to the base and System.Text.Json serializes by
-*declared* type. No `File<T>` or `Folder<T>` member — `pureTitle`, `version`,
-`contentLength`, `folderType`, `filesCount`, `isRoom` — ever reaches the wire.
-`fileEntryType` (**1 folder, 2 file**) is the only discriminator you get.
-
-They are easy to mistake for DTOs — `UserPayload` and `EmployeeFullDto` share 11
-field names — but they are not, and nothing maps between them. `UserController`
-hands the raw `UserInfo` to the webhook and the DTO to the HTTP response two lines
-apart.
-
-Consequences worth knowing before you write a receiver:
-
-- **`title` is always present, for files as well as folders.** `File<T>` hides
-  `Title` behind `[JsonIgnore]` and exposes `pureTitle` instead, but that
-  override is never reached, so `title` is what arrives and `pureTitle` never
-  does. (An earlier revision of this document claimed the opposite; a captured
-  production delivery settled it.)
-- **Nothing is required.** The server serializes with `WhenWritingDefault`, so every
-  null, `false` and `0` is omitted. Absence means "default", never "unset".
-- **`security` / `securityByUsers` are on every file and folder event** — internal
-  ACL maps. `securityByUsers` is initialised non-null, so it is always present, often
-  as `{}`.
-- **`contacts` and `contactsList` are the same data twice**, and `ldapQouta` is
-  misspelled in the domain type and therefore on the wire.
+The pairing above is declared in code — `[WebhookPayload(WebhookPayloadKind.File)]` sits on the
+`WebhookTrigger` field *and* on the DTO — so this table and the
+`x-docspace-trigger-payloads` block of the contract are both mirrors of the source,
+kept honest by `WebhookPayloadPairingTests`.
 
 ## Receiving: the parts a runtime has to get right
 
@@ -347,21 +323,15 @@ needs a one-off URL reservation or an elevated shell; the app prints the exact
 
 ## Known gaps
 
-- 11 enums (`FolderType`, `FileStatus`, `FileShare`, `EmployeeStatus`,
-  `FilesSecurityActions`, …) are typed `integer` with the C# enum named in the
-  description. Value tables not yet filled in.
-- 6 nested types are `additionalProperties: true` placeholders: `Tag`,
-  `FileShareRecord<T>`, `FormInfo<T>`, `WatermarkSettings`, `RoomDataLifetime`,
-  `ChatSettings`.
-- One captured `file.created` delivery has been checked against the contract, and
-  it corrected two errors (see above). No other trigger has been conformance
-  checked yet, and `user.*` especially deserves one: a capture from a clean dev
-  portal is *not* sufficient evidence, because `sid`, `ssoNameId`, `ssoSessionId`
-  and `ldapQouta` are null there and vanish from the JSON, but appear on LDAP/SSO
-  tenants.
-- Fields marked `REVIEW` in the contract — `ssoSessionId` above all — need a decision
-  before this is published as a public contract. Shipping an SDK blesses the current
-  shape.
+- The generator flattens `allOf`, so `FilePayload`, `FolderPayload` and
+  `RoomPayload` are standalone classes that repeat the `FileEntryPayload` fields
+  rather than deriving from it. `FileEntryPayload` is still emitted, but nothing
+  in the trigger map points at it — do not write a receiver that matches on it.
+- The room logo, watermark, lifetime, tags and chat settings are not on the wire,
+  and neither are file thumbnails or form-filling roles. Each needs per-request
+  work the publisher should not pay for; read them from the REST API. If a
+  receiver turns out to need one of them, adding it is a contract change, not a
+  serialization accident.
 - Runtimes cover **verification and parsing only**, by decision. Deliberately not
   included yet: replay/idempotency helpers and per-framework adapters. The
   constraints they would encode are documented above under *Receiving* — a
@@ -369,14 +339,6 @@ needs a one-off URL reservation or an elevated shell; the app prints the exact
 - Only TypeScript and C# have reusable runtimes in `src/`. The other samples
   carry their signature check inline; that logic wants lifting into a per
   language `src/` once the shape has settled.
-- The Ruby and Swift samples are unverified — see *Samples*. What was checked
-  statically: every model, property and method they call exists in the generated
-  code; Ruby's `EntryId.build` returns the scalar; Swift's `EntryId` is an enum
-  with associated values; both SDKs carry all 34 `FileEntryPayload` fields; and
-  neither references a supporting file that models-only output omits. What was
-  not checked: that either actually compiles and runs.
-- All nine SDKs were checked field-by-field against the contract, and all nine
-  carry the full 34 properties of `FileEntryPayload`.
 - Swift renames the reserved word `Type`, so `WebhookTargetInfo.type` is typed
   `ModelType`. The property name and wire key are unaffected.
 - The PHP generator renders the `EntryId` oneOf as a property-less class, so

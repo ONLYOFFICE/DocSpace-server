@@ -4,12 +4,16 @@
  * tools/gen-trigger-map.py. Do not edit; rerun ./generate.sh instead.
  */
 import {
-    FileEntryPayload,
-    FileEntryPayloadFromJSON,
+    FilePayload,
+    FilePayloadFromJSON,
+    FolderPayload,
+    FolderPayloadFromJSON,
     FormSubmitPayload,
     FormSubmitPayloadFromJSON,
     GroupPayload,
     GroupPayloadFromJSON,
+    RoomPayload,
+    RoomPayloadFromJSON,
     UserPayload,
     UserPayloadFromJSON,
 } from './models';
@@ -25,35 +29,35 @@ export interface TriggerPayloadMap {
     'group.created': GroupPayload;
     'group.updated': GroupPayload;
     'group.deleted': GroupPayload;
-    'file.created': FileEntryPayload;
-    'file.uploaded': FileEntryPayload;
-    'file.updated': FileEntryPayload;
-    'file.trashed': FileEntryPayload;
-    'file.deleted': FileEntryPayload;
-    'file.restored': FileEntryPayload;
-    'file.copied': FileEntryPayload;
-    'file.moved': FileEntryPayload;
-    'file.downloaded': FileEntryPayload;
-    'folder.created': FileEntryPayload;
-    'folder.updated': FileEntryPayload;
-    'folder.trashed': FileEntryPayload;
-    'folder.deleted': FileEntryPayload;
-    'folder.restored': FileEntryPayload;
-    'folder.copied': FileEntryPayload;
-    'folder.moved': FileEntryPayload;
-    'folder.downloaded': FileEntryPayload;
-    'room.created': FileEntryPayload;
-    'room.updated': FileEntryPayload;
-    'room.archived': FileEntryPayload;
-    'room.deleted': FileEntryPayload;
-    'room.restored': FileEntryPayload;
-    'room.copied': FileEntryPayload;
-    'agent.created': FileEntryPayload;
-    'agent.updated': FileEntryPayload;
-    'agent.deleted': FileEntryPayload;
+    'file.created': FilePayload;
+    'file.uploaded': FilePayload;
+    'file.updated': FilePayload;
+    'file.trashed': FilePayload;
+    'file.deleted': FilePayload;
+    'file.restored': FilePayload;
+    'file.copied': FilePayload;
+    'file.moved': FilePayload;
+    'file.downloaded': FilePayload;
+    'folder.created': FolderPayload;
+    'folder.updated': FolderPayload;
+    'folder.trashed': FolderPayload;
+    'folder.deleted': FolderPayload;
+    'folder.restored': FolderPayload;
+    'folder.copied': FolderPayload;
+    'folder.moved': FolderPayload;
+    'folder.downloaded': FolderPayload;
+    'room.created': RoomPayload;
+    'room.updated': RoomPayload;
+    'room.archived': RoomPayload;
+    'room.deleted': RoomPayload;
+    'room.restored': RoomPayload;
+    'room.copied': RoomPayload;
+    'agent.created': RoomPayload;
+    'agent.updated': RoomPayload;
+    'agent.deleted': RoomPayload;
     'form.submit': FormSubmitPayload;
-    'form.filled.out': FileEntryPayload;
-    'form.stopped': FileEntryPayload;
+    'form.filled.out': FilePayload;
+    'form.stopped': FilePayload;
     '*': unknown;
 }
 
@@ -74,35 +78,35 @@ export const PAYLOAD_DESERIALIZERS: {
     'group.created': GroupPayloadFromJSON,
     'group.updated': GroupPayloadFromJSON,
     'group.deleted': GroupPayloadFromJSON,
-    'file.created': FileEntryPayloadFromJSON,
-    'file.uploaded': FileEntryPayloadFromJSON,
-    'file.updated': FileEntryPayloadFromJSON,
-    'file.trashed': FileEntryPayloadFromJSON,
-    'file.deleted': FileEntryPayloadFromJSON,
-    'file.restored': FileEntryPayloadFromJSON,
-    'file.copied': FileEntryPayloadFromJSON,
-    'file.moved': FileEntryPayloadFromJSON,
-    'file.downloaded': FileEntryPayloadFromJSON,
-    'folder.created': FileEntryPayloadFromJSON,
-    'folder.updated': FileEntryPayloadFromJSON,
-    'folder.trashed': FileEntryPayloadFromJSON,
-    'folder.deleted': FileEntryPayloadFromJSON,
-    'folder.restored': FileEntryPayloadFromJSON,
-    'folder.copied': FileEntryPayloadFromJSON,
-    'folder.moved': FileEntryPayloadFromJSON,
-    'folder.downloaded': FileEntryPayloadFromJSON,
-    'room.created': FileEntryPayloadFromJSON,
-    'room.updated': FileEntryPayloadFromJSON,
-    'room.archived': FileEntryPayloadFromJSON,
-    'room.deleted': FileEntryPayloadFromJSON,
-    'room.restored': FileEntryPayloadFromJSON,
-    'room.copied': FileEntryPayloadFromJSON,
-    'agent.created': FileEntryPayloadFromJSON,
-    'agent.updated': FileEntryPayloadFromJSON,
-    'agent.deleted': FileEntryPayloadFromJSON,
+    'file.created': FilePayloadFromJSON,
+    'file.uploaded': FilePayloadFromJSON,
+    'file.updated': FilePayloadFromJSON,
+    'file.trashed': FilePayloadFromJSON,
+    'file.deleted': FilePayloadFromJSON,
+    'file.restored': FilePayloadFromJSON,
+    'file.copied': FilePayloadFromJSON,
+    'file.moved': FilePayloadFromJSON,
+    'file.downloaded': FilePayloadFromJSON,
+    'folder.created': FolderPayloadFromJSON,
+    'folder.updated': FolderPayloadFromJSON,
+    'folder.trashed': FolderPayloadFromJSON,
+    'folder.deleted': FolderPayloadFromJSON,
+    'folder.restored': FolderPayloadFromJSON,
+    'folder.copied': FolderPayloadFromJSON,
+    'folder.moved': FolderPayloadFromJSON,
+    'folder.downloaded': FolderPayloadFromJSON,
+    'room.created': RoomPayloadFromJSON,
+    'room.updated': RoomPayloadFromJSON,
+    'room.archived': RoomPayloadFromJSON,
+    'room.deleted': RoomPayloadFromJSON,
+    'room.restored': RoomPayloadFromJSON,
+    'room.copied': RoomPayloadFromJSON,
+    'agent.created': RoomPayloadFromJSON,
+    'agent.updated': RoomPayloadFromJSON,
+    'agent.deleted': RoomPayloadFromJSON,
     'form.submit': FormSubmitPayloadFromJSON,
-    'form.filled.out': FileEntryPayloadFromJSON,
-    'form.stopped': FileEntryPayloadFromJSON,
+    'form.filled.out': FilePayloadFromJSON,
+    'form.stopped': FilePayloadFromJSON,
     '*': identity,
 };
 

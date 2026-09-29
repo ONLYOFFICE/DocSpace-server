@@ -4,8 +4,8 @@
 
 | Name | Type | Description | Notes |
 | ---- | ---- | ----------- | ----- |
-| **original_form** | [**FileEntryPayload**](FileEntryPayload.md) |  | [optional] |
-| **submitted_form** | [**FileEntryPayload**](FileEntryPayload.md) |  | [optional] |
+| **original_form** | [**FilePayload**](FilePayload.md) |  | [optional] |
+| **submitted_form** | [**FilePayload**](FilePayload.md) |  | [optional] |
 
 ## Example
 

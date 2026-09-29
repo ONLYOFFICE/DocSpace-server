@@ -1,9 +1,9 @@
 /*
  * ONLYOFFICE DocSpace Webhooks
  *
- * Wire contract for OUTBOUND DocSpace webhook deliveries.  This is a hand-maintained document. It is NOT the REST API spec and shares no schemas with it: webhook payloads are the internal domain entities (UserInfo, GroupInfo, File<T>, Folder<T>), not the controller DTOs.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" - - it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely - - dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+ * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto). They began as copies of the matching REST DTOs and are free to diverge from them.  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" - - it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely - - dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
  *
- * The version of the OpenAPI document: 0.1.0
+ * The version of the OpenAPI document: 1.0.0
  * Generated by: https://github.com/openapitools/openapi-generator.git
  */
 
@@ -27,7 +27,7 @@ using OpenAPIDateConverter = DocSpace.Webhooks.SDK.Client.OpenAPIDateConverter;
 namespace DocSpace.Webhooks.SDK.Model
 {
     /// <summary>
-    /// ASC.Core.Common/Core/GroupInfo.cs. Note &#x60;ID&#x60; in C#; the camelCase policy lowercases the whole leading run, so it is \&quot;id\&quot; on the wire, while &#x60;CategoryID&#x60; becomes \&quot;categoryID\&quot;. 
+    /// ASC.Api.Core/Webhook/Payloads/GroupWebhookDto.cs. A copy of the REST GroupDto.  The member list is not carried - a group can hold thousands of users and each would be expanded into every group event. &#x60;membersCount&#x60; is the hint that the roster changed; read it from GET api/2.0/group/{id}. 
     /// </summary>
     [DataContract(Name = "GroupPayload")]
     public partial class GroupPayload : IValidatableObject
@@ -37,18 +37,22 @@ namespace DocSpace.Webhooks.SDK.Model
         /// </summary>
         /// <param name="id">id.</param>
         /// <param name="name">name.</param>
-        /// <param name="categoryID">categoryID.</param>
         /// <param name="parent">parent.</param>
-        /// <param name="sid">LDAP identifier. REVIEW..</param>
-        /// <param name="removed">removed.</param>
-        public GroupPayload(Guid id = default, string name = default, Guid categoryID = default, GroupPayload parent = default, string sid = default, bool removed = default)
+        /// <param name="category">category.</param>
+        /// <param name="isLDAP">isLDAP.</param>
+        /// <param name="isSystem">isSystem.</param>
+        /// <param name="manager">manager.</param>
+        /// <param name="membersCount">membersCount.</param>
+        public GroupPayload(Guid id = default, string name = default, Guid parent = default, Guid category = default, bool isLDAP = default, bool isSystem = default, UserSummaryPayload manager = default, int membersCount = default)
         {
             this.Id = id;
             this.Name = name;
-            this.CategoryID = categoryID;
             this.Parent = parent;
-            this.Sid = sid;
-            this.Removed = removed;
+            this.Category = category;
+            this.IsLDAP = isLDAP;
+            this.IsSystem = isSystem;
+            this.Manager = manager;
+            this.MembersCount = membersCount;
         }
 
         /// <summary>
@@ -64,29 +68,40 @@ namespace DocSpace.Webhooks.SDK.Model
         public string Name { get; set; }
 
         /// <summary>
-        /// Gets or Sets CategoryID
-        /// </summary>
-        [DataMember(Name = "categoryID", EmitDefaultValue = false)]
-        public Guid CategoryID { get; set; }
-
-        /// <summary>
         /// Gets or Sets Parent
         /// </summary>
         [DataMember(Name = "parent", EmitDefaultValue = false)]
-        public GroupPayload Parent { get; set; }
+        public Guid Parent { get; set; }
 
         /// <summary>
-        /// LDAP identifier. REVIEW.
+        /// Gets or Sets Category
         /// </summary>
-        /// <value>LDAP identifier. REVIEW.</value>
-        [DataMember(Name = "sid", EmitDefaultValue = false)]
-        public string Sid { get; set; }
+        [DataMember(Name = "category", EmitDefaultValue = false)]
+        public Guid Category { get; set; }
 
         /// <summary>
-        /// Gets or Sets Removed
+        /// Gets or Sets IsLDAP
         /// </summary>
-        [DataMember(Name = "removed", EmitDefaultValue = true)]
-        public bool Removed { get; set; }
+        [DataMember(Name = "isLDAP", EmitDefaultValue = true)]
+        public bool IsLDAP { get; set; }
+
+        /// <summary>
+        /// Gets or Sets IsSystem
+        /// </summary>
+        [DataMember(Name = "isSystem", EmitDefaultValue = true)]
+        public bool IsSystem { get; set; }
+
+        /// <summary>
+        /// Gets or Sets Manager
+        /// </summary>
+        [DataMember(Name = "manager", EmitDefaultValue = false)]
+        public UserSummaryPayload Manager { get; set; }
+
+        /// <summary>
+        /// Gets or Sets MembersCount
+        /// </summary>
+        [DataMember(Name = "membersCount", EmitDefaultValue = false)]
+        public int MembersCount { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -98,10 +113,12 @@ namespace DocSpace.Webhooks.SDK.Model
             sb.Append("class GroupPayload {\n");
             sb.Append("  Id: ").Append(Id).Append("\n");
             sb.Append("  Name: ").Append(Name).Append("\n");
-            sb.Append("  CategoryID: ").Append(CategoryID).Append("\n");
             sb.Append("  Parent: ").Append(Parent).Append("\n");
-            sb.Append("  Sid: ").Append(Sid).Append("\n");
-            sb.Append("  Removed: ").Append(Removed).Append("\n");
+            sb.Append("  Category: ").Append(Category).Append("\n");
+            sb.Append("  IsLDAP: ").Append(IsLDAP).Append("\n");
+            sb.Append("  IsSystem: ").Append(IsSystem).Append("\n");
+            sb.Append("  Manager: ").Append(Manager).Append("\n");
+            sb.Append("  MembersCount: ").Append(MembersCount).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }

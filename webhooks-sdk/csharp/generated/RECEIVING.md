@@ -40,12 +40,19 @@ Comparing them against the headers also detects tampering for free.
 ```csharp
 var hook = WebhookParser.Parse(body);
 
-if (hook.PayloadAs<FileEntryPayload>() is { } entry)
+// Files, folders and rooms each have their own schema, so ask for the one the
+// trigger carries. PayloadAs returns null when the delivery is something else.
+if (hook.PayloadAs<FilePayload>() is { } file)
 {
-    // 1 = folder, 2 = file. The only discriminator there is: no File- or
-    // Folder-specific member ever reaches the wire.
-    var kind = entry.FileEntryType == 2 ? "file" : "folder";
-    Console.WriteLine($"{kind}: {entry.Title}");
+    Console.WriteLine($"file: {file.Title} ({file.ContentLength} bytes)");
+}
+else if (hook.PayloadAs<FolderPayload>() is { } folder)
+{
+    Console.WriteLine($"folder: {folder.Title}");
+}
+else if (hook.PayloadAs<RoomPayload>() is { } room)
+{
+    Console.WriteLine($"room: {room.Title} (type {room.RoomType})");
 }
 ```
 
@@ -79,11 +86,17 @@ therefore a new id — the same logical event arrives with a different key.
 
 ## Models
 
+ - [Model.ContactPayload](docs/ContactPayload.md)
  - [Model.EntryId](docs/EntryId.md)
  - [Model.FileEntryPayload](docs/FileEntryPayload.md)
+ - [Model.FilePayload](docs/FilePayload.md)
+ - [Model.FolderPayload](docs/FolderPayload.md)
  - [Model.FormSubmitPayload](docs/FormSubmitPayload.md)
  - [Model.GroupPayload](docs/GroupPayload.md)
+ - [Model.GroupSummaryPayload](docs/GroupSummaryPayload.md)
+ - [Model.RoomPayload](docs/RoomPayload.md)
  - [Model.UserPayload](docs/UserPayload.md)
+ - [Model.UserSummaryPayload](docs/UserSummaryPayload.md)
  - [Model.WebhookConfigInfo](docs/WebhookConfigInfo.md)
  - [Model.WebhookEnvelope](docs/WebhookEnvelope.md)
  - [Model.WebhookEventInfo](docs/WebhookEventInfo.md)
