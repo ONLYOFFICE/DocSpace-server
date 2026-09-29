@@ -23,13 +23,13 @@
 
 package onlyoffice.docspace.webhooks.sdk.models
 
-import onlyoffice.docspace.webhooks.sdk.models.FileEntryPayload
+import onlyoffice.docspace.webhooks.sdk.models.FilePayload
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * Files/Core/Utils/WebhookManager.cs -> SubmittedFormData<T>. The ONLY trigger with a wrapper rather than a bare entry, and the only one whose `webhook.target.id` refers to a different entity (the original form) than the entry that changed. form.filled.out and form.stopped do NOT use this shape -- they send FilePayload. 
+ * ASC.Files/Core/ApiModels/WebhookDto/FormSubmitWebhookDto.cs. The ONLY trigger with a wrapper rather than a bare entry, and the only one whose `webhook.target.id` refers to a different entity (the original form) than the entry that changed. form.filled.out and form.stopped do NOT use this shape -- they send FilePayload. 
  *
  * @param originalForm 
  * @param submittedForm 
@@ -39,10 +39,10 @@ import com.squareup.moshi.JsonClass
 data class FormSubmitPayload (
 
     @Json(name = "originalForm")
-    val originalForm: FileEntryPayload? = null,
+    val originalForm: FilePayload? = null,
 
     @Json(name = "submittedForm")
-    val submittedForm: FileEntryPayload? = null
+    val submittedForm: FilePayload? = null
 
 ) {
 

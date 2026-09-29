@@ -26,11 +26,17 @@ public final class JSON {
                     (JsonSerializer<OffsetDateTime>) (src, type, ctx) ->
                             new JsonPrimitive(
                                     DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(src)))
+            .registerTypeAdapterFactory(new ContactPayload.CustomTypeAdapterFactory())
             .registerTypeAdapterFactory(new EntryId.CustomTypeAdapterFactory())
             .registerTypeAdapterFactory(new FileEntryPayload.CustomTypeAdapterFactory())
+            .registerTypeAdapterFactory(new FilePayload.CustomTypeAdapterFactory())
+            .registerTypeAdapterFactory(new FolderPayload.CustomTypeAdapterFactory())
             .registerTypeAdapterFactory(new FormSubmitPayload.CustomTypeAdapterFactory())
             .registerTypeAdapterFactory(new GroupPayload.CustomTypeAdapterFactory())
+            .registerTypeAdapterFactory(new GroupSummaryPayload.CustomTypeAdapterFactory())
+            .registerTypeAdapterFactory(new RoomPayload.CustomTypeAdapterFactory())
             .registerTypeAdapterFactory(new UserPayload.CustomTypeAdapterFactory())
+            .registerTypeAdapterFactory(new UserSummaryPayload.CustomTypeAdapterFactory())
             .registerTypeAdapterFactory(new WebhookConfigInfo.CustomTypeAdapterFactory())
             .registerTypeAdapterFactory(new WebhookEnvelope.CustomTypeAdapterFactory())
             .registerTypeAdapterFactory(new WebhookEventInfo.CustomTypeAdapterFactory())

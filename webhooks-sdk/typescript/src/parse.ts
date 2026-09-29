@@ -39,7 +39,7 @@ export interface AnyWebhook {
  *
  * switch (hook.trigger) {
  *     case 'file.created':
- *         hook.payload.pureTitle;   // FilePayload -- note: files have no `title`
+ *         hook.payload.version;     // FilePayload -- file fields, not just the shared ones
  *         break;
  *     case 'user.created':
  *         hook.payload.email;       // UserPayload

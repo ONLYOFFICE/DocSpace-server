@@ -6,10 +6,12 @@
 | ---- | ---- | ----------- | ----- |
 | **id** | **String** |  | [optional] |
 | **name** | **String** |  | [optional] |
-| **category_id** | **String** |  | [optional] |
-| **parent** | [**GroupPayload**](GroupPayload.md) |  | [optional] |
-| **sid** | **String** | LDAP identifier. REVIEW. | [optional] |
-| **removed** | **Boolean** |  | [optional] |
+| **parent** | **String** |  | [optional] |
+| **category** | **String** |  | [optional] |
+| **is_ldap** | **Boolean** |  | [optional] |
+| **is_system** | **Boolean** |  | [optional] |
+| **manager** | [**UserSummaryPayload**](UserSummaryPayload.md) |  | [optional] |
+| **members_count** | **Integer** |  | [optional] |
 
 ## Example
 
@@ -19,10 +21,12 @@ require 'docspace-webhooks-sdk'
 instance = DocspaceWebhooksSdk::GroupPayload.new(
   id: null,
   name: null,
-  category_id: null,
   parent: null,
-  sid: null,
-  removed: null
+  category: null,
+  is_ldap: null,
+  is_system: null,
+  manager: null,
+  members_count: null
 )
 ```
 

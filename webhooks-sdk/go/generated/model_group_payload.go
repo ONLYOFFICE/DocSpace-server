@@ -1,9 +1,9 @@
 /*
 ONLYOFFICE DocSpace Webhooks
 
-Wire contract for OUTBOUND DocSpace webhook deliveries.  This is a hand-maintained document. It is NOT the REST API spec and shares no schemas with it: webhook payloads are the internal domain entities (UserInfo, GroupInfo, File<T>, Folder<T>), not the controller DTOs.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto). They began as copies of the matching REST DTOs and are free to diverge from them.  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
 
-API version: 0.1.0
+API version: 1.0.0
 */
 
 // Code generated by OpenAPI Generator (https://openapi-generator.tech); DO NOT EDIT.
@@ -17,15 +17,16 @@ import (
 // checks if the GroupPayload type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &GroupPayload{}
 
-// GroupPayload ASC.Core.Common/Core/GroupInfo.cs. Note `ID` in C#; the camelCase policy lowercases the whole leading run, so it is \"id\" on the wire, while `CategoryID` becomes \"categoryID\". 
+// GroupPayload ASC.Api.Core/Webhook/Payloads/GroupWebhookDto.cs. A copy of the REST GroupDto.  The member list is not carried - a group can hold thousands of users and each would be expanded into every group event. `membersCount` is the hint that the roster changed; read it from GET api/2.0/group/{id}. 
 type GroupPayload struct {
 	Id *string `json:"id,omitempty"`
 	Name *string `json:"name,omitempty"`
-	CategoryID *string `json:"categoryID,omitempty"`
-	Parent *GroupPayload `json:"parent,omitempty"`
-	// LDAP identifier. REVIEW.
-	Sid *string `json:"sid,omitempty"`
-	Removed *bool `json:"removed,omitempty"`
+	Parent *string `json:"parent,omitempty"`
+	Category *string `json:"category,omitempty"`
+	IsLDAP *bool `json:"isLDAP,omitempty"`
+	IsSystem *bool `json:"isSystem,omitempty"`
+	Manager *UserSummaryPayload `json:"manager,omitempty"`
+	MembersCount *int32 `json:"membersCount,omitempty"`
 }
 
 // NewGroupPayload instantiates a new GroupPayload object
@@ -109,42 +110,10 @@ func (o *GroupPayload) SetName(v string) {
 	o.Name = &v
 }
 
-// GetCategoryID returns the CategoryID field value if set, zero value otherwise.
-func (o *GroupPayload) GetCategoryID() string {
-	if o == nil || IsNil(o.CategoryID) {
-		var ret string
-		return ret
-	}
-	return *o.CategoryID
-}
-
-// GetCategoryIDOk returns a tuple with the CategoryID field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *GroupPayload) GetCategoryIDOk() (*string, bool) {
-	if o == nil || IsNil(o.CategoryID) {
-		return nil, false
-	}
-	return o.CategoryID, true
-}
-
-// HasCategoryID returns a boolean if a field has been set.
-func (o *GroupPayload) HasCategoryID() bool {
-	if o != nil && !IsNil(o.CategoryID) {
-		return true
-	}
-
-	return false
-}
-
-// SetCategoryID gets a reference to the given string and assigns it to the CategoryID field.
-func (o *GroupPayload) SetCategoryID(v string) {
-	o.CategoryID = &v
-}
-
 // GetParent returns the Parent field value if set, zero value otherwise.
-func (o *GroupPayload) GetParent() GroupPayload {
+func (o *GroupPayload) GetParent() string {
 	if o == nil || IsNil(o.Parent) {
-		var ret GroupPayload
+		var ret string
 		return ret
 	}
 	return *o.Parent
@@ -152,7 +121,7 @@ func (o *GroupPayload) GetParent() GroupPayload {
 
 // GetParentOk returns a tuple with the Parent field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *GroupPayload) GetParentOk() (*GroupPayload, bool) {
+func (o *GroupPayload) GetParentOk() (*string, bool) {
 	if o == nil || IsNil(o.Parent) {
 		return nil, false
 	}
@@ -168,73 +137,169 @@ func (o *GroupPayload) HasParent() bool {
 	return false
 }
 
-// SetParent gets a reference to the given GroupPayload and assigns it to the Parent field.
-func (o *GroupPayload) SetParent(v GroupPayload) {
+// SetParent gets a reference to the given string and assigns it to the Parent field.
+func (o *GroupPayload) SetParent(v string) {
 	o.Parent = &v
 }
 
-// GetSid returns the Sid field value if set, zero value otherwise.
-func (o *GroupPayload) GetSid() string {
-	if o == nil || IsNil(o.Sid) {
+// GetCategory returns the Category field value if set, zero value otherwise.
+func (o *GroupPayload) GetCategory() string {
+	if o == nil || IsNil(o.Category) {
 		var ret string
 		return ret
 	}
-	return *o.Sid
+	return *o.Category
 }
 
-// GetSidOk returns a tuple with the Sid field value if set, nil otherwise
+// GetCategoryOk returns a tuple with the Category field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *GroupPayload) GetSidOk() (*string, bool) {
-	if o == nil || IsNil(o.Sid) {
+func (o *GroupPayload) GetCategoryOk() (*string, bool) {
+	if o == nil || IsNil(o.Category) {
 		return nil, false
 	}
-	return o.Sid, true
+	return o.Category, true
 }
 
-// HasSid returns a boolean if a field has been set.
-func (o *GroupPayload) HasSid() bool {
-	if o != nil && !IsNil(o.Sid) {
+// HasCategory returns a boolean if a field has been set.
+func (o *GroupPayload) HasCategory() bool {
+	if o != nil && !IsNil(o.Category) {
 		return true
 	}
 
 	return false
 }
 
-// SetSid gets a reference to the given string and assigns it to the Sid field.
-func (o *GroupPayload) SetSid(v string) {
-	o.Sid = &v
+// SetCategory gets a reference to the given string and assigns it to the Category field.
+func (o *GroupPayload) SetCategory(v string) {
+	o.Category = &v
 }
 
-// GetRemoved returns the Removed field value if set, zero value otherwise.
-func (o *GroupPayload) GetRemoved() bool {
-	if o == nil || IsNil(o.Removed) {
+// GetIsLDAP returns the IsLDAP field value if set, zero value otherwise.
+func (o *GroupPayload) GetIsLDAP() bool {
+	if o == nil || IsNil(o.IsLDAP) {
 		var ret bool
 		return ret
 	}
-	return *o.Removed
+	return *o.IsLDAP
 }
 
-// GetRemovedOk returns a tuple with the Removed field value if set, nil otherwise
+// GetIsLDAPOk returns a tuple with the IsLDAP field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *GroupPayload) GetRemovedOk() (*bool, bool) {
-	if o == nil || IsNil(o.Removed) {
+func (o *GroupPayload) GetIsLDAPOk() (*bool, bool) {
+	if o == nil || IsNil(o.IsLDAP) {
 		return nil, false
 	}
-	return o.Removed, true
+	return o.IsLDAP, true
 }
 
-// HasRemoved returns a boolean if a field has been set.
-func (o *GroupPayload) HasRemoved() bool {
-	if o != nil && !IsNil(o.Removed) {
+// HasIsLDAP returns a boolean if a field has been set.
+func (o *GroupPayload) HasIsLDAP() bool {
+	if o != nil && !IsNil(o.IsLDAP) {
 		return true
 	}
 
 	return false
 }
 
-// SetRemoved gets a reference to the given bool and assigns it to the Removed field.
-func (o *GroupPayload) SetRemoved(v bool) {
-	o.Removed = &v
+// SetIsLDAP gets a reference to the given bool and assigns it to the IsLDAP field.
+func (o *GroupPayload) SetIsLDAP(v bool) {
+	o.IsLDAP = &v
+}
+
+// GetIsSystem returns the IsSystem field value if set, zero value otherwise.
+func (o *GroupPayload) GetIsSystem() bool {
+	if o == nil || IsNil(o.IsSystem) {
+		var ret bool
+		return ret
+	}
+	return *o.IsSystem
+}
+
+// GetIsSystemOk returns a tuple with the IsSystem field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GroupPayload) GetIsSystemOk() (*bool, bool) {
+	if o == nil || IsNil(o.IsSystem) {
+		return nil, false
+	}
+	return o.IsSystem, true
+}
+
+// HasIsSystem returns a boolean if a field has been set.
+func (o *GroupPayload) HasIsSystem() bool {
+	if o != nil && !IsNil(o.IsSystem) {
+		return true
+	}
+
+	return false
+}
+
+// SetIsSystem gets a reference to the given bool and assigns it to the IsSystem field.
+func (o *GroupPayload) SetIsSystem(v bool) {
+	o.IsSystem = &v
+}
+
+// GetManager returns the Manager field value if set, zero value otherwise.
+func (o *GroupPayload) GetManager() UserSummaryPayload {
+	if o == nil || IsNil(o.Manager) {
+		var ret UserSummaryPayload
+		return ret
+	}
+	return *o.Manager
+}
+
+// GetManagerOk returns a tuple with the Manager field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GroupPayload) GetManagerOk() (*UserSummaryPayload, bool) {
+	if o == nil || IsNil(o.Manager) {
+		return nil, false
+	}
+	return o.Manager, true
+}
+
+// HasManager returns a boolean if a field has been set.
+func (o *GroupPayload) HasManager() bool {
+	if o != nil && !IsNil(o.Manager) {
+		return true
+	}
+
+	return false
+}
+
+// SetManager gets a reference to the given UserSummaryPayload and assigns it to the Manager field.
+func (o *GroupPayload) SetManager(v UserSummaryPayload) {
+	o.Manager = &v
+}
+
+// GetMembersCount returns the MembersCount field value if set, zero value otherwise.
+func (o *GroupPayload) GetMembersCount() int32 {
+	if o == nil || IsNil(o.MembersCount) {
+		var ret int32
+		return ret
+	}
+	return *o.MembersCount
+}
+
+// GetMembersCountOk returns a tuple with the MembersCount field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GroupPayload) GetMembersCountOk() (*int32, bool) {
+	if o == nil || IsNil(o.MembersCount) {
+		return nil, false
+	}
+	return o.MembersCount, true
+}
+
+// HasMembersCount returns a boolean if a field has been set.
+func (o *GroupPayload) HasMembersCount() bool {
+	if o != nil && !IsNil(o.MembersCount) {
+		return true
+	}
+
+	return false
+}
+
+// SetMembersCount gets a reference to the given int32 and assigns it to the MembersCount field.
+func (o *GroupPayload) SetMembersCount(v int32) {
+	o.MembersCount = &v
 }
 
 func (o GroupPayload) MarshalJSON() ([]byte, error) {
@@ -253,17 +318,23 @@ func (o GroupPayload) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Name) {
 		toSerialize["name"] = o.Name
 	}
-	if !IsNil(o.CategoryID) {
-		toSerialize["categoryID"] = o.CategoryID
-	}
 	if !IsNil(o.Parent) {
 		toSerialize["parent"] = o.Parent
 	}
-	if !IsNil(o.Sid) {
-		toSerialize["sid"] = o.Sid
+	if !IsNil(o.Category) {
+		toSerialize["category"] = o.Category
 	}
-	if !IsNil(o.Removed) {
-		toSerialize["removed"] = o.Removed
+	if !IsNil(o.IsLDAP) {
+		toSerialize["isLDAP"] = o.IsLDAP
+	}
+	if !IsNil(o.IsSystem) {
+		toSerialize["isSystem"] = o.IsSystem
+	}
+	if !IsNil(o.Manager) {
+		toSerialize["manager"] = o.Manager
+	}
+	if !IsNil(o.MembersCount) {
+		toSerialize["membersCount"] = o.MembersCount
 	}
 	return toSerialize, nil
 }

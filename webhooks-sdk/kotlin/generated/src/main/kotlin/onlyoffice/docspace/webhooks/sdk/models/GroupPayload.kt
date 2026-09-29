@@ -23,19 +23,22 @@
 
 package onlyoffice.docspace.webhooks.sdk.models
 
+import onlyoffice.docspace.webhooks.sdk.models.UserSummaryPayload
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * ASC.Core.Common/Core/GroupInfo.cs. Note `ID` in C#; the camelCase policy lowercases the whole leading run, so it is \"id\" on the wire, while `CategoryID` becomes \"categoryID\". 
+ * ASC.Api.Core/Webhook/Payloads/GroupWebhookDto.cs. A copy of the REST GroupDto.  The member list is not carried - a group can hold thousands of users and each would be expanded into every group event. `membersCount` is the hint that the roster changed; read it from GET api/2.0/group/{id}. 
  *
  * @param id 
  * @param name 
- * @param categoryID 
  * @param parent 
- * @param sid LDAP identifier. REVIEW.
- * @param removed 
+ * @param category 
+ * @param isLDAP 
+ * @param isSystem 
+ * @param manager 
+ * @param membersCount 
  */
 
 
@@ -47,18 +50,23 @@ data class GroupPayload (
     @Json(name = "name")
     val name: kotlin.String? = null,
 
-    @Json(name = "categoryID")
-    val categoryID: java.util.UUID? = null,
-
     @Json(name = "parent")
-    val parent: GroupPayload? = null,
+    val parent: java.util.UUID? = null,
 
-    /* LDAP identifier. REVIEW. */
-    @Json(name = "sid")
-    val sid: kotlin.String? = null,
+    @Json(name = "category")
+    val category: java.util.UUID? = null,
 
-    @Json(name = "removed")
-    val removed: kotlin.Boolean? = null
+    @Json(name = "isLDAP")
+    val isLDAP: kotlin.Boolean? = null,
+
+    @Json(name = "isSystem")
+    val isSystem: kotlin.Boolean? = null,
+
+    @Json(name = "manager")
+    val manager: UserSummaryPayload? = null,
+
+    @Json(name = "membersCount")
+    val membersCount: kotlin.Int? = null
 
 ) {
 

@@ -4,8 +4,8 @@
 ## Properties
 | Name | Type | Description | Notes |
 | ------------ | ------------- | ------------- | ------------- |
-| **originalForm** | [**FileEntryPayload**](FileEntryPayload.md) |  |  [optional] |
-| **submittedForm** | [**FileEntryPayload**](FileEntryPayload.md) |  |  [optional] |
+| **originalForm** | [**FilePayload**](FilePayload.md) |  |  [optional] |
+| **submittedForm** | [**FilePayload**](FilePayload.md) |  |  [optional] |
 
 
 

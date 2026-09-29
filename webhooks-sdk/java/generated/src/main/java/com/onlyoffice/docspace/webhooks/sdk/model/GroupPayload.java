@@ -1,8 +1,8 @@
 /*
  * ONLYOFFICE DocSpace Webhooks
- * Wire contract for OUTBOUND DocSpace webhook deliveries.  This is a hand-maintained document. It is NOT the REST API spec and shares no schemas with it: webhook payloads are the internal domain entities (UserInfo, GroupInfo, File<T>, Folder<T>), not the controller DTOs.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+ * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto). They began as copies of the matching REST DTOs and are free to diverge from them.  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
  *
- * The version of the OpenAPI document: 0.1.0
+ * The version of the OpenAPI document: 1.0.0
  * 
  *
  * NOTE: This class is auto generated by OpenAPI Generator (https://openapi-generator.tech).
@@ -19,6 +19,7 @@ import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import com.onlyoffice.docspace.webhooks.sdk.model.UserSummaryPayload;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.UUID;
@@ -48,7 +49,7 @@ import java.util.Set;
 import com.onlyoffice.docspace.webhooks.sdk.JSON;
 
 /**
- * ASC.Core.Common/Core/GroupInfo.cs. Note &#x60;ID&#x60; in C#; the camelCase policy lowercases the whole leading run, so it is \&quot;id\&quot; on the wire, while &#x60;CategoryID&#x60; becomes \&quot;categoryID\&quot;. 
+ * ASC.Api.Core/Webhook/Payloads/GroupWebhookDto.cs. A copy of the REST GroupDto.  The member list is not carried - a group can hold thousands of users and each would be expanded into every group event. &#x60;membersCount&#x60; is the hint that the roster changed; read it from GET api/2.0/group/{id}. 
  */
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.25.0")
 public class GroupPayload {
@@ -62,25 +63,35 @@ public class GroupPayload {
   @javax.annotation.Nullable
   private String name;
 
-  public static final String SERIALIZED_NAME_CATEGORY_I_D = "categoryID";
-  @SerializedName(SERIALIZED_NAME_CATEGORY_I_D)
-  @javax.annotation.Nullable
-  private UUID categoryID;
-
   public static final String SERIALIZED_NAME_PARENT = "parent";
   @SerializedName(SERIALIZED_NAME_PARENT)
   @javax.annotation.Nullable
-  private GroupPayload parent;
+  private UUID parent;
 
-  public static final String SERIALIZED_NAME_SID = "sid";
-  @SerializedName(SERIALIZED_NAME_SID)
+  public static final String SERIALIZED_NAME_CATEGORY = "category";
+  @SerializedName(SERIALIZED_NAME_CATEGORY)
   @javax.annotation.Nullable
-  private String sid;
+  private UUID category;
 
-  public static final String SERIALIZED_NAME_REMOVED = "removed";
-  @SerializedName(SERIALIZED_NAME_REMOVED)
+  public static final String SERIALIZED_NAME_IS_L_D_A_P = "isLDAP";
+  @SerializedName(SERIALIZED_NAME_IS_L_D_A_P)
   @javax.annotation.Nullable
-  private Boolean removed;
+  private Boolean isLDAP;
+
+  public static final String SERIALIZED_NAME_IS_SYSTEM = "isSystem";
+  @SerializedName(SERIALIZED_NAME_IS_SYSTEM)
+  @javax.annotation.Nullable
+  private Boolean isSystem;
+
+  public static final String SERIALIZED_NAME_MANAGER = "manager";
+  @SerializedName(SERIALIZED_NAME_MANAGER)
+  @javax.annotation.Nullable
+  private UserSummaryPayload manager;
+
+  public static final String SERIALIZED_NAME_MEMBERS_COUNT = "membersCount";
+  @SerializedName(SERIALIZED_NAME_MEMBERS_COUNT)
+  @javax.annotation.Nullable
+  private Integer membersCount;
 
   public GroupPayload() {
   }
@@ -123,26 +134,7 @@ public class GroupPayload {
   }
 
 
-  public GroupPayload categoryID(@javax.annotation.Nullable UUID categoryID) {
-    this.categoryID = categoryID;
-    return this;
-  }
-
-  /**
-   * Get categoryID
-   * @return categoryID
-   */
-  @javax.annotation.Nullable
-  public UUID getCategoryID() {
-    return categoryID;
-  }
-
-  public void setCategoryID(@javax.annotation.Nullable UUID categoryID) {
-    this.categoryID = categoryID;
-  }
-
-
-  public GroupPayload parent(@javax.annotation.Nullable GroupPayload parent) {
+  public GroupPayload parent(@javax.annotation.Nullable UUID parent) {
     this.parent = parent;
     return this;
   }
@@ -152,50 +144,107 @@ public class GroupPayload {
    * @return parent
    */
   @javax.annotation.Nullable
-  public GroupPayload getParent() {
+  public UUID getParent() {
     return parent;
   }
 
-  public void setParent(@javax.annotation.Nullable GroupPayload parent) {
+  public void setParent(@javax.annotation.Nullable UUID parent) {
     this.parent = parent;
   }
 
 
-  public GroupPayload sid(@javax.annotation.Nullable String sid) {
-    this.sid = sid;
+  public GroupPayload category(@javax.annotation.Nullable UUID category) {
+    this.category = category;
     return this;
   }
 
   /**
-   * LDAP identifier. REVIEW.
-   * @return sid
+   * Get category
+   * @return category
    */
   @javax.annotation.Nullable
-  public String getSid() {
-    return sid;
+  public UUID getCategory() {
+    return category;
   }
 
-  public void setSid(@javax.annotation.Nullable String sid) {
-    this.sid = sid;
+  public void setCategory(@javax.annotation.Nullable UUID category) {
+    this.category = category;
   }
 
 
-  public GroupPayload removed(@javax.annotation.Nullable Boolean removed) {
-    this.removed = removed;
+  public GroupPayload isLDAP(@javax.annotation.Nullable Boolean isLDAP) {
+    this.isLDAP = isLDAP;
     return this;
   }
 
   /**
-   * Get removed
-   * @return removed
+   * Get isLDAP
+   * @return isLDAP
    */
   @javax.annotation.Nullable
-  public Boolean getRemoved() {
-    return removed;
+  public Boolean getIsLDAP() {
+    return isLDAP;
   }
 
-  public void setRemoved(@javax.annotation.Nullable Boolean removed) {
-    this.removed = removed;
+  public void setIsLDAP(@javax.annotation.Nullable Boolean isLDAP) {
+    this.isLDAP = isLDAP;
+  }
+
+
+  public GroupPayload isSystem(@javax.annotation.Nullable Boolean isSystem) {
+    this.isSystem = isSystem;
+    return this;
+  }
+
+  /**
+   * Get isSystem
+   * @return isSystem
+   */
+  @javax.annotation.Nullable
+  public Boolean getIsSystem() {
+    return isSystem;
+  }
+
+  public void setIsSystem(@javax.annotation.Nullable Boolean isSystem) {
+    this.isSystem = isSystem;
+  }
+
+
+  public GroupPayload manager(@javax.annotation.Nullable UserSummaryPayload manager) {
+    this.manager = manager;
+    return this;
+  }
+
+  /**
+   * Get manager
+   * @return manager
+   */
+  @javax.annotation.Nullable
+  public UserSummaryPayload getManager() {
+    return manager;
+  }
+
+  public void setManager(@javax.annotation.Nullable UserSummaryPayload manager) {
+    this.manager = manager;
+  }
+
+
+  public GroupPayload membersCount(@javax.annotation.Nullable Integer membersCount) {
+    this.membersCount = membersCount;
+    return this;
+  }
+
+  /**
+   * Get membersCount
+   * @return membersCount
+   */
+  @javax.annotation.Nullable
+  public Integer getMembersCount() {
+    return membersCount;
+  }
+
+  public void setMembersCount(@javax.annotation.Nullable Integer membersCount) {
+    this.membersCount = membersCount;
   }
 
 
@@ -211,15 +260,17 @@ public class GroupPayload {
     GroupPayload groupPayload = (GroupPayload) o;
     return Objects.equals(this.id, groupPayload.id) &&
         Objects.equals(this.name, groupPayload.name) &&
-        Objects.equals(this.categoryID, groupPayload.categoryID) &&
         Objects.equals(this.parent, groupPayload.parent) &&
-        Objects.equals(this.sid, groupPayload.sid) &&
-        Objects.equals(this.removed, groupPayload.removed);
+        Objects.equals(this.category, groupPayload.category) &&
+        Objects.equals(this.isLDAP, groupPayload.isLDAP) &&
+        Objects.equals(this.isSystem, groupPayload.isSystem) &&
+        Objects.equals(this.manager, groupPayload.manager) &&
+        Objects.equals(this.membersCount, groupPayload.membersCount);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, name, categoryID, parent, sid, removed);
+    return Objects.hash(id, name, parent, category, isLDAP, isSystem, manager, membersCount);
   }
 
   @Override
@@ -228,10 +279,12 @@ public class GroupPayload {
     sb.append("class GroupPayload {\n");
     sb.append("    id: ").append(toIndentedString(id)).append("\n");
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
-    sb.append("    categoryID: ").append(toIndentedString(categoryID)).append("\n");
     sb.append("    parent: ").append(toIndentedString(parent)).append("\n");
-    sb.append("    sid: ").append(toIndentedString(sid)).append("\n");
-    sb.append("    removed: ").append(toIndentedString(removed)).append("\n");
+    sb.append("    category: ").append(toIndentedString(category)).append("\n");
+    sb.append("    isLDAP: ").append(toIndentedString(isLDAP)).append("\n");
+    sb.append("    isSystem: ").append(toIndentedString(isSystem)).append("\n");
+    sb.append("    manager: ").append(toIndentedString(manager)).append("\n");
+    sb.append("    membersCount: ").append(toIndentedString(membersCount)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -250,7 +303,7 @@ public class GroupPayload {
 
   static {
     // a set of all properties/fields (JSON key names)
-    openapiFields = new HashSet<String>(Arrays.asList("id", "name", "categoryID", "parent", "sid", "removed"));
+    openapiFields = new HashSet<String>(Arrays.asList("id", "name", "parent", "category", "isLDAP", "isSystem", "manager", "membersCount"));
 
     // a set of required properties/fields (JSON key names)
     openapiRequiredFields = new HashSet<String>(0);
@@ -283,15 +336,15 @@ public class GroupPayload {
       if ((jsonObj.get("name") != null && !jsonObj.get("name").isJsonNull()) && !jsonObj.get("name").isJsonPrimitive()) {
         throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `name` to be a primitive type in the JSON string but got `%s`", jsonObj.get("name").toString()));
       }
-      if ((jsonObj.get("categoryID") != null && !jsonObj.get("categoryID").isJsonNull()) && !jsonObj.get("categoryID").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `categoryID` to be a primitive type in the JSON string but got `%s`", jsonObj.get("categoryID").toString()));
+      if ((jsonObj.get("parent") != null && !jsonObj.get("parent").isJsonNull()) && !jsonObj.get("parent").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `parent` to be a primitive type in the JSON string but got `%s`", jsonObj.get("parent").toString()));
       }
-      // validate the optional field `parent`
-      if (jsonObj.get("parent") != null && !jsonObj.get("parent").isJsonNull()) {
-        GroupPayload.validateJsonElement(jsonObj.get("parent"));
+      if ((jsonObj.get("category") != null && !jsonObj.get("category").isJsonNull()) && !jsonObj.get("category").isJsonPrimitive()) {
+        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `category` to be a primitive type in the JSON string but got `%s`", jsonObj.get("category").toString()));
       }
-      if ((jsonObj.get("sid") != null && !jsonObj.get("sid").isJsonNull()) && !jsonObj.get("sid").isJsonPrimitive()) {
-        throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "Expected the field `sid` to be a primitive type in the JSON string but got `%s`", jsonObj.get("sid").toString()));
+      // validate the optional field `manager`
+      if (jsonObj.get("manager") != null && !jsonObj.get("manager").isJsonNull()) {
+        UserSummaryPayload.validateJsonElement(jsonObj.get("manager"));
       }
   }
 

@@ -1,13 +1,18 @@
 openapi: 3.1.0
 info:
   title: ONLYOFFICE DocSpace Webhooks
-  version: 0.1.0
+  version: 1.0.0
   description: |
     Wire contract for OUTBOUND DocSpace webhook deliveries.
 
-    This is a hand-maintained document. It is NOT the REST API spec and shares no
-    schemas with it: webhook payloads are the internal domain entities
-    (UserInfo, GroupInfo, File<T>, Folder<T>), not the controller DTOs.
+    This document is NOT the REST API spec and shares no schemas with it. Webhook
+    payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto,
+    FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto). They
+    began as copies of the matching REST DTOs and are free to diverge from them.
+
+    Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger
+    field, and each DTO declares the same WebhookPayloadKind; the map below is that
+    pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.
 
     SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)
       1. PropertyNamingPolicy = CamelCase.
@@ -56,7 +61,8 @@ paths: {}
 x-docspace-trigger-payloads:
   description: >
     Machine-readable trigger -> payload schema map. Source of truth for the SDK
-    dispatch layer. Verified against every PublishAsync call site.
+    dispatch layer. Mirrors the [WebhookPayload] attributes on WebhookTrigger and
+    on the payload DTOs; WebhookPayloadPairingTests keeps those two in step.
   map:
     user.created: UserPayload
     user.invited: UserPayload
@@ -65,35 +71,35 @@ x-docspace-trigger-payloads:
     group.created: GroupPayload
     group.updated: GroupPayload
     group.deleted: GroupPayload
-    file.created: FileEntryPayload
-    file.uploaded: FileEntryPayload
-    file.updated: FileEntryPayload
-    file.trashed: FileEntryPayload
-    file.deleted: FileEntryPayload
-    file.restored: FileEntryPayload
-    file.copied: FileEntryPayload
-    file.moved: FileEntryPayload
-    file.downloaded: FileEntryPayload
-    folder.created: FileEntryPayload
-    folder.updated: FileEntryPayload
-    folder.trashed: FileEntryPayload
-    folder.deleted: FileEntryPayload
-    folder.restored: FileEntryPayload
-    folder.copied: FileEntryPayload
-    folder.moved: FileEntryPayload
-    folder.downloaded: FileEntryPayload
-    room.created: FileEntryPayload
-    room.updated: FileEntryPayload
-    room.archived: FileEntryPayload
-    room.deleted: FileEntryPayload
-    room.restored: FileEntryPayload
-    room.copied: FileEntryPayload
-    agent.created: FileEntryPayload
-    agent.updated: FileEntryPayload
-    agent.deleted: FileEntryPayload
+    file.created: FilePayload
+    file.uploaded: FilePayload
+    file.updated: FilePayload
+    file.trashed: FilePayload
+    file.deleted: FilePayload
+    file.restored: FilePayload
+    file.copied: FilePayload
+    file.moved: FilePayload
+    file.downloaded: FilePayload
+    folder.created: FolderPayload
+    folder.updated: FolderPayload
+    folder.trashed: FolderPayload
+    folder.deleted: FolderPayload
+    folder.restored: FolderPayload
+    folder.copied: FolderPayload
+    folder.moved: FolderPayload
+    folder.downloaded: FolderPayload
+    room.created: RoomPayload
+    room.updated: RoomPayload
+    room.archived: RoomPayload
+    room.deleted: RoomPayload
+    room.restored: RoomPayload
+    room.copied: RoomPayload
+    agent.created: RoomPayload
+    agent.updated: RoomPayload
+    agent.deleted: RoomPayload
     form.submit: FormSubmitPayload
-    form.filled.out: FileEntryPayload
-    form.stopped: FileEntryPayload
+    form.filled.out: FilePayload
+    form.stopped: FilePayload
     "*": null
 
 components:
@@ -196,19 +202,23 @@ components:
           format: date-time
 
     # ---------------------------------------------------------------- payloads
-
     UserPayload:
       type: object
       description: |
-        ASC.Core.Common/Core/UserInfo.cs -- the domain entity, verbatim.
-        It carries NO [JsonIgnore] at all, so every public member below reaches
-        the wire. sid / ssoNameId / ssoSessionId / ldapQouta are null on portals
-        without LDAP or SSO and therefore invisible in most test captures; they
-        DO appear on LDAP/SSO tenants, and are flagged REVIEW below.
+        ASC.Api.Core/Webhook/Payloads/UserWebhookDto.cs. A copy of the REST
+        EmployeeFullDto, owned by the webhook contract and free to diverge from it.
+
+        Not carried, deliberately: sid / ssoNameId / ssoSessionId (LDAP and SAML
+        identifiers, and a SAML SESSION id, all of which the domain entity used to
+        put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme,
+        isAnonim, and `shared`. `contacts` appears once, as a typed list, rather
+        than twice in two shapes.
       properties:
         id:
           type: string
           format: uuid
+        displayName:
+          type: string
         firstName:
           type: string
         lastName:
@@ -218,44 +228,48 @@ components:
         email:
           type: string
           format: email
-        birthDate:
-          type: string
-          format: date-time
-        sex:
-          type: boolean
+        contacts:
+          type: array
+          items:
+            $ref: "#/components/schemas/ContactPayload"
         status:
           type: integer
           description: enum EmployeeStatus
         activationStatus:
           type: integer
-          description: enum EmployeeActivationStatus (flags)
-        terminatedDate:
+          description: enum EmployeeActivationStatus (flags), AutoGenerated masked off
+        terminated:
           type: string
           format: date-time
-        title:
+        department:
           type: string
-        workFromDate:
-          type: string
-          format: date-time
+          description: Comma-separated group names, HTML-encoded.
+        groups:
+          type: array
+          items:
+            $ref: "#/components/schemas/GroupSummaryPayload"
         location:
           type: string
         notes:
           type: string
-        contacts:
-          type: string
-          description: >
-            Flattened form of contactsList. BOTH are emitted -- the same data twice.
-        contactsList:
+        isAdmin:
+          type: boolean
+        isRoomAdmin:
+          type: boolean
+        isOwner:
+          type: boolean
+        isVisitor:
+          type: boolean
+        isCollaborator:
+          type: boolean
+        isLDAP:
+          type: boolean
+        isSSO:
+          type: boolean
+        listAdminModules:
           type: array
           items:
             type: string
-        removed:
-          type: boolean
-        lastModified:
-          type: string
-          format: date-time
-        tenantId:
-          type: integer
         cultureName:
           type: string
         mobilePhone:
@@ -263,200 +277,300 @@ components:
         mobilePhoneActivationStatus:
           type: integer
           description: enum MobilePhoneActivationStatus
-        createDate:
-          type: string
-          format: date-time
-        createdBy:
-          type: string
-          format: uuid
-        spam:
-          type: boolean
-        sid:
-          type: string
-          description: LDAP identifier. REVIEW.
-        ldapQouta:
+        quotaLimit:
           type: integer
           format: int64
-          description: >
-            sic -- misspelled in the domain type, and misspelled on the wire.
-            LDAP quota. REVIEW.
-        ssoNameId:
-          type: string
-          description: SAML identifier. REVIEW.
-        ssoSessionId:
-          type: string
-          description: >
-            SAML SESSION identifier. REVIEW -- should almost certainly not be
-            on the wire.
-        isActive:
+        usedSpace:
+          type: number
+        isCustomQuota:
           type: boolean
-          readOnly: true
-          description: computed getter
-        checkActivation:
+        createdBy:
+          $ref: "#/components/schemas/UserSummaryPayload"
+        registrationDate:
+          type: string
+          format: date-time
+        hasAvatar:
           type: boolean
-          readOnly: true
-          description: computed getter
+        avatar:
+          type: string
+        avatarOriginal:
+          type: string
+        avatarMax:
+          type: string
+        avatarMedium:
+          type: string
+        avatarSmall:
+          type: string
+        profileUrl:
+          type: string
+
+    UserSummaryPayload:
+      type: object
+      description: A user referenced from another payload.
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        userName:
+          type: string
+        email:
+          type: string
+          format: email
+        avatar:
+          type: string
+        profileUrl:
+          type: string
+
+    ContactPayload:
+      type: object
+      properties:
+        type:
+          type: string
+        value:
+          type: string
 
     GroupPayload:
       type: object
-      description: >
-        ASC.Core.Common/Core/GroupInfo.cs. Note `ID` in C#; the camelCase policy
-        lowercases the whole leading run, so it is "id" on the wire, while
-        `CategoryID` becomes "categoryID".
+      description: |
+        ASC.Api.Core/Webhook/Payloads/GroupWebhookDto.cs. A copy of the REST
+        GroupDto.
+
+        The member list is not carried - a group can hold thousands of users and
+        each would be expanded into every group event. `membersCount` is the hint
+        that the roster changed; read it from GET api/2.0/group/{id}.
       properties:
         id:
           type: string
           format: uuid
         name:
           type: string
-        categoryID:
+        parent:
           type: string
           format: uuid
-        parent:
-          $ref: "#/components/schemas/GroupPayload"
-        sid:
+        category:
           type: string
-          description: LDAP identifier. REVIEW.
-        removed:
+          format: uuid
+        isLDAP:
+          type: boolean
+        isSystem:
+          type: boolean
+        manager:
+          $ref: "#/components/schemas/UserSummaryPayload"
+        membersCount:
+          type: integer
+
+    GroupSummaryPayload:
+      type: object
+      description: A group referenced from another payload.
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        manager:
+          type: string
+          description: The user name of the group manager, not an id.
+        isSystem:
           type: boolean
 
     FileEntryPayload:
       type: object
       description: |
-        The payload for EVERY file, folder, room, agent and form trigger.
+        ASC.Files/Core/ApiModels/WebhookDto/FileEntryWebhookDto.cs. What
+        FilePayload, FolderPayload and RoomPayload have in common.
 
-        There is deliberately no File- or Folder-specific schema. WebhookManager
-        calls PublishAsync<T1,T2> with a static parameter type of FileEntry<T>,
-        so T1 binds to the abstract base and System.Text.Json serializes by
-        DECLARED type. File<T> and Folder<T> members -- pureTitle, version,
-        contentLength, folderType, filesCount, isRoom -- therefore never reach
-        the wire, however the entry was published.
+        This schema is never sent on its own -- unlike the previous contract,
+        where every file, folder, room, agent and form trigger sent exactly this
+        and nothing else. The old payload was typed as the abstract FileEntry<T>
+        at the publish site, so System.Text.Json serialized by DECLARED type and
+        every File<T> and Folder<T> member was silently dropped: version,
+        contentLength, fileType, folderType, filesCount, roomType never reached a
+        receiver. That is fixed; the subtypes below carry their own fields.
 
-        One consequence worth internalising: `title` IS present, even for files.
-        File<T> hides Title behind [JsonIgnore] and exposes pureTitle instead,
-        but that override is invisible here because the base declaration is what
-        gets serialized.
-
-        Verified against a captured production delivery: all 14 keys of a real
-        file.created payload are members of this schema and nothing else.
-        (Files/Core/Core/Entries/FileEntry.cs; [JsonIgnore] members excluded.)
+        Not carried, deliberately: access, security, securityByUsers,
+        availableShareRights, shareSettings, canShare, shared, sharedForUser,
+        sharedExternal, parentShared, isFavorite, requestToken, external,
+        shareRecord. Those answer "what may the caller see", and a delivery has no
+        caller - who receives it is decided by WebhookFileEntryAccessChecker
+        against the subscription owner. Putting one user's permission matrix on
+        the wire was both meaningless to the receiver and a disclosure.
       properties:
         id:
           $ref: "#/components/schemas/EntryId"
         parentId:
           $ref: "#/components/schemas/EntryId"
-        rootId:
+        rootFolderId:
           $ref: "#/components/schemas/EntryId"
-        originId:
-          $ref: "#/components/schemas/EntryId"
-        originRoomId:
-          $ref: "#/components/schemas/EntryId"
-        folderIdDisplay:
-          $ref: "#/components/schemas/EntryId"
-        mutableId:
-          type: boolean
         title:
           type: string
-          description: >
-            The entry name, e.g. "321.xlsx". Present for files as well as
-            folders: File<T> overrides Title with [JsonIgnore] and exposes
-            pureTitle instead, but that override is never reached because the
-            base declaration is what gets serialized.
-        isNew:
-          type: boolean
-          description: Declared abstract on FileEntry; omitted when false.
-        createBy:
-          type: string
-          format: uuid
-        createOn:
+        fileEntryType:
+          type: integer
+          description: 1 folder, 2 file. Present on every entry payload.
+        created:
           type: string
           format: date-time
-        modifiedBy:
-          type: string
-          format: uuid
-        modifiedOn:
+        createdBy:
+          $ref: "#/components/schemas/UserSummaryPayload"
+        updated:
           type: string
           format: date-time
-        sharedBy:
-          type: string
-          format: uuid
-        rootCreateBy:
-          type: string
-          format: uuid
-        parentRoomCreatedBy:
-          type: string
-          format: uuid
+        updatedBy:
+          $ref: "#/components/schemas/UserSummaryPayload"
         rootFolderType:
           type: integer
           description: enum FolderType
         parentRoomType:
           type: integer
           description: enum FolderType
-        fileEntryType:
-          type: integer
-          description: >
-            enum FileEntryType -- 1 folder, 2 file. The ONLY way to tell a folder
-            from a file: no subtype-specific fields are ever sent.
-        access:
-          type: integer
-          description: enum FileShare
-        shared:
-          type: boolean
-        sharedForUser:
-          type: boolean
-        sharedExternal:
-          type: boolean
-        parentShared:
-          type: boolean
-        providerId:
-          type: integer
-        providerKey:
-          type: string
+        originId:
+          $ref: "#/components/schemas/EntryId"
+        originRoomId:
+          $ref: "#/components/schemas/EntryId"
         originTitle:
           type: string
         originRoomTitle:
           type: string
+        providerItem:
+          type: boolean
+        providerKey:
+          type: string
+        providerId:
+          type: integer
         order:
           type: integer
-        error:
-          type: string
-        tags:
-          type: array
-          items:
-            type: object
-            additionalProperties: true
-          description: "TODO: expand Tag."
-        shareRecord:
-          type: object
-          additionalProperties: true
-          description: "TODO: expand FileShareRecord<T>."
-        security:
-          type: object
-          additionalProperties:
-            type: boolean
-          description: >
-            Caller-relative permission map (enum FilesSecurityActions -> bool).
-            Internal ACL state on the wire. REVIEW.
-        securityByUsers:
-          type: object
-          additionalProperties:
-            type: object
-            additionalProperties:
+          description: Position within an indexed room.
+
+    FilePayload:
+      description: |
+        ASC.Files/Core/ApiModels/WebhookDto/FileWebhookDto.cs. A copy of the REST
+        FileDto. Sent by every file.* trigger and by form.filled.out and
+        form.stopped.
+
+        Not carried: thumbnailUrl, dimensions, viewAccessibility, formFillingStatus,
+        hasDraft and the form-role fields. Each needs per-request work the REST
+        helper does and a delivery must not - dimensions in particular opens the
+        file stream to measure the image.
+      allOf:
+        - $ref: "#/components/schemas/FileEntryPayload"
+        - type: object
+          properties:
+            version:
+              type: integer
+            versionGroup:
+              type: integer
+            contentLength:
+              type: integer
+              format: int64
+              description: Bytes, as a number. The REST DTO sends a formatted string.
+            fileType:
+              type: integer
+              description: enum FileType
+            fileExst:
+              type: string
+              description: Includes the leading dot, e.g. ".docx".
+            comment:
+              type: string
+            viewUrl:
+              type: string
+              description: Download URL. Carries no share token.
+            webUrl:
+              type: string
+              description: Browser URL. Carries no share token.
+            encrypted:
               type: boolean
-          description: >
-            Per-user permission map. Initialised non-null, so it is emitted as
-            {} rather than omitted. REVIEW.
+            locked:
+              type: boolean
+            lockedBy:
+              type: string
+            isForm:
+              type: boolean
+            customFilterEnabled:
+              type: boolean
+            customFilterEnabledBy:
+              type: string
+            lastOpened:
+              type: string
+              format: date-time
+            vectorizationStatus:
+              type: integer
+              description: enum VectorizationStatus
+
+    FolderPayload:
+      description: |
+        ASC.Files/Core/ApiModels/WebhookDto/FolderWebhookDto.cs. The folder.*
+        triggers. Rooms are RoomPayload, never this, even though both come from
+        Folder<T>.
+
+        Not carried: inRoom, mute, new - all per-viewer state.
+      allOf:
+        - $ref: "#/components/schemas/FileEntryPayload"
+        - type: object
+          properties:
+            filesCount:
+              type: integer
+            foldersCount:
+              type: integer
+            type:
+              type: integer
+              description: enum FolderType
+            isShareable:
+              type: boolean
+
+    RoomPayload:
+      description: |
+        ASC.Files/Core/ApiModels/WebhookDto/RoomWebhookDto.cs. The room.* triggers
+        and every agent.* trigger - an agent is an AI room and has the same shape
+        today.
+
+        Not carried: logo, watermark, lifetime, tags, chatSettings. Each needs
+        per-request URL building or an extra query; read them from
+        GET api/2.0/files/rooms/{id}.
+      allOf:
+        - $ref: "#/components/schemas/FileEntryPayload"
+        - type: object
+          properties:
+            roomType:
+              type: integer
+              description: enum RoomType
+            type:
+              type: integer
+              description: enum FolderType
+            filesCount:
+              type: integer
+            foldersCount:
+              type: integer
+            private:
+              type: boolean
+            indexing:
+              type: boolean
+            denyDownload:
+              type: boolean
+            pinned:
+              type: boolean
+            quotaLimit:
+              type: integer
+              format: int64
+            usedSpace:
+              type: integer
+              format: int64
+            color:
+              type: string
+            cover:
+              type: string
 
     FormSubmitPayload:
       type: object
       description: |
-        Files/Core/Utils/WebhookManager.cs -> SubmittedFormData<T>. The ONLY
+        ASC.Files/Core/ApiModels/WebhookDto/FormSubmitWebhookDto.cs. The ONLY
         trigger with a wrapper rather than a bare entry, and the only one whose
-        `webhook.target.id` refers to a different entity (the original form)
-        than the entry that changed. form.filled.out and form.stopped do NOT use
-        this shape -- they send FilePayload.
+        `webhook.target.id` refers to a different entity (the original form) than
+        the entry that changed. form.filled.out and form.stopped do NOT use this
+        shape -- they send FilePayload.
       properties:
         originalForm:
-          $ref: "#/components/schemas/FileEntryPayload"
+          $ref: "#/components/schemas/FilePayload"
         submittedForm:
-          $ref: "#/components/schemas/FileEntryPayload"
+          $ref: "#/components/schemas/FilePayload"

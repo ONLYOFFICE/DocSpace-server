@@ -7,9 +7,9 @@ using DocSpace.Webhooks.SDK.Model;
 // ---------------------------------------------------------------- arguments
 
 var host = "localhost";
-var port = 5555;
+var port = 35555;
 var path = "/webhook";
-string? secret = Environment.GetEnvironmentVariable("DOCSPACE_WEBHOOK_SECRET");
+string? secret = "ednntakm";
 string? file = null;
 string? signature = null;
 
@@ -217,12 +217,18 @@ static string? Summarize(object? payload) => payload switch
 {
     UserPayload u => $"user: {u.UserName} <{u.Email}>  status={u.Status}",
     GroupPayload g => $"group: {g.Name}  id={g.Id}",
-    // Files and folders share one payload shape -- the publisher serializes
-    // the FileEntry<T> base, so fileEntryType is the only discriminator and
-    // no File/Folder-specific field is ever present.
-    FileEntryPayload e =>
-        $"{(e.FileEntryType == 2 ? "file" : "folder")}: {e.Title}  "
-        + $"id={e.Id?.ActualInstance}  parent={e.ParentId?.ActualInstance}",
+    // Files, folders and rooms each have their own schema. The generator
+    // flattens allOf, so these are unrelated classes -- there is no
+    // FileEntryPayload case that would catch all three.
+    FilePayload f =>
+        $"file: {f.Title}  id={f.Id?.ActualInstance}  "
+        + $"v{f.VarVersion}  {f.ContentLength} bytes",
+    FolderPayload d =>
+        $"folder: {d.Title}  id={d.Id?.ActualInstance}  "
+        + $"{d.FilesCount} files / {d.FoldersCount} folders",
+    RoomPayload r =>
+        $"room: {r.Title}  id={r.Id?.ActualInstance}  "
+        + $"roomType={r.RoomType}",
     FormSubmitPayload s => $"form: {s.SubmittedForm?.Title} "
                            + $"-> original {s.OriginalForm?.Id?.ActualInstance}",
     _ => null,

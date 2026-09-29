@@ -24,47 +24,33 @@
 package onlyoffice.docspace.webhooks.sdk.models
 
 import onlyoffice.docspace.webhooks.sdk.models.EntryId
+import onlyoffice.docspace.webhooks.sdk.models.UserSummaryPayload
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
 
 /**
- * The payload for EVERY file, folder, room, agent and form trigger.  There is deliberately no File- or Folder-specific schema. WebhookManager calls PublishAsync<T1,T2> with a static parameter type of FileEntry<T>, so T1 binds to the abstract base and System.Text.Json serializes by DECLARED type. File<T> and Folder<T> members -- pureTitle, version, contentLength, folderType, filesCount, isRoom -- therefore never reach the wire, however the entry was published.  One consequence worth internalising: `title` IS present, even for files. File<T> hides Title behind [JsonIgnore] and exposes pureTitle instead, but that override is invisible here because the base declaration is what gets serialized.  Verified against a captured production delivery: all 14 keys of a real file.created payload are members of this schema and nothing else. (Files/Core/Core/Entries/FileEntry.cs; [JsonIgnore] members excluded.) 
+ * ASC.Files/Core/ApiModels/WebhookDto/FileEntryWebhookDto.cs. What FilePayload, FolderPayload and RoomPayload have in common.  This schema is never sent on its own -- unlike the previous contract, where every file, folder, room, agent and form trigger sent exactly this and nothing else. The old payload was typed as the abstract FileEntry<T> at the publish site, so System.Text.Json serialized by DECLARED type and every File<T> and Folder<T> member was silently dropped: version, contentLength, fileType, folderType, filesCount, roomType never reached a receiver. That is fixed; the subtypes below carry their own fields.  Not carried, deliberately: access, security, securityByUsers, availableShareRights, shareSettings, canShare, shared, sharedForUser, sharedExternal, parentShared, isFavorite, requestToken, external, shareRecord. Those answer \"what may the caller see\", and a delivery has no caller - who receives it is decided by WebhookFileEntryAccessChecker against the subscription owner. Putting one user's permission matrix on the wire was both meaningless to the receiver and a disclosure. 
  *
  * @param id 
  * @param parentId 
- * @param rootId 
- * @param originId 
- * @param originRoomId 
- * @param folderIdDisplay 
- * @param mutableId 
- * @param title The entry name, e.g. \"321.xlsx\". Present for files as well as folders: File<T> overrides Title with [JsonIgnore] and exposes pureTitle instead, but that override is never reached because the base declaration is what gets serialized. 
- * @param isNew Declared abstract on FileEntry; omitted when false.
- * @param createBy 
- * @param createOn 
- * @param modifiedBy 
- * @param modifiedOn 
- * @param sharedBy 
- * @param rootCreateBy 
- * @param parentRoomCreatedBy 
+ * @param rootFolderId 
+ * @param title 
+ * @param fileEntryType 1 folder, 2 file. Present on every entry payload.
+ * @param created 
+ * @param createdBy 
+ * @param updated 
+ * @param updatedBy 
  * @param rootFolderType enum FolderType
  * @param parentRoomType enum FolderType
- * @param fileEntryType enum FileEntryType -- 1 folder, 2 file. The ONLY way to tell a folder from a file: no subtype-specific fields are ever sent. 
- * @param access enum FileShare
- * @param shared 
- * @param sharedForUser 
- * @param sharedExternal 
- * @param parentShared 
- * @param providerId 
- * @param providerKey 
+ * @param originId 
+ * @param originRoomId 
  * @param originTitle 
  * @param originRoomTitle 
- * @param order 
- * @param error 
- * @param tags TODO: expand Tag.
- * @param shareRecord TODO: expand FileShareRecord<T>.
- * @param security Caller-relative permission map (enum FilesSecurityActions -> bool). Internal ACL state on the wire. REVIEW. 
- * @param securityByUsers Per-user permission map. Initialised non-null, so it is emitted as {} rather than omitted. REVIEW. 
+ * @param providerItem 
+ * @param providerKey 
+ * @param providerId 
+ * @param order Position within an indexed room.
  */
 
 
@@ -76,49 +62,27 @@ data class FileEntryPayload (
     @Json(name = "parentId")
     val parentId: EntryId? = null,
 
-    @Json(name = "rootId")
-    val rootId: EntryId? = null,
+    @Json(name = "rootFolderId")
+    val rootFolderId: EntryId? = null,
 
-    @Json(name = "originId")
-    val originId: EntryId? = null,
-
-    @Json(name = "originRoomId")
-    val originRoomId: EntryId? = null,
-
-    @Json(name = "folderIdDisplay")
-    val folderIdDisplay: EntryId? = null,
-
-    @Json(name = "mutableId")
-    val mutableId: kotlin.Boolean? = null,
-
-    /* The entry name, e.g. \"321.xlsx\". Present for files as well as folders: File<T> overrides Title with [JsonIgnore] and exposes pureTitle instead, but that override is never reached because the base declaration is what gets serialized.  */
     @Json(name = "title")
     val title: kotlin.String? = null,
 
-    /* Declared abstract on FileEntry; omitted when false. */
-    @Json(name = "isNew")
-    val isNew: kotlin.Boolean? = null,
+    /* 1 folder, 2 file. Present on every entry payload. */
+    @Json(name = "fileEntryType")
+    val fileEntryType: kotlin.Int? = null,
 
-    @Json(name = "createBy")
-    val createBy: java.util.UUID? = null,
+    @Json(name = "created")
+    val created: java.time.OffsetDateTime? = null,
 
-    @Json(name = "createOn")
-    val createOn: java.time.OffsetDateTime? = null,
+    @Json(name = "createdBy")
+    val createdBy: UserSummaryPayload? = null,
 
-    @Json(name = "modifiedBy")
-    val modifiedBy: java.util.UUID? = null,
+    @Json(name = "updated")
+    val updated: java.time.OffsetDateTime? = null,
 
-    @Json(name = "modifiedOn")
-    val modifiedOn: java.time.OffsetDateTime? = null,
-
-    @Json(name = "sharedBy")
-    val sharedBy: java.util.UUID? = null,
-
-    @Json(name = "rootCreateBy")
-    val rootCreateBy: java.util.UUID? = null,
-
-    @Json(name = "parentRoomCreatedBy")
-    val parentRoomCreatedBy: java.util.UUID? = null,
+    @Json(name = "updatedBy")
+    val updatedBy: UserSummaryPayload? = null,
 
     /* enum FolderType */
     @Json(name = "rootFolderType")
@@ -128,31 +92,11 @@ data class FileEntryPayload (
     @Json(name = "parentRoomType")
     val parentRoomType: kotlin.Int? = null,
 
-    /* enum FileEntryType -- 1 folder, 2 file. The ONLY way to tell a folder from a file: no subtype-specific fields are ever sent.  */
-    @Json(name = "fileEntryType")
-    val fileEntryType: kotlin.Int? = null,
+    @Json(name = "originId")
+    val originId: EntryId? = null,
 
-    /* enum FileShare */
-    @Json(name = "access")
-    val access: kotlin.Int? = null,
-
-    @Json(name = "shared")
-    val shared: kotlin.Boolean? = null,
-
-    @Json(name = "sharedForUser")
-    val sharedForUser: kotlin.Boolean? = null,
-
-    @Json(name = "sharedExternal")
-    val sharedExternal: kotlin.Boolean? = null,
-
-    @Json(name = "parentShared")
-    val parentShared: kotlin.Boolean? = null,
-
-    @Json(name = "providerId")
-    val providerId: kotlin.Int? = null,
-
-    @Json(name = "providerKey")
-    val providerKey: kotlin.String? = null,
+    @Json(name = "originRoomId")
+    val originRoomId: EntryId? = null,
 
     @Json(name = "originTitle")
     val originTitle: kotlin.String? = null,
@@ -160,27 +104,18 @@ data class FileEntryPayload (
     @Json(name = "originRoomTitle")
     val originRoomTitle: kotlin.String? = null,
 
+    @Json(name = "providerItem")
+    val providerItem: kotlin.Boolean? = null,
+
+    @Json(name = "providerKey")
+    val providerKey: kotlin.String? = null,
+
+    @Json(name = "providerId")
+    val providerId: kotlin.Int? = null,
+
+    /* Position within an indexed room. */
     @Json(name = "order")
-    val order: kotlin.Int? = null,
-
-    @Json(name = "error")
-    val error: kotlin.String? = null,
-
-    /* TODO: expand Tag. */
-    @Json(name = "tags")
-    val tags: kotlin.collections.List<kotlin.collections.Map<kotlin.String, kotlin.Any>>? = null,
-
-    /* TODO: expand FileShareRecord<T>. */
-    @Json(name = "shareRecord")
-    val shareRecord: kotlin.collections.Map<kotlin.String, kotlin.Any>? = null,
-
-    /* Caller-relative permission map (enum FilesSecurityActions -> bool). Internal ACL state on the wire. REVIEW.  */
-    @Json(name = "security")
-    val security: kotlin.collections.Map<kotlin.String, kotlin.Boolean>? = null,
-
-    /* Per-user permission map. Initialised non-null, so it is emitted as {} rather than omitted. REVIEW.  */
-    @Json(name = "securityByUsers")
-    val securityByUsers: kotlin.collections.Map<kotlin.String, kotlin.collections.Map<kotlin.String, kotlin.Boolean>>? = null
+    val order: kotlin.Int? = null
 
 ) {
 

@@ -13,9 +13,9 @@
 /**
  * ONLYOFFICE DocSpace Webhooks
  *
- * Wire contract for OUTBOUND DocSpace webhook deliveries.  This is a hand-maintained document. It is NOT the REST API spec and shares no schemas with it: webhook payloads are the internal domain entities (UserInfo, GroupInfo, File<T>, Folder<T>), not the controller DTOs.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free.
+ * Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto). They began as copies of the matching REST DTOs and are free to diverge from them.  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free.
  *
- * The version of the OpenAPI document: 0.1.0
+ * The version of the OpenAPI document: 1.0.0
  * Generated by: https://openapi-generator.tech
  * Generator version: 7.25.0
  */
@@ -35,7 +35,7 @@ use \OnlyOffice\DocSpace\Webhooks\Sdk\ObjectSerializer;
  * GroupPayload Class Doc Comment
  *
  * @category Class
- * @description ASC.Core.Common/Core/GroupInfo.cs. Note &#x60;ID&#x60; in C#; the camelCase policy lowercases the whole leading run, so it is \&quot;id\&quot; on the wire, while &#x60;CategoryID&#x60; becomes \&quot;categoryID\&quot;.
+ * @description ASC.Api.Core/Webhook/Payloads/GroupWebhookDto.cs. A copy of the REST GroupDto.  The member list is not carried - a group can hold thousands of users and each would be expanded into every group event. &#x60;membersCount&#x60; is the hint that the roster changed; read it from GET api/2.0/group/{id}.
  * @package  OnlyOffice\DocSpace\Webhooks\Sdk
  * @author   OpenAPI Generator team
  * @link     https://openapi-generator.tech
@@ -60,10 +60,12 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     protected static $openAPITypes = [
         'id' => 'string',
         'name' => 'string',
-        'category_id' => 'string',
-        'parent' => '\OnlyOffice\DocSpace\Webhooks\Sdk\Model\GroupPayload',
-        'sid' => 'string',
-        'removed' => 'bool'
+        'parent' => 'string',
+        'category' => 'string',
+        'is_ldap' => 'bool',
+        'is_system' => 'bool',
+        'manager' => '\OnlyOffice\DocSpace\Webhooks\Sdk\Model\UserSummaryPayload',
+        'members_count' => 'int'
     ];
 
     /**
@@ -76,10 +78,12 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     protected static $openAPIFormats = [
         'id' => 'uuid',
         'name' => null,
-        'category_id' => 'uuid',
-        'parent' => null,
-        'sid' => null,
-        'removed' => null
+        'parent' => 'uuid',
+        'category' => 'uuid',
+        'is_ldap' => null,
+        'is_system' => null,
+        'manager' => null,
+        'members_count' => null
     ];
 
     /**
@@ -90,10 +94,12 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     protected static array $openAPINullables = [
         'id' => false,
         'name' => false,
-        'category_id' => false,
         'parent' => false,
-        'sid' => false,
-        'removed' => false
+        'category' => false,
+        'is_ldap' => false,
+        'is_system' => false,
+        'manager' => false,
+        'members_count' => false
     ];
 
     /**
@@ -184,10 +190,12 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     protected static $attributeMap = [
         'id' => 'id',
         'name' => 'name',
-        'category_id' => 'categoryID',
         'parent' => 'parent',
-        'sid' => 'sid',
-        'removed' => 'removed'
+        'category' => 'category',
+        'is_ldap' => 'isLDAP',
+        'is_system' => 'isSystem',
+        'manager' => 'manager',
+        'members_count' => 'membersCount'
     ];
 
     /**
@@ -198,10 +206,12 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     protected static $setters = [
         'id' => 'setId',
         'name' => 'setName',
-        'category_id' => 'setCategoryId',
         'parent' => 'setParent',
-        'sid' => 'setSid',
-        'removed' => 'setRemoved'
+        'category' => 'setCategory',
+        'is_ldap' => 'setIsLdap',
+        'is_system' => 'setIsSystem',
+        'manager' => 'setManager',
+        'members_count' => 'setMembersCount'
     ];
 
     /**
@@ -212,10 +222,12 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     protected static $getters = [
         'id' => 'getId',
         'name' => 'getName',
-        'category_id' => 'getCategoryId',
         'parent' => 'getParent',
-        'sid' => 'getSid',
-        'removed' => 'getRemoved'
+        'category' => 'getCategory',
+        'is_ldap' => 'getIsLdap',
+        'is_system' => 'getIsSystem',
+        'manager' => 'getManager',
+        'members_count' => 'getMembersCount'
     ];
 
     /**
@@ -277,10 +289,12 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     {
         $this->setIfExists('id', $data ?? [], null);
         $this->setIfExists('name', $data ?? [], null);
-        $this->setIfExists('category_id', $data ?? [], null);
         $this->setIfExists('parent', $data ?? [], null);
-        $this->setIfExists('sid', $data ?? [], null);
-        $this->setIfExists('removed', $data ?? [], null);
+        $this->setIfExists('category', $data ?? [], null);
+        $this->setIfExists('is_ldap', $data ?? [], null);
+        $this->setIfExists('is_system', $data ?? [], null);
+        $this->setIfExists('manager', $data ?? [], null);
+        $this->setIfExists('members_count', $data ?? [], null);
     }
 
     /**
@@ -380,36 +394,9 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Gets category_id
-     *
-     * @return string|null
-     */
-    public function getCategoryId()
-    {
-        return $this->container['category_id'];
-    }
-
-    /**
-     * Sets category_id
-     *
-     * @param string|null $category_id category_id
-     *
-     * @return self
-     */
-    public function setCategoryId($category_id)
-    {
-        if (is_null($category_id)) {
-            throw new \InvalidArgumentException('non-nullable category_id cannot be null');
-        }
-        $this->container['category_id'] = $category_id;
-
-        return $this;
-    }
-
-    /**
      * Gets parent
      *
-     * @return \OnlyOffice\DocSpace\Webhooks\Sdk\Model\GroupPayload|null
+     * @return string|null
      */
     public function getParent()
     {
@@ -419,7 +406,7 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets parent
      *
-     * @param \OnlyOffice\DocSpace\Webhooks\Sdk\Model\GroupPayload|null $parent parent
+     * @param string|null $parent parent
      *
      * @return self
      */
@@ -434,55 +421,136 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     }
 
     /**
-     * Gets sid
+     * Gets category
      *
      * @return string|null
      */
-    public function getSid()
+    public function getCategory()
     {
-        return $this->container['sid'];
+        return $this->container['category'];
     }
 
     /**
-     * Sets sid
+     * Sets category
      *
-     * @param string|null $sid LDAP identifier. REVIEW.
+     * @param string|null $category category
      *
      * @return self
      */
-    public function setSid($sid)
+    public function setCategory($category)
     {
-        if (is_null($sid)) {
-            throw new \InvalidArgumentException('non-nullable sid cannot be null');
+        if (is_null($category)) {
+            throw new \InvalidArgumentException('non-nullable category cannot be null');
         }
-        $this->container['sid'] = $sid;
+        $this->container['category'] = $category;
 
         return $this;
     }
 
     /**
-     * Gets removed
+     * Gets is_ldap
      *
      * @return bool|null
      */
-    public function getRemoved()
+    public function getIsLdap()
     {
-        return $this->container['removed'];
+        return $this->container['is_ldap'];
     }
 
     /**
-     * Sets removed
+     * Sets is_ldap
      *
-     * @param bool|null $removed removed
+     * @param bool|null $is_ldap is_ldap
      *
      * @return self
      */
-    public function setRemoved($removed)
+    public function setIsLdap($is_ldap)
     {
-        if (is_null($removed)) {
-            throw new \InvalidArgumentException('non-nullable removed cannot be null');
+        if (is_null($is_ldap)) {
+            throw new \InvalidArgumentException('non-nullable is_ldap cannot be null');
         }
-        $this->container['removed'] = $removed;
+        $this->container['is_ldap'] = $is_ldap;
+
+        return $this;
+    }
+
+    /**
+     * Gets is_system
+     *
+     * @return bool|null
+     */
+    public function getIsSystem()
+    {
+        return $this->container['is_system'];
+    }
+
+    /**
+     * Sets is_system
+     *
+     * @param bool|null $is_system is_system
+     *
+     * @return self
+     */
+    public function setIsSystem($is_system)
+    {
+        if (is_null($is_system)) {
+            throw new \InvalidArgumentException('non-nullable is_system cannot be null');
+        }
+        $this->container['is_system'] = $is_system;
+
+        return $this;
+    }
+
+    /**
+     * Gets manager
+     *
+     * @return \OnlyOffice\DocSpace\Webhooks\Sdk\Model\UserSummaryPayload|null
+     */
+    public function getManager()
+    {
+        return $this->container['manager'];
+    }
+
+    /**
+     * Sets manager
+     *
+     * @param \OnlyOffice\DocSpace\Webhooks\Sdk\Model\UserSummaryPayload|null $manager manager
+     *
+     * @return self
+     */
+    public function setManager($manager)
+    {
+        if (is_null($manager)) {
+            throw new \InvalidArgumentException('non-nullable manager cannot be null');
+        }
+        $this->container['manager'] = $manager;
+
+        return $this;
+    }
+
+    /**
+     * Gets members_count
+     *
+     * @return int|null
+     */
+    public function getMembersCount()
+    {
+        return $this->container['members_count'];
+    }
+
+    /**
+     * Sets members_count
+     *
+     * @param int|null $members_count members_count
+     *
+     * @return self
+     */
+    public function setMembersCount($members_count)
+    {
+        if (is_null($members_count)) {
+            throw new \InvalidArgumentException('non-nullable members_count cannot be null');
+        }
+        $this->container['members_count'] = $members_count;
 
         return $this;
     }

@@ -1,9 +1,9 @@
 /*
 ONLYOFFICE DocSpace Webhooks
 
-Wire contract for OUTBOUND DocSpace webhook deliveries.  This is a hand-maintained document. It is NOT the REST API spec and shares no schemas with it: webhook payloads are the internal domain entities (UserInfo, GroupInfo, File<T>, Folder<T>), not the controller DTOs.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto). They began as copies of the matching REST DTOs and are free to diverge from them.  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
 
-API version: 0.1.0
+API version: 1.0.0
 */
 
 // Code generated by OpenAPI Generator (https://openapi-generator.tech); DO NOT EDIT.
@@ -18,49 +18,49 @@ import (
 // checks if the UserPayload type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &UserPayload{}
 
-// UserPayload ASC.Core.Common/Core/UserInfo.cs -- the domain entity, verbatim. It carries NO [JsonIgnore] at all, so every public member below reaches the wire. sid / ssoNameId / ssoSessionId / ldapQouta are null on portals without LDAP or SSO and therefore invisible in most test captures; they DO appear on LDAP/SSO tenants, and are flagged REVIEW below. 
+// UserPayload ASC.Api.Core/Webhook/Payloads/UserWebhookDto.cs. A copy of the REST EmployeeFullDto, owned by the webhook contract and free to diverge from it.  Not carried, deliberately: sid / ssoNameId / ssoSessionId (LDAP and SAML identifiers, and a SAML SESSION id, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim, and `shared`. `contacts` appears once, as a typed list, rather than twice in two shapes. 
 type UserPayload struct {
 	Id *string `json:"id,omitempty"`
+	DisplayName *string `json:"displayName,omitempty"`
 	FirstName *string `json:"firstName,omitempty"`
 	LastName *string `json:"lastName,omitempty"`
 	UserName *string `json:"userName,omitempty"`
 	Email *string `json:"email,omitempty"`
-	BirthDate *time.Time `json:"birthDate,omitempty"`
-	Sex *bool `json:"sex,omitempty"`
+	Contacts []ContactPayload `json:"contacts,omitempty"`
 	// enum EmployeeStatus
 	Status *int32 `json:"status,omitempty"`
-	// enum EmployeeActivationStatus (flags)
+	// enum EmployeeActivationStatus (flags), AutoGenerated masked off
 	ActivationStatus *int32 `json:"activationStatus,omitempty"`
-	TerminatedDate *time.Time `json:"terminatedDate,omitempty"`
-	Title *string `json:"title,omitempty"`
-	WorkFromDate *time.Time `json:"workFromDate,omitempty"`
+	Terminated *time.Time `json:"terminated,omitempty"`
+	// Comma-separated group names, HTML-encoded.
+	Department *string `json:"department,omitempty"`
+	Groups []GroupSummaryPayload `json:"groups,omitempty"`
 	Location *string `json:"location,omitempty"`
 	Notes *string `json:"notes,omitempty"`
-	// Flattened form of contactsList. BOTH are emitted -- the same data twice. 
-	Contacts *string `json:"contacts,omitempty"`
-	ContactsList []string `json:"contactsList,omitempty"`
-	Removed *bool `json:"removed,omitempty"`
-	LastModified *time.Time `json:"lastModified,omitempty"`
-	TenantId *int32 `json:"tenantId,omitempty"`
+	IsAdmin *bool `json:"isAdmin,omitempty"`
+	IsRoomAdmin *bool `json:"isRoomAdmin,omitempty"`
+	IsOwner *bool `json:"isOwner,omitempty"`
+	IsVisitor *bool `json:"isVisitor,omitempty"`
+	IsCollaborator *bool `json:"isCollaborator,omitempty"`
+	IsLDAP *bool `json:"isLDAP,omitempty"`
+	IsSSO *bool `json:"isSSO,omitempty"`
+	ListAdminModules []string `json:"listAdminModules,omitempty"`
 	CultureName *string `json:"cultureName,omitempty"`
 	MobilePhone *string `json:"mobilePhone,omitempty"`
 	// enum MobilePhoneActivationStatus
 	MobilePhoneActivationStatus *int32 `json:"mobilePhoneActivationStatus,omitempty"`
-	CreateDate *time.Time `json:"createDate,omitempty"`
-	CreatedBy *string `json:"createdBy,omitempty"`
-	Spam *bool `json:"spam,omitempty"`
-	// LDAP identifier. REVIEW.
-	Sid *string `json:"sid,omitempty"`
-	// sic -- misspelled in the domain type, and misspelled on the wire. LDAP quota. REVIEW. 
-	LdapQouta *int64 `json:"ldapQouta,omitempty"`
-	// SAML identifier. REVIEW.
-	SsoNameId *string `json:"ssoNameId,omitempty"`
-	// SAML SESSION identifier. REVIEW -- should almost certainly not be on the wire. 
-	SsoSessionId *string `json:"ssoSessionId,omitempty"`
-	// computed getter
-	IsActive *bool `json:"isActive,omitempty"`
-	// computed getter
-	CheckActivation *bool `json:"checkActivation,omitempty"`
+	QuotaLimit *int64 `json:"quotaLimit,omitempty"`
+	UsedSpace *float32 `json:"usedSpace,omitempty"`
+	IsCustomQuota *bool `json:"isCustomQuota,omitempty"`
+	CreatedBy *UserSummaryPayload `json:"createdBy,omitempty"`
+	RegistrationDate *time.Time `json:"registrationDate,omitempty"`
+	HasAvatar *bool `json:"hasAvatar,omitempty"`
+	Avatar *string `json:"avatar,omitempty"`
+	AvatarOriginal *string `json:"avatarOriginal,omitempty"`
+	AvatarMax *string `json:"avatarMax,omitempty"`
+	AvatarMedium *string `json:"avatarMedium,omitempty"`
+	AvatarSmall *string `json:"avatarSmall,omitempty"`
+	ProfileUrl *string `json:"profileUrl,omitempty"`
 }
 
 // NewUserPayload instantiates a new UserPayload object
@@ -110,6 +110,38 @@ func (o *UserPayload) HasId() bool {
 // SetId gets a reference to the given string and assigns it to the Id field.
 func (o *UserPayload) SetId(v string) {
 	o.Id = &v
+}
+
+// GetDisplayName returns the DisplayName field value if set, zero value otherwise.
+func (o *UserPayload) GetDisplayName() string {
+	if o == nil || IsNil(o.DisplayName) {
+		var ret string
+		return ret
+	}
+	return *o.DisplayName
+}
+
+// GetDisplayNameOk returns a tuple with the DisplayName field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UserPayload) GetDisplayNameOk() (*string, bool) {
+	if o == nil || IsNil(o.DisplayName) {
+		return nil, false
+	}
+	return o.DisplayName, true
+}
+
+// HasDisplayName returns a boolean if a field has been set.
+func (o *UserPayload) HasDisplayName() bool {
+	if o != nil && !IsNil(o.DisplayName) {
+		return true
+	}
+
+	return false
+}
+
+// SetDisplayName gets a reference to the given string and assigns it to the DisplayName field.
+func (o *UserPayload) SetDisplayName(v string) {
+	o.DisplayName = &v
 }
 
 // GetFirstName returns the FirstName field value if set, zero value otherwise.
@@ -240,68 +272,36 @@ func (o *UserPayload) SetEmail(v string) {
 	o.Email = &v
 }
 
-// GetBirthDate returns the BirthDate field value if set, zero value otherwise.
-func (o *UserPayload) GetBirthDate() time.Time {
-	if o == nil || IsNil(o.BirthDate) {
-		var ret time.Time
+// GetContacts returns the Contacts field value if set, zero value otherwise.
+func (o *UserPayload) GetContacts() []ContactPayload {
+	if o == nil || IsNil(o.Contacts) {
+		var ret []ContactPayload
 		return ret
 	}
-	return *o.BirthDate
+	return o.Contacts
 }
 
-// GetBirthDateOk returns a tuple with the BirthDate field value if set, nil otherwise
+// GetContactsOk returns a tuple with the Contacts field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserPayload) GetBirthDateOk() (*time.Time, bool) {
-	if o == nil || IsNil(o.BirthDate) {
+func (o *UserPayload) GetContactsOk() ([]ContactPayload, bool) {
+	if o == nil || IsNil(o.Contacts) {
 		return nil, false
 	}
-	return o.BirthDate, true
+	return o.Contacts, true
 }
 
-// HasBirthDate returns a boolean if a field has been set.
-func (o *UserPayload) HasBirthDate() bool {
-	if o != nil && !IsNil(o.BirthDate) {
+// HasContacts returns a boolean if a field has been set.
+func (o *UserPayload) HasContacts() bool {
+	if o != nil && !IsNil(o.Contacts) {
 		return true
 	}
 
 	return false
 }
 
-// SetBirthDate gets a reference to the given time.Time and assigns it to the BirthDate field.
-func (o *UserPayload) SetBirthDate(v time.Time) {
-	o.BirthDate = &v
-}
-
-// GetSex returns the Sex field value if set, zero value otherwise.
-func (o *UserPayload) GetSex() bool {
-	if o == nil || IsNil(o.Sex) {
-		var ret bool
-		return ret
-	}
-	return *o.Sex
-}
-
-// GetSexOk returns a tuple with the Sex field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *UserPayload) GetSexOk() (*bool, bool) {
-	if o == nil || IsNil(o.Sex) {
-		return nil, false
-	}
-	return o.Sex, true
-}
-
-// HasSex returns a boolean if a field has been set.
-func (o *UserPayload) HasSex() bool {
-	if o != nil && !IsNil(o.Sex) {
-		return true
-	}
-
-	return false
-}
-
-// SetSex gets a reference to the given bool and assigns it to the Sex field.
-func (o *UserPayload) SetSex(v bool) {
-	o.Sex = &v
+// SetContacts gets a reference to the given []ContactPayload and assigns it to the Contacts field.
+func (o *UserPayload) SetContacts(v []ContactPayload) {
+	o.Contacts = v
 }
 
 // GetStatus returns the Status field value if set, zero value otherwise.
@@ -368,100 +368,100 @@ func (o *UserPayload) SetActivationStatus(v int32) {
 	o.ActivationStatus = &v
 }
 
-// GetTerminatedDate returns the TerminatedDate field value if set, zero value otherwise.
-func (o *UserPayload) GetTerminatedDate() time.Time {
-	if o == nil || IsNil(o.TerminatedDate) {
+// GetTerminated returns the Terminated field value if set, zero value otherwise.
+func (o *UserPayload) GetTerminated() time.Time {
+	if o == nil || IsNil(o.Terminated) {
 		var ret time.Time
 		return ret
 	}
-	return *o.TerminatedDate
+	return *o.Terminated
 }
 
-// GetTerminatedDateOk returns a tuple with the TerminatedDate field value if set, nil otherwise
+// GetTerminatedOk returns a tuple with the Terminated field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserPayload) GetTerminatedDateOk() (*time.Time, bool) {
-	if o == nil || IsNil(o.TerminatedDate) {
+func (o *UserPayload) GetTerminatedOk() (*time.Time, bool) {
+	if o == nil || IsNil(o.Terminated) {
 		return nil, false
 	}
-	return o.TerminatedDate, true
+	return o.Terminated, true
 }
 
-// HasTerminatedDate returns a boolean if a field has been set.
-func (o *UserPayload) HasTerminatedDate() bool {
-	if o != nil && !IsNil(o.TerminatedDate) {
+// HasTerminated returns a boolean if a field has been set.
+func (o *UserPayload) HasTerminated() bool {
+	if o != nil && !IsNil(o.Terminated) {
 		return true
 	}
 
 	return false
 }
 
-// SetTerminatedDate gets a reference to the given time.Time and assigns it to the TerminatedDate field.
-func (o *UserPayload) SetTerminatedDate(v time.Time) {
-	o.TerminatedDate = &v
+// SetTerminated gets a reference to the given time.Time and assigns it to the Terminated field.
+func (o *UserPayload) SetTerminated(v time.Time) {
+	o.Terminated = &v
 }
 
-// GetTitle returns the Title field value if set, zero value otherwise.
-func (o *UserPayload) GetTitle() string {
-	if o == nil || IsNil(o.Title) {
+// GetDepartment returns the Department field value if set, zero value otherwise.
+func (o *UserPayload) GetDepartment() string {
+	if o == nil || IsNil(o.Department) {
 		var ret string
 		return ret
 	}
-	return *o.Title
+	return *o.Department
 }
 
-// GetTitleOk returns a tuple with the Title field value if set, nil otherwise
+// GetDepartmentOk returns a tuple with the Department field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserPayload) GetTitleOk() (*string, bool) {
-	if o == nil || IsNil(o.Title) {
+func (o *UserPayload) GetDepartmentOk() (*string, bool) {
+	if o == nil || IsNil(o.Department) {
 		return nil, false
 	}
-	return o.Title, true
+	return o.Department, true
 }
 
-// HasTitle returns a boolean if a field has been set.
-func (o *UserPayload) HasTitle() bool {
-	if o != nil && !IsNil(o.Title) {
+// HasDepartment returns a boolean if a field has been set.
+func (o *UserPayload) HasDepartment() bool {
+	if o != nil && !IsNil(o.Department) {
 		return true
 	}
 
 	return false
 }
 
-// SetTitle gets a reference to the given string and assigns it to the Title field.
-func (o *UserPayload) SetTitle(v string) {
-	o.Title = &v
+// SetDepartment gets a reference to the given string and assigns it to the Department field.
+func (o *UserPayload) SetDepartment(v string) {
+	o.Department = &v
 }
 
-// GetWorkFromDate returns the WorkFromDate field value if set, zero value otherwise.
-func (o *UserPayload) GetWorkFromDate() time.Time {
-	if o == nil || IsNil(o.WorkFromDate) {
-		var ret time.Time
+// GetGroups returns the Groups field value if set, zero value otherwise.
+func (o *UserPayload) GetGroups() []GroupSummaryPayload {
+	if o == nil || IsNil(o.Groups) {
+		var ret []GroupSummaryPayload
 		return ret
 	}
-	return *o.WorkFromDate
+	return o.Groups
 }
 
-// GetWorkFromDateOk returns a tuple with the WorkFromDate field value if set, nil otherwise
+// GetGroupsOk returns a tuple with the Groups field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserPayload) GetWorkFromDateOk() (*time.Time, bool) {
-	if o == nil || IsNil(o.WorkFromDate) {
+func (o *UserPayload) GetGroupsOk() ([]GroupSummaryPayload, bool) {
+	if o == nil || IsNil(o.Groups) {
 		return nil, false
 	}
-	return o.WorkFromDate, true
+	return o.Groups, true
 }
 
-// HasWorkFromDate returns a boolean if a field has been set.
-func (o *UserPayload) HasWorkFromDate() bool {
-	if o != nil && !IsNil(o.WorkFromDate) {
+// HasGroups returns a boolean if a field has been set.
+func (o *UserPayload) HasGroups() bool {
+	if o != nil && !IsNil(o.Groups) {
 		return true
 	}
 
 	return false
 }
 
-// SetWorkFromDate gets a reference to the given time.Time and assigns it to the WorkFromDate field.
-func (o *UserPayload) SetWorkFromDate(v time.Time) {
-	o.WorkFromDate = &v
+// SetGroups gets a reference to the given []GroupSummaryPayload and assigns it to the Groups field.
+func (o *UserPayload) SetGroups(v []GroupSummaryPayload) {
+	o.Groups = v
 }
 
 // GetLocation returns the Location field value if set, zero value otherwise.
@@ -528,164 +528,260 @@ func (o *UserPayload) SetNotes(v string) {
 	o.Notes = &v
 }
 
-// GetContacts returns the Contacts field value if set, zero value otherwise.
-func (o *UserPayload) GetContacts() string {
-	if o == nil || IsNil(o.Contacts) {
-		var ret string
-		return ret
-	}
-	return *o.Contacts
-}
-
-// GetContactsOk returns a tuple with the Contacts field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *UserPayload) GetContactsOk() (*string, bool) {
-	if o == nil || IsNil(o.Contacts) {
-		return nil, false
-	}
-	return o.Contacts, true
-}
-
-// HasContacts returns a boolean if a field has been set.
-func (o *UserPayload) HasContacts() bool {
-	if o != nil && !IsNil(o.Contacts) {
-		return true
-	}
-
-	return false
-}
-
-// SetContacts gets a reference to the given string and assigns it to the Contacts field.
-func (o *UserPayload) SetContacts(v string) {
-	o.Contacts = &v
-}
-
-// GetContactsList returns the ContactsList field value if set, zero value otherwise.
-func (o *UserPayload) GetContactsList() []string {
-	if o == nil || IsNil(o.ContactsList) {
-		var ret []string
-		return ret
-	}
-	return o.ContactsList
-}
-
-// GetContactsListOk returns a tuple with the ContactsList field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *UserPayload) GetContactsListOk() ([]string, bool) {
-	if o == nil || IsNil(o.ContactsList) {
-		return nil, false
-	}
-	return o.ContactsList, true
-}
-
-// HasContactsList returns a boolean if a field has been set.
-func (o *UserPayload) HasContactsList() bool {
-	if o != nil && !IsNil(o.ContactsList) {
-		return true
-	}
-
-	return false
-}
-
-// SetContactsList gets a reference to the given []string and assigns it to the ContactsList field.
-func (o *UserPayload) SetContactsList(v []string) {
-	o.ContactsList = v
-}
-
-// GetRemoved returns the Removed field value if set, zero value otherwise.
-func (o *UserPayload) GetRemoved() bool {
-	if o == nil || IsNil(o.Removed) {
+// GetIsAdmin returns the IsAdmin field value if set, zero value otherwise.
+func (o *UserPayload) GetIsAdmin() bool {
+	if o == nil || IsNil(o.IsAdmin) {
 		var ret bool
 		return ret
 	}
-	return *o.Removed
+	return *o.IsAdmin
 }
 
-// GetRemovedOk returns a tuple with the Removed field value if set, nil otherwise
+// GetIsAdminOk returns a tuple with the IsAdmin field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserPayload) GetRemovedOk() (*bool, bool) {
-	if o == nil || IsNil(o.Removed) {
+func (o *UserPayload) GetIsAdminOk() (*bool, bool) {
+	if o == nil || IsNil(o.IsAdmin) {
 		return nil, false
 	}
-	return o.Removed, true
+	return o.IsAdmin, true
 }
 
-// HasRemoved returns a boolean if a field has been set.
-func (o *UserPayload) HasRemoved() bool {
-	if o != nil && !IsNil(o.Removed) {
+// HasIsAdmin returns a boolean if a field has been set.
+func (o *UserPayload) HasIsAdmin() bool {
+	if o != nil && !IsNil(o.IsAdmin) {
 		return true
 	}
 
 	return false
 }
 
-// SetRemoved gets a reference to the given bool and assigns it to the Removed field.
-func (o *UserPayload) SetRemoved(v bool) {
-	o.Removed = &v
+// SetIsAdmin gets a reference to the given bool and assigns it to the IsAdmin field.
+func (o *UserPayload) SetIsAdmin(v bool) {
+	o.IsAdmin = &v
 }
 
-// GetLastModified returns the LastModified field value if set, zero value otherwise.
-func (o *UserPayload) GetLastModified() time.Time {
-	if o == nil || IsNil(o.LastModified) {
-		var ret time.Time
+// GetIsRoomAdmin returns the IsRoomAdmin field value if set, zero value otherwise.
+func (o *UserPayload) GetIsRoomAdmin() bool {
+	if o == nil || IsNil(o.IsRoomAdmin) {
+		var ret bool
 		return ret
 	}
-	return *o.LastModified
+	return *o.IsRoomAdmin
 }
 
-// GetLastModifiedOk returns a tuple with the LastModified field value if set, nil otherwise
+// GetIsRoomAdminOk returns a tuple with the IsRoomAdmin field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserPayload) GetLastModifiedOk() (*time.Time, bool) {
-	if o == nil || IsNil(o.LastModified) {
+func (o *UserPayload) GetIsRoomAdminOk() (*bool, bool) {
+	if o == nil || IsNil(o.IsRoomAdmin) {
 		return nil, false
 	}
-	return o.LastModified, true
+	return o.IsRoomAdmin, true
 }
 
-// HasLastModified returns a boolean if a field has been set.
-func (o *UserPayload) HasLastModified() bool {
-	if o != nil && !IsNil(o.LastModified) {
+// HasIsRoomAdmin returns a boolean if a field has been set.
+func (o *UserPayload) HasIsRoomAdmin() bool {
+	if o != nil && !IsNil(o.IsRoomAdmin) {
 		return true
 	}
 
 	return false
 }
 
-// SetLastModified gets a reference to the given time.Time and assigns it to the LastModified field.
-func (o *UserPayload) SetLastModified(v time.Time) {
-	o.LastModified = &v
+// SetIsRoomAdmin gets a reference to the given bool and assigns it to the IsRoomAdmin field.
+func (o *UserPayload) SetIsRoomAdmin(v bool) {
+	o.IsRoomAdmin = &v
 }
 
-// GetTenantId returns the TenantId field value if set, zero value otherwise.
-func (o *UserPayload) GetTenantId() int32 {
-	if o == nil || IsNil(o.TenantId) {
-		var ret int32
+// GetIsOwner returns the IsOwner field value if set, zero value otherwise.
+func (o *UserPayload) GetIsOwner() bool {
+	if o == nil || IsNil(o.IsOwner) {
+		var ret bool
 		return ret
 	}
-	return *o.TenantId
+	return *o.IsOwner
 }
 
-// GetTenantIdOk returns a tuple with the TenantId field value if set, nil otherwise
+// GetIsOwnerOk returns a tuple with the IsOwner field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserPayload) GetTenantIdOk() (*int32, bool) {
-	if o == nil || IsNil(o.TenantId) {
+func (o *UserPayload) GetIsOwnerOk() (*bool, bool) {
+	if o == nil || IsNil(o.IsOwner) {
 		return nil, false
 	}
-	return o.TenantId, true
+	return o.IsOwner, true
 }
 
-// HasTenantId returns a boolean if a field has been set.
-func (o *UserPayload) HasTenantId() bool {
-	if o != nil && !IsNil(o.TenantId) {
+// HasIsOwner returns a boolean if a field has been set.
+func (o *UserPayload) HasIsOwner() bool {
+	if o != nil && !IsNil(o.IsOwner) {
 		return true
 	}
 
 	return false
 }
 
-// SetTenantId gets a reference to the given int32 and assigns it to the TenantId field.
-func (o *UserPayload) SetTenantId(v int32) {
-	o.TenantId = &v
+// SetIsOwner gets a reference to the given bool and assigns it to the IsOwner field.
+func (o *UserPayload) SetIsOwner(v bool) {
+	o.IsOwner = &v
+}
+
+// GetIsVisitor returns the IsVisitor field value if set, zero value otherwise.
+func (o *UserPayload) GetIsVisitor() bool {
+	if o == nil || IsNil(o.IsVisitor) {
+		var ret bool
+		return ret
+	}
+	return *o.IsVisitor
+}
+
+// GetIsVisitorOk returns a tuple with the IsVisitor field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UserPayload) GetIsVisitorOk() (*bool, bool) {
+	if o == nil || IsNil(o.IsVisitor) {
+		return nil, false
+	}
+	return o.IsVisitor, true
+}
+
+// HasIsVisitor returns a boolean if a field has been set.
+func (o *UserPayload) HasIsVisitor() bool {
+	if o != nil && !IsNil(o.IsVisitor) {
+		return true
+	}
+
+	return false
+}
+
+// SetIsVisitor gets a reference to the given bool and assigns it to the IsVisitor field.
+func (o *UserPayload) SetIsVisitor(v bool) {
+	o.IsVisitor = &v
+}
+
+// GetIsCollaborator returns the IsCollaborator field value if set, zero value otherwise.
+func (o *UserPayload) GetIsCollaborator() bool {
+	if o == nil || IsNil(o.IsCollaborator) {
+		var ret bool
+		return ret
+	}
+	return *o.IsCollaborator
+}
+
+// GetIsCollaboratorOk returns a tuple with the IsCollaborator field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UserPayload) GetIsCollaboratorOk() (*bool, bool) {
+	if o == nil || IsNil(o.IsCollaborator) {
+		return nil, false
+	}
+	return o.IsCollaborator, true
+}
+
+// HasIsCollaborator returns a boolean if a field has been set.
+func (o *UserPayload) HasIsCollaborator() bool {
+	if o != nil && !IsNil(o.IsCollaborator) {
+		return true
+	}
+
+	return false
+}
+
+// SetIsCollaborator gets a reference to the given bool and assigns it to the IsCollaborator field.
+func (o *UserPayload) SetIsCollaborator(v bool) {
+	o.IsCollaborator = &v
+}
+
+// GetIsLDAP returns the IsLDAP field value if set, zero value otherwise.
+func (o *UserPayload) GetIsLDAP() bool {
+	if o == nil || IsNil(o.IsLDAP) {
+		var ret bool
+		return ret
+	}
+	return *o.IsLDAP
+}
+
+// GetIsLDAPOk returns a tuple with the IsLDAP field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UserPayload) GetIsLDAPOk() (*bool, bool) {
+	if o == nil || IsNil(o.IsLDAP) {
+		return nil, false
+	}
+	return o.IsLDAP, true
+}
+
+// HasIsLDAP returns a boolean if a field has been set.
+func (o *UserPayload) HasIsLDAP() bool {
+	if o != nil && !IsNil(o.IsLDAP) {
+		return true
+	}
+
+	return false
+}
+
+// SetIsLDAP gets a reference to the given bool and assigns it to the IsLDAP field.
+func (o *UserPayload) SetIsLDAP(v bool) {
+	o.IsLDAP = &v
+}
+
+// GetIsSSO returns the IsSSO field value if set, zero value otherwise.
+func (o *UserPayload) GetIsSSO() bool {
+	if o == nil || IsNil(o.IsSSO) {
+		var ret bool
+		return ret
+	}
+	return *o.IsSSO
+}
+
+// GetIsSSOOk returns a tuple with the IsSSO field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UserPayload) GetIsSSOOk() (*bool, bool) {
+	if o == nil || IsNil(o.IsSSO) {
+		return nil, false
+	}
+	return o.IsSSO, true
+}
+
+// HasIsSSO returns a boolean if a field has been set.
+func (o *UserPayload) HasIsSSO() bool {
+	if o != nil && !IsNil(o.IsSSO) {
+		return true
+	}
+
+	return false
+}
+
+// SetIsSSO gets a reference to the given bool and assigns it to the IsSSO field.
+func (o *UserPayload) SetIsSSO(v bool) {
+	o.IsSSO = &v
+}
+
+// GetListAdminModules returns the ListAdminModules field value if set, zero value otherwise.
+func (o *UserPayload) GetListAdminModules() []string {
+	if o == nil || IsNil(o.ListAdminModules) {
+		var ret []string
+		return ret
+	}
+	return o.ListAdminModules
+}
+
+// GetListAdminModulesOk returns a tuple with the ListAdminModules field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UserPayload) GetListAdminModulesOk() ([]string, bool) {
+	if o == nil || IsNil(o.ListAdminModules) {
+		return nil, false
+	}
+	return o.ListAdminModules, true
+}
+
+// HasListAdminModules returns a boolean if a field has been set.
+func (o *UserPayload) HasListAdminModules() bool {
+	if o != nil && !IsNil(o.ListAdminModules) {
+		return true
+	}
+
+	return false
+}
+
+// SetListAdminModules gets a reference to the given []string and assigns it to the ListAdminModules field.
+func (o *UserPayload) SetListAdminModules(v []string) {
+	o.ListAdminModules = v
 }
 
 // GetCultureName returns the CultureName field value if set, zero value otherwise.
@@ -784,42 +880,106 @@ func (o *UserPayload) SetMobilePhoneActivationStatus(v int32) {
 	o.MobilePhoneActivationStatus = &v
 }
 
-// GetCreateDate returns the CreateDate field value if set, zero value otherwise.
-func (o *UserPayload) GetCreateDate() time.Time {
-	if o == nil || IsNil(o.CreateDate) {
-		var ret time.Time
+// GetQuotaLimit returns the QuotaLimit field value if set, zero value otherwise.
+func (o *UserPayload) GetQuotaLimit() int64 {
+	if o == nil || IsNil(o.QuotaLimit) {
+		var ret int64
 		return ret
 	}
-	return *o.CreateDate
+	return *o.QuotaLimit
 }
 
-// GetCreateDateOk returns a tuple with the CreateDate field value if set, nil otherwise
+// GetQuotaLimitOk returns a tuple with the QuotaLimit field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserPayload) GetCreateDateOk() (*time.Time, bool) {
-	if o == nil || IsNil(o.CreateDate) {
+func (o *UserPayload) GetQuotaLimitOk() (*int64, bool) {
+	if o == nil || IsNil(o.QuotaLimit) {
 		return nil, false
 	}
-	return o.CreateDate, true
+	return o.QuotaLimit, true
 }
 
-// HasCreateDate returns a boolean if a field has been set.
-func (o *UserPayload) HasCreateDate() bool {
-	if o != nil && !IsNil(o.CreateDate) {
+// HasQuotaLimit returns a boolean if a field has been set.
+func (o *UserPayload) HasQuotaLimit() bool {
+	if o != nil && !IsNil(o.QuotaLimit) {
 		return true
 	}
 
 	return false
 }
 
-// SetCreateDate gets a reference to the given time.Time and assigns it to the CreateDate field.
-func (o *UserPayload) SetCreateDate(v time.Time) {
-	o.CreateDate = &v
+// SetQuotaLimit gets a reference to the given int64 and assigns it to the QuotaLimit field.
+func (o *UserPayload) SetQuotaLimit(v int64) {
+	o.QuotaLimit = &v
+}
+
+// GetUsedSpace returns the UsedSpace field value if set, zero value otherwise.
+func (o *UserPayload) GetUsedSpace() float32 {
+	if o == nil || IsNil(o.UsedSpace) {
+		var ret float32
+		return ret
+	}
+	return *o.UsedSpace
+}
+
+// GetUsedSpaceOk returns a tuple with the UsedSpace field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UserPayload) GetUsedSpaceOk() (*float32, bool) {
+	if o == nil || IsNil(o.UsedSpace) {
+		return nil, false
+	}
+	return o.UsedSpace, true
+}
+
+// HasUsedSpace returns a boolean if a field has been set.
+func (o *UserPayload) HasUsedSpace() bool {
+	if o != nil && !IsNil(o.UsedSpace) {
+		return true
+	}
+
+	return false
+}
+
+// SetUsedSpace gets a reference to the given float32 and assigns it to the UsedSpace field.
+func (o *UserPayload) SetUsedSpace(v float32) {
+	o.UsedSpace = &v
+}
+
+// GetIsCustomQuota returns the IsCustomQuota field value if set, zero value otherwise.
+func (o *UserPayload) GetIsCustomQuota() bool {
+	if o == nil || IsNil(o.IsCustomQuota) {
+		var ret bool
+		return ret
+	}
+	return *o.IsCustomQuota
+}
+
+// GetIsCustomQuotaOk returns a tuple with the IsCustomQuota field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UserPayload) GetIsCustomQuotaOk() (*bool, bool) {
+	if o == nil || IsNil(o.IsCustomQuota) {
+		return nil, false
+	}
+	return o.IsCustomQuota, true
+}
+
+// HasIsCustomQuota returns a boolean if a field has been set.
+func (o *UserPayload) HasIsCustomQuota() bool {
+	if o != nil && !IsNil(o.IsCustomQuota) {
+		return true
+	}
+
+	return false
+}
+
+// SetIsCustomQuota gets a reference to the given bool and assigns it to the IsCustomQuota field.
+func (o *UserPayload) SetIsCustomQuota(v bool) {
+	o.IsCustomQuota = &v
 }
 
 // GetCreatedBy returns the CreatedBy field value if set, zero value otherwise.
-func (o *UserPayload) GetCreatedBy() string {
+func (o *UserPayload) GetCreatedBy() UserSummaryPayload {
 	if o == nil || IsNil(o.CreatedBy) {
-		var ret string
+		var ret UserSummaryPayload
 		return ret
 	}
 	return *o.CreatedBy
@@ -827,7 +987,7 @@ func (o *UserPayload) GetCreatedBy() string {
 
 // GetCreatedByOk returns a tuple with the CreatedBy field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserPayload) GetCreatedByOk() (*string, bool) {
+func (o *UserPayload) GetCreatedByOk() (*UserSummaryPayload, bool) {
 	if o == nil || IsNil(o.CreatedBy) {
 		return nil, false
 	}
@@ -843,233 +1003,265 @@ func (o *UserPayload) HasCreatedBy() bool {
 	return false
 }
 
-// SetCreatedBy gets a reference to the given string and assigns it to the CreatedBy field.
-func (o *UserPayload) SetCreatedBy(v string) {
+// SetCreatedBy gets a reference to the given UserSummaryPayload and assigns it to the CreatedBy field.
+func (o *UserPayload) SetCreatedBy(v UserSummaryPayload) {
 	o.CreatedBy = &v
 }
 
-// GetSpam returns the Spam field value if set, zero value otherwise.
-func (o *UserPayload) GetSpam() bool {
-	if o == nil || IsNil(o.Spam) {
+// GetRegistrationDate returns the RegistrationDate field value if set, zero value otherwise.
+func (o *UserPayload) GetRegistrationDate() time.Time {
+	if o == nil || IsNil(o.RegistrationDate) {
+		var ret time.Time
+		return ret
+	}
+	return *o.RegistrationDate
+}
+
+// GetRegistrationDateOk returns a tuple with the RegistrationDate field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UserPayload) GetRegistrationDateOk() (*time.Time, bool) {
+	if o == nil || IsNil(o.RegistrationDate) {
+		return nil, false
+	}
+	return o.RegistrationDate, true
+}
+
+// HasRegistrationDate returns a boolean if a field has been set.
+func (o *UserPayload) HasRegistrationDate() bool {
+	if o != nil && !IsNil(o.RegistrationDate) {
+		return true
+	}
+
+	return false
+}
+
+// SetRegistrationDate gets a reference to the given time.Time and assigns it to the RegistrationDate field.
+func (o *UserPayload) SetRegistrationDate(v time.Time) {
+	o.RegistrationDate = &v
+}
+
+// GetHasAvatar returns the HasAvatar field value if set, zero value otherwise.
+func (o *UserPayload) GetHasAvatar() bool {
+	if o == nil || IsNil(o.HasAvatar) {
 		var ret bool
 		return ret
 	}
-	return *o.Spam
+	return *o.HasAvatar
 }
 
-// GetSpamOk returns a tuple with the Spam field value if set, nil otherwise
+// GetHasAvatarOk returns a tuple with the HasAvatar field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserPayload) GetSpamOk() (*bool, bool) {
-	if o == nil || IsNil(o.Spam) {
+func (o *UserPayload) GetHasAvatarOk() (*bool, bool) {
+	if o == nil || IsNil(o.HasAvatar) {
 		return nil, false
 	}
-	return o.Spam, true
+	return o.HasAvatar, true
 }
 
-// HasSpam returns a boolean if a field has been set.
-func (o *UserPayload) HasSpam() bool {
-	if o != nil && !IsNil(o.Spam) {
+// HasHasAvatar returns a boolean if a field has been set.
+func (o *UserPayload) HasHasAvatar() bool {
+	if o != nil && !IsNil(o.HasAvatar) {
 		return true
 	}
 
 	return false
 }
 
-// SetSpam gets a reference to the given bool and assigns it to the Spam field.
-func (o *UserPayload) SetSpam(v bool) {
-	o.Spam = &v
+// SetHasAvatar gets a reference to the given bool and assigns it to the HasAvatar field.
+func (o *UserPayload) SetHasAvatar(v bool) {
+	o.HasAvatar = &v
 }
 
-// GetSid returns the Sid field value if set, zero value otherwise.
-func (o *UserPayload) GetSid() string {
-	if o == nil || IsNil(o.Sid) {
+// GetAvatar returns the Avatar field value if set, zero value otherwise.
+func (o *UserPayload) GetAvatar() string {
+	if o == nil || IsNil(o.Avatar) {
 		var ret string
 		return ret
 	}
-	return *o.Sid
+	return *o.Avatar
 }
 
-// GetSidOk returns a tuple with the Sid field value if set, nil otherwise
+// GetAvatarOk returns a tuple with the Avatar field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserPayload) GetSidOk() (*string, bool) {
-	if o == nil || IsNil(o.Sid) {
+func (o *UserPayload) GetAvatarOk() (*string, bool) {
+	if o == nil || IsNil(o.Avatar) {
 		return nil, false
 	}
-	return o.Sid, true
+	return o.Avatar, true
 }
 
-// HasSid returns a boolean if a field has been set.
-func (o *UserPayload) HasSid() bool {
-	if o != nil && !IsNil(o.Sid) {
+// HasAvatar returns a boolean if a field has been set.
+func (o *UserPayload) HasAvatar() bool {
+	if o != nil && !IsNil(o.Avatar) {
 		return true
 	}
 
 	return false
 }
 
-// SetSid gets a reference to the given string and assigns it to the Sid field.
-func (o *UserPayload) SetSid(v string) {
-	o.Sid = &v
+// SetAvatar gets a reference to the given string and assigns it to the Avatar field.
+func (o *UserPayload) SetAvatar(v string) {
+	o.Avatar = &v
 }
 
-// GetLdapQouta returns the LdapQouta field value if set, zero value otherwise.
-func (o *UserPayload) GetLdapQouta() int64 {
-	if o == nil || IsNil(o.LdapQouta) {
-		var ret int64
-		return ret
-	}
-	return *o.LdapQouta
-}
-
-// GetLdapQoutaOk returns a tuple with the LdapQouta field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *UserPayload) GetLdapQoutaOk() (*int64, bool) {
-	if o == nil || IsNil(o.LdapQouta) {
-		return nil, false
-	}
-	return o.LdapQouta, true
-}
-
-// HasLdapQouta returns a boolean if a field has been set.
-func (o *UserPayload) HasLdapQouta() bool {
-	if o != nil && !IsNil(o.LdapQouta) {
-		return true
-	}
-
-	return false
-}
-
-// SetLdapQouta gets a reference to the given int64 and assigns it to the LdapQouta field.
-func (o *UserPayload) SetLdapQouta(v int64) {
-	o.LdapQouta = &v
-}
-
-// GetSsoNameId returns the SsoNameId field value if set, zero value otherwise.
-func (o *UserPayload) GetSsoNameId() string {
-	if o == nil || IsNil(o.SsoNameId) {
+// GetAvatarOriginal returns the AvatarOriginal field value if set, zero value otherwise.
+func (o *UserPayload) GetAvatarOriginal() string {
+	if o == nil || IsNil(o.AvatarOriginal) {
 		var ret string
 		return ret
 	}
-	return *o.SsoNameId
+	return *o.AvatarOriginal
 }
 
-// GetSsoNameIdOk returns a tuple with the SsoNameId field value if set, nil otherwise
+// GetAvatarOriginalOk returns a tuple with the AvatarOriginal field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserPayload) GetSsoNameIdOk() (*string, bool) {
-	if o == nil || IsNil(o.SsoNameId) {
+func (o *UserPayload) GetAvatarOriginalOk() (*string, bool) {
+	if o == nil || IsNil(o.AvatarOriginal) {
 		return nil, false
 	}
-	return o.SsoNameId, true
+	return o.AvatarOriginal, true
 }
 
-// HasSsoNameId returns a boolean if a field has been set.
-func (o *UserPayload) HasSsoNameId() bool {
-	if o != nil && !IsNil(o.SsoNameId) {
+// HasAvatarOriginal returns a boolean if a field has been set.
+func (o *UserPayload) HasAvatarOriginal() bool {
+	if o != nil && !IsNil(o.AvatarOriginal) {
 		return true
 	}
 
 	return false
 }
 
-// SetSsoNameId gets a reference to the given string and assigns it to the SsoNameId field.
-func (o *UserPayload) SetSsoNameId(v string) {
-	o.SsoNameId = &v
+// SetAvatarOriginal gets a reference to the given string and assigns it to the AvatarOriginal field.
+func (o *UserPayload) SetAvatarOriginal(v string) {
+	o.AvatarOriginal = &v
 }
 
-// GetSsoSessionId returns the SsoSessionId field value if set, zero value otherwise.
-func (o *UserPayload) GetSsoSessionId() string {
-	if o == nil || IsNil(o.SsoSessionId) {
+// GetAvatarMax returns the AvatarMax field value if set, zero value otherwise.
+func (o *UserPayload) GetAvatarMax() string {
+	if o == nil || IsNil(o.AvatarMax) {
 		var ret string
 		return ret
 	}
-	return *o.SsoSessionId
+	return *o.AvatarMax
 }
 
-// GetSsoSessionIdOk returns a tuple with the SsoSessionId field value if set, nil otherwise
+// GetAvatarMaxOk returns a tuple with the AvatarMax field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserPayload) GetSsoSessionIdOk() (*string, bool) {
-	if o == nil || IsNil(o.SsoSessionId) {
+func (o *UserPayload) GetAvatarMaxOk() (*string, bool) {
+	if o == nil || IsNil(o.AvatarMax) {
 		return nil, false
 	}
-	return o.SsoSessionId, true
+	return o.AvatarMax, true
 }
 
-// HasSsoSessionId returns a boolean if a field has been set.
-func (o *UserPayload) HasSsoSessionId() bool {
-	if o != nil && !IsNil(o.SsoSessionId) {
+// HasAvatarMax returns a boolean if a field has been set.
+func (o *UserPayload) HasAvatarMax() bool {
+	if o != nil && !IsNil(o.AvatarMax) {
 		return true
 	}
 
 	return false
 }
 
-// SetSsoSessionId gets a reference to the given string and assigns it to the SsoSessionId field.
-func (o *UserPayload) SetSsoSessionId(v string) {
-	o.SsoSessionId = &v
+// SetAvatarMax gets a reference to the given string and assigns it to the AvatarMax field.
+func (o *UserPayload) SetAvatarMax(v string) {
+	o.AvatarMax = &v
 }
 
-// GetIsActive returns the IsActive field value if set, zero value otherwise.
-func (o *UserPayload) GetIsActive() bool {
-	if o == nil || IsNil(o.IsActive) {
-		var ret bool
+// GetAvatarMedium returns the AvatarMedium field value if set, zero value otherwise.
+func (o *UserPayload) GetAvatarMedium() string {
+	if o == nil || IsNil(o.AvatarMedium) {
+		var ret string
 		return ret
 	}
-	return *o.IsActive
+	return *o.AvatarMedium
 }
 
-// GetIsActiveOk returns a tuple with the IsActive field value if set, nil otherwise
+// GetAvatarMediumOk returns a tuple with the AvatarMedium field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserPayload) GetIsActiveOk() (*bool, bool) {
-	if o == nil || IsNil(o.IsActive) {
+func (o *UserPayload) GetAvatarMediumOk() (*string, bool) {
+	if o == nil || IsNil(o.AvatarMedium) {
 		return nil, false
 	}
-	return o.IsActive, true
+	return o.AvatarMedium, true
 }
 
-// HasIsActive returns a boolean if a field has been set.
-func (o *UserPayload) HasIsActive() bool {
-	if o != nil && !IsNil(o.IsActive) {
+// HasAvatarMedium returns a boolean if a field has been set.
+func (o *UserPayload) HasAvatarMedium() bool {
+	if o != nil && !IsNil(o.AvatarMedium) {
 		return true
 	}
 
 	return false
 }
 
-// SetIsActive gets a reference to the given bool and assigns it to the IsActive field.
-func (o *UserPayload) SetIsActive(v bool) {
-	o.IsActive = &v
+// SetAvatarMedium gets a reference to the given string and assigns it to the AvatarMedium field.
+func (o *UserPayload) SetAvatarMedium(v string) {
+	o.AvatarMedium = &v
 }
 
-// GetCheckActivation returns the CheckActivation field value if set, zero value otherwise.
-func (o *UserPayload) GetCheckActivation() bool {
-	if o == nil || IsNil(o.CheckActivation) {
-		var ret bool
+// GetAvatarSmall returns the AvatarSmall field value if set, zero value otherwise.
+func (o *UserPayload) GetAvatarSmall() string {
+	if o == nil || IsNil(o.AvatarSmall) {
+		var ret string
 		return ret
 	}
-	return *o.CheckActivation
+	return *o.AvatarSmall
 }
 
-// GetCheckActivationOk returns a tuple with the CheckActivation field value if set, nil otherwise
+// GetAvatarSmallOk returns a tuple with the AvatarSmall field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserPayload) GetCheckActivationOk() (*bool, bool) {
-	if o == nil || IsNil(o.CheckActivation) {
+func (o *UserPayload) GetAvatarSmallOk() (*string, bool) {
+	if o == nil || IsNil(o.AvatarSmall) {
 		return nil, false
 	}
-	return o.CheckActivation, true
+	return o.AvatarSmall, true
 }
 
-// HasCheckActivation returns a boolean if a field has been set.
-func (o *UserPayload) HasCheckActivation() bool {
-	if o != nil && !IsNil(o.CheckActivation) {
+// HasAvatarSmall returns a boolean if a field has been set.
+func (o *UserPayload) HasAvatarSmall() bool {
+	if o != nil && !IsNil(o.AvatarSmall) {
 		return true
 	}
 
 	return false
 }
 
-// SetCheckActivation gets a reference to the given bool and assigns it to the CheckActivation field.
-func (o *UserPayload) SetCheckActivation(v bool) {
-	o.CheckActivation = &v
+// SetAvatarSmall gets a reference to the given string and assigns it to the AvatarSmall field.
+func (o *UserPayload) SetAvatarSmall(v string) {
+	o.AvatarSmall = &v
+}
+
+// GetProfileUrl returns the ProfileUrl field value if set, zero value otherwise.
+func (o *UserPayload) GetProfileUrl() string {
+	if o == nil || IsNil(o.ProfileUrl) {
+		var ret string
+		return ret
+	}
+	return *o.ProfileUrl
+}
+
+// GetProfileUrlOk returns a tuple with the ProfileUrl field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UserPayload) GetProfileUrlOk() (*string, bool) {
+	if o == nil || IsNil(o.ProfileUrl) {
+		return nil, false
+	}
+	return o.ProfileUrl, true
+}
+
+// HasProfileUrl returns a boolean if a field has been set.
+func (o *UserPayload) HasProfileUrl() bool {
+	if o != nil && !IsNil(o.ProfileUrl) {
+		return true
+	}
+
+	return false
+}
+
+// SetProfileUrl gets a reference to the given string and assigns it to the ProfileUrl field.
+func (o *UserPayload) SetProfileUrl(v string) {
+	o.ProfileUrl = &v
 }
 
 func (o UserPayload) MarshalJSON() ([]byte, error) {
@@ -1085,6 +1277,9 @@ func (o UserPayload) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Id) {
 		toSerialize["id"] = o.Id
 	}
+	if !IsNil(o.DisplayName) {
+		toSerialize["displayName"] = o.DisplayName
+	}
 	if !IsNil(o.FirstName) {
 		toSerialize["firstName"] = o.FirstName
 	}
@@ -1097,11 +1292,8 @@ func (o UserPayload) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Email) {
 		toSerialize["email"] = o.Email
 	}
-	if !IsNil(o.BirthDate) {
-		toSerialize["birthDate"] = o.BirthDate
-	}
-	if !IsNil(o.Sex) {
-		toSerialize["sex"] = o.Sex
+	if !IsNil(o.Contacts) {
+		toSerialize["contacts"] = o.Contacts
 	}
 	if !IsNil(o.Status) {
 		toSerialize["status"] = o.Status
@@ -1109,14 +1301,14 @@ func (o UserPayload) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ActivationStatus) {
 		toSerialize["activationStatus"] = o.ActivationStatus
 	}
-	if !IsNil(o.TerminatedDate) {
-		toSerialize["terminatedDate"] = o.TerminatedDate
+	if !IsNil(o.Terminated) {
+		toSerialize["terminated"] = o.Terminated
 	}
-	if !IsNil(o.Title) {
-		toSerialize["title"] = o.Title
+	if !IsNil(o.Department) {
+		toSerialize["department"] = o.Department
 	}
-	if !IsNil(o.WorkFromDate) {
-		toSerialize["workFromDate"] = o.WorkFromDate
+	if !IsNil(o.Groups) {
+		toSerialize["groups"] = o.Groups
 	}
 	if !IsNil(o.Location) {
 		toSerialize["location"] = o.Location
@@ -1124,20 +1316,29 @@ func (o UserPayload) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Notes) {
 		toSerialize["notes"] = o.Notes
 	}
-	if !IsNil(o.Contacts) {
-		toSerialize["contacts"] = o.Contacts
+	if !IsNil(o.IsAdmin) {
+		toSerialize["isAdmin"] = o.IsAdmin
 	}
-	if !IsNil(o.ContactsList) {
-		toSerialize["contactsList"] = o.ContactsList
+	if !IsNil(o.IsRoomAdmin) {
+		toSerialize["isRoomAdmin"] = o.IsRoomAdmin
 	}
-	if !IsNil(o.Removed) {
-		toSerialize["removed"] = o.Removed
+	if !IsNil(o.IsOwner) {
+		toSerialize["isOwner"] = o.IsOwner
 	}
-	if !IsNil(o.LastModified) {
-		toSerialize["lastModified"] = o.LastModified
+	if !IsNil(o.IsVisitor) {
+		toSerialize["isVisitor"] = o.IsVisitor
 	}
-	if !IsNil(o.TenantId) {
-		toSerialize["tenantId"] = o.TenantId
+	if !IsNil(o.IsCollaborator) {
+		toSerialize["isCollaborator"] = o.IsCollaborator
+	}
+	if !IsNil(o.IsLDAP) {
+		toSerialize["isLDAP"] = o.IsLDAP
+	}
+	if !IsNil(o.IsSSO) {
+		toSerialize["isSSO"] = o.IsSSO
+	}
+	if !IsNil(o.ListAdminModules) {
+		toSerialize["listAdminModules"] = o.ListAdminModules
 	}
 	if !IsNil(o.CultureName) {
 		toSerialize["cultureName"] = o.CultureName
@@ -1148,32 +1349,41 @@ func (o UserPayload) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.MobilePhoneActivationStatus) {
 		toSerialize["mobilePhoneActivationStatus"] = o.MobilePhoneActivationStatus
 	}
-	if !IsNil(o.CreateDate) {
-		toSerialize["createDate"] = o.CreateDate
+	if !IsNil(o.QuotaLimit) {
+		toSerialize["quotaLimit"] = o.QuotaLimit
+	}
+	if !IsNil(o.UsedSpace) {
+		toSerialize["usedSpace"] = o.UsedSpace
+	}
+	if !IsNil(o.IsCustomQuota) {
+		toSerialize["isCustomQuota"] = o.IsCustomQuota
 	}
 	if !IsNil(o.CreatedBy) {
 		toSerialize["createdBy"] = o.CreatedBy
 	}
-	if !IsNil(o.Spam) {
-		toSerialize["spam"] = o.Spam
+	if !IsNil(o.RegistrationDate) {
+		toSerialize["registrationDate"] = o.RegistrationDate
 	}
-	if !IsNil(o.Sid) {
-		toSerialize["sid"] = o.Sid
+	if !IsNil(o.HasAvatar) {
+		toSerialize["hasAvatar"] = o.HasAvatar
 	}
-	if !IsNil(o.LdapQouta) {
-		toSerialize["ldapQouta"] = o.LdapQouta
+	if !IsNil(o.Avatar) {
+		toSerialize["avatar"] = o.Avatar
 	}
-	if !IsNil(o.SsoNameId) {
-		toSerialize["ssoNameId"] = o.SsoNameId
+	if !IsNil(o.AvatarOriginal) {
+		toSerialize["avatarOriginal"] = o.AvatarOriginal
 	}
-	if !IsNil(o.SsoSessionId) {
-		toSerialize["ssoSessionId"] = o.SsoSessionId
+	if !IsNil(o.AvatarMax) {
+		toSerialize["avatarMax"] = o.AvatarMax
 	}
-	if !IsNil(o.IsActive) {
-		toSerialize["isActive"] = o.IsActive
+	if !IsNil(o.AvatarMedium) {
+		toSerialize["avatarMedium"] = o.AvatarMedium
 	}
-	if !IsNil(o.CheckActivation) {
-		toSerialize["checkActivation"] = o.CheckActivation
+	if !IsNil(o.AvatarSmall) {
+		toSerialize["avatarSmall"] = o.AvatarSmall
+	}
+	if !IsNil(o.ProfileUrl) {
+		toSerialize["profileUrl"] = o.ProfileUrl
 	}
 	return toSerialize, nil
 }

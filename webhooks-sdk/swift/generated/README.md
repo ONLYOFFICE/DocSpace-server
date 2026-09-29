@@ -89,8 +89,9 @@ func handle(body: Data, signature: String?) throws -> Bool {
         let user = try decoder.decode(UserPayload.self, from: payload)
         print("\(trigger): \(user.userName ?? "")")
     } else {
-        // Files, folders, rooms, agents and forms share one payload shape.
-        // fileEntryType tells them apart: 1 folder, 2 file.
+        // Files, folders and rooms each have their own schema; they share the
+        // fields of FileEntryPayload, which is enough for a generic log line.
+        // Decode FilePayload / FolderPayload / RoomPayload for the rest.
         let entry = try decoder.decode(FileEntryPayload.self, from: payload)
         let kind = entry.fileEntryType == 2 ? "file" : "folder"
         print("\(trigger): \(kind) \"\(entry.title ?? "")\"")
@@ -128,11 +129,17 @@ New events are added over time. Treat an unfamiliar `event.trigger` as something
 
 ## Documentation for Models
 
+ - [ContactPayload](docs/ContactPayload.md)
  - [EntryId](docs/EntryId.md)
  - [FileEntryPayload](docs/FileEntryPayload.md)
+ - [FilePayload](docs/FilePayload.md)
+ - [FolderPayload](docs/FolderPayload.md)
  - [FormSubmitPayload](docs/FormSubmitPayload.md)
  - [GroupPayload](docs/GroupPayload.md)
+ - [GroupSummaryPayload](docs/GroupSummaryPayload.md)
+ - [RoomPayload](docs/RoomPayload.md)
  - [UserPayload](docs/UserPayload.md)
+ - [UserSummaryPayload](docs/UserSummaryPayload.md)
  - [WebhookConfigInfo](docs/WebhookConfigInfo.md)
  - [WebhookEnvelope](docs/WebhookEnvelope.md)
  - [WebhookEventInfo](docs/WebhookEventInfo.md)

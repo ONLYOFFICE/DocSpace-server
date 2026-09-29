@@ -1,9 +1,9 @@
 =begin
 #ONLYOFFICE DocSpace Webhooks
 
-#Wire contract for OUTBOUND DocSpace webhook deliveries.  This is a hand-maintained document. It is NOT the REST API spec and shares no schemas with it: webhook payloads are the internal domain entities (UserInfo, GroupInfo, File<T>, Folder<T>), not the controller DTOs.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+#Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto). They began as copies of the matching REST DTOs and are free to diverge from them.  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
 
-The version of the OpenAPI document: 0.1.0
+The version of the OpenAPI document: 1.0.0
 
 Generated by: https://openapi-generator.tech
 Generator version: 7.25.0
@@ -14,30 +14,35 @@ require 'date'
 require 'time'
 
 module DocspaceWebhooksSdk
-  # ASC.Core.Common/Core/GroupInfo.cs. Note `ID` in C#; the camelCase policy lowercases the whole leading run, so it is \"id\" on the wire, while `CategoryID` becomes \"categoryID\". 
+  # ASC.Api.Core/Webhook/Payloads/GroupWebhookDto.cs. A copy of the REST GroupDto.  The member list is not carried - a group can hold thousands of users and each would be expanded into every group event. `membersCount` is the hint that the roster changed; read it from GET api/2.0/group/{id}. 
   class GroupPayload < ApiModelBase
     attr_accessor :id
 
     attr_accessor :name
 
-    attr_accessor :category_id
-
     attr_accessor :parent
 
-    # LDAP identifier. REVIEW.
-    attr_accessor :sid
+    attr_accessor :category
 
-    attr_accessor :removed
+    attr_accessor :is_ldap
+
+    attr_accessor :is_system
+
+    attr_accessor :manager
+
+    attr_accessor :members_count
 
     # Attribute mapping from ruby-style variable name to JSON key.
     def self.attribute_map
       {
         :'id' => :'id',
         :'name' => :'name',
-        :'category_id' => :'categoryID',
         :'parent' => :'parent',
-        :'sid' => :'sid',
-        :'removed' => :'removed'
+        :'category' => :'category',
+        :'is_ldap' => :'isLDAP',
+        :'is_system' => :'isSystem',
+        :'manager' => :'manager',
+        :'members_count' => :'membersCount'
       }
     end
 
@@ -56,10 +61,12 @@ module DocspaceWebhooksSdk
       {
         :'id' => :'String',
         :'name' => :'String',
-        :'category_id' => :'String',
-        :'parent' => :'GroupPayload',
-        :'sid' => :'String',
-        :'removed' => :'Boolean'
+        :'parent' => :'String',
+        :'category' => :'String',
+        :'is_ldap' => :'Boolean',
+        :'is_system' => :'Boolean',
+        :'manager' => :'UserSummaryPayload',
+        :'members_count' => :'Integer'
       }
     end
 
@@ -93,20 +100,28 @@ module DocspaceWebhooksSdk
         self.name = attributes[:'name']
       end
 
-      if attributes.key?(:'category_id')
-        self.category_id = attributes[:'category_id']
-      end
-
       if attributes.key?(:'parent')
         self.parent = attributes[:'parent']
       end
 
-      if attributes.key?(:'sid')
-        self.sid = attributes[:'sid']
+      if attributes.key?(:'category')
+        self.category = attributes[:'category']
       end
 
-      if attributes.key?(:'removed')
-        self.removed = attributes[:'removed']
+      if attributes.key?(:'is_ldap')
+        self.is_ldap = attributes[:'is_ldap']
+      end
+
+      if attributes.key?(:'is_system')
+        self.is_system = attributes[:'is_system']
+      end
+
+      if attributes.key?(:'manager')
+        self.manager = attributes[:'manager']
+      end
+
+      if attributes.key?(:'members_count')
+        self.members_count = attributes[:'members_count']
       end
     end
 
@@ -132,10 +147,12 @@ module DocspaceWebhooksSdk
       self.class == o.class &&
           id == o.id &&
           name == o.name &&
-          category_id == o.category_id &&
           parent == o.parent &&
-          sid == o.sid &&
-          removed == o.removed
+          category == o.category &&
+          is_ldap == o.is_ldap &&
+          is_system == o.is_system &&
+          manager == o.manager &&
+          members_count == o.members_count
     end
 
     # @see the `==` method
@@ -147,7 +164,7 @@ module DocspaceWebhooksSdk
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, name, category_id, parent, sid, removed].hash
+      [id, name, parent, category, is_ldap, is_system, manager, members_count].hash
     end
 
     # Builds the object from hash

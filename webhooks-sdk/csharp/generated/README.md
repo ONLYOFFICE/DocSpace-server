@@ -61,10 +61,19 @@ app.MapPost("/webhook", async (HttpRequest request) =>
 
     switch (hook.Payload)
     {
-        case FileEntryPayload entry:
-            // fileEntryType tells a file from a folder: 1 folder, 2 file.
-            var kind = entry.FileEntryType == 2 ? "file" : "folder";
-            Console.WriteLine($"{hook.Trigger}: {kind} \"{entry.Title}\"");
+        // Files, folders and rooms each have their own schema. They share the
+        // fields of FileEntryPayload, but the generator flattens allOf, so these
+        // are separate classes and there is no base type to match on.
+        case FilePayload file:
+            Console.WriteLine($"{hook.Trigger}: file \"{file.Title}\" v{file.VarVersion}");
+            break;
+
+        case FolderPayload folder:
+            Console.WriteLine($"{hook.Trigger}: folder \"{folder.Title}\"");
+            break;
+
+        case RoomPayload room:
+            Console.WriteLine($"{hook.Trigger}: room \"{room.Title}\" (type {room.RoomType})");
             break;
 
         case UserPayload user:
@@ -103,11 +112,17 @@ This package exposes no API endpoints; it decodes what DocSpace sends. The event
 <a id="documentation-for-models"></a>
 ## Documentation for Models
 
+ - [Model.ContactPayload](docs/ContactPayload.md)
  - [Model.EntryId](docs/EntryId.md)
  - [Model.FileEntryPayload](docs/FileEntryPayload.md)
+ - [Model.FilePayload](docs/FilePayload.md)
+ - [Model.FolderPayload](docs/FolderPayload.md)
  - [Model.FormSubmitPayload](docs/FormSubmitPayload.md)
  - [Model.GroupPayload](docs/GroupPayload.md)
+ - [Model.GroupSummaryPayload](docs/GroupSummaryPayload.md)
+ - [Model.RoomPayload](docs/RoomPayload.md)
  - [Model.UserPayload](docs/UserPayload.md)
+ - [Model.UserSummaryPayload](docs/UserSummaryPayload.md)
  - [Model.WebhookConfigInfo](docs/WebhookConfigInfo.md)
  - [Model.WebhookEnvelope](docs/WebhookEnvelope.md)
  - [Model.WebhookEventInfo](docs/WebhookEventInfo.md)

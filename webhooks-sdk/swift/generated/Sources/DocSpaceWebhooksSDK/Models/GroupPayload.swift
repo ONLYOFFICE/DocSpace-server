@@ -7,33 +7,38 @@
 
 import Foundation
 
-/** ASC.Core.Common/Core/GroupInfo.cs. Note &#x60;ID&#x60; in C#; the camelCase policy lowercases the whole leading run, so it is \&quot;id\&quot; on the wire, while &#x60;CategoryID&#x60; becomes \&quot;categoryID\&quot;.  */
+/** ASC.Api.Core/Webhook/Payloads/GroupWebhookDto.cs. A copy of the REST GroupDto.  The member list is not carried - a group can hold thousands of users and each would be expanded into every group event. &#x60;membersCount&#x60; is the hint that the roster changed; read it from GET api/2.0/group/{id}.  */
 public struct GroupPayload: Sendable, Codable, Hashable {
 
     public var id: UUID?
     public var name: String?
-    public var categoryID: UUID?
-    public var parent: GroupPayload?
-    /** LDAP identifier. REVIEW. */
-    public var sid: String?
-    public var removed: Bool?
+    public var parent: UUID?
+    public var category: UUID?
+    public var isLDAP: Bool?
+    public var isSystem: Bool?
+    public var manager: UserSummaryPayload?
+    public var membersCount: Int?
 
-    public init(id: UUID? = nil, name: String? = nil, categoryID: UUID? = nil, parent: GroupPayload? = nil, sid: String? = nil, removed: Bool? = nil) {
+    public init(id: UUID? = nil, name: String? = nil, parent: UUID? = nil, category: UUID? = nil, isLDAP: Bool? = nil, isSystem: Bool? = nil, manager: UserSummaryPayload? = nil, membersCount: Int? = nil) {
         self.id = id
         self.name = name
-        self.categoryID = categoryID
         self.parent = parent
-        self.sid = sid
-        self.removed = removed
+        self.category = category
+        self.isLDAP = isLDAP
+        self.isSystem = isSystem
+        self.manager = manager
+        self.membersCount = membersCount
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case id
         case name
-        case categoryID
         case parent
-        case sid
-        case removed
+        case category
+        case isLDAP
+        case isSystem
+        case manager
+        case membersCount
     }
 
     // Encodable protocol methods
@@ -42,10 +47,12 @@ public struct GroupPayload: Sendable, Codable, Hashable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(id, forKey: .id)
         try container.encodeIfPresent(name, forKey: .name)
-        try container.encodeIfPresent(categoryID, forKey: .categoryID)
         try container.encodeIfPresent(parent, forKey: .parent)
-        try container.encodeIfPresent(sid, forKey: .sid)
-        try container.encodeIfPresent(removed, forKey: .removed)
+        try container.encodeIfPresent(category, forKey: .category)
+        try container.encodeIfPresent(isLDAP, forKey: .isLDAP)
+        try container.encodeIfPresent(isSystem, forKey: .isSystem)
+        try container.encodeIfPresent(manager, forKey: .manager)
+        try container.encodeIfPresent(membersCount, forKey: .membersCount)
     }
 }
 

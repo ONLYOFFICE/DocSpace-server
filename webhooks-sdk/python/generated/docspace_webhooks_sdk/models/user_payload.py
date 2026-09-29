@@ -3,9 +3,9 @@
 """
     ONLYOFFICE DocSpace Webhooks
 
-    Wire contract for OUTBOUND DocSpace webhook deliveries.  This is a hand-maintained document. It is NOT the REST API spec and shares no schemas with it: webhook payloads are the internal domain entities (UserInfo, GroupInfo, File<T>, Folder<T>), not the controller DTOs.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
+    Wire contract for OUTBOUND DocSpace webhook deliveries.  This document is NOT the REST API spec and shares no schemas with it. Webhook payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto, FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto). They began as copies of the matching REST DTOs and are free to diverge from them.  Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger field, and each DTO declares the same WebhookPayloadKind; the map below is that pairing. See ASC.Webhooks.Core/WebhookPayloadKind.cs for why it is spelled twice.  SERIALIZATION RULES (ASC.Webhooks.Core/WebhookPublisher.cs)   1. PropertyNamingPolicy = CamelCase.   2. DefaultIgnoreCondition = WhenWritingDefault. Every null, false, 0 and      default-valued property is OMITTED. Consequently almost nothing here is      `required`, and absence never means \"unset\" -- it means \"default\".   3. [JsonIgnore] on the domain type is honoured.   4. Computed read-only getters ARE serialized. IgnoreReadOnlyProperties is      set only on the sender's options, by which point `payload` is an opaque      JsonElement, so it never applies to payload bodies.   5. DateTime is emitted as UTC ISO-8601. Envelope timestamps are truncated      to whole seconds (WebhookPayload.GetShortUtcNow).   6. Entry ids are generic T: int for internal storage, string for      third-party providers. Modelled here as oneOf[integer, string].  TRANSPORT   POST, Content-Type: application/json; charset=utf-8   Redirects are not followed. Retry budget is ~31s (5 attempts, exponential   from 1s), so receivers must acknowledge fast and process out of band.    Headers:     x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw                               body>. GitHub emits lowercase hex, so compare                               case-insensitively. This is the only header                               that is authenticated.     x-docspace-event-id       Copy of event.id.     x-docspace-event-timestamp                               Copy of event.createOn, same ISO-8601 UTC                               spelling, e.g. 2026-09-17T10:22:56Z.    The last two exist so a receiver can drop a stale or already-seen delivery   without parsing the body. They are NOT covered by the signature, which is   computed over the body alone, so anything in transit can rewrite them.    Reject on them freely -- dropping a delivery is fail-safe, and whoever can   rewrite a header could drop the request instead. Never ACCEPT on them: a   replayed delivery with its timestamp header rewritten to \"now\" still   carries a valid signature, so a receiver that checks freshness only   against the header has no replay protection at all. After verifying,   re-check event.createOn and event.id from the parsed body; they are the   authoritative values, and comparing them against the headers also detects   tampering for free. 
 
-    The version of the OpenAPI document: 0.1.0
+    The version of the OpenAPI document: 1.0.0
     Generated by OpenAPI Generator (https://openapi-generator.tech)
 
     Do not edit the class manually.
@@ -18,49 +18,58 @@ import re  # noqa: F401
 import json
 
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from uuid import UUID
+from docspace_webhooks_sdk.models.contact_payload import ContactPayload
+from docspace_webhooks_sdk.models.group_summary_payload import GroupSummaryPayload
+from docspace_webhooks_sdk.models.user_summary_payload import UserSummaryPayload
 from typing import Optional, Set
 from typing_extensions import Self
 from pydantic_core import to_jsonable_python
 
 class UserPayload(BaseModel):
     """
-    ASC.Core.Common/Core/UserInfo.cs -- the domain entity, verbatim. It carries NO [JsonIgnore] at all, so every public member below reaches the wire. sid / ssoNameId / ssoSessionId / ldapQouta are null on portals without LDAP or SSO and therefore invisible in most test captures; they DO appear on LDAP/SSO tenants, and are flagged REVIEW below. 
+    ASC.Api.Core/Webhook/Payloads/UserWebhookDto.cs. A copy of the REST EmployeeFullDto, owned by the webhook contract and free to diverge from it.  Not carried, deliberately: sid / ssoNameId / ssoSessionId (LDAP and SAML identifiers, and a SAML SESSION id, all of which the domain entity used to put on the wire), loginEventId, authCookieLifetime, tfaAppEnabled, theme, isAnonim, and `shared`. `contacts` appears once, as a typed list, rather than twice in two shapes. 
     """ # noqa: E501
     id: Optional[UUID] = None
+    display_name: Optional[StrictStr] = Field(default=None, alias="displayName")
     first_name: Optional[StrictStr] = Field(default=None, alias="firstName")
     last_name: Optional[StrictStr] = Field(default=None, alias="lastName")
     user_name: Optional[StrictStr] = Field(default=None, alias="userName")
     email: Optional[StrictStr] = None
-    birth_date: Optional[datetime] = Field(default=None, alias="birthDate")
-    sex: Optional[StrictBool] = None
+    contacts: Optional[List[ContactPayload]] = None
     status: Optional[StrictInt] = Field(default=None, description="enum EmployeeStatus")
-    activation_status: Optional[StrictInt] = Field(default=None, description="enum EmployeeActivationStatus (flags)", alias="activationStatus")
-    terminated_date: Optional[datetime] = Field(default=None, alias="terminatedDate")
-    title: Optional[StrictStr] = None
-    work_from_date: Optional[datetime] = Field(default=None, alias="workFromDate")
+    activation_status: Optional[StrictInt] = Field(default=None, description="enum EmployeeActivationStatus (flags), AutoGenerated masked off", alias="activationStatus")
+    terminated: Optional[datetime] = None
+    department: Optional[StrictStr] = Field(default=None, description="Comma-separated group names, HTML-encoded.")
+    groups: Optional[List[GroupSummaryPayload]] = None
     location: Optional[StrictStr] = None
     notes: Optional[StrictStr] = None
-    contacts: Optional[StrictStr] = Field(default=None, description="Flattened form of contactsList. BOTH are emitted -- the same data twice. ")
-    contacts_list: Optional[List[StrictStr]] = Field(default=None, alias="contactsList")
-    removed: Optional[StrictBool] = None
-    last_modified: Optional[datetime] = Field(default=None, alias="lastModified")
-    tenant_id: Optional[StrictInt] = Field(default=None, alias="tenantId")
+    is_admin: Optional[StrictBool] = Field(default=None, alias="isAdmin")
+    is_room_admin: Optional[StrictBool] = Field(default=None, alias="isRoomAdmin")
+    is_owner: Optional[StrictBool] = Field(default=None, alias="isOwner")
+    is_visitor: Optional[StrictBool] = Field(default=None, alias="isVisitor")
+    is_collaborator: Optional[StrictBool] = Field(default=None, alias="isCollaborator")
+    is_ldap: Optional[StrictBool] = Field(default=None, alias="isLDAP")
+    is_sso: Optional[StrictBool] = Field(default=None, alias="isSSO")
+    list_admin_modules: Optional[List[StrictStr]] = Field(default=None, alias="listAdminModules")
     culture_name: Optional[StrictStr] = Field(default=None, alias="cultureName")
     mobile_phone: Optional[StrictStr] = Field(default=None, alias="mobilePhone")
     mobile_phone_activation_status: Optional[StrictInt] = Field(default=None, description="enum MobilePhoneActivationStatus", alias="mobilePhoneActivationStatus")
-    create_date: Optional[datetime] = Field(default=None, alias="createDate")
-    created_by: Optional[UUID] = Field(default=None, alias="createdBy")
-    spam: Optional[StrictBool] = None
-    sid: Optional[StrictStr] = Field(default=None, description="LDAP identifier. REVIEW.")
-    ldap_qouta: Optional[StrictInt] = Field(default=None, description="sic -- misspelled in the domain type, and misspelled on the wire. LDAP quota. REVIEW. ", alias="ldapQouta")
-    sso_name_id: Optional[StrictStr] = Field(default=None, description="SAML identifier. REVIEW.", alias="ssoNameId")
-    sso_session_id: Optional[StrictStr] = Field(default=None, description="SAML SESSION identifier. REVIEW -- should almost certainly not be on the wire. ", alias="ssoSessionId")
-    is_active: Optional[StrictBool] = Field(default=None, description="computed getter", alias="isActive")
-    check_activation: Optional[StrictBool] = Field(default=None, description="computed getter", alias="checkActivation")
-    __properties: ClassVar[List[str]] = ["id", "firstName", "lastName", "userName", "email", "birthDate", "sex", "status", "activationStatus", "terminatedDate", "title", "workFromDate", "location", "notes", "contacts", "contactsList", "removed", "lastModified", "tenantId", "cultureName", "mobilePhone", "mobilePhoneActivationStatus", "createDate", "createdBy", "spam", "sid", "ldapQouta", "ssoNameId", "ssoSessionId", "isActive", "checkActivation"]
+    quota_limit: Optional[StrictInt] = Field(default=None, alias="quotaLimit")
+    used_space: Optional[Union[StrictFloat, StrictInt]] = Field(default=None, alias="usedSpace")
+    is_custom_quota: Optional[StrictBool] = Field(default=None, alias="isCustomQuota")
+    created_by: Optional[UserSummaryPayload] = Field(default=None, alias="createdBy")
+    registration_date: Optional[datetime] = Field(default=None, alias="registrationDate")
+    has_avatar: Optional[StrictBool] = Field(default=None, alias="hasAvatar")
+    avatar: Optional[StrictStr] = None
+    avatar_original: Optional[StrictStr] = Field(default=None, alias="avatarOriginal")
+    avatar_max: Optional[StrictStr] = Field(default=None, alias="avatarMax")
+    avatar_medium: Optional[StrictStr] = Field(default=None, alias="avatarMedium")
+    avatar_small: Optional[StrictStr] = Field(default=None, alias="avatarSmall")
+    profile_url: Optional[StrictStr] = Field(default=None, alias="profileUrl")
+    __properties: ClassVar[List[str]] = ["id", "displayName", "firstName", "lastName", "userName", "email", "contacts", "status", "activationStatus", "terminated", "department", "groups", "location", "notes", "isAdmin", "isRoomAdmin", "isOwner", "isVisitor", "isCollaborator", "isLDAP", "isSSO", "listAdminModules", "cultureName", "mobilePhone", "mobilePhoneActivationStatus", "quotaLimit", "usedSpace", "isCustomQuota", "createdBy", "registrationDate", "hasAvatar", "avatar", "avatarOriginal", "avatarMax", "avatarMedium", "avatarSmall", "profileUrl"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -92,12 +101,8 @@ class UserPayload(BaseModel):
         * `None` is only added to the output dict for nullable fields that
           were set at model initialization. Other fields with value `None`
           are ignored.
-        * OpenAPI `readOnly` fields are excluded.
-        * OpenAPI `readOnly` fields are excluded.
         """
         excluded_fields: Set[str] = set([
-            "is_active",
-            "check_activation",
         ])
 
         _dict = self.model_dump(
@@ -105,6 +110,21 @@ class UserPayload(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in contacts (list)
+        _items = []
+        if self.contacts:
+            for _item_contacts in self.contacts:
+                _items.append(_item_contacts.to_dict() if _item_contacts is not None else None)
+            _dict['contacts'] = _items
+        # override the default output from pydantic by calling `to_dict()` of each item in groups (list)
+        _items = []
+        if self.groups:
+            for _item_groups in self.groups:
+                _items.append(_item_groups.to_dict() if _item_groups is not None else None)
+            _dict['groups'] = _items
+        # override the default output from pydantic by calling `to_dict()` of created_by
+        if self.created_by:
+            _dict['createdBy'] = self.created_by.to_dict()
         return _dict
 
     @classmethod
@@ -118,36 +138,42 @@ class UserPayload(BaseModel):
 
         _obj = cls.model_validate({
             "id": obj.get("id"),
+            "displayName": obj.get("displayName"),
             "firstName": obj.get("firstName"),
             "lastName": obj.get("lastName"),
             "userName": obj.get("userName"),
             "email": obj.get("email"),
-            "birthDate": obj.get("birthDate"),
-            "sex": obj.get("sex"),
+            "contacts": [ContactPayload.from_dict(_item) for _item in obj["contacts"]] if obj.get("contacts") is not None else None,
             "status": obj.get("status"),
             "activationStatus": obj.get("activationStatus"),
-            "terminatedDate": obj.get("terminatedDate"),
-            "title": obj.get("title"),
-            "workFromDate": obj.get("workFromDate"),
+            "terminated": obj.get("terminated"),
+            "department": obj.get("department"),
+            "groups": [GroupSummaryPayload.from_dict(_item) for _item in obj["groups"]] if obj.get("groups") is not None else None,
             "location": obj.get("location"),
             "notes": obj.get("notes"),
-            "contacts": obj.get("contacts"),
-            "contactsList": obj.get("contactsList"),
-            "removed": obj.get("removed"),
-            "lastModified": obj.get("lastModified"),
-            "tenantId": obj.get("tenantId"),
+            "isAdmin": obj.get("isAdmin"),
+            "isRoomAdmin": obj.get("isRoomAdmin"),
+            "isOwner": obj.get("isOwner"),
+            "isVisitor": obj.get("isVisitor"),
+            "isCollaborator": obj.get("isCollaborator"),
+            "isLDAP": obj.get("isLDAP"),
+            "isSSO": obj.get("isSSO"),
+            "listAdminModules": obj.get("listAdminModules"),
             "cultureName": obj.get("cultureName"),
             "mobilePhone": obj.get("mobilePhone"),
             "mobilePhoneActivationStatus": obj.get("mobilePhoneActivationStatus"),
-            "createDate": obj.get("createDate"),
-            "createdBy": obj.get("createdBy"),
-            "spam": obj.get("spam"),
-            "sid": obj.get("sid"),
-            "ldapQouta": obj.get("ldapQouta"),
-            "ssoNameId": obj.get("ssoNameId"),
-            "ssoSessionId": obj.get("ssoSessionId"),
-            "isActive": obj.get("isActive"),
-            "checkActivation": obj.get("checkActivation")
+            "quotaLimit": obj.get("quotaLimit"),
+            "usedSpace": obj.get("usedSpace"),
+            "isCustomQuota": obj.get("isCustomQuota"),
+            "createdBy": UserSummaryPayload.from_dict(obj["createdBy"]) if obj.get("createdBy") is not None else None,
+            "registrationDate": obj.get("registrationDate"),
+            "hasAvatar": obj.get("hasAvatar"),
+            "avatar": obj.get("avatar"),
+            "avatarOriginal": obj.get("avatarOriginal"),
+            "avatarMax": obj.get("avatarMax"),
+            "avatarMedium": obj.get("avatarMedium"),
+            "avatarSmall": obj.get("avatarSmall"),
+            "profileUrl": obj.get("profileUrl")
         })
         return _obj
 
