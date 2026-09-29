@@ -158,13 +158,23 @@ export async function listRoomSkillFiles(roomId: string): Promise<AiFolderFile[]
   return files;
 }
 
-// DocSpace pre-signed URLs come back as host-relative paths; `fetch()` in
-// Node refuses relative URLs, so resolve them against the portal root.
-function resolveAbsoluteUrl(url: string): string {
-  if (/^https?:\/\//i.test(url)) {
-    return url;
+// The download address names the portal as the browser sees it: the path
+// of the file handler on the host of the request that minted it. Only the
+// path and query matter to the handler (the file, the version and its key
+// are all in the query), so the fetch goes to the proxy this service already
+// reaches the portal through. Fetching the browser-facing host from the
+// server itself is what fails on a real domain — a name the machine cannot
+// resolve back to itself, a hairpin NAT, a self-signed certificate — while
+// the same address works on localhost, where the two hosts coincide. A
+// host-relative address (`/storage/files/...`) resolves against the proxy
+// the same way.
+function throughProxy(url: string): string {
+  const base = proxyBaseUrl.endsWith("/") ? proxyBaseUrl : `${proxyBaseUrl}/`;
+  if (!/^https?:\/\//i.test(url)) {
+    return new URL(url, base).toString();
   }
-  return new URL(url, proxyBaseUrl.endsWith("/") ? proxyBaseUrl : `${proxyBaseUrl}/`).toString();
+  const { pathname, search } = new URL(url);
+  return new URL(`${pathname}${search}`, base).toString();
 }
 
 /**
@@ -193,7 +203,7 @@ export async function readFileText(fileId: string): Promise<string> {
   if (!downloadUrl) {
     throw new Error(`No download address for file ${fileId}`);
   }
-  const url = resolveAbsoluteUrl(downloadUrl);
+  const url = throughProxy(downloadUrl);
   const { signal, cancel } = withTimeout(undefined);
   try {
     // The caller's conditional headers describe the widget's request, not this
