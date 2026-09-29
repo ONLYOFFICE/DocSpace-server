@@ -194,8 +194,12 @@ public class AuditXlsxReportWriter(
                         }
                         else
                         {
-                            // force text format to stop formulas from executing in user-controlled values
-                            cells.Add(new Cell(value?.ToString(), "@"));
+                            // The page column holds a URL, which is long enough to wrap onto a second
+                            // line in a cell that wraps. force text format to stop formulas from
+                            // executing in user-controlled values
+                            var wrap = prop.Name == nameof(BaseEvent.Page) ? false : (bool?)null;
+
+                            cells.Add(new Cell(value?.ToString(), "@", Wrap: wrap));
                         }
                     }
 
@@ -247,7 +251,7 @@ public class AuditXlsxReportWriter(
         return name.Length > 31 ? name[..31] : name;
     }
 
-    private sealed record Cell(string Value, string Format, string Halign = null);
+    private sealed record Cell(string Value, string Format, string Halign = null, bool? Wrap = null);
 }
 
 /// <summary>

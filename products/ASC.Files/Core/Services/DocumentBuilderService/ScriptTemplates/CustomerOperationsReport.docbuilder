@@ -227,21 +227,18 @@ function writeCell(worksheet, position, data) {
 
     if (data.url) {
         worksheet.SetHyperlink(position, data.url, "", data.value, data.value);
-
-        // The editor paints a hyperlink in its own blue; the reports have always shown their links
-        // in the body text color, so it is set back here.
-        sRange.SetFontColor(data.fontColor || defaultFontColorBlack);
     } else if (data.value != null) {
         sRange.SetValue(data.value);
-        sRange.SetWrap(true);
+        sRange.SetWrap(data.wrap !== false);
     }
 
     if (data.fontSize) {
         sRange.SetFontSize(data.fontSize);
     }
-    if (data.fontColor) {
-        sRange.SetFontColor(data.fontColor);
-    }
+
+    // Set unconditionally: a value that merely looks like a URL is turned into a hyperlink by the
+    // editor and painted in its blue, and the reports have always shown their text in one color.
+    sRange.SetFontColor(data.fontColor || defaultFontColorBlack);
     if (data.bold) {
         sRange.SetBold(true);
     }
