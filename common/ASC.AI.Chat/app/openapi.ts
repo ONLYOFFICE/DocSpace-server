@@ -565,7 +565,8 @@ const UNAUTHORIZED_RESPONSE: Json = jsonResponse(
 const ERROR_DESCRIPTIONS: Readonly<Record<string, string>> = {
   "400": "The request body or query is malformed, or a required value is missing.",
   "402":
-    "The portal has no paid AI quota left, so the profile bound to this action cannot be dispatched.",
+    "The portal has no paid AI quota left, so the profile bound to this action cannot be dispatched. " +
+    "`error` carries the portal's explanation in the caller's language.",
   "403":
     "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
   "404":

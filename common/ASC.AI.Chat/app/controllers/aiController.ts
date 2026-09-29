@@ -57,7 +57,7 @@ import { asyncHandler, streamNdjson, streamOpenAiSse, attachmentLimitError } fro
 import { observeChatStream } from "../telemetry/chatStream.js";
 import type { StreamDialect } from "../telemetry/chatStream.js";
 import { assertThreadCreatable } from "./threadsController.js";
-import { isObject, parseInt10 } from "../narrow.js";
+import { getString, isObject, parseInt10 } from "../narrow.js";
 import {
   HttpToolsAdapter,
   safeGetToolsPrompt,
@@ -612,11 +612,30 @@ async function unknownProfileIdError(
   return aiToolsUnpaidError(profile.providerType);
 }
 
-// Sentinel message so the callers can tell the billing failure (402) apart
-// from the unknown-profile validation error (400) in unknownProfileIdError's
-// single string channel.
+// Sentinel so the callers can tell the billing failure (402) apart from the
+// unknown-profile validation error (400) in unknownProfileIdError's single
+// string channel. Never sent as-is: the 402 body carries the portal's
+// localized wording, see aiToolsUnpaidMessage.
 const AI_TOOLS_UNPAID_ERROR =
   "The AI Tools service is not paid for the current portal";
+
+// The 402 body for the unpaid gateway. The C# settings (`aiNotReadyMessage`)
+// carry the reason in the user's culture; this service has no resources of
+// its own, so answering with the English sentinel put a `ru` user back on an
+// untranslated refusal after the refusal moved out of the stream (Bug 84023,
+// same class as Bug 83048). Falls back to the sentinel when the portal
+// predates the field.
+async function aiToolsUnpaidMessage(): Promise<string> {
+  const primed = getChatContextSnapshot()?.aiNotReadyMessage;
+  if (primed) {
+    return primed;
+  }
+  const config = await aiService.get("/config").catch(() => undefined);
+  const message = isObject(config)
+    ? getString(config, "aiNotReadyMessage")
+    : undefined;
+  return message || AI_TOOLS_UNPAID_ERROR;
+}
 
 // 402 message when the effective profile rides the portal gateway while the
 // tenant's AI Tools wallet service is not paid, null otherwise. Without
@@ -782,10 +801,12 @@ export const aiController = {
     // will actually be used is checked.
     {
       const profileError = await unknownProfileIdError(req.body.profileId);
+      if (profileError === AI_TOOLS_UNPAID_ERROR) {
+        res.status(402).json({ error: await aiToolsUnpaidMessage() });
+        return;
+      }
       if (profileError) {
-        res
-          .status(profileError === AI_TOOLS_UNPAID_ERROR ? 402 : 400)
-          .json({ error: profileError });
+        res.status(400).json({ error: profileError });
         return;
       }
     }
@@ -842,10 +863,12 @@ export const aiController = {
     // Same pre-flight as sendWithStream (Bugs 83045 / 83160).
     {
       const profileError = await unknownProfileIdError(req.body.profileId);
+      if (profileError === AI_TOOLS_UNPAID_ERROR) {
+        res.status(402).json({ error: await aiToolsUnpaidMessage() });
+        return;
+      }
       if (profileError) {
-        res
-          .status(profileError === AI_TOOLS_UNPAID_ERROR ? 402 : 400)
-          .json({ error: profileError });
+        res.status(400).json({ error: profileError });
         return;
       }
     }
