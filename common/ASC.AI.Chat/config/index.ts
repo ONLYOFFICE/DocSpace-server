@@ -86,6 +86,21 @@ export function mcpPortalBaseUrl(): string | undefined {
     return process.env["AI__MCP_PORTAL_BASE_URL"] || undefined;
 }
 
+// The portal-wide CORS setting, `core:cors`, as the .NET services see it.
+// They read it from the shared appsettings or from the environment as
+// `core__cors` (the .NET form of a `:` key). nconf is not given a `__`
+// separator here -- see mcpEndpointOverride for why -- so that one form is
+// read straight from the environment, and wins over the file as it does
+// for .NET. Undefined when neither sets it.
+export function coreCors(): string | undefined {
+    const fromEnv = process.env["core__cors"];
+    if (fromEnv !== undefined) {
+        return fromEnv;
+    }
+    const fromFile: unknown = nconf.get("core:cors");
+    return typeof fromFile === "string" ? fromFile : undefined;
+}
+
 // SSRF egress policy for user-supplied provider / web-search `baseUrl`s.
 // By default loopback and RFC1918 private ranges are rejected before any
 // outbound call (see `assertSafeBaseUrl` in app/security.ts), mirroring the

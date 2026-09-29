@@ -42,7 +42,8 @@ import cookieParser from "cookie-parser";
 import bodyParser from "body-parser";
 import cors from "cors";
 import logger, { logStream } from "./app/log.js";
-import { getAppConfig } from "./config/index.js";
+import { coreCors, getAppConfig } from "./config/index.js";
+import { describeCors, resolveCorsOptions } from "./app/cors.js";
 import registerRoutes, { API_PREFIX } from "./app/routes.js";
 import { requestContextMiddleware } from "./app/requestContext.js";
 import { storage } from "./app/storage/index.js";
@@ -69,16 +70,18 @@ app.use((_req, res, next) => {
   next();
 });
 
-// CORS is off by default: the chat UI reaches this service same-origin via
-// the DocSpace nginx (`/api/2.0/ai`), so no cross-origin request is
-// expected. A blanket `cors()` would emit `Access-Control-Allow-Origin: *`
-// on an authenticated, user-scoped API — undesirable. Set
-// `AI_CHAT_CORS_ORIGINS` (comma-separated) only if a real cross-origin
-// caller exists; an explicit allowlist is then honored with credentials.
-const corsOrigins = (process.env["AI_CHAT_CORS_ORIGINS"] ?? "")
-  .split(",")
-  .map((o) => o.trim())
-  .filter(Boolean);
+// CORS follows the portal's own API: `core:cors` from the shared
+// appsettings, with `AI_CHAT_CORS_ORIGINS` as a per-service override (see
+// `app/cors.ts`). The chat UI inside the portal is same-origin behind nginx
+// and never needs it; a cross-origin caller -- an application built on the
+// UI kit, a script holding an API key -- does, and until now got its
+// preflight answered 401 by the auth gate, since a preflight carries no
+// credentials. With `*` no credentials are allowed, so such a caller must
+// send its own `Authorization` header; the session cookie never travels.
+const corsOptions = resolveCorsOptions(
+  process.env["AI_CHAT_CORS_ORIGINS"],
+  coreCors(),
+);
 
 // strict:false lets bare JSON primitives through; @onlyoffice/ai-chat's
 // ApiProvider serializes single-arg routes as `JSON.stringify(arg)` — e.g.
@@ -117,10 +120,12 @@ app
   })
   .use(bodyParser.urlencoded({ extended: false }));
 
-if (corsOrigins.length > 0) {
-  app.use(cors({ origin: corsOrigins, credentials: true }));
-  logger.info(`CORS enabled for origins: ${corsOrigins.join(", ")}`);
+// Before the routes and their auth gate: `cors()` answers a preflight
+// itself and ends it there.
+if (corsOptions) {
+  app.use(cors(corsOptions));
 }
+logger.info(describeCors(corsOptions));
 
 app.use(requestContextMiddleware);
 
