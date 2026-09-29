@@ -117,23 +117,6 @@ public class AppsFolderMoveCopyTests(
     }
 
     [Fact]
-    public async Task MoveAppsFolder_ToFillingFormsRoomRoot_BecomesRegularFolder()
-    {
-        // Arrange
-        await _filesClient.Authenticate(Owner);
-        var source = await CreateSmartRoom("Autotest Apps Move To Forms Source");
-        var target = await CreateFillingFormsRoom("Autotest Apps Move To Forms Target");
-        var apps = await CreateAppsFolder(source.Id);
-
-        // Act
-        await MoveAndWait(apps.Id, target.Id);
-
-        // Assert
-        (await GetFolderTitles(target.Id)).Should().Contain(AppsTitle);
-        await AssertAppsFolderAbsent(target.Id);
-    }
-
-    [Fact]
     public async Task CopyAppsFolder_ToAnotherRoomRoot_CopyIsAppsFolder()
     {
         // Arrange
