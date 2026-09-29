@@ -83,13 +83,27 @@ public abstract class AppsFolderTestBase(
         created.Title.Should().Be(AppsTitle);
     }
 
-    protected async Task MoveAndWait(int folderId, int destFolderId, FileConflictResolveType conflictResolveType = FileConflictResolveType.Skip)
+    protected async Task MoveAndWait(int folderId, int destFolderId)
     {
         var results = (await _filesOperationsApi.MoveBatchItemsAsync(
-            BuildBatchRequest(folderId, destFolderId, conflictResolveType),
+            BuildBatchRequest(folderId, destFolderId, FileConflictResolveType.Skip),
             TestContext.Current.CancellationToken)).Response;
 
         await AssertOperationSucceeded(results.FirstOrDefault()?.Id);
+    }
+
+    /// <summary>
+    /// Starts a move and waits for it without asserting its outcome: a move the product rejects per item still
+    /// finishes, and a finished operation can already be pruned from the status list, so the caller checks where the
+    /// folder ended up instead.
+    /// </summary>
+    protected async Task MoveKeepingBothAndWait(int folderId, int destFolderId)
+    {
+        var results = (await _filesOperationsApi.MoveBatchItemsAsync(
+            BuildBatchRequest(folderId, destFolderId, FileConflictResolveType.Duplicate),
+            TestContext.Current.CancellationToken)).Response;
+
+        await WaitLongOperation(results.FirstOrDefault()?.Id);
     }
 
     protected async Task CopyAndWait(int folderId, int destFolderId)
