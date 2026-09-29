@@ -34,8 +34,8 @@
 namespace ASC.Files.Tests.Tests._03_Rooms.Apps;
 
 /// <summary>
-/// Trashing the <c>.ai</c> folder frees the room's slot; the folder keeps its type in the trash, so
-/// restoring it to the room root makes it the room's <c>Apps</c> folder again.
+/// Trashing the <c>.ai</c> folder frees the room's slot and turns it into a regular folder; restoring
+/// it to the room root makes it the room's <c>Ai</c> folder again.
 /// </summary>
 [Trait("Category", "Rooms")]
 [Trait("Feature", "AppsFolder")]
