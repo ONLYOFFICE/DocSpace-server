@@ -319,6 +319,23 @@ public class DbWorker(
         return claimed;
     }
 
+    public async Task<DbWebhooksLog> ResetJournalAttemptsAsync(int tenantId, int id)
+    {
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await webhooksDbContext.WebhooksLogs
+            .Where(r => r.TenantId == tenantId && r.Id == id)
+            .ExecuteUpdateAsync(q => q
+                .SetProperty(p => p.Attempts, 0)
+                .SetProperty(p => p.NextAttemptOn, DateTime.UtcNow)
+                .SetProperty(p => p.Status, 0)
+                .SetProperty(p => p.Delivery, (DateTime?)null)
+                .SetProperty(p => p.ResponsePayload, (string)null)
+                .SetProperty(p => p.ResponseHeaders, (string)null));
+
+        return await ReadJournal(tenantId, id);
+    }
+
     public async Task CancelJournalAttemptsAsync(int tenantId, int id)
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();

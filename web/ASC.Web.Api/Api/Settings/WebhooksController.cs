@@ -321,22 +321,27 @@ public class WebhooksController(
     /// <remarks>
     /// Sends one past webhook delivery again. The `id` in the path is that of a delivery record from
     /// `GET api/2.0/settings/webhooks/log`, not of a subscription, and the payload kept in that record is sent once
-    /// more to the subscription it belongs to. The work is asynchronous: a fresh delivery record is created and
-    /// queued at once, and the response describes that new record, with an identifier of its own and with `status`
-    /// and `delivery` not filled in yet. To learn the outcome, read `GET api/2.0/settings/webhooks/log` with
-    /// `eventId` set to the returned identifier until `delivery` appears. The original record stays as it is, and
-    /// every call queues one more attempt, so this is not safe to repeat blindly. A `DocSpaceAdmin` may retry any
-    /// delivery in the portal, anyone else only deliveries of the subscriptions they created, and a `Guest` is
-    /// refused. An `id` of 0 is rejected as an invalid request and an unknown one gives 404. The operation is rate
-    /// limited, so a burst of calls is answered with 429; to retry several records use
-    /// `PUT api/2.0/settings/webhook/retry`.
+    /// more to the subscription it belongs to, byte for byte, so its signature stays valid. The work is
+    /// asynchronous: the record is put back in the queue at once and the response describes it with `status` and
+    /// `delivery` cleared, ready to be filled in by the new attempt. To learn the outcome, read
+    /// `GET api/2.0/settings/webhooks/log` with `eventId` set to that same identifier until `delivery` appears.
+    ///
+    /// The record keeps its identifier, which is what the receiver sees as `event.id` and in the
+    /// `x-docspace-event-id` header, so a retried delivery is recognisable as a duplicate of the original rather
+    /// than as a new event. The cost of that is history: the outcome of the previous attempt is cleared instead of
+    /// being kept beside the new one, so the log holds only the latest attempt of any given delivery.
+    ///
+    /// A `DocSpaceAdmin` may retry any delivery in the portal, anyone else only deliveries of the subscriptions
+    /// they created, and a `Guest` is refused. An `id` of 0 is rejected as an invalid request and an unknown one
+    /// gives 404. The operation is rate limited, so a burst of calls is answered with 429; to retry several records
+    /// use `PUT api/2.0/settings/webhook/retry`.
     /// </remarks>
     /// <summary>
     /// Retry a webhook delivery
     /// </summary>
     /// <path>api/2.0/settings/webhook/{id}/retry</path>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "The newly queued delivery record, with its status and delivery moment not filled in yet", typeof(WebhooksLogDto))]
+    [SwaggerResponse(200, "The requeued delivery record, keeping its identifier, with its status and delivery moment cleared", typeof(WebhooksLogDto))]
     [SwaggerResponse(400, "The delivery record identifier is 0")]
     [SwaggerResponse(403, "The delivery belongs to another member's subscription, or the caller may not use webhooks")]
     [SwaggerResponse(404, "No delivery record with this ID exists in the portal")]
@@ -366,21 +371,30 @@ public class WebhooksController(
 
         var result = await webhookPublisher.RetryPublishAsync(item);
 
+        if (result == null)
+        {
+            // the record was removed between the read above and the requeue
+            throw new ItemNotFoundException();
+        }
+
         return mapper.Map(result);
     }
 
     /// <remarks>
     /// Sends a batch of past webhook deliveries again. `ids` holds the identifiers of delivery records from
-    /// `GET api/2.0/settings/webhooks/log`; each of them is sent once more to the subscription it belongs to as a
-    /// fresh delivery record, queued for asynchronous delivery, and the response lists those new records with
-    /// `status` and `delivery` not filled in yet. Records that do not exist, and records of another member's
-    /// subscription when the caller is not a `DocSpaceAdmin`, are skipped in silence instead of failing the call, so
-    /// a response shorter than `ids` is the only sign that something was left out: compare the counts rather than
-    /// assuming everything was queued. An empty `ids` list is accepted and queues nothing. Read the outcomes from
-    /// `GET api/2.0/settings/webhooks/log`, matching the returned identifiers with `eventId`. Every call queues
-    /// another round of attempts, and the original records stay as they are. A `Guest` is refused. The operation is
-    /// rate limited, so a burst of calls is answered with 429. For a single record
-    /// `PUT api/2.0/settings/webhook/{id}/retry` reports a missing or forbidden record instead of skipping it.
+    /// `GET api/2.0/settings/webhooks/log`; each of them is put back in the queue for the subscription it belongs
+    /// to and sent once more, byte for byte, and the response lists those records with `status` and `delivery`
+    /// cleared. Records that do not exist, and records of another member's subscription when the caller is not a
+    /// `DocSpaceAdmin`, are skipped in silence instead of failing the call, so a response shorter than `ids` is the
+    /// only sign that something was left out: compare the counts rather than assuming everything was queued. An
+    /// empty `ids` list is accepted and queues nothing. Read the outcomes from
+    /// `GET api/2.0/settings/webhooks/log`, matching the returned identifiers with `eventId`.
+    ///
+    /// Each record keeps its identifier, so a retried delivery reaches the receiver as `event.id` of the original
+    /// event rather than as a new one, and the outcome of its previous attempt is cleared rather than kept beside
+    /// the new one. A `Guest` is refused. The operation is rate limited, so a burst of calls is answered with 429.
+    /// For a single record `PUT api/2.0/settings/webhook/{id}/retry` reports a missing or forbidden record instead
+    /// of skipping it.
     /// </remarks>
     /// <summary>
     /// Retry webhook deliveries
@@ -388,7 +402,7 @@ public class WebhooksController(
     /// <path>api/2.0/settings/webhook/retry</path>
     /// <collection>list</collection>
     [Tags("Settings / Webhooks")]
-    [SwaggerResponse(200, "The newly queued delivery records, one for every identifier that could be retried", typeof(IAsyncEnumerable<WebhooksLogDto>))]
+    [SwaggerResponse(200, "The requeued delivery records, one for every identifier that could be retried, each keeping its identifier", typeof(IAsyncEnumerable<WebhooksLogDto>))]
     [SwaggerResponse(403, "The caller is a `Guest`, or a non-admin caller while the developer tools are restricted")]
     [HttpPut("webhook/retry")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -412,6 +426,11 @@ public class WebhooksController(
             }
 
             var result = await webhookPublisher.RetryPublishAsync(item);
+
+            if (result == null)
+            {
+                continue;
+            }
 
             yield return mapper.Map(result);
         }
