@@ -1146,10 +1146,9 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
 
-        if (!isRoom && !parent.ProviderEntry)
-        {
-            await ThrowIfAppsFolderExistsAsync(folderDao, parent.Id, title);
-        }
+        await using var aiFolderLock = !isRoom && !parent.ProviderEntry
+            ? await AcquireAiFolderSlotAsync(folderDao, parent.Id, title)
+            : null;
 
         if (isRoom && privacy)
         {
@@ -1293,19 +1292,6 @@ public class FileStorageService //: IFileStorageService
         catch (Exception e)
         {
             throw GenerateException(e);
-        }
-    }
-
-    private static async Task ThrowIfAppsFolderExistsAsync<T>(IFolderDao<T> folderDao, T parentId, string title, T folderId = default)
-    {
-        if (!string.Equals(Global.ReplaceInvalidCharsAndTruncate(title), FileConstant.AiFolderTitle, StringComparison.Ordinal))
-        {
-            return;
-        }
-
-        if (await folderDao.GetFoldersAsync(parentId, FolderType.Ai).AnyAsync(f => !EqualityComparer<T>.Default.Equals(f.Id, folderId)))
-        {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_AppsFolderExists);
         }
     }
 
@@ -1722,10 +1708,9 @@ public class FileStorageService //: IFileStorageService
 
         if (!string.Equals(folder.Title, title, StringComparison.Ordinal))
         {
-            if (!folder.IsRoom && !folder.ProviderEntry)
-            {
-                await ThrowIfAppsFolderExistsAsync(folderDao, folder.ParentId, title, folder.Id);
-            }
+            await using var aiFolderLock = !folder.IsRoom && !folder.ProviderEntry
+                ? await AcquireAiFolderSlotAsync(folderDao, folder.ParentId, title, folder.Id)
+                : null;
 
             var oldTitle = folder.Title;
             T newFolderId = default;
@@ -6266,6 +6251,33 @@ public class FileStorageService //: IFileStorageService
         }
 
         return await externalDbSyncService.GetTaskAsync(roomId);
+    }
+
+    private async ValueTask<IDistributedLockHandle> AcquireAiFolderSlotAsync<T>(IFolderDao<T> folderDao, T parentId, string title, T folderId = default)
+    {
+        if (!string.Equals(Global.ReplaceInvalidCharsAndTruncate(title), FileConstant.AiFolderTitle, StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        var aiFolderLock = await distributedLockProvider.TryAcquireFairLockAsync(
+            LockKeyHelper.GetAiFolderCheckKey(tenantManager.GetCurrentTenantId(), parentId));
+
+        try
+        {
+            if (await folderDao.GetFoldersAsync(parentId, FolderType.Ai)
+                    .AnyAsync(f => !EqualityComparer<T>.Default.Equals(f.Id, folderId)))
+            {
+                throw new InvalidOperationException(FilesCommonResource.ErrorMessage_AppsFolderExists);
+            }
+        }
+        catch
+        {
+            await aiFolderLock.DisposeAsync();
+            throw;
+        }
+
+        return aiFolderLock;
     }
 
     private async Task ValidateChangeRolesPermission<T>(File<T> form)
