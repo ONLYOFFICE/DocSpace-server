@@ -271,6 +271,22 @@ public class BaseTest(
     }
 
     /// <summary>
+    /// Reads the raw JSON because <c>FileEntryBaseDto</c> in the generated listing model carries
+    /// neither <c>id</c> nor <c>type</c>.
+    /// </summary>
+    protected async Task<int> GetKnowledgeFolderIdAsync(int aiRoomId)
+    {
+        var response = await _foldersApi.GetFoldersWithHttpInfoAsync(aiRoomId, TestContext.Current.CancellationToken);
+
+        using var payload = JsonDocument.Parse(response.RawContent);
+
+        return payload.RootElement.GetProperty("response").EnumerateArray()
+            .Where(f => f.GetProperty("type").GetInt32() == (int)FolderType.Knowledge)
+            .Select(f => f.GetProperty("id").GetInt32())
+            .First();
+    }
+
+    /// <summary>
     /// The single place every room is created through, so that room creation - one of the slowest
     /// calls in the suite - is measured the same way whatever type the caller asked for.
     /// </summary>
