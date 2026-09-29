@@ -677,7 +677,13 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   },
 
   // Preferences.
-  aiPreferencesSetDeepMode: { "400": "`value` is missing or is not a boolean." },
+  aiPreferencesSetDeepMode: {
+    "400": "`value` is missing or is not a boolean, or `entityId` is not a room ID.",
+  },
+  aiPreferencesClearDeepMode: { "400": "`entityId` is not a room ID." },
+  aiPreferencesSetReasoningLevel: {
+    "400": "`value` is not one of the depths, or `entityId` is not a room ID.",
+  },
 
   // Profiles - creating and updating are refused outright while the portal
   // runs on the AI gateway, and both validate the provider URL.
