@@ -771,8 +771,9 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   },
   aiWebSearchConfigure: {
     "400":
-      "The configuration is missing or malformed, or the provider URL points at a private "
-      + "network address.",
+      "The configuration is missing or malformed, the provider URL points at a private "
+      + "network address, or the provider refused the configuration - the body then carries "
+      + "`success: false` and an `error` naming the field. Nothing is stored in any of these cases.",
     "404": true,
   },
   aiWebSearchSetActiveConfig: {
@@ -1268,7 +1269,7 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiWebSearchIsConfigured: "Whether a web-search provider is stored for the scope.",
   aiWebSearchTestConnection:
     "The outcome of the probe. A failed probe is reported here, not as a status.",
-  aiWebSearchConfigure: "Whether the configuration was stored, after the provider answered.",
+  aiWebSearchConfigure: "The stored configuration, after the provider accepted it.",
   aiWebSearchSetActiveConfig: "Confirms the configuration was stored, unverified.",
   aiWebSearchClear: "Confirms the portal has no web-search configuration any more.",
   aiWebSearchPassthroughSearch:
