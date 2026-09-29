@@ -1,7 +1,5 @@
 builder.CreateFile("xlsx");
 
-var defaultFontSize = 11;
-var defaultFontColorBlack = Api.CreateColorFromRGB(0, 0, 0);
 var defaultFontColorGray = Api.CreateColorFromRGB(127, 127, 127);
 var defaultBorderColorWhite = Api.CreateColorFromRGB(255, 255, 255);
 
@@ -28,6 +26,8 @@ var colors = {
     mainFontColor: Api.CreateColorFromRGB(inputData.themeColors.mainFontColor[0], inputData.themeColors.mainFontColor[1], inputData.themeColors.mainFontColor[2])
 };
 
+${reportTableStyle}
+
 function toColumnName(num) {
     for (var res = '', a = 1, b = 26; (num -= a) >= 0; a = b, b *= 26) {
         res = String.fromCharCode(parseInt((num % b) / a) + 65) + res;
@@ -51,10 +51,15 @@ function writeCell(row, col, data) {
         sRange.SetValue(data.value);
     }
 
-    sRange.SetFontSize(defaultFontSize);
-    sRange.SetFontColor(data.fontColor || defaultFontColorBlack);
-    sRange.SetBold(data.bold || false);
-    sRange.SetItalic(data.italic || false);
+    if (data.fontColor) {
+        sRange.SetFontColor(data.fontColor);
+    }
+    if (data.bold) {
+        sRange.SetBold(true);
+    }
+    if (data.italic) {
+        sRange.SetItalic(true);
+    }
     sRange.SetAlignHorizontal(data.halign || "left");
     sRange.SetAlignVertical(data.valign || "center");
 
@@ -121,6 +126,9 @@ function writeInfo() {
 function writeDataTable(startCol, table) {
     oWorksheet.GetRange("A" + HEADER_ROW).SetRowHeight(ROW_HEIGHT);
 
+    // The row banding comes from the table style this range is turned into, so the data cells carry
+    // nothing but their value and number format. The header keeps its own colors: a table with no
+    // users is never created, and the header would be left unpainted.
     for (var c = 0; c < table.headers.length; c++) {
         writeCell(HEADER_ROW, startCol + c, headerCell(table.headers[c]));
     }
@@ -129,12 +137,11 @@ function writeDataTable(startCol, table) {
         var row = HEADER_ROW + 1 + i;
         oWorksheet.GetRange("A" + row).SetRowHeight(ROW_HEIGHT);
 
-        var bgColor = i % 2 == 0 ? null : colors.lightBgColor;
         var user = table.users[i];
 
-        writeCell(row, startCol, { value: user.userId, bgColor: bgColor, valign: "center", format: "@", border: true });
-        writeCell(row, startCol + 1, { value: user.userType, bgColor: bgColor, valign: "center", format: "@", border: true });
-        writeCell(row, startCol + 2, { value: user.expire, bgColor: bgColor, valign: "center", format: inputData.resources.dateFormat, border: true });
+        writeCell(row, startCol, { value: user.userId, valign: "center", format: "@" });
+        writeCell(row, startCol + 1, { value: user.userType, valign: "center", format: "@" });
+        writeCell(row, startCol + 2, { value: user.expire, valign: "center", format: inputData.resources.dateFormat });
     }
 
     var lastRow = HEADER_ROW + table.users.length;
@@ -168,6 +175,8 @@ function writeSummary(startRow, block) {
 
 customizeWorksheet();
 
+createReportTableStyle();
+
 writeImg();
 
 writeInfo();
@@ -182,11 +191,11 @@ var freezePanes = oWorksheet.GetFreezePanes();
 freezePanes.FreezeRows(HEADER_ROW);
 
 if (inputData.editors.users.length > 0) {
-    oWorksheet.FormatAsTable(editorsRange);
+    oWorksheet.AddListObject("xlSrcRange", editorsRange, undefined, "xlYes", undefined, REPORT_TABLE_STYLE_NAME);
 }
 
 if (inputData.viewers.users.length > 0) {
-    oWorksheet.FormatAsTable(viewersRange);
+    oWorksheet.AddListObject("xlSrcRange", viewersRange, undefined, "xlYes", undefined, REPORT_TABLE_STYLE_NAME);
 }
 
 oWorksheet.GetRange("A1").Select();

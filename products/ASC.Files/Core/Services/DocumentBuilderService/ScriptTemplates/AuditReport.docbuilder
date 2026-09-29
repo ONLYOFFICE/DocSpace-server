@@ -1,7 +1,5 @@
 builder.CreateFile("xlsx");
 
-var defaultFontSize = 11;
-var defaultFontColorBlack = Api.CreateColorFromRGB(0, 0, 0);
 var defaultFontColorGray = Api.CreateColorFromRGB(127, 127, 127);
 var defaultBorderColorWhite = Api.CreateColorFromRGB(255, 255, 255);
 
@@ -23,6 +21,8 @@ var colors = {
     lightBgColor: Api.CreateColorFromRGB(inputData.themeColors.lightBgColor[0], inputData.themeColors.lightBgColor[1], inputData.themeColors.lightBgColor[2]),
     mainFontColor: Api.CreateColorFromRGB(inputData.themeColors.mainFontColor[0], inputData.themeColors.mainFontColor[1], inputData.themeColors.mainFontColor[2])
 };
+
+${reportTableStyle}
 
 function getMaxLineLength(text) {
     if (text == null) {
@@ -93,6 +93,8 @@ function prepareInfo() {
 }
 
 function prepareHeader() {
+    // The header keeps its colors of its own rather than taking them from the table style: a report
+    // with no rows creates no table at all, and the header would be left unpainted.
     var row = [];
     for (var i = 0; i < inputData.keys.length; i++) {
         row.push({
@@ -111,7 +113,6 @@ function prepareHeader() {
 function prepareData() {
     var table = [];
     for (var i = 0; i < values.length; i++) {
-        var bgColor = i % 2 == 0 ? null : colors.lightBgColor;
         var rowValues = [];
         for (var j = 0; j < values[i].length; j++) {
             var cell = values[i][j];
@@ -120,9 +121,7 @@ function prepareData() {
                 "url": cell.url,
                 "halign": cell.halign,
                 valign: "center",
-                "format": cell.format,
-                "bgColor": bgColor,
-                "borderColor": defaultBorderColorWhite
+                "format": cell.format
             });
         }
         table.push({ height: 19.5, dataArray: rowValues });
@@ -148,9 +147,15 @@ function writeCell(position, data) {
         sRange.SetWrap(true);
     }
 
-    sRange.SetFontSize(data.fontSize || defaultFontSize);
-    sRange.SetFontColor(data.fontColor || defaultFontColorBlack);
-    sRange.SetBold(data.bold || false);
+    if (data.fontSize) {
+        sRange.SetFontSize(data.fontSize);
+    }
+    if (data.fontColor) {
+        sRange.SetFontColor(data.fontColor);
+    }
+    if (data.bold) {
+        sRange.SetBold(true);
+    }
     sRange.SetAlignHorizontal(data.halign || "left");
     sRange.SetAlignVertical(data.valign || "bottom");
 
@@ -213,6 +218,8 @@ function setColumnWidths() {
 
 customizeWorksheet();
 
+createReportTableStyle();
+
 writeImg();
 
 writeTable(prepareInfo());
@@ -231,7 +238,7 @@ freezePanes.FreezeRows(headerRowIndex);
 
 if (values.length > 0) {
     var formattedTableRange = "A" + headerRowIndex + ":" + toColumnName(colCount) + (headerRowIndex + values.length);
-    oWorksheet.FormatAsTable(formattedTableRange);
+    oWorksheet.AddListObject("xlSrcRange", formattedTableRange, undefined, "xlYes", undefined, REPORT_TABLE_STYLE_NAME);
 }
 
 oWorksheet.GetRange("A1").Select();

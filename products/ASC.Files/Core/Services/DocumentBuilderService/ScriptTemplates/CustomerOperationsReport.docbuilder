@@ -105,12 +105,18 @@ function prepareInfo() {
 }
 
 function prepareHeader() {
+    // The header keeps its colors of its own rather than taking them from the table style: a report
+    // with no rows creates no table at all, and the header would be left unpainted.
     var row = [];
     for (var i = 0; i < inputData.keys.length; i++) {
         row.push({
             "value": inputData.keys[i],
+            "bold": true,
+            "fontColor": colors.mainFontColor,
+            "bgColor": colors.mainBgColor,
             "halign": inputData.aligns[i],
-            valign: "center"
+            valign: "center",
+            "borderColor": defaultBorderColorWhite
         });
     }
     return { height: TABLE_ROW_HEIGHT, dataArray: row };

@@ -2,7 +2,6 @@
 builder.CreateFile("xlsx");
 
 var defaultFontSize = 11;
-var defaultFontColorBlack = Api.CreateColorFromRGB(0, 0, 0);
 var defaultFontColorGray = Api.CreateColorFromRGB(127, 127, 127);
 var defaultBgColorGray = Api.CreateColorFromRGB(242, 242, 242);
 var defaultBorderColorWhite = Api.CreateColorFromRGB(255, 255, 255);
@@ -12,6 +11,8 @@ var inputData = ${inputData};
 var inputDataItems = [${inputDataItems}];
 
 var oWorksheet = Api.GetActiveSheet();
+
+${reportTableStyle}
 
 var currentRowIndex = 1;
 var currentColIndex = 1;
@@ -120,18 +121,19 @@ function prepareData(startColIndex, startRowIndex) {
 
     for (var i = 0; i < sortedDataItems.length; i++) {
         var item = sortedDataItems[i];
-        var indexBgColor = i > 0 ? defaultBgColorGray : null;
-        var bgColor = i % 2 == 0 ? null : colors.lightBgColor;
+        // The banding and the grey index column both come from the table style these rows are turned
+        // into, so the cells carry nothing but their value, number format and the few things a style
+        // cannot say.
         dataTable.push({
             height: 19.5,
             dataArray: [
-                { "value": item.index, "fontSize": (defaultFontSize + 1), "bgColor": indexBgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": "@" },
-                { "value": item.name, "url": item.url, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": "@" },
-                { "value": item.type, "bold": !item.type.startsWith('.'), "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite },
-                { "value": item.size, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": inputData.resources.numberFormat },
-                { "value": item.author, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": "@" },
-                { "value": item.created, "fontColor": defaultFontColorGray, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": inputData.resources.dateFormat },
-                { "value": item.modified, "fontColor": defaultFontColorGray, "bgColor": bgColor, valign: "center", "borderColor": defaultBorderColorWhite, "format": inputData.resources.dateFormat }
+                { "value": item.index, "fontSize": (defaultFontSize + 1), valign: "center", "format": "@" },
+                { "value": item.name, "url": item.url, valign: "center", "format": "@" },
+                { "value": item.type, "bold": !item.type.startsWith('.'), valign: "center" },
+                { "value": item.size, valign: "center", "format": inputData.resources.numberFormat },
+                { "value": item.author, valign: "center", "format": "@" },
+                { "value": item.created, "fontColor": defaultFontColorGray, valign: "center", "format": inputData.resources.dateFormat },
+                { "value": item.modified, "fontColor": defaultFontColorGray, valign: "center", "format": inputData.resources.dateFormat }
             ]
         });
     }
@@ -175,9 +177,15 @@ function writeCell(position, data) {
         }
     }
 
-    sRange.SetFontSize(data.fontSize || defaultFontSize);
-    sRange.SetFontColor(data.fontColor || defaultFontColorBlack);
-    sRange.SetBold(data.bold || false);
+    if (data.fontSize) {
+        sRange.SetFontSize(data.fontSize);
+    }
+    if (data.fontColor) {
+        sRange.SetFontColor(data.fontColor);
+    }
+    if (data.bold) {
+        sRange.SetBold(true);
+    }
     sRange.SetAlignHorizontal(data.halign || "left");
     sRange.SetAlignVertical(data.valign || "bottom");
 
@@ -232,6 +240,13 @@ function writeImg() {
 
 customizeWorksheet();
 
+createReportTableStyle();
+
+// The index column carries a grey of its own. Only this report shows it, so the element is added to
+// the shared style here rather than declared with it, and only this report's table switches it on.
+Api.GetActiveWorkbook().GetTableStyles().GetItem(REPORT_TABLE_STYLE_NAME)
+   .GetTableStyleElements().GetItem("xlFirstColumn").SetFillColor(defaultBgColorGray);
+
 writeImg();
 
 var infoTable = prepareInfo();
@@ -247,7 +262,10 @@ var formattedTableRange = toColumnName(currentColIndex) + (currentRowIndex) + ":
 
 writeTable(dataTable);
 
-oWorksheet.FormatAsTable(formattedTableRange);
+oWorksheet.AddListObject("xlSrcRange", formattedTableRange, undefined, "xlYes", undefined, REPORT_TABLE_STYLE_NAME);
+
+var listObjects = oWorksheet.GetListObjects();
+listObjects[listObjects.length - 1].SetShowTableStyleFirstColumn(true);
 
 oWorksheet.GetRange(toColumnName(1) + 1).Select();
 
