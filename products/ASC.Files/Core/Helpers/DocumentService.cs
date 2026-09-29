@@ -1105,7 +1105,7 @@ public static class DocumentServiceHttpClientExtension
         {
             pipelineBuilder.AddRetry(new RetryStrategyOptions<LicenseValidationResult>
             {
-                MaxRetryAttempts = 3,
+                MaxRetryAttempts = 4,
                 Delay = TimeSpan.FromSeconds(1),
                 BackoffType = DelayBackoffType.Exponential,
                 ShouldHandle = new PredicateBuilder<LicenseValidationResult>().HandleResult(result => result == null)
