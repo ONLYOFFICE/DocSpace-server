@@ -7,8 +7,7 @@ info:
 
     This document is NOT the REST API spec and shares no schemas with it. Webhook
     payloads are DTOs owned by the webhook contract (UserWebhookDto, GroupWebhookDto,
-    FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto). They
-    began as copies of the matching REST DTOs and are free to diverge from them.
+    FileWebhookDto, FolderWebhookDto, RoomWebhookDto, FormSubmitWebhookDto).
 
     Each trigger declares its payload with [WebhookPayload] on the WebhookTrigger
     field, and each DTO declares the same WebhookPayloadKind; the map below is that
