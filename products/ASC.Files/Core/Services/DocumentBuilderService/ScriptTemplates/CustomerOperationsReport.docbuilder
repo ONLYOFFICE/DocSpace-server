@@ -10,7 +10,6 @@ var MAX_COLUMN_WIDTH = 100;
 // cannot drift apart.
 var TABLE_ROW_HEIGHT = 19.5;
 
-
 // Reference-safe names the two sheets wear while the pivot is created - see insertPivot().
 var PIVOT_SOURCE_TEMP_SHEET_NAME = "PivotSource";
 var PIVOT_TARGET_TEMP_SHEET_NAME = "PivotTarget";
@@ -479,6 +478,10 @@ function writePivot(headerRowIndex, colCount, detailColumnLengths) {
     // row column instead, and the grand total reuses the caption the detail sheet's total row uses.
     pivotTable.SetRowAxisLayout("Tabular", false);
     pivotTable.SetGrandTotalName(inputData.resources.total);
+
+    // No Update() here. Every call above lays the pivot out on the spot, so GetTableRange1() already
+    // reports its final range for stylePivot() below. Update() only re-reads the source range, which
+    // has not changed since the pivot was inserted, and would lay the pivot out once more for nothing.
 
     // The editor refits the pivot's columns to their content every time the pivot is laid out again -
     // which each of the calls above already did, and which the reader's next field move or refresh
