@@ -1,0 +1,38 @@
+# Line endings: everything text is stored and checked out as LF, regardless of
+# core.autocrlf on the developer's machine. Editors follow .editorconfig.
+* text=auto eol=lf
+
+# Windows batch files must keep CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Shell scripts must be LF even if edited on Windows
+*.sh text eol=lf
+
+# Binary files: never touch their bytes
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.otf binary
+*.pdf binary
+*.docx binary
+*.xlsx binary
+*.pptx binary
+*.zip binary
+*.7z binary
+*.gz binary
+*.tgz binary
+*.dll binary
+*.exe binary
+*.pdb binary
+*.nupkg binary
+*.snk binary
+*.pfx binary
+*.p7s binary
