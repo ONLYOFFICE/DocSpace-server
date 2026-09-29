@@ -83,10 +83,10 @@ public abstract class AppsFolderTestBase(
         created.Title.Should().Be(AppsTitle);
     }
 
-    protected async Task MoveAndWait(int folderId, int destFolderId)
+    protected async Task MoveAndWait(int folderId, int destFolderId, FileConflictResolveType conflictResolveType = FileConflictResolveType.Skip)
     {
         var results = (await _filesOperationsApi.MoveBatchItemsAsync(
-            BuildBatchRequest(folderId, destFolderId, FileConflictResolveType.Skip),
+            BuildBatchRequest(folderId, destFolderId, conflictResolveType),
             TestContext.Current.CancellationToken)).Response;
 
         await AssertOperationSucceeded(results.FirstOrDefault()?.Id);

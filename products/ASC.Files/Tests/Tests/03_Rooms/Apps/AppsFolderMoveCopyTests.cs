@@ -96,6 +96,27 @@ public class AppsFolderMoveCopyTests(
     }
 
     [Fact]
+    public async Task MoveFolderNamedApps_KeepingBothIntoRootWithAppsFolder_StaysRegularFolder()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateSmartRoom("Autotest Apps Move Keep Both");
+        var original = await CreateAppsFolder(room.Id);
+        var subfolder = await CreateFolder("Autotest Subfolder", room.Id);
+        var incoming = await CreateAppsFolder(subfolder.Id);
+
+        // Act
+        await MoveAndWait(incoming.Id, room.Id, FileConflictResolveType.Duplicate);
+
+        // Assert
+        (await GetFolderTitles(room.Id)).Count(t => t == AppsTitle).Should().Be(2);
+        await AssertAppsFolderPresent(room.Id);
+
+        await _foldersApi.RenameFolderAsync(original.Id, new CreateFolder("Autotest Former Apps"), TestContext.Current.CancellationToken);
+        await AssertAppsFolderAbsent(room.Id);
+    }
+
+    [Fact]
     public async Task MoveAppsFolder_ToFillingFormsRoomRoot_BecomesRegularFolder()
     {
         // Arrange
