@@ -2,6 +2,7 @@
 builder.CreateFile("xlsx");
 
 var defaultFontSize = 11;
+var defaultFontColorBlack = Api.CreateColorFromRGB(0, 0, 0);
 var defaultFontColorGray = Api.CreateColorFromRGB(127, 127, 127);
 var defaultBgColorGray = Api.CreateColorFromRGB(242, 242, 242);
 var defaultBorderColorWhite = Api.CreateColorFromRGB(255, 255, 255);
@@ -171,6 +172,10 @@ function writeCell(position, data) {
 
     if (data.url) {
         oWorksheet.SetHyperlink(position, data.url, "", data.value, data.value);
+
+        // The editor paints a hyperlink in its own blue; the reports have always shown their links
+        // in the body text color, so it is set back here.
+        sRange.SetFontColor(data.fontColor || defaultFontColorBlack);
     } else {
         if (data.value != null) {
             sRange.SetValue(data.value);
