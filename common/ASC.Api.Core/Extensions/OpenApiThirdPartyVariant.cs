@@ -242,7 +242,7 @@ public class ThirdPartyVariantDocumentFilter : IDocumentFilter
                     continue;
                 }
 
-                var difference = Difference(operation, variant);
+                var difference = Difference(operation, variant, key[..^marker.Length]);
 
                 if (difference.Count == 0)
                 {
@@ -253,9 +253,118 @@ public class ThirdPartyVariantDocumentFilter : IDocumentFilter
                 operation.Extensions[ExtensionName] = new JsonNodeExtension(difference);
             }
         }
+
+        FixThirdPartySchemaExamples(swaggerDoc);
     }
 
-    private static JsonObject Difference(OpenApiOperation operation, OpenApiOperation variant)
+    /// <summary>
+    /// What a folder or a room of a connected storage is called: the provider's own prefix and the number of
+    /// the connection.
+    /// </summary>
+    private const string ThirdPartyFolderIdExample = "sbox-42";
+
+    /// <summary>
+    /// What a file of a connected storage is called: the same, followed by the encoded path inside the storage.
+    /// </summary>
+    private const string ThirdPartyFileIdExample = "sbox-42-L1JlcG9ydC5kb2N4";
+
+    /// <summary>
+    /// The example of an identifier that is a number for a portal entry and a string for a third-party one.
+    /// The twin inherits the documentation of the generic member it was closed from, so its example would stay
+    /// the portal one - <c>"1"</c> - which is not a value a third-party identifier can have.
+    /// </summary>
+    /// <param name="name">The parameter or property holding the identifier.</param>
+    /// <param name="context">The route of the operation or the name of the schema it belongs to.</param>
+    private static string ThirdPartyIdExample(string name, string context)
+    {
+        if (name.Contains("file", StringComparison.OrdinalIgnoreCase))
+        {
+            return ThirdPartyFileIdExample;
+        }
+
+        // A plain "id" says nothing by itself; on a route it is the entry the route names.
+        if (string.Equals(name, "id", StringComparison.OrdinalIgnoreCase)
+            && context != null
+            && context.Contains("/file/", StringComparison.OrdinalIgnoreCase))
+        {
+            return ThirdPartyFileIdExample;
+        }
+
+        return ThirdPartyFolderIdExample;
+    }
+
+    /// <summary>
+    /// Gives the identifiers of the <c>ThirdParty*</c> schemas third-party examples: every property that is an
+    /// integer in the schema of the portal shape and a string here.
+    /// </summary>
+    private static void FixThirdPartySchemaExamples(OpenApiDocument swaggerDoc)
+    {
+        var schemas = swaggerDoc.Components?.Schemas;
+
+        if (schemas == null)
+        {
+            return;
+        }
+
+        const string prefix = "ThirdParty";
+
+        foreach (var (name, schema) in schemas)
+        {
+            if (!name.StartsWith(prefix, StringComparison.Ordinal)
+                || !schemas.TryGetValue(name[prefix.Length..], out var portal))
+            {
+                continue;
+            }
+
+            var portalProperties = OwnProperties(portal).ToDictionary(p => p.Key, p => p.Value);
+
+            foreach (var (propertyName, property) in OwnProperties(schema))
+            {
+                if (property is not OpenApiSchema own
+                    || own.Type is not { } type
+                    || !type.HasFlag(JsonSchemaType.String)
+                    || !portalProperties.TryGetValue(propertyName, out var counterpart)
+                    || counterpart.Type is not { } counterpartType
+                    || !counterpartType.HasFlag(JsonSchemaType.Integer))
+                {
+                    continue;
+                }
+
+                own.Examples = [JsonValue.Create(ThirdPartyIdExample(propertyName, null))];
+            }
+        }
+    }
+
+    /// <summary>
+    /// The properties a schema declares itself, whether directly or in the inline part of an <c>allOf</c>.
+    /// </summary>
+    private static IEnumerable<KeyValuePair<string, IOpenApiSchema>> OwnProperties(IOpenApiSchema schema)
+    {
+        if (schema is OpenApiSchemaReference)
+        {
+            yield break;
+        }
+
+        foreach (var property in schema.Properties ?? new Dictionary<string, IOpenApiSchema>())
+        {
+            yield return property;
+        }
+
+        foreach (var part in schema.AllOf ?? [])
+        {
+            if (part is OpenApiSchemaReference)
+            {
+                continue;
+            }
+
+            foreach (var property in part.Properties ?? new Dictionary<string, IOpenApiSchema>())
+            {
+                yield return property;
+            }
+        }
+    }
+
+    private static JsonObject Difference(OpenApiOperation operation, OpenApiOperation variant, string route)
     {
         var difference = new JsonObject();
 
@@ -268,6 +377,20 @@ public class ThirdPartyVariantDocumentFilter : IDocumentFilter
 
             if (counterpart == null || !JsonNode.DeepEquals(json, Serialize(counterpart)))
             {
+                // The id that is an integer for a portal entry and a string here: its example came with the
+                // documentation of the generic parameter, and "1" is not a third-party identifier.
+                if (counterpart?.Schema?.Type is { } counterpartType
+                    && counterpartType.HasFlag(JsonSchemaType.Integer)
+                    && parameter.Schema?.Type is { } type
+                    && type.HasFlag(JsonSchemaType.String)
+                    && json is JsonObject parameterJson
+                    && parameterJson["schema"] is JsonObject schemaJson)
+                {
+                    parameterJson.Remove("example");
+                    schemaJson.Remove("example");
+                    schemaJson["examples"] = new JsonArray(JsonValue.Create(ThirdPartyIdExample(parameter.Name, route)));
+                }
+
                 parameters.Add(json);
             }
         }

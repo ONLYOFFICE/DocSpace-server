@@ -223,7 +223,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -390,7 +390,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -531,7 +531,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -720,7 +720,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -906,7 +906,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -1067,7 +1067,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -1322,7 +1322,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -1897,7 +1897,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -2047,7 +2047,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -2208,7 +2208,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -2346,7 +2346,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -2495,7 +2495,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -2645,7 +2645,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -2821,7 +2821,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -2994,7 +2994,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -3178,7 +3178,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -3317,7 +3317,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -3482,7 +3482,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -3757,7 +3757,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -3886,7 +3886,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -4036,7 +4036,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -4209,7 +4209,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -4380,7 +4380,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -4536,7 +4536,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -4695,7 +4695,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -4859,7 +4859,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -5007,7 +5007,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -5162,7 +5162,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -5455,7 +5455,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -5758,7 +5758,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -6140,7 +6140,10 @@
               "description": "The file whose encryption keys are read. Only a file in an end-to-end encrypted\r\n            private room has any.",
               "required": true,
               "schema": {
-                "type": "string"
+                "type": "string",
+                "examples": [
+                  "sbox-42-L1JlcG9ydC5kb2N4"
+                ]
               }
             }
           ]
@@ -6297,7 +6300,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "12345"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -6903,7 +6906,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -7047,7 +7050,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -7222,7 +7225,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -7963,7 +7966,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -8951,7 +8954,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -9122,7 +9125,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -9249,7 +9252,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -9423,7 +9426,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -9595,7 +9598,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -10064,7 +10067,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -10075,7 +10078,7 @@
               "description": "Keeps only the entries that lie in this room, which matters when the listing being read gathers entries from\r\nmore than one of them.",
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -10239,7 +10242,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -10380,7 +10383,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -10521,7 +10524,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -10774,7 +10777,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -10933,7 +10936,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -11083,7 +11086,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -11219,7 +11222,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -12363,7 +12366,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -12612,7 +12615,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -12835,7 +12838,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -13396,7 +13399,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -13543,7 +13546,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -13704,7 +13707,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -15749,7 +15752,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -15922,7 +15925,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -16088,7 +16091,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -16259,7 +16262,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -16467,7 +16470,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -16640,7 +16643,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -20703,7 +20706,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -20867,7 +20870,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -21015,7 +21018,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -21179,7 +21182,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -21327,7 +21330,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -21468,7 +21471,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -21651,7 +21654,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -21839,7 +21842,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -22027,7 +22030,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -24845,7 +24848,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -25016,7 +25019,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -25187,7 +25190,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -25336,7 +25339,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -25485,7 +25488,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -25609,7 +25612,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -25791,7 +25794,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -25941,7 +25944,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -26086,7 +26089,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -26230,7 +26233,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -26382,7 +26385,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -26555,7 +26558,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -26731,7 +26734,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -26890,7 +26893,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -27069,7 +27072,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -27327,7 +27330,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -27488,7 +27491,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -27689,7 +27692,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -27827,7 +27830,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -27988,7 +27991,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -45987,7 +45990,7 @@
         "properties": {
           "fileId": {
             "examples": [
-              "1"
+              "sbox-42-L1JlcG9ydC5kb2N4"
             ],
             "type": [
               "null",
@@ -46385,7 +46388,7 @@
         "properties": {
           "folderId": {
             "examples": [
-              "10"
+              "sbox-42"
             ],
             "type": [
               "null",
@@ -46405,7 +46408,7 @@
           },
           "fileId": {
             "examples": [
-              "123"
+              "sbox-42-L1JlcG9ydC5kb2N4"
             ],
             "type": [
               "null",
@@ -46481,7 +46484,7 @@
             "properties": {
               "folderId": {
                 "examples": [
-                  "10"
+                  "sbox-42"
                 ],
                 "type": [
                   "null",
@@ -46833,7 +46836,7 @@
             "properties": {
               "id": {
                 "examples": [
-                  "10"
+                  "sbox-42"
                 ],
                 "type": [
                   "null",
@@ -46843,7 +46846,7 @@
               },
               "rootFolderId": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": [
                   "null",
@@ -46853,7 +46856,7 @@
               },
               "originId": {
                 "examples": [
-                  "12"
+                  "sbox-42"
                 ],
                 "type": [
                   "null",
@@ -46863,7 +46866,7 @@
               },
               "originRoomId": {
                 "examples": [
-                  "22"
+                  "sbox-42"
                 ],
                 "type": [
                   "null",
@@ -47412,7 +47415,7 @@
             "properties": {
               "parentId": {
                 "examples": [
-                  "10"
+                  "sbox-42"
                 ],
                 "type": [
                   "null",
@@ -47864,7 +47867,7 @@
         "properties": {
           "folderId": {
             "examples": [
-              "1"
+              "sbox-42"
             ],
             "type": [
               "null",
@@ -47890,7 +47893,7 @@
         "properties": {
           "id": {
             "examples": [
-              "1234"
+              "sbox-42"
             ],
             "type": [
               "null",
@@ -47900,7 +47903,7 @@
           },
           "folderId": {
             "examples": [
-              "10"
+              "sbox-42"
             ],
             "type": [
               "null",

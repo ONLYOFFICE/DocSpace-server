@@ -312,6 +312,16 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
             return null;
         }
 
+        // The third-party twin shares the path and the method of its operation, so the lookup below would
+        // hand it the portal parameter's example ("1" for an id that is "sbox-42" there). What the twin
+        // changes is stated in the extension, and that is where its examples are.
+        if (operation.vendorExtensions.containsKey(ThirdPartyVariants.IS_VARIANT)) {
+            String variantExample = variantExample(raw, parameterName, location);
+            if (variantExample != null) {
+                return variantExample;
+            }
+        }
+
         for (Parameter parameter : raw.getParameters()) {
             if (!parameterName.equals(parameter.getName())) {
                 continue;
@@ -327,6 +337,56 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
             Object schemaExample = schemaExample(parameter.getSchema());
             if (schemaExample != null) {
                 return exampleText(schemaExample);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * The example the third-party twin of an operation states for a parameter it changes, read from the
+     * {@code x-thirdparty-variant} extension; null when the twin leaves that parameter as it is.
+     */
+    private static String variantExample(Operation raw, String parameterName, String location) {
+        Object extension = raw.getExtensions() == null ? null : raw.getExtensions().get(ThirdPartyVariants.EXTENSION);
+        if (!(extension instanceof Map)) {
+            return null;
+        }
+
+        Object parameters = ((Map<?, ?>) extension).get("parameters");
+        if (!(parameters instanceof List)) {
+            return null;
+        }
+
+        for (Object item : (List<?>) parameters) {
+            if (!(item instanceof Map)) {
+                continue;
+            }
+
+            Map<?, ?> parameter = (Map<?, ?>) item;
+            if (!parameterName.equals(parameter.get("name"))) {
+                continue;
+            }
+            if (location != null && !location.isEmpty() && !location.equals(parameter.get("in"))) {
+                continue;
+            }
+
+            if (parameter.get("example") != null) {
+                return exampleText(parameter.get("example"));
+            }
+
+            if (parameter.get("schema") instanceof Map) {
+                Map<?, ?> schema = (Map<?, ?>) parameter.get("schema");
+                if (schema.get("example") != null) {
+                    return exampleText(schema.get("example"));
+                }
+                if (schema.get("examples") instanceof List) {
+                    for (Object example : (List<?>) schema.get("examples")) {
+                        if (example != null) {
+                            return exampleText(example);
+                        }
+                    }
+                }
             }
         }
 
