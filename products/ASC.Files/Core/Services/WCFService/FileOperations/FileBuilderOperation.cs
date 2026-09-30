@@ -61,6 +61,9 @@ public record FileBuilderOperationData<T> : FileOperationData<T>
     [ProtoMember(11)]
     public string Argument { get; set; }
 
+    [ProtoMember(12)]
+    public string BaseUri { get; set; }
+
     public FileBuilderOperationData()
     {
 
@@ -73,6 +76,7 @@ public record FileBuilderOperationData<T> : FileOperationData<T>
         int? folderId,
         Dictionary<string, FileBuilderOutputData> outputs,
         string argument,
+        string baseUri,
         int tenantId,
         Guid userId,
         IDictionary<string, string> headers,
@@ -83,6 +87,7 @@ public record FileBuilderOperationData<T> : FileOperationData<T>
         FolderId = folderId;
         Outputs = outputs;
         Argument = argument;
+        BaseUri = baseUri;
     }
 
     // the script may carry document content, so it stays out of the logged event
@@ -127,6 +132,11 @@ internal class FileBuilderOperation<T>(IServiceProvider serviceProvider, FileBui
 
     protected override async Task DoJob(AsyncServiceScope serviceScope)
     {
+        if (!string.IsNullOrEmpty(_data.BaseUri))
+        {
+            serviceScope.ServiceProvider.GetRequiredService<CommonLinkUtility>().ServerUri = _data.BaseUri;
+        }
+
         var runner = serviceScope.ServiceProvider.GetRequiredService<DocumentBuilderScriptRunner>();
         List<File<int>> saved = [];
 

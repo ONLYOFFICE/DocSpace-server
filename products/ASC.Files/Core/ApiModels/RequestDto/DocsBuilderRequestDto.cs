@@ -37,7 +37,7 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// The document builder script to run and where to put what it produces.
 /// </summary>
-public class DocsBuilderRequestDto : FileOperationRequestBaseDto
+public class DocsBuilderRequestDto
 {
     /// <summary>
     /// The document builder script. It addresses a portal file by writing the identifier of that file where the

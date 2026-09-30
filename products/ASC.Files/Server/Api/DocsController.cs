@@ -44,7 +44,8 @@ public class DocsController(
     FileConverter fileConverter,
     FileBuilderOperationsManager fileBuilderOperationsManager,
     FileOperationDtoHelper fileOperationDtoHelper,
-    FileDtoHelper fileDtoHelper)
+    FileDtoHelper fileDtoHelper,
+    CommonLinkUtility commonLinkUtility)
     : ControllerBase
 {
     /// <remarks>
@@ -93,8 +94,8 @@ public class DocsController(
     }
 
     /// <remarks>
-    /// Queues a background run of a document builder script on portal files and answers with the caller's builder
-    /// operations, the new one included. The script names portal files by identifier - `builder.OpenFile("1234")` -
+    /// Queues a background run of a document builder script on portal files and answers with the operation just
+    /// started. The script names portal files by identifier - `builder.OpenFile("1234")` -
     /// where the document builder documentation writes an address. The caller needs read access to every file the
     /// script opens, edit access to each file `outputs` replaces and the right to create files in each folder a result
     /// is saved into. Each file the script saves goes where `outputs` says, keyed by the name given to SaveFile:
@@ -107,20 +108,17 @@ public class DocsController(
     /// </remarks>
     /// <summary>Run a document builder script</summary>
     /// <path>api/2.0/docs/builder</path>
-    /// <collection>list</collection>
     [Tags("Docs")]
-    [SwaggerResponse(200, "The document builder operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [SwaggerResponse(200, "The queued document builder operation to poll", typeof(FileOperationDto))]
     [SwaggerResponse(400, "The script or the argument is malformed, a file is addressed by an address, or a saved file has nowhere to go")]
     [SwaggerResponse(403, "You do not have enough permissions to read the file the script opens or to write the result")]
     [SwaggerResponse(404, "File or folder not found")]
     [HttpPost("builder")]
-    public async IAsyncEnumerable<FileOperationDto> RunBuilderScript(DocsBuilderRequestDto inDto)
+    public async Task<FileOperationDto> RunBuilderScript(DocsBuilderRequestDto inDto)
     {
-        var taskId = await fileBuilderOperationsManager.Publish(inDto.Script, inDto.FolderId, inDto.Outputs, inDto.Argument);
+        var taskId = await fileBuilderOperationsManager.Publish(inDto.Script, inDto.FolderId, inDto.Outputs, inDto.Argument, commonLinkUtility.ServerRootPath);
+        var tasks = await fileBuilderOperationsManager.GetOperationResults(taskId);
 
-        foreach (var e in await fileBuilderOperationsManager.GetOperationResults(inDto.ReturnSingleOperation ? taskId : null))
-        {
-            yield return await fileOperationDtoHelper.GetAsync(e);
-        }
+        return await fileOperationDtoHelper.GetAsync(tasks.FirstOrDefault());
     }
 }
