@@ -408,7 +408,7 @@ public class QuotaUsedSpaceTests(
 
         const int rootsCount = 4;
 
-        var roots = new List<FolderDtoInteger>(rootsCount);
+        var roots = new List<FolderDto>(rootsCount);
         for (var i = 0; i < rootsCount; i++)
         {
             roots.Add(await CreateFolderInMy($"quota_concurrent_{i}", Owner));

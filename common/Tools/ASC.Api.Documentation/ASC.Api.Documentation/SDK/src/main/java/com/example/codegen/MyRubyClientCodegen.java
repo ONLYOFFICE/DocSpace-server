@@ -15,6 +15,7 @@ import org.openapitools.codegen.model.ApiInfoMap;
 import org.openapitools.codegen.model.ModelMap;
 import org.openapitools.codegen.model.OperationMap;
 import org.openapitools.codegen.model.OperationsMap;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
@@ -213,9 +214,32 @@ public class MyRubyClientCodegen extends RubyClientCodegen {
         return folderPath + File.separator + filename;
     }
 
+    // The third-party twin of a generic action (see ThirdPartyVariants): the string-id shape the document
+    // carries as `x-thirdparty-variant`, exposed as a sibling method with the ThirdParty suffix.
+    @Override
+    public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List<Server> servers) {
+        CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);
+        ThirdPartyVariants.attach(this, op, path, httpMethod, operation, servers, ThirdPartyVariants.Naming.OVERLOAD);
+        return op;
+    }
+
+    @Override
+    public void postProcess() {
+        super.postProcess();
+        StaleOutput.delete(this);
+        LineEndings.normalize(this);
+    }
+
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
+        // Ruby is dynamic, so the twin stays attached: one method, [Integer, String] in the docs, and
+        // the response model picked at run time by the id's class (see ThirdPartyVariants.markUnions).
+        ThirdPartyVariants.addAttachedImports(this, objs);
+
         super.postProcessOperationsWithModels(objs, allModels);
+        for (CodegenOperation op : objs.getOperations().getOperation()) {
+            ThirdPartyVariants.markUnions(op, (a, b) -> a + ", " + b);
+        }
 
         if (objs == null || objs.getOperations() == null) {
             return objs;

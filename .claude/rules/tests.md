@@ -128,7 +128,7 @@ nullable property. The DTO accepts all of those and the server does the rejectin
 ordinary typed calls.
 
 One more carve-out, on the response side: a generated model can be too narrow to carry what the
-endpoint returns. `FolderContentDtoInteger.Folders` is typed `List<FileEntryBaseDto>`, which has
+endpoint returns. `FolderContentDto.Folders` is typed `List<FileEntryBaseDto>`, which has
 `Title` but neither `Id` nor `Logo`, so a room read through a folder listing loses both. When the
 assertion needs a field the model drops, read the raw JSON — and say so in a comment, because
 that is an SDK defect worth reporting, not a preference.

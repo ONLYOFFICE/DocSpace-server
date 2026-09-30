@@ -68,6 +68,7 @@ switch (launchProfile)
             // no data volume, like MySQL: the tenant and entry ids start over with every run, so documents
             // kept from a previous run would match the new entries by (TenantId, Id) and leak into the search
             .AddOpensearch(withDashboard: false, withDataVolume: false, isProxied: false)
+            .AddNextcloud()
             .AllowPortalRegistration();
 
         configurator
