@@ -546,6 +546,7 @@ internal class FolderDao(
 
         if (transaction == null)
         {
+            await using var aiFolderLock = await AcquireAiFolderLockAsync(_tenantManager.GetCurrentTenantId(), folder.ParentId, Global.ReplaceInvalidCharsAndTruncate(folder.Title));
             await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
             var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
@@ -596,15 +597,27 @@ internal class FolderDao(
         }
 
         var parentFolderType = await filesDbContext.FolderTypeByIdAsync(tenantId, parentId);
-
         if (parentFolderType is not (FolderType.CustomRoom or FolderType.PublicRoom or FolderType.VirtualDataRoom or FolderType.EditingRoom))
         {
             return FolderType.DEFAULT;
         }
 
-        return await filesDbContext.AiFolderExistsAsync(tenantId, parentId, folderId)
-            ? FolderType.DEFAULT
-            : FolderType.Ai;
+        if (await filesDbContext.AiFolderExistsAsync(tenantId, parentId, folderId))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_AppsFolderExists);
+        }
+
+        return FolderType.Ai;
+    }
+
+    private async ValueTask<IDistributedLockHandle> AcquireAiFolderLockAsync(int tenantId, int parentId, string title)
+    {
+        if (!string.Equals(title, FileConstant.AiFolderTitle, StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        return await _distributedLockProvider.TryAcquireFairLockAsync(LockKeyHelper.GetAiFolderCheckKey(tenantId, parentId));
     }
 
     private async Task<int> InternalSaveFolderToDbAsync(FilesDbContext filesDbContext, Folder<int> folder)
@@ -630,8 +643,12 @@ internal class FolderDao(
 
         if (toUpdate != null)
         {
-            toUpdate.Title = folder.Title;
-            toUpdate.FolderType = await ResolveFolderTypeAsync(filesDbContext, tenantId, toUpdate.Id, toUpdate.ParentId, toUpdate.Title, toUpdate.FolderType);
+            if (!string.Equals(toUpdate.Title, folder.Title, StringComparison.Ordinal))
+            {
+                toUpdate.Title = folder.Title;
+                toUpdate.FolderType = await ResolveFolderTypeAsync(filesDbContext, tenantId, toUpdate.Id, toUpdate.ParentId, toUpdate.Title, toUpdate.FolderType);
+            }
+
             toUpdate.CreateBy = folder.CreateBy;
             toUpdate.ModifiedOn = _tenantUtil.DateTimeToUtc(folder.ModifiedOn);
             toUpdate.ModifiedBy = folder.ModifiedBy;
@@ -1074,6 +1091,7 @@ internal class FolderDao(
             await using var context = await _dbContextFactory.CreateDbContextAsync();
             await using var tx = await context.Database.BeginTransactionAsync();
             var folder = await GetFolderAsync(folderId);
+            await using var aiFolderLock = await AcquireAiFolderLockAsync(tenantId, toFolderId, folder.Title);
             var oldParentId = folder.ParentId;
 
             if (folder.FolderType is not (FolderType.DEFAULT or FolderType.Ai or FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone) &&
@@ -1474,11 +1492,18 @@ internal class FolderDao(
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
 
+        var title = Global.ReplaceInvalidCharsAndTruncate(newTitle);
+
+        await using var aiFolderLock = await AcquireAiFolderLockAsync(tenantId, folder.ParentId, title);
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var toUpdate = await filesDbContext.FolderAsync(tenantId, folder.Id);
 
-        toUpdate.Title = Global.ReplaceInvalidCharsAndTruncate(newTitle);
-        toUpdate.FolderType = await ResolveFolderTypeAsync(filesDbContext, tenantId, toUpdate.Id, toUpdate.ParentId, toUpdate.Title, toUpdate.FolderType);
+        if (!string.Equals(toUpdate.Title, title, StringComparison.Ordinal))
+        {
+            toUpdate.Title = title;
+            toUpdate.FolderType = await ResolveFolderTypeAsync(filesDbContext, tenantId, toUpdate.Id, toUpdate.ParentId, toUpdate.Title, toUpdate.FolderType);
+        }
+
         toUpdate.ModifiedOn = DateTime.UtcNow;
         toUpdate.ModifiedBy = _authContext.CurrentAccount.ID;
         filesDbContext.Update(toUpdate);
