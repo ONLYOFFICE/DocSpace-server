@@ -399,6 +399,168 @@ public class ServicePricesRequestDto
     public bool Active { get; init; }
 }
 
+/// <summary>
+/// The parameters that select one service limit of the portal.
+/// </summary>
+public class ServiceLimitRequestDto
+{
+    /// <summary>
+    /// The ID of the service limit, as returned in `id` by the operation that created it or by the lists of limits.
+    /// </summary>
+    /// <example>42</example>
+    [FromRoute(Name = "id")]
+    public int Id { get; init; }
+}
+
+/// <summary>
+/// The parameters that select the service whose portal-wide limit is read.
+/// </summary>
+public class CustomerServiceLimitRequestDto
+{
+    /// <summary>
+    /// The wallet service, named the way the billing catalogue names it, such as `ai-tools` or `backup`. Take the
+    /// value from the `serviceName` field of `GET api/2.0/portal/payment/walletservices`; the match ignores case.
+    /// </summary>
+    /// <example>ai-tools</example>
+    [StringLength(255)]
+    [FromRoute(Name = "serviceName")]
+    public string ServiceName { get; init; }
+}
+
+/// <summary>
+/// The parameters that select the service whose per-user limits are listed, and how the list is paged and sorted.
+/// </summary>
+public class ParticipantServiceLimitsRequestDto : CustomerServiceLimitRequestDto
+{
+    /// <summary>
+    /// The number of limits to skip before the first one returned. Counted after the ordering is applied, and starts
+    /// at 0 when omitted.
+    /// </summary>
+    /// <example>0</example>
+    [FromQuery(Name = "offset")]
+    public int? Offset { get; init; }
+
+    /// <summary>
+    /// The maximum number of limits returned in one page. Defaults to 25 when omitted; the answer echoes the window
+    /// back next to `totalQuantity`, `totalPage` and `currentPage`.
+    /// </summary>
+    /// <example>25</example>
+    [FromQuery(Name = "limit")]
+    public int? Limit { get; init; }
+
+    /// <summary>
+    /// The field the limits are sorted by. The accounting service applies its own ordering when this is omitted.
+    /// </summary>
+    /// <example>Created</example>
+    [FromQuery(Name = "orderBy")]
+    public ServiceLimitOrderBy? OrderBy { get; init; }
+
+    /// <summary>
+    /// The direction the field named in `orderBy` is sorted in. Newest first is what the accounting service does by
+    /// default, so leaving this out sorts the same way as asking for descending explicitly.
+    /// </summary>
+    /// <example>Descending</example>
+    [FromQuery(Name = "orderType")]
+    public OperationOrderType? OrderType { get; init; }
+}
+
+/// <summary>
+/// The spending limit to create on a wallet service, for the whole portal or for one of its users.
+/// </summary>
+/// <example>
+/// {
+///   "serviceName": "ai-tools",
+///   "userId": "00000000-0000-0000-0000-000000000000",
+///   "amountValue": 50,
+///   "quantityValue": 1000,
+///   "period": "Day"
+/// }
+/// </example>
+public class CreateServiceLimitRequestDto
+{
+    /// <summary>
+    /// The pay-as-you-go wallet service to limit, named the way the billing catalogue names it, such as `ai-tools`.
+    /// Take the value from the `serviceName` field of `GET api/2.0/portal/payment/walletservices`; the match ignores
+    /// case.
+    /// </summary>
+    /// <example>ai-tools</example>
+    [Required]
+    [StringLength(255)]
+    public string ServiceName { get; init; }
+
+    /// <summary>
+    /// The ID of the portal user the limit is set for. Omit it to set the limit on the portal as a whole, where the
+    /// spending of every user counts towards it.
+    /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
+    public Guid? UserId { get; init; }
+
+    /// <summary>
+    /// The most money the service may cost per period, in the currency of the service; the currency is the one the
+    /// service is sold in and cannot be chosen. Zero blocks the service completely.
+    /// </summary>
+    /// <example>50</example>
+    [Range(0, double.MaxValue)]
+    public decimal? AmountValue { get; init; }
+
+    /// <summary>
+    /// The largest quantity of the service that may be consumed per period, in the unit the service is sold in, such
+    /// as pages, requests or gigabytes. Zero blocks the service completely.
+    /// </summary>
+    /// <example>1000</example>
+    [Range(0, int.MaxValue)]
+    public int? QuantityValue { get; init; }
+
+    /// <summary>
+    /// The calendar period the thresholds apply to, counted in UTC.
+    /// </summary>
+    /// <example>Day</example>
+    public ServiceLimitPeriod Period { get; init; } = ServiceLimitPeriod.Day;
+}
+
+/// <summary>
+/// The new thresholds and state of an existing service limit.
+/// </summary>
+/// <example>
+/// {
+///   "id": 42,
+///   "amountValue": 100,
+///   "quantityValue": 2000,
+///   "enabled": true
+/// }
+/// </example>
+public class UpdateServiceLimitRequestDto
+{
+    /// <summary>
+    /// The ID of the service limit, as returned in `id` by the operation that created it or by the lists of limits.
+    /// </summary>
+    /// <example>42</example>
+    [Required]
+    public int Id { get; init; }
+
+    /// <summary>
+    /// The most money the service may cost per period, in the currency of the service. Zero blocks the service
+    /// completely.
+    /// </summary>
+    /// <example>100</example>
+    [Range(0, double.MaxValue)]
+    public decimal? AmountValue { get; init; }
+
+    /// <summary>
+    /// The largest quantity of the service that may be consumed per period, in the unit the service is sold in. Zero
+    /// blocks the service completely.
+    /// </summary>
+    /// <example>2000</example>
+    [Range(0, int.MaxValue)]
+    public int? QuantityValue { get; init; }
+
+    /// <summary>
+    /// Whether the limit is in force: false switches it off at once, true switches it back on.
+    /// </summary>
+    /// <example>true</example>
+    public bool? Enabled { get; init; }
+}
+
 
 /// <summary>
 /// Deserializes a value that historically was a single JSON string but is now a list:

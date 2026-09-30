@@ -72,4 +72,19 @@ public interface IAccountingApi
 
     [Get("/price/service/{serviceId}")]
     Task<List<ServicePriceInfo>> GetServicePricesAsync(int serviceId, [Query] bool active);
+
+    [Get("/serviceLimit/{id}")]
+    Task<ServiceLimit> GetServiceLimitAsync(int id);
+
+    [Get("/serviceLimit/customer/{portalId}/{serviceName}")]
+    Task<ServiceLimit> GetCustomerServiceLimitAsync(string portalId, string serviceName);
+
+    [Get("/serviceLimit/customer/{portalId}/{serviceName}/participants")]
+    Task<ServiceLimitReport> GetParticipantServiceLimitsAsync(string portalId, string serviceName, [Query] ServiceLimitFilter filter);
+
+    [Post("/serviceLimit")]
+    Task<ServiceLimit> CreateServiceLimitAsync([Body] ServiceLimitCreateOperation data);
+
+    [Put("/serviceLimit")]
+    Task<ServiceLimit> UpdateServiceLimitAsync([Body] ServiceLimitUpdateOperation data);
 }

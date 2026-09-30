@@ -145,6 +145,43 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
         }, opt => opt.SetDuration(_servicePricesCacheDuration));
     }
 
+    public async Task<ServiceLimit> GetServiceLimitAsync(int id)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.GetServiceLimitAsync(id);
+    }
+
+    public async Task<ServiceLimit> GetCustomerServiceLimitAsync(string portalId, string serviceName)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.GetCustomerServiceLimitAsync(portalId, serviceName);
+    }
+
+    public async Task<ServiceLimitReport> GetParticipantServiceLimitsAsync(string portalId, string serviceName, ServiceLimitFilter filter)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.GetParticipantServiceLimitsAsync(portalId, serviceName, filter);
+    }
+
+    public async Task<ServiceLimit> CreateServiceLimitAsync(string portalId, string serviceName, string customerParticipantName,
+        decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.CreateServiceLimitAsync(new ServiceLimitCreateOperation(portalId, serviceName, customerParticipantName,
+            amountValue, quantityValue, period));
+    }
+
+    public async Task<ServiceLimit> UpdateServiceLimitAsync(int id, decimal? amountValue, int? quantityValue, bool? enabled)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.UpdateServiceLimitAsync(new ServiceLimitUpdateOperation(id, amountValue, quantityValue, enabled));
+    }
+
     private static string GetServicePricesCacheKey(string serviceName, bool active)
     {
         return $"accounting-service-prices-{serviceName}-{active}";
@@ -1057,6 +1094,210 @@ public class Currency
     /// <example>USD</example>
     public string Code { get; init; }
 }
+
+/// <summary>
+/// The calendar period a service limit counts the spending over. The period is calendar-aligned in UTC rather than
+/// rolling: a daily limit resets at midnight UTC, not 24 hours after the first charge.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum ServiceLimitPeriod
+{
+    /// <summary>
+    /// No calendar period. Accepted by the accounting service, but a limit is meant to use one of the periods below.
+    /// </summary>
+    [Description("None")]
+    None,
+
+    /// <summary>
+    /// From the start of the hour, reset at the start of the next hour.
+    /// </summary>
+    [Description("Hour")]
+    Hour,
+
+    /// <summary>
+    /// From midnight, reset at the next midnight. The usual choice and the default for a new limit.
+    /// </summary>
+    [Description("Day")]
+    Day,
+
+    /// <summary>
+    /// From Monday, reset on the next Monday.
+    /// </summary>
+    [Description("Week")]
+    Week,
+
+    /// <summary>
+    /// From the 1st of the month, reset on the 1st of the next month.
+    /// </summary>
+    [Description("Month")]
+    Month,
+
+    /// <summary>
+    /// From January 1, reset on the next January 1.
+    /// </summary>
+    [Description("Year")]
+    Year,
+
+    /// <summary>
+    /// A three-year window, reset when it ends.
+    /// </summary>
+    [Description("ThreeYears")]
+    ThreeYears
+}
+
+/// <summary>
+/// The field the service limits of the portal users are sorted by.
+/// </summary>
+public enum ServiceLimitOrderBy
+{
+    /// <summary>
+    /// The participant the limit is set for.
+    /// </summary>
+    [Description("Participant")]
+    Participant,
+
+    /// <summary>
+    /// The date and time the limit was created.
+    /// </summary>
+    [Description("Created")]
+    Created
+}
+
+/// <summary>
+/// The paging and ordering of the service limits set for the portal users.
+/// </summary>
+public class ServiceLimitFilter
+{
+    /// <summary>
+    /// The number of items to skip before starting to return results. Used for pagination.
+    /// </summary>
+    public int? Offset { get; init; }
+
+    /// <summary>
+    /// The maximum number of items to return in the response.
+    /// </summary>
+    public int? Limit { get; init; }
+
+    /// <summary>
+    /// The field to order by.
+    /// </summary>
+    public ServiceLimitOrderBy? OrderBy { get; init; }
+
+    /// <summary>
+    /// Order direction: ASC or DESC.
+    /// </summary>
+    /// <remarks>
+    /// Descending is the server-side default, so it is normalized to <c>null</c> here:
+    /// an explicit Descending and an unspecified value produce the same request (no orderType param).
+    /// </remarks>
+    public OperationOrderType? OrderType
+    {
+        get;
+        init => field = value is OperationOrderType.Descending ? null : value;
+    }
+}
+
+/// <summary>
+/// A spending limit on a pay-as-you-go wallet service, set for the whole portal or for one of its users.
+/// </summary>
+public class ServiceLimit
+{
+    /// <summary>
+    /// The service limit ID.
+    /// </summary>
+    /// <example>42</example>
+    public int Id { get; init; }
+
+    /// <summary>
+    /// The limited wallet service, named the way the billing catalogue names it.
+    /// </summary>
+    /// <example>ai-tools</example>
+    public string ServiceName { get; init; }
+
+    /// <summary>
+    /// The number of the billing account of the portal the limit belongs to.
+    /// </summary>
+    /// <example>12345</example>
+    public int CustomerAccountNumber { get; init; }
+
+    /// <summary>
+    /// The ID of the portal user the limit is set for; null when the limit covers the portal as a whole.
+    /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
+    public string Participant { get; init; }
+
+    /// <summary>
+    /// The most money the service may cost per period, in `currency`; null when the limit has no money threshold.
+    /// </summary>
+    /// <example>50</example>
+    public decimal? AmountValue { get; init; }
+
+    /// <summary>
+    /// The currency of the service `amountValue` is expressed in; null when the limit has no money threshold.
+    /// </summary>
+    /// <example>USD</example>
+    public string Currency { get; init; }
+
+    /// <summary>
+    /// The largest quantity of the service that may be consumed per period, in `serviceUnit`; null when the limit
+    /// has no quantity threshold.
+    /// </summary>
+    /// <example>1000</example>
+    public int? QuantityValue { get; init; }
+
+    /// <summary>
+    /// The unit of the service `quantityValue` is expressed in, such as pages, requests or gigabytes; null when the
+    /// limit has no quantity threshold.
+    /// </summary>
+    /// <example>request</example>
+    public string ServiceUnit { get; init; }
+
+    /// <summary>
+    /// The calendar period the thresholds apply to.
+    /// </summary>
+    /// <example>Day</example>
+    public ServiceLimitPeriod Period { get; init; }
+
+    /// <summary>
+    /// Whether the limit is in force. A switched-off limit stops restricting the service at once and stays in the
+    /// history.
+    /// </summary>
+    /// <example>true</example>
+    public bool Enabled { get; init; }
+
+    /// <summary>
+    /// The date and time when the limit was created.
+    /// </summary>
+    /// <example>2026-09-01T10:30:00Z</example>
+    public DateTime Created { get; init; }
+
+    /// <summary>
+    /// The date and time when the limit was last changed.
+    /// </summary>
+    /// <example>2026-09-15T08:00:00Z</example>
+    public DateTime Modified { get; init; }
+}
+
+/// <summary>
+/// Represents a paged list of the service limits set for the portal users.
+/// </summary>
+public class ServiceLimitReport : BaseReport<ServiceLimit>
+{
+}
+
+public record ServiceLimitCreateOperation(
+    string CustomerName,
+    string ServiceName,
+    string CustomerParticipantName,
+    decimal? AmountValue,
+    int? QuantityValue,
+    ServiceLimitPeriod Period);
+
+public record ServiceLimitUpdateOperation(
+    int Id,
+    decimal? AmountValue,
+    int? QuantityValue,
+    bool? Enabled);
 
 public record SessionOpenOperation(
     string CustomerName,

@@ -1596,6 +1596,200 @@ public class PaymentController(
     }
 
     /// <remarks>
+    /// Returns one spending limit of the portal by its ID - the portal-wide one or one set for a user. Only a DocSpace
+    /// administrator may read it, an installation without a billing service answers 403, and the call is read-only. A
+    /// limit caps what a pay-as-you-go wallet service may cost or consume per calendar period, counted in UTC, and
+    /// comes back with its thresholds, their currency and unit, the period and whether it is in force. An ID that does
+    /// not exist or belongs to another portal answers 404. The portal-wide limit of a service is also
+    /// `GET api/2.0/portal/payment/servicelimit/customer/{serviceName}`, and the per-user ones are listed by
+    /// `GET api/2.0/portal/payment/servicelimit/customer/{serviceName}/participants`. What was already spent is not
+    /// part of the limit; read it from `GET api/2.0/portal/payment/customer/usage`.
+    /// </remarks>
+    /// <summary>
+    /// Get a service limit
+    /// </summary>
+    /// <path>api/2.0/portal/payment/servicelimit/{id}</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The service limit with its thresholds, period and state", typeof(ServiceLimit))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
+    [SwaggerResponse(404, "No service limit with this ID belongs to the portal")]
+    [HttpGet("servicelimit/{id:int}")]
+    public async Task<ServiceLimit> GetServiceLimit(ServiceLimitRequestDto inDto)
+    {
+        paymentHelper.DemandConfigured();
+
+        await paymentHelper.DemandAdminAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var serviceLimit = await tariffService.GetServiceLimitAsync(tenant.Id, inDto.Id);
+
+        return serviceLimit ?? throw new ItemNotFoundException("Service limit could not be found");
+    }
+
+    /// <remarks>
+    /// Returns the limit set on a wallet service for the portal as a whole - the ceiling the spending of every user
+    /// counts towards. Only a DocSpace administrator may read it, an installation without a billing service answers
+    /// 403, a portal with no billing customer gets an empty result, and the call is read-only. A service name this
+    /// installation does not sell fails with 404. The limits set for individual users are checked in addition to this
+    /// one and are listed by `GET api/2.0/portal/payment/servicelimit/customer/{serviceName}/participants`; create a
+    /// limit with `POST api/2.0/portal/payment/servicelimit`.
+    /// </remarks>
+    /// <summary>
+    /// Get the portal service limit
+    /// </summary>
+    /// <path>api/2.0/portal/payment/servicelimit/customer/{serviceName}</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The portal-wide limit of the service, or an empty result when the portal has no billing customer", typeof(ServiceLimit))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
+    [SwaggerResponse(404, "The service is not a wallet service of this installation")]
+    [HttpGet("servicelimit/customer/{serviceName}")]
+    public async Task<ServiceLimit> GetCustomerServiceLimit(CustomerServiceLimitRequestDto inDto)
+    {
+        paymentHelper.DemandConfigured();
+
+        await paymentHelper.DemandAdminAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        var serviceName = (await paymentHelper.GetCorrectServiceNamesAsync([inDto.ServiceName])).Single();
+
+        return await tariffService.GetCustomerServiceLimitAsync(tenant.Id, serviceName);
+    }
+
+    /// <remarks>
+    /// Lists the limits set on a wallet service for individual portal users, one page at a time. Only a DocSpace
+    /// administrator may read it, an installation without a billing service answers 403, a portal with no billing
+    /// customer gets an empty result, and the call is read-only. A service name this installation does not sell fails
+    /// with 404. A user limit is checked in addition to the portal-wide one of
+    /// `GET api/2.0/portal/payment/servicelimit/customer/{serviceName}` and may be higher than it; each item names the
+    /// user in `participant`. `offset` and `limit` page through the result and default to 0 and 25, `orderBy` and
+    /// `orderType` sort it, and the answer repeats them next to `totalQuantity`, `totalPage` and `currentPage`.
+    /// </remarks>
+    /// <summary>
+    /// Get the user service limits
+    /// </summary>
+    /// <path>api/2.0/portal/payment/servicelimit/customer/{serviceName}/participants</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "A page of the user limits of the service with its paging information, or an empty result when the portal has no billing customer", typeof(ServiceLimitReport))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
+    [SwaggerResponse(404, "The service is not a wallet service of this installation")]
+    [HttpGet("servicelimit/customer/{serviceName}/participants")]
+    public async Task<ServiceLimitReport> GetParticipantServiceLimits(ParticipantServiceLimitsRequestDto inDto)
+    {
+        paymentHelper.DemandConfigured();
+
+        await paymentHelper.DemandAdminAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+        if (customerInfo == null)
+        {
+            return null;
+        }
+
+        var serviceName = (await paymentHelper.GetCorrectServiceNamesAsync([inDto.ServiceName])).Single();
+
+        var filter = new ServiceLimitFilter
+        {
+            Offset = inDto.Offset,
+            Limit = inDto.Limit,
+            OrderBy = inDto.OrderBy,
+            OrderType = inDto.OrderType
+        };
+
+        return await tariffService.GetParticipantServiceLimitsAsync(tenant.Id, serviceName, filter);
+    }
+
+    /// <remarks>
+    /// Creates a spending limit on a pay-as-you-go wallet service, for the portal as a whole or, with `userId`, for
+    /// one portal user; a user limit is checked in addition to the portal-wide one. The portal needs a billing
+    /// customer, and the caller needs the permission to edit the portal settings as well as DocSpace administrator
+    /// rights. At least one of `amountValue` and `quantityValue` must be given; with both, the service stops as soon as
+    /// either is reached. The period is calendar-aligned in UTC, defaults to a day, and what was already spent in the
+    /// current period counts at once. The call is mutating and not idempotent: a service has only one limit in force
+    /// per portal and per user, so a second one is refused until the first is switched off with
+    /// `PUT api/2.0/portal/payment/servicelimit`. The service, the user and the period cannot be changed later.
+    /// </remarks>
+    /// <summary>
+    /// Create a service limit
+    /// </summary>
+    /// <path>api/2.0/portal/payment/servicelimit</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The service limit as it was created", typeof(ServiceLimit))]
+    [SwaggerResponse(400, "Neither `amountValue` nor `quantityValue` is given")]
+    [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the portal has no billing service configured")]
+    [SwaggerResponse(404, "The portal has no billing customer, the service is not a wallet service of this installation, or the user does not exist")]
+    [HttpPost("servicelimit")]
+    public async Task<ServiceLimit> CreateServiceLimit(CreateServiceLimitRequestDto inDto)
+    {
+        paymentHelper.DemandConfigured();
+
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
+
+        if (!inDto.AmountValue.HasValue && !inDto.QuantityValue.HasValue)
+        {
+            throw new ArgumentException("Either the amount or the quantity threshold must be set");
+        }
+
+        var serviceName = (await paymentHelper.GetCorrectServiceNamesAsync([inDto.ServiceName])).Single();
+
+        string participantName = null;
+        if (inDto.UserId.HasValue)
+        {
+            if (!await userManager.UserExistsAsync(inDto.UserId.Value))
+            {
+                throw new ItemNotFoundException("User could not be found");
+            }
+
+            participantName = inDto.UserId.Value.ToString();
+        }
+
+        return await tariffService.CreateServiceLimitAsync(tenantId, serviceName, participantName, inDto.AmountValue, inDto.QuantityValue, inDto.Period);
+    }
+
+    /// <remarks>
+    /// Changes the thresholds of an existing spending limit of the portal, or switches it off and back on with
+    /// `enabled`. The portal needs a billing customer, and the caller needs the permission to edit the portal
+    /// settings as well as DocSpace administrator rights. Only the thresholds and the state can change: to move a
+    /// limit to another service, user or period, switch it off and create a new one with
+    /// `POST api/2.0/portal/payment/servicelimit`. There is no deletion - a switched-off limit stops restricting the
+    /// service at once, frees its place for a new one and stays in the history. The call is mutating and idempotent,
+    /// and a new threshold applies from the very next operation; lowering it below what was already spent blocks the
+    /// service until the period ends. An ID that does not exist or belongs to another portal answers 404.
+    /// </remarks>
+    /// <summary>
+    /// Update a service limit
+    /// </summary>
+    /// <path>api/2.0/portal/payment/servicelimit</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "The service limit as it was stored", typeof(ServiceLimit))]
+    [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the portal has no billing service configured")]
+    [SwaggerResponse(404, "The portal has no billing customer, or no service limit with this ID belongs to the portal")]
+    [HttpPut("servicelimit")]
+    public async Task<ServiceLimit> UpdateServiceLimit(UpdateServiceLimitRequestDto inDto)
+    {
+        paymentHelper.DemandConfigured();
+
+        await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
+
+        var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
+
+        var serviceLimit = await tariffService.UpdateServiceLimitAsync(tenantId, inDto.Id, inDto.AmountValue, inDto.QuantityValue, inDto.Enabled);
+
+        return serviceLimit ?? throw new ItemNotFoundException("Service limit could not be found");
+    }
+
+    /// <remarks>
     /// Returns the portal's automatic wallet top-up settings - whether it is on, the balance that triggers a
     /// charge, the balance it is topped up to, and the currency both are expressed in. Any DocSpace
     /// administrator may read them, and unlike the operation that changes them this one needs neither a

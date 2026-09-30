@@ -1579,6 +1579,69 @@ public class TariffService(
         return await accountingClient.GetServicePricesAsync(serviceName, active);
     }
 
+    /// <summary>
+    /// Returns the service limit only when it belongs to the tenant: the accounting service addresses a limit by its
+    /// global ID, so the owner is checked against the account number of the tenant's customer.
+    /// </summary>
+    public async Task<ServiceLimit> GetServiceLimitAsync(int tenantId, int id)
+    {
+        ServiceLimit serviceLimit;
+        try
+        {
+            serviceLimit = await accountingClient.GetServiceLimitAsync(id);
+        }
+        catch (AccountingCustomerNotFoundException exception)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+            return null;
+        }
+
+        if (serviceLimit == null)
+        {
+            return null;
+        }
+
+        var balance = await GetCustomerBalanceAsync(tenantId);
+        if (balance == null || balance.AccountNumber != serviceLimit.CustomerAccountNumber)
+        {
+            return null;
+        }
+
+        return serviceLimit;
+    }
+
+    public async Task<ServiceLimit> GetCustomerServiceLimitAsync(int tenantId, string serviceName)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        return await accountingClient.GetCustomerServiceLimitAsync(portalId, serviceName);
+    }
+
+    public async Task<ServiceLimitReport> GetParticipantServiceLimitsAsync(int tenantId, string serviceName, ServiceLimitFilter filter)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        return await accountingClient.GetParticipantServiceLimitsAsync(portalId, serviceName, filter);
+    }
+
+    public async Task<ServiceLimit> CreateServiceLimitAsync(int tenantId, string serviceName, string customerParticipantName, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        return await accountingClient.CreateServiceLimitAsync(portalId, serviceName, customerParticipantName, amountValue, quantityValue, period);
+    }
+
+    /// <summary>
+    /// Updates the service limit only when it belongs to the tenant; returns null otherwise.
+    /// </summary>
+    public async Task<ServiceLimit> UpdateServiceLimitAsync(int tenantId, int id, decimal? amountValue, int? quantityValue, bool? enabled)
+    {
+        var serviceLimit = await GetServiceLimitAsync(tenantId, id);
+        if (serviceLimit == null)
+        {
+            return null;
+        }
+
+        return await accountingClient.UpdateServiceLimitAsync(id, amountValue, quantityValue, enabled);
+    }
+
     #endregion
 
 

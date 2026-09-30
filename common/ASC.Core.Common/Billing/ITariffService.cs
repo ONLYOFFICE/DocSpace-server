@@ -68,6 +68,11 @@ public interface ITariffService
     Task<List<Currency>> GetAllAccountingCurrenciesAsync();
     List<string> GetSupportedAccountingCurrencies();
     Task<List<ServicePriceInfo>> GetAccountingServicePricesAsync(string serviceName, bool active = false);
+    Task<ServiceLimit> GetServiceLimitAsync(int tenantId, int id);
+    Task<ServiceLimit> GetCustomerServiceLimitAsync(int tenantId, string serviceName);
+    Task<ServiceLimitReport> GetParticipantServiceLimitsAsync(int tenantId, string serviceName, ServiceLimitFilter filter);
+    Task<ServiceLimit> CreateServiceLimitAsync(int tenantId, string serviceName, string customerParticipantName, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period);
+    Task<ServiceLimit> UpdateServiceLimitAsync(int tenantId, int id, decimal? amountValue, int? quantityValue, bool? enabled);
 
     Task<bool> IsFreeTariffAsync(Tariff tariff);
 }
