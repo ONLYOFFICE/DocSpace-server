@@ -138,7 +138,8 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
 
     public async Task<(string BuilderKey, Dictionary<string, string> Urls)> DocbuilderRequestAsync(string requestKey,
                                            string inputScript,
-                                           bool isAsync)
+                                           bool isAsync,
+                                           CancellationToken cancellationToken = default)
     {
         string scriptUrl = null;
         if (!string.IsNullOrEmpty(inputScript))
@@ -172,7 +173,14 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 filesLinkUtility.DocServiceSignatureSecret,
                 filesLinkUtility.DocServiceSignatureHeader,
                 await filesLinkUtility.GetDocServiceSslVerificationAsync(),
-                clientFactory);
+                clientFactory,
+                cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // The caller gave the request up: that is not an error of the document server. A request that timed
+            // out is cancelled too, but not by this token, and is reported as the error below.
+            throw;
         }
         catch (Exception ex)
         {
