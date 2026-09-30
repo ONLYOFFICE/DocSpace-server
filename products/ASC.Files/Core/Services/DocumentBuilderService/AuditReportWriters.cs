@@ -280,11 +280,14 @@ public class AuditXlsxReportWriter(
 
                     if (full || written >= MaxRows)
                     {
+                        full = true;
                         break;
                     }
                 }
 
-                var rowLimitNote = written < descriptor.TotalCount
+                // Only a report stopped at a limit says it left events out. The count is taken before the events
+                // are read, and events the retention cleanup removes meanwhile would otherwise read as cut off.
+                var rowLimitNote = full && written < descriptor.TotalCount
                     ? string.Format(descriptor.Culture, AuditReportResource.ReportRowLimitNote,
                         written.ToString("N0", descriptor.Culture), descriptor.TotalCount.ToString("N0", descriptor.Culture))
                     : null;
