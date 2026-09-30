@@ -217,6 +217,8 @@ public class MyTypeScriptAxiosClientCodegen extends TypeScriptAxiosClientCodegen
             }
 
             CodegenOperation variant = (CodegenOperation) attached;
+            ThirdPartyVariants.alignBodyName(op, variant);
+
             Map<String, CodegenParameter> variantParams = new HashMap<>();
             CodegenParameter variantBody = null;
             for (CodegenParameter parameter : variant.allParams) {

@@ -22,7 +22,6 @@ import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
 import io.swagger.v3.oas.models.headers.*;
 import org.openapitools.codegen.CodegenOperation;
-import org.openapitools.codegen.CodegenParameter;
 import org.openapitools.codegen.model.ModelMap;
 
 public class MyGoClientCodegen extends GoClientCodegen {
@@ -141,30 +140,15 @@ public class MyGoClientCodegen extends GoClientCodegen {
 
         super.postProcessOperationsWithModels(objs, allModels);
         for (CodegenOperation op : objs.getOperations().getOperation()) {
+            // Also gives the twin's body parameter the original's name, which the twin's execute function,
+            // rendered against the original's request struct, needs (saveAsPdf, not thirdPartySaveAsPdf).
             ThirdPartyVariants.markUnions(op, (a, b) -> "interface{}");
 
-            // The twin's execute function is rendered against the original's request struct, so the
-            // twin's body parameter has to carry the field's name (saveAsPdf, not thirdPartySaveAsPdf).
             Object attached = op.vendorExtensions.get(ThirdPartyVariants.VARIANT_OPERATION);
             if (attached instanceof CodegenOperation) {
-                CodegenOperation variant = (CodegenOperation) attached;
                 // The base class turns "POST" into "Post" (http.MethodPost) for the listed operations
                 // only; the twin, rendered through the same execute partial, takes it from the original.
-                variant.httpMethod = op.httpMethod;
-                CodegenParameter body = op.allParams.stream().filter(p -> p.isBodyParam).findFirst().orElse(null);
-                if (body != null) {
-                    for (CodegenParameter parameter : variant.allParams) {
-                        if (parameter.isBodyParam) {
-                            parameter.paramName = body.paramName;
-                        }
-                    }
-                    if (variant.bodyParam != null) {
-                        variant.bodyParam.paramName = body.paramName;
-                    }
-                    for (CodegenParameter parameter : variant.bodyParams) {
-                        parameter.paramName = body.paramName;
-                    }
-                }
+                ((CodegenOperation) attached).httpMethod = op.httpMethod;
             }
         }
 
