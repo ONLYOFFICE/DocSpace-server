@@ -58,6 +58,9 @@ public record FileBuilderOperationData<T> : FileOperationData<T>
     [ProtoMember(10)]
     public Dictionary<string, FileBuilderOutputData> Outputs { get; set; }
 
+    [ProtoMember(11)]
+    public string Argument { get; set; }
+
     public FileBuilderOperationData()
     {
 
@@ -69,6 +72,7 @@ public record FileBuilderOperationData<T> : FileOperationData<T>
         string script,
         int? folderId,
         Dictionary<string, FileBuilderOutputData> outputs,
+        string argument,
         int tenantId,
         Guid userId,
         IDictionary<string, string> headers,
@@ -78,6 +82,7 @@ public record FileBuilderOperationData<T> : FileOperationData<T>
         Script = script;
         FolderId = folderId;
         Outputs = outputs;
+        Argument = argument;
     }
 
     // the script may carry document content, so it stays out of the logged event
@@ -127,7 +132,7 @@ internal class FileBuilderOperation<T>(IServiceProvider serviceProvider, FileBui
 
         try
         {
-            await runner.RunAsync(_data.Script, _data.FolderId, _data.Outputs, Headers, saved, CancellationToken);
+            await runner.RunAsync(_data.Script, _data.FolderId, _data.Outputs, _data.Argument, Headers, saved, CancellationToken);
         }
         catch (Exception e) when (e is not (OperationCanceledException or AuthorizingException or FileNotFoundException or DirectoryNotFoundException))
         {

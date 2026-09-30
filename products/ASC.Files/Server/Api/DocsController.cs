@@ -110,13 +110,13 @@ public class DocsController(
     /// <collection>list</collection>
     [Tags("Docs")]
     [SwaggerResponse(200, "The document builder operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
-    [SwaggerResponse(400, "The script is malformed, addresses a file by an address, or saves a file that has nowhere to go")]
+    [SwaggerResponse(400, "The script or the argument is malformed, a file is addressed by an address, or a saved file has nowhere to go")]
     [SwaggerResponse(403, "You do not have enough permissions to read the file the script opens or to write the result")]
     [SwaggerResponse(404, "File or folder not found")]
     [HttpPost("builder")]
     public async IAsyncEnumerable<FileOperationDto> RunBuilderScript(DocsBuilderRequestDto inDto)
     {
-        var taskId = await fileBuilderOperationsManager.Publish(inDto.Script, inDto.FolderId, inDto.Outputs);
+        var taskId = await fileBuilderOperationsManager.Publish(inDto.Script, inDto.FolderId, inDto.Outputs, inDto.Argument);
 
         foreach (var e in await fileBuilderOperationsManager.GetOperationResults(inDto.ReturnSingleOperation ? taskId : null))
         {

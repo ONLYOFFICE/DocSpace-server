@@ -46,6 +46,6 @@ public class BuilderPermissionsCheck<T>(DocumentBuilderScriptRunner documentBuil
             return;
         }
 
-        await documentBuilderScriptRunner.ValidateAsync(data.Script, data.FolderId, data.Outputs);
+        await documentBuilderScriptRunner.ValidateAsync(data.Script, data.FolderId, data.Outputs, data.Argument);
     }
 }

@@ -157,9 +157,10 @@ public class DocumentBuilderScriptRunner(
     /// Checks everything that can be refused without building. The web side calls it to fail fast; the worker
     /// checks again when it runs.
     /// </summary>
-    public async Task ValidateAsync(string script, int? folderId, Dictionary<string, FileBuilderOutputData> outputs)
+    public async Task ValidateAsync(string script, int? folderId, Dictionary<string, FileBuilderOutputData> outputs, string argument)
     {
         CheckScript(script);
+        CheckArgument(argument);
 
         await ResolveOutputsAsync(script, outputs);
 
@@ -194,19 +195,53 @@ public class DocumentBuilderScriptRunner(
         string script,
         int? folderId,
         Dictionary<string, FileBuilderOutputData> outputs,
+        string argument,
         IDictionary<string, StringValues> headers,
         List<File<int>> saved,
         CancellationToken cancellationToken)
     {
         CheckScript(script);
+        CheckArgument(argument);
 
         var targets = await ResolveOutputsAsync(script, outputs);
 
         var (prepared, source) = await ResolveFilesAsync(script, publishCopies: true);
 
-        var urls = await BuildAsync(prepared, cancellationToken);
+        var urls = await BuildAsync(prepared, argument, cancellationToken);
 
         await SaveAsync(urls, targets, source, folderId, headers, saved);
+    }
+
+    private static void CheckArgument(string argument)
+    {
+        if (argument == null)
+        {
+            return;
+        }
+
+        var root = JsonSerializer.Deserialize<JsonElement>(argument);
+
+        if (root.ValueKind != JsonValueKind.Object)
+        {
+            throw new ArgumentException("The argument must be a JSON object", nameof(argument));
+        }
+
+        if (HasAddress(root))
+        {
+            throw new ArgumentException("The argument must not carry an address", nameof(argument));
+        }
+    }
+
+    // decoded values, so a JSON escape does not hide an address
+    private static bool HasAddress(JsonElement element)
+    {
+        return element.ValueKind switch
+        {
+            JsonValueKind.String => _absoluteUrl.IsMatch(element.GetString()),
+            JsonValueKind.Object => element.EnumerateObject().Any(property => _absoluteUrl.IsMatch(property.Name) || HasAddress(property.Value)),
+            JsonValueKind.Array => element.EnumerateArray().Any(HasAddress),
+            _ => false
+        };
     }
 
     private static void CheckScript(string script)
@@ -320,13 +355,13 @@ public class DocumentBuilderScriptRunner(
         return documentServiceConnector.ReplaceCommunityAddress(url);
     }
 
-    private async Task<Dictionary<string, string>> BuildAsync(string script, CancellationToken cancellationToken)
+    private async Task<Dictionary<string, string>> BuildAsync(string script, string argument, CancellationToken cancellationToken)
     {
         await using var stream = new MemoryStream(Encoding.UTF8.GetBytes(script));
 
         // Started asynchronously and polled by the issued key, as DocumentBuilderTask does. No key of our own: the
         // service reads it as a poll for a build it never started and answers "cannot read run file".
-        var (key, urls) = await documentServiceConnector.DocbuilderRequestFromFileAsync(stream, ScriptFileName, new BuilderFromFileBody { Async = true });
+        var (key, urls) = await documentServiceConnector.DocbuilderRequestFromFileAsync(stream, ScriptFileName, new BuilderFromFileBody { Async = true, Argument = argument == null ? null : JsonSerializer.Deserialize<JsonElement>(argument) });
 
         while (urls == null)
         {

@@ -61,6 +61,13 @@ public class DocsBuilderRequestDto : FileOperationRequestBaseDto
     /// </summary>
     /// <example>{"result.docx": {"fileId": 1234}, "result.pdf": {"folderId": 1234}}</example>
     public Dictionary<string, DocsBuilderOutputDto> Outputs { get; set; }
+
+    /// <summary>
+    /// Values the script reads through the global `Argument` object, such as `Argument.title`. A JSON object without
+    /// http or https addresses.
+    /// </summary>
+    /// <example>{"title": "Quarterly report"}</example>
+    public JsonElement? Argument { get; set; }
 }
 
 /// <summary>

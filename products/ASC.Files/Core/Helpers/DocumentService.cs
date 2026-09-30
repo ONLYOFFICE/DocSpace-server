@@ -1136,7 +1136,13 @@ public static class DocumentService
     /// The document builder parameters without the address of the script: the shape of the "params" part of a
     /// multipart document builder request, where the script travels as a separate part.
     /// </summary>
-    public class BuilderFromFileBody : FromFileBody;
+    public class BuilderFromFileBody : FromFileBody
+    {
+        /// <summary>
+        /// The values the script reads through the global Argument object.
+        /// </summary>
+        public JsonElement? Argument { get; set; }
+    }
 
     /// <summary>
     /// The conversion parameters without the address of the source document: the shape of the "params"
