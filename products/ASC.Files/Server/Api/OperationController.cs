@@ -44,6 +44,7 @@ public class OperationController(
     FileDeleteOperationsManager fileDeleteOperationsManager,
     FileMarkAsReadOperationsManager fileMarkAsReadOperationsManager,
     FileDuplicateOperationsManager fileDuplicateOperationsManager,
+    FileBuilderOperationsManager fileBuilderOperationsManager,
     CommonLinkUtility commonLinkUtility)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
@@ -221,7 +222,7 @@ public class OperationController(
     [HttpGet("")]
     public async IAsyncEnumerable<FileOperationDto> GetOperationStatuses(FileOperationResultRequestBaseDto inDto)
     {
-        List<IFileOperationsManager> managers = [fileDuplicateOperationsManager, fileMoveCopyOperationsManager, fileDeleteOperationsManager, fileDownloadOperationsManager, fileMarkAsReadOperationsManager];
+        List<IFileOperationsManager> managers = [fileDuplicateOperationsManager, fileMoveCopyOperationsManager, fileDeleteOperationsManager, fileDownloadOperationsManager, fileMarkAsReadOperationsManager, fileBuilderOperationsManager];
 
         foreach (var manager in managers)
         {
@@ -234,9 +235,10 @@ public class OperationController(
 
     /// <remarks>
     /// Returns the background file operations of the caller that are of one kind, named by the number in the route:
-    /// `1` for a copy, `2` for a deletion, `3` for a download, `4` for a mark-as-read and `7` for a duplication. The
-    /// answer carries the same records as `GET api/2.0/files/fileops`, with the same rule that a finished operation
-    /// is reported once and then dropped, and `id` narrows it further to a single operation. Moves, kind `0`, cannot
+    /// `1` for a copy, `2` for a deletion, `3` for a download, `4` for a mark-as-read, `7` for a duplication and `8`
+    /// for a document builder run. The answer carries the same records as `GET api/2.0/files/fileops`, with the same
+    /// rule that a finished operation is reported once and then dropped, and `id` narrows it further to a single
+    /// operation. Moves, kind `0`, cannot
     /// be read through this route: the address `api/2.0/files/fileops/move` belongs to another operation, so read
     /// moves from `GET api/2.0/files/fileops` and pick the records whose `operation` is `0`. A kind that has no queue
     /// of its own — `5` for an import, `6` for a conversion — is accepted and answers with an empty array, while a
@@ -260,6 +262,7 @@ public class OperationController(
             FileOperationType.Download => fileDownloadOperationsManager,
             FileOperationType.MarkAsRead => fileMarkAsReadOperationsManager,
             FileOperationType.Duplicate => fileDuplicateOperationsManager,
+            FileOperationType.Build => fileBuilderOperationsManager,
             _ => null
         };
 
@@ -487,7 +490,7 @@ public class OperationController(
     [HttpPut("terminate/{id?}")]
     public async IAsyncEnumerable<FileOperationDto> TerminateTasks(OperationIdRequestDto inDto)
     {
-        List<IFileOperationsManager> managers = [fileDuplicateOperationsManager, fileMoveCopyOperationsManager, fileDeleteOperationsManager, fileDownloadOperationsManager, fileMarkAsReadOperationsManager];
+        List<IFileOperationsManager> managers = [fileDuplicateOperationsManager, fileMoveCopyOperationsManager, fileDeleteOperationsManager, fileDownloadOperationsManager, fileMarkAsReadOperationsManager, fileBuilderOperationsManager];
 
         foreach (var manager in managers)
         {

@@ -251,6 +251,8 @@ public abstract class ComposeFileOperation<T1, T2> : FileOperation
 [ProtoInclude(105, typeof(FileMarkAsReadOperationData<string>))]
 [ProtoInclude(106, typeof(FileDownloadOperationData<int>))]
 [ProtoInclude(107, typeof(FileDownloadOperationData<string>))]
+[ProtoInclude(108, typeof(FileBuilderOperationData<int>))]
+[ProtoInclude(109, typeof(FileBuilderOperationData<string>))]
 public record FileOperationData<T>
 {
     [ProtoMember(1)]

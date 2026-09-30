@@ -40,6 +40,7 @@ namespace ASC.Web.Files.Services.WCFService.FileOperations;
 [Singleton(GenericArguments = [typeof(FileMarkAsReadOperation)])]
 [Singleton(GenericArguments = [typeof(FileDuplicateOperation)])]
 [Singleton(GenericArguments = [typeof(FileDownloadOperation)])]
+[Singleton(GenericArguments = [typeof(FileBuilderOperation)])]
 public class FileOperationsManagerHolder<T> : IDisposable where T : FileOperation
 {
     private readonly IServiceProvider _serviceProvider;
@@ -345,6 +346,52 @@ public class FileMarkAsReadOperationsManager(
         var thirdPartyData = new FileMarkAsReadOperationData<string>(folderStringIds, fileStringIds, tenantId, userId, GetHttpHeaders(), sessionSnapshot);
 
         await _eventBus.PublishAsync(new MarkAsReadIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
+        {
+            TaskId = taskId,
+            Data = data,
+            ThirdPartyData = thirdPartyData
+        });
+
+        return taskId;
+    }
+}
+
+[Scope(typeof(FileOperationsManager<FileBuilderOperation>))]
+public class FileBuilderOperationsManager(
+    IHttpContextAccessor httpContextAccessor,
+    IEventBus eventBus,
+    AuthContext authContext,
+    TenantManager tenantManager,
+    FileOperationsManagerHolder<FileBuilderOperation> fileOperationsManagerHolder,
+    ExternalShare externalShare,
+    IServiceProvider serviceProvider) : FileOperationsManager<FileBuilderOperation>(httpContextAccessor, eventBus, authContext, fileOperationsManagerHolder, externalShare, serviceProvider)
+{
+    public async Task<string> Publish(string script, int? folderId, Dictionary<string, DocsBuilderOutputDto> outputs)
+    {
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var userId = _authContext.CurrentAccount.ID;
+        var sessionSnapshot = await _externalShare.TakeSessionSnapshotAsync();
+
+        var outputData = outputs?.ToDictionary(
+            x => x.Key,
+            x => new FileBuilderOutputData { FileId = x.Value.FileId, FolderId = x.Value.FolderId, Title = x.Value.Title });
+
+        var (fileIds, folderIds) = DocumentBuilderScriptRunner.GetEntries(script, folderId, outputData);
+
+        var data = new FileBuilderOperationData<int>(folderIds, fileIds, script, folderId, outputData, tenantId, userId, GetHttpHeaders(), sessionSnapshot);
+        var thirdPartyData = new FileBuilderOperationData<string>([], [], null, null, null, tenantId, userId, GetHttpHeaders(), sessionSnapshot);
+
+        var permissionsCheck = _serviceProvider.GetService<BuilderPermissionsCheck<int>>();
+        await permissionsCheck.RunPermissionCheckAsync(data);
+
+        var permissionsCheckThirdParty = _serviceProvider.GetService<BuilderPermissionsCheck<string>>();
+        await permissionsCheckThirdParty.RunPermissionCheckAsync(thirdPartyData);
+
+        var op = _serviceProvider.GetService<FileBuilderOperation>();
+        op.Init(true);
+        var taskId = await _fileOperationsManagerHolder.Publish(op);
+
+        await _eventBus.PublishAsync(new FileBuilderIntegrationEvent(_authContext.CurrentAccount.ID, tenantId)
         {
             TaskId = taskId,
             Data = data,

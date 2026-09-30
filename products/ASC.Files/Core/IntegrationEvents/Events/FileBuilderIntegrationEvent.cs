@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,37 +31,24 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Files.Services.WCFService.FileOperations;
+namespace ASC.Files.Core.IntegrationEvents.Events;
 
-/// <summary>
-/// The file operation type.
-/// </summary>
-public enum FileOperationType
+[ProtoContract]
+public record FileBuilderIntegrationEvent : IntegrationEvent
 {
-    [Description("Move")]
-    Move,
+    private FileBuilderIntegrationEvent() : base() { }
 
-    [Description("Copy")]
-    Copy,
+    public FileBuilderIntegrationEvent(Guid createBy, int tenantId) : base(createBy, tenantId)
+    {
 
-    [Description("Delete")]
-    Delete,
+    }
 
-    [Description("Download")]
-    Download,
+    [ProtoMember(1)]
+    public string TaskId { get; set; }
 
-    [Description("MarkAsRead")]
-    MarkAsRead,
+    [ProtoMember(2)]
+    public FileBuilderOperationData<int> Data { get; set; }
 
-    [Description("Import")]
-    Import,
-
-    [Description("Convert")]
-    Convert,
-
-    [Description("Duplicate")]
-    Duplicate,
-
-    [Description("Build")]
-    Build
+    [ProtoMember(3)]
+    public FileBuilderOperationData<string> ThirdPartyData { get; set; }
 }

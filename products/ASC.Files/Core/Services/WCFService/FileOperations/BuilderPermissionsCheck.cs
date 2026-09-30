@@ -31,37 +31,21 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Files.Services.WCFService.FileOperations;
+namespace ASC.Files.Core.Services.WCFService.FileOperations;
 
-/// <summary>
-/// The file operation type.
-/// </summary>
-public enum FileOperationType
+[Scope(GenericArguments = [typeof(int)])]
+[Scope(GenericArguments = [typeof(string)])]
+public class BuilderPermissionsCheck<T>(DocumentBuilderScriptRunner documentBuilderScriptRunner)
+    : IPermissionsChecker<FileBuilderOperationData<T>, T>
 {
-    [Description("Move")]
-    Move,
+    public async Task RunPermissionCheckAsync(FileBuilderOperationData<T> data)
+    {
+        // the builder opens portal files only; the third-party half is always empty
+        if (typeof(T) != typeof(int))
+        {
+            return;
+        }
 
-    [Description("Copy")]
-    Copy,
-
-    [Description("Delete")]
-    Delete,
-
-    [Description("Download")]
-    Download,
-
-    [Description("MarkAsRead")]
-    MarkAsRead,
-
-    [Description("Import")]
-    Import,
-
-    [Description("Convert")]
-    Convert,
-
-    [Description("Duplicate")]
-    Duplicate,
-
-    [Description("Build")]
-    Build
+        await documentBuilderScriptRunner.ValidateAsync(data.Script, data.FolderId, data.Outputs);
+    }
 }

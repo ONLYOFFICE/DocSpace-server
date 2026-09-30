@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,37 +31,31 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Files.Services.WCFService.FileOperations;
+namespace ASC.Files.Worker.IntegrationEvents.EventHandling;
 
-/// <summary>
-/// The file operation type.
-/// </summary>
-public enum FileOperationType
+[Scope]
+public class FileBuilderIntegrationEventHandler(
+    ILogger<FileBuilderIntegrationEventHandler> logger,
+    FileOperationsManager<FileBuilderOperation> fileOperationsManager,
+    TenantManager tenantManager,
+    SecurityContext securityContext)
+    : IIntegrationEventHandler<FileBuilderIntegrationEvent>
 {
-    [Description("Move")]
-    Move,
+    public async Task Handle(FileBuilderIntegrationEvent @event)
+    {
+        CustomSynchronizationContext.CreateContext();
+        using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
+        {
+            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
 
-    [Description("Copy")]
-    Copy,
+            if (!@event.Redelivered && await fileOperationsManager.IsTooBusy())
+            {
+                throw new IntegrationEventRejectExeption(@event.Id);
+            }
 
-    [Description("Delete")]
-    Delete,
-
-    [Description("Download")]
-    Download,
-
-    [Description("MarkAsRead")]
-    MarkAsRead,
-
-    [Description("Import")]
-    Import,
-
-    [Description("Convert")]
-    Convert,
-
-    [Description("Duplicate")]
-    Duplicate,
-
-    [Description("Build")]
-    Build
+            await tenantManager.SetCurrentTenantAsync(@event.TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(@event.TenantId, @event.CreateBy);
+            await fileOperationsManager.Enqueue(@event.TaskId, @event.ThirdPartyData, @event.Data);
+        }
+    }
 }

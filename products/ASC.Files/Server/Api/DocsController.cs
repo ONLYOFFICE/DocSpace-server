@@ -42,7 +42,8 @@ public class DocsController(
     FileStorageService fileStorageService,
     GlobalFolderHelper globalFolderHelper,
     FileConverter fileConverter,
-    DocumentBuilderScriptRunner documentBuilderScriptRunner,
+    FileBuilderOperationsManager fileBuilderOperationsManager,
+    FileOperationDtoHelper fileOperationDtoHelper,
     FileDtoHelper fileDtoHelper)
     : ControllerBase
 {
@@ -92,39 +93,34 @@ public class DocsController(
     }
 
     /// <remarks>
-    /// Runs a document builder script against the files of this portal and saves what it produced. The script is the
-    /// one the document builder documentation describes, with one difference: where that documentation writes the
-    /// address of a document, the script writes the identifier of a portal file - `builder.OpenFile("1234")` - and the
-    /// portal resolves it into an address the document service can reach, after checking that the caller may read that
-    /// file. A script that writes an address out by hand is refused, and so is one that names a file the caller cannot
-    /// read. By default every file the script saves becomes a new portal file in the folder of the file it opened, or
-    /// in `folderId` when one is named; a script that opens no file has to name that folder. With `overwrite` the
-    /// result replaces the opened file as a new version of it instead, which needs the right to edit that file and a
-    /// script that produces exactly one result. The call is answered once the script has finished running.
-    ///
-    /// The script runs inside the document service with the rights of that service, so this call is only as safe as
-    /// the accounts allowed to make it.
+    /// Queues a background run of a document builder script on portal files and answers with the caller's builder
+    /// operations, the new one included. The script names portal files by identifier - `builder.OpenFile("1234")` -
+    /// where the document builder documentation writes an address. The caller needs read access to every file the
+    /// script opens, edit access to each file `outputs` replaces and the right to create files in each folder a result
+    /// is saved into. Each file the script saves goes where `outputs` says, keyed by the name given to SaveFile:
+    /// `fileId` stores it as a new version of that file, `folderId` as a new file there; an unlisted file goes to
+    /// `folderId` of the request or to the folder of the opened file. Poll `GET api/2.0/files/fileops` with the
+    /// returned `id` until the operation reports `finished`: `files` then lists the saved files, a replaced one with
+    /// its new version, including those saved before a failure, and `error` the reason a failed build gave. A request
+    /// that can be refused in advance fails at once with 400, 403 or 404. The script runs with the rights of the
+    /// document service, so this call is only as safe as the accounts allowed to make it.
     /// </remarks>
     /// <summary>Run a document builder script</summary>
     /// <path>api/2.0/docs/builder</path>
     /// <collection>list</collection>
     [Tags("Docs")]
-    [SwaggerResponse(200, "The files the script produced, as they were saved in the portal", typeof(List<FileDto<int>>))]
-    [SwaggerResponse(400, "The script is malformed, addresses a file by an address, or produced nothing to save")]
+    [SwaggerResponse(200, "The document builder operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [SwaggerResponse(400, "The script is malformed, addresses a file by an address, or saves a file that has nowhere to go")]
     [SwaggerResponse(403, "You do not have enough permissions to read the file the script opens or to write the result")]
     [SwaggerResponse(404, "File or folder not found")]
     [HttpPost("builder")]
-    public async Task<List<FileDto<int>>> RunBuilderScript(DocsBuilderRequestDto inDto)
+    public async IAsyncEnumerable<FileOperationDto> RunBuilderScript(DocsBuilderRequestDto inDto)
     {
-        var files = await documentBuilderScriptRunner.RunAsync(inDto.Script, inDto.FolderId, inDto.Outputs);
+        var taskId = await fileBuilderOperationsManager.Publish(inDto.Script, inDto.FolderId, inDto.Outputs);
 
-        var result = new List<FileDto<int>>(files.Count);
-
-        foreach (var file in files)
+        foreach (var e in await fileBuilderOperationsManager.GetOperationResults(inDto.ReturnSingleOperation ? taskId : null))
         {
-            result.Add(await fileDtoHelper.GetAsync(file));
+            yield return await fileOperationDtoHelper.GetAsync(e);
         }
-
-        return result;
     }
 }

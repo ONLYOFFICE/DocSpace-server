@@ -47,7 +47,9 @@ public class DocumentBuilderScriptRunner(
     PathProvider pathProvider,
     DocumentServiceConnector documentServiceConnector,
     FileConverter fileConverter,
-    FileStorageService fileStorageService)
+    EntryManager entryManager,
+    FilesMessageService filesMessageService,
+    WebhookManager webhookManager)
 {
     /// <summary>
     /// A call that opens a portal file, with the identifier the caller wrote in place of the address. Both objects the
@@ -111,18 +113,109 @@ public class DocumentBuilderScriptRunner(
     private const string ScriptFileName = "script.docbuilder";
 
     /// <summary>
+    /// The portal files and folders a run touches: the files the script opens or replaces and the folders it saves
+    /// into. Read off the request only; <see cref="ValidateAsync"/> checks them.
+    /// </summary>
+    public static (List<int> Files, List<int> Folders) GetEntries(string script, int? folderId, Dictionary<string, FileBuilderOutputData> outputs)
+    {
+        List<int> files = [];
+        List<int> folders = [];
+
+        if (!string.IsNullOrEmpty(script))
+        {
+            foreach (Match match in _openFileCall.Matches(script))
+            {
+                if (int.TryParse(match.Groups["id"].Value, CultureInfo.InvariantCulture, out var id))
+                {
+                    files.Add(id);
+                }
+            }
+        }
+
+        foreach (var output in outputs?.Values ?? Enumerable.Empty<FileBuilderOutputData>())
+        {
+            if (output?.FileId is { } fileId)
+            {
+                files.Add(fileId);
+            }
+
+            if (output?.FolderId is { } outputFolderId)
+            {
+                folders.Add(outputFolderId);
+            }
+        }
+
+        if (folderId.HasValue)
+        {
+            folders.Add(folderId.Value);
+        }
+
+        return ([.. files.Distinct()], [.. folders.Distinct()]);
+    }
+
+    /// <summary>
+    /// Checks everything that can be refused without building. The web side calls it to fail fast; the worker
+    /// checks again when it runs.
+    /// </summary>
+    public async Task ValidateAsync(string script, int? folderId, Dictionary<string, FileBuilderOutputData> outputs)
+    {
+        CheckScript(script);
+
+        await ResolveOutputsAsync(script, outputs);
+
+        var (_, source) = await ResolveFilesAsync(script, publishCopies: false);
+
+        if (folderId is null && source is null)
+        {
+            var homeless = _saveFileCall.Matches(script)
+                .Select(match => match.Groups["name"].Value)
+                .FirstOrDefault(name => outputs is null || !outputs.ContainsKey(name));
+
+            if (homeless != null)
+            {
+                throw new ArgumentException($"\"{homeless}\" has nowhere to go: name a folder for it, or one for the request", nameof(outputs));
+            }
+
+            if (outputs is not { Count: > 0 })
+            {
+                throw new ArgumentException("The script opens no file and the request names no folder, so there is nowhere to save the result", nameof(folderId));
+            }
+        }
+    }
+
+    /// <summary>
     /// Runs <paramref name="script"/> and puts each file it produced where <paramref name="outputs"/> says, keyed by
     /// the name the script saved it under: over an existing file as a new version of it, or into a folder as a new
     /// file. A produced file the map does not mention goes to <paramref name="folderId"/>, and failing that to the
-    /// folder of the file the script opened.
+    /// folder of the file the script opened. Saved files are added to <paramref name="saved"/> one by one, so a run
+    /// that fails part way still reports them.
     /// </summary>
-    public async Task<List<File<int>>> RunAsync(string script, int? folderId, Dictionary<string, DocsBuilderOutputDto> outputs)
+    public async Task RunAsync(
+        string script,
+        int? folderId,
+        Dictionary<string, FileBuilderOutputData> outputs,
+        IDictionary<string, StringValues> headers,
+        List<File<int>> saved,
+        CancellationToken cancellationToken)
+    {
+        CheckScript(script);
+
+        var targets = await ResolveOutputsAsync(script, outputs);
+
+        var (prepared, source) = await ResolveFilesAsync(script, publishCopies: true);
+
+        var urls = await BuildAsync(prepared, cancellationToken);
+
+        await SaveAsync(urls, targets, source, folderId, headers, saved);
+    }
+
+    private static void CheckScript(string script)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(script);
 
         // The portal resolves the files a script may touch, so an address written out by hand would step around that.
         // This is a guard rail rather than a boundary: the script is arbitrary code and can build an address it never
-        // spells out. What keeps the caller honest is the access check below, not this.
+        // spells out. What keeps the caller honest is the access check, not this.
         if (_absoluteUrl.IsMatch(script))
         {
             throw new ArgumentException("The script must address a portal file by its identifier, not by an address", nameof(script));
@@ -147,17 +240,6 @@ public class DocumentBuilderScriptRunner(
         {
             throw new ArgumentException("The script has to create a file with CreateFile or open one with OpenFile", nameof(script));
         }
-
-        // Everything about the destinations is settled before the build: the names against the script, the rights,
-        // and the formats. A bad request is refused before the document service does any work, and the files and
-        // folders loaded to check it are kept so the save does not fetch them a second time.
-        var targets = await ResolveOutputsAsync(script, outputs);
-
-        var (prepared, source) = await ResolveFilesAsync(script);
-
-        var urls = await BuildAsync(prepared);
-
-        return await SaveAsync(urls, targets, source, folderId);
     }
 
     /// <summary>
@@ -179,10 +261,10 @@ public class DocumentBuilderScriptRunner(
     }
 
     /// <summary>
-    /// Replaces every identifier the script opens with an address the document service can download it from, and
-    /// answers with the rewritten script and the file the script opened first.
+    /// Checks every file the script opens and, when <paramref name="publishCopies"/> is set, replaces its identifier
+    /// with an address the document service can download it from. Answers with the script and the file it opened first.
     /// </summary>
-    private async Task<(string Script, File<int> Source)> ResolveFilesAsync(string script)
+    private async Task<(string Script, File<int> Source)> ResolveFilesAsync(string script, bool publishCopies)
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var prepared = new StringBuilder(script);
@@ -208,7 +290,10 @@ public class DocumentBuilderScriptRunner(
 
             logger.DebugScriptOpensFile(fileId);
 
-            prepared.Remove(id.Index, id.Length).Insert(id.Index, await GetBuilderUrlAsync(fileDao, file));
+            if (publishCopies)
+            {
+                prepared.Remove(id.Index, id.Length).Insert(id.Index, await GetBuilderUrlAsync(fileDao, file));
+            }
 
             if (match.Groups["method"].Value == "OpenFile")
             {
@@ -235,16 +320,27 @@ public class DocumentBuilderScriptRunner(
         return documentServiceConnector.ReplaceCommunityAddress(url);
     }
 
-    private async Task<Dictionary<string, string>> BuildAsync(string script)
+    private async Task<Dictionary<string, string>> BuildAsync(string script, CancellationToken cancellationToken)
     {
         await using var stream = new MemoryStream(Encoding.UTF8.GetBytes(script));
 
-        // No key: the document service issues one itself and reads a key in the request as a poll for a build it is
-        // already running. Sending one of our own makes it look for a script it never stored, which it reports as
-        // "cannot read run file".
-        var (_, urls) = await documentServiceConnector.DocbuilderRequestFromFileAsync(stream, ScriptFileName, new BuilderFromFileBody());
+        // Started asynchronously and polled by the issued key, as DocumentBuilderTask does. No key of our own: the
+        // service reads it as a poll for a build it never started and answers "cannot read run file".
+        var (key, urls) = await documentServiceConnector.DocbuilderRequestFromFileAsync(stream, ScriptFileName, new BuilderFromFileBody { Async = true });
 
-        if (urls is not { Count: > 0 })
+        while (urls == null)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new InvalidOperationException("The document service did not hand back a key for the build");
+            }
+
+            await Task.Delay(1000, cancellationToken);
+
+            (key, urls) = await documentServiceConnector.DocbuilderRequestAsync(key, null, true);
+        }
+
+        if (urls.Count == 0)
         {
             throw new ArgumentException("The script produced no file. It has to save one with SaveFile");
         }
@@ -264,7 +360,7 @@ public class DocumentBuilderScriptRunner(
     /// on a replacement, a format that does not match the file it would become a version of, or a place the caller
     /// may not write. The loaded files and folders are returned so the save does not read them again.
     /// </summary>
-    private async Task<Dictionary<string, OutputTarget>> ResolveOutputsAsync(string script, Dictionary<string, DocsBuilderOutputDto> outputs)
+    private async Task<Dictionary<string, OutputTarget>> ResolveOutputsAsync(string script, Dictionary<string, FileBuilderOutputData> outputs)
     {
         var targets = new Dictionary<string, OutputTarget>(StringComparer.Ordinal);
         if (outputs is not { Count: > 0 })
@@ -331,14 +427,14 @@ public class DocumentBuilderScriptRunner(
     /// or a new file in a folder. A produced file the request did not mention falls back to the folder it named, and
     /// failing that to the folder of the file the script opened.
     /// </summary>
-    private async Task<List<File<int>>> SaveAsync(
+    private async Task SaveAsync(
         Dictionary<string, string> urls,
         Dictionary<string, OutputTarget> targets,
         File<int> source,
-        int? folderId)
+        int? folderId,
+        IDictionary<string, StringValues> headers,
+        List<File<int>> saved)
     {
-        var saved = new List<File<int>>(urls.Count);
-
         foreach (var (name, url) in urls)
         {
             var extension = FileUtility.GetFileExtension(name);
@@ -347,7 +443,10 @@ public class DocumentBuilderScriptRunner(
             {
                 if (target.File != null)
                 {
-                    saved.Add(await fileStorageService.SaveEditingAsync(target.File.Id, extension, url, null));
+                    var file = await entryManager.SaveEditingAsync(target.File.Id, extension, url, null, keepLink: true);
+                    await filesMessageService.SendAsync(MessageAction.FileUpdated, file, headers, file.Title);
+                    await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
+                    saved.Add(file);
                     continue;
                 }
 
@@ -363,8 +462,6 @@ public class DocumentBuilderScriptRunner(
 
             saved.Add(await fileConverter.SaveConvertedFileAsync(folder, url, extension, name, updateIfExist: false));
         }
-
-        return saved;
     }
 
     /// <summary>A produced file's settled destination: a file to replace, or a folder and the title to save under.</summary>
