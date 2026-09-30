@@ -1714,7 +1714,8 @@ public class PaymentController(
     /// customer, and the caller needs the permission to edit the portal settings as well as DocSpace administrator
     /// rights. At least one of `amountValue` and `quantityValue` must be given; with both, the service stops as soon as
     /// either is reached. The period is calendar-aligned in UTC, defaults to a day, and what was already spent in the
-    /// current period counts at once. The call is mutating and not idempotent: a service has only one limit in force
+    /// current period counts at once. The call is written to the portal audit trail and is mutating and not
+    /// idempotent: a service has only one limit in force
     /// per portal and per user, so a second one is refused until the first is switched off with
     /// `PUT api/2.0/portal/payment/servicelimit`. The service, the user and the period cannot be changed later.
     /// </remarks>
@@ -1754,7 +1755,11 @@ public class PaymentController(
             participantName = inDto.UserId.Value.ToString();
         }
 
-        return await tariffService.CreateServiceLimitAsync(tenantId, serviceName, participantName, inDto.AmountValue, inDto.QuantityValue, inDto.Period);
+        var serviceLimit = await tariffService.CreateServiceLimitAsync(tenantId, serviceName, participantName, inDto.AmountValue, inDto.QuantityValue, inDto.Period);
+
+        await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitCreated, serviceName, participantName);
+
+        return serviceLimit;
     }
 
     /// <remarks>
@@ -1764,7 +1769,7 @@ public class PaymentController(
     /// limit to another service, user or period, switch it off and create a new one with
     /// `POST api/2.0/portal/payment/servicelimit`. There is no deletion - a switched-off limit stops restricting the
     /// service at once, frees its place for a new one and stays in the history. The call is mutating and idempotent,
-    /// and a new threshold applies from the very next operation; lowering it below what was already spent blocks the
+    /// it is written to the portal audit trail, and a new threshold applies from the very next operation; lowering it below what was already spent blocks the
     /// service until the period ends. An ID that does not exist or belongs to another portal answers 404.
     /// </remarks>
     /// <summary>
@@ -1784,9 +1789,27 @@ public class PaymentController(
 
         var tenantId = await paymentHelper.EnsureCustomerAndAdminRightsAsync();
 
-        var serviceLimit = await tariffService.UpdateServiceLimitAsync(tenantId, inDto.Id, inDto.AmountValue, inDto.QuantityValue, inDto.Enabled);
+        var serviceLimit = await tariffService.UpdateServiceLimitAsync(tenantId, inDto.Id, inDto.AmountValue, inDto.QuantityValue, inDto.Enabled)
+            ?? throw new ItemNotFoundException("Service limit could not be found");
 
-        return serviceLimit ?? throw new ItemNotFoundException("Service limit could not be found");
+        await SendServiceLimitAuditMessageAsync(MessageAction.CustomerServiceLimitUpdated, serviceLimit.ServiceName, serviceLimit.Participant);
+
+        return serviceLimit;
+    }
+
+    // The audit record names the service and, for a per-user limit, the user it is set for. The user ID goes both
+    // into the details and into the target, because the display name may change later.
+    private async Task SendServiceLimitAuditMessageAsync(MessageAction action, string serviceName, string participantName)
+    {
+        if (!Guid.TryParse(participantName, out var userId))
+        {
+            messageService.Send(action, serviceName);
+            return;
+        }
+
+        var userName = await displayUserSettingsHelper.GetFullUserNameAsync(userId, false, false);
+
+        messageService.Send(action, MessageTarget.Create(userId), $"{serviceName} ({userName})");
     }
 
     /// <remarks>

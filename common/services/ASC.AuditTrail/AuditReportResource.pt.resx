@@ -243,6 +243,12 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Relatório de operações do cliente descarregado</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Limite de despesas do serviço criado: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Limite de despesas do serviço atualizado: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Assinatura do cliente atualizada: {0}</value>
   </data>

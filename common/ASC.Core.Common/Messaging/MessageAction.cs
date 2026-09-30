@@ -1048,6 +1048,12 @@ public enum MessageAction
     [Description("MCP server of AI agent updated")]
     UpdatedServerOfAgent = 6109,
 
+    [Description("Customer service limit created")]
+    CustomerServiceLimitCreated = 6110,
+
+    [Description("Customer service limit updated")]
+    CustomerServiceLimitUpdated = 6111,
+
     #endregion
 
     #region others

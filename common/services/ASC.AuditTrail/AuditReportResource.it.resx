@@ -243,6 +243,12 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Report delle operazioni cliente scaricato</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Limite di spesa del servizio creato: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Limite di spesa del servizio aggiornato: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Abbonamento cliente aggiornato: {0}</value>
   </data>

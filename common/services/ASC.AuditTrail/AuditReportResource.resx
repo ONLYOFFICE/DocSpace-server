@@ -270,6 +270,12 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Customer operations report downloaded</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Customer service limit created: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Customer service limit updated: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Customer subscription updated: {0}</value>
   </data>

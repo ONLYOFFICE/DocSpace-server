@@ -243,6 +243,12 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Извештај о корисничким операцијама преузет</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Ограничење потрошње за услугу је креирано: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Ограничење потрошње за услугу је ажурирано: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Претплата корисника је ажурирана: {0}</value>
   </data>

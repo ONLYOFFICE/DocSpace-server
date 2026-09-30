@@ -538,6 +538,24 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Customer service limit created: {0}.
+        /// </summary>
+        public static string CustomerServiceLimitCreated {
+            get {
+                return ResourceManager.GetString("CustomerServiceLimitCreated", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Customer service limit updated: {0}.
+        /// </summary>
+        public static string CustomerServiceLimitUpdated {
+            get {
+                return ResourceManager.GetString("CustomerServiceLimitUpdated", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Customer subscription updated: {0}.
         /// </summary>
         public static string CustomerSubscriptionUpdated {

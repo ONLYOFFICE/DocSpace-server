@@ -243,6 +243,12 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>تم تنزيل تقرير عمليات العملاء</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>تم إنشاء حد الإنفاق على الخدمة: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>تم تحديث حد الإنفاق على الخدمة: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>تم تحديث اشتراك العميل: {0}</value>
   </data>

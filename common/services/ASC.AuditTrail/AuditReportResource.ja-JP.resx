@@ -237,6 +237,12 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>顧客操作レポートがダウンロードされました</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>サービスの支出上限が作成されました: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>サービスの支出上限が更新されました: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>顧客サブスクリプションが更新されました: {0}</value>
   </data>

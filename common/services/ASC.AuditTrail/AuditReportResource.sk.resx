@@ -243,6 +243,12 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Bola stiahnutá správa o operáciách zákazníka</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Limit výdavkov na službu bol vytvorený: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Limit výdavkov na službu bol aktualizovaný: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Predplatné zákazníka bolo aktualizované: {0}</value>
   </data>

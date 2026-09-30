@@ -237,6 +237,12 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Müştəri əməliyyatları hesabatı endirildi</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Xidmət üzrə xərc limiti yaradıldı: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Xidmət üzrə xərc limiti yeniləndi: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Müştəri abunəliyi yeniləndi: {0}</value>
   </data>

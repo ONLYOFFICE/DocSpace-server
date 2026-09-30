@@ -243,6 +243,12 @@
   <data name="CustomerOperationsReportDownloaded" xml:space="preserve">
     <value>Đã tải báo cáo hoạt động khách hàng xuống</value>
   </data>
+  <data name="CustomerServiceLimitCreated" xml:space="preserve">
+    <value>Đã tạo giới hạn chi tiêu cho dịch vụ: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitUpdated" xml:space="preserve">
+    <value>Đã cập nhật giới hạn chi tiêu cho dịch vụ: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Đã cập nhật gói đăng ký của khách hàng: {0}</value>
   </data>
