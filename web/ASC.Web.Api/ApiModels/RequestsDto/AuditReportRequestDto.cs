@@ -41,9 +41,8 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 public class AuditReportRequestDto
 {
     /// <summary>
-    /// The format the report file is written in. The workbook format is the default and is the only one that leaves
-    /// the finished file addressable by ID: a report asked for as CSV comes back with an empty `resultFileId`, so it
-    /// can only be reached through `resultFileName` and `resultFileUrl`.
+    /// The format the report file is written in: a spreadsheet workbook, which is the default, or a comma-separated
+    /// text file.
     /// </summary>
     /// <example>Xlsx</example>
     [FromQuery(Name = "format")]

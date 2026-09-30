@@ -102,13 +102,14 @@ public class FoldersControllerInternal(
     /// Queues a background job that renders the history of a folder into a spreadsheet, or into a CSV file when
     /// `format` asks for one, and saves the result in the caller's "My documents". The answer is the queued task, not
     /// the report: poll `GET api/2.0/files/folder/{folderId}/log/report` until `isCompleted` is true, then take the
-    /// file from `resultFileId`, `resultFileName` and `resultFileUrl`, of which a CSV report fills only the last two.
-    /// `from` and `to` limit the exported period; leaving both out exports the whole history. While a report for the
-    /// same folder and caller is still running, this call joins it and answers with the running task instead of
-    /// starting a second one, so retrying is safe. The caller needs read access to the folder and may not be a guest,
-    /// and the portal plan has to include the audit feature - otherwise the call is refused, with 403 for the access
-    /// rule and 404 for a folder that does not exist. Only a portal administrator gets the address, browser and
-    /// platform columns. Give up a running report with `DELETE api/2.0/files/folder/{folderId}/log/report`.
+    /// file from `resultFileId`, `resultFileName` and `resultFileUrl`; the URL of a CSV file too large for the editor
+    /// downloads it instead of opening it. `from` and `to` limit the exported period; leaving both out exports the
+    /// whole history. While a report for the same folder and caller is still running, this call joins it and answers
+    /// with the running task instead of starting a second one, so retrying is safe. The caller needs read access to the
+    /// folder and may not be a guest, and the portal plan has to include the audit feature - otherwise the call is
+    /// refused, with 403 for the access rule and 404 for a folder that does not exist. Only a portal administrator gets
+    /// the address, browser and platform columns. Give up a running report with
+    /// `DELETE api/2.0/files/folder/{folderId}/log/report`.
     /// </remarks>
     /// <summary>
     /// Start the folder history report generation
@@ -147,13 +148,13 @@ public class FoldersControllerInternal(
     /// <remarks>
     /// Reports how far the history report of a folder has got, and is the operation to poll after
     /// `POST api/2.0/files/folder/{folderId}/log/report` has queued one. `percentage` climbs to 100, `isCompleted`
-    /// turns true when the job is over however it ended, `error` carries the reason when it failed, and
-    /// `resultFileId`, `resultFileName` and `resultFileUrl` name the file that was saved in the caller's "My
-    /// documents" - a CSV report leaving the identifier empty. An empty answer means there is no report for this
-    /// folder and caller, either because none was started or because a finished one has already been picked up by an
-    /// earlier poll. The caller needs read access to the folder and may not be a guest, and the portal plan has to
-    /// include the audit feature; a caller who fails the access rule is answered with 403 and a folder that does not
-    /// exist with 404. The call is read-only, and each caller sees only their own report.
+    /// turns true when the job is over however it ended, `error` carries the reason when it failed, and `resultFileId`,
+    /// `resultFileName` and `resultFileUrl` name the file that was saved in the caller's "My documents". An empty
+    /// answer means there is no report for this folder and caller, either because none was started or because a
+    /// finished one has already been picked up by an earlier poll. The caller needs read access to the folder and may
+    /// not be a guest, and the portal plan has to include the audit feature; a caller who fails the access rule is
+    /// answered with 403 and a folder that does not exist with 404. The call is read-only, and each caller sees only
+    /// their own report.
     /// </remarks>
     /// <summary>
     /// Get the folder history report generation status

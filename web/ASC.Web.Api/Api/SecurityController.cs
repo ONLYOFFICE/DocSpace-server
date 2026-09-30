@@ -313,9 +313,10 @@ public class SecurityController(
     /// plan, otherwise the call is answered with 402. The file is not ready when the response arrives - poll
     /// `GET api/2.0/security/audit/login/report` until `isCompleted` is true, then take `resultFileUrl`, and treat a
     /// non-empty `error` as a failed build. The finished file is saved to the caller's My documents section, as an XLSX
-    /// workbook by default or as CSV when `format=Csv`, in which case `resultFileId` stays empty and only the name and
-    /// the URL identify it. One job runs per caller and kind: calling again while the previous one is still building
-    /// returns that job instead of starting a second, and `DELETE api/2.0/security/audit/login/report` cancels it.
+    /// workbook by default or as CSV when `format=Csv`, and `resultFileId` identifies it in either format;
+    /// `resultFileUrl` opens it in the editor, except for a CSV file too large for the editor, which it downloads
+    /// instead. One job runs per caller and kind: calling again while the previous one is still building returns that
+    /// job instead of starting a second, and `DELETE api/2.0/security/audit/login/report` cancels it.
     /// </remarks>
     /// <summary>
     /// Start login history report
@@ -345,14 +346,14 @@ public class SecurityController(
     /// <remarks>
     /// Returns the state of the login history report the calling user has started, and is the operation to poll after
     /// `POST api/2.0/security/audit/login/report`. The caller needs the portal-settings right of a DocSpace
-    /// administrator plus the audit option of the portal's pricing plan, otherwise the call is answered with 402.
-    /// Jobs are kept per user and per report kind: this operation never shows another administrator's report, nor the
-    /// audit trail report, which has its own status at `GET api/2.0/security/audit/events/report`. The answer is
-    /// empty when no report of this kind is known for the caller; otherwise `percentage` grows towards 100,
-    /// `isCompleted` turns true when the build has ended, `error` carries the failure message when it ended badly,
-    /// and `resultFileName` and `resultFileUrl` point at the file saved to the caller's My documents section, while
-    /// `resultFileId` is filled for an XLSX report only. The operation is read-only and safe to poll every few
-    /// seconds; a finished job is dropped as soon as the next report of this kind is started.
+    /// administrator plus the audit option of the portal's pricing plan, otherwise the call is answered with 402. Jobs
+    /// are kept per user and per report kind: this operation never shows another administrator's report, nor the audit
+    /// trail report, which has its own status at `GET api/2.0/security/audit/events/report`. The answer is empty when
+    /// no report of this kind is known for the caller; otherwise `percentage` grows towards 100, `isCompleted` turns
+    /// true when the build has ended, `error` carries the failure message when it ended badly, and `resultFileId`,
+    /// `resultFileName` and `resultFileUrl` point at the file saved to the caller's My documents section. The operation
+    /// is read-only and safe to poll every few seconds; a finished job is dropped as soon as the next report of this
+    /// kind is started.
     /// </remarks>
     /// <summary>
     /// Get login history report status
@@ -412,9 +413,10 @@ public class SecurityController(
     /// plan, otherwise the call is answered with 402. The file is not ready when the response arrives - poll
     /// `GET api/2.0/security/audit/events/report` until `isCompleted` is true, then take `resultFileUrl`, and treat a
     /// non-empty `error` as a failed build. The finished file is saved to the caller's My documents section, as an XLSX
-    /// workbook by default or as CSV when `format=Csv`, in which case `resultFileId` stays empty and only the name and
-    /// the URL identify it. One job runs per caller and kind: calling again while the previous one is still building
-    /// returns that job instead of starting a second, and `DELETE api/2.0/security/audit/events/report` cancels it.
+    /// workbook by default or as CSV when `format=Csv`, and `resultFileId` identifies it in either format;
+    /// `resultFileUrl` opens it in the editor, except for a CSV file too large for the editor, which it downloads
+    /// instead. One job runs per caller and kind: calling again while the previous one is still building returns that
+    /// job instead of starting a second, and `DELETE api/2.0/security/audit/events/report` cancels it.
     /// </remarks>
     /// <summary>
     /// Start audit trail report
@@ -444,14 +446,14 @@ public class SecurityController(
     /// <remarks>
     /// Returns the state of the audit trail report the calling user has started, and is the operation to poll after
     /// `POST api/2.0/security/audit/events/report`. The caller needs the portal-settings right of a DocSpace
-    /// administrator plus the audit option of the portal's pricing plan, otherwise the call is answered with 402.
-    /// Jobs are kept per user and per report kind: this operation never shows another administrator's report, nor the
-    /// login history report, which has its own status at `GET api/2.0/security/audit/login/report`. The answer is
-    /// empty when no report of this kind is known for the caller; otherwise `percentage` grows towards 100,
-    /// `isCompleted` turns true when the build has ended, `error` carries the failure message when it ended badly,
-    /// and `resultFileName` and `resultFileUrl` point at the file saved to the caller's My documents section, while
-    /// `resultFileId` is filled for an XLSX report only. The operation is read-only and safe to poll every few
-    /// seconds; a finished job is dropped as soon as the next report of this kind is started.
+    /// administrator plus the audit option of the portal's pricing plan, otherwise the call is answered with 402. Jobs
+    /// are kept per user and per report kind: this operation never shows another administrator's report, nor the login
+    /// history report, which has its own status at `GET api/2.0/security/audit/login/report`. The answer is empty when
+    /// no report of this kind is known for the caller; otherwise `percentage` grows towards 100, `isCompleted` turns
+    /// true when the build has ended, `error` carries the failure message when it ended badly, and `resultFileId`,
+    /// `resultFileName` and `resultFileUrl` point at the file saved to the caller's My documents section. The operation
+    /// is read-only and safe to poll every few seconds; a finished job is dropped as soon as the next report of this
+    /// kind is started.
     /// </remarks>
     /// <summary>
     /// Get audit trail report status

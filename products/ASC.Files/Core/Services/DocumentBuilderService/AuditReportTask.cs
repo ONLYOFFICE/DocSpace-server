@@ -171,7 +171,7 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
 
         var result = _data.Format == AuditReportFormat.Csv
             ? await serviceProvider.GetRequiredService<AuditCsvReportWriter>()
-                .WriteAsync(trackedBatches, descriptor, ReportProgressAsync, CancellationToken)
+                .WriteAsync(_userId, trackedBatches, descriptor, ReportProgressAsync, CancellationToken)
             : await serviceProvider.GetRequiredService<AuditXlsxReportWriter>()
                 .WriteAsync(_userId, trackedBatches, descriptor, ReportProgressAsync, CancellationToken);
 

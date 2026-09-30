@@ -261,15 +261,21 @@ public class AuditXlsxReportWriter(
 }
 
 /// <summary>
-/// Renders an audit report as a CSV file and uploads it. This path bypasses the document builder
-/// entirely, so it produces no file entry id.
+/// Renders an audit report as a CSV file and saves it into the author's "My documents" folder. This
+/// path bypasses the document builder entirely: the file is written batch by batch into a temporary
+/// file, so neither its size nor the length of the period is bounded by memory.
 /// </summary>
 [Scope]
 public class AuditCsvReportWriter(
+    TempStream tempStream,
     CsvFileHelper csvFileHelper,
-    CsvFileUploader csvFileUploader)
+    ReportResultFileSaver fileSaver,
+    FilesLinkUtility filesLinkUtility,
+    CommonLinkUtility commonLinkUtility,
+    SetupInfo setupInfo)
 {
     public async Task<AuditReportResult> WriteAsync<T>(
+        Guid userId,
         IAsyncEnumerable<IReadOnlyList<T>> batches,
         AuditReportDescriptor descriptor,
         Func<int, Task> onProgressAsync,
@@ -277,17 +283,34 @@ public class AuditCsvReportWriter(
     {
         var reportName = string.Format(descriptor.NameFormat + ".csv", descriptor.NameArg0, descriptor.NameArg1);
 
-        await using var stream = new MemoryStream();
+        await using var stream = tempStream.Create();
 
         // UTF-8 with a byte order mark, which is what lets spreadsheet applications read non-Latin text right.
         await csvFileHelper.CreateLargeFileAsync(stream, batches, new BaseEventMap<T>(), encoding: Encoding.UTF8, cancellationToken: cancellationToken);
 
         await onProgressAsync(50);
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         stream.Position = 0;
 
-        var fileUrl = await csvFileUploader.UploadFile(stream, reportName);
+        var file = await fileSaver.SaveToMyDocumentsAsync(userId, reportName, stream);
 
-        return new AuditReportResult(default, reportName, fileUrl);
+        return new AuditReportResult(file.Id, file.Title, GetFileUrl(file));
+    }
+
+    // The editor opens a CSV by having the document server convert it, and the document server refuses
+    // a source larger than it downloads in one go, by default the same 100 MB as the single-request
+    // limit of the portal. Past that size the report is offered for download instead.
+    private string GetFileUrl(File<int> file)
+    {
+        if (file.ContentLength > setupInfo.AvailableFileSize)
+        {
+            return commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileDownloadUrl(file.Id));
+        }
+
+        var fileUrl = commonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebEditorUrl(file.Id));
+
+        return fileUrl + $"&options={{\"codePage\":{Encoding.UTF8.CodePage}}}";
     }
 }
