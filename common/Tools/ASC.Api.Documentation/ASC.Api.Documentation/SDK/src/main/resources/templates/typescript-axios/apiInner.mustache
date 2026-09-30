@@ -59,7 +59,7 @@ export const {{x-classname}}AxiosParamCreator = function (configuration?: Config
          * REST API Reference for {{operationId}} operation
          * @see {{vendorExtensions.x-seealsoUrl}}
          */
-        {{nickname}}: async ({{#allParams}}{{paramName}}{{^required}}?{{/required}}: {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{#isNullable}} | null{{/isNullable}}{{/isEnum}}, {{/allParams}}options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        {{nickname}}: async ({{#allParams}}{{paramName}}{{^required}}?{{/required}}: {{>paramType}}, {{/allParams}}options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
     {{#allParams}}
     {{#required}}
             // verify required parameter '{{paramName}}' is not null or undefined
@@ -290,7 +290,7 @@ export const {{x-classname}}Fp = function(configuration?: Configuration) {
          * REST API Reference for {{operationId}} operation
          * @see {{vendorExtensions.x-seealsoUrl}}
          */
-        async {{nickname}}({{#allParams}}{{paramName}}{{^required}}?{{/required}}: {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{#isNullable}} | null{{/isNullable}}{{/isEnum}}, {{/allParams}}options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{{{returnType}}}{{^returnType}}void{{/returnType}}>> {
+        async {{nickname}}({{#allParams}}{{paramName}}{{^required}}?{{/required}}: {{>paramType}}, {{/allParams}}options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<{{>returnType}}>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.{{nickname}}({{#allParams}}{{paramName}}, {{/allParams}}options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['{{x-classname}}.{{nickname}}']?.[localVarOperationServerIndex]?.url;
@@ -331,12 +331,12 @@ export const {{x-classname}}Factory = function (configuration?: Configuration, b
          * @throws {RequiredError}
          */
         {{#useSingleRequestParameter}}
-        {{nickname}}({{#allParams.0}}requestParameters: {{x-classname}}{{operationIdCamelCase}}Request{{^hasRequiredParams}} = {}{{/hasRequiredParams}}, {{/allParams.0}}options?: RawAxiosRequestConfig): AxiosPromise<{{{returnType}}}{{^returnType}}void{{/returnType}}> {
+        {{nickname}}({{#allParams.0}}requestParameters: {{x-classname}}{{operationIdCamelCase}}Request{{^hasRequiredParams}} = {}{{/hasRequiredParams}}, {{/allParams.0}}options?: RawAxiosRequestConfig): AxiosPromise<{{>returnType}}> {
             return localVarFp.{{nickname}}({{#allParams.0}}{{#allParams}}requestParameters.{{paramName}}, {{/allParams}}{{/allParams.0}}options).then((request) => request(axios, basePath));
         },
         {{/useSingleRequestParameter}}
         {{^useSingleRequestParameter}}
-        {{nickname}}({{#allParams}}{{paramName}}{{^required}}?{{/required}}: {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{#isNullable}} | null{{/isNullable}}{{/isEnum}}, {{/allParams}}options?: RawAxiosRequestConfig): AxiosPromise<{{{returnType}}}{{^returnType}}void{{/returnType}}> {
+        {{nickname}}({{#allParams}}{{paramName}}{{^required}}?{{/required}}: {{>paramType}}, {{/allParams}}options?: RawAxiosRequestConfig): AxiosPromise<{{>returnType}}> {
             return localVarFp.{{nickname}}({{#allParams}}{{paramName}}, {{/allParams}}options).then((request) => request(axios, basePath));
         },
         {{/useSingleRequestParameter}}
@@ -376,10 +376,10 @@ export interface {{x-classname}}Interface {
      * @memberof {{x-classname}}Interface
      */
     {{#useSingleRequestParameter}}
-    {{nickname}}({{#allParams.0}}requestParameters{{^hasRequiredParams}}?{{/hasRequiredParams}}: {{x-classname}}{{operationIdCamelCase}}Request, {{/allParams.0}}options?: RawAxiosRequestConfig): AxiosPromise<{{{returnType}}}{{^returnType}}void{{/returnType}}>;
+    {{nickname}}({{#allParams.0}}requestParameters{{^hasRequiredParams}}?{{/hasRequiredParams}}: {{x-classname}}{{operationIdCamelCase}}Request, {{/allParams.0}}options?: RawAxiosRequestConfig): AxiosPromise<{{>returnType}}>;
     {{/useSingleRequestParameter}}
     {{^useSingleRequestParameter}}
-    {{nickname}}({{#allParams}}{{paramName}}{{^required}}?{{/required}}: {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{#isNullable}} | null{{/isNullable}}{{/isEnum}}, {{/allParams}}options?: RawAxiosRequestConfig): AxiosPromise<{{{returnType}}}{{^returnType}}void{{/returnType}}>;
+    {{nickname}}({{#allParams}}{{paramName}}{{^required}}?{{/required}}: {{>paramType}}, {{/allParams}}options?: RawAxiosRequestConfig): AxiosPromise<{{>returnType}}>;
     {{/useSingleRequestParameter}}
 
 {{/operation}}
@@ -398,10 +398,10 @@ export interface {{x-classname}}{{operationIdCamelCase}}Request {
     {{#allParams}}
     /**
      * {{{description}}}
-     * @type {{=<% %>=}}{<%&dataType%>}<%={{ }}=%>
+     * @type {{=<% %>=}}{<%#vendorExtensions.x-thirdparty-union-type%><%&vendorExtensions.x-thirdparty-union-type%><%/vendorExtensions.x-thirdparty-union-type%><%^vendorExtensions.x-thirdparty-union-type%><%&dataType%><%/vendorExtensions.x-thirdparty-union-type%>}<%={{ }}=%>
      * @memberof {{x-classname}}{{operationIdCamelCase}}
      */
-    readonly {{paramName}}{{^required}}?{{/required}}: {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{#isNullable}} | null{{/isNullable}}{{/isEnum}}
+    readonly {{paramName}}{{^required}}?{{/required}}: {{>paramType}}
     {{^-last}}
 
     {{/-last}}
@@ -446,12 +446,25 @@ export class {{x-classname}} extends BaseAPI {
      * @memberof {{x-classname}}
      */
     {{#useSingleRequestParameter}}
+    {{#vendorExtensions.x-thirdparty-overload}}
+    public {{nickname}}(requestParameters: {{x-classname}}{{operationIdCamelCase}}Request & {{{vendorExtensions.x-thirdparty-narrow}}}, options?: RawAxiosRequestConfig): AxiosPromise<{{{returnType}}}{{^returnType}}void{{/returnType}}>;
+    /**
+     * The same operation for an entry in a connected third-party storage: the identifier is a string such as `sbox-42`, and the answer carries string identifiers as well.
+     * @summary {{&summary}} (third-party storage)
+     * @param {{=<% %>=}}{<%& classname %><%& operationIdCamelCase %>Request}<%={{ }}=%> requestParameters Request parameters.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof {{x-classname}}
+     */
+    public {{nickname}}(requestParameters: {{x-classname}}{{operationIdCamelCase}}Request & {{{vendorExtensions.x-thirdparty-narrow-variant}}}, options?: RawAxiosRequestConfig): AxiosPromise<{{{vendorExtensions.x-thirdparty-return-type-variant}}}>;
+    public {{nickname}}(requestParameters: {{x-classname}}{{operationIdCamelCase}}Request, options?: RawAxiosRequestConfig): AxiosPromise<{{{vendorExtensions.x-thirdparty-return-type-union}}}>;
+    {{/vendorExtensions.x-thirdparty-overload}}
     public {{nickname}}({{#allParams.0}}requestParameters: {{x-classname}}{{operationIdCamelCase}}Request{{^hasRequiredParams}} = {}{{/hasRequiredParams}}, {{/allParams.0}}options?: RawAxiosRequestConfig) {
         return {{x-classname}}Fp(this.configuration).{{nickname}}({{#allParams.0}}{{#allParams}}requestParameters.{{paramName}}, {{/allParams}}{{/allParams.0}}options).then((request) => request(this.axios, this.basePath));
     }
     {{/useSingleRequestParameter}}
     {{^useSingleRequestParameter}}
-    public {{nickname}}({{#allParams}}{{paramName}}{{^required}}?{{/required}}: {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{#isNullable}} | null{{/isNullable}}{{/isEnum}}, {{/allParams}}options?: RawAxiosRequestConfig) {
+    public {{nickname}}({{#allParams}}{{paramName}}{{^required}}?{{/required}}: {{>paramType}}, {{/allParams}}options?: RawAxiosRequestConfig) {
         return {{x-classname}}Fp(this.configuration).{{nickname}}({{#allParams}}{{paramName}}, {{/allParams}}options).then((request) => request(this.axios, this.basePath));
     }
     {{/useSingleRequestParameter}}

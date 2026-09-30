@@ -263,7 +263,7 @@ public class SubfoldersTests(
         titles.IndexOf("Autotest Folder B").Should().BeLessThan(titles.IndexOf("Autotest Folder A"));
     }
 
-    private async Task<FolderDtoInteger> CreateRoomOfType(RoomType roomType, string title) => roomType switch
+    private async Task<FolderDto> CreateRoomOfType(RoomType roomType, string title) => roomType switch
     {
         RoomType.CustomRoom => await CreateCustomRoom(title),
         RoomType.FillingFormsRoom => await CreateFillingFormsRoom(title),

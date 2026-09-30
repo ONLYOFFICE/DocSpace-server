@@ -44,7 +44,7 @@ public class RoomLinkCreateTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    private Task<FolderDtoInteger> MkRoom(string title, RoomType roomType = RoomType.CustomRoom)
+    private Task<FolderDto> MkRoom(string title, RoomType roomType = RoomType.CustomRoom)
     {
         return roomType switch
         {
