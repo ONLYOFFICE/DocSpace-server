@@ -147,11 +147,11 @@ function parseRoomsPage(
 }
 
 /**
- * The rooms the caller can read that hold a `.ai` folder in their root, as
- * one cloud entry — `GET api/2.0/files/rooms?withAiFolder=true`, paged. The
- * server already leaves out rooms the caller may not see and third-party
- * rooms (which cannot carry the folder). Empty when there is none, so the
- * widget shows no picker at all.
+ * The rooms the caller can read whose `.ai` folder holds at least one skill
+ * file, as one cloud entry — `GET api/2.0/files/rooms?withAiFolder=true`,
+ * paged, then one look into each folder. The server already leaves out
+ * rooms the caller may not see and third-party rooms (which cannot carry the
+ * folder). Empty when there is none, so the widget shows no picker at all.
  */
 export async function getContextFolders(): Promise<ContextFolder[]> {
   const rooms: ContextFolder["rooms"] = [];
@@ -182,7 +182,21 @@ export async function getContextFolders(): Promise<ContextFolder[]> {
       cancel();
     }
   }
-  return rooms.length > 0 ? [{ cloud: CONTEXT_CLOUD, rooms }] : [];
+  // A `.ai` folder with no skill file in it connects nothing, so such a
+  // room is not offered either. A room whose folder cannot be read is left
+  // out rather than failing the whole list.
+  const withSkills = await mapLimit(rooms, READ_CONCURRENCY, async (room) => {
+    try {
+      return (await listRoomSkillFiles(room.id)).length > 0 ? room : undefined;
+    } catch (error) {
+      logger.warn(`getContextFolders: skipping room ${room.id} (${room.name}): ${String(error)}`);
+      return undefined;
+    }
+  });
+  const offered = withSkills.filter(
+    (room): room is ContextFolder["rooms"][number] => room !== undefined,
+  );
+  return offered.length > 0 ? [{ cloud: CONTEXT_CLOUD, rooms: offered }] : [];
 }
 
 /**
