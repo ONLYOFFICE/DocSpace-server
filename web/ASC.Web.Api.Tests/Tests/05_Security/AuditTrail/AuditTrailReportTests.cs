@@ -45,15 +45,6 @@ namespace ASC.Web.Api.Tests.Tests._05_Security.AuditTrail;
 /// instances")</c>, i.e. the TS suite itself already expects them to fail on a local/self-hosted
 /// instance like this one.
 /// </summary>
-/// <remarks>
-/// SDK gap: the generated <c>AuditTrailDataApi.CreateAuditTrailReportAsync</c> types the response
-/// as <see cref="StringWrapper"/> (a plain string), but the controller actually returns a
-/// <c>DocumentBuilderTaskDto</c> object (<c>{ id, error, percentage, isCompleted, status, ... }</c>)
-/// — the OpenAPI schema for this endpoint is wrong, and deserializing that object into
-/// <see cref="StringWrapper.Response"/> would fail. The positive cases below go through raw JSON
-/// instead; the negative (permission) cases are unaffected, since <see cref="ApiException"/> is
-/// raised from the status code alone, before the body is ever deserialized into the (wrong) type.
-/// </remarks>
 [Trait("Category", "Security")]
 public class AuditTrailReportTests(
     AspireAppFixture fixture)
@@ -66,14 +57,11 @@ public class AuditTrailReportTests(
         await _webApiClient.Authenticate(Owner);
 
         // Act
-        using var response = await _webApi.PostAsync("api/2.0/security/audit/events/report", null, TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var result = await _auditTrailDataApi.CreateAuditTrailReportAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        using var json = JsonDocument.Parse(body);
-        var id = json.RootElement.GetProperty("response").GetProperty("id").GetString();
-        id.Should().NotBeNullOrEmpty();
+        result.Response.Should().NotBeNull();
+        result.Response.Id.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -84,14 +72,11 @@ public class AuditTrailReportTests(
         await _webApiClient.Authenticate(admin);
 
         // Act
-        using var response = await _webApi.PostAsync("api/2.0/security/audit/events/report", null, TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var result = await _auditTrailDataApi.CreateAuditTrailReportAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        using var json = JsonDocument.Parse(body);
-        var id = json.RootElement.GetProperty("response").GetProperty("id").GetString();
-        id.Should().NotBeNullOrEmpty();
+        result.Response.Should().NotBeNull();
+        result.Response.Id.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -127,9 +112,6 @@ public class AuditTrailReportTests(
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
     }
 
-    // TODO: move the period cases below onto the SDK method once the SDK is regenerated with the
-    // `from`/`to` query parameters of this endpoint, and drop ReportPath. The pinned SDK predates
-    // them, which is the only reason these cases go over raw HTTP.
     [Fact]
     public async Task CreateAuditTrailReport_WithPeriod_StartsReportGeneration()
     {
@@ -138,14 +120,11 @@ public class AuditTrailReportTests(
         var now = DateTime.UtcNow;
 
         // Act
-        using var response = await _webApi.PostRawAsync(ReportPath(now.AddDays(-7), now), "{}", TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var result = await _auditTrailDataApi.CreateAuditTrailReportAsync(from: now.AddDays(-7), to: now, cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        using var json = JsonDocument.Parse(body);
-        var id = json.RootElement.GetProperty("response").GetProperty("id").GetString();
-        id.Should().NotBeNullOrEmpty();
+        result.Response.Should().NotBeNull();
+        result.Response.Id.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -156,10 +135,11 @@ public class AuditTrailReportTests(
         var now = DateTime.UtcNow;
 
         // Act
-        using var response = await _webApi.PostRawAsync(ReportPath(now.AddYears(-10), null), "{}", TestContext.Current.CancellationToken);
+        var result = await _auditTrailDataApi.CreateAuditTrailReportAsync(from: now.AddYears(-10), cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        result.Response.Should().NotBeNull();
+        result.Response.Id.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -170,10 +150,11 @@ public class AuditTrailReportTests(
         var now = DateTime.UtcNow;
 
         // Act
-        using var response = await _webApi.PostRawAsync(ReportPath(now.AddDays(-1), now.AddDays(-2)), "{}", TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _auditTrailDataApi.CreateAuditTrailReportAsync(from: now.AddDays(-1), to: now.AddDays(-2), cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        exception.ErrorCode.Should().Be(400);
     }
 
     [Fact]
@@ -184,26 +165,10 @@ public class AuditTrailReportTests(
         var now = DateTime.UtcNow;
 
         // Act
-        using var response = await _webApi.PostRawAsync(ReportPath(null, now.AddYears(-10)), "{}", TestContext.Current.CancellationToken);
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _auditTrailDataApi.CreateAuditTrailReportAsync(to: now.AddYears(-10), cancellationToken: TestContext.Current.CancellationToken));
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-    }
-
-    private static string ReportPath(DateTime? from, DateTime? to)
-    {
-        var query = new List<string>();
-
-        if (from.HasValue)
-        {
-            query.Add("from=" + Uri.EscapeDataString(from.Value.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture)));
-        }
-
-        if (to.HasValue)
-        {
-            query.Add("to=" + Uri.EscapeDataString(to.Value.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture)));
-        }
-
-        return "api/2.0/security/audit/events/report?" + string.Join("&", query);
+        exception.ErrorCode.Should().Be(400);
     }
 }
