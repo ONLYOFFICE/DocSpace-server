@@ -315,8 +315,10 @@ public class SecurityController(
     /// non-empty `error` as a failed build. The finished file is saved to the caller's My documents section, as an XLSX
     /// workbook by default or as CSV when `format=Csv`, and `resultFileId` identifies it in either format;
     /// `resultFileUrl` opens it in the editor, except for a CSV file too large for the editor, which it downloads
-    /// instead. One job runs per caller and kind: calling again while the previous one is still building returns that
-    /// job instead of starting a second, and `DELETE api/2.0/security/audit/login/report` cancels it.
+    /// instead. An XLSX report keeps only the most recent events up to its row limit, 100,000 by default, and its
+    /// header says how many were left out; `format=Csv` exports every event of the period. One job runs per caller and
+    /// kind: calling again while the previous one is still building returns that job instead of starting a second, and
+    /// `DELETE api/2.0/security/audit/login/report` cancels it.
     /// </remarks>
     /// <summary>
     /// Start login history report
@@ -415,8 +417,10 @@ public class SecurityController(
     /// non-empty `error` as a failed build. The finished file is saved to the caller's My documents section, as an XLSX
     /// workbook by default or as CSV when `format=Csv`, and `resultFileId` identifies it in either format;
     /// `resultFileUrl` opens it in the editor, except for a CSV file too large for the editor, which it downloads
-    /// instead. One job runs per caller and kind: calling again while the previous one is still building returns that
-    /// job instead of starting a second, and `DELETE api/2.0/security/audit/events/report` cancels it.
+    /// instead. An XLSX report keeps only the most recent events up to its row limit, 100,000 by default, and its
+    /// header says how many were left out; `format=Csv` exports every event of the period. One job runs per caller and
+    /// kind: calling again while the previous one is still building returns that job instead of starting a second, and
+    /// `DELETE api/2.0/security/audit/events/report` cancels it.
     /// </remarks>
     /// <summary>
     /// Start audit trail report

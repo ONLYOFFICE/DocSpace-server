@@ -57,7 +57,7 @@ function customizeWorksheet() {
 }
 
 function prepareInfo() {
-    return [
+    var info = [
         {
             height: 15.5,
             dataArray: [
@@ -85,12 +85,27 @@ function prepareInfo() {
                 { "value": inputData.resources.dateGenerated, "bold": true, valign: "center" },
                 { "value": inputData.info.dateGenerated, "fontColor": defaultFontColorGray, "format": inputData.resources.dateGeneratedFormat, valign: "center" }
             ]
-        },
-        {
-            height: 15.5,
-            dataArray: []
         }
     ];
+
+    // Only a report cut at its row limit carries the note. The note is a sentence: it runs on over the empty
+    // cells to its right rather than wrapping, and it does not widen the column it starts in.
+    if (inputData.info.rowLimit) {
+        info.push({
+            height: 15.5,
+            dataArray: [
+                { "value": inputData.resources.rowLimit, "bold": true, valign: "center" },
+                { "value": inputData.info.rowLimit, "fontColor": defaultFontColorGray, "format": "@", valign: "center", "wrap": false, "fixedWidth": true }
+            ]
+        });
+    }
+
+    info.push({
+        height: 15.5,
+        dataArray: []
+    });
+
+    return info;
 }
 
 function prepareHeader() {
@@ -185,7 +200,7 @@ function writeTable(table) {
                 continue;
             }
 
-            var length = getMaxLineLength(data.value);
+            var length = data.fixedWidth ? 0 : getMaxLineLength(data.value);
             if (!columnMaxLengths[currentColIndex] || length > columnMaxLengths[currentColIndex]) {
                 columnMaxLengths[currentColIndex] = length;
             }

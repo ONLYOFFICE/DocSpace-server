@@ -33,7 +33,8 @@
 
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
-/// Identifies one audit report: how its file is named, which period it covers and which columns it shows.
+/// Identifies one audit report: how its file is named, which period it covers, which columns it shows and how
+/// many events the period holds.
 public sealed record AuditReportDescriptor(
     string NameFormat,
     string NameArg0,
@@ -41,7 +42,8 @@ public sealed record AuditReportDescriptor(
     DateTime? From,
     DateTime? To,
     CultureInfo Culture,
-    IReadOnlyList<AuditReportColumn> Columns);
+    IReadOnlyList<AuditReportColumn> Columns,
+    int TotalCount);
 
 public sealed record AuditReportColumn(string ResourceKey, PropertyInfo Property);
 
@@ -98,9 +100,26 @@ public class AuditXlsxReportWriter(
     DocumentBuilderTask documentBuilderTask,
     ReportHeaderService reportHeaderService,
     ReportResultFileSaver fileSaver,
-    FilesLinkUtility filesLinkUtility)
+    FilesLinkUtility filesLinkUtility,
+    IConfiguration configuration)
 {
     private const string ScriptName = "AuditReport.docbuilder";
+
+    // The events are written into the script, and the document server refuses to download a script larger than
+    // its FileConverter.converter.maxDownloadBytes (100 MB by default). An audit row takes about 800 bytes of the
+    // script as it is written now, so the default keeps a period well under that limit; a sheet could not hold
+    // more than about a million rows in any case.
+    private const int DefaultMaxRows = 100_000;
+    private const int SheetMaxRows = 1_000_000;
+
+    /// <summary>
+    /// How many events a workbook holds at most. The events come newest first, so a longer period keeps its most
+    /// recent events and the report header says how many were left out; the CSV format has no such limit.
+    /// </summary>
+    public int MaxRows { get; } = Math.Clamp(
+        int.TryParse(configuration["files:audit-report:xlsx-max-rows"], out var maxRows) ? maxRows : DefaultMaxRows,
+        1,
+        SheetMaxRows);
 
     private static readonly JsonSerializerOptions _jsonOptions = new()
     {
@@ -127,6 +146,11 @@ public class AuditXlsxReportWriter(
 
         var dateFormat = header.LongDateFormat;
 
+        var rowLimitNote = descriptor.TotalCount > MaxRows
+            ? string.Format(descriptor.Culture, AuditReportResource.ReportRowLimitNote,
+                MaxRows.ToString("N0", descriptor.Culture), descriptor.TotalCount.ToString("N0", descriptor.Culture))
+            : null;
+
         var period = descriptor.From.HasValue && descriptor.To.HasValue
             ? $"{descriptor.From.Value.ConvertNumerals("d")} – {descriptor.To.Value.ConvertNumerals("d")}"
             : descriptor.From?.ConvertNumerals("d") ?? descriptor.To?.ConvertNumerals("d") ?? string.Empty;
@@ -139,6 +163,7 @@ public class AuditXlsxReportWriter(
                 report = Resource.AccountingReportTitle + ":",
                 period = Resource.AccountingReportPeriod + ":",
                 dateGenerated = Resource.AccountingReportDateGenerated + ":",
+                rowLimit = AuditReportResource.ReportRowLimitLabel + ":",
                 sheetName = GetSheetName(descriptor.NameFormat),
                 dateGeneratedFormat = dateFormat
             },
@@ -147,7 +172,8 @@ public class AuditXlsxReportWriter(
                 company = header.Company,
                 report = GetReportTitle(descriptor.NameFormat),
                 period,
-                dateGenerated = header.DateGenerated
+                dateGenerated = header.DateGenerated,
+                rowLimit = rowLimitNote
             },
             logoSrc = header.LogoSrc,
             logoWidthMm = header.LogoWidthMm,
@@ -186,9 +212,12 @@ public class AuditXlsxReportWriter(
             {
                 await writer.WriteAsync(scriptParts[0]);
 
+                var written = 0;
+
+                // Leaving the loop at the limit disposes the stream, which stops reading the older events.
                 await foreach (var batch in batches.WithCancellation(cancellationToken))
                 {
-                    foreach (var @event in batch)
+                    foreach (var @event in batch.Take(MaxRows - written))
                     {
                         var cells = new List<Cell>(props.Count);
 
@@ -209,6 +238,13 @@ public class AuditXlsxReportWriter(
                         }
 
                         await writer.WriteAsync(JsonSerializer.Serialize(cells, _jsonOptions) + ",");
+
+                        written++;
+                    }
+
+                    if (written >= MaxRows)
+                    {
+                        break;
                     }
                 }
 

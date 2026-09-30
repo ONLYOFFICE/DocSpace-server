@@ -103,13 +103,14 @@ public class FoldersControllerInternal(
     /// `format` asks for one, and saves the result in the caller's "My documents". The answer is the queued task, not
     /// the report: poll `GET api/2.0/files/folder/{folderId}/log/report` until `isCompleted` is true, then take the
     /// file from `resultFileId`, `resultFileName` and `resultFileUrl`; the URL of a CSV file too large for the editor
-    /// downloads it instead of opening it. `from` and `to` limit the exported period; leaving both out exports the
-    /// whole history. While a report for the same folder and caller is still running, this call joins it and answers
-    /// with the running task instead of starting a second one, so retrying is safe. The caller needs read access to the
-    /// folder and may not be a guest, and the portal plan has to include the audit feature - otherwise the call is
-    /// refused, with 403 for the access rule and 404 for a folder that does not exist. Only a portal administrator gets
-    /// the address, browser and platform columns. Give up a running report with
-    /// `DELETE api/2.0/files/folder/{folderId}/log/report`.
+    /// downloads it instead of opening it. An XLSX report keeps only the most recent events up to its row limit,
+    /// 100,000 by default, and its header says how many were left out; `format=Csv` exports every event of the period.
+    /// `from` and `to` limit the exported period; leaving both out exports the whole history. While a report for the
+    /// same folder and caller is still running, this call joins it and answers with the running task instead of
+    /// starting a second one, so retrying is safe. The caller needs read access to the folder and may not be a guest,
+    /// and the portal plan has to include the audit feature - otherwise the call is refused, with 403 for the access
+    /// rule and 404 for a folder that does not exist. Only a portal administrator gets the address, browser and
+    /// platform columns. Give up a running report with `DELETE api/2.0/files/folder/{folderId}/log/report`.
     /// </remarks>
     /// <summary>
     /// Start the folder history report generation

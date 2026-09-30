@@ -831,6 +831,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Client's {0} secret regenerated</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>The report shows the {0} most recent of {1} events. Download it in CSV format to get all of them.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Vectorization settings have been reset</value>
   </data>

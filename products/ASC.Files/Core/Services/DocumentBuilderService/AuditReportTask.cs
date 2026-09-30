@@ -163,17 +163,25 @@ public class AuditReportTask : DocumentBuilderTask<int, AuditReportTaskData>
         var isDocSpaceAdmin = await serviceProvider.GetService<UserManager>().IsDocSpaceAdminAsync(_userId);
 
         var descriptor = new AuditReportDescriptor(reportNameFormat, nameArg0, nameArg1, _data.From, _data.To, culture,
-            AuditReportColumns.Resolve<T>(_data.Kind, isDocSpaceAdmin));
+            AuditReportColumns.Resolve<T>(_data.Kind, isDocSpaceAdmin), total);
 
         // Writers are resolved from the per-execution scope: the tenant and user context they rely
         // on is only established above, inside this job's own scope.
-        var trackedBatches = TrackReadProgressAsync(batches, total);
+        AuditReportResult result;
 
-        var result = _data.Format == AuditReportFormat.Csv
-            ? await serviceProvider.GetRequiredService<AuditCsvReportWriter>()
-                .WriteAsync(_userId, trackedBatches, descriptor, ReportProgressAsync, CancellationToken)
-            : await serviceProvider.GetRequiredService<AuditXlsxReportWriter>()
-                .WriteAsync(_userId, trackedBatches, descriptor, ReportProgressAsync, CancellationToken);
+        if (_data.Format == AuditReportFormat.Csv)
+        {
+            result = await serviceProvider.GetRequiredService<AuditCsvReportWriter>()
+                .WriteAsync(_userId, TrackReadProgressAsync(batches, total), descriptor, ReportProgressAsync, CancellationToken);
+        }
+        else
+        {
+            // A workbook stops reading at its row limit, so that is where its reading progress ends.
+            var xlsxWriter = serviceProvider.GetRequiredService<AuditXlsxReportWriter>();
+
+            result = await xlsxWriter
+                .WriteAsync(_userId, TrackReadProgressAsync(batches, Math.Min(total, xlsxWriter.MaxRows)), descriptor, ReportProgressAsync, CancellationToken);
+        }
 
         ResultFileId = result.FileId;
         ResultFileName = result.FileName;
