@@ -82,10 +82,18 @@ public abstract class BaseIndexer<T>(Client client,
     protected readonly TenantManager _tenantManager = tenantManager;
     private static readonly Lock _locker = new();
 
-    public async IAsyncEnumerable<List<T>> IndexAllAsync(
+    public IAsyncEnumerable<List<T>> IndexAllAsync(
         Func<DateTime, (int, int, int)> getCount,
         Func<DateTime, List<int>> getIds,
         Func<long, long, DateTime, List<T>> getData)
+    {
+        return IndexAllAsync(getCount, getIds, (start, stop, lastIndexed) => Task.FromResult(getData(start, stop, lastIndexed)));
+    }
+
+    public async IAsyncEnumerable<List<T>> IndexAllAsync(
+        Func<DateTime, (int, int, int)> getCount,
+        Func<DateTime, List<int>> getIds,
+        Func<long, long, DateTime, Task<List<T>>> getData)
     {
         DateTime lastIndexed;
 
@@ -108,7 +116,7 @@ public abstract class BaseIndexer<T>(Client client,
 
         for (var i = 0; i < ids.Count - 1; i++)
         {
-            yield return getData(ids[i], ids[i + 1], lastIndexed);
+            yield return await getData(ids[i], ids[i + 1], lastIndexed);
         }
     }
 

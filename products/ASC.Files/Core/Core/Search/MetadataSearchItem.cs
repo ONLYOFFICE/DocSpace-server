@@ -133,6 +133,8 @@ public class FactoryIndexerFileMetadata(
     IDbContextFactory<FilesDbContext> dbContextFactory)
     : FactoryIndexer<DbFileMetadataSearch>(loggerFactory, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider)
 {
+    public override string SettingsTitle => FilesCommonResource.IndexTitleFileMetadata;
+
     public override async Task IndexAllAsync()
     {
         await MetadataSearchHelper.IndexAllAsync<DbFileMetadataSearch>(_indexer, dbContextFactory, FileEntryType.File, Index, Logger);
@@ -150,6 +152,8 @@ public class FactoryIndexerFolderMetadata(
     IDbContextFactory<FilesDbContext> dbContextFactory)
     : FactoryIndexer<DbFolderMetadataSearch>(loggerFactory, tenantManager, searchSettingsHelper, factoryIndexer, baseIndexer, serviceProvider)
 {
+    public override string SettingsTitle => FilesCommonResource.IndexTitleFolderMetadata;
+
     public override async Task IndexAllAsync()
     {
         await MetadataSearchHelper.IndexAllAsync<DbFolderMetadataSearch>(_indexer, dbContextFactory, FileEntryType.Folder, Index, Logger);
@@ -215,15 +219,15 @@ public static class MetadataSearchHelper
             return ids;
         }
 
-        List<TDoc> GetData(long start, long stop, DateTime lastIndexed)
+        async Task<List<TDoc>> GetData(long start, long stop, DateTime lastIndexed)
         {
-            using var filesDbContext = dbContextFactory.CreateDbContext();
+            await using var filesDbContext = await dbContextFactory.CreateDbContextAsync();
 
-            var entryIds = EntryIds(filesDbContext, entryType, lastIndexed)
+            var entryIds = await EntryIds(filesDbContext, entryType, lastIndexed)
                 .Where(r => r >= start && r <= stop)
-                .ToList();
+                .ToListAsync();
 
-            return BuildDocsAsync<TDoc>(filesDbContext, entryType, entryIds, tenantId: null).GetAwaiter().GetResult();
+            return await BuildDocsAsync<TDoc>(filesDbContext, entryType, entryIds, tenantId: null);
         }
 
         (int, int, int) GetCount(DateTime lastIndexed)

@@ -47,7 +47,7 @@ public class MetadataCascadeWorker(
     /// folder's values once it holds the run lock, so one that is already past that point carries the values of an
     /// earlier request, and folding a later request into it would silently keep the edited values from the subtree.
     /// Any other request gets its own operation, otherwise the templates (or the Overwrite) of the second request
-    /// would never reach the subtree. The operations of a tenant run one after another (see
+    /// would never reach the subtree. The operations over one tree run one after another (see
     /// <see cref="MetadataCascadeOperation.DoJob"/>). Completed operations are dropped.
     /// </summary>
     public async Task<string> StartAsync(int tenantId, Guid userId, int folderId, IEnumerable<int> templateIds, MetadataConflictResolveType conflict, MetadataCascadeMode mode)

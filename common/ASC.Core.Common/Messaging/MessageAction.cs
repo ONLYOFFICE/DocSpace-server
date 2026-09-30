@@ -1104,35 +1104,38 @@ public enum MessageAction
 
     #region Metadata
 
+    // 5300+: the documents numbering. The block was numbered 9910+ once, inside the OAuth range the audit mapper
+    // formats by the target instead of the description, which put the entry id where the entry title belongs
+
     [Description("Metadata template created")]
-    MetadataTemplateCreated = 9910,
+    MetadataTemplateCreated = 5300,
 
     [Description("Metadata template updated")]
-    MetadataTemplateUpdated = 9911,
+    MetadataTemplateUpdated = 5301,
 
     [Description("Metadata template deleted")]
-    MetadataTemplateDeleted = 9912,
+    MetadataTemplateDeleted = 5302,
 
     [Description("Metadata field created")]
-    MetadataFieldCreated = 9913,
+    MetadataFieldCreated = 5303,
 
     [Description("Metadata field updated")]
-    MetadataFieldUpdated = 9914,
+    MetadataFieldUpdated = 5304,
 
     [Description("Metadata field deleted")]
-    MetadataFieldDeleted = 9915,
+    MetadataFieldDeleted = 5305,
 
     [Description("Metadata template assigned")]
-    MetadataTemplateAssigned = 9916,
+    MetadataTemplateAssigned = 5306,
 
     [Description("Metadata template unassigned")]
-    MetadataTemplateUnassigned = 9917,
+    MetadataTemplateUnassigned = 5307,
 
     [Description("Metadata values updated")]
-    MetadataValuesUpdated = 9918,
+    MetadataValuesUpdated = 5308,
 
     [Description("Metadata cascade assignment started")]
-    MetadataCascadeStarted = 9919,
+    MetadataCascadeStarted = 5309,
 
     #endregion
 

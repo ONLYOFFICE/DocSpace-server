@@ -1266,7 +1266,7 @@ internal class FolderDao(
 
             await context.SaveChangesAsync();
 
-            if (!trashId.Equals(toFolderId))
+            if (!trashId.Equals(toFolderId) && await metadataTemplatesCache.HasTemplatesAsync())
             {
                 // the content of the moved folder keeps what it inherited from the ancestors left behind as its own metadata.
                 // Only after the save above: the query tells a source left behind from a source still above by the ancestor

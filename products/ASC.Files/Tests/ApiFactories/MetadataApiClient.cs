@@ -80,9 +80,17 @@ public class MetadataApiClient(HttpClient client)
         return client.GetAsync($"api/2.0/files/metadata/templates/{templateId}", cancellationToken);
     }
 
+    /// <summary>
+    /// Updates a template with an arbitrary body. Returns the raw response so the error cases can be asserted on the status code.
+    /// </summary>
+    public Task<HttpResponseMessage> UpdateTemplateResponseAsync(int templateId, object body, CancellationToken cancellationToken)
+    {
+        return PutAsync($"api/2.0/files/metadata/templates/{templateId}", body, cancellationToken);
+    }
+
     public async Task<MetadataTemplateResponse> UpdateTemplateAsync(int templateId, object body, CancellationToken cancellationToken)
     {
-        using var response = await PutAsync($"api/2.0/files/metadata/templates/{templateId}", body, cancellationToken);
+        using var response = await UpdateTemplateResponseAsync(templateId, body, cancellationToken);
 
         return await ReadAsync<MetadataTemplateResponse>(response, cancellationToken);
     }
@@ -139,6 +147,21 @@ public class MetadataApiClient(HttpClient client)
         response.EnsureSuccessStatusCode();
     }
 
+    /// <summary>
+    /// Deletes a field of a template. Returns the raw response so the error cases can be asserted on the status code.
+    /// </summary>
+    public Task<HttpResponseMessage> DeleteFieldResponseAsync(int templateId, int fieldId, CancellationToken cancellationToken)
+    {
+        return client.DeleteAsync($"api/2.0/files/metadata/templates/{templateId}/fields/{fieldId}", cancellationToken);
+    }
+
+    public async Task DeleteFieldAsync(int templateId, int fieldId, CancellationToken cancellationToken)
+    {
+        using var response = await DeleteFieldResponseAsync(templateId, fieldId, cancellationToken);
+
+        response.EnsureSuccessStatusCode();
+    }
+
     #endregion
 
     #region Assignment and values
@@ -155,6 +178,24 @@ public class MetadataApiClient(HttpClient client)
     public Task AssignFileTemplatesAsync(int fileId, IEnumerable<int> templateIds, CancellationToken cancellationToken)
     {
         return AssignTemplatesAsync("file", fileId, templateIds, cascade: false, conflictResolveType: 0, cancellationToken);
+    }
+
+    /// <summary>
+    /// Assigns the templates to the file. Returns the raw response so the error cases can be asserted on the status code.
+    /// </summary>
+    public Task<HttpResponseMessage> AssignFileTemplatesResponseAsync(int fileId, IEnumerable<int> templateIds, CancellationToken cancellationToken)
+    {
+        var body = new { templateIds = templateIds.ToList(), cascade = false, conflictResolveType = 0 };
+
+        return PutAsync($"api/2.0/files/metadata/file/{fileId}/templates", body, cancellationToken);
+    }
+
+    /// <summary>
+    /// Removes a template from the file. Returns the raw response so the error cases can be asserted on the status code.
+    /// </summary>
+    public Task<HttpResponseMessage> UnassignFileTemplateResponseAsync(int fileId, int templateId, CancellationToken cancellationToken)
+    {
+        return client.DeleteAsync($"api/2.0/files/metadata/file/{fileId}/templates/{templateId}", cancellationToken);
     }
 
     public async Task<MetadataOperationResponse?> GetCascadeProgressAsync(int folderId, CancellationToken cancellationToken)
@@ -238,6 +279,14 @@ public class MetadataApiClient(HttpClient client)
     public Task<HttpResponseMessage> SetFolderValuesResponseAsync(int folderId, IEnumerable<MetadataValuePayload> values, CancellationToken cancellationToken)
     {
         return SetValuesResponseAsync("folder", folderId, values, cancellationToken);
+    }
+
+    /// <summary>
+    /// Sets the values of the file. Returns the raw response so the error cases can be asserted on the status code.
+    /// </summary>
+    public Task<HttpResponseMessage> SetFileValuesResponseAsync(int fileId, IEnumerable<MetadataValuePayload> values, CancellationToken cancellationToken)
+    {
+        return SetValuesResponseAsync("file", fileId, values, cancellationToken);
     }
 
     private Task<HttpResponseMessage> SetValuesResponseAsync(string entryKind, int entryId, IEnumerable<MetadataValuePayload> values, CancellationToken cancellationToken)
@@ -344,9 +393,27 @@ public class MetadataApiClient(HttpClient client)
 
     private async Task<EntryMetadataSetResponse> GetEntryMetadataAsync(string entryKind, int entryId, CancellationToken cancellationToken)
     {
-        using var response = await client.GetAsync($"api/2.0/files/metadata/{entryKind}/{entryId}", cancellationToken);
+        using var response = await GetEntryMetadataResponseAsync(entryKind, entryId, cancellationToken);
 
         return await ReadAsync<EntryMetadataSetResponse>(response, cancellationToken);
+    }
+
+    /// <summary>
+    /// Reads the metadata of the folder. Returns the raw response so the error cases (a folder that is gone) can be asserted on the status code.
+    /// </summary>
+    public Task<HttpResponseMessage> GetFolderMetadataResponseAsync(int folderId, CancellationToken cancellationToken)
+    {
+        return GetEntryMetadataResponseAsync("folder", folderId, cancellationToken);
+    }
+
+    public Task<HttpResponseMessage> GetFileMetadataResponseAsync(int fileId, CancellationToken cancellationToken)
+    {
+        return GetEntryMetadataResponseAsync("file", fileId, cancellationToken);
+    }
+
+    private Task<HttpResponseMessage> GetEntryMetadataResponseAsync(string entryKind, int entryId, CancellationToken cancellationToken)
+    {
+        return client.GetAsync($"api/2.0/files/metadata/{entryKind}/{entryId}", cancellationToken);
     }
 
     #endregion

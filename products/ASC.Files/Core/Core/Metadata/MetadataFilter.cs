@@ -94,15 +94,17 @@ public class MetadataFilterConditionRequest
     public string Op { get; set; }
 
     /// <summary>
-    /// The exact value: string fields, and number fields given a single value.
+    /// The exact value: string fields, and number fields given a single value. A JSON number is accepted as well as a string.
     /// </summary>
     /// <example>ACME</example>
+    [JsonConverter(typeof(MetadataFilterValueConverter))]
     public string Value { get; set; }
 
     /// <summary>
     /// The inclusive lower bound of a range. A date given without a time ("2026-06-01") is the start of that day (UTC).
     /// </summary>
     /// <example>2026-01-01</example>
+    [JsonConverter(typeof(MetadataFilterValueConverter))]
     public string From { get; set; }
 
     /// <summary>
@@ -110,6 +112,7 @@ public class MetadataFilterConditionRequest
     /// a value with a time is an instant and is taken as is.
     /// </summary>
     /// <example>2026-06-30</example>
+    [JsonConverter(typeof(MetadataFilterValueConverter))]
     public string To { get; set; }
 
     /// <summary>
@@ -117,6 +120,31 @@ public class MetadataFilterConditionRequest
     /// </summary>
     /// <example>["4f1e2d3c-5b6a-4788-99aa-0c1d2e3f4a55"]</example>
     public List<Guid> OptionIds { get; set; }
+}
+
+/// <summary>
+/// Reads a condition value from whichever JSON token carries it: a number or a boolean is taken by its JSON text, so
+/// <c>{"value": 5}</c> is the same condition as <c>{"value": "5"}</c>. The declared type, and so the schema, stays a string.
+/// </summary>
+public class MetadataFilterValueConverter : JsonConverter<string>
+{
+    public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        return reader.TokenType switch
+        {
+            JsonTokenType.String => reader.GetString(),
+            JsonTokenType.Number => reader.HasValueSequence ? Encoding.UTF8.GetString(System.Buffers.BuffersExtensions.ToArray(reader.ValueSequence)) : Encoding.UTF8.GetString(reader.ValueSpan),
+            JsonTokenType.True => "true",
+            JsonTokenType.False => "false",
+            JsonTokenType.Null => null,
+            _ => throw new JsonException($"A string or a number is expected, not {reader.TokenType}")
+        };
+    }
+
+    public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value);
+    }
 }
 
 /// <summary>

@@ -83,6 +83,39 @@ public class MetadataTypedSearchTests(AspireAppFixture fixture) : BaseTest(fixtu
     }
 
     [Fact]
+    public async Task SearchFolder_WithANumberGivenAsAJsonNumber_IsAccepted()
+    {
+        await _filesClient.Authenticate(Owner);
+        var api = new MetadataApiClient(_filesClient);
+        var suffix = Suffix();
+
+        var template = await api.CreateTemplateAsync("Amount " + suffix, [new MetadataFieldPayload { Name = "Amount", Type = 2 }], TestContext.Current.CancellationToken);
+        var fieldId = template.Field("Amount").Id;
+        var room = await CreateCustomRoom($"Amount {suffix}");
+        var matching = await CreateFolder($"Five {suffix}", room.Id);
+        var other = await CreateFolder($"Seven {suffix}", room.Id);
+
+        await api.AssignFolderTemplatesAsync(matching.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+        await api.AssignFolderTemplatesAsync(other.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+        await api.SetFolderValuesAsync(matching.Id, [new MetadataValuePayload { FieldId = fieldId, NumberValue = 5 }], TestContext.Current.CancellationToken);
+        await api.SetFolderValuesAsync(other.Id, [new MetadataValuePayload { FieldId = fieldId, NumberValue = 7 }], TestContext.Current.CancellationToken);
+
+        // the value and the bounds are declared as strings; a client building the condition from a number used to get a 400
+        var equal = new { metadataTemplateId = template.Id, metadataFilters = new object[] { new { fieldId, op = "eq", value = 5 } } };
+        var range = new { metadataTemplateId = template.Id, metadataFilters = new object[] { new { fieldId, op = "range", from = 1, to = 6 } } };
+
+        var byValue = await PollFolderSearchAsync(api, room.Id, equal, c => c.FolderIds().Contains(matching.Id));
+        byValue.FolderIds().Should().Equal(matching.Id);
+
+        var byRange = await PollFolderSearchAsync(api, room.Id, range, c => c.FolderIds().Contains(matching.Id));
+        byRange.FolderIds().Should().Equal(matching.Id);
+
+        // the listing takes the same conditions as a JSON string in the query, read by the same converter
+        var listed = await api.GetFolderContentAsync(room.Id, template.Id, [new { fieldId, op = "eq", value = 5 }], cancellationToken: TestContext.Current.CancellationToken);
+        listed.FolderIds().Should().Equal(matching.Id);
+    }
+
+    [Fact]
     public async Task SearchFolder_OnTheTemplatesSection_ReturnsBadRequest()
     {
         var data = await ArrangeAsync();
@@ -162,7 +195,12 @@ public class MetadataTypedSearchTests(AspireAppFixture fixture) : BaseTest(fixtu
     /// Repeats the search until both the expected folder and the expected file are in the answer: the two metadata
     /// documents are refreshed independently, so one of them can be visible a moment before the other.
     /// </summary>
-    private static async Task<FolderContentResponse> PollFolderSearchAsync(MetadataApiClient api, int folderId, object body, int expectedFolderId, int expectedFileId)
+    private static Task<FolderContentResponse> PollFolderSearchAsync(MetadataApiClient api, int folderId, object body, int expectedFolderId, int expectedFileId)
+    {
+        return PollFolderSearchAsync(api, folderId, body, c => c.FolderIds().Contains(expectedFolderId) && c.FileIds().Contains(expectedFileId));
+    }
+
+    private static async Task<FolderContentResponse> PollFolderSearchAsync(MetadataApiClient api, int folderId, object body, Func<FolderContentResponse, bool> until)
     {
         var deadline = DateTime.UtcNow.AddSeconds(15);
 
@@ -170,7 +208,7 @@ public class MetadataTypedSearchTests(AspireAppFixture fixture) : BaseTest(fixtu
         {
             var content = await api.SearchFolderAsync(folderId, body, TestContext.Current.CancellationToken);
 
-            if ((content.FolderIds().Contains(expectedFolderId) && content.FileIds().Contains(expectedFileId)) || DateTime.UtcNow > deadline)
+            if (until(content) || DateTime.UtcNow > deadline)
             {
                 return content;
             }

@@ -39,7 +39,7 @@ public class MetadataCascadeOperation : DistributedTaskProgress
     private const int BatchSize = 1000;
 
     /// <summary>
-    /// The longest a pass waits for the previous one of the same tenant. Long enough for any realistic subtree,
+    /// The longest a pass waits for the previous one over the same tree. Long enough for any realistic subtree,
     /// finite so a stuck predecessor surfaces as an error instead of a silently hanging queue.
     /// </summary>
     private static readonly TimeSpan _runLockTimeout = TimeSpan.FromHours(1);
@@ -117,28 +117,30 @@ public class MetadataCascadeOperation : DistributedTaskProgress
 
         try
         {
-            // the passes of one tenant run one after another: two operations over nested or overlapping subtrees
-            // would otherwise both read "no link yet" for the same entry and both insert it, failing a whole batch
-            await using (await distributedLockProvider.TryAcquireFairLockAsync($"lock_metadata_cascade_run_{TenantId}", _runLockTimeout))
+            await tenantManager.SetCurrentTenantAsync(TenantId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
+
+            var folderDao = daoFactory.GetFolderDao<int>();
+            var metadataDao = daoFactory.GetMetadataDao<int>();
+
+            var folder = await folderDao.GetFolderAsync(FolderId) ?? throw new ItemNotFoundException();
+
+            if (!await fileSecurity.CanEditAsync(folder))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+            }
+
+            // the passes over one tree run one after another: two operations over nested or overlapping subtrees
+            // would otherwise both read "no link yet" for the same entry and both insert it, failing a whole batch.
+            // The trees are disjoint (a room, the "My documents" of a user), so a pass in one does not wait for a
+            // long pass in another, the way it did while the lock covered the whole tenant
+            await using (await distributedLockProvider.TryAcquireFairLockAsync($"lock_metadata_cascade_run_{TenantId}_{await GetTreeIdAsync(folderDao, folder)}", _runLockTimeout))
             {
                 // published before anything is read: a request arriving from now on gets a pass of its own
                 Started = true;
                 await PublishChanges();
 
                 CancellationToken.ThrowIfCancellationRequested();
-
-                await tenantManager.SetCurrentTenantAsync(TenantId);
-                await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
-
-                var folderDao = daoFactory.GetFolderDao<int>();
-                var metadataDao = daoFactory.GetMetadataDao<int>();
-
-                var folder = await folderDao.GetFolderAsync(FolderId) ?? throw new ItemNotFoundException();
-
-                if (!await fileSecurity.CanEditAsync(folder))
-                {
-                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
-                }
 
                 try
                 {
@@ -174,6 +176,17 @@ public class MetadataCascadeOperation : DistributedTaskProgress
         {
             await PublishChanges();
         }
+    }
+
+    /// <summary>
+    /// The tree the pass runs in: the room for a folder inside one (the room itself included), otherwise the root of
+    /// the section the folder is in (the "My documents" of its owner).
+    /// </summary>
+    private static async Task<int> GetTreeIdAsync(IFolderDao<int> folderDao, Folder<int> folder)
+    {
+        var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(folder);
+
+        return roomId > 0 ? roomId : folder.RootId;
     }
 
     private async Task AssignAsync(IMetadataDao<int> metadataDao, Folder<int> folder)
