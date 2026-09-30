@@ -56,7 +56,9 @@ public class LoginEventsRepository(
             from q in messagesContext.LoginEvents
             from p in messagesContext.Users.Where(p => q.UserId == p.Id).DefaultIfEmpty()
             where q.TenantId == tenant
-            orderby q.Date descending
+            // Dates are stored to the second, so events can share one: the id settles their order, or a page
+            // window could return an event twice across pages and skip another.
+            orderby q.Date descending, q.Id descending
             select new LoginEventQuery
             {
                 Event = q,

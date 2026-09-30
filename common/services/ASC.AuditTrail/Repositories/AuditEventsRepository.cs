@@ -170,7 +170,9 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
             q1 = q1.Where(r => r.DescriptionRaw.Contains(description));
         }
 
-        q1 = q1.OrderByDescending(r => r.Date);
+        // Dates are stored to the second, so events can share one: the id settles their order, or a page window
+        // could return an event twice across pages and skip another.
+        q1 = q1.OrderByDescending(r => r.Date).ThenByDescending(r => r.Id);
 
         if (startIndex > 0)
         {
