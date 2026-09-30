@@ -212,6 +212,36 @@ public class LoginEventsRepository(
         return q;
     }
 
+    /// <summary>
+    /// Whether the portal has recorded a login event of <paramref name="action"/> since <paramref name="fromDate"/>,
+    /// optionally only one of <paramref name="userId"/> or one whose description holds <paramref name="descriptionItem"/>
+    /// as a whole item. Meant for the sign-in checks: it reads no event, joins no user and resolves no location.
+    /// </summary>
+    public async Task<bool> ExistsAsync(MessageAction action, DateTime fromDate, Guid? userId = null, string descriptionItem = null)
+    {
+        var tenant = tenantManager.GetCurrentTenantId();
+        await using var messagesContext = await dbContextFactory.CreateDbContextAsync();
+
+        var q = messagesContext.LoginEvents
+            .Where(r => r.TenantId == tenant && r.Action == (int)action && r.Date >= fromDate);
+
+        if (userId.HasValue)
+        {
+            var id = userId.Value;
+            q = q.Where(r => r.UserId == id);
+        }
+
+        if (descriptionItem != null)
+        {
+            // The description is stored as a JSON array of strings. Serialized the same way, the item keeps its
+            // quotes and escapes, so it matches one whole item and never a part of a longer one.
+            var item = JsonSerializer.Serialize(descriptionItem);
+            q = q.Where(r => r.DescriptionRaw.Contains(item));
+        }
+
+        return await q.AnyAsync();
+    }
+
     public async Task<DbLoginEvent> GetLastSuccessEventAsync(int tenantId)
     {
         await using var auditTrailContext = await dbContextFactory.CreateDbContextAsync();
