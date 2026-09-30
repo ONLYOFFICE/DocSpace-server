@@ -166,4 +166,73 @@ public class FolderHistoryReportTests(
         // Assert
         AssertReportStarted(report);
     }
+
+    /// <summary>
+    /// A CSV report reads the room's history in batches below the last event id it has written, and saves the result
+    /// as a file of "My documents". Every event is one row, so a batch that repeated or skipped a page would show as
+    /// a duplicated or a missing row.
+    /// </summary>
+    [Fact]
+    public async Task CreateReport_Csv_SavesTheRoomHistory()
+    {
+        // Arrange
+        var room = await CreateCustomRoom("Autotest Report Folder History Csv");
+        await CreateFile("Report Csv History File", room.Id);
+        await AssertHistoryContainsAsync(room.Id, MessageAction.FileCreated);
+
+        // Act
+        await _foldersApi.CreateReportFolderHistoryAsync(room.Id, AuditReportFormat.Csv, cancellationToken: TestContext.Current.CancellationToken);
+        var report = await PollReportAsync(room.Id);
+
+        // Assert
+        report.Should().NotBeNull();
+        report!.IsCompleted.Should().BeTrue();
+        report.Error.Should().BeNullOrEmpty();
+        report.ResultFileId.Should().NotBeNull();
+
+        // The model types the id as a bare object: it arrives as the JSON number of the saved file.
+        var rows = await DownloadCsvRowsAsync(int.Parse(report.ResultFileId.ToString()!, CultureInfo.InvariantCulture));
+
+        rows.Should().HaveCountGreaterThan(1, "the report holds a header row and a row per event");
+        rows.Skip(1).Should().OnlyHaveUniqueItems();
+        rows.Should().Contain(r => r.Contains("Report Csv History File"));
+    }
+
+    /// <summary>
+    /// Polls the report of <paramref name="folderId"/> until it has ended. The status answer is emptied once a
+    /// finished report has been read, so the first completed answer is the one returned.
+    /// </summary>
+    private async Task<DocumentBuilderTaskDto?> PollReportAsync(int folderId)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(60);
+        DocumentBuilderTaskDto? report;
+
+        while (true)
+        {
+            report = (await _foldersApi.GetReportFolderHistoryAsync(folderId, TestContext.Current.CancellationToken)).Response;
+
+            if (report?.IsCompleted == true || DateTime.UtcNow >= deadline)
+            {
+                return report;
+            }
+
+            await Task.Delay(1_000, TestContext.Current.CancellationToken);
+        }
+    }
+
+    /// <summary>
+    /// Reads a saved file through the file handler: the SDK exposes no operation that returns a file's content.
+    /// </summary>
+    private async Task<List<string>> DownloadCsvRowsAsync(int fileId)
+    {
+        using var response = await _filesClient.GetAsync($"filehandler.ashx?action=download&fileid={fileId}", TestContext.Current.CancellationToken);
+        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException($"Unable to download file {fileId} ({(int)response.StatusCode}): {body}");
+        }
+
+        return body.Split(["\r\n", "\n"], StringSplitOptions.RemoveEmptyEntries).ToList();
+    }
 }

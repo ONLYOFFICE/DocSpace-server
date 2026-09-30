@@ -183,9 +183,10 @@ public class HistoryService(
     }
 
     /// <summary>
-    /// Streams the history of a folder, newest first, in batches of at most <paramref name="batchSize"/>, each
-    /// read by a query of its own. The history is ordered by event id, which is unique, so paging it by offset
-    /// neither repeats nor skips an event.
+    /// Streams the history of a folder, newest first, in batches of at most <paramref name="batchSize"/>. Every
+    /// batch is a short query of its own that resumes below the last event id of the previous one, so events
+    /// recorded while the report is read neither shift a batch nor show up twice, and no query reads the batches
+    /// before it again.
     /// </summary>
     public async IAsyncEnumerable<IReadOnlyList<AuditEvent>> GetFolderAuditEventBatchesAsync(
         int folderId,
@@ -197,15 +198,24 @@ public class HistoryService(
         var entry = await daoFactory.GetFolderDao<int>().GetFolderAsync(folderId)
             ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
 
-        for (var offset = 0; ; offset += batchSize)
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var lastId = int.MaxValue;
+
+        while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             var batch = new List<AuditEvent>();
 
-            await foreach (var (dbEvent, _) in GetHistoryAsync(entry, offset, batchSize, false, [], [], fromDate, toDate))
+            await using (var messageDbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken))
             {
-                batch.Add(await ToAuditEventAsync(dbEvent));
+                var events = messageDbContext.GetAuditEventsByReferencesBefore(tenantId, entry.Id, (byte)entry.FileEntryType, lastId, batchSize, fromDate, toDate);
+
+                await foreach (var (dbEvent, _) in events.WithCancellation(cancellationToken))
+                {
+                    lastId = dbEvent.Id;
+                    batch.Add(await ToAuditEventAsync(dbEvent));
+                }
             }
 
             if (batch.Count == 0)
