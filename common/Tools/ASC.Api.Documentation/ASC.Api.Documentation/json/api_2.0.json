@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.1",
   "info": {
-    "title": "Api",
+    "title": "ONLYOFFICE DocSpace API",
     "description": "REST API of ONLYOFFICE DocSpace - a multi-tenant platform for document management, collaboration and file sharing. Requests are authenticated with the portal session cookie, an API key, Basic credentials, or an OAuth 2.0 / OpenID Connect token; see the security schemes of this document.",
     "contact": {
       "name": "API Support",
@@ -719,7 +719,31 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
-        }
+      },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
       },
       "post": {
         "tags": [
@@ -803,8 +827,32 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
         }
-      }
     },
     "/api/2.0/authentication/{code}": {
       "post": {
@@ -900,8 +948,32 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
         }
-      }
     },
     "/api/2.0/authentication/logout": {
       "post": {
@@ -964,8 +1036,32 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
         }
-      }
     },
     "/api/2.0/authentication/confirm": {
       "post": {
@@ -1051,8 +1147,32 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
         }
-      }
     },
     "/api/2.0/authentication/setphone": {
       "post": {
@@ -1254,8 +1374,32 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
         }
-      }
     },
     "/api/2.0/capabilities": {
       "get": {
@@ -1318,8 +1462,32 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
         }
-      }
     },
     "/api/2.0/migration/list": {
       "get": {
@@ -9317,8 +9485,32 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
         }
-      }
     },
     "/api/2.0/settings/devtoolsaccess": {
       "post": {
@@ -11539,8 +11731,32 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
         }
-      }
     },
     "/api/2.0/settings/push/docregisterdevice": {
       "post": {
@@ -13437,8 +13653,32 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
         }
-      }
     },
     "/api/2.0/settings/maildomainsettings": {
       "post": {
@@ -13726,8 +13966,32 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
         }
-      }
     },
     "/api/2.0/settings/cultures": {
       "get": {
@@ -13790,8 +14054,32 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
         }
-      }
     },
     "/api/2.0/settings/timezones": {
       "get": {
@@ -14374,7 +14662,31 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
-        }
+      },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
       },
       "put": {
         "tags": [
@@ -15409,7 +15721,31 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
-        }
+      },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
       },
       "put": {
         "tags": [
@@ -18480,8 +18816,32 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
         }
-      }
     },
     "/api/2.0/settings/license": {
       "post": {
@@ -19151,8 +19511,32 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
         }
-      }
     },
     "/api/2.0/settings/sendjoininvite": {
       "post": {
@@ -19234,8 +19618,32 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
         }
-      }
     },
     "/api/2.0/settings/notification/{type}": {
       "get": {
@@ -20835,8 +21243,32 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
         }
-      }
     },
     "/api/2.0/settings/whitelabel/logos/isdefault": {
       "get": {
@@ -23675,7 +24107,31 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
-        }
+      },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
       },
       "post": {
         "tags": [

@@ -46,6 +46,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
                     settings.Output,
                     settings.PublishOutput,
                     settings.ServerUrl,
+                    settings.InfoFrom,
                     [.. settings.Files!],
                     progress: percent => task.Value = percent,
                     cancellationToken);
@@ -56,7 +57,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         return 0;
     }
 
-    private static async Task JoinAsync(string outputPath, string? publishPath, string? serverUrl, string[] inputFiles, Action<double>? progress = null, CancellationToken cancellationToken = default)
+    private static async Task JoinAsync(string outputPath, string? publishPath, string? serverUrl, string? infoFromPath, string[] inputFiles, Action<double>? progress = null, CancellationToken cancellationToken = default)
     {
         if (inputFiles == null || inputFiles.Length == 0)
         {
@@ -79,6 +80,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
             }
 
             var openapi = LoadJson(file);
+            PushDownRootSecurity(openapi);
 
             if (result == null)
             {
@@ -97,6 +99,14 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         if (result == null)
         {
             throw new Exception("Nothing to merge.");
+        }
+
+        // The first document is the base of the join, so without this its `info` - whichever service it describes -
+        // would become the `info` of the whole API.
+        if (!string.IsNullOrWhiteSpace(infoFromPath))
+        {
+            result["info"] = LoadJson(infoFromPath)["info"]?.DeepClone()
+                ?? throw new Exception($"No info in the openapi file: {infoFromPath}");
         }
 
         // Two documents come out of the one merge, and they are not the same document. The SDK input
@@ -163,6 +173,45 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         catch (Exception ex)
         {
             throw new Exception($"Invalid JSON in file: {path}\n{ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Moves the root <c>security</c> of a document onto each of its operations that declares none, and drops it
+    /// from the root. A root requirement is the default of that one document only: left on the joined root it would
+    /// also become the requirement of every operation of the other documents that declares none - the OAuth token
+    /// endpoint among them - and describe schemes those services never asked for.
+    /// </summary>
+    private static void PushDownRootSecurity(JsonObject document)
+    {
+        if (!document.TryGetPropertyValue("security", out var securityNode))
+        {
+            return;
+        }
+
+        document.Remove("security");
+
+        if (securityNode is not JsonArray security || document["paths"] is not JsonObject paths)
+        {
+            return;
+        }
+
+        foreach (var path in paths)
+        {
+            if (path.Value is not JsonObject methods)
+            {
+                continue;
+            }
+
+            foreach (var method in methods)
+            {
+                if (method.Value is not JsonObject operation || operation.ContainsKey("security"))
+                {
+                    continue;
+                }
+
+                operation["security"] = security.DeepClone();
+            }
         }
     }
 

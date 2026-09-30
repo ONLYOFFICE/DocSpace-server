@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.1",
   "info": {
-    "title": "Api",
+    "title": "ONLYOFFICE DocSpace API",
     "description": "REST API of ONLYOFFICE DocSpace - a multi-tenant platform for document management, collaboration and file sharing. Requests are authenticated with the portal session cookie, an API key, Basic credentials, or an OAuth 2.0 / OpenID Connect token; see the security schemes of this document.",
     "contact": {
       "name": "API Support",

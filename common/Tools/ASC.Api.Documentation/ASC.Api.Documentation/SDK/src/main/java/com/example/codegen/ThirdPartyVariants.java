@@ -201,6 +201,32 @@ final class ThirdPartyVariants {
     static final String DATATYPE_VARIANT = "x-thirdparty-datatype-variant";
 
     /**
+     * For a language that renders the twin inside the operation's own method: gives the twin's body parameter
+     * the original's name. The generator names a body after its schema, so the twin's comes out as
+     * thirdPartySaveAsPdf, while the one method there is takes it as saveAsPdf - and whatever the templates
+     * render from the twin (its execute function in Go, the "Third-party storage" note in the api docs) has to
+     * say saveAsPdf. The generator keeps copies of a parameter in the per-kind lists, so every copy is renamed.
+     */
+    static void alignBodyName(CodegenOperation op, CodegenOperation variant) {
+        CodegenParameter body = op.allParams.stream().filter(p -> p.isBodyParam).findFirst().orElse(null);
+        if (body == null) {
+            return;
+        }
+
+        for (List<CodegenParameter> list : List.of(variant.allParams, variant.bodyParams,
+                variant.requiredParams, variant.optionalParams)) {
+            for (CodegenParameter parameter : list) {
+                if (parameter.isBodyParam) {
+                    parameter.paramName = body.paramName;
+                }
+            }
+        }
+        if (variant.bodyParam != null) {
+            variant.bodyParam.paramName = body.paramName;
+        }
+    }
+
+    /**
      * For a language that renders the twin inside the operation's own method: marks on the original
      * what differs, so that the template can type the parameters as a union, declare the answer as a
      * union or as overloads, and pick the response model at run time by the id's type.
@@ -214,6 +240,8 @@ final class ThirdPartyVariants {
         }
 
         CodegenOperation variant = (CodegenOperation) attached;
+        alignBodyName(op, variant);
+
         Map<String, CodegenParameter> variantParams = new LinkedHashMap<>();
         CodegenParameter variantBody = null;
         for (CodegenParameter parameter : variant.allParams) {

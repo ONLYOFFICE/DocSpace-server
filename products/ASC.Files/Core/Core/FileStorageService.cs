@@ -6101,6 +6101,7 @@ public class FileStorageService //: IFileStorageService
 
         await formFillingReportCreator.MigrateFormVersionAsync(room.Id, form.Id, form.Version);
         var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile);
+        await formFillingReportCreator.SyncExternalDbAsync(room, form.Id, form.Version);
 
         return (task, form, isNewFile);
     }
@@ -6177,6 +6178,7 @@ public class FileStorageService //: IFileStorageService
 
         await formFillingReportCreator.MigrateFormVersionAsync(room.Id, form.Id, form.Version);
         var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile);
+        await formFillingReportCreator.SyncExternalDbAsync(room, form.Id, form.Version);
 
         return (task, form, isNewFile);
     }

@@ -6,7 +6,7 @@
 
         {{#allParams}}
         :param {{paramName}}:{{#description}} {{{.}}}{{/description}}{{#required}} (required){{/required}}{{#optional}}(optional){{/optional}}
-        :type {{paramName}}: {{dataType}}{{#optional}}, optional{{/optional}}
+        :type {{paramName}}: {{#vendorExtensions.x-thirdparty-union-type}}{{{vendorExtensions.x-thirdparty-union-type}}}{{/vendorExtensions.x-thirdparty-union-type}}{{^vendorExtensions.x-thirdparty-union-type}}{{dataType}}{{/vendorExtensions.x-thirdparty-union-type}}{{#optional}}, optional{{/optional}}
         {{/allParams}}
 {{#compatibleWithPythonLegacyApi}}
 {{^async}}

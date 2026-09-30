@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.1",
   "info": {
-    "title": "Api",
+    "title": "ONLYOFFICE DocSpace API",
     "description": "REST API of ONLYOFFICE DocSpace - a multi-tenant platform for document management, collaboration and file sharing. Requests are authenticated with the portal session cookie, an API key, Basic credentials, or an OAuth 2.0 / OpenID Connect token; see the security schemes of this document.",
     "contact": {
       "name": "API Support",
@@ -223,7 +223,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -357,6 +357,30 @@
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ],
         "x-thirdparty-variant": {
           "parameters": [
             {
@@ -366,7 +390,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -507,7 +531,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -663,6 +687,30 @@
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ],
         "x-thirdparty-variant": {
           "parameters": [
             {
@@ -672,7 +720,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -825,6 +873,30 @@
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ],
         "x-thirdparty-variant": {
           "parameters": [
             {
@@ -834,7 +906,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -995,7 +1067,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -1250,7 +1322,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -1825,7 +1897,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -1942,6 +2014,30 @@
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ],
         "x-thirdparty-variant": {
           "parameters": [
             {
@@ -1951,7 +2047,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -2112,7 +2208,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -2250,7 +2346,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -2399,7 +2495,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -2549,7 +2645,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -2725,7 +2821,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -2898,7 +2994,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -3082,7 +3178,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -3188,6 +3284,30 @@
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ],
         "x-thirdparty-variant": {
           "parameters": [
             {
@@ -3197,7 +3317,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -3329,6 +3449,30 @@
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ],
         "x-thirdparty-variant": {
           "parameters": [
             {
@@ -3338,7 +3482,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -3454,7 +3598,31 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
-        }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
       }
     },
     "/api/2.0/files/file/{fileId}/edit/diff": {
@@ -3556,6 +3724,30 @@
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ],
         "x-thirdparty-variant": {
           "parameters": [
             {
@@ -3565,7 +3757,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -3661,6 +3853,30 @@
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ],
         "x-thirdparty-variant": {
           "parameters": [
             {
@@ -3670,7 +3886,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -3820,7 +4036,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -3993,7 +4209,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -4131,6 +4347,30 @@
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ],
         "x-thirdparty-variant": {
           "parameters": [
             {
@@ -4140,7 +4380,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -4296,7 +4536,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -4422,6 +4662,30 @@
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ],
         "x-thirdparty-variant": {
           "parameters": [
             {
@@ -4431,7 +4695,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -4595,7 +4859,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -4743,7 +5007,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -4898,7 +5162,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -5191,7 +5455,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -5494,7 +5758,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -5876,7 +6140,10 @@
               "description": "The file whose encryption keys are read. Only a file in an end-to-end encrypted\r\n            private room has any.",
               "required": true,
               "schema": {
-                "type": "string"
+                "type": "string",
+                "examples": [
+                  "sbox-42-L1JlcG9ydC5kb2N4"
+                ]
               }
             }
           ]
@@ -6033,7 +6300,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "12345"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -6477,7 +6744,31 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
-        }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
       }
     },
     "/api/2.0/files/masterform/{fileId}/checkfillformdraft": {
@@ -6582,6 +6873,30 @@
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ],
         "x-thirdparty-variant": {
           "parameters": [
             {
@@ -6591,7 +6906,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -6735,7 +7050,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -6910,7 +7225,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -7651,7 +7966,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -8343,7 +8658,31 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
-        }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
       }
     },
     "/api/2.0/files/folder/{folderId}/xlsx": {
@@ -8615,7 +8954,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -8786,7 +9125,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -8880,6 +9219,30 @@
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ],
         "x-thirdparty-variant": {
           "parameters": [
             {
@@ -8889,7 +9252,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -9063,7 +9426,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -9235,7 +9598,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -9671,6 +10034,30 @@
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ],
         "x-thirdparty-variant": {
           "parameters": [
             {
@@ -9680,7 +10067,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -9691,7 +10078,7 @@
               "description": "Keeps only the entries that lie in this room, which matters when the listing being read gathers entries from\r\nmore than one of them.",
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -9855,7 +10242,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -9996,7 +10383,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -10137,7 +10524,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -10390,7 +10777,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -10516,6 +10903,30 @@
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ],
         "x-thirdparty-variant": {
           "parameters": [
             {
@@ -10525,7 +10936,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -10675,7 +11086,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -10811,7 +11222,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -11955,7 +12366,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -12204,7 +12615,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -12427,7 +12838,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -12988,7 +13399,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -13135,7 +13546,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -13296,7 +13707,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -13389,7 +13800,31 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
-        }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
       }
     },
     "/api/2.0/files/fileops/copy": {
@@ -14080,7 +14515,31 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
-        }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
       }
     },
     "/api/2.0/files/fileops/{operationType}": {
@@ -14177,7 +14636,31 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
-        }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
       }
     },
     "/api/2.0/files/fileops/markasread": {
@@ -15148,7 +15631,31 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
-        }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
       }
     },
     "/api/2.0/files/favorites": {
@@ -15531,7 +16038,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -15704,7 +16211,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -15870,7 +16377,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -16041,7 +16548,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -16249,7 +16756,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -16422,7 +16929,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -16883,7 +17390,31 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
-        }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
       }
     },
     "/api/2.0/files/thirdparty": {
@@ -18076,7 +18607,31 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
-        }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
       }
     },
     "/api/2.0/files/info": {
@@ -20437,7 +20992,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -20601,7 +21156,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -20749,7 +21304,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -20913,7 +21468,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -21061,7 +21616,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -21202,7 +21757,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -21385,7 +21940,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -21573,7 +22128,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -21761,7 +22316,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42-L1JlcG9ydC5kb2N4"
                 ],
                 "type": "string"
               }
@@ -22341,7 +22896,31 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
-        }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
       }
     },
     "/api/2.0/files/share/{key}/password": {
@@ -22441,7 +23020,31 @@
           "503": {
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
-        }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ]
       }
     },
     "/api/2.0/files/thirdparty/capabilities": {
@@ -24498,6 +25101,30 @@
             "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
           }
         },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          },
+          { }
+        ],
         "x-thirdparty-variant": {
           "parameters": [
             {
@@ -24507,7 +25134,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -24678,7 +25305,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -24849,7 +25476,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "10"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -24998,7 +25625,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -25147,7 +25774,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -25271,7 +25898,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -25453,7 +26080,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -25603,7 +26230,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -25748,7 +26375,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -25892,7 +26519,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -26044,7 +26671,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -26217,7 +26844,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -26393,7 +27020,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -26552,7 +27179,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -26731,7 +27358,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -26989,7 +27616,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -27150,7 +27777,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -27351,7 +27978,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -27489,7 +28116,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -27650,7 +28277,7 @@
               "required": true,
               "schema": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": "string"
               }
@@ -45515,7 +46142,7 @@
         "properties": {
           "fileId": {
             "examples": [
-              "1"
+              "sbox-42-L1JlcG9ydC5kb2N4"
             ],
             "type": [
               "null",
@@ -45913,7 +46540,7 @@
         "properties": {
           "folderId": {
             "examples": [
-              "10"
+              "sbox-42"
             ],
             "type": [
               "null",
@@ -45933,7 +46560,7 @@
           },
           "fileId": {
             "examples": [
-              "123"
+              "sbox-42-L1JlcG9ydC5kb2N4"
             ],
             "type": [
               "null",
@@ -46009,7 +46636,7 @@
             "properties": {
               "folderId": {
                 "examples": [
-                  "10"
+                  "sbox-42"
                 ],
                 "type": [
                   "null",
@@ -46361,7 +46988,7 @@
             "properties": {
               "id": {
                 "examples": [
-                  "10"
+                  "sbox-42"
                 ],
                 "type": [
                   "null",
@@ -46371,7 +46998,7 @@
               },
               "rootFolderId": {
                 "examples": [
-                  "1"
+                  "sbox-42"
                 ],
                 "type": [
                   "null",
@@ -46381,7 +47008,7 @@
               },
               "originId": {
                 "examples": [
-                  "12"
+                  "sbox-42"
                 ],
                 "type": [
                   "null",
@@ -46391,7 +47018,7 @@
               },
               "originRoomId": {
                 "examples": [
-                  "22"
+                  "sbox-42"
                 ],
                 "type": [
                   "null",
@@ -46940,7 +47567,7 @@
             "properties": {
               "parentId": {
                 "examples": [
-                  "10"
+                  "sbox-42"
                 ],
                 "type": [
                   "null",
@@ -47292,7 +47919,7 @@
         "properties": {
           "folderId": {
             "examples": [
-              "1"
+              "sbox-42"
             ],
             "type": [
               "null",
@@ -47318,7 +47945,7 @@
         "properties": {
           "id": {
             "examples": [
-              "1234"
+              "sbox-42"
             ],
             "type": [
               "null",
@@ -47328,7 +47955,7 @@
           },
           "folderId": {
             "examples": [
-              "10"
+              "sbox-42"
             ],
             "type": [
               "null",

@@ -81,7 +81,7 @@ public static class OpenApiExtension
 
             var openApiInfo = new OpenApiInfo
             {
-                Title = "Api",
+                Title = "ONLYOFFICE DocSpace API",
                 Version = "4.0.0",
                 // One Info object serves every service document (a single AddOpenApi call site in
                 // BaseStartup), so the text has to hold for all of them - do not make it service-specific.
@@ -414,42 +414,44 @@ public static class OpenApiExtension
             //    .Union (context.MethodInfo.GetCustomAttributes(true)) .OfType<AuthorizeAttribute>();
 
 
+            operation.Security =
+            [
+                new OpenApiSecurityRequirement
+                {
+                    [ new OpenApiSecuritySchemeReference(CookiesManager.AuthCookiesName, context.Document)] = []
+                },
+                new OpenApiSecurityRequirement
+                {
+                    [ new OpenApiSecuritySchemeReference("Bearer", context.Document)] = []
+                },
+                new OpenApiSecurityRequirement
+                {
+                    [ new OpenApiSecuritySchemeReference("ApiKeyBearer", context.Document)] = []
+                },
+                new OpenApiSecurityRequirement
+                {
+                    [ new OpenApiSecuritySchemeReference("Basic", context.Document)] = []
+                },
+                new OpenApiSecurityRequirement
+                {
+                    [ new OpenApiSecuritySchemeReference("OAuth2", context.Document)] = ["read", "write"]
+                },
+                new OpenApiSecurityRequirement
+                {
+                    [ new OpenApiSecuritySchemeReference("OpenId", context.Document)] = []
+                }
+            ];
+
             if (allowAnonymous.Any())
             {
-                operation.Security?.Clear();
+                // [AllowAnonymous] makes authentication optional, not absent: the server still reads the caller
+                // (a rename, a version restore or a room read of a private entry needs one). The empty requirement
+                // is what says so in OpenAPI - with no security at all the generated clients would never attach
+                // the credentials they were configured with.
+                operation.Security.Add(new OpenApiSecurityRequirement());
             }
             else
             {
-                operation.Security ??= new List<OpenApiSecurityRequirement>();
-
-                operation.Security =
-                [
-                    new OpenApiSecurityRequirement
-                    {
-                        [ new OpenApiSecuritySchemeReference(CookiesManager.AuthCookiesName, context.Document)] = []
-                    },
-                    new OpenApiSecurityRequirement
-                    {
-                        [ new OpenApiSecuritySchemeReference("Bearer", context.Document)] = []
-                    },
-                    new OpenApiSecurityRequirement
-                    {
-                        [ new OpenApiSecuritySchemeReference("ApiKeyBearer", context.Document)] = []
-                    },
-                    new OpenApiSecurityRequirement
-                    {
-                        [ new OpenApiSecuritySchemeReference("Basic", context.Document)] = []
-                    },
-                    new OpenApiSecurityRequirement
-                    {
-                        [ new OpenApiSecuritySchemeReference("OAuth2", context.Document)] = ["read", "write"]
-                    },
-                    new OpenApiSecurityRequirement
-                    {
-                        [ new OpenApiSecuritySchemeReference("OpenId", context.Document)] = []
-                    }
-                ];
-
                 operation.Responses ??= new OpenApiResponses();
                 operation.Responses.Add("401", new OpenApiResponse { Description = "Unauthorized" });
             }
