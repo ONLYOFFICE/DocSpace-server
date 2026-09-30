@@ -197,10 +197,7 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         var eventQueryList = await q2.ToListAsync();
         var events = limitedActionText ? mapper.ToLimitedAuditEvents(eventQueryList) : mapper.ToAuditEvents(eventQueryList);
 
-        foreach (var e in events)
-        {
-            await geolocationHelper.AddGeolocationAsync(e);
-        }
+        await geolocationHelper.AddGeolocationAsync(events);
 
         return events;
     }

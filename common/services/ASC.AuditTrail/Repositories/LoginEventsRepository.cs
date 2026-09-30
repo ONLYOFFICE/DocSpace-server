@@ -54,7 +54,7 @@ public class LoginEventsRepository(
 
         var query =
             from q in messagesContext.LoginEvents
-            from p in messagesContext.Users.Where(p => q.UserId == p.Id).DefaultIfEmpty()
+            from p in messagesContext.Users.Where(p => p.TenantId == tenant && p.Id == q.UserId).DefaultIfEmpty()
             where q.TenantId == tenant
             // Dates are stored to the second, so events can share one: the id settles their order, or a page
             // window could return an event twice across pages and skip another.
@@ -108,10 +108,7 @@ public class LoginEventsRepository(
         var eventQueryList = await query.ToListAsync();
         var events = limitedActionText ? eventMapper.ToLimitedLoginEvents(eventQueryList) : eventMapper.ToLoginEvents(eventQueryList);
 
-        foreach (var e in events)
-        {
-            await geolocationHelper.AddGeolocationAsync(e);
-        }
+        await geolocationHelper.AddGeolocationAsync(events);
 
         return events;
     }
@@ -149,7 +146,7 @@ public class LoginEventsRepository(
 
                 page = await (
                         from e in q
-                        from p in messagesContext.Users.Where(p => e.UserId == p.Id).DefaultIfEmpty()
+                        from p in messagesContext.Users.Where(p => p.TenantId == tenant && p.Id == e.UserId).DefaultIfEmpty()
                         orderby e.Date descending, e.Id descending
                         select new LoginEventQuery
                         {
