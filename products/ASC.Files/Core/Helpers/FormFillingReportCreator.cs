@@ -57,21 +57,31 @@ public class FormFillingReportCreator(
 
         await MigrateFormVersionAsync(roomId, originalFormId, originalFormVersion);
 
-        if (sendFormToExternalDB && externalDatabaseClient.IsEnabled())
-        {
-            var fileId = formsDataFile.Id is int id ? id : 0;
-            var userId = authContext.CurrentAccount.ID;
-            var tenantId = tenantManager.GetCurrentTenantId();
-
-            await eventBus.PublishAsync(new ExternalDbFormSubmissionIntegrationEvent(
-                userId, tenantId, originalFormId, originalFormVersion,
-                roomId, fileId, resultFormNumber, formsDataUrl));
-        }
+        var fileId = formsDataFile.Id is int id ? id : 0;
+        await PublishExternalDbSubmissionAsync(sendFormToExternalDB, originalFormId, originalFormVersion, roomId, fileId, resultFormNumber, formsDataUrl);
 
         if (settingsSaveFormAsXLSX)
         {
             await exportToXLSX.UpdateXlsxReport(roomId, originalFormId, originalFormVersion, isNewFile: false);
         }
+    }
+
+    public Task SyncExternalDbAsync(Folder<int> room, int originalFormId, int originalFormVersion)
+    {
+        return PublishExternalDbSubmissionAsync(room.SettingsSendFormToExternalDB, originalFormId, originalFormVersion,
+            room.Id, fileId: 0, resultFormNumber: 0, formsDataUrl: null);
+    }
+
+    private async Task PublishExternalDbSubmissionAsync(bool sendFormToExternalDB, int originalFormId, int originalFormVersion, int roomId, int fileId, int resultFormNumber, string formsDataUrl)
+    {
+        if (!sendFormToExternalDB || !externalDatabaseClient.IsEnabled())
+        {
+            return;
+        }
+
+        await eventBus.PublishAsync(new ExternalDbFormSubmissionIntegrationEvent(
+            authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId(), originalFormId, originalFormVersion,
+            roomId, fileId, resultFormNumber, formsDataUrl));
     }
 
     public async Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl)
@@ -102,18 +112,25 @@ public class FormFillingReportCreator(
 
         await externalDatabaseClient.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
 
+        await SetExternalDbTableNameAsync(originalFormId, tableName);
+    }
+
+    private async Task SetExternalDbTableNameAsync(int originalFormId, string tableName)
+    {
         var fileDao = daoFactory.GetFileDao<int>();
         var properties = await fileDao.GetProperties(originalFormId);
-        if (properties?.FormFilling != null && properties.FormFilling.ExternalDbTableName != tableName)
+        if (properties?.FormFilling == null || properties.FormFilling.ExternalDbTableName == tableName)
         {
-            properties.FormFilling.ExternalDbTableName = tableName;
-            await fileDao.SaveProperties(originalFormId, properties);
+            return;
+        }
 
-            var originalForm = await fileDao.GetFileAsync(originalFormId);
-            if (originalForm != null)
-            {
-                await socketManager.UpdateFileAsync(originalForm);
-            }
+        properties.FormFilling.ExternalDbTableName = tableName;
+        await fileDao.SaveProperties(originalFormId, properties);
+
+        var originalForm = await fileDao.GetFileAsync(originalFormId);
+        if (originalForm != null)
+        {
+            await socketManager.UpdateFileAsync(originalForm);
         }
     }
 
@@ -194,6 +211,7 @@ public class FormFillingReportCreator(
 
         var culture = tenantManager.GetCurrentTenant().GetCulture();
         var hadFailure = false;
+        var exported = false;
 
         foreach (var item in missing)
         {
@@ -216,12 +234,19 @@ public class FormFillingReportCreator(
             {
                 await externalDatabaseClient.CreateTableAndUpsertAsync(
                     tableName, columnDefinitions, rowData, keyColumn: "form_id");
+                exported = true;
             }
             catch (Exception ex)
             {
                 logger.ErrorGapSyncUpsertFailed(ex, item.Id, tableName);
                 hadFailure = true;
             }
+        }
+
+        // The gap sync can be the first to create the table (e.g. from the sync button), so record it here too.
+        if (exported)
+        {
+            await SetExternalDbTableNameAsync(originalFormId, tableName);
         }
 
         return !hadFailure;
