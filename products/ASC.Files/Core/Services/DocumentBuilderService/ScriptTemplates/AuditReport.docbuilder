@@ -6,9 +6,12 @@ var defaultBorderColorWhite = Api.CreateColorFromRGB(255, 255, 255);
 
 var MAX_COLUMN_WIDTH = 100;
 
-var inputData = ${inputData};
-
+// The rows come first: the server writes them as it reads the events, and fills in the input data after them,
+// once it knows how many rows fit into the script. A row holds only the values; each column's format and wrapping
+// are in inputData.columns.
 var values = [${dataValues}];
+
+var inputData = ${inputData};
 
 var oWorksheet = Api.GetActiveSheet();
 
@@ -131,14 +134,12 @@ function prepareData() {
     for (var i = 0; i < values.length; i++) {
         var rowValues = [];
         for (var j = 0; j < values[i].length; j++) {
-            var cell = values[i][j];
+            var column = inputData.columns[j];
             rowValues.push({
-                "value": cell.value,
-                "url": cell.url,
-                "halign": cell.halign,
+                "value": values[i][j],
                 valign: "center",
-                "format": cell.format,
-                "wrap": cell.wrap
+                "format": column.format,
+                "wrap": column.wrap
             });
         }
         table.push({ height: 19.5, dataArray: rowValues });
