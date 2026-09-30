@@ -31,7 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import type { RoomSkill, StorageAdapter } from "@onlyoffice/ai-chat/core";
+import type { ContextFolder, RoomSkill, StorageAdapter } from "@onlyoffice/ai-chat/core";
 
 import { HttpAttachmentsStorage } from "./attachmentsStorage.js";
 import { HttpAssignmentsStorage } from "./assignmentsStorage.js";
@@ -45,7 +45,7 @@ import { HttpPromptsStorage } from "./promptsStorage.js";
 import { HttpThreadsStorage } from "./threadsStorage.js";
 import { HttpToolPrefsStorage } from "./toolPrefsStorage.js";
 import { HttpWebSearchStorage } from "./webSearchStorage.js";
-import { getRoomSkill, getRoomSkills } from "./roomSkills.js";
+import { getContextFolders, getRoomSkill, getRoomSkills } from "./roomSkills.js";
 
 export class HttpStorageAdapter implements StorageAdapter {
   public threads = new HttpThreadsStorage();
@@ -61,10 +61,13 @@ export class HttpStorageAdapter implements StorageAdapter {
   public attachments = new HttpAttachmentsStorage();
   public formAnalysis = new HttpFormAnalysisStorage();
 
-  // Skills of a room connected as chat context: the Markdown files of the
-  // room's `.ai` folder. `getContextFolders` is deliberately absent — the
-  // client connects the room the user is in, there is no room picker.
-  // DocSpace is a single cloud, so `cloud` is not consulted.
+  // Rooms and skills for the chat's context: the rooms with a `.ai` folder
+  // the caller can read (one cloud entry — DocSpace is a single cloud, so
+  // `cloud` is not consulted) and the Markdown files of a room's folder.
+  async getContextFolders(): Promise<ContextFolder[]> {
+    return getContextFolders();
+  }
+
   async getRoomSkills(_cloud: string, roomId: string): Promise<RoomSkill[]> {
     return getRoomSkills(roomId);
   }

@@ -44,7 +44,7 @@
 // The skill id is the DocSpace file id, so the body read is a plain file
 // read with the caller's own credentials.
 
-import type { RoomSkill } from "@onlyoffice/ai-chat/core";
+import type { ContextFolder, RoomSkill } from "@onlyoffice/ai-chat/core";
 import { proxyBaseUrl, withTimeout } from "./httpClient.js";
 import { countFilesApiRead, getForwardedHeaders } from "../requestContext.js";
 import {
@@ -82,6 +82,14 @@ const MAX_SKILL_BYTES = 4 * 64 * 1024;
 
 const MARKDOWN_EXTENSION = ".md";
 
+/**
+ * The one cloud DocSpace is to the chat widget. The client connects the
+ * current room under the same label (`CONTEXT_ROOM_CLOUD` in ui-kit), so a
+ * room picked from the list and the room connected on open compare equal.
+ * Never shown: the client lists the rooms without the cloud level.
+ */
+export const CONTEXT_CLOUD = "docspace";
+
 const CONDITIONAL_HEADERS = new Set([
   "if-none-match",
   "if-modified-since",
@@ -118,6 +126,63 @@ function parseAiFolderPage(raw: unknown): { files: AiFolderFile[]; total: number
     }
   }
   return { files, total: getNumber(envelope, "total") ?? files.length };
+}
+
+function parseRoomsPage(
+  raw: unknown,
+): { rooms: ContextFolder["rooms"]; total: number } | undefined {
+  const envelope = isObject(raw) ? getObject(raw, "response") : undefined;
+  if (!envelope) {
+    return undefined;
+  }
+  const rooms: ContextFolder["rooms"] = [];
+  for (const entry of getObjectArray(envelope, "folders") ?? []) {
+    const id = getEntityId(entry, "id");
+    const name = getString(entry, "title");
+    if (id !== undefined && name) {
+      rooms.push({ id, name });
+    }
+  }
+  return { rooms, total: getNumber(envelope, "total") ?? rooms.length };
+}
+
+/**
+ * The rooms the caller can read that hold a `.ai` folder in their root, as
+ * one cloud entry — `GET api/2.0/files/rooms?withAiFolder=true`, paged. The
+ * server already leaves out rooms the caller may not see and third-party
+ * rooms (which cannot carry the folder). Empty when there is none, so the
+ * widget shows no picker at all.
+ */
+export async function getContextFolders(): Promise<ContextFolder[]> {
+  const rooms: ContextFolder["rooms"] = [];
+  for (let page = 0; page < MAX_PAGES; page += 1) {
+    const params = new URLSearchParams({
+      withAiFolder: "true",
+      count: String(PAGE_SIZE),
+      startIndex: String(page * PAGE_SIZE),
+    });
+    const url = `${proxyBaseUrl}/api/2.0/files/rooms?${params}`;
+    const { signal, cancel } = withTimeout(undefined);
+    countFilesApiRead();
+    try {
+      const res = await fetch(url, { headers: getForwardedHeaders(), signal });
+      if (!res.ok) {
+        throw new DocspaceApiHttpError(res.status, res.statusText, url);
+      }
+      const parsed = parseRoomsPage(await res.json());
+      if (!parsed) {
+        logger.warn(`getContextFolders -> unparseable response from ${url}`);
+        break;
+      }
+      rooms.push(...parsed.rooms);
+      if ((page + 1) * PAGE_SIZE >= parsed.total) {
+        break;
+      }
+    } finally {
+      cancel();
+    }
+  }
+  return rooms.length > 0 ? [{ cloud: CONTEXT_CLOUD, rooms }] : [];
 }
 
 /**

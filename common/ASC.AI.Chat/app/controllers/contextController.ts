@@ -37,10 +37,9 @@ import { asyncHandler } from "./_helpers.js";
 import { asString } from "../narrow.js";
 
 // The widget's `context` engine: the rooms a host offers as chat context and
-// the skills inside them. DocSpace connects the room the user is in from the
-// client itself and offers no room picker, so `getContextFolders` stays
-// unimplemented on the storage and the engine answers `[]` — the widget then
-// shows no cog. The two skill reads are backed by the room's `.ai` folder
+// the skills inside them. The client connects the room the user is in when
+// the chat opens; the picker lists every other room with a `.ai` folder the
+// caller can read. All three reads are backed by the DocSpace Files API
 // (see `storage/roomSkills.ts`).
 const engine = new ContextEngine({ storage });
 
