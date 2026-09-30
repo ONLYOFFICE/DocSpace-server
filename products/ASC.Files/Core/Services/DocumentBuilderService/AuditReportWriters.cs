@@ -241,11 +241,19 @@ public class AuditXlsxReportWriter(
                 var written = 0;
                 var full = false;
 
-                // Leaving the loop at a limit disposes the stream, which stops reading the older events.
+                // Leaving the loop at a limit disposes the stream, which stops reading the older events. The row
+                // limit is checked before a row is serialized and before the next batch is asked for, so a report
+                // cut at the end of a batch reads no batch it would drop.
                 await foreach (var batch in batches.WithCancellation(cancellationToken))
                 {
                     foreach (var @event in batch)
                     {
+                        if (written >= MaxRows)
+                        {
+                            full = true;
+                            break;
+                        }
+
                         var row = new string[props.Count];
 
                         for (var i = 0; i < props.Count; i++)
@@ -259,7 +267,7 @@ public class AuditXlsxReportWriter(
 
                         rowBudget -= Encoding.UTF8.GetByteCount(json);
 
-                        if (written >= MaxRows || rowBudget < 0)
+                        if (rowBudget < 0)
                         {
                             full = true;
                             break;
@@ -270,7 +278,7 @@ public class AuditXlsxReportWriter(
                         written++;
                     }
 
-                    if (full)
+                    if (full || written >= MaxRows)
                     {
                         break;
                     }
