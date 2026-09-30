@@ -55,9 +55,36 @@ public class DocsBuilderRequestDto
     public int? FolderId { get; set; }
 
     /// <summary>
-    /// Whether the result replaces the file the script opened, as a new version of it, instead of being saved as a new
-    /// file. A script that does this has to open a file it may edit and produce exactly one result.
+    /// Where each produced file goes, keyed by the name the script saves it under - the second argument of
+    /// `builder.SaveFile("docx", "report.docx")`. An entry either replaces an existing file with a new version or
+    /// puts a new file in a folder. A produced file with no entry falls back to `folderId`.
     /// </summary>
-    /// <example>false</example>
-    public bool Overwrite { get; set; }
+    /// <example>{"result.docx": {"fileId": 1234}, "result.pdf": {"folderId": 1234}}</example>
+    public Dictionary<string, DocsBuilderOutputDto> Outputs { get; set; }
+}
+
+/// <summary>
+/// Where one produced file goes. Exactly one of the two destinations is given.
+/// </summary>
+public class DocsBuilderOutputDto
+{
+    /// <summary>
+    /// The file this result replaces, as a new version of it. The caller has to be allowed to edit it, and the
+    /// result has to carry the same format.
+    /// </summary>
+    /// <example>1234</example>
+    public int? FileId { get; set; }
+
+    /// <summary>
+    /// The folder this result is saved into as a new file. The caller has to be allowed to create files there.
+    /// </summary>
+    /// <example>1234</example>
+    public int? FolderId { get; set; }
+
+    /// <summary>
+    /// The title to save under, when the name the script used is not the one the portal should show. Only together
+    /// with `folderId`: a file being replaced keeps its own title.
+    /// </summary>
+    /// <example>result.docx</example>
+    public string Title { get; set; }
 }

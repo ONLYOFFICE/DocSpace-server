@@ -116,7 +116,7 @@ public class DocsController(
     [HttpPost("builder")]
     public async Task<List<FileDto<int>>> RunBuilderScript(DocsBuilderRequestDto inDto)
     {
-        var files = await documentBuilderScriptRunner.RunAsync(inDto.Script, inDto.FolderId, inDto.Overwrite);
+        var files = await documentBuilderScriptRunner.RunAsync(inDto.Script, inDto.FolderId, inDto.Outputs);
 
         var result = new List<FileDto<int>>(files.Count);
 

@@ -85,6 +85,15 @@ public class DocumentBuilderScriptRunner(
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
     /// <summary>
+    /// The name a script saves a result under, the second argument of SaveFile. It is the key the caller uses to say
+    /// where that result goes, so only a literal one can be matched; a name assembled at run time is invisible here
+    /// and its result falls back to the default folder.
+    /// </summary>
+    private static readonly Regex _saveFileCall = new(
+        """\.\s*SaveFile\s*\(\s*(?<q1>["'])[^"']*\k<q1>\s*,\s*(?<q2>["'])(?<name>[^"']*)\k<q2>""",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
+    /// <summary>
     /// Reaching the builder object by index, which is how the name of a method is hidden from the patterns above.
     /// </summary>
     private static readonly Regex _builderIndexer = new(
@@ -102,11 +111,12 @@ public class DocumentBuilderScriptRunner(
     private const string ScriptFileName = "script.docbuilder";
 
     /// <summary>
-    /// Runs <paramref name="script"/> and saves what it produced. With <paramref name="overwrite"/> the result is
-    /// written back over the file the script opened, as a new version of it; otherwise every produced file is saved as
-    /// a new file, beside the opened one or in <paramref name="folderId"/> when one is named.
+    /// Runs <paramref name="script"/> and puts each file it produced where <paramref name="outputs"/> says, keyed by
+    /// the name the script saved it under: over an existing file as a new version of it, or into a folder as a new
+    /// file. A produced file the map does not mention goes to <paramref name="folderId"/>, and failing that to the
+    /// folder of the file the script opened.
     /// </summary>
-    public async Task<List<File<int>>> RunAsync(string script, int? folderId, bool overwrite)
+    public async Task<List<File<int>>> RunAsync(string script, int? folderId, Dictionary<string, DocsBuilderOutputDto> outputs)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(script);
 
@@ -138,15 +148,16 @@ public class DocumentBuilderScriptRunner(
             throw new ArgumentException("The script has to create a file with CreateFile or open one with OpenFile", nameof(script));
         }
 
-        var (prepared, source) = await ResolveFilesAsync(script);
+        // Everything about the destinations is settled before the build: the names against the script, the rights,
+        // and the formats. A bad request is refused before the document service does any work, and the files and
+        // folders loaded to check it are kept so the save does not fetch them a second time.
+        var targets = await ResolveOutputsAsync(script, outputs);
 
-        var parentId = await GetTargetFolderIdAsync(source, folderId, overwrite);
+        var (prepared, source) = await ResolveFilesAsync(script);
 
         var urls = await BuildAsync(prepared);
 
-        return overwrite
-            ? [await OverwriteAsync(source, urls)]
-            : await SaveBesideAsync(parentId, urls);
+        return await SaveAsync(urls, targets, source, folderId);
     }
 
     /// <summary>
@@ -224,36 +235,6 @@ public class DocumentBuilderScriptRunner(
         return documentServiceConnector.ReplaceCommunityAddress(url);
     }
 
-    private async Task<int> GetTargetFolderIdAsync(File<int> source, int? folderId, bool overwrite)
-    {
-        if (overwrite)
-        {
-            if (source == null)
-            {
-                throw new ArgumentException("A script that updates its source has to open one with OpenFile");
-            }
-
-            if (!await fileSecurity.CanEditAsync(source))
-            {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
-            }
-
-            return source.ParentId;
-        }
-
-        if (folderId.HasValue)
-        {
-            return folderId.Value;
-        }
-
-        if (source == null)
-        {
-            throw new ArgumentException("A script that opens no file has to be told the folder to save its result in");
-        }
-
-        return source.ParentId;
-    }
-
     private async Task<Dictionary<string, string>> BuildAsync(string script)
     {
         await using var stream = new MemoryStream(Encoding.UTF8.GetBytes(script));
@@ -273,29 +254,119 @@ public class DocumentBuilderScriptRunner(
         return urls;
     }
 
-    private async Task<File<int>> OverwriteAsync(File<int> source, Dictionary<string, string> urls)
+    /// <summary>
+    /// Refuses a destination keyed by a name the script never saves under. The key is the second argument of
+    /// SaveFile, so a key that matches none of them can never be used and is a typo in the request.
+    /// </summary>
+    /// <summary>
+    /// Turns each requested destination into a loaded target, refusing anything that cannot work before the build
+    /// runs: a key that names no saved file, a slot that is neither a file to replace nor a folder to fill, a title
+    /// on a replacement, a format that does not match the file it would become a version of, or a place the caller
+    /// may not write. The loaded files and folders are returned so the save does not read them again.
+    /// </summary>
+    private async Task<Dictionary<string, OutputTarget>> ResolveOutputsAsync(string script, Dictionary<string, DocsBuilderOutputDto> outputs)
     {
-        if (urls.Count > 1)
+        var targets = new Dictionary<string, OutputTarget>(StringComparer.Ordinal);
+        if (outputs is not { Count: > 0 })
         {
-            throw new ArgumentException("A script that updates its source has to produce exactly one file");
+            return targets;
         }
 
-        var (name, url) = urls.First();
+        var saved = _saveFileCall.Matches(script)
+            .Select(match => match.Groups["name"].Value)
+            .ToHashSet(StringComparer.Ordinal);
 
-        return await fileStorageService.SaveEditingAsync(source.Id, FileUtility.GetFileExtension(name), url, null);
+        foreach (var (name, output) in outputs)
+        {
+            if (!saved.Contains(name))
+            {
+                throw new ArgumentException($"The script saves no file named \"{name}\"", nameof(outputs));
+            }
+
+            if (output == null || output.FileId.HasValue == output.FolderId.HasValue)
+            {
+                throw new ArgumentException($"\"{name}\" has to name either a file to replace or a folder to save into", nameof(outputs));
+            }
+
+            if (output.FileId.HasValue)
+            {
+                if (!string.IsNullOrEmpty(output.Title))
+                {
+                    throw new ArgumentException($"\"{name}\" replaces a file, which keeps its own title", nameof(outputs));
+                }
+
+                var file = await daoFactory.GetFileDao<int>().GetFileAsync(output.FileId.Value).NotFoundIfNull("File not found");
+
+                if (!await fileSecurity.CanEditAsync(file))
+                {
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+                }
+
+                var produced = FileUtility.GetFileExtension(name);
+                var current = FileUtility.GetFileExtension(file.Title);
+                if (!produced.Equals(current, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new ArgumentException($"\"{name}\" is a {produced} file and cannot become a version of a {current} one", nameof(outputs));
+                }
+
+                targets[name] = new OutputTarget(file, null, null);
+                continue;
+            }
+
+            var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(output.FolderId.Value).NotFoundIfNull("Folder not found");
+
+            if (!await fileSecurity.CanCreateAsync(folder))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+            }
+
+            targets[name] = new OutputTarget(null, folder, output.Title);
+        }
+
+        return targets;
     }
 
-    private async Task<List<File<int>>> SaveBesideAsync(int parentId, Dictionary<string, string> urls)
+    /// <summary>
+    /// Puts each produced file where <see cref="ResolveOutputsAsync"/> settled it: a new version of an existing file,
+    /// or a new file in a folder. A produced file the request did not mention falls back to the folder it named, and
+    /// failing that to the folder of the file the script opened.
+    /// </summary>
+    private async Task<List<File<int>>> SaveAsync(
+        Dictionary<string, string> urls,
+        Dictionary<string, OutputTarget> targets,
+        File<int> source,
+        int? folderId)
     {
-        var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(parentId).NotFoundIfNull("Folder not found");
-
         var saved = new List<File<int>>(urls.Count);
 
         foreach (var (name, url) in urls)
         {
-            saved.Add(await fileConverter.SaveConvertedFileAsync(folder, url, FileUtility.GetFileExtension(name), name, updateIfExist: false));
+            var extension = FileUtility.GetFileExtension(name);
+
+            if (targets.TryGetValue(name, out var target))
+            {
+                if (target.File != null)
+                {
+                    saved.Add(await fileStorageService.SaveEditingAsync(target.File.Id, extension, url, null));
+                    continue;
+                }
+
+                var chosen = string.IsNullOrEmpty(target.Title) ? name : target.Title;
+                saved.Add(await fileConverter.SaveConvertedFileAsync(target.Folder, url, extension, chosen, updateIfExist: false));
+                continue;
+            }
+
+            var parentId = folderId ?? source?.ParentId
+                ?? throw new ArgumentException($"\"{name}\" has nowhere to go: name a folder for it, or one for the request");
+
+            var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(parentId).NotFoundIfNull("Folder not found");
+
+            saved.Add(await fileConverter.SaveConvertedFileAsync(folder, url, extension, name, updateIfExist: false));
         }
 
         return saved;
     }
+
+    /// <summary>A produced file's settled destination: a file to replace, or a folder and the title to save under.</summary>
+    private sealed record OutputTarget(File<int> File, Folder<int> Folder, string Title);
 }
