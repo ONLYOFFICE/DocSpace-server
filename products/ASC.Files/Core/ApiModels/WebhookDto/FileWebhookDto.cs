@@ -115,7 +115,7 @@ public class FileWebhookDto<T> : FileEntryWebhookDto<T>
     /// Specifies whether the file is a form or not.
     /// </summary>
     /// <example>false</example>
-    public bool? IsForm { get; set; }
+    public bool? IsPdf { get; set; }
 
     /// <summary>
     /// Specifies whether a custom filter is enabled for the file or not.

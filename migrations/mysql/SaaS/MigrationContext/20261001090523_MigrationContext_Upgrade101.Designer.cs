@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ASC.Migrations.MySql.SaaS.Migrations
 {
     [DbContext(typeof(MigrationContext))]
-    [Migration("20260928090523_MigrationContext_Upgrade97")]
-    partial class MigrationContext_Upgrade97
+    [Migration("20261001090523_MigrationContext_Upgrade101")]
+    partial class MigrationContext_Upgrade101
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
