@@ -63,3 +63,5 @@ global using Microsoft.Extensions.Logging.Abstractions;
 
 global using Polly;
 global using Polly.Retry;
+
+global using ZiggyCreatures.Caching.Fusion;
