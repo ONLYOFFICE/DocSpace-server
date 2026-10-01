@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -288,7 +288,8 @@ public class FileStorageService //: IFileStorageService
         Location? location = null,
         int? groupId = null,
         RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
-        List<FolderType> folderType = null)
+        List<FolderType> folderType = null,
+        bool withAiFolder = false)
     {
         var subjectId = subject ?? Guid.Empty;
         var subjectOwnerIdGuid = subjectOwnerId ?? Guid.Empty;
@@ -457,7 +458,8 @@ public class FileStorageService //: IFileStorageService
                 location,
                 groupId,
                 privacyFilter,
-                folderType);
+                folderType,
+                withAiFolder);
         }
         catch (Exception e)
         {
@@ -562,7 +564,7 @@ public class FileStorageService //: IFileStorageService
         // that was new in it up to this moment stops being new for the caller, synchronously, so the
         // very next news read already reflects the visit. Section roots (Rooms, Archive, Recent, ...)
         // are only containers - opening them must not consume the per-room badges.
-        if (parent.IsRoom || parent.FolderType == FolderType.DEFAULT)
+        if (parent.IsRoom || parent.FolderType is FolderType.DEFAULT or FolderType.Ai)
         {
             await fileMarker.RemoveMarkAsNewAsync(parent);
         }
@@ -1287,6 +1289,26 @@ public class FileStorageService //: IFileStorageService
         {
             throw GenerateException(e);
         }
+    }
+
+    public async Task<Folder<int>> GetRoomAiFolderAsync(int roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var room = await folderDao.GetFolderAsync(roomId);
+
+        if (room is not { IsRoom: true })
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (!await fileSecurity.CanReadAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
+        }
+
+        var aiFolder = await folderDao.GetFoldersAsync(roomId, FolderType.Ai).OrderBy(f => f.Id).FirstOrDefaultAsync();
+
+        return aiFolder ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
     }
 
     public async Task<Folder<T>> FolderQuotaChangeAsync<T>(T folderId, long quota)

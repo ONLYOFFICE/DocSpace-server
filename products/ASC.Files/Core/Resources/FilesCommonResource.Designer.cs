@@ -439,6 +439,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The room already contains the .ai folder.
+        /// </summary>
+        public static string ErrorMessage_AppsFolderExists {
+            get {
+                return ResourceManager.GetString("ErrorMessage_AppsFolderExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bad request..
         /// </summary>
         public static string ErrorMessage_BadRequest {
