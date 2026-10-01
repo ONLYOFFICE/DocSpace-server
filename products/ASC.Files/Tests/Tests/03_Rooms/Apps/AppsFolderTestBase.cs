@@ -55,12 +55,12 @@ public abstract class AppsFolderTestBase(
         RoomType.CustomRoom, RoomType.PublicRoom, RoomType.VirtualDataRoom, RoomType.EditingRoom
     ];
 
-    protected async Task<FolderDtoInteger> CreateSmartRoom(string title, RoomType roomType = RoomType.CustomRoom)
+    protected async Task<FolderDto> CreateSmartRoom(string title, RoomType roomType = RoomType.CustomRoom)
     {
         return await CreateRoom(new CreateRoomRequestDto(title, roomType: roomType));
     }
 
-    protected Task<FolderDtoInteger> CreateAppsFolder(int parentId)
+    protected Task<FolderDto> CreateAppsFolder(int parentId)
     {
         return CreateFolder(AppsTitle, parentId);
     }

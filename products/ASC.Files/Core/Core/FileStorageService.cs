@@ -289,7 +289,8 @@ public class FileStorageService //: IFileStorageService
         int? groupId = null,
         RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
         List<FolderType> folderType = null,
-        bool withAiFolder = false)
+        bool withAiFolder = false,
+        MetadataFilter metadataFilter = null)
     {
         var subjectId = subject ?? Guid.Empty;
         var subjectOwnerIdGuid = subjectOwnerId ?? Guid.Empty;
@@ -459,7 +460,7 @@ public class FileStorageService //: IFileStorageService
                 groupId,
                 privacyFilter,
                 folderType,
-                withAiFolder);
+                withAiFolder, metadataFilter);
         }
         catch (Exception e)
         {

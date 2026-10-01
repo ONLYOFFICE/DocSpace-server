@@ -54,7 +54,8 @@ public class FoldersControllerInternal(
     IEventBus eventBus,
     IServiceProvider serviceProvider,
     CommonLinkUtility commonLinkUtility,
-    AuthContext authContext
+    AuthContext authContext,
+    MetadataFilterHelper metadataFilterHelper
     )
     : FoldersController<int>(
         daoFactory,
@@ -68,7 +69,8 @@ public class FoldersControllerInternal(
         fileDtoHelper,
         permissionContext,
         fileShareDtoHelper,
-        apiContext)
+        apiContext,
+        metadataFilterHelper)
 {
     private readonly FileStorageService _fileStorageServiceInternal = fileStorageService;
     /// <remarks>
@@ -284,7 +286,8 @@ public class FoldersControllerThirdparty(
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
     FileShareDtoHelper fileShareDtoHelper,
-    ApiContext apiContext)
+    ApiContext apiContext,
+    MetadataFilterHelper metadataFilterHelper)
     : FoldersController<string>(
         daoFactory,
         fileSecurity,
@@ -297,7 +300,8 @@ public class FoldersControllerThirdparty(
         fileDtoHelper,
         permissionContext,
         fileShareDtoHelper,
-        apiContext);
+        apiContext,
+        metadataFilterHelper);
 
 public abstract class FoldersController<T>(
     IDaoFactory daoFactory,
@@ -311,7 +315,8 @@ public abstract class FoldersController<T>(
     FileDtoHelper fileDtoHelper,
     PermissionContext permissionContext,
     FileShareDtoHelper fileShareDtoHelper,
-    ApiContext apiContext)
+    ApiContext apiContext,
+    MetadataFilterHelper metadataFilterHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
@@ -414,6 +419,7 @@ public abstract class FoldersController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "One page of the folder contents, with the folder itself and the chain of its parents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "Invalid metadata filter, or a metadata filter on a section that cannot apply it")]
     [SwaggerResponse(403, "The caller may not read this folder")]
     [SwaggerResponse(404, "The folder does not exist")]
     [AllowAnonymous]
@@ -427,7 +433,42 @@ public abstract class FoldersController<T>(
             formsItemDto = new FormsItemDto(inDto.FormsItemKey, inDto.FormsItemType);
         }
 
-        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.SharedBy, inDto.FilterType, inDto.RoomId, true, inDto.WithSubFolders ?? true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, split, formsItemDto, inDto.Location, inDto.FolderType);
+        MetadataFilter metadataFilter = null;
+
+        if (inDto.MetadataTemplateId.HasValue || !string.IsNullOrEmpty(inDto.MetadataFilters))
+        {
+            // the endpoint is anonymous and the filter names the templates and the fields of the tenant: the access to the
+            // folder is checked before the filter is parsed, so a caller without it cannot probe them through the validation errors
+            await fileStorageService.GetFolderAsync(inDto.FolderId);
+
+            metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters);
+        }
+
+        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, inDto.UserIdOrGroupId, inDto.SharedBy, inDto.FilterType, inDto.RoomId, true, inDto.WithSubFolders ?? true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, split, formsItemDto, inDto.Location, inDto.FolderType, metadataFilter);
+        return folder.NotFoundIfNull();
+    }
+
+    /// <remarks>
+    /// Searches the folder by metadata. The same filter the folder listing takes in the "metadataTemplateId" and "metadataFilters"
+    /// query parameters, here as a typed request body for the clients that build the conditions as objects rather than as a JSON string.
+    /// </remarks>
+    /// <summary>
+    /// Search a folder by metadata
+    /// </summary>
+    /// <path>api/2.0/files/{folderId}/search</path>
+    [Tags("Files / Folders")]
+    [SwaggerResponse(200, "Folder contents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "Invalid metadata filter, or a metadata filter on a section that cannot apply it")]
+    [SwaggerResponse(403, "You don't have enough permission to view the folder content")]
+    [SwaggerResponse(404, "The required folder was not found")]
+    [HttpPost("{folderId}/search")]
+    public async Task<FolderContentDto<T>> SearchFolder(SearchFolderRequestDto<T> inDto)
+    {
+        var search = inDto.Search;
+
+        var metadataFilter = await metadataFilterHelper.ParseAsync(search.MetadataTemplateId, search.MetadataFilters);
+
+        var folder = await folderContentDtoHelper.GetAsync(inDto.FolderId, null, null, search.FilterType, default, true, search.WithSubFolders ?? true, null, null, null, search.SortBy, search.SortOrder, search.StartIndex, search.Count, search.FilterValue, metadataFilter: metadataFilter);
         return folder.NotFoundIfNull();
     }
 
@@ -454,7 +495,12 @@ public abstract class FoldersController<T>(
     {
         var folder = (await fileStorageService.GetFolderAsync(inDto.FolderId)).NotFoundIfNull("Folder not found");
 
-        return await _folderDtoHelper.GetAsync(folder, contextFolder: folder);
+        var result = await _folderDtoHelper.GetAsync(folder, contextFolder: folder);
+
+        // the row a client re-reads after a socket event carries the same metadata the listing shows
+        await _folderDtoHelper.SetAssignedMetadataTemplatesAsync(result);
+
+        return result;
     }
 
     /// <remarks>
@@ -766,7 +812,8 @@ public class FoldersControllerCommon(
     UserManager userManager,
     SecurityContext securityContext,
     FilesSettingsHelper filesSettingsHelper,
-    SettingsManager settingsManager)
+    SettingsManager settingsManager,
+    MetadataFilterHelper metadataFilterHelper)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
@@ -801,12 +848,15 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@favorites</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Favorites\" section with one page of the entries the caller marked as favorite", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "Invalid metadata filter")]
     [SwaggerResponse(403, "The caller is not allowed to read the \"Favorites\" section")]
     [SwaggerResponse(404, "The \"Favorites\" section could not be resolved for this account")]
     [HttpGet("@favorites")]
-    public async Task<FolderContentDto<int>> GetFavoritesFolder(GetCommonFolderRequestDto inDto)
+    public async Task<FolderContentDto<int>> GetFavoritesFolder(GetFavoritesFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderFavoritesAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters);
+
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderFavoritesAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, false, ApplyFilterOption.All, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter: metadataFilter);
     }
 
     /// <remarks>
@@ -865,13 +915,16 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/recent</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Recent\" section with one page of the files the caller opened lately", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "Invalid metadata filter")]
     [SwaggerResponse(403, "The caller is not allowed to read the \"Recent\" section")]
     [SwaggerResponse(404, "The \"Recent\" section could not be resolved for this account")]
     [HttpGet("@recent")]
     [HttpGet("recent")]
     public async Task<FolderContentDto<int>> GetRecentFolder(GetRecentFolderRequestDto inDto)
     {
-        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderRecentAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, inDto.Extension);
+        var metadataFilter = await metadataFilterHelper.ParseAsync(inDto.MetadataTemplateId, inDto.MetadataFilters);
+
+        return await folderContentDtoHelper.GetAsync(await globalFolderHelper.FolderRecentAsync, inDto.UserIdOrGroupId, null, inDto.FilterType, 0, true, true, inDto.ExcludeSubject, inDto.ApplyFilterOption, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, inDto.Extension, metadataFilter: metadataFilter);
     }
 
     /// <remarks>

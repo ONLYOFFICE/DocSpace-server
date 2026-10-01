@@ -187,4 +187,23 @@ public class RoomContentRequestDto
     /// <example>1</example>
     [FromQuery(Name = "groupId")]
     public int? GroupId { get; set; }
+
+    /// <summary>
+    /// The ID of the metadata template the entries must be assigned to. On its own it narrows the listing to the entries
+    /// carrying the template; together with the metadata filters it also pins the template the filtered fields belong to.
+    /// </summary>
+    /// <example>1</example>
+    [FromQuery(Name = "metadataTemplateId")]
+    public int? MetadataTemplateId { get; set; }
+
+    /// <summary>
+    /// The URL-encoded JSON array of the metadata filter conditions,
+    /// e.g. [{"fieldId":1,"op":"eq","value":"ACME"},{"fieldId":2,"op":"range","from":"2026-01-01","to":"2026-06-30"},{"fieldId":3,"op":"in","optionIds":["..."]}].
+    /// The range bounds are inclusive; a date-only bound covers the whole day, so "to":"2026-06-30" includes the values stored on 30 June.
+    /// A custom field is addressed by its name instead of the fieldId: {"name":"Client","op":"eq","value":"ACME"}.
+    /// The same filter is taken as a typed request body by POST api/2.0/files/rooms/search.
+    /// </summary>
+    /// <example>[{"fieldId":1,"op":"eq","value":"ACME"}]</example>
+    [FromQuery(Name = "metadataFilters")]
+    public string MetadataFilters { get; set; }
 }
