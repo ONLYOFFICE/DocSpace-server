@@ -152,6 +152,13 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
         return await accountingApi.GetServiceLimitAsync(id);
     }
 
+    public async Task<ServiceLimitUsage> GetServiceLimitUsageAsync(int id)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.GetServiceLimitUsageAsync(id);
+    }
+
     public async Task<ServiceLimit> GetCustomerServiceLimitAsync(string portalId, string serviceName)
     {
         EnsureConfigured();
@@ -1276,6 +1283,88 @@ public class ServiceLimit
     /// </summary>
     /// <example>2026-09-15T08:00:00Z</example>
     public DateTime Modified { get; init; }
+}
+
+/// <summary>
+/// What has been spent against a service limit in its current calendar period, and what is left.
+/// </summary>
+public class ServiceLimitUsage
+{
+    /// <summary>
+    /// The ID of the service limit the usage is counted for.
+    /// </summary>
+    /// <example>42</example>
+    public int ServiceLimitId { get; init; }
+
+    /// <summary>
+    /// The calendar period the limit is reset with.
+    /// </summary>
+    /// <example>Day</example>
+    public ServiceLimitPeriod Period { get; init; }
+
+    /// <summary>
+    /// The start of the current period, in UTC.
+    /// </summary>
+    /// <example>2026-10-01T00:00:00Z</example>
+    public DateTime PeriodStart { get; init; }
+
+    /// <summary>
+    /// The end of the current period, in UTC: the moment the consumed figures reset to zero.
+    /// </summary>
+    /// <example>2026-10-02T00:00:00Z</example>
+    public DateTime PeriodEnd { get; init; }
+
+    /// <summary>
+    /// The money threshold of the limit, in `currency`; null when the limit has no money threshold.
+    /// </summary>
+    /// <example>50</example>
+    public decimal? AmountValue { get; init; }
+
+    /// <summary>
+    /// The money charged for the service in the current period, in `currency`. Operations that have started but
+    /// not finished yet count with their expected cost.
+    /// </summary>
+    /// <example>12.5</example>
+    public decimal AmountConsumed { get; init; }
+
+    /// <summary>
+    /// The money still available in the current period, in `currency`; zero once the threshold is reached, and
+    /// null when the limit has no money threshold.
+    /// </summary>
+    /// <example>37.5</example>
+    public decimal? AmountAvailable { get; init; }
+
+    /// <summary>
+    /// The currency of the amounts; null when the limit has no money threshold.
+    /// </summary>
+    /// <example>USD</example>
+    public string Currency { get; init; }
+
+    /// <summary>
+    /// The quantity threshold of the limit, in `serviceUnit`; null when the limit has no quantity threshold.
+    /// </summary>
+    /// <example>1000</example>
+    public int? QuantityValue { get; init; }
+
+    /// <summary>
+    /// The quantity of the service consumed in the current period, in `serviceUnit`.
+    /// </summary>
+    /// <example>250</example>
+    public int QuantityConsumed { get; init; }
+
+    /// <summary>
+    /// The quantity still available in the current period, in `serviceUnit`; zero once the threshold is reached,
+    /// and null when the limit has no quantity threshold.
+    /// </summary>
+    /// <example>750</example>
+    public int? QuantityAvailable { get; init; }
+
+    /// <summary>
+    /// The unit of the quantities, such as pages, requests or gigabytes; null when the limit has no quantity
+    /// threshold.
+    /// </summary>
+    /// <example>request</example>
+    public string ServiceUnit { get; init; }
 }
 
 /// <summary>

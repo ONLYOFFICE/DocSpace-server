@@ -1628,6 +1628,40 @@ public class PaymentController(
     }
 
     /// <remarks>
+    /// Returns what has been spent against one spending limit of the portal in its current calendar period and what
+    /// is left of it - the figures a client needs to show how close a service is to being blocked. Only a DocSpace
+    /// administrator may read it, an installation without a billing service answers 403, and the call is read-only.
+    /// `periodStart` and `periodEnd` bound the current period in UTC, and the consumed figures reset to zero at
+    /// `periodEnd`. The consumed amount and quantity include operations that have started but not finished yet, at
+    /// their expected cost, so the figures can drop when such an operation expires unfinished. The
+    /// available figures are zero once a threshold is reached and null for a threshold the limit does not have. An ID
+    /// that does not exist or belongs to another portal answers 404. The thresholds themselves are read with
+    /// `GET api/2.0/portal/payment/servicelimit/{id}`, and the spending over an arbitrary period with
+    /// `GET api/2.0/portal/payment/customer/usage`.
+    /// </remarks>
+    /// <summary>
+    /// Get the service limit usage
+    /// </summary>
+    /// <path>api/2.0/portal/payment/servicelimit/{id}/usage</path>
+    [Tags("Portal / Payment")]
+    [SwaggerResponse(200, "What was spent against the limit in its current period and what is left", typeof(ServiceLimitUsage))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
+    [SwaggerResponse(404, "No service limit with this ID belongs to the portal")]
+    [HttpGet("servicelimit/{id:int}/usage")]
+    public async Task<ServiceLimitUsage> GetServiceLimitUsage(ServiceLimitRequestDto inDto)
+    {
+        paymentHelper.DemandConfigured();
+
+        await paymentHelper.DemandAdminAsync();
+
+        var tenant = tenantManager.GetCurrentTenant();
+
+        var usage = await tariffService.GetServiceLimitUsageAsync(tenant.Id, inDto.Id);
+
+        return usage ?? throw new ItemNotFoundException("Service limit could not be found");
+    }
+
+    /// <remarks>
     /// Returns the limit set on a wallet service for the portal as a whole - the ceiling the spending of every user
     /// counts towards. Only a DocSpace administrator may read it, an installation without a billing service answers
     /// 403, a portal with no billing customer gets an empty result, and the call is read-only. A service name this

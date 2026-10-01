@@ -1611,6 +1611,29 @@ public class TariffService(
     }
 
     /// <summary>
+    /// Returns the usage of the service limit in its current period only when the limit belongs to the tenant. The
+    /// usage carries no owner of its own, so the limit itself is checked first; returns null otherwise.
+    /// </summary>
+    public async Task<ServiceLimitUsage> GetServiceLimitUsageAsync(int tenantId, int id)
+    {
+        var serviceLimit = await GetServiceLimitAsync(tenantId, id);
+        if (serviceLimit == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            return await accountingClient.GetServiceLimitUsageAsync(id);
+        }
+        catch (AccountingNotFoundException exception)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+            return null;
+        }
+    }
+
+    /// <summary>
     /// Returns the portal-wide limit of the service, or null when none is set on it.
     /// </summary>
     public async Task<ServiceLimit> GetCustomerServiceLimitAsync(int tenantId, string serviceName)

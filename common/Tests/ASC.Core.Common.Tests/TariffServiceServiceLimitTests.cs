@@ -121,6 +121,47 @@ public class TariffServiceServiceLimitTests
         handler.LastMethod.Should().Be(HttpMethod.Get);
     }
 
+    [Fact]
+    public async Task GetServiceLimitUsage_LimitOfThisPortal_ReturnsUsage()
+    {
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request => IsUsageRequest(request) ? UsageResponse() : ServiceLimitResponse(OwnAccountNumber));
+
+        var usage = await tariffService.GetServiceLimitUsageAsync(TenantId, 42);
+
+        usage.Should().NotBeNull();
+        usage.ServiceLimitId.Should().Be(42);
+        usage.AmountConsumed.Should().Be(12.5m);
+        handler.CallCount.Should().Be(2);
+        handler.LastUri!.AbsolutePath.Should().EndWith("/usage");
+    }
+
+    [Fact]
+    public async Task GetServiceLimitUsage_LimitOfAnotherPortal_ReturnsNullWithoutRequestingUsage()
+    {
+        // The usage has no owner of its own, so the limit is checked first and the usage of a foreign limit is never read.
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request => IsUsageRequest(request) ? UsageResponse() : ServiceLimitResponse(OtherAccountNumber));
+
+        var usage = await tariffService.GetServiceLimitUsageAsync(TenantId, 42);
+
+        usage.Should().BeNull();
+        handler.CallCount.Should().Be(1);
+        handler.LastUri!.AbsolutePath.Should().NotEndWith("/usage");
+    }
+
+    [Fact]
+    public async Task GetServiceLimitUsage_UnknownId_ReturnsNull()
+    {
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            _ => AccountingClientTests.Json(HttpStatusCode.NotFound, """{"title":"Resource not found","status":404}"""));
+
+        var usage = await tariffService.GetServiceLimitUsageAsync(TenantId, 999999);
+
+        usage.Should().BeNull();
+        handler.CallCount.Should().Be(1);
+    }
+
     private static async Task<(TariffService tariffService, AccountingClientTests.CapturingHandler handler)> CreateTariffServiceAsync(
         Balance balance, Func<HttpRequestMessage, HttpResponseMessage> responder)
     {
@@ -149,6 +190,17 @@ public class TariffServiceServiceLimitTests
             tenantExtraConfig: null!);
 
         return (tariffService, handler);
+    }
+
+    private static bool IsUsageRequest(HttpRequestMessage request)
+    {
+        return request.RequestUri!.AbsolutePath.EndsWith("/usage", StringComparison.Ordinal);
+    }
+
+    private static HttpResponseMessage UsageResponse()
+    {
+        return AccountingClientTests.Json(HttpStatusCode.OK,
+            """{"serviceLimitId":42,"period":"Day","periodStart":"2026-10-01T00:00:00Z","periodEnd":"2026-10-02T00:00:00Z","amountValue":50,"amountConsumed":12.5,"amountAvailable":37.5,"currency":"USD","quantityConsumed":0}""");
     }
 
     private static HttpResponseMessage ServiceLimitResponse(int customerAccountNumber)

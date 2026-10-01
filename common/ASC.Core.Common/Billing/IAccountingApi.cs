@@ -76,6 +76,9 @@ public interface IAccountingApi
     [Get("/serviceLimit/{id}")]
     Task<ServiceLimit> GetServiceLimitAsync(int id);
 
+    [Get("/serviceLimit/{id}/usage")]
+    Task<ServiceLimitUsage> GetServiceLimitUsageAsync(int id);
+
     [Get("/serviceLimit/customer/{portalId}/{serviceName}")]
     Task<ServiceLimit> GetCustomerServiceLimitAsync(string portalId, string serviceName);
 

@@ -100,6 +100,58 @@ public class AccountingClientServiceLimitTests
     }
 
     [Fact]
+    public async Task GetServiceLimitUsage_BuildsUsagePathAndDeserializesResponse()
+    {
+        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.OK,
+            """
+            {
+              "serviceLimitId": 42,
+              "period": "Day",
+              "periodStart": "2026-10-01T00:00:00Z",
+              "periodEnd": "2026-10-02T00:00:00Z",
+              "amountValue": 50,
+              "amountConsumed": 12.5,
+              "amountAvailable": 37.5,
+              "currency": "USD",
+              "quantityValue": null,
+              "quantityConsumed": 250,
+              "quantityAvailable": null,
+              "serviceUnit": null
+            }
+            """));
+
+        var usage = await client.GetServiceLimitUsageAsync(42);
+
+        handler.LastMethod.Should().Be(HttpMethod.Get);
+        handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit/42/usage");
+
+        usage.ServiceLimitId.Should().Be(42);
+        usage.Period.Should().Be(ServiceLimitPeriod.Day);
+        usage.PeriodStart.Should().Be(new DateTime(2026, 10, 1, 0, 0, 0, DateTimeKind.Utc));
+        usage.PeriodEnd.Should().Be(new DateTime(2026, 10, 2, 0, 0, 0, DateTimeKind.Utc));
+        usage.AmountValue.Should().Be(50m);
+        usage.AmountConsumed.Should().Be(12.5m);
+        usage.AmountAvailable.Should().Be(37.5m);
+        usage.Currency.Should().Be("USD");
+        usage.QuantityValue.Should().BeNull();
+        usage.QuantityConsumed.Should().Be(250);
+        usage.QuantityAvailable.Should().BeNull();
+        usage.ServiceUnit.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task GetServiceLimitUsage_UnknownId_ThrowsNotFoundWithoutRetry()
+    {
+        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.NotFound,
+            """{"title":"Resource not found","status":404}"""));
+
+        var act = async () => await client.GetServiceLimitUsageAsync(999999);
+
+        await act.Should().ThrowExactlyAsync<AccountingNotFoundException>();
+        handler.CallCount.Should().Be(1);
+    }
+
+    [Fact]
     public async Task GetCustomerServiceLimit_BuildsCustomerPath()
     {
         var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.OK, ServiceLimitJson));
