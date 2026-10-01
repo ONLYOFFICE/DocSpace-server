@@ -55,7 +55,28 @@ public class DocumentBuilderScriptHelper
         catch (UnauthorizedAccessException) { }
     }
 
+    // The report table style is declared by more than one report, so it lives in a script of its own
+    // and is inlined into whichever template asks for it by this placeholder. The templates stay
+    // standalone resources without carrying a copy of the declaration each.
+    private const string TableStylePlaceholder = "${reportTableStyle}";
+    private const string TableStyleTemplateFileName = "ReportTableStyle.docbuilder";
+
     public static async Task<string> ReadTemplateFromEmbeddedResource(string templateFileName)
+    {
+        var template = await ReadEmbeddedResourceAsync(templateFileName);
+
+        if (template == null || !template.Contains(TableStylePlaceholder))
+        {
+            return template;
+        }
+
+        var tableStyle = await ReadEmbeddedResourceAsync(TableStyleTemplateFileName)
+                         ?? throw new Exception($"Template not found: {TableStyleTemplateFileName}");
+
+        return template.Replace(TableStylePlaceholder, tableStyle);
+    }
+
+    private static async Task<string> ReadEmbeddedResourceAsync(string templateFileName)
     {
         var templateNamespace = typeof(DocumentBuilderScriptHelper).Namespace;
         var resourceName = $"{templateNamespace}.ScriptTemplates.{templateFileName}";

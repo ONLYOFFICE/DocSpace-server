@@ -48,3 +48,8 @@ common/services/ASC.Monolith/DocStore/
 # ---------- CodeGraph ----------
 # Local symbol index (codegraph.db and friends) — rebuilt per machine.
 /.codegraph/
+
+# openapi-desc-opt: the queue and the batch manifest are rebuilt by every scan and mean nothing
+# outside the pass that wrote them.
+/.claude/skills/openapi-desc-opt/unoptimized-controllers.md
+/.claude/skills/openapi-desc-opt/batch-manifest.json

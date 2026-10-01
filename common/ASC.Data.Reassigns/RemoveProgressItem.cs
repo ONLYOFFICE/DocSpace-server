@@ -163,7 +163,7 @@ public class RemoveProgressItem : DistributedTaskProgress
 
             if (_deleteProfile)
             {
-                await client.DeleteClientsAsync(UserId);
+                await ReassignProgressItem.DeleteClientsAsync(client, logger, UserId);
                 await DeleteUserProfile(userManager, userPhotoManager, messageService, userName);
             }
 

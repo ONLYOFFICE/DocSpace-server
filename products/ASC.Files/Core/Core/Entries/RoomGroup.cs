@@ -39,6 +39,38 @@ public class RoomGroup
     public string Name { get; set; }
     public string Icon { get; set; }
     public Guid UserID { get; set; }
+
+    /// <summary>
+    /// The kind of room the group gathers - see <see cref="RoomGroupArea"/> for how it maps onto the
+    /// section the group is shown in.
+    /// </summary>
+    public FolderType FolderType { get; set; }
+}
+
+/// <summary>
+/// The Rooms / Forms split as the groups see it. A group is dedicated to one kind of room and stored
+/// as such: a group of form-filling rooms belongs to the Forms section, every other group to Rooms.
+/// The section survives an empty group, which is why it is stored rather than derived from the rooms
+/// still in it.
+/// </summary>
+public static class RoomGroupArea
+{
+    /// <summary>
+    /// The room kind a group of the given section gathers. Only the two sections that were split own
+    /// groups; Rooms is not tied to one kind of room, so it is stored as no kind at all.
+    /// </summary>
+    public static FolderType ToFolderType(this SearchArea searchArea)
+    {
+        return searchArea == SearchArea.Forms ? FolderType.FillingFormsRoom : FolderType.DEFAULT;
+    }
+
+    /// <summary>
+    /// The section a group of the given room kind is shown in.
+    /// </summary>
+    public static SearchArea ToSearchArea(this FolderType folderType)
+    {
+        return folderType == FolderType.FillingFormsRoom ? SearchArea.Forms : SearchArea.Active;
+    }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]

@@ -284,5 +284,10 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/form-suggested-questions", (req, res) => {
+    files.formSuggestedQuestions(req.body);
+    res.end();
+  });
+
   return router;
 };

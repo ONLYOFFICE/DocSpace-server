@@ -174,6 +174,12 @@ public class AuditXlsxReportWriter(
 
         var scriptParts = script.Split("${dataValues}");
 
+        // The page column holds a URL, which is long enough to wrap onto a second line in a cell that
+        // wraps. Resolved once per column rather than for every cell of every event.
+        var wraps = props
+            .Select(p => p.Name == nameof(BaseEvent.Page) ? false : (bool?)null)
+            .ToList();
+
         try
         {
             await using (var writer = new StreamWriter(scriptFilePath))
@@ -184,8 +190,9 @@ public class AuditXlsxReportWriter(
                 {
                     var cells = new List<Cell>(props.Count);
 
-                    foreach (var prop in props)
+                    for (var i = 0; i < props.Count; i++)
                     {
+                        var prop = props[i];
                         var value = prop.GetValue(@event);
 
                         if (prop.PropertyType == typeof(DateTime))
@@ -195,7 +202,7 @@ public class AuditXlsxReportWriter(
                         else
                         {
                             // force text format to stop formulas from executing in user-controlled values
-                            cells.Add(new Cell(value?.ToString(), "@"));
+                            cells.Add(new Cell(value?.ToString(), "@", Wrap: wraps[i]));
                         }
                     }
 
@@ -247,7 +254,7 @@ public class AuditXlsxReportWriter(
         return name.Length > 31 ? name[..31] : name;
     }
 
-    private sealed record Cell(string Value, string Format, string Halign = null);
+    private sealed record Cell(string Value, string Format, string Halign = null, bool? Wrap = null);
 }
 
 /// <summary>

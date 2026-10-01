@@ -838,7 +838,7 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/present/mark</path>
     [Tags("Portal / Users")]
-    [SwaggerResponse(200, "The request was accepted; a storage error is only logged, so the flag may still be unsaved")]
+    [SwaggerResponse(200, "The gift message is marked as read for the calling user; the same answer is returned when saving the flag failed, because the error is only written to the portal log. The response carries no content")]
     [HttpPost("present/mark")]
     public async Task MarkGiftMessageAsRead()
     {
@@ -1021,7 +1021,7 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "The letter with the deactivation and reactivation links was queued for delivery to the portal owner")]
+    [SwaggerResponse(200, "The deactivation letter has been handed to the mail service and the request is recorded in the audit trail; the portal itself is still active and the response carries no content")]
     [SwaggerResponse(403, "The caller is not the portal owner or has no portal-settings right")]
     [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be deactivated")]
     [AllowNotPayment]
@@ -1061,7 +1061,7 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/delete</path>
     [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "The letter with the removal link was queued for delivery to the portal owner")]
+    [SwaggerResponse(200, "The removal letter has been handed to the mail service; nothing about the portal has changed yet and the response carries no content")]
     [SwaggerResponse(403, "The caller is not the portal owner or has no portal-settings right")]
     [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be removed")]
     [AllowNotPayment]
@@ -1102,7 +1102,7 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/continue</path>
     [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "The portal is active again")]
+    [SwaggerResponse(200, "The portal is active again and its users can sign in; the response carries no content")]
     [AllowSuspended]
     [HttpPut("continue")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalContinue")]
@@ -1134,7 +1134,7 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/suspend</path>
     [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "The portal is suspended and its content is kept")]
+    [SwaggerResponse(200, "The portal is now suspended, its users can no longer work in it and its content is kept; the response carries no content")]
     [SwaggerResponse(403, "The account the confirmation link was issued for is not the portal owner")]
     [SwaggerResponse(500, "On a server installation every other space has limited access, so the last remaining space cannot be deactivated")]
     [HttpPut("suspend")]

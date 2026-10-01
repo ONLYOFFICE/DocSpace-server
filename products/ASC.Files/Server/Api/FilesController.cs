@@ -340,7 +340,7 @@ public abstract class FilesController<T>(
     /// </summary>
     /// <path>api/2.0/files/{folderId}/file</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "The created file", typeof(FileDto<int>))]
+    [SwaggerResponse(200, "The file created in the folder: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The caller may not create files in the folder, the folder does not exist or is a section where files cannot be created, the template does not exist or cannot be read, or the form gallery has no file of the title's format")]
@@ -1305,7 +1305,7 @@ public class FilesControllerCommon(
     /// </summary>
     /// <path>api/2.0/files/@my/file</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "The created file", typeof(FileDto<int>))]
+    [SwaggerResponse(200, "The file created in My documents: its id and the title the portal actually stored, whose extension may differ from the requested one; `thumbnailStatus` says whether the preview is already built", typeof(FileDto<int>))]
     [SwaggerResponse(400, "The request body cannot be read or has no `title`, or the title is empty or longer than 165 characters")]
     [SwaggerResponse(402, "The new file does not fit into the storage quota of the portal, the room or the user")]
     [SwaggerResponse(403, "The template does not exist or cannot be read, or the form gallery has no file of the title's format")]

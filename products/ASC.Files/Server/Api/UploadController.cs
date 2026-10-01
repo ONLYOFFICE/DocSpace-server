@@ -478,7 +478,7 @@ public abstract class UploadController<T>(
     /// <summary>Insert a file</summary>
     /// <path>api/2.0/files/{folderId}/insert</path>
     [Tags("Files / Folders")]
-    [SwaggerResponse(200, "The stored file", typeof(FileDto<int>))]
+    [SwaggerResponse(200, "The stored file with its id and the title it was actually saved under; a `version` above 1 means the content was added to a file that already carried this name instead of creating a new one", typeof(FileDto<int>))]
     [SwaggerResponse(402, "The file exceeds the single-request upload limit, or storing it would exceed a storage quota or size limit")]
     [SwaggerResponse(403, "The caller cannot add content to this folder")]
     [SwaggerResponse(404, "No folder with the specified ID")]

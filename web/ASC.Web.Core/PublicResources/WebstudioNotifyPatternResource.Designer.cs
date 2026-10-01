@@ -968,7 +968,8 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///$OrangeButton
         ///
-        ///You are also welcome to contact your dedicated sales manager directly for the license update.        /// [rest of string was truncated]&quot;;.
+        ///You are also welcome to contact your dedicated sales manager directly for the license update.
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_grace_period_before_expiration {
             get {
@@ -1133,7 +1134,8 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///      Outgoing Mail (SMTP): 
         ///      Server: &lt;b&gt;$Server&lt;/b&gt;
-        ///      Port: &lt;b&gt;$SmtpPort&lt;/b&gt;        /// [rest of string was truncated]&quot;;.
+        ///      Port: &lt;b&gt;$SmtpPort&lt;/b&gt;
+        /// [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_mailbox_created {
             get {

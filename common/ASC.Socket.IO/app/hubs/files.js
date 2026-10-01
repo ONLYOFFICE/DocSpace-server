@@ -646,6 +646,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:external-db-settings", { externalDbEnabled });
   }
 
+  function formSuggestedQuestions({ room, attachmentId, questions } = {}) {
+    logger.info(`form suggested questions in room ${room}, attachment: ${attachmentId}`);
+    filesIO.to(room).emit("s:form-suggested-questions", { attachmentId, questions });
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -696,6 +701,7 @@ module.exports = (io) => {
     changeAiConfig,
     changeAiAccessSettings,
     changeExternalSharingSettings,
-    externalDbSettings
+    externalDbSettings,
+    formSuggestedQuestions
   };
 };
