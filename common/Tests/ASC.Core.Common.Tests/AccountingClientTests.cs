@@ -247,7 +247,7 @@ public class AccountingClientTests
         await act.Should().ThrowAsync<AccountingNotConfiguredException>();
     }
 
-    private static (AccountingClient client, CapturingHandler handler) CreateClient(
+    internal static (AccountingClient client, CapturingHandler handler) CreateClient(
         Func<HttpRequestMessage, HttpResponseMessage> responder, string baseUrl = BaseUrl)
     {
         var configuration = new ConfigurationBuilder()
@@ -280,7 +280,7 @@ public class AccountingClientTests
         return (provider.GetRequiredService<AccountingClient>(), handler);
     }
 
-    private static HttpResponseMessage Json(HttpStatusCode status, string json)
+    internal static HttpResponseMessage Json(HttpStatusCode status, string json)
     {
         return new HttpResponseMessage(status)
         {
@@ -296,7 +296,7 @@ public class AccountingClientTests
         return $"ASC {key}:{timestamp}:{hash}";
     }
 
-    private static Dictionary<string, string> ParseQuery(Uri uri)
+    internal static Dictionary<string, string> ParseQuery(Uri uri)
     {
         var result = new Dictionary<string, string>();
         var query = uri.Query.TrimStart('?');
@@ -317,7 +317,7 @@ public class AccountingClientTests
         return result;
     }
 
-    private sealed class CapturingHandler(Func<HttpRequestMessage, HttpResponseMessage> responder) : HttpMessageHandler
+    internal sealed class CapturingHandler(Func<HttpRequestMessage, HttpResponseMessage> responder) : HttpMessageHandler
     {
         public int CallCount { get; private set; }
         public Uri? LastUri { get; private set; }
