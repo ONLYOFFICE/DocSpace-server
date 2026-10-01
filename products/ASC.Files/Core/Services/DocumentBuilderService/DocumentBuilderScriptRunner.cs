@@ -327,9 +327,15 @@ public class DocumentBuilderScriptRunner(
 
             var file = await fileDao.GetFileAsync(fileId).NotFoundIfNull("File not found");
 
-            if (!await fileSecurity.CanReadAsync(file))
+            // the script can change what it opens, so read or fill-only access is not enough
+            if (!await fileSecurity.CanEditAsync(file))
             {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+            }
+
+            if (!await fileSecurity.CanCopyAsync(file))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_CopyFile);
             }
 
             logger.DebugScriptOpensFile(fileId);

@@ -726,6 +726,11 @@ public class FileConverter(
         ArgumentNullException.ThrowIfNull(file);
         ArgumentNullException.ThrowIfNull(body);
 
+        if (!await fileSecurity.CanCopyAsync(file))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_CopyFile);
+        }
+
         // The format, the name and the caching key belong to the file, not to the request, so they are always taken
         // from it: a caller-supplied key would serve a stale result out of the document service cache.
         if (string.IsNullOrEmpty(body.OutputType))
