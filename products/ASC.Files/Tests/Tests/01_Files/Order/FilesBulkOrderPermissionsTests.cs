@@ -53,7 +53,7 @@ public class FilesBulkOrderPermissionsTests(
 
         await _filesClient.Authenticate(null);
 
-        var request = new OrdersRequestDtoInteger([new OrdersItemRequestDtoInteger(file.Id, FileEntryType.File, 1)]);
+        var request = new OrdersRequestDto([new OrdersItemRequestDto(file.Id, FileEntryType.File, 1)]);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -74,7 +74,7 @@ public class FilesBulkOrderPermissionsTests(
         var file = await CreateFile("Autotest BulkOrder Guest File", room.Id);
 
         await _filesClient.Authenticate(guest);
-        var request = new OrdersRequestDtoInteger([new OrdersItemRequestDtoInteger(file.Id, FileEntryType.File, 1)]);
+        var request = new OrdersRequestDto([new OrdersItemRequestDto(file.Id, FileEntryType.File, 1)]);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -104,7 +104,7 @@ public class FilesBulkOrderPermissionsTests(
         var file = await CreateFile("Autotest BulkOrder RoomAdmin File", room.Id);
 
         await _filesClient.Authenticate(roomAdmin);
-        var request = new OrdersRequestDtoInteger([new OrdersItemRequestDtoInteger(file.Id, FileEntryType.File, 2)]);
+        var request = new OrdersRequestDto([new OrdersItemRequestDto(file.Id, FileEntryType.File, 2)]);
 
         // Act
         var response = await _filesApi.SetFilesOrderWithHttpInfoAsync(request, TestContext.Current.CancellationToken);
@@ -124,7 +124,7 @@ public class FilesBulkOrderPermissionsTests(
         var file = await CreateFile("Autotest BulkOrder User Read File", room.Id);
 
         await _filesClient.Authenticate(user);
-        var request = new OrdersRequestDtoInteger([new OrdersItemRequestDtoInteger(file.Id, FileEntryType.File, 1)]);
+        var request = new OrdersRequestDto([new OrdersItemRequestDto(file.Id, FileEntryType.File, 1)]);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -143,7 +143,7 @@ public class FilesBulkOrderPermissionsTests(
         var room = await CreateVirtualRoom("Autotest BulkOrder Admin Room");
         var file = await CreateFile("Autotest BulkOrder Admin File", room.Id);
 
-        var request = new OrdersRequestDtoInteger([new OrdersItemRequestDtoInteger(file.Id, FileEntryType.File, 3)]);
+        var request = new OrdersRequestDto([new OrdersItemRequestDto(file.Id, FileEntryType.File, 3)]);
 
         // Act
         var result = await _filesApi.SetFilesOrderAsync(request, TestContext.Current.CancellationToken);

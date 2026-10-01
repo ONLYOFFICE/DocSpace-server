@@ -160,7 +160,7 @@ public class CheckDestFolderTests(
         result.Result.Should().Be(CheckDestFolderResult.AllAllowed);
     }
 
-    private Task<FolderDtoInteger> CreateRoomOf(RoomType roomType, string title) => roomType switch
+    private Task<FolderDto> CreateRoomOf(RoomType roomType, string title) => roomType switch
     {
         RoomType.EditingRoom => CreateCollaborationRoom(title),
         RoomType.PublicRoom => CreatePublicRoom(title),

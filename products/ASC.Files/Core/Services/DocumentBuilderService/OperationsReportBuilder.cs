@@ -53,7 +53,8 @@ public class OperationsReportBuilder(
             ? await GetTenantWalletServiceAsync(taskData.ServiceName.First())
             : null;
 
-        var addSourceColumns = tenantWalletService is TenantWalletService.AITools or TenantWalletService.AISearch;
+        // Both AI services record the source of the operation and the provider's cost in its metadata.
+        var isAiService = tenantWalletService is TenantWalletService.AITools or TenantWalletService.AISearch;
 
         // AI search is billed by results, not tokens, so only AI tools get the token columns.
         var tokenColumns = tenantWalletService is TenantWalletService.AITools ? GetTokenColumns() : null;
@@ -75,10 +76,16 @@ public class OperationsReportBuilder(
 
         columns.Add(new ReportColumn(Resource.AccountingCustomerOperationServiceUnit));
         columns.Add(new ReportColumn(Resource.AccountingCustomerOperationCredit, ReportColumnAlign.Right, Sum: true));
+
+        if (isAiService)
+        {
+            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationProviderCost, ReportColumnAlign.Right, Sum: true));
+        }
+
         columns.Add(new ReportColumn(Resource.AccountingCustomerOperationDebit, ReportColumnAlign.Right, Sum: true));
         columns.Add(new ReportColumn(Resource.AccountingCustomerOperationCurrency, Currency: true));
 
-        if (addSourceColumns)
+        if (isAiService)
         {
             columns.Add(new ReportColumn(Resource.AccountingCustomerOperationSourceType));
             columns.Add(new ReportColumn(Resource.AccountingCustomerOperationSourceTitle));
@@ -130,7 +137,7 @@ public class OperationsReportBuilder(
                         continue;
                     }
 
-                    await writer.WriteAsync(SerializeOperations(records, dateFormat, context.Options, addSourceColumns, tokenColumns));
+                    await writer.WriteAsync(SerializeOperations(records, dateFormat, context.Options, isAiService, tokenColumns));
                 }
             },
             pivot);
@@ -224,7 +231,7 @@ public class OperationsReportBuilder(
         ];
     }
 
-    private static string SerializeOperations(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions, bool addSourceColumns, List<(string Header, Func<OperationTokenUsage, long?> Tokens)> tokenColumns)
+    private static string SerializeOperations(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions, bool isAiService, List<(string Header, Func<OperationTokenUsage, long?> Tokens)> tokenColumns)
     {
         var sb = new StringBuilder();
 
@@ -251,10 +258,16 @@ public class OperationsReportBuilder(
 
             properties.Add(new PropertyValue(record.ServiceUnit, "@"));
             properties.Add(MoneyValue(record.Credit));
+
+            if (isAiService)
+            {
+                properties.Add(MoneyValue(WalletServiceDescriptionManager.GetProviderCost(record.Metadata)));
+            }
+
             properties.Add(MoneyValue(record.Debit));
             properties.Add(new PropertyValue(record.Currency, "@"));
 
-            if (addSourceColumns)
+            if (isAiService)
             {
                 properties.Add(new PropertyValue(WalletServiceDescriptionManager.GetSourceTypeTitle(record.SourceType), "@"));
                 properties.Add(new PropertyValue(record.SourceTitle, "@"));

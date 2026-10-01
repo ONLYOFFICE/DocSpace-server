@@ -198,7 +198,7 @@ public abstract class RoomLogoTestBase(
     }
 
     /// <summary>Creates the logo of a room from an already-uploaded <paramref name="tmpFile"/>.</summary>
-    protected async Task<FolderDtoInteger> CreateLogo(int roomId, string tmpFile, int x = 0, int y = 0, int width = 1, int height = 1)
+    protected async Task<FolderDto> CreateLogo(int roomId, string tmpFile, int x = 0, int y = 0, int width = 1, int height = 1)
     {
         return (await _roomsApi.CreateRoomLogoAsync(
             roomId,
@@ -207,7 +207,7 @@ public abstract class RoomLogoTestBase(
     }
 
     /// <summary>Creates a plain Custom room and sets a fresh 1x1 PNG as its logo.</summary>
-    protected async Task<FolderDtoInteger> CreateRoomWithLogo(string title)
+    protected async Task<FolderDto> CreateRoomWithLogo(string title)
     {
         var room = await CreateCustomRoom(title);
         var tmpFile = await UploadLogo(CreateTestImageBytes());

@@ -57,7 +57,7 @@ public abstract class QuotaTestBase(
             TestContext.Current.CancellationToken);
     }
 
-    protected async Task<FolderDtoInteger> CreateRoomOfType(RoomType roomType, string title)
+    protected async Task<FolderDto> CreateRoomOfType(RoomType roomType, string title)
     {
         return roomType switch
         {

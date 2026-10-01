@@ -45,6 +45,9 @@ public class WalletServiceDescriptionManager
         { "image", "total_tokens" }
     };
 
+    // The kinds of AI search operation that have a description and a unit of their own.
+    private static readonly HashSet<string> _aiSearchTypes = ["search", "fetch"];
+
     public static (string, string, int) GetServiceDescriptionAndUom(Operation operation, Dictionary<string, string> metadata)
     {
         if (operation == null)
@@ -80,6 +83,16 @@ public class WalletServiceDescriptionManager
                     quantity = quantityValue;
                 }
             }
+        }
+
+        // AI search bills web searches and page crawls under one service: only the type tells them apart.
+        // An operation without a known type stays plain AI search.
+        if (serviceName == "ai-search" &&
+            metadata != null &&
+            metadata.TryGetValue(BillingClient.MetadataType, out var searchType) &&
+            _aiSearchTypes.Contains(searchType))
+        {
+            serviceName = searchType;
         }
 
         if (string.IsNullOrEmpty(serviceName))
@@ -200,6 +213,19 @@ public class WalletServiceDescriptionManager
             found = true;
             return tokens;
         }
+    }
+
+    /// <summary>
+    /// Reads what the provider charged for the whole quantity of an AI operation from its metadata.
+    /// Returns <c>null</c> when the metadata carries no cost or one that is not a number.
+    /// </summary>
+    public static decimal? GetProviderCost(Dictionary<string, string> metadata)
+    {
+        return metadata != null &&
+               metadata.TryGetValue(BillingClient.MetadataCost, out var value) &&
+               decimal.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var cost)
+            ? cost
+            : null;
     }
 
     /// <summary>

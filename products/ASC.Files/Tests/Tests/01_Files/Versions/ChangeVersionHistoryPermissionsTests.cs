@@ -235,7 +235,7 @@ public class ChangeVersionHistoryPermissionsTests(
     }
 
     /// <summary>Creates a file inside an already-created room and bumps it to a second version.</summary>
-    private async Task<(FolderDtoInteger Room, FileDtoInteger File)> CreateRoomFileWithSecondVersion(FolderDtoInteger room, string fileTitle)
+    private async Task<(FolderDto Room, FileDto File)> CreateRoomFileWithSecondVersion(FolderDto room, string fileTitle)
     {
         await _filesClient.Authenticate(Owner);
 

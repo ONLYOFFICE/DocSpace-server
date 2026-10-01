@@ -89,7 +89,7 @@ public class RoomArchiveTests(
         await ArchiveRoom(room.Id);
 
         // Assert
-        // FolderContentDtoInteger.Files/Folders are typed List<FileEntryBaseDto>, which drops Id -
+        // FolderContentDto.Files/Folders are typed List<FileEntryBaseDto>, which drops Id -
         // an SDK gap noted in the tests rule, so membership is asserted by Title instead.
         var content = (await _foldersApi.GetFolderByFolderIdAsync(room.Id, cancellationToken: TestContext.Current.CancellationToken)).Response;
         content.Files.Should().Contain(f => f.Title == file.Title);

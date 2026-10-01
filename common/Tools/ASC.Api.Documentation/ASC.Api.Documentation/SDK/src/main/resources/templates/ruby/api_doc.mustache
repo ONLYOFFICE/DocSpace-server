@@ -120,6 +120,12 @@ This endpoint does not need any parameter.
 ### Return type
 
 {{#returnType}}{{#returnTypeIsPrimitive}}**{{returnType}}**{{/returnTypeIsPrimitive}}{{^returnTypeIsPrimitive}}[**{{returnType}}**]({{returnBaseType}}.md){{/returnTypeIsPrimitive}}{{/returnType}}{{^returnType}}nil (empty response body){{/returnType}}
+{{#vendorExtensions.x-thirdparty-variant-operation}}
+
+### Third-party storage
+
+The same method serves an entry in a connected third-party storage, whose identifier is a string such as `sbox-42`: pass{{#allParams}}{{#vendorExtensions.x-thirdparty-changed}} `{{paramName}}` as `{{{dataType}}}`{{/vendorExtensions.x-thirdparty-changed}}{{/allParams}}{{#vendorExtensions.x-thirdparty-return-changed}} and the answer is [**{{{returnType}}}**]({{returnBaseType}}.md){{/vendorExtensions.x-thirdparty-return-changed}}.
+{{/vendorExtensions.x-thirdparty-variant-operation}}
 
 ### Authorization
 

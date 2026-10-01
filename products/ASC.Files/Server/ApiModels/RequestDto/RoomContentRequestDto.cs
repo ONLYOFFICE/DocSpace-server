@@ -130,6 +130,14 @@ public class RoomContentRequestDto
     public RoomPrivacyFilter? PrivacyFilter { get; set; }
 
     /// <summary>
+    /// Keeps only the rooms that hold a .ai folder in their root. The content of that folder is read with
+    /// `GET api/2.0/files/rooms/{id}/ai`. Omitting it returns rooms with and without the folder.
+    /// </summary>
+    /// <example>true</example>
+    [FromQuery(Name = "withAiFolder")]
+    public bool? WithAiFolder { get; set; }
+
+    /// <summary>
     /// How many rooms one page may carry. Ask for the next page by raising the start index by the number of rooms
     /// already received.
     /// </summary>

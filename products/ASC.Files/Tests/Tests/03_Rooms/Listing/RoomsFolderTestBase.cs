@@ -48,7 +48,7 @@ public abstract class RoomsFolderTestBase(
     protected const int ActiveAreaRoomCount = 4;
 
     /// <summary>One room of each type, mirroring the TS <c>createAllRoomTypes</c> helper.</summary>
-    protected async Task<List<FolderDtoInteger>> CreateAllRoomTypesAsync()
+    protected async Task<List<FolderDto>> CreateAllRoomTypesAsync()
     {
         return
         [
@@ -100,7 +100,7 @@ public abstract class RoomsFolderTestBase(
     /// Reads GET /files/rooms straight from JSON, with the same query parameters as
     /// <c>RoomsApi.GetRoomsFolderAsync</c>.
     ///
-    /// <c>FolderContentDtoInteger.Folders</c> is typed <c>List&lt;FileEntryBaseDto&gt;</c>, which
+    /// <c>FolderContentDto.Folders</c> is typed <c>List&lt;FileEntryBaseDto&gt;</c>, which
     /// carries <c>Title</c> but neither <c>Id</c> nor <c>RoomType</c> — those two are only on the
     /// concrete room DTO the endpoint actually returns. That is an SDK/OpenAPI defect, not a
     /// preference, and this helper exists solely to work around it: every test that only needs

@@ -54,7 +54,7 @@ public class RoomQuotaResetTests(
         var room = await CreateCustomRoom("Autotest No Custom Quota Room " + Guid.NewGuid().ToString()[..8]);
 
         var result = (await _quotaApi.ResetRoomQuotaAsync(
-            new UpdateRoomsRoomIdsRequestDtoInteger([new(room.Id)]),
+            new UpdateRoomsRoomIdsRequestDto([new(room.Id)]),
             TestContext.Current.CancellationToken)).Response;
 
         result.Should().ContainSingle();
@@ -69,7 +69,7 @@ public class RoomQuotaResetTests(
         await EnableRoomQuota();
 
         var result = (await _quotaApi.ResetRoomQuotaAsync(
-            new UpdateRoomsRoomIdsRequestDtoInteger([]),
+            new UpdateRoomsRoomIdsRequestDto([]),
             TestContext.Current.CancellationToken)).Response;
 
         result.Should().BeEmpty();
@@ -85,7 +85,7 @@ public class RoomQuotaResetTests(
         var room = await CreateCustomRoom("Autotest Archived Reset Room " + Guid.NewGuid().ToString()[..8]);
 
         await _quotaApi.UpdateRoomsQuotaAsync(
-            new UpdateRoomsQuotaRequestDtoInteger([new(room.Id)], QuotaMinimalBytes),
+            new UpdateRoomsQuotaRequestDto([new(room.Id)], QuotaMinimalBytes),
             TestContext.Current.CancellationToken);
 
         await _roomsApi.ArchiveRoomAsync(room.Id, new ArchiveRoomRequest(false), TestContext.Current.CancellationToken);
@@ -93,7 +93,7 @@ public class RoomQuotaResetTests(
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () =>
             await _quotaApi.ResetRoomQuotaAsync(
-                new UpdateRoomsRoomIdsRequestDtoInteger([new(room.Id)]),
+                new UpdateRoomsRoomIdsRequestDto([new(room.Id)]),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
@@ -115,7 +115,7 @@ public class RoomQuotaResetTests(
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () =>
             await _quotaApi.ResetRoomQuotaAsync(
-                new UpdateRoomsRoomIdsRequestDtoInteger([new(room.Id)]),
+                new UpdateRoomsRoomIdsRequestDto([new(room.Id)]),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
@@ -134,11 +134,11 @@ public class RoomQuotaResetTests(
         var room = await CreateRoomOfType(roomType, "Autotest Reset Quota Room Type " + Guid.NewGuid().ToString()[..8]);
 
         await _quotaApi.UpdateRoomsQuotaAsync(
-            new UpdateRoomsQuotaRequestDtoInteger([new(room.Id)], QuotaMinimalBytes),
+            new UpdateRoomsQuotaRequestDto([new(room.Id)], QuotaMinimalBytes),
             TestContext.Current.CancellationToken);
 
         var result = (await _quotaApi.ResetRoomQuotaAsync(
-            new UpdateRoomsRoomIdsRequestDtoInteger([new(room.Id)]),
+            new UpdateRoomsRoomIdsRequestDto([new(room.Id)]),
             TestContext.Current.CancellationToken)).Response;
 
         result.Should().ContainSingle();

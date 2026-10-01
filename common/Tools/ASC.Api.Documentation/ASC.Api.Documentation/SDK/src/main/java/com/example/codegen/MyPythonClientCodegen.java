@@ -18,6 +18,7 @@ package com.example.codegen;
 
 import org.openapitools.codegen.model.*;
 import org.openapitools.codegen.languages.PythonClientCodegen;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.servers.*;
 import io.swagger.v3.oas.models.headers.*;
 import static org.openapitools.codegen.utils.StringUtils.underscore;
@@ -82,9 +83,110 @@ public class MyPythonClientCodegen extends PythonClientCodegen {
         }
     }
 
+    /** On a parameter that differs in the twin: the pydantic typing of the union, and of the twin alone. */
+    private static final String PY_TYPING = "x-py-typing";
+    private static final String PY_TYPING_UNION = "x-thirdparty-py-typing-union";
+    private static final String PY_TYPING_VARIANT = "x-thirdparty-py-typing-variant";
+
+    // Python has typing.overload, so the twin stays attached to its operation: the method takes
+    // Union[int, str] ids, three @overload stubs give the precise answer type per id type, and the
+    // response map picks the model at run time by the id's type. The twin's parameters get their
+    // pydantic typing the same way the real operations do - by running them through the base class.
+    private void markThirdPartyOverloads(OperationsMap objs, List<ModelMap> allModels) {
+        List<CodegenOperation> variants = new ArrayList<>();
+        for (CodegenOperation op : objs.getOperations().getOperation()) {
+            Object attached = op.vendorExtensions.get(ThirdPartyVariants.VARIANT_OPERATION);
+            if (attached instanceof CodegenOperation) {
+                variants.add((CodegenOperation) attached);
+            }
+        }
+        if (variants.isEmpty()) {
+            return;
+        }
+
+        boolean typed = variants.stream()
+            .flatMap(v -> v.allParams.stream())
+            .allMatch(p -> p.vendorExtensions.containsKey(PY_TYPING));
+        if (!typed) {
+            OperationMap variantMap = new OperationMap();
+            variantMap.setClassname(objs.getOperations().getClassname());
+            variantMap.setOperation(variants);
+            OperationsMap scratch = new OperationsMap();
+            scratch.setOperation(variantMap);
+            scratch.setImports(new ArrayList<>(objs.getImports()));
+            super.postProcessOperationsWithModels(scratch, allModels);
+        }
+
+        // The base class rebuilds the file's imports from what the operations' own typing names, so the
+        // twin's models - its answer, its body - are appended here in the same "from ... import ..." form.
+        List<Map<String, String>> imports = objs.getImports();
+        Set<String> present = new HashSet<>();
+        for (Map<String, String> entry : imports) {
+            present.add(entry.get("import"));
+        }
+        for (CodegenOperation variant : variants) {
+            for (String name : variant.imports) {
+                String line = toModelImport(name);
+                if (line != null && present.add(line)) {
+                    Map<String, String> entry = new LinkedHashMap<>();
+                    entry.put("import", line);
+                    imports.add(entry);
+                }
+            }
+        }
+
+        for (CodegenOperation op : objs.getOperations().getOperation()) {
+            ThirdPartyVariants.markUnions(op, (a, b) -> "Union[" + a + ", " + b + "]");
+
+            Object attached = op.vendorExtensions.get(ThirdPartyVariants.VARIANT_OPERATION);
+            if (!(attached instanceof CodegenOperation)) {
+                continue;
+            }
+            CodegenOperation variant = (CodegenOperation) attached;
+            CodegenParameter variantBody = variant.allParams.stream().filter(p -> p.isBodyParam).findFirst().orElse(null);
+
+            for (CodegenParameter parameter : op.allParams) {
+                if (!parameter.vendorExtensions.containsKey(ThirdPartyVariants.UNION_TYPE)) {
+                    continue;
+                }
+                CodegenParameter twin = parameter.isBodyParam
+                    ? variantBody
+                    : variant.allParams.stream().filter(p -> p.paramName.equals(parameter.paramName)).findFirst().orElse(null);
+                if (twin == null) {
+                    continue;
+                }
+                Object original = parameter.vendorExtensions.get(PY_TYPING);
+                Object twinTyping = twin.vendorExtensions.get(PY_TYPING);
+                if (original != null && twinTyping != null) {
+                    parameter.vendorExtensions.put(PY_TYPING_VARIANT, twinTyping);
+                    parameter.vendorExtensions.put(PY_TYPING_UNION, "Union[" + original + ", " + twinTyping + "]");
+                }
+            }
+        }
+    }
+
+    // The third-party twin of a generic action (see ThirdPartyVariants): the string-id shape the document
+    // carries as `x-thirdparty-variant`, exposed as a sibling method with the ThirdParty suffix.
+    @Override
+    public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List<Server> servers) {
+        CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);
+        ThirdPartyVariants.attach(this, op, path, httpMethod, operation, servers, ThirdPartyVariants.Naming.OVERLOAD);
+        return op;
+    }
+
+    @Override
+    public void postProcess() {
+        super.postProcess();
+        StaleOutput.delete(this);
+        LineEndings.normalize(this);
+    }
+
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
+        ThirdPartyVariants.addAttachedImports(this, objs);
+
         super.postProcessOperationsWithModels(objs, allModels);
+        markThirdPartyOverloads(objs, allModels);
 
         if (objs != null && objs.getOperations() != null) {
             OperationMap operationMap = objs.getOperations();
