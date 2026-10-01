@@ -260,7 +260,8 @@ public class UserController(
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The new profile with its detailed information", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "The password does not meet the portal password policy")]
-    [SwaggerResponse(403, "The invitation link is invalid or has expired, the portal does not allow inviting this kind of account, or the caller may not create an account of the requested type")]
+    [SwaggerResponse(403, "The invitation link is invalid or has expired, the portal does not allow inviting this kind of account, the caller may not create an account of the requested type, the `files` URL was refused, or the server behind it answered with an error status after the account had been created")]
+    [SwaggerResponse(500, "The `files` URL could not be reached within 10 seconds, or the downloaded file is empty, is not an image the portal can read, or exceeds the portal limit on image size; the account is created all the same")]
     [HttpPost]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Authenticated")]
     public async Task<EmployeeFullDto> AddMember(MemberRequestDto inDto)
@@ -2217,8 +2218,9 @@ public class UserController(
     [SwaggerResponse(200, "The profile as it is after the update", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "The first and last name pair is not a valid user name")]
     [SwaggerResponse(402, "The tariff or the user quota does not allow the requested guest or member seat")]
-    [SwaggerResponse(403, "The account is the portal owner or a system account, the caller may not edit it, or only the portal owner may edit a DocSpace administrator")]
+    [SwaggerResponse(403, "The account is the portal owner or a system account, the caller may not edit it, only the portal owner may edit a DocSpace administrator, or, on the caller's own profile, the `files` URL was refused or the server behind it answered with an error status")]
     [SwaggerResponse(404, "No user has the specified ID")]
+    [SwaggerResponse(500, "On the caller's own profile, the `files` URL could not be reached within 10 seconds, or the downloaded file is empty, is not an image the portal can read, or exceeds the portal limit on image size")]
     [HttpPut("{userid}", Order = 1)]
     public async Task<EmployeeFullDto> UpdateMember(UpdateMemberByIdRequestDto inDto)
     {

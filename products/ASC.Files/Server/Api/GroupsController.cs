@@ -237,6 +237,7 @@ public class GroupsController(
     /// <collection>list</collection>
     [Tags("Rooms / Groups")]
     [SwaggerResponse(200, "The room groups of the calling account", typeof(IAsyncEnumerable<RoomGroupDto>))]
+    [SwaggerResponse(400, "The `searchArea` names a section other than `Active` and `Forms`")]
     [HttpGet("")]
     public async IAsyncEnumerable<RoomGroupDto> GetRoomGroups(RoomGroupsRequestDto inDto)
     {
