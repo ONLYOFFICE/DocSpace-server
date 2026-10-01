@@ -1,0 +1,1178 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+namespace ASC.Files.Core.Data;
+
+[Scope(typeof(IMetadataDao<int>))]
+internal class MetadataDao(
+    IDbContextFactory<FilesDbContext> dbContextManager,
+    UserManager userManager,
+    TenantManager tenantManager,
+    TenantUtil tenantUtil,
+    SetupInfo setupInfo,
+    MaxTotalSizeStatistic maxTotalSizeStatistic,
+    SettingsManager settingsManager,
+    AuthContext authContext,
+    IServiceProvider serviceProvider,
+    IDistributedLockProvider distributedLockProvider,
+    MetadataTemplatesCache metadataTemplatesCache)
+    : AbstractDao(dbContextManager,
+        userManager,
+        tenantManager,
+        tenantUtil,
+        setupInfo,
+        maxTotalSizeStatistic,
+        settingsManager,
+        authContext,
+        serviceProvider,
+        distributedLockProvider), IMetadataDao<int>
+{
+    public async Task<MetadataTemplate> SaveTemplateAsync(MetadataTemplate template)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var now = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
+        var userId = _authContext.CurrentAccount.ID;
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        DbFilesMetadataTemplate dbTemplate;
+
+        if (template.Id == 0)
+        {
+            dbTemplate = new DbFilesMetadataTemplate
+            {
+                TenantId = tenantId,
+                Name = template.Name,
+                Visible = template.Visible,
+                IsSystem = template.IsSystem,
+                CreateBy = userId,
+                CreateOn = now,
+                ModifiedBy = userId,
+                ModifiedOn = now
+            };
+
+            await filesDbContext.MetadataTemplates.AddAsync(dbTemplate);
+        }
+        else
+        {
+            dbTemplate = await Query(filesDbContext.MetadataTemplates).FirstOrDefaultAsync(r => r.Id == template.Id);
+            if (dbTemplate == null)
+            {
+                return null;
+            }
+
+            dbTemplate.Name = template.Name;
+            dbTemplate.Visible = template.Visible;
+            dbTemplate.ModifiedBy = userId;
+            dbTemplate.ModifiedOn = now;
+
+            // the context is no-tracking, so a loaded entity has to be re-attached for its changes to be saved
+            filesDbContext.MetadataTemplates.Update(dbTemplate);
+        }
+
+        await filesDbContext.SaveChangesAsync();
+
+        if (template.Id == 0)
+        {
+            await metadataTemplatesCache.InvalidateAsync(tenantId);
+        }
+
+        return ToTemplate(dbTemplate);
+    }
+
+    public async Task<MetadataTemplate> SaveTemplateWithFieldsAsync(MetadataTemplate template, IEnumerable<MetadataField> fields)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var now = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
+        var userId = _authContext.CurrentAccount.ID;
+        var fieldsList = fields?.ToList() ?? [];
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        var saved = await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            var dbTemplate = new DbFilesMetadataTemplate
+            {
+                TenantId = tenantId,
+                Name = template.Name,
+                Visible = template.Visible,
+                IsSystem = template.IsSystem,
+                CreateBy = userId,
+                CreateOn = now,
+                ModifiedBy = userId,
+                ModifiedOn = now
+            };
+
+            await context.MetadataTemplates.AddAsync(dbTemplate);
+
+            // the fields need the template id, so the template is flushed first; both writes are still one transaction
+            await context.SaveChangesAsync();
+
+            var dbFields = fieldsList.Select(field => new DbFilesMetadataField
+            {
+                TenantId = tenantId,
+                TemplateId = dbTemplate.Id,
+                Name = field.Name,
+                Type = field.Type,
+                Options = SerializeOptions(field.Options),
+                Order = field.Order ?? 0,
+                CreateBy = userId,
+                CreateOn = now,
+                ModifiedBy = userId,
+                ModifiedOn = now
+            }).ToList();
+
+            if (dbFields.Count > 0)
+            {
+                await context.MetadataFields.AddRangeAsync(dbFields);
+                await context.SaveChangesAsync();
+            }
+
+            await tx.CommitAsync();
+
+            // the same order a read gives, so the answer of the creation and the template read afterwards agree
+            var result = ToTemplate(dbTemplate);
+            result.Fields.AddRange(dbFields.OrderBy(f => f.Order).ThenBy(f => f.Id).Select(ToField));
+
+            return result;
+        });
+
+        await metadataTemplatesCache.InvalidateAsync(tenantId);
+
+        return saved;
+    }
+
+    public async Task<MetadataTemplate> GetTemplateAsync(int templateId, bool withFields = true)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var dbTemplate = await Query(filesDbContext.MetadataTemplates).FirstOrDefaultAsync(r => r.Id == templateId);
+        if (dbTemplate == null)
+        {
+            return null;
+        }
+
+        var template = ToTemplate(dbTemplate);
+
+        if (withFields)
+        {
+            template.Fields = await Query(filesDbContext.MetadataFields)
+                .Where(r => r.TemplateId == templateId)
+                .OrderBy(r => r.Order)
+                .ThenBy(r => r.Id)
+                .Select(r => ToField(r))
+                .ToListAsync();
+        }
+
+        return template;
+    }
+
+    public async IAsyncEnumerable<MetadataTemplate> GetTemplatesAsync(bool? visible = null, bool includeSystem = true, bool withFields = false)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var query = Query(filesDbContext.MetadataTemplates);
+
+        if (visible.HasValue)
+        {
+            query = query.Where(r => r.Visible == visible.Value);
+        }
+
+        if (!includeSystem)
+        {
+            query = query.Where(r => !r.IsSystem);
+        }
+
+        var templates = await query.OrderBy(r => r.Id).ToListAsync();
+
+        Dictionary<int, List<MetadataField>> fieldsByTemplate = null;
+
+        if (withFields && templates.Count > 0)
+        {
+            var templateIds = templates.Select(t => t.Id).ToList();
+
+            var fields = await Query(filesDbContext.MetadataFields)
+                .Where(r => templateIds.Contains(r.TemplateId))
+                .OrderBy(r => r.Order)
+                .ThenBy(r => r.Id)
+                .ToListAsync();
+
+            fieldsByTemplate = fields
+                .GroupBy(f => f.TemplateId)
+                .ToDictionary(g => g.Key, g => g.Select(ToField).ToList());
+        }
+
+        foreach (var dbTemplate in templates)
+        {
+            var template = ToTemplate(dbTemplate);
+
+            if (fieldsByTemplate != null && fieldsByTemplate.TryGetValue(dbTemplate.Id, out var fields))
+            {
+                template.Fields = fields;
+            }
+
+            yield return template;
+        }
+    }
+
+    public async Task DeleteTemplateAsync(int templateId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            var fieldIds = await context.MetadataFields
+                .Where(r => r.TenantId == tenantId && r.TemplateId == templateId)
+                .Select(r => r.Id)
+                .ToListAsync();
+
+            if (fieldIds.Count > 0)
+            {
+                await context.MetadataValues
+                    .Where(r => r.TenantId == tenantId && fieldIds.Contains(r.FieldId))
+                    .ExecuteDeleteAsync();
+
+                await context.MetadataFields
+                    .Where(r => r.TenantId == tenantId && r.TemplateId == templateId)
+                    .ExecuteDeleteAsync();
+            }
+
+            await context.MetadataLinks
+                .Where(r => r.TenantId == tenantId && r.TemplateId == templateId)
+                .ExecuteDeleteAsync();
+
+            await context.MetadataTemplates
+                .Where(r => r.TenantId == tenantId && r.Id == templateId)
+                .ExecuteDeleteAsync();
+
+            await tx.CommitAsync();
+        });
+
+        await metadataTemplatesCache.InvalidateAsync(tenantId);
+    }
+
+    public async Task<MetadataTemplate> GetSystemTemplateAsync(bool withFields = true)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var dbTemplate = await Query(filesDbContext.MetadataTemplates).FirstOrDefaultAsync(r => r.IsSystem);
+        if (dbTemplate == null)
+        {
+            return null;
+        }
+
+        return withFields ? await GetTemplateAsync(dbTemplate.Id) : ToTemplate(dbTemplate);
+    }
+
+    public async Task<MetadataField> SaveFieldAsync(MetadataField field)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var now = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
+        var userId = _authContext.CurrentAccount.ID;
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        DbFilesMetadataField dbField;
+
+        if (field.Id == 0)
+        {
+            dbField = new DbFilesMetadataField
+            {
+                TenantId = tenantId,
+                TemplateId = field.TemplateId,
+                Name = field.Name,
+                Type = field.Type,
+                Options = SerializeOptions(field.Options),
+                Order = field.Order ?? 0,
+                CreateBy = userId,
+                CreateOn = now,
+                ModifiedBy = userId,
+                ModifiedOn = now
+            };
+
+            await filesDbContext.MetadataFields.AddAsync(dbField);
+        }
+        else
+        {
+            dbField = await Query(filesDbContext.MetadataFields).FirstOrDefaultAsync(r => r.Id == field.Id);
+            if (dbField == null)
+            {
+                return null;
+            }
+
+            dbField.Name = field.Name;
+            dbField.Type = field.Type;
+            dbField.Options = SerializeOptions(field.Options);
+            dbField.Order = field.Order ?? dbField.Order;
+            dbField.ModifiedBy = userId;
+            dbField.ModifiedOn = now;
+
+            // the context is no-tracking, so a loaded entity has to be re-attached for its changes to be saved
+            filesDbContext.MetadataFields.Update(dbField);
+        }
+
+        await filesDbContext.SaveChangesAsync();
+
+        return ToField(dbField);
+    }
+
+    public async Task<MetadataField> GetFieldAsync(int fieldId)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var dbField = await Query(filesDbContext.MetadataFields).FirstOrDefaultAsync(r => r.Id == fieldId);
+
+        return dbField == null ? null : ToField(dbField);
+    }
+
+    public async IAsyncEnumerable<MetadataField> GetFieldsAsync(int templateId)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var fields = Query(filesDbContext.MetadataFields)
+            .Where(r => r.TemplateId == templateId)
+            .OrderBy(r => r.Order)
+            .ThenBy(r => r.Id)
+            .AsAsyncEnumerable();
+
+        await foreach (var field in fields)
+        {
+            yield return ToField(field);
+        }
+    }
+
+    public async IAsyncEnumerable<MetadataField> GetFieldsAsync(IEnumerable<int> fieldIds)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var fields = Query(filesDbContext.MetadataFields)
+            .Where(r => fieldIds.Contains(r.Id))
+            .AsAsyncEnumerable();
+
+        await foreach (var field in fields)
+        {
+            yield return ToField(field);
+        }
+    }
+
+    public async Task DeleteFieldAsync(int fieldId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            await context.MetadataValues
+                .Where(r => r.TenantId == tenantId && r.FieldId == fieldId)
+                .ExecuteDeleteAsync();
+
+            await context.MetadataFields
+                .Where(r => r.TenantId == tenantId && r.Id == fieldId)
+                .ExecuteDeleteAsync();
+
+            await tx.CommitAsync();
+        });
+    }
+
+    public async Task<bool> HasValuesAsync(int fieldId)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await Query(filesDbContext.MetadataValues).AnyAsync(r => r.FieldId == fieldId);
+    }
+
+    public async Task<List<int>> GetUnusedFieldIdsAsync(int templateId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await Query(filesDbContext.MetadataFields)
+            .Where(f => f.TemplateId == templateId && !filesDbContext.MetadataValues.Any(v => v.TenantId == tenantId && v.FieldId == f.Id))
+            .Select(f => f.Id)
+            .ToListAsync();
+    }
+
+    public async Task<bool> HasValuesAsync(int fieldId, IEnumerable<Guid> optionIds)
+    {
+        var ids = optionIds.Select(id => id.ToString()).ToList();
+
+        if (ids.Count == 0)
+        {
+            return false;
+        }
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await Query(filesDbContext.MetadataValues).AnyAsync(r => r.FieldId == fieldId && ids.Contains(r.OptionId));
+    }
+
+    public async Task SaveLinksAsync(IEnumerable<MetadataTemplateLink> links)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var now = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
+        var userId = _authContext.CurrentAccount.ID;
+        var linksList = links.ToList();
+
+        await RetryOnDuplicateKeyAsync(async () =>
+        {
+            await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+            foreach (var link in linksList)
+            {
+                var entryId = (int)link.EntryId;
+
+                var existing = await filesDbContext.MetadataLinks.FindAsync(tenantId, link.TemplateId, entryId, link.EntryType);
+
+                if (existing == null)
+                {
+                    await filesDbContext.MetadataLinks.AddAsync(new DbFilesMetadataLink
+                    {
+                        TenantId = tenantId,
+                        TemplateId = link.TemplateId,
+                        EntryId = entryId,
+                        EntryType = link.EntryType,
+                        Cascade = link.Cascade,
+                        CascadeConflict = link.Cascade ? link.CascadeConflict : MetadataConflictResolveType.Skip,
+                        SourceFolderId = link.SourceFolderId,
+                        CreateBy = link.CreateBy != Guid.Empty ? link.CreateBy : userId,
+                        CreateOn = now
+                    });
+                }
+                else
+                {
+                    // direct assignment wins over cascaded provenance, cascade flag is never downgraded
+                    var changed = false;
+
+                    if (existing.SourceFolderId != null && link.SourceFolderId == null)
+                    {
+                        existing.SourceFolderId = null;
+                        changed = true;
+                    }
+
+                    if (link.Cascade && !existing.Cascade)
+                    {
+                        existing.Cascade = true;
+                        changed = true;
+                    }
+
+                    // a repeated cascade request re-declares how the subtree conflicts are treated: the latest mode wins
+                    if (link.Cascade && existing.CascadeConflict != link.CascadeConflict)
+                    {
+                        existing.CascadeConflict = link.CascadeConflict;
+                        changed = true;
+                    }
+
+                    if (changed)
+                    {
+                        // the context is no-tracking, so the found entity has to be re-attached for its changes to be saved
+                        filesDbContext.MetadataLinks.Update(existing);
+                    }
+                }
+            }
+
+            await filesDbContext.SaveChangesAsync();
+        });
+    }
+
+    public async IAsyncEnumerable<MetadataTemplateLink> GetLinksAsync(int entryId, FileEntryType entryType)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var link in filesDbContext.MetadataLinksByEntryAsync(tenantId, entryId, entryType))
+        {
+            yield return ToLink(link);
+        }
+    }
+
+    public async IAsyncEnumerable<MetadataTemplateLink> GetLinksAsync(IEnumerable<int> entryIds, FileEntryType entryType)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var link in filesDbContext.MetadataLinksByEntriesAsync(tenantId, entryIds, entryType))
+        {
+            yield return ToLink(link);
+        }
+    }
+
+    public async IAsyncEnumerable<MetadataTemplateLink> GetLinksAsync(IEnumerable<int> fileIds, IEnumerable<int> folderIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var link in filesDbContext.MetadataLinksByFilesAndFoldersAsync(tenantId, fileIds, folderIds))
+        {
+            yield return ToLink(link);
+        }
+    }
+
+    public async IAsyncEnumerable<int> GetCascadeTemplateIdsForAncestorsAsync(int folderId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await foreach (var templateId in filesDbContext.MetadataCascadeTemplateIdsAsync(tenantId, folderId))
+        {
+            yield return templateId;
+        }
+    }
+
+    public async Task DeleteLinksAsync(int entryId, FileEntryType entryType, int? templateId = null)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        if (templateId.HasValue)
+        {
+            await filesDbContext.DeleteMetadataLinkAsync(tenantId, entryId, entryType, templateId.Value);
+        }
+        else
+        {
+            await filesDbContext.DeleteMetadataLinksByEntriesAsync(tenantId, [entryId], entryType);
+        }
+    }
+
+    public async Task DeleteLinkWithValuesAsync(int entryId, FileEntryType entryType, int templateId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            await context.DeleteMetadataLinkAsync(tenantId, entryId, entryType, templateId);
+
+            var fieldIds = await context.MetadataFields
+                .Where(f => f.TenantId == tenantId && f.TemplateId == templateId)
+                .Select(f => f.Id)
+                .ToListAsync();
+
+            if (fieldIds.Count > 0)
+            {
+                await context.DeleteMetadataValuesByFieldsAsync(tenantId, entryId, entryType, fieldIds);
+            }
+
+            await tx.CommitAsync();
+        });
+    }
+
+    public async Task DeleteOrphanedTemplateRowsAsync(int templateId, IEnumerable<int> fieldIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var fieldIdsList = fieldIds.ToList();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        if (fieldIdsList.Count > 0)
+        {
+            await filesDbContext.MetadataValues
+                .Where(r => r.TenantId == tenantId && fieldIdsList.Contains(r.FieldId))
+                .ExecuteDeleteAsync();
+        }
+
+        await filesDbContext.MetadataLinks
+            .Where(r => r.TenantId == tenantId && r.TemplateId == templateId)
+            .ExecuteDeleteAsync();
+    }
+
+    public async Task<List<MetadataValue>> DeleteValuesWrittenAsAsync(int fieldId, MetadataFieldType type)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var rows = filesDbContext.MetadataValues.Where(r => r.TenantId == tenantId && r.FieldId == fieldId);
+
+        rows = type switch
+        {
+            MetadataFieldType.String => rows.Where(r => r.ValueString != null),
+            MetadataFieldType.Number => rows.Where(r => r.ValueNumber != null),
+            MetadataFieldType.Date => rows.Where(r => r.ValueDate != null),
+            _ => rows.Where(r => r.OptionId != "")
+        };
+
+        var entries = await rows
+            .Select(r => new MetadataValue { FieldId = r.FieldId, EntryId = r.EntryId, EntryType = r.EntryType })
+            .Distinct()
+            .ToListAsync();
+
+        await rows.ExecuteDeleteAsync();
+
+        return entries;
+    }
+
+    public async Task ConvertCascadeLinksToDirectAsync(int sourceFolderId, int? templateId = null)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        await filesDbContext.ConvertMetadataCascadeLinksToDirectAsync(tenantId, sourceFolderId, templateId);
+    }
+
+    public async Task SetValuesAsync(int entryId, FileEntryType entryType, IEnumerable<MetadataValue> values)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var now = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
+        var userId = _authContext.CurrentAccount.ID;
+
+        var valuesList = values.ToList();
+        if (valuesList.Count == 0)
+        {
+            return;
+        }
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        await RetryOnDuplicateKeyAsync(() => strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            var fieldIds = valuesList.Select(v => v.FieldId).Distinct().ToList();
+
+            await context.DeleteMetadataValuesByFieldsAsync(tenantId, entryId, entryType, fieldIds);
+
+            foreach (var value in valuesList.Where(v => !v.IsEmpty))
+            {
+                foreach (var row in ToDbValues(value, tenantId, entryId, entryType, userId, now))
+                {
+                    await context.MetadataValues.AddAsync(row);
+                }
+            }
+
+            await context.SaveChangesAsync();
+            await tx.CommitAsync();
+        }));
+    }
+
+    public async IAsyncEnumerable<MetadataValue> GetValuesAsync(int entryId, FileEntryType entryType, IEnumerable<int> fieldIds = null)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var rows = await filesDbContext.MetadataValuesByEntryAsync(tenantId, entryId, entryType).ToListAsync();
+
+        if (fieldIds != null)
+        {
+            var fieldIdSet = fieldIds.ToHashSet();
+            rows = rows.Where(r => fieldIdSet.Contains(r.FieldId)).ToList();
+        }
+
+        foreach (var value in ToValues(rows))
+        {
+            yield return value;
+        }
+    }
+
+    public async IAsyncEnumerable<MetadataValue> GetValuesAsync(IEnumerable<int> entryIds, FileEntryType entryType)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var rows = await filesDbContext.MetadataValuesByEntriesAsync(tenantId, entryIds, entryType).ToListAsync();
+
+        foreach (var group in rows.GroupBy(r => r.EntryId))
+        {
+            foreach (var value in ToValues(group.ToList()))
+            {
+                yield return value;
+            }
+        }
+    }
+
+    public async Task DeleteValuesAsync(int entryId, FileEntryType entryType, IEnumerable<int> fieldIds = null)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        if (fieldIds != null)
+        {
+            await filesDbContext.DeleteMetadataValuesByFieldsAsync(tenantId, entryId, entryType, fieldIds);
+        }
+        else
+        {
+            await filesDbContext.DeleteMetadataValuesByEntriesAsync(tenantId, [entryId], entryType);
+        }
+    }
+
+    public async Task<bool> CopyMetadataAsync(int fromEntryId, int toEntryId, FileEntryType entryType)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var userId = _authContext.CurrentAccount.ID;
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        // the context is created inside the strategy, so a retried attempt starts from an empty change tracker
+        // instead of re-adding the rows of the failed one on top of themselves
+        return await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            var copied = await context.CopyMetadataAsync(tenantId, fromEntryId, toEntryId, entryType, userId);
+
+            await tx.CommitAsync();
+
+            return copied;
+        });
+    }
+
+    public async IAsyncEnumerable<int> GetSubtreeFolderIdsAsync(int rootFolderId)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var folderIds = filesDbContext.Tree
+            .Where(t => t.ParentId == rootFolderId && t.FolderId != rootFolderId)
+            .OrderBy(t => t.FolderId)
+            .Select(t => t.FolderId)
+            .AsAsyncEnumerable();
+
+        await foreach (var folderId in folderIds)
+        {
+            yield return folderId;
+        }
+    }
+
+    public async IAsyncEnumerable<int> GetFileIdsByParentFoldersAsync(IEnumerable<int> folderIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var fileIds = filesDbContext.Files
+            .Where(r => r.TenantId == tenantId && r.CurrentVersion && folderIds.Contains(r.ParentId))
+            .OrderBy(r => r.Id)
+            .Select(r => r.Id)
+            .Distinct()
+            .AsAsyncEnumerable();
+
+        await foreach (var fileId in fileIds)
+        {
+            yield return fileId;
+        }
+    }
+
+    public async Task<List<int>> ApplyCascadeBatchAsync(IReadOnlyCollection<int> entryIds, FileEntryType entryType, IReadOnlyCollection<int> templateIds, int sourceFolderId, IReadOnlyCollection<MetadataValue> values, MetadataConflictResolveType conflict)
+    {
+        if (entryIds.Count == 0)
+        {
+            return [];
+        }
+
+        var tenantId = _tenantManager.GetCurrentTenantId();
+        var now = _tenantUtil.DateTimeToUtc(_tenantUtil.DateTimeNow());
+        var userId = _authContext.CurrentAccount.ID;
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        var changed = new HashSet<int>();
+
+        await RetryOnDuplicateKeyAsync(() => strategy.ExecuteAsync(async () =>
+        {
+            // a retried attempt starts over, so does its record of what it wrote
+            changed.Clear();
+
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            var existingLinks = await context.MetadataLinks
+                .Where(r => r.TenantId == tenantId && r.EntryType == entryType && entryIds.Contains(r.EntryId) && templateIds.Contains(r.TemplateId))
+                .Select(r => new { r.EntryId, r.TemplateId })
+                .ToListAsync();
+
+            var existingLinkSet = existingLinks.Select(l => (l.EntryId, l.TemplateId)).ToHashSet();
+
+            // the folder the pass runs for is the nearest cascading ancestor of every entry in the batch (the subtrees of the
+            // nested cascading folders were left out by the caller), so an inherited link pointing at a farther source follows
+            // it, the same way a move re-points it in ApplyMetadataCascadeLinksAsync; a direct assignment keeps its provenance.
+            // Without this an un-cascade on the farther folder converted the links below the nearer one, and one on the nearer
+            // folder converted nothing
+            await context.MetadataLinks
+                .Where(r => r.TenantId == tenantId && r.EntryType == entryType && entryIds.Contains(r.EntryId) && templateIds.Contains(r.TemplateId) &&
+                    r.SourceFolderId != null && r.SourceFolderId != sourceFolderId)
+                .ExecuteUpdateAsync(s => s.SetProperty(r => r.SourceFolderId, sourceFolderId));
+
+            foreach (var entryId in entryIds)
+            {
+                foreach (var templateId in templateIds)
+                {
+                    if (!existingLinkSet.Contains((entryId, templateId)))
+                    {
+                        changed.Add(entryId);
+
+                        await context.MetadataLinks.AddAsync(new DbFilesMetadataLink
+                        {
+                            TenantId = tenantId,
+                            TemplateId = templateId,
+                            EntryId = entryId,
+                            EntryType = entryType,
+                            SourceFolderId = sourceFolderId,
+                            CreateBy = userId,
+                            CreateOn = now
+                        });
+                    }
+                }
+            }
+
+            var valuesList = values.Where(v => !v.IsEmpty).ToList();
+
+            if (valuesList.Count > 0)
+            {
+                var fieldIds = valuesList.Select(v => v.FieldId).Distinct().ToList();
+
+                var existingValues = await context.MetadataValues
+                    .Where(r => r.TenantId == tenantId && r.EntryType == entryType && entryIds.Contains(r.EntryId) && fieldIds.Contains(r.FieldId))
+                    .Select(r => new { r.EntryId, r.FieldId })
+                    .ToListAsync();
+
+                var existingValueSet = existingValues.Select(v => (v.EntryId, v.FieldId)).ToHashSet();
+
+                if (conflict == MetadataConflictResolveType.Overwrite)
+                {
+                    await context.MetadataValues
+                        .Where(r => r.TenantId == tenantId && r.EntryType == entryType && entryIds.Contains(r.EntryId) && fieldIds.Contains(r.FieldId))
+                        .ExecuteDeleteAsync();
+                }
+
+                foreach (var entryId in entryIds)
+                {
+                    foreach (var value in valuesList)
+                    {
+                        if (conflict == MetadataConflictResolveType.Skip && existingValueSet.Contains((entryId, value.FieldId)))
+                        {
+                            continue;
+                        }
+
+                        changed.Add(entryId);
+
+                        foreach (var row in ToDbValues(value, tenantId, entryId, entryType, userId, now))
+                        {
+                            await context.MetadataValues.AddAsync(row);
+                        }
+                    }
+                }
+            }
+
+            await context.SaveChangesAsync();
+            await tx.CommitAsync();
+        }));
+
+        return changed.ToList();
+    }
+
+    public async Task<List<MetadataTemplateLink>> GetCascadeLinksByFoldersAsync(IEnumerable<int> folderIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.MetadataLinks
+            .Where(r => r.TenantId == tenantId && r.Cascade && r.EntryType == FileEntryType.Folder && folderIds.Contains(r.EntryId))
+            .Select(r => ToLink(r))
+            .ToListAsync();
+    }
+
+    public async Task<Dictionary<int, int>> GetAncestorLevelsAsync(int folderId)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.Tree
+            .Where(t => t.FolderId == folderId && t.ParentId != folderId)
+            .ToDictionaryAsync(t => t.ParentId, t => t.Level);
+    }
+
+    public async Task<List<MetadataTemplateLink>> GetCascadeLinksInSubtreeAsync(int rootFolderId, IEnumerable<int> templateIds)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.Tree
+            .Where(t => t.ParentId == rootFolderId && t.FolderId != rootFolderId)
+            .Join(filesDbContext.MetadataLinks
+                    .Where(l => l.TenantId == tenantId && l.Cascade && l.EntryType == FileEntryType.Folder && templateIds.Contains(l.TemplateId)),
+                t => t.FolderId,
+                l => l.EntryId,
+                (t, l) => l)
+            .Select(l => ToLink(l))
+            .ToListAsync();
+    }
+
+    public async Task<List<int>> GetFolderIdsInSubtreesAsync(IEnumerable<int> rootFolderIds)
+    {
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.Tree
+            .Where(t => rootFolderIds.Contains(t.ParentId))
+            .Select(t => t.FolderId)
+            .Distinct()
+            .ToListAsync();
+    }
+
+    public async Task<List<MetadataTemplateLink>> GetLinksByTemplateAsync(int templateId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.MetadataLinks
+            .Where(r => r.TenantId == tenantId && r.TemplateId == templateId)
+            .Select(r => ToLink(r))
+            .ToListAsync();
+    }
+
+    public async Task<List<MetadataValue>> GetValueEntriesAsync(int fieldId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        return await filesDbContext.MetadataValues
+            .Where(r => r.TenantId == tenantId && r.FieldId == fieldId)
+            .Select(r => new MetadataValue { FieldId = r.FieldId, EntryId = r.EntryId, EntryType = r.EntryType })
+            .ToListAsync();
+    }
+
+    /// <summary>
+    /// Runs a write that reads the existing link or value rows and inserts the missing ones. The cascade pass and
+    /// the user requests are not serialized against each other, so a request writing the same entry in between (an
+    /// assignment of the same template, a value for the same field) makes the insert collide on the primary key;
+    /// the write is then repeated from scratch and its second read sees the row and skips it, instead of failing the
+    /// request or dropping the rest of the cascade.
+    /// </summary>
+    private static async Task RetryOnDuplicateKeyAsync(Func<Task> write)
+    {
+        const int attempts = 3;
+
+        for (var attempt = 1; ; attempt++)
+        {
+            try
+            {
+                await write();
+
+                return;
+            }
+            catch (DbUpdateException e) when (attempt < attempts && IsDuplicateKey(e))
+            {
+            }
+        }
+    }
+
+    /// <summary>
+    /// The collision is told by the provider's error code, not by the message: MySQL localizes the message
+    /// with <c>lc_messages</c>, so a self-hosted server in another language would never match the English text.
+    /// </summary>
+    internal static bool IsDuplicateKey(DbUpdateException exception)
+    {
+        return exception.InnerException switch
+        {
+            MySqlConnector.MySqlException { ErrorCode: MySqlConnector.MySqlErrorCode.DuplicateKeyEntry } => true,
+            Npgsql.PostgresException { SqlState: Npgsql.PostgresErrorCodes.UniqueViolation } => true,
+            _ => false
+        };
+    }
+
+    private static MetadataTemplate ToTemplate(DbFilesMetadataTemplate dbTemplate)
+    {
+        return new MetadataTemplate
+        {
+            Id = dbTemplate.Id,
+            Name = dbTemplate.Name,
+            Visible = dbTemplate.Visible,
+            IsSystem = dbTemplate.IsSystem,
+            CreateBy = dbTemplate.CreateBy,
+            CreateOn = dbTemplate.CreateOn,
+            ModifiedBy = dbTemplate.ModifiedBy,
+            ModifiedOn = dbTemplate.ModifiedOn
+        };
+    }
+
+    private static MetadataField ToField(DbFilesMetadataField dbField)
+    {
+        return new MetadataField
+        {
+            Id = dbField.Id,
+            TemplateId = dbField.TemplateId,
+            Name = dbField.Name,
+            Type = dbField.Type,
+            Options = DeserializeOptions(dbField.Options),
+            Order = dbField.Order,
+            CreateBy = dbField.CreateBy,
+            CreateOn = dbField.CreateOn,
+            ModifiedBy = dbField.ModifiedBy,
+            ModifiedOn = dbField.ModifiedOn
+        };
+    }
+
+    private static MetadataTemplateLink ToLink(DbFilesMetadataLink dbLink)
+    {
+        return new MetadataTemplateLink
+        {
+            TemplateId = dbLink.TemplateId,
+            EntryId = dbLink.EntryId,
+            EntryType = dbLink.EntryType,
+            Cascade = dbLink.Cascade,
+            SourceFolderId = dbLink.SourceFolderId,
+            CascadeConflict = dbLink.CascadeConflict,
+            CreateBy = dbLink.CreateBy,
+            CreateOn = dbLink.CreateOn
+        };
+    }
+
+    private static IEnumerable<MetadataValue> ToValues(List<DbFilesMetadataValue> rows)
+    {
+        foreach (var group in rows.GroupBy(r => r.FieldId))
+        {
+            var first = group.First();
+
+            var value = new MetadataValue
+            {
+                FieldId = group.Key,
+                EntryId = first.EntryId,
+                EntryType = first.EntryType,
+                CreateBy = first.CreateBy,
+                CreateOn = first.CreateOn,
+                ModifiedBy = first.ModifiedBy,
+                ModifiedOn = first.ModifiedOn
+            };
+
+            var optionIds = group
+                .Where(r => !string.IsNullOrEmpty(r.OptionId))
+                .Select(r => Guid.Parse(r.OptionId))
+                .ToList();
+
+            if (optionIds.Count > 0)
+            {
+                value.OptionIds = optionIds;
+            }
+            else
+            {
+                value.StringValue = first.ValueString;
+                value.NumberValue = first.ValueNumber;
+                value.DateValue = first.ValueDate;
+            }
+
+            yield return value;
+        }
+    }
+
+    private static IEnumerable<DbFilesMetadataValue> ToDbValues(MetadataValue value, int tenantId, int entryId, FileEntryType entryType, Guid userId, DateTime now)
+    {
+        if (value.OptionIds is { Count: > 0 })
+        {
+            foreach (var optionId in value.OptionIds.Distinct())
+            {
+                yield return new DbFilesMetadataValue
+                {
+                    TenantId = tenantId,
+                    EntryId = entryId,
+                    EntryType = entryType,
+                    FieldId = value.FieldId,
+                    OptionId = optionId.ToString(),
+                    CreateBy = userId,
+                    CreateOn = now,
+                    ModifiedBy = userId,
+                    ModifiedOn = now
+                };
+            }
+        }
+        else
+        {
+            yield return new DbFilesMetadataValue
+            {
+                TenantId = tenantId,
+                EntryId = entryId,
+                EntryType = entryType,
+                FieldId = value.FieldId,
+                OptionId = string.Empty,
+                ValueString = value.StringValue,
+                ValueNumber = value.NumberValue,
+                ValueDate = value.DateValue,
+                CreateBy = userId,
+                CreateOn = now,
+                ModifiedBy = userId,
+                ModifiedOn = now
+            };
+        }
+    }
+
+    private static string SerializeOptions(List<MetadataFieldOption> options)
+    {
+        return options is { Count: > 0 } ? JsonSerializer.Serialize(options) : null;
+    }
+
+    private static List<MetadataFieldOption> DeserializeOptions(string options)
+    {
+        return string.IsNullOrEmpty(options) ? null : JsonSerializer.Deserialize<List<MetadataFieldOption>>(options);
+    }
+}

@@ -460,6 +460,12 @@
   <data name="IndexTitle" xml:space="preserve">
     <value>Search in documents content</value>
   </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Search in file metadata</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Search in folder metadata</value>
+  </data>
   <data name="KnowledgeFolder" xml:space="preserve">
     <value>Knowledge</value>
   </data>
