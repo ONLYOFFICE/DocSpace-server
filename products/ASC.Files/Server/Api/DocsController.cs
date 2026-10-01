@@ -34,7 +34,7 @@
 namespace ASC.Files.Api;
 
 /// <summary>
-/// Conversion carried out by the document service on behalf of the portal.
+/// Operations carried out by the document service on behalf of the portal.
 /// </summary>
 [Scope]
 [ApiEndpoint("docs")]
@@ -49,24 +49,24 @@ public class DocsController(
     : ControllerBase
 {
     /// <remarks>
-    /// Converts a file of this portal into another format and saves the result as a new portal file, answering with
-    /// that file. The source is named by identifier and read by the server, which uploads its content to the document
-    /// service, so the caller never learns the address of the document service and the document service never reaches
-    /// back into the portal for the source. The caller needs read access to the source file and the right to create
-    /// files in the folder; without a folder the result is saved into the "My documents" section of the caller.
-    /// Everything except `fileId` and `folderId` is passed on to the document service as it defines it, and
-    /// `outputtype` is the only parameter a plain conversion needs: the format of the source, its name and the key
-    /// its result is cached under are read off the file and cannot be set by the caller. The source is kept and the
-    /// result is saved beside it under a free name, so converting the same file twice adds a second file instead of
-    /// replacing the first. The call is answered once the conversion has finished, so a large file keeps the request
-    /// open for as long as the document service takes.
+    /// Converts a portal file into another format and saves the result as a new file, answering with that file. The
+    /// caller needs read access to the source and the right to create files in `folderId`; without `folderId` the
+    /// result goes to the "My documents" section of the caller. `outputtype` is the only parameter a plain conversion
+    /// needs; the other fields are passed to the document service under its own names, while the source format, name
+    /// and cache key are taken from the file. The call is mutating and not idempotent: the source is kept, and each
+    /// call adds another file under a free name. It answers once the conversion is done, so a large file keeps the
+    /// request open. Only files stored in the portal itself are accepted. To convert while copying into another folder,
+    /// a third-party one included, use `POST api/2.0/files/file/{fileId}/copyas`; to convert into the portal's own
+    /// editable format beside the source, use `PUT api/2.0/files/file/{fileId}/checkconversion`. A missing or
+    /// unsupported `outputtype` is refused with 400, missing access with 403, and an unknown file or folder with 404.
     /// </remarks>
     /// <summary>Convert a file</summary>
     /// <path>api/2.0/docs/converter</path>
     [Tags("Docs")]
     [SwaggerResponse(200, "The converted file, as it was saved in the portal", typeof(FileDto<int>))]
+    [SwaggerResponse(400, "`outputtype` is missing or the file cannot be converted to it")]
     [SwaggerResponse(403, "You do not have enough permissions to read the file or to create files in the folder")]
-    [SwaggerResponse(404, "File or folder not found")]
+    [SwaggerResponse(404, "The file or the folder does not exist")]
     [HttpPost("converter")]
     public async Task<FileDto<int>> ConvertFile(DocsConverterRequestDto inDto)
     {
@@ -94,17 +94,17 @@ public class DocsController(
     }
 
     /// <remarks>
-    /// Queues a background run of a document builder script on portal files and answers with the operation just
-    /// started. The script names portal files by identifier - `builder.OpenFile("1234")` - where the document builder
-    /// documentation writes an address. The caller needs read access to every file the script opens, edit access to
-    /// each file `outputs` replaces, which must not be locked or open in an editor, and the right to create files in
-    /// each folder a result is saved into. Each file the script saves goes where `outputs` says, keyed by the name
-    /// given to SaveFile: `fileId` stores it as a new version of that file, `folderId` as a new file there; an unlisted
-    /// file goes to `folderId` or to the folder of the opened file. Poll `GET api/2.0/files/fileops` with the returned
-    /// `id` until the operation reports `finished`: `files` then lists the saved files, a replaced one with its new
-    /// version, including those saved before a failure, and `error` the reason a failed build gave. What can be refused
-    /// in advance fails at once with 400, 403 or 404. The script runs with the rights of the document service, so this
-    /// call is only as safe as the accounts allowed to make it.
+    /// Queues a background run of a document builder script and answers with the operation just started. The script
+    /// names portal files by identifier - `builder.OpenFile("1234")` - where the document builder documentation writes
+    /// an address; only files stored in the portal itself can be opened. The caller needs read access to every file the
+    /// script opens, edit access to each file `outputs` replaces, which must not be locked or open in an editor, and
+    /// the right to create files in each folder a result is saved into. Each file the script saves goes where `outputs`
+    /// says, keyed by the name given to SaveFile: `fileId` stores it as a new version of that file, `folderId` as a new
+    /// file there; an unlisted file goes to `folderId` or to the folder of the opened file. The call is not idempotent:
+    /// each call is a new run. Poll `GET api/2.0/files/fileops` with the returned `id` until the operation reports
+    /// `finished`: `files` then lists the saved files, a replaced one with its new version, including those saved
+    /// before a failure, and `error` the reason a failed build gave. For a plain format change use
+    /// `POST api/2.0/docs/converter`. What can be refused in advance fails at once with 400, 403 or 404.
     /// </remarks>
     /// <summary>Run a document builder script</summary>
     /// <path>api/2.0/docs/builder</path>
@@ -112,7 +112,7 @@ public class DocsController(
     [SwaggerResponse(200, "The queued document builder operation to poll", typeof(FileOperationDto))]
     [SwaggerResponse(400, "The script or the argument is malformed, a file is addressed by an address, or a saved file has nowhere to go")]
     [SwaggerResponse(403, "You cannot read a file the script opens or write a result, or the file to replace is locked, being edited or in the trash")]
-    [SwaggerResponse(404, "File or folder not found")]
+    [SwaggerResponse(404, "A file the script opens or replaces, or a target folder, does not exist")]
     [HttpPost("builder")]
     public async Task<FileOperationDto> RunBuilderScript(DocsBuilderRequestDto inDto)
     {

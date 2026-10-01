@@ -202,8 +202,8 @@ public class OperationController(
 
     /// <remarks>
     /// Returns the background file operations of the caller that are still running or whose finished result has not
-    /// been read yet, grouped by kind: duplications first, then moves and copies, deletions, downloads and
-    /// mark-as-read. This is the polling target for every operation in this section — an operation appears here as
+    /// been read yet, grouped by kind: duplications first, then moves and copies, deletions, downloads, mark-as-read
+    /// and builder runs. This is the polling target for every operation in this section — an operation appears here as
     /// soon as it is queued and carries `progress` from 0 to 100, `finished`, the `error` of a failed item and, for a
     /// download, the address of the archive in `url`. A record is dropped once its finished state has been handed
     /// out, so a completed operation is reported once and an empty array means there is nothing left to report rather
@@ -234,16 +234,15 @@ public class OperationController(
     }
 
     /// <remarks>
-    /// Returns the background file operations of the caller that are of one kind, named by the number in the route:
-    /// `1` for a copy, `2` for a deletion, `3` for a download, `4` for a mark-as-read, `7` for a duplication and `8`
-    /// for a document builder run. The answer carries the same records as `GET api/2.0/files/fileops`, with the same
-    /// rule that a finished operation is reported once and then dropped, and `id` narrows it further to a single
-    /// operation. Moves, kind `0`, cannot
-    /// be read through this route: the address `api/2.0/files/fileops/move` belongs to another operation, so read
-    /// moves from `GET api/2.0/files/fileops` and pick the records whose `operation` is `0`. A kind that has no queue
-    /// of its own — `5` for an import, `6` for a conversion — is accepted and answers with an empty array, while a
-    /// number outside the operation type is rejected as an invalid request. The call changes nothing and never shows
-    /// another account's operations.
+    /// Returns the background file operations of the caller that are of one kind, named by the number in the route: `1`
+    /// for a copy, `2` for a deletion, `3` for a download, `4` for a mark-as-read, `7` for a duplication and `8` for a
+    /// document builder run. The answer carries the same records as `GET api/2.0/files/fileops`, with the same rule
+    /// that a finished operation is reported once and then dropped, and `id` narrows it further to a single operation.
+    /// Moves, kind `0`, cannot be read through this route: the address `api/2.0/files/fileops/move` belongs to another
+    /// operation, so read moves from `GET api/2.0/files/fileops` and pick the records whose `operation` is `0`. A kind
+    /// that has no queue of its own — `5` for an import, `6` for a conversion — is accepted and answers with an empty
+    /// array, while a number outside the operation type is rejected as an invalid request. The call changes nothing and
+    /// never shows another account's operations.
     /// </remarks>
     /// <summary>Get file operations by type</summary>
     /// <path>api/2.0/files/fileops/{operationType}</path>
