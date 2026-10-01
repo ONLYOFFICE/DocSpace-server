@@ -36,6 +36,7 @@ namespace ASC.Web.Core;
 public class WalletServiceDescriptionManager
 {
     private const string AgentSourceType = "Agent";
+    private const string FetchType = "fetch";
 
     private static readonly Dictionary<string, string> _mapping = new()
     {
@@ -80,6 +81,15 @@ public class WalletServiceDescriptionManager
                     quantity = quantityValue;
                 }
             }
+        }
+
+        // AI search bills page crawls under the same service as searches: only the type tells them apart.
+        if (serviceName == "ai-search" &&
+            metadata != null &&
+            metadata.TryGetValue(BillingClient.MetadataType, out var searchType) &&
+            searchType == FetchType)
+        {
+            serviceName = FetchType;
         }
 
         if (string.IsNullOrEmpty(serviceName))
@@ -200,6 +210,19 @@ public class WalletServiceDescriptionManager
             found = true;
             return tokens;
         }
+    }
+
+    /// <summary>
+    /// Reads what the provider charged for the whole quantity of an AI operation from its metadata.
+    /// Returns <c>null</c> when the metadata carries no cost or one that is not a number.
+    /// </summary>
+    public static decimal? GetProviderCost(Dictionary<string, string> metadata)
+    {
+        return metadata != null &&
+               metadata.TryGetValue(BillingClient.MetadataCost, out var value) &&
+               decimal.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var cost)
+            ? cost
+            : null;
     }
 
     /// <summary>

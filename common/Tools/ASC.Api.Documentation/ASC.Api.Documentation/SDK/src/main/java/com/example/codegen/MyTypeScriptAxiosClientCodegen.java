@@ -26,6 +26,7 @@ import org.openapitools.codegen.languages.TypeScriptAxiosClientCodegen;
 import static org.openapitools.codegen.utils.StringUtils.camelize;
 import org.openapitools.codegen.*;
 import org.openapitools.codegen.utils.ModelUtils;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.servers.*;
 import io.swagger.v3.oas.models.headers.*;
 import io.swagger.v3.oas.models.media.Schema;
@@ -176,8 +177,104 @@ public class MyTypeScriptAxiosClientCodegen extends TypeScriptAxiosClientCodegen
         }
     }
 
+    // The third-party twin of a generic action (see ThirdPartyVariants): the string-id shape the document
+    // carries as `x-thirdparty-variant`. TypeScript has no overloading by parameter type, but it has
+    // overload signatures, so the twin stays attached to its operation and the template renders one
+    // method: the request parameters that differ are typed `number | string`, and where the answer
+    // differs too the method gets three signatures - one per id type, and the general one.
+    @Override
+    public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List<Server> servers) {
+        CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);
+        ThirdPartyVariants.attach(this, op, path, httpMethod, operation, servers, ThirdPartyVariants.Naming.OVERLOAD);
+        return op;
+    }
+
+    /** On a parameter whose type differs in the third-party twin: the union of both types. */
+    private static final String UNION_TYPE = "x-thirdparty-union-type";
+
+    /** On an operation whose answer differs in the twin: render overload signatures. */
+    private static final String OVERLOAD = "x-thirdparty-overload";
+
+    /** The object type that narrows the request to the portal (int) shape: `{ fileId: number }`. */
+    private static final String NARROW = "x-thirdparty-narrow";
+
+    /** The object type that narrows the request to the third-party (string) shape. */
+    private static final String NARROW_VARIANT = "x-thirdparty-narrow-variant";
+
+    /** The twin's return type, and the union of both. */
+    private static final String RETURN_TYPE_VARIANT = "x-thirdparty-return-type-variant";
+    private static final String RETURN_TYPE_UNION = "x-thirdparty-return-type-union";
+
+    private static void markOverloads(OperationsMap objs) {
+        if (objs == null || objs.getOperations() == null || objs.getOperations().getOperation() == null) {
+            return;
+        }
+
+        for (CodegenOperation op : objs.getOperations().getOperation()) {
+            Object attached = op.vendorExtensions.get(ThirdPartyVariants.VARIANT_OPERATION);
+            if (!(attached instanceof CodegenOperation)) {
+                continue;
+            }
+
+            CodegenOperation variant = (CodegenOperation) attached;
+            ThirdPartyVariants.alignBodyName(op, variant);
+
+            Map<String, CodegenParameter> variantParams = new HashMap<>();
+            CodegenParameter variantBody = null;
+            for (CodegenParameter parameter : variant.allParams) {
+                variantParams.put(parameter.paramName, parameter);
+                if (parameter.isBodyParam) {
+                    // The entry of allParams, not variant.bodyParam: the generator keeps those as separate
+                    // copies, and the "changed" mark sits on the entry.
+                    variantBody = parameter;
+                }
+            }
+
+            List<String> narrow = new ArrayList<>();
+            List<String> narrowVariant = new ArrayList<>();
+
+            for (CodegenParameter parameter : op.allParams) {
+                // The body parameter is named after its schema, so the twin's differs (saveAsPdf vs
+                // thirdPartySaveAsPdf); there is one body per operation, so it is matched by role.
+                CodegenParameter twin = parameter.isBodyParam ? variantBody : variantParams.get(parameter.paramName);
+                if (twin == null || !twin.vendorExtensions.containsKey(ThirdPartyVariants.CHANGED)
+                        || Objects.equals(parameter.dataType, twin.dataType)) {
+                    continue;
+                }
+
+                parameter.vendorExtensions.put(UNION_TYPE, parameter.dataType + " | " + twin.dataType);
+                // Optional stays optional, or the narrowing signature would never match a call without it.
+                String name = parameter.paramName + (parameter.required ? "" : "?");
+                narrow.add(name + ": " + parameter.dataType);
+                narrowVariant.add(name + ": " + twin.dataType);
+            }
+
+            boolean returnChanged = variant.vendorExtensions.containsKey(ThirdPartyVariants.RETURN_CHANGED)
+                && !Objects.equals(op.returnType, variant.returnType);
+
+            if (!narrow.isEmpty() && returnChanged) {
+                op.vendorExtensions.put(OVERLOAD, true);
+                op.vendorExtensions.put(NARROW, "{ " + String.join("; ", narrow) + " }");
+                op.vendorExtensions.put(NARROW_VARIANT, "{ " + String.join("; ", narrowVariant) + " }");
+                op.vendorExtensions.put(RETURN_TYPE_VARIANT, variant.returnType == null ? "void" : variant.returnType);
+                op.vendorExtensions.put(RETURN_TYPE_UNION,
+                    (op.returnType == null ? "void" : op.returnType) + " | " + (variant.returnType == null ? "void" : variant.returnType));
+            }
+        }
+    }
+
+    @Override
+    public void postProcess() {
+        super.postProcess();
+        StaleOutput.delete(this);
+        LineEndings.normalize(this);
+    }
+
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
+        ThirdPartyVariants.addAttachedImports(this, objs);
+        markOverloads(objs);
+
         objs = super.postProcessOperationsWithModels(objs, allModels);
         OperationMap operationMap = objs.getOperations();
         List<CodegenOperation> operations = operationMap.getOperation();

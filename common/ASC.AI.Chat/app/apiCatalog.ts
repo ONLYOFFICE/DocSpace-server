@@ -35,6 +35,7 @@ import {
   DEFAULT_AI_ROUTES,
   DEFAULT_ASSIGNMENTS_ROUTES,
   DEFAULT_ATTACHMENTS_ROUTES,
+  DEFAULT_CONTEXT_ROUTES,
   DEFAULT_PREFERENCES_ROUTES,
   DEFAULT_PROFILES_ROUTES,
   DEFAULT_PROMPTS_ROUTES,
@@ -95,6 +96,12 @@ export const ENGINE_DOCS: ReadonlyArray<EngineDoc> = [
     tag: "Attachments",
     description: "Message file and image attachments.",
     routes: ATTACHMENTS_ROUTES,
+  },
+  {
+    name: "context",
+    tag: "Context",
+    description: "Rooms connected to the chat as context and the skills of their .ai folder.",
+    routes: DEFAULT_CONTEXT_ROUTES,
   },
   {
     name: "preferences",

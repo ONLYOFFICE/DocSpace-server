@@ -1554,4 +1554,7 @@
   <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
     <value>Слика</value>
   </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>Трошак провајдера</value>
+  </data>
 </root>

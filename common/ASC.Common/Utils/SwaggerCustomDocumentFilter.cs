@@ -147,7 +147,7 @@ public class DerivedSchemaFilter : ISchemaFilter
             var derivedArray = new JsonArray();
             foreach (var type in derivedTypes)
             {
-                var schemaId = CustomSchemaId(type);
+                var schemaId = OpenApiSchemaId.Of(type);
                 derivedArray.Add(schemaId);
             }
 
@@ -187,26 +187,6 @@ public class DerivedSchemaFilter : ISchemaFilter
         schema.Type = null;
     }
 
-    private static string CustomSchemaId(Type type)
-    {
-        var name = type.Name;
-
-        if (string.IsNullOrEmpty(name))
-        {
-            return name;
-        }
-
-        if (type.IsGenericType)
-        {
-            name = name.Split('`')[0];
-
-            var genericArgs = string.Join("", type.GenericTypeArguments.Select(CustomSchemaId));
-            name += genericArgs;
-        }
-        name = name.Replace("+", "_");
-        name = name.Replace("Int32", "Integer");
-        return name;
-    }
 }
 
 public class LowercaseDocumentFilter : IDocumentFilter

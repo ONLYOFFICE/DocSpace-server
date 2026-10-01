@@ -67,7 +67,7 @@ public class RoomReorderTests(
         await _filesApi.SetFileOrderAsync(fileId, new OrderRequestDto(order), TestContext.Current.CancellationToken);
     }
 
-    private async Task<FolderContentDtoInteger> GetContent(int folderId)
+    private async Task<FolderContentDto> GetContent(int folderId)
     {
         return (await _foldersApi.GetFolderByFolderIdAsync(folderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
     }

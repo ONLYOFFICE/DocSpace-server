@@ -66,6 +66,7 @@ switch (launchProfile)
             .AddRabbitMq(withManagementPlugin: false)
             .AddRedis()
             .AddOpensearch(withDashboard: false, isProxied: false)
+            .AddNextcloud()
             .AllowPortalRegistration();
 
         configurator
