@@ -2092,15 +2092,15 @@
       },
       "description": "The AI module settings."
     },
-    "AiFolderIntegerArrayWrapper": {
+    "AiFolderArrayWrapper": {
       "type": "object",
       "properties": {
         "response": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/AiFolderDtoInteger"
+            "$ref": "#/components/schemas/AiFolderDto"
           },
-          "description": "The list of FolderDtoInteger objects returned by the operation."
+          "description": "The list of FolderDto objects returned by the operation."
         },
         "count": {
           "type": "integer",
@@ -2135,12 +2135,12 @@
           "format": "int32"
         }
       },
-      "description": "The successful API response containing the list of FolderDtoInteger objects."
+      "description": "The successful API response containing the list of FolderDto objects."
     },
-    "AiFolderDtoInteger": {
+    "AiFolderDto": {
       "allOf": [
         {
-          "$ref": "#/components/schemas/AiFileEntryDtoInteger"
+          "$ref": "#/components/schemas/AiFileEntryDto"
         },
         {
           "type": "object",
@@ -2822,7 +2822,7 @@
       },
       "description": "The logo cover information."
     },
-    "AiFileEntryDtoInteger": {
+    "AiFileEntryDto": {
       "allOf": [
         {
           "$ref": "#/components/schemas/AiFileEntryBaseDto"
@@ -3342,10 +3342,10 @@
       "description": "What every file and folder in an answer has in common; the concrete shape is a file or a folder, told apart by the\r\nentry type.",
       "x-derived": true,
       "x-derived-types": [
-        "FileDtoInteger",
-        "FileDtoString",
-        "FolderDtoInteger",
-        "FolderDtoString"
+        "FileDto",
+        "ThirdPartyFileDto",
+        "FolderDto",
+        "ThirdPartyFolderDto"
       ]
     },
     "AiFileEntryType": {
@@ -3884,12 +3884,12 @@
       },
       "description": "The agent new item's information."
     },
-    "AiFolderIntegerWrapper": {
+    "AiFolderWrapper": {
       "type": "object",
       "properties": {
         "response": {
-          "description": "The FolderDtoInteger object returned by the operation.",
-          "$ref": "#/components/schemas/AiFolderDtoInteger"
+          "description": "The FolderDto object returned by the operation.",
+          "$ref": "#/components/schemas/AiFolderDto"
         },
         "count": {
           "type": "integer",
@@ -3924,14 +3924,14 @@
           "format": "int32"
         }
       },
-      "description": "The successful API response containing the FolderDtoInteger object."
+      "description": "The successful API response containing the FolderDto object."
     },
-    "AiFolderContentIntegerWrapper": {
+    "AiFolderContentWrapper": {
       "type": "object",
       "properties": {
         "response": {
-          "description": "The FolderContentDtoInteger object returned by the operation.",
-          "$ref": "#/components/schemas/AiFolderContentDtoInteger"
+          "description": "The FolderContentDto object returned by the operation.",
+          "$ref": "#/components/schemas/AiFolderContentDto"
         },
         "count": {
           "type": "integer",
@@ -3966,9 +3966,9 @@
           "format": "int32"
         }
       },
-      "description": "The successful API response containing the FolderContentDtoInteger object."
+      "description": "The successful API response containing the FolderContentDto object."
     },
-    "AiFolderContentDtoInteger": {
+    "AiFolderContentDto": {
       "required": [
         "pathParts",
         "total"
@@ -4015,7 +4015,7 @@
         },
         "current": {
           "description": "The folder or section the page was read from, with its own title, type and access rights. It describes the\r\ncontainer, not the entries, and is filled in even when the page is empty.",
-          "$ref": "#/components/schemas/AiFolderDtoInteger"
+          "$ref": "#/components/schemas/AiFolderDto"
         },
         "pathParts": {
           "examples": [
@@ -5622,7 +5622,7 @@
         ]
       },
       "response": {
-        "$ref": "#/components/schemas/AiFolderIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderWrapper"
       }
     },
     "aiAgentsUpdate": {
@@ -5692,7 +5692,7 @@
         }
       },
       "response": {
-        "$ref": "#/components/schemas/AiFolderIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderWrapper"
       }
     },
     "aiAgentsDelete": {
@@ -5737,7 +5737,7 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/AiFolderIntegerArrayWrapper"
+        "$ref": "#/components/schemas/AiFolderArrayWrapper"
       }
     },
     "aiAgentsResetQuota": {
@@ -5762,12 +5762,12 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/AiFolderIntegerArrayWrapper"
+        "$ref": "#/components/schemas/AiFolderArrayWrapper"
       }
     },
     "aiAgentsList": {
       "response": {
-        "$ref": "#/components/schemas/AiFolderContentIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderContentWrapper"
       }
     },
     "aiAgentsNews": {
@@ -5777,7 +5777,7 @@
     },
     "aiAgentsGet": {
       "response": {
-        "$ref": "#/components/schemas/AiFolderIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderWrapper"
       }
     },
     "aiSettingsGet": {

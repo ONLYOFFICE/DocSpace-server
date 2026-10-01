@@ -5,14 +5,14 @@ All URIs are relative to *https://your-docspace.onlyoffice.com*
 
 | Method | HTTP request | Description |
 | ------------- | ------------- | ------------- |
-{{#operations}}{{#operation}}| [**{{operationId}}**]({{classname}}.md#{{operationId}}) | **{{httpMethod}}** {{path}} | {{{summary}}} |
+{{#operations}}{{#operation}}| [**{{operationId}}**]({{classname}}.md#{{operationId}}{{#vendorExtensions.x-is-thirdparty-variant}}-thirdparty{{/vendorExtensions.x-is-thirdparty-variant}}) | **{{httpMethod}}** {{path}} | {{{summary}}} |
 {{/operation}}{{/operations}}
 
 {{#operations}}
 {{#operation}}
 
-<a id="{{{operationId}}}"></a>
-# **{{{operationId}}}**
+<a id="{{{operationId}}}{{#vendorExtensions.x-is-thirdparty-variant}}-thirdparty{{/vendorExtensions.x-is-thirdparty-variant}}"></a>
+# **{{{operationId}}}**{{#vendorExtensions.x-is-thirdparty-variant}} (third-party storage){{/vendorExtensions.x-is-thirdparty-variant}}
 > {{returnType}}{{^returnType}}void{{/returnType}} {{operationId}} ({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = null{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}})
 
 {{#notes}}{{{.}}}{{/notes}}
