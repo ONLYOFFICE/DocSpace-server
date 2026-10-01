@@ -43,9 +43,9 @@ public class StartFileConversionPermissionsTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    private static CheckConversionRequestDtoInteger ConvertToPdf()
+    private static CheckConversionRequestDto ConvertToPdf()
     {
-        return new CheckConversionRequestDtoInteger(startConvert: true, outputType: "pdf");
+        return new CheckConversionRequestDto(startConvert: true, outputType: "pdf");
     }
 
     [Fact]

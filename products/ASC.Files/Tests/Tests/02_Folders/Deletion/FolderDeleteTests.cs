@@ -416,7 +416,7 @@ public class FolderDeleteTests(
     /// operation reports finished before the listing reflects it, and under a full-suite run that
     /// lag regularly outlives a bare read.
     /// </summary>
-    private async Task<FolderContentDtoInteger> GetTrashAsync(List<FolderType>? folderType = null, int expectedFolders = 1)
+    private async Task<FolderContentDto> GetTrashAsync(List<FolderType>? folderType = null, int expectedFolders = 1)
     {
         var trashId = await GetTrashFolderIdAsync(Owner);
         var deadline = DateTime.UtcNow.AddSeconds(30);
@@ -434,7 +434,7 @@ public class FolderDeleteTests(
         }
     }
 
-    private async Task MoveFoldersToTrash(params FolderDtoInteger[] folders)
+    private async Task MoveFoldersToTrash(params FolderDto[] folders)
     {
         foreach (var folder in folders)
         {
@@ -442,7 +442,7 @@ public class FolderDeleteTests(
         }
     }
 
-    private async Task DeleteFolderAndWaitForCompletion(FolderDtoInteger folder)
+    private async Task DeleteFolderAndWaitForCompletion(FolderDto folder)
     {
         var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { Immediately = false }, TestContext.Current.CancellationToken)).Response;
         var operationId = results.FirstOrDefault()?.Id;
@@ -455,7 +455,7 @@ public class FolderDeleteTests(
         results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
     }
 
-    private async Task<FolderDtoInteger> CreateRoom(RoomType roomType, string title) => roomType switch
+    private async Task<FolderDto> CreateRoom(RoomType roomType, string title) => roomType switch
     {
         RoomType.CustomRoom => await CreateCustomRoom(title),
         RoomType.PublicRoom => await CreatePublicRoom(title),

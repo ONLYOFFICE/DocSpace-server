@@ -43,6 +43,7 @@ public class BillingClient(IOptions<PaymentConfiguration> configuration, IBillin
     public const string MetadataDetails = "details";
     public const string MetadataType = "type";
     public const string MetadataModel = "model";
+    public const string MetadataCost = "cost";
     public const string MetadataAgentTitle = "agent_title";
     public const string MetadataAgentId = "agent_id";
     public const string MetadataSourceId = "source_id";

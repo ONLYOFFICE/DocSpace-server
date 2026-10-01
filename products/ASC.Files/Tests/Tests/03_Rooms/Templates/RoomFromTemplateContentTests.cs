@@ -38,7 +38,7 @@ namespace ASC.Files.Tests.Tests._03_Rooms.Templates;
 /// hierarchies, and the isolation of the copy from both the template and the source room.
 /// </summary>
 /// <remarks>
-/// <see cref="DocSpace.API.SDK.Model.FolderContentDtoInteger.Folders"/> and <c>.Files</c> are typed
+/// <see cref="DocSpace.API.SDK.Model.FolderContentDto.Folders"/> and <c>.Files</c> are typed
 /// <c>List&lt;FileEntryBaseDto&gt;</c>, which carries <c>Title</c> but neither <c>Id</c> nor
 /// <c>Logo</c>. Tests that need the id of a copied entry read the raw JSON instead (see
 /// <see cref="GetFolderContentRaw"/>) — this is an SDK model gap, not a preference.
