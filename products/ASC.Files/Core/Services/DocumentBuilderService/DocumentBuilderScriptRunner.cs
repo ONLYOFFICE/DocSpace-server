@@ -49,7 +49,9 @@ public class DocumentBuilderScriptRunner(
     FileConverter fileConverter,
     EntryManager entryManager,
     FilesMessageService filesMessageService,
-    WebhookManager webhookManager)
+    WebhookManager webhookManager,
+    LockerManager lockerManager,
+    FileTrackerHelper fileTracker)
 {
     /// <summary>
     /// A call that opens a portal file, with the identifier the caller wrote in place of the address. Both objects the
@@ -166,21 +168,28 @@ public class DocumentBuilderScriptRunner(
 
         var (_, source) = await ResolveFilesAsync(script, publishCopies: false);
 
-        if (folderId is null && source is null)
-        {
-            var homeless = _saveFileCall.Matches(script)
-                .Select(match => match.Groups["name"].Value)
-                .FirstOrDefault(name => outputs is null || !outputs.ContainsKey(name));
+        var homeless = _saveFileCall.Matches(script)
+            .Select(match => match.Groups["name"].Value)
+            .FirstOrDefault(name => outputs is null || !outputs.ContainsKey(name));
 
+        if (folderId.HasValue)
+        {
+            await GetWritableFolderAsync(folderId.Value);
+        }
+        else if (source != null)
+        {
             if (homeless != null)
             {
-                throw new ArgumentException($"\"{homeless}\" has nowhere to go: name a folder for it, or one for the request", nameof(outputs));
+                await GetWritableFolderAsync(source.ParentId);
             }
-
-            if (outputs is not { Count: > 0 })
-            {
-                throw new ArgumentException("The script opens no file and the request names no folder, so there is nowhere to save the result", nameof(folderId));
-            }
+        }
+        else if (homeless != null)
+        {
+            throw new ArgumentException($"\"{homeless}\" has nowhere to go: name a folder for it, or one for the request", nameof(outputs));
+        }
+        else if (outputs is not { Count: > 0 })
+        {
+            throw new ArgumentException("The script opens no file and the request names no folder, so there is nowhere to save the result", nameof(folderId));
         }
     }
 
@@ -426,12 +435,7 @@ public class DocumentBuilderScriptRunner(
                     throw new ArgumentException($"\"{name}\" replaces a file, which keeps its own title", nameof(outputs));
                 }
 
-                var file = await daoFactory.GetFileDao<int>().GetFileAsync(output.FileId.Value).NotFoundIfNull("File not found");
-
-                if (!await fileSecurity.CanEditAsync(file))
-                {
-                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
-                }
+                var file = await GetEditableFileAsync(output.FileId.Value);
 
                 var produced = FileUtility.GetFileExtension(name);
                 var current = FileUtility.GetFileExtension(file.Title);
@@ -444,17 +448,50 @@ public class DocumentBuilderScriptRunner(
                 continue;
             }
 
-            var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(output.FolderId.Value).NotFoundIfNull("Folder not found");
-
-            if (!await fileSecurity.CanCreateAsync(folder))
-            {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
-            }
-
-            targets[name] = new OutputTarget(null, folder, output.Title);
+            targets[name] = new OutputTarget(null, await GetWritableFolderAsync(output.FolderId.Value), output.Title);
         }
 
         return targets;
+    }
+
+    // the checks the save runs, so a file that cannot be replaced is refused before the build
+    private async Task<File<int>> GetEditableFileAsync(int fileId)
+    {
+        var file = await daoFactory.GetFileDao<int>().GetFileAsync(fileId).NotFoundIfNull("File not found");
+
+        if (!await fileSecurity.CanEditAsync(file))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
+        if (await lockerManager.FileLockedForMeAsync(file.Id))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_LockedFile);
+        }
+
+        if (await fileTracker.IsEditingAsync(file.Id, false))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_UpdateEditingFile);
+        }
+
+        if (file.RootFolderType == FolderType.TRASH)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ViewTrashItem);
+        }
+
+        return file;
+    }
+
+    private async Task<Folder<int>> GetWritableFolderAsync(int folderId)
+    {
+        var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(folderId).NotFoundIfNull("Folder not found");
+
+        if (!await fileSecurity.CanCreateAsync(folder))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+
+        return folder;
     }
 
     /// <summary>
@@ -493,9 +530,7 @@ public class DocumentBuilderScriptRunner(
             var parentId = folderId ?? source?.ParentId
                 ?? throw new ArgumentException($"\"{name}\" has nowhere to go: name a folder for it, or one for the request");
 
-            var folder = await daoFactory.GetFolderDao<int>().GetFolderAsync(parentId).NotFoundIfNull("Folder not found");
-
-            saved.Add(await fileConverter.SaveConvertedFileAsync(folder, url, extension, name, updateIfExist: false));
+            saved.Add(await fileConverter.SaveConvertedFileAsync(await GetWritableFolderAsync(parentId), url, extension, name, updateIfExist: false));
         }
     }
 

@@ -95,23 +95,23 @@ public class DocsController(
 
     /// <remarks>
     /// Queues a background run of a document builder script on portal files and answers with the operation just
-    /// started. The script names portal files by identifier - `builder.OpenFile("1234")` -
-    /// where the document builder documentation writes an address. The caller needs read access to every file the
-    /// script opens, edit access to each file `outputs` replaces and the right to create files in each folder a result
-    /// is saved into. Each file the script saves goes where `outputs` says, keyed by the name given to SaveFile:
-    /// `fileId` stores it as a new version of that file, `folderId` as a new file there; an unlisted file goes to
-    /// `folderId` of the request or to the folder of the opened file. Poll `GET api/2.0/files/fileops` with the
-    /// returned `id` until the operation reports `finished`: `files` then lists the saved files, a replaced one with
-    /// its new version, including those saved before a failure, and `error` the reason a failed build gave. A request
-    /// that can be refused in advance fails at once with 400, 403 or 404. The script runs with the rights of the
-    /// document service, so this call is only as safe as the accounts allowed to make it.
+    /// started. The script names portal files by identifier - `builder.OpenFile("1234")` - where the document builder
+    /// documentation writes an address. The caller needs read access to every file the script opens, edit access to
+    /// each file `outputs` replaces, which must not be locked or open in an editor, and the right to create files in
+    /// each folder a result is saved into. Each file the script saves goes where `outputs` says, keyed by the name
+    /// given to SaveFile: `fileId` stores it as a new version of that file, `folderId` as a new file there; an unlisted
+    /// file goes to `folderId` or to the folder of the opened file. Poll `GET api/2.0/files/fileops` with the returned
+    /// `id` until the operation reports `finished`: `files` then lists the saved files, a replaced one with its new
+    /// version, including those saved before a failure, and `error` the reason a failed build gave. What can be refused
+    /// in advance fails at once with 400, 403 or 404. The script runs with the rights of the document service, so this
+    /// call is only as safe as the accounts allowed to make it.
     /// </remarks>
     /// <summary>Run a document builder script</summary>
     /// <path>api/2.0/docs/builder</path>
     [Tags("Docs")]
     [SwaggerResponse(200, "The queued document builder operation to poll", typeof(FileOperationDto))]
     [SwaggerResponse(400, "The script or the argument is malformed, a file is addressed by an address, or a saved file has nowhere to go")]
-    [SwaggerResponse(403, "You do not have enough permissions to read the file the script opens or to write the result")]
+    [SwaggerResponse(403, "You cannot read a file the script opens or write a result, or the file to replace is locked, being edited or in the trash")]
     [SwaggerResponse(404, "File or folder not found")]
     [HttpPost("builder")]
     public async Task<FileOperationDto> RunBuilderScript(DocsBuilderRequestDto inDto)

@@ -37,29 +37,38 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// <summary>
 /// The document builder script to run and where to put what it produces.
 /// </summary>
+/// <example>
+/// {
+///   "script": "builder.OpenFile(\"1234\"); Api.GetDocument().GetElement(0).AddText(Argument.title); builder.SaveFile(\"docx\", \"result.docx\"); builder.SaveFile(\"pdf\", \"result.pdf\"); builder.CloseFile();",
+///   "folderId": 5678,
+///   "outputs": {
+///     "result.docx": { "fileId": 1234 },
+///     "result.pdf": { "folderId": 5678, "title": "Quarterly report.pdf" }
+///   },
+///   "argument": { "title": "Quarterly report" }
+/// }
+/// </example>
 public class DocsBuilderRequestDto
 {
     /// <summary>
-    /// The document builder script. It addresses a portal file by writing the identifier of that file where the
-    /// document builder documentation writes an address - `builder.OpenFile("1234")` - and the portal resolves it
-    /// after checking that the caller may read it. Addresses written out by hand are refused.
+    /// The document builder script. It names a portal file by its id where the document builder documentation
+    /// writes an address - `builder.OpenFile("1234")`; an address written out in the script is refused.
     /// </summary>
-    /// <example>builder.OpenFile("1234"); Api.GetDocument().GetElement(0).AddText("done"); builder.SaveFile("docx", "result.docx"); builder.CloseFile();</example>
+    /// <example>builder.OpenFile("1234"); Api.GetDocument().GetElement(0).AddText(Argument.title); builder.SaveFile("docx", "result.docx"); builder.SaveFile("pdf", "result.pdf"); builder.CloseFile();</example>
     public required string Script { get; set; }
 
     /// <summary>
-    /// Where the produced files are saved. It defaults to the folder of the file the script opened, and is required
-    /// when the script opens none.
+    /// The id of the folder for the produced files that `outputs` does not list, as reported by a folder listing
+    /// such as `GET api/2.0/files/{folderId}`.
     /// </summary>
     /// <example>5678</example>
     public int? FolderId { get; set; }
 
     /// <summary>
-    /// Where each produced file goes, keyed by the name the script saves it under - the second argument of
-    /// `builder.SaveFile("docx", "report.docx")`. An entry either replaces an existing file with a new version or
-    /// puts a new file in a folder. A produced file with no entry falls back to `folderId`.
+    /// Destinations of the produced files, keyed by the name the script saves each one under - the second argument of
+    /// `builder.SaveFile("docx", "result.docx")`.
     /// </summary>
-    /// <example>{"result.docx": {"fileId": 1234}, "result.pdf": {"folderId": 1234}}</example>
+    /// <example>{"result.docx": {"fileId": 1234}, "result.pdf": {"folderId": 5678, "title": "Quarterly report.pdf"}}</example>
     public Dictionary<string, DocsBuilderOutputDto> Outputs { get; set; }
 
     /// <summary>
@@ -71,27 +80,33 @@ public class DocsBuilderRequestDto
 }
 
 /// <summary>
-/// Where one produced file goes. Exactly one of the two destinations is given.
+/// Where one produced file goes. Exactly one of `fileId` and `folderId` is given.
 /// </summary>
+/// <example>
+/// {
+///   "folderId": 5678,
+///   "title": "Quarterly report.pdf"
+/// }
+/// </example>
 public class DocsBuilderOutputDto
 {
     /// <summary>
-    /// The file this result replaces, as a new version of it. The caller has to be allowed to edit it, and the
-    /// result has to carry the same format.
+    /// The id of a portal file to store the result in as a new version. The result has to have the same format as
+    /// that file.
     /// </summary>
     /// <example>1234</example>
     public int? FileId { get; set; }
 
     /// <summary>
-    /// The folder this result is saved into as a new file. The caller has to be allowed to create files there.
+    /// The id of a folder to save the result in as a new file.
     /// </summary>
-    /// <example>1234</example>
+    /// <example>5678</example>
     public int? FolderId { get; set; }
 
     /// <summary>
-    /// The title to save under, when the name the script used is not the one the portal should show. Only together
-    /// with `folderId`: a file being replaced keeps its own title.
+    /// The title of the new file, when it has to differ from the name the script saved the result under. Not allowed
+    /// with `fileId`: a replaced file keeps its title.
     /// </summary>
-    /// <example>result.docx</example>
+    /// <example>Quarterly report.pdf</example>
     public string Title { get; set; }
 }

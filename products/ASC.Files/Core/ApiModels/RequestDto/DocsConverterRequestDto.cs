@@ -40,17 +40,24 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 /// the portal passes the request on rather than translating it. What the portal can read off the file - its format,
 /// its name and the key of its revision - is not asked for and cannot be overridden.
 /// </summary>
+/// <example>
+/// {
+///   "fileId": 1234,
+///   "folderId": 5678,
+///   "outputtype": "pdf",
+///   "pdf": { "form": true }
+/// }
+/// </example>
 public class DocsConverterRequestDto
 {
     /// <summary>
-    /// The file to convert. It is read from the portal by the server, which is why the caller never hands over an
-    /// address and the document service never has to reach back into the portal.
+    /// The id of the portal file to convert, as reported by a folder listing such as `GET api/2.0/files/{folderId}`.
     /// </summary>
     /// <example>1234</example>
     public required int FileId { get; set; }
 
     /// <summary>
-    /// Where the converted file is saved. Leaving it out saves the result in the My documents section of the caller.
+    /// The id of the folder to save the converted file in.
     /// </summary>
     /// <example>5678</example>
     public int? FolderId { get; set; }
