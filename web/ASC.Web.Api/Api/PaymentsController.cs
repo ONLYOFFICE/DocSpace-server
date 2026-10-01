@@ -1631,9 +1631,10 @@ public class PaymentController(
     /// Returns the limit set on a wallet service for the portal as a whole - the ceiling the spending of every user
     /// counts towards. Only a DocSpace administrator may read it, an installation without a billing service answers
     /// 403, a portal with no billing customer gets an empty result, and the call is read-only. A service name this
-    /// installation does not sell fails with 404. The limits set for individual users are checked in addition to this
-    /// one and are listed by `GET api/2.0/portal/payment/servicelimit/customer/{serviceName}/participants`; create a
-    /// limit with `POST api/2.0/portal/payment/servicelimit`.
+    /// installation does not sell fails with 404, and so does a service with no portal-wide limit set on it - create
+    /// one with `POST api/2.0/portal/payment/servicelimit`. The limits set for individual users are checked in
+    /// addition to this one and are listed by
+    /// `GET api/2.0/portal/payment/servicelimit/customer/{serviceName}/participants`.
     /// </remarks>
     /// <summary>
     /// Get the portal service limit
@@ -1642,7 +1643,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The portal-wide limit of the service, or an empty result when the portal has no billing customer", typeof(ServiceLimit))]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
-    [SwaggerResponse(404, "The service is not a wallet service of this installation")]
+    [SwaggerResponse(404, "The service is not a wallet service of this installation, or no portal-wide limit is set on it")]
     [HttpGet("servicelimit/customer/{serviceName}")]
     public async Task<ServiceLimit> GetCustomerServiceLimit(CustomerServiceLimitRequestDto inDto)
     {
@@ -1660,7 +1661,9 @@ public class PaymentController(
 
         var serviceName = (await paymentHelper.GetCorrectServiceNamesAsync([inDto.ServiceName])).Single();
 
-        return await tariffService.GetCustomerServiceLimitAsync(tenant.Id, serviceName);
+        var serviceLimit = await tariffService.GetCustomerServiceLimitAsync(tenant.Id, serviceName);
+
+        return serviceLimit ?? throw new ItemNotFoundException("Service limit could not be found");
     }
 
     /// <remarks>

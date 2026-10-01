@@ -1378,6 +1378,13 @@ public static class AccountingHttpClientExtension
                             return false;
                         }
 
+                        // A missing service limit is a definitive result ("no limit is set"), so its 404 is not retried.
+                        // Other 404s are retried: a customer created a moment ago may not be visible yet.
+                        if (response.StatusCode == HttpStatusCode.NotFound && IsServiceLimitRequest(response.RequestMessage))
+                        {
+                            return false;
+                        }
+
                         // "Customer not found" is a definitive result, not a transient error - retrying won't change it.
                         if (response.StatusCode == HttpStatusCode.BadRequest)
                         {
@@ -1414,8 +1421,8 @@ public static class AccountingHttpClientExtension
 
         return new AccountingException($"Accounting request to {request.RequestUri} failed: {exception.Message}", exception);
     }
-    // Maps non-success responses to the domain exceptions the callers expect (payment required / customer not found),
-    // and wraps any other failure into AccountingException with the status code and response body.
+    // Maps non-success responses to the domain exceptions the callers expect (payment required / customer not found /
+    // resource not found), and wraps any other failure into AccountingException with the status code and response body.
     private static async ValueTask<Exception> CreateExceptionAsync(HttpResponseMessage response)
     {
         if (response.IsSuccessStatusCode)
@@ -1434,7 +1441,17 @@ public static class AccountingHttpClientExtension
             return new AccountingCustomerNotFoundException();
         }
 
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            return new AccountingNotFoundException($"Accounting resource not found {content}");
+        }
+
         return new AccountingException($"Accounting request failed with status code {response.StatusCode} {content}");
+    }
+
+    private static bool IsServiceLimitRequest(HttpRequestMessage request)
+    {
+        return request?.RequestUri?.AbsolutePath.Contains("/serviceLimit/", StringComparison.OrdinalIgnoreCase) == true;
     }
 
     private static bool IsCustomerNotFound(HttpStatusCode status, string content)
@@ -1470,3 +1487,8 @@ public class AccountingNotConfiguredException(string message = "Accounting servi
 public class AccountingPaymentRequiredException(string message = "Payment required") : AccountingException(message);
 
 public class AccountingCustomerNotFoundException(string message = "Customer not found") : AccountingException(message);
+
+/// <summary>
+/// The accounting service answered 404: the requested resource (e.g. a service limit) does not exist.
+/// </summary>
+public class AccountingNotFoundException(string message = "Resource not found") : AccountingException(message);

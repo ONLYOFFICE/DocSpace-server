@@ -1590,7 +1590,7 @@ public class TariffService(
         {
             serviceLimit = await accountingClient.GetServiceLimitAsync(id);
         }
-        catch (AccountingCustomerNotFoundException exception)
+        catch (AccountingException exception) when (exception is AccountingNotFoundException or AccountingCustomerNotFoundException)
         {
             logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
             return null;
@@ -1610,10 +1610,22 @@ public class TariffService(
         return serviceLimit;
     }
 
+    /// <summary>
+    /// Returns the portal-wide limit of the service, or null when none is set on it.
+    /// </summary>
     public async Task<ServiceLimit> GetCustomerServiceLimitAsync(int tenantId, string serviceName)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
-        return await accountingClient.GetCustomerServiceLimitAsync(portalId, serviceName);
+
+        try
+        {
+            return await accountingClient.GetCustomerServiceLimitAsync(portalId, serviceName);
+        }
+        catch (AccountingNotFoundException exception)
+        {
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+            return null;
+        }
     }
 
     public async Task<ServiceLimitReport> GetParticipantServiceLimitsAsync(int tenantId, string serviceName, ServiceLimitFilter filter)
