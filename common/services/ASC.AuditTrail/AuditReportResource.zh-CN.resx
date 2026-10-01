@@ -783,6 +783,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>客户端 {0} 密钥已重新生成</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>注意</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>报告显示了 {1} 个事件中最近的 {0} 个。要获取所有事件，请以 CSV 格式下载报告。</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>已重置向量化设置</value>
   </data>

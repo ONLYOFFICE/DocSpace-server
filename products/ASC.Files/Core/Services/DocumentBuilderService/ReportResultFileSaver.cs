@@ -34,9 +34,11 @@
 namespace ASC.Files.Core.Services.DocumentBuilderService;
 
 /// <summary>
-/// Downloads a report produced by the document builder and stores it as a new file entry,
-/// broadcasting the creation over the socket. Shared by every report task that saves its result
-/// as a brand-new file.
+/// Stores a report as a new file entry, broadcasting the creation over the socket: either one the
+/// document builder produced, downloaded from its URL, or one written on this side. Shared by every
+/// report task that saves its result as a brand-new file. The file goes through the same tenant,
+/// room and user quota checks as any other saved file, but not through the single-request upload
+/// limit, which is about HTTP bodies and not about files the portal generates itself.
 /// </summary>
 [Scope]
 public class ReportResultFileSaver(
@@ -56,14 +58,19 @@ public class ReportResultFileSaver(
         return await SaveAsync(createdBy, parentId, title, fileUri);
     }
 
+    /// <summary>
+    /// Saves a report written on this side into the author's "My documents" folder. The stream has to
+    /// be seekable and positioned at the start: its length is what the quotas are checked against.
+    /// </summary>
+    public async Task<File<int>> SaveToMyDocumentsAsync(Guid createdBy, string title, Stream stream)
+    {
+        var parentId = await globalFolder.GetFolderMyAsync(daoFactory);
+
+        return await SaveAsync(createdBy, parentId, title, stream);
+    }
+
     public async Task<File<int>> SaveAsync(Guid createdBy, int parentId, string title, Uri fileUri)
     {
-        var file = serviceProvider.GetService<File<int>>();
-
-        file.CreateBy = createdBy;
-        file.ParentId = parentId;
-        file.Title = title;
-
         using var request = new HttpRequestMessage { RequestUri = fileUri };
 
 #pragma warning disable CA2000
@@ -73,9 +80,19 @@ public class ReportResultFileSaver(
         using var response = await httpClient.SendAsync(request);
         await using var stream = await response.Content.ReadAsStreamAsync();
 
-        var fileDao = daoFactory.GetFileDao<int>();
+        return await SaveAsync(createdBy, parentId, title, stream);
+    }
 
+    public async Task<File<int>> SaveAsync(Guid createdBy, int parentId, string title, Stream stream)
+    {
+        var file = serviceProvider.GetService<File<int>>();
+
+        file.CreateBy = createdBy;
+        file.ParentId = parentId;
+        file.Title = title;
         file.ContentLength = stream.Length;
+
+        var fileDao = daoFactory.GetFileDao<int>();
 
         file = await fileDao.SaveFileAsync(file, stream);
         await socketManager.CreateFileAsync(file);

@@ -88,6 +88,34 @@ public class LoginEventsFilterTests(
         events.Should().HaveCount(1);
     }
 
+    /// <summary>
+    /// The page window is applied after the filters. It used to be applied to the log first, so `count=1` took the
+    /// newest event of the whole portal, and filtering it by a user who was not the last to sign in left nothing.
+    /// </summary>
+    [Fact]
+    public async Task GetLoginEventsByFilter_Owner_FiltersByUserIdBeforeCount()
+    {
+        // Arrange — the user signs in first, the second member after them, so the newest event is not the user's.
+        var user = await InviteContact(EmployeeType.User);
+        var otherUser = await InviteContact(EmployeeType.User);
+        await _webApiClient.Authenticate(user);
+        await _webApiClient.Authenticate(Owner);
+        await PollLoginEventsByFilterAsync(e => e.Count > 0, userId: user.Id);
+
+        // Event dates are stored to the second: without the pause both sign-ins can share one and tie in the order.
+        await Task.Delay(TimeSpan.FromSeconds(1.1), TestContext.Current.CancellationToken);
+
+        await _webApiClient.Authenticate(otherUser);
+        await _webApiClient.Authenticate(Owner);
+        await PollLoginEventsByFilterAsync(e => e.Count > 0, userId: otherUser.Id);
+
+        // Act
+        var events = await PollLoginEventsByFilterAsync(e => e.Count > 0, userId: user.Id, count: 1);
+
+        // Assert
+        events.Should().ContainSingle().Which.UserId.Should().Be(user.Id);
+    }
+
     [Fact]
     public async Task GetLoginEventsByFilter_DocSpaceAdmin_FiltersByUserId()
     {

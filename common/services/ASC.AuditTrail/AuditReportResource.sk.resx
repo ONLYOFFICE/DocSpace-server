@@ -792,6 +792,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Znovu vygenerované tajný kód klienta {0}</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Poznámka</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Report zobrazuje posledných {0} z {1} udalostí. Ak chcete získať všetky udalosti, stiahnite si report vo formáte CSV.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Nastavenia vektorizácie boli obnovené</value>
   </data>

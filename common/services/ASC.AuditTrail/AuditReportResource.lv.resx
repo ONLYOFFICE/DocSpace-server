@@ -792,6 +792,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Privātā atslēga klientam {0} ir izveidota</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Piezīme</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Atskaitē ir parādīti jaunākie {0} no {1} notikumiem. Lai iegūtu visus notikumus, lejupielādējiet atskaiti CSV formātā.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Vektorizācijas iestatījumi ir atiestatīti</value>
   </data>
