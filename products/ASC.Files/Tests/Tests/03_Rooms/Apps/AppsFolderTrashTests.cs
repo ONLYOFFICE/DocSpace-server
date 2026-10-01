@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,29 +31,48 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Core;
+namespace ASC.Files.Tests.Tests._03_Rooms.Apps;
 
-public static class FileConstant
+/// <summary>
+/// Trashing the <c>.ai</c> folder frees the room's slot and turns it into a regular folder; restoring
+/// it to the room root makes it the room's <c>Ai</c> folder again.
+/// </summary>
+[Trait("Category", "Rooms")]
+[Trait("Feature", "AppsFolder")]
+public class AppsFolderTrashTests(
+    AspireAppFixture fixture)
+    : AppsFolderTestBase(fixture)
 {
-    public static readonly string ModuleId = "files";
+    [Fact]
+    public async Task DeleteAppsFolder_ToTrash_FreesRoomSlot()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateSmartRoom("Autotest Apps Trash");
+        var apps = await CreateAppsFolder(room.Id);
 
-    public static readonly string StorageModule = "files";
-    public static readonly string StorageDomainTmp = "files_temp";
-    public static readonly string StorageTemplate = "files_template";
+        // Act
+        await DeleteToTrashAndWait(apps.Id);
 
-    public const string StartDocPath = "sample/";
-    public const string StartDocDefaultPath = "en-US/";
-    public const string StartDocMyPath = "my/";
-    public const string StartDocCorporatePath = "corporate/";
-    public const string NewDocPath = "new/";
-    public const string NewDocDefaultPath = "default/";
-    public const string NewDocDefaultCustomModePath = "ru-RU/";
-    public const string NewDocFileName = "new";
+        // Assert
+        (await GetFolderTitles(room.Id)).Should().NotContain(AppsTitle);
+        await AssertAppsFolderAbsent(room.Id);
+    }
 
-    public const string DownloadTitle = "download";
+    [Fact]
+    public async Task RestoreAppsFolder_FromTrashToRoomRoot_BecomesAppsFolderAgain()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateSmartRoom("Autotest Apps Restore");
+        var apps = await CreateAppsFolder(room.Id);
+        await DeleteToTrashAndWait(apps.Id);
 
-    public const string AiFolderTitle = ".ai";
+        // Act
+        await MoveAndWait(apps.Id, room.Id);
 
-    public const string AnonFillingSession = "anon_";
-    public const string IsFormKeyPrefix = "isform_";
+        // Assert
+        (await GetFolderTitles(room.Id)).Should().Contain(AppsTitle);
+        await AssertAppsFolderPresent(room.Id);
+    }
 }

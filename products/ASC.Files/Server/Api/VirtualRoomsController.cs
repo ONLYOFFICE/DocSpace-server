@@ -56,7 +56,8 @@ public class VirtualRoomsInternalController(
     RoomTemplatesWorker roomTemplatesWorker,
     UserManager userManager,
     IDaoFactory daoFactory,
-    FileSecurity fileSecurity)
+    FileSecurity fileSecurity,
+    FolderContentDtoHelper folderContentDtoHelper)
     : VirtualRoomsController<int>(globalFolderHelper,
         fileOperationDtoHelper,
         customTagsService,
@@ -107,6 +108,26 @@ public class VirtualRoomsInternalController(
             inDto.Tags, inDto.Logo, inDto.ChatSettings, inDto.SendFormToExternalDB, inDto.SaveFormAsXLSX);
 
         return await _folderDtoHelper.GetAsync(room);
+    }
+
+    /// <remarks>
+    /// Returns one page of the contents of the .ai folder that lies in the root of a room, in the same shape as
+    /// `GET api/2.0/files/{folderId}` returns for any other folder. The rooms that hold such a folder are listed with
+    /// `GET api/2.0/files/rooms?withAiFolder=true`. Any member who can read the room may call it; somebody who cannot
+    /// is refused, and a room that does not exist or holds no .ai folder is answered as not found.
+    /// </remarks>
+    /// <summary>Get the .ai folder of a room</summary>
+    /// <path>api/2.0/files/rooms/{id}/ai</path>
+    [Tags("Rooms")]
+    [SwaggerResponse(200, "One page of the .ai folder contents, with the folder itself and the chain of its parents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(403, "The caller may not read this room")]
+    [SwaggerResponse(404, "The room does not exist or holds no .ai folder")]
+    [HttpGet("{id}/ai")]
+    public async Task<FolderContentDto<int>> GetRoomAiFolder(GetRoomAiFolderRequestDto inDto)
+    {
+        var aiFolder = await _fileStorageService.GetRoomAiFolderAsync(inDto.Id);
+
+        return await folderContentDtoHelper.GetAsync(aiFolder.Id, null, null, inDto.FilterType, default, true, true, null, null, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
 
     /// <remarks>
@@ -1215,7 +1236,8 @@ public class VirtualRoomsCommonController(
 
         return await GetRoomsAsync(parentId, inDto.Type, inDto.SearchArea, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text, metadataFilter,
             inDto.SubjectId, inDto.SubjectOwnerId, inDto.WithoutTags ?? false, tagNames, inDto.ExcludeSubject ?? false, inDto.Provider ?? ProviderFilter.None,
-            inDto.QuotaFilter ?? QuotaFilter.All, inDto.StorageFilter ?? StorageFilter.None, inDto.PrivacyFilter ?? RoomPrivacyFilter.None, inDto.GroupId);
+            inDto.QuotaFilter ?? QuotaFilter.All, inDto.StorageFilter ?? StorageFilter.None, inDto.PrivacyFilter ?? RoomPrivacyFilter.None, inDto.GroupId,
+            inDto.WithAiFolder ?? false);
     }
 
     /// <remarks>
@@ -1273,7 +1295,8 @@ public class VirtualRoomsCommonController(
         QuotaFilter quotaFilter = QuotaFilter.All,
         StorageFilter storageFilter = StorageFilter.None,
         RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
-        int? groupId = null)
+        int? groupId = null,
+        bool withAiFolder = false)
     {
         var filter = RoomTypeExtensions.MapToFilterType(types);
 
@@ -1315,6 +1338,7 @@ public class VirtualRoomsCommonController(
             storageFilter: storageFilter,
             groupId: groupId,
             privacyFilter: privacyFilter,
+            withAiFolder: withAiFolder,
             metadataFilter: metadataFilter);
 
         var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex);

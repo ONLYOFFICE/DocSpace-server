@@ -1554,4 +1554,7 @@
   <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
     <value>이미지</value>
   </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>공급자 비용</value>
+  </data>
 </root>

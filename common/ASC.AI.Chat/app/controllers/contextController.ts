@@ -31,29 +31,41 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Files.Core;
+import { ContextEngine } from "@onlyoffice/ai-chat/core";
+import { storage } from "../storage/index.js";
+import { asyncHandler } from "./_helpers.js";
+import { asString } from "../narrow.js";
 
-public static class FileConstant
-{
-    public static readonly string ModuleId = "files";
+// The widget's `context` engine: the rooms a host offers as chat context and
+// the skills inside them. The client connects the room the user is in when
+// the chat opens; the picker lists every other room with a `.ai` folder the
+// caller can read. All three reads are backed by the DocSpace Files API
+// (see `storage/roomSkills.ts`).
+const engine = new ContextEngine({ storage });
 
-    public static readonly string StorageModule = "files";
-    public static readonly string StorageDomainTmp = "files_temp";
-    public static readonly string StorageTemplate = "files_template";
+export const contextController = {
+  getContextFolders: asyncHandler(async (_req, res) => {
+    res.json(await engine.getContextFolders());
+  }),
 
-    public const string StartDocPath = "sample/";
-    public const string StartDocDefaultPath = "en-US/";
-    public const string StartDocMyPath = "my/";
-    public const string StartDocCorporatePath = "corporate/";
-    public const string NewDocPath = "new/";
-    public const string NewDocDefaultPath = "default/";
-    public const string NewDocDefaultCustomModePath = "ru-RU/";
-    public const string NewDocFileName = "new";
+  getRoomSkills: asyncHandler(async (req, res) => {
+    const cloud = asString(req.query["cloud"]) ?? "";
+    const roomId = asString(req.query["roomId"]);
+    if (!roomId) {
+      res.status(400).json({ error: "roomId required" });
+      return;
+    }
+    res.json(await engine.getRoomSkills(cloud, roomId));
+  }),
 
-    public const string DownloadTitle = "download";
-
-    public const string AiFolderTitle = ".ai";
-
-    public const string AnonFillingSession = "anon_";
-    public const string IsFormKeyPrefix = "isform_";
-}
+  getRoomSkill: asyncHandler(async (req, res) => {
+    const cloud = asString(req.query["cloud"]) ?? "";
+    const roomId = asString(req.query["roomId"]);
+    const skillId = asString(req.query["skillId"]);
+    if (!roomId || !skillId) {
+      res.status(400).json({ error: "roomId and skillId required" });
+      return;
+    }
+    res.json(await engine.getRoomSkill(cloud, roomId, skillId));
+  }),
+};
