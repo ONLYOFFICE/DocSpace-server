@@ -374,7 +374,7 @@ public class MetadataApiClient(HttpClient client)
 
     /// <summary>
     /// The file as the info endpoint reports it: the row a client re-reads after a socket event. Read raw because the
-    /// generated FileDtoInteger/FolderDtoInteger of the SDK have no assignedMetadataTemplates yet, the property the
+    /// generated FileDto/FolderDto of the SDK have no assignedMetadataTemplates yet, the property the
     /// assertion needs: an SDK gap to close with the next regeneration, not a preference.
     /// </summary>
     public async Task<RoomEntryResponse> GetFileInfoAsync(int fileId, CancellationToken cancellationToken)

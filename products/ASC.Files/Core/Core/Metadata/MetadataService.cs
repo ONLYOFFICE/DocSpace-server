@@ -382,13 +382,18 @@ public class MetadataService(
                         continue;
                     }
 
-                    field = await metadataDao.SaveFieldAsync(new MetadataField
+                    var created = new MetadataField
                     {
                         TemplateId = systemTemplate.Id,
                         Name = update.Name,
-                        Type = MetadataFieldType.String,
-                        Order = systemTemplate.Fields.Count
-                    });
+                        Type = MetadataFieldType.String
+                    };
+
+                    // after the last field by its position, not by the count: the fields no entry holds are dropped
+                    // below, so the count falls behind the positions and a new field would land before an old one
+                    AppendFieldsWithoutOrder([created], systemTemplate.Fields);
+
+                    field = await metadataDao.SaveFieldAsync(created);
 
                     systemTemplate.Fields.Add(field);
                     fieldsByName[field.Name] = field;

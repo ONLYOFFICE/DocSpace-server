@@ -142,6 +142,12 @@ public class MetadataCascadeOperation : DistributedTaskProgress
 
                 CancellationToken.ThrowIfCancellationRequested();
 
+                // the wait for the lock can be long: the right to edit is checked again now that the pass is about to write
+                if (!await fileSecurity.CanEditAsync(folder))
+                {
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+                }
+
                 try
                 {
                     if (Mode == MetadataCascadeMode.Stamp)

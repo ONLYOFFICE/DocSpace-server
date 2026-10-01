@@ -104,7 +104,7 @@ public class MetadataDateValuesTests(AspireAppFixture fixture) : BaseTest(fixtur
         rooms.RoomIds().Should().NotContain(room.Id, "a bound carrying a time is an instant and is not stretched to the end of the day");
     }
 
-    private async Task<(MetadataApiClient Api, MetadataTemplateResponse Template, FolderDtoInteger Room)> ArrangeAsync(DateTime value)
+    private async Task<(MetadataApiClient Api, MetadataTemplateResponse Template, FolderDto Room)> ArrangeAsync(DateTime value)
     {
         await _filesClient.Authenticate(Owner);
 

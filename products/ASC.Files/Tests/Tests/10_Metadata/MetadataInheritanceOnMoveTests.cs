@@ -241,7 +241,7 @@ public class MetadataInheritanceOnMoveTests(AspireAppFixture fixture) : BaseTest
     /// A file holding its own Client and an empty Department. Inside the room it takes the batch move path,
     /// from "My documents" the per-file one.
     /// </summary>
-    private async Task<FileDtoInteger> CreateOwnFileAsync(InheritanceData data, bool sameRoom)
+    private async Task<FileDto> CreateOwnFileAsync(InheritanceData data, bool sameRoom)
     {
         var title = $"own-{data.Suffix}.docx";
 

@@ -150,6 +150,13 @@ public class MetadataFieldOrderTests(AspireAppFixture fixture) : BaseTest(fixtur
 
         var read = await api.GetFolderCustomFieldsAsync(room.Id, TestContext.Current.CancellationToken);
         read.Select(f => f.Name).Should().Equal(["A", "C", "D", "B"], "the read agrees with the write");
+
+        // two fields dropped at once: the count of the remaining fields is below their positions, and the new field
+        // used to take a position in between instead of the last one
+        await api.SetFolderCustomFieldsAsync(room.Id, [new CustomFieldPayload("A", null), new CustomFieldPayload("C", null)], TestContext.Current.CancellationToken);
+        var afterTwoRemovals = await api.SetFolderCustomFieldAsync(room.Id, "E", "6", TestContext.Current.CancellationToken);
+
+        afterTwoRemovals.Select(f => f.Name).Should().Equal(["D", "B", "E"], "the new field goes after the last one whatever the count");
     }
 
     private async Task<MetadataApiClient> ArrangeAsync()
