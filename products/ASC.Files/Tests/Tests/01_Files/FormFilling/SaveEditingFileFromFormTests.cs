@@ -47,7 +47,7 @@ public class SaveEditingFileFromFormTests(
     AspireAppFixture fixture)
     : FormFillingTestBase(fixture)
 {
-    private async Task<FileDtoInteger> SetupForm()
+    private async Task<FileDto> SetupForm()
     {
         await _filesClient.Authenticate(Owner);
         var room = await CreateFillingFormsRoom("Autotest SaveEditingFromForm Room " + Guid.NewGuid().ToString()[..8]);

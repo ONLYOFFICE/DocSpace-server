@@ -792,6 +792,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>İstemcinin {0} sırrı yeniden oluşturuldu</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Not</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Raporda {1} olaydan en son {0} tanesi gösteriliyor. Tüm olayları almak için raporu CSV biçiminde indirin.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Vektörleştirme ayarları sıfırlandı</value>
   </data>

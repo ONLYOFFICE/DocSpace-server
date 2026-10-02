@@ -48,7 +48,7 @@ public class RoomInvitationTests(
     /// Invites <paramref name="count"/> new, still-pending users into a fresh CustomRoom with
     /// Editing access and returns the room together with the invited users.
     /// </summary>
-    private async Task<(FolderDtoInteger Room, List<User> Users)> CreateRoomWithInvitedUsers(int count)
+    private async Task<(FolderDto Room, List<User> Users)> CreateRoomWithInvitedUsers(int count)
     {
         var room = await CreateCustomRoom("Autotest Resend Room");
 

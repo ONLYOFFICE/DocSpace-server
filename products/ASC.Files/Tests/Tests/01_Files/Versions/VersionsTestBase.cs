@@ -45,7 +45,7 @@ public abstract class VersionsTestBase(
     /// Creates a file in the caller's My Documents and bumps it to a second version, which is the
     /// precondition every version-history test needs.
     /// </summary>
-    protected async Task<FileDtoInteger> CreateFileWithSecondVersion(string title, User? user = null)
+    protected async Task<FileDto> CreateFileWithSecondVersion(string title, User? user = null)
     {
         var owner = user ?? Owner;
         var file = await CreateFileInMy(title, owner);
@@ -59,7 +59,7 @@ public abstract class VersionsTestBase(
     /// Creates a custom room with a file inside it and bumps the file to a second version, for the
     /// tests that check version-history behaviour on room-scoped files.
     /// </summary>
-    protected async Task<(FolderDtoInteger Room, FileDtoInteger File)> CreateRoomFileWithSecondVersion(string roomTitle, string fileTitle)
+    protected async Task<(FolderDto Room, FileDto File)> CreateRoomFileWithSecondVersion(string roomTitle, string fileTitle)
     {
         var room = await CreateCustomRoom(roomTitle);
         var file = await CreateFile(fileTitle, room.Id);

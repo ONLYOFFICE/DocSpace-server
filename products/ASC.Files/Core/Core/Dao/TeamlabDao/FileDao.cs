@@ -39,6 +39,9 @@ internal class FileDao(
         ILogger<FileDao> logger,
         FactoryIndexerFile factoryIndexer,
         FactoryIndexerForm factoryIndexerFormData,
+        FactoryIndexerFileMetadata factoryIndexerFileMetadata,
+        MetadataIndexHelper metadataIndexHelper,
+        MetadataTemplatesCache metadataTemplatesCache,
         UserManager userManager,
         FileUtility fileUtility,
         IDbContextFactory<FilesDbContext> dbContextManager,
@@ -180,7 +183,8 @@ internal class FileDao(
         }
     }
 
-    public async IAsyncEnumerable<File<int>> GetFilesFilteredAsync(IEnumerable<int> fileIds, IEnumerable<int> excludeParentsIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent)
+    public async IAsyncEnumerable<File<int>> GetFilesFilteredAsync(IEnumerable<int> fileIds, IEnumerable<int> excludeParentsIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent,
+        MetadataFilter metadataFilter = null)
     {
         if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
         {
@@ -194,6 +198,8 @@ internal class FileDao(
         {
             query = query.Where(r => !filesDbContext.Tree.Any(t => t.FolderId == r.ParentId && excludeParentsIds.Contains(r.ParentId)));
         }
+
+        query = await ApplyMetadataFilterAsync(query, filesDbContext, metadataFilter);
 
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
@@ -275,7 +281,7 @@ internal class FileDao(
     }
 
     public async IAsyncEnumerable<File<int>> GetFilesAsync(int parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false, List<FolderType> folderType = null)
+        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, int roomId = 0, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false, List<FolderType> folderType = null, MetadataFilter metadataFilter = null)
     {
         if (filterType == FilterType.FoldersOnly || count == 0)
         {
@@ -284,7 +290,7 @@ internal class FileDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = await GetFilesQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto, folderType);
+        var q = await GetFilesQueryWithFilters(parentId, orderBy, filterType, subjectGroup, subjectID, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto, folderType, metadataFilter);
 
         if (containingMyFiles)
         {
@@ -580,6 +586,7 @@ internal class FileDao(
             }
 
             var isNew = false;
+            var metadataInherited = false;
             var cloneStreamForSave = new MemoryStream();
             var streamChange = false;
             var needVectorization = false;
@@ -703,8 +710,21 @@ internal class FileDao(
                         }
 
                         await filesDbContext.SaveChangesAsync();
+
+                        // without a template there is no link to inherit: the tenants without metadata skip the two lookups
+                        if (isNew && await metadataTemplatesCache.HasTemplatesAsync())
+                        {
+                            metadataInherited = await filesDbContext.ApplyMetadataCascadeLinksAsync(tenantId, file.Id, FileEntryType.File, file.ParentId, file.CreateBy);
+                        }
+
                         await tx.CommitAsync();
                     });
+
+                    if (metadataInherited)
+                    {
+                        // the inherited values are visible to the SQL fallback at once, the index must not lag behind
+                        await metadataIndexHelper.IndexEntriesAsync(FileEntryType.File, [file.Id]);
+                    }
 
                     file.PureTitle = file.Title;
                     file.RootCreateBy = currentFolder.RootCreateBy;
@@ -834,7 +854,7 @@ internal class FileDao(
     }
 
     public async Task<int> GetFilesCountAsync(int parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent,
-        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, bool applyFormStepFilter = false, List<FolderType> folderType = null)
+        bool withSubfolders = false, bool excludeSubject = false, int roomId = 0, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, bool applyFormStepFilter = false, List<FolderType> folderType = null, MetadataFilter metadataFilter = null)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -843,7 +863,7 @@ internal class FileDao(
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
 
-        var q = await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto, folderType);
+        var q = await GetFilesQueryWithFilters(parentId, null, filterType, subjectGroup, subjectId, searchText, searchInContent, withSubfolders, excludeSubject, roomId, extension, filesDbContext, formsItemDto, folderType, metadataFilter);
         if (additionalFilterOption != AdditionalFilterOption.All)
         {
             q = ApplyAdditionalFileFilters(q, filesDbContext, parentId, parentType, additionalFilterOption);
@@ -1112,6 +1132,8 @@ internal class FileDao(
             await context.DeleteFileLinksByIdsAsync(tenantId, fileIdsStrings);
             await context.DeleteFilesPropertiesByIdsAsync(tenantId, fileIdsStrings);
             await context.DeleteFormRoleMappingsByFileIdsAsync(tenantId, fileIds);
+            await context.DeleteMetadataLinksByEntriesAsync(tenantId, fileIds, FileEntryType.File);
+            await context.DeleteMetadataValuesByEntriesAsync(tenantId, fileIds, FileEntryType.File);
 
             await tx.CommitAsync();
         });
@@ -1345,6 +1367,8 @@ internal class FileDao(
 
             var q = Query(context.Files).Where(r => r.Id == fileId);
 
+            var metadataInherited = false;
+
             await using (var tx = await context.Database.BeginTransactionAsync())
             {
                 var oldParentId = (await q.FirstOrDefaultAsync())?.ParentId;
@@ -1464,6 +1488,13 @@ internal class FileDao(
                     needDeleteVectors = await context.MarkVectorizationDeletedAsync(tenantId, fileId) > 0;
                 }
 
+                if (toFolderId != trashId && await metadataTemplatesCache.HasTemplatesAsync())
+                {
+                    // stamped inside the transaction, otherwise a failure right after the commit
+                    // would leave the moved file without the metadata inherited at the destination
+                    metadataInherited = await context.ApplyMetadataCascadeLinksAsync(tenantId, fileId, FileEntryType.File, toFolderId, _authContext.CurrentAccount.ID);
+                }
+
                 await tx.CommitAsync();
 
                 foreach (var f in fromFolders)
@@ -1484,6 +1515,12 @@ internal class FileDao(
                 await IncrementCountAsync(context, toFolderId, tenantId, FileEntryType.File);
             }
 
+            if (metadataInherited)
+            {
+                await metadataIndexHelper.IndexEntriesAsync(FileEntryType.File, [fileId]);
+            }
+
+            // the worker refreshes the search document of the file: the ancestor chain stored in it is stale after a move
             await eventBus.PublishAsync(new FileIndexIntegrationEvent(file.CreateBy, tenantId)
             {
                 FileId = fileId,
@@ -1524,11 +1561,13 @@ internal class FileDao(
 
         var tenantId = _tenantManager.GetCurrentTenantId();
         var folderDao = daoFactory.GetFolderDao<int>();
+        var trashId = await globalFolder.GetFolderTrashAsync(daoFactory);
 
         await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var strategy = filesDbContext.Database.CreateExecutionStrategy();
 
         List<DbFile> movedFiles = null;
+        IReadOnlyCollection<int> metadataInheritedIds = [];
 
         await strategy.ExecuteAsync(async () =>
         {
@@ -1542,6 +1581,13 @@ internal class FileDao(
 
             await context.UpdateFilesFolderIdAsync(tenantId, ids, parents, toFolderId);
 
+            if (toFolderId != trashId && await metadataTemplatesCache.HasTemplatesAsync())
+            {
+                // the same stamping the single-file move does: the batch is the regular path inside a room,
+                // so without it the moved files would never inherit the cascade of the destination
+                metadataInheritedIds = await context.ApplyMetadataCascadeLinksAsync(tenantId, movedFiles.Select(f => f.Id).Distinct().ToList(), FileEntryType.File, toFolderId, _authContext.CurrentAccount.ID);
+            }
+
             await tx.CommitAsync();
         });
 
@@ -1550,6 +1596,11 @@ internal class FileDao(
         if (movedIds.Count == 0)
         {
             return movedIds;
+        }
+
+        if (metadataInheritedIds.Count > 0)
+        {
+            await metadataIndexHelper.IndexEntriesAsync(FileEntryType.File, metadataInheritedIds);
         }
 
         // the rows are already moved: the follow-ups below are best-effort each,
@@ -1675,6 +1726,11 @@ internal class FileDao(
         {
             copy.ContentLength = stream.CanSeek ? stream.Length : file.ContentLength;
             copy = await SaveFileAsync(copy, stream, true, true, null);
+        }
+
+        if (await daoFactory.GetMetadataDao<int>().CopyMetadataAsync(file.Id, copy.Id, FileEntryType.File))
+        {
+            await metadataIndexHelper.IndexEntriesAsync(FileEntryType.File, [copy.Id]);
         }
 
         if (file.ThumbnailStatus != Thumbnail.Created)
@@ -2408,7 +2464,8 @@ internal class FileDao(
         List<FolderType> folderType,
         OrderBy orderBy,
         int offset,
-        int count)
+        int count,
+        MetadataFilter metadataFilter = null)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -2420,6 +2477,7 @@ internal class FileDao(
         var q = GetFilesByTagQuery(filesDbContext, tagOwner, tagType, location, trashId, folderType);
 
         q = await GetFilesQueryWithFilters(q, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject);
+        q = await ApplyMetadataFilterAsync(q, filesDbContext, metadataFilter);
 
         q = orderBy == null
             ? q
@@ -2907,7 +2965,8 @@ internal class FileDao(
         string[] extension,
         FilesDbContext filesDbContext,
         FormsItemDto formsItemDto,
-        List<FolderType> folderType = null)
+        List<FolderType> folderType = null,
+        MetadataFilter metadataFilter = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
         var currentUserId = _authContext.CurrentAccount.ID;
@@ -2917,8 +2976,9 @@ internal class FileDao(
 
         var searchByText = !string.IsNullOrEmpty(searchText);
         var searchByExtension = !extension.IsNullOrEmpty();
+        var searchByMetadata = metadataFilter is { IsEmpty: false };
 
-        if (withSubfolders && (searchByText || searchByExtension || filterType != FilterType.None || subjectID != Guid.Empty))
+        if (withSubfolders && (searchByText || searchByExtension || searchByMetadata || filterType != FilterType.None || subjectID != Guid.Empty))
         {
             q = GetFileQuery(filesDbContext, r => r.CurrentVersion)
                 .Join(filesDbContext.Tree, r => r.ParentId, a => a.FolderId, (file, tree) => new { file, tree })
@@ -2948,13 +3008,40 @@ internal class FileDao(
 
             if (success)
             {
-                q = q.Where(r => searchIds.Contains(r.Id));
+                if (searchByText)
+                {
+                    // the string values of the system template take part in the general text search: the files matched by
+                    // them are united with the files matched by their own fields
+                    q = await MetadataSearchQuery.ApplyTextSearchAsync(q, filesDbContext, tenantId, FileEntryType.File, factoryIndexerFileMetadata, searchIds, searchText, GetSearchText(searchText),
+                        await metadataTemplatesCache.HasSystemTemplateAsync(), r => r.Id);
+                }
+                else
+                {
+                    q = q.Where(r => searchIds.Contains(r.Id));
+                }
+
+                if (searchByText && searchByExtension)
+                {
+                    // the extension lives in the index selector only, and the metadata ids united above were not
+                    // selected by it: the extension is applied again in SQL so the union cannot bypass it
+                    q = BuildSearch(q, extension, SearchType.End);
+                }
             }
             else
             {
                 if (searchByText)
                 {
-                    q = BuildSearch(q, searchText, SearchType.Any);
+                    if (await metadataTemplatesCache.HasSystemTemplateAsync())
+                    {
+                        var lowerText = GetSearchText(searchText);
+                        var globalTextIds = MetadataSearchQuery.SystemTemplateTextEntryIds(filesDbContext, tenantId, FileEntryType.File, lowerText);
+
+                        q = q.Where(f => f.Title.ToLower().Contains(lowerText) || globalTextIds.Contains(f.Id));
+                    }
+                    else
+                    {
+                        q = BuildSearch(q, searchText, SearchType.Any);
+                    }
                 }
 
                 if (searchByExtension)
@@ -2963,6 +3050,8 @@ internal class FileDao(
                 }
             }
         }
+
+        q = await ApplyMetadataFilterAsync(q, filesDbContext, metadataFilter);
 
         q = orderBy == null
             ? q
@@ -3129,6 +3218,25 @@ internal class FileDao(
         return q;
     }
 
+    /// <summary>
+    /// Narrows a file query by the structured metadata filter, see <see cref="MetadataSearchQuery.ApplyFilterAsync{TRow, TDoc}"/>:
+    /// the index is asked tenant-wide and the id list is intersected with the query, which is already limited to the
+    /// folder, the section tags or the share records.
+    /// </summary>
+    private Task<IQueryable<DbFile>> ApplyMetadataFilterAsync(IQueryable<DbFile> q, FilesDbContext filesDbContext, MetadataFilter metadataFilter)
+    {
+        return MetadataSearchQuery.ApplyFilterAsync(q, filesDbContext, _tenantManager.GetCurrentTenantId(), FileEntryType.File, factoryIndexerFileMetadata, metadataFilter, r => r.Id);
+    }
+
+    /// <summary>
+    /// The same narrowing for the projections that carry the file as <see cref="IQueryResult{T}.Entry"/> (the tag listings).
+    /// </summary>
+    private Task<IQueryable<T>> ApplyMetadataFilterAsync<T>(IQueryable<T> q, FilesDbContext filesDbContext, MetadataFilter metadataFilter)
+        where T : IQueryResult<DbFile>
+    {
+        return MetadataSearchQuery.ApplyFilterAsync(q, filesDbContext, _tenantManager.GetCurrentTenantId(), FileEntryType.File, factoryIndexerFileMetadata, metadataFilter, r => r.Entry.Id);
+    }
+
     private IQueryable<FileByTagQuery> GetFilesByTagQuery(FilesDbContext filesDbContext, Guid tagOwner, IEnumerable<TagType> tagType, Location? location, int? trashId, List<FolderType> folderType)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
@@ -3281,6 +3389,9 @@ public record FileReassignInfo
 internal class CacheFileDao(ILogger<FileDao> logger,
         FactoryIndexerFile factoryIndexer,
         FactoryIndexerForm factoryIndexerFormData,
+        FactoryIndexerFileMetadata factoryIndexerFileMetadata,
+        MetadataIndexHelper metadataIndexHelper,
+        MetadataTemplatesCache metadataTemplatesCache,
         UserManager userManager,
         FileUtility fileUtility,
         IDbContextFactory<FilesDbContext> dbContextManager,
@@ -3323,6 +3434,9 @@ internal class CacheFileDao(ILogger<FileDao> logger,
         logger,
         factoryIndexer,
         factoryIndexerFormData,
+        factoryIndexerFileMetadata,
+        metadataIndexHelper,
+        metadataTemplatesCache,
         userManager,
         fileUtility,
         dbContextManager,

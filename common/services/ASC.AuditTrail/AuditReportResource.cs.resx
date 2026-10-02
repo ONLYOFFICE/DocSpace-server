@@ -777,6 +777,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Regenerace klientova tajemství {0}</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Poznámka</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Hlášení zobrazuje posledních {0} z {1} událostí. Chcete-li získat všechny události, stáhněte hlášení ve formátu CSV.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Nastavení vektorizace bylo resetováno</value>
   </data>

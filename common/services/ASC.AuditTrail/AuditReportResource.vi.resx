@@ -792,6 +792,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Đã tạo lại bí mật của máy khách {0}</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Lưu ý</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Báo cáo hiển thị {0} sự kiện gần đây nhất trong tổng số {1} sự kiện. Để nhận tất cả sự kiện, hãy tải xuống báo cáo ở định dạng CSV.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Cài đặt véc-tơ hóa đã được đặt lại</value>
   </data>

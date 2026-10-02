@@ -783,6 +783,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>تمت إعادة إنشاء سر {0} الخاص بالعميل</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>ملاحظة</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>يعرض التقرير أحدث {0} من أصل {1} حدث. للحصول على جميع الأحداث، قم بتنزيل التقرير بتنسيق CSV.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>تم إعادة تعيين إعدادات التحويل المتجهي (Vectorization)</value>
   </data>

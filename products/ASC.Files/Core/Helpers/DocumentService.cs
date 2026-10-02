@@ -351,7 +351,8 @@ public static class DocumentService
         string signatureSecret,
         string signatureHeader,
         bool sslVerification,
-       IHttpClientFactory clientFactory)
+       IHttpClientFactory clientFactory,
+        CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(docbuilderUrl);
 
@@ -360,7 +361,7 @@ public static class DocumentService
             throw new ArgumentException("requestKey or inputScript is empty");
         }
 
-        return InternalDocbuilderRequestAsync(docbuilderUrl, requestKey, scriptUrl, isAsync, signatureSecret, signatureHeader, sslVerification, clientFactory);
+        return InternalDocbuilderRequestAsync(docbuilderUrl, requestKey, scriptUrl, isAsync, signatureSecret, signatureHeader, sslVerification, clientFactory, cancellationToken);
     }
 
     private static async Task<(string DocBuilderKey, Dictionary<string, string> Urls)> InternalDocbuilderRequestAsync(
@@ -371,7 +372,8 @@ public static class DocumentService
        string signatureSecret,
        string signatureHeader,
        bool sslVerification,
-       IHttpClientFactory clientFactory)
+       IHttpClientFactory clientFactory,
+       CancellationToken cancellationToken)
     {
         docbuilderUrl = FilesLinkUtility.AddQueryString(docbuilderUrl, new Dictionary<string, string> {
             { FilesLinkUtility.ShardKey, requestKey }
@@ -403,9 +405,9 @@ public static class DocumentService
 
         string dataResponse;
 
-        using (var response = await httpClient.SendAsync(request))
+        using (var response = await httpClient.SendAsync(request, cancellationToken))
         {
-            dataResponse = await response.Content.ReadAsStringAsync();
+            dataResponse = await response.Content.ReadAsStringAsync(cancellationToken);
         }
 
         if (string.IsNullOrEmpty(dataResponse))
@@ -1105,7 +1107,7 @@ public static class DocumentServiceHttpClientExtension
         {
             pipelineBuilder.AddRetry(new RetryStrategyOptions<LicenseValidationResult>
             {
-                MaxRetryAttempts = 3,
+                MaxRetryAttempts = 4,
                 Delay = TimeSpan.FromSeconds(1),
                 BackoffType = DelayBackoffType.Exponential,
                 ShouldHandle = new PredicateBuilder<LicenseValidationResult>().HandleResult(result => result == null)
