@@ -54,7 +54,7 @@ public abstract class RoomPinTestsBase(
     /// <summary>
     /// Lists rooms exactly like <see cref="DocSpace.API.SDK.Api.Rooms.RoomsApi.GetRoomsFolderAsync"/>,
     /// but returns each room's <c>id</c> and <c>pinned</c> flag alongside its title.
-    /// <c>FolderContentDtoInteger.Folders</c> is typed <c>List&lt;FileEntryBaseDto&gt;</c>, which only
+    /// <c>FolderContentDto.Folders</c> is typed <c>List&lt;FileEntryBaseDto&gt;</c>, which only
     /// carries the fields common to every entry type — neither <c>Id</c> nor <c>Pinned</c> is one of
     /// them. That is an SDK defect worth reporting, not a preference: the request itself still goes
     /// through the typed SDK call (so sorting/filtering/paging are exercised as intended), only the
@@ -150,7 +150,7 @@ public abstract class RoomPinTestsBase(
     }
 
     /// <summary>Creates a room of the given type through the room-specific helpers already on <see cref="BaseTest"/>.</summary>
-    protected Task<FolderDtoInteger> CreateRoomOfType(RoomType roomType, string title) => roomType switch
+    protected Task<FolderDto> CreateRoomOfType(RoomType roomType, string title) => roomType switch
     {
         RoomType.CustomRoom => CreateCustomRoom(title),
         RoomType.PublicRoom => CreatePublicRoom(title),

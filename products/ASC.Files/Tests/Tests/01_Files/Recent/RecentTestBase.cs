@@ -45,7 +45,7 @@ public abstract class RecentTestBase(AspireAppFixture fixture) : RoomsPermission
     /// Reads the Recent section for the currently authenticated user, optionally filtered by folder
     /// type(s), the same way <c>FolderType?includeType</c> is used elsewhere in the suite.
     /// </summary>
-    protected async Task<FolderContentDtoInteger> GetRecentAsync(List<FolderType>? folderType = null)
+    protected async Task<FolderContentDto> GetRecentAsync(List<FolderType>? folderType = null)
     {
         var recentId = (await _foldersApi.GetRecentFolderAsync(cancellationToken: TestContext.Current.CancellationToken)).Response.Current.Id;
 
@@ -60,7 +60,7 @@ public abstract class RecentTestBase(AspireAppFixture fixture) : RoomsPermission
     /// the last observed listing either way. Adding to Recent and deleting from it are both applied
     /// asynchronously, so a bare read right after the request races with the write.
     /// </summary>
-    protected async Task<FolderContentDtoInteger> PollRecentUntil(Func<FolderContentDtoInteger, bool> until, TimeSpan? timeout = null)
+    protected async Task<FolderContentDto> PollRecentUntil(Func<FolderContentDto, bool> until, TimeSpan? timeout = null)
     {
         var deadline = DateTime.UtcNow.Add(timeout ?? TimeSpan.FromSeconds(10));
 
@@ -102,7 +102,7 @@ public abstract class RecentTestBase(AspireAppFixture fixture) : RoomsPermission
     /// the room's ordinary integer folder id, so it is parsed back for use with the rest of the
     /// (integer-keyed) Files API - the same cast the TypeScript suite makes explicitly.
     /// </summary>
-    protected async Task<int> CreateThirdPartyRoomAsync(string customerTitle, string roomTitle)
+    protected async Task<string> CreateThirdPartyRoomAsync(string customerTitle, string roomTitle)
     {
         var connection = await _thirdPartyApi.SaveThirdPartyAsync(
             new ThirdPartyRequestDto(
@@ -118,6 +118,6 @@ public abstract class RecentTestBase(AspireAppFixture fixture) : RoomsPermission
             new CreateThirdPartyRoom(title: roomTitle, roomType: RoomType.CustomRoom),
             TestContext.Current.CancellationToken);
 
-        return int.Parse(room.Response.Id);
+        return room.Response.Id;
     }
 }

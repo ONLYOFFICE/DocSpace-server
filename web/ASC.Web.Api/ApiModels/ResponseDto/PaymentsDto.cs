@@ -165,6 +165,13 @@ public class OperationDto
     /// <example>99.99</example>
     public decimal Debit { get; set; }
     /// <summary>
+    /// What the AI provider charged for the whole `quantity` of an AI tools or AI search charge, as the billing
+    /// service recorded it - the provider's side of the same operation `debit` bills the portal for. It is `null`
+    /// on any other movement, and on an AI charge recorded without a provider cost.
+    /// </summary>
+    /// <example>0.007</example>
+    public decimal? Cost { get; set; }
+    /// <summary>
     /// Who caused the movement, as the billing service records them - an internal name, which is what the
     /// `participantName` filter matches on. Show `participantDisplayName` instead.
     /// </summary>
@@ -222,6 +229,7 @@ public class OperationDto
         Currency = operation.Currency;
         Credit = operation.Credit;
         Debit = operation.Debit;
+        Cost = WalletServiceDescriptionManager.GetProviderCost(operation.Metadata);
         ParticipantName = operation.ParticipantName;
         ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
             ? value

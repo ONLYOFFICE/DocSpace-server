@@ -170,7 +170,9 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
             q1 = q1.Where(r => r.DescriptionRaw.Contains(description));
         }
 
-        q1 = q1.OrderByDescending(r => r.Date);
+        // Dates are stored to the second, so events can share one: the id settles their order, or a page window
+        // could return an event twice across pages and skip another.
+        q1 = q1.OrderByDescending(r => r.Date).ThenByDescending(r => r.Id);
 
         if (startIndex > 0)
         {
@@ -195,12 +197,122 @@ public class AuditEventsRepository(AuditActionMapper auditActionMapper,
         var eventQueryList = await q2.ToListAsync();
         var events = limitedActionText ? mapper.ToLimitedAuditEvents(eventQueryList) : mapper.ToAuditEvents(eventQueryList);
 
-        foreach (var e in events)
-        {
-            await geolocationHelper.AddGeolocationAsync(e);
-        }
+        await geolocationHelper.AddGeolocationAsync(events);
 
         return events;
+    }
+
+    /// <summary>
+    /// Streams the audit events of a period, newest first, in batches of at most <paramref name="batchSize"/>.
+    /// Every batch is a short query of its own that resumes after the last event of the previous one, so
+    /// neither the command timeout nor the memory of the caller grows with the length of the period.
+    /// </summary>
+    public async IAsyncEnumerable<IReadOnlyList<AuditEvent>> GetBatchesByPeriodAsync(
+        DateTime? from,
+        DateTime? to,
+        int batchSize,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var tenant = tenantManager.GetCurrentTenantId();
+        var actions = GetMappedActions();
+
+        DateTime? lastDate = null;
+        var lastId = 0;
+
+        while (true)
+        {
+            List<AuditEventQuery> page;
+
+            await using (var auditTrailContext = await dbContextFactory.CreateDbContextAsync(cancellationToken))
+            {
+                var q = FilterByPeriod(auditTrailContext.AuditEvents.AsNoTracking(), tenant, actions, from, to);
+
+                if (lastDate.HasValue)
+                {
+                    var date = lastDate.Value;
+                    var id = lastId;
+                    q = q.Where(r => r.Date < date || (r.Date == date && r.Id < id));
+                }
+
+                page = await (
+                        from e in q
+                        from u in auditTrailContext.Users.Where(u => u.TenantId == tenant && u.Id == e.UserId).DefaultIfEmpty()
+                        orderby e.Date descending, e.Id descending
+                        select new AuditEventQuery
+                        {
+                            Event = e,
+                            UserData = new UserData
+                            {
+                                FirstName = u.FirstName,
+                                LastName = u.LastName
+                            }
+                        })
+                    .Take(batchSize)
+                    .ToListAsync(cancellationToken);
+            }
+
+            if (page.Count == 0)
+            {
+                yield break;
+            }
+
+            // The cursor is taken from the stored rows: mapping moves the event dates into the portal time zone.
+            lastDate = page[^1].Event.Date;
+            lastId = page[^1].Event.Id;
+
+            var events = mapper.ToAuditEvents(page);
+
+            await geolocationHelper.AddGeolocationAsync(events);
+
+            yield return events;
+
+            if (page.Count < batchSize)
+            {
+                yield break;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Counts the audit events <see cref="GetBatchesByPeriodAsync"/> streams for the same period.
+    /// </summary>
+    public async Task<int> GetCountByPeriodAsync(DateTime? from, DateTime? to)
+    {
+        var tenant = tenantManager.GetCurrentTenantId();
+        await using var auditTrailContext = await dbContextFactory.CreateDbContextAsync();
+
+        return await FilterByPeriod(auditTrailContext.AuditEvents, tenant, GetMappedActions(), from, to).CountAsync();
+    }
+
+    // An unfiltered audit trail still keeps only the actions some mapper knows how to describe, exactly as
+    // GetByFilterWithActionsAsync does when no action, location or action type is given.
+    private List<int> GetMappedActions()
+    {
+        return auditActionMapper.Mappers
+            .SelectMany(r => r.Mappers)
+            .SelectMany(r => r.Actions)
+            .Select(r => (int)r.Key)
+            .Distinct()
+            .ToList();
+    }
+
+    private static IQueryable<DbAuditEvent> FilterByPeriod(IQueryable<DbAuditEvent> q, int tenant, List<int> actions, DateTime? from, DateTime? to)
+    {
+        q = q.Where(r => r.TenantId == tenant && actions.Contains(r.Action ?? 0));
+
+        if (from.HasValue && from.Value != DateTime.MinValue)
+        {
+            var fromDate = from.Value;
+            q = q.Where(r => r.Date >= fromDate);
+        }
+
+        if (to.HasValue && to.Value != DateTime.MinValue)
+        {
+            var toDate = to.Value;
+            q = q.Where(r => r.Date <= toDate);
+        }
+
+        return q;
     }
 
     private static IQueryable<DbAuditEvent> FindByEntry(IQueryable<DbAuditEvent> q, EntryType entry, string target, IEnumerable<KeyValuePair<MessageAction, MessageMaps>> actions)

@@ -51,6 +51,7 @@ import { textToDocxController } from "./controllers/textToDocxController.js";
 import { aiController } from "./controllers/aiController.js";
 import { assignmentsController } from "./controllers/assignmentsController.js";
 import { attachmentsController } from "./controllers/attachmentsController.js";
+import { contextController } from "./controllers/contextController.js";
 import { editorToolsController } from "./controllers/editorToolsController.js";
 import { openaiPassthroughController } from "./controllers/openaiPassthroughController.js";
 import { preferencesController } from "./controllers/preferencesController.js";
@@ -74,6 +75,7 @@ const CONTROLLERS: Readonly<Record<string, ControllerMap>> = {
   ai: aiController,
   assignments: assignmentsController,
   attachments: attachmentsController,
+  context: contextController,
   preferences: preferencesController,
   profiles: profilesController,
   prompts: promptsController,

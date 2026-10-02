@@ -783,6 +783,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Հաճախորդի {0} գաղտնին վերականգնվել է</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Նշում</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Հաշվետվությունում ցուցադրված են {1} իրադարձություններից վերջին {0}-ը։ Բոլոր իրադարձությունները ստանալու համար ներբեռնեք հաշվետվությունը CSV ձևաչափով։</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Վեկտորացման կարգավորումները վերակայվել են</value>
   </data>

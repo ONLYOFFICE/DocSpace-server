@@ -439,6 +439,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The room already contains the .ai folder.
+        /// </summary>
+        public static string ErrorMessage_AppsFolderExists {
+            get {
+                return ResourceManager.GetString("ErrorMessage_AppsFolderExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bad request..
         /// </summary>
         public static string ErrorMessage_BadRequest {
@@ -1119,6 +1128,24 @@ namespace ASC.Files.Core.Resources {
         public static string IndexTitle {
             get {
                 return ResourceManager.GetString("IndexTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search in file metadata.
+        /// </summary>
+        public static string IndexTitleFileMetadata {
+            get {
+                return ResourceManager.GetString("IndexTitleFileMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search in folder metadata.
+        /// </summary>
+        public static string IndexTitleFolderMetadata {
+            get {
+                return ResourceManager.GetString("IndexTitleFolderMetadata", resourceCulture);
             }
         }
         

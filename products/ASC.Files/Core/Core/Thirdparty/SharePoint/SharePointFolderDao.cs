@@ -87,7 +87,8 @@ internal class SharePointFolderDao(
         return Task.FromResult(SharePointProviderInfo.ToFolder(SharePointProviderInfo.RootFolder));
     }
 
-    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
+    public async IAsyncEnumerable<Folder<string>> GetRoomsAsync(IEnumerable<string> roomsIds, IEnumerable<FilterType> filterTypes, IEnumerable<string> tags, Guid subjectId, string searchText, bool withSubfolders, bool withoutTags, bool excludeSubject, ProviderFilter provider, Guid subjectOwnerId, IEnumerable<string> subjectEntriesIds, IEnumerable<int> parentsIds = null, int? groupId = null, RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None, bool withAiFolder = false,
+        MetadataFilter metadataFilter = null)
     {
         if (CheckInvalidFilters(filterTypes) || (provider != ProviderFilter.None && provider != SharePointProviderInfo.ProviderFilter))
         {
@@ -129,7 +130,8 @@ internal class SharePointFolderDao(
     }
 
     public IAsyncEnumerable<Folder<string>> GetFoldersAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, bool containingForms = false, List<FolderType> folderType = null)
+        bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, bool containingForms = false, List<FolderType> folderType = null,
+        MetadataFilter metadataFilter = null)
     {
         if (CheckInvalidFilter(filterType))
         {
@@ -165,9 +167,10 @@ internal class SharePointFolderDao(
         return folders;
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(IEnumerable<string> folderIds, IEnumerable<string> excludeParentIds  = null, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false)
+    public IAsyncEnumerable<Folder<string>> GetFoldersAsync(IEnumerable<string> folderIds, IEnumerable<string> excludeParentIds  = null, FilterType filterType = FilterType.None, bool subjectGroup = false, Guid? subjectID = null, string searchText = "", bool searchSubfolders = false, bool checkShare = true, bool excludeSubject = false,
+        MetadataFilter metadataFilter = null)
     {
-        if (CheckInvalidFilter(filterType))
+        if (CheckInvalidFilter(filterType) || metadataFilter is { IsEmpty: false })
         {
             return AsyncEnumerable.Empty<Folder<string>>();
         }
@@ -512,7 +515,8 @@ internal class SharePointFolderDao(
         throw new NotImplementedException();
     }
 
-    public IAsyncEnumerable<Folder<string>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count)
+    public IAsyncEnumerable<Folder<string>> GetFoldersByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count,
+        MetadataFilter metadataFilter = null)
     {
         throw new NotImplementedException();
     }

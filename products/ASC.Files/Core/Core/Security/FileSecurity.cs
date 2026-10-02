@@ -2184,7 +2184,7 @@ public class FileSecurity(
                             if (folder is
                                 {
                                     RootFolderType: FolderType.VirtualRooms,
-                                    FolderType: FolderType.DEFAULT or FolderType.FormFillingFolderDone or FolderType.FormFillingFolderInProgress
+                                    FolderType: FolderType.DEFAULT or FolderType.Ai or FolderType.FormFillingFolderDone or FolderType.FormFillingFolderInProgress
                                 })
                             {
                                 return true;
@@ -2690,7 +2690,8 @@ public class FileSecurity(
         return daoFactory.GetSecurityDao<T>().GetPureSharesCountAsync(entry, filterType, status, text);
     }
 
-    public async IAsyncEnumerable<FileEntry> GetSharesForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, Guid sharedBy, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false)
+    public async IAsyncEnumerable<FileEntry> GetSharesForMeAsync(FilterType filterType, bool subjectGroup, Guid subjectID, Guid sharedBy, string searchText = "", string[] extension = null, bool searchInContent = false, bool withSubfolders = false,
+        MetadataFilter metadataFilter = null)
     {
         var securityDao = daoFactory.GetSecurityDao<string>();
         var orderedSubjects = await GetUserOrderedSubjectsAsync(authContext.CurrentAccount.ID, true);
@@ -2712,9 +2713,10 @@ public class FileSecurity(
 
         var firstTask = recordsInternal.Count == 0 ?
             ValueTask.FromResult(new List<FileEntry>(0)) :
-            GetSharesForMeAsync(recordsInternal, orderedSubjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
+            GetSharesForMeAsync(recordsInternal, orderedSubjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders, metadataFilter).ToListAsync();
 
-        var secondTask = recordsThirdParty.Count == 0 ?
+        // the third-party entries never carry metadata, so with a metadata filter the providers are not asked at all
+        var secondTask = recordsThirdParty.Count == 0 || metadataFilter is { IsEmpty: false } ?
             ValueTask.FromResult(new List<FileEntry>(0)) :
             GetSharesForMeAsync(recordsThirdParty, orderedSubjects, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, withSubfolders).ToListAsync();
 
@@ -2742,7 +2744,9 @@ public class FileSecurity(
         QuotaFilter quotaFilter,
         StorageFilter storageFilter,
         int? groupId = null,
-        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
+        bool withAiFolder = false,
+        MetadataFilter metadataFilter = null)
     {
         var securityDao = daoFactory.GetSecurityDao<string>();
 
@@ -2800,11 +2804,11 @@ public class FileSecurity(
         if (isAdmin && searchArea is not (SearchArea.Templates or SearchArea.FormTemplates))
         {
             return await GetAllVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
-                subjectOwnerId, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId, privacyFilter);
+                subjectOwnerId, subjectEntries, quotaFilter, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId, privacyFilter, withAiFolder, metadataFilter);
         }
 
         return await GetVirtualRoomsForMeAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject, provider,
-            subjectOwnerId, subjectEntries, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId, privacyFilter);
+            subjectOwnerId, subjectEntries, storageFilter, internalRoomsRecords, thirdPartyRoomsRecords, groupId, privacyFilter, withAiFolder, metadataFilter);
     }
 
     // FillingFormsRoom rooms physically live under VirtualRooms but are surfaced in the separate Forms
@@ -2841,7 +2845,9 @@ public class FileSecurity(
         Dictionary<int, FileShareRecord<int>> internalRecords,
         Dictionary<string, FileShareRecord<string>> thirdPartyRecords,
         int? groupId,
-        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
+        bool withAiFolder = false,
+        MetadataFilter metadataFilter = null)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
@@ -2864,7 +2870,7 @@ public class FileSecurity(
 
         var roomsEntries = storageFilter == StorageFilter.ThirdParty ?
             [] :
-            await folderDao.GetRoomsAsync(rootFoldersIds, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectOwnerId, subjectEntries, quotaFilter, groupId, privacyFilter)
+            await folderDao.GetRoomsAsync(rootFoldersIds, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectOwnerId, subjectEntries, quotaFilter, groupId, privacyFilter, withAiFolder, metadataFilter)
                 .Where(r => withSubfolders || r.IsRoom)
                 .Where(r => MatchesFormsSplit(r, searchArea))
                 // This is the administrator's view, which otherwise lists every room in the portal.
@@ -2874,7 +2880,9 @@ public class FileSecurity(
                 .Where(r => !r.SettingsPrivate || r.CreateBy == currentUserId || internalRecords.ContainsKey(r.Id))
                 .ToListAsync();
 
-        var thirdPartyRoomsEntries = storageFilter == StorageFilter.Internal || privacyFilter == RoomPrivacyFilter.Private ?
+        // the metadata values are stored for the internal entries only, so a provider based room can never
+        // match the filter: it is excluded instead of being returned unfiltered
+        var thirdPartyRoomsEntries = storageFilter == StorageFilter.Internal || privacyFilter == RoomPrivacyFilter.Private || withAiFolder || metadataFilter is { IsEmpty: false } ?
             [] :
             await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectOwnerId, subjectEntries, groupId)
                 .Where(r => withSubfolders || r.IsRoom)
@@ -2955,7 +2963,9 @@ public class FileSecurity(
         Dictionary<int, FileShareRecord<int>> internalRecords,
         Dictionary<string, FileShareRecord<string>> thirdPartyRecords,
         int? groupId = null,
-        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None)
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
+        bool withAiFolder = false,
+        MetadataFilter metadataFilter = null)
     {
         var folderDao = daoFactory.GetFolderDao<int>();
         var folderThirdPartyDao = daoFactory.GetFolderDao<string>();
@@ -2976,13 +2986,15 @@ public class FileSecurity(
 
         var rooms = storageFilter == StorageFilter.ThirdParty
             ? []
-            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectOwnerId, subjectEntries, rootFoldersIds, groupId, privacyFilter)
+            : await folderDao.GetRoomsAsync(internalRecords.Keys, filterTypes, tagNames, subjectId, search, withSubfolders, withoutTags, excludeSubject, provider, subjectOwnerId, subjectEntries, rootFoldersIds, groupId, privacyFilter, withAiFolder, metadataFilter)
                 .Where(r => withSubfolders || r.IsRoom)
                 .Where(r => MatchesFormsSplit(r, searchArea))
                 .Where(r => Filter(r, internalRecords))
                 .ToListAsync();
 
-        var thirdPartyRooms = storageFilter == StorageFilter.Internal || privacyFilter == RoomPrivacyFilter.Private
+        // the metadata values are stored for the internal entries only, so a provider based room can never
+        // match the filter: it is excluded instead of being returned unfiltered
+        var thirdPartyRooms = storageFilter == StorageFilter.Internal || privacyFilter == RoomPrivacyFilter.Private || withAiFolder || metadataFilter is { IsEmpty: false }
             ? []
             : await folderThirdPartyDao.GetProviderBasedRoomsAsync(searchArea, thirdPartyRecords.Keys, filterTypes, tagNames, subjectId, search, withoutTags, excludeSubject, provider, subjectOwnerId, subjectEntries, groupId)
                 .Where(r => withSubfolders || r.IsRoom)
@@ -3091,7 +3103,8 @@ public class FileSecurity(
         string searchText = "",
         string[] extension = null,
         bool searchInContent = false,
-        bool withSubfolders = false)
+        bool withSubfolders = false,
+        MetadataFilter metadataFilter = null)
     {
         var folderDao = daoFactory.GetFolderDao<T>();
         var fileDao = daoFactory.GetFileDao<T>();
@@ -3127,12 +3140,14 @@ public class FileSecurity(
             }
         }
 
-        var folderToExclude = subjectID == Guid.Empty && string.IsNullOrEmpty(searchText) && filterType == FilterType.None ? folderIds.Keys.ToArray() : [];
+        // an unfiltered listing hides the files that live inside a shared folder; any filter, the metadata one included, lists them
+        var searchByMetadata = metadataFilter is { IsEmpty: false };
+        var folderToExclude = subjectID == Guid.Empty && string.IsNullOrEmpty(searchText) && filterType == FilterType.None && !searchByMetadata ? folderIds.Keys.ToArray() : [];
         var entries = new List<FileEntry<T>>();
 
         if (filterType != FilterType.FoldersOnly)
         {
-            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), folderToExclude, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
+            var files = fileDao.GetFilesFilteredAsync(fileIds.Keys.ToArray(), folderToExclude, filterType, subjectGroup, subjectID, searchText, extension, searchInContent, metadataFilter);
 
             await foreach (var x in files)
             {
@@ -3149,7 +3164,7 @@ public class FileSecurity(
 
         if (filterType is FilterType.None or FilterType.FoldersOnly)
         {
-            IAsyncEnumerable<FileEntry<T>> folders = folderDao.GetFoldersAsync(folderIds.Keys, folderToExclude, filterType, subjectGroup, subjectID, searchText, withSubfolders && filterType == FilterType.FoldersOnly, false);
+            IAsyncEnumerable<FileEntry<T>> folders = folderDao.GetFoldersAsync(folderIds.Keys, folderToExclude, filterType, subjectGroup, subjectID, searchText, withSubfolders && filterType == FilterType.FoldersOnly, false, metadataFilter: metadataFilter);
 
             if (withSubfolders && filterType == FilterType.FoldersOnly)
             {
@@ -3169,7 +3184,9 @@ public class FileSecurity(
             }
         }
 
-        if (filterType != FilterType.FoldersOnly && filterType != FilterType.None && withSubfolders)
+        // the pass below re-adds the directly shared files found inside the shared folders without the metadata filter,
+        // which would bring back the files the filter has just rejected: with the filter the first pass is the only one
+        if (filterType != FilterType.FoldersOnly && filterType != FilterType.None && withSubfolders && !searchByMetadata)
         {
             IAsyncEnumerable<FileEntry<T>> filesInSharedFolders = fileDao.GetFilesAsync(folderIds.Keys, filterType, subjectGroup, subjectID, searchText, extension, searchInContent);
             filesInSharedFolders = FilterReadAsync(filesInSharedFolders);

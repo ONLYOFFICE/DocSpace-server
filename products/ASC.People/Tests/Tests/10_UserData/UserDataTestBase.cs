@@ -55,7 +55,7 @@ public abstract class UserDataTestBase(AspireAppFixture fixture) : BaseTest(fixt
     /// reassign/remove call moves or drops. Leaves <see cref="BaseTest._filesClient"/> authenticated
     /// as that member; callers that need the Owner back must re-authenticate explicitly.
     /// </summary>
-    protected async Task<FolderDtoInteger> CreateOwnRoomWithFileAsync(User owner, string roomTitle, string fileTitle)
+    protected async Task<FolderDto> CreateOwnRoomWithFileAsync(User owner, string roomTitle, string fileTitle)
     {
         await _filesClient.Authenticate(owner);
         var room = await CreateCustomRoom(roomTitle);
@@ -68,7 +68,7 @@ public abstract class UserDataTestBase(AspireAppFixture fixture) : BaseTest(fixt
     /// Invites a new member of <paramref name="type"/> and gives them a room and a file of their
     /// own, then restores <see cref="BaseTest._filesClient"/> to the Owner.
     /// </summary>
-    protected async Task<(User Actor, FolderDtoInteger Room)> CreateActorWithRoomAndFileAsync(EmployeeType type, string roomTitle, string fileTitle)
+    protected async Task<(User Actor, FolderDto Room)> CreateActorWithRoomAndFileAsync(EmployeeType type, string roomTitle, string fileTitle)
     {
         var actor = await InviteContact(type);
         var room = await CreateOwnRoomWithFileAsync(actor, roomTitle, fileTitle);
@@ -93,7 +93,7 @@ public abstract class UserDataTestBase(AspireAppFixture fixture) : BaseTest(fixt
     /// The room whose title matches <paramref name="roomTitle"/>. Read through the folder listing
     /// rather than a by-id lookup because <c>OwnedBy</c> lives only on the listing's
     /// <c>FileEntryBaseDto</c> entries - see the "endpoints the SDK does not expose" note on
-    /// <c>FolderContentDtoInteger.Folders</c>. Must be called as a caller allowed to see the room
+    /// <c>FolderContentDto.Folders</c>. Must be called as a caller allowed to see the room
     /// (the Owner, here).
     /// </summary>
     protected async Task<FileEntryBaseDto> FindRoomByTitleAsync(string roomTitle)
