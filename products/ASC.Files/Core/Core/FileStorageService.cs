@@ -2950,6 +2950,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         var currentFolderType = FolderType.USER;
+        string previousTitle = null;
         int currentProviderId;
 
         MessageAction messageAction;
@@ -2993,6 +2994,10 @@ public class FileStorageService //: IFileStorageService
 
             currentFolderType = currentProvider.RootFolderType;
 
+            // An empty title keeps the current one; a non-empty one is cleaned the same way as on connect.
+            thirdPartyParams.CustomerTitle = Global.ReplaceInvalidCharsAndTruncate(thirdPartyParams.CustomerTitle);
+            previousTitle = currentProvider.CustomerTitle;
+
             switch (currentProvider.RootFolderType)
             {
                 case FolderType.COMMON when !thirdPartyParams.Corporate:
@@ -3003,7 +3008,12 @@ public class FileStorageService //: IFileStorageService
                     }
                 case FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.Archive:
                     {
-                        var updatedProvider = await providerDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = currentProviderId, AuthData = thirdPartyParams.AuthData });
+                        var updatedProvider = await providerDao.UpdateRoomProviderInfoAsync(new ProviderData
+                        {
+                            Id = currentProviderId,
+                            Title = thirdPartyParams.CustomerTitle,
+                            AuthData = thirdPartyParams.AuthData
+                        });
                         currentProviderId = updatedProvider.ProviderId;
                         break;
                     }
@@ -3026,6 +3036,11 @@ public class FileStorageService //: IFileStorageService
         }
 
         await filesMessageService.SendAsync(messageAction, parentFolder, folder.Id, provider.ProviderKey);
+
+        if (previousTitle is not null && provider.CustomerTitle != previousTitle)
+        {
+            await socketManager.UpdateFolderAsync(folder);
+        }
 
         if (thirdPartyParams.Corporate && currentFolderType != FolderType.COMMON)
         {
