@@ -609,34 +609,47 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
 
         var channel = await _persistentConnection.CreateModelAsync();
 
-        // without a prefetch limit the broker pushes the whole queue at once, and its consumer
-        // timeout runs from delivery, so the tail of a large backlog times out while still waiting
-        // for the sequential handler; global: false limits each consumer, not the whole channel
-        await channel.BasicQosAsync(prefetchSize: 0, prefetchCount: _prefetchCount, global: false);
-
-        await channel.ExchangeDeclareAsync(exchange: EXCHANGE_NAME,
-                                type: "direct");
-
-        await channel.ExchangeDeclareAsync(exchange: DEAD_LETTER_EXCHANGE_NAME,
-                                type: "direct");
-
-        await channel.QueueDeclareAsync(queue: _deadLetterQueueName,
-                        durable: true,
-                        exclusive: false,
-                        autoDelete: false,
-                        arguments: null);
-
-
-        var arguments = new Dictionary<string, object>
+        try
         {
-            { "x-dead-letter-exchange", DEAD_LETTER_EXCHANGE_NAME }
-        };
+            // without a prefetch limit the broker pushes the whole queue at once, and its consumer
+            // timeout runs from delivery, so the tail of a large backlog times out while still waiting
+            // for the sequential handler; global: false limits each consumer, not the whole channel
+            await channel.BasicQosAsync(prefetchSize: 0, prefetchCount: _prefetchCount, global: false);
 
-        await channel.QueueDeclareAsync(queue: _queueName,
-                                durable: true,
-                                exclusive: false,
-                                autoDelete: false,
-                                arguments: arguments);
+            await channel.ExchangeDeclareAsync(exchange: EXCHANGE_NAME,
+                                    type: "direct");
+
+            await channel.ExchangeDeclareAsync(exchange: DEAD_LETTER_EXCHANGE_NAME,
+                                    type: "direct");
+
+            await channel.QueueDeclareAsync(queue: _deadLetterQueueName,
+                            durable: true,
+                            exclusive: false,
+                            autoDelete: false,
+                            arguments: null);
+
+
+            var arguments = new Dictionary<string, object>
+            {
+                { "x-dead-letter-exchange", DEAD_LETTER_EXCHANGE_NAME }
+            };
+
+            await channel.QueueDeclareAsync(queue: _queueName,
+                                    durable: true,
+                                    exclusive: false,
+                                    autoDelete: false,
+                                    arguments: arguments);
+        }
+        catch
+        {
+            // a declaration the broker refuses (e.g. a queue declared with other arguments) closes
+            // the channel on its side only: left as is, it stays registered for automatic recovery,
+            // and RecreateConsumerAsync would add one such channel per retry until the next recovery
+            // reopened them all
+            await CloseChannelAsync(channel);
+
+            throw;
+        }
 
         channel.CallbackExceptionAsync += Channel_CallbackException;
 
