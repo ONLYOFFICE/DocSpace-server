@@ -786,6 +786,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>클라이언트의 {0} 시크릿이 재생성되었습니다</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>참고</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>보고서에는 {1}개의 이벤트 중 최근 {0}개가 표시됩니다. 모든 이벤트를 받으려면 보고서를 CSV 형식으로 다운로드하세요.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>벡터화 설정이 재설정되었습니다</value>
   </data>

@@ -1132,6 +1132,24 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Search in file metadata.
+        /// </summary>
+        public static string IndexTitleFileMetadata {
+            get {
+                return ResourceManager.GetString("IndexTitleFileMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search in folder metadata.
+        /// </summary>
+        public static string IndexTitleFolderMetadata {
+            get {
+                return ResourceManager.GetString("IndexTitleFolderMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Knowledge.
         /// </summary>
         public static string KnowledgeFolder {

@@ -107,6 +107,11 @@ public abstract class FilesHelperBase(
         var file = await _fileStorageService.GetFileAsync(fileId, version);
         file = file.NotFoundIfNull("File not found");
 
-        return await _fileDtoHelper.GetAsync(file);
+        var result = await _fileDtoHelper.GetAsync(file);
+
+        // the row a client re-reads after a socket event carries the same metadata the listing shows
+        await _fileDtoHelper.SetAssignedMetadataTemplatesAsync(result);
+
+        return result;
     }
 }

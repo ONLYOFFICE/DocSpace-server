@@ -39,6 +39,30 @@ import { isReasoningLevel, REASONING_LEVELS } from "../storage/reasoningDepth.js
 
 const engine = new PreferencesEngine({ storage });
 
+// The scope a preference is written to. Preferences are keyed on a folder
+// (an agent room; any other accessible folder folds to the portal-wide
+// scope downstream), and folder ids are integers on the .NET side — so
+// anything else names no scope at all. A thread id in particular used to
+// fold to the portal-wide preference and answer `{ success: true }` for a
+// write that changed nothing the caller could observe (Bug 84026); it is
+// refused with 400 instead. An absent value is the portal-wide scope. Reads
+// stay lenient: an unknown scope reads as the portal-wide fallback.
+function writeScope(value: unknown): string | undefined {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+  if (typeof value === "number" && Number.isInteger(value) && value > 0) {
+    return String(value);
+  }
+  if (typeof value === "string" && /^\d+$/.test(value)) {
+    return value;
+  }
+  throw Object.assign(new Error("entityId must be a room id (a positive integer)"), {
+    status: 400,
+    expose: true,
+  });
+}
+
 export const preferencesController = {
   getDeepMode: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
@@ -56,15 +80,14 @@ export const preferencesController = {
       res.status(400).json({ error: "value is required and must be a boolean" });
       return;
     }
-    const entityId = typeof args.entityId === "string" ? args.entityId : undefined;
+    const entityId = writeScope(args.entityId);
     await engine.setDeepMode(args.value, entityId);
     res.json({ success: true });
   }),
 
   clearDeepMode: asyncHandler(async (req, res) => {
     const { entityId } = unpackPositional(req.body, ["entityId"] as const);
-    const entityIdStr = typeof entityId === "string" ? entityId : undefined;
-    await engine.clearDeepMode(entityIdStr);
+    await engine.clearDeepMode(writeScope(entityId));
     res.json({ success: true });
   }),
 
@@ -99,7 +122,7 @@ export const preferencesController = {
       });
       return;
     }
-    const entityId = typeof args.entityId === "string" ? args.entityId : undefined;
+    const entityId = writeScope(args.entityId);
     await storage.preferences.upsertReasoningLevel?.(args.value, entityId);
     res.json({ success: true });
   }),

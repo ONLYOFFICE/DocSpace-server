@@ -86,6 +86,11 @@ public static class LoginEventsExtension
                 entity.HasIndex(e => new { e.TenantId, e.UserId })
                     .HasDatabaseName("tenant_id");
 
+                // The log of one portal, newest first: the report reads it in keyset-paged batches ordered by
+                // date and id, and InnoDB appends the primary key to the index, so it serves that order as is.
+                entity.HasIndex(e => new { e.TenantId, e.Date })
+                    .HasDatabaseName("tenant_id_date");
+
                 entity.Property(e => e.Id).HasColumnName("id");
 
                 entity.Property(e => e.Action)

@@ -48,4 +48,7 @@ internal static partial class BaseIndexerLogger
 
     [LoggerMessage(LogLevel.Error, "CheckExist {indexName}")]
     public static partial void ErrorCheckExist(this ILogger logger, string indexName, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "Bulk index {indexName}: document {id} refused: {reason}")]
+    public static partial void ErrorBulkItem(this ILogger logger, string indexName, string id, string reason);
 }

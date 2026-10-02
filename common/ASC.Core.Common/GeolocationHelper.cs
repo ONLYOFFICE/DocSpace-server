@@ -56,6 +56,29 @@ public class GeolocationHelper(IDbContextFactory<CustomDbContext> dbContextFacto
         return baseEvent;
     }
 
+    /// <summary>
+    /// Fills the location of a batch of events, resolving each distinct address once: a report batch
+    /// holds thousands of events that mostly share a handful of addresses.
+    /// </summary>
+    public async Task AddGeolocationAsync(IEnumerable<BaseEvent> baseEvents)
+    {
+        var locations = new Dictionary<string, string[]>();
+
+        foreach (var baseEvent in baseEvents)
+        {
+            var ip = baseEvent.IP ?? string.Empty;
+
+            if (!locations.TryGetValue(ip, out var location))
+            {
+                location = await GetGeolocationAsync(ip);
+                locations[ip] = location;
+            }
+
+            baseEvent.Country = location[0];
+            baseEvent.City = location[1];
+        }
+    }
+
     public async Task<string[]> GetGeolocationAsync(string ip)
     {
         try

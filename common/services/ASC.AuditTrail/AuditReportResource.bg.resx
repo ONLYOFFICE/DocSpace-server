@@ -783,6 +783,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Тайната на клиент {0} е регенерирана</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Забележка</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Отчетът показва последните {0} от {1} събития. За да получите всички събития, изтеглете отчета във формат CSV.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Настройките за векторизация са нулирани</value>
   </data>
