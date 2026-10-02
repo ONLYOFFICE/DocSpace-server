@@ -73,6 +73,12 @@ public class AiSettingsDto
     /// </summary>
     /// <example>gpt-5.4</example>
     public string? RecommendedModelForForms { get; init; }
+
+    /// <summary>
+    /// How tool calls made by the model are approved for the current user. The default applies while the user has stored nothing.
+    /// </summary>
+    /// <example>1</example>
+    public ToolPermissionMode ToolPermissionMode { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
