@@ -81,6 +81,8 @@ export interface ChatContextSnapshot {
     contextEntityId: string | undefined;
   };
   aiReady: boolean | undefined;
+  /** The portal's localized reason for `aiReady === false`; undefined when ready or absent. */
+  aiNotReadyMessage: string | undefined;
   profiles: Profile[];
   global: ChatContextScope;
   /** `null` when `entityId` was given but the folder is inaccessible or unknown. */

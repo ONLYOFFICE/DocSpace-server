@@ -783,6 +783,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Klijentova {0} tajna regenerisana</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Napomena</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Izveštaj prikazuje poslednjih {0} od {1} događaja. Da biste dobili sve događaje, preuzmite izveštaj u CSV formatu.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Podešavanja vektorizacije su resetovana</value>
   </data>

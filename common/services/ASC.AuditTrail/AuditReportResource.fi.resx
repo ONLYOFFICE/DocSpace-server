@@ -792,6 +792,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Asiakasohjelman {0} salaisuus luotu uudelleen</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Huomautus</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Raportissa näytetään {0} uusinta tapahtumaa {1} tapahtumasta. Saat kaikki tapahtumat lataamalla raportin CSV-muodossa.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Vektorisaatioasetukset on nollattu</value>
   </data>

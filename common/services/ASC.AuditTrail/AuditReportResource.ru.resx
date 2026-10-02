@@ -798,6 +798,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Секрет клиента {0} создан повторно</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Примечание</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>В отчете показаны последние {0} из {1} событий. Чтобы получить все события, выгрузите отчет в формате CSV.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Настройки векторизации сброшены</value>
   </data>

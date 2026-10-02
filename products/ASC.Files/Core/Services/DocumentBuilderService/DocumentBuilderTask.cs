@@ -169,7 +169,7 @@ public class DocumentBuilderTask(DocumentServiceConnector documentServiceConnect
 {
     internal async Task<string> BuildFileAsync(DocumentBuilderInputData inputData, CancellationToken cancellationToken)
     {
-        var resultTuple = await documentServiceConnector.DocbuilderRequestAsync(null, inputData.Script, true);
+        var resultTuple = await documentServiceConnector.DocbuilderRequestAsync(null, inputData.Script, true, cancellationToken);
 
         if (string.IsNullOrEmpty(resultTuple.BuilderKey))
         {
@@ -182,7 +182,7 @@ public class DocumentBuilderTask(DocumentServiceConnector documentServiceConnect
 
             await Task.Delay(1000, cancellationToken);
 
-            resultTuple = await documentServiceConnector.DocbuilderRequestAsync(resultTuple.BuilderKey, null, true);
+            resultTuple = await documentServiceConnector.DocbuilderRequestAsync(resultTuple.BuilderKey, null, true, cancellationToken);
 
             if (string.IsNullOrEmpty(resultTuple.BuilderKey))
             {

@@ -82,10 +82,18 @@ public abstract class BaseIndexer<T>(Client client,
     protected readonly TenantManager _tenantManager = tenantManager;
     private static readonly Lock _locker = new();
 
-    public async IAsyncEnumerable<List<T>> IndexAllAsync(
+    public IAsyncEnumerable<List<T>> IndexAllAsync(
         Func<DateTime, (int, int, int)> getCount,
         Func<DateTime, List<int>> getIds,
         Func<long, long, DateTime, List<T>> getData)
+    {
+        return IndexAllAsync(getCount, getIds, (start, stop, lastIndexed) => Task.FromResult(getData(start, stop, lastIndexed)));
+    }
+
+    public async IAsyncEnumerable<List<T>> IndexAllAsync(
+        Func<DateTime, (int, int, int)> getCount,
+        Func<DateTime, List<int>> getIds,
+        Func<long, long, DateTime, Task<List<T>>> getData)
     {
         DateTime lastIndexed;
 
@@ -108,7 +116,7 @@ public abstract class BaseIndexer<T>(Client client,
 
         for (var i = 0; i < ids.Count - 1; i++)
         {
-            yield return getData(ids[i], ids[i + 1], lastIndexed);
+            yield return await getData(ids[i], ids[i + 1], lastIndexed);
         }
     }
 
@@ -284,7 +292,7 @@ public abstract class BaseIndexer<T>(Client client,
                 if (runBulk)
                 {
                     var portion1 = portion.ToList();
-                    await client.Instance.BulkAsync(r => r.IndexMany(portion1, GetMeta).SourceExcludes("attachments"));
+                    LogBulkErrors(await client.Instance.BulkAsync(r => r.IndexMany(portion1, GetMeta).SourceExcludes("attachments")));
                     for (var j = portionStart; j < i; j++)
                     {
                         if (data[j] is ISearchItemDocument { Document: not null } doc)
@@ -312,7 +320,25 @@ public abstract class BaseIndexer<T>(Client client,
                 await BeforeIndexAsync(item);
             }
 
-            await client.Instance.BulkAsync(r => r.IndexMany(data, GetMeta));
+            LogBulkErrors(await client.Instance.BulkAsync(r => r.IndexMany(data, GetMeta)));
+        }
+    }
+
+    /// <summary>
+    /// A bulk request answers 200 even when some of its documents were refused (a keyword term over the 32766 byte
+    /// limit, a mapping conflict): the refusal is per item, in the body. It used to be dropped unread, so a document
+    /// that never made it into the index left no trace anywhere.
+    /// </summary>
+    private void LogBulkErrors(BulkResponse response)
+    {
+        if (!response.Errors)
+        {
+            return;
+        }
+
+        foreach (var item in response.ItemsWithErrors)
+        {
+            _logger.ErrorBulkItem(IndexName, item.Id, item.Error?.Reason);
         }
     }
 

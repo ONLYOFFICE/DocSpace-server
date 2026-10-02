@@ -62,6 +62,9 @@ public class FolderHistoryReportPermissionsTests(
 
         // Assert
         AssertReportStarted(report);
+
+        // The worker builds reports one at a time: a report left running would hold up those of later tests.
+        await CancelReportAsync(room.Id);
     }
 
     [Fact]
@@ -78,6 +81,9 @@ public class FolderHistoryReportPermissionsTests(
 
         // Assert
         AssertReportStarted(report);
+
+        // The worker builds reports one at a time: a report left running would hold up those of later tests.
+        await CancelReportAsync(room.Id);
     }
 
     [Fact]
@@ -95,6 +101,9 @@ public class FolderHistoryReportPermissionsTests(
 
         // Assert
         AssertReportStarted(report);
+
+        // The worker builds reports one at a time: a report left running would hold up those of later tests.
+        await CancelReportAsync(room.Id);
     }
 
     [Fact]
@@ -112,6 +121,9 @@ public class FolderHistoryReportPermissionsTests(
 
         // Assert
         AssertReportStarted(report);
+
+        // The worker builds reports one at a time: a report left running would hold up those of later tests.
+        await CancelReportAsync(room.Id);
     }
 
     [Fact]
@@ -129,6 +141,9 @@ public class FolderHistoryReportPermissionsTests(
 
         // Assert
         AssertReportStarted(report);
+
+        // The worker builds reports one at a time: a report left running would hold up those of later tests.
+        await CancelReportAsync(room.Id);
     }
 
     [Fact]
@@ -146,6 +161,9 @@ public class FolderHistoryReportPermissionsTests(
 
         // Assert
         AssertReportStarted(report);
+
+        // The worker builds reports one at a time: a report left running would hold up those of later tests.
+        await CancelReportAsync(room.Id);
     }
 
     [Fact]

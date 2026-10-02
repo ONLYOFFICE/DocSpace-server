@@ -67,6 +67,10 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
     public DbSet<DbMcpServer> McpServers { get; set; }
     public DbSet<DbToolPreference> ToolPrefs { get; set; }
     public DbSet<DbAttachment> Attachments { get; set; }
+    public DbSet<DbFilesMetadataTemplate> MetadataTemplates { get; set; }
+    public DbSet<DbFilesMetadataField> MetadataFields { get; set; }
+    public DbSet<DbFilesMetadataLink> MetadataLinks { get; set; }
+    public DbSet<DbFilesMetadataValue> MetadataValues { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -103,6 +107,10 @@ public partial class FilesDbContext(DbContextOptions<FilesDbContext> dbContextOp
             .AddDbServers()
             .AddDbToolPrefs()
             .AddDbAttachments()
+            .AddDbFilesMetadataTemplate()
+            .AddDbFilesMetadataField()
+            .AddDbFilesMetadataLink()
+            .AddDbFilesMetadataValue()
             .AddDbFunctions();
     }
 }
