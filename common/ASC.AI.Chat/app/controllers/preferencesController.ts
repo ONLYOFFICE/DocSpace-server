@@ -134,8 +134,9 @@ export const preferencesController = {
   // How a tool call is approved — the composer's "Permissions" row. One
   // value per user in the C# AI user settings (`config/tool-mode`), not a
   // per-room preference: `entityId` is accepted for route symmetry with the
-  // depth and ignored. The C# default is `auto`, so the library's own
-  // default (`ask`) only ever shows for a failed read.
+  // depth and ignored. The C# default is `auto`, the same as the library's
+  // own (`DEFAULT_TOOL_PERMISSION_MODE`), so a failed read and a fresh user
+  // look alike to the composer.
   getToolPermissionMode: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
     const value = await engine.getToolPermissionMode(entityId);

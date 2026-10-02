@@ -11091,7 +11091,7 @@
           },
           "requireApproval": {
             "type": "boolean",
-            "description": "Whether the consumer must show an approval dialog before this tool runs. Feeds the `autoAllow` flag on a `tool-call-pending` event together with the user's tool permission mode: `false` skips the dialog under the \"auto\" mode (under \"ask\", the default, only the persisted \"always-allow\" list does), `true` and `undefined` defer to that list; \"allow\" skips it for every tool. Host tools set it and default to `false`; MCP / custom-server tools leave it unset. Wire-serializable, so it survives a remote (server-side) engine.",
+            "description": "Whether the consumer must show an approval dialog before this tool runs. Feeds the `autoAllow` flag on a `tool-call-pending` event together with the user's tool permission mode: `false` skips the dialog under the \"auto\" mode, the default (under \"ask\" only the persisted \"always-allow\" list does), `true` and `undefined` defer to that list; \"allow\" skips it for every tool. Host tools set it and default to `false`; MCP / custom-server tools leave it unset. Wire-serializable, so it survives a remote (server-side) engine.",
             "examples": [
               false
             ]
