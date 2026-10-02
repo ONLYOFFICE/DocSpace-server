@@ -96,4 +96,16 @@ internal static partial class EventBusRabbitMQLogger
 
     [LoggerMessage(LogLevel.Warning, "RabbitMQ: model is shutdown: {cause}")]
     public static partial void WarningModelIsShutdown(this ILogger<EventBusRabbitMQ> logger, string cause, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "RabbitMQ: could not recreate consumer channel, next attempt in {delay}s")]
+    public static partial void WarningCouldNotRecreateChannel(this ILogger<EventBusRabbitMQ> logger, double delay, Exception exception);
+
+    [LoggerMessage(LogLevel.Debug, "RabbitMQ: skipped event {eventName} with delivery tag {deliveryTag}: its channel is closed, the broker will redeliver it")]
+    public static partial void DebugSkipDeliveryOnClosedChannel(this ILogger<EventBusRabbitMQ> logger, string eventName, ulong deliveryTag);
+
+    [LoggerMessage(LogLevel.Warning, "RabbitMQ: could not settle delivery tag {deliveryTag}: its channel is closed, the broker will redeliver it")]
+    public static partial void WarningSettleOnClosedChannel(this ILogger<EventBusRabbitMQ> logger, ulong deliveryTag, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "RabbitMQ: could not deserialize event {eventName}, rejected")]
+    public static partial void ErrorDeserializingEvent(this ILogger<EventBusRabbitMQ> logger, string eventName, Exception exception);
 }
