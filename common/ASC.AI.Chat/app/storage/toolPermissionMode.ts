@@ -30,30 +30,37 @@
 // Public License v3.
 //
 // SPDX-License-Identifier: AGPL-3.0-only
+import { isToolPermissionMode, type ToolPermissionMode } from "@onlyoffice/ai-chat/core";
 
-namespace ASC.AI.Models.ResponseDto;
+// The C# `ASC.AI.Core.Settings.ToolPermissionMode` enum (`Ask = 0, Auto = 1,
+// Allow = 2`) and the chat library's `"ask" | "auto" | "allow"` are two
+// spellings of one thing. The enum has no string converter, so on the wire
+// it is a number — but a string member name is accepted too, in any casing,
+// in case a converter is registered later. Writes always send the number:
+// System.Text.Json takes it with or without a converter.
 
-/// <summary>
-/// The per-user AI settings.
-/// </summary>
-public class AiUserSettingsDto
-{
-    /// <summary>
-    /// Indicates whether the recommended model banner is visible in the AI chat for the current user.
-    /// </summary>
-    /// <example>true</example>
-    public bool ChatRecommendedModelVisible { get; init; }
+const BY_NUMBER: readonly ToolPermissionMode[] = ["ask", "auto", "allow"];
 
-    /// <summary>
-    /// How tool calls made by the model are approved for the current user. The default applies while the user has stored nothing.
-    /// </summary>
-    /// <example>1</example>
-    public ToolPermissionMode ToolPermissionMode { get; init; }
+/**
+ * A C# mode (number or member name) as the library's mode; `null` for a
+ * missing or unknown value so callers can tell "nothing stored" from a mode.
+ */
+export function csharpToToolPermissionMode(raw: unknown): ToolPermissionMode | null {
+  if (typeof raw === "number") {
+    return BY_NUMBER[raw] ?? null;
+  }
+  if (typeof raw === "string") {
+    const lower = raw.toLowerCase();
+    if (isToolPermissionMode(lower)) {
+      return lower;
+    }
+    const asNumber = Number(raw);
+    return /^\d+$/.test(raw) ? (BY_NUMBER[asNumber] ?? null) : null;
+  }
+  return null;
 }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class AiUserSettingsDtoMapper
-{
-    public static partial AiUserSettingsDto MapToDto(this AiUserSettings source);
+/** A library mode as the C# enum value the settings endpoint accepts. */
+export function toolPermissionModeToCsharp(mode: ToolPermissionMode): number {
+  return BY_NUMBER.indexOf(mode);
 }

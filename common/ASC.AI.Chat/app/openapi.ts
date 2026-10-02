@@ -374,6 +374,10 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
     "Returns the effective extended-thinking depth of the scope: `off` while deep mode is off, otherwise the persisted depth (`low`, `medium`, `high`, `max`), falling back to the default depth (`medium`) when none has been stored. `entityId` picks a room and omitting it reads the portal-wide preference. Providers clamp the depth to what the model accepts.",
   aiPreferencesSetReasoningLevel:
     "Persists the extended-thinking depth of the scope as its single stored value: a depth turns deep mode on at that depth, `off` turns it off and replaces the stored depth (a later deep-mode `true` without a depth lands on `medium`). `entityId` picks a room and omitting it writes the portal-wide preference. Idempotent.",
+  aiPreferencesGetToolPermissionMode:
+    "Returns how a tool call the model makes is approved for the calling user, in the chat library's spelling: `ask` prompts for every call bar the tools pinned as always allowed, `auto` also runs a tool that opted out of approval itself or is annotated read-only / non-destructive, `allow` runs everything without asking. The mode is one value per user, stored in the user's AI settings (the same value `GET api/2.0/ai/config/tool-mode` reports as the AI service's enum); `entityId` is accepted for symmetry with the depth routes and ignored. The AI service's default is `auto`.",
+  aiPreferencesSetToolPermissionMode:
+    "Persists the tool permission mode of the calling user. `value` has to be one of `ask`, `auto`, `allow`: anything else is rejected rather than coerced, so an absent or mistyped value can never overwrite the stored mode. `entityId` is validated like on the other writes and otherwise ignored - the mode applies to every chat of the user. Idempotent.",
 
   // Profiles - AI provider credentials and model discovery.
   aiProfilesCreate:
@@ -432,6 +436,10 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
     "Returns the AI settings of the calling user, as opposed to the portal-wide ones. It takes no parameters - the user is the authenticated caller, and there is no way to read somebody else's settings - and is proxied unchanged to the DocSpace AI service. Use `GET api/2.0/ai/config` for the portal-wide configuration. This is a read-only operation.",
   aiSettingsSetUser:
     "Replaces the AI settings of the calling user and returns the stored result. The body is proxied unchanged to the DocSpace AI service, which validates it, so a rejected value comes back with that service's verdict. Only the caller's own settings can be written. Portal-wide configuration is not touched by this operation.",
+  aiSettingsGetToolMode:
+    "Returns the calling user's tool permission mode as the DocSpace AI service spells it - `{ mode }` with the service's `ToolPermissionMode` enum (`Ask`, `Auto`, `Allow`), proxied unchanged. The chat reads the same value in its own spelling through `GET api/2.0/ai/preferences/get-tool-permission-mode`. This is a read-only operation.",
+  aiSettingsSetToolMode:
+    "Stores the calling user's tool permission mode and returns the stored result. The body (`{ mode }`) is proxied unchanged to the DocSpace AI service, which rejects a value outside its `ToolPermissionMode` enum. The mode applies to every chat of the user in the portal.",
 
   // Threads - chat threads and their messages.
   aiThreadsCreate:
@@ -683,6 +691,9 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiPreferencesClearDeepMode: { "400": "`entityId` is not a room ID." },
   aiPreferencesSetReasoningLevel: {
     "400": "`value` is not one of the depths, or `entityId` is not a room ID.",
+  },
+  aiPreferencesSetToolPermissionMode: {
+    "400": "`value` is not one of `ask`, `auto`, `allow`, or `entityId` is not a room ID.",
   },
 
   // Profiles - creating and updating are refused outright while the portal
@@ -1044,6 +1055,12 @@ const REQUEST_BODY_DOCS: Readonly<Record<string, RequestBodyDoc>> = {
       "validates the shape. Read the current one with `GET api/2.0/ai/config/user` and send " +
       "it back changed.",
   },
+  aiSettingsSetToolMode: {
+    description:
+      "`{ mode }` with the AI service's `ToolPermissionMode` enum, proxied unchanged; the " +
+      "service rejects anything outside the enum.",
+    example: { mode: 1 },
+  },
   aiSettingsSetVectorization: {
     description:
       "The portal's vectorization settings, proxied unchanged to the DocSpace AI service, which " +
@@ -1188,6 +1205,10 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
     "Confirms the scope has no preference of its own and now inherits the default.",
   aiPreferencesIsDeepModeSet:
     "Whether the scope has a preference of its own, whichever way that preference is set.",
+  aiPreferencesGetToolPermissionMode:
+    "The mode in force for the scope, as a bare JSON string, falling back to `ask` when none " +
+    "is stored.",
+  aiPreferencesSetToolPermissionMode: "Confirms the preference was stored.",
 
   aiProfilesCreate:
     "Whether the profile was created, with it in `profile`. A refusal is reported in `error` " +
@@ -1222,6 +1243,8 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiSettingsSetVectorization: "The stored vectorization settings.",
   aiSettingsGetUser: "The calling user's AI settings.",
   aiSettingsSetUser: "The calling user's stored AI settings.",
+  aiSettingsGetToolMode: "The calling user's tool permission mode, as `{ mode }`.",
+  aiSettingsSetToolMode: "The calling user's stored tool permission mode, as `{ mode }`.",
 
   aiThreadsCreate: "The created thread.",
   aiThreadsOpenOrCreate:

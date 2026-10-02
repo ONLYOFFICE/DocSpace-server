@@ -34,26 +34,13 @@
 namespace ASC.AI.Models.ResponseDto;
 
 /// <summary>
-/// The per-user AI settings.
+/// The current user's tool permission mode.
 /// </summary>
-public class AiUserSettingsDto
+public class ToolPermissionModeDto
 {
-    /// <summary>
-    /// Indicates whether the recommended model banner is visible in the AI chat for the current user.
-    /// </summary>
-    /// <example>true</example>
-    public bool ChatRecommendedModelVisible { get; init; }
-
     /// <summary>
     /// How tool calls made by the model are approved for the current user. The default applies while the user has stored nothing.
     /// </summary>
     /// <example>1</example>
-    public ToolPermissionMode ToolPermissionMode { get; init; }
-}
-
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class AiUserSettingsDtoMapper
-{
-    public static partial AiUserSettingsDto MapToDto(this AiUserSettings source);
+    public ToolPermissionMode Mode { get; init; }
 }

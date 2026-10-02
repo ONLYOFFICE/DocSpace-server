@@ -31,29 +31,29 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Models.ResponseDto;
+namespace ASC.AI.Core.Settings;
 
 /// <summary>
-/// The per-user AI settings.
+/// How a tool call made by the model in the AI chat is approved before it runs.
 /// </summary>
-public class AiUserSettingsDto
+[EnumExtensions]
+public enum ToolPermissionMode
 {
     /// <summary>
-    /// Indicates whether the recommended model banner is visible in the AI chat for the current user.
+    /// Every tool call waits for the user's confirmation, except the tools the user pinned as always allowed.
     /// </summary>
-    /// <example>true</example>
-    public bool ChatRecommendedModelVisible { get; init; }
+    [Description("Ask")]
+    Ask = 0,
 
     /// <summary>
-    /// How tool calls made by the model are approved for the current user. The default applies while the user has stored nothing.
+    /// Tools that opted out of confirmation themselves run at once, every other call still waits for the user. The default.
     /// </summary>
-    /// <example>1</example>
-    public ToolPermissionMode ToolPermissionMode { get; init; }
-}
+    [Description("Auto")]
+    Auto = 1,
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class AiUserSettingsDtoMapper
-{
-    public static partial AiUserSettingsDto MapToDto(this AiUserSettings source);
+    /// <summary>
+    /// Every tool call runs without asking.
+    /// </summary>
+    [Description("Allow")]
+    Allow = 2
 }
