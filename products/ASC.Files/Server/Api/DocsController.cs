@@ -75,19 +75,7 @@ public class DocsController(
 
         var folder = await fileStorageService.GetFolderAsync(inDto.FolderId ?? await globalFolderHelper.FolderMyAsync);
 
-        var body = new ConvertFromFileBody
-        {
-            CodePage = inDto.CodePage,
-            Delimiter = inDto.Delimiter,
-            DocumentLayout = inDto.DocumentLayout,
-            DocumentRenderer = inDto.DocumentRenderer,
-            OutputType = inDto.OutputType,
-            Password = inDto.Password,
-            Region = inDto.Region,
-            Thumbnail = inDto.Thumbnail,
-            SpreadsheetLayout = inDto.SpreadsheetLayout,
-            Pdf = inDto.Pdf
-        };
+        var body = inDto.MapToConvertFromFileBody();
 
         var converted = await fileConverter.ConvertFromFileAsync(file, folder, body);
 

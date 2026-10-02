@@ -372,9 +372,7 @@ public class FileBuilderOperationsManager(
         var userId = _authContext.CurrentAccount.ID;
         var sessionSnapshot = await _externalShare.TakeSessionSnapshotAsync();
 
-        var outputData = outputs?.ToDictionary(
-            x => x.Key,
-            x => new FileBuilderOutputData { FileId = x.Value.FileId, FolderId = x.Value.FolderId, Title = x.Value.Title });
+        var outputData = outputs?.ToDictionary(x => x.Key, x => x.Value.MapToFileBuilderOutputData());
 
         var (fileIds, folderIds) = DocumentBuilderScriptRunner.GetEntries(script, folderId, outputData);
 

@@ -125,3 +125,13 @@ public class DocsConverterRequestDto
     /// <example>{"form": true}</example>
     public PdfData Pdf { get; set; }
 }
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class DocsConverterRequestDtoMapper
+{
+    // the format, the name and the key are read off the file, never taken from the request
+    [MapperIgnoreTarget(nameof(ConvertFromFileBody.FileType))]
+    [MapperIgnoreTarget(nameof(ConvertFromFileBody.Title))]
+    [MapperIgnoreTarget(nameof(ConvertFromFileBody.Key))]
+    public static partial ConvertFromFileBody MapToConvertFromFileBody(this DocsConverterRequestDto source);
+}

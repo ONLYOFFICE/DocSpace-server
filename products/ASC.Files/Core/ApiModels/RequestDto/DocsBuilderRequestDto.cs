@@ -114,3 +114,9 @@ public class DocsBuilderOutputDto
     /// <example>Quarterly report.pdf</example>
     public string Title { get; set; }
 }
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
+public static partial class DocsBuilderOutputDtoMapper
+{
+    public static partial FileBuilderOutputData MapToFileBuilderOutputData(this DocsBuilderOutputDto source);
+}

@@ -51,7 +51,8 @@ public class DocumentBuilderScriptRunner(
     FilesMessageService filesMessageService,
     WebhookManager webhookManager,
     LockerManager lockerManager,
-    FileTrackerHelper fileTracker)
+    FileTrackerHelper fileTracker,
+    SocketManager socketManager)
 {
     /// <summary>
     /// A call that opens a portal file, with the identifier the caller wrote in place of the address. Both objects the
@@ -554,9 +555,11 @@ public class DocumentBuilderScriptRunner(
                 if (target.File != null)
                 {
                     var file = await entryManager.SaveEditingAsync(target.File.Id, extension, url, null, keepLink: true);
+                    saved.Add(file);
+
+                    await socketManager.UpdateFileAsync(file);
                     await filesMessageService.SendAsync(MessageAction.FileUpdated, file, headers, file.Title);
                     await webhookManager.PublishAsync(WebhookTrigger.FileUpdated, file);
-                    saved.Add(file);
                     continue;
                 }
 
