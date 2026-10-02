@@ -173,7 +173,11 @@ export const webSearchController = {
     const config = asConfig(args.body);
     await checkConfigUrl(config);
     const result = await engine.configure(config, entityId);
-    res.json(result);
+    // A configuration the provider probe refused is a client error, not a
+    // stored outcome: nothing was saved, so answer 400 with the engine's
+    // field-level reason rather than a 200 carrying `success: false`
+    // (Bug 83994).
+    res.status(result.success ? 200 : 400).json(result);
   }),
 
   setActiveConfig: asyncHandler(async (req, res) => {
