@@ -111,7 +111,7 @@ public class DocsController(
     /// <path>api/2.0/docs/builder</path>
     [Tags("Docs")]
     [SwaggerResponse(200, "The queued document builder operation to poll", typeof(FileOperationDto))]
-    [SwaggerResponse(400, "The script or the argument is malformed, a file is addressed by an address, or a saved file has nowhere to go")]
+    [SwaggerResponse(400, "The script or the argument is malformed or too long, a file is addressed by an address, or a saved file has nowhere to go")]
     [SwaggerResponse(403, "You cannot edit or copy a file the script opens or write a result, or the file to replace is locked, being edited or in the trash")]
     [SwaggerResponse(404, "A file the script opens or replaces, or a target folder, does not exist")]
     [HttpPost("builder")]

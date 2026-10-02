@@ -114,6 +114,9 @@ public class DocumentBuilderScriptRunner(
 
     private const string ScriptFileName = "script.docbuilder";
 
+    // travels in an event bus message, as the script does
+    private const int MaxArgumentLength = 2 * 1024 * 1024;
+
     /// <summary>
     /// The portal files and folders a run touches: the files the script opens or replaces and the folders it saves
     /// into. Read off the request only; <see cref="ValidateAsync"/> checks them.
@@ -226,6 +229,11 @@ public class DocumentBuilderScriptRunner(
         if (argument == null)
         {
             return;
+        }
+
+        if (argument.Length > MaxArgumentLength)
+        {
+            throw new ArgumentException("The argument is too long", nameof(argument));
         }
 
         var root = JsonSerializer.Deserialize<JsonElement>(argument);

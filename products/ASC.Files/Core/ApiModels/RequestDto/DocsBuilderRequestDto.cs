@@ -55,6 +55,7 @@ public class DocsBuilderRequestDto
     /// writes an address - `builder.OpenFile("1234")`; an address written out in the script is refused.
     /// </summary>
     /// <example>builder.OpenFile("1234"); Api.GetDocument().GetElement(0).AddText(Argument.title); builder.SaveFile("docx", "result.docx"); builder.SaveFile("pdf", "result.pdf"); builder.CloseFile();</example>
+    [StringLength(MaxScriptLength)]
     public required string Script { get; set; }
 
     /// <summary>
@@ -77,6 +78,9 @@ public class DocsBuilderRequestDto
     /// </summary>
     /// <example>{"title": "Quarterly report"}</example>
     public JsonElement? Argument { get; set; }
+
+    // the script and the argument travel in an event bus message, which the broker caps
+    private const int MaxScriptLength = 2 * 1024 * 1024;
 }
 
 /// <summary>
