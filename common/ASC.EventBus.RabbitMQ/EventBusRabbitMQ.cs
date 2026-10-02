@@ -61,6 +61,8 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
     private readonly SemaphoreSlim _recreateSemaphore = new(1, 1);
     private static readonly TimeSpan _initialRecreateDelay = TimeSpan.FromSeconds(1);
     private static readonly TimeSpan _maxRecreateDelay = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan _disposeRecreationWait = TimeSpan.FromSeconds(10);
+    private readonly CancellationTokenSource _disposeCts = new();
     private readonly ConcurrentBag<IChannel> _publisherChannelPool = [];
     private int _pooledPublisherChannelCount;
     private readonly ResiliencePipeline _publishPipeline;
@@ -369,7 +371,23 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
     {
         _disposing = true;
 
-        await CloseChannelAsync(_consumerChannel);
+        // a recreation in flight could open a consumer after the close below, one that would keep taking messages
+        // until the connection goes; stop its backoff and wait for it, but never hold the shutdown for long
+        await _disposeCts.CancelAsync();
+
+        var recreationDone = await _recreateSemaphore.WaitAsync(_disposeRecreationWait);
+
+        try
+        {
+            await CloseChannelAsync(_consumerChannel);
+        }
+        finally
+        {
+            if (recreationDone)
+            {
+                _recreateSemaphore.Release();
+            }
+        }
 
         // an in-flight publication may still return a channel to the pool after this drain,
         // but a leaked channel at process shutdown is harmless, so a single pass is enough
@@ -485,6 +503,13 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
         var deliveryTag = eventArgs.DeliveryTag;
 
         var eventName = eventArgs.RoutingKey;
+
+        if (_disposing)
+        {
+            // shutting down: the subscriptions are being cleared and the handlers' scope is going away;
+            // left unsettled, the message goes back to the queue once the channel closes
+            return;
+        }
 
         if (!channel.IsOpen)
         {
@@ -709,6 +734,14 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
 
                     await StartBasicConsumeAsync();
 
+                    if (_disposing)
+                    {
+                        // DisposeAsync gave up waiting for this recreation and has already closed the channel it saw
+                        await CloseChannelAsync(channel);
+
+                        return;
+                    }
+
                     _logger.InfoCreatedConsumerChannel();
 
                     return;
@@ -722,7 +755,14 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
                     _consumerTag = string.Empty;
                 }
 
-                await Task.Delay(delay);
+                try
+                {
+                    await Task.Delay(delay, _disposeCts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
 
                 delay = delay * 2 < _maxRecreateDelay ? delay * 2 : _maxRecreateDelay;
             }
