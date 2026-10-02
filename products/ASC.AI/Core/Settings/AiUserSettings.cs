@@ -42,7 +42,10 @@ public record AiUserSettings : ISettings<AiUserSettings>
     /// </summary>
     public bool ChatRecommendedModelVisible { get; init; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public ToolPermissionMode ToolPermissionMode { get; init; } = ToolPermissionMode.Auto;
+
     public DateTime LastModified { get; set; }
 
-    public AiUserSettings GetDefault() => new() { ChatRecommendedModelVisible = true };
+    public AiUserSettings GetDefault() => new() { ChatRecommendedModelVisible = true, ToolPermissionMode = ToolPermissionMode.Auto };
 }

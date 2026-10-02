@@ -31,29 +31,29 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.AI.Models.ResponseDto;
+namespace ASC.AI.Models.RequestDto.Settings;
 
 /// <summary>
-/// The per-user AI settings.
+/// Request to change how tool calls made by the model are approved for the current user.
 /// </summary>
-public class AiUserSettingsDto
+public class SetToolPermissionModeRequestDto
 {
     /// <summary>
-    /// Indicates whether the recommended model banner is visible in the AI chat for the current user.
+    /// The tool permission mode parameters.
     /// </summary>
-    /// <example>true</example>
-    public bool ChatRecommendedModelVisible { get; init; }
-
-    /// <summary>
-    /// How tool calls made by the model are approved for the current user. The default applies while the user has stored nothing.
-    /// </summary>
-    /// <example>1</example>
-    public ToolPermissionMode ToolPermissionMode { get; init; }
+    /// <example>{"mode": 1}</example>
+    [FromBody]
+    public required SetToolPermissionModeRequestBody Body { get; init; }
 }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None,
-    PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public static partial class AiUserSettingsDtoMapper
+/// <summary>
+/// Parameters for changing the tool permission mode.
+/// </summary>
+public class SetToolPermissionModeRequestBody
 {
-    public static partial AiUserSettingsDto MapToDto(this AiUserSettings source);
+    /// <summary>
+    /// The approval mode to store for the current user.
+    /// </summary>
+    /// <example>1</example>
+    public required ToolPermissionMode Mode { get; init; }
 }

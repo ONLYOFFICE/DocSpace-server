@@ -118,7 +118,14 @@ public class AiSettingsService(
 
     public async Task<AiSettings> GetAiSettingsAsync()
     {
-        var aiStatus = await accessibility.GetStatusAsync();
+        var aiStatusTask = accessibility.GetStatusAsync();
+        var toolPermissionModeTask = GetToolPermissionModeAsync();
+
+        await Task.WhenAll(aiStatusTask, toolPermissionModeTask);
+
+        var aiStatus = await aiStatusTask;
+        var toolPermissionMode = await toolPermissionModeTask;
+
         if (aiStatus.Enabled && aiStatus.GatewayEnabled)
         {
             return new AiSettings
@@ -128,6 +135,7 @@ public class AiSettingsService(
                 EmbeddingModel = vectorizationGlobalSettings.Model.Id,
                 SystemAiEnabled = true,
                 RecommendedModelForForms = aiSettingsStore.GetRecommendedModelForForms(),
+                ToolPermissionMode = toolPermissionMode
             };
         }
 
@@ -147,7 +155,31 @@ public class AiSettingsService(
             EmbeddingModel = vectorizationGlobalSettings.Model.Id,
             SystemAiEnabled = aiStatus.GatewayEnabled,
             RecommendedModelForForms = aiSettingsStore.GetRecommendedModelForForms(),
+            ToolPermissionMode = toolPermissionMode
         };
+    }
+
+    public async Task<ToolPermissionMode> GetToolPermissionModeAsync()
+    {
+        var settings = await settingsManager.LoadForCurrentUserAsync<AiUserSettings>();
+
+        return settings.ToolPermissionMode;
+    }
+
+    public async Task<ToolPermissionMode> SetToolPermissionModeAsync(ToolPermissionMode mode)
+    {
+        if (!ToolPermissionModeExtensions.IsDefined(mode))
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+        }
+
+        var current = await settingsManager.LoadForCurrentUserAsync<AiUserSettings>();
+
+        await settingsManager.SaveForCurrentUserAsync(current with { ToolPermissionMode = mode });
+
+        messageService.Send(MessageAction.UserUpdatedAiSettings, mode.ToStringFast());
+
+        return mode;
     }
 
     public async Task<AiUserSettings> GetAiUserSettingsAsync()
