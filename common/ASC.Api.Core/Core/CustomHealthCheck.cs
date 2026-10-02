@@ -52,7 +52,8 @@ public static class CustomHealthCheck
                                     : HealthCheckResult.Unhealthy())
                  .AddCheck<WarmupHealthCheck>("warmup", tags: ["warmup", "services"])
                  .AddDatabase(configuration)
-                 .AddDistibutedCache(configuration);
+                 .AddDistibutedCache(configuration)
+                 .AddEventBusConsumer(configuration);
         //.AddMessageQueue(configuration);
 
         return services;
@@ -96,6 +97,18 @@ public static class CustomHealthCheck
                     name: "postgredb",
                     tags: ["postgredb", "services"],
                     timeout: new TimeSpan(0, 0, 30));
+            }
+
+            return hcBuilder;
+        }
+
+        public IHealthChecksBuilder AddEventBusConsumer(IConfiguration configuration)
+        {
+            // reads the consumer state only, unlike AddMessageQueue below,
+            // whose probe waits inside TryConnectAsync while the connection recovers
+            if (ServiceCollectionExtension.IsRabbitMqEnabled(configuration))
+            {
+                hcBuilder.AddCheck<EventBusConsumerHealthCheck>("rabbitMQConsumer", tags: ["rabbitMQ", "services"]);
             }
 
             return hcBuilder;

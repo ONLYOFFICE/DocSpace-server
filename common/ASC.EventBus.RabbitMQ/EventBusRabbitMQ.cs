@@ -52,6 +52,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
 
     private string _consumerTag;
     private IChannel _consumerChannel;
+    private EventBusConsumer _consumer;
     private string _queueName;
     private readonly string _deadLetterQueueName;
 
@@ -64,6 +65,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
     private int _pooledPublisherChannelCount;
     private readonly ResiliencePipeline _publishPipeline;
     private volatile bool _disposing;
+    private long _consumerLostAt;
 
     private static readonly ResiliencePropertyKey<Guid> _eventIdPropertyKey = new("event-id");
 
@@ -327,6 +329,28 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
         _subsManager.RemoveDynamicSubscription<TH>(eventName);
     }
 
+    /// <summary>
+    /// How long this instance has had no live consumer on its queue, counted from the first call that found it missing;
+    /// null while the consumer is in place or, with no subscriptions, not needed at all.
+    /// </summary>
+    public TimeSpan? GetConsumerDownTime()
+    {
+        // a closed channel shows in IsOpen, which automatic recovery turns back on; a broker-side cancel leaves
+        // the channel open and only the consumer knows about it. The consumer's own IsRunning would cover both,
+        // but after a connection loss the client may reset it after the recovered consume-ok has already set it
+        if (_subsManager.IsEmpty
+            || _consumerChannel is { IsOpen: true } && _consumer is { CancelledByBroker: false } && !string.IsNullOrEmpty(_consumerTag))
+        {
+            Interlocked.Exchange(ref _consumerLostAt, 0);
+
+            return null;
+        }
+
+        var lostAt = Interlocked.CompareExchange(ref _consumerLostAt, Stopwatch.GetTimestamp(), 0);
+
+        return lostAt == 0 ? TimeSpan.Zero : Stopwatch.GetElapsedTime(lostAt);
+    }
+
     public void Dispose()
     {
         DisposeAsync().AsTask().GetAwaiter().GetResult();
@@ -394,10 +418,11 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
                 return;
             }
 
-            var consumer = new AsyncEventingBasicConsumer(_consumerChannel);
+            var consumer = new EventBusConsumer(_consumerChannel);
 
             consumer.ReceivedAsync += Consumer_Received;
             consumer.ShutdownAsync += Consumer_Shutdown;
+            _consumer = consumer;
             _consumerTag = await _consumerChannel.BasicConsumeAsync(
                 queue: _queueName,
                 autoAck: false,
@@ -751,6 +776,28 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
                 await Task.Yield();
                 await (Task)concreteType.GetMethod("Handle").Invoke(handler, [@event]);
             }
+        }
+    }
+
+    private sealed class EventBusConsumer(IChannel channel) : AsyncEventingBasicConsumer(channel)
+    {
+        private volatile bool _cancelledByBroker;
+
+        // basic.cancel and consume-ok arrive on the consumer's own channel, so they cannot overtake each other
+        public bool CancelledByBroker => _cancelledByBroker;
+
+        public override Task HandleBasicCancelAsync(string consumerTag, CancellationToken cancellationToken = default)
+        {
+            _cancelledByBroker = true;
+
+            return base.HandleBasicCancelAsync(consumerTag, cancellationToken);
+        }
+
+        public override Task HandleBasicConsumeOkAsync(string consumerTag, CancellationToken cancellationToken = default)
+        {
+            _cancelledByBroker = false;
+
+            return base.HandleBasicConsumeOkAsync(consumerTag, cancellationToken);
         }
     }
 }
