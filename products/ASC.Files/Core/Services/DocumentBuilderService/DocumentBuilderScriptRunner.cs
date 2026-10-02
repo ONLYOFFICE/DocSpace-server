@@ -371,6 +371,11 @@ public class DocumentBuilderScriptRunner(
                     throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_CopyFile);
                 }
 
+                if (await DocSpaceHelper.IsConversionForbiddenAsync(file, daoFactory.GetCacheFolderDao<int>()))
+                {
+                    throw new InvalidOperationException($"File {fileId} lies in a private room or in a room with a watermark, which a script cannot open");
+                }
+
                 logger.DebugScriptOpensFile(fileId);
                 checkedFiles[fileId] = file;
             }

@@ -749,6 +749,11 @@ public class FileConverter(
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_CopyFile);
         }
 
+        if (await DocSpaceHelper.IsConversionForbiddenAsync(file, daoFactory.GetCacheFolderDao<T>()))
+        {
+            throw new InvalidOperationException("A file in a private room or in a room with a watermark cannot be converted");
+        }
+
         // The format, the name and the caching key belong to the file, not to the request, so they are always taken
         // from it: a caller-supplied key would serve a stale result out of the document service cache.
         if (string.IsNullOrEmpty(body.OutputType))
@@ -760,9 +765,6 @@ public class FileConverter(
         body.Title = file.Title;
         body.Key = await documentServiceHelper.GetDocKeyAsync(file);
 
-        // No room watermark is drawn in: the result stays in the portal, where the room draws its own over whatever
-        // is shown, so a mark burnt into the file here would be the second one. Every conversion that saves its
-        // result back into the portal leaves the watermark alone for the same reason.
         var toExtension = "." + body.OutputType.Trim('.');
 
         if (!await EnableConvertAsync(file, toExtension, false))

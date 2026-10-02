@@ -158,6 +158,17 @@ public static class DocSpaceHelper
         return room is { SettingsPrivate: true };
     }
 
+    /// <summary>
+    /// Whether the file lies in a private room or in a room with a watermark, whose content is not converted into a
+    /// file of its own: such a file would leave the room unencrypted or without the watermark.
+    /// </summary>
+    public static async Task<bool> IsConversionForbiddenAsync<T>(FileEntry<T> file, IFolderDao<T> folderDao)
+    {
+        var room = await GetParentRoom(file, folderDao);
+
+        return LocatedInPrivateRoom(room) || IsWatermarkEnabled(room);
+    }
+
     public static async Task<bool> IsWatermarkEnabled<T>(FileEntry<T> file, IFolderDao<T> folderDao)
     {
         if (file.ProviderEntry || file.RootFolderType is not (FolderType.VirtualRooms or FolderType.Archive))
