@@ -97,6 +97,10 @@ public class DocumentBuilderScriptRunner(
         """\.\s*SaveFile\s*\(\s*(?<q1>["'])[^"']*\k<q1>\s*,\s*(?<q2>["'])(?<name>[^"']*)\k<q2>""",
         RegexOptions.Compiled | RegexOptions.CultureInvariant);
 
+    private static readonly Regex _anySaveFileCall = new(
+        """\.\s*SaveFile\s*\(""",
+        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
     /// <summary>
     /// Reaching the builder object by index, which is how the name of a method is hidden from the patterns above.
     /// </summary>
@@ -116,6 +120,10 @@ public class DocumentBuilderScriptRunner(
 
     // travels in an event bus message, as the script does
     private const int MaxArgumentLength = 2 * 1024 * 1024;
+
+    // each OpenFile call costs an access check and a full copy of the file in the temporary storage
+    private const int MaxOpenFileCalls = 20;
+    private const int MaxSaveFileCalls = 20;
 
     /// <summary>
     /// The portal files and folders a run touches: the files the script opens or replaces and the folders it saves
@@ -288,6 +296,16 @@ public class DocumentBuilderScriptRunner(
             throw new ArgumentException("Every OpenFile call must be made on the document builder and name a portal file by a literal identifier", nameof(script));
         }
 
+        if (_anyOpenFileCall.Count(script) > MaxOpenFileCalls)
+        {
+            throw new ArgumentException($"The script may call OpenFile at most {MaxOpenFileCalls} times", nameof(script));
+        }
+
+        if (_anySaveFileCall.Count(script) > MaxSaveFileCalls)
+        {
+            throw new ArgumentException($"The script may call SaveFile at most {MaxSaveFileCalls} times", nameof(script));
+        }
+
         if (!_anyOpenFileCall.IsMatch(script) && !_anyCreateFileCall.IsMatch(script))
         {
             throw new ArgumentException("The script has to create a file with CreateFile or open one with OpenFile", nameof(script));
@@ -320,6 +338,7 @@ public class DocumentBuilderScriptRunner(
     {
         var fileDao = daoFactory.GetFileDao<int>();
         var prepared = new StringBuilder(script);
+        var checkedFiles = new Dictionary<int, File<int>>();
         File<int> source = null;
 
         // Walked backwards so that replacing one call does not move the offsets of the calls before it. The first call
@@ -333,21 +352,26 @@ public class DocumentBuilderScriptRunner(
                 throw new ArgumentException($"{match.Groups["method"].Value} expects the identifier of a portal file, got \"{id.Value}\"", nameof(script));
             }
 
-            var file = await fileDao.GetFileAsync(fileId).NotFoundIfNull("File not found");
-
-            // the script can change what it opens, so read or fill-only access is not enough
-            if (!await fileSecurity.CanEditAsync(file))
+            if (!checkedFiles.TryGetValue(fileId, out var file))
             {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+                file = await fileDao.GetFileAsync(fileId).NotFoundIfNull("File not found");
+
+                // the script can change what it opens, so read or fill-only access is not enough
+                if (!await fileSecurity.CanEditAsync(file))
+                {
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+                }
+
+                if (!await fileSecurity.CanCopyAsync(file))
+                {
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_CopyFile);
+                }
+
+                logger.DebugScriptOpensFile(fileId);
+                checkedFiles[fileId] = file;
             }
 
-            if (!await fileSecurity.CanCopyAsync(file))
-            {
-                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_CopyFile);
-            }
-
-            logger.DebugScriptOpensFile(fileId);
-
+            // A copy per call, even for a file opened twice: the portal drops a temporary copy once it has been read.
             if (publishCopies)
             {
                 prepared.Remove(id.Index, id.Length).Insert(id.Index, await GetBuilderUrlAsync(fileDao, file));

@@ -97,7 +97,8 @@ public class DocsController(
     /// <remarks>
     /// Queues a background run of a document builder script and answers with the operation just started. The script
     /// names portal files by identifier - `builder.OpenFile("1234")` - where the document builder documentation writes
-    /// an address; only portal files can be opened. The caller needs edit access to every file the script opens, which
+    /// an address; only portal files can be opened. A script may call OpenFile and SaveFile at most 20 times each,
+    /// counting every call written in it. The caller needs edit access to every file the script opens, which
     /// may also be copied, and to each file `outputs` replaces, which must not be locked or open in an editor, and the
     /// right to create files in each folder a result is saved into. Each file the script saves goes where `outputs`
     /// says, keyed by the name given to SaveFile: `fileId` stores it as a new version of that file, `folderId` as a new
@@ -111,7 +112,7 @@ public class DocsController(
     /// <path>api/2.0/docs/builder</path>
     [Tags("Docs")]
     [SwaggerResponse(200, "The queued document builder operation to poll", typeof(FileOperationDto))]
-    [SwaggerResponse(400, "The script or the argument is malformed or too long, a file is addressed by an address, or a saved file has nowhere to go")]
+    [SwaggerResponse(400, "The script or the argument is malformed or too long, the script calls OpenFile or SaveFile too often, a file is addressed by an address, or a saved file has nowhere to go")]
     [SwaggerResponse(403, "You cannot edit or copy a file the script opens or write a result, or the file to replace is locked, being edited or in the trash")]
     [SwaggerResponse(404, "A file the script opens or replaces, or a target folder, does not exist")]
     [HttpPost("builder")]
