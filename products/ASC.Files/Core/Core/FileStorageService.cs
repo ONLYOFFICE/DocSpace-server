@@ -3151,6 +3151,14 @@ public class FileStorageService //: IFileStorageService
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder);
         }
 
+        // A connection a room stands on is the room itself: removing it here left an orphaned room behind,
+        // without the notifications, webhook and audit entry of a room deletion. Such a room is deleted as a room,
+        // and that deletion disconnects the storage.
+        if (providerInfo.FolderId != null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ProviderUsedByRoom);
+        }
+
         if (providerInfo.RootFolderType == FolderType.COMMON)
         {
             await fileMarker.RemoveMarkAsNewForAllAsync(folder);

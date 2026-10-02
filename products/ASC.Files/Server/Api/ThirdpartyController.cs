@@ -119,7 +119,8 @@ public class ThirdpartyController(
     /// connected the account can remove it; another member's request is refused unless they hold delete rights on the
     /// folder it stands for. Nothing is deleted at the storage service: the files stay with the provider, and what
     /// goes away is the portal's link to them together with the stored credentials, the sharing records and the tags
-    /// kept for its entries. A room that was created on this account stops being available. When the account being
+    /// kept for its entries. An account a room was created on is refused with 403 while the room exists: delete the
+    /// room instead, which disconnects the account along with it. When the account being
     /// removed is the one connected for backups by `POST api/2.0/files/thirdparty/backup`, its backup schedule is
     /// deleted as well. The removal cannot be repeated: once the account is gone the same ID is refused rather than
     /// confirmed, so treat the first successful answer as the record of it.
