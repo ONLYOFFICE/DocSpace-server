@@ -908,12 +908,13 @@ public static class DocumentService
     }
 
     /// <summary>
-    /// The PDF data.
+    /// The settings of a PDF result.
     /// </summary>
     public class PdfData
     {
         /// <summary>
-        /// Specifies if the PDF document is a PDF form or not.
+        /// Whether the result is a fillable PDF form: true keeps the form fields of the source as fields to fill in,
+        /// false saves a plain PDF.
         /// </summary>
         /// <example>true</example>
         public bool Form { get; set; }
@@ -925,22 +926,22 @@ public static class DocumentService
     public class DocumentLayout
     {
         /// <summary>
-        /// Whether placeholders are drawn or not.
+        /// Whether an empty form field shows its placeholder text in the result; false leaves it blank.
         /// </summary>
         /// <example>true</example>
         public bool? DrawPlaceHolders { get; set; }
 
         /// <summary>
-        /// Whether forms are highlighted or not.
+        /// Whether form fields keep their highlight colour in the result; false draws them without it.
         /// </summary>
-        /// <example>true</example>
+        /// <example>false</example>
         public bool? DrawFormHighlight { get; set; }
 
         /// <summary>
         /// Whether the print mode is turned on. It only applies to a docx converted into pdf: with the print mode off
         /// the highlight flag does nothing and the placeholder flag saves the forms in the pdf.
         /// </summary>
-        /// <example>false</example>
+        /// <example>true</example>
         public bool? IsPrint { get; set; }
     }
 
@@ -970,7 +971,7 @@ public static class DocumentService
     }
 
     /// <summary>
-    /// The thumbnail data.
+    /// The thumbnail data. A field left out takes the document service default.
     /// </summary>
     [DebuggerDisplay("{Height}x{Width}")]
     public class ThumbnailData
@@ -982,29 +983,29 @@ public static class DocumentService
         /// 2 - convert the metric size of the page into pixels at 96 dpi.
         /// </summary>
         /// <example>1</example>
-        public int Aspect { get; set; }
+        public int? Aspect { get; set; }
 
         /// <summary>
         /// Specifies if the thumbnails should be generated for the first page only or for all the document pages.
         /// </summary>
         /// <example>true</example>
-        public bool First { get; set; }
+        public bool? First { get; set; }
 
         /// <summary>
-        /// The thumbnail height in pixels.
+        /// The thumbnail height in pixels; not used with aspect 2.
         /// </summary>
         /// <example>100</example>
-        public int Height { get; set; }
+        public int? Height { get; set; }
 
         /// <summary>
-        /// The thumbnail width in pixels.
+        /// The thumbnail width in pixels; not used with aspect 2.
         /// </summary>
         /// <example>100</example>
-        public int Width { get; set; }
+        public int? Width { get; set; }
     }
 
     /// <summary>
-    /// The settings for converting the spreadsheet to pdf.
+    /// The settings for converting the spreadsheet to pdf. A field left out takes the document service default.
     /// </summary>
     [DebuggerDisplay("SpreadsheetLayout {IgnorePrintArea} {Orientation} {FitToHeight} {FitToWidth} {Headings} {GridLines}")]
     public class SpreadsheetLayout
@@ -1013,43 +1014,43 @@ public static class DocumentService
         /// Specifies whether to ignore the print area chosen for the spreadsheet file or not.
         /// </summary>
         /// <example>false</example>
-        public bool IgnorePrintArea { get; set; }
+        public bool? IgnorePrintArea { get; set; }
 
         /// <summary>
-        /// The orientation of the output PDF file.
+        /// The page orientation of the output PDF file: portrait or landscape.
         /// </summary>
         /// <example>landscape</example>
         public string Orientation { get; set; }
 
         /// <summary>
-        /// The height of the converted area, measured in the number of pages.
+        /// The number of pages the converted area is fitted into in height; 0 does not fit it.
         /// </summary>
         /// <example>0</example>
-        public int FitToHeight { get; set; }
+        public int? FitToHeight { get; set; }
 
         /// <summary>
-        /// Allows to set the scale of the output PDF file.
+        /// The scale of the output PDF file, in percent.
         /// </summary>
         /// <example>100</example>
         public int? Scale { get; set; }
 
         /// <summary>
-        /// The width of the converted area, measured in the number of pages.
+        /// The number of pages the converted area is fitted into in width; 0 does not fit it.
         /// </summary>
         /// <example>1</example>
-        public int FitToWidth { get; set; }
+        public int? FitToWidth { get; set; }
 
         /// <summary>
         /// Specifies whether to include the headings to the output PDF file or not.
         /// </summary>
         /// <example>false</example>
-        public bool Headings { get; set; }
+        public bool? Headings { get; set; }
 
         /// <summary>
         /// Specifies whether to include grid lines to the output PDF file or not.
         /// </summary>
         /// <example>false</example>
-        public bool GridLines { get; set; }
+        public bool? GridLines { get; set; }
 
         /// <summary>
         /// The margins of the output PDF file.
@@ -1062,7 +1063,7 @@ public static class DocumentService
         public LayoutPageSize PageSize { get; set; }
 
         /// <summary>
-        /// The margins of the output PDF file.
+        /// The margins of the output PDF file, each a length with its unit: mm, cm or in.
         /// </summary>
         [DebuggerDisplay("Margins {Top} {Right} {Bottom} {Left}")]
         public class LayoutMargins
@@ -1093,7 +1094,7 @@ public static class DocumentService
         }
 
         /// <summary>
-        /// The page size of the output PDF file.
+        /// The page size of the output PDF file, each side a length with its unit: mm, cm or in.
         /// </summary>
         [DebuggerDisplay("PageSize {Width} {Height}")]
         public class LayoutPageSize

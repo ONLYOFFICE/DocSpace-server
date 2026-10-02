@@ -608,15 +608,7 @@ public class FileConverter(
         var isNewFile = false;
         var newFileTitle = FileUtility.ReplaceFileExtension(title, convertedFileType);
 
-        if (Equals(folder.Id, 0))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_FolderNotFound);
-        }
-
-        if (!await fileSecurity.CanCreateAsync(folder))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
-        }
+        await CheckCanSaveIntoAsync(folder);
 
         if (updateIfExist)
         {
@@ -646,7 +638,22 @@ public class FileConverter(
         return (newFile, isNewFile);
     }
 
-    public async Task<File<T>> SaveConvertedFileAsync<T>(Folder<T> folder, string convertedFileUrl, string convertedFileType, string title, bool updateIfExist)
+    private async Task CheckCanSaveIntoAsync<T>(Folder<T> folder)
+    {
+        if (Equals(folder.Id, 0))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (!await fileSecurity.CanCreateAsync(folder))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+    }
+
+    // with the headers of the request the audit names its user; without them it records the document service
+    public async Task<File<T>> SaveConvertedFileAsync<T>(Folder<T> folder, string convertedFileUrl, string convertedFileType, string title, bool updateIfExist,
+        IDictionary<string, StringValues> headers = null)
     {
         var (newFile, isNewFile) = await PrepareConvertedFileAsync(folder, convertedFileType, title, updateIfExist);
 
@@ -666,7 +673,7 @@ public class FileConverter(
 
             await using var convertedFileStream = await ResponseStream.FromMessageAsync(response);
 
-            newFile = await StoreConvertedFileAsync(newFile, isNewFile, convertedFileStream);
+            newFile = await StoreConvertedFileAsync(newFile, isNewFile, convertedFileStream, headers);
         }
         catch (HttpRequestException e)
         {
@@ -687,14 +694,15 @@ public class FileConverter(
     /// Saves content the caller already holds, for a conversion whose answer is the document itself instead of an
     /// address to download it from.
     /// </summary>
-    public async Task<File<T>> SaveConvertedFileAsync<T>(Folder<T> folder, Stream convertedFileStream, string convertedFileType, string title, bool updateIfExist)
+    public async Task<File<T>> SaveConvertedFileAsync<T>(Folder<T> folder, Stream convertedFileStream, string convertedFileType, string title, bool updateIfExist,
+        IDictionary<string, StringValues> headers = null)
     {
         var (newFile, isNewFile) = await PrepareConvertedFileAsync(folder, convertedFileType, title, updateIfExist);
 
-        return await StoreConvertedFileAsync(newFile, isNewFile, convertedFileStream);
+        return await StoreConvertedFileAsync(newFile, isNewFile, convertedFileStream, headers);
     }
 
-    private async Task<File<T>> StoreConvertedFileAsync<T>(File<T> newFile, bool isNewFile, Stream convertedFileStream)
+    private async Task<File<T>> StoreConvertedFileAsync<T>(File<T> newFile, bool isNewFile, Stream convertedFileStream, IDictionary<string, StringValues> headers)
     {
         newFile.ContentLength = convertedFileStream.Length;
         newFile = await daoFactory.GetFileDao<T>().SaveFileAsync(newFile, convertedFileStream);
@@ -708,7 +716,14 @@ public class FileConverter(
             await socketManager.CreateFileAsync(newFile);
         }
 
-        await filesMessageService.SendAsync(MessageAction.FileConverted, newFile, MessageInitiator.DocsService, newFile.Title);
+        if (headers != null)
+        {
+            await filesMessageService.SendAsync(MessageAction.FileConverted, newFile, headers, newFile.Title);
+        }
+        else
+        {
+            await filesMessageService.SendAsync(MessageAction.FileConverted, newFile, MessageInitiator.DocsService, newFile.Title);
+        }
 
         await fileMarker.MarkAsNewAsync(newFile);
 
@@ -721,10 +736,13 @@ public class FileConverter(
     /// conversion parameters are the ones the document service defines, except for the format, the name and the
     /// caching key, which are read off the file.
     /// </summary>
-    public async Task<File<T>> ConvertFromFileAsync<T>(File<T> file, Folder<T> folder, ConvertFromFileBody body)
+    public async Task<File<T>> ConvertFromFileAsync<T>(File<T> file, Folder<T> folder, ConvertFromFileBody body, IDictionary<string, StringValues> headers)
     {
         ArgumentNullException.ThrowIfNull(file);
         ArgumentNullException.ThrowIfNull(body);
+
+        // before the source is read and the document service does any work
+        await CheckCanSaveIntoAsync(folder);
 
         if (!await fileSecurity.CanCopyAsync(file))
         {
@@ -763,7 +781,7 @@ public class FileConverter(
             await using var converted = await documentServiceConnector.GetConvertedFileAsync(buffered, body.Title, body);
 
             // The source is kept, so the result goes in beside it under a free title rather than replacing anything.
-            return await SaveConvertedFileAsync(folder, converted, body.OutputType, body.Title, updateIfExist: false);
+            return await SaveConvertedFileAsync(folder, converted, body.OutputType, body.Title, updateIfExist: false, headers);
         }
         finally
         {

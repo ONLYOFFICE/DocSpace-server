@@ -215,10 +215,30 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
                 await filesLinkUtility.GetDocServiceSslVerificationAsync(),
                 clientFactory);
         }
+        catch (DocumentServiceException ex) when (GetCallerError(ex.Code) is { } error)
+        {
+            throw new ArgumentException(error, ex);
+        }
         catch (Exception ex)
         {
             throw CustomizeError(ex);
         }
+    }
+
+    /// <summary>
+    /// The conversion failures caused by the source or the request rather than by the document service, worded for
+    /// the caller; any other code answers null.
+    /// </summary>
+    private static string GetCallerError(DocumentServiceException.ErrorCode code)
+    {
+        return code switch
+        {
+            DocumentServiceException.ErrorCode.ConvertPassword => "The document is protected with a password, and the password is missing or wrong",
+            DocumentServiceException.ErrorCode.Convert => "The document service could not read the file: it is damaged or its content does not match its extension",
+            DocumentServiceException.ErrorCode.OutputType => "The document service cannot convert this file to the requested format",
+            DocumentServiceException.ErrorCode.SizeLimit => "The file is too large for the document service to convert",
+            _ => null
+        };
     }
 
     /// <summary>

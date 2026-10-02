@@ -58,14 +58,15 @@ public class DocsController(
     /// file keeps the request open. Only files stored in the portal itself are accepted. To convert while copying into
     /// another folder, a third-party one included, use `POST api/2.0/files/file/{fileId}/copyas`; to convert into the
     /// portal's own editable format beside the source, use `PUT api/2.0/files/file/{fileId}/checkconversion`. A missing
-    /// or unsupported `outputtype` is refused with 400, missing access with 403, and an unknown file or folder with
-    /// 404.
+    /// or unsupported `outputtype` is refused with 400, and so is a source the document service rejects: a wrong or
+    /// missing `password`, a damaged file, or one too large to convert; retrying the same request will not help. Missing
+    /// access is refused with 403 and an unknown file or folder with 404, both before any conversion starts.
     /// </remarks>
     /// <summary>Convert a file</summary>
     /// <path>api/2.0/docs/converter</path>
     [Tags("Docs")]
     [SwaggerResponse(200, "The converted file, as it was saved in the portal", typeof(FileDto<int>))]
-    [SwaggerResponse(400, "`outputtype` is missing or the file cannot be converted to it")]
+    [SwaggerResponse(400, "`outputtype` is missing or the file cannot be converted to it, or the document service rejects the source: a wrong or missing password, a damaged file, or one too large")]
     [SwaggerResponse(403, "You cannot read or copy the file, or create files in the folder")]
     [SwaggerResponse(404, "The file or the folder does not exist")]
     [HttpPost("converter")]
@@ -77,7 +78,8 @@ public class DocsController(
 
         var body = inDto.MapToConvertFromFileBody();
 
-        var converted = await fileConverter.ConvertFromFileAsync(file, folder, body);
+        var headers = MessageSettings.GetHttpHeaders(Request);
+        var converted = await fileConverter.ConvertFromFileAsync(file, folder, body, headers);
 
         return await fileDtoHelper.GetAsync(converted);
     }
@@ -90,18 +92,22 @@ public class DocsController(
     /// may also be copied, and to each file `outputs` replaces, which must not be locked or open in an editor, and the
     /// right to create files in each folder a result is saved into. Each file the script saves goes where `outputs`
     /// says, keyed by the name given to SaveFile: `fileId` stores it as a new version of that file, `folderId` as a new
-    /// file there; an unlisted file goes to `folderId` or to the folder of the opened file. The call is not idempotent:
-    /// each call is a new run. Poll `GET api/2.0/files/fileops` with the returned `id` until the operation reports
+    /// file there; an unlisted file goes to `folderId` or to the folder of the opened file. Each entry of `outputs`
+    /// names exactly one of `fileId` and `folderId`; `title` goes only with `folderId`, since a replaced file keeps its
+    /// title, and a result stored over `fileId` has to be in that file's format. The call is not idempotent: each call
+    /// is a new run. Poll `GET api/2.0/files/fileops` with the returned `id` until the operation reports
     /// `finished`: `files` then lists the saved files, a replaced one with its new version, including those saved
-    /// before a failure, and `error` the reason a failed build gave. For a plain format change use
-    /// `POST api/2.0/docs/converter`. What can be refused in advance fails at once with 400, 403 or 404.
+    /// before a failure, and `error` the reason a failed build gave. A build that has not finished after 10 minutes is
+    /// given up and reported as failed. A caller runs one script at a time: a new request while an earlier one is
+    /// queued or running is refused with 403, so wait for `finished` before starting the next. For a plain format
+    /// change use `POST api/2.0/docs/converter`. What can be refused in advance fails at once with 400, 403 or 404.
     /// </remarks>
     /// <summary>Run a document builder script</summary>
     /// <path>api/2.0/docs/builder</path>
     [Tags("Docs")]
     [SwaggerResponse(200, "The queued document builder operation to poll", typeof(FileOperationDto))]
-    [SwaggerResponse(400, "The script or the argument is malformed or too long, the script calls OpenFile or SaveFile too often, a file is addressed by an address, or a saved file has nowhere to go")]
-    [SwaggerResponse(403, "You cannot edit or copy a file the script opens or write a result, or the file to replace is locked, being edited or in the trash")]
+    [SwaggerResponse(400, "The script or the argument is malformed or too long, the script calls OpenFile or SaveFile too often, a file is addressed by an address, an `outputs` entry breaks the rules above, or a saved file has nowhere to go")]
+    [SwaggerResponse(403, "You cannot edit or copy a file the script opens or write a result, the file to replace is locked, being edited or in the trash, or another script of yours is still queued or running")]
     [SwaggerResponse(404, "A file the script opens or replaces, or a target folder, does not exist")]
     [HttpPost("builder")]
     public async Task<FileOperationDto> RunBuilderScript(DocsBuilderRequestDto inDto)

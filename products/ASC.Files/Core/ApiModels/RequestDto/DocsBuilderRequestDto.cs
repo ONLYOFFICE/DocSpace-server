@@ -84,7 +84,7 @@ public class DocsBuilderRequestDto
 }
 
 /// <summary>
-/// Where one produced file goes. Exactly one of `fileId` and `folderId` is given.
+/// Where one produced file goes.
 /// </summary>
 /// <example>
 /// {
@@ -95,21 +95,21 @@ public class DocsBuilderRequestDto
 public class DocsBuilderOutputDto
 {
     /// <summary>
-    /// The id of a portal file to store the result in as a new version. The result has to have the same format as
-    /// that file.
+    /// The id of a portal file to store the result in as a new version, as reported by a folder listing such as
+    /// `GET api/2.0/files/{folderId}`.
     /// </summary>
     /// <example>1234</example>
     public int? FileId { get; set; }
 
     /// <summary>
-    /// The id of a folder to save the result in as a new file.
+    /// The id of a folder to save the result in as a new file, as reported by a folder listing such as
+    /// `GET api/2.0/files/{folderId}`.
     /// </summary>
     /// <example>5678</example>
     public int? FolderId { get; set; }
 
     /// <summary>
-    /// The title of the new file, when it has to differ from the name the script saved the result under. Not allowed
-    /// with `fileId`: a replaced file keeps its title.
+    /// The title of the new file, when it has to differ from the name the script saved the result under.
     /// </summary>
     /// <example>Quarterly report.pdf</example>
     public string Title { get; set; }

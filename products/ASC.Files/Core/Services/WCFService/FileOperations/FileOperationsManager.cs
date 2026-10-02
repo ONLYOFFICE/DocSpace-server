@@ -123,7 +123,7 @@ public class FileOperationsManagerHolder<T> : IDisposable where T : FileOperatio
         return await _tasks.PublishTask(task);
     }
 
-    public async Task CheckRunning(Guid userId, FileOperationType fileOperationType)
+    public async Task CheckRunning(Guid userId, FileOperationType fileOperationType, string error)
     {
         var operations = (await _tasks.GetAllTasks())
             .Where(t => t.Owner == userId)
@@ -131,7 +131,7 @@ public class FileOperationsManagerHolder<T> : IDisposable where T : FileOperatio
 
         if (operations.Any(o => o.Status <= DistributedTaskStatus.Running))
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ManyDownloads);
+            throw new InvalidOperationException(error);
         }
     }
 
@@ -372,6 +372,8 @@ public class FileBuilderOperationsManager(
         var userId = _authContext.CurrentAccount.ID;
         var sessionSnapshot = await _externalShare.TakeSessionSnapshotAsync();
 
+        await _fileOperationsManagerHolder.CheckRunning(userId, FileOperationType.Build, "A document builder script of yours is already queued or running; wait until it finishes");
+
         var outputData = outputs?.ToDictionary(x => x.Key, x => x.Value.MapToFileBuilderOutputData());
 
         var (fileIds, folderIds) = DocumentBuilderScriptRunner.GetEntries(script, folderId, outputData);
@@ -419,7 +421,7 @@ public class FileDownloadOperationsManager(
             throw new AuthenticationException();
         }
 
-        await _fileOperationsManagerHolder.CheckRunning(await GetUserIdAsync(), FileOperationType.Download);
+        await _fileOperationsManagerHolder.CheckRunning(await GetUserIdAsync(), FileOperationType.Download, FilesCommonResource.ErrorMessage_ManyDownloads);
         if ((folders == null || folders.Count == 0) && (files == null || files.Count == 0))
         {
             return null;

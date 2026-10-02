@@ -126,6 +126,9 @@ public class DocumentBuilderScriptRunner(
     private const int MaxOpenFileCalls = 20;
     private const int MaxSaveFileCalls = 20;
 
+    // a script that never ends would hold a worker slot for good; the document service is not told to stop
+    private static readonly TimeSpan _maxBuildTime = TimeSpan.FromMinutes(10);
+
     /// <summary>
     /// The portal files and folders a run touches: the files the script opens or replaces and the folders it saves
     /// into. Read off the request only; <see cref="ValidateAsync"/> checks them.
@@ -411,16 +414,26 @@ public class DocumentBuilderScriptRunner(
         // service reads it as a poll for a build it never started and answers "cannot read run file".
         var (key, urls) = await documentServiceConnector.DocbuilderRequestFromFileAsync(stream, ScriptFileName, new BuilderFromFileBody { Async = true, Argument = argument == null ? null : JsonSerializer.Deserialize<JsonElement>(argument) });
 
-        while (urls == null)
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        deadline.CancelAfter(_maxBuildTime);
+
+        try
         {
-            if (string.IsNullOrEmpty(key))
+            while (urls == null)
             {
-                throw new InvalidOperationException("The document service did not hand back a key for the build");
+                if (string.IsNullOrEmpty(key))
+                {
+                    throw new InvalidOperationException("The document service did not hand back a key for the build");
+                }
+
+                await Task.Delay(1000, deadline.Token);
+
+                (key, urls) = await documentServiceConnector.DocbuilderRequestAsync(key, null, true, deadline.Token);
             }
-
-            await Task.Delay(1000, cancellationToken);
-
-            (key, urls) = await documentServiceConnector.DocbuilderRequestAsync(key, null, true);
+        }
+        catch (OperationCanceledException) when (deadline.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
+        {
+            throw new TimeoutException($"The build did not finish within {_maxBuildTime.TotalMinutes} minutes");
         }
 
         if (urls.Count == 0)
@@ -433,10 +446,6 @@ public class DocumentBuilderScriptRunner(
         return urls;
     }
 
-    /// <summary>
-    /// Refuses a destination keyed by a name the script never saves under. The key is the second argument of
-    /// SaveFile, so a key that matches none of them can never be used and is a typo in the request.
-    /// </summary>
     /// <summary>
     /// Turns each requested destination into a loaded target, refusing anything that cannot work before the build
     /// runs: a key that names no saved file, a slot that is neither a file to replace nor a folder to fill, a title
@@ -564,14 +573,14 @@ public class DocumentBuilderScriptRunner(
                 }
 
                 var chosen = string.IsNullOrEmpty(target.Title) ? name : target.Title;
-                saved.Add(await fileConverter.SaveConvertedFileAsync(target.Folder, url, extension, chosen, updateIfExist: false));
+                saved.Add(await fileConverter.SaveConvertedFileAsync(target.Folder, url, extension, chosen, updateIfExist: false, headers));
                 continue;
             }
 
             var parentId = folderId ?? source?.ParentId
                 ?? throw new ArgumentException($"\"{name}\" has nowhere to go: name a folder for it, or one for the request");
 
-            saved.Add(await fileConverter.SaveConvertedFileAsync(await GetWritableFolderAsync(parentId), url, extension, name, updateIfExist: false));
+            saved.Add(await fileConverter.SaveConvertedFileAsync(await GetWritableFolderAsync(parentId), url, extension, name, updateIfExist: false, headers));
         }
     }
 

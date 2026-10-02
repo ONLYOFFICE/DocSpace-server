@@ -57,7 +57,8 @@ public class DocsConverterRequestDto
     public required int FileId { get; set; }
 
     /// <summary>
-    /// The id of the folder to save the converted file in.
+    /// The id of the folder to save the converted file in, as reported by a folder listing such as
+    /// `GET api/2.0/files/{folderId}`.
     /// </summary>
     /// <example>5678</example>
     public int? FolderId { get; set; }
@@ -89,7 +90,8 @@ public class DocsConverterRequestDto
     public DocumentRenderer DocumentRenderer { get; set; }
 
     /// <summary>
-    /// The format the document is converted to.
+    /// The extension of the format to convert to, without the dot. The formats a source can become are listed under
+    /// `extsConvertible` in `GET api/2.0/files/settings`, keyed by the source extension, both with a leading dot there.
     /// </summary>
     /// <example>pdf</example>
     [JsonPropertyName("outputtype")]
@@ -102,7 +104,7 @@ public class DocsConverterRequestDto
     public string Password { get; set; }
 
     /// <summary>
-    /// The display format for currency, date and time when a spreadsheet is converted to PDF.
+    /// The culture code whose currency, date and time formats a spreadsheet converted to PDF is shown in.
     /// </summary>
     /// <example>en-US</example>
     public string Region { get; set; }

@@ -62,6 +62,9 @@ public enum FileOperationType
     [Description("Duplicate")]
     Duplicate,
 
+    /// <summary>
+    /// A document builder script run started by `POST api/2.0/docs/builder`; its result lists the files it saved.
+    /// </summary>
     [Description("Build")]
     Build
 }
