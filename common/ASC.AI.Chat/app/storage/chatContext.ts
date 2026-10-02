@@ -31,12 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import {
-  isToolPermissionMode,
-  type McpServerConfig,
-  type Profile,
-  type Thread,
-} from "@onlyoffice/ai-chat/core";
+import type { McpServerConfig, Profile, Thread } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { dtoToProfile } from "./profilesStorage.js";
@@ -47,6 +42,7 @@ import { parseWebSearchConfig } from "./webSearchStorage.js";
 import type { DocspaceFolderInfo } from "./docspaceFilesApi.js";
 import type { ChatContextScope, ChatContextSnapshot } from "./chatContextSnapshot.js";
 import { depthToLevel } from "./reasoningDepth.js";
+import { csharpToToolPermissionMode } from "./toolPermissionMode.js";
 import {
   getChatContextMisses,
   getFilesApiReadCount,
@@ -161,10 +157,6 @@ function parseScope(raw: unknown, entityId: string | undefined): ChatContextScop
     folder: parseFolder(raw["folder"]),
     assignments: parseAssignments(raw["assignments"]),
     reasoningLevel: preferences ? depthToLevel(preferences["depth"]) : null,
-    toolPermissionMode:
-      preferences && isToolPermissionMode(preferences["toolPermissionMode"])
-        ? preferences["toolPermissionMode"]
-        : null,
     toolPrefs: toolPrefs ?? ({} as JsonObject),
     mcpServers: parseMcpServers(raw["mcpServers"]),
   };
@@ -229,6 +221,7 @@ export function parseChatContext(
     },
     aiReady: config ? getBoolean(config, "aiReady") : undefined,
     aiNotReadyMessage: config ? getString(config, "aiNotReadyMessage") : undefined,
+    toolPermissionMode: config ? csharpToToolPermissionMode(config["toolPermissionMode"]) : null,
     profiles: parseProfiles(getArray(raw, "profiles")),
     global,
     entity,

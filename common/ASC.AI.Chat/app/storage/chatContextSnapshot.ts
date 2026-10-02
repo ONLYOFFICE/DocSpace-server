@@ -64,8 +64,6 @@ export interface ChatContextScope {
   assignments: Record<string, string>;
   /** The stored extended-thinking depth (`off` = deep mode off), `null` when none is persisted. */
   reasoningLevel: ReasoningLevel | null;
-  /** The stored tool permission mode, `null` when none is persisted. */
-  toolPermissionMode: ToolPermissionMode | null;
   /** Raw `serverType -> { disabled, allowAlways }` map as the C# storage serves it. */
   toolPrefs: JsonObject;
   mcpServers: Record<string, McpServerConfig>;
@@ -84,6 +82,12 @@ export interface ChatContextSnapshot {
     contextEntityId: string | undefined;
   };
   aiReady: boolean | undefined;
+  /**
+   * How a tool call is approved for the calling user — one value per user,
+   * from the aggregate's `config.toolPermissionMode`; `null` when the
+   * aggregate predates the setting.
+   */
+  toolPermissionMode: ToolPermissionMode | null;
   /** The portal's localized reason for `aiReady === false`; undefined when ready or absent. */
   aiNotReadyMessage: string | undefined;
   profiles: Profile[];

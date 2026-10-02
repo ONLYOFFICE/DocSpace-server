@@ -131,9 +131,11 @@ export const preferencesController = {
     res.json({ success: true });
   }),
 
-  // How a tool call is approved — the composer's "Permissions" row. Stored
-  // next to the depth in the same C# row; the engine answers the default
-  // (`ask`) for a scope with nothing stored.
+  // How a tool call is approved — the composer's "Permissions" row. One
+  // value per user in the C# AI user settings (`config/tool-mode`), not a
+  // per-room preference: `entityId` is accepted for route symmetry with the
+  // depth and ignored. The C# default is `auto`, so the library's own
+  // default (`ask`) only ever shows for a failed read.
   getToolPermissionMode: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
     const value = await engine.getToolPermissionMode(entityId);
@@ -150,6 +152,7 @@ export const preferencesController = {
       });
       return;
     }
+    // Validated like every other write, then dropped: the mode is per user.
     const entityId = writeScope(args.entityId);
     await engine.setToolPermissionMode(args.value, entityId);
     res.json({ success: true });

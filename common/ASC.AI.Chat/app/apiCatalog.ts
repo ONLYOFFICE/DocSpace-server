@@ -107,7 +107,7 @@ export const ENGINE_DOCS: ReadonlyArray<EngineDoc> = [
     name: "preferences",
     tag: "Preferences",
     description:
-      "Per-entity chat preferences: the extended-thinking depth, its deep-mode toggle and the tool permission mode.",
+      "Chat preferences: the per-entity extended-thinking depth with its deep-mode toggle, and the per-user tool permission mode.",
     routes: DEFAULT_PREFERENCES_ROUTES,
   },
   {
@@ -254,6 +254,21 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
     tag: "Settings",
     operationId: "aiSettingsSetUser",
     summary: "Update user AI settings",
+    hasBody: true,
+  },
+  {
+    method: "GET",
+    path: "/config/tool-mode",
+    tag: "Settings",
+    operationId: "aiSettingsGetToolMode",
+    summary: "Get the tool permission mode",
+  },
+  {
+    method: "PUT",
+    path: "/config/tool-mode",
+    tag: "Settings",
+    operationId: "aiSettingsSetToolMode",
+    summary: "Set the tool permission mode",
     hasBody: true,
   },
   {

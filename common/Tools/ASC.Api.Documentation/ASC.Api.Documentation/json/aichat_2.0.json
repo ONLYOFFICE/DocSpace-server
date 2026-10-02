@@ -77,7 +77,7 @@
     },
     {
       "name": "AI / Preferences",
-      "description": "Per-entity chat preferences: the extended-thinking depth, its deep-mode toggle and the tool permission mode.",
+      "description": "Chat preferences: the per-entity extended-thinking depth with its deep-mode toggle, and the per-user tool permission mode.",
       "x-displayName": "Preferences"
     },
     {
@@ -2984,7 +2984,7 @@
         ],
         "operationId": "aiPreferencesGetToolPermissionMode",
         "summary": "Get tool permission mode",
-        "description": "Returns how a tool call the model makes is approved in the scope: `ask` prompts for every call bar the tools pinned as always allowed, `auto` also runs a tool that opted out of approval itself, `allow` runs everything without asking. Falls back to `ask` when the scope has no stored mode. `entityId` picks a room and omitting it reads the portal-wide preference.",
+        "description": "Returns how a tool call the model makes is approved for the calling user, in the chat library's spelling: `ask` prompts for every call bar the tools pinned as always allowed, `auto` also runs a tool that opted out of approval itself or is annotated read-only / non-destructive, `allow` runs everything without asking. The mode is one value per user, stored in the user's AI settings (the same value `GET api/2.0/ai/config/tool-mode` reports as the AI service's enum); `entityId` is accepted for symmetry with the depth routes and ignored. The AI service's default is `auto`.",
         "responses": {
           "200": {
             "description": "The mode in force for the scope, as a bare JSON string, falling back to `ask` when none is stored.",
@@ -3050,7 +3050,7 @@
         ],
         "operationId": "aiPreferencesSetToolPermissionMode",
         "summary": "Set tool permission mode",
-        "description": "Persists the tool permission mode of the scope. `value` has to be one of `ask`, `auto`, `allow`: anything else is rejected rather than coerced, so an absent or mistyped value can never overwrite the stored mode. `entityId` picks a room and omitting it writes the portal-wide preference. Idempotent.",
+        "description": "Persists the tool permission mode of the calling user. `value` has to be one of `ask`, `auto`, `allow`: anything else is rejected rather than coerced, so an absent or mistyped value can never overwrite the stored mode. `entityId` is validated like on the other writes and otherwise ignored - the mode applies to every chat of the user. Idempotent.",
         "responses": {
           "200": {
             "description": "Confirms the preference was stored.",
@@ -9488,6 +9488,135 @@
               "schema": {
                 "type": "object",
                 "additionalProperties": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/config/tool-mode": {
+      "get": {
+        "tags": [
+          "AI / Settings"
+        ],
+        "operationId": "aiSettingsGetToolMode",
+        "summary": "Get the tool permission mode",
+        "description": "Returns the calling user's tool permission mode as the DocSpace AI service spells it - `{ mode }` with the service's `ToolPermissionMode` enum (`Ask`, `Auto`, `Allow`), proxied unchanged. The chat reads the same value in its own spelling through `GET api/2.0/ai/preferences/get-tool-permission-mode`. This is a read-only operation.",
+        "responses": {
+          "200": {
+            "description": "The calling user's tool permission mode, as `{ mode }`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "AI / Settings"
+        ],
+        "operationId": "aiSettingsSetToolMode",
+        "summary": "Set the tool permission mode",
+        "description": "Stores the calling user's tool permission mode and returns the stored result. The body (`{ mode }`) is proxied unchanged to the DocSpace AI service, which rejects a value outside its `ToolPermissionMode` enum. The mode applies to every chat of the user in the portal.",
+        "responses": {
+          "200": {
+            "description": "The calling user's stored tool permission mode, as `{ mode }`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "description": "`{ mode }` with the AI service's `ToolPermissionMode` enum, proxied unchanged; the service rejects anything outside the enum.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "examples": [
+                  {
+                    "mode": 1
+                  }
+                ]
               }
             }
           }
