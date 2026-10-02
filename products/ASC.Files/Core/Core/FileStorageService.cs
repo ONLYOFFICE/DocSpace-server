@@ -723,6 +723,20 @@ public class FileStorageService //: IFileStorageService
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
+        // Only the owner of the connection may turn it into a room, as only the owner may update it,
+        // and only someone who may create rooms at all: the regular room creation demands the same right
+        // on the Rooms root.
+        if (providerInfo.Owner != authContext.CurrentAccount.ID)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        var roomsRoot = await daoFactory.GetFolderDao<int>().GetFolderAsync(await globalFolderHelper.FolderVirtualRoomsAsync);
+        if (!await fileSecurity.CanCreateAsync(roomsRoot))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+
         if (providerInfo.RootFolderType != FolderType.VirtualRooms)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidProvider);
