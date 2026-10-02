@@ -47,8 +47,10 @@ public class AiGatewayProxyController(
     private static readonly HashSet<string> _allowedPaths = new(StringComparer.OrdinalIgnoreCase)
     {
         "models",
+        "customer/models",
         "chat/completions",
         "images/generations",
+        "embeddings",
         "search",
         "contents"
     };
