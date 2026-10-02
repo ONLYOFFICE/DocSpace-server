@@ -419,9 +419,11 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
 
         _logger.WarningModelIsShutdown(@event.Cause?.ToString(), @event.Exception);
 
-        // the connection went down with the channel: automatic recovery reopens this very channel
-        // together with its consumer, so a consumer of our own would end up as a duplicate
-        if (!_persistentConnection.IsConnected)
+        // any other reason took the connection down with the channel: automatic recovery reopens
+        // this very channel together with its consumer, so a consumer of our own would be a duplicate.
+        // IsConnected cannot tell the two apart: the connection's shutdown handler waits for the
+        // recovery, and the client holds this notification back until it is done
+        if (!IsChannelLevelError(@event))
         {
             return Task.CompletedTask;
         }
@@ -433,6 +435,14 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
         _ = Task.Run(() => RecreateConsumerAsync(channel));
 
         return Task.CompletedTask;
+    }
+
+    // AMQP soft errors: the broker closes the channel and keeps the connection
+    private static bool IsChannelLevelError(ShutdownEventArgs @event)
+    {
+        return @event.Initiator == ShutdownInitiator.Peer
+            && @event.ReplyCode is Constants.ContentTooLarge or Constants.NoRoute or Constants.NoConsumers
+                or Constants.AccessRefused or Constants.NotFound or Constants.ResourceLocked or Constants.PreconditionFailed;
     }
 
     private async Task Consumer_Received(object sender, BasicDeliverEventArgs eventArgs)
@@ -623,8 +633,9 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
 
         try
         {
-            // already replaced by an earlier call, or no subscriptions left to consume for
-            if (_disposing || !ReferenceEquals(closedChannel, _consumerChannel) || string.IsNullOrEmpty(_queueName))
+            // already replaced by an earlier call, reopened by automatic recovery,
+            // or no subscriptions left to consume for
+            if (_disposing || !ReferenceEquals(closedChannel, _consumerChannel) || closedChannel.IsOpen || string.IsNullOrEmpty(_queueName))
             {
                 return;
             }
