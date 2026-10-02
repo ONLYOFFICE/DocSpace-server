@@ -330,14 +330,23 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
     }
 
     /// <summary>
-    /// How long this instance has had no live consumer on its queue, counted from the first call that found it missing;
-    /// null while the consumer is in place or, with no subscriptions, not needed at all.
+    /// What keeps this instance from handling its queue, with the time it has lasted, counted from the first call
+    /// that found it: the connection being down, or, with the connection up, the consumer missing. Null while the
+    /// connection is up and the consumer is in place or, with no subscriptions, not needed at all.
     /// </summary>
-    public TimeSpan? GetConsumerDownTime()
+    public (bool Connected, TimeSpan DownTime)? GetConsumerDownTime()
     {
+        if (_persistentConnection.GetDisconnectedTime() is { } disconnectedTime)
+        {
+            // the consumer cannot come back before the connection does, so its own clock starts only after that
+            Interlocked.Exchange(ref _consumerLostAt, 0);
+
+            return (false, disconnectedTime);
+        }
+
         // a closed channel shows in IsOpen, which automatic recovery turns back on; a broker-side cancel leaves
         // the channel open and only the consumer knows about it. The consumer's own IsRunning would cover both,
-        // but after a connection loss the client may reset it after the recovered consume-ok has already set it
+        // but around a connection recovery it depends on the order the client resets and sets it in
         if (_subsManager.IsEmpty
             || _consumerChannel is { IsOpen: true } && _consumer is { CancelledByBroker: false } && !string.IsNullOrEmpty(_consumerTag))
         {
@@ -348,7 +357,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
 
         var lostAt = Interlocked.CompareExchange(ref _consumerLostAt, Stopwatch.GetTimestamp(), 0);
 
-        return lostAt == 0 ? TimeSpan.Zero : Stopwatch.GetElapsedTime(lostAt);
+        return (true, lostAt == 0 ? TimeSpan.Zero : Stopwatch.GetElapsedTime(lostAt));
     }
 
     public void Dispose()
@@ -446,8 +455,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
 
         // any other reason took the connection down with the channel: automatic recovery reopens
         // this very channel together with its consumer, so a consumer of our own would be a duplicate.
-        // IsConnected cannot tell the two apart: the connection's shutdown handler waits for the
-        // recovery, and the client holds this notification back until it is done
+        // The reply code tells the two apart whatever the connection state is by the time this runs
         if (!IsChannelLevelError(@event))
         {
             return Task.CompletedTask;

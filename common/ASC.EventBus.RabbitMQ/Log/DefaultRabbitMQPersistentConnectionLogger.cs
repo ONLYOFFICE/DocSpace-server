@@ -49,12 +49,18 @@ internal static partial class DefaultRabbitMQPersistentConnectionLogger
     [LoggerMessage(LogLevel.Critical, "FATAL ERROR: RabbitMQ connections could not be created and opened")]
     public static partial void CriticalRabbitMQCouldNotBeCreated(this ILogger<DefaultRabbitMQPersistentConnection> logger);
 
-    [LoggerMessage(LogLevel.Warning, "A RabbitMQ connection is shutdown. Trying to re-connect...")]
-    public static partial void WarningRabbitMQConnectionShutdown(this ILogger<DefaultRabbitMQPersistentConnection> logger);
+    [LoggerMessage(LogLevel.Warning, "A RabbitMQ connection is blocked by the broker: {reason}")]
+    public static partial void WarningRabbitMQConnectionBlocked(this ILogger<DefaultRabbitMQPersistentConnection> logger, string reason);
 
-    [LoggerMessage(LogLevel.Warning, "A RabbitMQ connection throw exception. Trying to re-connect...")]
-    public static partial void WarningRabbitMQConnectionThrowException(this ILogger<DefaultRabbitMQPersistentConnection> logger);
+    [LoggerMessage(LogLevel.Warning, "A RabbitMQ connection callback threw an exception")]
+    public static partial void WarningRabbitMQConnectionThrowException(this ILogger<DefaultRabbitMQPersistentConnection> logger, Exception exception);
 
-    [LoggerMessage(LogLevel.Warning, "A RabbitMQ connection is on shutdown. Trying to re-connect...")]
-    public static partial void WarningRabbitMQConnectionIsOnShutDown(this ILogger<DefaultRabbitMQPersistentConnection> logger);
+    [LoggerMessage(LogLevel.Warning, "A RabbitMQ connection is on shutdown ({replyCode} {replyText}), automatic recovery will re-connect")]
+    public static partial void WarningRabbitMQConnectionIsOnShutDown(this ILogger<DefaultRabbitMQPersistentConnection> logger, ushort replyCode, string replyText);
+
+    [LoggerMessage(LogLevel.Information, "A RabbitMQ connection has been recovered")]
+    public static partial void InformationRabbitMQConnectionRecovered(this ILogger<DefaultRabbitMQPersistentConnection> logger);
+
+    [LoggerMessage(LogLevel.Warning, "A RabbitMQ connection recovery attempt failed, the next one follows")]
+    public static partial void WarningRabbitMQConnectionRecoveryFailed(this ILogger<DefaultRabbitMQPersistentConnection> logger, Exception exception);
 }

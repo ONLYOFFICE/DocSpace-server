@@ -35,13 +35,19 @@ namespace ASC.Api.Core.Core;
 
 /// <summary>
 /// Fails the service once its RabbitMQ consumer has been gone for longer than a recreation or a connection
-/// recovery takes: the pod keeps running and answering, but no event of its queue is handled any more.
+/// recovery takes, or its connection for longer than any broker outage should last: the pod keeps running
+/// and answering, but no event of its queue is handled, or published, any more.
 /// </summary>
 public class EventBusConsumerHealthCheck(IServiceProvider serviceProvider) : IHealthCheck
 {
-    // a broker-closed channel comes back as soon as the handler in flight returns, a lost connection
-    // within the client's 5s recovery interval; a restart beats waiting for anything longer
-    private static readonly TimeSpan _gracePeriod = TimeSpan.FromMinutes(2);
+    // a broker-closed channel comes back as soon as the handler in flight returns, a consumer after a
+    // reconnect as soon as the client has recovered its channels; a restart beats waiting for anything longer
+    private static readonly TimeSpan _consumerGracePeriod = TimeSpan.FromMinutes(2);
+
+    // with the broker out of reach a restart brings nothing back and would take every service down at once
+    // during a broker reboot; automatic recovery keeps retrying, so a connection down for this long means
+    // a recovery that is stuck
+    private static readonly TimeSpan _connectionGracePeriod = TimeSpan.FromMinutes(15);
 
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {
@@ -50,16 +56,16 @@ public class EventBusConsumerHealthCheck(IServiceProvider serviceProvider) : IHe
             return Task.FromResult(HealthCheckResult.Healthy("No RabbitMQ event bus"));
         }
 
-        var downTime = eventBus.GetConsumerDownTime();
-
-        if (downTime is null)
+        if (eventBus.GetConsumerDownTime() is not (var connected, var downTime))
         {
-            return Task.FromResult(HealthCheckResult.Healthy("RabbitMQ consumer is in place or not needed"));
+            return Task.FromResult(HealthCheckResult.Healthy("RabbitMQ connection is up, the consumer is in place or not needed"));
         }
 
-        var description = $"RabbitMQ consumer is missing for {downTime.Value.TotalSeconds:F0}s";
+        var description = connected
+            ? $"RabbitMQ consumer is missing for {downTime.TotalSeconds:F0}s"
+            : $"RabbitMQ connection is down for {downTime.TotalSeconds:F0}s";
 
-        return Task.FromResult(downTime < _gracePeriod
+        return Task.FromResult(downTime < (connected ? _consumerGracePeriod : _connectionGracePeriod)
             ? HealthCheckResult.Degraded(description)
             : HealthCheckResult.Unhealthy(description));
     }
