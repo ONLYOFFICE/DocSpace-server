@@ -374,6 +374,10 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
     "Returns the effective extended-thinking depth of the scope: `off` while deep mode is off, otherwise the persisted depth (`low`, `medium`, `high`, `max`), falling back to the default depth (`medium`) when none has been stored. `entityId` picks a room and omitting it reads the portal-wide preference. Providers clamp the depth to what the model accepts.",
   aiPreferencesSetReasoningLevel:
     "Persists the extended-thinking depth of the scope as its single stored value: a depth turns deep mode on at that depth, `off` turns it off and replaces the stored depth (a later deep-mode `true` without a depth lands on `medium`). `entityId` picks a room and omitting it writes the portal-wide preference. Idempotent.",
+  aiPreferencesGetToolPermissionMode:
+    "Returns how a tool call the model makes is approved in the scope: `ask` prompts for every call bar the tools pinned as always allowed, `auto` also runs a tool that opted out of approval itself, `allow` runs everything without asking. Falls back to `ask` when the scope has no stored mode. `entityId` picks a room and omitting it reads the portal-wide preference.",
+  aiPreferencesSetToolPermissionMode:
+    "Persists the tool permission mode of the scope. `value` has to be one of `ask`, `auto`, `allow`: anything else is rejected rather than coerced, so an absent or mistyped value can never overwrite the stored mode. `entityId` picks a room and omitting it writes the portal-wide preference. Idempotent.",
 
   // Profiles - AI provider credentials and model discovery.
   aiProfilesCreate:
@@ -683,6 +687,9 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiPreferencesClearDeepMode: { "400": "`entityId` is not a room ID." },
   aiPreferencesSetReasoningLevel: {
     "400": "`value` is not one of the depths, or `entityId` is not a room ID.",
+  },
+  aiPreferencesSetToolPermissionMode: {
+    "400": "`value` is not one of `ask`, `auto`, `allow`, or `entityId` is not a room ID.",
   },
 
   // Profiles - creating and updating are refused outright while the portal
@@ -1188,6 +1195,10 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
     "Confirms the scope has no preference of its own and now inherits the default.",
   aiPreferencesIsDeepModeSet:
     "Whether the scope has a preference of its own, whichever way that preference is set.",
+  aiPreferencesGetToolPermissionMode:
+    "The mode in force for the scope, as a bare JSON string, falling back to `ask` when none " +
+    "is stored.",
+  aiPreferencesSetToolPermissionMode: "Confirms the preference was stored.",
 
   aiProfilesCreate:
     "Whether the profile was created, with it in `profile`. A refusal is reported in `error` " +

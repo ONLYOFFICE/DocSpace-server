@@ -31,7 +31,11 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { PreferencesEngine } from "@onlyoffice/ai-chat/core";
+import {
+  isToolPermissionMode,
+  PreferencesEngine,
+  TOOL_PERMISSION_MODES,
+} from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
 import { asString } from "../narrow.js";
@@ -124,6 +128,30 @@ export const preferencesController = {
     }
     const entityId = writeScope(args.entityId);
     await storage.preferences.upsertReasoningLevel?.(args.value, entityId);
+    res.json({ success: true });
+  }),
+
+  // How a tool call is approved — the composer's "Permissions" row. Stored
+  // next to the depth in the same C# row; the engine answers the default
+  // (`ask`) for a scope with nothing stored.
+  getToolPermissionMode: asyncHandler(async (req, res) => {
+    const entityId = asString(req.query["entityId"]);
+    const value = await engine.getToolPermissionMode(entityId);
+    res.json(value);
+  }),
+
+  setToolPermissionMode: asyncHandler(async (req, res) => {
+    const args = unpackPositional(req.body, ["value", "entityId"] as const);
+    // Same discipline as `setDeepMode`: only a real mode is accepted, so an
+    // absent or mistyped value can never overwrite the stored mode.
+    if (!isToolPermissionMode(args.value)) {
+      res.status(400).json({
+        error: `value is required and must be one of: ${TOOL_PERMISSION_MODES.join(", ")}`,
+      });
+      return;
+    }
+    const entityId = writeScope(args.entityId);
+    await engine.setToolPermissionMode(args.value, entityId);
     res.json({ success: true });
   }),
 };

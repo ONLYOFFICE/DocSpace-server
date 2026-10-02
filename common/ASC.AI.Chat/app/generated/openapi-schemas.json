@@ -45,6 +45,15 @@
       ],
       "description": "Provider-neutral extended-thinking depth. `off` disables thinking where the model allows it."
     },
+    "AiAiToolPermissionMode": {
+      "type": "string",
+      "enum": [
+        "ask",
+        "auto",
+        "allow"
+      ],
+      "description": "How a tool call the model makes is approved: ask every time, auto-approve opted-out tools, or allow all."
+    },
     "AiAiActionArgs": {
       "type": "object",
       "properties": {
@@ -374,7 +383,7 @@
         },
         "autoAllow": {
           "type": "boolean",
-          "description": "The consumer should execute the tool without prompting the user. True when the tool is in the persisted \"always-allow\" list, or the tool itself opts in via `TMCPItem.requireApproval === false` (host tools default to this). For a client-side tool with a server-side engine, this lets the engine return the pending call already flagged auto-allow so the client runs it and streams the result back without a dialog round-trip."
+          "description": "The consumer should execute the tool without prompting the user. Decided by the tool permission mode (`resolveAutoAllow`): under \"ask\" only a tool in the persisted \"always-allow\" list; under \"auto\" also one that opts in via `TMCPItem.requireApproval === false` (host tools default to this); under \"allow\" every tool. For a client-side tool with a server-side engine, this lets the engine return the pending call already flagged auto-allow so the client runs it and streams the result back without a dialog round-trip."
         },
         "serverExecuted": {
           "type": "boolean",
@@ -4619,6 +4628,29 @@
           "value": {
             "$ref": "#/components/schemas/AiAiReasoningLevel",
             "description": "New extended-thinking depth; `off` turns deep mode off."
+          },
+          "entityId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "aiPreferencesGetToolPermissionMode": {
+      "response": {
+        "$ref": "#/components/schemas/AiAiToolPermissionMode"
+      }
+    },
+    "aiPreferencesSetToolPermissionMode": {
+      "request": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/AiAiToolPermissionMode",
+            "description": "New tool permission mode."
           },
           "entityId": {
             "type": "string"

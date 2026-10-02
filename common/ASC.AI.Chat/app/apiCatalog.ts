@@ -107,7 +107,7 @@ export const ENGINE_DOCS: ReadonlyArray<EngineDoc> = [
     name: "preferences",
     tag: "Preferences",
     description:
-      "Per-entity chat preferences: the extended-thinking depth and its deep-mode toggle.",
+      "Per-entity chat preferences: the extended-thinking depth, its deep-mode toggle and the tool permission mode.",
     routes: DEFAULT_PREFERENCES_ROUTES,
   },
   {

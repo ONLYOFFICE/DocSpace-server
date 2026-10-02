@@ -32,6 +32,7 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 import type { McpServerConfig, Profile, Thread, WebSearchConfig } from "@onlyoffice/ai-chat/core";
+import type { ToolPermissionMode } from "@onlyoffice/ai-chat/core";
 import type { ReasoningLevel } from "./reasoningDepth.js";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 import type { DocspaceFolderInfo } from "./docspaceFilesApi.js";
@@ -63,6 +64,8 @@ export interface ChatContextScope {
   assignments: Record<string, string>;
   /** The stored extended-thinking depth (`off` = deep mode off), `null` when none is persisted. */
   reasoningLevel: ReasoningLevel | null;
+  /** The stored tool permission mode, `null` when none is persisted. */
+  toolPermissionMode: ToolPermissionMode | null;
   /** Raw `serverType -> { disabled, allowAlways }` map as the C# storage serves it. */
   toolPrefs: JsonObject;
   mcpServers: Record<string, McpServerConfig>;

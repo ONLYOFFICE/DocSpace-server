@@ -77,7 +77,7 @@
     },
     {
       "name": "AI / Preferences",
-      "description": "Per-entity chat preferences: the extended-thinking depth and its deep-mode toggle.",
+      "description": "Per-entity chat preferences: the extended-thinking depth, its deep-mode toggle and the tool permission mode.",
       "x-displayName": "Preferences"
     },
     {
@@ -170,7 +170,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -266,7 +266,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -371,7 +371,7 @@
             }
           },
           "402": {
-            "description": "The portal has no paid AI quota left, so the profile bound to this action cannot be dispatched.",
+            "description": "The portal has no paid AI quota left, so the profile bound to this action cannot be dispatched. `error` carries the portal's explanation in the caller's language.",
             "content": {
               "application/json": {
                 "schema": {
@@ -381,7 +381,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -473,7 +473,7 @@
             }
           },
           "402": {
-            "description": "The portal has no paid AI quota left, so the profile bound to this action cannot be dispatched.",
+            "description": "The portal has no paid AI quota left, so the profile bound to this action cannot be dispatched. `error` carries the portal's explanation in the caller's language.",
             "content": {
               "application/json": {
                 "schema": {
@@ -483,7 +483,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -555,7 +555,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -649,7 +649,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -766,7 +766,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -848,7 +848,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -943,7 +943,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1031,7 +1031,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1128,7 +1128,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1210,7 +1210,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1305,7 +1305,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1374,7 +1374,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1384,7 +1384,7 @@
             }
           },
           "404": {
-            "description": "The referenced object does not exist, or the caller cannot access it - the two are deliberately indistinguishable, so a room the caller may not open answers 404 rather than 403.",
+            "description": "The referenced object does not exist: an unknown or deleted room named by `entityId`, or an object the caller cannot read - for those the two cases are deliberately indistinguishable.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1460,7 +1460,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1561,7 +1561,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1684,7 +1684,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1813,7 +1813,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1909,7 +1909,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1991,7 +1991,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2067,7 +2067,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2159,7 +2159,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2263,7 +2263,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2335,7 +2335,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2386,7 +2386,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2455,7 +2455,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2533,7 +2533,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2589,7 +2589,7 @@
             }
           },
           "400": {
-            "description": "`value` is missing or is not a boolean.",
+            "description": "`value` is missing or is not a boolean, or `entityId` is not a room ID.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2609,7 +2609,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2683,6 +2683,16 @@
               }
             }
           },
+          "400": {
+            "description": "`entityId` is not a room ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
             "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
             "content": {
@@ -2694,7 +2704,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2770,7 +2780,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2836,7 +2846,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2891,6 +2901,16 @@
               }
             }
           },
+          "400": {
+            "description": "`value` is not one of the depths, or `entityId` is not a room ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
           "401": {
             "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
             "content": {
@@ -2902,7 +2922,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2942,6 +2962,167 @@
                   "value": {
                     "$ref": "#/components/schemas/AiAiReasoningLevel",
                     "description": "New extended-thinking depth; `off` turns deep mode off."
+                  },
+                  "entityId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "value"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/2.0/ai/preferences/get-tool-permission-mode": {
+      "get": {
+        "tags": [
+          "AI / Preferences"
+        ],
+        "operationId": "aiPreferencesGetToolPermissionMode",
+        "summary": "Get tool permission mode",
+        "description": "Returns how a tool call the model makes is approved in the scope: `ask` prompts for every call bar the tools pinned as always allowed, `auto` also runs a tool that opted out of approval itself, `allow` runs everything without asking. Falls back to `ask` when the scope has no stored mode. `entityId` picks a room and omitting it reads the portal-wide preference.",
+        "responses": {
+          "200": {
+            "description": "The mode in force for the scope, as a bare JSON string, falling back to `ask` when none is stored.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiAiToolPermissionMode"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "entityId",
+            "in": "query",
+            "description": "The DocSpace entity the request is scoped to - the room, folder or agent workspace the chat is invoked from. Omit for the portal-wide scope.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "examples": [
+                "1234"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "/api/2.0/ai/preferences/set-tool-permission-mode": {
+      "put": {
+        "tags": [
+          "AI / Preferences"
+        ],
+        "operationId": "aiPreferencesSetToolPermissionMode",
+        "summary": "Set tool permission mode",
+        "description": "Persists the tool permission mode of the scope. `value` has to be one of `ask`, `auto`, `allow`: anything else is rejected rather than coerced, so an absent or mistyped value can never overwrite the stored mode. `entityId` picks a room and omitting it writes the portal-wide preference. Idempotent.",
+        "responses": {
+          "200": {
+            "description": "Confirms the preference was stored.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`value` is not one of `ask`, `auto`, `allow`, or `entityId` is not a room ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing `asc_auth_key` cookie or `Authorization` header.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unhandled failure. The reason is logged server-side and never echoed back.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "value": {
+                    "$ref": "#/components/schemas/AiAiToolPermissionMode",
+                    "description": "New tool permission mode."
                   },
                   "entityId": {
                     "type": "string"
@@ -3161,7 +3342,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3250,7 +3431,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3367,7 +3548,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3495,7 +3676,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3647,7 +3828,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3726,7 +3907,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3778,7 +3959,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3850,7 +4031,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3952,7 +4133,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4052,7 +4233,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4131,7 +4312,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4197,7 +4378,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4273,7 +4454,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4370,7 +4551,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4459,7 +4640,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4511,7 +4692,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4563,7 +4744,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4672,7 +4853,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4755,7 +4936,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4821,7 +5002,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4921,7 +5102,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5065,7 +5246,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5154,7 +5335,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5248,7 +5429,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5344,7 +5525,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5440,7 +5621,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5539,7 +5720,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5641,7 +5822,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5746,7 +5927,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5865,7 +6046,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5958,7 +6139,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6024,7 +6205,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6120,7 +6301,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6206,7 +6387,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6216,7 +6397,7 @@
             }
           },
           "404": {
-            "description": "The referenced object does not exist, or the caller cannot access it - the two are deliberately indistinguishable, so a room the caller may not open answers 404 rather than 403.",
+            "description": "The referenced object does not exist: an unknown or deleted room named by `entityId`, or an object the caller cannot read - for those the two cases are deliberately indistinguishable.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6316,7 +6497,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6326,7 +6507,7 @@
             }
           },
           "404": {
-            "description": "The referenced object does not exist, or the caller cannot access it - the two are deliberately indistinguishable, so a room the caller may not open answers 404 rather than 403.",
+            "description": "The referenced object does not exist: an unknown or deleted room named by `entityId`, or an object the caller cannot read - for those the two cases are deliberately indistinguishable.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6424,7 +6605,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6434,7 +6615,7 @@
             }
           },
           "404": {
-            "description": "The referenced object does not exist, or the caller cannot access it - the two are deliberately indistinguishable, so a room the caller may not open answers 404 rather than 403.",
+            "description": "The referenced object does not exist: an unknown or deleted room named by `entityId`, or an object the caller cannot read - for those the two cases are deliberately indistinguishable.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6535,7 +6716,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6616,7 +6797,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6714,7 +6895,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6790,7 +6971,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6800,7 +6981,7 @@
             }
           },
           "404": {
-            "description": "The referenced object does not exist, or the caller cannot access it - the two are deliberately indistinguishable, so a room the caller may not open answers 404 rather than 403.",
+            "description": "The referenced object does not exist: an unknown or deleted room named by `entityId`, or an object the caller cannot read - for those the two cases are deliberately indistinguishable.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6898,7 +7079,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6908,7 +7089,7 @@
             }
           },
           "404": {
-            "description": "The referenced object does not exist, or the caller cannot access it - the two are deliberately indistinguishable, so a room the caller may not open answers 404 rather than 403.",
+            "description": "The referenced object does not exist: an unknown or deleted room named by `entityId`, or an object the caller cannot read - for those the two cases are deliberately indistinguishable.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7006,7 +7187,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7082,7 +7263,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7172,7 +7353,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7182,7 +7363,7 @@
             }
           },
           "404": {
-            "description": "The referenced object does not exist, or the caller cannot access it - the two are deliberately indistinguishable, so a room the caller may not open answers 404 rather than 403.",
+            "description": "The referenced object does not exist: an unknown or deleted room named by `entityId`, or an object the caller cannot read - for those the two cases are deliberately indistinguishable.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7278,7 +7459,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7354,7 +7535,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7461,7 +7642,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7471,7 +7652,7 @@
             }
           },
           "404": {
-            "description": "The referenced object does not exist, or the caller cannot access it - the two are deliberately indistinguishable, so a room the caller may not open answers 404 rather than 403.",
+            "description": "The referenced object does not exist: an unknown or deleted room named by `entityId`, or an object the caller cannot read - for those the two cases are deliberately indistinguishable.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7547,7 +7728,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7557,7 +7738,7 @@
             }
           },
           "404": {
-            "description": "The referenced object does not exist, or the caller cannot access it - the two are deliberately indistinguishable, so a room the caller may not open answers 404 rather than 403.",
+            "description": "The referenced object does not exist: an unknown or deleted room named by `entityId`, or an object the caller cannot read - for those the two cases are deliberately indistinguishable.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7647,7 +7828,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7699,7 +7880,7 @@
         "description": "Validates a web-search configuration against the live provider and stores it only if the provider answers, which makes it the safe way to save a form in one step. `entityId` scopes the configuration to a room and has to name one the caller can open; omitting it configures the portal. A `baseUrl` pointing at a private network address is refused. Use `PUT api/2.0/ai/web-search/set-active-config` when the configuration should be stored without a provider round trip.",
         "responses": {
           "200": {
-            "description": "Whether the configuration was stored, after the provider answered.",
+            "description": "The stored configuration, after the provider accepted it.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7709,7 +7890,7 @@
             }
           },
           "400": {
-            "description": "The configuration is missing or malformed, or the provider URL points at a private network address.",
+            "description": "The configuration is missing or malformed, the provider URL points at a private network address, or the provider refused the configuration - the body then carries `success: false` and an `error` naming the field. Nothing is stored in any of these cases.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7729,7 +7910,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7739,7 +7920,7 @@
             }
           },
           "404": {
-            "description": "The referenced object does not exist, or the caller cannot access it - the two are deliberately indistinguishable, so a room the caller may not open answers 404 rather than 403.",
+            "description": "The referenced object does not exist: an unknown or deleted room named by `entityId`, or an object the caller cannot read - for those the two cases are deliberately indistinguishable.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7833,7 +8014,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7843,7 +8024,7 @@
             }
           },
           "404": {
-            "description": "The referenced object does not exist, or the caller cannot access it - the two are deliberately indistinguishable, so a room the caller may not open answers 404 rather than 403.",
+            "description": "The referenced object does not exist: an unknown or deleted room named by `entityId`, or an object the caller cannot read - for those the two cases are deliberately indistinguishable.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7927,7 +8108,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8020,7 +8201,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8115,7 +8296,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8309,7 +8490,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8454,7 +8635,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8537,7 +8718,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8611,7 +8792,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8767,7 +8948,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8860,7 +9041,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8954,7 +9135,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9043,7 +9224,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9095,7 +9276,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9145,7 +9326,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9219,7 +9400,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9269,7 +9450,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9372,7 +9553,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9466,7 +9647,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9832,7 +10013,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10241,7 +10422,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10313,7 +10494,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10427,7 +10608,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10533,7 +10714,7 @@
             }
           },
           "403": {
-            "description": "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+            "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10667,6 +10848,15 @@
           "max"
         ],
         "description": "Provider-neutral extended-thinking depth. `off` disables thinking where the model allows it."
+      },
+      "AiAiToolPermissionMode": {
+        "type": "string",
+        "enum": [
+          "ask",
+          "auto",
+          "allow"
+        ],
+        "description": "How a tool call the model makes is approved: ask every time, auto-approve opted-out tools, or allow all."
       },
       "AiAiActionArgs": {
         "type": "object",
@@ -10997,7 +11187,7 @@
           },
           "autoAllow": {
             "type": "boolean",
-            "description": "The consumer should execute the tool without prompting the user. True when the tool is in the persisted \"always-allow\" list, or the tool itself opts in via `TMCPItem.requireApproval === false` (host tools default to this). For a client-side tool with a server-side engine, this lets the engine return the pending call already flagged auto-allow so the client runs it and streams the result back without a dialog round-trip."
+            "description": "The consumer should execute the tool without prompting the user. Decided by the tool permission mode (`resolveAutoAllow`): under \"ask\" only a tool in the persisted \"always-allow\" list; under \"auto\" also one that opts in via `TMCPItem.requireApproval === false` (host tools default to this); under \"allow\" every tool. For a client-side tool with a server-side engine, this lets the engine return the pending call already flagged auto-allow so the client runs it and streams the result back without a dialog round-trip."
           },
           "serverExecuted": {
             "type": "boolean",

@@ -34,7 +34,11 @@
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject } from "../narrow.js";
-import type { PreferencesStorage } from "@onlyoffice/ai-chat/core";
+import {
+  isToolPermissionMode,
+  type PreferencesStorage,
+  type ToolPermissionMode,
+} from "@onlyoffice/ai-chat/core";
 import {
   chatContextScope,
   invalidateChatContext,
@@ -49,6 +53,12 @@ import {
 } from "./reasoningDepth.js";
 
 const PATH = "/preferences";
+
+/** One scope's stored values, in the library's spellings. */
+type PreferencesRow = {
+  reasoningLevel: ReasoningLevel | null;
+  toolPermissionMode: ToolPermissionMode | null;
+};
 
 function entityIdQuery(entityId: string | undefined): Record<string, QueryValue> | undefined {
   return entityId ? { entityId } : undefined;
@@ -67,9 +77,18 @@ async function scopedEntityId(
   return (await resolveAgentEntityId(entityId)) ?? null;
 }
 
-// The C# storage keeps ONE value per scope: `depth`, its `ReasoningDepth`
+// The C# storage keeps ONE row per scope: `depth`, its `ReasoningDepth`
 // enum (`none | low | medium | high | xhigh | max`, see `reasoningDepth.ts`).
-// The library's two preferences are both views of it:
+// The tool permission mode (`ask | auto | allow`, the library's spelling) is
+// read and written as `toolPermissionMode` on the same row. The C# side has
+// no such column yet: until it grows one the field is dropped on write and
+// absent on read, so the mode reads back as "nothing stored" and the engine
+// answers its default (`ask`). The C# upsert replaces the whole row with what
+// it is sent, so every write here carries BOTH values — the one being changed
+// and the current one of the other — so that the other is never wiped once
+// the column exists.
+//
+// The library's two thinking preferences are both views of `depth`:
 //
 // - the reasoning level IS the depth (`none` ↔ `off`);
 // - deep mode is "the depth is above `none`". Writing `false` stores `none`;
@@ -82,6 +101,29 @@ async function scopedEntityId(
 //
 // `null` from a read means "nothing persisted in scope" for both views.
 export class HttpPreferencesStorage implements PreferencesStorage {
+  // -- tool permission mode ------------------------------------------------
+
+  async createToolPermissionMode(value: ToolPermissionMode, entityId?: string): Promise<void> {
+    await this.writeMode(value, entityId);
+  }
+
+  async readToolPermissionMode(entityId?: string): Promise<ToolPermissionMode | null> {
+    const row = await this.readRow(entityId);
+    return row?.toolPermissionMode ?? null;
+  }
+
+  async updateToolPermissionMode(value: ToolPermissionMode, entityId?: string): Promise<void> {
+    await this.writeMode(value, entityId);
+  }
+
+  async upsertToolPermissionMode(value: ToolPermissionMode, entityId?: string): Promise<void> {
+    await this.writeMode(value, entityId);
+  }
+
+  async deleteToolPermissionMode(entityId?: string): Promise<void> {
+    await this.deleteScope(entityId);
+  }
+
   // -- reasoning level -----------------------------------------------------
 
   async createReasoningLevel(value: ReasoningLevel, entityId?: string): Promise<void> {
@@ -89,25 +131,8 @@ export class HttpPreferencesStorage implements PreferencesStorage {
   }
 
   async readReasoningLevel(entityId?: string): Promise<ReasoningLevel | null> {
-    const snapshot = readChatContext("preferences");
-    const scope = snapshot ? chatContextScope(snapshot, entityId) : undefined;
-    if (scope) {
-      return scope.reasoningLevel;
-    }
-    reportChatContextMiss(`preferences.readReasoningLevel(${entityId ?? "-"})`);
-    try {
-      const query = entityIdQuery(await resolveAgentEntityId(entityId));
-      const raw = await aiService.get(PATH, query ? { query } : undefined);
-      if (!isObject(raw)) {
-        return null;
-      }
-      return depthToLevel(raw["depth"]);
-    } catch (err) {
-      if (err instanceof AiServiceHttpError && err.status === 404) {
-        return null;
-      }
-      throw err;
-    }
+    const row = await this.readRow(entityId);
+    return row?.reasoningLevel ?? null;
   }
 
   async updateReasoningLevel(value: ReasoningLevel, entityId?: string): Promise<void> {
@@ -159,9 +184,57 @@ export class HttpPreferencesStorage implements PreferencesStorage {
     await this.writeDepth(DEFAULT_REASONING_LEVEL, entityId);
   }
 
+  // The scope's row as the library sees it, from the round snapshot when it
+  // holds one, else from the AI service; `null` when nothing is persisted.
+  private async readRow(entityId?: string): Promise<PreferencesRow | null> {
+    const snapshot = readChatContext("preferences");
+    const scope = snapshot ? chatContextScope(snapshot, entityId) : undefined;
+    if (scope) {
+      return {
+        reasoningLevel: scope.reasoningLevel,
+        toolPermissionMode: scope.toolPermissionMode,
+      };
+    }
+    reportChatContextMiss(`preferences.read(${entityId ?? "-"})`);
+    try {
+      const query = entityIdQuery(await resolveAgentEntityId(entityId));
+      const raw = await aiService.get(PATH, query ? { query } : undefined);
+      if (!isObject(raw)) {
+        return null;
+      }
+      const mode = raw["toolPermissionMode"];
+      return {
+        reasoningLevel: depthToLevel(raw["depth"]),
+        toolPermissionMode: isToolPermissionMode(mode) ? mode : null,
+      };
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return null;
+      }
+      throw err;
+    }
+  }
+
   private async writeDepth(level: ReasoningLevel, entityId?: string): Promise<void> {
+    const current = await this.readRow(entityId);
+    await this.writeRow(
+      { reasoningLevel: level, toolPermissionMode: current?.toolPermissionMode ?? null },
+      entityId,
+    );
+  }
+
+  private async writeMode(mode: ToolPermissionMode, entityId?: string): Promise<void> {
+    const current = await this.readRow(entityId);
+    await this.writeRow(
+      { reasoningLevel: current?.reasoningLevel ?? null, toolPermissionMode: mode },
+      entityId,
+    );
+  }
+
+  private async writeRow(row: PreferencesRow, entityId?: string): Promise<void> {
     await aiService.put(PATH, {
-      depth: levelToDepth(level),
+      depth: row.reasoningLevel === null ? null : levelToDepth(row.reasoningLevel),
+      toolPermissionMode: row.toolPermissionMode,
       entityId: await scopedEntityId(entityId),
     });
     invalidateChatContext("preferences");
