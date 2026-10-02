@@ -1611,6 +1611,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/servicelimit/{id}</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The service limit with its thresholds, period and state", typeof(ServiceLimit))]
+    [SwaggerResponse(400, "The ID is zero or negative")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "No service limit with this ID belongs to the portal")]
     [HttpGet("servicelimit/{id:int}")]
@@ -1645,6 +1646,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/servicelimit/{id}/usage</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "What was spent against the limit in its current period and what is left", typeof(ServiceLimitUsage))]
+    [SwaggerResponse(400, "The ID is zero or negative")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "No service limit with this ID belongs to the portal")]
     [HttpGet("servicelimit/{id:int}/usage")]
@@ -1715,6 +1717,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/servicelimit/customer/{serviceName}/participants</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "A page of the user limits of the service with its paging information, or an empty result when the portal has no billing customer", typeof(ServiceLimitReport))]
+    [SwaggerResponse(400, "`offset` is negative, `limit` is outside the allowed page size, or `orderBy` or `orderType` is not one of its values")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "The service is not a wallet service of this installation")]
     [HttpGet("servicelimit/customer/{serviceName}/participants")]
@@ -1762,7 +1765,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/servicelimit</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The service limit as it was created", typeof(ServiceLimit))]
-    [SwaggerResponse(400, "Neither `amountValue` nor `quantityValue` is given")]
+    [SwaggerResponse(400, "Neither `amountValue` nor `quantityValue` is given, a threshold is negative or above its maximum, or `period` is not one of its values")]
     [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "The portal has no billing customer, the service is not a wallet service of this installation, or the user does not exist")]
     [HttpPost("servicelimit")]
@@ -1815,6 +1818,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/servicelimit</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The service limit as it was stored", typeof(ServiceLimit))]
+    [SwaggerResponse(400, "The ID is zero or negative, or a threshold is negative or above its maximum")]
     [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "The portal has no billing customer, or no service limit with this ID belongs to the portal")]
     [HttpPut("servicelimit")]

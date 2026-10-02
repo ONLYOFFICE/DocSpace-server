@@ -400,6 +400,17 @@ public class ServicePricesRequestDto
 }
 
 /// <summary>
+/// The bounds the service limit requests are validated against.
+/// </summary>
+public static class ServiceLimitConstraints
+{
+    /// <summary>
+    /// The largest amount threshold a service limit may have, in the currency of the service.
+    /// </summary>
+    public const double MaxAmountValue = 10_000;
+}
+
+/// <summary>
 /// The parameters that select one service limit of the portal.
 /// </summary>
 public class ServiceLimitRequestDto
@@ -408,6 +419,7 @@ public class ServiceLimitRequestDto
     /// The ID of the service limit, as returned in `id` by the operation that created it or by the lists of limits.
     /// </summary>
     /// <example>42</example>
+    [Range(1, int.MaxValue)]
     [FromRoute(Name = "id")]
     public int Id { get; init; }
 }
@@ -437,6 +449,7 @@ public class ParticipantServiceLimitsRequestDto : CustomerServiceLimitRequestDto
     /// at 0 when omitted.
     /// </summary>
     /// <example>0</example>
+    [Range(0, int.MaxValue)]
     [FromQuery(Name = "offset")]
     public int? Offset { get; init; }
 
@@ -445,6 +458,7 @@ public class ParticipantServiceLimitsRequestDto : CustomerServiceLimitRequestDto
     /// back next to `totalQuantity`, `totalPage` and `currentPage`.
     /// </summary>
     /// <example>25</example>
+    [Range(1, ApiContext.MaxCount)]
     [FromQuery(Name = "limit")]
     public int? Limit { get; init; }
 
@@ -452,6 +466,7 @@ public class ParticipantServiceLimitsRequestDto : CustomerServiceLimitRequestDto
     /// The field the limits are sorted by. The accounting service applies its own ordering when this is omitted.
     /// </summary>
     /// <example>Created</example>
+    [EnumDataType(typeof(ServiceLimitOrderBy))]
     [FromQuery(Name = "orderBy")]
     public ServiceLimitOrderBy? OrderBy { get; init; }
 
@@ -460,6 +475,7 @@ public class ParticipantServiceLimitsRequestDto : CustomerServiceLimitRequestDto
     /// default, so leaving this out sorts the same way as asking for descending explicitly.
     /// </summary>
     /// <example>Descending</example>
+    [EnumDataType(typeof(OperationOrderType))]
     [FromQuery(Name = "orderType")]
     public OperationOrderType? OrderType { get; init; }
 }
@@ -500,7 +516,7 @@ public class CreateServiceLimitRequestDto
     /// service is sold in and cannot be chosen. Zero blocks the service completely.
     /// </summary>
     /// <example>50</example>
-    [Range(0, double.MaxValue)]
+    [Range(0, ServiceLimitConstraints.MaxAmountValue)]
     public decimal? AmountValue { get; init; }
 
     /// <summary>
@@ -515,6 +531,7 @@ public class CreateServiceLimitRequestDto
     /// The calendar period the thresholds apply to, counted in UTC.
     /// </summary>
     /// <example>Day</example>
+    [EnumDataType(typeof(ServiceLimitPeriod))]
     public ServiceLimitPeriod Period { get; init; } = ServiceLimitPeriod.Day;
 }
 
@@ -536,6 +553,7 @@ public class UpdateServiceLimitRequestDto
     /// </summary>
     /// <example>42</example>
     [Required]
+    [Range(1, int.MaxValue)]
     public int Id { get; init; }
 
     /// <summary>
@@ -543,7 +561,7 @@ public class UpdateServiceLimitRequestDto
     /// completely.
     /// </summary>
     /// <example>100</example>
-    [Range(0, double.MaxValue)]
+    [Range(0, ServiceLimitConstraints.MaxAmountValue)]
     public decimal? AmountValue { get; init; }
 
     /// <summary>
