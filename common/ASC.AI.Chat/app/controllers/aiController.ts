@@ -213,6 +213,7 @@ function buildContextFragment(entityId: string | undefined): string {
   lines.push(
     `- Today's date is ${today}.`,
     "- Prefer answering from the conversation when you can; use tools only when the request clearly needs data or actions in the workspace.",
+    "- When you link to a workspace file, use only a link a tool returned for it (its `url` or `webUrl`), copied verbatim. Never compose a link yourself from a file id or title; if no tool returned a link, name the file without one.",
   );
   return lines.join("\n");
 }
