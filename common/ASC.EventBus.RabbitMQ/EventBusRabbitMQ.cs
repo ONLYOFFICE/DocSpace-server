@@ -45,6 +45,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
     private readonly IEventBusSubscriptionsManager _subsManager;
     private readonly IServiceProvider _serviceProvider;
     private readonly int _retryCount;
+    private readonly ushort _prefetchCount;
     private readonly IIntegrationEventSerializer _serializer;
 
     private const int MaxPooledPublisherChannels = 16;
@@ -71,7 +72,8 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
                             IEventBusSubscriptionsManager subsManager,
                             IIntegrationEventSerializer serializer,
                             string queueName = null,
-                            int retryCount = 5)
+                            int retryCount = 5,
+                            ushort prefetchCount = 10)
     {
         _persistentConnection = persistentConnection ?? throw new ArgumentNullException(nameof(persistentConnection));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -81,6 +83,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
 
         _retryCount = retryCount;
+        _prefetchCount = prefetchCount;
         _subsManager.OnEventRemoved += async (s, e) =>
                                                     {
                                                         await SubsManager_OnEventRemovedAsync(s, e);
@@ -511,6 +514,11 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
         _logger.TraceCreatingConsumerChannel();
 
         var channel = await _persistentConnection.CreateModelAsync();
+
+        // without a prefetch limit the broker pushes the whole queue at once, and its consumer
+        // timeout runs from delivery, so the tail of a large backlog times out while still waiting
+        // for the sequential handler; global: false limits each consumer, not the whole channel
+        await channel.BasicQosAsync(prefetchSize: 0, prefetchCount: _prefetchCount, global: false);
 
         await channel.ExchangeDeclareAsync(exchange: EXCHANGE_NAME,
                                 type: "direct");
