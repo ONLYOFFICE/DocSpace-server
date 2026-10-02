@@ -162,15 +162,6 @@ export default function registerRoutes(app: Application): void {
   // validated downstream; `httpClient` / MCP forwarding relay both. Health
   // endpoints above stay open.
   router.use((req, res, next) => {
-    // A CORS preflight never carries credentials -- the browser strips
-    // them by design -- so refusing it here would refuse every
-    // cross-origin call before it is made. It reaches no handler: with
-    // CORS on, `cors()` in app.ts has already answered it; with CORS off
-    // it falls through to Express's own OPTIONS reply.
-    if (req.method === "OPTIONS") {
-      next();
-      return;
-    }
     const cookies = (req as { cookies?: Record<string, unknown> }).cookies;
     const authKey = cookies?.["asc_auth_key"];
     const hasCookie = typeof authKey === "string" && authKey.trim().length > 0;

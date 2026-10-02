@@ -43,7 +43,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import logger, { logStream } from "./app/log.js";
 import { coreCors, getAppConfig } from "./config/index.js";
-import { describeCors, resolveCorsOptions } from "./app/cors.js";
+import { corsOptions } from "./app/cors.js";
 import registerRoutes, { API_PREFIX } from "./app/routes.js";
 import { requestContextMiddleware } from "./app/requestContext.js";
 import { storage } from "./app/storage/index.js";
@@ -69,19 +69,6 @@ app.use((_req, res, next) => {
   }) as typeof res.writeHead;
   next();
 });
-
-// CORS follows the portal's own API: `core:cors` from the shared
-// appsettings, with `AI_CHAT_CORS_ORIGINS` as a per-service override (see
-// `app/cors.ts`). The chat UI inside the portal is same-origin behind nginx
-// and never needs it; a cross-origin caller -- an application built on the
-// UI kit, a script holding an API key -- does, and until now got its
-// preflight answered 401 by the auth gate, since a preflight carries no
-// credentials. With `*` no credentials are allowed, so such a caller must
-// send its own `Authorization` header; the session cookie never travels.
-const corsOptions = resolveCorsOptions(
-  process.env["AI_CHAT_CORS_ORIGINS"],
-  coreCors(),
-);
 
 // strict:false lets bare JSON primitives through; @onlyoffice/ai-chat's
 // ApiProvider serializes single-arg routes as `JSON.stringify(arg)` — e.g.
@@ -120,12 +107,14 @@ app
   })
   .use(bodyParser.urlencoded({ extended: false }));
 
-// Before the routes and their auth gate: `cors()` answers a preflight
-// itself and ends it there.
-if (corsOptions) {
-  app.use(cors(corsOptions));
+// CORS as the .NET services have it, from `core:cors` (see `app/cors.ts`).
+// Before the routes and their auth gate: a preflight carries no
+// credentials, and `cors()` answers it here and ends it.
+const corsPolicy = corsOptions(coreCors());
+if (corsPolicy) {
+  app.use(cors(corsPolicy));
 }
-logger.info(describeCors(corsOptions));
+logger.info(corsPolicy ? `CORS enabled for ${coreCors()}` : "CORS disabled");
 
 app.use(requestContextMiddleware);
 
