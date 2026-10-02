@@ -243,6 +243,16 @@ def main() -> None:
         print(f"  {c}")
     if len(commits) > 40:
         print(f"  ... and {len(commits) - 40} more")
+    # git-commits.md: no AI attribution in the branch's own commit messages
+    attributed = []
+    for block in git("log", "--no-merges", "--format=%h%x1f%B%x1e", f"{merge_base}..{a.head}").split("\x1e"):
+        if "\x1f" not in block:
+            continue
+        sha, body = block.strip().split("\x1f", 1)
+        if re.search(r"co-authored-by:.*(claude|anthropic|copilot|gpt|openai)|generated with \[?claude|noreply@anthropic\.com", body, re.I):
+            attributed.append(sha)
+    if attributed:
+        print(f"!! [git-commits.md] AI attribution in commit messages: {', '.join(attributed)}")
     if status and not a.worktree:
         print(f"!! working tree is dirty ({len(status)} files) - uncommitted changes are NOT scanned; pass --worktree to include them")
     print()
