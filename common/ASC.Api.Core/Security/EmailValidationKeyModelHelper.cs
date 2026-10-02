@@ -259,9 +259,7 @@ public class EmailValidationKeyModelHelper(
 
             case ConfirmType.Auth:
                 var validInterval = DateTime.UtcNow.Add(-provider.ValidAuthKeyInterval);
-                var authLinkActivatedEvent = (await loginEventsRepository.GetByFilterAsync(action: MessageAction.AuthLinkActivated, fromDate: validInterval))
-                    .FirstOrDefault(x => x.Description.Contains(key));
-                if (authLinkActivatedEvent != null)
+                if (key != null && await loginEventsRepository.ExistsAsync(MessageAction.AuthLinkActivated, validInterval, descriptionItem: key))
                 {
                     return (ValidationResult.Invalid, null);
                 }
@@ -276,8 +274,7 @@ public class EmailValidationKeyModelHelper(
                         var portalRenameEventDate = tenantUtil.DateTimeToUtc(portalRenameEvent.Date);
                         if (portalRenameEventDate >= validInterval)
                         {
-                            var loginEvent = (await loginEventsRepository.GetByFilterAsync(userInfo.Id, MessageAction.LoginSuccessViaApi, limit: 1, fromDate: portalRenameEventDate)).FirstOrDefault();
-                            if (loginEvent == null)
+                            if (!await loginEventsRepository.ExistsAsync(MessageAction.LoginSuccessViaApi, portalRenameEventDate, userInfo.Id))
                             {
                                 checkKeyResult = provider.ValidateEmailKey(email + type + portalRenameEventDate.ToString(CultureInfo.InvariantCulture), key, provider.ValidAuthKeyInterval);
                             }

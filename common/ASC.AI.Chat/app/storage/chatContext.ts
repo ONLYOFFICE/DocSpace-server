@@ -219,6 +219,7 @@ export function parseChatContext(
       contextEntityId: request.contextEntityId,
     },
     aiReady: config ? getBoolean(config, "aiReady") : undefined,
+    aiNotReadyMessage: config ? getString(config, "aiNotReadyMessage") : undefined,
     profiles: parseProfiles(getArray(raw, "profiles")),
     global,
     entity,

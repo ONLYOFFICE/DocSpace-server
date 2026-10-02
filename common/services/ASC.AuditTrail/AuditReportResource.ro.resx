@@ -783,6 +783,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Cheia secretă a clientului {0} a fost regenerată</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Notă</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Raportul afișează cele mai recente {0} din {1} evenimente. Pentru a obține toate evenimentele, descărcați raportul în format CSV.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Setările de vectorizare au fost resetate</value>
   </data>

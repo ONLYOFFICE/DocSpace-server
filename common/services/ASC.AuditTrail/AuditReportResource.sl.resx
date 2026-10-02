@@ -786,6 +786,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Skrivnost odjemalca {0} ponovno ustvarjena</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Opomba</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Poročilo prikazuje zadnjih {0} od {1} dogodkov. Če želite pridobiti vse dogodke, prenesite poročilo v obliki CSV.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Nastavitve vektorizacije so bile ponastavljene</value>
   </data>

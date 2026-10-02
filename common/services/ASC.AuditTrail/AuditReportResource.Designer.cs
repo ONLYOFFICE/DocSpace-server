@@ -2320,6 +2320,24 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Note.
+        /// </summary>
+        public static string ReportRowLimitLabel {
+            get {
+                return ResourceManager.GetString("ReportRowLimitLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The report shows the {0} most recent of {1} events. Download it in CSV format to get all of them.
+        /// </summary>
+        public static string ReportRowLimitNote {
+            get {
+                return ResourceManager.GetString("ReportRowLimitNote", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Vectorization settings have been reset.
         /// </summary>
         public static string ResetVectorizationSettings {

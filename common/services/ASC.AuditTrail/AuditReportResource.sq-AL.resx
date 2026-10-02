@@ -777,6 +777,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Sekreti {0} i klientit u rigjenerua</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Shënim</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Raporti shfaq {0} ngjarjet më të fundit nga {1}. Për të marrë të gjitha ngjarjet, shkarkoni raportin në formatin CSV.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Cilësimet e vectorizimit janë rivendosur</value>
   </data>
