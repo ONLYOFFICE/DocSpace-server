@@ -33,7 +33,6 @@
 
 using System.Globalization;
 
-using ASC.Core;
 using ASC.Core.Billing;
 using ASC.Core.Common.Hosting;
 using ASC.Core.Common.Quota.Features;
@@ -42,7 +41,6 @@ using ASC.Core.Users;
 using ASC.MessagingSystem.Core;
 using ASC.Web.Core.PublicResources;
 using ASC.Web.Core.Quota;
-using ASC.Web.Studio.Core.Notify;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -70,6 +68,12 @@ public class RenewSubscriptionService(
     // Defaults to one tick period (the same key as renewperiod) when not configured.
     private readonly TimeSpan _renewAdvance = TimeSpan.Parse(configuration["core:accounting:renewadvance"] ?? configuration["core:accounting:renewperiod"] ?? "0:1:0", CultureInfo.InvariantCulture);
 
+    // Renewals whose payment change got no answer from the billing service, re-checked on every run.
+    private const string PendingCacheKey = "renewsubscriptionservice_pending";
+
+    // Re-checks on the runs after the one that sent the renewal. If billing still does not show the subscription
+    // extended after the last of them - whether it answered or not - the renewal is treated as failed.
+    private const int MaxRenewVerifyChecks = 3;
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
@@ -84,6 +88,8 @@ public class RenewSubscriptionService(
                 var tenantQuotas = await quotaService.GetTenantQuotasAsync();
                 _walletQuotas = tenantQuotas.Where(x => x.Wallet).ToDictionary(x => x.TenantId, x => x);
             }
+
+            await VerifyPendingRenewalsAsync(stoppingToken);
 
             // Look ahead by _renewAdvance so quotas are renewed before their DueDate passes (no downtime).
             var to = DateTime.UtcNow + _renewAdvance;
@@ -114,6 +120,9 @@ public class RenewSubscriptionService(
     {
         UserInfo payer = null;
         UserInfo owner = null;
+
+        // what is being renewed, for the logs; refined to the purchased quota and quantity once they are known
+        var description = $"{_walletQuotas[data.Quota].Name} {data.NextQuantity ?? data.Quantity}";
 
         try
         {
@@ -220,6 +229,8 @@ public class RenewSubscriptionService(
                 }
             }
 
+            description = $"{targetQuota.Name} {nextQuantity}";
+
             var productQuantityType = data.NextQuota is null ? ProductQuantityType.Renew : ProductQuantityType.Set;
 
             var quantity = new Dictionary<string, int>
@@ -251,17 +262,35 @@ public class RenewSubscriptionService(
                 }
             }
 
-            var result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, productQuantityType, defaultCurrency, false, null, metadata);
+            bool result;
+
+            try
+            {
+                // throwIfFailure lets the transport failure through, which is swallowed into "false" otherwise
+                result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, productQuantityType, defaultCurrency, false, null, metadata, true);
+            }
+            catch (BillingTransportException)
+            {
+                // No answer is not a refusal: the change may have been applied with only the response lost. The
+                // failure letter asks the customer to renew manually, which could make them pay twice - so check
+                // again on the next runs.
+                logger.WarningRenewSubscriptionServiceOutcomeUnknown(data.TenantId, description);
+
+                await AddPendingRenewalAsync(new PendingRenewal(
+                    data.TenantId,
+                    targetQuota.ProductId,
+                    description,
+                    data.DueDate.Value,
+                    owner.Id,
+                    payer != null && payer.Id != ASC.Core.Users.Constants.LostUser.Id ? payer.Id : null,
+                    0));
+
+                return;
+            }
 
             if (result)
             {
-                var newTariff = await tariffService.GetTariffAsync(data.TenantId, refresh: false);
-
-                var description = $"{targetQuota.Name} {nextQuantity}";
-                var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
-                messageService.Send(MessageInitiator.PaymentService, MessageAction.CustomerSubscriptionUpdated, description);
-
-                logger.InfoRenewSubscriptionServiceDone(data.TenantId, description);
+                await ReportRenewedAsync(scope.ServiceProvider, data.TenantId, description);
 
                 return;
             }
@@ -271,14 +300,161 @@ public class RenewSubscriptionService(
             logger.ErrorWithException(ex);
         }
 
-        await SendRenewSubscriptionErrorAsync(data.TenantId, payer, owner);
+        await SendRenewSubscriptionErrorAsync(data.TenantId, description, payer, owner);
     }
 
-    private async Task SendRenewSubscriptionErrorAsync(int tenantId, UserInfo payer, UserInfo owner)
+    private async Task ReportRenewedAsync(IServiceProvider serviceProvider, int tenantId, string description)
+    {
+        await serviceProvider.GetRequiredService<ITariffService>().GetTariffAsync(tenantId, refresh: false);
+
+        var messageService = serviceProvider.GetRequiredService<MessageService>();
+        messageService.Send(MessageInitiator.PaymentService, MessageAction.CustomerSubscriptionUpdated, description);
+
+        logger.InfoRenewSubscriptionServiceDone(tenantId, description);
+    }
+
+    private async Task VerifyPendingRenewalsAsync(CancellationToken stoppingToken)
     {
         try
         {
-            logger.ErrorRenewSubscriptionServiceFail(tenantId);
+            var pending = await hybridCache.GetOrDefaultAsync<List<PendingRenewal>>(PendingCacheKey, token: stoppingToken);
+            if (pending is not { Count: > 0 })
+            {
+                return;
+            }
+
+            var unresolved = new List<PendingRenewal>();
+
+            foreach (var renewal in pending)
+            {
+                var next = await VerifyPendingRenewalAsync(renewal);
+                if (next != null)
+                {
+                    unresolved.Add(next);
+                }
+            }
+
+            await SavePendingRenewalsAsync(unresolved);
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+        }
+    }
+
+    // Returns the renewal to check again on the next run, or null once it is settled.
+    private async Task<PendingRenewal> VerifyPendingRenewalAsync(PendingRenewal renewal)
+    {
+        var check = renewal.Checks + 1;
+
+        await using var scope = _scopeFactory.CreateAsyncScope();
+
+        var extended = false;
+        Exception error = null;
+
+        try
+        {
+            var tariffService = scope.ServiceProvider.GetRequiredService<ITariffService>();
+            extended = await tariffService.IsSubscriptionExtendedAsync(renewal.TenantId, renewal.ProductId, renewal.PreviousDueDate);
+        }
+        catch (Exception ex)
+        {
+            error = ex;
+        }
+
+        if (!extended)
+        {
+            if (check < MaxRenewVerifyChecks)
+            {
+                logger.WarningRenewSubscriptionServiceNotConfirmed(renewal.TenantId, renewal.Description, check, error?.Message ?? "not extended yet");
+
+                return renewal with { Checks = check };
+            }
+
+            if (error != null)
+            {
+                logger.ErrorWithException(error);
+            }
+
+            await SendRenewSubscriptionErrorAsync(renewal);
+
+            return null;
+        }
+
+        try
+        {
+            var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+            await tenantManager.SetCurrentTenantAsync(renewal.TenantId);
+
+            var securityContext = scope.ServiceProvider.GetRequiredService<SecurityContext>();
+            await securityContext.AuthenticateMeWithoutCookieAsync(renewal.TenantId, renewal.PayerId ?? renewal.OwnerId);
+
+            await ReportRenewedAsync(scope.ServiceProvider, renewal.TenantId, renewal.Description);
+        }
+        catch (Exception ex)
+        {
+            // the renewal is applied, only its audit entry is missing - nothing to retry or to warn the customer about
+            logger.ErrorWithException(ex);
+        }
+
+        return null;
+    }
+
+    private async Task AddPendingRenewalAsync(PendingRenewal renewal)
+    {
+        var pending = await hybridCache.GetOrDefaultAsync<List<PendingRenewal>>(PendingCacheKey) ?? [];
+
+        pending.Add(renewal);
+
+        await SavePendingRenewalsAsync(pending);
+    }
+
+    private async Task SavePendingRenewalsAsync(List<PendingRenewal> pending)
+    {
+        if (pending.Count == 0)
+        {
+            await hybridCache.RemoveAsync(PendingCacheKey);
+
+            return;
+        }
+
+        // far longer than the few runs the checks take, so the entries survive a restart of the service
+        await hybridCache.SetAsync(PendingCacheKey, pending, TimeSpan.FromDays(1));
+    }
+
+    private async Task SendRenewSubscriptionErrorAsync(PendingRenewal renewal)
+    {
+        UserInfo payer = null;
+        UserInfo owner = null;
+
+        try
+        {
+            await using var scope = _scopeFactory.CreateAsyncScope();
+
+            var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
+            await tenantManager.SetCurrentTenantAsync(renewal.TenantId);
+
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager>();
+            owner = await userManager.GetUsersAsync(renewal.OwnerId);
+
+            if (renewal.PayerId is { } payerId)
+            {
+                payer = await userManager.GetUsersAsync(payerId);
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+        }
+
+        await SendRenewSubscriptionErrorAsync(renewal.TenantId, renewal.Description, payer, owner);
+    }
+
+    private async Task SendRenewSubscriptionErrorAsync(int tenantId, string description, UserInfo payer, UserInfo owner)
+    {
+        try
+        {
+            logger.ErrorRenewSubscriptionServiceFail(tenantId, description);
 
             await using var scope = _scopeFactory.CreateAsyncScope();
 
@@ -296,6 +472,20 @@ public class RenewSubscriptionService(
             logger.ErrorWithException(ex);
         }
     }
+
+    /// <summary>
+    /// A renewal the billing service did not answer about. Renewed as soon as billing reports the subscription to
+    /// <see cref="ProductId"/> as ending after <see cref="PreviousDueDate"/>; failed when that has not happened
+    /// after <see cref="MaxRenewVerifyChecks"/> checks (<see cref="Checks"/> counts the ones already made).
+    /// </summary>
+    private sealed record PendingRenewal(
+        int TenantId,
+        string ProductId,
+        string Description,
+        DateTime PreviousDueDate,
+        Guid OwnerId,
+        Guid? PayerId,
+        int Checks);
 }
 
 static file class Queries

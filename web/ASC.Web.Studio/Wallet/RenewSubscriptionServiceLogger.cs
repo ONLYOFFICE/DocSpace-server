@@ -41,8 +41,14 @@ internal static partial class RenewSubscriptionServiceLogger
     [LoggerMessage(LogLevel.Information, "Subscription renewed: tenant {tenantId}, {description}")]
     public static partial void InfoRenewSubscriptionServiceDone(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
 
-    [LoggerMessage(LogLevel.Error, "Subscription renewal failed: tenant {tenantId}")]
-    public static partial void ErrorRenewSubscriptionServiceFail(this ILogger<RenewSubscriptionService> logger, int tenantId);
+    [LoggerMessage(LogLevel.Error, "Subscription renewal failed: tenant {tenantId}, {description}")]
+    public static partial void ErrorRenewSubscriptionServiceFail(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
+
+    [LoggerMessage(LogLevel.Warning, "Subscription renewal outcome is unknown, billing did not answer, will re-check: tenant {tenantId}, {description}")]
+    public static partial void WarningRenewSubscriptionServiceOutcomeUnknown(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
+
+    [LoggerMessage(LogLevel.Warning, "Subscription renewal is not confirmed by check {check}: tenant {tenantId}, {description}: {reason}")]
+    public static partial void WarningRenewSubscriptionServiceNotConfirmed(this ILogger<RenewSubscriptionService> logger, int tenantId, string description, int check, string reason);
 
     [LoggerMessage(LogLevel.Error, "Subscription renewal for tenant {tenantId} scheduled a switch to unknown wallet quota {nextQuotaId}")]
     public static partial void ErrorRenewSubscriptionServiceUnknownNextQuota(this ILogger<RenewSubscriptionService> logger, int tenantId, int nextQuotaId);
