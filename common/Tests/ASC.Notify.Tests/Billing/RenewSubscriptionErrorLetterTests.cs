@@ -36,12 +36,16 @@ namespace ASC.Notify.Tests.Billing;
 /// <summary>
 /// What the owner and the payer get when a purchased tariff or service could not be renewed
 /// automatically (<c>renew_subscription_error</c>). Email only.
+///
+/// The letter names the subscription the way the customer operations report does: the billing service name
+/// of the wallet quota (<c>admin</c> for the business plan) resolved through
+/// <c>AccountingCustomerOperationServiceDesc_*</c> and <c>AccountingCustomerOperationServiceUOM_*</c>.
 /// </summary>
 public class RenewSubscriptionErrorLetterTests : LetterTestBase<RenewSubscriptionErrorNotifyAction>
 {
     protected override Task InitAsync(RenewSubscriptionErrorNotifyAction action, LetterScope scope)
     {
-        action.Init(scope.Recipient);
+        action.Init(scope.Recipient, "admin", 2);
 
         return Task.CompletedTask;
     }
@@ -62,6 +66,8 @@ public class RenewSubscriptionErrorLetterTests : LetterTestBase<RenewSubscriptio
         // No apostrophes in the expected strings: TextileStyler rewrites them.
         letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain("automatic renewal of your purchased tariff plan or services")
+            .And.Contain("Business plan")
+            .And.Contain("2 Admins")
             .And.Contain("We kindly ask you to renew it manually.");
 
         // The brand no longer carries the DocSpace suffix.

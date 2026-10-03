@@ -3460,16 +3460,22 @@ public sealed class RenewSubscriptionErrorNotifyAction(CommonLinkUtility commonL
         ];
     }
 
-    public void Init(UserInfo user)
+    // serviceName is the billing service of the subscription (TenantQuota.ServiceName); the letter names it the
+    // way the customer operations report does - "Business plan", "2 Admins" - in the recipient's culture.
+    public void Init(UserInfo user, string serviceName, int quantity)
     {
         var culture = GetCulture(user);
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitBillingSection", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
+        var (_, title, unit) = WalletServiceDescriptionManager.GetServiceTitleAndUom(serviceName, null, culture);
+
         Tags =
         [
             new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Culture, culture.Name),
+            new TagValue("ServiceName", title ?? serviceName),
+            new TagValue("ServiceQuantity", string.IsNullOrEmpty(unit) ? $"{quantity}" : $"{quantity} {unit}"),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/billing/overview")),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours)
         ];
