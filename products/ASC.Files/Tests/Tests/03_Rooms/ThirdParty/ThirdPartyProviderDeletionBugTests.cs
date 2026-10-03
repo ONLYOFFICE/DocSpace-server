@@ -76,11 +76,12 @@ public class ThirdPartyProviderDeletionBugTests(
 
     /// <remarks>
     /// Bug 83264: connect Nextcloud, create a room on it, add that room to a room group, then
-    /// delete the room — removing the provider account behind it does not remove the room's group
-    /// membership, so the group keeps a dangling reference to the room and
-    /// <c>getRoomGroups</c> throws <c>System.InvalidOperationException</c> ("Sequence contains no
-    /// elements") in <c>ProviderAccountDao.GetProviderInfoAsync</c>, taking down the entire group
-    /// list instead of just the affected group/room.
+    /// delete the room — removing the provider account behind it did not remove the room's group
+    /// membership, so the group kept a dangling reference to the room and <c>getRoomGroups</c>
+    /// failed on the missing provider, taking down the entire group list instead of just the
+    /// affected room. <c>ProviderAccountDao.RemoveProviderInfoAsync</c> now deletes the group links
+    /// of the connection's rooms, and <c>ProviderFolderDao.GetFoldersAsync</c> leaves out the ids of
+    /// a removed connection, so links that are already dangling no longer break the listing.
     /// </remarks>
     [Fact]
     [Trait("Bug", "83264")]
