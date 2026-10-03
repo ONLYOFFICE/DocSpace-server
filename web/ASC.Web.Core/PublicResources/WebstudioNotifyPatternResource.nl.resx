@@ -916,7 +916,11 @@ Uitzonderingsbericht: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Hallo, $UserName!
 
-Wij nemen contact met u op om u te laten weten dat de automatische verlenging van uw aangeschafte tariefplan of diensten niet kon worden uitgevoerd. Wij verzoeken u vriendelijk om het handmatig te verlengen.
+Wij nemen contact met u op om u te laten weten dat de automatische verlenging van uw aangeschafte tariefplan of diensten niet kon worden uitgevoerd:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Wij verzoeken u vriendelijk om het handmatig te verlengen.
 
 $OrangeButton
 

@@ -916,7 +916,11 @@ Məlumatın "$FromUserName":"$FromUserLink" istifadəçisindən "$ToUserName":"$
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Salam $UserName!
 
-Aldığınız tarif planının və ya xidmətlərin avtomatik yenilənmədiyini bildirmək üçün sizinlə əlaqə saxlayırıq. Sizdən onu əl ilə yeniləmənizi xahiş edirik.
+Aldığınız tarif planının və ya xidmətlərin avtomatik yenilənmədiyini bildirmək üçün sizinlə əlaqə saxlayırıq:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Sizdən onu əl ilə yeniləmənizi xahiş edirik.
 
 $OrangeButton
 

@@ -3461,7 +3461,9 @@ public sealed class RenewSubscriptionErrorNotifyAction(CommonLinkUtility commonL
     }
 
     // serviceName is the billing service of the subscription (TenantQuota.ServiceName); the letter names it the
-    // way the customer operations report does - "Business plan", "2 Admins" - in the recipient's culture.
+    // way the customer operations report does - "Business plan", "Admins" - in the recipient's culture. The unit
+    // is a label in front of the number ("Admins: 2"), as the report's column headers read, so it needs no
+    // agreement with the number in any language.
     public void Init(UserInfo user, string serviceName, int quantity)
     {
         var culture = GetCulture(user);
@@ -3475,7 +3477,8 @@ public sealed class RenewSubscriptionErrorNotifyAction(CommonLinkUtility commonL
             new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Culture, culture.Name),
             new TagValue("ServiceName", title ?? serviceName),
-            new TagValue("ServiceQuantity", string.IsNullOrEmpty(unit) ? $"{quantity}" : $"{quantity} {unit}"),
+            new TagValue("ServiceUnit", unit ?? string.Empty),
+            new TagValue("ServiceQuantity", $"{quantity}"),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/billing/overview")),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours)
         ];

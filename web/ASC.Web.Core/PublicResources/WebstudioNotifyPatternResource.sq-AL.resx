@@ -918,7 +918,11 @@ Mesazh përjashtimi: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Përshëndetje, $UserName!
 
-Po ju kontaktojmë për t'ju informuar se rinovimi automatik i planit tarifor ose i shërbimeve të blera nuk u realizua me sukses. Ju lutem ta rinovoni manualisht.
+Po ju kontaktojmë për t'ju informuar se rinovimi automatik i planit tarifor ose i shërbimeve të blera nuk u realizua me sukses:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Ju lutem ta rinovoni manualisht.
 
 $OrangeButton
 

@@ -54,7 +54,10 @@ public class RenewSubscriptionErrorLetterTests : LetterTestBase<RenewSubscriptio
     {
         letter.Body.Should().Contain(scope.Recipient.FirstName)
             .And.Contain(Resource("ButtonVisitBillingSection", scope.Culture))
-            .And.Contain($"{scope.PortalUrl}/billing/overview");
+            .And.Contain($"{scope.PortalUrl}/billing/overview")
+            // the styler gives <strong> a style attribute, so only its closing half is matched
+            .And.Contain($">{ServiceText("Desc", scope.Culture)}</strong>")
+            .And.Contain(ServiceText("UOM", scope.Culture));
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
@@ -66,11 +69,17 @@ public class RenewSubscriptionErrorLetterTests : LetterTestBase<RenewSubscriptio
         // No apostrophes in the expected strings: TextileStyler rewrites them.
         letter.Body.Should().Contain($"Hello, {scope.Recipient.FirstName}!")
             .And.Contain("automatic renewal of your purchased tariff plan or services")
-            .And.Contain("Business plan")
-            .And.Contain("2 Admins")
+            .And.Contain(">Business plan</strong>, Admins: 2")
             .And.Contain("We kindly ask you to renew it manually.");
 
         // The brand no longer carries the DocSpace suffix.
         letter.Body.Should().NotContain("DocSpace");
+    }
+
+    /// <summary>The business plan's name ("Desc") or unit ("UOM") as the operations report shows it in that culture.</summary>
+    private static string ServiceText(string kind, CultureInfo culture)
+    {
+        return ASC.Web.Core.PublicResources.Resource.ResourceManager.GetString($"AccountingCustomerOperationService{kind}_admin", culture)
+            ?? throw new InvalidOperationException($"Service 'admin' has no {kind} text.");
     }
 }

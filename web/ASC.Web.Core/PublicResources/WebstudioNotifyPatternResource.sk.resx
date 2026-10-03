@@ -937,7 +937,11 @@ Správa o chybe: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Dobrý deň, $UserName!
 
-Oznamujeme vám, že automatické obnovenie vášho zakúpeného tarifného plánu alebo služieb sa nepodarilo dokončiť. Láskavo vás žiadame, aby ste ho obnovili manuálne.
+Oznamujeme vám, že automatické obnovenie vášho zakúpeného tarifného plánu alebo služieb sa nepodarilo dokončiť:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Láskavo vás žiadame, aby ste ho obnovili manuálne.
 
 $OrangeButton
 

@@ -937,7 +937,11 @@ $UserName님,
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>$UserName님, 안녕하세요!
 
-구매하신 요금제 또는 서비스의 자동 갱신이 완료되지 않았음을 알려드립니다. 수동으로 갱신해 주시기 바랍니다.
+구매하신 요금제 또는 서비스의 자동 갱신이 완료되지 않았음을 알려드립니다:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+수동으로 갱신해 주시기 바랍니다.
 
 $OrangeButton
 

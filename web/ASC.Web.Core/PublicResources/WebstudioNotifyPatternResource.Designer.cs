@@ -1502,7 +1502,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///We’re reaching out to inform you that the automatic renewal of your purchased tariff plan or services couldn’t be completed:
         ///
-        ///*$ServiceName*: $ServiceQuantity
+        ///*$ServiceName*, $ServiceUnit: $ServiceQuantity
         ///
         ///We kindly ask you to renew it manually.
         ///
