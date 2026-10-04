@@ -628,6 +628,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unblock your ${LetterLogoText}.
+        /// </summary>
+        public static string ButtonUnblockPortal {
+            get {
+                return ResourceManager.GetString("ButtonUnblockPortal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Upgrade.
         /// </summary>
         public static string ButtonUpgrade {
@@ -1386,6 +1395,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ${LetterLogoText} has been blocked by the retention policy because it was not used. [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_portal_retention_blocked_to_support {
+            get {
+                return ResourceManager.GetString("pattern_portal_retention_blocked_to_support", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to h1.Disabling account on &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;
         ///
         ///You have requested to disable your account in &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
@@ -1705,28 +1723,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Your ${LetterLogoText} will be &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_saas_admin_startup_warning_after_half_year_v1 {
-            get {
-                return ResourceManager.GetString("pattern_saas_admin_startup_warning_after_half_year_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Your ${LetterLogoText} will be &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_saas_admin_startup_warning_after_three_months_v1 {
-            get {
-                return ResourceManager.GetString("pattern_saas_admin_startup_warning_after_three_months_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Get &lt;span style=&quot;color: #FF6F3D;&quot;&gt;free&lt;/span&gt; ${LetterLogoText} apps&lt;/td&gt;&lt;/tr&gt;
         ///
         ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-he [rest of string was truncated]&quot;;.
@@ -1734,28 +1730,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_saas_admin_user_apps_tips_v1 {
             get {
                 return ResourceManager.GetString("pattern_saas_admin_user_apps_tips_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Your ${LetterLogoText} will be &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_saas_admin_warning_after_half_year_v1 {
-            get {
-                return ResourceManager.GetString("pattern_saas_admin_warning_after_half_year_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Your ${LetterLogoText} will be &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_saas_admin_warning_after_three_months_v1 {
-            get {
-                return ResourceManager.GetString("pattern_saas_admin_warning_after_three_months_v1", resourceCulture);
             }
         }
         
@@ -1896,6 +1870,60 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_saas_owner_payment_warning_grace_period_last_day {
             get {
                 return ResourceManager.GetString("pattern_saas_owner_payment_warning_grace_period_last_day", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: 'Open Sans', Helv [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_saas_owner_retention_blocked {
+            get {
+                return ResourceManager.GetString("pattern_saas_owner_retention_blocked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: 'Open Sans', Helv [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_saas_owner_retention_deleted {
+            get {
+                return ResourceManager.GetString("pattern_saas_owner_retention_deleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: 'Open Sans', Helv [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_saas_owner_retention_deletion_reminder {
+            get {
+                return ResourceManager.GetString("pattern_saas_owner_retention_deletion_reminder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: 'Open Sans', Helv [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_saas_owner_retention_inactivity_warning {
+            get {
+                return ResourceManager.GetString("pattern_saas_owner_retention_inactivity_warning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: 'Open Sans', Helv [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_saas_owner_retention_unpaid_warning {
+            get {
+                return ResourceManager.GetString("pattern_saas_owner_retention_unpaid_warning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: 'Open Sans', Helv [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_saas_owner_retention_wallet_warning {
+            get {
+                return ResourceManager.GetString("pattern_saas_owner_retention_wallet_warning", resourceCulture);
             }
         }
         
@@ -2662,6 +2690,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to ${LetterLogoText} has been blocked by the retention policy.
+        /// </summary>
+        public static string subject_portal_retention_blocked_to_support {
+            get {
+                return ResourceManager.GetString("subject_portal_retention_blocked_to_support", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Disabling account on ${__VirtualRootHost}.
         /// </summary>
         public static string subject_profile_delete {
@@ -2833,47 +2870,11 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} will be deleted.
-        /// </summary>
-        public static string subject_saas_admin_startup_warning_after_half_year_v1 {
-            get {
-                return ResourceManager.GetString("subject_saas_admin_startup_warning_after_half_year_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} will be deleted.
-        /// </summary>
-        public static string subject_saas_admin_startup_warning_after_three_months_v1 {
-            get {
-                return ResourceManager.GetString("subject_saas_admin_startup_warning_after_three_months_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Get free ${LetterLogoText} apps.
         /// </summary>
         public static string subject_saas_admin_user_apps_tips_v1 {
             get {
                 return ResourceManager.GetString("subject_saas_admin_user_apps_tips_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} will be deleted.
-        /// </summary>
-        public static string subject_saas_admin_warning_after_half_year_v1 {
-            get {
-                return ResourceManager.GetString("subject_saas_admin_warning_after_half_year_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} will be deleted.
-        /// </summary>
-        public static string subject_saas_admin_warning_after_three_months_v1 {
-            get {
-                return ResourceManager.GetString("subject_saas_admin_warning_after_three_months_v1", resourceCulture);
             }
         }
         
@@ -2955,6 +2956,60 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_saas_owner_payment_warning_grace_period_last_day {
             get {
                 return ResourceManager.GetString("subject_saas_owner_payment_warning_grace_period_last_day", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your ${LetterLogoText} has been blocked.
+        /// </summary>
+        public static string subject_saas_owner_retention_blocked {
+            get {
+                return ResourceManager.GetString("subject_saas_owner_retention_blocked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your ${LetterLogoText} has been deleted.
+        /// </summary>
+        public static string subject_saas_owner_retention_deleted {
+            get {
+                return ResourceManager.GetString("subject_saas_owner_retention_deleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your ${LetterLogoText} will be deleted on $DeleteDate.
+        /// </summary>
+        public static string subject_saas_owner_retention_deletion_reminder {
+            get {
+                return ResourceManager.GetString("subject_saas_owner_retention_deletion_reminder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your ${LetterLogoText} will be blocked on $BlockDate.
+        /// </summary>
+        public static string subject_saas_owner_retention_inactivity_warning {
+            get {
+                return ResourceManager.GetString("subject_saas_owner_retention_inactivity_warning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your ${LetterLogoText} will be blocked on $BlockDate.
+        /// </summary>
+        public static string subject_saas_owner_retention_unpaid_warning {
+            get {
+                return ResourceManager.GetString("subject_saas_owner_retention_unpaid_warning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Funds on your ${LetterLogoText} wallet will be lost.
+        /// </summary>
+        public static string subject_saas_owner_retention_wallet_warning {
+            get {
+                return ResourceManager.GetString("subject_saas_owner_retention_wallet_warning", resourceCulture);
             }
         }
         

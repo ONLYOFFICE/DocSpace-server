@@ -36,9 +36,8 @@ using Constants = ASC.Core.Users.Constants;
 namespace ASC.Web.Studio.Core.Notify;
 
 /// <summary>
-/// The daily tariff job. It walks every portal, applies the retention policy to it (or, while the policy
-/// is switched off, the old six-month deletion rule), and then asks each periodic letter whether today
-/// is its day for that portal.
+/// The daily tariff job. It walks every portal, applies the retention policy to it, and then asks each
+/// periodic letter whether today is its day for that portal.
 ///
 /// It used to decide that itself, in one <c>else if</c> chain per edition that filled forty shared
 /// locals; the letters now answer for themselves (<see cref="BasePeriodicNotifyAction"/>), so adding one
@@ -53,18 +52,12 @@ public class StudioPeriodicNotify(
     UserManager userManager,
     StudioNotifyHelper studioNotifyHelper,
     ITariffService tariffService,
-    CoreSettings coreSettings,
     IServiceProvider serviceProvider,
     AuditEventsRepository auditEventsRepository,
     LoginEventsRepository loginEventsRepository,
-    IFusionCache hybridCache,
-    PortalRemovalService portalRemovalService,
-    PortalRetentionJob portalRetentionJob,
-    SecurityContext securityContext)
+    PortalRetentionJob portalRetentionJob)
 {
     private readonly ILogger _log = loggerFactory.CreateLogger("ASC.Notify");
-
-    private const string CacheKey = "notification_date_for_unused_portals";
 
     /// <summary>
     /// The SaaS letters, and the only list of them. Order carries no meaning: every letter judges itself,
@@ -78,14 +71,10 @@ public class StudioPeriodicNotify(
         typeof(SaasAdminAiAgentsV1NotifyAction),
         typeof(SaasAdminDeveloperToolsV1NotifyAction),
         typeof(SaasAdminUserAppsTipsV1NotifyAction),
-        typeof(SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction),
-        typeof(SaasAdminStartupWarningAfterHalfYearV1NotifyAction),
         typeof(SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction),
         typeof(SaasOwnerPaymentWarningGracePeriodActivationNotifyAction),
         typeof(SaasOwnerPaymentWarningGracePeriodLastDayNotifyAction),
-        typeof(SaasOwnerPaymentWarningGracePeriodExpiredNotifyAction),
-        typeof(SaasAdminWarningAfterThreeMonthsV1NotifyAction),
-        typeof(SaasAdminWarningAfterHalfYearV1NotifyAction)
+        typeof(SaasOwnerPaymentWarningGracePeriodExpiredNotifyAction)
     ];
 
     /// <summary>The Enterprise and Developer letters. Never runs in the same installation as the list above.</summary>
@@ -104,28 +93,12 @@ public class StudioPeriodicNotify(
         typeof(DeveloperAdminPaymentWarningGracePeriodExpirationNotifyAction)
     ];
 
-    /// <summary>
-    /// The inactivity warnings of the old six-month rule. With the retention policy on, its own letters
-    /// take their place, and these would promise the owner a deletion that is no longer the one coming.
-    /// </summary>
-    private static readonly HashSet<Type> _replacedByRetention =
-    [
-        typeof(SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction),
-        typeof(SaasAdminStartupWarningAfterHalfYearV1NotifyAction),
-        typeof(SaasAdminWarningAfterThreeMonthsV1NotifyAction),
-        typeof(SaasAdminWarningAfterHalfYearV1NotifyAction)
-    ];
-
     public async ValueTask SendSaasLettersAsync(string senderName, DateTime scheduleDate)
     {
         _log.InformationStartSendSaasTariffLetters();
 
-        var retention = portalRetentionJob.Options.Enabled;
-
-        // The retention policy also walks the portals it has blocked: they are deleted, or reminded, from here.
-        var tenants = retention
-            ? await tenantManager.GetTenantsByStatusAsync(TenantStatus.Active, TenantStatus.Blocked)
-            : await tenantManager.GetTenantsAsync();
+        // The retention policy also walks the portals it has blocked: they are reminded, or deleted, from here.
+        var tenants = await tenantManager.GetTenantsByStatusAsync(TenantStatus.Active, TenantStatus.Blocked);
 
         if (tenants.Count <= 0)
         {
@@ -134,9 +107,7 @@ public class StudioPeriodicNotify(
         }
 
         var nowDate = scheduleDate.Date;
-        var notifyUnusedFrom = await GetUnusedPortalNotifyStartAsync(nowDate);
-        var retentionStart = retention ? await portalRetentionJob.GetPolicyStartAsync(nowDate) : default;
-        var letters = retention ? _saasLetters.Where(l => !_replacedByRetention.Contains(l)).ToArray() : _saasLetters;
+        var retentionStart = await portalRetentionJob.GetPolicyStartAsync(nowDate);
 
         // The paid add-ons the wallet is charged for, by quota id: their titles are what the upcoming
         // payment letter lists. Global and cached, so they are read once for all tenants.
@@ -148,21 +119,16 @@ public class StudioPeriodicNotify(
             {
                 await tenantManager.SetCurrentTenantAsync(tenant.Id);
 
-                var context = await BuildContextAsync(tenant, nowDate, notifyUnusedFrom);
+                var context = await BuildContextAsync(tenant, nowDate);
+                var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
 
                 // Before any letter: a portal blocked or removed here must not be written to afterwards.
-                var leaveAlone = retention
-                    ? await portalRetentionJob.ApplyAsync(context, retentionStart)
-                    : await TryRemoveAbandonedPortalAsync(context);
-
-                if (leaveAlone)
+                if (await portalRetentionJob.ApplyAsync(context, retentionStart, client, senderName))
                 {
                     continue;
                 }
 
-                var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
-
-                await SendLettersAsync(letters, context, client, senderName);
+                await SendLettersAsync(_saasLetters, context, client, senderName);
 
                 // Every add-on renews on its own due date, whatever the tariff state is, so this reminder
                 // is sent on its own and takes no part in the letters above.
@@ -197,7 +163,7 @@ public class StudioPeriodicNotify(
             {
                 await tenantManager.SetCurrentTenantAsync(tenant.Id);
 
-                var context = await BuildContextAsync(tenant, nowDate, nowDate, enterprise: true);
+                var context = await BuildContextAsync(tenant, nowDate, enterprise: true);
                 var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
 
                 await SendLettersAsync(_enterpriseLetters, context, client, senderName);
@@ -229,7 +195,7 @@ public class StudioPeriodicNotify(
     /// Everything the letters need to judge this portal, read once. The tariff and the quota are cached
     /// but not free, and the letters would otherwise fetch them twenty-five times over.
     /// </summary>
-    private async Task<PeriodicLetterContext> BuildContextAsync(Tenant tenant, DateTime nowDate, DateTime notifyUnusedFrom, bool enterprise = false)
+    private async Task<PeriodicLetterContext> BuildContextAsync(Tenant tenant, DateTime nowDate, bool enterprise = false)
     {
         var tariff = await tariffService.GetTariffAsync(tenant.Id);
         var quota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
@@ -249,7 +215,6 @@ public class StudioPeriodicNotify(
             DelayDueDate = tariff.DelayDueDate.Date,
             DelayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue,
             DefaultRebranding = !enterprise || await tenantLogoManager.IsDefaultLogoSettingsAsync(),
-            UnusedPortalNotifyFrom = notifyUnusedFrom,
             LastActivity = new Lazy<Task<DateTime>>(() => GetLastActivityDateAsync(tenant))
         };
     }
@@ -267,77 +232,6 @@ public class StudioPeriodicNotify(
         var lastLoginEventDate = lastLoginEvent?.Date.Date ?? tenant.CreationDateTime.Date;
 
         return lastAuditEventDate > lastLoginEventDate ? lastAuditEventDate : lastLoginEventDate;
-    }
-
-    /// <summary>
-    /// The day this installation started counting towards deleting unused portals. Stamped on the first
-    /// run and kept, so an upgrade does not mail - and a week later delete - every idle portal at once.
-    /// </summary>
-    private async Task<DateTime> GetUnusedPortalNotifyStartAsync(DateTime nowDate)
-    {
-        var cacheValue = await hybridCache.GetOrDefaultAsync<string>(CacheKey);
-
-        if (!string.IsNullOrEmpty(cacheValue))
-        {
-            return JsonSerializer.Deserialize<DateTime>(cacheValue);
-        }
-
-        await hybridCache.SetAsync(CacheKey, JsonSerializer.Serialize(nowDate));
-
-        return nowDate;
-    }
-
-    /// <summary>
-    /// Deletes a portal that has run out of chances: a free one left idle for six months and a week, or
-    /// a paid one whose tariff lapsed that long ago. Returns true when the caller must leave this portal
-    /// alone for the rest of the run - it is either gone, or deliberately spared. This is the rule that
-    /// applies while the retention policy (<see cref="PortalRetentionJob"/>) is switched off.
-    /// </summary>
-    /// <remarks>
-    /// This is not a notification, which is why it does not live among the letters. It runs first so that
-    /// nothing can be sent to a portal that is about to disappear. Whether a portal has run out of
-    /// chances is <see cref="PeriodicLetterContext.GetAbandonedReasonAsync"/>'s answer, so it can be
-    /// asked without any of the deleting below.
-    /// </remarks>
-    private async Task<bool> TryRemoveAbandonedPortalAsync(PeriodicLetterContext context)
-    {
-        var tenant = context.Tenant;
-
-        if (await context.GetAbandonedReasonAsync() is not { } reason)
-        {
-            return false;
-        }
-
-        if (await tenantManager.IsForbiddenDomainAsync(tenant.Alias))
-        {
-            // Kept alive on purpose, but still out of the running for today's letters.
-            return true;
-        }
-
-        var tenantDomain = tenant.GetTenantDomain(coreSettings);
-
-        if (reason == AbandonedPortalReason.Unpaid)
-        {
-            _log.InformationStartRemovingUnpaidTenant(tenant.Id, tenantDomain);
-        }
-        else
-        {
-            _log.InformationStartRemovingInactiveTenant(tenant.Id, tenantDomain);
-        }
-
-        try
-        {
-            await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
-            await portalRemovalService.RemoveAsync(tenant, Guid.Empty, auto: true);
-        }
-        finally
-        {
-            // the owner was authenticated only to remove the portal: keep that identity
-            // out of the tenants processed after this one
-            securityContext.Logout();
-        }
-
-        return true;
     }
 
     /// <summary>

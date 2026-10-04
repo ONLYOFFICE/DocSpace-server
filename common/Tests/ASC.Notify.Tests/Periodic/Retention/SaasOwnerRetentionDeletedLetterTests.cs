@@ -31,24 +31,29 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Studio.Core.Notify;
+namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
-/// The day the retention policy first ran in this installation, kept with the installation-wide
-/// settings. No portal's count starts before it, so the first run does not block every long-idle portal
-/// on the first night.
+/// The portal has been deleted by the retention policy (<c>saas_owner_retention_deleted</c>). It names no
+/// address: the removal renames the alias before the letter is rendered.
 /// </summary>
-public class PortalRetentionPolicyStartSettings : ISettings<PortalRetentionPolicyStartSettings>
+public class SaasOwnerRetentionDeletedLetterTests : PortalRetentionLetterTestBase<SaasOwnerRetentionDeletedNotifyAction>
 {
-    /// <summary>The day of the first run with the policy on, or null before it.</summary>
-    public DateTime? StartedOn { get; set; }
+    protected override PortalRetentionCategory Category => PortalRetentionCategory.Free;
 
-    public static Guid ID => new("{26EEF35F-8069-4A32-BECE-3956FE9C245F}");
+    protected override PortalRetentionLetter? Letter => null;
 
-    public PortalRetentionPolicyStartSettings GetDefault()
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        return new PortalRetentionPolicyStartSettings();
+        letter.Body.Should().Contain(Caption("ButtonLeaveFeedback", scope))
+            .And.Contain(LetterEnvironment.NotificationImageUrl("docspace_deleted.gif"));
     }
 
-    public DateTime LastModified { get; set; }
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
+    {
+        letter.Subject.Should().Be($"Your {LetterEnvironment.LogoText} has been deleted");
+
+        letter.Body.Should().Contain("was not used and has been deleted together with all its data")
+            .And.Contain("Privacy Policy");
+    }
 }

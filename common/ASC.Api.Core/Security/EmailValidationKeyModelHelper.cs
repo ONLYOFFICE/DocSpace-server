@@ -286,13 +286,15 @@ public class EmailValidationKeyModelHelper(
             case ConfirmType.PortalSuspend:
             case ConfirmType.PortalRemove:
             case ConfirmType.PortalContinue:
+            case ConfirmType.PortalUnblock:
                 if (!await CheckOwnerRights(email))
                 {
                     checkKeyResult = ValidationResult.Invalid;
                     break;
                 }
 
-                var validTimeInterval = type == ConfirmType.PortalContinue ? TimeSpan.MaxValue : provider.ValidEmailKeyInterval;
+                // The way back is open for as long as there is something to come back to.
+                var validTimeInterval = type is ConfirmType.PortalContinue or ConfirmType.PortalUnblock ? TimeSpan.MaxValue : provider.ValidEmailKeyInterval;
 
                 checkKeyResult = provider.ValidateEmailKey(email + type, key, validTimeInterval);
                 break;

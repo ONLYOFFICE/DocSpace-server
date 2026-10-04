@@ -31,24 +31,37 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Studio.Core.Notify;
+namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
-/// The day the retention policy first ran in this installation, kept with the installation-wide
-/// settings. No portal's count starts before it, so the first run does not block every long-idle portal
-/// on the first night.
+/// The note to support that the retention policy has blocked a portal
+/// (<c>portal_retention_blocked_to_support</c>): who to call, and by when.
 /// </summary>
-public class PortalRetentionPolicyStartSettings : ISettings<PortalRetentionPolicyStartSettings>
+public class PortalRetentionBlockedToSupportLetterTests : LetterTestBase<PortalRetentionBlockedToSupportNotifyAction>
 {
-    /// <summary>The day of the first run with the policy on, or null before it.</summary>
-    public DateTime? StartedOn { get; set; }
+    private const string Domain = "retention-blocked.example.com";
 
-    public static Guid ID => new("{26EEF35F-8069-4A32-BECE-3956FE9C245F}");
+    private static readonly DateTime _deleteOn = new(2026, 12, 3);
 
-    public PortalRetentionPolicyStartSettings GetDefault()
+    protected override Task InitAsync(PortalRetentionBlockedToSupportNotifyAction action, LetterScope scope)
     {
-        return new PortalRetentionPolicyStartSettings();
+        action.Init(scope.Recipient, Domain, PortalRetentionCategory.Free, _deleteOn);
+
+        return Task.CompletedTask;
     }
 
-    public DateTime LastModified { get; set; }
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
+    {
+        letter.Body.Should().Contain(Domain)
+            .And.Contain(scope.Recipient.Email)
+            .And.Contain(nameof(PortalRetentionCategory.Free))
+            .And.Contain("2026-12-03", "support reads the date in one format, whatever the culture");
+    }
+
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
+    {
+        letter.Subject.Should().Be($"{LetterEnvironment.LogoText} has been blocked by the retention policy");
+
+        letter.Body.Should().Contain("Unless it is unblocked, the portal and all its data will be deleted on that date.");
+    }
 }

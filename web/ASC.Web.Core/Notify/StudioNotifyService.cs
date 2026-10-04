@@ -559,6 +559,24 @@ public class StudioNotifyService(
         await studioNotifyServiceHelper.SendNoticeToAsync(portalDeleteSuccessV1NotifyAction, [owner], [EMailSenderName]);
     }
 
+    /// <summary>
+    /// Tells support that the retention policy has blocked a portal, so a manager can step in before the
+    /// deletion date. Nothing is sent when the installation has no support address.
+    /// </summary>
+    public async Task SendMsgPortalBlockedToSupportAsync(string tenantDomain, UserInfo owner, PortalRetentionCategory category, DateTime deleteOn)
+    {
+        var email = commonLinkUtility.GetSupportEmail();
+        if (string.IsNullOrEmpty(email))
+        {
+            return;
+        }
+
+        var action = serviceProvider.GetService<PortalRetentionBlockedToSupportNotifyAction>();
+        action.Init(owner, tenantDomain, category, deleteOn);
+
+        await studioNotifyServiceHelper.SendNoticeToAsync(action, await studioNotifyHelper.RecipientFromEmailAsync(email, false), [EMailSenderName]);
+    }
+
     public async Task SendMsgPaidPortalDeletedToSupportAsync(string tenantDomain, UserInfo owner, CustomerInfo customerInfo)
     {
         var email = commonLinkUtility.GetSupportEmail();

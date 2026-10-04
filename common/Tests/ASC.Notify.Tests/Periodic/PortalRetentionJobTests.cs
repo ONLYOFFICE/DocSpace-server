@@ -44,6 +44,8 @@ public class PortalRetentionJobTests
 
     private static readonly DateTime _policyStart = _today.AddYears(-2);
 
+    private static readonly string _senderName = ASC.Core.Configuration.Constants.NotifyEMailSenderSysName;
+
     private static async ValueTask<LetterStackFixture> GetStackAsync()
     {
         return await TestContext.Current.GetFixture<LetterStackFixture>()
@@ -63,7 +65,6 @@ public class PortalRetentionJobTests
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["core:retention:enabled"] = "true",
                 ["core:retention:dryRun"] = dryRun ? "true" : "false"
             })
             .Build();
@@ -72,13 +73,15 @@ public class PortalRetentionJobTests
     }
 
     /// <summary>
-    /// A portal that does not exist in the stack, with its status last changed long ago, so only what the
-    /// case sets decides where its count starts.
+    /// A portal that does not exist in the stack, owned by the stack portal's owner so its letters have
+    /// someone to go to, with its status last changed long ago, so only what the case sets decides where
+    /// its count starts.
     /// </summary>
-    private static Tenant InMemoryTenant(TenantStatus status = TenantStatus.Active, DateTime? statusChanged = null)
+    private static Tenant InMemoryTenant(LetterScope scope, TenantStatus status = TenantStatus.Active, DateTime? statusChanged = null)
     {
         return new Tenant(int.MaxValue - 1, "retention-in-memory")
         {
+            OwnerId = scope.Tenant.OwnerId,
             Status = status,
             StatusChangeDate = statusChanged ?? DateTime.MinValue
         };
@@ -99,11 +102,14 @@ public class PortalRetentionJobTests
     {
         using var scope = await OpenScopeAsync();
         var logger = new RecordingLogger();
+        var client = new RecordingNotifyClient();
 
-        var leaveAlone = await CreateJob(scope, logger, dryRun: false).ApplyAsync(Free(InMemoryTenant(), _today.AddDays(-30)), _policyStart);
+        var leaveAlone = await CreateJob(scope, logger, dryRun: false).ApplyAsync(Free(InMemoryTenant(scope), _today.AddDays(-30)), _policyStart, client, _senderName);
 
         leaveAlone.Should().BeFalse("a warning does not keep the other letters away");
         logger.Messages.Should().ContainSingle(m => m.Contains("Free: Notify FirstNotice"));
+        client.Sent.Should().ContainSingle()
+            .Which.Action.Should().BeOfType<SaasOwnerRetentionInactivityWarningNotifyAction>("a free portal is told to sign in");
     }
 
     [Fact]
@@ -111,13 +117,15 @@ public class PortalRetentionJobTests
     {
         using var scope = await OpenScopeAsync();
         var logger = new RecordingLogger();
-        var tenant = InMemoryTenant();
+        var client = new RecordingNotifyClient();
+        var tenant = InMemoryTenant(scope);
 
-        var leaveAlone = await CreateJob(scope, logger, dryRun: true).ApplyAsync(Free(tenant, _today.AddDays(-60)), _policyStart);
+        var leaveAlone = await CreateJob(scope, logger, dryRun: true).ApplyAsync(Free(tenant, _today.AddDays(-60)), _policyStart, client, _senderName);
 
         logger.Messages.Should().ContainSingle(m => m.Contains("dry run") && m.Contains("Free: Block"));
         leaveAlone.Should().BeFalse();
         tenant.Status.Should().Be(TenantStatus.Active, "a dry run only says what it would do");
+        client.Sent.Should().BeEmpty("nor does it write to anyone");
     }
 
     [Fact]
@@ -125,11 +133,12 @@ public class PortalRetentionJobTests
     {
         using var scope = await OpenScopeAsync();
         var logger = new RecordingLogger();
+        var client = new RecordingNotifyClient();
 
         // Idle for a year, but its status changed a month ago: the count restarts from that change.
-        var context = Free(InMemoryTenant(statusChanged: _today.AddDays(-30)), _today.AddYears(-1));
+        var context = Free(InMemoryTenant(scope, statusChanged: _today.AddDays(-30)), _today.AddYears(-1));
 
-        await CreateJob(scope, logger, dryRun: true).ApplyAsync(context, _policyStart);
+        await CreateJob(scope, logger, dryRun: true).ApplyAsync(context, _policyStart, client, _senderName);
 
         logger.Messages.Should().ContainSingle(m => m.Contains("Free: Notify FirstNotice"));
     }
@@ -139,13 +148,15 @@ public class PortalRetentionJobTests
     {
         using var scope = await OpenScopeAsync();
         var logger = new RecordingLogger();
-        var tenant = InMemoryTenant(TenantStatus.Blocked, _today.AddDays(-30));
+        var client = new RecordingNotifyClient();
+        var tenant = InMemoryTenant(scope, TenantStatus.Blocked, _today.AddDays(-30));
 
-        var leaveAlone = await CreateJob(scope, logger, dryRun: true).ApplyAsync(Free(tenant, _today.AddYears(-1)), _policyStart);
+        var leaveAlone = await CreateJob(scope, logger, dryRun: true).ApplyAsync(Free(tenant, _today.AddYears(-1)), _policyStart, client, _senderName);
 
         leaveAlone.Should().BeTrue("a blocked portal gets none of the ordinary letters");
         logger.Messages.Should().ContainSingle(m => m.Contains("dry run") && m.Contains("Free: Delete"));
         tenant.Status.Should().Be(TenantStatus.Blocked);
+        client.Sent.Should().BeEmpty();
     }
 
     [Fact]
@@ -153,14 +164,15 @@ public class PortalRetentionJobTests
     {
         using var scope = await OpenScopeAsync();
         var logger = new RecordingLogger();
+        var client = new RecordingNotifyClient();
 
         // Active yesterday, but the tariff lapsed ninety days ago: the activity does not count.
-        var context = PeriodicLetterContexts.Lapsed(PeriodicLetterContexts.Fresh(InMemoryTenant(), _today), _today.AddDays(-90)) with
+        var context = PeriodicLetterContexts.Lapsed(PeriodicLetterContexts.Fresh(InMemoryTenant(scope), _today), _today.AddDays(-90)) with
         {
             LastActivity = PeriodicLetterContexts.Activity(_today.AddDays(-1))
         };
 
-        await CreateJob(scope, logger, dryRun: true).ApplyAsync(context, _policyStart);
+        await CreateJob(scope, logger, dryRun: true).ApplyAsync(context, _policyStart, client, _senderName);
 
         logger.Messages.Should().ContainSingle(m => m.Contains("FormerPaying: Block"));
     }
@@ -170,18 +182,20 @@ public class PortalRetentionJobTests
     {
         using var scope = await OpenScopeAsync();
         var logger = new RecordingLogger();
+        var client = new RecordingNotifyClient();
 
-        var paid = PeriodicLetterContexts.Paid(PeriodicLetterContexts.Fresh(InMemoryTenant(), _today), _today.AddYears(1)) with
+        var paid = PeriodicLetterContexts.Paid(PeriodicLetterContexts.Fresh(InMemoryTenant(scope), _today), _today.AddYears(1)) with
         {
             LastActivity = PeriodicLetterContexts.Activity(_today.AddYears(-1))
         };
 
-        var delayed = PeriodicLetterContexts.Delayed(PeriodicLetterContexts.Fresh(InMemoryTenant(), _today), _today.AddDays(3));
+        var delayed = PeriodicLetterContexts.Delayed(PeriodicLetterContexts.Fresh(InMemoryTenant(scope), _today), _today.AddDays(3));
 
-        (await CreateJob(scope, logger, dryRun: true).ApplyAsync(paid, _policyStart)).Should().BeFalse();
-        (await CreateJob(scope, logger, dryRun: true).ApplyAsync(delayed, _policyStart)).Should().BeFalse();
+        (await CreateJob(scope, logger, dryRun: true).ApplyAsync(paid, _policyStart, client, _senderName)).Should().BeFalse();
+        (await CreateJob(scope, logger, dryRun: true).ApplyAsync(delayed, _policyStart, client, _senderName)).Should().BeFalse();
 
         logger.Messages.Should().BeEmpty("a paid portal or one in its grace period is never counted");
+        client.Sent.Should().BeEmpty();
     }
 
     /// <summary>Keeps the formatted messages, which is all these cases look at.</summary>

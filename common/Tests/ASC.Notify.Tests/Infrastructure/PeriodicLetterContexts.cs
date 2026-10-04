@@ -64,7 +64,6 @@ internal static class PeriodicLetterContexts
             DelayDueDate = DateTime.MaxValue.Date,
             DelayDueDateIsNotMax = false,
             DefaultRebranding = true,
-            UnusedPortalNotifyFrom = today.AddYears(-1),
             LastActivity = Activity(today)
         };
     }
@@ -127,19 +126,6 @@ internal static class PeriodicLetterContexts
             Tariff = new Tariff { Quotas = [], State = TariffState.NotPaid, DueDate = due, DelayDueDate = DateTime.MaxValue },
             DueDate = due.Date,
             DueDateIsNotMax = true
-        };
-    }
-
-    /// <summary>
-    /// A portal nobody has touched for <paramref name="months"/> months, checked on the anniversary of
-    /// its creation — the only day the inactivity warnings look at.
-    /// </summary>
-    public static PeriodicLetterContext Idle(PeriodicLetterContext context, int months)
-    {
-        return context with
-        {
-            CreatedDate = context.NowDate.AddYears(-2),
-            LastActivity = Activity(context.NowDate.AddMonths(-months))
         };
     }
 

@@ -122,14 +122,11 @@ public sealed class PortalRetentionScheduleOptions
 }
 
 /// <summary>
-/// The retention policy as configured under <c>core:retention</c>. Every threshold has a default, so
-/// the section only has to name what differs; <see cref="Enabled"/> is off unless switched on.
+/// The retention policy as configured under <c>core:retention</c>. The policy always applies; every
+/// threshold has a default, so the section only has to name what differs.
 /// </summary>
 public sealed class PortalRetentionOptions
 {
-    /// <summary>Whether the daily job applies the policy at all.</summary>
-    public bool Enabled { get; set; }
-
     /// <summary>Whether the job only logs what it would do, without sending, blocking or deleting.</summary>
     public bool DryRun { get; set; }
 
@@ -202,8 +199,8 @@ public static class PortalRetentionSchedule
     /// the last status change for a former paying one.
     /// </param>
     /// <param name="policyStart">
-    /// The day the policy was switched on. No count starts before it, so switching it on does not block
-    /// every long-idle portal on the first night without the warnings that should have come first.
+    /// The day the policy first ran in this installation. No count starts before it, so the first run does
+    /// not block every long-idle portal without the warnings that should have come first.
     /// </param>
     /// <param name="blockedOn">The day the portal was blocked, or null while it is still active.</param>
     /// <param name="today">The day the run is for.</param>

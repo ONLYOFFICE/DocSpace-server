@@ -31,42 +31,30 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Notify.Tests.Periodic.InactivityWarnings;
+namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
-/// The last warning before a free portal is removed (<c>saas_admin_startup_warning_after_half_year_v1</c>),
-/// sent to the owner after six months without activity. The portal goes a week later.
+/// The block, as a free portal hears of it (<c>saas_owner_retention_blocked</c>): there is no button -
+/// a free portal is unblocked through support, and the letter sends the owner there.
 /// </summary>
-public class SaasAdminStartupWarningAfterHalfYearLetterTests : PeriodicLetterTestBase<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>
+public class SaasOwnerRetentionBlockedFreeLetterTests : PortalRetentionLetterTestBase<SaasOwnerRetentionBlockedNotifyAction>
 {
-    private static string FeedbackUrl(CultureInfo culture)
-    {
-        return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Site, "registrationcanceled", culture, "https://www.onlyoffice.com/registration-canceled.aspx");
-    }
+    protected override PortalRetentionCategory Category => PortalRetentionCategory.Free;
 
-    private static string LegalTermsUrl(CultureInfo culture)
-    {
-        return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Common, "legalterms", culture, "https://docspace.onlyoffice.com/s/Fj-fVY--ZhHHnv7");
-    }
+    protected override PortalRetentionLetter? Letter => PortalRetentionLetter.Blocked;
+
+    protected override string PreviewName(SaasOwnerRetentionBlockedNotifyAction action) => action.ID + "_free";
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(Resource("ButtonLeaveFeedback", scope.Culture))
-            .And.Contain(FeedbackUrl(scope.Culture))
-            .And.Contain(LegalTermsUrl(scope.Culture))
-            .And.Contain(LetterEnvironment.PortalUrl);
+        letter.Body.Should().Contain(Day(DeleteOn, scope))
+            .And.NotContain(Caption("ButtonUnblockPortal", scope))
+            .And.NotContain(nameof(ConfirmType.PortalUnblock), "a free portal cannot be unblocked from the letter");
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        var logoText = LetterEnvironment.LogoText;
-
-        letter.Subject.Should().Be($"Your {logoText} will be deleted");
-
-        // No apostrophes in the expected strings: TextileStyler turns "haven't" into "haven&#8217;t".
-        letter.Body.Should().Contain($"entered your {logoText}")
-            .And.Contain("for more than half a year.")
-            .And.Contain("Privacy Policy")
-            .And.Contain("just enter it and make any action");
+        letter.Body.Should().Contain($"To keep your {LetterEnvironment.LogoText}, contact our")
+            .And.NotContain("unblock it before that date");
     }
 }

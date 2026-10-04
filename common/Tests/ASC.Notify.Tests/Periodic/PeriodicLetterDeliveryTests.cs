@@ -89,7 +89,7 @@ public class PeriodicLetterDeliveryTests
 
         using var scope = await OpenScopeAsync(stack);
 
-        var recipients = await RecipientsOfAsync<SaasAdminWarningAfterThreeMonthsV1NotifyAction>(scope);
+        var recipients = await RecipientsOfAsync<SaasOwnerRetentionInactivityWarningNotifyAction>(scope);
 
         recipients.Should().Contain(stack.Portal.Owner.Id);
     }
@@ -145,7 +145,7 @@ public class PeriodicLetterDeliveryTests
 
         using var scope = await OpenScopeAsync(stack);
 
-        var action = scope.Services.GetRequiredService<SaasAdminWarningAfterThreeMonthsV1NotifyAction>();
+        var action = scope.Services.GetRequiredService<SaasOwnerRetentionInactivityWarningNotifyAction>();
         var client = new RecordingNotifyClient();
 
         await action.SendAsync(PeriodicLetterContexts.Paid(scope.Tenant), client, _senderName);
@@ -196,45 +196,5 @@ public class PeriodicLetterDeliveryTests
 
         (await RecipientsOfAsync<SaasOwnerPaymentWarningGracePeriodExpiredNotifyAction>(scope))
             .Should().Contain(owner, "the payment notice does not ask at all");
-    }
-
-    /// <summary>
-    /// Stands in for the notify client the tariff job registers. It records what it was asked to send and
-    /// sends nothing: the point here is the recipient list, and rendering the letter is what the letter
-    /// tests are for.
-    /// </summary>
-    private sealed class RecordingNotifyClient : INotifyClient
-    {
-        public List<(INotifyAction Action, IRecipient Recipient)> Sent { get; } = [];
-
-        public Task SendNoticeToAsync(INotifyAction action, IRecipient recipient, string senderNames)
-        {
-            Sent.Add((action, recipient));
-
-            return Task.CompletedTask;
-        }
-
-        // Nothing else is reachable from BasePeriodicNotifyAction.SendAsync. A call here means the
-        // sending code changed and this stand-in stopped standing in for it.
-        public void AddInterceptor(ISendInterceptor interceptor) => throw NotUsed();
-
-        public Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient, bool checkSubscription) => throw NotUsed();
-
-        public Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient) => throw NotUsed();
-
-        public Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient recipient, string senderNames) => throw NotUsed();
-
-        public Task SendNoticeAsync(INotifyAction action, string objectID, IRecipient[] recipient, string senderNames) => throw NotUsed();
-
-        public Task SendNoticeToAsync(INotifyAction action, string objectID, IRecipient[] recipients, string[] senderNames, bool checkSubsciption) => throw NotUsed();
-
-        public Task SendNoticeToAsync(INotifyAction action, IRecipient[] recipients, string[] senderNames) => throw NotUsed();
-
-        private static NotSupportedException NotUsed([CallerMemberName] string member = "")
-        {
-            return new NotSupportedException(
-                $"A periodic letter reached INotifyClient.{member}, which it never used to. Either the "
-                + "sending code changed, or this stand-in is being asked the wrong thing.");
-        }
     }
 }

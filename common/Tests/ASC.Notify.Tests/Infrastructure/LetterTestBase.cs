@@ -99,6 +99,12 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
     /// </summary>
     protected virtual double MinimumHtmlSupport => 75;
 
+    /// <summary>
+    /// The name the rendered letter is saved under. The letter id, unless one action is rendered in more
+    /// than one variant: then each variant names itself, so the classes do not write over each other.
+    /// </summary>
+    protected virtual string PreviewName(TAction action) => action.ID;
+
     [Theory]
     [MemberData(nameof(LetterCultures.All), MemberType = typeof(LetterCultures))]
     public async Task Letter_Renders(string cultureName)
@@ -128,7 +134,7 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
             AssertDefaultCultureText(letter, scope);
         }
 
-        await SaveForReviewAsync(letter, action.ID, culture);
+        await SaveForReviewAsync(letter, PreviewName(action), culture);
     }
 
     [Theory]

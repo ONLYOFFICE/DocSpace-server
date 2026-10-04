@@ -100,5 +100,12 @@ public enum ConfirmType
     Wizard,
 
     [Description("Guest share link")]
-    GuestShareLink
+    GuestShareLink,
+
+    /// <summary>
+    /// Unblocks a portal the retention policy has blocked. The link is mailed to the owner with the
+    /// letters about the block and stays valid until the portal is deleted.
+    /// </summary>
+    [Description("Portal unblock")]
+    PortalUnblock
 }

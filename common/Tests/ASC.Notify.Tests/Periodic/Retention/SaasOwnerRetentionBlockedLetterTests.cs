@@ -31,34 +31,32 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Notify.Tests.Periodic.InactivityWarnings;
+namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
-/// The first warning a free portal gets (<c>saas_admin_startup_warning_after_three_months_v1</c>), sent to
-/// the owner after three months without activity. The six-month letter and the removal follow.
+/// The block, as a portal that has paid before hears of it (<c>saas_owner_retention_blocked</c>): the day
+/// it is deleted, and the button that unblocks it. <see cref="SaasOwnerRetentionBlockedFreeLetterTests"/>
+/// renders the same letter for a free portal, which is sent to support instead.
 /// </summary>
-public class SaasAdminStartupWarningAfterThreeMonthsLetterTests : PeriodicLetterTestBase<SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction>
+public class SaasOwnerRetentionBlockedLetterTests : PortalRetentionLetterTestBase<SaasOwnerRetentionBlockedNotifyAction>
 {
-    private static string DashboardUrl(LetterScope scope) => $"{scope.PortalUrl}/dashboard";
+    protected override PortalRetentionCategory Category => PortalRetentionCategory.FormerPaying;
+
+    protected override PortalRetentionLetter? Letter => PortalRetentionLetter.Blocked;
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should()
-            .Contain(Resource("ButtonLogIn", scope.Culture).Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText))
-            .And.Contain(DashboardUrl(scope))
-            .And.Contain(LetterEnvironment.PortalUrl);
+        letter.Body.Should().Contain(Day(DeleteOn, scope))
+            .And.Contain(Caption("ButtonUnblockPortal", scope))
+            .And.Contain(nameof(ConfirmType.PortalUnblock), "the button is the confirmation link that unblocks the portal");
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        var logoText = LetterEnvironment.LogoText;
+        letter.Subject.Should().Be($"Your {LetterEnvironment.LogoText} has been blocked");
 
-        letter.Subject.Should().Be($"Your {logoText} will be deleted");
-
-        // No apostrophes in the expected strings: TextileStyler turns "haven't" into "haven&#8217;t".
-        letter.Body.Should().Contain($"entered your {logoText}")
-            .And.Contain("for 3 months.")
-            .And.Contain("will be deleted after 6 months of inactivity")
-            .And.Contain($"Simply log in now to keep your {logoText} active");
+        letter.Body.Should().Contain("has been blocked because it was not used")
+            .And.Contain("unblock it before that date")
+            .And.NotContain(", contact our", "a portal that can be unblocked from the letter is not sent to support");
     }
 }

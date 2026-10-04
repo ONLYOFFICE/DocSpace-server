@@ -31,24 +31,31 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Studio.Core.Notify;
+namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
-/// The day the retention policy first ran in this installation, kept with the installation-wide
-/// settings. No portal's count starts before it, so the first run does not block every long-idle portal
-/// on the first night.
+/// The reminder that a blocked portal is about to be deleted
+/// (<c>saas_owner_retention_deletion_reminder</c>), here for a portal that may still be unblocked from it.
 /// </summary>
-public class PortalRetentionPolicyStartSettings : ISettings<PortalRetentionPolicyStartSettings>
+public class SaasOwnerRetentionDeletionReminderLetterTests : PortalRetentionLetterTestBase<SaasOwnerRetentionDeletionReminderNotifyAction>
 {
-    /// <summary>The day of the first run with the policy on, or null before it.</summary>
-    public DateTime? StartedOn { get; set; }
+    protected override PortalRetentionCategory Category => PortalRetentionCategory.FormerPayingWithBalance;
 
-    public static Guid ID => new("{26EEF35F-8069-4A32-BECE-3956FE9C245F}");
+    protected override PortalRetentionLetter? Letter => PortalRetentionLetter.FinalDeletionNotice;
 
-    public PortalRetentionPolicyStartSettings GetDefault()
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        return new PortalRetentionPolicyStartSettings();
+        letter.Subject.Should().Contain(Day(DeleteOn, scope));
+
+        letter.Body.Should().Contain(Day(DeleteOn, scope))
+            .And.Contain(Caption("ButtonUnblockPortal", scope))
+            .And.Contain(nameof(ConfirmType.PortalUnblock));
     }
 
-    public DateTime LastModified { get; set; }
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
+    {
+        letter.Subject.Should().Be($"Your {LetterEnvironment.LogoText} will be deleted on {Day(DeleteOn, scope)}");
+
+        letter.Body.Should().Contain("is blocked because it was not used");
+    }
 }

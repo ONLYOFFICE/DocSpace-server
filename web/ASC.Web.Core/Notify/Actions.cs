@@ -1673,121 +1673,251 @@ public sealed class SaasAdminWelcomeV1NotifyAction(CommonLinkUtility commonLinkU
 
 
 
-/// <summary>Six months after a paid tariff lapsed: the last word before the portal is deleted.</summary>
-[Scope]
-public sealed class SaasAdminWarningAfterHalfYearV1NotifyAction(
+/// <summary>
+/// The letters of the portal retention policy. None of them is on a schedule of its own:
+/// <see cref="PortalRetentionJob"/> decides the day and the letter, and hands over the category and
+/// the decision through <see cref="Init"/>, which is where the dates the letter discloses come from.
+/// </summary>
+public abstract class PortalRetentionNotifyAction(
     UserManager userManager,
     StudioNotifyHelper studioNotifyHelper,
     ITariffService tariffService,
-    ExternalResourceSettingsHelper externalResources,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
     : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
-    public override string ID => "saas_admin_warning_after_half_year_v1";
+    private readonly UserManager _userManager = userManager;
 
-    public override List<Pattern> Patterns
+    protected PortalRetentionCategory Category { get; private set; }
+
+    protected PortalRetentionDecision Decision { get; private set; }
+
+    public void Init(PortalRetentionCategory category, PortalRetentionDecision decision)
     {
-        get =>
-        [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_warning_after_half_year_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_warning_after_half_year_v1)
-        ];
+        Category = category;
+        Decision = decision;
+    }
+
+    /// <summary>Never by itself: the retention job sends these letters when its schedule says so.</summary>
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(false);
     }
 
     protected override bool ToOwner => true;
+
+    /// <summary>Whoever paid for the portal hears about it too.</summary>
+    protected override bool ToPayer => Category is PortalRetentionCategory.FormerPaying or PortalRetentionCategory.FormerPayingWithBalance;
+
     protected override bool TrulyYoursAsTableRow => true;
 
-    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    /// <summary>
+    /// Whether the owner may unblock the portal from the letter. A portal that has paid, or still has
+    /// money on its wallet, may; a free one is unblocked through support.
+    /// </summary>
+    protected bool CanUnblock => Category != PortalRetentionCategory.Free;
+
+    /// <summary>A day the letter discloses, written out in the recipient's culture.</summary>
+    protected static TagValue Date(string tag, DateTime date, CultureInfo culture)
     {
-        return Task.FromResult(!context.Quota.Free && context.Tariff.State == TariffState.NotPaid
-            && context.DueDateIsNotMax && context.DueDate.AddMonths(6) == context.NowDate);
+        return new TagValue(tag, date.ToString("D", culture));
     }
 
-    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    /// <summary>
+    /// The unblocking button, or - for a free portal - the flag that sends the owner to support instead.
+    /// The link is the owner's whoever the letter goes to: unblocking is the owner's decision.
+    /// </summary>
+    protected async Task AddUnblockTagsAsync(PeriodicLetterContext context, CultureInfo culture, List<ITagValue> tags, CommonLinkUtility commonLinkUtility)
     {
-        tags.Add(TagValues.OrangeButton(Resource("ButtonLeaveFeedback", culture), externalResources.Site.GetRegionalFullEntry("registrationcanceled", culture)));
-        tags.Add(new TagValue("URL1", externalResources.Common.GetRegionalFullEntry("legalterms", culture)));
-        tags.Add(new TagValue(CommonTags.TopGif, NotifyHelper.GetNotificationImageUrl("docspace_deleted.gif")));
+        tags.Add(new TagValue("CanUnblock", CanUnblock ? "True" : "False"));
 
-        return Task.CompletedTask;
+        if (CanUnblock)
+        {
+            var owner = await _userManager.GetUsersAsync(context.Tenant.OwnerId);
+
+            tags.Add(TagValues.OrangeButton(Resource("ButtonUnblockPortal", culture), commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalUnblock)));
+        }
     }
 }
 
-/// <summary>Three months after a paid tariff lapsed: the portal is still there, but not for long.</summary>
+/// <summary>A free portal nobody has used for a month: when it is blocked, and when it is deleted.</summary>
 [Scope]
-public sealed class SaasAdminWarningAfterThreeMonthsV1NotifyAction(
+public sealed class SaasOwnerRetentionInactivityWarningNotifyAction(
     UserManager userManager,
     StudioNotifyHelper studioNotifyHelper,
     ITariffService tariffService,
     CommonLinkUtility commonLinkUtility,
-    ExternalResourceSettingsHelper externalResources,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
-    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
-    public override string ID => "saas_admin_warning_after_three_months_v1";
+    public override string ID => "saas_owner_retention_inactivity_warning";
 
     public override List<Pattern> Patterns
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_warning_after_three_months_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_warning_after_three_months_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_retention_inactivity_warning, () => WebstudioNotifyPatternResource.pattern_saas_owner_retention_inactivity_warning)
         ];
-    }
-
-    protected override bool ToOwner => true;
-    protected override bool TrulyYoursAsTableRow => true;
-
-    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
-    {
-        return Task.FromResult(!context.Quota.Free && context.Tariff.State == TariffState.NotPaid
-            && context.DueDateIsNotMax && context.DueDate.AddMonths(3) == context.NowDate);
     }
 
     protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
     {
-        tags.Add(TagValues.OrangeButton(Resource("ButtonLogIn", culture), commonLinkUtility.GetFullAbsolutePath("~/dashboard")));
-        tags.Add(new TagValue("URL1", externalResources.Common.GetRegionalFullEntry("legalterms", culture)));
-        tags.Add(new TagValue(CommonTags.TopGif, NotifyHelper.GetNotificationImageUrl("docspace_deleted.gif")));
+        tags.Add(Date("BlockDate", Decision.BlockOn, culture));
+        tags.Add(Date("DeleteDate", Decision.DeleteOn, culture));
+        tags.Add(TagValues.OrangeButton(Resource("ButtonGoToDocSpace", culture), commonLinkUtility.GetFullAbsolutePath("~")));
 
         return Task.CompletedTask;
     }
 }
 
-/// <summary>A free portal nobody has touched for six months: the last warning, a week before it is deleted.</summary>
+/// <summary>A portal whose paid tariff lapsed and was not renewed: when it is blocked, and when it is deleted.</summary>
 [Scope]
-public sealed class SaasAdminStartupWarningAfterHalfYearV1NotifyAction(
+public sealed class SaasOwnerRetentionUnpaidWarningNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+{
+    public override string ID => "saas_owner_retention_unpaid_warning";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_retention_unpaid_warning, () => WebstudioNotifyPatternResource.pattern_saas_owner_retention_unpaid_warning)
+        ];
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(Date("DueDate", context.DueDate, culture));
+        tags.Add(Date("BlockDate", Decision.BlockOn, culture));
+        tags.Add(Date("DeleteDate", Decision.DeleteOn, culture));
+        tags.Add(TagValues.OrangeButton(Resource("ButtonRenewNow", culture), commonLinkUtility.GetFullAbsolutePath("~/billing/overview")));
+
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>
+/// An unused portal that still has money on its wallet: the money goes with the portal, and the letter
+/// says by when.
+/// </summary>
+[Scope]
+public sealed class SaasOwnerRetentionWalletWarningNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+{
+    public override string ID => "saas_owner_retention_wallet_warning";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_retention_wallet_warning, () => WebstudioNotifyPatternResource.pattern_saas_owner_retention_wallet_warning)
+        ];
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(Date("BlockDate", Decision.BlockOn, culture));
+        tags.Add(Date("DeleteDate", Decision.DeleteOn, culture));
+        tags.Add(new TagValue("URL1", commonLinkUtility.GetFullAbsolutePath("~/billing/wallet")));
+        tags.Add(TagValues.OrangeButton(Resource("ButtonGoToDocSpace", culture), commonLinkUtility.GetFullAbsolutePath("~")));
+
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>
+/// The portal has just been blocked. The owner of a portal that has paid, or still has money on its
+/// wallet, gets the link that unblocks it; the owner of a free one is sent to support.
+/// </summary>
+[Scope]
+public sealed class SaasOwnerRetentionBlockedNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+{
+    public override string ID => "saas_owner_retention_blocked";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_retention_blocked, () => WebstudioNotifyPatternResource.pattern_saas_owner_retention_blocked)
+        ];
+    }
+
+    protected override async Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(Date("DeleteDate", Decision.DeleteOn, culture));
+
+        await AddUnblockTagsAsync(context, culture, tags, commonLinkUtility);
+    }
+}
+
+/// <summary>A blocked portal is about to be deleted.</summary>
+[Scope]
+public sealed class SaasOwnerRetentionDeletionReminderNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+{
+    public override string ID => "saas_owner_retention_deletion_reminder";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_retention_deletion_reminder, () => WebstudioNotifyPatternResource.pattern_saas_owner_retention_deletion_reminder)
+        ];
+    }
+
+    protected override async Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(Date("DeleteDate", Decision.DeleteOn, culture));
+
+        await AddUnblockTagsAsync(context, culture, tags, commonLinkUtility);
+    }
+}
+
+/// <summary>The portal has been deleted by the retention policy.</summary>
+[Scope]
+public sealed class SaasOwnerRetentionDeletedNotifyAction(
     UserManager userManager,
     StudioNotifyHelper studioNotifyHelper,
     ITariffService tariffService,
     ExternalResourceSettingsHelper externalResources,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
-    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
-    public override string ID => "saas_admin_startup_warning_after_half_year_v1";
+    public override string ID => "saas_owner_retention_deleted";
 
     public override List<Pattern> Patterns
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_startup_warning_after_half_year_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_startup_warning_after_half_year_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_retention_deleted, () => WebstudioNotifyPatternResource.pattern_saas_owner_retention_deleted)
         ];
-    }
-
-    protected override bool ToOwner => true;
-    protected override bool TrulyYoursAsTableRow => true;
-
-    public override async Task<bool> ShouldSendAsync(PeriodicLetterContext context)
-    {
-        if (!context.Quota.Free || context.NowDate < context.UnusedPortalNotifyFrom || !context.IsCreationAnniversary())
-        {
-            return false;
-        }
-
-        var lastActivity = await context.GetLastActivityDateAsync();
-
-        return lastActivity.AddMonths(6) <= context.NowDate && lastActivity.AddMonths(7) > context.NowDate;
     }
 
     protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
@@ -1797,6 +1927,38 @@ public sealed class SaasAdminStartupWarningAfterHalfYearV1NotifyAction(
         tags.Add(new TagValue(CommonTags.TopGif, NotifyHelper.GetNotificationImageUrl("docspace_deleted.gif")));
 
         return Task.CompletedTask;
+    }
+}
+
+/// <summary>
+/// Tells support that the retention policy has blocked a portal, so a manager can step in before it
+/// is deleted - the only way back for a free portal.
+/// </summary>
+[Scope]
+public sealed class PortalRetentionBlockedToSupportNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
+{
+    public override string ID => "portal_retention_blocked_to_support";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_portal_retention_blocked_to_support, () => WebstudioNotifyPatternResource.pattern_portal_retention_blocked_to_support)
+        ];
+    }
+
+    public void Init(UserInfo owner, string tenantDomain, PortalRetentionCategory category, DateTime deleteOn)
+    {
+        Tags =
+        [
+            new TagValue(CommonTags.PortalUrl, tenantDomain),
+            new TagValue(CommonTags.UserEmail, owner.Email),
+            new TagValue(CommonTags.UserName, owner.DisplayUserName(displayUserSettingsHelper)),
+            new TagValue("Category", category.ToString()),
+            new TagValue("DeleteDate", deleteOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)),
+            new TagValue(CommonTags.Footer, null),
+            TagValues.WithoutUnsubscribe()
+        ];
     }
 }
 
@@ -2449,52 +2611,6 @@ public sealed class SaasAdminHandyAppsV1NotifyAction(
     protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
     {
         tags.Add(TagValues.OrangeButton(Resource("ButtonGoToDocSpace", culture), commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')));
-
-        return Task.CompletedTask;
-    }
-}
-
-/// <summary>A free portal nobody has touched for three months: the first of two warnings before it is
-/// deleted.</summary>
-[Scope]
-public sealed class SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction(
-    UserManager userManager,
-    StudioNotifyHelper studioNotifyHelper,
-    ITariffService tariffService,
-    CommonLinkUtility commonLinkUtility,
-    PeriodicNotifyAction periodicNotifyAction,
-    TenantManager tenantManager)
-    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
-{
-    public override string ID => "saas_admin_startup_warning_after_three_months_v1";
-
-    public override List<Pattern> Patterns
-    {
-        get =>
-        [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_startup_warning_after_three_months_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_startup_warning_after_three_months_v1)
-        ];
-    }
-
-    protected override bool ToOwner => true;
-    protected override bool TrulyYoursAsTableRow => true;
-
-    public override async Task<bool> ShouldSendAsync(PeriodicLetterContext context)
-    {
-        if (!context.Quota.Free || context.NowDate < context.UnusedPortalNotifyFrom || !context.IsCreationAnniversary())
-        {
-            return false;
-        }
-
-        var lastActivity = await context.GetLastActivityDateAsync();
-
-        return lastActivity.AddMonths(3) <= context.NowDate && lastActivity.AddMonths(4) > context.NowDate;
-    }
-
-    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
-    {
-        tags.Add(TagValues.OrangeButton(Resource("ButtonLogIn", culture), commonLinkUtility.GetFullAbsolutePath("~/dashboard")));
-        tags.Add(new TagValue(CommonTags.TopGif, NotifyHelper.GetNotificationImageUrl("docspace_deleted.gif")));
 
         return Task.CompletedTask;
     }

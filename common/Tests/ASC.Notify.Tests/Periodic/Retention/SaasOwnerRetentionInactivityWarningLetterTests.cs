@@ -31,24 +31,34 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Studio.Core.Notify;
+namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
-/// The day the retention policy first ran in this installation, kept with the installation-wide
-/// settings. No portal's count starts before it, so the first run does not block every long-idle portal
-/// on the first night.
+/// The first warning to a free portal nobody uses (<c>saas_owner_retention_inactivity_warning</c>): the
+/// days it is blocked and deleted, and the way to keep it - signing in.
 /// </summary>
-public class PortalRetentionPolicyStartSettings : ISettings<PortalRetentionPolicyStartSettings>
+public class SaasOwnerRetentionInactivityWarningLetterTests : PortalRetentionLetterTestBase<SaasOwnerRetentionInactivityWarningNotifyAction>
 {
-    /// <summary>The day of the first run with the policy on, or null before it.</summary>
-    public DateTime? StartedOn { get; set; }
+    protected override PortalRetentionCategory Category => PortalRetentionCategory.Free;
 
-    public static Guid ID => new("{26EEF35F-8069-4A32-BECE-3956FE9C245F}");
-
-    public PortalRetentionPolicyStartSettings GetDefault()
+    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        return new PortalRetentionPolicyStartSettings();
+        letter.Subject.Should().Contain(Day(BlockOn, scope));
+
+        letter.Body.Should().Contain(Day(BlockOn, scope))
+            .And.Contain(Day(DeleteOn, scope))
+            .And.Contain(scope.PortalUrl)
+            .And.Contain(Caption("ButtonGoToDocSpace", scope));
     }
 
-    public DateTime LastModified { get; set; }
+    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
+    {
+        var logoText = LetterEnvironment.LogoText;
+
+        letter.Subject.Should().Be($"Your {logoText} will be blocked on {Day(BlockOn, scope)}");
+
+        letter.Body.Should().Contain("has not been used for some time")
+            .And.Contain("Free portals that nobody uses are blocked and then deleted together with all their data")
+            .And.Contain("To keep it, just sign in and continue working.");
+    }
 }

@@ -31,43 +31,31 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Notify.Tests.Periodic.InactivityWarnings;
+namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
-/// The "will be deleted" heads-up (<c>saas_admin_warning_after_three_months_v1</c>), sent in SaaS to the
-/// portal owner three months after the subscription expired. The portal is removed three months later,
-/// a week after <c>saas_admin_warning_after_half_year_v1</c>.
+/// The reminder to an unused portal with money left on its wallet
+/// (<c>saas_owner_retention_wallet_warning</c>): the money goes with the portal, and the letter says by when.
 /// </summary>
-public class SaasAdminWarningAfterThreeMonthsLetterTests : PeriodicLetterTestBase<SaasAdminWarningAfterThreeMonthsV1NotifyAction>
+public class SaasOwnerRetentionWalletWarningLetterTests : PortalRetentionLetterTestBase<SaasOwnerRetentionWalletWarningNotifyAction>
 {
-    private static string DashboardUrl(LetterScope scope) => $"{scope.PortalUrl}/dashboard";
+    protected override PortalRetentionCategory Category => PortalRetentionCategory.FreeWithBalance;
 
-    private static string LegalTermsUrl(CultureInfo culture)
-    {
-        return LetterEnvironment.ExternalEntry(LetterEnvironment.ExternalResources.Common, "legalterms", culture, "https://docspace.onlyoffice.com/s/Fj-fVY--ZhHHnv7");
-    }
+    protected override PortalRetentionLetter? Letter => PortalRetentionLetter.MonthlyNotice;
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should()
-            .Contain(Resource("ButtonLogIn", scope.Culture).Replace("${" + CommonTags.LetterLogoText + "}", LetterEnvironment.LogoText))
-            .And.Contain(DashboardUrl(scope))
-            .And.Contain(LegalTermsUrl(scope.Culture))
-            .And.Contain(LetterEnvironment.SupportUrl)
-            .And.Contain(LetterEnvironment.PortalUrl);
+        letter.Body.Should().Contain(Day(BlockOn, scope))
+            .And.Contain(Day(DeleteOn, scope))
+            .And.Contain($"{scope.PortalUrl}/billing/wallet")
+            .And.Contain(Caption("ButtonGoToDocSpace", scope));
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        var logoText = LetterEnvironment.LogoText;
+        letter.Subject.Should().Be($"Funds on your {LetterEnvironment.LogoText} wallet will be lost");
 
-        letter.Subject.Should().Be($"Your {logoText} will be deleted");
-
-        // No apostrophes in the expected strings: TextileStyler turns "haven't" into "haven&#8217;t".
-        letter.Body.Should().Contain($"entered your {logoText}")
-            .And.Contain("for 3 months.")
-            .And.Contain("will be deleted after 6 months of inactivity")
-            .And.Contain("Privacy Policy")
-            .And.Contain("support team");
+        letter.Body.Should().Contain("there is still money left on its")
+            .And.Contain("The funds left on the wallet will be lost together with it.");
     }
 }

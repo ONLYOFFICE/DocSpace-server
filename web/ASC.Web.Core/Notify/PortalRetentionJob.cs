@@ -35,8 +35,9 @@ namespace ASC.Web.Studio.Core.Notify;
 
 /// <summary>
 /// Applies the retention policy to one portal on the daily run: works out its category, asks
-/// <see cref="PortalRetentionSchedule"/> what today brings, and blocks or removes it when that is the
-/// answer. Nothing is stored per portal - see the schedule for why none of it is needed.
+/// <see cref="PortalRetentionSchedule"/> what today brings, and tells the owner, blocks the portal or
+/// removes it when that is the answer. Nothing is stored per portal - see the schedule for why none of
+/// it is needed.
 /// </summary>
 [Scope]
 public class PortalRetentionJob(
@@ -46,14 +47,17 @@ public class PortalRetentionJob(
     ITariffService tariffService,
     TenantManager tenantManager,
     CoreSettings coreSettings,
+    UserManager userManager,
+    StudioNotifyService studioNotifyService,
     PortalRemovalService portalRemovalService,
-    SecurityContext securityContext)
+    SecurityContext securityContext,
+    IServiceProvider serviceProvider)
 {
     public PortalRetentionOptions Options => configuration.Options;
 
     /// <summary>
     /// The day the policy started counting in this installation, stamped on the first real run. A dry run
-    /// does not stamp it: it previews what the policy would do if it were switched on today.
+    /// does not stamp it: it previews what the policy would do if it started counting today.
     /// </summary>
     public async Task<DateTime> GetPolicyStartAsync(DateTime today)
     {
@@ -76,10 +80,11 @@ public class PortalRetentionJob(
     }
 
     /// <summary>
-    /// Applies the policy to the portal of <paramref name="context"/>. Returns true when the caller must
-    /// leave the portal alone for the rest of the run: it is blocked, it was just blocked, or it is gone.
+    /// Applies the policy to the portal of <paramref name="context"/>, sending its letters through
+    /// <paramref name="client"/>. Returns true when the caller must leave the portal alone for the rest of
+    /// the run: it is blocked, it was just blocked, or it is gone.
     /// </summary>
-    public async Task<bool> ApplyAsync(PeriodicLetterContext context, DateTime policyStart)
+    public async Task<bool> ApplyAsync(PeriodicLetterContext context, DateTime policyStart, INotifyClient client, string senderName)
     {
         var tenant = context.Tenant;
         var blocked = tenant.Status == TenantStatus.Blocked;
@@ -140,20 +145,67 @@ public class PortalRetentionJob(
 
         switch (decision.Step)
         {
+            case PortalRetentionStep.Notify:
+                await SendAsync(LetterFor(category, decision.Letter), context, category, decision, client, senderName);
+
+                return blocked;
+
             case PortalRetentionStep.Block:
-                tenant.SetStatus(TenantStatus.Blocked);
-                await tenantManager.SaveTenantAsync(tenant);
+                await BlockAsync(context, category, decision, client, senderName);
 
                 return true;
 
             case PortalRetentionStep.Delete:
-                await RemoveAsync(tenant);
+                await RemoveAsync(context, category, decision, client, senderName);
 
                 return true;
 
             default:
                 return blocked;
         }
+    }
+
+    /// <summary>
+    /// The letter that carries a decision. The warnings before the block differ by category - the free
+    /// portal is told to sign in, the lapsed one to renew, the one with money left that the money goes with
+    /// it - while everything from the block on reads the same, the way back aside.
+    /// </summary>
+    private static Type LetterFor(PortalRetentionCategory category, PortalRetentionLetter? letter)
+    {
+        return letter switch
+        {
+            PortalRetentionLetter.Blocked => typeof(SaasOwnerRetentionBlockedNotifyAction),
+            PortalRetentionLetter.EarlyDeletionNotice or PortalRetentionLetter.FinalDeletionNotice => typeof(SaasOwnerRetentionDeletionReminderNotifyAction),
+            _ => category switch
+            {
+                PortalRetentionCategory.Free => typeof(SaasOwnerRetentionInactivityWarningNotifyAction),
+                PortalRetentionCategory.FormerPaying => typeof(SaasOwnerRetentionUnpaidWarningNotifyAction),
+                _ => typeof(SaasOwnerRetentionWalletWarningNotifyAction)
+            }
+        };
+    }
+
+    private async Task SendAsync(Type letter, PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName)
+    {
+        var action = (PortalRetentionNotifyAction)serviceProvider.GetRequiredService(letter);
+
+        action.Init(category, decision);
+
+        await action.SendAsync(context, client, senderName);
+    }
+
+    /// <summary>Blocks the portal and says so - to the owner, and to support, where a manager can step in.</summary>
+    private async Task BlockAsync(PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName)
+    {
+        var tenant = context.Tenant;
+
+        tenant.SetStatus(TenantStatus.Blocked);
+        await tenantManager.SaveTenantAsync(tenant);
+
+        await SendAsync(typeof(SaasOwnerRetentionBlockedNotifyAction), context, category, decision, client, senderName);
+
+        var owner = await userManager.GetUsersAsync(tenant.OwnerId);
+        await studioNotifyService.SendMsgPortalBlockedToSupportAsync(tenant.GetTenantDomain(coreSettings), owner, category, decision.DeleteOn);
     }
 
     /// <summary>
@@ -169,13 +221,34 @@ public class PortalRetentionJob(
         return statusChanged > anchor ? statusChanged : anchor;
     }
 
-    private async Task RemoveAsync(Tenant tenant)
+    /// <summary>
+    /// Removes the portal. The letters go while its rows still exist: to the owner, and - for a portal that
+    /// has paid - to support, who make sure nothing is billed for it any more.
+    /// </summary>
+    private async Task RemoveAsync(PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName)
     {
+        var tenant = context.Tenant;
+
+        // Before the removal: it renames the alias, and the letter to support names the portal.
+        var tenantDomain = tenant.GetTenantDomain(coreSettings);
+        var formerPaying = category is PortalRetentionCategory.FormerPaying or PortalRetentionCategory.FormerPayingWithBalance;
+
         try
         {
             // The request to the identity service carries a token issued for the current account.
             await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
-            await portalRemovalService.RemoveAsync(tenant, Guid.Empty, auto: true);
+            await portalRemovalService.RemoveAsync(tenant, Guid.Empty, auto: true, async () =>
+            {
+                await SendAsync(typeof(SaasOwnerRetentionDeletedNotifyAction), context, category, decision, client, senderName);
+
+                if (formerPaying)
+                {
+                    var owner = await userManager.GetUsersAsync(tenant.OwnerId);
+                    var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+
+                    await studioNotifyService.SendMsgPaidPortalDeletedToSupportAsync(tenantDomain, owner, customerInfo);
+                }
+            });
         }
         finally
         {

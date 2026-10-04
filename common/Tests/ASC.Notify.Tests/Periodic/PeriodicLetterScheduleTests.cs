@@ -95,30 +95,6 @@ public class PeriodicLetterScheduleTests
         return PeriodicLetterContexts.Trial(context, due);
     }
 
-    /// <summary>
-    /// A portal nobody has touched for <paramref name="months"/> months, checked on the anniversary of
-    /// its creation - the only day the inactivity warnings look at.
-    /// </summary>
-    private static PeriodicLetterContext Idle(PeriodicLetterContext context, int months)
-    {
-        return PeriodicLetterContexts.Idle(context, months);
-    }
-
-    /// <summary>
-    /// A free portal created on <paramref name="created"/> and untouched since <paramref name="lastActivity"/>,
-    /// looked at on <paramref name="now"/>. Unlike <see cref="Idle"/> it does not move the creation date
-    /// to a day that is bound to be an anniversary, which is the whole point of the cases that use it.
-    /// </summary>
-    private static PeriodicLetterContext FreeIdleSince(string created, string now, DateTime lastActivity)
-    {
-        return PeriodicLetterContexts.Fresh(new Tenant(1, "test"), Date(now)) with
-        {
-            Quota = Quota(free: true),
-            CreatedDate = Date(created),
-            LastActivity = Activity(lastActivity)
-        };
-    }
-
     /// <summary>Inline data cannot carry a <see cref="DateTime"/>, so the cases spell their dates out.</summary>
     private static DateTime Date(string value)
     {
@@ -206,44 +182,6 @@ public class PeriodicLetterScheduleTests
     }
 
     [Fact]
-    public async Task StartupWarningAfterThreeMonths_NeedsAFreePortalIdleForThreeMonths()
-    {
-        var context = Fresh;
-
-        (await AsksToSendAsync<SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction>(Idle(context, months: 3) with { Quota = Quota(free: true) }))
-            .Should().BeTrue();
-
-        (await AsksToSendAsync<SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction>(Idle(context, months: 3)))
-            .Should().BeFalse("the warning is only for free portals");
-    }
-
-    [Fact]
-    public async Task StartupWarningAfterThreeMonths_StaysSilentWhileThePortalIsStillUsed()
-    {
-        var context = Fresh;
-
-        (await AsksToSendAsync<SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction>(Idle(context, months: 3) with { Quota = Quota(free: true) }))
-            .Should().BeTrue();
-
-        (await AsksToSendAsync<SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction>(Idle(context, months: 2) with { Quota = Quota(free: true) }))
-            .Should().BeFalse("two months of quiet is not three");
-    }
-
-    [Fact]
-    public async Task StartupWarningAfterHalfYear_TakesOverAtSixMonths()
-    {
-        var context = Fresh;
-
-        (await AsksToSendAsync<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>(Idle(context, months: 6) with { Quota = Quota(free: true) }))
-            .Should().BeTrue();
-
-        // Five, not three: three is where the other warning speaks, and a window that opened a month
-        // early would still be silent there. The month below the threshold is the one that pins it.
-        (await AsksToSendAsync<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>(Idle(context, months: 5) with { Quota = Quota(free: true) }))
-            .Should().BeFalse("five months of quiet is not six");
-    }
-
-    [Fact]
     public async Task GracePeriodBeforeActivation_GoesOutThreeDaysBeforeTheTariffEnds()
     {
         var context = Fresh;
@@ -301,30 +239,6 @@ public class PeriodicLetterScheduleTests
 
         (await AsksToSendAsync<SaasOwnerPaymentWarningGracePeriodExpiredNotifyAction>(Delayed(context, delay: _today.AddDays(1))))
             .Should().BeFalse("it has not run out yet");
-    }
-
-    [Fact]
-    public async Task WarningAfterThreeMonths_GoesOutThreeMonthsAfterTheTariffLapsed()
-    {
-        var context = Fresh;
-
-        (await AsksToSendAsync<SaasAdminWarningAfterThreeMonthsV1NotifyAction>(Lapsed(context, due: _today.AddMonths(-3))))
-            .Should().BeTrue();
-
-        (await AsksToSendAsync<SaasAdminWarningAfterThreeMonthsV1NotifyAction>(Lapsed(context, due: _today.AddMonths(-4))))
-            .Should().BeFalse("the window is that day only");
-    }
-
-    [Fact]
-    public async Task WarningAfterHalfYear_GoesOutSixMonthsAfterTheTariffLapsed()
-    {
-        var context = Fresh;
-
-        (await AsksToSendAsync<SaasAdminWarningAfterHalfYearV1NotifyAction>(Lapsed(context, due: _today.AddMonths(-6))))
-            .Should().BeTrue();
-
-        (await AsksToSendAsync<SaasAdminWarningAfterHalfYearV1NotifyAction>(Lapsed(context, due: _today.AddMonths(-5))))
-            .Should().BeFalse("the window is that day only, and five months is not six");
     }
 
     [Fact]
@@ -483,28 +397,6 @@ public class PeriodicLetterScheduleTests
     }
 
     /// <summary>
-    /// The two inactivity warnings divide the timeline between them: the second one takes over where the
-    /// first stops, and neither covers a portal that is still in use.
-    /// </summary>
-    [Theory]
-    [InlineData(1, 0)]
-    [InlineData(3, 1)]
-    [InlineData(6, 1)]
-    [InlineData(9, 0)]
-    public async Task InactivityWarningsDoNotOverlap(int idleMonths, int expected)
-    {
-        var context = Idle(Fresh, idleMonths) with { Quota = Quota(free: true) };
-
-        var claimed = new[]
-        {
-            await AsksToSendAsync<SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction>(context),
-            await AsksToSendAsync<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>(context)
-        };
-
-        claimed.Count(fires => fires).Should().Be(expected);
-    }
-
-    /// <summary>
     /// A portal in its first fortnight gets the letter for that day and nothing else. The registration
     /// letters are the one group where independence is free: two of them would need the same portal to be
     /// two different ages.
@@ -575,53 +467,6 @@ public class PeriodicLetterScheduleTests
     }
 
     /// <summary>
-    /// The inactivity warnings are asked once a month, on the day of the month the portal was created.
-    /// A portal created on the 29th-31st has no such day in February and in the 30-day months, so the
-    /// anniversary is clamped to the last day the month has. Without that clamp the warning for that
-    /// month is not delayed - it is never sent at all, because the window it belongs to has passed by
-    /// the time the next anniversary comes round.
-    /// </summary>
-    [Theory]
-    [InlineData("2026-01-31", "2026-02-28", true, "February has no 31st, so the last day of it is the anniversary")]
-    [InlineData("2026-01-31", "2026-04-30", true, "April has no 31st either")]
-    [InlineData("2026-01-31", "2026-03-31", true, "March has a 31st of its own and needs no clamping")]
-    [InlineData("2026-01-30", "2026-02-28", true, "the 30th clamps in February too")]
-    [InlineData("2026-01-31", "2026-04-29", false, "the day before the clamped anniversary is not it")]
-    [InlineData("2026-01-31", "2026-03-30", false, "March has a 31st, so the 30th is an ordinary day")]
-    public async Task InactivityWarning_FindsTheAnniversaryInAMonthTooShortForIt(
-        string created, string now, bool expected, string because)
-    {
-        // Idle for exactly six months on the day it is looked at, which is this warning's window.
-        var context = FreeIdleSince(created, now, Date(now).AddMonths(-6));
-
-        (await AsksToSendAsync<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>(context))
-            .Should().Be(expected, because);
-    }
-
-    /// <summary>
-    /// The installation stamps the day it started counting towards deleting unused portals, and the
-    /// warnings say nothing before it. Otherwise an upgrade mails every portal that has been idle since
-    /// long before anybody was watching - and deletes them a week later.
-    /// </summary>
-    [Fact]
-    public async Task InactivityWarnings_StaySilentUntilTheInstallationStartedCounting()
-    {
-        var idle = Idle(Fresh, months: 6) with { Quota = Quota(free: true) };
-
-        (await AsksToSendAsync<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>(idle))
-            .Should().BeTrue();
-
-        var counting = idle with { UnusedPortalNotifyFrom = _today.AddDays(1) };
-
-        (await AsksToSendAsync<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>(counting))
-            .Should().BeFalse("the installation only starts counting tomorrow");
-
-        (await AsksToSendAsync<SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction>(
-            Idle(Fresh, months: 3) with { Quota = Quota(free: true), UnusedPortalNotifyFrom = _today.AddDays(1) }))
-            .Should().BeFalse("and the other warning carries the same guard, separately written");
-    }
-
-    /// <summary>
     /// A trial is not a subscription that lapses: the SaaS payment warnings are guarded on
     /// <c>State &gt;= TariffState.Paid</c>, and a trial sits below it. The dates are identical to a paid
     /// tariff's, so nothing but the state keeps these letters away from a portal that owes nothing.
@@ -644,70 +489,4 @@ public class PeriodicLetterScheduleTests
             ).Should().BeFalse("nor does a trial open a grace period to announce");
     }
 
-    /// <summary>
-    /// When a portal has run out of chances. This is the one predicate here that does not send a letter
-    /// but deletes the portal, which is why it is worth asking directly rather than only through the
-    /// deletion it triggers.
-    /// </summary>
-    [Fact]
-    public async Task AbandonedPortal_FreeOneIsRemovedAWeekAfterTheLastWarning()
-    {
-        // 2026-06-09 is a week before _today, so that day is the anniversary the last warning went out on.
-        var context = FreeIdleSince("2024-06-09", "2026-06-16", Date("2025-12-09"));
-
-        (await context.GetAbandonedReasonAsync()).Should().Be(AbandonedPortalReason.Inactive,
-            "six months and a week of silence, checked a week after the warning");
-
-        (await (context with { LastActivity = Activity(Date("2025-12-10")) }).GetAbandonedReasonAsync())
-            .Should().BeNull("a day short of six months and a week is not yet");
-    }
-
-    [Fact]
-    public async Task AbandonedPortal_FreeOneIsOnlyLookedAtAWeekAfterAnAnniversary()
-    {
-        var context = FreeIdleSince("2024-06-09", "2026-06-16", Date("2025-12-09"));
-
-        (await (context with { CreatedDate = Date("2024-06-10") }).GetAbandonedReasonAsync())
-            .Should().BeNull("a week ago was not this portal's anniversary, so nothing was warned then");
-    }
-
-    [Fact]
-    public async Task AbandonedPortal_FreeOneWaitsForTheInstallationToStartCounting()
-    {
-        var context = FreeIdleSince("2024-06-09", "2026-06-16", Date("2025-12-09"));
-
-        (await (context with { UnusedPortalNotifyFrom = Date("2026-06-10") }).GetAbandonedReasonAsync())
-            .Should().BeNull("the warning week has not passed since the installation started counting");
-
-        (await (context with { UnusedPortalNotifyFrom = Date("2026-06-09") }).GetAbandonedReasonAsync())
-            .Should().Be(AbandonedPortalReason.Inactive, "a week to the day is a week");
-    }
-
-    [Fact]
-    public async Task AbandonedPortal_PaidOneIsRemovedSixMonthsAndAWeekAfterTheTariffLapsed()
-    {
-        var lapsed = Lapsed(Fresh, due: _today.AddMonths(-6).AddDays(-7));
-
-        (await lapsed.GetAbandonedReasonAsync()).Should().Be(AbandonedPortalReason.Unpaid);
-
-        (await Lapsed(Fresh, due: _today.AddMonths(-6).AddDays(-6)).GetAbandonedReasonAsync())
-            .Should().BeNull("a day short of the six months and a week");
-
-        // No anniversary anywhere in it: a lapsed tariff is counted from its own due date, and _today is
-        // not the anniversary of this portal's creation.
-        (await (lapsed with { CreatedDate = _today.AddDays(3) }).GetAbandonedReasonAsync())
-            .Should().Be(AbandonedPortalReason.Unpaid);
-    }
-
-    [Fact]
-    public async Task AbandonedPortal_PaidOneStillOnItsTariffIsLeftAlone()
-    {
-        (await Paid(Fresh, due: _today.AddYears(1)).GetAbandonedReasonAsync()).Should().BeNull();
-
-        (await Delayed(Fresh, delay: _today.AddDays(3)).GetAbandonedReasonAsync())
-            .Should().BeNull("a grace period is not a lapsed tariff");
-
-        (await (Lapsed(Fresh, due: _today.AddMonths(-12)) with { DueDateIsNotMax = false }).GetAbandonedReasonAsync())
-            .Should().BeNull("with no due date there is nothing to count six months from");
-    }
 }

@@ -41,7 +41,7 @@ public class PortalRetentionScheduleTests
 {
     private static readonly PortalRetentionOptions _options = new();
 
-    /// <summary>The day the count starts. The policy was switched on long before it.</summary>
+    /// <summary>The day the count starts. The policy first ran long before it.</summary>
     private static readonly DateTime _start = new(2026, 1, 10);
 
     private static readonly DateTime _policyStart = new(2025, 1, 1);
@@ -226,23 +226,23 @@ public class PortalRetentionScheduleTests
     }
 
     [Fact]
-    public void PolicyStart_CountsFromTheDayThePolicyWasSwitchedOn()
+    public void PolicyStart_CountsFromThePolicysFirstRun()
     {
         var policyStart = new DateTime(2026, 9, 1);
         var schedule = _options.For(PortalRetentionCategory.Free);
 
-        // Idle for years when the policy is switched on: nothing happens on the first night ...
+        // Idle for years when the policy first runs: nothing happens on the first night ...
         PortalRetentionSchedule.Decide(schedule, new DateTime(2023, 1, 1), policyStart, null, policyStart)
             .Step.Should().Be(PortalRetentionStep.None);
 
-        // ... it gets the whole chain counted from the switch ...
+        // ... it gets the whole chain counted from the first run ...
         PortalRetentionSchedule.Decide(schedule, new DateTime(2023, 1, 1), policyStart, null, policyStart.AddDays(30))
             .Letter.Should().Be(PortalRetentionLetter.FirstNotice);
 
         PortalRetentionSchedule.Decide(schedule, new DateTime(2023, 1, 1), policyStart, null, policyStart.AddDays(60))
             .Step.Should().Be(PortalRetentionStep.Block);
 
-        // ... while a portal active after the switch is counted from its own activity.
+        // ... while a portal active after the first run is counted from its own activity.
         PortalRetentionSchedule.Decide(schedule, policyStart.AddDays(10), policyStart, null, policyStart.AddDays(60))
             .Step.Should().Be(PortalRetentionStep.None);
     }
@@ -263,26 +263,25 @@ public class PortalRetentionScheduleTests
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["core:retention:enabled"] = "true",
+                ["core:retention:dryRun"] = "true",
                 ["core:retention:free:blockAfterDays"] = "45"
             })
             .Build();
 
         var options = new PortalRetentionConfiguration(configuration).Options;
 
-        options.Enabled.Should().BeTrue();
-        options.DryRun.Should().BeFalse();
+        options.DryRun.Should().BeTrue();
         options.Free.BlockAfterDays.Should().Be(45);
         options.Free.FirstNoticeDays.Should().Be(30, "a threshold the section does not name keeps its default");
         options.FormerPaying.RetentionDays.Should().Be(90);
     }
 
     [Fact]
-    public void Options_WithoutTheSection_AreSwitchedOff()
+    public void Options_WithoutTheSection_ApplyThePolicyForReal()
     {
         var options = new PortalRetentionConfiguration(new ConfigurationBuilder().Build()).Options;
 
-        options.Enabled.Should().BeFalse();
+        options.DryRun.Should().BeFalse("the policy applies unless a dry run is asked for");
         options.WithBalance.BlockAfterDays.Should().Be(365);
     }
 }
