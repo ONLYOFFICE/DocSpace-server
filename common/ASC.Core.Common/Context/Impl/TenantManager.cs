@@ -91,6 +91,12 @@ public class TenantManager(
         return tenantService.GetTenantsAsync(ids);
     }
 
+    /// <summary>The portals in any of the given states, e.g. the active and the blocked ones the retention job walks.</summary>
+    public async Task<List<Tenant>> GetTenantsByStatusAsync(params TenantStatus[] statuses)
+    {
+        return (await tenantService.GetTenantsByStatusAsync(statuses)).ToList();
+    }
+
     public Task<Tenant> GetTenantAsync(int tenantId)
     {
         return tenantService.GetTenantAsync(tenantId);

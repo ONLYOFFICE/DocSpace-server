@@ -92,6 +92,13 @@ public class DbTenantService(
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Tenant>> GetTenantsByStatusAsync(IEnumerable<TenantStatus> statuses)
+    {
+        await using var tenantDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        return await tenantDbContext.TenantsByStatusAsync(statuses).Select(r => r.Map()).ToListAsync();
+    }
+
     public async Task<IEnumerable<Tenant>> GetTenantsAsync(string login, string passwordHash)
     {
         ArgumentException.ThrowIfNullOrEmpty(login);
@@ -219,7 +226,7 @@ public class DbTenantService(
 
         return await tenantDbContext.Tenants
             .Where(t => t.Id != -1)
-            .Where(t => t.Status != TenantStatus.Suspended && t.Status != TenantStatus.RemovePending)
+            .Where(t => t.Status != TenantStatus.Suspended && t.Status != TenantStatus.RemovePending && t.Status != TenantStatus.Blocked)
             .OrderBy(a => a.Status)
             .ThenBy(a => a.Id)
             .Project()

@@ -39,6 +39,7 @@ public interface ITenantService
     byte[] GetTenantSettings(int tenant, string key);
     Task<IEnumerable<Tenant>> GetTenantsAsync(DateTime from, bool active = true);
     Task<IEnumerable<Tenant>> GetTenantsAsync(List<int> ids);
+    Task<IEnumerable<Tenant>> GetTenantsByStatusAsync(IEnumerable<TenantStatus> statuses);
     Task<IEnumerable<Tenant>> GetTenantsAsync(string login, string passwordHash);
     Task<IEnumerable<TenantVersion>> GetTenantVersionsAsync();
     Task<Tenant> GetTenantAsync(int id);

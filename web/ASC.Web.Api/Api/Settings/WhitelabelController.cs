@@ -250,7 +250,7 @@ public class WhitelabelController(
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "The logo slots of the portal, each with its target size and the URLs of the light and dark images", typeof(IAsyncEnumerable<WhiteLabelItemDto>))]
-    [AllowNotPayment, AllowAnonymous, AllowSuspended]
+    [AllowNotPayment, AllowAnonymous, AllowSuspended, AllowBlocked]
     [HttpGet("whitelabel/logos")]
     public async IAsyncEnumerable<WhiteLabelItemDto> GetWhiteLabelLogos([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {

@@ -99,7 +99,7 @@ public partial class SettingsController(
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Current portal settings, tailored to the caller's authentication state", typeof(SettingsDto))]
     [HttpGet("")]
-    [AllowNotPayment, AllowSuspended, AllowAnonymous]
+    [AllowNotPayment, AllowSuspended, AllowBlocked, AllowAnonymous]
     public async Task<SettingsDto> GetPortalSettings(PortalSettingsRequestDto inDto)
     {
         var studioAdminMessageSettings = await settingsManager.LoadAsync<StudioAdminMessageSettings>();
@@ -856,7 +856,7 @@ public partial class SettingsController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Current color theme configuration: saved themes, selected theme, and plan limit", typeof(CustomColorThemesSettingsDto))]
-    [AllowAnonymous, AllowNotPayment, AllowSuspended]
+    [AllowAnonymous, AllowNotPayment, AllowSuspended, AllowBlocked]
     [HttpGet("colortheme")]
     public async Task<CustomColorThemesSettingsDto> GetPortalColorTheme()
     {

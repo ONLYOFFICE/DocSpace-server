@@ -39,5 +39,12 @@ public class AllowNotPaymentAttribute : Attribute;
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
 public class AllowSuspendedAttribute : Attribute;
 
+/// <summary>
+/// Lets an action through while the portal is blocked by the retention policy: what the "portal is
+/// blocked" page needs to render, and the unblocking itself.
+/// </summary>
+[AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
+public class AllowBlockedAttribute : Attribute;
+
 [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class)]
 public class AiFeatureAttribute : Attribute;

@@ -488,7 +488,7 @@ public class AuthenticationController(
     [Tags("Authentication")]
     [SwaggerResponse(200, "Whether the confirmation link may be used, with the room and the email it was issued for when it is an invitation", typeof(ConfirmDto))]
     [SwaggerResponse(403, "The portal's IP restrictions do not allow this address to check an invitation link")]
-    [AllowNotPayment, AllowSuspended, AllowAnonymous]
+    [AllowNotPayment, AllowSuspended, AllowBlocked, AllowAnonymous]
     [HttpPost("confirm")]
     public async Task<ConfirmDto> CheckConfirm(EmailValidationKeyModel inDto)
     {

@@ -207,6 +207,11 @@ internal class CachedTenantService : ITenantService
         return await _service.GetTenantsAsync(ids);
     }
 
+    public async Task<IEnumerable<Tenant>> GetTenantsByStatusAsync(IEnumerable<TenantStatus> statuses)
+    {
+        return await _service.GetTenantsByStatusAsync(statuses);
+    }
+
     public async Task<Tenant> RestoreTenantAsync(Tenant oldTenant, Tenant newTenant, CoreSettings coreSettings)
     {
         newTenant = await _service.RestoreTenantAsync(oldTenant, newTenant, coreSettings);

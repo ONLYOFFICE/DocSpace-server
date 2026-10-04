@@ -58,5 +58,14 @@ public enum TenantStatus
     Migrating = 5,
 
     [Description("Encryption")]
-    Encryption = 6
+    Encryption = 6,
+
+    /// <summary>
+    /// Blocked by the retention policy after a long period without use: its users can no longer sign in
+    /// and its content is kept until the deletion date announced to the owner. The owner of a portal
+    /// that has paid before can unblock it from the link in the letter; a free portal is unblocked
+    /// through support. A blocked portal that nobody unblocks is deleted at the end of the retention period.
+    /// </summary>
+    [Description("Blocked")]
+    Blocked = 7
 }
