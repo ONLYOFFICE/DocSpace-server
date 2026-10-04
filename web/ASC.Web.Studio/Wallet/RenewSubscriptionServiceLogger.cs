@@ -47,9 +47,6 @@ internal static partial class RenewSubscriptionServiceLogger
     [LoggerMessage(LogLevel.Warning, "Subscription renewal outcome is unknown, billing did not answer, will re-check: tenant {tenantId}, {description}")]
     public static partial void WarningRenewSubscriptionServiceOutcomeUnknown(this ILogger<RenewSubscriptionService> logger, int tenantId, string description);
 
-    [LoggerMessage(LogLevel.Error, "Pending subscription renewal for tenant {tenantId} refers to unknown wallet quota {quotaId}, dropped")]
-    public static partial void ErrorRenewSubscriptionServiceUnknownPendingQuota(this ILogger<RenewSubscriptionService> logger, int tenantId, int quotaId);
-
     [LoggerMessage(LogLevel.Warning, "Subscription renewal is not confirmed by check {check}: tenant {tenantId}, {description}: {reason}")]
     public static partial void WarningRenewSubscriptionServiceNotConfirmed(this ILogger<RenewSubscriptionService> logger, int tenantId, string description, int check, string reason);
 

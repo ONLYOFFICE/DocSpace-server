@@ -282,7 +282,9 @@ public class RenewSubscriptionService(
 
                 await AddPendingRenewalAsync(new PendingRenewal(
                     data.TenantId,
-                    renewedQuota.TenantId,
+                    renewedQuota.ProductId,
+                    description,
+                    renewedQuota.ServiceName,
                     renewedQuantity,
                     data.DueDate.Value,
                     owner.Id,
@@ -304,7 +306,7 @@ public class RenewSubscriptionService(
             logger.ErrorWithException(ex);
         }
 
-        await SendRenewSubscriptionErrorAsync(data.TenantId, renewedQuota, renewedQuantity, payer, owner);
+        await SendRenewSubscriptionErrorAsync(data.TenantId, Describe(renewedQuota, renewedQuantity), renewedQuota.ServiceName, renewedQuantity, payer, owner);
     }
 
     // the quota name and quantity the logs and the audit trail show for a renewal, e.g. "adminwallet 2"
@@ -352,14 +354,7 @@ public class RenewSubscriptionService(
     // Returns the renewal to check again on the next run, or null once it is settled.
     private async Task<PendingRenewal> VerifyPendingRenewalAsync(PendingRenewal renewal)
     {
-        if (!_walletQuotas.TryGetValue(renewal.QuotaId, out var quota))
-        {
-            logger.ErrorRenewSubscriptionServiceUnknownPendingQuota(renewal.TenantId, renewal.QuotaId);
-
-            return null;
-        }
-
-        var description = Describe(quota, renewal.Quantity);
+        var description = renewal.Description;
         var check = renewal.Checks + 1;
 
         await using var scope = _scopeFactory.CreateAsyncScope();
@@ -370,7 +365,7 @@ public class RenewSubscriptionService(
         try
         {
             var tariffService = scope.ServiceProvider.GetRequiredService<ITariffService>();
-            extended = await tariffService.IsSubscriptionExtendedAsync(renewal.TenantId, quota.ProductId, renewal.PreviousDueDate);
+            extended = await tariffService.IsSubscriptionExtendedAsync(renewal.TenantId, renewal.ProductId, renewal.PreviousDueDate);
         }
         catch (Exception ex)
         {
@@ -391,7 +386,7 @@ public class RenewSubscriptionService(
                 logger.ErrorWithException(error);
             }
 
-            await SendRenewSubscriptionErrorAsync(renewal, quota);
+            await SendRenewSubscriptionErrorAsync(renewal);
 
             return null;
         }
@@ -437,7 +432,7 @@ public class RenewSubscriptionService(
         await hybridCache.SetAsync(PendingCacheKey, pending, TimeSpan.FromDays(1));
     }
 
-    private async Task SendRenewSubscriptionErrorAsync(PendingRenewal renewal, TenantQuota quota)
+    private async Task SendRenewSubscriptionErrorAsync(PendingRenewal renewal)
     {
         UserInfo payer = null;
         UserInfo owner = null;
@@ -462,14 +457,14 @@ public class RenewSubscriptionService(
             logger.ErrorWithException(ex);
         }
 
-        await SendRenewSubscriptionErrorAsync(renewal.TenantId, quota, renewal.Quantity, payer, owner);
+        await SendRenewSubscriptionErrorAsync(renewal.TenantId, renewal.Description, renewal.ServiceName, renewal.Quantity, payer, owner);
     }
 
-    private async Task SendRenewSubscriptionErrorAsync(int tenantId, TenantQuota quota, int quantity, UserInfo payer, UserInfo owner)
+    private async Task SendRenewSubscriptionErrorAsync(int tenantId, string description, string serviceName, int quantity, UserInfo payer, UserInfo owner)
     {
         try
         {
-            logger.ErrorRenewSubscriptionServiceFail(tenantId, Describe(quota, quantity));
+            logger.ErrorRenewSubscriptionServiceFail(tenantId, description);
 
             await using var scope = _scopeFactory.CreateAsyncScope();
 
@@ -481,7 +476,7 @@ public class RenewSubscriptionService(
 
             var studioNotifyService = scope.ServiceProvider.GetRequiredService<StudioNotifyService>();
             // the letter names the service the way the customer operations report does, keyed by the billing service name
-            await studioNotifyService.SendRenewSubscriptionErrorAsync(payer, owner, quota.ServiceName ?? quota.Name, quantity);
+            await studioNotifyService.SendRenewSubscriptionErrorAsync(payer, owner, serviceName, quantity);
         }
         catch (Exception ex)
         {
@@ -490,14 +485,18 @@ public class RenewSubscriptionService(
     }
 
     /// <summary>
-    /// A renewal the billing service did not answer about: <see cref="Quantity"/> of wallet quota
-    /// <see cref="QuotaId"/>. Renewed as soon as billing reports that subscription as ending after
-    /// <see cref="PreviousDueDate"/>; failed when that has not happened after <see cref="MaxRenewVerifyChecks"/>
-    /// checks (<see cref="Checks"/> counts the ones already made).
+    /// A renewal the billing service did not answer about. Renewed as soon as billing reports the subscription to
+    /// <see cref="ProductId"/> as ending after <see cref="PreviousDueDate"/>; failed when that has not happened
+    /// after <see cref="MaxRenewVerifyChecks"/> checks (<see cref="Checks"/> counts the ones already made).
+    /// Self-contained on purpose: it is settled without looking the wallet quota up again, so it cannot be lost
+    /// to a quota that is gone by then. <see cref="Description"/> is the log and audit text ("adminwallet 2"),
+    /// <see cref="ServiceName"/> and <see cref="Quantity"/> fill the failure letter.
     /// </summary>
     private sealed record PendingRenewal(
         int TenantId,
-        int QuotaId,
+        string ProductId,
+        string Description,
+        string ServiceName,
         int Quantity,
         DateTime PreviousDueDate,
         Guid OwnerId,
