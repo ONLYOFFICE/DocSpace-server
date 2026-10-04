@@ -69,6 +69,7 @@ global using ASC.Core.Common;
 global using ASC.Core.Common.Configuration;
 global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.EF.Model;
+global using ASC.Core.Common.Identity;
 global using ASC.Core.Common.Notify.Push;
 global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Features;

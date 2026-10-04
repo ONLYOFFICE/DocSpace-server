@@ -31,15 +31,14 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.Core.Common.Identity;
-
 using Constants = ASC.Core.Users.Constants;
 
 namespace ASC.Web.Studio.Core.Notify;
 
 /// <summary>
-/// The daily tariff job. It walks every portal, deletes the ones that have been abandoned long enough,
-/// and then asks each periodic letter whether today is its day for that portal.
+/// The daily tariff job. It walks every portal, applies the retention policy to it (or, while the policy
+/// is switched off, the old six-month deletion rule), and then asks each periodic letter whether today
+/// is its day for that portal.
 ///
 /// It used to decide that itself, in one <c>else if</c> chain per edition that filled forty shared
 /// locals; the letters now answer for themselves (<see cref="BasePeriodicNotifyAction"/>), so adding one
@@ -54,15 +53,13 @@ public class StudioPeriodicNotify(
     UserManager userManager,
     StudioNotifyHelper studioNotifyHelper,
     ITariffService tariffService,
-    ApiSystemHelper apiSystemHelper,
-    CoreBaseSettings coreBaseSettings,
     CoreSettings coreSettings,
     IServiceProvider serviceProvider,
     AuditEventsRepository auditEventsRepository,
     LoginEventsRepository loginEventsRepository,
     IFusionCache hybridCache,
-    IEventBus eventBus,
-    IdentityClient identityClient,
+    PortalRemovalService portalRemovalService,
+    PortalRetentionJob portalRetentionJob,
     SecurityContext securityContext)
 {
     private readonly ILogger _log = loggerFactory.CreateLogger("ASC.Notify");
@@ -107,15 +104,30 @@ public class StudioPeriodicNotify(
         typeof(DeveloperAdminPaymentWarningGracePeriodExpirationNotifyAction)
     ];
 
-    private static string GetCspKey(string domain) => $"csp:{domain}";
+    /// <summary>
+    /// The inactivity warnings of the old six-month rule. With the retention policy on, its own letters
+    /// take their place, and these would promise the owner a deletion that is no longer the one coming.
+    /// </summary>
+    private static readonly HashSet<Type> _replacedByRetention =
+    [
+        typeof(SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction),
+        typeof(SaasAdminStartupWarningAfterHalfYearV1NotifyAction),
+        typeof(SaasAdminWarningAfterThreeMonthsV1NotifyAction),
+        typeof(SaasAdminWarningAfterHalfYearV1NotifyAction)
+    ];
 
     public async ValueTask SendSaasLettersAsync(string senderName, DateTime scheduleDate)
     {
         _log.InformationStartSendSaasTariffLetters();
 
-        var activeTenants = await tenantManager.GetTenantsAsync();
+        var retention = portalRetentionJob.Options.Enabled;
 
-        if (activeTenants.Count <= 0)
+        // The retention policy also walks the portals it has blocked: they are deleted, or reminded, from here.
+        var tenants = retention
+            ? await tenantManager.GetTenantsByStatusAsync(TenantStatus.Active, TenantStatus.Blocked)
+            : await tenantManager.GetTenantsAsync();
+
+        if (tenants.Count <= 0)
         {
             _log.InformationEndSendSaasTariffLetters();
             return;
@@ -123,12 +135,14 @@ public class StudioPeriodicNotify(
 
         var nowDate = scheduleDate.Date;
         var notifyUnusedFrom = await GetUnusedPortalNotifyStartAsync(nowDate);
+        var retentionStart = retention ? await portalRetentionJob.GetPolicyStartAsync(nowDate) : default;
+        var letters = retention ? _saasLetters.Where(l => !_replacedByRetention.Contains(l)).ToArray() : _saasLetters;
 
         // The paid add-ons the wallet is charged for, by quota id: their titles are what the upcoming
         // payment letter lists. Global and cached, so they are read once for all tenants.
         var walletQuotas = (await tenantManager.GetTenantQuotasAsync(all: true, wallet: true)).ToDictionary(q => q.TenantId);
 
-        foreach (var tenant in activeTenants)
+        foreach (var tenant in tenants)
         {
             try
             {
@@ -136,15 +150,19 @@ public class StudioPeriodicNotify(
 
                 var context = await BuildContextAsync(tenant, nowDate, notifyUnusedFrom);
 
-                // Before any letter: a portal removed here must not be written to afterwards.
-                if (await TryRemoveAbandonedPortalAsync(context))
+                // Before any letter: a portal blocked or removed here must not be written to afterwards.
+                var leaveAlone = retention
+                    ? await portalRetentionJob.ApplyAsync(context, retentionStart)
+                    : await TryRemoveAbandonedPortalAsync(context);
+
+                if (leaveAlone)
                 {
                     continue;
                 }
 
                 var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
 
-                await SendLettersAsync(_saasLetters, context, client, senderName);
+                await SendLettersAsync(letters, context, client, senderName);
 
                 // Every add-on renews on its own due date, whatever the tariff state is, so this reminder
                 // is sent on its own and takes no part in the letters above.
@@ -272,7 +290,8 @@ public class StudioPeriodicNotify(
     /// <summary>
     /// Deletes a portal that has run out of chances: a free one left idle for six months and a week, or
     /// a paid one whose tariff lapsed that long ago. Returns true when the caller must leave this portal
-    /// alone for the rest of the run - it is either gone, or deliberately spared.
+    /// alone for the rest of the run - it is either gone, or deliberately spared. This is the rule that
+    /// applies while the retention policy (<see cref="PortalRetentionJob"/>) is switched off.
     /// </summary>
     /// <remarks>
     /// This is not a notification, which is why it does not live among the letters. It runs first so that
@@ -309,17 +328,7 @@ public class StudioPeriodicNotify(
         try
         {
             await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
-            await identityClient.DeleteTenantClientsAsync(false);
-            await tenantManager.RemoveTenantAsync(tenant, true);
-
-            if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
-            {
-                await apiSystemHelper.RemoveTenantFromCacheAsync(tenantDomain);
-            }
-
-            await hybridCache.RemoveAsync(GetCspKey(tenantDomain));
-
-            await eventBus.PublishAsync(new RemovePortalIntegrationEvent(Guid.Empty, tenant.Id));
+            await portalRemovalService.RemoveAsync(tenant, Guid.Empty, auto: true);
         }
         finally
         {

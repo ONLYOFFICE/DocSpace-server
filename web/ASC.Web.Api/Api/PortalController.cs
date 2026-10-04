@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.Core.Common.Identity;
-
 using Microsoft.AspNetCore.RateLimiting;
 
 using Constants = ASC.Core.Users.Constants;
@@ -90,9 +88,8 @@ public class PortalController(
     QuotaHelper quotaHelper,
     QuotaSocketManager quotaSocketManager,
     ApiDateTimeHelper apiDateTimeHelper,
-    IEventBus eventBus,
     CspSettingsHelper cspSettingsHelper,
-    IdentityClient client,
+    PortalRemovalService portalRemovalService,
     InvitationLinkDtoHelper invitationLinkDtoHelper,
     CountPaidUserChecker countPaidUserChecker)
     : ControllerBase
@@ -1161,32 +1158,25 @@ public class PortalController(
         var tariff = await tariffService.GetTariffAsync(tenant.Id);
         var quota = await tenantManager.GetTenantQuotaAsync(tenant.Id);
 
-        await client.DeleteTenantClientsAsync();
-        await tenantManager.RemoveTenantAsync(tenant);
-
-        if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
-        {
-            await apiSystemHelper.RemoveTenantFromCacheAsync(tenantDomain);
-        }
-
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
 
         var redirectLink = externalResourceSettingsHelper.Site.GetRegionalFullEntry("registrationcanceled");
 
-        await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
-
-        messageService.Send(MessageAction.PortalDeleted);
-
-        await cspSettingsHelper.RemoveFromCacheAsync(tenantDomain);
-        await cspSettingsHelper.UpdateBaseDomainAsync();
-
-        if (!coreBaseSettings.Standalone && !quota.Free && tariff.State >= TariffState.Paid)
+        await portalRemovalService.RemoveAsync(tenant, securityContext.CurrentAccount.ID, auto: false, async () =>
         {
-            var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-            await studioNotifyService.SendMsgPaidPortalDeletedToSupportAsync(tenantDomain, owner, customerInfo);
-        }
+            await studioNotifyService.SendMsgPortalDeletionSuccessAsync(owner, redirectLink);
 
-        await eventBus.PublishAsync(new RemovePortalIntegrationEvent(securityContext.CurrentAccount.ID, tenant.Id));
+            messageService.Send(MessageAction.PortalDeleted);
+
+            await cspSettingsHelper.RemoveFromCacheAsync(tenantDomain);
+            await cspSettingsHelper.UpdateBaseDomainAsync();
+
+            if (!coreBaseSettings.Standalone && !quota.Free && tariff.State >= TariffState.Paid)
+            {
+                var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
+                await studioNotifyService.SendMsgPaidPortalDeletedToSupportAsync(tenantDomain, owner, customerInfo);
+            }
+        });
 
         return redirectLink;
     }

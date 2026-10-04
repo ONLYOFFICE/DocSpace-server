@@ -1436,6 +1436,35 @@ public class TariffService(
 
     #region Accounting
 
+    public async Task<bool?> HasPositiveBalanceAsync(int tenantId)
+    {
+        if (!accountingClient.Configured)
+        {
+            return false;
+        }
+
+        // Not through GetCustomerBalanceAsync: it answers null both for a portal without a wallet and for
+        // a failed request, and a decision that may block a portal has to tell the two apart. It also
+        // asks the service directly, past the cache, since the answer is only needed on a few days.
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+            var balance = await accountingClient.GetCustomerBalanceAsync(portalId);
+
+            return balance?.SubAccounts?.Any(s => s.Amount > 0) ?? false;
+        }
+        catch (AccountingCustomerNotFoundException)
+        {
+            return false;
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+
+            return null;
+        }
+    }
+
     public async Task<Balance> GetCustomerBalanceAsync(int tenantId, bool refresh = false)
     {
         if (!accountingClient.Configured)
