@@ -57,6 +57,8 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Agent information", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
+    [SwaggerResponse(500, "`tags` is not a JSON array of strings")]
     [HttpGet("agents")]
     public async Task<FolderContentDto<int>> GetAgents(GetAgentListRequestDto inDto)
     {
@@ -113,6 +115,11 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Agent information", typeof(FolderDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title`, `title` is blank or longer than 170 characters, `color` is longer than 6 characters, `cover` is longer than 50 characters or not a known cover, an `email` in `share` is malformed or longer than 255 characters, `share` invites more addresses by email than the portal allows at once, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty")]
+    [SwaggerResponse(402, "The portal has reached the AI agent limit of its pricing plan or its payment is overdue, or the logo does not fit into the portal storage quota")]
+    [SwaggerResponse(403, "The caller is a user or a guest, `private` is set while the caller has no encryption keys, `quota` is set while the storage quota for AI agents is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded")]
+    [SwaggerResponse(404, "`logo.tmpFile` names no uploaded picture, or one already used")]
+    [SwaggerResponse(500, "`logo.width` or `logo.height` is larger than 2147483647")]
     [HttpPost("agents")]
     public async Task<FolderDto<int>> CreateAgent(CreateAgentRequestDto inDto)
     {
@@ -158,6 +165,11 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents/{id}</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Updated agent information", typeof(FolderDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or holds a property the room update does not define, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, a tag name is empty, or `chatSettings` is sent for a room that is not an AI agent")]
+    [SwaggerResponse(402, "The new logo or watermark image does not fit into the portal storage quota")]
+    [SwaggerResponse(403, "The caller may not edit the agent, the agent does not exist or lies in Trash or in the archive, `quota` exceeds the storage limit of the portal, or `logo.tmpFile` or a relative `watermark.imageUrl` is not an image the caller uploaded")]
+    [SwaggerResponse(404, "The uploaded image named by `logo.tmpFile` or `watermark.imageUrl` no longer exists")]
+    [SwaggerResponse(500, "`logo.width` or `logo.height` is larger than 2147483647")]
     [HttpPut("agents/{id}")]
     public async Task<FolderDto<int>> UpdateAgent(UpdateRoomRequestDto<int> inDto)
     {
@@ -173,6 +185,8 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents/{id}</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
+    [SwaggerResponse(403, "The caller may not read or delete the agent")]
+    [SwaggerResponse(404, "No AI agent has the specified ID")]
     [HttpDelete("agents/{id}")]
     public async Task<FileOperationDto> DeleteAgent(DeleteRoomRequestDto<int> inDto)
     {

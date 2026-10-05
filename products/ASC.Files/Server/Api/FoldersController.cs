@@ -92,7 +92,7 @@ public class FoldersControllerInternal(
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "One page of the folder history, the most recent record first", typeof(IAsyncEnumerable<HistoryDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, or `fromDate` or `toDate` is not a date and time ending in `Z` or a UTC offset")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or `fromDate` or `toDate` is not a date and time ending in `Z` or a UTC offset")]
     [SwaggerResponse(403, "The caller may not read this folder")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpGet("folder/{folderId:int}/log")]
@@ -121,7 +121,6 @@ public class FoldersControllerInternal(
     /// <path>api/2.0/files/folder/{folderId}/log/report</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The queued report task", typeof(DocumentBuilderTaskDto))]
-    [SwaggerResponse(400, "The `format` is neither `Xlsx` nor `Csv`, or `from` or `to` is not a date and time")]
     [SwaggerResponse(402, "The portal's pricing plan has no audit option, or the login history and audit trail section is not enabled")]
     [SwaggerResponse(403, "The caller may not export the history of this folder")]
     [SwaggerResponse(404, "The folder does not exist")]
@@ -432,7 +431,7 @@ public abstract class FoldersController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "One page of the folder contents, with the folder itself and the chain of its parents", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number or is negative, the `userIdOrGroupId` or `sharedBy` is not a GUID, the `roomId` is not a number while the folder id is one, `excludeSubject` or `withSubFolders` is not a boolean, or the `filterType`, `folderType`, `applyFilterOption`, `searchArea`, `sortOrder` or `location` is not one of the known values")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or the `roomId` is not a number while the folder id is one")]
     [SwaggerResponse(403, "The caller may not read this folder, the folder lies inside Trash, or an anonymous caller asks for a folder that does not exist")]
     [SwaggerResponse(404, "The folder does not exist")]
     [SwaggerResponse(500, "The folder lies in a third-party storage that cannot deliver it")]
@@ -734,7 +733,7 @@ public abstract class FoldersController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The primary external link of the folder", typeof(FileShareDto))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, or the `startIndex` is not a number")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(401, "An anonymous caller has no external link")]
     [SwaggerResponse(403, "The caller may not manage the links of this folder")]
     [SwaggerResponse(404, "The folder does not exist, or its primary link was revoked")]
@@ -878,7 +877,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@favorites</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Favorites\" section with one page of the entries the caller marked as favorite", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number or is negative, the `userIdOrGroupId` is not a GUID, or the `filterType` or `sortOrder` is not one of the known values")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
     [SwaggerResponse(403, "The caller is not allowed to read the \"Favorites\" section")]
     [SwaggerResponse(404, "The \"Favorites\" section could not be resolved for this account")]
     [HttpGet("@favorites")]
@@ -906,7 +905,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@my</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"My documents\" section with one page of its contents", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number or is negative, the `userIdOrGroupId` is not a GUID, or the `filterType`, `applyFilterOption` or `sortOrder` is not one of the known values")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
     [SwaggerResponse(403, "The caller is not allowed to read the \"My documents\" section")]
     [SwaggerResponse(404, "This account has no personal section")]
     [HttpGet("@my")]
@@ -946,7 +945,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/recent</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Recent\" section with one page of the files the caller opened lately", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number or is negative, the `userIdOrGroupId` is not a GUID, `excludeSubject` is not a boolean, or the `filterType`, `applyFilterOption`, `searchArea` or `sortOrder` is not one of the known values")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
     [SwaggerResponse(403, "The caller is not allowed to read the \"Recent\" section")]
     [SwaggerResponse(404, "The \"Recent\" section could not be resolved for this account")]
     [HttpGet("@recent")]
@@ -976,7 +975,7 @@ public class FoldersControllerCommon(
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The sections available to the caller, each with one page of its content", typeof(IAsyncEnumerable<FolderContentDto<int>>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number or is negative, the `userIdOrGroupId` is not a GUID, `withoutTrash` is not a boolean, or the `filterType` or `sortOrder` is not one of the known values")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
     [SwaggerResponse(403, "The caller is not allowed to read one of the sections")]
     [SwaggerResponse(404, "One of the sections could not be resolved for this account")]
     [HttpGet("@root")]
@@ -1038,7 +1037,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@trash</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Trash\" section with one page of the entries the caller deleted", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number or is negative, the `userIdOrGroupId` is not a GUID, or the `filterType`, `applyFilterOption` or `sortOrder` is not one of the known values")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
     [SwaggerResponse(403, "The caller is not allowed to read the \"Trash\" section")]
     [SwaggerResponse(404, "This account has no \"Trash\" section")]
     [HttpGet("@trash")]
@@ -1062,7 +1061,7 @@ public class FoldersControllerCommon(
     /// <path>api/2.0/files/@forms</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The \"Forms\" section with one page of the form-filling rooms available to the caller", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number or is negative, the `userIdOrGroupId` is not a GUID, or the `filterType` or `sortOrder` is not one of the known values")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
     [SwaggerResponse(403, "The caller is not allowed to read the \"Forms\" section")]
     [SwaggerResponse(404, "The \"Forms\" section could not be resolved for this account")]
     [HttpGet("@forms")]

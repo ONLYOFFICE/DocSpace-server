@@ -425,7 +425,6 @@ public class SecurityController(
     /// <path>api/2.0/settings/security/administrator</path>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "The module and the user asked about together with the flag that says whether that user administers the module", typeof(ProductAdministratorDto))]
-    [SwaggerResponse(400, "The `productid` or the `userid` is not a GUID")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("administrator")]
     public async Task<ProductAdministratorDto> GetIsProductAdministrator(UserProductIdsRequestDto inDto)

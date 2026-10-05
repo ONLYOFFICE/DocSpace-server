@@ -215,7 +215,7 @@ public class WebPluginsController(
     /// <path>api/2.0/settings/webplugins/{name}</path>
     [Tags("Settings / Webplugins")]
     [SwaggerResponse(200, "The web plugin and the files of its package are removed from the portal")]
-    [SwaggerResponse(403, "Web plugins or plugin deletion are switched off, the caller may not edit the portal settings, or the plugin is installation-wide outside a standalone installation")]
+    [SwaggerResponse(403, "Web plugins or plugin deletion are switched off, the caller has no portal-settings right, or the plugin is installation-wide outside a standalone installation")]
     [SwaggerResponse(404, "No web plugin with this manifest name is available in the portal, or the files of its package are missing from storage")]
     [HttpDelete("{name}")]
     public async Task DeleteWebPlugin(WebPluginNameRequestDto inDto)

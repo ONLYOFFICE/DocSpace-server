@@ -1068,7 +1068,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The full profiles of the matching accounts", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(400, "The `status` in the route is not one of the known values, or `query` is missing")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or `query` is missing")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [SwaggerResponse(500, "The `filterBy` is `group` and the `filterValue` is not a GUID")]
     [HttpGet("status/{status}/search")]
@@ -1118,7 +1118,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "A page of active accounts, with their full profiles", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, or the `sortOrder` is not one of the known values")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a member or a guest")]
     [SwaggerResponse(500, "The `filterBy` is `group` and the `filterValue` is not a GUID")]
     [HttpGet]
@@ -1306,7 +1306,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / User status")]
     [SwaggerResponse(200, "A page of accounts in the requested state, with their full profiles", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(400, "The `status` in the route or the `sortOrder` is not one of the known values, the `count` is outside 1-100 or not a number, or the `startIndex` is not a number")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a member or a guest")]
     [SwaggerResponse(500, "The `filterBy` is `group` and the `filterValue` is not a GUID")]
     [HttpGet("status/{status}")]
@@ -1357,7 +1357,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "A page of matching accounts, with their full profiles", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, the `groupId` or `inviterId` is not a GUID, `isAdministrator`, `withoutGroup`, `excludeGroup` or `invitedByMe` is not a boolean, or the `employeeStatus`, `activationStatus`, `employeeType`, `employeeTypes`, `payments`, `accountLoginType`, `quotaFilter`, `area` or `sortOrder` is not one of the known values")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a member or a guest")]
     [AllowNotPayment]
     [HttpGet("filter")]
@@ -1498,7 +1498,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "A page of matching accounts, with their short profiles", typeof(IAsyncEnumerable<EmployeeDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, the `groupId` or `inviterId` is not a GUID, `isAdministrator`, `withoutGroup`, `excludeGroup` or `invitedByMe` is not a boolean, or the `employeeStatus`, `activationStatus`, `employeeType`, `employeeTypes`, `payments`, `accountLoginType`, `quotaFilter`, `area` or `sortOrder` is not one of the known values")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a member or a guest")]
     [HttpGet("simple/filter")]
     public async IAsyncEnumerable<EmployeeDto> GetSimpleByFilter(SimpleByFilterRequestDto inDto)
@@ -1819,7 +1819,7 @@ public class UserController(
     /// <path>api/2.0/people/theme</path>
     [Tags("People / Theme")]
     [SwaggerResponse(200, "The interface theme that was stored", typeof(DarkThemeSettings))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `theme`, or the `theme` is not one of the known values")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `theme`")]
     [HttpPut("theme")]
     public async Task<DarkThemeSettings> ChangePortalTheme(DarkThemeSettingsRequestDto inDto)
     {
@@ -2016,7 +2016,7 @@ public class UserController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Password")]
     [SwaggerResponse(200, "The message stating that the recovery link was sent to the address", typeof(string))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `email`, the email is not a valid address or is longer than 255 characters, or `recaptchaType` is sent as a string instead of a number")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `email`, or the email is not a valid address or is longer than 255 characters")]
     [SwaggerResponse(403, "The CAPTCHA was not passed, an authenticated caller may not ask for that account, or, for an authenticated caller, the account does not exist, is disabled, comes from LDAP or SSO, or has an auto-generated email")]
     [AllowNotPayment]
     [AllowAnonymous]
@@ -2555,7 +2555,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / User type")]
     [SwaggerResponse(200, "The converted users with their detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(400, "The `type` in the route is not one of the known values, or the request body cannot be read or has no `userIds`")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `userIds`")]
     [SwaggerResponse(402, "The tariff or the paid-user quota does not allow one more paid user")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("type/{type}")]
@@ -3229,7 +3229,7 @@ public class UserControllerAdditional<T>(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The matching accounts, each with its access state for the room", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, the `inviterId` is not a GUID, `excludeShared`, `includeShared` or `invitedByMe` is not a boolean, or the `employeeStatus`, `activationStatus`, `area` or `employeeTypes` is not one of the known values")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a guest or cannot read the room")]
     [SwaggerResponse(404, "No room has the specified ID")]
     [HttpGet("room/{id}")]
@@ -3263,7 +3263,7 @@ public class UserControllerAdditional<T>(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The matching accounts, each with its access state for the folder", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, the `inviterId` is not a GUID, `excludeShared`, `includeShared` or `invitedByMe` is not a boolean, or the `employeeStatus`, `activationStatus`, `area` or `employeeTypes` is not one of the known values")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a guest or cannot read the folder")]
     [SwaggerResponse(404, "No folder has the specified ID")]
     [HttpGet("folder/{id}")]
@@ -3297,7 +3297,7 @@ public class UserControllerAdditional<T>(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The matching accounts, each with its access state for the file", typeof(IAsyncEnumerable<EmployeeFullDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, the `inviterId` is not a GUID, `excludeShared`, `includeShared` or `invitedByMe` is not a boolean, or the `employeeStatus`, `activationStatus`, `area` or `employeeTypes` is not one of the known values")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a guest or cannot read the file")]
     [SwaggerResponse(404, "No file has the specified ID")]
     [HttpGet("file/{id}")]

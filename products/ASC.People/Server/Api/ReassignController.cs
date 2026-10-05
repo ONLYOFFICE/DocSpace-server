@@ -193,7 +193,6 @@ public class ReassignController(
     /// <path>api/2.0/people/reassign/necessary</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "True if the data of the user has to be reassigned before the removal or the type change", typeof(bool))]
-    [SwaggerResponse(400, "The `userId` is not a GUID, or the `type` is not one of the known values")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet("necessary")]
     public async Task<bool> NecessaryReassign([FromQuery] NecessaryReassignDto inDto)

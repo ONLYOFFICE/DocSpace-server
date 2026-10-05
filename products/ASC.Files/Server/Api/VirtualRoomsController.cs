@@ -125,6 +125,7 @@ public class VirtualRoomsInternalController(
     /// <path>api/2.0/files/rooms/{id}/ai</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "One page of the .ai folder contents, with the folder itself and the chain of its parents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
     [SwaggerResponse(403, "The caller may not read this room")]
     [SwaggerResponse(404, "The room does not exist or holds no .ai folder")]
     [HttpGet("{id}/ai")]
@@ -377,9 +378,9 @@ public class VirtualRoomsThirdPartyController(
     /// <path>api/2.0/files/rooms/thirdparty/{id}</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room created out of the third-party folder, with string identifiers", typeof(FolderDto<string>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `roomType` is sent as a string instead of a number or is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected")]
     [SwaggerResponse(402, "The portal has reached the room limit of its pricing plan or its payment is overdue")]
-    [SwaggerResponse(403, "The storage account was not connected for room storage or already backs a room, the room would be public while the portal forbids external sharing, or, with `createAsNewFolder`, the subfolder cannot be created, as when the caller is a user or a guest, `title` is blank, `cover` is not a known cover, a tag name is empty or the logo cannot be applied")]
+    [SwaggerResponse(403, "The caller is not the account that connected the storage or may not create rooms, the storage account was not connected for room storage or already backs a room, the room would be public while the portal forbids external sharing, or, with `createAsNewFolder`, the subfolder cannot be created, as when `title` is blank, `cover` is not a known cover, a tag name is empty or the logo cannot be applied")]
     [SwaggerResponse(404, "`id` is not a folder of a connected third-party storage: a plain number, an identifier with a storage type the portal does not know, or a folder the storage does not have")]
     [SwaggerResponse(500, "The identifier carries a storage account number beyond the 32-bit range, or `logo.width` or `logo.height` is larger than 2147483647")]
     [HttpPost("thirdparty/{id}")]
@@ -776,7 +777,7 @@ public abstract class VirtualRoomsController<T>(
     /// <collection>list</collection>
     [Tags("Rooms")]
     [SwaggerResponse(200, "One page of the room access entries, ordered by role and then by name", typeof(IAsyncEnumerable<FileShareDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, `filterType` is not a known filter, or a third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(403, "The caller may not read the room")]
     [SwaggerResponse(404, "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
     [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
@@ -815,7 +816,7 @@ public abstract class VirtualRoomsController<T>(
     [SwaggerResponse(400, "The request body cannot be read, `linkType` or `access` is not a known value, the title or password is longer than 255 characters, `maxUseCount` is outside 1-1000 or below the number of times the invitation link was already used, the password does not meet the portal password policy, `expirationDate` lies more than 10 years ahead or, for an invitation link, in the past, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(403, "The caller may not manage the links of this room, the access level is not available for this kind of link in this room, the room already has its invitation link or the link limit is reached, or the admin's restriction on external links forbids the change")]
     [SwaggerResponse(404, "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
-    [SwaggerResponse(500, "`linkType` is 0 and `linkId` is the id of the room owner's account, or a third-party identifier carries a storage account number beyond the 32-bit range")]
+    [SwaggerResponse(500, "`linkType` is `Invitation` and `linkId` is the id of the room owner's account, or a third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPut("{id}/links")]
     public async Task<FileShareDto> SetRoomLink(RoomLinkRequestDto<T> inDto)
     {
@@ -867,7 +868,7 @@ public abstract class VirtualRoomsController<T>(
     /// <collection>list</collection>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The sharing links of the room", typeof(IAsyncEnumerable<FileShareDto>))]
-    [SwaggerResponse(400, "`type` is not a known link type, or a third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(403, "The caller may not read the room")]
     [SwaggerResponse(404, "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
     [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
@@ -1183,7 +1184,7 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/resend</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The invitations that were still pending have been sent again")]
-    [SwaggerResponse(400, "The request body cannot be read or an entry of `usersIds` is not a GUID, or a third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(400, "The request body cannot be read, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(403, "The caller is not a manager of the room, or the room is archived")]
     [SwaggerResponse(404, "The room does not exist or is a room template, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
     [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
@@ -1303,7 +1304,7 @@ public class VirtualRoomsCommonController(
     /// <path>api/2.0/files/rooms</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The rooms of the selected section with the paging counters", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number or is negative, the `subjectId` or `subjectOwnerId` is not a GUID, the `groupId` is not a number, `withoutTags` or `excludeSubject` is not a boolean, `tags` is not a JSON array of strings, or the `type`, `searchArea`, `provider`, `quotaFilter`, `storageFilter`, `privacyFilter`, `sortBy` or `sortOrder` is not one of the known values")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or `tags` is not a JSON array of strings")]
     [SwaggerResponse(403, "The caller cannot read the selected section")]
     [HttpGet("rooms")]
     public async Task<FolderContentDto<int>> GetRoomsFolder(RoomContentRequestDto inDto)
@@ -1507,7 +1508,7 @@ public class VirtualRoomsCommonController(
     /// <collection>list</collection>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The tag names available to the caller", typeof(IAsyncEnumerable<string>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, or the `startIndex` is negative or not a number")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
     [HttpGet("tags")]
     public IAsyncEnumerable<string> GetRoomTagsInfo(GetTagsInfoRequestDto inDto)
     {

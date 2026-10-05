@@ -18,6 +18,8 @@ Run from anywhere inside the repository:
   scan.py --diff-check FILE...  only [SwaggerResponse] lines changed since the snapshot (HEAD if there is none);
                                 BOM and line endings intact
   scan.py --verify-doc ID|FILE...              declared codes and texts are in the regenerated document
+  scan.py --audit-catches [ID|FILE...]         declared codes every found producer of which is caught on the way,
+                                               services followed (all actions when none is named)
 
 The exception -> status table and the global MVC filters are read, per host project, from the startup class chain
 that registers them (AddExceptionHandler<T>, Filters.Add), so a service with its own handler gets its own table.
@@ -77,27 +79,32 @@ MODIFIERS = r"(?:(?:public|private|protected|internal|static|async|override|virt
 
 # ---------------------------------------------------------------- lexing
 
-def blank(src):
-    """Same-length copy of a C# source with comments and string/char literal contents replaced by spaces."""
+def blank(src, strings=True):
+    """Same-length copy of a C# source with comments and string/char literal contents replaced by spaces.
+    With strings=False only the comments go: what the compiler sees, attribute texts included."""
     out = list(src)
     i, n = 0, len(src)
 
-    def wipe(a, b):
+    def wipe(a, b, literal=True):
+        if literal and not strings:
+            return
         for k in range(a, b):
             if out[k] not in "\r\n":
                 out[k] = " "
 
     while i < n:
         c = src[i]
-        if c == "/" and src.startswith("//", i):
+        if c == "/" and src.startswith("//", i) or c == "#" and not src[src.rfind("\n", 0, i) + 1:i].strip():
+            # a comment, or a preprocessor line (#region, #endregion, #if ...): between an action's attributes
+            # and the previous declaration, a #region line would hide the action from the method parser
             j = src.find("\n", i)
             j = n if j < 0 else j
-            wipe(i, j)
+            wipe(i, j, literal=False)
             i = j
         elif c == "/" and src.startswith("/*", i):
             j = src.find("*/", i + 2)
             j = n if j < 0 else j + 2
-            wipe(i, j)
+            wipe(i, j, literal=False)
             i = j
         elif c == "'":
             j = i + 1
@@ -204,6 +211,7 @@ class SourceFile:
         self.rel = path.relative_to(ROOT).as_posix()
         self.src = path.read_text(encoding="utf-8-sig", errors="replace")
         self.bl = blank(self.src)
+        self.nc = blank(self.src, strings=False)      # comments gone, string literals kept
         self._lines = None
 
     def line(self, pos):
@@ -238,8 +246,9 @@ class TypeDecl:
 
 
 class Method:
-    def __init__(self, f, cls, name, decl_start, sig_pos, params, body, attrs):
+    def __init__(self, f, cls, name, decl_start, sig_pos, params, body, attrs, modifiers=""):
         self.f, self.cls, self.name = f, cls, name
+        self.modifiers = modifiers      # the declaration between its attributes and its name
         self.decl_start, self.sig_pos, self.params, self.body, self.attrs = decl_start, sig_pos, params, body, attrs
 
     @property
@@ -282,7 +291,7 @@ def parse_types(f):
         if hm:
             bases = [simple_name(b) for b in split_top(re.sub(r"\(.*?\)", "", hm.group(1), flags=re.S))]
             bases = [b for b in bases if b]
-        attrs = f.src[attr_block_start(bl, m.start()):m.start()]
+        attrs = f.nc[attr_block_start(bl, m.start()):m.start()]
         types.append(TypeDecl(f, kind, name, m.start(), attrs, bases, body))
     return types
 
@@ -298,9 +307,13 @@ def parse_methods(f, types):
         stmt = attr_block_start(bl, m.start())
         prefix = bl[stmt:m.start()]
         prefix_noattr = re.sub(r"^\s*(?:\[[^\[\]]*(?:\[[^\[\]]*\][^\[\]]*)*\]\s*)*", "", prefix)
-        if not re.match(MODIFIERS + r"[^=;(){}]*$", prefix_noattr, re.S):
+        # parentheses are allowed when balanced: a tuple return type, Task<(int Id, string Name)>, has them
+        if not re.match(MODIFIERS + r"[^=;{}]*$", prefix_noattr, re.S) or \
+                prefix_noattr.count("(") != prefix_noattr.count(")"):
             continue
         if re.search(r"\b(class|record|struct|interface|enum|delegate|event|operator)\b", prefix_noattr):
+            continue
+        if prefix_noattr.split() == ["new"]:      # `new Foo(...)` as an expression statement, not a declaration
             continue
         close = match_close(bl, m.end() - 1, "(", ")")
         k = close + 1
@@ -329,9 +342,9 @@ def parse_methods(f, types):
                 owner = t
         if owner is None or owner.kind == "enum":
             continue
-        params = f.src[m.end():close]
-        attrs = f.src[stmt:m.start()]
-        owner.methods.append(Method(f, owner, name, stmt, m.start(), params, body, attrs))
+        params = f.nc[m.end():close]
+        attrs = f.nc[stmt:m.start()]
+        owner.methods.append(Method(f, owner, name, stmt, m.start(), params, body, attrs, prefix_noattr))
 
 
 class Index:
@@ -367,6 +380,25 @@ class Index:
         decls = [d for d in self.types.get(name, []) if d.kind in ("class", "record")]
         own = [d for d in decls if self.project(d.f) == self.project(near)]
         return (own or decls)[0] if len(own or decls) == 1 else None
+
+    def hosted_in(self, proj):
+        """Other host projects that load `proj`'s controllers with AddApplicationPart(typeof(X).Assembly), X being a
+        type of `proj` (the monolith loads ApiSystem's this way). There the actions run under that host's
+        exception handler and global filters, not under their own project's."""
+        if not hasattr(self, "_parts"):
+            self._parts = {}
+            for f in self.files.values():
+                for m in re.finditer(r"\bAddApplicationPart\s*\(\s*typeof\s*\(\s*([\w.]+)\s*\)\s*\.\s*Assembly", f.bl):
+                    qualified = m.group(1)
+                    name, _, ns = qualified.rpartition(".")[::-1]
+                    decls = [d for d in self.types.get(name, []) if d.kind in ("class", "record")]
+                    if ns:
+                        decls = [d for d in decls if re.search(rf"\bnamespace\s+{re.escape(ns)}\s*[;{{]", d.f.nc)]
+                    for d in decls:
+                        part, host = self.project(d.f), self.project(f)
+                        if part and host and part != host:
+                            self._parts.setdefault(part, set()).add(host)
+        return sorted(self._parts.get(proj, ()))
 
     def host(self, proj):
         """(exception handler TypeDecl or None, [global filter names]) that the startup class chain of a host
@@ -430,6 +462,66 @@ class Index:
                         todo.append(d)
         return out
 
+    # ---- services a method calls (--audit-catches)
+    def members(self, t):
+        """{name: declared type} of a class: its primary-constructor parameters, fields and properties."""
+        if not hasattr(self, "_members"):
+            self._members = {}
+        if id(t) in self._members:
+            return self._members[id(t)]
+        out, f = {}, t.f
+        if t.body:
+            m = re.search(r"\b" + re.escape(t.name) + r"\s*(?:<[^>]*>)?\s*\(", f.bl[t.start:t.body[0]])
+            if m:
+                open_ = t.start + m.end() - 1
+                for p in split_top(f.nc[open_ + 1:match_close(f.bl, open_, "(", ")")]):
+                    p = re.sub(r"\s*=.*$", "", re.sub(r"\[[^\]]*\]", "", p), flags=re.S)   # attributes, default value
+                    parts = p.strip().rsplit(None, 1)
+                    if len(parts) == 2:
+                        out[parts[1]] = simple_name(parts[0])
+            seg = f.bl[t.body[0] + 1:t.body[1]]
+            for fm in re.finditer(r"(?:private|protected|internal|public)\s+(?:static\s+)?(?:readonly\s+)?"
+                                  r"([A-Z][\w.]*(?:<[^;=(){}]*>)?\??)\s+(_?\w+)\s*(?:[;=]|\{\s*get)", seg):
+                out.setdefault(fm.group(2), simple_name(fm.group(1)))
+        self._members[id(t)] = out
+        return out
+
+    def implementations(self, type_name):
+        """The classes behind a type name: the class itself, or every class implementing an interface of that name."""
+        if not hasattr(self, "_impls"):
+            self._impls = {}
+        if type_name not in self._impls:
+            decls = self.types.get(type_name, [])
+            out = [d for d in decls if d.kind in ("class", "record")]
+            if any(d.kind == "interface" for d in decls):
+                out += [d for lst in self.types.values() for d in lst
+                        if d.kind in ("class", "record") and type_name in d.bases]
+            self._impls[type_name] = out
+        return self._impls[type_name]
+
+    def service_calls(self, method):
+        """[(position, [target methods])] for each `member.Name(...)` in the body whose member's declared type is
+        known. Calls through a local variable, a chained expression, a static or an extension method are not
+        resolved."""
+        f, (a, b) = method.f, method.body
+        members = {}
+        for c in self.class_chain(method.cls):
+            for k, v in self.members(c).items():
+                members.setdefault(k, v)
+        out = []
+        for m in re.finditer(r"(?<![\w.])(?:this\s*\.\s*)?(_?\w+)\s*\.\s*([A-Z]\w*)\s*(?:<[^(){};=]*>)?\s*\(", f.bl[a:b]):
+            type_name = members.get(m.group(1))
+            if not type_name:
+                continue
+            targets = [mt for cls in self.implementations(type_name) for c in self.class_chain(cls)
+                       for mt in c.methods if mt.name == m.group(2) and mt.body]
+            if targets:
+                close = match_close(f.bl, a + m.end() - 1, "(", ")")
+                argc = len(split_top(f.bl[a + m.end():close]))
+                fitting = [t for t in targets if arity(t)[0] <= argc <= arity(t)[1]]
+                out.append((a + m.start(2), fitting or targets))
+        return out
+
 
 def status_of(name):
     return http.HTTPStatus[re.sub(r"(?<!^)(?=[A-Z])", "_", name).upper()].value
@@ -440,7 +532,7 @@ def parse_exception_table(handler):
     A handler without a `switch (exception)` maps nothing: the middleware answers 500 for every exception."""
     if handler is None or not handler.body:
         return [], None
-    src = handler.f.src[handler.body[0]:handler.body[1]]
+    src = handler.f.nc[handler.body[0]:handler.body[1]]
     m = re.search(r"switch\s*\(\s*exception\s*\)\s*\{", src)
     if not m:
         return [], None
@@ -531,11 +623,19 @@ def swallowed(index, f, method, pos, exc):
 class Analyzer:
     """Evidence under one exception handler: the same throw is a different status in a host with its own handler."""
 
-    def __init__(self, index, handler):
+    def __init__(self, index, handler, honour_catches=True):
         self.ix = index
         self.handler = handler
         self.table, self.custom_case = parse_exception_table(handler)
         self.cache = {}
+        self.cuts = 0        # how many times the walk stopped at the depth limit or on a cycle
+        # False only for --audit-catches: the same walk with every try/catch ignored, to see what the catches hide
+        self.honour_catches = honour_catches
+        self.deep_cache = {}
+        self.deep_cuts = 0
+
+    def caught(self, f, method, pos, exc):
+        return self.honour_catches and swallowed(self.ix, f, method, pos, exc)
 
     def exc_code(self, exc_name):
         """(code, known): status this host's exception handler gives this exception type."""
@@ -546,11 +646,18 @@ class Analyzer:
         known = chain[-1] in ("Exception", "SystemException") or exc_name == "Exception"
         return 500, known
 
+    MAX_DEPTH = 5
+
     def method_evidence(self, method, depth=0, stack=()):
-        if method.key in self.cache:
-            return self.cache[method.key]
-        if depth > 5 or method.key in stack or not method.body:
+        hit = self.cache.get(method.key)
+        if hit and depth + hit[1] <= self.MAX_DEPTH:
+            return hit[0]
+        if not method.body:
             return []
+        if depth > self.MAX_DEPTH or method.key in stack:
+            self.cuts += 1
+            return []
+        cuts_before, height = self.cuts, 0
         stack = stack + (method.key,)
         f, (a, b) = method.f, method.body
         bl = f.bl
@@ -562,7 +669,7 @@ class Analyzer:
                 chain_methods.setdefault(mt.name, []).append(mt)
 
         def add(ev, exc_for_catch):
-            if not swallowed(self.ix, f, method, ev.pos, exc_for_catch):
+            if not self.caught(f, method, ev.pos, exc_for_catch):
                 evs.append(ev)
 
         for m in re.finditer(r"\bthrow\s+new\s+([\w.]+)\s*(<[^>]*>)?\s*[({]", bl[a:b]):
@@ -625,7 +732,7 @@ class Analyzer:
                 targets, kind = chain_methods[name], "helper"
             elif name.startswith("Demand"):
                 targets = [mt for mt in self.ix.methods.get(name, [])
-                           if "private" not in mt.attrs.split("(")[0] and mt.body]
+                           if not re.search(r"\bprivate\b", mt.modifiers) and mt.body]
                 kind = "demand"
                 if not targets:
                     evs.append(Ev(403, "demand?", f, pos, "AuthorizingException", strong=False,
@@ -641,10 +748,13 @@ class Analyzer:
             for t in targets:
                 if t.key == method.key:
                     continue
-                for ev in self.method_evidence(t, depth + 1, stack):
+                callee_evs = self.method_evidence(t, depth + 1, stack)
+                if t.key in self.cache:
+                    height = max(height, 1 + self.cache[t.key][1])
+                for ev in callee_evs:
                     if ev.kind == "dto":
                         continue
-                    if not swallowed(self.ix, f, method, pos, ev.exc):
+                    if not self.caught(f, method, pos, ev.exc):
                         evs.append(Ev(ev.code, ev.kind, ev.f, ev.pos, ev.exc,
                                       via=(f"{name}@{f.rel.split('/')[-1]}:{f.line(pos)}",) + ev.via,
                                       strong=ev.strong, detail=ev.detail))
@@ -655,8 +765,40 @@ class Analyzer:
             if k not in best or len(ev.via) < len(best[k].via):
                 best[k] = ev
         evs = sorted(best.values(), key=lambda e: (len(e.via), e.f.rel, e.pos))
-        self.cache[method.key] = evs
+        # Only a complete walk is cached, with its height: reused from another depth, a walk cut short would make
+        # an action's evidence (and the fingerprint of its rejections) depend on which action was analysed first.
+        if self.cuts == cuts_before:
+            self.cache[method.key] = (evs, height)
         return evs
+
+    SERVICE_HOPS = 3
+
+    def deep_evidence(self, method, hops=0, stack=frozenset()):
+        """{code: [Ev]} of `method` plus the services it calls (--audit-catches only): a call `member.Name(...)` is
+        followed into Name of the member's declared type, or of every class implementing it when it is an interface,
+        up to SERVICE_HOPS levels; a try/catch at the call site is honoured as in method_evidence."""
+        key = (method.key, hops)
+        if key in self.deep_cache:
+            return self.deep_cache[key]
+        if method.key in stack:
+            self.deep_cuts += 1
+            return {}
+        cuts_before = self.deep_cuts
+        stack = stack | {method.key}
+        out = {}
+        for e in self.method_evidence(method):
+            if e.strong and e.kind != "dto":
+                out.setdefault(e.code, []).append(e)
+        if hops < self.SERVICE_HOPS:
+            for pos, targets in self.ix.service_calls(method):
+                for t in targets:
+                    for code, evs in self.deep_evidence(t, hops + 1, stack).items():
+                        for e in evs:
+                            if not self.caught(method.f, method, pos, e.exc):
+                                out.setdefault(code, []).append(e)
+        if self.deep_cuts == cuts_before:      # a walk cut on a cycle depends on the caller's stack: not reusable
+            self.deep_cache[key] = out
+        return out
 
     # ---- DTO binding -> 400
     def props(self, t):
@@ -664,7 +806,7 @@ class Analyzer:
             return t.props
         out = []
         if t.body:
-            bl, src = t.f.bl, t.f.src
+            bl, src = t.f.bl, t.f.nc
             seg = bl[t.body[0] + 1:t.body[1]]
             for m in re.finditer(r"\bpublic\s+((?:required\s+|virtual\s+|override\s+|new\s+)*)([\w<>\[\],.?\s]+?)\s+([A-Z]\w*)\s*(?:\{|=>)", seg):
                 pos = t.body[0] + 1 + m.start()
@@ -698,9 +840,6 @@ class Analyzer:
                 return d
         return None
 
-    def is_enum(self, type_text):
-        return any(d.kind == "enum" for d in self.ix.types.get(simple_name(type_text), []))
-
     def has_converter(self, t, attrs=""):
         return bool(re.search(r"\b(JsonConverter|TypeConverter|ModelBinder)\b", t.attrs + attrs))
 
@@ -725,9 +864,7 @@ class Analyzer:
                               detail=f"[{', '.join(sorted(used))}] on {pname}  [{' > '.join(via)}]"))
             inner = generic_args(ptype) or [ptype]
             for it in inner:
-                if self.is_enum(it) and "JsonConverter" not in attrs:
-                    evs.append(Ev(400, "enum-body", c.f, pos, strong=False,
-                                  detail=f"enum {pname} sent as a string  [{' > '.join(via)}]"))
+                # an enum sent as a string is a type mismatch: binding answers it, the 400 text does not list it (§3)
                 d = self.dto_type(it)
                 if d and not self.has_converter(d, attrs):
                     self.body_evidence(d, via + [pname], depth + 1, seen, evs)
@@ -752,7 +889,11 @@ class Analyzer:
             t = self.dto_type(ptype)
             if not t or self.has_converter(t, attrs):
                 continue
-            if "FromBody" in attrs:
+            # [ApiController] infers [FromBody] for a complex parameter that names no source and whose members name
+            # none either (AuthWithCodeRequestsDto): its whole graph is then validated like an explicit body
+            inferred_body = not re.search(r"\b(From\w+|AsParameters|ModelBinder)\b", attrs) and not any(
+                re.search(r"\b(From\w+|AsParameters|ModelBinder)\b", pa) for _, (_, _, _, pa, _) in self.type_props(t))
+            if "FromBody" in attrs or inferred_body:
                 self.body_evidence(t, [pname], 0, set(), evs)
                 continue
             if "IValidatableObject" in self.ix.type_chain(t.name):
@@ -888,6 +1029,21 @@ def print_hosts(hosts):
         print(f"[{names}] global filters: {', '.join(filters) or 'none'}")
 
 
+def print_foreign_hosts(ix, actions):
+    """A project whose controllers another host also loads answers differently there: an exception the action does
+    not turn into a status itself gets the other host's table. Conventions §1 says what to document then."""
+    for proj in sorted({a.proj for a in actions if a.proj}):
+        docs = ", ".join(sorted({a.doc for a in actions if a.proj == proj}))
+        own = ix.host(proj)
+        for other in ix.hosted_in(proj):
+            handler, filters = ix.host(other)
+            if (handler, filters) == own:
+                continue        # the same pipeline in both hosts: nothing to tell
+            table = handler.f.rel if handler else "no exception handler registered"
+            print(f"[{docs}] also hosted by {other.relative_to(ROOT).as_posix()} (AddApplicationPart): there an "
+                  f"exception maps by {table}, global filters {', '.join(filters) or 'none'}")
+
+
 def fingerprint(a, code):
     h = hashlib.sha1(norm(a.m.body_text()).encode())
     parts = sorted({f"{e.kind}|{norm(e.text())}|{'>'.join(v.split('@')[0] for v in e.via)}"
@@ -914,6 +1070,12 @@ def save_rejected(entries):
 def gaps(a):
     strong = sorted({e.code for e in a.evs if e.strong})
     return [c for c in strong if c not in a.declared and not (200 <= c < 300)]
+
+
+def unbacked_codes(a):
+    """Declared non-2xx codes with no evidence of any strength (counted or hint) in the action's own code."""
+    seen = {e.code for e in a.evs}
+    return [c for c in sorted(a.declared) if c >= 300 and c not in seen]
 
 
 def apply_rejections(actions, rejected):
@@ -964,11 +1126,17 @@ def print_action(a, valid, expired, dirty, detail):
     rej = [c for c in gaps(a) if (a.id, c) in valid]
     if rej:
         print(f"    rejected (still valid): {' '.join(map(str, rej))}")
+    # a lead, not a verdict: services called on other objects are not followed, and most of these codes come from them
+    unbacked = unbacked_codes(a)
+    if unbacked and not detail:
+        print(f"    no evidence in the action's own code for declared: {' '.join(map(str, unbacked))}")
     if detail:
         for e in [e for e in a.evs if not e.strong and e.code not in a.declared][:10]:
             print(fmt_ev(e, "?"))
         for e in [e for e in a.evs if e.code in a.declared][:12]:
             print(fmt_ev(e, "="))
+        for c in unbacked:
+            print(f"    - {c} declared, nothing found behind it in the action's own code: \"{a.declared[c][:120]}\"")
 
 
 def resolve(actions, ref):
@@ -997,16 +1165,25 @@ def snapshot_path(rel):
 
 def eol_of(data):
     crlf, lf = data.count(b"\r\n"), data.count(b"\n")
+    if lf == 0:
+        return "none"
     return "CRLF" if crlf == lf else ("LF" if crlf == 0 else f"MIXED ({lf - crlf} LF-only lines)")
 
 
+def head_commit():
+    return subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
+
+
 def cmd_snapshot(paths):
+    head = head_commit()
     for p in paths:
         rel = rel_path(p)
         data = (ROOT / rel).read_bytes()
         dst = snapshot_path(rel)
         dst.parent.mkdir(parents=True, exist_ok=True)
         dst.write_bytes(data)
+        # the commit the snapshot was taken on: a snapshot left from an earlier batch is reported as stale
+        dst.with_name(dst.name + ".head").write_text(head, encoding="utf-8")
         print(f"snapshot {rel}: {len(data)} bytes")
 
 
@@ -1020,6 +1197,12 @@ def cmd_diff_check(paths):
             # the pre-edit copy: changes the user had made before the batch are part of it, not of the diff
             base = snap.read_bytes()
             base_name = "snapshot"
+            head_file = snap.with_name(snap.name + ".head")
+            taken_on = head_file.read_text(encoding="utf-8").strip() if head_file.exists() else ""
+            if taken_on != head_commit():
+                ok = False
+                print(f"{rel}: the snapshot was taken on {taken_on[:10] or 'an unknown commit'}, HEAD is "
+                      f"{head_commit()[:10]} now: likely left from an earlier batch; take a new one before editing")
             old = base.decode("utf-8", errors="replace").splitlines()
             new = data.decode("utf-8", errors="replace").splitlines()
             diff = [l for l in difflib.unified_diff(old, new, n=0, lineterm="") if not l.startswith(("+++", "---", "@@"))]
@@ -1027,7 +1210,7 @@ def cmd_diff_check(paths):
         else:
             base = subprocess.run(["git", "show", f"HEAD:{rel}"], cwd=ROOT, capture_output=True).stdout
             base_name = "HEAD"
-            out = subprocess.run(["git", "diff", "-U0", "--", rel], cwd=ROOT, capture_output=True, text=True,
+            out = subprocess.run(["git", "diff", "-U0", "HEAD", "--", rel], cwd=ROOT, capture_output=True, text=True,
                                  encoding="utf-8").stdout
             diff = [l for l in out.splitlines() if l[:1] in "+-" and not l.startswith(("+++", "---"))]
             eol_base = None      # the HEAD blob is stored normalized; only mixed endings are a finding
@@ -1064,12 +1247,13 @@ def cmd_verify_doc(actions, refs):
         doc = docs[path]
         op_id = a.m.name[:-5] if a.m.name.endswith("Async") else a.m.name
         op_id = op_id[:1].lower() + op_id[1:]
-        route = re.sub(r"\{(\w+)[:?][^}]*\}", r"{\1}", a.route.strip("/~"))
+        # the generator lower-cases the literal segments of a path (`fromTemplate` -> `fromtemplate`)
+        route = re.sub(r"\{(\w+)[:?][^}]*\}", r"{\1}", a.route.strip("/~")).lower()
         ops = []
         for pth, item in doc.get("paths", {}).items():
             o = item.get(a.verb.lower())
-            if o and o.get("operationId") == op_id and (not route or pth.rstrip("/").endswith("/" + route)
-                                                        or pth.rstrip("/").endswith(route)):
+            p = pth.rstrip("/").lower()
+            if o and o.get("operationId") == op_id and (not route or p.endswith("/" + route) or p.endswith(route)):
                 ops.append((pth, o))
         stale = path.stat().st_mtime < a.m.f.path.stat().st_mtime
         print(f"{a.id} -> {path.name}{'  [document older than the source: regenerate]' if stale else ''}")
@@ -1093,6 +1277,41 @@ def cmd_verify_doc(actions, refs):
     print("VERDICT:", "documented" if ok else "PROBLEMS above")
 
 
+def cmd_audit_catches(ix, actions, refs):
+    """Declared error codes whose every producer found is caught on the way: the action's own code, its controller
+    helpers, Demand* and the services it calls (Analyzer.deep_evidence) walked twice, with the try/catch filtering
+    and without it. A code that exists only without it may be unreachable — conventions §7 decides."""
+    targets = [a for r in refs for a in resolve(actions, r)] if refs else actions
+    if refs and not targets:
+        sys.exit("no action matches")
+    honoured, ignored = {}, {}
+    flagged = 0
+    for a in targets:
+        handler, _ = ix.host(a.proj)
+        key = handler.f.rel if handler else None
+        if key not in honoured:
+            honoured[key] = Analyzer(ix, handler)
+            ignored[key] = Analyzer(ix, handler, honour_catches=False)
+        with_catches = honoured[key].deep_evidence(a.m)
+        without = ignored[key].deep_evidence(a.m)
+        own = {e.code for e in a.evs}
+        hidden = [c for c in sorted(a.declared) if c >= 400 and c in without and c not in with_catches and c not in own]
+        if not hidden:
+            continue
+        flagged += 1
+        print(f"\n{a.id}  {a.verb} {a.route or '(no route)'}  doc={a.doc}")
+        print(f"    {a.m.f.rel}:{a.line}")
+        if re.search(r"\bStatusCode\s*\(\s*(?!StatusCodes\b|HttpStatusCode\b|\d)[A-Za-z_][\w.]*\s*[,)]", a.m.body_text()):
+            print("    note: the action answers StatusCode(<variable>, ...) - a status chosen by a callee is not seen here")
+        for c in hidden:
+            print(f"    {c} declared, every producer found is caught: \"{a.declared[c][:110]}\"")
+            for e in without[c][:4]:
+                print(f"        {e.exc or e.kind}  {e.where()}")
+    print(f"\n{len(targets)} action(s) audited, {flagged} with a declared code that only a caught path produces. "
+          f"A lead, not a verdict: calls through locals, chained expressions, statics and extension methods are "
+          f"not followed, and a producer that throws no `throw new` of its own (a BCL call) is not seen.")
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--batch", type=int, default=5)
@@ -1106,6 +1325,7 @@ def main():
     ap.add_argument("--snapshot", nargs="+")
     ap.add_argument("--diff-check", nargs="+")
     ap.add_argument("--verify-doc", nargs="+")
+    ap.add_argument("--audit-catches", nargs="*", metavar="ID|FILE")
     args = ap.parse_args()
 
     if args.snapshot:
@@ -1121,6 +1341,9 @@ def main():
 
     if args.verify_doc:
         return cmd_verify_doc(actions, args.verify_doc)
+
+    if args.audit_catches is not None:
+        return cmd_audit_catches(ix, actions, args.audit_catches)
 
     if args.reject:
         if not args.reason:
@@ -1161,6 +1384,7 @@ def main():
 
     dirty = dirty_files()
     print_hosts(hosts)
+    print_foreign_hosts(ix, actions)
 
     if args.endpoint:
         hits = [a for r in args.endpoint for a in resolve(actions, r)]

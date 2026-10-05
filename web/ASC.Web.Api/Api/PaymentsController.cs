@@ -229,7 +229,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/updatewallet</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "`true` when the purchase or the scheduled change was accepted, `false` when the provider declined it", typeof(bool))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, `productQuantityType` is sent as a string instead of a number, the quantity type is not `Set` or `Add`, the product is not a wallet service, the quantity is below the minimum for it or is empty or zero where a purchase needs one, or that service is already set")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, the quantity type is not `Set` or `Add`, the product is not a wallet service, the quantity is below the minimum for it or is empty or zero where a purchase needs one, or that service is already set")]
     [SwaggerResponse(402, "The plan of the portal is not paid and the requested service is an add-on to it, or in the `Add` form the billing service declines the purchase, answers with an error or cannot be reached")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no balance or no sub-account in the accounting currency")]
@@ -355,7 +355,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/calculatewallet</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The amount the purchase would cost, its currency and the quantity it was calculated for", typeof(PaymentCalculation))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, `productQuantityType` is sent as a string instead of a number, the quantity type is not `Add`, the quantity is not greater than zero, or the product is not a wallet service")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `quantity`, `quantity` does not hold exactly one product, the quantity type is not `Add`, the quantity is not greater than zero, or the product is not a wallet service")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
     [SwaggerResponse(404, "This portal has no billing customer, or its wallet has no balance or no sub-account in the accounting currency")]
     [HttpPut("calculatewallet")]
@@ -571,7 +571,7 @@ public class PaymentController(
     /// <path>api/2.0/portal/payment/prices</path>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "Product name to the price of one unit in the currency of the request, `0` where the product has no price in it", typeof(Dictionary<string, decimal>))]
-    [SwaggerResponse(403, "The caller may not edit the portal settings")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("prices")]
     public async Task<Dictionary<string, decimal>> GetPortalPrices()
     {
@@ -600,7 +600,7 @@ public class PaymentController(
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The default currency of the portal region first, followed by the currency of the current request when it differs", typeof(IAsyncEnumerable<CurrenciesDto>))]
-    [SwaggerResponse(403, "The caller may not edit the portal settings")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("currencies")]
     public async IAsyncEnumerable<CurrenciesDto> GetPaymentCurrencies()
     {
@@ -635,7 +635,7 @@ public class PaymentController(
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The visible quotas matching the filters, newest first, each with its price, features and limits", typeof(IEnumerable<QuotaDto>))]
-    [SwaggerResponse(403, "The caller may not edit the portal settings")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("quotas")]
     public async Task<IEnumerable<QuotaDto>> GetPaymentQuotas(QuotasRequestDto inDto)
     {
@@ -671,7 +671,7 @@ public class PaymentController(
     /// <collection>list</collection>
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The wallet services on offer, with their prices, units and grouped variants", typeof(IEnumerable<WalletServiceDto>))]
-    [SwaggerResponse(403, "The caller may not edit the portal settings")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("walletservices")]
     public async Task<IEnumerable<WalletServiceDto>> GetWalletServices()
     {
@@ -697,7 +697,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The wallet service with its price, unit and the limits it grants", typeof(WalletServiceDto))]
     [SwaggerResponse(400, "`service` is sent empty, or is neither the name nor the number of a wallet service")]
-    [SwaggerResponse(403, "The caller may not edit the portal settings")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [SwaggerResponse(404, "This installation does not sell a wallet service under that name")]
     [HttpGet("walletservice")]
     public async Task<WalletServiceDto> GetWalletService(GetWalletServiceRequestDto inDto)
@@ -1593,7 +1593,7 @@ public class PaymentController(
     [SwaggerResponse(200, "The list of the service prices", typeof(List<ServicePriceInfo>))]
     [SwaggerResponse(400, "The `serviceName` is longer than 255 characters")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the portal has no billing service configured")]
-    [SwaggerResponse(500, "The accounting service answers the price request with an error or cannot be reached")]
+    [SwaggerResponse(500, "The accounting service is not configured, answers the price request with an error or cannot be reached")]
     [HttpGet("accounting/prices/{serviceName}")]
     public async Task<List<ServicePriceInfo>> GetAccountingServicePrices(ServicePricesRequestDto inDto)
     {
@@ -1739,7 +1739,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The whole set of wallet services switched on for the portal after the change", typeof(TenantWalletServiceSettings))]
     [SwaggerResponse(400, "The request body cannot be read, including a `service` name that is not a wallet service")]
-    [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, the portal has no billing service configured, AI tools or AI search was switched on while AI is disabled for the portal, or AI search was switched on while AI tools is off")]
+    [SwaggerResponse(403, "The caller has no portal-settings right or is not a DocSpace administrator, the portal has no billing service configured, AI tools or AI search was switched on while AI is disabled for the portal, or AI search was switched on while AI tools is off")]
     [SwaggerResponse(404, "This portal has no billing customer yet")]
     [HttpPost("servicestate")]
     public async Task<TenantWalletServiceSettings> ChangeTenantWalletServiceState(ChangeWalletServiceStateRequestDto inDto)
@@ -1832,7 +1832,7 @@ public class PaymentController(
     [Tags("Portal / Payment")]
     [SwaggerResponse(200, "The set of barred AI chat models as it was stored", typeof(RestrictedModelsResponse))]
     [SwaggerResponse(400, "The request body cannot be read, or `models` is missing or `null`")]
-    [SwaggerResponse(403, "The caller may not edit the portal settings or is not a DocSpace administrator, or the installation has no billing service or no AI gateway configured")]
+    [SwaggerResponse(403, "The caller has no portal-settings right or is not a DocSpace administrator, or the installation has no billing service or no AI gateway configured")]
     [SwaggerResponse(404, "This portal has no billing customer yet")]
     [SwaggerResponse(500, "The AI gateway answers with an error or cannot be reached")]
     [HttpPut("ai-model/restrictions")]

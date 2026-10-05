@@ -258,7 +258,7 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/maildomainsettings</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Confirmation message that the trusted mail domain settings were saved", typeof(string))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `type`, `domains` or `inviteUsersAsVisitors`, the `type` is sent as a string instead of a number, or the trust type is `Custom` and the domain list is empty or holds an empty or malformed domain")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `type`, `domains` or `inviteUsersAsVisitors`, or the trust type is `Custom` and the domain list is empty or holds an empty or malformed domain")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPost("maildomainsettings")]
     public async Task<string> SaveMailDomainSettings(MailDomainSettingsRequestsDto inDto)
@@ -600,7 +600,7 @@ public partial class SettingsController(
     [SwaggerResponse(400, "The request body cannot be read or has no `tenantId`")]
     [SwaggerResponse(402, "The portal's pricing plan does not include the statistics feature required for tenant quotas")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
-    [SwaggerResponse(415, "The portal is not a Standalone installation")]
+    [SwaggerResponse(415, "The caller is not a DocSpace administrator, or the portal is not a Standalone installation")]
     [HttpPut("tenantquotasettings")]
     public async Task<TenantQuotaSettings> SetTenantQuotaSettings(TenantQuotaSettingsRequestsDto inDto)
     {
@@ -739,8 +739,6 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/dns</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Confirmation that the DNS mapping was updated", typeof(string))]
-    [SwaggerResponse(400, "The domain name is invalid, or collides with the portal's reserved base domain")]
-    [SwaggerResponse(402, "This option is not available under the portal's current pricing plan")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [SwaggerResponse(415, "The portal is not a Standalone installation, so a custom domain cannot be mapped")]
     [SwaggerResponse(500, "The installation hides the DNS settings section, or the domain name is not a valid host name, lies under the portal's base domain, has a length outside the allowed range, is reserved, or is already the alias or mapped domain of a portal, this one included")]
@@ -825,7 +823,6 @@ public partial class SettingsController(
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Resulting wizard settings, including the completed flag", typeof(WizardSettings))]
     [SwaggerResponse(400, "The request body cannot be read or has no `email` or `passwordHash`, the email address is empty or malformed, or the license's start date is in the future")]
-    [SwaggerResponse(402, "The supplied license is missing, invalid, expired, or its user quota does not cover the portal")]
     [SwaggerResponse(403, "The account the confirmation link was issued for has no portal-settings right")]
     [SwaggerResponse(500, "The wizard is already completed, the AMI instance ID does not match, the email address fails the portal's check, the password is empty, or the license is missing, unreadable, rejected by validation or of the wrong type")]
     [AllowNotPayment]
@@ -1084,7 +1081,7 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/defaultFolder</path>
     [Tags("Settings / Common settings")]
     [SwaggerResponse(200, "Saved default folder setting for the current user", typeof(StudioDefaultPageSettings))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `defaultFolderType`, the `defaultFolderType` is sent as a string instead of a number, the folder is not one a start page can be set to, or a guest chooses My documents")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `defaultFolderType`, the folder is not one a start page can be set to, or a guest chooses My documents")]
     [HttpPut("defaultfolder")]
     public async Task<StudioDefaultPageSettings> SaveDefaultFolder(DefaultProductRequestDto inDto)
     {

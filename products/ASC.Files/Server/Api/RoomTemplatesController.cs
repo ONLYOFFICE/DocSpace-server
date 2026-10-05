@@ -176,7 +176,7 @@ public class RoomTemplatesController(IEventBus eventBus,
     /// <path>api/2.0/files/roomtemplate/{id}/public</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "True when the template is shared with everyone, false when only its owner and the accounts it was shared with can reach it", typeof(bool))]
-    [SwaggerResponse(400, "`id` is not a number or is less than 1")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or `id` is less than 1")]
     [SwaggerResponse(403, "The caller has no read access to the template")]
     [SwaggerResponse(404, "`id` does not identify a room template")]
     [HttpGet("{id}/public")]

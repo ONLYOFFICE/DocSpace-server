@@ -129,7 +129,7 @@ public class BackupController(
     /// <path>api/2.0/backup/createbackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "True if the schedule was saved", typeof(bool))]
-    [SwaggerResponse(400, "The number of the stored copies is outside 1 - 30, a dump was requested on a portal that is not a standalone installation, the storage type or the period is an unknown name, or `storageParams` repeats a key, including `tenantId` on a dump")]
+    [SwaggerResponse(400, "The request body cannot be read, the number of the stored copies is outside 1-30, a dump was requested on a portal that is not a standalone installation, or `storageParams` repeats a key or, on a dump, contains `tenantId`")]
     [SwaggerResponse(402, "The portal subscription does not cover scheduled backups, has expired or has not been paid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "The target folder was not found")]
@@ -224,7 +224,7 @@ public class BackupController(
     /// <path>api/2.0/backup/startbackup</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "The state of the queued backup job", typeof(BackupProgress))]
-    [SwaggerResponse(400, "The folder ID does not match the storage type, a dump was requested on a portal that is not a standalone installation, the storage type is an unknown name, or `storageParams` repeats a key")]
+    [SwaggerResponse(400, "The request body cannot be read, the folder ID does not match the storage type, a dump was requested on a portal that is not a standalone installation, or `storageParams` repeats a key")]
     [SwaggerResponse(402, "The portal already uses more storage than its plan allows and the backup goes to `Documents`, or the free backups of the current month are used up and the paid backup service is not available to this portal or cannot be charged")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "The target folder or the backup quota was not found")]
@@ -537,10 +537,10 @@ public class BackupController(
     /// <path>api/2.0/backup/startrestore</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "The state of the queued restoring job", typeof(BackupProgress))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `backupId`, the storage type is an unknown name, or `storageParams` repeats a key")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `backupId`, or `storageParams` repeats a key")]
     [SwaggerResponse(402, "The pricing plan of this portal does not allow restoring")]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "The backup record was not found, or the file given in `filePath` or its folder was not found")]
+    [SwaggerResponse(404, "The backup record was not found, the file given in `filePath` or its folder was not found, or, for `Local` storage, no backup archive has been uploaded to the portal")]
     [SwaggerResponse(500, "`backupId` is not a GUID and `storageParams` has no `filePath`, or a key or value of `storageParams` is null")]
     [HttpPost("startrestore")]
     public async Task<BackupProgress> StartBackupRestore(BackupRestoreDto inDto)

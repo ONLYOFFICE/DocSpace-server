@@ -98,7 +98,7 @@ public abstract class TagsController<T>(FileStorageService fileStorageService,
     /// <path>api/2.0/files/favorites/{fileId}</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "Echo of the requested state, which does not prove that the mark was changed", typeof(bool))]
-    [SwaggerResponse(400, "`favorite` is not a boolean, or a third-party file identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or a third-party file identifier refers to a storage account that is not connected")]
     [SwaggerResponse(403, "Changing the favorite mark is refused for the caller")]
     [SwaggerResponse(404, "A third-party file identifier names a storage type the portal does not know")]
     [SwaggerResponse(500, "A third-party file identifier carries a storage account number beyond the 32-bit range")]

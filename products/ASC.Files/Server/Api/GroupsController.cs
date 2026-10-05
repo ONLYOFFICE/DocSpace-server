@@ -61,7 +61,7 @@ public class GroupsController(
     /// <path>api/2.0/files/group</path>
     [Tags("Rooms / Groups")]
     [SwaggerResponse(200, "The created room group with the rooms that were linked to it", typeof(RoomGroupDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `name`, `icon` or `rooms`, the name is blank or longer than 128 characters, the icon is not a built-in cover, a room identifier is neither a positive number nor a non-numeric string, or a third-party room identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `name`, `icon` or `rooms`, the name is blank or longer than 128 characters, the icon is not a built-in cover, `searchArea` names a section other than `Active` and `Forms`, a room identifier is neither a positive number nor a non-numeric string, a third-party room identifier refers to a storage account that is not connected, or none of the listed rooms can be added and the existing ones all belong to the other section than `searchArea`")]
     [SwaggerResponse(403, "The `rooms` list is empty, the listed rooms exist but none of them is a room the caller can read, or only some of them could be added - the group is then created with those")]
     [SwaggerResponse(404, "None of the listed rooms exists, or a string room identifier does not name a third-party storage")]
     [SwaggerResponse(500, "A third-party room identifier carries a storage account number beyond the 32-bit range")]
@@ -143,7 +143,7 @@ public class GroupsController(
     /// <path>api/2.0/files/group/{id}</path>
     [Tags("Rooms / Groups")]
     [SwaggerResponse(200, "The room group as stored after the change", typeof(RoomGroupDto))]
-    [SwaggerResponse(400, "The request body cannot be read or names its members with every one of them null, the new name is blank or longer than 128 characters, a room identifier is neither a positive number nor a non-numeric string, or a third-party room identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(400, "The request body cannot be read or names its members with every one of them null, the new name is blank or longer than 128 characters, a room identifier is neither a positive number nor a non-numeric string, a third-party room identifier refers to a storage account that is not connected, or none of the rooms of `roomsToAdd` can be added and the existing ones all belong to the other section than the group")]
     [SwaggerResponse(403, "The rooms of `roomsToAdd`, or the rooms of `roomsToRemove` that are not in the group, exist but none of them is a room the caller can read, or only some of the rooms could be applied - the earlier steps stay applied")]
     [SwaggerResponse(404, "The group does not exist or belongs to another account, none of the rooms of `roomsToAdd` or of the rooms of `roomsToRemove` that are not in the group exists, or a string room identifier does not name a third-party storage")]
     [SwaggerResponse(500, "A third-party room identifier carries a storage account number beyond the 32-bit range")]

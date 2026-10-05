@@ -72,7 +72,7 @@ public class GroupController(
     /// <collection>list</collection>
     [Tags("Group")]
     [SwaggerResponse(200, "The matching groups, with their summary information", typeof(IAsyncEnumerable<GroupDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, the `userId` is not a GUID, `manager` is not a boolean, or the `sortOrder` is not one of the known values")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet]
     public async IAsyncEnumerable<GroupDto> GetGroups(GeneralInformationRequestDto inDto)
@@ -634,7 +634,7 @@ public class GroupControllerAdditional<T>(
     /// <collection>list</collection>
     [Tags("Group / Search")]
     [SwaggerResponse(200, "The matching groups, each with its access state for the room", typeof(IAsyncEnumerable<GroupDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, or `excludeShared` is not a boolean")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "No room has the specified ID")]
     [HttpGet("room/{id}")]
@@ -667,7 +667,7 @@ public class GroupControllerAdditional<T>(
     /// <collection>list</collection>
     [Tags("Group / Search")]
     [SwaggerResponse(200, "The matching groups, each with its access state for the folder", typeof(IAsyncEnumerable<GroupDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, or `excludeShared` is not a boolean")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "No folder has the specified ID")]
     [HttpGet("folder/{id}")]
@@ -699,7 +699,7 @@ public class GroupControllerAdditional<T>(
     /// <collection>list</collection>
     [Tags("Group / Search")]
     [SwaggerResponse(200, "The matching groups, each with its access state for the file", typeof(IAsyncEnumerable<GroupDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, or `excludeShared` is not a boolean")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "No file has the specified ID")]
     [HttpGet("file/{id}")]

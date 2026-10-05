@@ -97,7 +97,7 @@ public class FilesControllerInternal(
     /// <collection>list</collection>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The activity entries of the file, newest first", typeof(IAsyncEnumerable<HistoryDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, or `fromDate` or `toDate` is not a date and time ending in `Z` or a UTC offset")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or `fromDate` or `toDate` is not a date and time ending in `Z` or a UTC offset")]
     [SwaggerResponse(403, "The caller has no read access to the file")]
     [SwaggerResponse(404, "No file with this identifier exists")]
     [HttpGet("file/{fileId:int}/log")]
@@ -910,7 +910,7 @@ public abstract class FilesController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The primary external link of the file", typeof(FileShareDto))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, or the `startIndex` is not a number")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(401, "An anonymous caller has no external link")]
     [SwaggerResponse(403, "The caller may not share the file")]
     [SwaggerResponse(404, "The file does not exist, or its primary link was revoked")]
@@ -942,7 +942,7 @@ public abstract class FilesController<T>(
     /// <collection>list</collection>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The external links of the file", typeof(IAsyncEnumerable<FileShareDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, or the `startIndex` is not a number")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller cannot read the file")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpGet("file/{id}/links")]
@@ -1048,7 +1048,7 @@ public abstract class FilesController<T>(
     /// <collection>list</collection>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The files and folders that were moved, with the positions they now hold", typeof(IAsyncEnumerable<FileEntryDto<int>>))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `items`, an item has no `entryId` or `entryType`, an `order` is below 1 or is neither a number nor a dotted path ending in one, or an `entryType` is sent as a string instead of a number")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `items`, an item has no `entryId` or `entryType`, or an `order` is below 1 or is neither a number nor a dotted path ending in one")]
     [SwaggerResponse(403, "The caller may not administer the room of an entry, or an entry lies outside any room")]
     [SwaggerResponse(404, "An entry does not exist or is sent with the wrong `entryType`")]
     [HttpPut("order")]
@@ -1166,7 +1166,7 @@ public abstract class FilesController<T>(
     /// <path>api/2.0/files/file/{fileId}/manageformfilling</path>
     [Tags("Files / Files")]
     [SwaggerResponse(200, "The action was applied to the form")]
-    [SwaggerResponse(400, "The request body cannot be read or has no `formId`, or `action` is sent as a string instead of a number")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `formId`")]
     [SwaggerResponse(403, "The form does not exist, is not a PDF or lies outside a room, the caller may not start or stop its filling, or `action` is not one of the known values")]
     [SwaggerResponse(500, "The form has no filling properties yet, as when a filling that was never started is resumed, or the form lies in a third-party storage")]
     // Same shape as formrolemapping above: the id travels in the body, the route placeholder is

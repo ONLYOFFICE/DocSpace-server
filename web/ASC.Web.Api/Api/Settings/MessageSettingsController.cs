@@ -250,7 +250,6 @@ public class MessageSettingsController(
     [SwaggerResponse(400, "The request body cannot be read or has no `email`, the email address is malformed, internationalized or longer than 255 characters, lies outside the trusted domains, or already belongs to a member of the portal")]
     [SwaggerResponse(403, "The portal is not accepting requests while it is being restored, transferred or encrypted")]
     [SwaggerResponse(405, "The portal publishes no trusted-domain policy, so it has nothing to join")]
-    [SwaggerResponse(429, "Too many invitation requests came from the same network address")]
     [SwaggerResponse(500, "Eleven invitation requests from the same network address have already been counted, each less than two minutes after the one before")]
     [AllowAnonymous]
     [HttpPost("sendjoininvite")]

@@ -624,7 +624,7 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/defaulttemplate</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The blank document configured for each supported extension", typeof(DefaultTemplateSettingsDto))]
-    [SwaggerResponse(403, "The caller may not read the portal settings")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("settings/defaulttemplate")]
     public async Task<DefaultTemplateSettingsDto> GetDefaultTemplates()
     {
@@ -649,7 +649,7 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The blank document configured for each supported extension after the change", typeof(DefaultTemplateSettingsDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `selectedFile` or `fileExtension`, the file identifier is of an unsupported kind, or its extension is not the one requested")]
-    [SwaggerResponse(403, "The caller may not read the portal settings, or may not copy the selected file")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or may not copy the selected file")]
     [SwaggerResponse(404, "The selected file does not exist")]
     [SwaggerResponse(500, "The file identifier is a number that cannot be read as a 32-bit integer: fractional, in exponent notation or out of range")]
     [HttpPut("settings/defaulttemplate")]
@@ -677,7 +677,7 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The blank document configured for each supported extension after the reset", typeof(DefaultTemplateSettingsDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `fileExtension`")]
-    [SwaggerResponse(403, "The caller may not read the portal settings")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpDelete("settings/defaulttemplate")]
     public async Task<DefaultTemplateSettingsDto> ResetDefaultTemplate(DefaultTemplateSettingsResetRequestDto inDto)
     {
@@ -702,7 +702,7 @@ public class SettingsController(
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The blank document configured for each supported extension after the upload", typeof(DefaultTemplateSettingsDto))]
     [SwaggerResponse(400, "The uploaded file is missing or larger than the 100 MB limit, or its file name does not end with the requested extension")]
-    [SwaggerResponse(403, "The caller may not read the portal settings, or the uploaded PDF is not a fillable form")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or the uploaded PDF is not a fillable form")]
     [HttpPost("settings/defaulttemplate")]
     // Kestrel's global 100 MB limit aborts the connection mid-upload, so the caller would see a
     // reset instead of a reason. The form limit below takes over: the multipart reader rejects the

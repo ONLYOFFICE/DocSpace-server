@@ -93,7 +93,7 @@ public class AccountsController<T>(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The matching users and groups, each with its access state for the room", typeof(IAsyncEnumerable<IAccountEntryDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, the `inviterId` is not a GUID, `excludeShared`, `includeShared` or `invitedByMe` is not a boolean, or the `employeeStatus`, `activationStatus`, `area` or `employeeTypes` is not one of the known values")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "No room has the specified ID")]
     [HttpGet("room/{id}/search")]
@@ -127,7 +127,7 @@ public class AccountsController<T>(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The matching users and groups, each with its access state for the folder", typeof(IAsyncEnumerable<IAccountEntryDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, the `inviterId` is not a GUID, `excludeShared`, `includeShared` or `invitedByMe` is not a boolean, or the `employeeStatus`, `activationStatus`, `area` or `employeeTypes` is not one of the known values")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "No folder has the specified ID")]
     [HttpGet("folder/{id}/search")]
@@ -160,7 +160,7 @@ public class AccountsController<T>(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The matching users and groups, each with its access state for the file", typeof(IAsyncEnumerable<IAccountEntryDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, the `inviterId` is not a GUID, `excludeShared`, `includeShared` or `invitedByMe` is not a boolean, or the `employeeStatus`, `activationStatus`, `area` or `employeeTypes` is not one of the known values")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "No file has the specified ID")]
     [HttpGet("file/{id}/search")]

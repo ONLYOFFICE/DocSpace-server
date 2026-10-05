@@ -162,7 +162,7 @@ public class SecurityController(
     /// <collection>list</collection>
     [Tags("Security / Login history")]
     [SwaggerResponse(200, "Login events matching the filters, newest first, or the twenty most recent events when the portal has no audit option", typeof(IEnumerable<LoginEventDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, the `userId` is not a GUID, the `action` is not a known action, or `from` or `to` is not a date and time ending in `Z` or a UTC offset")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or `from` or `to` is not a date and time ending in `Z` or a UTC offset")]
     [SwaggerResponse(402, "The login history and audit trail section is not enabled for this portal")]
     [SwaggerResponse(403, "The caller does not have the portal-settings right of a DocSpace administrator")]
     [HttpGet("audit/login/filter")]
@@ -205,7 +205,7 @@ public class SecurityController(
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "Audit events matching the filters, newest first, or the twenty most recent events when the portal has no audit option", typeof(IEnumerable<AuditEventDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, the `startIndex` is not a number, the `userId` is not a GUID, the `moduleType`, `actionType`, `action` or `entryType` is not one of the known values, or `from` or `to` is not a date and time ending in `Z` or a UTC offset")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or `from` or `to` is not a date and time ending in `Z` or a UTC offset")]
     [SwaggerResponse(402, "The login history and audit trail section is not enabled for this portal")]
     [SwaggerResponse(403, "The caller does not have the portal-settings right of a DocSpace administrator")]
     [HttpGet("audit/events/filter")]
@@ -279,7 +279,6 @@ public class SecurityController(
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "The products with their modules and the actions each module can record", typeof(IEnumerable<AuditTrailProductMapperDto>))]
-    [SwaggerResponse(400, "The `productType` or the `moduleType` is not one of the known values")]
     [SwaggerResponse(403, "The caller does not have the portal-settings right of a DocSpace administrator")]
     [HttpGet("audit/mappers")]
     public async Task<IEnumerable<AuditTrailProductMapperDto>> GetAuditTrailMappers(AuditTrailTypesRequestDto inDto)
@@ -329,7 +328,7 @@ public class SecurityController(
     /// <path>api/2.0/security/audit/login/report</path>
     [Tags("Security / Login history")]
     [SwaggerResponse(200, "The state of the queued job that builds the login history report", typeof(DocumentBuilderTaskDto))]
-    [SwaggerResponse(400, "The requested period ends before it starts, or lies entirely outside the login history lifetime or the `format` is neither `Xlsx` nor `Csv`")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the requested period ends before it starts or lies entirely outside the login history lifetime")]
     [SwaggerResponse(402, "The portal's pricing plan has no audit option, or the login history and audit trail section is not enabled")]
     [SwaggerResponse(403, "The caller does not have the portal-settings right of a DocSpace administrator")]
     [HttpPost("audit/login/report")]
@@ -431,7 +430,7 @@ public class SecurityController(
     /// <path>api/2.0/security/audit/events/report</path>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "The state of the queued job that builds the audit trail report", typeof(DocumentBuilderTaskDto))]
-    [SwaggerResponse(400, "The requested period ends before it starts, or lies entirely outside the audit trail lifetime or the `format` is neither `Xlsx` nor `Csv`")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the requested period ends before it starts or lies entirely outside the audit trail lifetime")]
     [SwaggerResponse(402, "The portal's pricing plan has no audit option, or the login history and audit trail section is not enabled")]
     [SwaggerResponse(403, "The caller does not have the portal-settings right of a DocSpace administrator")]
     [HttpPost("audit/events/report")]

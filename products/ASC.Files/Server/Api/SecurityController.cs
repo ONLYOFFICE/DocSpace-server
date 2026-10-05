@@ -97,7 +97,7 @@ public abstract class SecurityController<T>(
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The accounts and groups that hold rights on the file, the owner first", typeof(IAsyncEnumerable<FileShareDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, or the `startIndex` is not a number")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a guest or may not read the file")]
     [SwaggerResponse(404, "The file does not exist")]
     [HttpGet("file/{id}/share")]
@@ -140,7 +140,7 @@ public abstract class SecurityController<T>(
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The accounts and groups that hold rights on the folder, the owner first", typeof(IAsyncEnumerable<FileShareDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, or the `startIndex` is not a number")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a guest or may not read the folder")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpGet("folder/{id}/share")]
@@ -307,7 +307,7 @@ public abstract class SecurityController<T>(
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The members of the group with the access each of them has on the folder", typeof(IAsyncEnumerable<GroupMemberSecurityRequestDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, or the `startIndex` is not a number")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a guest")]
     [HttpGet("folder/{folderId}/group/{groupId:guid}/share")]
     public async IAsyncEnumerable<GroupMemberSecurityRequestDto> GetGroupsMembersWithFolderSecurity(GroupMemberSecurityFolderRequestDto<T> inDto)
@@ -358,7 +358,7 @@ public abstract class SecurityController<T>(
     /// <path>api/2.0/files/file/{fileId}/group/{groupId}/share</path>
     [Tags("Files / Sharing")]
     [SwaggerResponse(200, "The members of the group with the access each of them has on the file", typeof(IAsyncEnumerable<GroupMemberSecurityRequestDto>))]
-    [SwaggerResponse(400, "The `count` is outside 1-100 or not a number, or the `startIndex` is not a number")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a guest")]
     [HttpGet("file/{fileId}/group/{groupId:guid}/share")]
     public async IAsyncEnumerable<GroupMemberSecurityRequestDto> GetGroupsMembersWithFileSecurity(GroupMemberSecurityFileRequestDto<T> inDto)

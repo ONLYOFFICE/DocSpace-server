@@ -154,7 +154,7 @@ public class PortalController(
     /// <path>api/2.0/portal/users/{userID}</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "The account of this portal, in the internal user format", typeof(UserInfo))]
-    [SwaggerResponse(403, "The caller is not allowed to view this account; a user or a guest gets it for any ID but their own, whether the account exists or not")]
+    [SwaggerResponse(403, "The caller is not allowed to view this account: a user or a guest gets it for any ID but their own, whether the account exists or not, and a room administrator gets it for a guest they have no relation with")]
     [SwaggerResponse(404, "No account with this ID exists on the portal, or the ID belongs to a system account")]
     [HttpGet("users/{userID:guid}")]
     public async Task<UserInfo> GetUserById(UserIDRequestDto inDto)
@@ -193,7 +193,6 @@ public class PortalController(
     /// <path>api/2.0/portal/users/invite/{employeeType}</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "The invitation URL to hand to the invited person, or an empty string when the caller may not invite that role", typeof(string))]
-    [SwaggerResponse(400, "The `employeeType` in the path is not one of the known roles")]
     [SwaggerResponse(403, "Inviting members is disabled for the portal")]
     [HttpGet("users/invite/{employeeType}")]
     [Obsolete("Use CRUD /api/2.0/portal/users/invitationlink instead")]
@@ -448,7 +447,7 @@ public class PortalController(
     /// <path>api/2.0/portal/users/invitationlink</path>
     [Tags("Portal / Users")]
     [SwaggerResponse(200, "The invitation link is deleted and its URL no longer lets anyone join the portal", typeof(string))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `id`, or the `id` is not a GUID")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `id`")]
     [SwaggerResponse(403, "Inviting members is disabled for the portal, the caller has no right to add users of the link's role, or a non-owner tries to delete the DocSpace administrator link")]
     [SwaggerResponse(404, "No invitation link with this ID exists on the portal")]
     [HttpDelete("users/invitationlink")]

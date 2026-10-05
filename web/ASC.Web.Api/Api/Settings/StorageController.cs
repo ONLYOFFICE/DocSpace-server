@@ -303,9 +303,7 @@ public class StorageController(
     /// </summary>
     /// <path>api/2.0/settings/encryption/settings</path>
     [Tags("Settings / Encryption")]
-    [SwaggerResponse(200, "The encryption status and the notify-users flag, with the password blanked out; empty where encryption settings cannot be read", typeof(EncryptionSettings))]
-    [SwaggerResponse(403, "The caller may not edit portal settings")]
-    [SwaggerResponse(405, "Storage encryption is not available on this installation")]
+    [SwaggerResponse(200, "The encryption status and the notify-users flag, with the password blanked out; empty on a custom-mode installation, or when the caller has no portal-settings right, the installation hides storage encryption or does not grant unrestricted space access, or the settings cannot be read", typeof(EncryptionSettings))]
     [HttpGet("encryption/settings")]
     public async Task<EncryptionSettings> GetStorageEncryptionSettings()
     {

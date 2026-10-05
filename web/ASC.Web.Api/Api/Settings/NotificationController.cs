@@ -84,7 +84,7 @@ public class NotificationController(
     /// <path>api/2.0/settings/notification</path>
     [Tags("Settings / Notifications")]
     [SwaggerResponse(200, "The notification kind and state as they were sent in the request", typeof(NotificationSettingsDto))]
-    [SwaggerResponse(400, "The request body cannot be read or has no `type`, or the `type` is sent as a string instead of a number")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `type`")]
     [HttpPost("")]
     public async Task<NotificationSettingsDto> SetNotificationSettings(NotificationSettingsRequestsDto inDto)
     {
