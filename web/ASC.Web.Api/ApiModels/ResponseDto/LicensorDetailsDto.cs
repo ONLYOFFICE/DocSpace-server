@@ -34,9 +34,10 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The vendor details the About page and the notification letters print, shared by the whole installation.
+/// The vendor details of the installation in the shape the licensor listing and the reset of the company details
+/// return, with the licensor flag spelled `IsLicensor`.
 /// </summary>
-public class CompanyWhiteLabelSettingsDto
+public class LicensorDetailsDto
 {
     /// <summary>
     /// The vendor name the About page shows and the letters sign off with. Until details are saved it holds
@@ -76,9 +77,10 @@ public class CompanyWhiteLabelSettingsDto
     /// <summary>
     /// Whether these details are those of the licensor of the product itself rather than of a reseller. Saving
     /// through `POST api/2.0/settings/rebranding/company` always clears it, so only details that came with the
-    /// installation can report `true`.
+    /// installation can report `true`. The name starts with a capital letter, unlike the other fields.
     /// </summary>
     /// <example>false</example>
+    [JsonPropertyName("IsLicensor")]
     public required bool IsLicensor { get; set; }
 
     /// <summary>
@@ -95,20 +97,4 @@ public class CompanyWhiteLabelSettingsDto
     /// </summary>
     /// <example>true</example>
     public required bool IsDefault { get; set; }
-}
-
-[Scope]
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public partial class CompanyWhiteLabelSettingsDtoMapper(CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper)
-{
-    [MapPropertyFromSource(nameof(CompanyWhiteLabelSettingsDto.IsDefault), Use = nameof(GetIsDefault))]
-    public partial CompanyWhiteLabelSettingsDto Map(CompanyWhiteLabelSettings source);
-
-    [MapPropertyFromSource(nameof(LicensorDetailsDto.IsDefault), Use = nameof(GetIsDefault))]
-    public partial LicensorDetailsDto MapToLicensorDetails(CompanyWhiteLabelSettings source);
-
-    private bool GetIsDefault(CompanyWhiteLabelSettings source)
-    {
-        return companyWhiteLabelSettingsHelper.IsDefault(source);
-    }
 }

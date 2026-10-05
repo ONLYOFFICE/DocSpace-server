@@ -605,19 +605,19 @@ public class WhitelabelController(
     /// <path>api/2.0/settings/companywhitelabel</path>
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "The licensor details in effect, followed by the built-in ONLYOFFICE ones when they have been replaced", typeof(List<CompanyWhiteLabelSettingsDto>))]
+    [SwaggerResponse(200, "The licensor details in effect, followed by the built-in ONLYOFFICE ones when they have been replaced", typeof(List<LicensorDetailsDto>))]
     [HttpGet("companywhitelabel")]
-    public async Task<List<CompanyWhiteLabelSettingsDto>> GetLicensorData()
+    public async Task<List<LicensorDetailsDto>> GetLicensorData()
     {
-        var result = new List<CompanyWhiteLabelSettingsDto>();
+        var result = new List<LicensorDetailsDto>();
 
         var instance = await companyWhiteLabelSettingsHelper.InstanceAsync();
 
-        result.Add(companyWhiteLabelSettingsDtoMapper.Map(instance));
+        result.Add(companyWhiteLabelSettingsDtoMapper.MapToLicensorDetails(instance));
 
         if (!companyWhiteLabelSettingsHelper.IsDefault(instance) && !instance.IsLicensor)
         {
-            result.Add(companyWhiteLabelSettingsDtoMapper.Map(settingsManager.GetDefault<CompanyWhiteLabelSettings>()));
+            result.Add(companyWhiteLabelSettingsDtoMapper.MapToLicensorDetails(settingsManager.GetDefault<CompanyWhiteLabelSettings>()));
         }
 
         return result;
@@ -722,10 +722,10 @@ public class WhitelabelController(
     /// <summary>Delete the company white label settings</summary>
     /// <path>api/2.0/settings/rebranding/company</path>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "The built-in company details that are now in effect", typeof(CompanyWhiteLabelSettingsDto))]
+    [SwaggerResponse(200, "The built-in company details that are now in effect", typeof(LicensorDetailsDto))]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the installation does not allow branding to be edited")]
     [HttpDelete("rebranding/company")]
-    public async Task<CompanyWhiteLabelSettingsDto> DeleteCompanyWhiteLabelSettings()
+    public async Task<LicensorDetailsDto> DeleteCompanyWhiteLabelSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -737,7 +737,7 @@ public class WhitelabelController(
 
         messageService.Send(MessageAction.WhiteLabelCompanySettingsUpdated);
 
-        return companyWhiteLabelSettingsDtoMapper.Map(defaultSettings);
+        return companyWhiteLabelSettingsDtoMapper.MapToLicensorDetails(defaultSettings);
     }
 
     #endregion
