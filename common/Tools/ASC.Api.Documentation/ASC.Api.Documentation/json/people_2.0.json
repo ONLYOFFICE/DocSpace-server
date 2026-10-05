@@ -111,7 +111,7 @@
             }
           },
           "400": {
-            "description": "The permissions array is empty or contains a scope the portal does not know"
+            "description": "The request body cannot be read or has no `name`, the name is empty or longer than 30 characters, `expiresInDays` is outside 1-365, or the permissions array is empty or contains a scope the portal does not know"
           },
           "403": {
             "description": "The caller is a guest, or the portal limits developer tools to administrators"
@@ -420,6 +420,12 @@
               }
             }
           },
+          "400": {
+            "description": "The request has no Authorization header, as with a session authenticated by a cookie"
+          },
+          "500": {
+            "description": "The Authorization header carries a token that is not an API key of this portal"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -437,16 +443,6 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -545,10 +541,13 @@
             }
           },
           "400": {
-            "description": "The permissions array is empty or contains a scope the portal does not know"
+            "description": "The request body cannot be read, the name is longer than 30 characters, or the permissions array is empty or contains a scope the portal does not know"
           },
           "403": {
             "description": "The key belongs to another member and the caller is not a DocSpace admin"
+          },
+          "500": {
+            "description": "The portal has no key with this ID"
           },
           "401": {
             "description": "Unauthorized",
@@ -567,16 +566,6 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -663,6 +652,9 @@
           "403": {
             "description": "The key belongs to another member and the caller is not a DocSpace admin"
           },
+          "500": {
+            "description": "The portal has no key with this ID"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -680,16 +672,6 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -852,6 +834,9 @@
               }
             }
           },
+          "400": {
+            "description": "A parameter has the wrong type, or the `count` is outside its allowed range"
+          },
           "403": {
             "description": "No permissions to perform this action"
           },
@@ -882,16 +867,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -971,7 +946,7 @@
             }
           },
           "400": {
-            "description": "The group name is empty, or one of the listed accounts is a guest, is disabled or does not exist"
+            "description": "The request body cannot be read or has no `groupName`, the group name is `null`, blank or longer than 128 characters, or one of the listed members or the manager is a guest, is disabled or does not exist"
           },
           "403": {
             "description": "No permissions to perform this action"
@@ -1237,6 +1212,9 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read, or `groupName` is longer than 128 characters"
+          },
           "403": {
             "description": "No permissions to perform this action"
           },
@@ -1270,16 +1248,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1752,7 +1720,7 @@
             }
           },
           "400": {
-            "description": "None of the listed accounts can be a group member"
+            "description": "The request body cannot be read or has no `members` list, or none of the listed accounts can be a group member"
           },
           "403": {
             "description": "No permissions to perform this action"
@@ -2160,6 +2128,9 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read or has no `userId`"
+          },
           "403": {
             "description": "No permissions to perform this action"
           },
@@ -2193,16 +2164,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2336,6 +2297,9 @@
               }
             }
           },
+          "400": {
+            "description": "A parameter has the wrong type, or the `count` is outside its allowed range"
+          },
           "403": {
             "description": "No permissions to perform this action"
           },
@@ -2369,16 +2333,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2528,6 +2482,9 @@
               }
             }
           },
+          "400": {
+            "description": "A parameter has the wrong type, or the `count` is outside its allowed range"
+          },
           "403": {
             "description": "No permissions to perform this action"
           },
@@ -2561,16 +2518,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2720,6 +2667,9 @@
               }
             }
           },
+          "400": {
+            "description": "A parameter has the wrong type, or the `count` is outside its allowed range"
+          },
           "403": {
             "description": "No permissions to perform this action"
           },
@@ -2753,16 +2703,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3736,8 +3676,11 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read or has no `email`, or the email is not a valid address or is longer than 255 characters"
+          },
           "403": {
-            "description": "The CAPTCHA was not passed, or an authenticated caller may not ask for that account"
+            "description": "The CAPTCHA was not passed, an authenticated caller may not ask for that account, or, for an authenticated caller, the account does not exist, is disabled, comes from LDAP or SSO, or has an auto-generated email"
           },
           "429": {
             "description": "Too Many Requests.",
@@ -3765,16 +3708,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3873,10 +3806,10 @@
             }
           },
           "403": {
-            "description": "The ID in the route is not the calling account, or the account may not edit its own profile"
+            "description": "The ID in the route is not the calling account, the account may not edit its own profile, or `x` equals the width of the image or `y` its height"
           },
           "404": {
-            "description": "No user has the specified ID"
+            "description": "No user has the specified ID, or no temporary file has the name given in `tmpFile`"
           },
           "401": {
             "description": "Unauthorized",
@@ -4262,13 +4195,16 @@
             }
           },
           "400": {
-            "description": "The files field is empty"
+            "description": "The request body cannot be read, or the files field is empty"
           },
           "403": {
-            "description": "The ID in the route is not the calling account, the account may not edit its own profile, or the URL was refused or could not be downloaded"
+            "description": "The ID in the route is not the calling account, the account may not edit its own profile, the URL was refused, or the server behind it answered with an error status"
           },
           "404": {
             "description": "No user has the specified ID"
+          },
+          "500": {
+            "description": "The URL could not be reached within 10 seconds, or the downloaded file is empty, is not an image the portal can read, or exceeds the portal limit on image size"
           },
           "401": {
             "description": "Unauthorized",
@@ -4287,16 +4223,6 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4633,7 +4559,10 @@
             "description": "The password does not meet the portal password policy"
           },
           "403": {
-            "description": "The invitation link is invalid or has expired, the portal does not allow inviting this kind of account, or the caller may not create an account of the requested type"
+            "description": "The invitation link is invalid or has expired, the portal does not allow inviting this kind of account, the caller may not create an account of the requested type, the `files` URL was refused, or the server behind it answered with an error status after the account had been created"
+          },
+          "500": {
+            "description": "The `files` URL could not be reached within 10 seconds, or the downloaded file is empty, is not an image the portal can read, or exceeds the portal limit on image size; the account is created all the same"
           },
           "401": {
             "description": "Unauthorized",
@@ -4652,16 +4581,6 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4811,8 +4730,14 @@
               }
             }
           },
+          "400": {
+            "description": "A parameter has the wrong type, or the `count` is outside its allowed range"
+          },
           "403": {
             "description": "The caller is a member or a guest"
+          },
+          "500": {
+            "description": "The `filterBy` is `group` and the `filterValue` is not a GUID"
           },
           "401": {
             "description": "Unauthorized",
@@ -4831,26 +4756,6 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5045,6 +4950,9 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read, or `userIds` is missing while `resendAll` is false"
+          },
           "403": {
             "description": "A member or a guest asked for resendAll, or listed an account other than their own"
           },
@@ -5084,16 +4992,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5179,10 +5077,13 @@
             }
           },
           "403": {
-            "description": "The account is not disabled, is a system or an LDAP account, or the caller may not delete a DocSpace administrator"
+            "description": "The account is not disabled, is a system or an LDAP account, the caller may not delete a DocSpace administrator, or the OAuth service refused to remove the OAuth clients of the account"
           },
           "404": {
             "description": "No user has the specified ID"
+          },
+          "500": {
+            "description": "A reassignment of the data of the account has not finished yet, or the OAuth service cannot be reached"
           },
           "401": {
             "description": "Unauthorized",
@@ -5201,16 +5102,6 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5447,10 +5338,13 @@
             "description": "The tariff or the user quota does not allow the requested guest or member seat"
           },
           "403": {
-            "description": "The account is the portal owner or a system account, the caller may not edit it, or only the portal owner may edit a DocSpace administrator"
+            "description": "The account is the portal owner or a system account, the caller may not edit it, only the portal owner may edit a DocSpace administrator, or, on the caller's own profile, the `files` URL was refused or the server behind it answered with an error status"
           },
           "404": {
             "description": "No user has the specified ID"
+          },
+          "500": {
+            "description": "On the caller's own profile, the `files` URL could not be reached within 10 seconds, or the downloaded file is empty, is not an image the portal can read, or exceeds the portal limit on image size"
           },
           "401": {
             "description": "Unauthorized",
@@ -5469,16 +5363,6 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5899,7 +5783,10 @@
             "description": "The userIds field is missing"
           },
           "403": {
-            "description": "No permissions to perform this action, or one of the listed accounts is not disabled"
+            "description": "No permissions to perform this action, one of the listed accounts is not disabled, or the OAuth service refused to remove the OAuth clients of an account"
+          },
+          "500": {
+            "description": "A reassignment of the data of one of the listed accounts has not finished yet, or the OAuth service cannot be reached"
           },
           "401": {
             "description": "Unauthorized",
@@ -5918,16 +5805,6 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6518,6 +6395,9 @@
               }
             }
           },
+          "400": {
+            "description": "A parameter has the wrong type, or the `count` is outside its allowed range"
+          },
           "403": {
             "description": "No permissions to perform this action"
           },
@@ -6551,16 +6431,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6800,6 +6670,9 @@
               }
             }
           },
+          "400": {
+            "description": "A parameter has the wrong type, or the `count` is outside its allowed range"
+          },
           "403": {
             "description": "No permissions to perform this action"
           },
@@ -6833,16 +6706,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7082,6 +6945,9 @@
               }
             }
           },
+          "400": {
+            "description": "A parameter has the wrong type, or the `count` is outside its allowed range"
+          },
           "403": {
             "description": "No permissions to perform this action"
           },
@@ -7115,16 +6981,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7256,8 +7112,14 @@
               }
             }
           },
+          "400": {
+            "description": "A parameter has the wrong type, or `query` is missing"
+          },
           "403": {
             "description": "The caller is not a DocSpace administrator"
+          },
+          "500": {
+            "description": "The `filterBy` is `group` and the `filterValue` is not a GUID"
           },
           "401": {
             "description": "Unauthorized",
@@ -7276,26 +7138,6 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7620,6 +7462,9 @@
               }
             }
           },
+          "400": {
+            "description": "A parameter has the wrong type, or the `count` is outside its allowed range"
+          },
           "403": {
             "description": "The caller is a member or a guest"
           },
@@ -7650,16 +7495,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8253,6 +8088,9 @@
               }
             }
           },
+          "400": {
+            "description": "A parameter has the wrong type, or the `count` is outside its allowed range"
+          },
           "403": {
             "description": "The caller is a member or a guest"
           },
@@ -8283,16 +8121,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8516,6 +8344,9 @@
               }
             }
           },
+          "400": {
+            "description": "A parameter has the wrong type, or the `count` is outside its allowed range"
+          },
           "403": {
             "description": "The caller is a guest or cannot read the room"
           },
@@ -8549,16 +8380,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8798,6 +8619,9 @@
               }
             }
           },
+          "400": {
+            "description": "A parameter has the wrong type, or the `count` is outside its allowed range"
+          },
           "403": {
             "description": "The caller is a guest or cannot read the folder"
           },
@@ -8831,16 +8655,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9080,6 +8894,9 @@
               }
             }
           },
+          "400": {
+            "description": "A parameter has the wrong type, or the `count` is outside its allowed range"
+          },
           "403": {
             "description": "The caller is a guest or cannot read the file"
           },
@@ -9113,16 +8930,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9314,6 +9121,9 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read or has no `theme`"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -9341,16 +9151,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9569,10 +9369,13 @@
             }
           },
           "400": {
-            "description": "The third-party identity is already linked to a portal profile"
+            "description": "The third-party identity is already linked to a portal profile, or `serializedProfile` is missing, empty or was issued by another portal"
           },
           "403": {
             "description": "The portal tariff does not include third-party authorization"
+          },
+          "500": {
+            "description": "The `serializedProfile` value is not one the login flow produced, or the provider authorization ended with an error other than a cancellation"
           },
           "401": {
             "description": "Unauthorized",
@@ -9591,16 +9394,6 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9681,8 +9474,14 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read or has no `key` or `serializedProfile`, or `serializedProfile` is empty or was issued by another portal"
+          },
           "403": {
             "description": "The invitation link is invalid or has expired, or the email already belongs to a profile that has not been activated yet"
+          },
+          "500": {
+            "description": "The `serializedProfile` value is not one the login flow produced, the provider authorization ended with an error other than a cancellation, or the identity has no email and the provider cannot generate one"
           },
           "429": {
             "description": "Too Many Requests.",
@@ -9691,26 +9490,6 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10031,7 +9810,7 @@
             }
           },
           "400": {
-            "description": "The destination user is not an active room or DocSpace admin, or the source user is a system account, the portal owner, the caller, or is not disabled"
+            "description": "The request body cannot be read or has no `fromUserId` or `toUserId`, the destination user does not exist or is not an active room or DocSpace admin, or the source user does not exist, is a system account, the portal owner, the caller, is not disabled, or is a DocSpace or People administrator while the caller is not the portal owner"
           },
           "403": {
             "description": "No permissions to perform this action"
@@ -10143,6 +9922,9 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read or has no `userId`"
+          },
           "403": {
             "description": "No permissions to perform this action"
           },
@@ -10173,16 +9955,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10657,7 +10429,7 @@
             }
           },
           "400": {
-            "description": "No user has the specified ID, or the account is the portal owner, the caller, or is not disabled"
+            "description": "The request body cannot be read or has no `userId`, no user has the specified ID, or the account is the portal owner, the caller, or is not disabled"
           },
           "403": {
             "description": "No permissions to perform this action"
@@ -10762,6 +10534,9 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read or has no `userId`"
+          },
           "403": {
             "description": "No permissions to perform this action"
           },
@@ -10792,16 +10567,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10873,7 +10638,7 @@
             }
           },
           "403": {
-            "description": "The caller is not a guest, so there is no personal folder to empty"
+            "description": "The caller is not a guest, or is a guest whose personal folder has not been created"
           },
           "401": {
             "description": "Unauthorized",
@@ -11160,8 +10925,14 @@
               }
             }
           },
+          "400": {
+            "description": "A parameter has the wrong type, or the `count` is outside its allowed range"
+          },
           "403": {
             "description": "The caller is a member or a guest"
+          },
+          "500": {
+            "description": "The `filterBy` is `group` and the `filterValue` is not a GUID"
           },
           "401": {
             "description": "Unauthorized",
@@ -11180,26 +10951,6 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -11549,6 +11300,9 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read or has no `userIds`"
+          },
           "402": {
             "description": "The tariff or the paid-user quota does not allow one more paid user"
           },
@@ -11582,16 +11336,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -11910,6 +11654,9 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read or has no `userId`"
+          },
           "403": {
             "description": "No permissions to perform this action"
           },
@@ -11940,16 +11687,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {

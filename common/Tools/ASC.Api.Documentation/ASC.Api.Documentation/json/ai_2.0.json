@@ -199,6 +199,12 @@
               }
             }
           },
+          "400": {
+            "description": "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative"
+          },
+          "500": {
+            "description": "`tags` is not a JSON array of strings"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -216,26 +222,6 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -314,6 +300,21 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read or has no `title`, `title` is blank or longer than 170 characters, `color` is longer than 6 characters, `cover` is longer than 50 characters or not a known cover, an `email` in `share` is malformed or longer than 255 characters, `share` invites more addresses by email than the portal allows at once, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty"
+          },
+          "402": {
+            "description": "The portal has reached the AI agent limit of its pricing plan or its payment is overdue, or the logo does not fit into the portal storage quota"
+          },
+          "403": {
+            "description": "The caller is a user or a guest, `private` is set while the caller has no encryption keys, `quota` is set while the storage quota for AI agents is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded"
+          },
+          "404": {
+            "description": "`logo.tmpFile` names no uploaded picture, or one already used"
+          },
+          "500": {
+            "description": "`logo.width` or `logo.height` is larger than 2147483647"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -331,26 +332,6 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -568,6 +549,21 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read or holds a property the room update does not define, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, a tag name is empty, or `chatSettings` is sent for a room that is not an AI agent"
+          },
+          "402": {
+            "description": "The new logo or watermark image does not fit into the portal storage quota"
+          },
+          "403": {
+            "description": "The caller may not edit the agent, the agent does not exist or lies in Trash or in the archive, `quota` exceeds the storage limit of the portal, or `logo.tmpFile` or a relative `watermark.imageUrl` is not an image the caller uploaded"
+          },
+          "404": {
+            "description": "The uploaded image named by `logo.tmpFile` or `watermark.imageUrl` no longer exists"
+          },
+          "500": {
+            "description": "`logo.width` or `logo.height` is larger than 2147483647"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -585,26 +581,6 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -699,6 +675,12 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "The caller may not read or delete the agent"
+          },
+          "404": {
+            "description": "No AI agent has the specified ID"
           },
           "401": {
             "description": "Unauthorized",
@@ -1631,29 +1613,17 @@
         ]
       }
     },
-    "/internal/ai/vectorization/tasks": {
-      "post": {
+    "/internal/ai/config/tool-mode": {
+      "get": {
         "tags": [
-          "AI / Vectorization"
+          "AI / Settings"
         ],
-        "summary": "Start a vectorization task",
-        "description": "Submits the specified files for vectorization processing.",
-        "operationId": "startTask",
-        "requestBody": {
-          "description": "The vectorization parameters including file identifiers.",
-          "content": {
-            "application/json": {
-              "schema": {
-                "description": "The vectorization parameters including file identifiers.",
-                "$ref": "#/components/schemas/VectorizationStartRequestBody"
-              }
-            }
-          },
-          "required": true
-        },
+        "summary": "Get the tool permission mode",
+        "description": "Returns how tool calls made by the model are approved for the current user. The stored mode applies to every\r\nchat of the user in the portal; while nothing is stored, the default mode is returned.",
+        "operationId": "getToolPermissionMode",
         "responses": {
           "200": {
-            "description": "Ok",
+            "description": "Tool permission mode",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -1663,6 +1633,13 @@
               },
               "X-RateLimit-Reset": {
                 "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolPermissionModeWrapper"
+                }
               }
             }
           },
@@ -1701,8 +1678,219 @@
               }
             }
           },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "AI / Settings"
+        ],
+        "summary": "Set the tool permission mode",
+        "description": "Stores how tool calls made by the model are approved for the current user. The mode applies to every chat of the\r\nuser in the portal and replaces the one stored before. A value outside the declared members is rejected rather\r\nthan coerced.",
+        "operationId": "setToolPermissionMode",
+        "requestBody": {
+          "description": "The tool permission mode parameters.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "The tool permission mode parameters.",
+                "$ref": "#/components/schemas/SetToolPermissionModeRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Tool permission mode",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ToolPermissionModeWrapper"
+                }
+              }
+            }
+          },
           "400": {
-            "description": "Bad Request.",
+            "description": "The mode is not one of the declared members"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
+          },
+          "503": {
+            "description": "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON."
+          }
+        },
+        "security": [
+          {
+            "asc_auth_key": [ ]
+          },
+          {
+            "Bearer": [ ]
+          },
+          {
+            "ApiKeyBearer": [ ]
+          },
+          {
+            "Basic": [ ]
+          },
+          {
+            "OAuth2": [
+              "read",
+              "write"
+            ]
+          },
+          {
+            "OpenId": [ ]
+          }
+        ]
+      }
+    },
+    "/internal/ai/vectorization/tasks": {
+      "post": {
+        "tags": [
+          "AI / Vectorization"
+        ],
+        "summary": "Start a vectorization task",
+        "description": "Submits the specified files for vectorization processing.",
+        "operationId": "startTask",
+        "requestBody": {
+          "description": "The vectorization parameters including file identifiers.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "description": "The vectorization parameters including file identifiers.",
+                "$ref": "#/components/schemas/VectorizationStartRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "headers": {
+              "X-RateLimit-Limit": {
+                "$ref": "#/components/headers/X-RateLimit-Limit"
+              },
+              "X-RateLimit-Remaining": {
+                "$ref": "#/components/headers/X-RateLimit-Remaining"
+              },
+              "X-RateLimit-Reset": {
+                "$ref": "#/components/headers/X-RateLimit-Reset"
+              }
+            }
+          },
+          "400": {
+            "description": "The request body cannot be read or has no `files`, or `files` is empty"
+          },
+          "403": {
+            "description": "The caller may not vectorize one of the files: it has never been queued for vectorization, it lies in the knowledge folder of an AI agent while vectorization is switched off, or the caller's access to it does not allow vectorization"
+          },
+          "404": {
+            "description": "One of the files does not exist"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests.",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/Retry-After"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1824,6 +2012,10 @@
               "string"
             ],
             "description": "The identifier of the model recommended for form generation."
+          },
+          "toolPermissionMode": {
+            "description": "How tool calls made by the model are approved for the current user. The default applies while the user has stored nothing.",
+            "$ref": "#/components/schemas/ToolPermissionMode"
           }
         },
         "description": "The AI module settings."
@@ -1879,6 +2071,10 @@
             ],
             "type": "boolean",
             "description": "Indicates whether the recommended model banner is visible in the AI chat for the current user."
+          },
+          "toolPermissionMode": {
+            "description": "How tool calls made by the model are approved for the current user. The default applies while the user has stored nothing.",
+            "$ref": "#/components/schemas/ToolPermissionMode"
           }
         },
         "description": "The per-user AI settings."
@@ -2884,6 +3080,17 @@
                   "boolean"
                 ],
                 "description": "Set when the link being used has already passed its expiration date, which is why the entry cannot be opened\r\neven though it is described here. It is null when no link is involved."
+              },
+              "assignedMetadataTemplates": {
+                "type": [
+                  "null",
+                  "array"
+                ],
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "description": "The IDs of the metadata templates assigned to the file entry."
               }
             }
           }
@@ -3540,7 +3747,7 @@
                   "null",
                   "integer"
                 ],
-                "description": "How much space the files of the room may take, in bytes. It is the limit set on this room, or the portal\r\ndefault for rooms when none was set. Null when the tariff of the portal does not count room statistics, when\r\nroom quotas are switched off, when the room lies in the archive or the trash, or when the caller may only read\r\nit.",
+                "description": "How much space the files of the room may take, in bytes. It is the limit set on this room, or the portal\r\ndefault for rooms when none was set. Null when the tariff of the portal does not count room statistics, when\r\nroom quotas are switched off, when the room lies in the archive or the trash, or when the role of the caller\r\nin the room carries no editing rights - a viewer, a commenter, a reviewer and a form filler do not see the\r\nfigure, a room manager, a content creator and an editor do.",
                 "format": "int64"
               },
               "isCustomQuota": {
@@ -3665,10 +3872,11 @@
               "ChatOutputs",
               "AiAgents",
               "DefaultTemplates",
-              "Forms"
+              "Forms",
+              "Ai"
             ],
             "type": "string",
-            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms]"
+            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms, Ai - Ai]"
           },
           {
             "examples": [
@@ -3704,10 +3912,11 @@
               33,
               34,
               35,
-              36
+              36,
+              37
             ],
             "type": "integer",
-            "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms]",
+            "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms, 37 - Ai]",
             "x-enum-varnames": [
               "DEFAULT",
               "COMMON",
@@ -3738,7 +3947,8 @@
               "ChatOutputs",
               "AiAgents",
               "DefaultTemplates",
-              "Forms"
+              "Forms",
+              "Ai"
             ]
           }
         ],
@@ -4200,6 +4410,19 @@
         },
         "description": "Parameters for configuring the embedding provider."
       },
+      "SetToolPermissionModeRequestBody": {
+        "required": [
+          "mode"
+        ],
+        "type": "object",
+        "properties": {
+          "mode": {
+            "description": "The approval mode to store for the current user.",
+            "$ref": "#/components/schemas/ToolPermissionMode"
+          }
+        },
+        "description": "Parameters for changing the tool permission mode."
+      },
       "SortOrder": {
         "oneOf": [
           {
@@ -4231,6 +4454,92 @@
         ],
         "description": "The order in which the results are sorted.",
         "x-enum-type": "integer"
+      },
+      "ToolPermissionMode": {
+        "oneOf": [
+          {
+            "examples": [
+              "Ask"
+            ],
+            "enum": [
+              "Ask",
+              "Auto",
+              "Allow"
+            ],
+            "type": "string",
+            "description": "[Ask - Ask, Auto - Auto, Allow - Allow]"
+          },
+          {
+            "examples": [
+              0
+            ],
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "[0 - Ask, 1 - Auto, 2 - Allow]",
+            "x-enum-varnames": [
+              "Ask",
+              "Auto",
+              "Allow"
+            ]
+          }
+        ],
+        "x-enum-type": "integer"
+      },
+      "ToolPermissionModeDto": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "description": "How tool calls made by the model are approved for the current user. The default applies while the user has stored nothing.",
+            "$ref": "#/components/schemas/ToolPermissionMode"
+          }
+        },
+        "description": "The current user's tool permission mode."
+      },
+      "ToolPermissionModeWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "description": "The ToolPermissionModeDto object returned by the operation.",
+            "$ref": "#/components/schemas/ToolPermissionModeDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the ToolPermissionModeDto object."
       },
       "UpdateRoomRequest": {
         "type": "object",

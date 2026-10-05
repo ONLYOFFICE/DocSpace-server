@@ -123,6 +123,7 @@ public class StorageController(
     /// <path>api/2.0/settings/storage/progress</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "Migration progress as a percentage, or -1 where storage migration is not offered", typeof(double))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [AllowNotPayment]
     [HttpGet("storage/progress")]
     public async Task<double> GetStorageProgress()
@@ -161,7 +162,8 @@ public class StorageController(
     [SwaggerResponse(200, "True when the encryption job has been queued; false in a build where storage encryption is switched off", typeof(bool))]
     [SwaggerResponse(402, "The portal pricing plan does not include storage encryption")]
     [SwaggerResponse(403, "The caller may not edit portal settings, or this installation does not allow storage encryption")]
-    [SwaggerResponse(405, "Storage encryption is not available on this installation")]
+    [SwaggerResponse(415, "Storage encryption is not available on this installation, or the storage or the CDN of the current portal is a third-party provider")]
+    [SwaggerResponse(500, "A backup of one of the portals is still running")]
     [HttpPost("encryption/start")]
     public async Task<bool> StartStorageEncryption(StorageEncryptionRequestsDto inDto)
     {
@@ -301,9 +303,7 @@ public class StorageController(
     /// </summary>
     /// <path>api/2.0/settings/encryption/settings</path>
     [Tags("Settings / Encryption")]
-    [SwaggerResponse(200, "The encryption status and the notify-users flag, with the password blanked out; empty where encryption settings cannot be read", typeof(EncryptionSettings))]
-    [SwaggerResponse(403, "The caller may not edit portal settings")]
-    [SwaggerResponse(405, "Storage encryption is not available on this installation")]
+    [SwaggerResponse(200, "The encryption status and the notify-users flag, with the password blanked out; empty on a custom-mode installation, or when the caller has no portal-settings right, the installation hides storage encryption or does not grant unrestricted space access, or the settings cannot be read", typeof(EncryptionSettings))]
     [HttpGet("encryption/settings")]
     public async Task<EncryptionSettings> GetStorageEncryptionSettings()
     {
@@ -354,7 +354,7 @@ public class StorageController(
     /// <path>api/2.0/settings/encryption/progress</path>
     [Tags("Settings / Encryption")]
     [SwaggerResponse(200, "Encryption or decryption progress as a percentage, or empty when no run is in flight", typeof(double?))]
-    [SwaggerResponse(405, "Storage encryption is not available on this installation")]
+    [SwaggerResponse(415, "Storage encryption is not available on this installation")]
     [HttpGet("encryption/progress")]
     public async Task<double?> GetStorageEncryptionProgress()
     {
@@ -396,7 +396,7 @@ public class StorageController(
     /// <path>api/2.0/settings/storage</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "The saved storage configuration; migration of the portal data to it has been started", typeof(StorageSettings))]
-    [SwaggerResponse(400, "The requested storage module is not configured on this installation")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `module`, or the requested storage module is unknown or not configured on this installation")]
     [SwaggerResponse(403, "The caller may not edit portal settings, or this installation does not allow changing the storage")]
     [HttpPut("storage")]
     public async Task<StorageSettings> UpdateStorage(StorageRequestsDto inDto)
@@ -534,7 +534,7 @@ public class StorageController(
     /// <path>api/2.0/settings/storage/cdn</path>
     [Tags("Settings / Storage")]
     [SwaggerResponse(200, "The saved CDN configuration; the upload of the static content has been handed to the storage service", typeof(CdnStorageSettings))]
-    [SwaggerResponse(400, "The requested CDN module is not configured on this installation")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `module`, or the requested CDN module is unknown or not configured on this installation")]
     [SwaggerResponse(403, "The caller may not edit portal settings, or this installation does not allow changing the storage")]
     [HttpPut("storage/cdn")]
     public async Task<CdnStorageSettings> UpdateCdnStorage(StorageRequestsDto inDto)
