@@ -114,7 +114,11 @@ public abstract class CustomerReportBuilderBase(
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         // The script reads the alignments as the lowercase strings it hands to SetAlignHorizontal,
         // so ReportColumnAlign has to reach it by name rather than by its numeric value.
-        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+        // The data is written into the script, which the document server refuses past its download
+        // limit: escaped to \uXXXX, every non-Latin letter would take six bytes of it instead of two.
+        // Quotes, backslashes and control characters are still escaped.
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
     public async Task<DocumentBuilderInputData> BuildAsync(Guid userId, CustomerOperationsReportTaskData data)

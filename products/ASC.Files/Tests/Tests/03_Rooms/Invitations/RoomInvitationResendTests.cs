@@ -49,7 +49,7 @@ public class RoomInvitationResendTests(
     /// Invites <paramref name="count"/> new, still-pending users into a fresh CustomRoom with the
     /// given access and returns the room together with the invited users.
     /// </summary>
-    private async Task<(FolderDtoInteger Room, List<User> Users)> CreateRoomWithInvitedUsers(
+    private async Task<(FolderDto Room, List<User> Users)> CreateRoomWithInvitedUsers(
         int count, FileShare access = FileShare.Editing)
     {
         var room = await CreateCustomRoom("Autotest Resend Room");

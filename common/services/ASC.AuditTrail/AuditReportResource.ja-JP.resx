@@ -1122,6 +1122,12 @@
   <data name="QuotaPerAiAgentDisabled" xml:space="preserve">
     <value>AIエージェントのデフォルトストレージ割り当てが無効になりました</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>注記</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>このレポートには、{1} 件のイベントのうち最新の {0} 件が表示されています。すべてのイベントを取得するには、レポートを CSV 形式でダウンロードしてください。</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>ベクトル化設定がリセットされました</value>
   </data>

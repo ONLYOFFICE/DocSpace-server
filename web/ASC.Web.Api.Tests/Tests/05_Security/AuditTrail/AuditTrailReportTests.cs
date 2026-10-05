@@ -45,15 +45,6 @@ namespace ASC.Web.Api.Tests.Tests._05_Security.AuditTrail;
 /// instances")</c>, i.e. the TS suite itself already expects them to fail on a local/self-hosted
 /// instance like this one.
 /// </summary>
-/// <remarks>
-/// SDK gap: the generated <c>AuditTrailDataApi.CreateAuditTrailReportAsync</c> types the response
-/// as <see cref="StringWrapper"/> (a plain string), but the controller actually returns a
-/// <c>DocumentBuilderTaskDto</c> object (<c>{ id, error, percentage, isCompleted, status, ... }</c>)
-/// — the OpenAPI schema for this endpoint is wrong, and deserializing that object into
-/// <see cref="StringWrapper.Response"/> would fail. The positive cases below go through raw JSON
-/// instead; the negative (permission) cases are unaffected, since <see cref="ApiException"/> is
-/// raised from the status code alone, before the body is ever deserialized into the (wrong) type.
-/// </remarks>
 [Trait("Category", "Security")]
 public class AuditTrailReportTests(
     AspireAppFixture fixture)
@@ -66,14 +57,11 @@ public class AuditTrailReportTests(
         await _webApiClient.Authenticate(Owner);
 
         // Act
-        using var response = await _webApi.PostAsync("api/2.0/security/audit/events/report", null, TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var result = await _auditTrailDataApi.CreateAuditTrailReportAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        using var json = JsonDocument.Parse(body);
-        var id = json.RootElement.GetProperty("response").GetProperty("id").GetString();
-        id.Should().NotBeNullOrEmpty();
+        result.Response.Should().NotBeNull();
+        result.Response.Id.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -84,14 +72,11 @@ public class AuditTrailReportTests(
         await _webApiClient.Authenticate(admin);
 
         // Act
-        using var response = await _webApi.PostAsync("api/2.0/security/audit/events/report", null, TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var result = await _auditTrailDataApi.CreateAuditTrailReportAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        using var json = JsonDocument.Parse(body);
-        var id = json.RootElement.GetProperty("response").GetProperty("id").GetString();
-        id.Should().NotBeNullOrEmpty();
+        result.Response.Should().NotBeNull();
+        result.Response.Id.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -125,5 +110,65 @@ public class AuditTrailReportTests(
         // Assert
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
+    }
+
+    [Fact]
+    public async Task CreateAuditTrailReport_WithPeriod_StartsReportGeneration()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var now = DateTime.UtcNow;
+
+        // Act
+        var result = await _auditTrailDataApi.CreateAuditTrailReportAsync(from: now.AddDays(-7), to: now, cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Response.Should().NotBeNull();
+        result.Response.Id.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task CreateAuditTrailReport_FromBeforeLifetime_StartsReportGeneration()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var now = DateTime.UtcNow;
+
+        // Act
+        var result = await _auditTrailDataApi.CreateAuditTrailReportAsync(from: now.AddYears(-10), cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Response.Should().NotBeNull();
+        result.Response.Id.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task CreateAuditTrailReport_PeriodEndsBeforeStart_ReturnsBadRequest()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var now = DateTime.UtcNow;
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _auditTrailDataApi.CreateAuditTrailReportAsync(from: now.AddDays(-1), to: now.AddDays(-2), cancellationToken: TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+    }
+
+    [Fact]
+    public async Task CreateAuditTrailReport_PeriodOutsideLifetime_ReturnsBadRequest()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var now = DateTime.UtcNow;
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _auditTrailDataApi.CreateAuditTrailReportAsync(to: now.AddYears(-10), cancellationToken: TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
     }
 }

@@ -154,7 +154,7 @@ use {{invokerPackage}}\ObjectSerializer;
 {{/-last}}
 {{/servers}}
 {{#allParams}}
-     * @param  {{{dataType}}}{{^required}}|null{{/required}} ${{paramName}}{{#description}} {{{.}}}{{/description}}{{^description}} {{paramName}}{{/description}} {{#required}}(required){{/required}}{{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}
+     * @param  {{#vendorExtensions.x-thirdparty-union-type}}{{{vendorExtensions.x-thirdparty-union-type}}}{{/vendorExtensions.x-thirdparty-union-type}}{{^vendorExtensions.x-thirdparty-union-type}}{{{dataType}}}{{/vendorExtensions.x-thirdparty-union-type}}{{^required}}|null{{/required}} ${{paramName}}{{#description}} {{{.}}}{{/description}}{{^description}} {{paramName}}{{/description}} {{#required}}(required){{/required}}{{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}
 {{/allParams}}
 {{#servers}}
 {{#-first}}
@@ -166,7 +166,7 @@ use {{invokerPackage}}\ObjectSerializer;
      *
      * @throws \{{invokerPackage}}\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return {{#returnType}}{{#responses}}{{#dataType}}{{^-first}}|{{/-first}}{{/dataType}}{{{dataType}}}{{/responses}}{{/returnType}}{{^returnType}}void{{/returnType}}
+     * @return {{#returnType}}{{#responses}}{{#dataType}}{{^-first}}|{{/-first}}{{/dataType}}{{{dataType}}}{{#vendorExtensions.x-thirdparty-datatype-variant}}|{{{.}}}{{/vendorExtensions.x-thirdparty-datatype-variant}}{{/responses}}{{/returnType}}{{^returnType}}void{{/returnType}}
     {{#isDeprecated}}
      * @deprecated
     {{/isDeprecated}}
@@ -216,7 +216,7 @@ use {{invokerPackage}}\ObjectSerializer;
 {{/-last}}
 {{/servers}}
 {{#allParams}}
-     * @param  {{{dataType}}}{{^required}}|null{{/required}} ${{paramName}}{{#description}} {{{.}}}{{/description}} {{#required}}(required){{/required}}{{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}
+     * @param  {{#vendorExtensions.x-thirdparty-union-type}}{{{vendorExtensions.x-thirdparty-union-type}}}{{/vendorExtensions.x-thirdparty-union-type}}{{^vendorExtensions.x-thirdparty-union-type}}{{{dataType}}}{{/vendorExtensions.x-thirdparty-union-type}}{{^required}}|null{{/required}} ${{paramName}}{{#description}} {{{.}}}{{/description}} {{#required}}(required){{/required}}{{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}
 {{/allParams}}
 {{#servers}}
 {{#-first}}
@@ -228,7 +228,7 @@ use {{invokerPackage}}\ObjectSerializer;
      *
      * @throws \{{invokerPackage}}\ApiException on non-2xx response or if the response body is not in the expected format
      * @throws \InvalidArgumentException
-     * @return array of {{#returnType}}{{#responses}}{{#dataType}}{{^-first}}|{{/-first}}{{/dataType}}{{{dataType}}}{{/responses}}{{/returnType}}{{^returnType}}null{{/returnType}}, HTTP status code, HTTP response headers (array of strings)
+     * @return array of {{#returnType}}{{#responses}}{{#dataType}}{{^-first}}|{{/-first}}{{/dataType}}{{{dataType}}}{{#vendorExtensions.x-thirdparty-datatype-variant}}|{{{.}}}{{/vendorExtensions.x-thirdparty-datatype-variant}}{{/responses}}{{/returnType}}{{^returnType}}null{{/returnType}}, HTTP status code, HTTP response headers (array of strings)
     {{#isDeprecated}}
      * @deprecated
     {{/isDeprecated}}
@@ -268,7 +268,7 @@ use {{invokerPackage}}\ObjectSerializer;
             {{#dataType}}
                 {{^isRange}}{{^isWildcard}}case {{code}}:{{/isWildcard}}{{#isWildcard}}default:{{/isWildcard}}
                     return $this->handleResponseWithDataType(
-                        '{{{dataType}}}',
+                        {{#vendorExtensions.x-thirdparty-datatype-variant}}is_string(${{vendorExtensions.x-thirdparty-dispatch-param}}) ? '{{{.}}}' : '{{{dataType}}}'{{/vendorExtensions.x-thirdparty-datatype-variant}}{{^vendorExtensions.x-thirdparty-datatype-variant}}'{{{dataType}}}'{{/vendorExtensions.x-thirdparty-datatype-variant}},
                         $request,
                         $response,
                     );{{/isRange}}
@@ -280,7 +280,7 @@ use {{invokerPackage}}\ObjectSerializer;
 
             {{#responses}}{{#dataType}}{{#isRange}}{{^isWildcard}}if ($this->responseWithinRangeCode('{{code}}', $statusCode)) {
                 return $this->handleResponseWithDataType(
-                    '{{{dataType}}}',
+                    {{#vendorExtensions.x-thirdparty-datatype-variant}}is_string(${{vendorExtensions.x-thirdparty-dispatch-param}}) ? '{{{.}}}' : '{{{dataType}}}'{{/vendorExtensions.x-thirdparty-datatype-variant}}{{^vendorExtensions.x-thirdparty-datatype-variant}}'{{{dataType}}}'{{/vendorExtensions.x-thirdparty-datatype-variant}},
                     $request,
                     $response,
                 );
@@ -300,7 +300,7 @@ use {{invokerPackage}}\ObjectSerializer;
             }
 
             return $this->handleResponseWithDataType(
-                '{{{returnType}}}',
+                {{#vendorExtensions.x-thirdparty-return-type-variant}}is_string(${{vendorExtensions.x-thirdparty-dispatch-param}}) ? '{{{.}}}' : '{{{returnType}}}'{{/vendorExtensions.x-thirdparty-return-type-variant}}{{^vendorExtensions.x-thirdparty-return-type-variant}}'{{{returnType}}}'{{/vendorExtensions.x-thirdparty-return-type-variant}},
                 $request,
                 $response,
             );
@@ -316,7 +316,7 @@ use {{invokerPackage}}\ObjectSerializer;
                 {{^isRange}}{{^isWildcard}}case {{code}}:{{/isWildcard}}{{#isWildcard}}default:{{/isWildcard}}
                     $data = ObjectSerializer::deserialize(
                         $e->getResponseBody(),
-                        '{{{dataType}}}',
+                        {{#vendorExtensions.x-thirdparty-datatype-variant}}is_string(${{vendorExtensions.x-thirdparty-dispatch-param}}) ? '{{{.}}}' : '{{{dataType}}}'{{/vendorExtensions.x-thirdparty-datatype-variant}}{{^vendorExtensions.x-thirdparty-datatype-variant}}'{{{dataType}}}'{{/vendorExtensions.x-thirdparty-datatype-variant}},
                         $e->getResponseHeaders()
                     );
                     $e->setResponseObject($data);
@@ -328,7 +328,7 @@ use {{invokerPackage}}\ObjectSerializer;
             if ($this->responseWithinRangeCode('{{code}}', $e->getCode())) {
                 $data = ObjectSerializer::deserialize(
                     $e->getResponseBody(),
-                    '{{{dataType}}}',
+                    {{#vendorExtensions.x-thirdparty-datatype-variant}}is_string(${{vendorExtensions.x-thirdparty-dispatch-param}}) ? '{{{.}}}' : '{{{dataType}}}'{{/vendorExtensions.x-thirdparty-datatype-variant}}{{^vendorExtensions.x-thirdparty-datatype-variant}}'{{{dataType}}}'{{/vendorExtensions.x-thirdparty-datatype-variant}},
                     $e->getResponseHeaders()
                 );
                 $e->setResponseObject($data);
@@ -378,7 +378,7 @@ use {{invokerPackage}}\ObjectSerializer;
 {{/-last}}
 {{/servers}}
 {{#allParams}}
-     * @param  {{{dataType}}}{{^required}}|null{{/required}} ${{paramName}}{{#description}} {{{.}}}{{/description}} {{#required}}(required){{/required}}{{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}
+     * @param  {{#vendorExtensions.x-thirdparty-union-type}}{{{vendorExtensions.x-thirdparty-union-type}}}{{/vendorExtensions.x-thirdparty-union-type}}{{^vendorExtensions.x-thirdparty-union-type}}{{{dataType}}}{{/vendorExtensions.x-thirdparty-union-type}}{{^required}}|null{{/required}} ${{paramName}}{{#description}} {{{.}}}{{/description}} {{#required}}(required){{/required}}{{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}
 {{/allParams}}
 {{#servers}}
 {{#-first}}
@@ -443,7 +443,7 @@ use {{invokerPackage}}\ObjectSerializer;
 {{/-last}}
 {{/servers}}
 {{#allParams}}
-     * @param  {{{dataType}}}{{^required}}|null{{/required}} ${{paramName}}{{#description}} {{{.}}}{{/description}} {{#required}}(required){{/required}}{{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}
+     * @param  {{#vendorExtensions.x-thirdparty-union-type}}{{{vendorExtensions.x-thirdparty-union-type}}}{{/vendorExtensions.x-thirdparty-union-type}}{{^vendorExtensions.x-thirdparty-union-type}}{{{dataType}}}{{/vendorExtensions.x-thirdparty-union-type}}{{^required}}|null{{/required}} ${{paramName}}{{#description}} {{{.}}}{{/description}} {{#required}}(required){{/required}}{{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}
 {{/allParams}}
 {{#servers}}
 {{#-first}}
@@ -461,7 +461,7 @@ use {{invokerPackage}}\ObjectSerializer;
      */
     public function {{operationId}}AsyncWithHttpInfo({{^vendorExtensions.x-group-parameters}}{{#allParams}}${{paramName}}{{^required}} = {{#defaultValue}}{{{.}}}{{/defaultValue}}{{^defaultValue}}null{{/defaultValue}}{{/required}}, {{/allParams}}{{#servers}}{{#-first}}?int $hostIndex = null, array $variables = [], {{/-first}}{{/servers}}string $contentType = self::contentTypes['{{{operationId}}}'][0]{{/vendorExtensions.x-group-parameters}}{{#vendorExtensions.x-group-parameters}}$associative_array{{/vendorExtensions.x-group-parameters}})
     {
-        $returnType = '{{{returnType}}}';
+        $returnType = {{#vendorExtensions.x-thirdparty-return-type-variant}}is_string(${{vendorExtensions.x-thirdparty-dispatch-param}}) ? '{{{.}}}' : '{{{returnType}}}'{{/vendorExtensions.x-thirdparty-return-type-variant}}{{^vendorExtensions.x-thirdparty-return-type-variant}}'{{{returnType}}}'{{/vendorExtensions.x-thirdparty-return-type-variant}};
         $request = $this->{{operationId}}Request({{^vendorExtensions.x-group-parameters}}{{#allParams}}${{paramName}}, {{/allParams}}{{#servers}}{{#-first}}$hostIndex, $variables, {{/-first}}{{/servers}}$contentType{{/vendorExtensions.x-group-parameters}}{{#vendorExtensions.x-group-parameters}}$associative_array{{/vendorExtensions.x-group-parameters}});
 
         return $this->client
@@ -533,7 +533,7 @@ use {{invokerPackage}}\ObjectSerializer;
 {{/-last}}
 {{/servers}}
 {{#allParams}}
-     * @param  {{{dataType}}}{{^required}}|null{{/required}} ${{paramName}}{{#description}} {{{.}}}{{/description}} {{#required}}(required){{/required}}{{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}
+     * @param  {{#vendorExtensions.x-thirdparty-union-type}}{{{vendorExtensions.x-thirdparty-union-type}}}{{/vendorExtensions.x-thirdparty-union-type}}{{^vendorExtensions.x-thirdparty-union-type}}{{{dataType}}}{{/vendorExtensions.x-thirdparty-union-type}}{{^required}}|null{{/required}} ${{paramName}}{{#description}} {{{.}}}{{/description}} {{#required}}(required){{/required}}{{^required}}(optional{{#defaultValue}}, default to {{{.}}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}
 {{/allParams}}
 {{#servers}}
 {{#-first}}

@@ -35,6 +35,7 @@ import {
   DEFAULT_AI_ROUTES,
   DEFAULT_ASSIGNMENTS_ROUTES,
   DEFAULT_ATTACHMENTS_ROUTES,
+  DEFAULT_CONTEXT_ROUTES,
   DEFAULT_PREFERENCES_ROUTES,
   DEFAULT_PROFILES_ROUTES,
   DEFAULT_PROMPTS_ROUTES,
@@ -97,10 +98,16 @@ export const ENGINE_DOCS: ReadonlyArray<EngineDoc> = [
     routes: ATTACHMENTS_ROUTES,
   },
   {
+    name: "context",
+    tag: "Context",
+    description: "Rooms connected to the chat as context and the skills of their .ai folder.",
+    routes: DEFAULT_CONTEXT_ROUTES,
+  },
+  {
     name: "preferences",
     tag: "Preferences",
     description:
-      "Per-entity chat preferences: the extended-thinking depth and its deep-mode toggle.",
+      "Chat preferences: the per-entity extended-thinking depth with its deep-mode toggle, and the per-user tool permission mode.",
     routes: DEFAULT_PREFERENCES_ROUTES,
   },
   {
@@ -247,6 +254,21 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
     tag: "Settings",
     operationId: "aiSettingsSetUser",
     summary: "Update user AI settings",
+    hasBody: true,
+  },
+  {
+    method: "GET",
+    path: "/config/tool-mode",
+    tag: "Settings",
+    operationId: "aiSettingsGetToolMode",
+    summary: "Get the tool permission mode",
+  },
+  {
+    method: "PUT",
+    path: "/config/tool-mode",
+    tag: "Settings",
+    operationId: "aiSettingsSetToolMode",
+    summary: "Set the tool permission mode",
     hasBody: true,
   },
   {

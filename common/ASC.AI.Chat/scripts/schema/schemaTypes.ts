@@ -125,6 +125,9 @@ export type ErrorResponse = {
 /** Provider-neutral extended-thinking depth. `off` disables thinking where the model allows it. */
 export type AiReasoningLevel = "off" | "low" | "medium" | "high" | "max";
 
+/** How a tool call the model makes is approved: ask every time, auto-approve opted-out tools, or allow all. */
+export type AiToolPermissionMode = "ask" | "auto" | "allow";
+
 export type AiActionArgs = {
   /** Extra tools offered to the model for this request. */
   tools?: TMCPItem[];
@@ -322,6 +325,12 @@ export type Res_aiPreferencesGetReasoningLevel = AiReasoningLevel;
 export type Req_aiPreferencesSetReasoningLevel = {
   /** New extended-thinking depth; `off` turns deep mode off. */
   value: AiReasoningLevel;
+  entityId?: string;
+};
+export type Res_aiPreferencesGetToolPermissionMode = AiToolPermissionMode;
+export type Req_aiPreferencesSetToolPermissionMode = {
+  /** New tool permission mode. */
+  value: AiToolPermissionMode;
   entityId?: string;
 };
 

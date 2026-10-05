@@ -1077,7 +1077,7 @@ public class RoomShareTests(
                 RoleColor = "ffefbf"
             }
         };
-        var roleMapping = new SaveFormRoleMappingDtoInteger(form.Id, roles);
+        var roleMapping = new SaveFormRoleMappingDto(form.Id, roles);
 
         await _filesApi.SaveFormRoleMappingAsync(form.Id.ToString(), roleMapping, TestContext.Current.CancellationToken);
 

@@ -35,7 +35,7 @@ namespace ASC.Files.Tests.Tests._03_Rooms.ThirdParty;
 
 /// <summary>
 /// POST /files/thirdparty — open bugs in the connect/update flow. Grouped separately from
-/// <see cref="ThirdPartyCredentialIsolationTests"/> because both of these stay red until fixed.
+/// <see cref="ThirdPartyCredentialIsolationTests"/> because they were red until fixed.
 /// </summary>
 [Trait("Category", "Rooms")]
 public class ThirdPartyProviderConnectBugTests(
@@ -70,8 +70,10 @@ public class ThirdPartyProviderConnectBugTests(
 
     /// <remarks>
     /// Bug 83303: calling <c>saveThirdParty</c> again with an existing <c>providerId</c> and a new
-    /// <c>customerTitle</c> returns 200 (implying success) but <c>getThirdPartyAccounts</c> still
-    /// shows the original title — the update is silently a no-op.
+    /// <c>customerTitle</c> returned 200 but <c>getThirdPartyAccounts</c> still showed the original
+    /// title: for a Rooms connection <c>FileStorageService.SaveThirdPartyAsync</c> updated only the
+    /// credentials and never passed the title on. It now hands the cleaned title to
+    /// <c>UpdateRoomProviderInfoAsync</c>.
     /// </remarks>
     [Fact]
     [Trait("Bug", "83303")]

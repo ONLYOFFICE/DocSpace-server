@@ -41,15 +41,6 @@ namespace ASC.Web.Api.Tests.Tests._05_Security.LoginHistory;
 /// endpoint — unlike the TypeScript suite, which calls <c>paymentsApi.setupPayment()</c> for a real
 /// SaaS deployment (and is a no-op against a local environment anyway).
 /// </summary>
-/// <remarks>
-/// SDK gap: the generated <c>LoginHistoryApi.CreateLoginHistoryReportAsync</c> types the response as
-/// <see cref="StringWrapper"/> (a plain string), but the controller actually returns a
-/// <c>DocumentBuilderTaskDto</c> object (<c>{ id, error, percentage, isCompleted, status, ... }</c>)
-/// — the OpenAPI schema for this endpoint is wrong, and deserializing that object into
-/// <see cref="StringWrapper.Response"/> would fail. The positive cases below go through raw JSON
-/// instead; the negative (permission) cases are unaffected, since <see cref="ApiException"/> is
-/// raised from the status code alone, before the body is ever deserialized into the (wrong) type.
-/// </remarks>
 [Trait("Category", "Security")]
 public class LoginHistoryReportTests(
     AspireAppFixture fixture)
@@ -62,14 +53,11 @@ public class LoginHistoryReportTests(
         await _webApiClient.Authenticate(Owner);
 
         // Act
-        using var response = await _webApi.PostRawAsync("api/2.0/security/audit/login/report", "{}", TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var result = await _loginHistoryApi.CreateLoginHistoryReportAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        using var json = JsonDocument.Parse(body);
-        var id = json.RootElement.GetProperty("response").GetProperty("id").GetString();
-        id.Should().NotBeNullOrEmpty();
+        result.Response.Should().NotBeNull();
+        result.Response.Id.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -80,14 +68,11 @@ public class LoginHistoryReportTests(
         await _webApiClient.Authenticate(admin);
 
         // Act
-        using var response = await _webApi.PostRawAsync("api/2.0/security/audit/login/report", "{}", TestContext.Current.CancellationToken);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        var result = await _loginHistoryApi.CreateLoginHistoryReportAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        using var json = JsonDocument.Parse(body);
-        var id = json.RootElement.GetProperty("response").GetProperty("id").GetString();
-        id.Should().NotBeNullOrEmpty();
+        result.Response.Should().NotBeNull();
+        result.Response.Id.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -121,5 +106,65 @@ public class LoginHistoryReportTests(
         // Assert
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
+    }
+
+    [Fact]
+    public async Task CreateLoginHistoryReport_WithPeriod_StartsReportGeneration()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var now = DateTime.UtcNow;
+
+        // Act
+        var result = await _loginHistoryApi.CreateLoginHistoryReportAsync(from: now.AddDays(-7), to: now, cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Response.Should().NotBeNull();
+        result.Response.Id.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task CreateLoginHistoryReport_FromBeforeLifetime_StartsReportGeneration()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var now = DateTime.UtcNow;
+
+        // Act
+        var result = await _loginHistoryApi.CreateLoginHistoryReportAsync(from: now.AddYears(-10), cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Response.Should().NotBeNull();
+        result.Response.Id.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task CreateLoginHistoryReport_PeriodEndsBeforeStart_ReturnsBadRequest()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var now = DateTime.UtcNow;
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _loginHistoryApi.CreateLoginHistoryReportAsync(from: now.AddDays(-1), to: now.AddDays(-2), cancellationToken: TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
+    }
+
+    [Fact]
+    public async Task CreateLoginHistoryReport_PeriodOutsideLifetime_ReturnsBadRequest()
+    {
+        // Arrange
+        await _webApiClient.Authenticate(Owner);
+        var now = DateTime.UtcNow;
+
+        // Act
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _loginHistoryApi.CreateLoginHistoryReportAsync(to: now.AddYears(-10), cancellationToken: TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(400);
     }
 }

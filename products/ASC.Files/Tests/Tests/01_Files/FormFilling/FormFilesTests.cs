@@ -123,7 +123,7 @@ public class FormFilesTests(
         try
         {
             // Attempt to manage form filling (e.g., start a filling process)
-            var manageParams = new ManageFormFillingDtoInteger(file.Id, FormFillingManageAction.Resume);
+            var manageParams = new ManageFormFillingDto(file.Id, FormFillingManageAction.Resume);
             await _filesApi.ManageFormFillingAsync(file.Id.ToString(), manageParams, TestContext.Current.CancellationToken);
 
             // If successful, get the file to check its status
@@ -149,7 +149,7 @@ public class FormFilesTests(
     //     var newFileName = "converted_file.pdf";
     //     
     //     // Act
-    //     var saveAsPdfParams = new SaveAsPdfInteger(
+    //     var saveAsPdfParams = new SaveAsPdf(
     //         folderId: destFolderId,
     //         title: newFileName
     //     );
@@ -184,7 +184,7 @@ public class FormFilesTests(
     //         }
     //     };
     //     
-    //     var roleMapping = new SaveFormRoleMappingDtoInteger(file.Id, roles);
+    //     var roleMapping = new SaveFormRoleMappingDto(file.Id, roles);
     //     
     //     // Act & Assert
     //     try

@@ -42,13 +42,13 @@ public abstract class FavoritesTestBase(
     AspireAppFixture fixture)
     : RoomsPermissionsTestBase(fixture)
 {
-    protected async Task<FileDtoInteger> CreateTextFile(string title, int folderId, string content = "hello")
+    protected async Task<FileDto> CreateTextFile(string title, int folderId, string content = "hello")
     {
         var wrapper = await _filesApi.CreateTextFileAsync(folderId, new CreateTextOrHtmlFile(title, content, true), TestContext.Current.CancellationToken);
         return wrapper.Response;
     }
 
-    protected async Task<FileDtoInteger> CreateHtmlFile(string title, int folderId, string content = "<p>test</p>")
+    protected async Task<FileDto> CreateHtmlFile(string title, int folderId, string content = "<p>test</p>")
     {
         var wrapper = await _filesApi.CreateHtmlFileAsync(folderId, new CreateTextOrHtmlFile(title, content, true), TestContext.Current.CancellationToken);
         return wrapper.Response;
@@ -78,7 +78,7 @@ public abstract class FavoritesTestBase(
         await WaitLongOperation();
     }
 
-    protected async Task<FolderContentDtoInteger> GetFavorites(
+    protected async Task<FolderContentDto> GetFavorites(
         FilterType? filterType = null,
         int? count = null,
         int? startIndex = null,
@@ -107,7 +107,7 @@ public abstract class FavoritesTestBase(
     /// 30s was not enough under the load of a full run: the suite passes in isolation and failed only
     /// alongside the other ~3800 tests, where the index write competes for the same machine.
     /// </summary>
-    protected async Task<FolderContentDtoInteger> PollFavorites(Func<FolderContentDtoInteger, bool> until, FilterType? filterType = null, int timeoutSeconds = 60, string? filterValue = null)
+    protected async Task<FolderContentDto> PollFavorites(Func<FolderContentDto, bool> until, FilterType? filterType = null, int timeoutSeconds = 60, string? filterValue = null)
     {
         var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
 
@@ -128,9 +128,9 @@ public abstract class FavoritesTestBase(
     protected sealed record RawFavoriteFile(string Title, string? OriginRoomTitle, bool? IsFavorite);
 
     /// <summary>
-    /// Reads GET /files/@favorites straight from JSON. <c>FolderContentDtoInteger.Files</c> is typed
+    /// Reads GET /files/@favorites straight from JSON. <c>FolderContentDto.Files</c> is typed
     /// <c>List&lt;FileEntryBaseDto&gt;</c>, which carries <c>Title</c> and <c>IsFavorite</c> but not
-    /// <c>OriginRoomTitle</c> - that field only exists on the concrete <c>FileEntryDtoInteger</c> the
+    /// <c>OriginRoomTitle</c> - that field only exists on the concrete <c>FileEntryDto</c> the
     /// endpoint actually returns. That is an SDK/OpenAPI defect, not a preference; every other test
     /// that does not need <c>originRoomTitle</c> should keep calling <see cref="GetFavorites"/>.
     /// </summary>

@@ -831,6 +831,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Client's {0} secret regenerated</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>The report shows the {0} most recent of {1} events. Download it in CSV format to get all of them.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Vectorization settings have been reset</value>
   </data>
@@ -1250,6 +1256,36 @@
   </data>
   <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
     <value>Docs Connect quota report downloaded</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Metadata template created: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Metadata template updated: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Metadata template deleted: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Metadata field created: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Metadata field updated: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Metadata field deleted: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Metadata template assigned: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Metadata template unassigned: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Metadata values updated: {0}</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Metadata cascade assignment started: {0}</value>
   </data>
   <data name="FileMarkedAsRead" xml:space="preserve">
     <value>Files [{0}]. Marked As Read</value>

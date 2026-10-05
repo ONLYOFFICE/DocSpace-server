@@ -72,17 +72,17 @@ public abstract class DuplicateTestBase(
         await WaitLongOperation(operationId);
     }
 
-    protected async Task<FolderContentDtoInteger> GetFolderContent(int folderId)
+    protected async Task<FolderContentDto> GetFolderContent(int folderId)
     {
         return (await _foldersApi.GetFolderByFolderIdAsync(folderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
     }
 
-    protected static List<string> FileTitles(FolderContentDtoInteger content)
+    protected static List<string> FileTitles(FolderContentDto content)
     {
         return (content.Files ?? []).Select(f => f.Title).ToList();
     }
 
-    protected static List<string> FolderTitles(FolderContentDtoInteger content)
+    protected static List<string> FolderTitles(FolderContentDto content)
     {
         return (content.Folders ?? []).Select(f => f.Title).ToList();
     }
@@ -93,7 +93,7 @@ public abstract class DuplicateTestBase(
     }
 
     /// <summary>
-    /// <see cref="FolderContentDtoInteger.Folders"/> and <see cref="FolderContentDtoInteger.Files"/>
+    /// <see cref="FolderContentDto.Folders"/> and <see cref="FolderContentDto.Files"/>
     /// are typed <c>List&lt;FileEntryBaseDto&gt;</c>, which carries a <c>Title</c> but no <c>Id</c>
     /// (the same SDK narrowness tests.md calls out for room reads through a folder listing). Locating
     /// a duplicated entry's id therefore has to go through the raw JSON.

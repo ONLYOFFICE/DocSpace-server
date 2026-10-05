@@ -45,6 +45,15 @@
       ],
       "description": "Provider-neutral extended-thinking depth. `off` disables thinking where the model allows it."
     },
+    "AiAiToolPermissionMode": {
+      "type": "string",
+      "enum": [
+        "ask",
+        "auto",
+        "allow"
+      ],
+      "description": "How a tool call the model makes is approved: ask every time, auto-approve opted-out tools, or allow all."
+    },
     "AiAiActionArgs": {
       "type": "object",
       "properties": {
@@ -149,10 +158,14 @@
         },
         "requireApproval": {
           "type": "boolean",
-          "description": "Whether the consumer must show an approval dialog before this tool runs. The engine reads it when deciding the `autoAllow` flag on a `tool-call-pending` event: `requireApproval === false` auto-allows the call (no dialog), `true` always prompts. `undefined` leaves the decision to the persisted \"always-allow\" list alone — so MCP / custom-server tools (which never set it) keep prompting as before, while host tools opt into auto-allow by default. Wire-serializable, so it survives a remote (server-side) engine.",
+          "description": "Whether the consumer must show an approval dialog before this tool runs. Feeds the `autoAllow` flag on a `tool-call-pending` event together with the user's tool permission mode: `false` skips the dialog under the \"auto\" mode, the default (under \"ask\" only the persisted \"always-allow\" list does), `true` and `undefined` defer to that list; \"allow\" skips it for every tool. Host tools set it and default to `false`; MCP / custom-server tools leave it unset. Wire-serializable, so it survives a remote (server-side) engine.",
           "examples": [
             false
           ]
+        },
+        "annotations": {
+          "$ref": "#/components/schemas/AiToolAnnotations",
+          "description": "The MCP tool annotations as the server declared them in `tools/list` (kept verbatim on the descriptor; never sent to the model). The approval flow reads two of them under the \"auto\" permission mode: `readOnlyHint: true` and `destructiveHint: false` run without the dialog, a destructive or unannotated tool keeps asking — see `resolveAutoAllow`. Wire-serializable."
         }
       },
       "required": [
@@ -162,6 +175,28 @@
       ],
       "additionalProperties": false,
       "description": "Descriptor for a tool exposed by an MCP server."
+    },
+    "AiToolAnnotations": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "readOnlyHint": {
+          "type": "boolean"
+        },
+        "destructiveHint": {
+          "type": "boolean"
+        },
+        "idempotentHint": {
+          "type": "boolean"
+        },
+        "openWorldHint": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "description": "MCP tool annotations (`Tool.annotations` in the protocol). All hints are advisory and optional; the protocol's defaults are `readOnlyHint: false` and `destructiveHint: true`, which is why an unannotated tool is treated as one that may destroy state."
     },
     "AiActionType": {
       "type": "string",
@@ -174,7 +209,8 @@
         "TextAnalyze",
         "ImageGeneration",
         "OCR",
-        "Vision"
+        "Vision",
+        "FormAnalysis"
       ],
       "description": "The AI action a request or an assignment applies to. Each action has its own assignment slot; `Default` is the profile used when an action's own slot is empty."
     },
@@ -373,7 +409,7 @@
         },
         "autoAllow": {
           "type": "boolean",
-          "description": "The consumer should execute the tool without prompting the user. True when the tool is in the persisted \"always-allow\" list, or the tool itself opts in via `TMCPItem.requireApproval === false` (host tools default to this). For a client-side tool with a server-side engine, this lets the engine return the pending call already flagged auto-allow so the client runs it and streams the result back without a dialog round-trip."
+          "description": "The consumer should execute the tool without prompting the user. Decided by the tool permission mode (`resolveAutoAllow`): under \"ask\" only a tool in the persisted \"always-allow\" list; under \"auto\" also one that opts in via `TMCPItem.requireApproval === false` (host tools default to this); under \"allow\" every tool. For a client-side tool with a server-side engine, this lets the engine return the pending call already flagged auto-allow so the client runs it and streams the result back without a dialog round-trip."
         },
         "serverExecuted": {
           "type": "boolean",
@@ -1264,6 +1300,10 @@
           "examples": [
             7
           ]
+        },
+        "created": {
+          "type": "number",
+          "description": "Release date as a Unix timestamp in **seconds**, when the provider's catalogue reports one (OpenAI-shaped `/models` responses and OpenRouter carry `created`; Anthropic carries an ISO `created_at`). The model picker sorts on it so the newest releases come first; entries without it fall back to alphabetical order."
         }
       },
       "required": [
@@ -2087,15 +2127,15 @@
       },
       "description": "The AI module settings."
     },
-    "AiFolderIntegerArrayWrapper": {
+    "AiFolderArrayWrapper": {
       "type": "object",
       "properties": {
         "response": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/AiFolderDtoInteger"
+            "$ref": "#/components/schemas/AiFolderDto"
           },
-          "description": "The list of FolderDtoInteger objects returned by the operation."
+          "description": "The list of FolderDto objects returned by the operation."
         },
         "count": {
           "type": "integer",
@@ -2130,12 +2170,12 @@
           "format": "int32"
         }
       },
-      "description": "The successful API response containing the list of FolderDtoInteger objects."
+      "description": "The successful API response containing the list of FolderDto objects."
     },
-    "AiFolderDtoInteger": {
+    "AiFolderDto": {
       "allOf": [
         {
-          "$ref": "#/components/schemas/AiFileEntryDtoInteger"
+          "$ref": "#/components/schemas/AiFileEntryDto"
         },
         {
           "type": "object",
@@ -2817,7 +2857,7 @@
       },
       "description": "The logo cover information."
     },
-    "AiFileEntryDtoInteger": {
+    "AiFileEntryDto": {
       "allOf": [
         {
           "$ref": "#/components/schemas/AiFileEntryBaseDto"
@@ -3337,10 +3377,10 @@
       "description": "What every file and folder in an answer has in common; the concrete shape is a file or a folder, told apart by the\r\nentry type.",
       "x-derived": true,
       "x-derived-types": [
-        "FileDtoInteger",
-        "FileDtoString",
-        "FolderDtoInteger",
-        "FolderDtoString"
+        "FileDto",
+        "ThirdPartyFileDto",
+        "FolderDto",
+        "ThirdPartyFolderDto"
       ]
     },
     "AiFileEntryType": {
@@ -3879,12 +3919,12 @@
       },
       "description": "The agent new item's information."
     },
-    "AiFolderIntegerWrapper": {
+    "AiFolderWrapper": {
       "type": "object",
       "properties": {
         "response": {
-          "description": "The FolderDtoInteger object returned by the operation.",
-          "$ref": "#/components/schemas/AiFolderDtoInteger"
+          "description": "The FolderDto object returned by the operation.",
+          "$ref": "#/components/schemas/AiFolderDto"
         },
         "count": {
           "type": "integer",
@@ -3919,14 +3959,14 @@
           "format": "int32"
         }
       },
-      "description": "The successful API response containing the FolderDtoInteger object."
+      "description": "The successful API response containing the FolderDto object."
     },
-    "AiFolderContentIntegerWrapper": {
+    "AiFolderContentWrapper": {
       "type": "object",
       "properties": {
         "response": {
-          "description": "The FolderContentDtoInteger object returned by the operation.",
-          "$ref": "#/components/schemas/AiFolderContentDtoInteger"
+          "description": "The FolderContentDto object returned by the operation.",
+          "$ref": "#/components/schemas/AiFolderContentDto"
         },
         "count": {
           "type": "integer",
@@ -3961,9 +4001,9 @@
           "format": "int32"
         }
       },
-      "description": "The successful API response containing the FolderContentDtoInteger object."
+      "description": "The successful API response containing the FolderContentDto object."
     },
-    "AiFolderContentDtoInteger": {
+    "AiFolderContentDto": {
       "required": [
         "pathParts",
         "total"
@@ -4010,7 +4050,7 @@
         },
         "current": {
           "description": "The folder or section the page was read from, with its own title, type and access rights. It describes the\r\ncontainer, not the entries, and is filled in even when the page is empty.",
-          "$ref": "#/components/schemas/AiFolderDtoInteger"
+          "$ref": "#/components/schemas/AiFolderDto"
         },
         "pathParts": {
           "examples": [
@@ -4614,6 +4654,29 @@
           "value": {
             "$ref": "#/components/schemas/AiAiReasoningLevel",
             "description": "New extended-thinking depth; `off` turns deep mode off."
+          },
+          "entityId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "aiPreferencesGetToolPermissionMode": {
+      "response": {
+        "$ref": "#/components/schemas/AiAiToolPermissionMode"
+      }
+    },
+    "aiPreferencesSetToolPermissionMode": {
+      "request": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/AiAiToolPermissionMode",
+            "description": "New tool permission mode."
           },
           "entityId": {
             "type": "string"
@@ -5617,7 +5680,7 @@
         ]
       },
       "response": {
-        "$ref": "#/components/schemas/AiFolderIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderWrapper"
       }
     },
     "aiAgentsUpdate": {
@@ -5687,7 +5750,7 @@
         }
       },
       "response": {
-        "$ref": "#/components/schemas/AiFolderIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderWrapper"
       }
     },
     "aiAgentsDelete": {
@@ -5732,7 +5795,7 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/AiFolderIntegerArrayWrapper"
+        "$ref": "#/components/schemas/AiFolderArrayWrapper"
       }
     },
     "aiAgentsResetQuota": {
@@ -5757,12 +5820,12 @@
         "additionalProperties": false
       },
       "response": {
-        "$ref": "#/components/schemas/AiFolderIntegerArrayWrapper"
+        "$ref": "#/components/schemas/AiFolderArrayWrapper"
       }
     },
     "aiAgentsList": {
       "response": {
-        "$ref": "#/components/schemas/AiFolderContentIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderContentWrapper"
       }
     },
     "aiAgentsNews": {
@@ -5772,7 +5835,7 @@
     },
     "aiAgentsGet": {
       "response": {
-        "$ref": "#/components/schemas/AiFolderIntegerWrapper"
+        "$ref": "#/components/schemas/AiFolderWrapper"
       }
     },
     "aiSettingsGet": {

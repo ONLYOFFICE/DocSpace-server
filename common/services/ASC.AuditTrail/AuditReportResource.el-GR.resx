@@ -783,6 +783,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Αναδημιουργήθηκε το μυστικό {0} του πελάτη</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Σημείωση</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Η έκθεση εμφανίζει τα {0} πιο πρόσφατα από τα {1} συμβάντα. Για να λάβετε όλα τα συμβάντα, κατεβάστε την έκθεση σε μορφή CSV.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Έχει γίνει επαναφορά ρυθμίσεων διανυσματικοποίησης</value>
   </data>
