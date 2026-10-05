@@ -607,4 +607,19 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
     <value>Ky veprim është i disponueshëm vetëm në një dhomë private</value>
   </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Rezultatet e bisedës</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>Dhoma përmban tashmë dosjen .ai</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Ruajtja nuk mund të shkëputet ndërsa një dhomë e përdor atë. Fshini dhomën në vend të kësaj</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Kërko në meta të dhënat e skedarit</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Kërko në meta të dhënat e dosjes</value>
+  </data>
 </root>

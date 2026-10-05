@@ -607,4 +607,19 @@
   <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
     <value>هذا الإجراء متاح فقط في غرفة خاصة</value>
   </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>مخرجات الدردشة</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>تحتوي الغرفة بالفعل على مجلد .ai</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>لا يمكن فصل التخزين أثناء استخدام غرفة له. احذف الغرفة بدلاً من ذلك</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>البحث في بيانات الملف الوصفية</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>البحث في بيانات المجلد الوصفية</value>
+  </data>
 </root>

@@ -1881,4 +1881,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Здравейте, $UserName!
+
+Свързваме се с вас, за да ви уведомим, че автоматичното попълване не се поддържа за текущия ви метод на плащане: парите достигат до ${LetterLogoText} Wallet само след като банковият превод бъде уреден, поради което балансът не може да бъде попълнен незабавно.
+
+Затова автоматичното попълване е изключено. За да избегнете прекъсване на платените услуги, моля, попълнете ръчно баланса на портфейла си или преминете към метод на плащане, който поддържа автоматично попълване.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Необходимо е действие: Автоматичното попълване не е налично за вашия ${LetterLogoText} Wallet</value>
+  </data>
 </root>

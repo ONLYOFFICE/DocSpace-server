@@ -1889,4 +1889,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>إجراء مطلوب: إعادة الشحن التلقائي غير متاحة لمحفظة ${LetterLogoText} الخاصة بك</value>
+  </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>مرحباً، $UserName!
+
+نتواصل معك لإعلامك بأن إعادة الشحن التلقائي غير مدعومة لطريقة الدفع الحالية: تصل الأموال إلى ${LetterLogoText} Wallet فقط بعد تسوية التحويل المصرفي، لذا لا يمكن تجديد الرصيد فوراً.
+
+لذلك تم إيقاف إعادة الشحن التلقائي. لتجنب أي انقطاع في الخدمات المدفوعة، يرجى تعبئة رصيد محفظتك يدوياً، أو التبديل إلى طريقة دفع تدعم إعادة الشحن التلقائي.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>
