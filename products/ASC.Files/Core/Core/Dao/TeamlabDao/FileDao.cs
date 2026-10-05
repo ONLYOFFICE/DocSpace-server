@@ -503,7 +503,8 @@ internal class FileDao(
 
         var folderDao = daoFactory.GetFolderDao<int>();
         var fileDao = daoFactory.GetFileDao<int>();
-        var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay);
+        var currentFolder = await folderDao.GetFolderAsync(file.FolderIdDisplay)
+            ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
 
         if (currentFolder is { FolderType: FolderType.Knowledge } &&
             file.ContentLength > vectorizationGlobalSettings.MaxContentLength)

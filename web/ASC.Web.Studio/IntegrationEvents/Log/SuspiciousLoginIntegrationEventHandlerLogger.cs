@@ -31,10 +31,15 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+using ASC.EventBus.Events;
+
 namespace ASC.Web.Studio.IntegrationEvents.EventHandling;
 
 internal static partial class SuspiciousLoginIntegrationEventHandlerLogger
 {
-    [LoggerMessage(LogLevel.Warning, "Suspicious login check skipped: tenant {tenantId} not found (user {userId}, login event {loginEventId})")]
+    [LoggerMessage(LogLevel.Critical, "Suspicious login check skipped: tenant {tenantId} not found (user {userId}, login event {loginEventId})")]
     public static partial void WarningTenantNotFound(this ILogger<SuspiciousLoginIntegrationEventHandler> logger, int tenantId, Guid userId, int loginEventId);
+
+    [LoggerMessage(LogLevel.Critical, "----- Handling integration event: {integrationEventId} at {appName} - ({integrationEvent})")]
+    public static partial void InformationHandlingLoginEvent(this ILogger logger, Guid integrationEventId, string appName, IntegrationEvent integrationEvent);
 }

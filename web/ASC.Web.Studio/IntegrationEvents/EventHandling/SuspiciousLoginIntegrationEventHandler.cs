@@ -46,7 +46,7 @@ public class SuspiciousLoginIntegrationEventHandler(
 
         using (logger.BeginScope(new[] { new KeyValuePair<string, object>("integrationEventContext", $"{@event.Id}-{Program.AppName}") }))
         {
-            logger.InformationHandlingIntegrationEvent(@event.Id, Program.AppName, @event);
+            logger.InformationHandlingLoginEvent(@event.Id, Program.AppName, @event);
 
             var tenant = await tenantManager.SetCurrentTenantAsync(@event.TenantId);
             if (tenant is null)

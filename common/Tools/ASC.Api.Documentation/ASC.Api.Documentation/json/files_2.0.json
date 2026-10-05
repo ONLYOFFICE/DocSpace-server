@@ -14394,7 +14394,7 @@
           "Files / Metadata"
         ],
         "summary": "Get file metadata",
-        "description": "Returns the metadata of a file: the templates assigned to it, directly or inherited from a cascading folder above\r\nit, each with its fields, and the custom text fields set on the file. The caller needs read access to the file, the\r\ncall is read-only. A field carries its value inside it; a field the file holds no value for comes without a `value`.\r\nThe custom fields are name and value pairs and are not part of any template. A file without metadata is answered with\r\nempty lists, not with an error. The same shape is returned by `PUT api/2.0/files/metadata/file/{fileId}/values`\r\nafter a write. A file the caller cannot read is answered with 403, a file that does not exist with 404.",
+        "description": "Returns the metadata of a file: the templates assigned to it, directly or inherited from a cascading folder above\r\nit, each with its fields, and the custom text fields set on the file. The caller needs read access to the file: a\r\nmember of the portal, or an anonymous caller through an external link that grants access to the file or to a\r\nfolder above it, with the link key in the `Request-Token` header or in the `share` query parameter. The call is\r\nread-only. A field carries its value inside it; a field the file holds no value for comes without a `value`.\r\nThe custom fields are name and value pairs and are not part of any template. A file without metadata is answered with\r\nempty lists, not with an error. The same shape is returned by `PUT api/2.0/files/metadata/file/{fileId}/values`\r\nafter a write. A request with neither a session nor a link key is answered with 401; a file the caller cannot read\r\nwith 403, a file that does not exist with 404.",
         "operationId": "getFileMetadata",
         "parameters": [
           {
@@ -14433,21 +14433,14 @@
               }
             }
           },
+          "401": {
+            "description": "The caller has neither a session nor an external link key"
+          },
           "403": {
             "description": "You don't have enough permission to perform the operation"
           },
           "404": {
             "description": "File not found"
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
           },
           "429": {
             "description": "Too Many Requests.",
@@ -14512,7 +14505,8 @@
           },
           {
             "OpenId": [ ]
-          }
+          },
+          { }
         ]
       }
     },
@@ -14522,7 +14516,7 @@
           "Files / Metadata"
         ],
         "summary": "Get folder metadata",
-        "description": "Returns the metadata of a folder or a room: the templates assigned to it, directly or inherited from a cascading\r\nfolder above it, each with its fields, and the custom text fields set on it. The caller needs read access to the\r\nfolder, the call is read-only. A field carries its value inside it; a field the folder holds no value for comes\r\nwithout a `value`. The custom fields are name and value pairs and are not part of any template. A folder without\r\nmetadata is answered with empty lists, not with an error. Whether a template cascades from this folder to its content\r\nis not reported here. A folder the caller cannot read is answered with 403, a folder that does not exist with 404.",
+        "description": "Returns the metadata of a folder or a room: the templates assigned to it, directly or inherited from a cascading\r\nfolder above it, each with its fields, and the custom text fields set on it. The caller needs read access to the\r\nfolder: a member of the portal, or an anonymous caller through an external link that grants access to the folder\r\nor to a folder above it, with the link key in the `Request-Token` header or in the `share` query parameter. The\r\ncall is read-only. A field carries its value inside it; a field the folder holds no value for comes without a\r\n`value`. The custom fields are name and value pairs and are not part of any template. A folder without metadata is\r\nanswered with empty lists, not with an error. Whether a template cascades from this folder to its content is not\r\nreported here. A request with neither a session nor a link key is answered with 401; a folder the caller cannot\r\nread with 403, a folder that does not exist with 404.",
         "operationId": "getFolderMetadata",
         "parameters": [
           {
@@ -14561,21 +14555,14 @@
               }
             }
           },
+          "401": {
+            "description": "The caller has neither a session nor an external link key"
+          },
           "403": {
             "description": "You don't have enough permission to perform the operation"
           },
           "404": {
             "description": "Folder not found"
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
           },
           "429": {
             "description": "Too Many Requests.",
@@ -14640,7 +14627,8 @@
           },
           {
             "OpenId": [ ]
-          }
+          },
+          { }
         ]
       }
     },
@@ -15302,7 +15290,7 @@
           "Files / Metadata"
         ],
         "summary": "Set file metadata values",
-        "description": "Writes the values of metadata fields on a file. The caller needs the right to edit the file. Every field must belong\r\nto a template the file carries, assigned with `PUT api/2.0/files/metadata/file/{fileId}/templates` or inherited from\r\na cascading folder, and a field may be listed once. A value carries exactly the member of its type: `stringValue` for\r\na text field of at most 8000 characters, `numberValue` for a number, `dateValue` for a date, `optionIds` for a\r\nchoice field, a single option for a single choice; an empty value clears the field. A date without a time zone\r\noffset is read as UTC. The write finishes in the request, the file is re-indexed for the metadata filters at once. The\r\ncustom text fields are not written here: use `PUT api/2.0/files/metadata/file/{fileId}/customFields`. The answer\r\nis the whole metadata of the file after the write, the same shape `GET api/2.0/files/metadata/file/{fileId}`\r\nreturns. A value of the wrong type, a field of a template the file does not carry, a field listed twice or a custom\r\nfield is answered with 400; a file the caller cannot edit with 403; a file or a field that does not exist with 404.",
+        "description": "Writes the values of metadata fields on a file. The caller needs the right to edit the file: a member with editing\r\naccess, or an anonymous caller through an external link that grants editing, with the link key in the\r\n`Request-Token` header or in the `share` query parameter; a link that grants viewing, commenting, reviewing or\r\nform filling only is refused. Every field must belong to a template the file carries, assigned with\r\n`PUT api/2.0/files/metadata/file/{fileId}/templates` or inherited from a cascading folder, and a field may be\r\nlisted once. A value carries exactly the member of its type: `stringValue` for a text field of at most 8000\r\ncharacters, `numberValue` for a number, `dateValue` for a date, `optionIds` for a choice field, a single option\r\nfor a single choice; an empty value clears the field. A date without a time zone offset is read as UTC. The write\r\nfinishes in the request, the file is re-indexed for the metadata filters at once. The custom text fields are not\r\nwritten here: use `PUT api/2.0/files/metadata/file/{fileId}/customFields`. The answer is the whole metadata of the\r\nfile after the write, the same shape `GET api/2.0/files/metadata/file/{fileId}` returns. A value of the wrong type,\r\na field of a template the file does not carry, a field listed twice or a custom field is answered with 400; a\r\nrequest with neither a session nor a link key with 401; a file the caller cannot edit with 403; a file or a field\r\nthat does not exist with 404.",
         "operationId": "setFileValues",
         "parameters": [
           {
@@ -15356,21 +15344,14 @@
           "400": {
             "description": "A value does not match the field type, a field is listed twice or is a custom field, or the field belongs to a template the file does not have"
           },
+          "401": {
+            "description": "The caller has neither a session nor an external link key"
+          },
           "403": {
             "description": "You don't have enough permission to perform the operation"
           },
           "404": {
             "description": "The file or a field does not exist"
-          },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
           },
           "429": {
             "description": "Too Many Requests.",
@@ -15425,7 +15406,8 @@
           },
           {
             "OpenId": [ ]
-          }
+          },
+          { }
         ]
       }
     },
