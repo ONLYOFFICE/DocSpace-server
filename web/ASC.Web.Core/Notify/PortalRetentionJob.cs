@@ -57,8 +57,7 @@ public class PortalRetentionJob(
     public PortalRetentionOptions Options => configuration.Options;
 
     /// <summary>
-    /// The day the policy started counting in this installation, stamped on the first real run. A dry run
-    /// does not stamp it: it previews what the policy would do if it started counting today.
+    /// The day the policy started counting in this installation, stamped on the first run.
     /// </summary>
     public async Task<DateTime> GetPolicyStartAsync(DateTime today)
     {
@@ -67,12 +66,8 @@ public class PortalRetentionJob(
         if (settings.StartedOn is not { } startedOn)
         {
             startedOn = today.Date;
-
-            if (!Options.DryRun)
-            {
-                settings.StartedOn = startedOn;
-                await settingsManager.SaveForDefaultTenantAsync(settings);
-            }
+            settings.StartedOn = startedOn;
+            await settingsManager.SaveForDefaultTenantAsync(settings);
         }
 
         logger.InformationPolicyStart(startedOn);
@@ -136,13 +131,7 @@ public class PortalRetentionJob(
             return blocked;
         }
 
-        logger.InformationDecision(Options.DryRun ? "dry run" : "applied", tenant.Id, tenant.GetTenantDomain(coreSettings),
-            category, decision.Step, decision.Letter, decision.BlockOn, decision.DeleteOn);
-
-        if (Options.DryRun)
-        {
-            return blocked;
-        }
+        logger.InformationDecision(tenant.Id, tenant.GetTenantDomain(coreSettings), category, decision.Step, decision.Letter, decision.BlockOn, decision.DeleteOn);
 
         switch (decision.Step)
         {

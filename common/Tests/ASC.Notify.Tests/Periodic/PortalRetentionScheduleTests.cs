@@ -263,25 +263,23 @@ public class PortalRetentionScheduleTests
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["core:retention:dryRun"] = "true",
                 ["core:retention:free:blockAfterDays"] = "45"
             })
             .Build();
 
         var options = new PortalRetentionConfiguration(configuration).Options;
 
-        options.DryRun.Should().BeTrue();
         options.Free.BlockAfterDays.Should().Be(45);
         options.Free.FirstNoticeDays.Should().Be(30, "a threshold the section does not name keeps its default");
         options.FormerPaying.RetentionDays.Should().Be(90);
     }
 
     [Fact]
-    public void Options_WithoutTheSection_ApplyThePolicyForReal()
+    public void Options_WithoutTheSection_KeepTheDefaults()
     {
         var options = new PortalRetentionConfiguration(new ConfigurationBuilder().Build()).Options;
 
-        options.DryRun.Should().BeFalse("the policy applies unless a dry run is asked for");
+        options.Free.BlockAfterDays.Should().Be(60);
         options.WithBalance.BlockAfterDays.Should().Be(365);
     }
 }

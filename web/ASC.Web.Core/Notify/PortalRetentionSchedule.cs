@@ -127,9 +127,6 @@ public sealed class PortalRetentionScheduleOptions
 /// </summary>
 public sealed class PortalRetentionOptions
 {
-    /// <summary>Whether the job only logs what it would do, without sending, blocking or deleting.</summary>
-    public bool DryRun { get; set; }
-
     public PortalRetentionScheduleOptions Free { get; set; } = new()
     {
         FirstNoticeDays = 30,
