@@ -218,18 +218,24 @@ public class MetadataController(
 
     /// <remarks>
     /// Returns the metadata of a file: the templates assigned to it, directly or inherited from a cascading folder above
-    /// it, each with its fields, and the custom text fields set on the file. The caller needs read access to the file, the
-    /// call is read-only. A field carries its value inside it; a field the file holds no value for comes without a `value`.
+    /// it, each with its fields, and the custom text fields set on the file. The caller needs read access to the file: a
+    /// member of the portal, or an anonymous caller through an external link that grants access to the file or to a
+    /// folder above it, with the link key in the `Request-Token` header or in the `share` query parameter. The call is
+    /// read-only. A field carries its value inside it; a field the file holds no value for comes without a `value`.
     /// The custom fields are name and value pairs and are not part of any template. A file without metadata is answered with
     /// empty lists, not with an error. The same shape is returned by `PUT api/2.0/files/metadata/file/{fileId}/values`
-    /// after a write. A file the caller cannot read is answered with 403, a file that does not exist with 404.
+    /// after a write. A request with neither a session nor a link key is answered with 401; a file the caller cannot read
+    /// with 403, a file that does not exist with 404.
     /// </remarks>
     /// <summary>Get file metadata</summary>
     /// <path>api/2.0/files/metadata/file/{fileId}</path>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Metadata")]
     [SwaggerResponse(200, "File metadata", typeof(EntryMetadataDto))]
+    [SwaggerResponse(401, "The caller has neither a session nor an external link key")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "File not found")]
+    [AllowAnonymous]
     [HttpGet("metadata/file/{fileId:int}")]
     public async Task<EntryMetadataDto> GetFileMetadata(FileIdRequestDto<int> inDto)
     {
@@ -241,17 +247,23 @@ public class MetadataController(
     /// <remarks>
     /// Returns the metadata of a folder or a room: the templates assigned to it, directly or inherited from a cascading
     /// folder above it, each with its fields, and the custom text fields set on it. The caller needs read access to the
-    /// folder, the call is read-only. A field carries its value inside it; a field the folder holds no value for comes
-    /// without a `value`. The custom fields are name and value pairs and are not part of any template. A folder without
-    /// metadata is answered with empty lists, not with an error. Whether a template cascades from this folder to its content
-    /// is not reported here. A folder the caller cannot read is answered with 403, a folder that does not exist with 404.
+    /// folder: a member of the portal, or an anonymous caller through an external link that grants access to the folder
+    /// or to a folder above it, with the link key in the `Request-Token` header or in the `share` query parameter. The
+    /// call is read-only. A field carries its value inside it; a field the folder holds no value for comes without a
+    /// `value`. The custom fields are name and value pairs and are not part of any template. A folder without metadata is
+    /// answered with empty lists, not with an error. Whether a template cascades from this folder to its content is not
+    /// reported here. A request with neither a session nor a link key is answered with 401; a folder the caller cannot
+    /// read with 403, a folder that does not exist with 404.
     /// </remarks>
     /// <summary>Get folder metadata</summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}</path>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Metadata")]
     [SwaggerResponse(200, "Folder metadata", typeof(EntryMetadataDto))]
+    [SwaggerResponse(401, "The caller has neither a session nor an external link key")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "Folder not found")]
+    [AllowAnonymous]
     [HttpGet("metadata/folder/{folderId:int}")]
     public async Task<EntryMetadataDto> GetFolderMetadata(FolderIdRequestDto<int> inDto)
     {
@@ -369,24 +381,31 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Writes the values of metadata fields on a file. The caller needs the right to edit the file. Every field must belong
-    /// to a template the file carries, assigned with `PUT api/2.0/files/metadata/file/{fileId}/templates` or inherited from
-    /// a cascading folder, and a field may be listed once. A value carries exactly the member of its type: `stringValue` for
-    /// a text field of at most 8000 characters, `numberValue` for a number, `dateValue` for a date, `optionIds` for a
-    /// choice field, a single option for a single choice; an empty value clears the field. A date without a time zone
-    /// offset is read as UTC. The write finishes in the request, the file is re-indexed for the metadata filters at once. The
-    /// custom text fields are not written here: use `PUT api/2.0/files/metadata/file/{fileId}/customFields`. The answer
-    /// is the whole metadata of the file after the write, the same shape `GET api/2.0/files/metadata/file/{fileId}`
-    /// returns. A value of the wrong type, a field of a template the file does not carry, a field listed twice or a custom
-    /// field is answered with 400; a file the caller cannot edit with 403; a file or a field that does not exist with 404.
+    /// Writes the values of metadata fields on a file. The caller needs the right to edit the file: a member with editing
+    /// access, or an anonymous caller through an external link that grants editing, with the link key in the
+    /// `Request-Token` header or in the `share` query parameter; a link that grants viewing, commenting, reviewing or
+    /// form filling only is refused. Every field must belong to a template the file carries, assigned with
+    /// `PUT api/2.0/files/metadata/file/{fileId}/templates` or inherited from a cascading folder, and a field may be
+    /// listed once. A value carries exactly the member of its type: `stringValue` for a text field of at most 8000
+    /// characters, `numberValue` for a number, `dateValue` for a date, `optionIds` for a choice field, a single option
+    /// for a single choice; an empty value clears the field. A date without a time zone offset is read as UTC. The write
+    /// finishes in the request, the file is re-indexed for the metadata filters at once. The custom text fields are not
+    /// written here: use `PUT api/2.0/files/metadata/file/{fileId}/customFields`. The answer is the whole metadata of the
+    /// file after the write, the same shape `GET api/2.0/files/metadata/file/{fileId}` returns. A value of the wrong type,
+    /// a field of a template the file does not carry, a field listed twice or a custom field is answered with 400; a
+    /// request with neither a session nor a link key with 401; a file the caller cannot edit with 403; a file or a field
+    /// that does not exist with 404.
     /// </remarks>
     /// <summary>Set file metadata values</summary>
     /// <path>api/2.0/files/metadata/file/{fileId}/values</path>
+    /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Metadata")]
     [SwaggerResponse(200, "The metadata of the file after the write: the assigned templates with the values of their fields, and the custom fields", typeof(EntryMetadataDto))]
+    [SwaggerResponse(401, "The caller has neither a session nor an external link key")]
     [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
     [SwaggerResponse(404, "The file or a field does not exist")]
     [SwaggerResponse(400, "A value does not match the field type, a field is listed twice or is a custom field, or the field belongs to a template the file does not have")]
+    [AllowAnonymous]
     [HttpPut("metadata/file/{fileId:int}/values")]
     public async Task<EntryMetadataDto> SetFileValues(SetFileMetadataValuesRequestDto<int> inDto)
     {
