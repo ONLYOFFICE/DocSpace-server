@@ -65,6 +65,7 @@ public class SettingsController(
     /// <path>api/2.0/files/thirdparty</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "true if third-party storages may be connected in this portal", typeof(bool))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [HttpPut("thirdparty")]
     public async Task<bool> ChangeAccessToThirdparty(SettingsRequestDto inDto)
     {
@@ -191,6 +192,7 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/external</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "true if external links may be created in this portal", typeof(bool))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [HttpPut("settings/external")]
     public async Task<bool> ExternalShare(DisplayRequestDto inDto)
     {
@@ -212,6 +214,7 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/externalsharingsettings</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The external sharing policy that is now in force", typeof(ExternalSharingSettingsDto))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [HttpPut("settings/externalsharingsettings")]
     public async Task<ExternalSharingSettingsDto> ChangeExternalSharingSettings(ExternalSharingSettingsRequestDto inDto)
     {
@@ -234,6 +237,7 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/externalsocialmedia</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "true if sharing on social networks is now in force", typeof(bool))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
     [HttpPut("settings/externalsocialmedia")]
     public async Task<bool> ExternalShareSocialMedia(DisplayRequestDto inDto)
     {
@@ -280,6 +284,7 @@ public class SettingsController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The full set of file settings for the caller and the portal", typeof(FilesSettingsDto))]
+    [SwaggerResponse(401, "The caller is neither signed in nor opening an external link")]
     [AllowAnonymous]
     [HttpGet("settings")]
     public async Task<FilesSettingsDto> GetFilesSettings()
@@ -574,6 +579,7 @@ public class SettingsController(
     /// <collection>list</collection>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The normalised set of default access rights stored for the caller", typeof(List<FileShare>))]
+    [SwaggerResponse(400, "The request body cannot be read or holds a number outside the published list of access rights")]
     [HttpPut("settings/dafaultaccessrights")]
     public async Task<List<FileShare>> ChangeDefaultAccessRights(DefaultAccessRightsrequestDto inDto)
     {
@@ -618,7 +624,7 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/defaulttemplate</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The blank document configured for each supported extension", typeof(DefaultTemplateSettingsDto))]
-    [SwaggerResponse(403, "The caller may not read the portal settings")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("settings/defaulttemplate")]
     public async Task<DefaultTemplateSettingsDto> GetDefaultTemplates()
     {
@@ -642,8 +648,10 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/defaulttemplate</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The blank document configured for each supported extension after the change", typeof(DefaultTemplateSettingsDto))]
-    [SwaggerResponse(400, "The file identifier is of an unsupported kind, or its extension is not the one requested")]
-    [SwaggerResponse(403, "The caller may not read the portal settings, or may not copy the selected file")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `selectedFile` or `fileExtension`, the file identifier is of an unsupported kind, or its extension is not the one requested")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or may not copy the selected file")]
+    [SwaggerResponse(404, "The selected file does not exist")]
+    [SwaggerResponse(500, "The file identifier is a number that cannot be read as a 32-bit integer: fractional, in exponent notation or out of range")]
     [HttpPut("settings/defaulttemplate")]
     public async Task<DefaultTemplateSettingsDto> SetDefaultTemplate(DefaultTemplateSettingsRequestDto inDto)
     {
@@ -668,7 +676,8 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/defaulttemplate</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The blank document configured for each supported extension after the reset", typeof(DefaultTemplateSettingsDto))]
-    [SwaggerResponse(403, "The caller may not read the portal settings")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `fileExtension`")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpDelete("settings/defaulttemplate")]
     public async Task<DefaultTemplateSettingsDto> ResetDefaultTemplate(DefaultTemplateSettingsResetRequestDto inDto)
     {
@@ -692,8 +701,8 @@ public class SettingsController(
     /// <path>api/2.0/files/settings/defaulttemplate</path>
     [Tags("Files / Settings")]
     [SwaggerResponse(200, "The blank document configured for each supported extension after the upload", typeof(DefaultTemplateSettingsDto))]
-    [SwaggerResponse(400, "The uploaded file is missing or larger than the 100 MB limit")]
-    [SwaggerResponse(403, "The caller may not read the portal settings, or the file does not match the requested extension")]
+    [SwaggerResponse(400, "The uploaded file is missing or larger than the 100 MB limit, or its file name does not end with the requested extension")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or the uploaded PDF is not a fillable form")]
     [HttpPost("settings/defaulttemplate")]
     // Kestrel's global 100 MB limit aborts the connection mid-upload, so the caller would see a
     // reset instead of a reason. The form limit below takes over: the multipart reader rejects the

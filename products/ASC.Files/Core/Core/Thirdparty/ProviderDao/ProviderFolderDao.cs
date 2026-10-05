@@ -245,7 +245,18 @@ internal class ProviderFolderDao(SetupInfo setupInfo,
                 .ToAsyncEnumerable()
                 .SelectMany(matchedId =>
                 {
-                    var folderDao = selectorLocal.GetFolderDao(matchedId.FirstOrDefault());
+                    IFolderDao<string> folderDao;
+                    try
+                    {
+                        folderDao = selectorLocal.GetFolderDao(matchedId.FirstOrDefault());
+                    }
+                    catch (ProviderInfoArgumentException)
+                    {
+                        // the connection behind these ids is gone, so are its folders: they are left out the way
+                        // missing internal folders are, instead of failing the whole listing (a room group that
+                        // still links a room of a removed connection used to take down every group)
+                        return AsyncEnumerable.Empty<Folder<string>>();
+                    }
 
                     return folderDao.GetFoldersAsync(matchedId.Select(selectorLocal.ConvertId).ToList(),
                         filterType: filterType, subjectGroup: subjectGroup, subjectID: subjectID, searchText: searchText, searchSubfolders: searchSubfolders, checkShare: checkShare, excludeSubject: excludeSubject);
