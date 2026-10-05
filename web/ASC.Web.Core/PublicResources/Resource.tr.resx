@@ -160,7 +160,7 @@
     <value>Ölçü birimi</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Yedekleme</value>
+    <value>Kopya</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Belirteçler</value>
