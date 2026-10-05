@@ -49,6 +49,7 @@ public class PortalRetentionJob(
     CoreSettings coreSettings,
     UserManager userManager,
     StudioNotifyService studioNotifyService,
+    MessageService messageService,
     PortalRemovalService portalRemovalService,
     SecurityContext securityContext,
     IServiceProvider serviceProvider)
@@ -201,6 +202,9 @@ public class PortalRetentionJob(
 
         tenant.SetStatus(TenantStatus.Blocked);
         await tenantManager.SaveTenantAsync(tenant);
+
+        // Written by the system: there is no request behind the daily job to take a user and an address from.
+        messageService.Send(MessageInitiator.System, MessageAction.PortalBlocked);
 
         await SendAsync(typeof(SaasOwnerRetentionBlockedNotifyAction), context, category, decision, client, senderName);
 

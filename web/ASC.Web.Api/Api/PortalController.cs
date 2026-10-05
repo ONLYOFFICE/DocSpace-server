@@ -1094,6 +1094,49 @@ public class PortalController(
     }
 
     /// <remarks>
+    /// Unblocks this portal after the retention policy blocked it for a long period without use, so its users can
+    /// sign in again and all of its rooms, files and accounts are there as before. It is reached only with the
+    /// unblocking link that the retention letters mail to the owner of a portal that has paid before or still has
+    /// money left on its wallet: that link authorizes the call in place of an authentication token, and no ordinary
+    /// token is accepted here. The call is mutating and idempotent - it makes a blocked portal active, records the
+    /// unblocking in the audit trail and refreshes the portal's Content Security Policy, and a portal that is not
+    /// blocked is left as it is. The retention count of the portal starts again from the unblocking. Nothing is
+    /// returned in the body; read the new state from `status` in `GET api/2.0/portal`. A portal whose paid tariff
+    /// lapsed is still unpaid once unblocked, so renewing the subscription is the next step. A free portal is not
+    /// unblocked this way - its owner is directed to support - and a portal already deleted at the end of its
+    /// retention period cannot be brought back by this call. To bring back a portal its owner deactivated, use
+    /// `PUT api/2.0/portal/continue` instead.
+    /// </remarks>
+    /// <summary>
+    /// Unblock a portal
+    /// </summary>
+    /// <path>api/2.0/portal/unblock</path>
+    [Tags("Portal / Settings")]
+    [SwaggerResponse(200, "The portal is active again and its users can sign in, or it was not blocked and is unchanged; the response carries no content")]
+    [AllowBlocked]
+    [AllowNotPayment]
+    [HttpPut("unblock")]
+    [Authorize(AuthenticationSchemes = "confirm", Roles = "PortalUnblock")]
+    public async Task UnblockPortal()
+    {
+        var tenant = tenantManager.GetCurrentTenant();
+
+        if (tenant.Status != TenantStatus.Blocked)
+        {
+            return;
+        }
+
+        // The new status date is also where the retention count starts again.
+        tenant.SetStatus(TenantStatus.Active);
+        await tenantManager.SaveTenantAsync(tenant);
+        messageService.Send(MessageAction.PortalUnblocked);
+
+        var current = await settingsManager.LoadAsync<CspSettings>();
+        await cspSettingsHelper.SaveAsync(current.Domains, false);
+        await cspSettingsHelper.UpdateBaseDomainAsync();
+    }
+
+    /// <remarks>
     /// Deactivates this portal: its status becomes suspended and its users can no longer work in it, while all of its
     /// rooms, files and accounts stay untouched. It is reached only with the deactivation link that
     /// `POST api/2.0/portal/suspend` mails to the portal owner - that link authorizes the call instead of an

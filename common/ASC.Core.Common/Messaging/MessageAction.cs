@@ -1048,6 +1048,12 @@ public enum MessageAction
     [Description("MCP server of AI agent updated")]
     UpdatedServerOfAgent = 6109,
 
+    [Description("Portal blocked")]
+    PortalBlocked = 6110,
+
+    [Description("Portal unblocked")]
+    PortalUnblocked = 6111,
+
     #endregion
 
     #region others
