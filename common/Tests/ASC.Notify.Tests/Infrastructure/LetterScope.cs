@@ -100,9 +100,9 @@ public sealed class LetterScope : IDisposable
             var services = scope.ServiceProvider;
 
             // Stands in for the request the sending code would have had. Being a loopback address, it
-            // sends ServerRootPath to the tenant's own domain for the host — which resolves back to
-            // `localhost` because the base domain is `localhost`, so the port set here is what survives.
-            services.GetRequiredService<CommonLinkUtility>().ServerUri = LetterEnvironment.PortalUrl;
+            // sends ServerRootPath to the tenant's own domain for the host, so the port set here is what
+            // survives of it.
+            services.GetRequiredService<CommonLinkUtility>().ServerUri = LetterEnvironment.PublishedUrl;
 
             var tenant = await services.GetRequiredService<TenantManager>()
                 .SetCurrentTenantAsync(fixture.Portal.TenantId);
@@ -161,7 +161,7 @@ public sealed class LetterScope : IDisposable
         throw new InvalidOperationException(
             $"The portal resolves to '{resolved}', but the stack was set up for '{expected}'. That is "
             + $"what Tenant.GetTenantDomain makes of the alias '{alias}': check whether "
-            + "`core:base-domain` still is `localhost`, or whether the tenant carries a mapped domain.");
+            + $"`core:base-domain` still is `{LetterEnvironment.BaseDomain}`, or whether the tenant carries a mapped domain.");
     }
 
     public void Dispose()

@@ -68,14 +68,11 @@ public sealed class LetterStackFixture : AspireHostFixture<LetterPortalClients>
     internal LetterPortalClients Portal => _portal ?? throw NotStarted();
 
     /// <summary>
-    /// Where the portal answers. Not the alias: <c>core:base-domain</c> is <c>localhost</c> here — both
-    /// in buildtools/config and from the AppHost, which sets it for every standalone project — and
-    /// <c>Tenant.GetTenantDomain</c> short-circuits on that to <c>localhost</c> whatever the alias is.
-    /// So a registered portal answers on the address the stack publishes, exactly like the letters have
-    /// always assumed. <see cref="LetterScope"/> checks that against <c>CommonLinkUtility</c> rather
-    /// than trusting this comment.
+    /// Where the portal answers: its alias under the stack's base domain (see
+    /// <see cref="LetterEnvironment.BaseDomain"/>), on the port the stack publishes. <see cref="LetterScope"/>
+    /// checks that against <c>CommonLinkUtility</c> rather than trusting this comment.
     /// </summary>
-    internal string PortalUrl => LetterEnvironment.PortalUrl;
+    internal string PortalUrl => LetterEnvironment.PortalUrlFor(Portal.PortalName);
 
     protected override IEnumerable<string> Resources => [ResourceNames.MailPit];
 
@@ -104,12 +101,15 @@ public sealed class LetterStackFixture : AspireHostFixture<LetterPortalClients>
 
         _inbox = new MailPitInbox(smtp.Host, smtp.Port, _mailPitApi);
 
+        // Before the portal: the domains it is given and the links its letters carry follow from it.
+        await SaveBaseDomainAsync(TestContext.Current.CancellationToken);
+
         _portal = await Timing.Measure("letter.portal", () => CreatePortalAsync(TestContext.Current.CancellationToken));
 
         var connectionString = await GetConnectionStringAsync(
             ResourceNames.Database, TestContext.Current.CancellationToken);
 
-        _host = await Timing.Measure("letterhost.build", () => LetterHost.BuildAsync(connectionString, PortalUrl));
+        _host = await Timing.Measure("letterhost.build", () => LetterHost.BuildAsync(connectionString, PortalUrl, GetEndpoint(ResourceNames.WebApi, "http")));
     }
 
     protected override async ValueTask OnDisposingAsync()
@@ -124,6 +124,57 @@ public sealed class LetterStackFixture : AspireHostFixture<LetterPortalClients>
         _inbox?.Dispose();
         _mailPitApi?.Dispose();
         _portal?.Dispose();
+    }
+
+    /// <summary>
+    /// Saves <see cref="LetterEnvironment.BaseDomain"/> as the installation's <c>BaseDomain</c> through
+    /// ASC.ApiSystem <c>settings/save</c>, the way a server installation is configured: there the base
+    /// domain lives in the database, while <c>core:base-domain</c> stays <c>localhost</c> - which is what
+    /// makes the installation standalone in the first place.
+    /// </summary>
+    private async Task SaveBaseDomainAsync(CancellationToken cancellationToken)
+    {
+        using var apiSystem = CreateHttpClient(ResourceNames.ApiSystem, "http");
+
+        var body = JsonSerializer.Serialize(
+            new { TenantId = -1, Key = "BaseDomain", Value = LetterEnvironment.BaseDomain },
+            new JsonSerializerOptions(JsonSerializerDefaults.Web));
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, "settings/save")
+        {
+            Content = new StringContent(body, Encoding.UTF8, "application/json")
+        };
+
+        // Unlike portal registration, saving a setting is never let through unsigned.
+        request.Headers.TryAddWithoutValidation("Authorization", CreateApiSystemAuthToken());
+
+        using var response = await apiSystem.SendAsync(request, cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException(
+                $"Saving the BaseDomain setting failed ({(int)response.StatusCode}): {await response.Content.ReadAsStringAsync(cancellationToken)}");
+        }
+    }
+
+    /// <summary>
+    /// The signature ASC.ApiSystem's <c>AuthHandler</c> accepts - what <c>ApiSystemHelper.CreateAuthToken</c>
+    /// sends from the services: an HMAC-SHA1 of the timestamp and a key name, keyed with the machine key the
+    /// AppHost hands every service, read from the same buildtools configuration.
+    /// </summary>
+    private static string CreateApiSystemAuthToken()
+    {
+        const string keyName = "letter-tests";
+
+        var machineKey = LetterEnvironment.Configuration["core:machinekey"]
+            ?? throw new InvalidOperationException("The buildtools configuration carries no core:machinekey to sign ApiSystem requests with.");
+
+        var timestamp = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
+
+        using var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(machineKey));
+        var hash = Convert.ToBase64String(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join('\n', timestamp, keyName))));
+
+        return $"ASC {keyName}:{timestamp}:{hash}";
     }
 
     private static InvalidOperationException NotStarted([CallerMemberName] string member = "")

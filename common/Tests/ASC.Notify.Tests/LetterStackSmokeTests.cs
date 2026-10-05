@@ -68,7 +68,7 @@ public class LetterStackSmokeTests
         scope.Recipient.Email.Should().NotBeNullOrEmpty();
         scope.Recipient.FirstName.Should().NotBeNullOrEmpty();
 
-        scope.PortalUrl.Should().Be(LetterEnvironment.PortalUrl);
+        scope.PortalUrl.Should().Be(stack.PortalUrl);
     }
 
     [Fact]

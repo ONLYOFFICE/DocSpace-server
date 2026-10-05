@@ -60,7 +60,7 @@ public class PortalRetentionJobTests
     }
 
     /// <summary>The job under test, with its own options and a logger that keeps what it is told.</summary>
-    private static PortalRetentionJob CreateJob(LetterScope scope, RecordingLogger logger, bool dryRun)
+    private static PortalRetentionJob CreateJob(LetterScope scope, RecordingLogger<PortalRetentionJob> logger, bool dryRun)
     {
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
@@ -101,7 +101,7 @@ public class PortalRetentionJobTests
     public async Task FreePortal_IdleForAMonth_IsWarned()
     {
         using var scope = await OpenScopeAsync();
-        var logger = new RecordingLogger();
+        var logger = new RecordingLogger<PortalRetentionJob>();
         var client = new RecordingNotifyClient();
 
         var leaveAlone = await CreateJob(scope, logger, dryRun: false).ApplyAsync(Free(InMemoryTenant(scope), _today.AddDays(-30)), _policyStart, client, _senderName);
@@ -116,7 +116,7 @@ public class PortalRetentionJobTests
     public async Task FreePortal_IdleForTwoMonths_IsBlocked_ButNotInADryRun()
     {
         using var scope = await OpenScopeAsync();
-        var logger = new RecordingLogger();
+        var logger = new RecordingLogger<PortalRetentionJob>();
         var client = new RecordingNotifyClient();
         var tenant = InMemoryTenant(scope);
 
@@ -132,7 +132,7 @@ public class PortalRetentionJobTests
     public async Task UnblockedPortal_CountsFromTheUnblocking()
     {
         using var scope = await OpenScopeAsync();
-        var logger = new RecordingLogger();
+        var logger = new RecordingLogger<PortalRetentionJob>();
         var client = new RecordingNotifyClient();
 
         // Idle for a year, but its status changed a month ago: the count restarts from that change.
@@ -147,7 +147,7 @@ public class PortalRetentionJobTests
     public async Task BlockedPortal_PastItsRetention_IsDeleted_ButNotInADryRun()
     {
         using var scope = await OpenScopeAsync();
-        var logger = new RecordingLogger();
+        var logger = new RecordingLogger<PortalRetentionJob>();
         var client = new RecordingNotifyClient();
         var tenant = InMemoryTenant(scope, TenantStatus.Blocked, _today.AddDays(-30));
 
@@ -163,7 +163,7 @@ public class PortalRetentionJobTests
     public async Task FormerPayingPortal_CountsFromTheDueDate()
     {
         using var scope = await OpenScopeAsync();
-        var logger = new RecordingLogger();
+        var logger = new RecordingLogger<PortalRetentionJob>();
         var client = new RecordingNotifyClient();
 
         // Active yesterday, but the tariff lapsed ninety days ago: the activity does not count.
@@ -181,7 +181,7 @@ public class PortalRetentionJobTests
     public async Task PayingPortal_IsLeftAlone()
     {
         using var scope = await OpenScopeAsync();
-        var logger = new RecordingLogger();
+        var logger = new RecordingLogger<PortalRetentionJob>();
         var client = new RecordingNotifyClient();
 
         var paid = PeriodicLetterContexts.Paid(PeriodicLetterContexts.Fresh(InMemoryTenant(scope), _today), _today.AddYears(1)) with
@@ -196,20 +196,5 @@ public class PortalRetentionJobTests
 
         logger.Messages.Should().BeEmpty("a paid portal or one in its grace period is never counted");
         client.Sent.Should().BeEmpty();
-    }
-
-    /// <summary>Keeps the formatted messages, which is all these cases look at.</summary>
-    private sealed class RecordingLogger : ILogger<PortalRetentionJob>
-    {
-        public List<string> Messages { get; } = [];
-
-        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
-
-        public bool IsEnabled(LogLevel logLevel) => true;
-
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
-        {
-            Messages.Add(formatter(state, exception));
-        }
     }
 }

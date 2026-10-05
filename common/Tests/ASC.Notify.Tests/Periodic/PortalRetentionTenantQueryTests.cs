@@ -59,9 +59,8 @@ public class PortalRetentionTenantQueryTests
 
         var walked = await tenantManager.GetTenantsByStatusAsync(TenantStatus.Active, TenantStatus.Blocked);
 
-        // The owner, not the alias: the stack rewrites the alias of its cached tenant to the published host.
         walked.Should().ContainSingle(t => t.Id == stack.Portal.TenantId)
-            .Which.OwnerId.Should().Be(stack.Portal.Owner.Id, "the row is mapped, not only found");
+            .Which.Alias.Should().Be(stack.Portal.PortalName, "the row is mapped, not only found");
 
         walked.Should().OnlyContain(t => t.Status == TenantStatus.Active || t.Status == TenantStatus.Blocked);
 

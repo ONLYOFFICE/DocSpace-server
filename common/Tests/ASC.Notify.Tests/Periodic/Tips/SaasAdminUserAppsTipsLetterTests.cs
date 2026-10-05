@@ -56,10 +56,10 @@ public class SaasAdminUserAppsTipsLetterTests : PeriodicLetterTestBase<SaasAdmin
         letter.Body.Should().Contain(scope.Recipient.FirstName)
             .And.Contain(DesktopUrl(scope.Culture))
             .And.Contain(MobileUrl(scope.Culture))
-            .And.Contain(LetterEnvironment.NotificationImageUrl("windows.png"))
-            .And.Contain(LetterEnvironment.NotificationImageUrl("apple.png"))
-            .And.Contain(LetterEnvironment.NotificationImageUrl("linux.png"))
-            .And.Contain(LetterEnvironment.NotificationImageUrl("android.png"));
+            .And.Contain(LetterEnvironment.NotificationImageUrl(scope.PortalUrl, "windows.png"))
+            .And.Contain(LetterEnvironment.NotificationImageUrl(scope.PortalUrl, "apple.png"))
+            .And.Contain(LetterEnvironment.NotificationImageUrl(scope.PortalUrl, "linux.png"))
+            .And.Contain(LetterEnvironment.NotificationImageUrl(scope.PortalUrl, "android.png"));
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)

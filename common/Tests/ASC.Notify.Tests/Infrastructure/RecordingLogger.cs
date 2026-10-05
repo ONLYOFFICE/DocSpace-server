@@ -31,29 +31,19 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Notify.Tests.Periodic.Retention;
+namespace ASC.Notify.Tests.Infrastructure;
 
-/// <summary>
-/// The portal has been deleted by the retention policy (<c>saas_owner_retention_deleted</c>). It names no
-/// address: the removal renames the alias before the letter is rendered.
-/// </summary>
-public class SaasOwnerRetentionDeletedLetterTests : PortalRetentionLetterTestBase<SaasOwnerRetentionDeletedNotifyAction>
+/// <summary>Keeps the formatted messages a service logs, for the cases that read its decisions back.</summary>
+internal sealed class RecordingLogger<T> : ILogger<T>
 {
-    protected override PortalRetentionCategory Category => PortalRetentionCategory.Free;
+    public List<string> Messages { get; } = [];
 
-    protected override PortalRetentionLetter? Letter => null;
+    public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
 
-    protected override void AssertContent(RenderedLetter letter, LetterScope scope)
+    public bool IsEnabled(LogLevel logLevel) => true;
+
+    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
-        letter.Body.Should().Contain(Caption("ButtonLeaveFeedback", scope))
-            .And.Contain(LetterEnvironment.NotificationImageUrl(scope.PortalUrl, "docspace_deleted.gif"));
-    }
-
-    protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
-    {
-        letter.Subject.Should().Be($"Your {LetterEnvironment.LogoText} has been deleted");
-
-        letter.Body.Should().Contain("was not used and has been deleted together with all its data")
-            .And.Contain("Privacy Policy");
+        Messages.Add(formatter(state, exception));
     }
 }

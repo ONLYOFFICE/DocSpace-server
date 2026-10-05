@@ -32,8 +32,11 @@
 // SPDX-License-Identifier: AGPL-3.0-only
 
 global using System.Globalization;
+global using System.Net;
 global using System.Reflection;
 global using System.Runtime.CompilerServices;
+global using System.Security.Cryptography;
+global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
 global using System.Text.RegularExpressions;
