@@ -160,7 +160,7 @@
     <value>Одиниця виміру</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Резервна копія</value>
+    <value>Копій</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Маркери</value>
