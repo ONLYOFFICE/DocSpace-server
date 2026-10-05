@@ -34,9 +34,9 @@
 namespace ASC.Web.Core.Log;
 internal static partial class CookiesManagerLogger
 {
-    [LoggerMessage(LogLevel.Debug, "Suspicious login check requested for user {userId}, login event {loginEventId}")]
+    [LoggerMessage(LogLevel.Critical, "Suspicious login check requested for user {userId}, login event {loginEventId}")]
     public static partial void DebugSuspiciousLoginCheckRequested(this ILogger<CookiesManager> logger, Guid userId, int loginEventId);
 
-    [LoggerMessage(LogLevel.Error, "Failed to request suspicious login check for user {userId}, login event {loginEventId}")]
+    [LoggerMessage(LogLevel.Critical, "Failed to request suspicious login check for user {userId}, login event {loginEventId}")]
     public static partial void ErrorSuspiciousLoginCheckRequest(this ILogger<CookiesManager> logger, Guid userId, int loginEventId, Exception exception);
 }
