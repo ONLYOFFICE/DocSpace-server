@@ -149,7 +149,7 @@ public class AppsController(
     /// <path>api/2.0/apps/{id}/enabled</path>
     [Tags("Apps")]
     [SwaggerResponse(200, "The application in its new state, with the saved settings document left untouched", typeof(AppDto))]
-    [SwaggerResponse(403, "The caller is not allowed to edit the portal settings")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [SwaggerResponse(404, "No application with this identifier is configured on this installation")]
     [HttpPut("{id}/enabled")]
     public async Task<AppDto> SetEnabledAsync(SetAppEnabledRequestDto inDto)
@@ -183,7 +183,7 @@ public class AppsController(
     [Tags("Apps")]
     [SwaggerResponse(200, "The application in its new state, with the stored settings document", typeof(AppDto))]
     [SwaggerResponse(400, "The request body is not a valid JSON document, so no settings are stored")]
-    [SwaggerResponse(403, "The caller is not allowed to edit the portal settings")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [SwaggerResponse(404, "No application with this identifier is configured on this installation")]
     [HttpPut("{id}/settings")]
     public async Task<AppDto> SetSettingsAsync(SetAppSettingsRequestDto inDto)

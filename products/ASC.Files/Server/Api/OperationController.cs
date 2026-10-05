@@ -65,7 +65,11 @@ public class OperationController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The download operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
-    [SwaggerResponse(403, "An item in the selection cannot be read by the caller, or another download of theirs is still running")]
+    [SwaggerResponse(400, "The request body cannot be read, or an item of `fileConvertIds` has no `key` or `value`")]
+    [SwaggerResponse(401, "The caller is not signed in and holds no external link")]
+    [SwaggerResponse(403, "None of the listed items that exist can be read by the caller, or another download of theirs is still running")]
+    [SwaggerResponse(404, "None of the listed items exists, counted separately for the portal's own items and for those on third-party accounts")]
+    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [AllowAnonymous]
     [HttpPut("bulkdownload")]
     public async IAsyncEnumerable<FileOperationDto> BulkDownload(DownloadRequestDto inDto)
@@ -99,7 +103,10 @@ public class OperationController(
     /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The move and copy operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
-    [SwaggerResponse(403, "The caller cannot create items in the destination folder, or cannot read one of the listed items")]
+    [SwaggerResponse(403, "The caller cannot create items in the destination folder or cannot read one of the listed items, the destination is a listed folder or lies inside one, the room or user quota would be exceeded, a file that is not a PDF form goes to a form-filling room, or a file to overwrite is locked or cannot be edited by the caller")]
+    [SwaggerResponse(404, "The destination folder, a listed file or a listed folder other than the first one does not exist")]
+    [SwaggerResponse(415, "A listed file has a format the portal does not accept for upload, or one a knowledge folder cannot index")]
+    [SwaggerResponse(500, "The first listed folder does not exist, or an id is a number that is not a 32-bit integer")]
     [HttpPut("copy")]
     public async IAsyncEnumerable<FileOperationDto> CopyBatchItems(BatchRequestDto inDto)
     {
@@ -129,7 +136,9 @@ public class OperationController(
     /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The delete operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
-    [SwaggerResponse(403, "The caller does not have the rights to delete one of the listed items")]
+    [SwaggerResponse(403, "The caller does not have the rights to delete one of the listed items, one of them is locked by another user or open for editing, or a room is sent to Trash without `immediately`")]
+    [SwaggerResponse(404, "A listed file or folder does not exist")]
+    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPut("delete")]
     public async IAsyncEnumerable<FileOperationDto> DeleteBatchItems(DeleteBatchRequestDto inDto)
     {
@@ -159,6 +168,9 @@ public class OperationController(
     /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The delete operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `fileId` or `versions`")]
+    [SwaggerResponse(403, "The caller cannot delete the file, the file is locked by another user, open for editing, in an archived room or in Trash, or `versions` includes the current version")]
+    [SwaggerResponse(404, "The file does not exist")]
     [HttpPut("deleteversion")]
     public async IAsyncEnumerable<FileOperationDto> DeleteFileVersions(DeleteVersionBatchRequestDto inDto)
     {
@@ -186,6 +198,7 @@ public class OperationController(
     /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The delete operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [SwaggerResponse(400, "`folderType` holds a value that is not a folder type")]
     [HttpPut("emptytrash")]
     public async IAsyncEnumerable<FileOperationDto> EmptyTrash(EmptyTrashRequestDto inDto)
     {
@@ -249,6 +262,7 @@ public class OperationController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The operations of the caller that are of the requested kind", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [SwaggerResponse(400, "`operationType` is neither the number nor the name of an operation type")]
     [AllowAnonymous]
     [HttpGet("{operationType}")]
     public async IAsyncEnumerable<FileOperationDto> GetOperationStatusesByType(FileOperationResultRequestDto inDto)
@@ -291,6 +305,7 @@ public class OperationController(
     /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The mark-as-read operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
+    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPut("markasread")]
     public async IAsyncEnumerable<FileOperationDto> MarkAsRead(BaseBatchRequestDto inDto)
     {
@@ -319,7 +334,10 @@ public class OperationController(
     /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The move and copy operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
-    [SwaggerResponse(403, "The caller cannot create items in the destination folder, or cannot take one of the items out of its source")]
+    [SwaggerResponse(403, "The caller cannot create items in the destination folder or cannot take one of the items out of its source, the destination is a listed folder or lies inside one, a folder or several files are moved into a form-filling room from outside it, the room or user quota would be exceeded, a file that is not a PDF form goes to a form-filling room, or a file to overwrite is locked or cannot be edited by the caller")]
+    [SwaggerResponse(404, "The destination folder, a listed file or a listed folder other than the first one does not exist")]
+    [SwaggerResponse(415, "A listed file has a format the portal does not accept for upload, or one a knowledge folder cannot index")]
+    [SwaggerResponse(500, "The first listed folder does not exist, or an id is a number that is not a 32-bit integer")]
     [HttpPut("move")]
     public async IAsyncEnumerable<FileOperationDto> MoveBatchItems(BatchRequestDto inDto)
     {
@@ -348,7 +366,10 @@ public class OperationController(
     /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The duplicate operations of the caller, the one just queued included", typeof(IAsyncEnumerable<FileOperationDto>))]
-    [SwaggerResponse(403, "The caller cannot create items in the folder that holds one of the listed items")]
+    [SwaggerResponse(403, "The caller cannot create items in the folder that holds one of the listed items, or cannot copy that item")]
+    [SwaggerResponse(404, "A listed file or folder does not exist")]
+    [SwaggerResponse(415, "A listed file has a format the portal does not accept for upload")]
+    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPut("duplicate")]
     public async IAsyncEnumerable<FileOperationDto> DuplicateBatchItems(DuplicateRequestDto inDto)
     {
@@ -376,7 +397,10 @@ public class OperationController(
     /// <path>api/2.0/files/fileops/checkdestfolder</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "Whether the destination accepts all of the listed files, some of them or none, and which ones it accepts", typeof(CheckDestFolderDto))]
+    [SwaggerResponse(400, "`destFolderId` is not given")]
     [SwaggerResponse(403, "The caller cannot create items in the destination folder")]
+    [SwaggerResponse(404, "The destination folder does not exist")]
+    [SwaggerResponse(500, "A listed file is on a third-party account and the destination accepts it, or a listed file does not exist while the destination is a form-filling room")]
     [HttpGet("checkdestfolder")]
     public async Task<CheckDestFolderDto> CheckMoveOrCopyDestFolder([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
     {
@@ -436,7 +460,9 @@ public class OperationController(
     /// <collection>list</collection>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The listed items that already have a same-named entry in the destination folder", typeof(IAsyncEnumerable<FileEntryBaseDto>))]
-    [SwaggerResponse(403, "The caller cannot create items in the destination folder")]
+    [SwaggerResponse(400, "`destFolderId` is not given")]
+    [SwaggerResponse(403, "The caller cannot create items in the destination folder, or the destination is a listed folder or lies inside one")]
+    [SwaggerResponse(404, "The destination folder does not exist")]
     [HttpGet("move")]
     public async IAsyncEnumerable<FileEntryBaseDto> CheckMoveOrCopyBatchItems([ModelBinder(BinderType = typeof(BatchModelBinder))] BatchRequestDto inDto)
     {

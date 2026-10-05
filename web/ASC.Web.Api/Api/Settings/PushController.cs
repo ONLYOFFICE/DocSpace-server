@@ -60,6 +60,7 @@ public class PushController(
     /// <path>api/2.0/settings/push/docregisterdevice</path>
     [Tags("Security / Firebase")]
     [SwaggerResponse(200, "The stored device registration of the calling user, with the Firebase token, the `doc` application and the subscription state as they are kept", typeof(FireBaseUser))]
+    [SwaggerResponse(500, "The Firebase token is longer than 255 characters and the database refuses to store it, as PostgreSQL and MySQL in strict mode do")]
     [HttpPost("docregisterdevice")]
     public async Task<FireBaseUser> DocRegisterPusnNotificationDevice(FirebaseRequestsDto inDto)
     {

@@ -97,6 +97,11 @@ public class VirtualRoomsInternalController(
     /// <path>api/2.0/files/rooms</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The created room with its id, type, settings, logo and tags", typeof(FolderDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `title` is blank or longer than 170 characters, `roomType` is not a known room type, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `share` is not empty, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty")]
+    [SwaggerResponse(402, "The portal has reached the room limit of its pricing plan or its payment is overdue, or the logo does not fit into the portal storage quota")]
+    [SwaggerResponse(403, "The caller is a user or a guest, `roomType` is a public room while the portal forbids external sharing, `private` is set while the caller has no encryption keys, `quota` is set while the storage quota for rooms is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded")]
+    [SwaggerResponse(404, "`logo.tmpFile` names no uploaded picture, or one already used")]
+    [SwaggerResponse(500, "`logo.width` or `logo.height` is larger than 2147483647")]
     [HttpPost("")]
     public async Task<FolderDto<int>> CreateRoom(CreateRoomRequestDto inDto)
     {
@@ -120,6 +125,7 @@ public class VirtualRoomsInternalController(
     /// <path>api/2.0/files/rooms/{id}/ai</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "One page of the .ai folder contents, with the folder itself and the chain of its parents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
     [SwaggerResponse(403, "The caller may not read this room")]
     [SwaggerResponse(404, "The room does not exist or holds no .ai folder")]
     [HttpGet("{id}/ai")]
@@ -146,6 +152,10 @@ public class VirtualRoomsInternalController(
     /// <path>api/2.0/files/rooms/fromtemplate</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The progress record of the room creation job", typeof(RoomFromTemplateStatusDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `templateId` or `title`, `title` is blank or longer than 170 characters, `color` is longer than 6 or `cover` longer than 50 characters, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, `lifetime` has an unknown `period` or a `value` outside 1-999, or the `watermark` text is longer than 255 characters")]
+    [SwaggerResponse(403, "The caller cannot read the template or is a user or a guest, or `quota` is set while the storage quota for rooms (for an AI agent template, for agents) is turned off")]
+    [SwaggerResponse(404, "No room template with `templateId` exists")]
+    [SwaggerResponse(500, "`logo.width` or `logo.height` is larger than 2147483647")]
     [HttpPost("fromTemplate")]
     public async Task<RoomFromTemplateStatusDto> CreateRoomFromTemplate(CreateRoomFromTemplateDto dto)
     {
@@ -276,9 +286,9 @@ public class VirtualRoomsInternalController(
     /// <path>api/2.0/files/rooms/{id}/externaldbsync</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The synchronization job record to poll", typeof(ExternalDbSyncTaskDto))]
-    [SwaggerResponse(400, "The portal has no external database configured")]
     [SwaggerResponse(403, "The room is not a form filling room, or the caller cannot edit it")]
-    [SwaggerResponse(404, "No room with this ID is visible to the caller")]
+    [SwaggerResponse(404, "No folder with this ID exists")]
+    [SwaggerResponse(500, "The portal has no external database configured")]
     [HttpPost("{id}/externalDbSync")]
     public async Task<ExternalDbSyncTaskDto> StartExternalDbSync(RoomIdRequestDto<int> inDto)
     {
@@ -301,7 +311,8 @@ public class VirtualRoomsInternalController(
     /// <path>api/2.0/files/rooms/{id}/externaldbsync</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The synchronization job record, or an empty body when the room has no job", typeof(ExternalDbSyncTaskDto))]
-    [SwaggerResponse(404, "No room with this ID is visible to the caller")]
+    [SwaggerResponse(403, "The room is not a form filling room, or the caller cannot edit it")]
+    [SwaggerResponse(404, "No folder with this ID exists")]
     [HttpGet("{id}/externalDbSync")]
     public async Task<ExternalDbSyncTaskDto> GetExternalDbSyncStatus(RoomIdRequestDto<int> inDto)
     {
@@ -367,6 +378,11 @@ public class VirtualRoomsThirdPartyController(
     /// <path>api/2.0/files/rooms/thirdparty/{id}</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room created out of the third-party folder, with string identifiers", typeof(FolderDto<string>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title` or `roomType`, `roomType` is not a known room type, `logo` has no `tmpFile`, a position outside 0-1280 or a size outside 1-1280, or the identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(402, "The portal has reached the room limit of its pricing plan or its payment is overdue")]
+    [SwaggerResponse(403, "The caller is not the account that connected the storage or may not create rooms, the storage account was not connected for room storage or already backs a room, the room would be public while the portal forbids external sharing, or, with `createAsNewFolder`, the subfolder cannot be created, as when `title` is blank, `cover` is not a known cover, a tag name is empty or the logo cannot be applied")]
+    [SwaggerResponse(404, "`id` is not a folder of a connected third-party storage: a plain number, an identifier with a storage type the portal does not know, or a folder the storage does not have")]
+    [SwaggerResponse(500, "The identifier carries a storage account number beyond the 32-bit range, or `logo.width` or `logo.height` is larger than 2147483647")]
     [HttpPost("thirdparty/{id}")]
     public async Task<FolderDto<string>> CreateRoomThirdParty(CreateThirdPartyRoomRequestDto inDto)
     {
@@ -418,6 +434,11 @@ public abstract class VirtualRoomsController<T>(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room with its settings and the access level of the caller", typeof(FolderDto<int>))]
+    [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(401, "An anonymous caller has no external link that grants access to the room")]
+    [SwaggerResponse(403, "The caller may not read this room")]
+    [SwaggerResponse(404, "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [AllowAnonymous]
     [HttpGet("{id}")]
     public async Task<FolderDto<T>> GetRoomInfo(RoomIdRequestDto<T> inDto)
@@ -443,6 +464,11 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room as it is after the update", typeof(FolderDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or holds a property the room update does not define, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, a tag name is empty, `chatSettings` is sent for a room that is not an AI room, or a third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(402, "The new logo or watermark image does not fit into the portal storage quota")]
+    [SwaggerResponse(403, "The caller may not edit this room, the room does not exist or lies in Trash or in the archive, `quota` exceeds the storage limit of the portal, or `logo.tmpFile` or a relative `watermark.imageUrl` is not an image the caller uploaded")]
+    [SwaggerResponse(404, "The uploaded image named by `logo.tmpFile` or `watermark.imageUrl` no longer exists, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range, or `logo.width` or `logo.height` is larger than 2147483647")]
     [HttpPut("{id}")]
     public async Task<FolderDto<T>> UpdateRoom(UpdateRoomRequestDto<T> inDto)
     {
@@ -467,6 +493,8 @@ public abstract class VirtualRoomsController<T>(
     /// <collection>list</collection>
     [Tags("Files / Quota")]
     [SwaggerResponse(200, "The rooms as they are after the new limit was applied", typeof(IAsyncEnumerable<FolderDto<int>>))]
+    [SwaggerResponse(403, "The storage quota for rooms (for an AI agent, for agents) is turned off, `quota` exceeds the storage limit of the portal, or the caller may not edit a listed room or it lies in Trash or in the archive")]
+    [SwaggerResponse(500, "A listed room does not exist, or an id is a number that is not a 32-bit integer")]
     [HttpPut("roomquota")]
     public async IAsyncEnumerable<FolderDto<int>> UpdateRoomsQuota(UpdateRoomsQuotaRequestDto<T> inDto)
     {
@@ -506,6 +534,8 @@ public abstract class VirtualRoomsController<T>(
     /// <collection>list</collection>
     [Tags("Files / Quota")]
     [SwaggerResponse(200, "The rooms as they are after the default limit was restored", typeof(IAsyncEnumerable<FolderDto<int>>))]
+    [SwaggerResponse(403, "The storage quota for rooms (for an AI agent, for agents) is turned off, or the caller may not edit a listed room or it lies in Trash or in the archive")]
+    [SwaggerResponse(500, "A listed room does not exist, or an id is a number that is not a 32-bit integer")]
     [HttpPut("resetquota")]
     public async IAsyncEnumerable<FolderDto<int>> ResetRoomQuota(UpdateRoomsRoomIdsRequestDto<T> inDto)
     {
@@ -540,6 +570,10 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The queued delete operation to poll", typeof(FileOperationDto))]
+    [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(403, "The caller may not delete this room")]
+    [SwaggerResponse(404, "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpDelete("{id}")]
     public async Task<FileOperationDto> DeleteRoom(DeleteRoomRequestDto<T> inDto)
     {
@@ -566,6 +600,10 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/archive</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The queued archive operation to poll", typeof(FileOperationDto))]
+    [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(403, "The caller may not read or archive this room, the id names a folder that is not a room, or a file in the room is locked or being edited")]
+    [SwaggerResponse(404, "The room does not exist or is a room template, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPut("{id}/archive")]
     public async Task<FileOperationDto> ArchiveRoom(ArchiveRoomRequestDto<T> inDto)
     {
@@ -599,6 +637,10 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/unarchive</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The queued unarchive operation to poll", typeof(FileOperationDto))]
+    [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(403, "The caller may not read or unarchive this room, the id names a folder that is not a room, or a file in the room is locked or being edited")]
+    [SwaggerResponse(404, "The room does not exist or is a room template, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPut("{id}/unarchive")]
     public async Task<FileOperationDto> UnarchiveRoom(ArchiveRoomRequestDto<T> inDto)
     {
@@ -633,6 +675,10 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/share</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The access entries of the named subjects, plus a warning or an error when something was not applied", typeof(RoomSecurityDto))]
+    [SwaggerResponse(400, "The request body cannot be read, an `email` in `invitations` is malformed or longer than 255 characters, `invitations` invites more addresses by email than the portal allows at once, `culture` is not a valid culture name while an invitation email is sent, or a third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(403, "Email invitations are sent while the portal forbids inviting guests, the caller may not read the room or change its members, a listed subject cannot be given the requested access in this room, or the room is private and a listed account or invited address has no encryption keys")]
+    [SwaggerResponse(404, "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPut("{id}/share")]
     [EnableRateLimiting(RateLimiterPolicy.EmailInvitationApi)]
     public async Task<RoomSecurityDto> SetRoomSecurity(RoomInvitationRequestDto<T> inDto)
@@ -731,6 +777,10 @@ public abstract class VirtualRoomsController<T>(
     /// <collection>list</collection>
     [Tags("Rooms")]
     [SwaggerResponse(200, "One page of the room access entries, ordered by role and then by name", typeof(IAsyncEnumerable<FileShareDto>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or a third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(403, "The caller may not read the room")]
+    [SwaggerResponse(404, "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpGet("{id}/share")]
     public async IAsyncEnumerable<FileShareDto> GetRoomSecurityInfo(RoomSecurityInfoRequestDto<T> inDto)
     {
@@ -763,6 +813,10 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/links</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The link as it is after the change, or an empty body when nothing was created", typeof(FileShareDto))]
+    [SwaggerResponse(400, "The request body cannot be read, `linkType` or `access` is not a known value, the title or password is longer than 255 characters, `maxUseCount` is outside 1-1000 or below the number of times the invitation link was already used, the password does not meet the portal password policy, `expirationDate` lies more than 10 years ahead or, for an invitation link, in the past, or a third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(403, "The caller may not manage the links of this room, the access level is not available for this kind of link in this room, the room already has its invitation link or the link limit is reached, or the admin's restriction on external links forbids the change")]
+    [SwaggerResponse(404, "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "`linkType` is `Invitation` and `linkId` is the id of the room owner's account, or a third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPut("{id}/links")]
     public async Task<FileShareDto> SetRoomLink(RoomLinkRequestDto<T> inDto)
     {
@@ -814,6 +868,10 @@ public abstract class VirtualRoomsController<T>(
     /// <collection>list</collection>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The sharing links of the room", typeof(IAsyncEnumerable<FileShareDto>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, or a third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(403, "The caller may not read the room")]
+    [SwaggerResponse(404, "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpGet("{id}/links")]
     public async IAsyncEnumerable<FileShareDto> GetRoomLinks(GetRoomLinksRequestDto<T> inDto)
     {
@@ -852,8 +910,10 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/link</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The primary external link of the room", typeof(FileShareDto))]
-    [SwaggerResponse(403, "The caller may not see the links of this room")]
-    [SwaggerResponse(404, "No room with this ID is visible to the caller, or its primary link was revoked")]
+    [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(403, "The caller may not read the room, or the room has no primary link yet and the caller may not manage its links, its type takes no external links, or the admin restricts external links to public rooms")]
+    [SwaggerResponse(404, "The room does not exist or its primary link was revoked, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpGet("{id}/link")]
     public async Task<FileShareDto> GetRoomsPrimaryExternalLink(RoomIdRequestDto<T> inDto)
     {
@@ -877,7 +937,10 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/tags</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room with its tag set after the change", typeof(FolderDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `names`, a name is null, blank or longer than 255 characters, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(403, "The caller may not edit this room, or the room is archived")]
+    [SwaggerResponse(404, "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPut("{id}/tags")]
     public async Task<FolderDto<T>> AddRoomTags(BatchTagsRequestDto<T> inDto)
     {
@@ -899,7 +962,10 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/tags</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room with its tag set after the change", typeof(FolderDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `names`, a name is null, blank or longer than 255 characters, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(403, "The caller may not edit this room, or the room is archived")]
+    [SwaggerResponse(404, "The room does not exist, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpDelete("{id}/tags")]
     public async Task<FolderDto<T>> DeleteRoomTags(BatchTagsRequestDto<T> inDto)
     {
@@ -928,7 +994,11 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/logo</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room with the addresses of its new logo", typeof(FolderDto<int>))]
-    [SwaggerResponse(404, "No room with this ID is visible to the caller")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `tmpFile`, `x` or `y` is outside 0-1280, `width` or `height` is missing or outside 1-1280, the crop position lies outside the uploaded picture, or a third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(402, "The logo does not fit into the portal storage quota")]
+    [SwaggerResponse(403, "The caller may not edit this room, the room is archived, or `tmpFile` is not a picture the caller uploaded")]
+    [SwaggerResponse(404, "No room with this ID exists, `tmpFile` names no uploaded picture or one already used, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "`width` or `height` is larger than 2147483647, or a third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPost("{id}/logo")]
     public async Task<FolderDto<T>> CreateRoomLogo(LogoRequest<T> inDto)
     {
@@ -954,8 +1024,10 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/cover</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room as it is after the cover change", typeof(FolderDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read, `color` is not six hexadecimal digits, `cover` is not an identifier from the cover gallery, or a third-party identifier refers to a storage account that is not connected")]
     [SwaggerResponse(403, "The caller may not edit this room, or the room is archived")]
-    [SwaggerResponse(404, "No room with this ID is visible to the caller")]
+    [SwaggerResponse(404, "No room with this ID exists, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPost("{id}/cover")]
     public async Task<FolderDto<T>> ChangeRoomCover(CoverRequestDto<T> inDto)
     {
@@ -982,6 +1054,7 @@ public abstract class VirtualRoomsController<T>(
     /// <collection>list</collection>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The built-in room covers with their identifiers and vector markup", typeof(IAsyncEnumerable<CoversResultDto>))]
+    [SwaggerResponse(403, "The caller is a guest with whom nothing on the portal has been shared")]
     [HttpGet("covers")]
     public async IAsyncEnumerable<CoversResultDto> GetRoomCovers()
     {
@@ -1028,6 +1101,10 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/logo</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room with its logo removed", typeof(FolderDto<int>))]
+    [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(403, "The room has a logo and the caller may not edit it, or the room is archived")]
+    [SwaggerResponse(404, "No room with this ID exists, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpDelete("{id}/logo")]
     public async Task<FolderDto<T>> DeleteRoomLogo(RoomIdRequestDto<T> inDto)
     {
@@ -1054,6 +1131,10 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/pin</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room with its pinned flag set for the caller", typeof(FolderDto<int>))]
+    [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(403, "The caller cannot read this room, the room is archived or is not a room, or the caller already has the maximum number of pinned rooms (AI agents are counted separately)")]
+    [SwaggerResponse(404, "No room with this ID exists, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPut("{id}/pin")]
     public async Task<FolderDto<T>> PinRoom(RoomIdRequestDto<T> inDto)
     {
@@ -1076,6 +1157,10 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/unpin</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room with its pinned flag cleared for the caller", typeof(FolderDto<int>))]
+    [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(403, "The caller cannot read this room, or the room is archived or is not a room")]
+    [SwaggerResponse(404, "No room with this ID exists, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPut("{id}/unpin")]
     public async Task<FolderDto<T>> UnpinRoom(RoomIdRequestDto<T> inDto)
     {
@@ -1099,6 +1184,10 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/resend</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The invitations that were still pending have been sent again")]
+    [SwaggerResponse(400, "The request body cannot be read, or a third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(403, "The caller is not a manager of the room, or the room is archived")]
+    [SwaggerResponse(404, "The room does not exist or is a room template, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPost("{id}/resend")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task ResendEmailInvitations(UserInvitationRequestDto<T> inDto)
@@ -1121,6 +1210,10 @@ public abstract class VirtualRoomsController<T>(
     /// <path>api/2.0/files/rooms/{id}/reorder</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The room whose contents were renumbered", typeof(FolderDto<int>))]
+    [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(403, "The caller may not edit this room, or the room is archived")]
+    [SwaggerResponse(404, "No room with this ID exists, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpPut("{id}/reorder")]
     public async Task<FolderDto<T>> ReorderRoom(RoomIdRequestDto<T> inDto)
     {
@@ -1146,6 +1239,10 @@ public abstract class VirtualRoomsController<T>(
     /// <collection>list</collection>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The new files of the room, grouped by day", typeof(List<NewItemsDto<FileEntryBaseDto>>))]
+    [SwaggerResponse(400, "A third-party identifier refers to a storage account that is not connected")]
+    [SwaggerResponse(403, "The caller cannot read this room, or the id names a folder in the Trash")]
+    [SwaggerResponse(404, "No room with this ID exists, or the id is neither a 32-bit number nor a third-party identifier of a known storage type")]
+    [SwaggerResponse(500, "A third-party identifier carries a storage account number beyond the 32-bit range")]
     [HttpGet("{id}/news")]
     public async Task<List<NewItemsDto<FileEntryBaseDto>>> GetNewRoomItems(RoomIdRequestDto<T> inDto)
     {
@@ -1207,7 +1304,7 @@ public class VirtualRoomsCommonController(
     /// <path>api/2.0/files/rooms</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The rooms of the selected section with the paging counters", typeof(FolderContentDto<int>))]
-    [SwaggerResponse(400, "Invalid metadata filter")]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, the `startIndex` is negative, or `tags` is not a JSON array of strings")]
     [SwaggerResponse(403, "The caller cannot read the selected section")]
     [HttpGet("rooms")]
     public async Task<FolderContentDto<int>> GetRoomsFolder(RoomContentRequestDto inDto)
@@ -1361,6 +1458,7 @@ public class VirtualRoomsCommonController(
     /// <path>api/2.0/files/tags</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The name of the created tag, or of the tag that already carried this name", typeof(string))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `name`, or the name is empty, blank or longer than 255 characters")]
     [SwaggerResponse(403, "Only a room manager or a portal administrator can create tags")]
     [HttpPost("tags")]
     public async Task<string> CreateRoomTag(CreateTagRequestDto inDto)
@@ -1384,7 +1482,9 @@ public class VirtualRoomsCommonController(
     /// <path>api/2.0/files/tags</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The new name of the renamed tag", typeof(string))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `oldName` or `newName`, a name is empty, blank or longer than 255 characters, or a tag with the new name already exists")]
     [SwaggerResponse(403, "Only a portal administrator can rename a tag")]
+    [SwaggerResponse(404, "No tag with the old name exists in the catalog")]
     [HttpPut("tags")]
     public async Task<string> UpdateRoomTag(UpdateTagRequestDto inDto)
     {
@@ -1408,6 +1508,7 @@ public class VirtualRoomsCommonController(
     /// <collection>list</collection>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The tag names available to the caller", typeof(IAsyncEnumerable<string>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
     [HttpGet("tags")]
     public IAsyncEnumerable<string> GetRoomTagsInfo(GetTagsInfoRequestDto inDto)
     {
@@ -1429,7 +1530,8 @@ public class VirtualRoomsCommonController(
     /// <collection>item</collection>
     [Tags("Rooms")]
     [SwaggerResponse(200, "True when at least one room still carries the tag", typeof(bool))]
-    [SwaggerResponse(404, "No tag with this name exists in the catalog")]
+    [SwaggerResponse(403, "Only a portal administrator can check tag usage")]
+    [SwaggerResponse(404, "No tag with this name exists in the catalog, or the `tagName` query parameter is missing")]
     // HasTagLinksRequestDto binds `tagName` `[FromQuery]`, so the route placeholder of the same name
     // is unbound and the value has to be sent twice - which is what the generated SDKs already do.
     [SwaggerPathParameter("tagName", "The tag being checked. Send the same value as the `tagName` query parameter, which is the one the handler reads.")]
@@ -1455,6 +1557,7 @@ public class VirtualRoomsCommonController(
     /// <path>api/2.0/files/tags</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The tags were removed from the catalog and from every room")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `names`, or a name is empty, blank or longer than 255 characters")]
     [SwaggerResponse(403, "Only a portal administrator can delete tags")]
     [HttpDelete("tags")]
     public async Task DeleteCustomTags(BatchTagsRequestDto inDto)
@@ -1477,7 +1580,7 @@ public class VirtualRoomsCommonController(
     /// <path>api/2.0/files/logos</path>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The path of the stored temporary image", typeof(UploadResultDto))]
-    [SwaggerResponse(400, "The request carries no image, or the image cannot be used as a logo")]
+    [SwaggerResponse(400, "The request is not a multipart form or carries no file, or the first file is empty, larger than the portal limit for uploaded images, or not a readable PNG or JPEG image")]
     [SwaggerResponse(403, "Only a room manager or a portal administrator can upload a logo")]
     [HttpPost("logos")]
     public async Task<UploadResultDto> UploadRoomLogo(UploadRoomLogoRequestDto inDto)
@@ -1533,7 +1636,8 @@ public class VirtualRoomsCommonController(
     /// <exception cref="NotSupportedException"></exception>
     [Tags("Rooms")]
     [SwaggerResponse(200, "The queued export job to poll", typeof(DocumentBuilderTaskDto))]
-    [SwaggerResponse(501, "Folder indexing is turned off")]
+    [SwaggerResponse(403, "The caller may not read the folder, the folder lies in the archive or is not a room with indexing turned on, or the caller is neither its room manager nor a portal administrator")]
+    [SwaggerResponse(404, "The folder does not exist or lies in the room templates section")]
     [HttpPost("rooms/{id:int}/indexexport")]
     public async Task<DocumentBuilderTaskDto> StartRoomIndexExport(RoomIdRequestDto<int> inDto)
     {
