@@ -46,12 +46,12 @@ func main() {
 	myFolderPayload := myFolder.GetResponse()
 	currentFolder := myFolderPayload.GetCurrent()
 	parentFolderID := currentFolder.GetId()
-	folderPayload := docspace_api_sdk.NewCreateFolderWithDefaults()
+	folderPayload := docspace_api_sdk.NewCreateFolderRequestWithDefaults()
 	folderPayload.SetTitle("SDK Sample Folder")
 
 	createdFolder, _, err := client.FilesFoldersAPI.
 		CreateFolder(ctx, parentFolderID).
-		CreateFolder(*folderPayload).
+		CreateFolderRequest(*folderPayload).
 		Execute()
 	if err != nil {
 		log.Fatalf("failed to create folder: %v", err)

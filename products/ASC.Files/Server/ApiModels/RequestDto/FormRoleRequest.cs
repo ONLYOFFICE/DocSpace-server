@@ -61,33 +61,9 @@ public class FormRoleRequest
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid UserId { get; set; }
-
-    /// <summary>
-    /// The role sequence.
-    /// </summary>
-    /// <example>12</example>
-    public int Sequence { get; set; }
-
-    /// <summary>
-    /// Specifies if the role was submitted or not.
-    /// </summary>
-    /// <example>false</example>
-    public bool Submitted { get; set; }
-
-    /// <summary>
-    /// The date and time when the role was opened.
-    /// </summary>
-    /// <example>2026-01-01T10:00:00Z</example>
-    public DateTime OpenedAt { get; set; }
-
-    /// <summary>
-    /// The date and time when the role was submitted.
-    /// </summary>
-    /// <example>2026-01-01T10:00:00Z</example>
-    public DateTime SubmissionDate { get; set; }
 }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]
 public static partial class FormRoleRequestMapper
 {
     public static partial FormRole Map(this FormRoleRequest source);

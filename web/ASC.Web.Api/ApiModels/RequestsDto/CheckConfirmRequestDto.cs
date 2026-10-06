@@ -88,7 +88,7 @@ public class CheckConfirmRequestDto
     public string RoomId { get; set; }
 }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]
 public static partial class CheckConfirmRequestDtoMapper
 {
     public static partial EmailValidationKeyModel Map(this CheckConfirmRequestDto source);

@@ -98,3 +98,16 @@ public class LicensorDetailsDto
     /// <example>true</example>
     public required bool IsDefault { get; set; }
 }
+
+[Scope]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public partial class LicensorDetailsDtoMapper(CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper)
+{
+    [MapPropertyFromSource(nameof(LicensorDetailsDto.IsDefault), Use = nameof(GetIsDefault))]
+    public partial LicensorDetailsDto Map(CompanyWhiteLabelSettings source);
+
+    private bool GetIsDefault(CompanyWhiteLabelSettings source)
+    {
+        return companyWhiteLabelSettingsHelper.IsDefault(source);
+    }
+}

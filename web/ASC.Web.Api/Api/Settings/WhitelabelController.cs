@@ -50,7 +50,8 @@ public class WhitelabelController(
     TenantExtra tenantExtra,
     StorageFactory storageFactory,
     AdditionalWhiteLabelSettingsMapper additionalWhiteLabelSettingsMapper,
-    CompanyWhiteLabelSettingsDtoMapper companyWhiteLabelSettingsDtoMapper)
+    CompanyWhiteLabelSettingsDtoMapper companyWhiteLabelSettingsDtoMapper,
+    LicensorDetailsDtoMapper licensorDetailsDtoMapper)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     #region Logos
@@ -620,11 +621,11 @@ public class WhitelabelController(
 
         var instance = await companyWhiteLabelSettingsHelper.InstanceAsync();
 
-        result.Add(companyWhiteLabelSettingsDtoMapper.MapToLicensorDetails(instance));
+        result.Add(licensorDetailsDtoMapper.Map(instance));
 
         if (!companyWhiteLabelSettingsHelper.IsDefault(instance) && !instance.IsLicensor)
         {
-            result.Add(companyWhiteLabelSettingsDtoMapper.MapToLicensorDetails(settingsManager.GetDefault<CompanyWhiteLabelSettings>()));
+            result.Add(licensorDetailsDtoMapper.Map(settingsManager.GetDefault<CompanyWhiteLabelSettings>()));
         }
 
         return result;
@@ -746,7 +747,7 @@ public class WhitelabelController(
 
         messageService.Send(MessageAction.WhiteLabelCompanySettingsUpdated);
 
-        return companyWhiteLabelSettingsDtoMapper.MapToLicensorDetails(defaultSettings);
+        return licensorDetailsDtoMapper.Map(defaultSettings);
     }
 
     #endregion

@@ -104,9 +104,6 @@ public partial class CompanyWhiteLabelSettingsDtoMapper(CompanyWhiteLabelSetting
     [MapPropertyFromSource(nameof(CompanyWhiteLabelSettingsDto.IsDefault), Use = nameof(GetIsDefault))]
     public partial CompanyWhiteLabelSettingsDto Map(CompanyWhiteLabelSettings source);
 
-    [MapPropertyFromSource(nameof(LicensorDetailsDto.IsDefault), Use = nameof(GetIsDefault))]
-    public partial LicensorDetailsDto MapToLicensorDetails(CompanyWhiteLabelSettings source);
-
     private bool GetIsDefault(CompanyWhiteLabelSettings source)
     {
         return companyWhiteLabelSettingsHelper.IsDefault(source);

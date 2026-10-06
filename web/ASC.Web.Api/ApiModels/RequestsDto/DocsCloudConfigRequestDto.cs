@@ -151,7 +151,7 @@ public class DocsCloudIpFilterRuleRequest
     public bool Allowed { get; set; }
 }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]
 public static partial class DocsCloudConfigRequestDtoMapper
 {
     public static partial DocsCloudConfig Map(this DocsCloudConfigRequestDto source);
