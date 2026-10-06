@@ -937,7 +937,11 @@ Sporočilo o napaki: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Pozdravljen, $UserName!
 
-Obveščamo vas, da samodejne obnove vašega naročniškega paketa ali storitev ni bilo mogoče izvesti. Vljudno vas prosimo, da ga obnovite ročno.
+Obveščamo vas, da samodejne obnove vašega naročniškega paketa ali storitev ni bilo mogoče izvesti:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Vljudno vas prosimo, da ga obnovite ročno.
 
 $OrangeButton
 

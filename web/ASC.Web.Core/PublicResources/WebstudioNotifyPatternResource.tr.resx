@@ -930,7 +930,11 @@ Kişisel verilerin silinmesi $DocsSpace’te yer açılmasını sağlar</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Merhaba, $UserName!
 
-Satın aldığınız tarife planının veya hizmetlerin otomatik yenileme işleminin tamamlanamadığını bildirmek için sizinle iletişime geçiyoruz. Manuel olarak yenilemenizi rica ediyoruz.
+Satın aldığınız tarife planının veya hizmetlerin otomatik yenileme işleminin tamamlanamadığını bildirmek için sizinle iletişime geçiyoruz:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Manuel olarak yenilemenizi rica ediyoruz.
 
 $OrangeButton
 

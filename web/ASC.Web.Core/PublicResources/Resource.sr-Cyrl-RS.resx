@@ -160,7 +160,7 @@
     <value>Јединица мере</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Бекап</value>
+    <value>Копија</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Токени</value>

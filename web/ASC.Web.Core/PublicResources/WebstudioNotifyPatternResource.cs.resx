@@ -915,7 +915,11 @@ Zpráva o výjimce: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Dobrý den, $UserName!
 
-Oznamujeme vám, že automatické obnovení vašeho zakoupeného tarifu nebo služeb nebylo možné dokončit. Žádáme vás, abyste jej obnovili ručně.
+Oznamujeme vám, že automatické obnovení vašeho zakoupeného tarifu nebo služeb nebylo možné dokončit:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Žádáme vás, abyste jej obnovili ručně.
 
 $OrangeButton
 

@@ -925,7 +925,11 @@ Mesaj de excepție: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Stimate, $UserName!
 
-Vă informăm că reînnoirea automată a planului tarifar sau a serviciilor achiziționate a eșuat. Vă rugăm să îl reînnoiți manual.
+Vă informăm că reînnoirea automată a planului tarifar sau a serviciilor achiziționate a eșuat:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Vă rugăm să îl reînnoiți manual.
 
 $OrangeButton
 

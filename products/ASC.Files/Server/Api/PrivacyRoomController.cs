@@ -66,6 +66,7 @@ public class PrivacyRoomControllerCommon(
     /// <collection>list</collection>
     [SwaggerResponse(201, "The encryption key is created. Answered 200 before DocSpace 4.0; the response body is unchanged", typeof(IEnumerable<EncryptionKeyDto>))]
     [SwaggerResponse(400, "The key material is missing, blank or too large to be stored")]
+    [SwaggerResponse(403, "The caller is a guest, who cannot own encryption keys")]
     [SwaggerResponse(409, "A key with the same identifier already exists")]
     [HttpPost("keys")]
     public async Task<ActionResult<IEnumerable<EncryptionKeyDto>>> SetKeys([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] EncryptionKeyRequestDto inDto)
@@ -100,6 +101,7 @@ public class PrivacyRoomControllerCommon(
     /// <collection>list</collection>
     [SwaggerResponse(200, "The encryption key is replaced", typeof(IEnumerable<EncryptionKeyDto>))]
     [SwaggerResponse(400, "The key material is missing, blank or too large to be stored")]
+    [SwaggerResponse(403, "The caller is a guest, who cannot own encryption keys")]
     [SwaggerResponse(404, "The encryption key to replace is not found")]
     [HttpPut("keys")]
     public async Task<IEnumerable<EncryptionKeyDto>> ReplaceKey([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] EncryptionKeyRequestDto inDto)
@@ -163,6 +165,9 @@ public class PrivacyRoomControllerCommon(
     /// `POST api/2.0/files/rooms` or listed by `GET api/2.0/files/rooms`.
     /// </param>
     [SwaggerResponse(200, "The encryption keys associated with the privacy room", typeof(IEnumerable<EncryptionKeyDto>))]
+    [SwaggerResponse(400, "The room is not a private room")]
+    [SwaggerResponse(403, "The caller has no read access to the room or holds no encryption key of their own")]
+    [SwaggerResponse(404, "The room is not found")]
     [HttpGet("{roomId:int}/access")]
     public async Task<IEnumerable<EncryptionKeyDto>> GetUserKeysForRoom(int roomId)
     {
@@ -189,6 +194,7 @@ public class PrivacyRoomControllerCommon(
     /// <path>api/2.0/privacyroom/keys/{id}</path>
     [SwaggerResponse(204, "The encryption key is deleted. Answered 200 with the remaining keys before DocSpace 4.0")]
     [SwaggerResponse(400, "The key identifier is not a valid GUID")]
+    [SwaggerResponse(403, "The caller is a guest, who cannot own encryption keys")]
     [SwaggerResponse(404, "The encryption key is not found")]
     [HttpDelete("keys/{id}")]
     public async Task<IActionResult> DeleteKeys(DeleteEncryptionKeyRequestDto inDto)

@@ -64,7 +64,7 @@ public class WhitelabelController(
     /// uploaded to the temporary store; a slot left out of the request keeps its image. The dark image is stored only
     /// for the slots that have a dark variant, that is `1`, `2`, `6`, `7` and `8`, and is ignored for the favicon and
     /// the editor logos; saving slot `2` also rebuilds the notification logo `8` from it. Requires a DocSpace
-    /// administrator and a plan that includes branding, which `GET api/2.0/settings/enablewhitelabel` reports;
+    /// administrator and a plan that includes customization, which `GET api/2.0/settings/enablewhitelabel` reports;
     /// otherwise the call is refused as payment required. It answers `true` and is undone by
     /// `PUT api/2.0/settings/whitelabel/logos/restore`. With `isDefault=true` it writes the installation-wide default
     /// branding instead, which only a server installation allows. Uploaded files go to
@@ -74,6 +74,8 @@ public class WhitelabelController(
     /// <path>api/2.0/settings/whitelabel/logos/save</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Always `true` once the submitted logos have been stored for the portal", typeof(bool))]
+    [SwaggerResponse(400, "The `logoText` is longer than 40 characters, although this method does not store it")]
+    [SwaggerResponse(402, "The portal's pricing plan has no customization option, or the branding section is switched off in the installation")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the installation does not allow default branding to be edited")]
     [HttpPost("whitelabel/logos/save")]
     public async Task<bool> SaveWhiteLabelSettings(WhiteLabelRequestsDto inDto, [FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
@@ -145,7 +147,7 @@ public class WhitelabelController(
     /// and end with the image extension, as in `2.png`; a name that also contains `dark`, as in `2.dark.png`, is
     /// stored as the dark-theme image of that slot. Slots that get no file keep the image they have, and a dark file
     /// is ignored for the favicon and the editor logos, which have no dark variant. A request that carries no file at
-    /// all is rejected. Requires a DocSpace administrator and a plan that includes branding, which
+    /// all is rejected. Requires a DocSpace administrator and a plan that includes customization, which
     /// `GET api/2.0/settings/enablewhitelabel` reports; otherwise the call is refused as payment required. It answers
     /// `true`, overwrites in place and is undone by `PUT api/2.0/settings/whitelabel/logos/restore`. With
     /// `isDefault=true` it writes the installation-wide default branding, which only a server installation allows.
@@ -154,8 +156,8 @@ public class WhitelabelController(
     /// <path>api/2.0/settings/whitelabel/logos/savefromfiles</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Always `true` once the uploaded files have been stored as the portal logos", typeof(bool))]
-    [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the installation does not allow default branding to be edited")]
-    [SwaggerResponse(409, "The request carried no file to store as a logo")]
+    [SwaggerResponse(402, "The portal's pricing plan has no customization option, or the branding section is switched off in the installation")]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator, the request is not a form or carries no file, or the installation does not allow default branding to be edited")]
     [HttpPost("whitelabel/logos/savefromfiles")]
     public async Task<bool> SaveWhiteLabelSettingsFromFiles([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
@@ -336,6 +338,7 @@ public class WhitelabelController(
     /// <collection>list</collection>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "One entry per logo slot, telling whether the slot still holds the built-in image", typeof(IAsyncEnumerable<IsDefaultWhiteLabelLogosDto>))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [AllowNotPayment]
     [HttpGet("whitelabel/logos/isdefault")]
     public async IAsyncEnumerable<IsDefaultWhiteLabelLogosDto> GetIsDefaultWhiteLabelLogos([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
@@ -361,7 +364,7 @@ public class WhitelabelController(
     /// <remarks>
     /// Drops every logo uploaded for the current portal and brings back the built-in images, so the portal looks
     /// unbranded again on the login page, in the left menu, in the editors and in letters. Requires a DocSpace
-    /// administrator. Unlike the two save operations it does not need a plan that includes branding, so a portal
+    /// administrator. Unlike the two save operations it does not need a plan that includes customization, so a portal
     /// whose subscription no longer covers it can still be reset. The call is destructive: the stored image files are
     /// deleted and cannot be recovered from the portal, only re-uploaded with
     /// `POST api/2.0/settings/whitelabel/logos/save`. It is idempotent and answers `true` both when logos were
@@ -432,7 +435,7 @@ public class WhitelabelController(
     /// characters; a longer value is rejected as an invalid request. Sending an empty or blank text, or exactly the
     /// built-in `ONLYOFFICE`, clears the setting instead of storing it, which has the same effect as
     /// `PUT api/2.0/settings/whitelabel/logotext/restore`. Requires a DocSpace administrator and a plan that includes
-    /// branding, which `GET api/2.0/settings/enablewhitelabel` reports; otherwise the call is refused as payment
+    /// customization, which `GET api/2.0/settings/enablewhitelabel` reports; otherwise the call is refused as payment
     /// required. The call is mutating and idempotent: the previous text is overwritten and `true` comes back. Logo
     /// images are not touched - they are saved by `POST api/2.0/settings/whitelabel/logos/save` - and the text is not
     /// rendered into them. Pass `isDefault=true` to write the installation-wide default wordmark instead of this
@@ -443,6 +446,8 @@ public class WhitelabelController(
     /// <path>api/2.0/settings/whitelabel/logotext/save</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Always `true` once the logo text has been stored for the portal", typeof(bool))]
+    [SwaggerResponse(400, "The `logoText` is longer than 40 characters")]
+    [SwaggerResponse(402, "The portal's pricing plan has no customization option, or the branding section is switched off in the installation")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the installation does not allow default branding to be edited")]
     [HttpPost("whitelabel/logotext/save")]
     public async Task<bool> SaveWhiteLabelLogoText(WhiteLabelRequestsDto inDto, [FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
@@ -493,6 +498,7 @@ public class WhitelabelController(
     /// <path>api/2.0/settings/whitelabel/logotext</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "The wordmark stored for the portal, or the built-in `ONLYOFFICE` when none is set", typeof(string))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [AllowNotPayment]
     [HttpGet("whitelabel/logotext")]
     public async Task<string> GetWhiteLabelLogoText([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
@@ -523,6 +529,7 @@ public class WhitelabelController(
     /// <path>api/2.0/settings/whitelabel/logotext/isdefault</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "A single `logotext` entry telling whether the portal still uses the built-in wordmark", typeof(IsDefaultWhiteLabelLogosDto))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("whitelabel/logotext/isdefault")]
     public async Task<IsDefaultWhiteLabelLogosDto> GetIsDefaultWhiteLabelLogoText([FromQuery] WhiteLabelQueryRequestsDto inQueryDto)
     {
@@ -542,12 +549,12 @@ public class WhitelabelController(
     /// <remarks>
     /// Clears the wordmark stored for the current portal, so the built-in `ONLYOFFICE` is printed again next to or
     /// instead of the logo images. Requires a DocSpace administrator. Unlike
-    /// `POST api/2.0/settings/whitelabel/logotext/save` it does not need a plan that includes branding, so a portal
-    /// whose subscription no longer covers branding can still be reset. The call is destructive for the stored text,
-    /// which is not kept anywhere and has to be typed again to come back, and it is idempotent: `true` comes back
-    /// both when a text was cleared and when there was none. Logo images are left untouched and have their own
-    /// `PUT api/2.0/settings/whitelabel/logos/restore`. Pass `isDefault=true` to reset the installation-wide default
-    /// wordmark instead of this portal's, which only a server installation allows. After the call
+    /// `POST api/2.0/settings/whitelabel/logotext/save` it does not need a plan that includes customization, so a
+    /// portal whose subscription no longer covers customization can still be reset. The call is destructive for the
+    /// stored text, which is not kept anywhere and has to be typed again to come back, and it is idempotent: `true`
+    /// comes back both when a text was cleared and when there was none. Logo images are left untouched and have their
+    /// own `PUT api/2.0/settings/whitelabel/logos/restore`. Pass `isDefault=true` to reset the installation-wide
+    /// default wordmark instead of this portal's, which only a server installation allows. After the call
     /// `GET api/2.0/settings/whitelabel/logotext` reports `ONLYOFFICE` and
     /// `GET api/2.0/settings/whitelabel/logotext/isdefault` reports `default` as `true`. The wordmark is the only
     /// setting this operation touches, so the company details and the help links of the installation are left as they
@@ -628,7 +635,7 @@ public class WhitelabelController(
     /// notification letters print as the vendor. The whole set is replaced by the `settings` object of the request,
     /// so send every field, not only the changed ones; a request without that object, or with an email or a site that
     /// is not a valid value, is rejected as an invalid request. Requires a DocSpace administrator, a server
-    /// installation with unrestricted space access and a plan that includes branding, which
+    /// installation with unrestricted space access and a plan that includes customization, which
     /// `GET api/2.0/settings/enablewhitelabel` reports; on a SaaS portal the call is refused. The values are
     /// installation-wide, so the change reaches every portal of that installation. Two fields are not taken from the
     /// request: the licensor flag is always stored as `false`, and hiding the About page is silently kept off unless
@@ -640,6 +647,7 @@ public class WhitelabelController(
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Always `true` once the company details have been stored for the installation", typeof(bool))]
     [SwaggerResponse(400, "The request carries no settings object, or the email or the site is not a valid value")]
+    [SwaggerResponse(402, "The portal's pricing plan has no customization option, or the branding section is switched off in the installation")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the installation does not allow branding to be edited")]
     [HttpPost("rebranding/company")]
     public async Task<bool> SaveCompanyWhiteLabelSettings(CompanyWhiteLabelSettingsWrapper wrapper)
@@ -693,6 +701,7 @@ public class WhitelabelController(
     /// <path>api/2.0/settings/rebranding/company</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "The company details in effect, with the licensor and default flags", typeof(CompanyWhiteLabelSettingsDto))]
+    [SwaggerResponse(304, "The company details have not changed since the `Last-Modified` value sent back in `If-Modified-Since`; the body is empty")]
     [AllowNotPayment]
     [HttpGet("rebranding/company")]
     public async Task<CompanyWhiteLabelSettingsDto> GetCompanyWhiteLabelSettings()
@@ -707,7 +716,7 @@ public class WhitelabelController(
     /// email, address and phone, so the About page and the notification letters print the original vendor again.
     /// Requires a DocSpace administrator and a server installation with unrestricted space access; on a SaaS portal
     /// the call is refused. Unlike `POST api/2.0/settings/rebranding/company` it does not need a plan that includes
-    /// branding, so an installation whose subscription no longer covers it can still be reset. The call is
+    /// customization, so an installation whose subscription no longer covers it can still be reset. The call is
     /// destructive: the previous details are not kept anywhere and have to be entered again to come back. It is
     /// idempotent, and instead of a flag it answers the details that are now in effect, so no follow-up read is
     /// needed. The reset is installation-wide and reaches every portal. The help and support links are reset
@@ -745,7 +754,7 @@ public class WhitelabelController(
     /// The whole set is replaced by the `settings` object of the request, so send every flag, not only the changed
     /// ones - a flag left out is stored as off. A request without that object is rejected as an invalid request.
     /// Requires a DocSpace administrator, a server installation with unrestricted space access and a plan that
-    /// includes branding, which `GET api/2.0/settings/enablewhitelabel` reports; on a SaaS portal the call is
+    /// includes customization, which `GET api/2.0/settings/enablewhitelabel` reports; on a SaaS portal the call is
     /// refused. The flags are installation-wide, so the change reaches every portal of that installation. The call is
     /// mutating and idempotent, and answers `true`. Only the visibility of these entries is controlled here, not the
     /// addresses behind them. Read the result back with `GET api/2.0/settings/rebranding/additional` and undo it with
@@ -756,6 +765,7 @@ public class WhitelabelController(
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "Always `true` once the resource flags have been stored for the installation", typeof(bool))]
     [SwaggerResponse(400, "The request carries no settings object")]
+    [SwaggerResponse(402, "The portal's pricing plan has no customization option, or the branding section is switched off in the installation")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the installation does not allow branding to be edited")]
     [HttpPost("rebranding/additional")]
     public async Task<bool> SaveAdditionalWhiteLabelSettings(AdditionalWhiteLabelSettingsWrapper wrapper)
@@ -803,7 +813,7 @@ public class WhitelabelController(
     /// documents, the Help Center link, the Feedback and Support link, the user forum, the video guides and the
     /// license agreements are offered as they are out of the box. Requires a DocSpace administrator and a server
     /// installation with unrestricted space access; on a SaaS portal the call is refused. Unlike
-    /// `POST api/2.0/settings/rebranding/additional` it does not need a plan that includes branding, so an
+    /// `POST api/2.0/settings/rebranding/additional` it does not need a plan that includes customization, so an
     /// installation whose subscription no longer covers it can still be reset. The call is destructive for the stored
     /// flags, which have to be set again to come back, and it is idempotent. Instead of a flag it answers the set
     /// that is now in effect, so no follow-up read is needed. The reset is installation-wide and reaches every
@@ -909,8 +919,8 @@ public class WhitelabelController(
     /// offering the rebranding interface or calling any of the save operations under `api/2.0/settings/whitelabel`.
     /// Requires a DocSpace administrator. The call is read-only and idempotent. The answer is `true` only when both
     /// conditions hold: the branding section is not switched off in the installation configuration, and the portal's
-    /// current plan includes customization. It comes back as `false` on a plan without branding, which is exactly the
-    /// case in which `POST api/2.0/settings/whitelabel/logos/save`,
+    /// current plan includes customization. It comes back as `false` on a plan without customization, which is
+    /// exactly the case in which `POST api/2.0/settings/whitelabel/logos/save`,
     /// `POST api/2.0/settings/whitelabel/logos/savefromfiles` and `POST api/2.0/settings/whitelabel/logotext/save`
     /// are refused as payment required. The restore operations do not depend on this flag and stay available, so a
     /// portal that loses branding can still be reset to the built-in logos and wordmark. The flag says nothing about
@@ -921,6 +931,7 @@ public class WhitelabelController(
     /// <path>api/2.0/settings/enablewhitelabel</path>
     [Tags("Settings / Rebranding")]
     [SwaggerResponse(200, "`true` when branding is enabled in this installation and included in the portal's plan", typeof(bool))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("enablewhitelabel")]
     public async Task<bool> GetEnableWhitelabel()
     {

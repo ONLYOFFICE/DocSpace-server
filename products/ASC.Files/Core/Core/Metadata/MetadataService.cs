@@ -37,6 +37,7 @@ namespace ASC.Files.Core;
 public class MetadataService(
     IDaoFactory daoFactory,
     FileSecurity fileSecurity,
+    ExternalShare externalShare,
     AuthContext authContext,
     UserManager userManager,
     TenantManager tenantManager,
@@ -746,6 +747,14 @@ public class MetadataService(
 
     internal async Task<FileEntry<int>> DemandEntryAccessAsync(int entryId, FileEntryType entryType, bool edit)
     {
+        // the reads and the values of a file are open to anonymous callers holding an external link key (the key is what
+        // the access check below evaluates): a caller with neither a session nor a key is a stranger and gets 401, not
+        // the 403 or 404 of the access check, the same rule the other anonymous endpoints of the files follow
+        if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() == Guid.Empty)
+        {
+            throw new AuthenticationException();
+        }
+
         FileEntry<int> entry = entryType == FileEntryType.File
             ? await daoFactory.GetFileDao<int>().GetFileAsync(entryId)
             : await daoFactory.GetFolderDao<int>().GetFolderAsync(entryId);

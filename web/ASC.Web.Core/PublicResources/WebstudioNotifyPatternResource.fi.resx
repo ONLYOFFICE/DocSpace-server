@@ -935,7 +935,11 @@ Poikkeusviesti: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Hei, $UserName!
 
-Otamme sinuun yhteyttä ilmoittaaksemme, että ostamasi hinnoittelupaketin tai palveluiden automaattista uusimista ei voitu suorittaa. Pyydämme sinua ystävällisesti uusimaan sen manuaalisesti.
+Otamme sinuun yhteyttä ilmoittaaksemme, että ostamasi hinnoittelupaketin tai palveluiden automaattista uusimista ei voitu suorittaa:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Pyydämme sinua ystävällisesti uusimaan sen manuaalisesti.
 
 $OrangeButton
 

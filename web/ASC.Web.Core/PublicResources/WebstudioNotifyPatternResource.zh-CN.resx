@@ -946,7 +946,11 @@ $OrangeButton
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>您好，$UserName!
 
-温馨提示，您已购买的资费套餐或服务未能自动续订。请您手动续订。
+温馨提示，您已购买的资费套餐或服务未能自动续订：
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+请您手动续订。
 
 $OrangeButton
 

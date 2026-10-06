@@ -68,7 +68,7 @@ public class ApiKeysController(
     /// <path>api/2.0/keys</path>
     [Tags("Api keys")]
     [SwaggerResponse(200, "The new API key, with the full secret in the key field", typeof(ApiKeyResponseDto))]
-    [SwaggerResponse(400, "The permissions array is empty or contains a scope the portal does not know")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `name`, the name is empty or longer than 30 characters, `expiresInDays` is outside 1-365, or the permissions array is empty or contains a scope the portal does not know")]
     [SwaggerResponse(403, "The caller is a guest, or the portal limits developer tools to administrators")]
     [HttpPost]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
@@ -215,6 +215,8 @@ public class ApiKeysController(
     /// <path>api/2.0/keys/@self</path>
     [Tags("Api keys")]
     [SwaggerResponse(200, "The API key that authenticated this request", typeof(ApiKeyResponseDto))]
+    [SwaggerResponse(400, "The request has no Authorization header, as with a session authenticated by a cookie")]
+    [SwaggerResponse(500, "The Authorization header carries a token that is not an API key of this portal")]
     [HttpGet("@self")]
     public async Task<ApiKeyResponseDto> GetApiKey()
     {
@@ -243,8 +245,9 @@ public class ApiKeysController(
     /// <path>api/2.0/keys/{keyId}</path>
     [Tags("Api keys")]
     [SwaggerResponse(200, "True if the key was changed, false if it was left untouched because it has already expired", typeof(bool))]
-    [SwaggerResponse(400, "The permissions array is empty or contains a scope the portal does not know")]
+    [SwaggerResponse(400, "The request body cannot be read, the name is longer than 30 characters, or the permissions array is empty or contains a scope the portal does not know")]
     [SwaggerResponse(403, "The key belongs to another member and the caller is not a DocSpace admin")]
+    [SwaggerResponse(500, "The portal has no key with this ID")]
     [HttpPut("{keyId:guid}")]
     public async Task<bool> UpdateApiKey(UpdateApiKeyRequestDto requestDto)
     {
@@ -297,6 +300,7 @@ public class ApiKeysController(
     [Tags("Api keys")]
     [SwaggerResponse(200, "True if the key was removed", typeof(bool))]
     [SwaggerResponse(403, "The key belongs to another member and the caller is not a DocSpace admin")]
+    [SwaggerResponse(500, "The portal has no key with this ID")]
     [HttpDelete("{keyId:guid}")]
     public async Task<bool> DeleteApiKey(DeleteApiKeyRequestDto requestDto)
     {
