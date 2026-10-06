@@ -97,7 +97,10 @@ public class OperationsReportBuilder(
         // Second sheet: how much each participant spent in total over the reported period. Only the
         // debit side is summed - credits are top-ups, not consumption. The currency is a row field
         // of its own, so each participant is totalled per currency; a pivot always lays its row
-        // fields out ahead of the values, which is why it precedes the total.
+        // fields out ahead of the values, which is why it precedes the total. When every operation
+        // shares one currency the script leaves that field out and names the currency in the total's
+        // caption instead. The biggest spenders come first rather than the participants in
+        // alphabetical order.
         var pivot = new ReportPivot(
             Resource.AccountingCustomerOperationsReportSummarySheetName,
             [Resource.AccountingCustomerOperationContact, Resource.AccountingCustomerOperationCurrency],
@@ -107,7 +110,11 @@ public class OperationsReportBuilder(
                     "Sum",
                     Resource.AccountingCustomerOperationsReportSummaryDebit,
                     MoneyFormat)
-            ]);
+            ],
+            new ReportPivotSort(
+                Resource.AccountingCustomerOperationContact,
+                Resource.AccountingCustomerOperationDebit,
+                ReportPivotSortOrder.Descending));
 
         var definition = new ReportDefinition(
             Resource.AccountingCustomerOperationsReportSheetName,

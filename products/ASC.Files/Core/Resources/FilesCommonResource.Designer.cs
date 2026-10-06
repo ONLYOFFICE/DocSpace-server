@@ -727,6 +727,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The storage cannot be disconnected while a room uses it. Delete the room instead.
+        /// </summary>
+        public static string ErrorMessage_ProviderUsedByRoom {
+            get {
+                return ResourceManager.GetString("ErrorMessage_ProviderUsedByRoom", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The role is not available for this user type.
         /// </summary>
         public static string ErrorMessage_RoleNotAvailable {

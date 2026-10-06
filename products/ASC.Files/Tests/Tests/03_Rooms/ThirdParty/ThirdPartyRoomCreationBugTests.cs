@@ -93,11 +93,11 @@ public class ThirdPartyRoomCreationBugTests(
     }
 
     /// <remarks>
-    /// Bug 83306: <c>createRoomThirdParty</c> has no ownership/role check — a plain <c>User</c>
-    /// (who gets 403 from both <c>saveThirdParty</c> and the regular <c>POST /files/rooms</c>) can
+    /// Bug 83306: <c>createRoomThirdParty</c> had no ownership/role check — a plain <c>User</c>
+    /// (who gets 403 from both <c>saveThirdParty</c> and the regular <c>POST /files/rooms</c>) could
     /// successfully (200) convert an Owner's still-unused third-party connection into a room they
-    /// don't even have access to afterwards. <c>deleteThirdParty</c> correctly checks ownership
-    /// (403) for the same actor; <c>createRoomThirdParty</c> does not.
+    /// did not even have access to afterwards. <c>FileStorageService.CreateThirdPartyRoomAsync</c>
+    /// now demands that the caller owns the connection and may create rooms in the Rooms root.
     /// </remarks>
     [Fact]
     [Trait("Bug", "83306")]
@@ -126,8 +126,8 @@ public class ThirdPartyRoomCreationBugTests(
     /// <remarks>
     /// Bug 83306: same missing ownership/role check as the <c>User</c> case above — a
     /// <c>Guest</c> (who gets 403 from <c>saveThirdParty</c> and from the regular
-    /// <c>POST /files/rooms</c>) can still successfully (200) turn someone else's unused
-    /// third-party connection into a room.
+    /// <c>POST /files/rooms</c>) could still successfully (200) turn someone else's unused
+    /// third-party connection into a room. Fixed by the same checks.
     /// </remarks>
     [Fact]
     [Trait("Bug", "83306")]

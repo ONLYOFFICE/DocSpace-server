@@ -160,7 +160,7 @@
     <value>측정 단위</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>백업</value>
+    <value>개 복사본</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>토큰</value>

@@ -324,6 +324,9 @@
   <data name="ErrorMessage_ProviderAlreadyConnect" xml:space="preserve">
     <value>This provider is already connected to the room</value>
   </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>The storage cannot be disconnected while a room uses it. Delete the room instead</value>
+  </data>
   <data name="ErrorMessage_RoleNotAvailable" xml:space="preserve">
     <value>The role is not available for this user type</value>
   </data>

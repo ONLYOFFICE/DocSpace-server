@@ -160,7 +160,7 @@
     <value>Jednostka miary</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Kopia zapasowa</value>
+    <value>Kopii</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Tokeny</value>

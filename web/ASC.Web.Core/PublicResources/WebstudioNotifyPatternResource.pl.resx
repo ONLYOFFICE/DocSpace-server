@@ -915,7 +915,11 @@ Komunikat o wyjątku: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Witaj, $UserName!
 
-Informujemy, że automatyczne odnowienie zakupionego planu taryfowego lub usług nie mogło zostać zrealizowane. Uprzejmie prosimy o ręczne odnowienie.
+Informujemy, że automatyczne odnowienie zakupionego planu taryfowego lub usług nie mogło zostać zrealizowane:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Uprzejmie prosimy o ręczne odnowienie.
 
 $OrangeButton
 

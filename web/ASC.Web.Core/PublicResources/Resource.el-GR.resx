@@ -160,7 +160,7 @@
     <value>Μονάδα μέτρησης</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Αντίγραφο ασφαλείας</value>
+    <value>Αντίγραφα</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Διακριτικά</value>

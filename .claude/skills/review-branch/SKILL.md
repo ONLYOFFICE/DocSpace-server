@@ -1,6 +1,6 @@
 ---
 name: review-branch
-description: "Review a DocSpace branch against the repo's own rules (`.claude/rules/*.md`, CLAUDE.md) for correctness, performance and security: scope the diff against the right base, run the mechanical scan, fan out rule/correctness/contract/performance/security reviewers, verify every finding in the code, check build and style, and report in a fixed format. Also the re-check after fixes: which findings are closed, which are still open, what is new. USE FOR: review the branch, look at the changes in a branch, does the branch follow the rules, the fixes were merged - check them, re-check once more, check the fixes against the review file - in any language the user writes in. DO NOT USE FOR: fixing the findings (that is a separate request), a single-file question, a security-only audit (claude-security), a performance-only pass (dotnet-diag:analyzing-dotnet-performance), running a suite without a review (run-tests)."
+description: "Review a DocSpace branch against the repo's own rules (`.claude/rules/*.md`, CLAUDE.md) for correctness, performance and security: scope the diff against the right base, run the mechanical scan, fan out rule/correctness/contract/performance/security/translation reviewers, verify every finding in the code, check build and style, and report in a fixed format. Also the re-check after fixes: which findings are closed, which are still open, what is new. USE FOR: review the branch, look at the changes in a branch, does the branch follow the rules, the fixes were merged - check them, re-check once more, check the fixes against the review file - in any language the user writes in. DO NOT USE FOR: fixing the findings (that is a separate request), a single-file question, a security-only audit (claude-security), a performance-only pass (dotnet-diag:analyzing-dotnet-performance), running a suite without a review (run-tests)."
 ---
 
 # Review a branch against the repo rules
@@ -37,8 +37,7 @@ checklist only, dotnet-diag not installed"), so a thinner review is never mistak
 | LSP (`csharp-lsp` plugin) | `.claude/settings.json` `enabledPlugins` | say so once; navigate with `codegraph_explore` if `.codegraph/` exists, otherwise by reading the files. Blast-radius claims ("all call sites") are then marked unverified |
 | `codegraph_explore` | user-installed, per-machine index | skip it silently, LSP only (`csharp-lsp.md`) |
 | `dotnet-diag:analyzing-dotnet-performance` | `dotnet-diag` plugin, marketplace `dotnet/skills` | reviewer D walks its own checklist (§3 D.3) plus the manual list in `csharp-style.md` → Performance work |
-| `claude-security` | user-level plugin, not in the repo settings | do not offer the deep scan; reviewer E's checklist is the whole security pass |
-| `dotnet` SDK / a free build | machine; a running DocSpace locks DLLs | §5 reports "not built" with the reason; the review continues on reading |
+| `claude-security` | user-level plugin, not in the repo settings | do not offer the deep scan; reviewer E's checklist is the whole security pass || `dotnet` SDK / a free build | machine; a running DocSpace locks DLLs | §5 reports "not built" with the reason; the review continues on reading |
 | repo skills (`run-tests`, `db-migrations`, `notify-emails`) | `.claude/skills/` | always present with the repo |
 
 How to tell: a skill is available only if it is in the session's skill list; calling an absent one
@@ -81,6 +80,7 @@ is read in context. What each section is for:
 | `git diff --check` | trailing whitespace / conflict markers in hand-written code (generated `*.Designer.cs` — ignore) |
 | Migrations | §3 C |
 | API contract and SDK | §3 C |
+| Localized resources (.resx) | §3 F. `!! placeholder mismatch` is a finding once you have looked at the value (a tag lost or renamed in a translation renders as literal `$Tag` or as nothing); "neutral changed, translation untouched" is one only if the commits do not declare it ("English only for now") |
 | Tests | §3 A3 and §6 |
 | Possibly committed by accident | a review `.md`, a `.binlog`, `.env` committed by accident |
 
@@ -202,11 +202,35 @@ remark or a question, not a blocker. When the branch touches auth, sharing, publ
 login and the user wants more depth — and only if `claude-security` is in the skill list — offer its change scan as a
 follow-up — do not start it yourself, it is a separate, heavy run.
 
+**F. Translations** — only if the branch changes `.resx` values (the scan's "Localized resources"
+section). The scan gives the keys whose neutral text changed and the mechanical facts per culture;
+F judges the text itself, for those keys only, never the whole file:
+
+- **meaning**: each culture says what the neutral text says now — nothing lost, nothing added, no
+  leftover of the old wording when the neutral text was rewritten;
+- **placeholders and markup**: every `$Tag`, `{0}` and textile/HTML mark of the neutral text is
+  present, unchanged and not translated. Tag names are ASCII (`NVelocityPatternFormatter.DefaultPattern`),
+  so a suffix glued on (`$UserName님`) is fine; a translated or misspelled tag is not;
+- **terminology**: names of services, plans and units match the same entities elsewhere in that
+  culture (`Resource.<culture>.resx` and siblings) — a letter that says "Business plan" must not call
+  it differently from the billing page in the same language;
+- **form**: the same register and form of address as the neighbouring texts of that culture, no
+  machine-translation artefacts (untranslated English fragments, literal word order), grammar that
+  survives the substituted values (a number or a unit inserted into a sentence that needs agreement).
+
+F reads the translations itself. Findings in low-resource locales (`hy-AM`, `sq-AL`, `az`, `sr-*`,
+`lv`, `sl`, ...) are marked lower-confidence.
+
+Severity: a lost or broken placeholder in a value that is rendered — blocker (the customer sees
+`$ServiceName` or an empty slot); a meaning that differs from the neutral text — remark, with the
+neutral text, the translation and a back-translation side by side; untranslated cultures — a remark
+only when the branch does not say so on purpose. Do not report wording taste.
+
 **Return format for every reviewer** (ask for exactly this):
 
 ```
 - severity: blocker | rule | remark | question
-  category: correctness | rule | performance | security | contract
+  category: correctness | rule | performance | security | contract | translation
   where: path:line
   rule: <rule file §section>  (or "—" for a correctness finding)
   what: one sentence
@@ -284,7 +308,7 @@ Then, omitting empty sections:
 ## Not verified       — what stays unverified and what would verify it (a suite, a profile)
 ```
 
-Per finding: a `[security]` / `[performance]` tag when that is its category, the `[path:line](path:line)` link, what is wrong, the concrete scenario, the fix. Code
+Per finding: a `[security]` / `[performance]` / `[translation]` tag when that is its category, the `[path:line](path:line)` link, what is wrong, the concrete scenario, the fix. Code
 snippets only when the line itself is the point (broken indentation, a wrong condition). No scan
 tables, no "what was done well" section — at most one line if something deserves it.
 

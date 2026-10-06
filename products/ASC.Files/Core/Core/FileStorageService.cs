@@ -723,6 +723,20 @@ public class FileStorageService //: IFileStorageService
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
+        // Only the owner of the connection may turn it into a room, as only the owner may update it,
+        // and only someone who may create rooms at all: the regular room creation demands the same right
+        // on the Rooms root.
+        if (providerInfo.Owner != authContext.CurrentAccount.ID)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        var roomsRoot = await daoFactory.GetFolderDao<int>().GetFolderAsync(await globalFolderHelper.FolderVirtualRoomsAsync);
+        if (!await fileSecurity.CanCreateAsync(roomsRoot))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+        }
+
         if (providerInfo.RootFolderType != FolderType.VirtualRooms)
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_InvalidProvider);
@@ -2950,6 +2964,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         var currentFolderType = FolderType.USER;
+        string previousTitle = null;
         int currentProviderId;
 
         MessageAction messageAction;
@@ -2993,6 +3008,10 @@ public class FileStorageService //: IFileStorageService
 
             currentFolderType = currentProvider.RootFolderType;
 
+            // An empty title keeps the current one; a non-empty one is cleaned the same way as on connect.
+            thirdPartyParams.CustomerTitle = Global.ReplaceInvalidCharsAndTruncate(thirdPartyParams.CustomerTitle);
+            previousTitle = currentProvider.CustomerTitle;
+
             switch (currentProvider.RootFolderType)
             {
                 case FolderType.COMMON when !thirdPartyParams.Corporate:
@@ -3003,7 +3022,12 @@ public class FileStorageService //: IFileStorageService
                     }
                 case FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.Archive:
                     {
-                        var updatedProvider = await providerDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = currentProviderId, AuthData = thirdPartyParams.AuthData });
+                        var updatedProvider = await providerDao.UpdateRoomProviderInfoAsync(new ProviderData
+                        {
+                            Id = currentProviderId,
+                            Title = thirdPartyParams.CustomerTitle,
+                            AuthData = thirdPartyParams.AuthData
+                        });
                         currentProviderId = updatedProvider.ProviderId;
                         break;
                     }
@@ -3026,6 +3050,11 @@ public class FileStorageService //: IFileStorageService
         }
 
         await filesMessageService.SendAsync(messageAction, parentFolder, folder.Id, provider.ProviderKey);
+
+        if (previousTitle is not null && provider.CustomerTitle != previousTitle)
+        {
+            await socketManager.UpdateFolderAsync(folder);
+        }
 
         if (thirdPartyParams.Corporate && currentFolderType != FolderType.COMMON)
         {
@@ -3120,6 +3149,14 @@ public class FileStorageService //: IFileStorageService
         if (!await fileSecurity.CanDeleteAsync(folder))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder);
+        }
+
+        // A connection a room stands on is the room itself: removing it here left an orphaned room behind,
+        // without the notifications, webhook and audit entry of a room deletion. Such a room is deleted as a room,
+        // and that deletion disconnects the storage.
+        if (providerInfo.FolderId != null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ProviderUsedByRoom);
         }
 
         if (providerInfo.RootFolderType == FolderType.COMMON)
@@ -5686,6 +5723,9 @@ public class FileStorageService //: IFileStorageService
 
         var properties = await daoFactory.GetFileDao<T>().GetProperties(formId);
         var room = await DocSpaceHelper.GetParentRoom(form, daoFactory.GetFolderDao<T>());
+
+        List<Guid> formFillersLosingTheForm = null;
+
         switch (action)
         {
             case FormFillingManageAction.Stop:
@@ -5710,6 +5750,7 @@ public class FileStorageService //: IFileStorageService
                 if (room.FolderType == FolderType.FillingFormsRoom)
                 {
                     properties.FormFilling.StartFilling = false;
+                    formFillersLosingTheForm = await GetFormFillersAsync(room);
                 }
 
                 var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
@@ -5743,8 +5784,7 @@ public class FileStorageService //: IFileStorageService
                     var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
                     await filesMessageService.SendAsync(MessageAction.FormStartedToFill, form, MessageInitiator.DocsService, currentUser?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
 
-                    var aces = await fileSharing.GetSharedInfoAsync(room);
-                    var formFillers = aces.Where(ace => ace.Access == FileShare.FillForms).Select(ace => ace.Id).ToList();
+                    var formFillers = await GetFormFillersAsync(room);
 
                     if (formFillers.Count != 0)
                     {
@@ -5776,6 +5816,8 @@ public class FileStorageService //: IFileStorageService
                         var editor = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
                         await webhookManager.PublishAsync(WebhookTrigger.FormStopped, form);
                         await filesMessageService.SendAsync(MessageAction.FormStopped, form, MessageInitiator.DocsService, editor?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
+
+                        formFillersLosingTheForm = await GetFormFillersAsync(room);
                     }
                 }
 
@@ -5787,6 +5829,17 @@ public class FileStorageService //: IFileStorageService
 
         await fileDao.SaveProperties(formId, properties);
         await socketManager.CreateFileAsync(form);
+
+        if (formFillersLosingTheForm is { Count: > 0 })
+        {
+            await socketManager.DeleteFileAsync(form, users: formFillersLosingTheForm);
+        }
+    }
+
+    private async Task<List<Guid>> GetFormFillersAsync<T>(Folder<T> room)
+    {
+        var aces = await fileSharing.GetSharedInfoAsync(room);
+        return aces.Where(ace => ace.Access == FileShare.FillForms).Select(ace => ace.Id).ToList();
     }
 
     public async Task<FormSubmissionsDto> GetSubmissionsByFormId(int formId)

@@ -167,8 +167,9 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <summary>
     /// How much space the files of the room may take, in bytes. It is the limit set on this room, or the portal
     /// default for rooms when none was set. Null when the tariff of the portal does not count room statistics, when
-    /// room quotas are switched off, when the room lies in the archive or the trash, or when the caller may only read
-    /// it.
+    /// room quotas are switched off, when the room lies in the archive or the trash, or when the role of the caller
+    /// in the room carries no editing rights - a viewer, a commenter, a reviewer and a form filler do not see the
+    /// figure, a room manager, a content creator and an editor do.
     /// </summary>
     /// <example>1073741824</example>
     public long? QuotaLimit { get; set; }
@@ -339,7 +340,8 @@ public class FolderDtoHelper(
             if ((await _tenantManager.GetCurrentTenantQuotaAsync()).Statistic &&
                     ((result.Security.TryGetValue(FileSecurity.FilesSecurityActions.EditRoom, out var canEdit) && canEdit) ||
                      (result.RootFolderType is FolderType.Archive or FolderType.TRASH && result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Delete, out var canDelete) && canDelete) ||
-                     (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Create, out var canCreate) && canCreate)))
+                     (result.Security.TryGetValue(FileSecurity.FilesSecurityActions.Create, out var canCreate) && canCreate) ||
+                     folder.Access == FileShare.Editing))
             {
                 TenantEntityQuotaSettings quotaSettings = folder.FolderType is FolderType.AiRoom
                 ? await settingsManager.LoadAsync<TenantAiAgentQuotaSettings>()

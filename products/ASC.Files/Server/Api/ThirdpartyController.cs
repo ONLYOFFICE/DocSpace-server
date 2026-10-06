@@ -119,7 +119,8 @@ public class ThirdpartyController(
     /// connected the account can remove it; another member's request is refused unless they hold delete rights on the
     /// folder it stands for. Nothing is deleted at the storage service: the files stay with the provider, and what
     /// goes away is the portal's link to them together with the stored credentials, the sharing records and the tags
-    /// kept for its entries. A room that was created on this account stops being available. When the account being
+    /// kept for its entries. An account a room was created on is refused with 403 while the room exists: delete the
+    /// room instead, which disconnects the account along with it. When the account being
     /// removed is the one connected for backups by `POST api/2.0/files/thirdparty/backup`, its backup schedule is
     /// deleted as well. The removal cannot be repeated: once the account is gone the same ID is refused rather than
     /// confirmed, so treat the first successful answer as the record of it.
@@ -129,6 +130,8 @@ public class ThirdpartyController(
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
     [SwaggerResponse(200, "The ID of the folder that stood for the removed account", typeof(string))]
+    [SwaggerResponse(403, "The caller neither connected the account nor has the right to delete the folder it stands for")]
+    [SwaggerResponse(404, "No third-party account with this ID exists on the portal")]
     [HttpDelete("thirdparty/{providerId:int}")]
     public async Task<string> DeleteThirdParty(ProviderIdRequestDto inDto)
     {
@@ -292,6 +295,10 @@ public class ThirdpartyController(
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
     [SwaggerResponse(200, "The root folder of the connected account", typeof(FolderDto<string>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `customerTitle` or `providerKey`, `providerId` is neither a number nor a numeric string, or, for a new account, `providerKey` names no known storage service or the `token` or `password` the service needs is missing")]
+    [SwaggerResponse(403, "The caller cannot create rooms, the portal-wide third-party switch is off or no storage service is enabled, the title of a new account is empty once invalid characters are removed, the service rejects the credentials, or `providerId` names an account connected by another member")]
+    [SwaggerResponse(404, "`providerId` names no third-party account on the portal")]
+    [SwaggerResponse(500, "The storage service cannot be reached or fails while the credentials are checked")]
     [HttpPost("thirdparty")]
     public async Task<FolderDto<string>> SaveThirdParty(ThirdPartyRequestDto inDto)
     {
@@ -326,6 +333,9 @@ public class ThirdpartyController(
     /// <exception cref="ArgumentException"></exception>
     [Tags("Files / Third-party integration")]
     [SwaggerResponse(200, "The root folder of the backup storage account", typeof(FolderDto<string>))]
+    [SwaggerResponse(400, "The request body cannot be read, `providerKey` names no known storage service, or, while no backup account is connected yet, the `token` or `password` the service needs is missing")]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator, the portal-wide third-party switch is off or no storage service is enabled, the service rejects the credentials, or, while no backup account is connected yet, the title is empty once invalid characters are removed")]
+    [SwaggerResponse(500, "The storage service cannot be reached or fails while the credentials are checked")]
     [HttpPost("thirdparty/backup")]
     public async Task<FolderDto<string>> SaveThirdPartyBackup(ThirdPartyBackupRequestDto inDto)
     {
