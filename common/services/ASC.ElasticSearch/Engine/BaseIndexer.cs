@@ -178,10 +178,11 @@ public abstract class BaseIndexer<T>(Client client,
     /// that stale flag makes OpenSearch auto-create the index with a dynamic mapping: the standard analyzer instead of the
     /// declared ones, so a title like "QA-R-Custom" is split on the hyphens and no wildcard with a hyphen matches it again.
     /// Such an index is never fixed by itself, since from then on it "exists". So it is created here at once, and one that a
-    /// racing write managed to auto-create in between is dropped and created again. A transport failure (a timeout, a
-    /// broken connection) is retried the same way; any other error from the server is final and is not retried.
-    /// Never throws, so the caller goes on to notify the other nodes. If it gives up, the error log says which of two
-    /// states the index is left in:
+    /// racing write managed to auto-create in between is dropped and created again. A transient failure is retried the
+    /// same way: no answer at all (a timeout, a broken connection), 429 (an overloaded node: circuit breaker, rejected
+    /// execution) or any 5xx; any other 4xx is a problem with the request itself (mapping, settings) and is not retried.
+    /// Never throws, so the caller goes on to notify the other nodes. If it gives up, for whatever reason, the error log
+    /// says which of two states the index is left in:
     /// - absent: safe - reads fall back to SQL, writes are skipped while it is missing, the next IndexAll creates it;
     /// - auto-created by a write: broken - CheckExist sees it as existing, so writes and searches go to it with the
     ///   dynamic mapping until it is reindexed.
@@ -209,12 +210,9 @@ public abstract class BaseIndexer<T>(Client client,
 
                     _logger.ErrorCreateIndex(data.IndexName, response.ServerError?.Error?.Reason ?? response.DebugInformation);
 
-                    // no server error means the request did not get an answer (transport failure): worth another attempt;
-                    // a server error other than the race (a mapping or settings problem) will not go away on a retry
-                    var errorType = response.ServerError?.Error?.Type;
-                    if (errorType != null && errorType != "resource_already_exists_exception")
+                    if (!IsRetryable(response))
                     {
-                        return;
+                        break;
                     }
                 }
                 catch (Exception e)
@@ -226,14 +224,48 @@ public abstract class BaseIndexer<T>(Client client,
             try
             {
                 _logger.ErrorCreateIndex(data.IndexName, client.Instance.Indices.Exists(data.IndexName).Exists
-                    ? "every attempt failed; the index was auto-created by a write, it has a dynamic mapping and must be reindexed"
-                    : "every attempt failed; the index is absent until the next IndexAll creates it");
+                    ? "gave up; the index was auto-created by a write, it has a dynamic mapping and must be reindexed"
+                    : "gave up; the index is absent until the next IndexAll creates it");
             }
             catch (Exception e)
             {
                 _logger.ErrorRecreateIndex(data.IndexName, e);
             }
         }
+    }
+
+    private async Task<bool> PingAsync()
+    {
+        try
+        {
+            var instance = client.Instance;
+            if (instance == null)
+            {
+                return false;
+            }
+
+            // a short deadline of its own: the client-wide request timeout is 5 minutes
+            var response = await instance.PingAsync(p => p.RequestConfiguration(r => r.RequestTimeout(TimeSpan.FromSeconds(10)).ThrowExceptions(false)));
+
+            return response.IsValid;
+        }
+        catch (Exception e)
+        {
+            _logger.ErrorPing(IndexName, e);
+
+            return false;
+        }
+    }
+
+    private static bool IsRetryable(CreateIndexResponse response)
+    {
+        if (response.ServerError?.Error?.Type == "resource_already_exists_exception")
+        {
+            return true;
+        }
+
+        // no status: the request got no answer at all
+        return response.ApiCall?.HttpStatusCode is null or 429 or >= 500;
     }
 
     private CreateIndexResponse CreateIndex(T data)
@@ -531,6 +563,16 @@ public abstract class BaseIndexer<T>(Client client,
 
     private async Task ClearAsync()
     {
+        // With OpenSearch down nothing below can succeed, and against an unreachable host every request waits for the
+        // client's 5-minute timeout while RecreateIndex holds the lock CheckExist needs - up to half an hour of blocked
+        // writes. So the reindex is refused up front, before the stored "last indexed" mark or the index is touched.
+        if (!await PingAsync())
+        {
+            _logger.WarningReindexSkipped(Wrapper.IndexName);
+
+            return;
+        }
+
         await using var webstudioDbContext = await dbContextFactory.CreateDbContextAsync();
         var index = await Queries.IndexAsync(webstudioDbContext, Wrapper.IndexName);
 

@@ -52,6 +52,12 @@ internal static partial class BaseIndexerLogger
     [LoggerMessage(LogLevel.Error, "Recreate index {indexName}")]
     public static partial void ErrorRecreateIndex(this ILogger logger, string indexName, Exception exception);
 
+    [LoggerMessage(LogLevel.Warning, "Reindex {indexName} skipped: OpenSearch does not answer")]
+    public static partial void WarningReindexSkipped(this ILogger logger, string indexName);
+
+    [LoggerMessage(LogLevel.Error, "Ping before reindex {indexName}")]
+    public static partial void ErrorPing(this ILogger logger, string indexName, Exception exception);
+
     [LoggerMessage(LogLevel.Error, "CheckExist {indexName}")]
     public static partial void ErrorCheckExist(this ILogger logger, string indexName, Exception exception);
 
