@@ -179,30 +179,44 @@ public abstract class BaseIndexer<T>(Client client,
     /// declared ones, so a title like "QA-R-Custom" is split on the hyphens and no wildcard with a hyphen matches it again.
     /// Such an index is never fixed by itself, since from then on it "exists". So it is created here at once, and one that a
     /// racing write managed to auto-create in between is dropped and created again.
+    /// Never throws: the caller must still notify the other nodes, whatever happened here.
     /// </summary>
     private void RecreateIndex(T data)
     {
-        lock (_locker)
+        const int attempts = 3;
+
+        try
         {
-            for (var attempt = 0; attempt < 3; attempt++)
+            lock (_locker)
             {
-                var response = CreateIndex(data);
-                if (response.IsValid)
+                for (var attempt = 1; attempt <= attempts; attempt++)
                 {
-                    return;
+                    if (attempt > 1)
+                    {
+                        client.Instance.Indices.Delete(data.IndexName);
+                    }
+
+                    var response = CreateIndex(data);
+                    if (response.IsValid)
+                    {
+                        return;
+                    }
+
+                    if (response.ServerError?.Error?.Type != "resource_already_exists_exception")
+                    {
+                        _logger.ErrorCreateIndex(data.IndexName, response.ServerError?.Error?.Reason ?? response.DebugInformation);
+
+                        return;
+                    }
                 }
 
-                if (response.ServerError?.Error?.Type != "resource_already_exists_exception")
-                {
-                    _logger.ErrorCreateIndex(data.IndexName, response.ServerError?.Error?.Reason ?? response.DebugInformation);
-
-                    return;
-                }
-
-                client.Instance.Indices.Delete(data.IndexName);
+                // the last action was a create, so the index is not left absent: it is there, but auto-created by a write
+                _logger.ErrorCreateIndex(data.IndexName, "auto-created by a concurrent write on every attempt; it has a dynamic mapping and must be reindexed");
             }
-
-            _logger.ErrorCreateIndex(data.IndexName, "the index was auto-created by a concurrent write on every attempt");
+        }
+        catch (Exception e)
+        {
+            _logger.ErrorRecreateIndex(data.IndexName, e);
         }
     }
 
