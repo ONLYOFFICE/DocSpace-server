@@ -16,6 +16,7 @@ Usage (from the repo root, server/):
 from __future__ import annotations
 
 import argparse
+import functools
 import fnmatch
 import re
 import subprocess
@@ -219,6 +220,115 @@ LINE_CHECKS = [
 ]
 
 
+# --- localized resources (.resx) -----------------------------------------------------------------
+# A resource family is the neutral file plus its culture siblings: Foo.resx, Foo.ru.resx, Foo.pt-BR.resx.
+
+RESX_CULTURE = re.compile(r"^(?P<stem>.+?)\.(?P<culture>[a-z]{2,3}(?:-[A-Za-z]{2,4})*(?:-[A-Z]{2})?)\.resx$")
+# what must survive translation verbatim: $Tags of notify patterns, {0} format items, HTML tags.
+# A tag name is ASCII-only, exactly as NVelocityPatternFormatter.DefaultPattern reads it, so a suffix glued
+# to it in the translation ("$UserName님" in Korean) still leaves the tag intact - Python's \w would not.
+PLACEHOLDER = re.compile(r"\$\{?[A-Za-z0-9_]+|\{\d+(?::[^}]*)?\}|</?[A-Za-z][A-Za-z0-9]*")
+
+
+def placeholders(text: str) -> list[str]:
+    return sorted(p.replace("${", "$") for p in PLACEHOLDER.findall(text))
+
+
+def resx_family(path: str) -> tuple[str, str]:
+    """path -> (neutral path, culture or '' for the neutral file)."""
+    folder, _, name = path.rpartition("/")
+    m = RESX_CULTURE.match(name)
+    if m:
+        return f"{folder}/{m.group('stem')}.resx" if folder else f"{m.group('stem')}.resx", m.group("culture")
+    return path, ""
+
+
+@functools.lru_cache(maxsize=None)
+def resx_values(ref: str | None, path: str) -> dict[str, str]:
+    """data name -> value at a git ref (None = working tree); {} when the file does not exist there."""
+    import xml.etree.ElementTree as ET
+
+    if ref is None:
+        p = Path(path)
+        raw = p.read_bytes() if p.exists() else None
+    else:
+        raw = git_bytes("show", f"{ref}:{path}")
+    if not raw:
+        return {}
+    try:
+        root = ET.fromstring(raw)
+    except ET.ParseError as e:
+        return {"!! parse error": str(e)}
+    return {d.get("name"): (d.findtext("value") or "") for d in root.iter("data") if d.get("name")}
+
+
+def print_resx_section(files: list[tuple[str, str]], base: str, head: str | None) -> None:
+    changed = [p for st, p in files if p.endswith(".resx") and not st.startswith("D")]
+    print("## Localized resources (.resx)")
+    if not changed:
+        print("  none")
+        print()
+        return
+
+    families: dict[str, set[str]] = defaultdict(set)
+    for p in changed:
+        neutral, _ = resx_family(p)
+        families[neutral].add(p)
+
+    for neutral in sorted(families):
+        # every culture file of the family that exists at head, changed or not
+        folder = str(Path(neutral).parent).replace("\\", "/")
+        stem = Path(neutral).name[:-len(".resx")]
+        listing = git("ls-files", folder) if head is None else git("ls-tree", "--name-only", head, f"{folder}/")
+        siblings = sorted(p for p in listing.splitlines()
+                          if resx_family(p)[0] == neutral and Path(p).name.startswith(stem + "."))
+
+        old_n, new_n = resx_values(base, neutral), resx_values(head, neutral)
+        keys = sorted(k for k in new_n if old_n.get(k) != new_n[k]) + sorted(k for k in old_n if k not in new_n)
+        print(f"  {neutral}: {len(families[neutral])} file(s) changed of {len(siblings)}; neutral keys changed: {len(keys)}")
+
+        # keys changed in a culture file but not in the neutral one: a translation edited on its own
+        for p in sorted(families[neutral] - {neutral}):
+            old_c, new_c = resx_values(base, p), resx_values(head, p)
+            own = [k for k in new_c if old_c.get(k) != new_c[k] and k not in keys]
+            if own:
+                print(f"    {resx_family(p)[1]}: changed without the neutral text: {', '.join(own[:10])}")
+
+        for key in keys[:20]:
+            if key not in new_n:
+                stale = [resx_family(p)[1] for p in siblings if p != neutral and key in resx_values(head, p)]
+                print(f"    - {key}: removed from neutral" + (f"; still in {', '.join(stale)}" if stale else ""))
+                continue
+            expected = placeholders(new_n[key])
+            untouched, missing, broken = [], [], []
+            for p in siblings:
+                if p == neutral:
+                    continue
+                culture = resx_family(p)[1]
+                old_c, new_c = resx_values(base, p), resx_values(head, p)
+                if key not in new_c:
+                    missing.append(culture)
+                    continue
+                if old_c.get(key) == new_c[key] and key in old_n:
+                    untouched.append(culture)
+                got = placeholders(new_c[key])
+                if got != expected:
+                    lost = sorted(set(expected) - set(got))
+                    extra = sorted(set(got) - set(expected))
+                    broken.append(f"{culture}(" + "; ".join(
+                        x for x in (f"lost {' '.join(lost)}" if lost else "", f"extra {' '.join(extra)}" if extra else "") if x) + ")")
+            print(f"    - {key}: placeholders {' '.join(expected) or '-'}")
+            if untouched:
+                print(f"      neutral changed, translation untouched: {', '.join(untouched)}")
+            if missing:
+                print(f"      no translation (falls back to neutral): {', '.join(missing)}")
+            if broken:
+                print(f"      !! placeholder mismatch: {', '.join(broken)}")
+        if len(keys) > 20:
+            print(f"    ... and {len(keys) - 20} more keys")
+    print()
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--base")
@@ -413,6 +523,9 @@ def main() -> None:
     for l in sub:
         print(f"  !! submodule checkout differs from the recorded pointer: {l.strip()}")
     print()
+
+    # --- localized resources -------------------------------------------------------------------
+    print_resx_section(files, merge_base, None if a.worktree else a.head)
 
     # --- tests ---------------------------------------------------------------------------------
     test_files = [p for _, p in files if is_test(p)]
