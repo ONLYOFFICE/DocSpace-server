@@ -4158,7 +4158,7 @@
     }
   },
   "operations": {
-    "aiAiSend": {
+    "aiSend": {
       "request": {
         "type": "object",
         "properties": {
@@ -4189,7 +4189,7 @@
         "$ref": "#/components/schemas/AiThreadMessageLike"
       }
     },
-    "aiAiSendCustom": {
+    "aiSendCustom": {
       "request": {
         "type": "object",
         "properties": {
@@ -4221,7 +4221,7 @@
         "description": "One-shot mode (`isStream: false`) returns the assistant message shown here; streaming mode instead emits a newline-delimited `ChatEvent` stream."
       }
     },
-    "aiAiSendWithStream": {
+    "aiSendWithStream": {
       "request": {
         "$ref": "#/components/schemas/AiSendStreamBody"
       },
@@ -4229,7 +4229,7 @@
         "$ref": "#/components/schemas/AiChatEvent"
       }
     },
-    "aiAiSendWithStreamOpenAI": {
+    "aiSendWithStreamOpenAI": {
       "request": {
         "$ref": "#/components/schemas/AiSendStreamBody"
       },
@@ -4237,7 +4237,7 @@
         "$ref": "#/components/schemas/AiOpenAIStreamChunk"
       }
     },
-    "aiAiRegenerateStream": {
+    "aiRegenerateStream": {
       "request": {
         "type": "object",
         "properties": {
@@ -4267,7 +4267,7 @@
         "$ref": "#/components/schemas/AiChatEvent"
       }
     },
-    "aiAiApproveToolCall": {
+    "aiApproveToolCall": {
       "request": {
         "type": "object",
         "additionalProperties": false,
@@ -4320,7 +4320,7 @@
         "$ref": "#/components/schemas/AiChatEvent"
       }
     },
-    "aiAiDenyToolCall": {
+    "aiDenyToolCall": {
       "request": {
         "$ref": "#/components/schemas/AiToolCallData"
       },

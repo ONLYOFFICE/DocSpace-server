@@ -139,7 +139,7 @@ export type AiActionArgs = {
   prompt?: { mode: "replace" | "append"; text: string };
 };
 
-export type Req_aiAiSend = {
+export type Req_aiSend = {
   /** Which AI action to run — selects the assignment slot and action. */
   actionType: ActionType;
   /** The user turn to send. */
@@ -149,9 +149,9 @@ export type Req_aiAiSend = {
   /** Optional entity (room) scope for profile resolution. */
   entityId?: string;
 };
-export type Res_aiAiSend = ThreadMessageLike;
+export type Res_aiSend = ThreadMessageLike;
 
-export type Req_aiAiSendCustom = {
+export type Req_aiSendCustom = {
   /** Stream the reply (ndjson) when true, else return a single message. */
   isStream: boolean;
   /** Caller-supplied system prompt for this one-turn call. */
@@ -164,7 +164,7 @@ export type Req_aiAiSendCustom = {
  * One-shot mode (`isStream: false`) returns the assistant message shown here;
  * streaming mode instead emits a newline-delimited `ChatEvent` stream.
  */
-export type Res_aiAiSendCustom = ThreadMessageLike;
+export type Res_aiSendCustom = ThreadMessageLike;
 
 /**
  * Shared body of the two streaming send endpoints (`sendWithStream` and its
@@ -184,13 +184,13 @@ export type AiSendStreamBody = {
   profileId?: string;
 };
 
-export type Req_aiAiSendWithStream = AiSendStreamBody;
-export type Res_aiAiSendWithStream = ChatEvent;
+export type Req_aiSendWithStream = AiSendStreamBody;
+export type Res_aiSendWithStream = ChatEvent;
 
-export type Req_aiAiSendWithStreamOpenAI = AiSendStreamBody;
-export type Res_aiAiSendWithStreamOpenAI = OpenAIStreamChunk;
+export type Req_aiSendWithStreamOpenAI = AiSendStreamBody;
+export type Res_aiSendWithStreamOpenAI = OpenAIStreamChunk;
 
-export type Req_aiAiRegenerateStream = {
+export type Req_aiRegenerateStream = {
   /** Target thread (must already exist). */
   threadId: string;
   /** Per-request engine options: extra tools, reasoning, prompt override. */
@@ -200,7 +200,7 @@ export type Req_aiAiRegenerateStream = {
   /** Session-level profile override for this request only. */
   profileId?: string;
 };
-export type Res_aiAiRegenerateStream = ChatEvent;
+export type Res_aiRegenerateStream = ChatEvent;
 
 /**
  * Identifies a pending tool call to resume — mirrors the library
@@ -223,16 +223,16 @@ export type AiToolCallData = {
   profileId?: string;
 };
 
-export type Req_aiAiApproveToolCall = AiToolCallData & {
+export type Req_aiApproveToolCall = AiToolCallData & {
   /** Final result of the tool call, as the model should see it. */
   result: unknown;
   /** Persist auto-approve for this tool's name. */
   allowAlways?: boolean;
 };
-export type Res_aiAiApproveToolCall = ChatEvent;
+export type Res_aiApproveToolCall = ChatEvent;
 
-export type Req_aiAiDenyToolCall = AiToolCallData;
-export type Res_aiAiDenyToolCall = ChatEvent;
+export type Req_aiDenyToolCall = AiToolCallData;
+export type Res_aiDenyToolCall = ChatEvent;
 
 /* --------------------------- Assignments ------------------------------- */
 

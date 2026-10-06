@@ -144,6 +144,7 @@ public static class OpenApiExtension
             c.OperationFilter<AllowAnonymousFilter>();
             c.OperationFilter<ApiDateTimeParameterFilter>();
             c.OperationFilter<FlattenObjectQueryParameterFilter>();
+            c.OperationFilter<RequestBodyNameOperationFilter>();
             c.OperationFilter<RateLimitOperationFilter>();
             c.DocumentFilter<RateLimitDocumentFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
@@ -671,6 +672,42 @@ public static class OpenApiExtension
             {
                 properties.TryAdd(name, property);
             }
+        }
+    }
+
+    /// <summary>
+    /// Names a request body that has no model of its own after the request model that carries it.
+    /// </summary>
+    /// <remarks>
+    /// A request model whose <c>[FromBody]</c> property is a bare array of numbers or enum values
+    /// (<c>DeleteTemplateFilesRequestDto.FileIds</c>) puts an inline array schema on the operation. The SDK
+    /// generators find no model name in it and call the argument <c>request_body</c>, where every other body is
+    /// named after its model. The extension names only that argument: the body on the wire is still the bare
+    /// array. A body that references a model, directly or through its array items, already gets that model's
+    /// name and is left alone, and so is a body bound straight to an action parameter, which has no request
+    /// model to be named after.
+    /// </remarks>
+    private class RequestBodyNameOperationFilter : IOperationFilter
+    {
+        private const string BodyNameExtension = "x-codegen-request-body-name";
+
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            if (operation.RequestBody is not OpenApiRequestBody { Content: { Count: > 0 } content } requestBody ||
+                content.Values.Any(media => media.Schema is null or OpenApiSchemaReference || media.Schema.Items is OpenApiSchemaReference))
+            {
+                return;
+            }
+
+            var body = context.ApiDescription.ParameterDescriptions.FirstOrDefault(p => p.Source == BindingSource.Body);
+            var model = body?.ParameterDescriptor?.ParameterType;
+            if (model == null || model == body.Type)
+            {
+                return;
+            }
+
+            requestBody.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+            requestBody.Extensions[BodyNameExtension] = new JsonNodeExtension(JsonValue.Create(CustomSchemaId(model)));
         }
     }
 

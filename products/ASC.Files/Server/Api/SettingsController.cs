@@ -581,7 +581,7 @@ public class SettingsController(
     [SwaggerResponse(200, "The normalised set of default access rights stored for the caller", typeof(List<FileShare>))]
     [SwaggerResponse(400, "The request body cannot be read or holds a number outside the published list of access rights")]
     [HttpPut("settings/dafaultaccessrights")]
-    public async Task<List<FileShare>> ChangeDefaultAccessRights(DefaultAccessRightsrequestDto inDto)
+    public async Task<List<FileShare>> ChangeDefaultAccessRights(DefaultAccessRightsRequestDto inDto)
     {
         await filesSettingsHelper.SetDefaultSharingAccessRights(inDto.Value);
         return await filesSettingsHelper.GetDefaultSharingAccessRights();

@@ -7294,7 +7294,8 @@
                 "description": "The files to take off the template list, by id; this array is the whole request body. Only a file stored in\r\nthe portal itself can be a template, which is why an id here is always numeric."
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "DeleteTemplateFilesRequestDto"
         },
         "responses": {
           "200": {
@@ -22538,7 +22539,8 @@
                 "description": "The access rights the sharing dialog should offer by default. The array is the whole request body rather than\r\na field of an object, and the portal stores a normalised subset of it instead of the array as sent, so read\r\nthe answer to learn what was kept. An empty array clears the setting, after which the portal reports read\r\naccess alone. A value outside the published list is rejected as an invalid request."
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "DefaultAccessRightsRequestDto"
         },
         "responses": {
           "200": {
