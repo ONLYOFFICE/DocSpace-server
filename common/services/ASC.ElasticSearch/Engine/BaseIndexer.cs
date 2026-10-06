@@ -178,11 +178,13 @@ public abstract class BaseIndexer<T>(Client client,
     /// that stale flag makes OpenSearch auto-create the index with a dynamic mapping: the standard analyzer instead of the
     /// declared ones, so a title like "QA-R-Custom" is split on the hyphens and no wildcard with a hyphen matches it again.
     /// Such an index is never fixed by itself, since from then on it "exists". So it is created here at once, and one that a
-    /// racing write managed to auto-create in between is dropped and created again; a failed attempt (a timeout, a refused
-    /// request) is retried the same way.
-    /// Never throws, so the caller goes on to notify the other nodes. If every attempt fails, the index is either absent
-    /// or auto-created, and the error log says which: an absent index is safe (reads fall back to SQL, writes are skipped,
-    /// the next IndexAll creates it), an auto-created one has to be reindexed.
+    /// racing write managed to auto-create in between is dropped and created again. A transport failure (a timeout, a
+    /// broken connection) is retried the same way; any other error from the server is final and is not retried.
+    /// Never throws, so the caller goes on to notify the other nodes. If it gives up, the error log says which of two
+    /// states the index is left in:
+    /// - absent: safe - reads fall back to SQL, writes are skipped while it is missing, the next IndexAll creates it;
+    /// - auto-created by a write: broken - CheckExist sees it as existing, so writes and searches go to it with the
+    ///   dynamic mapping until it is reindexed.
     /// </summary>
     private void RecreateIndex(T data)
     {
@@ -206,6 +208,14 @@ public abstract class BaseIndexer<T>(Client client,
                     }
 
                     _logger.ErrorCreateIndex(data.IndexName, response.ServerError?.Error?.Reason ?? response.DebugInformation);
+
+                    // no server error means the request did not get an answer (transport failure): worth another attempt;
+                    // a server error other than the race (a mapping or settings problem) will not go away on a retry
+                    var errorType = response.ServerError?.Error?.Type;
+                    if (errorType != null && errorType != "resource_already_exists_exception")
+                    {
+                        return;
+                    }
                 }
                 catch (Exception e)
                 {
