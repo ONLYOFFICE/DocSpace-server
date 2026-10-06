@@ -71,9 +71,13 @@ public class RenewSubscriptionService(
     // Renewals whose payment change got no answer from the billing service, re-checked on every run.
     private const string PendingCacheKey = "renewsubscriptionservice_pending";
 
-    // How long after the timeout a renewal is re-checked while billing gives no answer, before the customer is
-    // told it failed. A fixed time rather than a number of runs, which would shrink with renewperiod. An answer
-    // that the subscription is not extended settles the renewal at once.
+    // How long after the timeout billing's answer "not extended" is still not taken as final: billing can finish
+    // a request it stopped answering minutes later, and a premature "renew manually" can make the customer pay
+    // twice. Fixed times rather than a number of runs, which would shrink with renewperiod.
+    private static readonly TimeSpan _renewNotExtendedGrace = TimeSpan.FromMinutes(10);
+
+    // How long after the timeout a renewal is re-checked while billing gives no answer at all, before the
+    // customer is told it failed.
     private static readonly TimeSpan _renewVerifyPeriod = TimeSpan.FromMinutes(30);
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
@@ -386,11 +390,12 @@ public class RenewSubscriptionService(
 
         if (!extended)
         {
-            // billing answered that the subscription is not extended - the renewal did not go through; only
-            // no answer at all keeps it waiting
-            if (error != null && DateTime.UtcNow < renewal.TimedOutAt + _renewVerifyPeriod)
+            // "not extended" is final once the grace period is over; no answer at all waits the full period
+            var waitFor = error is null ? _renewNotExtendedGrace : _renewVerifyPeriod;
+
+            if (DateTime.UtcNow < renewal.TimedOutAt + waitFor)
             {
-                logger.WarningRenewSubscriptionServiceNotConfirmed(renewal.TenantId, description, renewal.TimedOutAt, error.Message);
+                logger.WarningRenewSubscriptionServiceNotConfirmed(renewal.TenantId, description, renewal.TimedOutAt, error?.Message ?? "not extended yet");
 
                 return renewal;
             }
@@ -502,9 +507,9 @@ public class RenewSubscriptionService(
 
     /// <summary>
     /// A renewal the billing service did not answer about. Renewed as soon as billing reports the subscription to
-    /// <see cref="ProductId"/> as ending after <see cref="PreviousDueDate"/>; failed as soon as billing answers
-    /// that it does not, or when billing has not answered within <see cref="_renewVerifyPeriod"/> of
-    /// <see cref="TimedOutAt"/>, the moment the request timed out.
+    /// <see cref="ProductId"/> as ending after <see cref="PreviousDueDate"/>; failed when billing still answers
+    /// that it does not once <see cref="_renewNotExtendedGrace"/> has passed since <see cref="TimedOutAt"/>, the
+    /// moment the request timed out, or when billing has not answered at all within <see cref="_renewVerifyPeriod"/>.
     /// Self-contained on purpose: it is settled without looking the wallet quota up again, so it cannot be lost
     /// to a quota that is gone by then. <see cref="Description"/> is the log and audit text ("adminwallet 2"),
     /// <see cref="ServiceName"/> and <see cref="Quantity"/> fill the failure letter.
