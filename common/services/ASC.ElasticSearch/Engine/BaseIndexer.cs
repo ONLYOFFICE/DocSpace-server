@@ -178,20 +178,23 @@ public abstract class BaseIndexer<T>(Client client,
     /// that stale flag makes OpenSearch auto-create the index with a dynamic mapping: the standard analyzer instead of the
     /// declared ones, so a title like "QA-R-Custom" is split on the hyphens and no wildcard with a hyphen matches it again.
     /// Such an index is never fixed by itself, since from then on it "exists". So it is created here at once, and one that a
-    /// racing write managed to auto-create in between is dropped and created again.
-    /// Never throws: the caller must still notify the other nodes, whatever happened here.
+    /// racing write managed to auto-create in between is dropped and created again; a failed attempt (a timeout, a refused
+    /// request) is retried the same way.
+    /// Never throws, so the caller goes on to notify the other nodes. If every attempt fails, the index is either absent
+    /// or auto-created, and the error log says which: an absent index is safe (reads fall back to SQL, writes are skipped,
+    /// the next IndexAll creates it), an auto-created one has to be reindexed.
     /// </summary>
     private void RecreateIndex(T data)
     {
         const int attempts = 3;
 
-        try
+        lock (_locker)
         {
-            lock (_locker)
+            for (var attempt = 1; attempt <= attempts; attempt++)
             {
-                for (var attempt = 1; attempt <= attempts; attempt++)
+                try
                 {
-                    if (attempt > 1)
+                    if (attempt > 1 && client.Instance.Indices.Exists(data.IndexName).Exists)
                     {
                         client.Instance.Indices.Delete(data.IndexName);
                     }
@@ -202,21 +205,24 @@ public abstract class BaseIndexer<T>(Client client,
                         return;
                     }
 
-                    if (response.ServerError?.Error?.Type != "resource_already_exists_exception")
-                    {
-                        _logger.ErrorCreateIndex(data.IndexName, response.ServerError?.Error?.Reason ?? response.DebugInformation);
-
-                        return;
-                    }
+                    _logger.ErrorCreateIndex(data.IndexName, response.ServerError?.Error?.Reason ?? response.DebugInformation);
                 }
-
-                // the last action was a create, so the index is not left absent: it is there, but auto-created by a write
-                _logger.ErrorCreateIndex(data.IndexName, "auto-created by a concurrent write on every attempt; it has a dynamic mapping and must be reindexed");
+                catch (Exception e)
+                {
+                    _logger.ErrorRecreateIndex(data.IndexName, e);
+                }
             }
-        }
-        catch (Exception e)
-        {
-            _logger.ErrorRecreateIndex(data.IndexName, e);
+
+            try
+            {
+                _logger.ErrorCreateIndex(data.IndexName, client.Instance.Indices.Exists(data.IndexName).Exists
+                    ? "every attempt failed; the index was auto-created by a write, it has a dynamic mapping and must be reindexed"
+                    : "every attempt failed; the index is absent until the next IndexAll creates it");
+            }
+            catch (Exception e)
+            {
+                _logger.ErrorRecreateIndex(data.IndexName, e);
+            }
         }
     }
 
@@ -249,9 +255,12 @@ public abstract class BaseIndexer<T>(Client client,
             return b;
         }
 
+        // the client is built with ThrowExceptions(): without this override a refused create ("already exists" included)
+        // would throw instead of returning a response the callers can read
         var response = client.Instance.Indices.Create(data.IndexName,
             c =>
-            c.Map<T>(m => m.AutoMap())
+            c.RequestConfiguration(r => r.ThrowExceptions(false))
+            .Map<T>(m => m.AutoMap())
             .Settings(r => r.Analysis(a =>
                             a.Analyzers(analyzers)
                             .CharFilters(d => d.HtmlStrip(CharFilter.html.ToStringFast())
@@ -525,10 +534,21 @@ public abstract class BaseIndexer<T>(Client client,
 
         // writes of this process stop trusting the flag before the index goes away, not when the notification comes back
         baseIndexerHelper.IsExist[Wrapper.IndexName] = false;
-        await client.Instance.Indices.DeleteAsync(Wrapper.IndexName);
+
+        // a failed delete does not stop the reindex: it may have gone through on the server anyway (a timeout), and if it
+        // did not, the first create in RecreateIndex finds the old index and the retry drops it
+        try
+        {
+            await client.Instance.Indices.DeleteAsync(Wrapper.IndexName);
+        }
+        catch (Exception e)
+        {
+            _logger.ErrorRecreateIndex(Wrapper.IndexName, e);
+        }
+
         RecreateIndex(Wrapper);
 
-        // the other nodes re-check the index: by now it exists again, with the declared mapping
+        // the other nodes drop their cached flag and ask OpenSearch again; RecreateIndex never throws, so this always runs
         await baseIndexerHelper.ClearAsync(Wrapper);
     }
 
