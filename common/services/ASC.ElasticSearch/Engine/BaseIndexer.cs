@@ -77,7 +77,6 @@ public abstract class BaseIndexer<T>(Client client,
     protected internal T Wrapper => serviceProvider.GetService<T>();
     internal string IndexName => Wrapper.IndexName;
 
-    private bool _isExist;
     private readonly ILogger _logger = logger;
     protected readonly TenantManager _tenantManager = tenantManager;
     private static readonly Lock _locker = new();
@@ -152,48 +151,169 @@ public abstract class BaseIndexer<T>(Client client,
 
             lock (_locker)
             {
-                IPromise<IAnalyzers> analyzers(AnalyzersDescriptor b)
+                // another thread may have created it while this one was waiting for the lock
+                if (client.Instance.Indices.Exists(data.IndexName).Exists)
                 {
-                    foreach (var c in AnalyzerExtensions.GetNames())
-                    {
-                        var c1 = c;
-                        b.Custom(c1 + "custom", ca => ca.Tokenizer(c1).Filters(nameof(Filter.lowercase)).CharFilters(nameof(CharFilter.io)));
-                    }
+                    baseIndexerHelper.IsExist[data.IndexName] = true;
 
-                    foreach (var c in CharFilterExtensions.GetNames())
-                    {
-                        if (c == nameof(CharFilter.io))
-                        {
-                            continue;
-                        }
-
-                        var charFilters = new List<string> { nameof(CharFilter.io), c };
-                        b.Custom(c + "custom", ca => ca.Tokenizer(nameof(Analyzer.whitespace)).Filters(nameof(Filter.lowercase)).CharFilters(charFilters));
-                    }
-
-                    if (data is ISearchItemDocument)
-                    {
-                        b.Custom("document", ca => ca.Tokenizer(Analyzer.whitespace.ToStringFast()).Filters(nameof(Filter.lowercase)).CharFilters(nameof(CharFilter.io)));
-                    }
-
-                    return b;
+                    return;
                 }
 
-                client.Instance.Indices.Create(data.IndexName,
-                    c =>
-                    c.Map<T>(m => m.AutoMap())
-                    .Settings(r => r.Analysis(a =>
-                                    a.Analyzers(analyzers)
-                                    .CharFilters(d => d.HtmlStrip(CharFilter.html.ToStringFast())
-                                    .Mapping(CharFilter.io.ToStringFast(), m => m.Mappings("ё => е", "Ё => Е"))))));
-
-                _isExist = true;
+                var response = CreateIndex(data);
+                if (!response.IsValid)
+                {
+                    _logger.ErrorCreateIndex(data.IndexName, response.ServerError?.Error?.Reason ?? response.DebugInformation);
+                }
             }
         }
         catch (Exception e)
         {
             _logger.ErrorCreateIfNotExist(e);
         }
+    }
+
+    /// <summary>
+    /// Recreates the index right after it was deleted, without asking the "exists" cache.
+    /// The cache of every node still says "exists" until the clear notification reaches it, and a document write behind
+    /// that stale flag makes OpenSearch auto-create the index with a dynamic mapping: the standard analyzer instead of the
+    /// declared ones, so a title like "QA-R-Custom" is split on the hyphens and no wildcard with a hyphen matches it again.
+    /// Such an index is never fixed by itself, since from then on it "exists". So it is created here at once, and one that a
+    /// racing write managed to auto-create in between is dropped and created again. A transient failure is retried the
+    /// same way: no answer at all (a timeout, a broken connection), 429 (an overloaded node: circuit breaker, rejected
+    /// execution) or any 5xx; any other 4xx is a problem with the request itself (mapping, settings) and is not retried.
+    /// Never throws, so the caller goes on to notify the other nodes. If it gives up, for whatever reason, the error log
+    /// says which of two states the index is left in:
+    /// - absent: safe - reads fall back to SQL, writes are skipped while it is missing, the next IndexAll creates it;
+    /// - auto-created by a write: broken - CheckExist sees it as existing, so writes and searches go to it with the
+    ///   dynamic mapping until it is reindexed.
+    /// </summary>
+    private void RecreateIndex(T data)
+    {
+        const int attempts = 3;
+
+        lock (_locker)
+        {
+            for (var attempt = 1; attempt <= attempts; attempt++)
+            {
+                try
+                {
+                    if (attempt > 1 && client.Instance.Indices.Exists(data.IndexName).Exists)
+                    {
+                        client.Instance.Indices.Delete(data.IndexName);
+                    }
+
+                    var response = CreateIndex(data);
+                    if (response.IsValid)
+                    {
+                        return;
+                    }
+
+                    _logger.ErrorCreateIndex(data.IndexName, response.ServerError?.Error?.Reason ?? response.DebugInformation);
+
+                    if (!IsRetryable(response))
+                    {
+                        break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.ErrorRecreateIndex(data.IndexName, e);
+                }
+            }
+
+            try
+            {
+                _logger.ErrorCreateIndex(data.IndexName, client.Instance.Indices.Exists(data.IndexName).Exists
+                    ? "gave up; the index was auto-created by a write, it has a dynamic mapping and must be reindexed"
+                    : "gave up; the index is absent until the next IndexAll creates it");
+            }
+            catch (Exception e)
+            {
+                _logger.ErrorRecreateIndex(data.IndexName, e);
+            }
+        }
+    }
+
+    private async Task<bool> PingAsync()
+    {
+        try
+        {
+            var instance = client.Instance;
+            if (instance == null)
+            {
+                return false;
+            }
+
+            // a short deadline of its own: the client-wide request timeout is 5 minutes
+            var response = await instance.PingAsync(p => p.RequestConfiguration(r => r.RequestTimeout(TimeSpan.FromSeconds(10)).ThrowExceptions(false)));
+
+            return response.IsValid;
+        }
+        catch (Exception e)
+        {
+            _logger.ErrorPing(IndexName, e);
+
+            return false;
+        }
+    }
+
+    private static bool IsRetryable(CreateIndexResponse response)
+    {
+        if (response.ServerError?.Error?.Type == "resource_already_exists_exception")
+        {
+            return true;
+        }
+
+        // no status: the request got no answer at all
+        return response.ApiCall?.HttpStatusCode is null or 429 or >= 500;
+    }
+
+    private CreateIndexResponse CreateIndex(T data)
+    {
+        IPromise<IAnalyzers> analyzers(AnalyzersDescriptor b)
+        {
+            foreach (var c in AnalyzerExtensions.GetNames())
+            {
+                var c1 = c;
+                b.Custom(c1 + "custom", ca => ca.Tokenizer(c1).Filters(nameof(Filter.lowercase)).CharFilters(nameof(CharFilter.io)));
+            }
+
+            foreach (var c in CharFilterExtensions.GetNames())
+            {
+                if (c == nameof(CharFilter.io))
+                {
+                    continue;
+                }
+
+                var charFilters = new List<string> { nameof(CharFilter.io), c };
+                b.Custom(c + "custom", ca => ca.Tokenizer(nameof(Analyzer.whitespace)).Filters(nameof(Filter.lowercase)).CharFilters(charFilters));
+            }
+
+            if (data is ISearchItemDocument)
+            {
+                b.Custom("document", ca => ca.Tokenizer(Analyzer.whitespace.ToStringFast()).Filters(nameof(Filter.lowercase)).CharFilters(nameof(CharFilter.io)));
+            }
+
+            return b;
+        }
+
+        // the client is built with ThrowExceptions(): without this override a refused create ("already exists" included)
+        // would throw instead of returning a response the callers can read
+        var response = client.Instance.Indices.Create(data.IndexName,
+            c =>
+            c.RequestConfiguration(r => r.ThrowExceptions(false))
+            .Map<T>(m => m.AutoMap())
+            .Settings(r => r.Analysis(a =>
+                            a.Analyzers(analyzers)
+                            .CharFilters(d => d.HtmlStrip(CharFilter.html.ToStringFast())
+                            .Mapping(CharFilter.io.ToStringFast(), m => m.Mappings("ё => е", "Ё => Е"))))));
+
+        if (response.IsValid)
+        {
+            baseIndexerHelper.IsExist[data.IndexName] = true;
+        }
+
+        return response;
     }
 
     public void Flush()
@@ -382,8 +502,7 @@ public abstract class BaseIndexer<T>(Client client,
     {
         try
         {
-            var isExist = baseIndexerHelper.IsExist.GetOrAdd(data.IndexName, k => client.Instance.Indices.Exists(k).Exists);
-            if (isExist)
+            if (baseIndexerHelper.IsExist.TryGetValue(data.IndexName, out var isExist) && isExist)
             {
                 return true;
             }
@@ -392,10 +511,11 @@ public abstract class BaseIndexer<T>(Client client,
             {
                 isExist = client.Instance.Indices.Exists(data.IndexName).Exists;
 
-                baseIndexerHelper.IsExist.TryUpdate(data.IndexName, _isExist, false);
-
+                // only "exists" is cached: a missing index is asked about again, so it is picked up as soon as it is created
                 if (isExist)
                 {
+                    baseIndexerHelper.IsExist[data.IndexName] = true;
+
                     return true;
                 }
             }
@@ -443,6 +563,16 @@ public abstract class BaseIndexer<T>(Client client,
 
     private async Task ClearAsync()
     {
+        // With OpenSearch down nothing below can succeed, and against an unreachable host every request waits for the
+        // client's 5-minute timeout while RecreateIndex holds the lock CheckExist needs - up to half an hour of blocked
+        // writes. So the reindex is refused up front, before the stored "last indexed" mark or the index is touched.
+        if (!await PingAsync())
+        {
+            _logger.WarningReindexSkipped(Wrapper.IndexName);
+
+            return;
+        }
+
         await using var webstudioDbContext = await dbContextFactory.CreateDbContextAsync();
         var index = await Queries.IndexAsync(webstudioDbContext, Wrapper.IndexName);
 
@@ -453,9 +583,25 @@ public abstract class BaseIndexer<T>(Client client,
         }
 
         _logger.DebugIndexDeleted(Wrapper.IndexName);
-        await client.Instance.Indices.DeleteAsync(Wrapper.IndexName);
+
+        // writes of this process stop trusting the flag before the index goes away, not when the notification comes back
+        baseIndexerHelper.IsExist[Wrapper.IndexName] = false;
+
+        // a failed delete does not stop the reindex: it may have gone through on the server anyway (a timeout), and if it
+        // did not, the first create in RecreateIndex finds the old index and the retry drops it
+        try
+        {
+            await client.Instance.Indices.DeleteAsync(Wrapper.IndexName);
+        }
+        catch (Exception e)
+        {
+            _logger.ErrorRecreateIndex(Wrapper.IndexName, e);
+        }
+
+        RecreateIndex(Wrapper);
+
+        // the other nodes drop their cached flag and ask OpenSearch again; RecreateIndex never throws, so this always runs
         await baseIndexerHelper.ClearAsync(Wrapper);
-        CreateIfNotExist(Wrapper);
     }
 
     private IIndexRequest<T> GetMeta(IndexDescriptor<T> request, T data, bool immediately = true)
