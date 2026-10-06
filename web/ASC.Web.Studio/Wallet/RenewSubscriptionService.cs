@@ -71,9 +71,10 @@ public class RenewSubscriptionService(
     // Renewals whose payment change got no answer from the billing service, re-checked on every run.
     private const string PendingCacheKey = "renewsubscriptionservice_pending";
 
-    // Re-checks on the runs after the one that sent the renewal. If billing still does not show the subscription
-    // extended after the last of them - whether it answered or not - the renewal is treated as failed.
-    private const int MaxRenewVerifyChecks = 3;
+    // How long after the timeout a renewal is re-checked while billing gives no answer, before the customer is
+    // told it failed. A fixed time rather than a number of runs, which would shrink with renewperiod. An answer
+    // that the subscription is not extended settles the renewal at once.
+    private static readonly TimeSpan _renewVerifyPeriod = TimeSpan.FromMinutes(30);
 
     protected override async Task ExecuteTaskAsync(CancellationToken stoppingToken)
     {
@@ -289,7 +290,7 @@ public class RenewSubscriptionService(
                     data.DueDate.Value,
                     owner.Id,
                     payer != null && payer.Id != ASC.Core.Users.Constants.LostUser.Id ? payer.Id : null,
-                    0));
+                    DateTime.UtcNow));
 
                 return;
             }
@@ -336,7 +337,7 @@ public class RenewSubscriptionService(
 
             // Once billing has failed to answer in this run, every further check would only wait out the same
             // client timeout and get the same answer, delaying the regular renewals behind them - so the rest
-            // count this run as one more unconfirmed check without asking.
+            // take that answer without asking.
             BillingTransportException billingDown = null;
 
             foreach (var renewal in pending)
@@ -382,15 +383,16 @@ public class RenewSubscriptionService(
     private async Task<PendingRenewal> SettlePendingRenewalAsync(PendingRenewal renewal, bool extended, Exception error)
     {
         var description = renewal.Description;
-        var check = renewal.Checks + 1;
 
         if (!extended)
         {
-            if (check < MaxRenewVerifyChecks)
+            // billing answered that the subscription is not extended - the renewal did not go through; only
+            // no answer at all keeps it waiting
+            if (error != null && DateTime.UtcNow < renewal.TimedOutAt + _renewVerifyPeriod)
             {
-                logger.WarningRenewSubscriptionServiceNotConfirmed(renewal.TenantId, description, check, error?.Message ?? "not extended yet");
+                logger.WarningRenewSubscriptionServiceNotConfirmed(renewal.TenantId, description, renewal.TimedOutAt, error.Message);
 
-                return renewal with { Checks = check };
+                return renewal;
             }
 
             if (error != null)
@@ -500,8 +502,9 @@ public class RenewSubscriptionService(
 
     /// <summary>
     /// A renewal the billing service did not answer about. Renewed as soon as billing reports the subscription to
-    /// <see cref="ProductId"/> as ending after <see cref="PreviousDueDate"/>; failed when that has not happened
-    /// after <see cref="MaxRenewVerifyChecks"/> checks (<see cref="Checks"/> counts the ones already made).
+    /// <see cref="ProductId"/> as ending after <see cref="PreviousDueDate"/>; failed as soon as billing answers
+    /// that it does not, or when billing has not answered within <see cref="_renewVerifyPeriod"/> of
+    /// <see cref="TimedOutAt"/>, the moment the request timed out.
     /// Self-contained on purpose: it is settled without looking the wallet quota up again, so it cannot be lost
     /// to a quota that is gone by then. <see cref="Description"/> is the log and audit text ("adminwallet 2"),
     /// <see cref="ServiceName"/> and <see cref="Quantity"/> fill the failure letter.
@@ -515,7 +518,7 @@ public class RenewSubscriptionService(
         DateTime PreviousDueDate,
         Guid OwnerId,
         Guid? PayerId,
-        int Checks);
+        DateTime TimedOutAt);
 }
 
 static file class Queries
