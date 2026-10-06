@@ -3470,13 +3470,13 @@ public sealed class RenewSubscriptionErrorNotifyAction(CommonLinkUtility commonL
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitBillingSection", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        var (_, title, unit) = WalletServiceDescriptionManager.GetServiceTitleAndUom(serviceName, null, culture);
+        var (normalizedServiceName, title, unit) = WalletServiceDescriptionManager.GetServiceTitleAndUom(serviceName, null, culture);
 
         Tags =
         [
             new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Culture, culture.Name),
-            new TagValue("ServiceName", title ?? serviceName),
+            new TagValue("ServiceName", title ?? normalizedServiceName),
             new TagValue("ServiceUnit", unit ?? string.Empty),
             new TagValue("ServiceQuantity", $"{quantity}"),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/billing/overview")),
