@@ -46,9 +46,9 @@ public class PortalRetentionScheduleTests
 
     private static readonly DateTime _policyStart = new(2025, 1, 1);
 
-    private static PortalRetentionDecision Active(PortalRetentionCategory category, int day)
+    private static PortalRetentionDecision Active(PortalRetentionCategory category, int day, int noticesFromDay = 0)
     {
-        return PortalRetentionSchedule.Decide(_options.For(category), _start, _policyStart, null, _start.AddDays(day));
+        return PortalRetentionSchedule.Decide(_options.For(category), _start, _policyStart, null, _start.AddDays(day), _start.AddDays(noticesFromDay));
     }
 
     private static PortalRetentionDecision Blocked(PortalRetentionCategory category, int dayAfterBlock)
@@ -57,13 +57,13 @@ public class PortalRetentionScheduleTests
     }
 
     /// <summary>Every day of the active part of a schedule that is not silent, as day → letter or block.</summary>
-    private static Dictionary<int, string> ActiveTimeline(PortalRetentionCategory category, int days)
+    private static Dictionary<int, string> ActiveTimeline(PortalRetentionCategory category, int days, int noticesFromDay = 0)
     {
         var timeline = new Dictionary<int, string>();
 
         for (var day = 0; day <= days; day++)
         {
-            var decision = Active(category, day);
+            var decision = Active(category, day, noticesFromDay);
 
             if (decision.Step != PortalRetentionStep.None)
             {
@@ -131,6 +131,28 @@ public class PortalRetentionScheduleTests
             [60] = nameof(PortalRetentionLetter.SecondNotice),
             [90] = nameof(PortalRetentionStep.Block)
         });
+    }
+
+    [Fact]
+    public void FormerPaying_GracePeriodOfAMonth_FirstWarningOnTheFirstUnpaidDay()
+    {
+        // A thirty-day grace period: the tariff is unpaid, and the portal the policy's, from day 31.
+        ActiveTimeline(PortalRetentionCategory.FormerPaying, 400, noticesFromDay: 31).Should().BeEquivalentTo(new Dictionary<int, string>
+        {
+            [31] = nameof(PortalRetentionLetter.FirstNotice),
+            [60] = nameof(PortalRetentionLetter.SecondNotice),
+            [90] = nameof(PortalRetentionStep.Block)
+        }, "a warning due in the grace period comes the day it ends, and nothing else moves");
+    }
+
+    [Fact]
+    public void FormerPaying_GracePeriodPastBothWarnings_OnlyTheLaterOneIsSent()
+    {
+        ActiveTimeline(PortalRetentionCategory.FormerPaying, 400, noticesFromDay: 71).Should().BeEquivalentTo(new Dictionary<int, string>
+        {
+            [71] = nameof(PortalRetentionLetter.SecondNotice),
+            [90] = nameof(PortalRetentionStep.Block)
+        }, "two warnings on one day would say the same twice");
     }
 
     [Fact]

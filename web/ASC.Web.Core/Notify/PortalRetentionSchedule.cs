@@ -186,7 +186,9 @@ public class PortalRetentionConfiguration(IConfiguration configuration)
 /// that moment, so the owner is always told, and the deletion is counted from the block, so the whole
 /// retention period lies between that letter and the deletion - whatever happened before, a change of
 /// category included. The reminders around them are sent on their exact day only, like every other
-/// periodic letter: a day the job did not run is a reminder that is not sent.
+/// periodic letter: a day the job did not run is a reminder that is not sent. The one exception is a
+/// warning due before the policy could see the portal at all - a lapsed tariff still in its grace
+/// period: it goes out on the first day the portal is the policy's.
 /// </remarks>
 public static class PortalRetentionSchedule
 {
@@ -201,16 +203,20 @@ public static class PortalRetentionSchedule
     /// </param>
     /// <param name="blockedOn">The day the portal was blocked, or null while it is still active.</param>
     /// <param name="today">The day the run is for.</param>
-    public static PortalRetentionDecision Decide(PortalRetentionScheduleOptions schedule, DateTime anchor, DateTime policyStart, DateTime? blockedOn, DateTime today)
+    /// <param name="noticesFrom">
+    /// The first day the policy sees the portal: for a former paying one, the first day after the grace
+    /// period of its tariff. A warning due earlier is sent on that day; the default puts no such limit.
+    /// </param>
+    public static PortalRetentionDecision Decide(PortalRetentionScheduleOptions schedule, DateTime anchor, DateTime policyStart, DateTime? blockedOn, DateTime today, DateTime noticesFrom = default)
     {
         today = today.Date;
 
         return blockedOn.HasValue
             ? DecideBlocked(schedule, blockedOn.Value.Date, today)
-            : DecideActive(schedule, anchor.Date > policyStart.Date ? anchor.Date : policyStart.Date, today);
+            : DecideActive(schedule, anchor.Date > policyStart.Date ? anchor.Date : policyStart.Date, noticesFrom.Date, today);
     }
 
-    private static PortalRetentionDecision DecideActive(PortalRetentionScheduleOptions schedule, DateTime start, DateTime today)
+    private static PortalRetentionDecision DecideActive(PortalRetentionScheduleOptions schedule, DateTime start, DateTime noticesFrom, DateTime today)
     {
         var blockOn = start.AddDays(schedule.BlockAfterDays);
         var deleteOn = blockOn.AddDays(schedule.RetentionDays);
@@ -221,24 +227,56 @@ public static class PortalRetentionSchedule
             return new PortalRetentionDecision(PortalRetentionStep.Block, PortalRetentionLetter.Blocked, today, today.AddDays(schedule.RetentionDays));
         }
 
-        PortalRetentionLetter? letter = null;
-
-        if (IsDay(start, schedule.FirstNoticeDays, today))
-        {
-            letter = PortalRetentionLetter.FirstNotice;
-        }
-        else if (IsDay(start, schedule.SecondNoticeDays, today))
-        {
-            letter = PortalRetentionLetter.SecondNotice;
-        }
-        else if (IsMonthlyNoticeDay(schedule, start, today))
-        {
-            letter = PortalRetentionLetter.MonthlyNotice;
-        }
+        var letter = WarningFor(schedule, start, noticesFrom, today);
 
         return letter.HasValue
             ? new PortalRetentionDecision(PortalRetentionStep.Notify, letter, blockOn, deleteOn)
             : PortalRetentionDecision.Nothing(blockOn, deleteOn);
+    }
+
+    /// <summary>
+    /// The warning that goes out today, if any. A warning due before <paramref name="noticesFrom"/> is moved
+    /// to that day; when several land there, only the latest is sent, since it says everything the earlier
+    /// ones would have.
+    /// </summary>
+    private static PortalRetentionLetter? WarningFor(PortalRetentionScheduleOptions schedule, DateTime start, DateTime noticesFrom, DateTime today)
+    {
+        PortalRetentionLetter? letter = null;
+        var latest = DateTime.MinValue;
+
+        foreach (var (warning, dueOn) in WarningDays(schedule, start))
+        {
+            var sendOn = dueOn < noticesFrom ? noticesFrom : dueOn;
+
+            if (sendOn == today && dueOn > latest)
+            {
+                letter = warning;
+                latest = dueOn;
+            }
+        }
+
+        return letter;
+    }
+
+    private static IEnumerable<(PortalRetentionLetter Letter, DateTime DueOn)> WarningDays(PortalRetentionScheduleOptions schedule, DateTime start)
+    {
+        if (schedule.FirstNoticeDays > 0)
+        {
+            yield return (PortalRetentionLetter.FirstNotice, start.AddDays(schedule.FirstNoticeDays));
+        }
+
+        if (schedule.SecondNoticeDays > 0)
+        {
+            yield return (PortalRetentionLetter.SecondNotice, start.AddDays(schedule.SecondNoticeDays));
+        }
+
+        if (schedule.MonthlyNoticeFromMonth > 0)
+        {
+            for (var month = schedule.MonthlyNoticeFromMonth; month <= schedule.MonthlyNoticeToMonth; month++)
+            {
+                yield return (PortalRetentionLetter.MonthlyNotice, start.AddMonths(month));
+            }
+        }
     }
 
     private static PortalRetentionDecision DecideBlocked(PortalRetentionScheduleOptions schedule, DateTime blockedOn, DateTime today)
@@ -268,31 +306,8 @@ public static class PortalRetentionSchedule
             : PortalRetentionDecision.Nothing(blockedOn, deleteOn);
     }
 
-    private static bool IsDay(DateTime start, int days, DateTime today)
-    {
-        return days > 0 && start.AddDays(days) == today;
-    }
-
     private static bool IsReminderDay(DateTime blockedOn, DateTime deleteOn, int daysBefore, DateTime today)
     {
         return daysBefore > 0 && deleteOn.AddDays(-daysBefore) == today && today > blockedOn;
-    }
-
-    private static bool IsMonthlyNoticeDay(PortalRetentionScheduleOptions schedule, DateTime start, DateTime today)
-    {
-        if (schedule.MonthlyNoticeFromMonth <= 0)
-        {
-            return false;
-        }
-
-        for (var month = schedule.MonthlyNoticeFromMonth; month <= schedule.MonthlyNoticeToMonth; month++)
-        {
-            if (start.AddMonths(month) == today)
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

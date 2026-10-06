@@ -146,15 +146,16 @@ public class PortalRetentionJobTests
         var logger = new RecordingLogger<PortalRetentionJob>();
         var client = new RecordingNotifyClient();
 
-        // Active yesterday, but the tariff lapsed thirty days ago: the activity does not count.
-        var context = PeriodicLetterContexts.Lapsed(PeriodicLetterContexts.Fresh(InMemoryTenant(scope), _today), _today.AddDays(-30)) with
+        // Active yesterday, but the tariff lapsed sixty days ago, past any grace period the stack is set
+        // up with: the activity does not count.
+        var context = PeriodicLetterContexts.Lapsed(PeriodicLetterContexts.Fresh(InMemoryTenant(scope), _today), _today.AddDays(-60)) with
         {
             LastActivity = PeriodicLetterContexts.Activity(_today.AddDays(-1))
         };
 
         await CreateJob(scope, logger).ApplyAsync(context, _policyStart, client, _senderName);
 
-        logger.Messages.Should().ContainSingle(m => m.Contains("FormerPaying: Notify FirstNotice"));
+        logger.Messages.Should().ContainSingle(m => m.Contains("FormerPaying: Notify SecondNotice"));
         client.Sent.Should().ContainSingle()
             .Which.Action.Should().BeOfType<SaasOwnerRetentionUnpaidWarningNotifyAction>("a lapsed portal is told to renew");
     }
