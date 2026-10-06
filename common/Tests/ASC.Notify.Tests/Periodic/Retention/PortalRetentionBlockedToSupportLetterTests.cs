@@ -45,7 +45,7 @@ public class PortalRetentionBlockedToSupportLetterTests : LetterTestBase<PortalR
 
     protected override Task InitAsync(PortalRetentionBlockedToSupportNotifyAction action, LetterScope scope)
     {
-        action.Init(scope.Recipient, Domain, PortalRetentionCategory.Free, _deleteOn);
+        action.Init(scope.Recipient, Domain, PortalRetentionCategory.FormerPaying, _deleteOn);
 
         return Task.CompletedTask;
     }
@@ -54,7 +54,7 @@ public class PortalRetentionBlockedToSupportLetterTests : LetterTestBase<PortalR
     {
         letter.Body.Should().Contain(Domain)
             .And.Contain(scope.Recipient.Email)
-            .And.Contain(nameof(PortalRetentionCategory.Free))
+            .And.Contain(nameof(PortalRetentionCategory.FormerPaying))
             .And.Contain("2026-12-03", "support reads the date in one format, whatever the culture")
             .And.Contain(nameof(ConfirmType.PortalUnblock), "support gets the owner's link that unblocks the portal");
     }

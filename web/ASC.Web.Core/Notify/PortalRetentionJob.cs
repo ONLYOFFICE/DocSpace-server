@@ -188,7 +188,10 @@ public class PortalRetentionJob(
         await action.SendAsync(context, client, senderName);
     }
 
-    /// <summary>Blocks the portal and says so - to the owner, and to support, where a manager can step in.</summary>
+    /// <summary>
+    /// Blocks the portal and says so - to the owner, and, for a portal that has paid or still has money on
+    /// its wallet, to support, where a manager can step in.
+    /// </summary>
     private async Task BlockAsync(PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName)
     {
         var tenant = context.Tenant;
@@ -200,6 +203,12 @@ public class PortalRetentionJob(
         messageService.Send(MessageInitiator.System, MessageAction.PortalBlocked);
 
         await SendAsync(typeof(SaasOwnerRetentionBlockedNotifyAction), context, category, decision, client, senderName);
+
+        // Support steps in only for a portal that has paid or still has money on its wallet.
+        if (category == PortalRetentionCategory.Free)
+        {
+            return;
+        }
 
         var owner = await userManager.GetUsersAsync(tenant.OwnerId);
         await studioNotifyService.SendMsgPortalBlockedToSupportAsync(tenant.GetTenantDomain(coreSettings), owner, category, decision.DeleteOn);

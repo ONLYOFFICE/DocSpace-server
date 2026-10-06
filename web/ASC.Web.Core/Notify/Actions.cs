@@ -1943,8 +1943,8 @@ public sealed class SaasOwnerRetentionDeletedNotifyAction(
 }
 
 /// <summary>
-/// Tells support that the retention policy has blocked a portal, so a manager can step in before it
-/// is deleted - the only way back for a free portal. The letter carries the owner's unblocking link:
+/// Tells support that the retention policy has blocked a portal that has paid or still has money on its
+/// wallet, so a manager can step in before it is deleted. The letter carries the owner's unblocking link:
 /// support opens it, or forwards it to the owner once they have talked.
 /// </summary>
 [Scope]
