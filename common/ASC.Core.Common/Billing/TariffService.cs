@@ -373,12 +373,14 @@ public class TariffService(
         }
         catch (Exception error)
         {
-            logger.ErrorWithException(error);
-
+            // a caller that asked for the exception reports it itself, at the level it considers right:
+            // the renewal service treats a timeout as an unknown outcome to re-check, not as an error
             if (throwIfFailure)
             {
                 throw;
             }
+
+            logger.ErrorWithException(error);
 
             return false;
         }

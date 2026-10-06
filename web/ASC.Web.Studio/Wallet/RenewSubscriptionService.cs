@@ -273,12 +273,12 @@ public class RenewSubscriptionService(
                 // throwIfFailure lets the transport failure through, which is swallowed into "false" otherwise
                 result = await tariffService.PaymentChangeAsync(data.TenantId, quantity, productQuantityType, defaultCurrency, false, null, metadata, true);
             }
-            catch (BillingTransportException)
+            catch (BillingTransportException ex)
             {
                 // No answer is not a refusal: the change may have been applied with only the response lost. The
                 // failure letter asks the customer to renew manually, which could make them pay twice - so check
                 // again on the next runs.
-                logger.WarningRenewSubscriptionServiceOutcomeUnknown(data.TenantId, description);
+                logger.WarningRenewSubscriptionServiceOutcomeUnknown(data.TenantId, description, ex.Message);
 
                 await AddPendingRenewalAsync(new PendingRenewal(
                     data.TenantId,
