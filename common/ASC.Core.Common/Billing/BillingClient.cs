@@ -506,7 +506,7 @@ public static class BillingHttpClientExtension
             return exception;
         }
 
-        return new BillingException($"Billing request to {request.RequestUri} failed: {exception.Message}", exception);
+        return new BillingTransportException($"Billing request to {request.RequestUri} failed: {exception.Message}", exception);
     }
     // The billing service reports errors as 200 OK with a '{"Message":"error...' body, so the content is inspected
     // for every response, not only for non-success status codes.
@@ -547,6 +547,12 @@ public class BillingException : Exception
 }
 
 public class BillingNotFoundException(string message) : BillingException(message);
+
+/// <summary>
+/// The billing service gave no answer (DNS, connect, TLS, timeout). Unlike an error response, this does not
+/// mean the request was rejected: a request that timed out may still have been applied on the billing side.
+/// </summary>
+public class BillingTransportException(string message, Exception inner) : BillingException(message, inner);
 
 public class BillingLicenseTypeException(string message) : BillingException(message);
 

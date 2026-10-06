@@ -937,7 +937,11 @@ Kļūdas ziņojums: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Sveiki, $UserName!
 
-Mēs vēlamies Jūs informēt, ka Jūsu iegādātā tarifu plāna vai pakalpojumu automātiskā atjaunošana neizdevās. Lūdzu, atjaunojiet to manuāli.
+Mēs vēlamies Jūs informēt, ka Jūsu iegādātā tarifu plāna vai pakalpojumu automātiskā atjaunošana neizdevās:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Lūdzu, atjaunojiet to manuāli.
 
 $OrangeButton
 

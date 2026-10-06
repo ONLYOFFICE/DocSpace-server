@@ -924,7 +924,11 @@ Messaggio di eccezione: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Ciao, $UserName!
 
-Ti informiamo che il rinnovo automatico del piano tariffario o dei servizi acquistati non è andato a buon fine. Ti invitiamo gentilmente a rinnovarlo manualmente.
+Ti informiamo che il rinnovo automatico del piano tariffario o dei servizi acquistati non è andato a buon fine:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Ti invitiamo gentilmente a rinnovarlo manualmente.
 
 $OrangeButton
 

@@ -116,7 +116,8 @@ public class WalletServiceDescriptionManager
         return (description, uom, quantity);
     }
 
-    public static (string serviceName, string title, string serviceUnit) GetServiceTitleAndUom(string serviceName, Dictionary<string, string> customUom)
+    // culture: a letter resolves the texts for its recipient; null takes the current UI culture
+    public static (string serviceName, string title, string serviceUnit) GetServiceTitleAndUom(string serviceName, Dictionary<string, string> customUom, CultureInfo culture = null)
     {
         // for testing purposes
         if (serviceName != null && serviceName.EndsWith("-1-hour"))
@@ -126,8 +127,8 @@ public class WalletServiceDescriptionManager
 
         var unit = customUom?.GetValueOrDefault(serviceName, serviceName) ?? serviceName;
 
-        var title = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}");
-        var serviceUnit = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{unit}");
+        var title = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}", culture);
+        var serviceUnit = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{unit}", culture);
 
         return (serviceName, title, serviceUnit);
     }

@@ -924,7 +924,11 @@ Ausnahmemeldung: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Hallo, $UserName!
 
-Wir möchten Sie darüber informieren, dass die automatische Verlängerung Ihres erworbenen Tarifplans oder Ihrer Dienste nicht abgeschlossen werden konnte. Wir bitten Sie, ihn manuell zu verlängern.
+Wir möchten Sie darüber informieren, dass die automatische Verlängerung Ihres erworbenen Tarifplans oder Ihrer Dienste nicht abgeschlossen werden konnte:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Wir bitten Sie, ihn manuell zu verlängern.
 
 $OrangeButton
 

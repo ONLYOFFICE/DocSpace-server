@@ -904,7 +904,7 @@ public class StudioNotifyService(
         }
     }
 
-    public async Task SendRenewSubscriptionErrorAsync(UserInfo payer, UserInfo owner)
+    public async Task SendRenewSubscriptionErrorAsync(UserInfo payer, UserInfo owner, string serviceName, int quantity)
     {
         var users = new[] { payer, owner }
             .Where(user => user != null && !string.IsNullOrEmpty(user.Email))
@@ -914,7 +914,7 @@ public class StudioNotifyService(
 
         foreach (var user in users)
         {
-            renewSubscriptionErrorNotifyAction.Init(user);
+            renewSubscriptionErrorNotifyAction.Init(user, serviceName, quantity);
 
             var recipient = new DirectRecipient(user.Id.ToString(), null, [user.Email], false);
             await studioNotifyServiceHelper.SendNoticeToAsync(renewSubscriptionErrorNotifyAction, [recipient], [EMailSenderName, TelegramSenderName]);

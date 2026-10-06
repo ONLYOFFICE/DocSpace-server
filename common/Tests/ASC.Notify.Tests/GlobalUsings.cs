@@ -43,6 +43,7 @@ global using ASC.AuditTrail.Models;
 global using ASC.Common.DependencyInjection;
 global using ASC.Core;
 global using ASC.Core.Billing;
+global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Context;
 global using ASC.Core.Common.WhiteLabel;
 global using ASC.Core.Tenants;
@@ -74,6 +75,8 @@ global using MailKit.Security;
 
 global using Microsoft.AspNetCore.Builder;
 global using Microsoft.EntityFrameworkCore;
+global using Microsoft.EntityFrameworkCore.Infrastructure;
+global using Microsoft.EntityFrameworkCore.Metadata;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
