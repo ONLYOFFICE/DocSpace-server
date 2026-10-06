@@ -42,19 +42,19 @@ public class TenantAuditSettingsDto
     /// How many days login events are kept, from 1 to 180; 180 when the portal never changed it.
     /// </summary>
     /// <example>180</example>
-    public required int LoginHistoryLifeTime { get; init; }
+    public int LoginHistoryLifeTime { get; init; }
 
     /// <summary>
     /// How many days audit trail events are kept, from 1 to 180; 180 when the portal never changed it.
     /// </summary>
     /// <example>90</example>
-    public required int AuditTrailLifeTime { get; init; }
+    public int AuditTrailLifeTime { get; init; }
 
     /// <summary>
     /// When the pair was last stored, or `0001-01-01T00:00:00` when it never was.
     /// </summary>
     /// <example>2026-01-01T00:00:00Z</example>
-    public required DateTime LastModified { get; init; }
+    public DateTime LastModified { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]

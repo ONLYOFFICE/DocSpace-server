@@ -8393,7 +8393,7 @@
           "Portal / Users"
         ],
         "summary": "Get a portal user",
-        "description": "Returns one user of this portal, addressed by ID, in the shape the portal stores the account: display name,\r\ne-mail, contacts, role and status flags, and the dates of the profile. Nothing has to be called first, and the\r\ncall is read-only and idempotent. Who may be read is decided per pair of accounts: a caller always reads their\r\nown profile, a DocSpace administrator reads anyone, a room administrator reads anyone except a guest they have\r\nno relation with, and a user or a guest reads nobody but themselves - a pair that is not allowed is refused.\r\nAn ID that belongs to no account of this portal and an ID of a system account are both answered as not found,\r\nso a 404 does not tell the two apart. `userID` in the path has to be a GUID; the calling user's own profile is\r\neasier to fetch with `GET api/2.0/people/@self`. This operation hands back the internal user record - use\r\n`GET api/2.0/people/{userId}` for the same user in the People format, with the group, quota and access\r\ninformation a client usually needs.",
+        "description": "Returns one user of this portal, addressed by ID, in the shape the portal stores the account: display name,\r\ne-mail, contacts, role and status flags, and the dates of the profile. Nothing has to be called first, and the\r\ncall is read-only and idempotent. Who may be read is decided per pair of accounts: a caller always reads their\r\nown profile, a DocSpace administrator reads anyone, a room administrator reads anyone except a guest they have\r\nno relation with, and a user or a guest reads nobody but themselves - a pair that is not allowed is refused.\r\nAn ID that belongs to no account of this portal and an ID of a system account are both answered as not found,\r\nso a 404 does not tell the two apart. `userId` in the path has to be a GUID; the calling user's own profile is\r\neasier to fetch with `GET api/2.0/people/@self`. This operation hands back the internal user record - use\r\n`GET api/2.0/people/{userId}` for the same user in the People format, with the group, quota and access\r\ninformation a client usually needs.",
         "operationId": "getUserById",
         "parameters": [
           {
@@ -11180,16 +11180,13 @@
             }
           },
           "400": {
-            "description": "The request body cannot be read, or a lifetime is outside the allowed range of 1 to 180 days"
+            "description": "The request body cannot be read or has no `settings`, or a lifetime is outside the allowed range of 1 to 180 days"
           },
           "402": {
             "description": "The portal's pricing plan has no audit option, or the login history and audit trail section is not enabled"
           },
           "403": {
             "description": "The caller does not have the portal-settings right of a DocSpace administrator"
-          },
-          "500": {
-            "description": "The request body has no `settings`"
           },
           "401": {
             "description": "Unauthorized",
@@ -11208,6 +11205,16 @@
                 "$ref": "#/components/headers/Retry-After"
               }
             },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -13264,8 +13271,8 @@
           "content": {
             "application/json": {
               "schema": {
-                "description": "One third-party authorization or storage provider and the keys the portal connects to it with.",
-                "$ref": "#/components/schemas/AuthServiceDto"
+                "description": "The keys to store for one third-party authorization or storage provider.",
+                "$ref": "#/components/schemas/SaveAuthKeysRequestDto"
               }
             }
           }
@@ -17412,7 +17419,7 @@
         "operationId": "getStorageEncryptionSettings",
         "responses": {
           "200": {
-            "description": "The encryption status and the notify-users flag, with the password blanked out; empty on a custom-mode installation, or when the caller has no portal-settings right, the installation hides storage encryption or does not grant unrestricted space access, or the settings cannot be read",
+            "description": "The encryption status and the notify-users flag; empty on a custom-mode installation, or when the caller has no portal-settings right, the installation hides storage encryption or does not grant unrestricted space access, or the settings cannot be read",
             "headers": {
               "X-RateLimit-Limit": {
                 "$ref": "#/components/headers/X-RateLimit-Limit"
@@ -29046,7 +29053,7 @@
         "type": "object",
         "properties": {
           "settings": {
-            "description": "The resource flags to store. They replace the stored ones as a whole.",
+            "description": "The resource flags to store.",
             "$ref": "#/components/schemas/AdditionalResourcesRequestDto"
           }
         },
@@ -30598,6 +30605,38 @@
         },
         "description": "One key of an authorization provider or a storage, with how the settings form shows it."
       },
+      "AuthKeyRequest": {
+        "required": [
+          "name",
+          "value"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "examples": [
+              "googleClientId"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The key name, as `GET api/2.0/settings/authservice` lists it in `props`."
+          },
+          "value": {
+            "examples": [
+              "1234567890-abc.apps.googleusercontent.com"
+            ],
+            "maxLength": 4000,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The value to store. An empty string clears the key."
+          }
+        },
+        "description": "One key of a provider and the value to store for it."
+      },
       "AuthRequestDto": {
         "type": "object",
         "properties": {
@@ -30765,7 +30804,7 @@
               "null",
               "string"
             ],
-            "description": "The provider being configured, by its internal key such as `google` or `box`. Take it from the `name` of\r\n`GET api/2.0/settings/authservice`; it is the only field that selects the provider, and a key this\r\ninstallation does not know is refused the same way a provider that forbids changes is."
+            "description": "The internal key of the provider, such as `google` or `box`. It is the `name` that\r\n`POST api/2.0/settings/authservice` takes to select the provider."
           },
           "title": {
             "examples": [
@@ -30809,7 +30848,7 @@
               false
             ],
             "type": "boolean",
-            "description": "Whether the provider is a paid option. A paid one can only be connected while the portal plan includes\r\nthird-party storage or the installation is licensed as self-hosted; the field is reported by the portal and\r\nignored on the way in."
+            "description": "Whether the provider is a paid option. A paid one can only be connected while the portal plan includes\r\nthird-party storage or the installation is licensed as self-hosted."
           },
           "props": {
             "examples": [
@@ -30828,7 +30867,7 @@
               "description": "One key of an authorization provider or a storage, with how the settings form shows it.",
               "$ref": "#/components/schemas/AuthKeyDto"
             },
-            "description": "The credentials the portal authenticates to the provider with, as the name and value pairs the provider\r\ndefines. Send the whole set the provider expects: leaving every value empty disconnects it, and a set that\r\nfails the provider validation is cleared rather than stored half-applied. The listing operation reports the\r\nvalues last saved, and a provider that forbids changes reports none at all."
+            "description": "The keys the provider defines, with the values last saved and how the settings form shows each of them.\r\nIt is empty for a provider that forbids changes."
           }
         },
         "description": "One third-party authorization or storage provider and the keys the portal connects to it with."
@@ -31411,7 +31450,7 @@
               "null",
               "string"
             ],
-            "description": "The company website, as an absolute URL. Required.",
+            "description": "The company website, as an absolute URL.",
             "format": "uri"
           },
           "email": {
@@ -31424,7 +31463,7 @@
               "null",
               "string"
             ],
-            "description": "The contact email address. Required.",
+            "description": "The contact email address.",
             "format": "email"
           },
           "address": {
@@ -31457,7 +31496,7 @@
               false
             ],
             "type": "boolean",
-            "description": "Whether the About page is hidden. It is only honoured when the pricing plan includes branding; otherwise it\r\nis stored as false."
+            "description": "Whether the About page is hidden."
           }
         },
         "description": "The company the installation is branded for, as shown on the About page and in letters."
@@ -31554,7 +31593,7 @@
         "type": "object",
         "properties": {
           "settings": {
-            "description": "The company details to store. They replace the stored ones as a whole.",
+            "description": "The company details to store.",
             "$ref": "#/components/schemas/CompanyInfoRequestDto"
           }
         },
@@ -33384,12 +33423,16 @@
         "type": "object",
         "properties": {
           "address": {
+            "examples": [
+              "127.0.0.1"
+            ],
             "maxLength": 255,
             "minLength": 0,
             "type": [
               "null",
               "string"
-            ]
+            ],
+            "description": "The IP address."
           },
           "allowed": {
             "examples": [
@@ -33405,12 +33448,16 @@
         "type": "object",
         "properties": {
           "address": {
+            "examples": [
+              "127.0.0.1"
+            ],
             "maxLength": 255,
             "minLength": 0,
             "type": [
               "null",
               "string"
-            ]
+            ],
+            "description": "The IP address."
           },
           "allowed": {
             "examples": [
@@ -33706,9 +33753,13 @@
             "description": "Whether anonymous access is supported."
           },
           "fileSizeLimit": {
+            "examples": [
+              104857600
+            ],
             "maximum": 209715200,
             "minimum": 0,
             "type": "integer",
+            "description": "The maximum file size in bytes.",
             "format": "int64"
           }
         },
@@ -33725,9 +33776,13 @@
             "description": "Whether anonymous access is supported."
           },
           "fileSizeLimit": {
+            "examples": [
+              104857600
+            ],
             "maximum": 209715200,
             "minimum": 0,
             "type": "integer",
+            "description": "The maximum file size in bytes.",
             "format": "int64"
           }
         },
@@ -35290,14 +35345,6 @@
         "description": "Whether the finished import mails the imported people their activation links before it is cleared away."
       },
       "FirebaseDeviceDto": {
-        "required": [
-          "application",
-          "firebaseDeviceToken",
-          "id",
-          "isSubscribed",
-          "tenantId",
-          "userId"
-        ],
         "type": "object",
         "properties": {
           "id": {
@@ -40189,7 +40236,7 @@
             "description": "Specifies whether the account still has to be activated: the opposite of `isActive`."
           }
         },
-        "description": "The user information."
+        "description": "A portal account in the format the portal stores it. Returned where the API has always handed out the\r\nstored record; new endpoints return ASC.Web.Api.Models.EmployeeDto instead."
       },
       "PortalUserWrapper": {
         "type": "object",
@@ -41155,6 +41202,41 @@
           }
         },
         "description": "Who is writing to the ONLYOFFICE sales team, and what about."
+      },
+      "SaveAuthKeysRequestDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "examples": [
+              "google"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The internal key of the provider, such as `google` or `box`. Take it from the `name` of\r\n`GET api/2.0/settings/authservice`."
+          },
+          "props": {
+            "examples": [
+              [
+                {
+                  "name": "googleClientId",
+                  "value": "1234567890-abc.apps.googleusercontent.com"
+                }
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "description": "One key of a provider and the value to store for it.",
+              "$ref": "#/components/schemas/AuthKeyRequest"
+            },
+            "description": "The keys of the provider with their new values, by the key names `GET api/2.0/settings/authservice` lists in\r\n`props`."
+          }
+        },
+        "description": "The keys to store for one third-party authorization or storage provider."
       },
       "SecurityArrayWrapper": {
         "type": "object",
@@ -43259,7 +43341,7 @@
                 "string"
               ]
             },
-            "description": "The connection properties of the module, as they were sent."
+            "description": "The connection properties stored for the module."
           },
           "lastModified": {
             "examples": [
@@ -43986,11 +44068,6 @@
         "description": "The successful API response containing the TenantAiAccessSettingsDto object."
       },
       "TenantAuditSettingsDto": {
-        "required": [
-          "auditTrailLifeTime",
-          "lastModified",
-          "loginHistoryLifeTime"
-        ],
         "type": "object",
         "properties": {
           "loginHistoryLifeTime": {
@@ -44024,7 +44101,7 @@
         "type": "object",
         "properties": {
           "settings": {
-            "description": "The two lifetimes to store. Both are required: the stored pair is replaced as a whole.",
+            "description": "The login history and audit trail lifetimes to store.",
             "$ref": "#/components/schemas/AuditLifetimeSettingsRequestDto"
           }
         },
@@ -45488,15 +45565,6 @@
         "description": "The successful API response containing the TenantWalletServiceSettingsDto object."
       },
       "TenantWalletSettingsDto": {
-        "required": [
-          "currency",
-          "enabled",
-          "lastModified",
-          "lowBalanceNotified",
-          "lowBalanceThreshold",
-          "minBalance",
-          "upToBalance"
-        ],
         "type": "object",
         "properties": {
           "enabled": {
@@ -45562,7 +45630,7 @@
         "type": "object",
         "properties": {
           "settings": {
-            "description": "The settings to store. They replace the stored ones as a whole, and a body without them resets automatic\r\ntop-up to its defaults.",
+            "description": "The automatic top-up settings to store.",
             "$ref": "#/components/schemas/WalletTopUpSettingsRequestDto"
           }
         },

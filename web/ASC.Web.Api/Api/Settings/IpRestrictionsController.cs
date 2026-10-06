@@ -123,7 +123,7 @@ public class IpRestrictionsController(
         }
 
         var tenant = tenantManager.GetCurrentTenant();
-        await iPRestrictionsService.SaveAsync(inDto.IpRestrictions.Select(r => new IpRestrictionBase { Ip = r.Ip, ForAdmin = r.ForAdmin }), tenant.Id);
+        await iPRestrictionsService.SaveAsync(inDto.IpRestrictions.Select(r => r.Map()), tenant.Id);
 
         var settings = new IPRestrictionsSettings { Enable = enable };
         await settingsManager.SaveAsync(settings);
@@ -209,7 +209,7 @@ public class IpRestrictionsController(
         }
 
         var tenant = tenantManager.GetCurrentTenant();
-        await iPRestrictionsService.SaveAsync(inDto.IpRestrictions.Select(r => new IpRestrictionBase { Ip = r.Ip, ForAdmin = r.ForAdmin }), tenant.Id);
+        await iPRestrictionsService.SaveAsync(inDto.IpRestrictions.Select(r => r.Map()), tenant.Id);
 
         var settings = new IPRestrictionsSettings { Enable = enable };
         await settingsManager.SaveAsync(settings);

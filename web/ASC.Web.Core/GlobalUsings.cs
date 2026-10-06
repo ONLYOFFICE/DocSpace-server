@@ -34,7 +34,6 @@
 global using System.Collections.Concurrent;
 global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
-global using System.Diagnostics;
 global using System.Globalization;
 global using System.Net;
 global using System.Net.Http.Headers;
@@ -51,7 +50,6 @@ global using System.Text.RegularExpressions;
 global using System.Web;
 global using System.Xml;
 
-global using ASC.Api.Core.Extensions;
 global using ASC.AuditTrail.Models;
 global using ASC.AuditTrail.Repositories;
 global using ASC.Common;

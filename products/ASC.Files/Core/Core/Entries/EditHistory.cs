@@ -265,4 +265,3 @@ public class EditHistoryChanges
     /// </summary>
     public string DocumentSha256 { get; set; }
 }
-

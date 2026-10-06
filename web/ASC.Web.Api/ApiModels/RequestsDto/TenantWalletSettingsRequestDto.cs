@@ -31,7 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Api.Models;
+namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
 /// The body of an automatic top-up settings change.
@@ -39,8 +39,7 @@ namespace ASC.Web.Api.Models;
 public class TenantWalletSettingsRequestDto
 {
     /// <summary>
-    /// The settings to store. They replace the stored ones as a whole, and a body without them resets automatic
-    /// top-up to its defaults.
+    /// The automatic top-up settings to store.
     /// </summary>
     /// <example>{"enabled": true, "minBalance": 10, "upToBalance": 100, "currency": "USD"}</example>
     public WalletTopUpSettingsRequestDto Settings { get; set; }

@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -40,30 +40,31 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 public class MentionDto
 {
     /// <summary>
-    /// The account itself, in the shape the people listings use: the display name, the avatars and the profile link.
+    /// The account itself, as the portal stores it.
     /// </summary>
-    /// <example>{"id": "00000000-0000-0000-0000-000000000000", "displayName": "John Doe"}</example>
-    public required EmployeeDto User { get; init; }
+    /// <example>{"id": "00000000-0000-0000-0000-000000000000", "firstName": "John", "lastName": "Doe"}</example>
+    public PortalUserDto User { get; init; }
 
     /// <summary>
     /// Where a mention notification for this user is delivered.
     /// </summary>
     /// <example>user@example.com</example>
-    public required string Email { get; init; }
+    [EmailAddress]
+    public string Email { get; init; }
 
     /// <summary>
     /// The account id as text, the same value the account object carries; it is what identifies the user in a sharing
     /// request built from this list.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    public required string Id { get; init; }
+    public string Id { get; init; }
 
     /// <summary>
     /// An absolute address of the medium-sized avatar. A generated default avatar is reported when the user never
     /// uploaded one, so the field is never empty.
     /// </summary>
     /// <example>https://portal.example.com/avatar/user_0001.png</example>
-    public required string Image { get; init; }
+    public string Image { get; init; }
 
     /// <summary>
     /// Not filled in by the operations that return this list: it always comes back false. Whether a user can already
@@ -76,34 +77,11 @@ public class MentionDto
     /// The name to display, assembled the way the portal is configured to show names.
     /// </summary>
     /// <example>John Doe</example>
-    public required string Name { get; init; }
+    public string Name { get; init; }
 }
 
-[Scope]
-public class MentionDtoHelper(EmployeeDtoHelper employeeDtoHelper)
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public static partial class MentionDtoMapper
 {
-    public async Task<List<MentionDto>> GetAsync(IEnumerable<MentionWrapper> mentions)
-    {
-        if (mentions is null)
-        {
-            return null;
-        }
-
-        var result = new List<MentionDto>();
-
-        foreach (var mention in mentions)
-        {
-            result.Add(new MentionDto
-            {
-                User = await employeeDtoHelper.GetAsync(mention.User),
-                Email = mention.Email,
-                Id = mention.Id,
-                Image = mention.Image,
-                HasAccess = mention.HasAccess,
-                Name = mention.Name
-            });
-        }
-
-        return result;
-    }
+    public static partial MentionDto Map(this MentionWrapper source);
 }

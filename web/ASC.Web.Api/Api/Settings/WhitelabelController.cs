@@ -781,15 +781,7 @@ public class WhitelabelController(
 
         ArgumentNullException.ThrowIfNull(inDto?.Settings, "settings");
 
-        var settings = new AdditionalWhiteLabelSettings
-        {
-            StartDocsEnabled = inDto.Settings.StartDocsEnabled,
-            HelpCenterEnabled = inDto.Settings.HelpCenterEnabled,
-            FeedbackAndSupportEnabled = inDto.Settings.FeedbackAndSupportEnabled,
-            UserForumEnabled = inDto.Settings.UserForumEnabled,
-            VideoGuidesEnabled = inDto.Settings.VideoGuidesEnabled,
-            LicenseAgreementsEnabled = inDto.Settings.LicenseAgreementsEnabled
-        };
+        var settings = inDto.Settings.Map();
 
         await settingsManager.SaveForDefaultTenantAsync(settings);
 
@@ -879,11 +871,7 @@ public class WhitelabelController(
 
         ArgumentNullException.ThrowIfNull(inDto?.Settings, "settings");
 
-        var settings = new MailWhiteLabelSettings
-        {
-            FooterEnabled = inDto.Settings.FooterEnabled,
-            FooterSocialEnabled = inDto.Settings.FooterSocialEnabled
-        };
+        var settings = inDto.Settings.Map();
 
         await settingsManager.SaveForDefaultTenantAsync(settings);
 

@@ -143,7 +143,7 @@ public class PortalController(
     /// own profile, a DocSpace administrator reads anyone, a room administrator reads anyone except a guest they have
     /// no relation with, and a user or a guest reads nobody but themselves - a pair that is not allowed is refused.
     /// An ID that belongs to no account of this portal and an ID of a system account are both answered as not found,
-    /// so a 404 does not tell the two apart. `userID` in the path has to be a GUID; the calling user's own profile is
+    /// so a 404 does not tell the two apart. `userId` in the path has to be a GUID; the calling user's own profile is
     /// easier to fetch with `GET api/2.0/people/@self`. This operation hands back the internal user record - use
     /// `GET api/2.0/people/{userId}` for the same user in the People format, with the group, quota and access
     /// information a client usually needs.

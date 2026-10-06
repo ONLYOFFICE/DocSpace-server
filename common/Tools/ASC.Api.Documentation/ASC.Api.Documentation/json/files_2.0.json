@@ -33539,7 +33539,7 @@
               "null",
               "string"
             ],
-            "description": "The data of the action, such as the bookmark or comment it points at."
+            "description": "The anchor value produced by the editor, opaque to the portal: it names the comment, the mention or the\r\nplace the document is scrolled to."
           },
           "type": {
             "examples": [
@@ -33551,20 +33551,20 @@
               "null",
               "string"
             ],
-            "description": "The type of the action."
+            "description": "What the anchor points at, as the editor names it - a comment thread, for instance."
           }
         },
-        "description": "An editor action, as the editor reports it."
+        "description": "An anchor inside a document, as the editor writes it."
       },
       "ActionLinkRequest": {
         "type": "object",
         "properties": {
           "action": {
-            "description": "The editor action that points at the place.",
+            "description": "The anchor itself. It is passed on to the editor unchanged, so it has to be the value the editor produced for\r\nthe comment or the mention it points at.",
             "$ref": "#/components/schemas/ActionLinkActionRequest"
           }
         },
-        "description": "The place in the document a link opens at."
+        "description": "The place inside a document that a link should open at."
       },
       "AiConfigDto": {
         "type": "object",
@@ -37672,6 +37672,7 @@
               "array"
             ],
             "items": {
+              "description": "One entry of the recent-documents list the editor offers.",
               "$ref": "#/components/schemas/RecentConfigDto"
             },
             "description": "The documents offered in the editor's recent list. It is left out altogether when there is nothing to offer."
@@ -37685,6 +37686,7 @@
               "array"
             ],
             "items": {
+              "description": "One creation template offered in the editor. The portal no longer offers any, so this never appears in an editor\r\nconfiguration.",
               "$ref": "#/components/schemas/TemplatesConfigDto"
             },
             "description": "Always empty: the portal no longer passes creation templates through the editor configuration."
@@ -37851,7 +37853,8 @@
             "description": "Where the framed viewer puts its toolbar. The portal always asks for the top.",
             "readOnly": true
           }
-        }
+        },
+        "description": "The addresses the framed viewer needs. It is reported for the embedded layout only."
       },
       "EmployeeActivationStatus": {
         "oneOf": [
@@ -44456,7 +44459,7 @@
               "null",
               "string"
             ],
-            "description": "The action performed on the file."
+            "description": "The same action as a camel-case key, for a client to look up its own wording by."
           }
         },
         "description": "The action performed on the file."
@@ -45132,18 +45135,11 @@
         "description": "The successful API response containing the list of MentionDto objects."
       },
       "MentionDto": {
-        "required": [
-          "email",
-          "id",
-          "image",
-          "name",
-          "user"
-        ],
         "type": "object",
         "properties": {
           "user": {
-            "description": "The account itself, in the shape the people listings use: the display name, the avatars and the profile link.",
-            "$ref": "#/components/schemas/EmployeeDto"
+            "description": "The account itself, as the portal stores it.",
+            "$ref": "#/components/schemas/PortalUserDto"
           },
           "email": {
             "examples": [
@@ -45153,7 +45149,8 @@
               "null",
               "string"
             ],
-            "description": "Where a mention notification for this user is delivered."
+            "description": "Where a mention notification for this user is delivered.",
+            "format": "email"
           },
           "id": {
             "examples": [
@@ -47642,7 +47639,298 @@
             "description": "The array of absolute URLs to the plugin configuration files.",
             "readOnly": true
           }
-        }
+        },
+        "description": "Which editor add-ons the portal connects. It currently connects none."
+      },
+      "PortalUserDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "examples": [
+              "00000000-0000-0000-0000-000000000000"
+            ],
+            "type": "string",
+            "description": "The user ID.",
+            "format": "uuid"
+          },
+          "firstName": {
+            "examples": [
+              "John"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The user's first name."
+          },
+          "lastName": {
+            "examples": [
+              "Doe"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The user's last name."
+          },
+          "userName": {
+            "examples": [
+              "johndoe"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The user username."
+          },
+          "birthDate": {
+            "examples": [
+              "1990-01-01T00:00:00Z"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The user birthday.",
+            "format": "date-time"
+          },
+          "sex": {
+            "examples": [
+              true
+            ],
+            "type": [
+              "null",
+              "boolean"
+            ],
+            "description": "The user sex (male or female)."
+          },
+          "status": {
+            "description": "The user status.",
+            "$ref": "#/components/schemas/EmployeeStatus"
+          },
+          "activationStatus": {
+            "description": "The user activation status.",
+            "$ref": "#/components/schemas/EmployeeActivationStatus"
+          },
+          "terminatedDate": {
+            "examples": [
+              "2025-12-31T23:59:59Z"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The date and time when the user account was terminated.",
+            "format": "date-time"
+          },
+          "title": {
+            "examples": [
+              "Manager"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The user title."
+          },
+          "workFromDate": {
+            "examples": [
+              "2020-01-15T00:00:00Z"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The user registration date.",
+            "format": "date-time"
+          },
+          "email": {
+            "examples": [
+              "john.doe@example.com"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The user email address.",
+            "format": "email"
+          },
+          "contacts": {
+            "examples": [
+              "skype:johndoe|telegram:@johndoe"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The list of user contacts in the string format."
+          },
+          "contactsList": {
+            "examples": [
+              [
+                "skype:johndoe",
+                "telegram:@johndoe"
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "The list of user contacts."
+          },
+          "location": {
+            "examples": [
+              "New York, USA"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The user location."
+          },
+          "notes": {
+            "examples": [
+              "Additional information about the user"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The user notes."
+          },
+          "removed": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "description": "Specifies if the user account was removed or not."
+          },
+          "lastModified": {
+            "examples": [
+              "2025-02-08T10:30:00Z"
+            ],
+            "type": "string",
+            "description": "The date and time when the user account was last modified.",
+            "format": "date-time"
+          },
+          "tenantId": {
+            "examples": [
+              1
+            ],
+            "type": "integer",
+            "description": "The tenant ID.",
+            "format": "int32"
+          },
+          "isActive": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Specifies if the user is active or not."
+          },
+          "cultureName": {
+            "examples": [
+              "en-US"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The user culture code."
+          },
+          "mobilePhone": {
+            "examples": [
+              "+1234567890"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The user mobile phone."
+          },
+          "mobilePhoneActivationStatus": {
+            "description": "The user mobile phone activation status.",
+            "$ref": "#/components/schemas/MobilePhoneActivationStatus"
+          },
+          "sid": {
+            "examples": [
+              "S-1-5-21-3623811015-3361044348-30300820-1013"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The LDAP user identifier."
+          },
+          "ldapQouta": {
+            "examples": [
+              1073741824
+            ],
+            "type": "integer",
+            "description": "The LDAP user quota attribute.",
+            "format": "int64"
+          },
+          "ssoNameId": {
+            "examples": [
+              "johndoe@example.com"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The SSO SAML user identifier."
+          },
+          "ssoSessionId": {
+            "examples": [
+              "_1a2b3c4d5e6f7g8h9i0j"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The SSO SAML user session identifier."
+          },
+          "createDate": {
+            "examples": [
+              "2020-01-15T00:00:00Z"
+            ],
+            "type": "string",
+            "description": "The date and time when the user account was created.",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "examples": [
+              "00000000-0000-0000-0000-000000000000"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The ID of the user who created the current user account.",
+            "format": "uuid"
+          },
+          "spam": {
+            "examples": [
+              false
+            ],
+            "type": [
+              "null",
+              "boolean"
+            ],
+            "description": "Specifies if tips, updates and offers are allowed to be sent to the user or not."
+          },
+          "checkActivation": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "description": "Specifies whether the account still has to be activated: the opposite of `isActive`."
+          }
+        },
+        "description": "A portal account in the format the portal stores it. Returned where the API has always handed out the\r\nstored record; new endpoints return ASC.Web.Api.Models.EmployeeDto instead."
       },
       "ProviderArrayWrapper": {
         "type": "object",
@@ -47916,7 +48204,8 @@
             "description": "Where the entry opens.",
             "format": "uri"
           }
-        }
+        },
+        "description": "One entry of the recent-documents list the editor offers."
       },
       "RequestLocation": {
         "oneOf": [
@@ -47967,7 +48256,8 @@
             "description": "How the editors render tracked changes at first: with the markup, in a simplified markup, as the final text,\r\nor as the original text. A session that may not write opens on the final text.",
             "readOnly": true
           }
-        }
+        },
+        "description": "How tracked changes are displayed when the document opens."
       },
       "RoomDataLifetimeDto": {
         "type": "object",
@@ -49902,7 +50192,8 @@
             "description": "The absolute URL to the document where it will be created and available after creation.",
             "format": "uri"
           }
-        }
+        },
+        "description": "One creation template offered in the editor. The portal no longer offers any, so this never appears in an editor\r\nconfiguration."
       },
       "TemplatesRequestDto": {
         "type": "object",
@@ -52735,7 +53026,8 @@
             ],
             "description": "Identifies the paying customer this participant belongs to, on deployments where the editors are licensed per\r\ncustomer."
           }
-        }
+        },
+        "description": "The account the editors attribute the changes of this session to."
       },
       "UserInvitation": {
         "type": "object",

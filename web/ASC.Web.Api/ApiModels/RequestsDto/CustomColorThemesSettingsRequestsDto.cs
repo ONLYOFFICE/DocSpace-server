@@ -107,3 +107,9 @@ public class ColorThemeColorsRequestDto
     /// <example>#5299E0</example>
     public string Buttons { get; set; }
 }
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]
+public static partial class CustomColorThemeRequestDtoMapper
+{
+    public static partial CustomColorThemesSettingsItem Map(this CustomColorThemeRequestDto source);
+}

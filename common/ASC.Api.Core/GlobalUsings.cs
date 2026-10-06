@@ -174,6 +174,8 @@ global using NLog.Web;
 global using RedisRateLimiting;
 global using RedisRateLimiting.AspNetCore;
 
+global using Riok.Mapperly.Abstractions;
+
 global using StackExchange.Redis;
 global using StackExchange.Redis.Extensions.Core.Abstractions;
 global using StackExchange.Redis.Extensions.Core.Configuration;

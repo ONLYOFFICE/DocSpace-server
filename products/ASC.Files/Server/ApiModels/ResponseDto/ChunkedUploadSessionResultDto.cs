@@ -31,56 +31,23 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Api.ApiModels.ResponseDto;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The storage the portal keeps its data in, or serves its static content from.
+/// The reserved chunked upload wrapped in the envelope the two older session operations answer with.
 /// </summary>
-public class StorageSettingsDto
+public class ChunkedUploadSessionResultDto<T>
 {
     /// <summary>
-    /// The storage module, or `null` when the built-in storage is used.
-    /// </summary>
-    /// <example>S3</example>
-    public string Module { get; init; }
-
-    /// <summary>
-    /// The connection properties stored for the module.
-    /// </summary>
-    /// <example>{"region": "eu-central-1", "bucket": "tenant-files"}</example>
-    public Dictionary<string, string> Props { get; init; }
-
-    /// <summary>
-    /// When the settings were last stored.
-    /// </summary>
-    /// <example>2025-01-01T12:00:00Z</example>
-    public DateTime LastModified { get; init; }
-}
-
-/// <summary>
-/// The state of the portal's storage encryption.
-/// </summary>
-public class EncryptionSettingsDto
-{
-    /// <summary>
-    /// Whether the storage is encrypted, decrypted, or on its way to either.
-    /// </summary>
-    /// <example>0</example>
-    public EncryptionStatus Status { get; init; }
-
-    /// <summary>
-    /// Whether the users are notified when the operation starts and ends.
+    /// Always true in a body that reaches the caller, because a call that does not succeed answers with an error
+    /// status and no body at all. It cannot be used to tell a refusal from a success.
     /// </summary>
     /// <example>true</example>
-    public bool NotifyUsers { get; init; }
-}
+    public bool Success { get; set; }
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
-public static partial class StorageSettingsDtoMapper
-{
-    public static partial StorageSettingsDto Map(this StorageSettings source);
-
-    public static partial StorageSettingsDto Map(this CdnStorageSettings source);
-
-    public static partial EncryptionSettingsDto Map(this EncryptionSettings source);
+    /// <summary>
+    /// The reserved upload itself, in the same shape the newer session operations answer with directly.
+    /// </summary>
+    /// <example>{"id": "1b6a2ee1f2a04c6f9bd2cbf0e0f23a54", "bytes_total": 10485760}</example>
+    public ChunkedUploadSessionDto<T> Data { get; set; }
 }

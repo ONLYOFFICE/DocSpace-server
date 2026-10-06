@@ -962,14 +962,6 @@ public class CustomizationConfig<T>(
     }
 }
 
-/// <summary>
-/// The addresses the framed viewer needs. It is reported for the embedded layout only.
-/// </summary>
-
-/// <summary>
-/// How tracked changes are displayed when the document opens.
-/// </summary>
-
 [EnumExtensions]
 public enum ReviewDisplayEnum
 {
@@ -1025,21 +1017,3 @@ public class LogoConfig(
         return editorType != EditorType.Mobile;
     }
 }
-
-/// <summary>
-/// Which editor add-ons the portal connects. It currently connects none.
-/// </summary>
-
-/// <summary>
-/// One entry of the recent-documents list the editor offers.
-/// </summary>
-
-/// <summary>
-/// One creation template offered in the editor. The portal no longer offers any, so this never appears in an editor
-/// configuration.
-/// </summary>
-
-/// <summary>
-/// The account the editors attribute the changes of this session to.
-/// </summary>
-

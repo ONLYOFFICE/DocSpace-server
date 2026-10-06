@@ -116,7 +116,7 @@ public partial class EditHistoryMapper(ApiDateTimeHelper apiDateTimeHelper, User
         result.Changes = editHistory.Changes.Select(r => new EditHistoryChangesDto(r, apiDateTimeHelper)).ToList();
         result.ChangesHistory = editHistory.ChangesString;
         result.Created = apiDateTimeHelper.Get(editHistory.ModifiedOn);
-        result.User = new EditHistoryAuthor(userManager, displayUserSettingsHelper) { Id = editHistory.ModifiedBy.ToString() }.Map();
+        result.User = EditHistoryAuthorDto.From(new EditHistoryAuthor(userManager, displayUserSettingsHelper) { Id = editHistory.ModifiedBy.ToString() });
 
         return result;
     }
@@ -137,7 +137,7 @@ public class EditHistoryChangesDto(EditHistoryChanges historyChanges, ApiDateTim
     /// The account that made this change, as the editing service reported it; an account it could not name is
     /// reported as a guest.
     /// </summary>
-    public EditHistoryAuthorDto User { get; set; } = historyChanges.Author?.Map();
+    public EditHistoryAuthorDto User { get; set; } = EditHistoryAuthorDto.From(historyChanges.Author);
 
     /// <summary>
     /// When this change was made, written with the offset of the portal's time zone rather than as plain UTC.

@@ -31,7 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Api.Models;
+namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
 /// The body of an audit lifetime change.
@@ -39,7 +39,7 @@ namespace ASC.Web.Api.Models;
 public class TenantAuditSettingsRequestDto
 {
     /// <summary>
-    /// The two lifetimes to store. Both are required: the stored pair is replaced as a whole.
+    /// The login history and audit trail lifetimes to store.
     /// </summary>
     /// <example>{"loginHistoryLifeTime": 180, "auditTrailLifeTime": 90}</example>
     public AuditLifetimeSettingsRequestDto Settings { get; set; }

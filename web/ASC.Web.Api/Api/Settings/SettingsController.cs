@@ -308,12 +308,12 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/userquotasettings</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Message about the result of saving the user quota settings", typeof(EntityQuotaSettingsDto))]
+    [SwaggerResponse(200, "The default per-user storage quota settings as they were stored", typeof(EntityQuotaSettingsDto))]
     [SwaggerResponse(400, "The entered quota value is invalid or greater than the total storage size")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("userquotasettings")]
-    public async Task<TenantUserQuotaSettings> SaveUserQuotaSettings(QuotaSettingsRequestsDto inDto)
+    public async Task<EntityQuotaSettingsDto> SaveUserQuotaSettings(QuotaSettingsRequestsDto inDto)
     {
         await DemandStatisticPermissionAsync();
 
@@ -363,7 +363,7 @@ public partial class SettingsController(
             messageService.Send(MessageAction.QuotaPerUserDisabled);
         }
 
-        return quotaSettings;
+        return quotaSettings.Map();
     }
 
     /// <remarks>
@@ -911,12 +911,7 @@ public partial class SettingsController(
         {
             await using (await distributedLockProvider.TryAcquireFairLockAsync("save_color_theme"))
             {
-                var theme = new CustomColorThemesSettingsItem
-                {
-                    Id = inDto.Theme.Id,
-                    Main = inDto.Theme.Main == null ? null : new CustomColorThemesSettingsColorItem { Accent = inDto.Theme.Main.Accent, Buttons = inDto.Theme.Main.Buttons },
-                    Text = inDto.Theme.Text == null ? null : new CustomColorThemesSettingsColorItem { Accent = inDto.Theme.Text.Accent, Buttons = inDto.Theme.Text.Buttons }
-                };
+                var theme = inDto.Theme.Map();
 
                 if (CustomColorThemesSettingsItem.Default.Exists(r => r.Id == theme.Id))
                 {
@@ -1136,11 +1131,11 @@ public partial class SettingsController(
     [HttpPut("emailactivation")]
     public async Task<EmailActivationSettingsDto> UpdateEmailActivationSettings(EmailActivationSettingsRequestDto inDto)
     {
-        var settings = new EmailActivationSettings { Show = inDto.Show };
+        var settings = inDto.Map();
 
         await settingsManager.SaveForCurrentUserAsync(settings);
 
-        return settings.Map();
+        return (await settingsManager.LoadForCurrentUserAsync<EmailActivationSettings>()).Map();
     }
 
     /// <remarks>
@@ -1259,7 +1254,7 @@ public partial class SettingsController(
     [SwaggerResponse(402, "The provider is a paid option not covered by the portal's current pricing plan")]
     [SwaggerResponse(403, "The caller has no portal-settings right, or the provider is unknown or its keys cannot be set")]
     [HttpPost("authservice")]
-    public async Task<bool> SaveAuthKeys(AuthServiceDto inDto)
+    public async Task<bool> SaveAuthKeys(SaveAuthKeysRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -1346,17 +1341,7 @@ public partial class SettingsController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        var settings = new ExternalDatabaseSettings
-        {
-            DatabaseType = inDto.DatabaseType,
-            Host = inDto.Host,
-            Port = inDto.Port,
-            DatabaseName = inDto.DatabaseName,
-            User = inDto.User,
-            Password = inDto.Password,
-            UseSsl = inDto.UseSsl,
-            SqliteFilePath = inDto.SqliteFilePath
-        };
+        var settings = inDto.Map();
 
         if (settings.DatabaseTypeEnum == ExternalDatabaseType.Sqlite && !coreBaseSettings.Standalone)
         {

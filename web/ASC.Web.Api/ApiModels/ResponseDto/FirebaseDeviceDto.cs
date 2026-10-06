@@ -42,37 +42,37 @@ public class FirebaseDeviceDto
     /// The id of the registration.
     /// </summary>
     /// <example>1</example>
-    public required int Id { get; init; }
+    public int Id { get; init; }
 
     /// <summary>
     /// The account the device belongs to; always the caller.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    public required Guid UserId { get; init; }
+    public Guid UserId { get; init; }
 
     /// <summary>
     /// The portal the registration belongs to; always the current one.
     /// </summary>
     /// <example>1</example>
-    public required int TenantId { get; init; }
+    public int TenantId { get; init; }
 
     /// <summary>
     /// The Firebase token the device was issued, as it was sent at registration.
     /// </summary>
     /// <example>fcm-token-123</example>
-    public required string FirebaseDeviceToken { get; init; }
+    public string FirebaseDeviceToken { get; init; }
 
     /// <summary>
     /// The application the registration is for; `doc` for the Documents application.
     /// </summary>
     /// <example>doc</example>
-    public required string Application { get; init; }
+    public string Application { get; init; }
 
     /// <summary>
     /// Whether the device is currently sent push notifications.
     /// </summary>
     /// <example>true</example>
-    public required bool? IsSubscribed { get; init; }
+    public bool? IsSubscribed { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]

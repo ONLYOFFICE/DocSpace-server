@@ -1698,7 +1698,7 @@ public class PaymentController(
 
         messageService.Send(MessageAction.CustomerWalletTopUpSettingsUpdated);
 
-        return settings.Map();
+        return (await settingsManager.LoadAsync<TenantWalletSettings>()).Map();
     }
 
     /// <remarks>

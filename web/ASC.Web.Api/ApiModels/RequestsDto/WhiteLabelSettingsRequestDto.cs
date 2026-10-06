@@ -31,7 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Api.Models;
+namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
 /// The body of a company details change for the installation's branding.
@@ -39,7 +39,7 @@ namespace ASC.Web.Api.Models;
 public class CompanyWhiteLabelSettingsRequestDto
 {
     /// <summary>
-    /// The company details to store. They replace the stored ones as a whole.
+    /// The company details to store.
     /// </summary>
     /// <example>{"companyName": "ONLYOFFICE", "site": "https://www.onlyoffice.com", "email": "support@onlyoffice.com", "address": "Lubanas st. 125a-25", "phone": "+7 843 2271372", "hideAbout": false}</example>
     public CompanyInfoRequestDto Settings { get; set; }
@@ -58,7 +58,7 @@ public class CompanyInfoRequestDto
     public string CompanyName { get; set; }
 
     /// <summary>
-    /// The company website, as an absolute URL. Required.
+    /// The company website, as an absolute URL.
     /// </summary>
     /// <example>https://www.onlyoffice.com</example>
     [Url]
@@ -66,7 +66,7 @@ public class CompanyInfoRequestDto
     public string Site { get; set; }
 
     /// <summary>
-    /// The contact email address. Required.
+    /// The contact email address.
     /// </summary>
     /// <example>support@onlyoffice.com</example>
     [EmailAddress]
@@ -89,8 +89,7 @@ public class CompanyInfoRequestDto
     public string Phone { get; set; }
 
     /// <summary>
-    /// Whether the About page is hidden. It is only honoured when the pricing plan includes branding; otherwise it
-    /// is stored as false.
+    /// Whether the About page is hidden.
     /// </summary>
     /// <example>false</example>
     public bool HideAbout { get; set; }
@@ -102,7 +101,7 @@ public class CompanyInfoRequestDto
 public class AdditionalWhiteLabelSettingsRequestDto
 {
     /// <summary>
-    /// The resource flags to store. They replace the stored ones as a whole.
+    /// The resource flags to store.
     /// </summary>
     /// <example>{"startDocsEnabled": true, "helpCenterEnabled": true, "feedbackAndSupportEnabled": true, "userForumEnabled": true, "videoGuidesEnabled": true, "licenseAgreementsEnabled": true}</example>
     public AdditionalResourcesRequestDto Settings { get; set; }
@@ -178,4 +177,12 @@ public class MailFooterRequestDto
     /// </summary>
     /// <example>true</example>
     public bool FooterSocialEnabled { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]
+public static partial class WhiteLabelSettingsRequestDtoMapper
+{
+    public static partial AdditionalWhiteLabelSettings Map(this AdditionalResourcesRequestDto source);
+
+    public static partial MailWhiteLabelSettings Map(this MailFooterRequestDto source);
 }

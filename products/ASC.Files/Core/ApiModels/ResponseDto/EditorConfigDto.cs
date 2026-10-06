@@ -126,6 +126,9 @@ public class CoEditingConfigDto
     public CoEditingConfigMode Mode => Fast ? CoEditingConfigMode.Fast : CoEditingConfigMode.Strict;
 }
 
+/// <summary>
+/// The addresses the framed viewer needs. It is reported for the embedded layout only.
+/// </summary>
 [Transient]
 public class EmbeddedConfigDto(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility)
 {
@@ -202,6 +205,9 @@ public class GobackConfigDto
     public string Url { get; set; }
 }
 
+/// <summary>
+/// How tracked changes are displayed when the document opens.
+/// </summary>
 public class ReviewConfigDto
 {
     /// <summary>
@@ -219,6 +225,9 @@ public class ReviewConfigDto
     public ReviewDisplayEnum ReviewDisplayEnum { set => ReviewDisplay = value.ToStringLowerFast(); }
 }
 
+/// <summary>
+/// Which editor add-ons the portal connects. It currently connects none.
+/// </summary>
 [Transient]
 public class PluginsConfigDto
 // ConsumerFactory consumerFactory,
@@ -263,6 +272,9 @@ public class PluginsConfigDto
         [];
 }
 
+/// <summary>
+/// One entry of the recent-documents list the editor offers.
+/// </summary>
 public class RecentConfigDto
 {
     /// <summary>
@@ -285,6 +297,10 @@ public class RecentConfigDto
     public string Url { get; set; }
 }
 
+/// <summary>
+/// One creation template offered in the editor. The portal no longer offers any, so this never appears in an editor
+/// configuration.
+/// </summary>
 public class TemplatesConfigDto
 {
     /// <summary>
@@ -307,6 +323,9 @@ public class TemplatesConfigDto
     public string Url { get; set; }
 }
 
+/// <summary>
+/// The account the editors attribute the changes of this session to.
+/// </summary>
 public class UserConfigDto
 {
     /// <summary>

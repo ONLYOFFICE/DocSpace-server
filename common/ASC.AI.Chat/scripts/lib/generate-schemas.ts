@@ -45,8 +45,8 @@ const SCHEMA_TYPES = path.resolve(__dirname, "..", "schema", "schemaTypes.ts");
 const TSCONFIG = path.resolve(__dirname, "..", "..", "tsconfig.json");
 
 // Prefix applied to shared/nested schema names (everything except the
-// already operation-scoped `Req_*` / `Res_*`) so component names cannot clash
-// with the .NET services' components when `OpenapiJoiner` merges the
+// already operation-scoped `Req_*` / `Res_*`) so the chat's component names
+// stay apart from the .NET services' components when `OpenapiJoiner` merges the
 // documents — it throws on a same-name-different-content collision (e.g. the
 // generic `ProviderType` / `ActionType`).
 const SCHEMA_NAMESPACE = "Ai";
@@ -89,10 +89,23 @@ function rewriteRefs(node: unknown, rename: (name: string) => string): unknown {
 }
 
 // Namespace shared schema names and rewrite every `$ref` accordingly.
+// Namespacing is not injective (`X` and `AiX` both publish as `AiX`, `TProvider` and `Provider` both as
+// `AiProvider`), so a second source name for a taken key is an error rather than a silent overwrite.
+function claim(owners: Map<string, string>, published: string, source: string): void {
+  const owner = owners.get(published);
+  if (owner !== undefined && owner !== source) {
+    throw new Error(`Schemas ${owner} and ${source} would both be published as ${published}`);
+  }
+  owners.set(published, source);
+}
+
 function namespaceSchemas(schemas: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
+  const owners = new Map<string, string>();
   for (const [name, schema] of Object.entries(schemas)) {
-    out[namespacedName(name)] = rewriteRefs(schema, namespacedName);
+    const published = namespacedName(name);
+    claim(owners, published, name);
+    out[published] = rewriteRefs(schema, namespacedName);
   }
   return out;
 }

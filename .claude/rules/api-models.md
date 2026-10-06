@@ -66,14 +66,18 @@ with it (`AuthService` → `AuthServiceDto.From`, `ExternalResourceSettings` →
 A copy is right only when the class lives on without the API: a setting, an entity, a domain class read by
 other code, a service result, or the contract of an external service (billing, DocsCloud, the AI gateway).
 
-- **1:1 copy → Mapperly**, with `RequiredMappingStrategy.Target`: every DTO property must be mapped, and a
-  property added to the domain class does not appear in the API by itself. A static extension mapper next
-  to the DTO is enough (`TenantWalletSettingsDtoMapper`, `FirebaseDeviceDtoMapper`).
+- **1:1 copy → Mapperly**, with `RequiredMappingStrategy.Target` towards a DTO: every DTO property must be
+  mapped, and a property added to the domain class does not appear in the API by itself. A static extension
+  mapper next to the DTO is enough (`TenantWalletSettingsDtoMapper`, `FirebaseDeviceDtoMapper`). A request DTO
+  mapped onto a domain or settings class uses `RequiredMappingStrategy.Source` instead, so a request field
+  nothing reads breaks the build (`IpRestrictionEntryDtoMapper`); details in `.claude/rules/dto-mapping.md`.
 - **Access checks, async lookups, computed fields → a `[Scope]` `*DtoHelper`** (`FileDtoHelper`,
-  `EmployeeDtoHelper`, `MentionDtoHelper`). A person is always an `EmployeeDto`/`EmployeeFullDto` from
-  `EmployeeDtoHelper`, never a `UserInfo`.
+  `EmployeeDtoHelper`). A person in a new endpoint is an `EmployeeDto`/`EmployeeFullDto` from
+  `EmployeeDtoHelper`, never a `UserInfo`. `PortalUserDto` — the stored user record field for field — exists
+  only to keep the JSON of old endpoints that always returned it (`GET portal/users/{userId}`, the `user` of
+  `MentionDto`); do not use it anywhere new.
 - The service layer may keep returning its own types; the controller maps at the boundary
-  (`EditorController.GetSharedUsers` → `MentionDtoHelper`).
+  (`EditorController.GetSharedUsers`: `MentionWrapper` → `MentionDto`).
 
 ## 4. Names and markup
 
@@ -109,6 +113,6 @@ Most exposed core classes predate this rule. Moving one is a contract change onl
 - [ ] No type on the endpoint's request or response graph is a setting, an entity, a core or foreign class,
       a service or an internal wrapper (§1).
 - [ ] The request DTO holds only caller-chosen fields; the controller sets the server-owned ones (§2).
-- [ ] Mapping is Mapperly with `RequiredMappingStrategy.Target` or a `*DtoHelper`; people are `EmployeeDto` (§3).
+- [ ] Mapping is Mapperly (`Target` towards a DTO, `Source` from a request) or a `*DtoHelper`; people in new endpoints are `EmployeeDto` (§3).
 - [ ] When an endpoint was moved: the OpenAPI diff shows only the intended changes, and any removed field is
       named in the PR together with the consumers checked (§5).

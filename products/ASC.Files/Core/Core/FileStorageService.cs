@@ -5180,7 +5180,7 @@ public class FileStorageService //: IFileStorageService
         var fileLink = filesLinkUtility.GetFileWebEditorUrl(file.Id);
         if (mentionMessage.ActionLink != null)
         {
-            fileLink += "&" + FilesLinkUtility.Anchor + "=" + HttpUtility.UrlEncode(ActionLinkConfig.Serialize(mentionMessage.ActionLink.ToConfig()));
+            fileLink += "&" + FilesLinkUtility.Anchor + "=" + HttpUtility.UrlEncode(ActionLinkConfig.Serialize(mentionMessage.ActionLink.Map()));
         }
 
         var message = (mentionMessage.Message ?? "").Trim();

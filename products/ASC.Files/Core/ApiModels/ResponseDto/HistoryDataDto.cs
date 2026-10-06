@@ -77,12 +77,11 @@ public record HistoryActionDto(MessageAction Id, string Key)
     /// </summary>
     /// <example>FileUploaded</example>
     public MessageAction Id { get; init; } = Id;
-    
-    
+
     /// <summary>
-    /// The action performed on the file.
+    /// The same action as a camel-case key, for a client to look up its own wording by.
     /// </summary>
-    /// <example>fileUploaded</example>   
+    /// <example>fileUploaded</example>
     public string Key { get; init; } = Key;
 }
 
@@ -386,8 +385,8 @@ public record LifeTimeHistoryDataDto : EntryHistoryDataDto
     public LifeTimeHistoryDataDto(RoomDataLifetime lifeTime, string id, string title, int? parentId = null, string parentTitle = null, int? parentType = null)
         : base(id, title, parentId, parentTitle, parentType)
     {
-        LifeTime = lifeTime;
+        LifeTime = lifeTime?.MapToDto();
     }
 
-    public RoomDataLifetime LifeTime { get; set; }
+    public RoomDataLifetimeDto LifeTime { get; set; }
 }

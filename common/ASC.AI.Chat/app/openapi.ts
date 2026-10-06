@@ -33,6 +33,7 @@
 
 import type { RouteSpec } from "@onlyoffice/ai-chat/core";
 import { EXAMPLE_AT_MS, EXAMPLE_IDS } from "./exampleIds.js";
+import { isObject } from "./narrow.js";
 
 // OpenAPI document generation for the AI service.
 //
@@ -1687,10 +1688,6 @@ const OPERATION_REQUEST_SCHEMAS: Readonly<Record<string, Json>> = {
 // Request-body schemas promoted to named components, keyed by component name.
 type RequestComponents = Record<string, Json>;
 
-function isPlainObject(value: Json | undefined): value is { [k: string]: Json } {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
 // A body with declared fields is published as the `<OperationId>Request`
 // component, so the reference and the SDKs name it the way the .NET services
 // name theirs (`CreateApiKeyRequestDto`) instead of the generator's
@@ -1708,8 +1705,8 @@ function requestBodyFor(
   const schema = (OPERATION_REQUEST_SCHEMAS[operationId] ??
     operations[operationId]?.request ??
     JSON_OBJECT_SCHEMA) as Json;
-  const body = jsonBody(schema, operationId) as { [k: string]: Json };
-  if (!isPlainObject(schema)) {
+  const body = jsonBody(schema, operationId);
+  if (!isObject(schema) || !isObject(body)) {
     return body;
   }
   const ref = schema["$ref"];
@@ -1719,12 +1716,17 @@ function requestBodyFor(
 
   const name = `${capitalize(operationId)}Request`;
   const properties = schema["properties"];
-  if (!isPlainObject(properties) || Object.keys(properties).length === 0) {
+  if (!isObject(properties) || Object.keys(properties).length === 0) {
     return { ...body, "x-codegen-request-body-name": name };
   }
 
-  const content = body["content"] as { "application/json": { schema: Json } };
-  requestComponents[name] = content["application/json"].schema;
+  const content = body["content"];
+  const media = isObject(content) ? content["application/json"] : undefined;
+  const bodySchema = isObject(media) ? media["schema"] : undefined;
+  if (bodySchema === undefined) {
+    return body;
+  }
+  requestComponents[name] = bodySchema;
   return {
     ...body,
     content: { "application/json": { schema: { $ref: `#/components/schemas/${name}` } } },

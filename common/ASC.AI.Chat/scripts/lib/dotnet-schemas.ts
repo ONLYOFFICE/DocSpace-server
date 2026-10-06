@@ -148,6 +148,16 @@ function collectRefs(node: unknown, acc: Set<string>): void {
   }
 }
 
+// Namespacing is not injective (`X` and `AiX` both publish as `AiX`, `TProvider` and `Provider` both as
+// `AiProvider`), so a second source name for a taken key is an error rather than a silent overwrite.
+function claim(owners: Map<string, string>, published: string, source: string): void {
+  const owner = owners.get(published);
+  if (owner !== undefined && owner !== source) {
+    throw new Error(`Schemas ${owner} and ${source} would both be published as ${published}`);
+  }
+  owners.set(published, source);
+}
+
 // `X` becomes `AiX`; a .NET name that already starts with the namespace
 // (`AiSettingsDto`) keeps it rather than turning into `AiAiSettingsDto`.
 function namespacedName(name: string): string {
@@ -274,8 +284,11 @@ export function extractDotnetProxySchemas(): DotnetProxySchemas {
   }
 
   const components: Record<string, unknown> = {};
+  const owners = new Map<string, string>();
   for (const name of closure) {
-    components[namespacedName(name)] = namespaceRefs(schemas[name]);
+    const published = namespacedName(name);
+    claim(owners, published, name);
+    components[published] = namespaceRefs(schemas[name]);
   }
 
   return { components, responses };

@@ -45,17 +45,17 @@ internal static class AuthorizationTestData
     /// A fresh S3 authorization service payload with unique key values, so a test can assert the
     /// values it saved are exactly the ones it reads back.
     /// </summary>
-    public static AuthServiceDto CreateS3AuthService()
+    public static SaveAuthKeysRequestDto CreateS3AuthService()
     {
         var accessKey = Initializer.Faker.Random.AlphaNumeric(20);
         var secretKey = Initializer.Faker.Random.AlphaNumeric(40);
 
-        return new AuthServiceDto(
+        return new SaveAuthKeysRequestDto(
             name: "s3",
             props:
             [
-                new AuthKeyDto(name: "acesskey", value: accessKey),
-                new AuthKeyDto(name: "secretaccesskey", value: secretKey)
+                new AuthKeyRequest(name: "acesskey", value: accessKey),
+                new AuthKeyRequest(name: "secretaccesskey", value: secretKey)
             ]);
     }
 

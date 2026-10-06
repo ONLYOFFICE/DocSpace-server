@@ -50,9 +50,8 @@ namespace ASC.Web.Api.ApiModels.ResponseDto;
 public class AuthServiceDto
 {
     /// <summary>
-    /// The provider being configured, by its internal key such as `google` or `box`. Take it from the `name` of
-    /// `GET api/2.0/settings/authservice`; it is the only field that selects the provider, and a key this
-    /// installation does not know is refused the same way a provider that forbids changes is.
+    /// The internal key of the provider, such as `google` or `box`. It is the `name` that
+    /// `POST api/2.0/settings/authservice` takes to select the provider.
     /// </summary>
     /// <example>google</example>
     public string Name { get; set; }
@@ -88,17 +87,14 @@ public class AuthServiceDto
 
     /// <summary>
     /// Whether the provider is a paid option. A paid one can only be connected while the portal plan includes
-    /// third-party storage or the installation is licensed as self-hosted; the field is reported by the portal and
-    /// ignored on the way in.
+    /// third-party storage or the installation is licensed as self-hosted.
     /// </summary>
     /// <example>false</example>
     public bool Paid { get; set; }
 
     /// <summary>
-    /// The credentials the portal authenticates to the provider with, as the name and value pairs the provider
-    /// defines. Send the whole set the provider expects: leaving every value empty disconnects it, and a set that
-    /// fails the provider validation is cleared rather than stored half-applied. The listing operation reports the
-    /// values last saved, and a provider that forbids changes reports none at all.
+    /// The keys the provider defines, with the values last saved and how the settings form shows each of them.
+    /// It is empty for a provider that forbids changes.
     /// </summary>
     /// <example>[{"name": "key", "value": "value"}]</example>
     public List<AuthKeyDto> Props { get; set; }

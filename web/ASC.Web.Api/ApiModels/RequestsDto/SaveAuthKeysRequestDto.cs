@@ -31,56 +31,49 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Api.ApiModels.ResponseDto;
+namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The storage the portal keeps its data in, or serves its static content from.
+/// The keys to store for one third-party authorization or storage provider.
 /// </summary>
-public class StorageSettingsDto
+/// <example>
+/// {
+///   "name": "google",
+///   "props": [{"name": "googleClientId", "value": "1234567890-abc.apps.googleusercontent.com"}]
+/// }
+/// </example>
+public class SaveAuthKeysRequestDto
 {
     /// <summary>
-    /// The storage module, or `null` when the built-in storage is used.
+    /// The internal key of the provider, such as `google` or `box`. Take it from the `name` of
+    /// `GET api/2.0/settings/authservice`.
     /// </summary>
-    /// <example>S3</example>
-    public string Module { get; init; }
+    /// <example>google</example>
+    public string Name { get; set; }
 
     /// <summary>
-    /// The connection properties stored for the module.
+    /// The keys of the provider with their new values, by the key names `GET api/2.0/settings/authservice` lists in
+    /// `props`.
     /// </summary>
-    /// <example>{"region": "eu-central-1", "bucket": "tenant-files"}</example>
-    public Dictionary<string, string> Props { get; init; }
-
-    /// <summary>
-    /// When the settings were last stored.
-    /// </summary>
-    /// <example>2025-01-01T12:00:00Z</example>
-    public DateTime LastModified { get; init; }
+    /// <example>[{"name": "googleClientId", "value": "1234567890-abc.apps.googleusercontent.com"}]</example>
+    public List<AuthKeyRequest> Props { get; set; }
 }
 
 /// <summary>
-/// The state of the portal's storage encryption.
+/// One key of a provider and the value to store for it.
 /// </summary>
-public class EncryptionSettingsDto
+public class AuthKeyRequest
 {
     /// <summary>
-    /// Whether the storage is encrypted, decrypted, or on its way to either.
+    /// The key name, as `GET api/2.0/settings/authservice` lists it in `props`.
     /// </summary>
-    /// <example>0</example>
-    public EncryptionStatus Status { get; init; }
+    /// <example>googleClientId</example>
+    public required string Name { get; set; }
 
     /// <summary>
-    /// Whether the users are notified when the operation starts and ends.
+    /// The value to store. An empty string clears the key.
     /// </summary>
-    /// <example>true</example>
-    public bool NotifyUsers { get; init; }
-}
-
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
-public static partial class StorageSettingsDtoMapper
-{
-    public static partial StorageSettingsDto Map(this StorageSettings source);
-
-    public static partial StorageSettingsDto Map(this CdnStorageSettings source);
-
-    public static partial EncryptionSettingsDto Map(this EncryptionSettings source);
+    /// <example>1234567890-abc.apps.googleusercontent.com</example>
+    [StringLength(4000)]
+    public required string Value { get; set; }
 }

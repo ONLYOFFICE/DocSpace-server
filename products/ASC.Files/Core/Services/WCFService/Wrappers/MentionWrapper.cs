@@ -80,4 +80,3 @@ public class MentionWrapper
     /// <example>John Doe</example>
     public string Name { get; internal set; }
 }
-

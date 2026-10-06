@@ -49,8 +49,7 @@ public class EditorControllerInternal(
     ConfigurationConverter<int> configurationConverter,
     SecurityContext securityContext,
     IHttpContextAccessor httpContextAccessor,
-    EditorToolCallStateStore editorToolCallStateStore,
-    MentionDtoHelper mentionDtoHelper)
+    EditorToolCallStateStore editorToolCallStateStore)
     : EditorController<int>(
         fileStorageService,
         documentServiceHelper,
@@ -61,8 +60,7 @@ public class EditorControllerInternal(
         configurationConverter,
         securityContext,
         httpContextAccessor,
-        editorToolCallStateStore,
-        mentionDtoHelper);
+        editorToolCallStateStore);
 
 [ApiEndpoint(Template = "file")]
 public class EditorControllerThirdparty(
@@ -75,8 +73,7 @@ public class EditorControllerThirdparty(
     ConfigurationConverter<string> configurationConverter,
     SecurityContext securityContext,
     IHttpContextAccessor httpContextAccessor,
-    EditorToolCallStateStore editorToolCallStateStore,
-    MentionDtoHelper mentionDtoHelper)
+    EditorToolCallStateStore editorToolCallStateStore)
     : EditorController<string>(
         fileStorageService,
         documentServiceHelper,
@@ -87,8 +84,7 @@ public class EditorControllerThirdparty(
         configurationConverter,
         securityContext,
         httpContextAccessor,
-        editorToolCallStateStore,
-        mentionDtoHelper);
+        editorToolCallStateStore);
 
 public abstract class EditorController<T>(
     FileStorageService fileStorageService,
@@ -100,8 +96,7 @@ public abstract class EditorController<T>(
         ConfigurationConverter<T> configurationConverter,
         SecurityContext securityContext,
         IHttpContextAccessor httpContextAccessor,
-        EditorToolCallStateStore editorToolCallStateStore,
-        MentionDtoHelper mentionDtoHelper)
+        EditorToolCallStateStore editorToolCallStateStore)
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
 
@@ -443,7 +438,7 @@ public abstract class EditorController<T>(
             return null;
         }
 
-        return await mentionDtoHelper.GetAsync(await fileStorageService.SharedUsersAsync(inDto.FileId));
+        return (await fileStorageService.SharedUsersAsync(inDto.FileId))?.Select(r => r.Map()).ToList();
     }
 
     /// <remarks>
@@ -458,7 +453,7 @@ public abstract class EditorController<T>(
     [HttpPost("infousers")]
     public async Task<List<MentionDto>> GetInfoUsers(GetInfoUsersRequestDto inDto)
     {
-        return await mentionDtoHelper.GetAsync(await fileStorageService.GetInfoUsersAsync(inDto.UserIds));
+        return (await fileStorageService.GetInfoUsersAsync(inDto.UserIds))?.Select(r => r.Map()).ToList();
     }
 
     /// <remarks>
@@ -509,7 +504,7 @@ public abstract class EditorController<T>(
     [HttpGet("{fileId}/protectusers")]
     public async Task<List<MentionDto>> GetProtectedFileUsers(FileIdRequestDto<T> inDto)
     {
-        return await mentionDtoHelper.GetAsync(await fileStorageService.ProtectUsersAsync(inDto.FileId));
+        return (await fileStorageService.ProtectUsersAsync(inDto.FileId))?.Select(r => r.Map()).ToList();
     }
 
     /// <remarks>

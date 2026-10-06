@@ -31,10 +31,11 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Api.ApiModels.ResponseDto;
+namespace ASC.Web.Api.Models;
 
 /// <summary>
-/// The user information.
+/// A portal account in the format the portal stores it. Returned where the API has always handed out the
+/// stored record; new endpoints return <see cref="EmployeeDto"/> instead.
 /// </summary>
 public class PortalUserDto
 {

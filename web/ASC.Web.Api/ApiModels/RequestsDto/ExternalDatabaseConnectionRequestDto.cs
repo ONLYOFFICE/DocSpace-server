@@ -31,7 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Api.Models;
+namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
 /// The connection parameters of an external database to test.
@@ -93,4 +93,10 @@ public class ExternalDatabaseConnectionRequestDto
     /// <example>/var/lib/docspace/external.db</example>
     [JsonPropertyName("sqliteFilePath")]
     public string SqliteFilePath { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]
+public static partial class ExternalDatabaseConnectionRequestDtoMapper
+{
+    public static partial ExternalDatabaseSettings Map(this ExternalDatabaseConnectionRequestDto source);
 }

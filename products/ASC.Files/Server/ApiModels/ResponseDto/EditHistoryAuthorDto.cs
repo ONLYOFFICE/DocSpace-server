@@ -52,10 +52,12 @@ public class EditHistoryAuthorDto
     /// </summary>
     /// <example>John Doe</example>
     public string Name { get; init; }
-}
 
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
-public static partial class EditHistoryAuthorDtoMapper
-{
-    public static partial EditHistoryAuthorDto Map(this EditHistoryAuthor source);
+    /// <summary>
+    /// Not a generated mapping on purpose: reading <see cref="EditHistoryAuthor.Name"/> looks the user up.
+    /// </summary>
+    public static EditHistoryAuthorDto From(EditHistoryAuthor author)
+    {
+        return author == null ? null : new EditHistoryAuthorDto { Id = author.Id, Name = author.Name };
+    }
 }

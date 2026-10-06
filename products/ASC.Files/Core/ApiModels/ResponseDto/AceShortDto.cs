@@ -31,56 +31,36 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Web.Api.ApiModels.ResponseDto;
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The storage the portal keeps its data in, or serves its static content from.
+/// One line of a document sharing list in display form: who the document is shared with and the label of their access
+/// level, rather than an access record with identifiers. Entries that deny access and invitation links are left out,
+/// so the list names only the subjects and links that can currently open the document.
 /// </summary>
-public class StorageSettingsDto
+public class AceShortDto(string subjectName, string permission, bool isLink)
 {
     /// <summary>
-    /// The storage module, or `null` when the built-in storage is used.
+    /// Who or what the line stands for, as a display string: the display name of a member, the name of a group, or
+    /// the title given to a shared link when `isLink` is true. It is empty when the subject has no name to show - a
+    /// shared link that was never given a title, for instance.
     /// </summary>
-    /// <example>S3</example>
-    public string Module { get; init; }
+    /// <example>John Doe</example>
+    public string User { get; init; } = subjectName;
 
     /// <summary>
-    /// The connection properties stored for the module.
+    /// The access level of that subject as a localized label, not a code: inside a room it usually names the role the
+    /// subject holds there ("Viewer", "Editor", "Room Manager"), while outside a room it names the access itself
+    /// ("Read Only", "Full Access"). The wording comes from the portal resources and is translated for the current
+    /// language, so show it to a person rather than compare it in code.
     /// </summary>
-    /// <example>{"region": "eu-central-1", "bucket": "tenant-files"}</example>
-    public Dictionary<string, string> Props { get; init; }
+    /// <example>Read Only</example>
+    public string Permissions { get; init; } = permission;
 
     /// <summary>
-    /// When the settings were last stored.
+    /// Whether the line stands for a shared link instead of a member or a group. Clients use it to draw a link badge
+    /// where they would otherwise draw an avatar.
     /// </summary>
-    /// <example>2025-01-01T12:00:00Z</example>
-    public DateTime LastModified { get; init; }
-}
-
-/// <summary>
-/// The state of the portal's storage encryption.
-/// </summary>
-public class EncryptionSettingsDto
-{
-    /// <summary>
-    /// Whether the storage is encrypted, decrypted, or on its way to either.
-    /// </summary>
-    /// <example>0</example>
-    public EncryptionStatus Status { get; init; }
-
-    /// <summary>
-    /// Whether the users are notified when the operation starts and ends.
-    /// </summary>
-    /// <example>true</example>
-    public bool NotifyUsers { get; init; }
-}
-
-[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
-public static partial class StorageSettingsDtoMapper
-{
-    public static partial StorageSettingsDto Map(this StorageSettings source);
-
-    public static partial StorageSettingsDto Map(this CdnStorageSettings source);
-
-    public static partial EncryptionSettingsDto Map(this EncryptionSettings source);
+    /// <example>false</example>
+    public bool isLink { get; init; } = isLink;
 }

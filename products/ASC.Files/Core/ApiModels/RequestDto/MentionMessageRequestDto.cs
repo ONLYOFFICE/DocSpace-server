@@ -82,32 +82,27 @@ public class MentionMessageRequestDto<T>
 }
 
 /// <summary>
-/// The place in the document a link opens at.
+/// The place inside a document that a link should open at.
 /// </summary>
 public class ActionLinkRequest
 {
     /// <summary>
-    /// The editor action that points at the place.
+    /// The anchor itself. It is passed on to the editor unchanged, so it has to be the value the editor produced for
+    /// the comment or the mention it points at.
     /// </summary>
+    /// <example>{"data": "section-42", "type": "comment"}</example>
     [JsonPropertyName("action")]
     public ActionLinkActionRequest Action { get; set; }
-
-    public ActionLinkConfig ToConfig()
-    {
-        return new ActionLinkConfig
-        {
-            Action = Action == null ? null : new ActionLinkConfig.ActionConfig { Data = Action.Data, Type = Action.Type }
-        };
-    }
 }
 
 /// <summary>
-/// An editor action, as the editor reports it.
+/// An anchor inside a document, as the editor writes it.
 /// </summary>
 public class ActionLinkActionRequest
 {
     /// <summary>
-    /// The data of the action, such as the bookmark or comment it points at.
+    /// The anchor value produced by the editor, opaque to the portal: it names the comment, the mention or the
+    /// place the document is scrolled to.
     /// </summary>
     /// <example>section-42</example>
     [JsonPropertyName("data")]
@@ -115,10 +110,16 @@ public class ActionLinkActionRequest
     public string Data { get; set; }
 
     /// <summary>
-    /// The type of the action.
+    /// What the anchor points at, as the editor names it - a comment thread, for instance.
     /// </summary>
     /// <example>comment</example>
     [JsonPropertyName("type")]
     [StringLength(128)]
     public string Type { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]
+public static partial class ActionLinkRequestMapper
+{
+    public static partial ActionLinkConfig Map(this ActionLinkRequest source);
 }

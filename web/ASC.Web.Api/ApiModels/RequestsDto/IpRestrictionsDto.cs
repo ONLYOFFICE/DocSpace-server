@@ -73,3 +73,9 @@ public class IpRestrictionEntryDto
     /// <example>false</example>
     public bool ForAdmin { get; set; }
 }
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]
+public static partial class IpRestrictionEntryDtoMapper
+{
+    public static partial IpRestrictionBase Map(this IpRestrictionEntryDto source);
+}

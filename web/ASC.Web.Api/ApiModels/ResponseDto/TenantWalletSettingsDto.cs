@@ -43,45 +43,45 @@ public class TenantWalletSettingsDto
     /// Whether the payment method on file is charged automatically when the wallet balance runs low.
     /// </summary>
     /// <example>true</example>
-    public required bool Enabled { get; init; }
+    public bool Enabled { get; init; }
 
     /// <summary>
     /// The balance below which a top-up is charged, in `currency`; 0 while top-up has never been configured.
     /// </summary>
     /// <example>10</example>
-    public required int MinBalance { get; init; }
+    public int MinBalance { get; init; }
 
     /// <summary>
     /// The balance a top-up brings the wallet up to, in `currency`; 0 while top-up has never been configured.
     /// </summary>
     /// <example>100</example>
-    public required int UpToBalance { get; init; }
+    public int UpToBalance { get; init; }
 
     /// <summary>
     /// The three-letter ISO 4217 code both amounts are expressed in, or `null` while top-up has never been configured.
     /// </summary>
     /// <example>USD</example>
-    public required string Currency { get; init; }
+    public string Currency { get; init; }
 
     /// <summary>
     /// The wallet balance below which the portal sends its low-balance warning. The portal maintains it; it cannot be
     /// set by a request.
     /// </summary>
     /// <example>1</example>
-    public required int LowBalanceThreshold { get; init; }
+    public int LowBalanceThreshold { get; init; }
 
     /// <summary>
     /// Whether the low-balance warning has already been sent for the current dip below `lowBalanceThreshold`. The
     /// portal maintains it, and switching top-up on re-arms it.
     /// </summary>
     /// <example>false</example>
-    public required bool LowBalanceNotified { get; init; }
+    public bool LowBalanceNotified { get; init; }
 
     /// <summary>
     /// When the settings were last stored, or `0001-01-01T00:00:00` when they never were.
     /// </summary>
     /// <example>2026-01-01T00:00:00Z</example>
-    public required DateTime LastModified { get; init; }
+    public DateTime LastModified { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]

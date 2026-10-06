@@ -616,10 +616,9 @@ public class SecurityController(
     /// <path>api/2.0/security/audit/settings/lifetime</path>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "The login history and audit trail lifetimes as they were stored", typeof(TenantAuditSettingsDto))]
-    [SwaggerResponse(400, "The request body cannot be read, or a lifetime is outside the allowed range of 1 to 180 days")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `settings`, or a lifetime is outside the allowed range of 1 to 180 days")]
     [SwaggerResponse(402, "The portal's pricing plan has no audit option, or the login history and audit trail section is not enabled")]
     [SwaggerResponse(403, "The caller does not have the portal-settings right of a DocSpace administrator")]
-    [SwaggerResponse(500, "The request body has no `settings`")]
     [HttpPost("audit/settings/lifetime")]
     public async Task<TenantAuditSettingsDto> SetAuditSettings(TenantAuditSettingsRequestDto inDto)
     {
@@ -646,7 +645,7 @@ public class SecurityController(
         await settingsManager.SaveAsync(settings, tenantManager.GetCurrentTenantId());
         messageService.Send(MessageAction.AuditSettingsUpdated);
 
-        return settings.Map();
+        return (await settingsManager.LoadAsync<TenantAuditSettings>(tenantManager.GetCurrentTenantId())).Map();
     }
 
     /// <remarks>

@@ -60,8 +60,10 @@ public class FormsItemDataDto
     /// The form data type.
     /// </summary>
     /// <example>text</example>
-    public string Type { get; init; }
+    public string Type { get; init; } = "";
 }
+
+#nullable enable
 
 /// <summary>
 /// The metadata of a single form field.
@@ -72,25 +74,25 @@ public class FormMetadataDto
     /// The form field key.
     /// </summary>
     /// <example>name</example>
-    public string Key { get; init; }
+    public string Key { get; init; } = "";
 
     /// <summary>
     /// The form field type.
     /// </summary>
     /// <example>text</example>
-    public string Type { get; init; }
+    public string Type { get; init; } = "";
 
     /// <summary>
     /// The form field format.
     /// </summary>
     /// <example>date</example>
-    public string Format { get; init; }
+    public string? Format { get; init; }
 
     /// <summary>
     /// The list of possible values for the form field.
     /// </summary>
     /// <example>[]</example>
-    public List<string> PossibleValues { get; init; }
+    public List<string>? PossibleValues { get; init; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
