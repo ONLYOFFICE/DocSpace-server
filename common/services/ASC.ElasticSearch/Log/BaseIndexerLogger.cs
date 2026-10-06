@@ -46,6 +46,9 @@ internal static partial class BaseIndexerLogger
     [LoggerMessage(LogLevel.Error, "CreateIfNotExist")]
     public static partial void ErrorCreateIfNotExist(this ILogger logger, Exception exception);
 
+    [LoggerMessage(LogLevel.Error, "Create index {indexName}: {reason}")]
+    public static partial void ErrorCreateIndex(this ILogger logger, string indexName, string reason);
+
     [LoggerMessage(LogLevel.Error, "CheckExist {indexName}")]
     public static partial void ErrorCheckExist(this ILogger logger, string indexName, Exception exception);
 

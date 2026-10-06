@@ -77,7 +77,6 @@ public abstract class BaseIndexer<T>(Client client,
     protected internal T Wrapper => serviceProvider.GetService<T>();
     internal string IndexName => Wrapper.IndexName;
 
-    private bool _isExist;
     private readonly ILogger _logger = logger;
     protected readonly TenantManager _tenantManager = tenantManager;
     private static readonly Lock _locker = new();
@@ -152,48 +151,104 @@ public abstract class BaseIndexer<T>(Client client,
 
             lock (_locker)
             {
-                IPromise<IAnalyzers> analyzers(AnalyzersDescriptor b)
+                // another thread may have created it while this one was waiting for the lock
+                if (client.Instance.Indices.Exists(data.IndexName).Exists)
                 {
-                    foreach (var c in AnalyzerExtensions.GetNames())
-                    {
-                        var c1 = c;
-                        b.Custom(c1 + "custom", ca => ca.Tokenizer(c1).Filters(nameof(Filter.lowercase)).CharFilters(nameof(CharFilter.io)));
-                    }
+                    baseIndexerHelper.IsExist[data.IndexName] = true;
 
-                    foreach (var c in CharFilterExtensions.GetNames())
-                    {
-                        if (c == nameof(CharFilter.io))
-                        {
-                            continue;
-                        }
-
-                        var charFilters = new List<string> { nameof(CharFilter.io), c };
-                        b.Custom(c + "custom", ca => ca.Tokenizer(nameof(Analyzer.whitespace)).Filters(nameof(Filter.lowercase)).CharFilters(charFilters));
-                    }
-
-                    if (data is ISearchItemDocument)
-                    {
-                        b.Custom("document", ca => ca.Tokenizer(Analyzer.whitespace.ToStringFast()).Filters(nameof(Filter.lowercase)).CharFilters(nameof(CharFilter.io)));
-                    }
-
-                    return b;
+                    return;
                 }
 
-                client.Instance.Indices.Create(data.IndexName,
-                    c =>
-                    c.Map<T>(m => m.AutoMap())
-                    .Settings(r => r.Analysis(a =>
-                                    a.Analyzers(analyzers)
-                                    .CharFilters(d => d.HtmlStrip(CharFilter.html.ToStringFast())
-                                    .Mapping(CharFilter.io.ToStringFast(), m => m.Mappings("ё => е", "Ё => Е"))))));
-
-                _isExist = true;
+                var response = CreateIndex(data);
+                if (!response.IsValid)
+                {
+                    _logger.ErrorCreateIndex(data.IndexName, response.ServerError?.Error?.Reason ?? response.DebugInformation);
+                }
             }
         }
         catch (Exception e)
         {
             _logger.ErrorCreateIfNotExist(e);
         }
+    }
+
+    /// <summary>
+    /// Recreates the index right after it was deleted, without asking the "exists" cache.
+    /// The cache of every node still says "exists" until the clear notification reaches it, and a document write behind
+    /// that stale flag makes OpenSearch auto-create the index with a dynamic mapping: the standard analyzer instead of the
+    /// declared ones, so a title like "QA-R-Custom" is split on the hyphens and no wildcard with a hyphen matches it again.
+    /// Such an index is never fixed by itself, since from then on it "exists". So it is created here at once, and one that a
+    /// racing write managed to auto-create in between is dropped and created again.
+    /// </summary>
+    private void RecreateIndex(T data)
+    {
+        lock (_locker)
+        {
+            for (var attempt = 0; attempt < 3; attempt++)
+            {
+                var response = CreateIndex(data);
+                if (response.IsValid)
+                {
+                    return;
+                }
+
+                if (response.ServerError?.Error?.Type != "resource_already_exists_exception")
+                {
+                    _logger.ErrorCreateIndex(data.IndexName, response.ServerError?.Error?.Reason ?? response.DebugInformation);
+
+                    return;
+                }
+
+                client.Instance.Indices.Delete(data.IndexName);
+            }
+
+            _logger.ErrorCreateIndex(data.IndexName, "the index was auto-created by a concurrent write on every attempt");
+        }
+    }
+
+    private CreateIndexResponse CreateIndex(T data)
+    {
+        IPromise<IAnalyzers> analyzers(AnalyzersDescriptor b)
+        {
+            foreach (var c in AnalyzerExtensions.GetNames())
+            {
+                var c1 = c;
+                b.Custom(c1 + "custom", ca => ca.Tokenizer(c1).Filters(nameof(Filter.lowercase)).CharFilters(nameof(CharFilter.io)));
+            }
+
+            foreach (var c in CharFilterExtensions.GetNames())
+            {
+                if (c == nameof(CharFilter.io))
+                {
+                    continue;
+                }
+
+                var charFilters = new List<string> { nameof(CharFilter.io), c };
+                b.Custom(c + "custom", ca => ca.Tokenizer(nameof(Analyzer.whitespace)).Filters(nameof(Filter.lowercase)).CharFilters(charFilters));
+            }
+
+            if (data is ISearchItemDocument)
+            {
+                b.Custom("document", ca => ca.Tokenizer(Analyzer.whitespace.ToStringFast()).Filters(nameof(Filter.lowercase)).CharFilters(nameof(CharFilter.io)));
+            }
+
+            return b;
+        }
+
+        var response = client.Instance.Indices.Create(data.IndexName,
+            c =>
+            c.Map<T>(m => m.AutoMap())
+            .Settings(r => r.Analysis(a =>
+                            a.Analyzers(analyzers)
+                            .CharFilters(d => d.HtmlStrip(CharFilter.html.ToStringFast())
+                            .Mapping(CharFilter.io.ToStringFast(), m => m.Mappings("ё => е", "Ё => Е"))))));
+
+        if (response.IsValid)
+        {
+            baseIndexerHelper.IsExist[data.IndexName] = true;
+        }
+
+        return response;
     }
 
     public void Flush()
@@ -382,8 +437,7 @@ public abstract class BaseIndexer<T>(Client client,
     {
         try
         {
-            var isExist = baseIndexerHelper.IsExist.GetOrAdd(data.IndexName, k => client.Instance.Indices.Exists(k).Exists);
-            if (isExist)
+            if (baseIndexerHelper.IsExist.TryGetValue(data.IndexName, out var isExist) && isExist)
             {
                 return true;
             }
@@ -392,10 +446,11 @@ public abstract class BaseIndexer<T>(Client client,
             {
                 isExist = client.Instance.Indices.Exists(data.IndexName).Exists;
 
-                baseIndexerHelper.IsExist.TryUpdate(data.IndexName, _isExist, false);
-
+                // only "exists" is cached: a missing index is asked about again, so it is picked up as soon as it is created
                 if (isExist)
                 {
+                    baseIndexerHelper.IsExist[data.IndexName] = true;
+
                     return true;
                 }
             }
@@ -453,9 +508,14 @@ public abstract class BaseIndexer<T>(Client client,
         }
 
         _logger.DebugIndexDeleted(Wrapper.IndexName);
+
+        // writes of this process stop trusting the flag before the index goes away, not when the notification comes back
+        baseIndexerHelper.IsExist[Wrapper.IndexName] = false;
         await client.Instance.Indices.DeleteAsync(Wrapper.IndexName);
+        RecreateIndex(Wrapper);
+
+        // the other nodes re-check the index: by now it exists again, with the declared mapping
         await baseIndexerHelper.ClearAsync(Wrapper);
-        CreateIfNotExist(Wrapper);
     }
 
     private IIndexRequest<T> GetMeta(IndexDescriptor<T> request, T data, bool immediately = true)
