@@ -5723,6 +5723,9 @@ public class FileStorageService //: IFileStorageService
 
         var properties = await daoFactory.GetFileDao<T>().GetProperties(formId);
         var room = await DocSpaceHelper.GetParentRoom(form, daoFactory.GetFolderDao<T>());
+
+        List<Guid> formFillersLosingTheForm = null;
+
         switch (action)
         {
             case FormFillingManageAction.Stop:
@@ -5747,6 +5750,7 @@ public class FileStorageService //: IFileStorageService
                 if (room.FolderType == FolderType.FillingFormsRoom)
                 {
                     properties.FormFilling.StartFilling = false;
+                    formFillersLosingTheForm = await GetFormFillersAsync(room);
                 }
 
                 var user = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
@@ -5780,8 +5784,7 @@ public class FileStorageService //: IFileStorageService
                     var currentUser = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
                     await filesMessageService.SendAsync(MessageAction.FormStartedToFill, form, MessageInitiator.DocsService, currentUser?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
 
-                    var aces = await fileSharing.GetSharedInfoAsync(room);
-                    var formFillers = aces.Where(ace => ace.Access == FileShare.FillForms).Select(ace => ace.Id).ToList();
+                    var formFillers = await GetFormFillersAsync(room);
 
                     if (formFillers.Count != 0)
                     {
@@ -5813,6 +5816,8 @@ public class FileStorageService //: IFileStorageService
                         var editor = await userManager.GetUsersAsync(authContext.CurrentAccount.ID);
                         await webhookManager.PublishAsync(WebhookTrigger.FormStopped, form);
                         await filesMessageService.SendAsync(MessageAction.FormStopped, form, MessageInitiator.DocsService, editor?.DisplayUserName(false, displayUserSettingsHelper), form.Title);
+
+                        formFillersLosingTheForm = await GetFormFillersAsync(room);
                     }
                 }
 
@@ -5824,6 +5829,17 @@ public class FileStorageService //: IFileStorageService
 
         await fileDao.SaveProperties(formId, properties);
         await socketManager.CreateFileAsync(form);
+
+        if (formFillersLosingTheForm is { Count: > 0 })
+        {
+            await socketManager.DeleteFileAsync(form, users: formFillersLosingTheForm);
+        }
+    }
+
+    private async Task<List<Guid>> GetFormFillersAsync<T>(Folder<T> room)
+    {
+        var aces = await fileSharing.GetSharedInfoAsync(room);
+        return aces.Where(ace => ace.Access == FileShare.FillForms).Select(ace => ace.Id).ToList();
     }
 
     public async Task<FormSubmissionsDto> GetSubmissionsByFormId(int formId)
