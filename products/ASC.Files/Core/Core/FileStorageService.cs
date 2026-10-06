@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -288,7 +288,9 @@ public class FileStorageService //: IFileStorageService
         Location? location = null,
         int? groupId = null,
         RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
-        List<FolderType> folderType = null)
+        List<FolderType> folderType = null,
+        bool withAiFolder = false,
+        MetadataFilter metadataFilter = null)
     {
         var subjectId = subject ?? Guid.Empty;
         var subjectOwnerIdGuid = subjectOwnerId ?? Guid.Empty;
@@ -457,7 +459,8 @@ public class FileStorageService //: IFileStorageService
                 location,
                 groupId,
                 privacyFilter,
-                folderType);
+                folderType,
+                withAiFolder, metadataFilter);
         }
         catch (Exception e)
         {
@@ -562,7 +565,7 @@ public class FileStorageService //: IFileStorageService
         // that was new in it up to this moment stops being new for the caller, synchronously, so the
         // very next news read already reflects the visit. Section roots (Rooms, Archive, Recent, ...)
         // are only containers - opening them must not consume the per-room badges.
-        if (parent.IsRoom || parent.FolderType == FolderType.DEFAULT)
+        if (parent.IsRoom || parent.FolderType is FolderType.DEFAULT or FolderType.Ai)
         {
             await fileMarker.RemoveMarkAsNewAsync(parent);
         }
@@ -718,6 +721,20 @@ public class FileStorageService //: IFileStorageService
         if (providerInfo == null)
         {
             throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        // Only the owner of the connection may turn it into a room, as only the owner may update it,
+        // and only someone who may create rooms at all: the regular room creation demands the same right
+        // on the Rooms root.
+        if (providerInfo.Owner != authContext.CurrentAccount.ID)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        var roomsRoot = await daoFactory.GetFolderDao<int>().GetFolderAsync(await globalFolderHelper.FolderVirtualRoomsAsync);
+        if (!await fileSecurity.CanCreateAsync(roomsRoot))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_Create);
         }
 
         if (providerInfo.RootFolderType != FolderType.VirtualRooms)
@@ -1287,6 +1304,26 @@ public class FileStorageService //: IFileStorageService
         {
             throw GenerateException(e);
         }
+    }
+
+    public async Task<Folder<int>> GetRoomAiFolderAsync(int roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<int>();
+        var room = await folderDao.GetFolderAsync(roomId);
+
+        if (room is not { IsRoom: true })
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
+
+        if (!await fileSecurity.CanReadAsync(room))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
+        }
+
+        var aiFolder = await folderDao.GetFoldersAsync(roomId, FolderType.Ai).OrderBy(f => f.Id).FirstOrDefaultAsync();
+
+        return aiFolder ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
     }
 
     public async Task<Folder<T>> FolderQuotaChangeAsync<T>(T folderId, long quota)
@@ -2927,6 +2964,7 @@ public class FileStorageService //: IFileStorageService
         }
 
         var currentFolderType = FolderType.USER;
+        string previousTitle = null;
         int currentProviderId;
 
         MessageAction messageAction;
@@ -2970,6 +3008,10 @@ public class FileStorageService //: IFileStorageService
 
             currentFolderType = currentProvider.RootFolderType;
 
+            // An empty title keeps the current one; a non-empty one is cleaned the same way as on connect.
+            thirdPartyParams.CustomerTitle = Global.ReplaceInvalidCharsAndTruncate(thirdPartyParams.CustomerTitle);
+            previousTitle = currentProvider.CustomerTitle;
+
             switch (currentProvider.RootFolderType)
             {
                 case FolderType.COMMON when !thirdPartyParams.Corporate:
@@ -2980,7 +3022,12 @@ public class FileStorageService //: IFileStorageService
                     }
                 case FolderType.VirtualRooms or FolderType.RoomTemplates or FolderType.Archive:
                     {
-                        var updatedProvider = await providerDao.UpdateRoomProviderInfoAsync(new ProviderData { Id = currentProviderId, AuthData = thirdPartyParams.AuthData });
+                        var updatedProvider = await providerDao.UpdateRoomProviderInfoAsync(new ProviderData
+                        {
+                            Id = currentProviderId,
+                            Title = thirdPartyParams.CustomerTitle,
+                            AuthData = thirdPartyParams.AuthData
+                        });
                         currentProviderId = updatedProvider.ProviderId;
                         break;
                     }
@@ -3003,6 +3050,11 @@ public class FileStorageService //: IFileStorageService
         }
 
         await filesMessageService.SendAsync(messageAction, parentFolder, folder.Id, provider.ProviderKey);
+
+        if (previousTitle is not null && provider.CustomerTitle != previousTitle)
+        {
+            await socketManager.UpdateFolderAsync(folder);
+        }
 
         if (thirdPartyParams.Corporate && currentFolderType != FolderType.COMMON)
         {
@@ -3097,6 +3149,14 @@ public class FileStorageService //: IFileStorageService
         if (!await fileSecurity.CanDeleteAsync(folder))
         {
             throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_DeleteFolder);
+        }
+
+        // A connection a room stands on is the room itself: removing it here left an orphaned room behind,
+        // without the notifications, webhook and audit entry of a room deletion. Such a room is deleted as a room,
+        // and that deletion disconnects the storage.
+        if (providerInfo.FolderId != null)
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_ProviderUsedByRoom);
         }
 
         if (providerInfo.RootFolderType == FolderType.COMMON)

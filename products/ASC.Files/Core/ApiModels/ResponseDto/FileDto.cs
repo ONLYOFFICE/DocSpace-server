@@ -328,8 +328,9 @@ public class FileDtoHelper(
     IFusionCache fusionCache,
     TenantManager tenantManager,
     FileTrackerHelper fileTracker,
+    MetadataTemplatesCache metadataTemplatesCache,
     ILogger<FileEntryDtoHelper> logger)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, fusionCache, tenantManager, logger)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, fusionCache, tenantManager, metadataTemplatesCache, logger)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
 

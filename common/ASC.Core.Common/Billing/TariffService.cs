@@ -72,6 +72,7 @@ public class TariffService(
 
     private const int DefaultTrialPeriod = 30;
     private const int MaxTopUpAttempts = 5;
+    private static readonly TimeSpan _subscriptionExtensionTolerance = TimeSpan.FromSeconds(1);
 
     //private readonly int _activeUsersMin;
     //private readonly int _activeUsersMax;
@@ -372,12 +373,14 @@ public class TariffService(
         }
         catch (Exception error)
         {
-            logger.ErrorWithException(error);
-
+            // a caller that asked for the exception reports it itself, at the level it considers right:
+            // the renewal service treats a timeout as an unknown outcome to re-check, not as an error
             if (throwIfFailure)
             {
                 throw;
             }
+
+            logger.ErrorWithException(error);
 
             return false;
         }
@@ -388,6 +391,35 @@ public class TariffService(
         }
 
         return changed;
+    }
+
+    /// <summary>
+    /// Asks the billing service itself, bypassing every cache, whether the subscription to <paramref name="productId"/>
+    /// now ends after <paramref name="previousDueDate"/> - i.e. whether a payment change whose response was lost
+    /// has actually been applied. Throws <see cref="BillingException"/> when the billing service gives no answer:
+    /// the outcome is then still unknown.
+    /// </summary>
+    public async Task<bool> IsSubscriptionExtendedAsync(int tenantId, string productId, DateTime previousDueDate)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+        var currentPayments = await billingClient.GetCurrentPaymentsAsync(portalId, true);
+
+        // MySQL datetime keeps no fractional seconds and rounds them, so the stored due date can differ from the
+        // billing end date of an unchanged subscription by up to half a second either way. A renewal moves it by a
+        // whole subscription period, so anything a second or more later is the renewal.
+        var extended = currentPayments.Any(payment =>
+            payment.ProductId.ToString() == productId &&
+            payment.EndDate - previousDueDate >= _subscriptionExtensionTolerance);
+
+        if (extended)
+        {
+            await ClearCacheAsync(tenantId);
+
+            await docsCloudClient.ClearCacheAsync(portalId);
+        }
+
+        return extended;
     }
 
     public async Task<PaymentCalculation> PaymentCalculateAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency)

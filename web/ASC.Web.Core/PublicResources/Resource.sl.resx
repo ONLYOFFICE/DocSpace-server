@@ -160,7 +160,7 @@
     <value>Merska enota</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Varnostno kopiraj</value>
+    <value>Kopij</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Žetoni</value>
@@ -1553,5 +1553,8 @@
   </data>
   <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
     <value>Slika</value>
+  </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>Strošek ponudnika</value>
   </data>
 </root>

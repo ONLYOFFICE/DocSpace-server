@@ -160,7 +160,7 @@
     <value>Јединица мере</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Бекап</value>
+    <value>Копија</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Токени</value>
@@ -1553,5 +1553,8 @@
   </data>
   <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
     <value>Слика</value>
+  </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>Трошак провајдера</value>
   </data>
 </root>

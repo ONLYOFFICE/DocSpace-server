@@ -126,7 +126,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <path>api/2.0/people/remove/start</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "The state of the queued deletion", typeof(TaskProgressResponseDto))]
-    [SwaggerResponse(400, "No user has the specified ID, or the account is the portal owner, the caller, or is not disabled")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `userId`, no user has the specified ID, or the account is the portal owner, the caller, or is not disabled")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("remove/start")]
     public async Task<TaskProgressResponseDto> StartRemove(TerminateRequestDto inDto)
@@ -179,6 +179,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <path>api/2.0/people/remove/terminate</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "The queued deletion is cancelled, or there was nothing to cancel. No content is returned")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `userId`")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("remove/terminate")]
     public async Task TerminateRemove(TerminateRequestDto inDto)
@@ -204,7 +205,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// <path>api/2.0/people/delete/personal/start</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "The state of the queued personal folder deletion", typeof(TaskProgressResponseDto))]
-    [SwaggerResponse(403, "The caller is not a guest, so there is no personal folder to empty")]
+    [SwaggerResponse(403, "The caller is not a guest, or is a guest whose personal folder has not been created")]
     [HttpPost("delete/personal/start")]
     public async Task<TaskProgressResponseDto> StartDeletePersonalFolder()
     {

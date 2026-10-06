@@ -160,7 +160,7 @@
     <value>Unitate de măsură</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Copiere de rezervă</value>
+    <value>Copii</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Token-uri</value>
@@ -1553,5 +1553,8 @@
   </data>
   <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
     <value>Imagine</value>
+  </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>Costul furnizorului</value>
   </data>
 </root>

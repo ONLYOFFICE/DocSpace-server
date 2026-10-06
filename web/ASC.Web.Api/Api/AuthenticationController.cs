@@ -134,6 +134,15 @@ public class AuthenticationController(
     [HttpPost("{code}", Order = 1)]
     public async Task<AuthenticationTokenDto> AuthenticateMeFromBodyWithCode(AuthWithCodeRequestsDto inDto)
     {
+        if (!string.IsNullOrEmpty(inDto.Culture))
+        {
+            var culture = coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, inDto.Culture, StringComparison.InvariantCultureIgnoreCase));
+            if (culture != null)
+            {
+                CultureInfo.CurrentCulture = culture;
+                CultureInfo.CurrentUICulture = culture;
+            }
+        }
         var tenantId = tenantManager.GetCurrentTenant().Id;
         var user = (await GetUserAsync(inDto)).UserInfo;
         var session = inDto.Session;
@@ -251,6 +260,16 @@ public class AuthenticationController(
     [HttpPost]
     public async Task<AuthenticationTokenDto> AuthenticateMe(AuthRequestsDto inDto)
     {
+        if (!string.IsNullOrEmpty(inDto.Culture))
+        {
+            var culture = coreBaseSettings.EnabledCultures.Find(c => string.Equals(c.Name, inDto.Culture, StringComparison.InvariantCultureIgnoreCase));
+            if (culture != null)
+            {
+                CultureInfo.CurrentCulture = culture;
+                CultureInfo.CurrentUICulture = culture;
+            }
+        }
+
         var wrapper = await GetUserAsync(inDto);
         var user = wrapper.UserInfo;
         var session = inDto.Session;
@@ -468,6 +487,7 @@ public class AuthenticationController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Authentication")]
     [SwaggerResponse(200, "Whether the confirmation link may be used, with the room and the email it was issued for when it is an invitation", typeof(ConfirmDto))]
+    [SwaggerResponse(400, "The request body cannot be read, or `email` is sent but empty or not a valid email address")]
     [SwaggerResponse(403, "The portal's IP restrictions do not allow this address to check an invitation link")]
     [AllowNotPayment, AllowSuspended, AllowAnonymous]
     [HttpPost("confirm")]

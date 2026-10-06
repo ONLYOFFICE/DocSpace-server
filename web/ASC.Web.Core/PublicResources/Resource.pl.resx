@@ -160,7 +160,7 @@
     <value>Jednostka miary</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Kopia zapasowa</value>
+    <value>Kopii</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Tokeny</value>
@@ -1553,5 +1553,8 @@
   </data>
   <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
     <value>Obraz</value>
+  </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>Koszt dostawcy</value>
   </data>
 </root>

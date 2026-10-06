@@ -91,28 +91,14 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+          "400": {
+            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, the password does not meet the password policy, the first and last name are both empty or not a valid user name, no free portal address could be generated, too many registrations came from this network address, or the reCAPTCHA response is invalid"
           },
           "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+            "description": "The portal could not be registered, as when `email` is empty or the `portalName` requested on a server installation is already taken"
           },
-          "400": {
-            "description": "Bad Request.",
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -200,28 +186,14 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+          "400": {
+            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, `email` is empty and no third-party profile supplied one, `password` does not meet the password policy, no free portal address could be generated, or too many registrations came from this network address"
           },
           "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+            "description": "The portal could not be registered"
           },
-          "400": {
-            "description": "Bad Request.",
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -309,28 +281,14 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+          "400": {
+            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, `provider` is empty, `accessToken` and `codeOAuth` are both empty, the provider returned no profile or no email address, `password` does not meet the password policy, no free portal address could be generated, or too many registrations came from this network address"
           },
           "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+            "description": "The portal could not be registered"
           },
-          "400": {
-            "description": "Bad Request.",
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -418,28 +376,14 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+          "400": {
+            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, `provisionProvider` or its `name`, `clientId` or `clientSecret` is missing, `email` is empty, the provider is not a known sign-in provider, no free portal address could be generated, too many registrations came from this network address, the reCAPTCHA response is invalid, or `password` does not meet the password policy"
           },
           "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+            "description": "The portal could not be registered"
           },
-          "400": {
-            "description": "Bad Request.",
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -842,6 +786,12 @@
               }
             }
           },
+          "400": {
+            "description": "A query value is longer than its limit or `email` is malformed, neither `portalName` nor `tenantId` is given, no portal matches them, or the portal is the last one with full space access"
+          },
+          "403": {
+            "description": "The method is available on a server installation only"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -854,16 +804,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -951,6 +891,12 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, neither `portalName` nor `tenantId` is given, or no portal matches them"
+          },
+          "403": {
+            "description": "The method is available on a server installation only"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -963,16 +909,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1060,18 +996,11 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, or `portalName` is empty, already taken, too short or holds characters a portal address may not have, or could not be checked"
+          },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1481,28 +1410,17 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+          "400": {
+            "description": "A query value is longer than its limit or `email` is malformed"
+          },
+          "403": {
+            "description": "The method is available on a server installation only"
           },
           "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+            "description": "The portals or their statistics could not be read"
           },
-          "400": {
-            "description": "Bad Request.",
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -1590,25 +1508,17 @@
               }
             }
           },
-          "500": {
-            "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
           "400": {
-            "description": "Bad Request.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
+            "description": "The request body cannot be read, a field is longer than its limit or `email` is malformed, or no third-party profile was resolved and `email` or `passwordHash` is empty"
+          },
+          "401": {
+            "description": "Too many attempts came from this network address and the reCAPTCHA response is invalid"
+          },
+          "403": {
+            "description": "Too many attempts came from this network address and no reCAPTCHA response was sent"
+          },
+          "500": {
+            "description": "No portal has an account with this email address and password hash, or the lookup failed"
           },
           "502": {
             "description": "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON."
@@ -1671,6 +1581,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "The method is available on a server installation only"
           },
           "401": {
             "description": "Unauthorized",
@@ -1762,6 +1675,9 @@
                 }
               }
             }
+          },
+          "403": {
+            "description": "The method is available on a server installation only"
           },
           "401": {
             "description": "Unauthorized",
@@ -1895,6 +1811,12 @@
               }
             }
           },
+          "400": {
+            "description": "A query value is longer than 255 characters, neither `portalName` nor `tenantId` is given, no portal matches them, or `key` is empty"
+          },
+          "403": {
+            "description": "The method is available on a server installation only"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -1907,16 +1829,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2004,6 +1916,12 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read or a field is longer than 255 characters, neither `portalName` nor `tenantId` is given, no portal matches them, `key` or `value` is empty, or the `value` of `BaseDomain` is not a DNS host name"
+          },
+          "403": {
+            "description": "The method is available on a server installation only"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -2016,16 +1934,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2113,6 +2021,12 @@
               }
             }
           },
+          "400": {
+            "description": "The request body cannot be read, or `hostName` is empty, longer than 255 characters or not a DNS host name"
+          },
+          "403": {
+            "description": "The method is available on a server installation only"
+          },
           "401": {
             "description": "Unauthorized",
             "content": {
@@ -2125,16 +2039,6 @@
           },
           "500": {
             "description": "Internal Server Error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorApiResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request.",
             "content": {
               "application/json": {
                 "schema": {

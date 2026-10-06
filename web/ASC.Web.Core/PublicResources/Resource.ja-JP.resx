@@ -160,7 +160,7 @@
     <value>計測単位</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>バックアップ</value>
+    <value>コピー</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>トークン</value>
@@ -1553,5 +1553,8 @@
   </data>
   <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
     <value>画像</value>
+  </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>プロバイダーのコスト</value>
   </data>
 </root>

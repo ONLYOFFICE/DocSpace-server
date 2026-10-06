@@ -507,9 +507,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.5.130.tgz::locator=asc-ai-chat%40workspace%3A.":
-  version: 0.5.130
-  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.5.130.tgz#onlyoffice-ai-chat-0.5.130.tgz::hash=39850e&locator=asc-ai-chat%40workspace%3A."
+"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.6.32.tgz::locator=asc-ai-chat%40workspace%3A.":
+  version: 0.6.32
+  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.6.32.tgz#onlyoffice-ai-chat-0.6.32.tgz::hash=622571&locator=asc-ai-chat%40workspace%3A."
   dependencies:
     lodash.clonedeep: "npm:^4.5.0"
   peerDependencies:
@@ -526,6 +526,7 @@ __metadata:
     "@radix-ui/react-slot": ^1.2.3
     "@radix-ui/react-switch": ^1.2.6
     "@radix-ui/react-tabs": ^1.1.13
+    "@radix-ui/react-toast": ^1.2.15
     "@radix-ui/react-tooltip": ^1.2.8
     assistant-stream: ^0.2.47
     class-variance-authority: ^0.7.1
@@ -570,6 +571,8 @@ __metadata:
       optional: true
     "@radix-ui/react-tabs":
       optional: true
+    "@radix-ui/react-toast":
+      optional: true
     "@radix-ui/react-tooltip":
       optional: true
     class-variance-authority:
@@ -602,7 +605,7 @@ __metadata:
       optional: true
     zustand:
       optional: true
-  checksum: 10/51a163889d48e0732b59f42fd19932d687bd50b52d2cca15c50ef249eab735057eab21842184e410a03dffd3ebd4fb9b954089d13863f268f9582870778b9c82
+  checksum: 10/3122d661723420440724ae5174bf3c05c6c1b5638336c9afb1bd7c9eee22a01f728ffbd0389e7773891f1605d3772119ccd8a190eb3a54092d24139c5ac28f7a
   languageName: node
   linkType: hard
 
@@ -1403,7 +1406,7 @@ __metadata:
     "@aws-sdk/client-cloudwatch-logs": "npm:^3.199.0"
     "@google/genai": "npm:^1.30.0"
     "@mistralai/mistralai": "npm:^1.11.0"
-    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-0.5.130.tgz"
+    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-0.6.32.tgz"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.222.0"
     "@opentelemetry/exporter-metrics-otlp-proto": "npm:^0.222.0"

@@ -77,6 +77,8 @@ public class SettingsController(
     /// <path>apisystem/settings/get</path>
     [Tags("Settings")]
     [SwaggerResponse(200, "Settings", typeof(IActionResult))]
+    [SwaggerResponse(400, "A query value is longer than 255 characters, neither `portalName` nor `tenantId` is given, no portal matches them, or `key` is empty")]
+    [SwaggerResponse(403, "The method is available on a server installation only")]
     [HttpGet("get")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> GetSettingsAsync([FromQuery] SettingsModel model)
@@ -122,6 +124,8 @@ public class SettingsController(
     /// <path>apisystem/settings/save</path>
     [Tags("Settings")]
     [SwaggerResponse(200, "Settings", typeof(IActionResult))]
+    [SwaggerResponse(400, "The request body cannot be read or a field is longer than 255 characters, neither `portalName` nor `tenantId` is given, no portal matches them, `key` or `value` is empty, or the `value` of `BaseDomain` is not a DNS host name")]
+    [SwaggerResponse(403, "The method is available on a server installation only")]
     [HttpPost("save")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> SaveSettingsAsync([FromBody] SettingsModel model)
@@ -192,6 +196,8 @@ public class SettingsController(
     /// <path>apisystem/settings/checkdomain</path>
     [Tags("Settings")]
     [SwaggerResponse(200, "True if success", typeof(IActionResult))]
+    [SwaggerResponse(400, "The request body cannot be read, or `hostName` is empty, longer than 255 characters or not a DNS host name")]
+    [SwaggerResponse(403, "The method is available on a server installation only")]
     [HttpPost("checkdomain")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
     public async Task<IActionResult> CheckDomain([FromBody] DomainModel model)

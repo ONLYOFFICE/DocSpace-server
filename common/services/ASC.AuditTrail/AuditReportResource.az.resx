@@ -777,6 +777,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Müştəri {0} sirri yenidən yaradıldı</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Qeyd</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Hesabatda {1} hadisədən ən son {0} hadisə göstərilir. Bütün hadisələri əldə etmək üçün hesabatı CSV formatında yükləyin.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Vektorlaşdırma parametrləri sıfırlandı</value>
   </data>

@@ -68,4 +68,18 @@ export const settingsController = {
     const settings = await aiService.put("/config/user", req.body ?? {}, { raw: true });
     res.json(settings);
   }),
+
+  // GET config/tool-mode → `GET internal/ai/config/tool-mode`. The calling
+  // user's tool permission mode as the AI service spells it (`{ mode }`, the
+  // C# enum). The chat itself reads it through the preferences routes.
+  getToolMode: asyncHandler(async (_req, res) => {
+    const settings = await aiService.get("/config/tool-mode", { raw: true });
+    res.json(settings);
+  }),
+
+  // PUT config/tool-mode → `PUT internal/ai/config/tool-mode`.
+  setToolMode: asyncHandler(async (req, res) => {
+    const settings = await aiService.put("/config/tool-mode", req.body ?? {}, { raw: true });
+    res.json(settings);
+  }),
 };

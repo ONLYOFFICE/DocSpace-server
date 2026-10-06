@@ -169,6 +169,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Provider cost.
+        /// </summary>
+        public static string AccountingCustomerOperationProviderCost {
+            get {
+                return ResourceManager.GetString("AccountingCustomerOperationProviderCost", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Quantity.
         /// </summary>
         public static string AccountingCustomerOperationQuantity {
@@ -367,7 +376,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Backup.
+        ///   Looks up a localized string similar to Copies.
         /// </summary>
         public static string AccountingCustomerOperationServiceUOM_backup {
             get {

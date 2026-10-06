@@ -45,6 +45,9 @@ public class WalletServiceDescriptionManager
         { "image", "total_tokens" }
     };
 
+    // The kinds of AI search operation that have a description and a unit of their own.
+    private static readonly HashSet<string> _aiSearchTypes = ["search", "fetch"];
+
     public static (string, string, int) GetServiceDescriptionAndUom(Operation operation, Dictionary<string, string> metadata)
     {
         if (operation == null)
@@ -82,6 +85,16 @@ public class WalletServiceDescriptionManager
             }
         }
 
+        // AI search bills web searches and page crawls under one service: only the type tells them apart.
+        // An operation without a known type stays plain AI search.
+        if (serviceName == "ai-search" &&
+            metadata != null &&
+            metadata.TryGetValue(BillingClient.MetadataType, out var searchType) &&
+            _aiSearchTypes.Contains(searchType))
+        {
+            serviceName = searchType;
+        }
+
         if (string.IsNullOrEmpty(serviceName))
         {
             switch (operation.Type)
@@ -103,7 +116,8 @@ public class WalletServiceDescriptionManager
         return (description, uom, quantity);
     }
 
-    public static (string serviceName, string title, string serviceUnit) GetServiceTitleAndUom(string serviceName, Dictionary<string, string> customUom)
+    // culture: a letter resolves the texts for its recipient; null takes the current UI culture
+    public static (string serviceName, string title, string serviceUnit) GetServiceTitleAndUom(string serviceName, Dictionary<string, string> customUom, CultureInfo culture = null)
     {
         // for testing purposes
         if (serviceName != null && serviceName.EndsWith("-1-hour"))
@@ -113,8 +127,8 @@ public class WalletServiceDescriptionManager
 
         var unit = customUom?.GetValueOrDefault(serviceName, serviceName) ?? serviceName;
 
-        var title = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}");
-        var serviceUnit = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{unit}");
+        var title = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}", culture);
+        var serviceUnit = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{unit}", culture);
 
         return (serviceName, title, serviceUnit);
     }
@@ -200,6 +214,19 @@ public class WalletServiceDescriptionManager
             found = true;
             return tokens;
         }
+    }
+
+    /// <summary>
+    /// Reads what the provider charged for the whole quantity of an AI operation from its metadata.
+    /// Returns <c>null</c> when the metadata carries no cost or one that is not a number.
+    /// </summary>
+    public static decimal? GetProviderCost(Dictionary<string, string> metadata)
+    {
+        return metadata != null &&
+               metadata.TryGetValue(BillingClient.MetadataCost, out var value) &&
+               decimal.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var cost)
+            ? cost
+            : null;
     }
 
     /// <summary>

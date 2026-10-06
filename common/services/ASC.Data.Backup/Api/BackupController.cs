@@ -149,10 +149,11 @@ public class BackupController(
     /// <path>api/2.0/backup/createbackupschedule</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "True if the schedule was saved", typeof(bool))]
-    [SwaggerResponse(400, "The number of the stored copies is outside 1 - 30, or a dump was requested on a portal that is not a standalone installation")]
+    [SwaggerResponse(400, "The request body cannot be read, the number of the stored copies is outside 1-30, a dump was requested on a portal that is not a standalone installation, or `storageParams` repeats a key or, on a dump, contains `tenantId`")]
     [SwaggerResponse(402, "The portal subscription does not cover scheduled backups, has expired or has not been paid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "The target folder was not found")]
+    [SwaggerResponse(500, "`cronParams` is missing, its period is not a defined value, its hour or day is out of range for the period, which includes a weekly or monthly schedule sent without `day`, a key or value of `storageParams` is null, the `folderId` or `filePath` key the storage type needs is missing, or `Local` storage was requested on a portal that is not a standalone installation")]
     [HttpPost("createbackupschedule")]
     public async Task<bool> CreateBackupSchedule(CreateBackupScheduleRequestDto inDto)
     {
@@ -243,10 +244,11 @@ public class BackupController(
     /// <path>api/2.0/backup/startbackup</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "The state of the queued backup job", typeof(BackupProgressDto))]
-    [SwaggerResponse(400, "The folder ID does not match the storage type, or a dump was requested on a portal that is not a standalone installation")]
-    [SwaggerResponse(402, "The free backups of the current month are used up and the paid backup service is not available to this portal")]
+    [SwaggerResponse(400, "The request body cannot be read, the folder ID does not match the storage type, a dump was requested on a portal that is not a standalone installation, or `storageParams` repeats a key")]
+    [SwaggerResponse(402, "The portal already uses more storage than its plan allows and the backup goes to `Documents`, or the free backups of the current month are used up and the paid backup service is not available to this portal or cannot be charged")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "The target folder or the backup quota was not found")]
+    [SwaggerResponse(500, "A key or value of `storageParams` is null, `ThridpartyDocuments` storage has no `folderId`, or `Local` storage has no `filePath` or was requested on a portal that is not a standalone installation")]
     [AllowNotPayment]
     [HttpPost("startbackup")]
     public async Task<BackupProgressDto> StartBackup(StartBackupRequestDto inDto, [FromServices] TenantQuotaController quotaController)
@@ -502,6 +504,7 @@ public class BackupController(
     [SwaggerResponse(200, "True once the request has been accepted, whether or not a backup was deleted", typeof(bool))]
     [SwaggerResponse(402, "The portal subscription has expired or has not been paid")]
     [SwaggerResponse(403, "No permissions to perform this action")]
+    [SwaggerResponse(500, "There is no backup record with this ID")]
     [HttpDelete("deletebackup/{id:guid}")]
     public async Task<bool> DeleteBackup([FromRoute] DeleteBackupRequestDto inDto)
     {
@@ -554,9 +557,11 @@ public class BackupController(
     /// <path>api/2.0/backup/startrestore</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "The state of the queued restoring job", typeof(BackupProgressDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `backupId`, or `storageParams` repeats a key")]
     [SwaggerResponse(402, "The pricing plan of this portal does not allow restoring")]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [SwaggerResponse(404, "The backup record was not found, or the file it points to is missing")]
+    [SwaggerResponse(404, "The backup record was not found, the file given in `filePath` or its folder was not found, or, for `Local` storage, no backup archive has been uploaded to the portal")]
+    [SwaggerResponse(500, "`backupId` is not a GUID and `storageParams` has no `filePath`, or a key or value of `storageParams` is null")]
     [HttpPost("startrestore")]
     public async Task<BackupProgressDto> StartBackupRestore(StartBackupRestoreRequestDto inDto)
     {
@@ -665,7 +670,7 @@ public class BackupController(
     /// <path>api/2.0/backup/getbackupscount</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "The number of backups created within the period", typeof(int))]
-    [SwaggerResponse(400, "The start of the period is later than its end")]
+    [SwaggerResponse(400, "The start of the period is later than its end, or `from`, `to` or `paid` cannot be parsed")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [HttpGet("getbackupscount")]
@@ -700,7 +705,7 @@ public class BackupController(
     /// <path>api/2.0/backup/getbackupscountbypaid</path>
     [Tags("Backup")]
     [SwaggerResponse(200, "The number of free and of paid backups created within the period", typeof(BackupsCountResultDto))]
-    [SwaggerResponse(400, "The start of the period is later than its end")]
+    [SwaggerResponse(400, "The start of the period is later than its end, or `from`, `to` or `paid` cannot be parsed")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [AllowNotPayment]
     [HttpGet("getbackupscountbypaid")]

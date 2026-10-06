@@ -260,7 +260,8 @@ public class UserController(
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The new profile with its detailed information", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "The password does not meet the portal password policy")]
-    [SwaggerResponse(403, "The invitation link is invalid or has expired, the portal does not allow inviting this kind of account, or the caller may not create an account of the requested type")]
+    [SwaggerResponse(403, "The invitation link is invalid or has expired, the portal does not allow inviting this kind of account, the caller may not create an account of the requested type, the `files` URL was refused, or the server behind it answered with an error status after the account had been created")]
+    [SwaggerResponse(500, "The `files` URL could not be reached within 10 seconds, or the downloaded file is empty, is not an image the portal can read, or exceeds the portal limit on image size; the account is created all the same")]
     [HttpPost]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Authenticated")]
     public async Task<EmployeeFullDto> AddMember(MemberRequestDto inDto)
@@ -753,8 +754,9 @@ public class UserController(
     /// <path>api/2.0/people/{userId}</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The profile as it was just before it was deleted", typeof(EmployeeFullDto))]
-    [SwaggerResponse(403, "The account is not disabled, is a system or an LDAP account, or the caller may not delete a DocSpace administrator")]
+    [SwaggerResponse(403, "The account is not disabled, is a system or an LDAP account, the caller may not delete a DocSpace administrator, or the OAuth service refused to remove the OAuth clients of the account")]
     [SwaggerResponse(404, "No user has the specified ID")]
+    [SwaggerResponse(500, "A reassignment of the data of the account has not finished yet, or the OAuth service cannot be reached")]
     [HttpDelete("{userId}")]
     public async Task<EmployeeFullDto> DeleteMember(GetMemberByIdRequestDto inDto)
     {
@@ -1066,7 +1068,9 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The full profiles of the matching accounts", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, or `query` is missing")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator")]
+    [SwaggerResponse(500, "The `filterBy` is `group` and the `filterValue` is not a GUID")]
     [HttpGet("status/{status}/search")]
     public async IAsyncEnumerable<EmployeeFullDto> SearchUsersByStatus(AdvancedSearchDto inDto)
     {
@@ -1114,7 +1118,9 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "A page of active accounts, with their full profiles", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a member or a guest")]
+    [SwaggerResponse(500, "The `filterBy` is `group` and the `filterValue` is not a GUID")]
     [HttpGet]
     public IAsyncEnumerable<EmployeeFullDto> GetAllProfiles(GetAllProfilesRequestDto inDto)
     {
@@ -1300,7 +1306,9 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / User status")]
     [SwaggerResponse(200, "A page of accounts in the requested state, with their full profiles", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a member or a guest")]
+    [SwaggerResponse(500, "The `filterBy` is `group` and the `filterValue` is not a GUID")]
     [HttpGet("status/{status}")]
     public IAsyncEnumerable<EmployeeFullDto> GetByStatus(GetByStatusRequestDto inDto)
     {
@@ -1349,6 +1357,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "A page of matching accounts, with their full profiles", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a member or a guest")]
     [AllowNotPayment]
     [HttpGet("filter")]
@@ -1489,6 +1498,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "A page of matching accounts, with their short profiles", typeof(IAsyncEnumerable<EmployeeDto>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a member or a guest")]
     [HttpGet("simple/filter")]
     public async IAsyncEnumerable<EmployeeDto> GetSimpleByFilter(SimpleByFilterRequestDto inDto)
@@ -1549,7 +1559,8 @@ public class UserController(
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "Every account that was asked for, including the ones that were skipped", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The userIds field is missing")]
-    [SwaggerResponse(403, "No permissions to perform this action, or one of the listed accounts is not disabled")]
+    [SwaggerResponse(403, "No permissions to perform this action, one of the listed accounts is not disabled, or the OAuth service refused to remove the OAuth clients of an account")]
+    [SwaggerResponse(500, "A reassignment of the data of one of the listed accounts has not finished yet, or the OAuth service cannot be reached")]
     [HttpPut("delete", Order = -1)]
     public async IAsyncEnumerable<EmployeeFullDto> RemoveUsers(UpdateMembersRequestDto inDto)
     {
@@ -1629,6 +1640,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The targeted accounts the caller is allowed to see", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "The request body cannot be read, or `userIds` is missing while `resendAll` is false")]
     [SwaggerResponse(403, "A member or a guest asked for resendAll, or listed an account other than their own")]
     [AllowNotPayment]
     [HttpPut("invite")]
@@ -1809,6 +1821,7 @@ public class UserController(
     /// <path>api/2.0/people/theme</path>
     [Tags("People / Theme")]
     [SwaggerResponse(200, "The interface theme that was stored", typeof(DarkThemeSettingsDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `theme`")]
     [HttpPut("theme")]
     public async Task<DarkThemeSettingsDto> ChangePortalTheme(DarkThemeSettingsRequestDto inDto)
     {
@@ -2005,7 +2018,8 @@ public class UserController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("People / Password")]
     [SwaggerResponse(200, "The message stating that the recovery link was sent to the address", typeof(string))]
-    [SwaggerResponse(403, "The CAPTCHA was not passed, or an authenticated caller may not ask for that account")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `email`, or the email is not a valid address or is longer than 255 characters")]
+    [SwaggerResponse(403, "The CAPTCHA was not passed, an authenticated caller may not ask for that account, or, for an authenticated caller, the account does not exist, is disabled, comes from LDAP or SSO, or has an auto-generated email")]
     [AllowNotPayment]
     [AllowAnonymous]
     [HttpPost("password")]
@@ -2206,8 +2220,9 @@ public class UserController(
     [SwaggerResponse(200, "The profile as it is after the update", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "The first and last name pair is not a valid user name")]
     [SwaggerResponse(402, "The tariff or the user quota does not allow the requested guest or member seat")]
-    [SwaggerResponse(403, "The account is the portal owner or a system account, the caller may not edit it, or only the portal owner may edit a DocSpace administrator")]
+    [SwaggerResponse(403, "The account is the portal owner or a system account, the caller may not edit it, only the portal owner may edit a DocSpace administrator, or, on the caller's own profile, the `files` URL was refused or the server behind it answered with an error status")]
     [SwaggerResponse(404, "No user has the specified ID")]
+    [SwaggerResponse(500, "On the caller's own profile, the `files` URL could not be reached within 10 seconds, or the downloaded file is empty, is not an image the portal can read, or exceeds the portal limit on image size")]
     [HttpPut("{userId}", Order = 1)]
     public async Task<EmployeeFullDto> UpdateMember(UpdateMemberByIdRequestDto inDto)
     {
@@ -2542,6 +2557,7 @@ public class UserController(
     /// <collection>list</collection>
     [Tags("People / User type")]
     [SwaggerResponse(200, "The converted users with their detailed information", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `userIds`")]
     [SwaggerResponse(402, "The tariff or the paid-user quota does not allow one more paid user")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("type/{type}")]
@@ -2714,6 +2730,7 @@ public class UserController(
     /// <path>api/2.0/people/type/terminate</path>
     [Tags("People / User type")]
     [SwaggerResponse(200, "The state of the cancelled user type change, or an empty body when nothing was queued for the user", typeof(TaskProgressResponseDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `userId`")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPut("type/terminate")]
     public async Task<TaskProgressResponseDto> TerminateUserTypeUpdate(TerminateRequestDto inDto)
@@ -3214,6 +3231,7 @@ public class UserControllerAdditional<T>(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The matching accounts, each with its access state for the room", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a guest or cannot read the room")]
     [SwaggerResponse(404, "No room has the specified ID")]
     [HttpGet("room/{id}")]
@@ -3247,6 +3265,7 @@ public class UserControllerAdditional<T>(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The matching accounts, each with its access state for the folder", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a guest or cannot read the folder")]
     [SwaggerResponse(404, "No folder has the specified ID")]
     [HttpGet("folder/{id}")]
@@ -3280,6 +3299,7 @@ public class UserControllerAdditional<T>(
     /// <collection>list</collection>
     [Tags("People / Search")]
     [SwaggerResponse(200, "The matching accounts, each with its access state for the file", typeof(IAsyncEnumerable<EmployeeFullDto>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "The caller is a guest or cannot read the file")]
     [SwaggerResponse(404, "No file has the specified ID")]
     [HttpGet("file/{id}")]

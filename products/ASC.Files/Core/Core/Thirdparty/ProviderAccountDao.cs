@@ -446,6 +446,8 @@ internal class ProviderAccountDao(
 
             await dbContext.DeleteDbFilesSecuritiesAsync(tenantId, entryIDs);
             await dbContext.DeleteDbFilesTagLinksAsync(tenantId, entryIDs);
+            // a room group that kept a link to a room of this connection would point at a provider that no longer exists
+            await dbContext.DeleteThirdpartyRoomGroupRefsAsync(tenantId, folderId, folderId + "-");
             await dbContext.DeleteThirdPartyAccountsByLinkIdAsync(tenantId, linkId);
 
             await tr.CommitAsync();

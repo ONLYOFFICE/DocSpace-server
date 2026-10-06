@@ -108,7 +108,7 @@ const assignmentsEngine = new AssignmentsEngine({ storage });
 
 // Gate for creating a thread (review #6, Bug 82719). Two requirements:
 //  1. If an `entityId` is supplied it must reference a folder the caller can
-//     access — a missing folder or a no-access response both surface as 404
+//     access — a missing folder surfaces as 404, a no-access response as 403
 //     (see `assertEntityAccessible`). An accessible NON-agent folder is
 //     allowed BY DESIGN (Bug 82719 reopen decision): threads are either
 //     global or agent-scoped, so `HttpThreadsStorage` folds a non-agent

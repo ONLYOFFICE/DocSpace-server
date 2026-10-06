@@ -937,7 +937,11 @@ Thông báo ngoại lệ: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Xin chào $UserName!
 
-Chúng tôi liên hệ để thông báo cho bạn rằng việc tự động gia hạn gói cước hoặc dịch vụ bạn đã mua chưa được hoàn thành. Chúng tôi mong bạn tự thao tác gia hạn lại.
+Chúng tôi liên hệ để thông báo cho bạn rằng việc tự động gia hạn gói cước hoặc dịch vụ bạn đã mua chưa được hoàn thành:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Chúng tôi mong bạn tự thao tác gia hạn lại.
 
 $OrangeButton
 
