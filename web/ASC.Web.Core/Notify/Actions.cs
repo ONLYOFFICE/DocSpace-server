@@ -1805,7 +1805,9 @@ public sealed class SaasOwnerRetentionUnpaidWarningNotifyAction(
 
 /// <summary>
 /// An unused portal that still has money on its wallet: the money goes with the portal, and the letter
-/// says by when.
+/// says by when. A free portal is told to sign in, which starts its count again. A portal whose paid
+/// tariff lapsed is counted from the due date, so signing in changes nothing for it, and it is told to
+/// renew instead.
 /// </summary>
 [Scope]
 public sealed class SaasOwnerRetentionWalletWarningNotifyAction(
@@ -1829,10 +1831,22 @@ public sealed class SaasOwnerRetentionWalletWarningNotifyAction(
 
     protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
     {
+        var unpaid = Category == PortalRetentionCategory.FormerPayingWithBalance;
+
+        tags.Add(new TagValue("Unpaid", unpaid ? "True" : "False"));
         tags.Add(Date("BlockDate", Decision.BlockOn, culture));
         tags.Add(Date("DeleteDate", Decision.DeleteOn, culture));
         tags.Add(new TagValue("URL1", commonLinkUtility.GetFullAbsolutePath("~/billing/wallet")));
-        tags.Add(TagValues.OrangeButton(Resource("ButtonGoToDocSpace", culture), commonLinkUtility.GetFullAbsolutePath("~")));
+
+        if (unpaid)
+        {
+            tags.Add(Date("DueDate", context.DueDate, culture));
+            tags.Add(TagValues.OrangeButton(Resource("ButtonRenewNow", culture), commonLinkUtility.GetFullAbsolutePath("~/billing/overview")));
+        }
+        else
+        {
+            tags.Add(TagValues.OrangeButton(Resource("ButtonGoToDocSpace", culture), commonLinkUtility.GetFullAbsolutePath("~")));
+        }
 
         return Task.CompletedTask;
     }

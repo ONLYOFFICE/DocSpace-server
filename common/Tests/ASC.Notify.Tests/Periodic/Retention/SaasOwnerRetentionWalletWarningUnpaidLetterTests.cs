@@ -34,30 +34,35 @@
 namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
-/// The reminder to an unused free portal with money left on its wallet
-/// (<c>saas_owner_retention_wallet_warning</c>): the money goes with the portal, the letter says by when,
-/// and signing in keeps both. The lapsed portal's variant is <see cref="SaasOwnerRetentionWalletWarningUnpaidLetterTests"/>.
+/// The reminder to a portal whose paid tariff lapsed while money is still on its wallet
+/// (<c>saas_owner_retention_wallet_warning</c>). Its count runs from the due date, so signing in would
+/// change nothing: the letter names the due date and asks to renew.
 /// </summary>
-public class SaasOwnerRetentionWalletWarningLetterTests : PortalRetentionLetterTestBase<SaasOwnerRetentionWalletWarningNotifyAction>
+public class SaasOwnerRetentionWalletWarningUnpaidLetterTests : PortalRetentionLetterTestBase<SaasOwnerRetentionWalletWarningNotifyAction>
 {
-    protected override PortalRetentionCategory Category => PortalRetentionCategory.FreeWithBalance;
+    protected override PortalRetentionCategory Category => PortalRetentionCategory.FormerPayingWithBalance;
 
     protected override PortalRetentionLetter? Letter => PortalRetentionLetter.MonthlyNotice;
 
+    protected override string PreviewName(SaasOwnerRetentionWalletWarningNotifyAction action) => action.ID + "_unpaid";
+
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(Day(BlockOn, scope))
+        letter.Body.Should().Contain(Day(DueOn, scope))
+            .And.Contain(Day(BlockOn, scope))
             .And.Contain(Day(DeleteOn, scope))
             .And.Contain($"{scope.PortalUrl}/billing/wallet")
-            .And.Contain(Caption("ButtonGoToDocSpace", scope));
+            .And.Contain($"{scope.PortalUrl}/billing/overview")
+            .And.Contain(Caption("ButtonRenewNow", scope));
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         letter.Subject.Should().Be($"Funds on your {LetterEnvironment.LogoText} wallet will be lost");
 
-        letter.Body.Should().Contain("there is still money left on its")
+        letter.Body.Should().Contain($"ended on <b>{Day(DueOn, scope)}</b>")
+            .And.Contain("Unless the subscription is renewed")
             .And.Contain("The funds left on the wallet will be lost together with it.")
-            .And.Contain("sign in and continue working");
+            .And.NotContain("sign in", "signing in does not move the count of a lapsed portal");
     }
 }
