@@ -804,7 +804,9 @@ $TrulyYours</value>
 *Category:* ${Category}
 *Deletion date:* ${DeleteDate}
 
-Unless it is unblocked, the portal and all its data will be deleted on that date.</value>
+Unless it is unblocked, the portal and all its data will be deleted on that date.
+
+To unblock it, open "Unblock the portal":"$URL1". The link does not expire, so it can also be forwarded to the owner.</value>
   </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>&lt;tr border="0" cellspacing="0" cellpadding="0"&gt;&lt;td class="fol" style="font-family: 'Open Sans', Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;"&gt;Your ${LetterLogoText} has been &lt;span style="color: #FF6F3D;"&gt;blocked&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;

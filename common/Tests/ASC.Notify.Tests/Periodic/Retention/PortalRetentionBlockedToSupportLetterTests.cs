@@ -35,7 +35,7 @@ namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
 /// The note to support that the retention policy has blocked a portal
-/// (<c>portal_retention_blocked_to_support</c>): who to call, and by when.
+/// (<c>portal_retention_blocked_to_support</c>): who to call, by when, and the link that unblocks it.
 /// </summary>
 public class PortalRetentionBlockedToSupportLetterTests : LetterTestBase<PortalRetentionBlockedToSupportNotifyAction>
 {
@@ -55,13 +55,16 @@ public class PortalRetentionBlockedToSupportLetterTests : LetterTestBase<PortalR
         letter.Body.Should().Contain(Domain)
             .And.Contain(scope.Recipient.Email)
             .And.Contain(nameof(PortalRetentionCategory.Free))
-            .And.Contain("2026-12-03", "support reads the date in one format, whatever the culture");
+            .And.Contain("2026-12-03", "support reads the date in one format, whatever the culture")
+            .And.Contain(nameof(ConfirmType.PortalUnblock), "support gets the owner's link that unblocks the portal");
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         letter.Subject.Should().Be($"{LetterEnvironment.LogoText} has been blocked by the retention policy");
 
-        letter.Body.Should().Contain("Unless it is unblocked, the portal and all its data will be deleted on that date.");
+        letter.Body.Should().Contain("Unless it is unblocked, the portal and all its data will be deleted on that date.")
+            .And.Contain("Unblock the portal")
+            .And.Contain("can also be forwarded to the owner");
     }
 }

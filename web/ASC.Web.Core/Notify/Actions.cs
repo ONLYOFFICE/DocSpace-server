@@ -1932,10 +1932,14 @@ public sealed class SaasOwnerRetentionDeletedNotifyAction(
 
 /// <summary>
 /// Tells support that the retention policy has blocked a portal, so a manager can step in before it
-/// is deleted - the only way back for a free portal.
+/// is deleted - the only way back for a free portal. The letter carries the owner's unblocking link:
+/// support opens it, or forwards it to the owner once they have talked.
 /// </summary>
 [Scope]
-public sealed class PortalRetentionBlockedToSupportNotifyAction(DisplayUserSettingsHelper displayUserSettingsHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
+public sealed class PortalRetentionBlockedToSupportNotifyAction(
+    DisplayUserSettingsHelper displayUserSettingsHelper,
+    CommonLinkUtility commonLinkUtility,
+    TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "portal_retention_blocked_to_support";
 
@@ -1956,6 +1960,7 @@ public sealed class PortalRetentionBlockedToSupportNotifyAction(DisplayUserSetti
             new TagValue(CommonTags.UserName, owner.DisplayUserName(displayUserSettingsHelper)),
             new TagValue("Category", category.ToString()),
             new TagValue("DeleteDate", deleteOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)),
+            new TagValue("URL1", commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalUnblock)),
             new TagValue(CommonTags.Footer, null),
             TagValues.WithoutUnsubscribe()
         ];
