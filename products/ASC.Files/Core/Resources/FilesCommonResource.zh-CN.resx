@@ -607,4 +607,19 @@
   <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
     <value>此操作仅在私人房间中可用</value>
   </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>聊天输出</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>该房间已包含 .ai 文件夹</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>房间使用存储时无法断开连接。请改为删除该房间</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>在文件元数据中搜索</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>在文件夹元数据中搜索</value>
+  </data>
 </root>

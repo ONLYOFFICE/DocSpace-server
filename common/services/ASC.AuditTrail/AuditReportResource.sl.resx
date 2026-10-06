@@ -1233,4 +1233,64 @@
   <data name="AiProfileUnassigned" xml:space="preserve">
     <value>Profil AI je bil odstranjen iz dejanja: {0}</value>
   </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Profil AI je bil dodeljen agentu AI za dejanje: {0}</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Kaskadno dodeljevanje metapodatkov je začeto: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Polje metapodatkov je bilo ustvarjeno: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Polje metapodatkov je bilo izbrisano: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Polje metapodatkov je bilo posodobljeno: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Predloga metapodatkov je bila dodeljena: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Predloga metapodatkov je bila ustvarjena: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Predloga metapodatkov je bila izbrisana: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Dodelitev predloge metapodatkov je bila preklicana: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Predloga metapodatkov je bila posodobljena: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Vrednosti metapodatkov so bile posodobljene: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Datoteke [{0}]. Označene kot prebrane</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Datoteke [{0}]. Datoteka ni bila shranjena. Kvota za shranjevanje portala je bila prekoračena.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Datoteke [{0}]. Shranjevanje datoteke presega kvoto za shranjevanje portala.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Mape [{0}]. Označene kot prebrane</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Šifrirni ključ zasebne sobe {0} je bil ustvarjen</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Šifrirni ključ zasebne sobe {0} je bil izbrisan</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Šifrirni ključ zasebne sobe {0} je bil posodobljen</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Zaznana je bila sumljiva prijava: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>Strežnik MCP {0} AI agenta je bil posodobljen</value>
+  </data>
 </root>

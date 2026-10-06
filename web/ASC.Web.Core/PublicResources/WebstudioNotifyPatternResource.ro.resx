@@ -1886,4 +1886,15 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Bună ziua, $UserName!
+
+Vă contactăm pentru a vă informa că reîncărcarea automată nu este acceptată pentru metoda dvs. actuală de plată: banii ajung în ${LetterLogoText} Wallet doar după ce transferul bancar este decontat, astfel încât soldul nu poate fi reîncărcat imediat.
+
+Prin urmare, reîncărcarea automată a fost dezactivată. Pentru a evita orice întrerupere a serviciilor plătite, vă rugăm să reîncărcați manual soldul portofelului sau să treceți la o metodă de plată care acceptă reîncărcarea automată.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>

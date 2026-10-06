@@ -607,4 +607,19 @@
   <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
     <value>Това действие е достъпно само в частна стая</value>
   </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Изходи от чат</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>Стаята вече съдържа папката .ai</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Хранилището не може да бъде изключено, докато стая го използва. Вместо това изтрийте стаята</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Търсене в метаданни на файл</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Търсене в метаданни на папка</value>
+  </data>
 </root>

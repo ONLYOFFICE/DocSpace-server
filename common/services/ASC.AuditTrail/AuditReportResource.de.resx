@@ -1263,4 +1263,34 @@
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>MCP-Server {0} des KI-Agenten aktualisiert</value>
   </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Metadaten-Kaskadenzuweisung gestartet: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Metadatenfeld erstellt: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Metadatenfeld gelöscht: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Metadatenfeld aktualisiert: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Metadaten-Vorlage zugewiesen: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Metadaten-Vorlage erstellt: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Metadaten-Vorlage gelöscht: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Zuweisung der Metadaten-Vorlage aufgehoben: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Metadaten-Vorlage aktualisiert: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Metadatenwerte aktualisiert: {0}</value>
+  </data>
 </root>

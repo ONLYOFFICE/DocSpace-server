@@ -1886,4 +1886,15 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Pozdravljeni, $UserName!
+
+Obračamo se na vas, da vas obvestimo, da samodejno dopolnjevanje ni podprto za vaš trenutni način plačila: denar prispe v ${LetterLogoText} Wallet šele po poravnavi bančnega nakazila, zato stanja ni mogoče takoj dopolniti.
+
+Samodejno dopolnjevanje je zato onemogočeno. Da bi se izognili morebitnim prekinitevam plačljivih storitev, prosimo ročno dopolnite stanje svoje denarnice ali preklopite na način plačila, ki podpira samodejno dopolnjevanje.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
 </root>
