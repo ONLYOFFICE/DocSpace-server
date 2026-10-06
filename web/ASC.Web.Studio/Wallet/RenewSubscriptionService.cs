@@ -334,9 +334,20 @@ public class RenewSubscriptionService(
 
             var unresolved = new List<PendingRenewal>();
 
+            // Once billing has failed to answer in this run, every further check would only wait out the same
+            // client timeout and get the same answer, delaying the regular renewals behind them - so the rest
+            // count this run as one more unconfirmed check without asking.
+            BillingTransportException billingDown = null;
+
             foreach (var renewal in pending)
             {
-                var next = await VerifyPendingRenewalAsync(renewal);
+                var (extended, error) = billingDown is null
+                    ? await CheckExtendedAsync(renewal)
+                    : (false, billingDown);
+
+                billingDown ??= error as BillingTransportException;
+
+                var next = await SettlePendingRenewalAsync(renewal, extended, error);
                 if (next != null)
                 {
                     unresolved.Add(next);
@@ -351,26 +362,27 @@ public class RenewSubscriptionService(
         }
     }
 
-    // Returns the renewal to check again on the next run, or null once it is settled.
-    private async Task<PendingRenewal> VerifyPendingRenewalAsync(PendingRenewal renewal)
+    private async Task<(bool Extended, Exception Error)> CheckExtendedAsync(PendingRenewal renewal)
     {
-        var description = renewal.Description;
-        var check = renewal.Checks + 1;
-
-        await using var scope = _scopeFactory.CreateAsyncScope();
-
-        var extended = false;
-        Exception error = null;
-
         try
         {
+            await using var scope = _scopeFactory.CreateAsyncScope();
+
             var tariffService = scope.ServiceProvider.GetRequiredService<ITariffService>();
-            extended = await tariffService.IsSubscriptionExtendedAsync(renewal.TenantId, renewal.ProductId, renewal.PreviousDueDate);
+
+            return (await tariffService.IsSubscriptionExtendedAsync(renewal.TenantId, renewal.ProductId, renewal.PreviousDueDate), null);
         }
         catch (Exception ex)
         {
-            error = ex;
+            return (false, ex);
         }
+    }
+
+    // Returns the renewal to check again on the next run, or null once it is settled.
+    private async Task<PendingRenewal> SettlePendingRenewalAsync(PendingRenewal renewal, bool extended, Exception error)
+    {
+        var description = renewal.Description;
+        var check = renewal.Checks + 1;
 
         if (!extended)
         {
@@ -393,6 +405,8 @@ public class RenewSubscriptionService(
 
         try
         {
+            await using var scope = _scopeFactory.CreateAsyncScope();
+
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             await tenantManager.SetCurrentTenantAsync(renewal.TenantId);
 
