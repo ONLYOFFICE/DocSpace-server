@@ -60,7 +60,8 @@ public class SaasOwnerRetentionWalletWarningUnpaidLetterTests : PortalRetentionL
     {
         letter.Subject.Should().Be($"Funds on your {LetterEnvironment.LogoText} wallet will be lost");
 
-        letter.Body.Should().Contain($"ended on <b>{Day(DueOn, scope)}</b>")
+        letter.Body.Should().Contain("ended on <strong")
+            .And.Contain($">{Day(DueOn, scope)}</strong>")
             .And.Contain("Unless the subscription is renewed")
             .And.Contain("The funds left on the wallet will be lost together with it.")
             .And.NotContain("sign in", "signing in does not move the count of a lapsed portal");

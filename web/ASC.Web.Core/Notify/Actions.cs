@@ -1709,8 +1709,6 @@ public abstract class PortalRetentionNotifyAction(
     /// <summary>Whoever paid for the portal hears about it too.</summary>
     protected override bool ToPayer => Category is PortalRetentionCategory.FormerPaying or PortalRetentionCategory.FormerPayingWithBalance;
 
-    protected override bool TrulyYoursAsTableRow => true;
-
     /// <summary>
     /// Whether the owner may unblock the portal from the letter. A portal that has paid, or still has
     /// money on its wallet, may; a free one is unblocked through support.

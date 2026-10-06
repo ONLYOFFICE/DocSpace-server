@@ -1878,7 +1878,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: 'Open Sans', Helv [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to h1.Your ${LetterLogoText} has been blocked [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_owner_retention_blocked {
             get {
@@ -1887,7 +1887,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: 'Open Sans', Helv [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to h1.Your ${LetterLogoText} has been deleted [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_owner_retention_deleted {
             get {
@@ -1896,7 +1896,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: 'Open Sans', Helv [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to h1.Your ${LetterLogoText} will be deleted [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_owner_retention_deletion_reminder {
             get {
@@ -1905,7 +1905,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: 'Open Sans', Helv [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to h1.Your ${LetterLogoText} is not in use [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_owner_retention_inactivity_warning {
             get {
@@ -1914,7 +1914,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: 'Open Sans', Helv [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to h1.Your subscription has ended [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_owner_retention_unpaid_warning {
             get {
@@ -1923,7 +1923,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: 'Open Sans', Helv [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to h1.Funds on your wallet will be lost [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_owner_retention_wallet_warning {
             get {
