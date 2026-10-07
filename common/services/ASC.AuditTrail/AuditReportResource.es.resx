@@ -1263,4 +1263,34 @@
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>Servidor MCP {0} del agente de IA actualizado</value>
   </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Asignación en cascada de metadatos iniciada: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Campo de metadatos creado: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Campo de metadatos eliminado: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Campo de metadatos actualizado: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Asignación de plantilla de metadatos cancelada: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Plantilla de metadatos asignada: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Plantilla de metadatos actualizada: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Plantilla de metadatos creada: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Plantilla de metadatos eliminada: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Valores de metadatos actualizados: {0}</value>
+  </data>
 </root>

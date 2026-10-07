@@ -1263,4 +1263,34 @@
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>Máy chủ MCP {0} của tác nhân AI đã được cập nhật</value>
   </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Bắt đầu gán siêu dữ liệu theo tầng: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Trường siêu dữ liệu đã được tạo: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Trường siêu dữ liệu đã bị xóa: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Trường siêu dữ liệu đã được cập nhật: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Mẫu siêu dữ liệu đã được gán: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Mẫu siêu dữ liệu đã được tạo: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Mẫu siêu dữ liệu đã bị xóa: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Hủy gán mẫu siêu dữ liệu: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Mẫu siêu dữ liệu đã được cập nhật: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Giá trị siêu dữ liệu đã được cập nhật: {0}</value>
+  </data>
 </root>

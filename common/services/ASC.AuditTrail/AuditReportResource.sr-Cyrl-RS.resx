@@ -1263,4 +1263,34 @@
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>MCP сервер {0} AI агента је ажуриран</value>
   </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Каскадно додељивање метаподатака је покренуто: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Додељивање шаблона метаподатака је отказано: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Шаблон метаподатака је ажуриран: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Поље метаподатака је креирано: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Поље метаподатака је обрисано: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Поље метаподатака је ажурирано: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Шаблон метаподатака је додељен: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Шаблон метаподатака је креиран: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Шаблон метаподатака је обрисан: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Вредности метаподатака су ажуриране: {0}</value>
+  </data>
 </root>

@@ -1889,4 +1889,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Cześć, $UserName!
+
+Kontaktujemy się, aby poinformować, że automatyczne doładowanie nie jest obsługiwane dla Twojej aktualnej metody płatności: pieniądze docierają do ${LetterLogoText} Wallet dopiero po rozliczeniu przelewu bankowego, dlatego salda nie można uzupełnić od razu.
+
+Automatyczne doładowanie zostało więc wyłączone. Aby uniknąć przerw w działaniu płatnych usług, prosimy o ręczne doładowanie salda portfela lub zmianę metody płatności obsługującej automatyczne doładowanie.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Wymagane działanie: Automatyczne doładowanie nie jest dostępne dla Twojego ${LetterLogoText} Wallet</value>
+  </data>
 </root>

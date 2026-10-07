@@ -1263,4 +1263,34 @@
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>Serveur MCP {0} de l'agent IA mis à jour</value>
   </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Attribution en cascade des métadonnées démarrée : {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Champ de métadonnées créé : {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Champ de métadonnées supprimé : {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Champ de métadonnées mis à jour : {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Modèle de métadonnées attribué : {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Modèle de métadonnées créé : {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Modèle de métadonnées supprimé : {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Attribution du modèle de métadonnées annulée : {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Modèle de métadonnées mis à jour : {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Valeurs des métadonnées mises à jour : {0}</value>
+  </data>
 </root>
