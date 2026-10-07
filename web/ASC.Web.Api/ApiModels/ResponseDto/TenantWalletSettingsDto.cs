@@ -78,7 +78,7 @@ public class TenantWalletSettingsDto
     public bool LowBalanceNotified { get; init; }
 
     /// <summary>
-    /// When the settings were last stored, or `0001-01-01T00:00:00` when they never were.
+    /// When the settings were last stored; when they were never stored, the moment they were read instead.
     /// </summary>
     /// <example>2026-01-01T00:00:00Z</example>
     public DateTime LastModified { get; init; }

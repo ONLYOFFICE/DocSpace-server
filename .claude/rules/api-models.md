@@ -53,6 +53,17 @@ controller. Reusing the response class as the body, or the stored class as eithe
 The controller builds the domain object from the request explicitly and fills the server-owned fields itself
 (`PaymentsController.SetTenantWalletSettings`, `SecurityController.SetAuditSettings`).
 
+**Exception — an endpoint moved to DTOs keeps its old request shape.** When the old body carried server-owned
+fields (`lastModified`, `lowBalance*`, `IsLicensor`, `databaseTypeEnum`, the descriptive fields of auth keys), the
+new request DTO keeps them so that clients sending them are not rejected. Such a field is allowed only when:
+
+- its `<summary>` says it is accepted for compatibility and ignored (and the operation remarks say the same);
+- nothing reads it: the mapper ignores it (`[MapperIgnoreSource]`) and the controller never touches it;
+- for a typed value, it is no stricter than before — a field that was get-only stays get-only, so a value of the
+  wrong type is still ignored rather than refused with 400 (`ExternalDatabaseConnectionRequestDto.DatabaseTypeEnum`).
+
+Do not remove such a field as a "clean-up": that is a contract change and goes through §5.2.
+
 ## 3. Mapping
 
 First decide whether a DTO is a copy at all. A class that exists only to be returned — nothing but the
@@ -112,7 +123,7 @@ Most exposed core classes predate this rule. Moving one is a contract change onl
 
 - [ ] No type on the endpoint's request or response graph is a setting, an entity, a core or foreign class,
       a service or an internal wrapper (§1).
-- [ ] The request DTO holds only caller-chosen fields; the controller sets the server-owned ones (§2).
+- [ ] The request DTO holds only caller-chosen fields, or server-owned ones kept for compatibility and documented as ignored; the controller sets the server-owned values (§2).
 - [ ] Mapping is Mapperly (`Target` towards a DTO, `Source` from a request) or a `*DtoHelper`; people in new endpoints are `EmployeeDto` (§3).
 - [ ] When an endpoint was moved: the OpenAPI diff shows only the intended changes, and any removed field is
       named in the PR together with the consumers checked (§5).

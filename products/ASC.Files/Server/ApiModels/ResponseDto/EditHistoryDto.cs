@@ -113,12 +113,19 @@ public partial class EditHistoryMapper(ApiDateTimeHelper apiDateTimeHelper, User
     {
         var result = Map(editHistory);
 
-        result.Changes = editHistory.Changes.Select(r => new EditHistoryChangesDto(r, apiDateTimeHelper)).ToList();
+        result.Changes = editHistory.Changes.Select(r => new EditHistoryChangesDto(r, MapAuthor(r.Author), apiDateTimeHelper)).ToList();
         result.ChangesHistory = editHistory.ChangesString;
         result.Created = apiDateTimeHelper.Get(editHistory.ModifiedOn);
-        result.User = EditHistoryAuthorDto.From(new EditHistoryAuthor(userManager, displayUserSettingsHelper) { Id = editHistory.ModifiedBy.ToString() });
+        result.User = MapAuthor(new EditHistoryAuthor(userManager, displayUserSettingsHelper) { Id = editHistory.ModifiedBy.ToString() });
 
         return result;
+    }
+
+    // Written by hand, not generated: EditHistoryAuthor.Name resolves the account through UserManager, and
+    // dto-mapping.md keeps such lookups out of generated mappings, in this scoped helper.
+    private static EditHistoryAuthorDto MapAuthor(EditHistoryAuthor author)
+    {
+        return author == null ? null : new EditHistoryAuthorDto { Id = author.Id, Name = author.Name };
     }
 
     [MapperIgnoreTarget(nameof(EditHistoryDto.Changes))]
@@ -131,13 +138,13 @@ public partial class EditHistoryMapper(ApiDateTimeHelper apiDateTimeHelper, User
 /// <summary>
 /// One single change inside a saved revision of a file.
 /// </summary>
-public class EditHistoryChangesDto(EditHistoryChanges historyChanges, ApiDateTimeHelper apiDateTimeHelper)
+public class EditHistoryChangesDto(EditHistoryChanges historyChanges, EditHistoryAuthorDto user, ApiDateTimeHelper apiDateTimeHelper)
 {
     /// <summary>
     /// The account that made this change, as the editing service reported it; an account it could not name is
     /// reported as a guest.
     /// </summary>
-    public EditHistoryAuthorDto User { get; set; } = EditHistoryAuthorDto.From(historyChanges.Author);
+    public EditHistoryAuthorDto User { get; set; } = user;
 
     /// <summary>
     /// When this change was made, written with the offset of the portal's time zone rather than as plain UTC.

@@ -43892,7 +43892,7 @@
               1
             ],
             "type": "integer",
-            "description": "The room ID.",
+            "description": "The ID of the room the form is in. It is stored with the role as sent, so pass the room the form lives in.",
             "format": "int32"
           },
           "roleName": {
@@ -43903,7 +43903,7 @@
               "null",
               "string"
             ],
-            "description": "The role name."
+            "description": "The name of a role the form defines, such as the one the form author gave a group of fields."
           },
           "roleColor": {
             "examples": [
@@ -43913,14 +43913,14 @@
               "null",
               "string"
             ],
-            "description": "The role color."
+            "description": "The color the editor marks the fields of this role with, as a hex code."
           },
           "userId": {
             "examples": [
               "00000000-0000-0000-0000-000000000000"
             ],
             "type": "string",
-            "description": "The user ID.",
+            "description": "The account that fills this role. It is notified once filling starts, unless it is the caller.",
             "format": "uuid"
           },
           "sequence": {
@@ -43928,7 +43928,7 @@
               12
             ],
             "type": "integer",
-            "description": "The role sequence.",
+            "description": "Accepted for compatibility and ignored: the position of the role in the list sets the filling order.",
             "format": "int32"
           },
           "submitted": {
@@ -43936,14 +43936,14 @@
               false
             ],
             "type": "boolean",
-            "description": "Specifies if the role was submitted or not."
+            "description": "Whether this role counts as already submitted. It is stored as sent; send false when filling starts."
           },
           "openedAt": {
             "examples": [
               "2026-01-01T10:00:00Z"
             ],
             "type": "string",
-            "description": "The date and time when the role was opened.",
+            "description": "Accepted for compatibility and ignored: the portal records when the role is opened.",
             "format": "date-time"
           },
           "submissionDate": {
@@ -43951,11 +43951,11 @@
               "2026-01-01T10:00:00Z"
             ],
             "type": "string",
-            "description": "The date and time when the role was submitted.",
+            "description": "Accepted for compatibility and ignored: the portal records when the role is submitted.",
             "format": "date-time"
           }
         },
-        "description": "The form role."
+        "description": "One role of a form and the account that fills it."
       },
       "FormSubmissionsDto": {
         "type": "object",
@@ -49395,7 +49395,7 @@
               "array"
             ],
             "items": {
-              "description": "The form role.",
+              "description": "One role of a form and the account that fills it.",
               "$ref": "#/components/schemas/FormRoleRequest"
             },
             "description": "The roles with the account taking each of them and the sequence number that decides the turn: the same number\r\nmeans the roles may be filled in parallel, different ones make a queue. The whole set is replaced on every\r\ncall, and an empty set resets the filling."

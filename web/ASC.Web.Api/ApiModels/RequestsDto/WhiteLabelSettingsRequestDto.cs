@@ -168,6 +168,13 @@ public class SaveAdditionalResourcesRequest
     public DateTime LastModified { get; set; }
 }
 
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]
+public static partial class SaveAdditionalResourcesRequestMapper
+{
+    [MapperIgnoreSource(nameof(SaveAdditionalResourcesRequest.LastModified))]
+    public static partial AdditionalWhiteLabelSettings Map(this SaveAdditionalResourcesRequest source);
+}
+
 /// <summary>
 /// The body of a change to the branding of the portal's letters.
 /// </summary>
@@ -199,10 +206,7 @@ public class SaveMailFooterRequest
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]
-public static partial class WhiteLabelSettingsRequestDtoMapper
+public static partial class SaveMailFooterRequestMapper
 {
-    [MapperIgnoreSource(nameof(SaveAdditionalResourcesRequest.LastModified))]
-    public static partial AdditionalWhiteLabelSettings Map(this SaveAdditionalResourcesRequest source);
-
     public static partial MailWhiteLabelSettings Map(this SaveMailFooterRequest source);
 }

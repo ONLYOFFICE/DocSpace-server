@@ -34,6 +34,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { createGenerator } from "ts-json-schema-generator";
 import { toOpenApiSchemas } from "./draft-to-openapi.js";
+import { claim } from "./schema-names.js";
 import { applySchemaDocs, cleanOperationDescriptions } from "./schemaDocs.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -89,16 +90,6 @@ function rewriteRefs(node: unknown, rename: (name: string) => string): unknown {
 }
 
 // Namespace shared schema names and rewrite every `$ref` accordingly.
-// Namespacing is not injective (`X` and `AiX` both publish as `AiX`, `TProvider` and `Provider` both as
-// `AiProvider`), so a second source name for a taken key is an error rather than a silent overwrite.
-function claim(owners: Map<string, string>, published: string, source: string): void {
-  const owner = owners.get(published);
-  if (owner !== undefined && owner !== source) {
-    throw new Error(`Schemas ${owner} and ${source} would both be published as ${published}`);
-  }
-  owners.set(published, source);
-}
-
 function namespaceSchemas(schemas: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   const owners = new Map<string, string>();

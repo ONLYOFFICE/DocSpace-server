@@ -45,7 +45,7 @@ public class LicensorDetailsDto
     /// </summary>
     /// <example>My Own Corporation</example>
     [StringLength(255)]
-    public required string CompanyName { get; set; }
+    public string CompanyName { get; set; }
 
     /// <summary>
     /// The address the vendor name links to, as an absolute URL with its scheme. Empty under the same conditions
@@ -54,7 +54,7 @@ public class LicensorDetailsDto
     /// <example>https://www.example.com</example>
     [Url]
     [StringLength(255)]
-    public required string Site { get; set; }
+    public string Site { get; set; }
 
     /// <summary>
     /// The mailbox the About page offers for reaching the vendor. It is not the portal's own support address, and
@@ -63,7 +63,7 @@ public class LicensorDetailsDto
     /// <example>contact@example.com</example>
     [EmailAddress]
     [StringLength(255)]
-    public required string Email { get; set; }
+    public string Email { get; set; }
 
     /// <summary>
     /// The postal address of the vendor as one free-form line, in the shape it was saved in - no structure is
@@ -71,7 +71,7 @@ public class LicensorDetailsDto
     /// </summary>
     /// <example>123 Business St, New York, NY 10001</example>
     [StringLength(255)]
-    public required string Address { get; set; }
+    public string Address { get; set; }
 
     /// <summary>
     /// The telephone number of the vendor in the shape it was saved in, with no dialling format enforced.
@@ -79,7 +79,7 @@ public class LicensorDetailsDto
     /// <example>+1-800-555-0123</example>
     [Phone]
     [StringLength(255)]
-    public required string Phone { get; set; }
+    public string Phone { get; set; }
 
     /// <summary>
     /// Whether these details are those of the licensor of the product itself rather than of a reseller. Saving
@@ -88,21 +88,21 @@ public class LicensorDetailsDto
     /// </summary>
     /// <example>false</example>
     [JsonPropertyName("IsLicensor")]
-    public required bool IsLicensor { get; set; }
+    public bool IsLicensor { get; set; }
 
     /// <summary>
     /// Whether the About page is hidden from the interface. A plan that does not include branding cannot switch it
     /// on: the value is stored as `false` in that case, so it can come back different from what was saved.
     /// </summary>
     /// <example>false</example>
-    public required bool HideAbout { get; set; }
+    public bool HideAbout { get; set; }
 
     /// <summary>
-    /// When these details were last stored. Nothing reads it back on the way in: it only reports the moment of the
-    /// last change.
+    /// When these details were last stored. Details that were never stored report the moment they were read; the
+    /// built-in ONLYOFFICE entry and the answer of the reset operation report `0001-01-01T00:00:00`.
     /// </summary>
     /// <example>2026-01-01T10:00:00</example>
-    public required DateTime LastModified { get; set; }
+    public DateTime LastModified { get; set; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]

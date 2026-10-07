@@ -643,7 +643,7 @@
             }
           },
           {
-            "name": "aWSRegion",
+            "name": "awsRegion",
             "in": "query",
             "description": "The portal AWS region.",
             "schema": {
@@ -1260,7 +1260,7 @@
             }
           },
           {
-            "name": "aWSRegion",
+            "name": "awsRegion",
             "in": "query",
             "description": "The portal AWS region.",
             "schema": {

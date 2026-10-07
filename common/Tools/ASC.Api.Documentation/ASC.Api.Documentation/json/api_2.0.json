@@ -6498,7 +6498,7 @@
           "Portal / Payment"
         ],
         "summary": "Set the auto top-up settings",
-        "description": "Switches the portal's automatic wallet top-up on or off and sets its thresholds: while it is on, the payment\r\nmethod on file is charged whenever the wallet balance falls below `minBalance`, enough to bring it up to\r\n`upToBalance`, in `currency`. The portal needs a billing customer whose wallet balance exists - a portal that\r\nhas never had one answers 404, so top the wallet up once with `POST api/2.0/portal/payment/deposit` first -\r\nand only the payer may change the settings. The body replaces the stored settings as a whole and an omitted\r\nbody resets them to the defaults; `minBalance` is accepted between 5 and 1000 and `upToBalance` between 6 and\r\n5000. The low-balance warning state (`lowBalanceThreshold`, `lowBalanceNotified`) is not part of the request:\r\nthe portal keeps it as it had it. The call is mutating and idempotent, it charges nothing by itself, it is written to the portal audit\r\ntrail, and switching the top-up on also re-arms the low-balance warning. The settings as they were stored come\r\nback in the answer.",
+        "description": "Switches the portal's automatic wallet top-up on or off and sets its thresholds: while it is on, the payment\r\nmethod on file is charged whenever the wallet balance falls below `minBalance`, enough to bring it up to\r\n`upToBalance`, in `currency`. The portal needs a billing customer whose wallet balance exists - a portal that\r\nhas never had one answers 404, so top the wallet up once with `POST api/2.0/portal/payment/deposit` first -\r\nand only the payer may change the settings. The body replaces the stored settings as a whole and an omitted\r\nbody resets them to the defaults; `minBalance` is accepted between 5 and 1000 and `upToBalance` between 6 and\r\n5000. The low-balance warning state (`lowBalanceThreshold`, `lowBalanceNotified`) and `lastModified` may be\r\nsent for compatibility but are ignored: the portal keeps the values it had. The call is mutating and\r\nidempotent, it charges nothing by itself, it is written to the portal audit trail, and switching the top-up on also re-arms the low-balance warning. The settings as they were stored come\r\nback in the answer.",
         "operationId": "setTenantWalletSettings",
         "requestBody": {
           "content": {
@@ -28938,15 +28938,6 @@
         "description": "One wallet service the portal is running right now, with the allowance it grants where that is counted."
       },
       "AdditionalResourcesDto": {
-        "required": [
-          "feedbackAndSupportEnabled",
-          "helpCenterEnabled",
-          "lastModified",
-          "licenseAgreementsEnabled",
-          "startDocsEnabled",
-          "userForumEnabled",
-          "videoGuidesEnabled"
-        ],
         "type": "object",
         "properties": {
           "startDocsEnabled": {
@@ -28996,7 +28987,7 @@
               "2026-01-01T10:00:00"
             ],
             "type": "string",
-            "description": "When these flags were last stored. Nothing reads it back on the way in: it only reports the moment of the last\r\nchange.",
+            "description": "When these flags were last stored. Flags that were never stored report the moment they were read, and the\r\nanswer of the reset operation reports `0001-01-01T00:00:00`.",
             "format": "date-time"
           }
         },
@@ -35224,7 +35215,7 @@
             "description": "The engine of the external database: `mysql`, or `sqlite` on a Standalone installation."
           },
           "databaseTypeEnum": {
-            "description": "Accepted for compatibility with earlier clients and not read: the engine is taken from `databaseType`.",
+            "description": "The engine named by `databaseType`, as the server reads it. A value sent here is ignored.",
             "$ref": "#/components/schemas/ExternalDatabaseType"
           },
           "dbHost": {
@@ -36708,16 +36699,6 @@
         "description": "The successful API response containing the list of LicensorDetailsDto objects."
       },
       "LicensorDetailsDto": {
-        "required": [
-          "address",
-          "companyName",
-          "email",
-          "hideAbout",
-          "IsLicensor",
-          "lastModified",
-          "phone",
-          "site"
-        ],
         "type": "object",
         "properties": {
           "companyName": {
@@ -36802,7 +36783,7 @@
               "2026-01-01T10:00:00"
             ],
             "type": "string",
-            "description": "When these details were last stored. Nothing reads it back on the way in: it only reports the moment of the\r\nlast change.",
+            "description": "When these details were last stored. Details that were never stored report the moment they were read; the\r\nbuilt-in ONLYOFFICE entry and the answer of the reset operation report `0001-01-01T00:00:00`.",
             "format": "date-time"
           }
         },
@@ -44497,7 +44478,7 @@
               "2026-01-01T00:00:00Z"
             ],
             "type": "string",
-            "description": "When the pair was last stored, or `0001-01-01T00:00:00` when it never was.",
+            "description": "When the pair was last stored; when it never was, the moment it was read instead.",
             "format": "date-time"
           }
         },
@@ -46026,7 +46007,7 @@
               "2026-01-01T00:00:00Z"
             ],
             "type": "string",
-            "description": "When the settings were last stored, or `0001-01-01T00:00:00` when they never were.",
+            "description": "When the settings were last stored; when they were never stored, the moment they were read instead.",
             "format": "date-time"
           }
         },

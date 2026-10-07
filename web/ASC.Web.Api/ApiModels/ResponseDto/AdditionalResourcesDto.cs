@@ -44,7 +44,7 @@ public class AdditionalResourcesDto
     /// flags below it depends on nothing that has to be configured, so its built-in value is always `true`.
     /// </summary>
     /// <example>true</example>
-    public required bool StartDocsEnabled { get; set; }
+    public bool StartDocsEnabled { get; set; }
 
     /// <summary>
     /// Whether the interface may offer the Help Center entry. It is `false` both when the entry was switched off
@@ -52,42 +52,42 @@ public class AdditionalResourcesDto
     /// themselves are not part of this answer and arrive in `externalResources` of `GET api/2.0/settings`.
     /// </summary>
     /// <example>true</example>
-    public required bool HelpCenterEnabled { get; set; }
+    public bool HelpCenterEnabled { get; set; }
 
     /// <summary>
     /// Whether the interface may offer the Feedback and Support entry, `false` for the same two reasons as
     /// `helpCenterEnabled`.
     /// </summary>
     /// <example>true</example>
-    public required bool FeedbackAndSupportEnabled { get; set; }
+    public bool FeedbackAndSupportEnabled { get; set; }
 
     /// <summary>
     /// Whether the interface may offer the user forum entry, `false` for the same two reasons as
     /// `helpCenterEnabled`.
     /// </summary>
     /// <example>true</example>
-    public required bool UserForumEnabled { get; set; }
+    public bool UserForumEnabled { get; set; }
 
     /// <summary>
     /// Whether the interface may offer the Video Guides entry, `false` for the same two reasons as
     /// `helpCenterEnabled`.
     /// </summary>
     /// <example>true</example>
-    public required bool VideoGuidesEnabled { get; set; }
+    public bool VideoGuidesEnabled { get; set; }
 
     /// <summary>
     /// Whether the interface may offer the License Agreements entry, `false` for the same two reasons as
     /// `helpCenterEnabled`.
     /// </summary>
     /// <example>true</example>
-    public required bool LicenseAgreementsEnabled { get; set; }
+    public bool LicenseAgreementsEnabled { get; set; }
 
     /// <summary>
-    /// When these flags were last stored. Nothing reads it back on the way in: it only reports the moment of the last
-    /// change.
+    /// When these flags were last stored. Flags that were never stored report the moment they were read, and the
+    /// answer of the reset operation reports `0001-01-01T00:00:00`.
     /// </summary>
     /// <example>2026-01-01T10:00:00</example>
-    public required DateTime LastModified { get; set; }
+    public DateTime LastModified { get; set; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]

@@ -144,6 +144,7 @@ public static class OpenApiExtension
             c.OperationFilter<AllowAnonymousFilter>();
             c.OperationFilter<ApiDateTimeParameterFilter>();
             c.OperationFilter<FlattenObjectQueryParameterFilter>();
+            c.OperationFilter<AcronymQueryParameterNameFilter>();
             c.OperationFilter<RequestBodyNameOperationFilter>();
             c.OperationFilter<RateLimitOperationFilter>();
             c.DocumentFilter<RateLimitDocumentFilter>();
@@ -603,6 +604,32 @@ public static class OpenApiExtension
     /// change; what does is the SDK method, which no longer takes an argument called <c>inDto</c> and names
     /// every field an agent has to fill instead.
     /// </remarks>
+    /// <summary>
+    /// Fixes the camel case of query parameter names that start with an acronym.
+    /// </summary>
+    /// <remarks>
+    /// <c>DescribeAllParametersInCamelCase</c> only lowers the first letter, so <c>AWSRegion</c> is published as
+    /// <c>aWSRegion</c>; this spells it the way System.Text.Json does, <c>awsRegion</c>. Query binding ignores case,
+    /// so the request that reaches the server is the same. The name cannot be fixed with <c>[FromQuery(Name)]</c> on
+    /// the model property instead: the same model is bound from the body elsewhere, and a binding-source attribute on
+    /// one of its properties turns off the body inference of <c>[ApiController]</c>.
+    /// </remarks>
+    private class AcronymQueryParameterNameFilter : IOperationFilter
+    {
+        private static readonly Regex _acronymStart = new("^[a-z][A-Z]{2}", RegexOptions.Compiled);
+
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            foreach (var parameter in operation.Parameters ?? [])
+            {
+                if (parameter is OpenApiParameter { In: ParameterLocation.Query, Name: { } name } concrete && _acronymStart.IsMatch(name))
+                {
+                    concrete.Name = JsonNamingPolicy.CamelCase.ConvertName(char.ToUpperInvariant(name[0]) + name[1..]);
+                }
+            }
+        }
+    }
+
     private class FlattenObjectQueryParameterFilter : IOperationFilter
     {
         public void Apply(OpenApiOperation operation, OperationFilterContext context)

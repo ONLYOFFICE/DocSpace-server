@@ -34,54 +34,54 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The form role.
+/// One role of a form and the account that fills it.
 /// </summary>
 public class FormRoleRequest
 {
     /// <summary>
-    /// The room ID.
+    /// The ID of the room the form is in. It is stored with the role as sent, so pass the room the form lives in.
     /// </summary>
     /// <example>1</example>
     public int RoomId { get; set; }
 
     /// <summary>
-    /// The role name.
+    /// The name of a role the form defines, such as the one the form author gave a group of fields.
     /// </summary>
     /// <example>Manager</example>
     public string RoleName { get; set; }
 
     /// <summary>
-    /// The role color.
+    /// The color the editor marks the fields of this role with, as a hex code.
     /// </summary>
     /// <example>#4781D1</example>
     public string RoleColor { get; set; }
 
     /// <summary>
-    /// The user ID.
+    /// The account that fills this role. It is notified once filling starts, unless it is the caller.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// The role sequence.
+    /// Accepted for compatibility and ignored: the position of the role in the list sets the filling order.
     /// </summary>
     /// <example>12</example>
     public int Sequence { get; set; }
 
     /// <summary>
-    /// Specifies if the role was submitted or not.
+    /// Whether this role counts as already submitted. It is stored as sent; send false when filling starts.
     /// </summary>
     /// <example>false</example>
     public bool Submitted { get; set; }
 
     /// <summary>
-    /// The date and time when the role was opened.
+    /// Accepted for compatibility and ignored: the portal records when the role is opened.
     /// </summary>
     /// <example>2026-01-01T10:00:00Z</example>
     public DateTime OpenedAt { get; set; }
 
     /// <summary>
-    /// The date and time when the role was submitted.
+    /// Accepted for compatibility and ignored: the portal records when the role is submitted.
     /// </summary>
     /// <example>2026-01-01T10:00:00Z</example>
     public DateTime SubmissionDate { get; set; }

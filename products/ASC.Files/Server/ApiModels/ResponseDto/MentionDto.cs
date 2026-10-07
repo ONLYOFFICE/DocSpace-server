@@ -81,6 +81,7 @@ public class MentionDto
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+[UseStaticMapper(typeof(PortalUserDtoMapper))]
 public static partial class MentionDtoMapper
 {
     public static partial MentionDto Map(this MentionWrapper source);

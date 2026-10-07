@@ -34,6 +34,7 @@
 import { readFileSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { claim } from "./schema-names.js";
 
 // Reuse of the .NET AI service's OpenAPI document for the proxy routes.
 //
@@ -146,16 +147,6 @@ function collectRefs(node: unknown, acc: Set<string>): void {
       }
     }
   }
-}
-
-// Namespacing is not injective (`X` and `AiX` both publish as `AiX`, `TProvider` and `Provider` both as
-// `AiProvider`), so a second source name for a taken key is an error rather than a silent overwrite.
-function claim(owners: Map<string, string>, published: string, source: string): void {
-  const owner = owners.get(published);
-  if (owner !== undefined && owner !== source) {
-    throw new Error(`Schemas ${owner} and ${source} would both be published as ${published}`);
-  }
-  owners.set(published, source);
 }
 
 // `X` becomes `AiX`; a .NET name that already starts with the namespace

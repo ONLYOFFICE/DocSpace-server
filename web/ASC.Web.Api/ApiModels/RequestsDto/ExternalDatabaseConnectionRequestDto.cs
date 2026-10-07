@@ -46,10 +46,13 @@ public class ExternalDatabaseConnectionRequestDto
     public string DatabaseType { get; set; }
 
     /// <summary>
-    /// Accepted for compatibility with earlier clients and not read: the engine is taken from `databaseType`.
+    /// The engine named by `databaseType`, as the server reads it. A value sent here is ignored.
     /// </summary>
     /// <example>0</example>
-    public ExternalDatabaseType? DatabaseTypeEnum { get; set; }
+    // Get-only on purpose, as on ExternalDatabaseSettings before: a settable enum would reject a string such as
+    // "MySql" with 400, while earlier clients could send anything here.
+    public ExternalDatabaseType? DatabaseTypeEnum =>
+        ExternalDatabaseTypeExtensions.TryParse(DatabaseType, ignoreCase: true, out var t) ? t : null;
 
     /// <summary>
     /// The host name or the IP address of the database server.
