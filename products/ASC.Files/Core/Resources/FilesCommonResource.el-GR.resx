@@ -601,10 +601,25 @@
   <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
     <value>Η φόρμα έχει αλλάξει. Αυτό το προσχέδιο είναι παρωχημένο και δεν μπορεί να υποβληθεί.</value>
   </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Μη έγκυρο αναγνωριστικό φακέλου</value>
-  </data>
   <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
     <value>Αυτή η ενέργεια είναι διαθέσιμη μόνο σε ιδιωτικό δωμάτιο</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Έξοδοι συνομιλίας</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>Το δωμάτιο περιέχει ήδη τον φάκελο .ai</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Η αποθήκευση δεν μπορεί να αποσυνδεθεί ενώ ένα δωμάτιο τη χρησιμοποιεί. Διαγράψτε το δωμάτιο</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Αναζήτηση σε μεταδεδομένα αρχείου</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Αναζήτηση σε μεταδεδομένα φακέλου</value>
+  </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Μη έγκυρο αναγνωριστικό φακέλου</value>
   </data>
 </root>

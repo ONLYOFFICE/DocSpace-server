@@ -601,4 +601,25 @@
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>Инструкција AI агента не може бити дужа од {0} знакова</value>
   </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Излази чата</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>Соба већ садржи фасциклу .ai</value>
+  </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Неважећи ID фасцикле</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Складиште не може бити искључено док га соба користи. Уместо тога избришите собу</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Ова радња је доступна само у приватној соби</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Претражи у метаподацима датотеке</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Претражи у метаподацима фасцикле</value>
+  </data>
 </root>

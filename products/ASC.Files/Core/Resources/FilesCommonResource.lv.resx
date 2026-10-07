@@ -601,10 +601,25 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>MI aģenta instrukcija nevar būt garāka par {0} rakstzīmēm</value>
   </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Šī darbība ir pieejama tikai privātā telpā</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Tērzēšanas izvades</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>Telpa jau satur mapi .ai</value>
+  </data>
   <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
     <value>Nederīgs mapes ID</value>
   </data>
-  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
-    <value>Šī darbība ir pieejama tikai privātā telpā</value>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Krātuvi nevar atvienot, kamēr to izmanto telpa. Tā vietā dzēsiet telpu</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Meklēt faila metadatos</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Meklēt mapes metadatos</value>
   </data>
 </root>

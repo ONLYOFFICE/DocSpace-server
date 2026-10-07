@@ -601,10 +601,25 @@ Compatibilitate garantată 100% cu formatele MS Office.</value>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>Instrucțiunea unui agent IA nu poate depăși {0} caractere</value>
   </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Această acțiune este disponibilă doar într-o cameră privată</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Ieșiri chat</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>Camera conține deja folderul .ai</value>
+  </data>
   <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
     <value>ID folder invalid</value>
   </data>
-  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
-    <value>Această acțiune este disponibilă doar într-o cameră privată</value>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Spațiul de stocare nu poate fi deconectat cât timp o cameră îl utilizează. Ștergeți camera</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Căutare în metadatele fișierului</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Căutare în metadatele folderului</value>
   </data>
 </root>

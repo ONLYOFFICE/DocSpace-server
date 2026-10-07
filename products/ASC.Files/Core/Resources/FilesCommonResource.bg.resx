@@ -601,9 +601,6 @@
   <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
     <value>Формулярът е променен. Тази чернова е остаряла и не може да бъде изпратена.</value>
   </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Невалидно ID на папка</value>
-  </data>
   <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
     <value>Това действие е достъпно само в частна стая</value>
   </data>
@@ -621,5 +618,8 @@
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Търсене в метаданни на папка</value>
+  </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Невалидно ID на папка</value>
   </data>
 </root>

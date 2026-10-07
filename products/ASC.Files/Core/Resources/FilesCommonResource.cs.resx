@@ -601,10 +601,25 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
     <value>Formulář byl změněn. Tento koncept je zastaralý a nelze jej odeslat.</value>
   </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Neplatné ID složky</value>
-  </data>
   <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
     <value>Tato akce je dostupná pouze v soukromé místnosti</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Výstupy chatu</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>Místnost již obsahuje složku .ai</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Úložiště nelze odpojit, dokud ho používá místnost. Místo toho místnost odstraňte</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Hledat v metadatech souboru</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Hledat v metadatech složky</value>
+  </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Neplatné ID složky</value>
   </data>
 </root>

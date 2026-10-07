@@ -601,10 +601,25 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>AI-agentin ohje ei voi olla pidempi kuin {0} merkkiä</value>
   </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Virheellinen kansion tunnus</value>
-  </data>
   <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
     <value>Tämä toiminto on käytettävissä vain yksityisessä huoneessa</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Chatin tulosteet</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>Huone sisältää jo .ai-kansion</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Tallennustilaa ei voi irrottaa, kun huone käyttää sitä. Poista huone sen sijaan</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Hae tiedoston metatiedoista</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Hae kansion metatiedoista</value>
+  </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Virheellinen kansion tunnus</value>
   </data>
 </root>

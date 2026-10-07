@@ -1290,4 +1290,7 @@
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>Servidor MCP {0} do agente de IA atualizado</value>
   </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Login suspeito detectado: {0}</value>
+  </data>
 </root>

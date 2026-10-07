@@ -601,10 +601,25 @@ Het beste geschikt voor docx, xlsx, pptx.</value>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>De instructie van een AI-agent mag niet langer zijn dan {0} tekens</value>
   </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Ongeldige map-ID</value>
-  </data>
   <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
     <value>Deze actie is alleen beschikbaar in een privékamer</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Chat-uitvoer</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>De ruimte bevat al de map .ai</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>De opslag kan niet worden losgekoppeld terwijl een ruimte deze gebruikt. Verwijder in plaats daarvan de ruimte</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Zoeken in bestandsmetagegevens</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Zoeken in mapmetagegevens</value>
+  </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Ongeldige map-ID</value>
   </data>
 </root>

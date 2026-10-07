@@ -604,7 +604,22 @@
   <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
     <value>Это действие доступно только в приватной комнате</value>
   </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Ответы чата</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>В комнате уже есть папка .ai</value>
+  </data>
   <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
     <value>Неверный идентификатор папки</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Невозможно отключить хранилище, пока его использует комната. Вместо этого удалите комнату</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Поиск в метаданных файлов</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Поиск в метаданных папок</value>
   </data>
 </root>

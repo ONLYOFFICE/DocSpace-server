@@ -601,10 +601,25 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>L'istruzione di un agente IA non può essere più lunga di {0} caratteri</value>
   </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>ID cartella non valido</value>
-  </data>
   <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
     <value>Questa azione è disponibile solo in una stanza privata</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Output della chat</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Cerca nei metadati della cartella</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>La stanza contiene già la cartella .ai</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>L'archiviazione non può essere disconnessa mentre una stanza la utilizza. Elimina invece la stanza</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Cerca nei metadati del file</value>
+  </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>ID cartella non valido</value>
   </data>
 </root>

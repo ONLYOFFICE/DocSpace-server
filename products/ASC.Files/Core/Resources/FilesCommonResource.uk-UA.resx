@@ -601,10 +601,25 @@
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>Інструкція AI-агента не може перевищувати {0} символів</value>
   </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Ця дія доступна лише в приватній кімнаті</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Виходи чату</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>Кімната вже містить папку .ai</value>
+  </data>
   <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
     <value>Недійсний ідентифікатор папки</value>
   </data>
-  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
-    <value>Ця дія доступна лише в приватній кімнаті</value>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Сховище не може бути відключено, поки кімната його використовує. Натомість видаліть кімнату</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Пошук у метаданих файлу</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Пошук у метаданих папки</value>
   </data>
 </root>

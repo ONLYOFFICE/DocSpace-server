@@ -601,10 +601,25 @@
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>La instrucción de un agente de IA no puede tener más de {0} caracteres</value>
   </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Esta acción solo está disponible en una sala privada</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Salidas del chat</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>La sala ya contiene la carpeta .ai</value>
+  </data>
   <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
     <value>ID de carpeta no válido</value>
   </data>
-  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
-    <value>Esta acción solo está disponible en una sala privada</value>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>El almacenamiento no puede desconectarse mientras una sala lo utiliza. Elimine la sala</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Buscar en metadatos del archivo</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Buscar en metadatos de la carpeta</value>
   </data>
 </root>

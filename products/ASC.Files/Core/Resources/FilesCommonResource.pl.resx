@@ -601,10 +601,25 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>Instrukcja agenta AI nie może być dłuższa niż {0} znaków</value>
   </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Ta akcja jest dostępna tylko w prywatnym pokoju</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Wyniki czatu</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>Pokój zawiera już folder .ai</value>
+  </data>
   <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
     <value>Nieprawidłowy identyfikator folderu</value>
   </data>
-  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
-    <value>Ta akcja jest dostępna tylko w prywatnym pokoju</value>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Nie można odłączyć magazynu, gdy pokój go używa. Zamiast tego usuń pokój</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Szukaj w metadanych pliku</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Szukaj w metadanych folderu</value>
   </data>
 </root>

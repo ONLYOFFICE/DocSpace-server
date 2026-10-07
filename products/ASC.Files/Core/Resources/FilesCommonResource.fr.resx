@@ -604,6 +604,21 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
     <value>Cette action est uniquement disponible dans une salle privée</value>
   </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Sorties du chat</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>La salle contient déjà le dossier .ai</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Le stockage ne peut pas être déconnecté tant qu'une salle l'utilise. Supprimez plutôt la salle</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Rechercher dans les métadonnées du fichier</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Rechercher dans les métadonnées du dossier</value>
+  </data>
   <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
     <value>ID de dossier invalide</value>
   </data>
