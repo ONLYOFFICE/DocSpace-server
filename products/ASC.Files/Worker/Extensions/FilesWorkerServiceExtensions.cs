@@ -91,7 +91,7 @@ public static class FilesWorkerServiceExtensions
         services.RegisterQueue<FileDuplicateOperation>(10);
         services.RegisterQueue<FileDownloadOperation>(10, timeUntilUnregisterInSeconds: 60 * 2);
         services.RegisterQueue<FileMarkAsReadOperation>(10);
-        services.RegisterQueue<FileBuilderOperation>(10);
+        services.RegisterQueue<FileBuilderOperation>(10, timeUntilUnregisterInSeconds: 60 * 11);
         services.RegisterQueue<FormFillingReportTask>();
         services.RegisterQueue<CreateRoomTemplateOperation>();
         services.RegisterQueue<CreateRoomFromTemplateOperation>();
