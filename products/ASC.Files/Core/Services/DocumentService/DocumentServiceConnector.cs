@@ -537,7 +537,11 @@ public class DocumentServiceConnector(ILogger<DocumentServiceConnector> logger,
     private Exception CustomizeError(Exception ex)
     {
         var error = FilesCommonResource.ErrorMessage_DocServiceException;
-        if (!string.IsNullOrEmpty(ex.Message))
+        if (ex is DocumentServiceException documentServiceException)
+        {
+            error += $" ({ex.Message}, error {(int)documentServiceException.Code})";
+        }
+        else if (!string.IsNullOrEmpty(ex.Message))
         {
             error += $" ({ex.Message})";
         }
