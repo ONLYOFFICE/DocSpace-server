@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Исканата папка не бе намерена</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Невалидно ID на папка</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Невалиден доставчик</value>
   </data>
@@ -601,10 +604,22 @@
   <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
     <value>Формулярът е променен. Тази чернова е остаряла и не може да бъде изпратена.</value>
   </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Невалидно ID на папка</value>
-  </data>
   <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
     <value>Това действие е достъпно само в частна стая</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Изходи от чат</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>Стаята вече съдържа папката .ai</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Хранилището не може да бъде изключено, докато стая го използва. Вместо това изтрийте стаята</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Търсене в метаданни на файл</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Търсене в метаданни на папка</value>
   </data>
 </root>

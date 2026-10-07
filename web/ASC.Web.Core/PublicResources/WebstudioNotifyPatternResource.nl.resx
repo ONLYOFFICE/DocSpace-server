@@ -1828,4 +1828,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Hallo, $UserName!
+
+We nemen contact met u op om u te laten weten dat automatisch aanvullen niet wordt ondersteund voor uw huidige betaalmethode: het geld komt pas in de ${LetterLogoText} Wallet terecht nadat de bankoverschrijving is verwerkt, zodat het saldo niet onmiddellijk kan worden aangevuld.
+
+Automatisch aanvullen is daarom uitgeschakeld. Om onderbreking van betaalde diensten te voorkomen, vult u uw walletsaldo handmatig aan of schakelt u over naar een betaalmethode die automatisch aanvullen ondersteunt.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Actie vereist: Automatisch aanvullen is niet beschikbaar voor uw ${LetterLogoText} Wallet</value>
+  </data>
 </root>

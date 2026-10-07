@@ -1834,4 +1834,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Përshëndetje, $UserName!
+
+Po ju kontaktojmë për t'ju njoftuar se rimbushja automatike nuk mbështetet për metodën tuaj aktuale të pagesës: paratë arrijnë në ${LetterLogoText} Wallet vetëm pasi të kryhet transferimi bankar, kështu që balanca nuk mund të rimbushet menjëherë.
+
+Prandaj rimbushja automatike është çaktivizuar. Për të shmangur çdo ndërprerje të shërbimeve me pagesë, ju lutemi rimbushni manualisht balancën e portofolit tuaj, ose kaloni në një metodë pagese që mbështet rimbushjen automatike.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Kërkohet veprim: Rimbushja automatike nuk është e disponueshme për Portofolin tuaj ${LetterLogoText}</value>
+  </data>
 </root>

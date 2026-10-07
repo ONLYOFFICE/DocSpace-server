@@ -1833,4 +1833,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Olá, $UserName!
+
+Entramos em contato para informá-lo de que o recarregamento automático não é compatível com seu método de pagamento atual: o dinheiro chega à ${LetterLogoText} Wallet somente após a liquidação da transferência bancária, portanto o saldo não pode ser reabastecido imediatamente.
+
+O recarregamento automático foi, portanto, desativado. Para evitar qualquer interrupção dos serviços pagos, recarregue o saldo da sua carteira manualmente ou mude para um método de pagamento que suporte o recarregamento automático.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Ação necessária: A recarga automática não está disponível para sua ${LetterLogoText} Wallet</value>
+  </data>
 </root>

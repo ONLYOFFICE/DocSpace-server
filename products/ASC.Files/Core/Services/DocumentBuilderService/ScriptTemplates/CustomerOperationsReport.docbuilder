@@ -402,6 +402,22 @@ function writePivot(headerRowIndex, colCount, detailColumnLengths) {
         return;
     }
 
+    // Nested under the participant, a currency that every row shares repeats one value and only hangs
+    // an expand/collapse button on every participant - the builder has no switch to hide those. With
+    // one currency the field is left out of the rows, and the currency moves into the caption of every
+    // money column instead, so the summary still says what it is counted in.
+    if (!hasMixedCurrencies() && inputData.totalCurrencyColumn >= 0) {
+        var currencyField = inputData.keys[inputData.totalCurrencyColumn];
+        pivot.rowFields = pivot.rowFields.filter(function (name) { return name !== currencyField; });
+
+        var currency = getCurrency(0);
+        for (var i = 0; currency && i < pivot.dataFields.length; i++) {
+            if (inputData.totalColumns.indexOf(inputData.keys.indexOf(pivot.dataFields[i].field)) >= 0) {
+                pivot.dataFields[i].caption += " (" + currency + ")";
+            }
+        }
+    }
+
     // The sheet is created and filled here rather than left to InsertPivotNewWorksheet, which would
     // drop the pivot at the top of a bare sheet: the summary carries the same header block as the
     // detail table, so the pivot has to start below it.
@@ -446,12 +462,30 @@ function writePivot(headerRowIndex, colCount, detailColumnLengths) {
         pivotTable.GetPivotFields(pivot.rowFields[i]).SetOrientation("Rows");
     }
 
+    // What the sort orders by: a row field is named by its source column, a data field by its pivot
+    // name, which the caption set below replaces - so for a data field it is read back from the field.
+    var sortBy = pivot.sort ? pivot.sort.by : null;
+
     for (var i = 0; i < pivot.dataFields.length; i++) {
         var dataField = pivot.dataFields[i];
         var addedField = pivotTable.AddDataField(dataField.field);
         addedField.SetFunction(dataField.aggregation);
         addedField.SetCaption(dataField.caption);
         addedField.SetNumberFormat(dataField.format);
+
+        if (pivot.sort && pivot.sort.by == dataField.field) {
+            sortBy = addedField.Name;
+        }
+    }
+
+    // A row field is ordered by its captions, ascending, unless told otherwise. Done before
+    // SetHasAutoFormat below: like every call here it lays the pivot out once more. A builder without
+    // AutoSort keeps the caption order.
+    if (pivot.sort) {
+        var sortRowField = pivotTable.GetPivotFields(pivot.sort.rowField);
+        if (typeof sortRowField.AutoSort === "function") {
+            sortRowField.AutoSort(pivot.sort.order == "descending" ? "xlDescending" : "xlAscending", sortBy);
+        }
     }
 
     // Every row carries its own currency, but the grand total would still add different currencies

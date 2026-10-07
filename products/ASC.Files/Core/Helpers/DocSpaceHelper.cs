@@ -63,7 +63,7 @@ public static class DocSpaceHelper
         }
     }
 
-    public static HashSet<FolderType> FormsFillingSystemFolders => [
+    public static readonly HashSet<FolderType> FormsFillingSystemFolders = [
         FolderType.FormFillingFolderDone,
         FolderType.FormFillingFolderInProgress,
         FolderType.InProcessFormFolder,

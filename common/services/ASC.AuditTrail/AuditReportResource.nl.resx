@@ -1263,4 +1263,34 @@
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>MCP-server {0} van AI-agent bijgewerkt</value>
   </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Metagegevens cascade-toewijzing gestart: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Metagegevensveld aangemaakt: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Metagegevensveld verwijderd: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Metagegevensveld bijgewerkt: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Metagegevenssjabloon toegewezen: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Metagegevenssjabloon aangemaakt: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Metagegevenssjabloon verwijderd: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Toewijzing metagegevenssjabloon opgeheven: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Metagegevenssjabloon bijgewerkt: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Metagegevenswaarden bijgewerkt: {0}</value>
+  </data>
 </root>
