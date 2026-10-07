@@ -62,7 +62,7 @@ public class CustomFilterPermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(null);
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.SetCustomFilterTagAsync(fileId, new CustomFilterParameters(true), TestContext.Current.CancellationToken));
+            async () => await _filesApi.SetCustomFilterTagAsync(fileId, new CustomFilterRequest(true), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(401);
     }
@@ -81,7 +81,7 @@ public class CustomFilterPermissionsTests(
 
         // Act
         await _filesClient.Authenticate(admin);
-        var result = (await _filesApi.SetCustomFilterTagAsync(fileId, new CustomFilterParameters(true), TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.SetCustomFilterTagAsync(fileId, new CustomFilterRequest(true), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         result.CustomFilterEnabled.Should().BeTrue();
@@ -102,7 +102,7 @@ public class CustomFilterPermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.SetCustomFilterTagAsync(fileId, new CustomFilterParameters(true), TestContext.Current.CancellationToken));
+            async () => await _filesApi.SetCustomFilterTagAsync(fileId, new CustomFilterRequest(true), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
     }
@@ -117,7 +117,7 @@ public class CustomFilterPermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.SetCustomFilterTagAsync(fileId, new CustomFilterParameters(true), TestContext.Current.CancellationToken));
+            async () => await _filesApi.SetCustomFilterTagAsync(fileId, new CustomFilterRequest(true), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
     }

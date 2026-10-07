@@ -115,7 +115,7 @@ public abstract class RecentTestBase(AspireAppFixture fixture) : RoomsPermission
 
         var room = await _roomsApi.CreateRoomThirdPartyAsync(
             connection.Response.Id,
-            new CreateThirdPartyRoom(title: roomTitle, roomType: RoomType.CustomRoom),
+            new CreateThirdPartyRoomRequest(title: roomTitle, roomType: RoomType.CustomRoom),
             TestContext.Current.CancellationToken);
 
         return room.Response.Id;

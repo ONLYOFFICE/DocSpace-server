@@ -51,7 +51,7 @@ public class FormResultsDto
     /// signature are left out of the record, so a field missing here was not necessarily left blank.
     /// </summary>
     /// <example>[{"key": "field1", "value": "Answer"}]</example>
-    public IEnumerable<FormsItemData> FormsData { get; set; }
+    public IEnumerable<FormsItemDataDto> FormsData { get; set; }
 }
 
 /// <summary>
@@ -66,7 +66,7 @@ public class FormSubmissionsDto
     /// no indexed description of that version.
     /// </summary>
     /// <example>[]</example>
-    public IEnumerable<FormMetadata> Metadata { get; set; }
+    public IEnumerable<FormMetadataDto> Metadata { get; set; }
 
     /// <summary>
     /// One entry per completed copy, ordered by the copy number that `formsData` carries. An empty list means nothing

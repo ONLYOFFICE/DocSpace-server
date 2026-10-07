@@ -34,6 +34,7 @@
 import { readFileSync } from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
+import { claim } from "./schema-names.js";
 
 // Reuse of the .NET AI service's OpenAPI document for the proxy routes.
 //
@@ -148,6 +149,14 @@ function collectRefs(node: unknown, acc: Set<string>): void {
   }
 }
 
+// `X` becomes `AiX`; a .NET name that already starts with the namespace
+// (`AiSettingsDto`) keeps it rather than turning into `AiAiSettingsDto`.
+function namespacedName(name: string): string {
+  return name.startsWith(SCHEMA_NAMESPACE) && /^[A-Z]/.test(name.slice(SCHEMA_NAMESPACE.length))
+    ? name
+    : `${SCHEMA_NAMESPACE}${name}`;
+}
+
 // Rewrite every `#/components/schemas/X` ref to the namespaced `AiX`.
 function namespaceRefs(node: unknown): unknown {
   if (Array.isArray(node)) {
@@ -158,7 +167,7 @@ function namespaceRefs(node: unknown): unknown {
     for (const [key, value] of Object.entries(node)) {
       const name = key === "$ref" ? refName(value) : null;
       out[key] = name !== null
-        ? `#/components/schemas/${SCHEMA_NAMESPACE}${name}`
+        ? `#/components/schemas/${namespacedName(name)}`
         : namespaceRefs(value);
     }
     return out;
@@ -266,8 +275,11 @@ export function extractDotnetProxySchemas(): DotnetProxySchemas {
   }
 
   const components: Record<string, unknown> = {};
+  const owners = new Map<string, string>();
   for (const name of closure) {
-    components[`${SCHEMA_NAMESPACE}${name}`] = namespaceRefs(schemas[name]);
+    const published = namespacedName(name);
+    claim(owners, published, name);
+    components[published] = namespaceRefs(schemas[name]);
   }
 
   return { components, responses };

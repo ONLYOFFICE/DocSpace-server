@@ -46,12 +46,12 @@ internal static class WebhooksTestData
     /// directly, which is also what the TS suite uses. <c>secretKey</c> is required by the
     /// backend on create/update even though the SDK marks it optional.
     /// </summary>
-    public static CreateWebhooksConfigRequestsDto CreateWebhookDto(
+    public static CreateWebhooksConfigRequestDto CreateWebhookDto(
         bool enabled = false, bool ssl = false, WebhookTrigger? triggers = null)
     {
         var suffix = Initializer.Faker.Random.AlphaNumeric(10);
 
-        return new CreateWebhooksConfigRequestsDto(
+        return new CreateWebhooksConfigRequestDto(
             name: $"webhook-{suffix}",
             uri: $"https://example.com/?id={suffix}",
             secretKey: Initializer.Faker.Random.AlphaNumeric(20),

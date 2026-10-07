@@ -43,10 +43,10 @@ public class SendEditorNotifyPermissionTests(
     AspireAppFixture fixture)
     : SharingTestBase(fixture)
 {
-    private static MentionMessageWrapper BuildRequest(string email)
+    private static MentionMessageRequest BuildRequest(string email)
     {
-        return new MentionMessageWrapper(
-            actionLink: new ActionLinkConfig(new ActionConfig("test-action", "comment")),
+        return new MentionMessageRequest(
+            actionLink: new ActionLinkRequest(new ActionLinkActionRequest("test-action", "comment")),
             emails: [email],
             message: "test");
     }

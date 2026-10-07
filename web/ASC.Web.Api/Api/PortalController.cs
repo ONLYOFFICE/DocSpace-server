@@ -143,21 +143,21 @@ public class PortalController(
     /// own profile, a DocSpace administrator reads anyone, a room administrator reads anyone except a guest they have
     /// no relation with, and a user or a guest reads nobody but themselves - a pair that is not allowed is refused.
     /// An ID that belongs to no account of this portal and an ID of a system account are both answered as not found,
-    /// so a 404 does not tell the two apart. `userID` in the path has to be a GUID; the calling user's own profile is
+    /// so a 404 does not tell the two apart. `userId` in the path has to be a GUID; the calling user's own profile is
     /// easier to fetch with `GET api/2.0/people/@self`. This operation hands back the internal user record - use
-    /// `GET api/2.0/people/{userid}` for the same user in the People format, with the group, quota and access
+    /// `GET api/2.0/people/{userId}` for the same user in the People format, with the group, quota and access
     /// information a client usually needs.
     /// </remarks>
     /// <summary>
     /// Get a portal user
     /// </summary>
-    /// <path>api/2.0/portal/users/{userID}</path>
+    /// <path>api/2.0/portal/users/{userId}</path>
     [Tags("Portal / Users")]
-    [SwaggerResponse(200, "The account of this portal, in the internal user format", typeof(UserInfo))]
+    [SwaggerResponse(200, "The account of this portal, in the internal user format", typeof(PortalUserDto))]
     [SwaggerResponse(403, "The caller is not allowed to view this account: a user or a guest gets it for any ID but their own, whether the account exists or not, and a room administrator gets it for a guest they have no relation with")]
     [SwaggerResponse(404, "No account with this ID exists on the portal, or the ID belongs to a system account")]
-    [HttpGet("users/{userID:guid}")]
-    public async Task<UserInfo> GetUserById(UserIDRequestDto inDto)
+    [HttpGet("users/{userId:guid}")]
+    public async Task<PortalUserDto> GetUserById(UserIDRequestDto inDto)
     {
         if (!await userManager.CanUserViewAnotherUserAsync(authContext.CurrentAccount.ID, inDto.Id))
         {
@@ -171,7 +171,7 @@ public class PortalController(
             throw new ItemNotFoundException(Resource.ErrorUserNotFound);
         }
 
-        return user;
+        return user.ToPortalUserDto();
     }
 
     /// <remarks>
@@ -711,11 +711,11 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/quota</path>
     [Tags("Portal / Quota")]
-    [SwaggerResponse(200, "The allowance the current tariff grants this portal, with sizes in bytes", typeof(TenantQuota))]
+    [SwaggerResponse(200, "The allowance the current tariff grants this portal, with sizes in bytes", typeof(TenantQuotaDto))]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [AllowNotPayment]
     [HttpGet("quota")]
-    public async Task<TenantQuota> GetPortalQuota()
+    public async Task<TenantQuotaDto> GetPortalQuota()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -727,7 +727,7 @@ public class PortalController(
             result.MaxTotalSize = 0;
         }
 
-        return result;
+        return result.Map();
     }
 
     /// <remarks>
@@ -747,10 +747,10 @@ public class PortalController(
     /// </summary>
     /// <path>api/2.0/portal/quota/right</path>
     [Tags("Portal / Quota")]
-    [SwaggerResponse(200, "The cheapest monthly quota that would still fit this portal, or an empty body when none does", typeof(TenantQuota))]
+    [SwaggerResponse(200, "The cheapest monthly quota that would still fit this portal, or an empty body when none does", typeof(TenantQuotaDto))]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("quota/right")]
-    public async Task<TenantQuota> GetRightQuota()
+    public async Task<TenantQuotaDto> GetRightQuota()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -761,7 +761,7 @@ public class PortalController(
                             .FirstOrDefault(quota =>
                                             quota.CountUser > needUsersCount
                                             && quota.MaxTotalSize > usedSpace
-                                            && !quota.Year);
+                                            && !quota.Year)?.Map();
     }
 
 

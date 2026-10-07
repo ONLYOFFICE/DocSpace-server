@@ -56,7 +56,7 @@ public class ShareResolveLinkTests(
             requestToken, folderId: room.Id.ToString(), cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         data.Should().NotBeNull();
-        data.Status.Should().Be(Status.Ok);
+        data.Status.Should().Be(ExternalShareStatus.Ok);
         data.EntityId.Should().Be(room.Id.ToString());
         data.EntityTitle.Should().Be(room.Title);
         data.IsRoom.Should().BeTrue();
@@ -78,7 +78,7 @@ public class ShareResolveLinkTests(
         var data = (await _sharingApi.GetExternalShareDataAsync(
             requestToken, fileId: file.Id.ToString(), cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        data.Status.Should().Be(Status.Ok);
+        data.Status.Should().Be(ExternalShareStatus.Ok);
         data.Type.Should().Be(FileEntryType.File);
         data.IsRoom.Should().NotBe(true);
         data.IsAuthenticated.Should().BeTrue();
@@ -142,7 +142,7 @@ public class ShareResolveLinkTests(
         var data = (await _sharingApi.GetExternalShareDataAsync(
             requestToken, folderId: room.Id.ToString(), cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        data.Status.Should().Be(Status.RequiredPassword);
+        data.Status.Should().Be(ExternalShareStatus.RequiredPassword);
     }
 
     [Fact]
@@ -151,6 +151,6 @@ public class ShareResolveLinkTests(
         var data = (await _sharingApi.GetExternalShareDataAsync(
             "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee", cancellationToken: TestContext.Current.CancellationToken)).Response;
 
-        data.Status.Should().Be(Status.Invalid);
+        data.Status.Should().Be(ExternalShareStatus.Invalid);
     }
 }

@@ -97,7 +97,7 @@ public class FolderDto<T> : FileEntryDto<T>
     /// <example>
     /// {"original": "", "large": "", "medium": "", "small": "", "color": "F2C4C4", "cover": {"id": "bookmark"}}
     /// </example>
-    public Logo Logo { get; set; }
+    public LogoDto Logo { get; set; }
 
     /// <summary>
     /// Whether the caller pinned the room to the top of their own room list. Pinning is personal and is lost when the

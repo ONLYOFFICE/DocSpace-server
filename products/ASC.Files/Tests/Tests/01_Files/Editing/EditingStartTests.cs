@@ -57,7 +57,7 @@ public class EditingStartTests(AspireAppFixture fixture) : EditingTestBase(fixtu
         var (_, file) = await CreateRoomWithFile("Autotest Start Edit Alone Room", "Autotest Start Edit Alone File");
 
         // Act
-        var result = (await _filesApi.StartEditFileAsync(file.Id, new StartEdit(editingAlone: true), TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.StartEditFileAsync(file.Id, new StartEditRequest(editingAlone: true), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         result.Should().NotBeNullOrEmpty();
@@ -83,7 +83,7 @@ public class EditingStartTests(AspireAppFixture fixture) : EditingTestBase(fixtu
         await _filesClient.Authenticate(member);
 
         // Act
-        var result = (await _filesApi.StartEditFileAsync(file.Id, new StartEdit(editingAlone: true), TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.StartEditFileAsync(file.Id, new StartEditRequest(editingAlone: true), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         result.Should().NotBeNullOrEmpty();
@@ -97,7 +97,7 @@ public class EditingStartTests(AspireAppFixture fixture) : EditingTestBase(fixtu
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.StartEditFileAsync(999999999, new StartEdit(editingAlone: true), TestContext.Current.CancellationToken));
+            async () => await _filesApi.StartEditFileAsync(999999999, new StartEditRequest(editingAlone: true), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(404);
@@ -123,13 +123,13 @@ public class EditingStartTests(AspireAppFixture fixture) : EditingTestBase(fixtu
         var member = await InviteContact(EmployeeType.User);
         await InviteToRoom(room.Id, member, FileShare.Editing);
 
-        var ownerResult = (await _filesApi.StartEditFileAsync(file.Id, new StartEdit(editingAlone: true), TestContext.Current.CancellationToken)).Response;
+        var ownerResult = (await _filesApi.StartEditFileAsync(file.Id, new StartEditRequest(editingAlone: true), TestContext.Current.CancellationToken)).Response;
 
         await _filesClient.Authenticate(member);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.StartEditFileAsync(file.Id, new StartEdit(editingAlone: true), TestContext.Current.CancellationToken));
+            async () => await _filesApi.StartEditFileAsync(file.Id, new StartEditRequest(editingAlone: true), TestContext.Current.CancellationToken));
 
         // Assert
         ownerResult.Should().NotBeNullOrEmpty();

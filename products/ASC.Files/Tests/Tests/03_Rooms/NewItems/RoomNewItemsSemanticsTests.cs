@@ -148,7 +148,7 @@ public class RoomNewItemsSemanticsTests(
         await _filesClient.Authenticate(Owner);
         await _filesApi.UpdateFileAsync(
             file.Id,
-            new UpdateFile { Title = "Autotest News File After Update.docx" },
+            new UpdateFileRequest { Title = "Autotest News File After Update.docx" },
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -180,7 +180,7 @@ public class RoomNewItemsSemanticsTests(
         await _filesClient.Authenticate(Owner);
         await _filesApi.UpdateFileAsync(
             file.Id,
-            new UpdateFile { Title = "Autotest News New Title.docx" },
+            new UpdateFileRequest { Title = "Autotest News New Title.docx" },
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -302,7 +302,7 @@ public class RoomNewItemsSemanticsTests(
         await _filesClient.Authenticate(Owner);
         await _filesApi.DeleteFileAsync(
             file.Id,
-            new Delete(false, true),
+            new DeleteFileRequest(false, true),
             false,
             TestContext.Current.CancellationToken);
         await WaitLongOperation();

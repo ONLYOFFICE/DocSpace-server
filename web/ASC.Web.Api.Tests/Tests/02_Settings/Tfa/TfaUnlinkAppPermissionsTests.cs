@@ -53,7 +53,7 @@ public class TfaUnlinkAppPermissionsTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _tfaSettingsApi.UnlinkTfaAppAsync(
-                new TfaRequestsDto(), TestContext.Current.CancellationToken));
+                new TfaRequestDto(), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(401);
@@ -79,7 +79,7 @@ public class TfaUnlinkAppPermissionsTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _tfaSettingsApi.UnlinkTfaAppAsync(
-                new TfaRequestsDto(id: target.Id), TestContext.Current.CancellationToken));
+                new TfaRequestDto(id: target.Id), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);

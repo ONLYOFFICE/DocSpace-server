@@ -489,7 +489,7 @@ public class FileShareTests(
 
         // Get external share data to verify password is required
         var externalShareData = (await _sharingApi.GetExternalShareDataAsync(passwordProtectedSharedTo.RequestToken, cancellationToken: TestContext.Current.CancellationToken)).Response;
-        externalShareData.Status.Should().Be(Status.RequiredPassword);
+        externalShareData.Status.Should().Be(ExternalShareStatus.RequiredPassword);
 
         // Now provide correct password
         var password = "securepassword123";

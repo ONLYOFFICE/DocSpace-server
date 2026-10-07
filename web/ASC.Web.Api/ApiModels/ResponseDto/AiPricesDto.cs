@@ -72,7 +72,7 @@ public class AiPricesDto
     /// currencies, so this is the only place to read it.
     /// </summary>
     /// <example>{"code":"USD","symbol":"$"}</example>
-    public required CurrencyInfo Currency { get; init; }
+    public required AiPriceCurrencyDto Currency { get; init; }
 }
 
 /// <summary>

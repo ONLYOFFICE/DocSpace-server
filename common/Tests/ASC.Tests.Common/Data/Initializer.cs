@@ -42,7 +42,7 @@ public static class Initializer
     public const string OwnerEmail = "test@example.com";
     public const string OwnerPassword = "11111111";
 
-    private static PasswordHasher _passwordHasherSettings = null!;
+    private static PasswordHashSettingsDto _passwordHasherSettings = null!;
 
     // Maps each per-test HttpClient to the WebApi client of the portal it belongs to, so the
     // HttpClient.Authenticate(user) extension can sign in without any shared/ambient state. Entries
@@ -61,7 +61,7 @@ public static class Initializer
     /// Stores the (machine-key-derived, portal-independent) password-hash settings used to compute
     /// client-side password hashes. Called once by the fixture before any test runs.
     /// </summary>
-    internal static void InitializePasswordHasher(PasswordHasher settings)
+    internal static void InitializePasswordHasher(PasswordHashSettingsDto settings)
     {
         _passwordHasherSettings = settings;
     }

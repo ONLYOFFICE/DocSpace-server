@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using QuotaSettingsRequestsDto = DocSpace.API.SDK.Model.QuotaSettingsRequestsDto;
+using QuotaSettingsRequestsDto = DocSpace.API.SDK.Model.QuotaSettingsRequestDto;
 
 namespace ASC.Files.Tests.Tests._03_Rooms.Create;
 
@@ -54,7 +54,7 @@ public class RoomCreateOptionalFieldsTests(AspireAppFixture fixture) : BaseTest(
         const long myQuota = 10 * 1024 * 1024;
         await _webApiClient.Authenticate(Owner);
         await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(
-            new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(100 * 1024 * 1024)),
+            new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestDtoDefaultQuota(100 * 1024 * 1024)),
             TestContext.Current.CancellationToken);
 
         // Act

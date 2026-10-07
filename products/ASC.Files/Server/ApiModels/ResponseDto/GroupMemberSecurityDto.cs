@@ -38,7 +38,7 @@ namespace ASC.Files.Core.ApiModels.ResponseDto;
 /// rights to. Every line of the answer describes the same file or folder and differs only in the member and in the
 /// level that applies to them.
 /// </summary>
-public class GroupMemberSecurityRequestDto
+public class GroupMemberSecurityDto
 {
     /// <summary>
     /// The member the line is about, as the portal reports the account: the display name, the avatar and the portal

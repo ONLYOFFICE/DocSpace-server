@@ -581,14 +581,14 @@ public class UserController(
     /// To have the recovery link sent in the first place, use `POST api/2.0/people/password`.
     /// </remarks>
     /// <summary>Change a user password</summary>
-    /// <path>api/2.0/people/{userid}/password</path>
+    /// <path>api/2.0/people/{userId}/password</path>
     [Tags("People / Password")]
     [SwaggerResponse(200, "The profile whose password was changed", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "The user ID is empty, no password was sent, or the password does not meet the portal policy")]
     [SwaggerResponse(403, "The account is not active, or only its owner may change this password")]
     [SwaggerResponse(404, "No account has the specified ID")]
     [AllowNotPayment]
-    [HttpPut("{userid:guid}/password")]
+    [HttpPut("{userId:guid}/password")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "PasswordChange,Activation")]
     public async Task<EmployeeFullDto> ChangeUserPassword(ChangePasswordByIdRequestDto inDto)
@@ -671,14 +671,14 @@ public class UserController(
     /// The change is requested through `POST api/2.0/people/email`, which is what sends the link.
     /// </remarks>
     /// <summary>Change a user email</summary>
-    /// <path>api/2.0/people/{userid}/email</path>
+    /// <path>api/2.0/people/{userId}/email</path>
     [Tags("People / Email")]
     [SwaggerResponse(200, "The profile with its new address", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "The user ID is empty, or the address is missing or malformed")]
     [SwaggerResponse(403, "The account is not active, or only its owner may change this address")]
     [SwaggerResponse(404, "No account has the specified ID")]
     [AllowNotPayment]
-    [HttpPut("{userid:guid}/email")]
+    [HttpPut("{userId:guid}/email")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "EmailChange")]
     public async Task<EmployeeFullDto> ChangeUserEmail(ChangeEmailByIdRequestDto inDto)
@@ -742,7 +742,7 @@ public class UserController(
     /// administrator.
     /// The profile disappears at once, together with its avatar, its group memberships, its file shares and its
     /// OAuth clients, while the data it owned is erased by a queued job afterwards, which can be watched through
-    /// `GET api/2.0/people/remove/progress/{userid}`.
+    /// `GET api/2.0/people/remove/progress/{userId}`.
     /// The removal is permanent and cannot be undone, so hand the rooms and the shared files over first through
     /// `POST api/2.0/people/reassign/start` - an account whose reassignment has not finished cannot be deleted.
     /// The call raises a `UserDeleted` webhook and answers with the profile as it was just before it was removed.
@@ -751,13 +751,13 @@ public class UserController(
     /// <summary>
     /// Delete a user
     /// </summary>
-    /// <path>api/2.0/people/{userid}</path>
+    /// <path>api/2.0/people/{userId}</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The profile as it was just before it was deleted", typeof(EmployeeFullDto))]
     [SwaggerResponse(403, "The account is not disabled, is a system or an LDAP account, the caller may not delete a DocSpace administrator, or the OAuth service refused to remove the OAuth clients of the account")]
     [SwaggerResponse(404, "No user has the specified ID")]
     [SwaggerResponse(500, "A reassignment of the data of the account has not finished yet, or the OAuth service cannot be reached")]
-    [HttpDelete("{userid}")]
+    [HttpDelete("{userId}")]
     public async Task<EmployeeFullDto> DeleteMember(GetMemberByIdRequestDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);
@@ -830,7 +830,7 @@ public class UserController(
     /// LDAP cannot close themselves and get 403.
     /// After the call the account has the `Terminated` status and can no longer sign in, but its rooms, files and
     /// group memberships are untouched, which is why an administrator still has to erase it through
-    /// `DELETE api/2.0/people/{userid}` - that operation requires exactly this disabled state.
+    /// `DELETE api/2.0/people/{userId}` - that operation requires exactly this disabled state.
     /// The step is reversible until then: re-enabling the account through `PUT api/2.0/people/status/{status}`
     /// restores it.
     /// The call raises a `UserUpdated` webhook, not a delete one, and answers with the profile in its new state.
@@ -894,7 +894,7 @@ public class UserController(
     /// guest and be one of the caller's own guests - a single entry that is not rejects the whole call with 403 and
     /// changes nothing.
     /// The call returns no body; read `GET api/2.0/people/filter` with `area` set to `Guests` to see what is left.
-    /// To delete a guest account for good, disable it and then use `DELETE api/2.0/people/{userid}`.
+    /// To delete a guest account for good, disable it and then use `DELETE api/2.0/people/{userId}`.
     /// </remarks>
     /// <summary>
     /// Remove guest relations
@@ -955,13 +955,13 @@ public class UserController(
     /// <summary>
     /// Get a guest sharing link
     /// </summary>
-    /// <path>api/2.0/people/guests/{userid}/share</path>
+    /// <path>api/2.0/people/guests/{userId}/share</path>
     [Tags("Portal / Guests")]
     [SwaggerResponse(200, "The shortened confirmation link, as plain text", typeof(string))]
     [SwaggerResponse(400, "The account is not a guest")]
     [SwaggerResponse(403, "The caller is a guest, or is not allowed to see that account")]
     [SwaggerResponse(404, "No account has the specified ID")]
-    [HttpGet("guests/{userid:guid}/share")]
+    [HttpGet("guests/{userId:guid}/share")]
     public async Task<string> GetGuestSharingLink(GuestShareRequestDto inDto)
     {
         var targetUser = await _userManager.GetUsersAsync(inDto.UserId);
@@ -995,7 +995,7 @@ public class UserController(
     /// Accepts a guest that another member shared, which links that guest to the calling account and makes it
     /// visible in the caller's list of guests.
     /// Everything the operation needs comes from the confirmation token of the link produced by
-    /// `GET api/2.0/people/guests/{userid}/share`: the request body is not read at all, so there is nothing to fill
+    /// `GET api/2.0/people/guests/{userId}/share`: the request body is not read at all, so there is nothing to fill
     /// in, and an expired or already used token is answered with 401.
     /// The caller has to be a room admin or a DocSpace admin; a member or a guest gets 403.
     /// The account the token names has to exist and still be a guest, otherwise the operation answers 404 or 400.
@@ -1189,7 +1189,7 @@ public class UserController(
     /// error message when the lookup fails.
     /// To find out whether an address is taken without the right to see its owner, use
     /// `GET api/2.0/people/exists`, and to look an account up by its ID or user name use
-    /// `GET api/2.0/people/{userid}`.
+    /// `GET api/2.0/people/{userId}`.
     /// </remarks>
     /// <summary>
     /// Get a profile by user email
@@ -1240,14 +1240,14 @@ public class UserController(
     /// <summary>
     /// Get a profile by user ID
     /// </summary>
-    /// <path>api/2.0/people/{userid}</path>
+    /// <path>api/2.0/people/{userId}</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The full profile, or a reduced one for a request authenticated with an invitation link", typeof(EmployeeFullDto))]
     [SwaggerResponse(403, "The caller is not allowed to see that account")]
     [SwaggerResponse(404, "No account has the specified ID or user name")]
     [AllowNotPayment]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "LinkInvite,Authenticated")]
-    [HttpGet("{userid}", Order = 1)]
+    [HttpGet("{userId}", Order = 1)]
     public async Task<EmployeeFullDto> GetProfileByUserId(GetMemberByIdRequestDto inDto)
     {
         var isInvite = _httpContextAccessor.HttpContext!.User.Claims
@@ -1544,10 +1544,10 @@ public class UserController(
     /// not delete: a room admin when the caller is not a DocSpace admin, and a DocSpace admin when the caller is not
     /// the portal owner.
     /// The answer lists every account that was asked for, including the ones that were skipped, so it is not proof
-    /// that an account was deleted - read `GET api/2.0/people/{userid}` for that, which then answers 404.
+    /// that an account was deleted - read `GET api/2.0/people/{userId}` for that, which then answers 404.
     /// The removal is permanent and cannot be undone, and each deleted account raises a `UserDeleted` webhook while
     /// its data is erased by a queued job that can be watched through
-    /// `GET api/2.0/people/remove/progress/{userid}`.
+    /// `GET api/2.0/people/remove/progress/{userId}`.
     /// Hand the rooms and the shared files over first through `POST api/2.0/people/reassign/start` - an account with
     /// an unfinished reassignment cannot be deleted.
     /// </remarks>
@@ -1796,11 +1796,13 @@ public class UserController(
     /// </summary>
     /// <path>api/2.0/people/theme</path>
     [Tags("People / Theme")]
-    [SwaggerResponse(200, "The interface theme of the calling account", typeof(DarkThemeSettings))]
+    [SwaggerResponse(200, "The interface theme of the calling account", typeof(DarkThemeSettingsDto))]
     [HttpGet("theme")]
-    public async Task<DarkThemeSettings> GetPortalTheme()
+    public async Task<DarkThemeSettingsDto> GetPortalTheme()
     {
-        return await settingsManager.LoadForCurrentUserAsync<DarkThemeSettings>();
+        var settings = await settingsManager.LoadForCurrentUserAsync<DarkThemeSettings>();
+
+        return settings.Map();
     }
 
     /// <remarks>
@@ -1818,10 +1820,10 @@ public class UserController(
     /// </summary>
     /// <path>api/2.0/people/theme</path>
     [Tags("People / Theme")]
-    [SwaggerResponse(200, "The interface theme that was stored", typeof(DarkThemeSettings))]
+    [SwaggerResponse(200, "The interface theme that was stored", typeof(DarkThemeSettingsDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `theme`")]
     [HttpPut("theme")]
-    public async Task<DarkThemeSettings> ChangePortalTheme(DarkThemeSettingsRequestDto inDto)
+    public async Task<DarkThemeSettingsDto> ChangePortalTheme(DarkThemeSettingsRequestDto inDto)
     {
         var darkThemeSettings = new DarkThemeSettings
         {
@@ -1830,7 +1832,7 @@ public class UserController(
 
         await settingsManager.SaveForCurrentUserAsync(darkThemeSettings);
 
-        return darkThemeSettings;
+        return darkThemeSettings.Map();
     }
 
     /// <remarks>
@@ -1844,7 +1846,7 @@ public class UserController(
     /// `hasPersonalFolder` with whether the account has a personal folder, and `authCookieLifetime` with the seconds
     /// the session has left - the last one only when less than a day remains or the portal is configured to expose
     /// it, so an absent value means neither, not an endless session.
-    /// To read somebody else use `GET api/2.0/people/{userid}`, which reports none of these four.
+    /// To read somebody else use `GET api/2.0/people/{userId}`, which reports none of these four.
     /// </remarks>
     /// <summary>
     /// Get my profile
@@ -1889,7 +1891,7 @@ public class UserController(
     /// <remarks>
     /// Starts changing the email address of an account, and what it actually does depends on who calls it.
     /// A caller acting on their own account only gets a confirmation letter sent to the new address, and the address
-    /// stays unchanged until that link is followed, which lands on `PUT api/2.0/people/{userid}/email`.
+    /// stays unchanged until that link is followed, which lands on `PUT api/2.0/people/{userId}/email`.
     /// A DocSpace administrator acting on somebody else changes the address immediately instead: the account is
     /// marked as not activated, every session of it is ended, and activation instructions are sent to the new
     /// address - and passing the address the account already has is then rejected with 400.
@@ -2005,7 +2007,7 @@ public class UserController(
     /// An authenticated caller does get told: a failure is answered with 403, and asking for somebody else requires
     /// DocSpace administrator rights, while the owner's password can be asked for by the owner alone and another
     /// administrator's only by the owner.
-    /// The link that is sent leads to `PUT api/2.0/people/{userid}/password`, which is where the new password is
+    /// The link that is sent leads to `PUT api/2.0/people/{userId}/password`, which is where the new password is
     /// set; no password is ever sent by email despite the wording of the message.
     /// Repeated calls are throttled.
     /// </remarks>
@@ -2094,14 +2096,14 @@ public class UserController(
     /// <summary>
     /// Set my activation status
     /// </summary>
-    /// <path>api/2.0/people/activationstatus/{activationstatus}</path>
+    /// <path>api/2.0/people/activationstatus/{activationStatus}</path>
     /// <collection>list</collection>
     [Tags("People / User status")]
     [SwaggerResponse(200, "The profile of the caller in its new activation state", typeof(IAsyncEnumerable<EmployeeFullDto>))]
     [SwaggerResponse(400, "The list is empty, holds more than one ID, or names an account other than the caller")]
     [SwaggerResponse(403, "The account may not edit its own profile")]
     [AllowNotPayment]
-    [HttpPut("activationstatus/{activationstatus}")]
+    [HttpPut("activationstatus/{activationStatus}")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Activation,EmailActivation")]
     public async IAsyncEnumerable<EmployeeFullDto> UpdateUserActivationStatus(UpdateMemberActivationStatusRequestDto inDto)
     {
@@ -2154,18 +2156,18 @@ public class UserController(
     /// administrator gets 403 for anybody else - and the account must be allowed to edit its own profile.
     /// The change takes effect immediately, raises a `UserUpdated` webhook, and answers with the profile carrying
     /// the new `cultureName`.
-    /// Other profile fields are not touched here; use `PUT api/2.0/people/{userid}` for those.
+    /// Other profile fields are not touched here; use `PUT api/2.0/people/{userId}` for those.
     /// </remarks>
     /// <summary>
     /// Update a user culture
     /// </summary>
-    /// <path>api/2.0/people/{userid}/culture</path>
+    /// <path>api/2.0/people/{userId}/culture</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The profile with its new culture", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "The specified culture is not enabled on the portal")]
     [SwaggerResponse(403, "The ID in the route is not the calling account, or the account may not edit its own profile")]
     [SwaggerResponse(404, "No user has the specified ID")]
-    [HttpPut("{userid}/culture")]
+    [HttpPut("{userId}/culture")]
     public async Task<EmployeeFullDto> UpdateMemberCulture(UpdateMemberCultureByIdRequestDto inDto)
     {
         if (!coreBaseSettings.EnabledCultures.Any(c =>
@@ -2200,20 +2202,20 @@ public class UserController(
     /// location are silently left alone even on one's own profile.
     /// Omitted fields keep their current values, an unusable pair of names answers 400, and `disable` set to true
     /// gives the account the `Terminated` status and ends every session it has, which is the state
-    /// `DELETE api/2.0/people/{userid}` then requires.
+    /// `DELETE api/2.0/people/{userId}` then requires.
     /// The `isUser` flag turns the account into a guest when true and back into a member when false, both of which
     /// can answer 402 because either direction takes a seat; a request to make the portal owner, a DocSpace
     /// administrator or a module administrator a guest is ignored without an error.
     /// A change raises a `UserUpdated` webhook and the answer holds the profile as it is afterwards, so read it
     /// instead of assuming the request was applied.
-    /// For the language use `PUT api/2.0/people/{userid}/culture`, for the type
+    /// For the language use `PUT api/2.0/people/{userId}/culture`, for the type
     /// `PUT api/2.0/people/type/{type}`, and for the status of several accounts at once
     /// `PUT api/2.0/people/status/{status}`.
     /// </remarks>
     /// <summary>
     /// Update a user
     /// </summary>
-    /// <path>api/2.0/people/{userid}</path>
+    /// <path>api/2.0/people/{userId}</path>
     [Tags("People / Profiles")]
     [SwaggerResponse(200, "The profile as it is after the update", typeof(EmployeeFullDto))]
     [SwaggerResponse(400, "The first and last name pair is not a valid user name")]
@@ -2221,7 +2223,7 @@ public class UserController(
     [SwaggerResponse(403, "The account is the portal owner or a system account, the caller may not edit it, only the portal owner may edit a DocSpace administrator, or, on the caller's own profile, the `files` URL was refused or the server behind it answered with an error status")]
     [SwaggerResponse(404, "No user has the specified ID")]
     [SwaggerResponse(500, "On the caller's own profile, the `files` URL could not be reached within 10 seconds, or the downloaded file is empty, is not an image the portal can read, or exceeds the portal limit on image size")]
-    [HttpPut("{userid}", Order = 1)]
+    [HttpPut("{userId}", Order = 1)]
     public async Task<EmployeeFullDto> UpdateMember(UpdateMemberByIdRequestDto inDto)
     {
         var user = await GetUserInfoAsync(inDto.UserId);
@@ -2401,7 +2403,7 @@ public class UserController(
     /// back as `Pending` rather than `Active` when it still has an unused invitation, so read the `status` in the
     /// answer instead of assuming it matches the request.
     /// Each changed account raises a `UserUpdated` webhook, and disabling is what
-    /// `DELETE api/2.0/people/{userid}` requires before it will delete an account.
+    /// `DELETE api/2.0/people/{userId}` requires before it will delete an account.
     /// </remarks>
     /// <summary>
     /// Change a user status
@@ -2628,7 +2630,7 @@ public class UserController(
     /// convert a DocSpace administrator, and converting to `Guest` also requires the portal to allow inviting guests.
     /// The account being converted has to be active and cannot be the caller, and the recipient - `reassignUserId`,
     /// or the caller when it is omitted - has to be an active room admin or DocSpace admin other than that account.
-    /// The conversion does not finish within this call: poll `GET api/2.0/people/type/progress/{userid}` with the
+    /// The conversion does not finish within this call: poll `GET api/2.0/people/type/progress/{userId}` with the
     /// converted user ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/type/terminate`.
     /// A failure inside the running job is reported in the `error` field of the progress, not as a status code here.
     /// </remarks>
@@ -2700,11 +2702,11 @@ public class UserController(
     /// Use `PUT api/2.0/people/type/terminate` to cancel a conversion that is still running.
     /// </remarks>
     /// <summary>Get the user type change progress</summary>
-    /// <path>api/2.0/people/type/progress/{userid}</path>
+    /// <path>api/2.0/people/type/progress/{userId}</path>
     [Tags("People / User type")]
     [SwaggerResponse(200, "The state of the queued user type change, or an empty body when nothing is queued for the user", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpGet("type/progress/{userid:guid}")]
+    [HttpGet("type/progress/{userId:guid}")]
     public async Task<TaskProgressResponseDto> GetUserTypeUpdateProgress(UserIdRequestDto inDto)
     {
         await _permissionContext.DemandPermissionsAsync(Constants.Action_AddRemoveUser);

@@ -296,7 +296,7 @@ public class RoomDeleteTests(
         await _filesClient.Authenticate(Owner);
         await _webApiClient.Authenticate(Owner);
         await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(
-            new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(100 * 1024 * 1024)),
+            new QuotaSettingsRequestDto(true, new QuotaSettingsRequestDtoDefaultQuota(100 * 1024 * 1024)),
             TestContext.Current.CancellationToken);
 
         var room = (await _roomsApi.CreateRoomAsync(

@@ -145,6 +145,7 @@ global using Microsoft.AspNetCore.Mvc.ApplicationModels;
 global using Microsoft.AspNetCore.Mvc.Authorization;
 global using Microsoft.AspNetCore.Mvc.Controllers;
 global using Microsoft.AspNetCore.Mvc.Filters;
+global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.AspNetCore.Mvc.Routing;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.AspNetCore.Routing;
@@ -172,6 +173,8 @@ global using NLog.Web;
 
 global using RedisRateLimiting;
 global using RedisRateLimiting.AspNetCore;
+
+global using Riok.Mapperly.Abstractions;
 
 global using StackExchange.Redis;
 global using StackExchange.Redis.Extensions.Core.Abstractions;

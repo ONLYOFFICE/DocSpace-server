@@ -112,7 +112,7 @@ public abstract class FavoritesOperationsTestBase(
     /// <summary>Moves a file to trash and waits for the asynchronous delete operation to finish.</summary>
     protected async Task DeleteFileToTrash(int fileId)
     {
-        await _filesApi.DeleteFileAsync(fileId, new Delete(false, false), false, TestContext.Current.CancellationToken);
+        await _filesApi.DeleteFileAsync(fileId, new DeleteFileRequest(false, false), false, TestContext.Current.CancellationToken);
         await WaitLongOperation();
     }
 

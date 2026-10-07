@@ -81,6 +81,7 @@ public class BaseTest(
     protected AuditTrailDataApi _auditTrailDataApi = null!;
     protected CSPApi _cspApi = null!;
     protected FirebaseApi _firebaseApi = null!;
+    protected EncryptionApi _encryptionApi = null!;
     protected LoginHistoryApi _loginHistoryApi = null!;
     protected OAuth2Api _oauth2Api = null!;
     protected SecurityAccessToDevToolsApi _securityAccessToDevToolsApi = null!;
@@ -135,6 +136,7 @@ public class BaseTest(
         _auditTrailDataApi = _clients.AuditTrailDataApi;
         _cspApi = _clients.CspApi;
         _firebaseApi = _clients.FirebaseApi;
+        _encryptionApi = _clients.EncryptionApi;
         _loginHistoryApi = _clients.LoginHistoryApi;
         _oauth2Api = _clients.OAuth2Api;
         _securityAccessToDevToolsApi = _clients.SecurityAccessToDevToolsApi;

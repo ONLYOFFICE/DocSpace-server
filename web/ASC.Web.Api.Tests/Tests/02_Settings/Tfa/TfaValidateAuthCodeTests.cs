@@ -53,7 +53,7 @@ public class TfaValidateAuthCodeTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _tfaSettingsApi.TfaValidateAuthCodeAsync(
-                new TfaValidateRequestsDto("000000"), TestContext.Current.CancellationToken));
+                new TfaValidateRequestDto("000000"), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);

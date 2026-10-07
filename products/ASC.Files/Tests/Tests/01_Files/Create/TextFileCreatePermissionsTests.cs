@@ -50,7 +50,7 @@ public class TextFileCreatePermissionsTests(
         await _filesClient.Authenticate(Owner);
 
         var result = (await _filesApi.CreateTextFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest Text My Docs Owner", "Owner content", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest Text My Docs Owner", "Owner content", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         result.Id.Should().BeGreaterThan(0);
@@ -64,7 +64,7 @@ public class TextFileCreatePermissionsTests(
         await _filesClient.Authenticate(admin);
 
         var result = (await _filesApi.CreateTextFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest Text My Docs Admin", "Admin content", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest Text My Docs Admin", "Admin content", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         result.Id.Should().BeGreaterThan(0);
@@ -78,7 +78,7 @@ public class TextFileCreatePermissionsTests(
         await _filesClient.Authenticate(roomAdmin);
 
         var result = (await _filesApi.CreateTextFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest Text My Docs Room Admin", "Room admin content", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest Text My Docs Room Admin", "Room admin content", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         result.Id.Should().BeGreaterThan(0);
@@ -92,7 +92,7 @@ public class TextFileCreatePermissionsTests(
         await _filesClient.Authenticate(user);
 
         var result = (await _filesApi.CreateTextFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest Text My Docs User", "User content", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest Text My Docs User", "User content", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         result.Id.Should().BeGreaterThan(0);
@@ -106,7 +106,7 @@ public class TextFileCreatePermissionsTests(
         await _filesClient.Authenticate(guest);
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.CreateTextFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest Text My Docs Guest", "Guest content", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest Text My Docs Guest", "Guest content", createNewIfExist: true),
             TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(404);
@@ -118,7 +118,7 @@ public class TextFileCreatePermissionsTests(
         await _filesClient.Authenticate(null);
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.CreateTextFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest Text My Docs Anon", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest Text My Docs Anon", createNewIfExist: true),
             TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(401);
@@ -134,7 +134,7 @@ public class TextFileCreatePermissionsTests(
         await _filesClient.Authenticate(null);
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.CreateTextFileAsync(
-            room.Id, new CreateTextOrHtmlFile("Autotest Text Anon", "some text"), TestContext.Current.CancellationToken));
+            room.Id, new CreateTextOrHtmlFileRequest("Autotest Text Anon", "some text"), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(401);
     }
@@ -158,7 +158,7 @@ public class TextFileCreatePermissionsTests(
         await _filesClient.Authenticate(user);
 
         var result = (await _filesApi.CreateTextFileAsync(
-            room.Id, new CreateTextOrHtmlFile("Autotest Text ContentCreator User", "some text", createNewIfExist: true),
+            room.Id, new CreateTextOrHtmlFileRequest("Autotest Text ContentCreator User", "some text", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         result.Id.Should().BeGreaterThan(0);
@@ -183,7 +183,7 @@ public class TextFileCreatePermissionsTests(
         await _filesClient.Authenticate(user);
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.CreateTextFileAsync(
-            room.Id, new CreateTextOrHtmlFile("Autotest Text Read User", "some text"), TestContext.Current.CancellationToken));
+            room.Id, new CreateTextOrHtmlFileRequest("Autotest Text Read User", "some text"), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
     }
@@ -199,7 +199,7 @@ public class TextFileCreatePermissionsTests(
         await _filesClient.Authenticate(user);
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.CreateTextFileAsync(
-            room.Id, new CreateTextOrHtmlFile("Autotest Text No Access", "some text"), TestContext.Current.CancellationToken));
+            room.Id, new CreateTextOrHtmlFileRequest("Autotest Text No Access", "some text"), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
     }

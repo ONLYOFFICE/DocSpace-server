@@ -37,14 +37,21 @@ namespace ASC.Api.Core.Extensions;
 /// Names the component schema a CLR type is documented under, the same way in every service document.
 /// </summary>
 /// <remarks>
-/// The name is the type name, with one convention on top for the generic DTOs. A file, a folder and every
-/// payload that carries their identifiers is generic in the identifier type, which is <c>int</c> for an entry
-/// the portal stores itself and <c>string</c> for an entry on a connected third-party account. Appending the
-/// argument to the name gave <c>FileDtoInteger</c> and <c>FileDtoString</c>, which tell a reader of the SDK
-/// nothing. So the portal's own shape takes the plain name, <c>FileDto</c>, and the third-party shape spells
-/// the storage out in front of it, <c>ThirdPartyFileDto</c>. A generic type closed over anything else keeps
-/// its argument names appended (<c>ItemKeyValuePairBooleanString</c>, <c>CreateFileJsonElement</c>).
-/// A plain name is only free while no non-generic type claims it; should one appear, Swashbuckle refuses the
+/// The name is the type name, with a few conventions on top. A type that carries
+/// <see cref="OpenApiSchemaNameAttribute"/> is published under the name given there instead: the class name
+/// is an implementation detail (a core settings class, an EF entity, a type called <c>Delete</c> or
+/// <c>Status</c>), while the schema name is what an SDK user and an AI agent read to understand what a
+/// payload is. A file, a folder and every payload that carries their identifiers is generic in the
+/// identifier type, which is <c>int</c> for an entry the portal stores itself and <c>string</c> for an entry
+/// on a connected third-party account. Appending the argument to the name gave <c>FileDtoInteger</c> and
+/// <c>FileDtoString</c>, which tell a reader of the SDK nothing. So the portal's own shape takes the plain
+/// name, <c>FileDto</c>, and the third-party shape spells the storage out in front of it,
+/// <c>ThirdPartyFileDto</c>. A payload closed over <c>JsonElement</c> takes the plain name too: that argument
+/// only says the identifier may be a number or a string, which the schema already states. A generic type
+/// closed over anything else keeps its argument names appended (<c>ItemKeyValuePairBooleanString</c>).
+/// The plural <c>Requests</c> of the legacy Web API request models (<c>CspRequestsDto</c>) is published in
+/// the singular, like every other request body.
+/// A name is only free while no other type claims it; should two types meet on one, Swashbuckle refuses the
 /// duplicate schema id while the document is generated, so the clash cannot pass unnoticed.
 /// </remarks>
 public static class OpenApiSchemaId
@@ -53,7 +60,9 @@ public static class OpenApiSchemaId
 
     public static string Of(Type type)
     {
-        var name = type.Name;
+        var definition = type.IsGenericType ? type.GetGenericTypeDefinition() : type;
+        var explicitName = definition.GetCustomAttribute<OpenApiSchemaNameAttribute>(false)?.Name;
+        var name = explicitName ?? type.Name;
 
         if (string.IsNullOrEmpty(name))
         {
@@ -65,9 +74,9 @@ public static class OpenApiSchemaId
             name = name.Split('`')[0];
             var arguments = type.GetGenericArguments();
 
-            if (arguments.Length == 1 && arguments[0] == typeof(int))
+            if (arguments.Length == 1 && (arguments[0] == typeof(int) || arguments[0] == typeof(JsonElement)))
             {
-                // The portal's own shape: the plain name.
+                // The portal's own shape, or an identifier that may be either: the plain name.
             }
             else if (arguments.Length == 1 && arguments[0] == typeof(string))
             {
@@ -79,9 +88,35 @@ public static class OpenApiSchemaId
             }
         }
 
+        if (explicitName is null)
+        {
+            if (name.EndsWith("RequestsDto", StringComparison.Ordinal))
+            {
+                name = name[..^"RequestsDto".Length] + "RequestDto";
+            }
+            else if (name.EndsWith("Requests", StringComparison.Ordinal))
+            {
+                name = name[..^"Requests".Length] + "Request";
+            }
+        }
+
         // Fix for nested classes
         name = name.Replace("+", "_");
         name = name.Replace("Int32", "Integer");
         return name;
     }
+}
+
+/// <summary>
+/// Publishes a type in the OpenAPI documents under the given schema name instead of its class name.
+/// </summary>
+/// <remarks>
+/// For a generic type, put it on the definition: the third-party prefix of <see cref="OpenApiSchemaId"/>
+/// is still applied to the <c>string</c> closure. It renames the schema only; the JSON on the wire does not
+/// change, so it is safe for existing clients and changes nothing but the generated SDK model name.
+/// </remarks>
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Interface, Inherited = false)]
+public sealed class OpenApiSchemaNameAttribute(string name) : Attribute
+{
+    public string Name { get; } = name;
 }

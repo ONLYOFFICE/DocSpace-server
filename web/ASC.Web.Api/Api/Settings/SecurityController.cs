@@ -389,12 +389,12 @@ public class SecurityController(
     /// <summary>
     /// Get product administrators
     /// </summary>
-    /// <path>api/2.0/settings/security/administrator/{productid}</path>
+    /// <path>api/2.0/settings/security/administrator/{productId}</path>
     /// <collection>list</collection>
     [Tags("Settings / Security")]
     [SwaggerResponse(200, "The users who administer the module asked about, or the portal-wide administrators when the all-zero identifier is used", typeof(IAsyncEnumerable<EmployeeDto>))]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
-    [HttpGet("administrator/{productid:guid}")]
+    [HttpGet("administrator/{productId:guid}")]
     public async IAsyncEnumerable<EmployeeDto> GetProductAdministrators(ProductIdRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
@@ -416,7 +416,7 @@ public class SecurityController(
     /// user and no group are answered with `false` instead of a failure, so a `false` does not prove the user exists.
     /// The verdict is read out of group membership alone and says nothing about whether the module is enabled for
     /// this portal, which `GET api/2.0/settings/security/{id}` reports. Use
-    /// `GET api/2.0/settings/security/administrator/{productid}` to list everyone who administers a module, and
+    /// `GET api/2.0/settings/security/administrator/{productId}` to list everyone who administers a module, and
     /// `PUT api/2.0/settings/security/administrator` to change the membership.
     /// </remarks>
     /// <summary>

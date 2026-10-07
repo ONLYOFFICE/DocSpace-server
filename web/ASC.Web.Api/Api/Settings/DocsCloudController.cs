@@ -188,19 +188,19 @@ public class DocsCloudController(
     /// </summary>
     /// <path>api/2.0/settings/docscloud/calculatedevpack</path>
     [Tags("Settings / DocsCloud")]
-    [SwaggerResponse(200, "The cost of switching to Docs Connect Dev Pack for the requested quantity, or an empty result if the billing service could not price it", typeof(PaymentCalculation))]
+    [SwaggerResponse(200, "The cost of switching to Docs Connect Dev Pack for the requested quantity, or an empty result if the billing service could not price it", typeof(PaymentCalculationDto))]
     [SwaggerResponse(400, "The request body cannot be read, the quantity is below the allowed minimum, the portal has no active Docs Connect subscription, or it already has a Docs Connect Dev Pack subscription")]
     [SwaggerResponse(402, "The portal tariff is delayed or not paid, so the switch cannot be priced")]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the billing service is not configured")]
     [SwaggerResponse(404, "The portal is not registered as a billing customer, or the Docs Connect and Docs Connect Dev Pack wallet products are not configured on this installation")]
     [HttpPost("calculatedevpack")]
-    public async Task<PaymentCalculation> CalculateDevPack(DocsCloudDevPackRequestDto inDto)
+    public async Task<PaymentCalculationDto> CalculateDevPack(DocsCloudDevPackRequestDto inDto)
     {
         var (fromQuota, toQuota) = await PrepareSwitchAsync(inDto.Quantity);
 
         var tenant = tenantManager.GetCurrentTenant();
 
-        return await tariffService.CalculateSwitchSubscriptionAsync(tenant.Id, fromQuota.GetPaymentId(), toQuota.GetPaymentId(), inDto.Quantity);
+        return (await tariffService.CalculateSwitchSubscriptionAsync(tenant.Id, fromQuota.GetPaymentId(), toQuota.GetPaymentId(), inDto.Quantity))?.Map();
     }
 
     /// <remarks>
@@ -225,15 +225,15 @@ public class DocsCloudController(
     /// <path>api/2.0/settings/docscloud/tenant</path>
     /// <param name="refresh">Pass `true` to skip the cached copy and request the tenant from Docs Connect again, replacing the cached one; with the default `false` the answer may be up to an hour old, or up to a minute old while the portal has no tenant.</param>
     [Tags("Settings / DocsCloud")]
-    [SwaggerResponse(200, "The Docs Connect tenant of the portal, or an empty result if no Docs Connect tenant is assigned to it", typeof(DocsCloudTenant))]
+    [SwaggerResponse(200, "The Docs Connect tenant of the portal, or an empty result if no Docs Connect tenant is assigned to it", typeof(DocsCloudTenantDto))]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [SwaggerResponse(500, "The Docs Connect service is not configured on this installation, is unreachable, or answered with an error other than not found")]
     [HttpGet("tenant")]
-    public async Task<DocsCloudTenant> GetTenant(bool refresh = false)
+    public async Task<DocsCloudTenantDto> GetTenant(bool refresh = false)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await docsCloudClient.GetTenantAsync(await GetPortalIdAsync(), refresh);
+        return (await docsCloudClient.GetTenantAsync(await GetPortalIdAsync(), refresh))?.Map();
     }
 
     /// <remarks>
@@ -258,12 +258,12 @@ public class DocsCloudController(
     /// <path>api/2.0/settings/docscloud/tenant/info</path>
     /// <param name="refresh">Pass `true` to skip the cached copy and request the license, server and usage information from Docs Connect again, replacing the cached one; with the default `false` the answer may be up to a minute old.</param>
     [Tags("Settings / DocsCloud")]
-    [SwaggerResponse(200, "The Docs Connect license and server information of the portal, with the user limits of the license and the usage statistics for the current period", typeof(DocsCloudTenantInfo))]
+    [SwaggerResponse(200, "The Docs Connect license and server information of the portal, with the user limits of the license and the usage statistics for the current period", typeof(DocsCloudTenantInfoDto))]
     [SwaggerResponse(400, "The portal has no activated Docs Connect tenant, so there is no license information to return")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [SwaggerResponse(500, "The Docs Connect service is not configured on this installation, is unreachable, or answered with an error other than not found")]
     [HttpGet("tenant/info")]
-    public async Task<DocsCloudTenantInfo> GetTenantInfo(bool refresh = false)
+    public async Task<DocsCloudTenantInfoDto> GetTenantInfo(bool refresh = false)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -271,7 +271,7 @@ public class DocsCloudController(
 
         if (!info.License.Trial)
         {
-            return info;
+            return info?.Map();
         }
 
         var tenant = tenantManager.GetCurrentTenant();
@@ -286,7 +286,7 @@ public class DocsCloudController(
             info.License.Trial = false;
         }
 
-        return info;
+        return info?.Map();
     }
 
     /// <remarks>
@@ -310,16 +310,16 @@ public class DocsCloudController(
     /// <path>api/2.0/settings/docscloud/tenant/config</path>
     /// <param name="refresh">Pass `true` to skip the cached copy and request the configuration from Docs Connect again, replacing the cached one; with the default `false` the answer may be up to an hour old.</param>
     [Tags("Settings / DocsCloud")]
-    [SwaggerResponse(200, "The configuration of the Docs Connect tenant of the portal, with its security, server, WOPI and IP filter settings", typeof(DocsCloudConfig))]
+    [SwaggerResponse(200, "The configuration of the Docs Connect tenant of the portal, with its security, server, WOPI and IP filter settings", typeof(DocsCloudConfigDto))]
     [SwaggerResponse(400, "The portal has no activated Docs Connect tenant, so there is no configuration to return")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [SwaggerResponse(500, "The Docs Connect service is not configured on this installation, is unreachable, or answered with an error other than not found")]
     [HttpGet("tenant/config")]
-    public async Task<DocsCloudConfig> GetTenantConfig(bool refresh = false)
+    public async Task<DocsCloudConfigDto> GetTenantConfig(bool refresh = false)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await docsCloudClient.GetTenantConfigAsync(await GetPortalIdAsync(), refresh);
+        return (await docsCloudClient.GetTenantConfigAsync(await GetPortalIdAsync(), refresh))?.Map();
     }
 
     /// <remarks>
@@ -344,16 +344,16 @@ public class DocsCloudController(
     /// </summary>
     /// <path>api/2.0/settings/docscloud/tenant/config</path>
     [Tags("Settings / DocsCloud")]
-    [SwaggerResponse(200, "The configuration of the Docs Connect tenant as Docs Connect stored it after the update", typeof(DocsCloudConfig))]
+    [SwaggerResponse(200, "The configuration of the Docs Connect tenant as Docs Connect stored it after the update", typeof(DocsCloudConfigDto))]
     [SwaggerResponse(400, "The request body cannot be read, a text field is longer than 255 characters, the file size limit is outside 0-209715200 bytes, or the portal has no activated Docs Connect tenant")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [SwaggerResponse(500, "The Docs Connect service is not configured on this installation, is unreachable, or answered with an error other than not found, including a rejection of the new values")]
     [HttpPut("tenant/config")]
-    public async Task<DocsCloudConfig> UpdateTenantConfig(DocsCloudConfig inDto)
+    public async Task<DocsCloudConfigDto> UpdateTenantConfig(DocsCloudConfigRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await paymentHelper.UpdateTenantConfigAsync(await GetPortalIdAsync(), inDto);
+        return (await paymentHelper.UpdateTenantConfigAsync(await GetPortalIdAsync(), inDto.Map()))?.Map();
     }
 
     /// <remarks>
@@ -378,16 +378,16 @@ public class DocsCloudController(
     /// <path>api/2.0/settings/docscloud/tenant/quota</path>
     /// <param name="refresh">Pass `true` to skip the cached copy and request the user quota from Docs Connect again, replacing the cached one; with the default `false` the answer may be up to a minute old.</param>
     [Tags("Settings / DocsCloud")]
-    [SwaggerResponse(200, "The editor and viewer users of the Docs Connect tenant of the portal, with the expiration date of each entry", typeof(DocsCloudQuota))]
+    [SwaggerResponse(200, "The editor and viewer users of the Docs Connect tenant of the portal, with the expiration date of each entry", typeof(DocsCloudQuotaDto))]
     [SwaggerResponse(400, "The portal has no activated Docs Connect tenant, so there is no user quota to return")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [SwaggerResponse(500, "The Docs Connect service is not configured on this installation, is unreachable, or answered with an error other than not found")]
     [HttpGet("tenant/quota")]
-    public async Task<DocsCloudQuota> GetTenantQuota(bool refresh = false)
+    public async Task<DocsCloudQuotaDto> GetTenantQuota(bool refresh = false)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await docsCloudClient.GetTenantQuotaAsync(await GetPortalIdAsync(), refresh);
+        return (await docsCloudClient.GetTenantQuotaAsync(await GetPortalIdAsync(), refresh))?.Map();
     }
 
     /// <remarks>
@@ -528,16 +528,16 @@ public class DocsCloudController(
     /// <path>api/2.0/settings/docscloud/tenant/usage</path>
     /// <param name="refresh">Pass `true` to skip the cached copy and request the usage statistics from Docs Connect again, replacing the cached one; with the default `false` the answer may be up to a minute old.</param>
     [Tags("Settings / DocsCloud")]
-    [SwaggerResponse(200, "The number of active Docs Connect users of the portal and the date the count starts from", typeof(DocsCloudUsage))]
+    [SwaggerResponse(200, "The number of active Docs Connect users of the portal and the date the count starts from", typeof(DocsCloudUsageDto))]
     [SwaggerResponse(400, "The portal has no activated Docs Connect tenant, so there is no usage information to return")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [SwaggerResponse(500, "The Docs Connect service is not configured on this installation, is unreachable, or answered with an error other than not found")]
     [HttpGet("tenant/usage")]
-    public async Task<DocsCloudUsage> GetTenantUsage(bool refresh = false)
+    public async Task<DocsCloudUsageDto> GetTenantUsage(bool refresh = false)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await docsCloudClient.GetTenantUsageAsync(await GetPortalIdAsync(), refresh);
+        return (await docsCloudClient.GetTenantUsageAsync(await GetPortalIdAsync(), refresh))?.Map();
     }
 
     private async Task ChangeCspSettingsAsync(DocsCloudTenant docsCloudTenant)

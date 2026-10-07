@@ -44,6 +44,6 @@ public class GetUserPhotoRequestDto
     /// works for the calling account itself.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromRoute(Name = "userid")]
+    [FromRoute(Name = "userId")]
     public required string UserId { get; set; }
 }

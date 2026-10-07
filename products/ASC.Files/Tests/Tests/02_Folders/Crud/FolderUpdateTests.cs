@@ -90,7 +90,7 @@ public class FolderUpdateTests(
         await CreateFile("test_file.docx", folder.Id);
         
         // Act
-        var deleteParams = new DeleteFolder(deleteAfter: false, immediately: true);
+        var deleteParams = new DeleteFolderRequest(deleteAfter: false, immediately: true);
         var results = (await _foldersApi.DeleteFolderAsync(folder.Id, deleteParams, TestContext.Current.CancellationToken)).Response;
         
         if (results.Any(r => !r.Finished))

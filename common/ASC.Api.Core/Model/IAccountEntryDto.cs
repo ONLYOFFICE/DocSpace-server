@@ -44,4 +44,5 @@ namespace ASC.Web.Api.Models;
 /// </remarks>
 [JsonDerivedType(typeof(EmployeeFullDto))]
 [JsonDerivedType(typeof(GroupDto))]
+[OpenApiSchemaName("AccountEntryDto")]
 public interface IAccountEntryDto;

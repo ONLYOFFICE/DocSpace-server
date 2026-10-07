@@ -374,7 +374,7 @@ public abstract class FoldersController<T>(
     [SwaggerResponse(403, "The caller may not delete the folder, or the folder is a room and `immediately` is not set")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpDelete("folder/{folderId}")]
-    public async IAsyncEnumerable<FileOperationDto> DeleteFolder(DeleteFolder<T> inDto)
+    public async IAsyncEnumerable<FileOperationDto> DeleteFolder(DeleteFolderRequestDto<T> inDto)
     {
         await fileOperationsManager.Publish([inDto.FolderId], [], false, !inDto.Delete.DeleteAfter, inDto.Delete.Immediately);
 

@@ -52,7 +52,7 @@ public class CustomFilterTests(
         var file = await CreateFile("Autotest CustomFilter.xlsx", room.Id);
 
         // Act
-        var result = (await _filesApi.SetCustomFilterTagAsync(file.Id, new CustomFilterParameters(true), TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.SetCustomFilterTagAsync(file.Id, new CustomFilterRequest(true), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         result.Id.Should().Be(file.Id);
@@ -67,10 +67,10 @@ public class CustomFilterTests(
         await _filesClient.Authenticate(Owner);
         var room = await CreateCustomRoom("Autotest CustomFilter Disable Room");
         var file = await CreateFile("Autotest CustomFilter.xlsx", room.Id);
-        await _filesApi.SetCustomFilterTagAsync(file.Id, new CustomFilterParameters(true), TestContext.Current.CancellationToken);
+        await _filesApi.SetCustomFilterTagAsync(file.Id, new CustomFilterRequest(true), TestContext.Current.CancellationToken);
 
         // Act
-        var result = (await _filesApi.SetCustomFilterTagAsync(file.Id, new CustomFilterParameters(false), TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.SetCustomFilterTagAsync(file.Id, new CustomFilterRequest(false), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         result.Id.Should().Be(file.Id);
@@ -86,7 +86,7 @@ public class CustomFilterTests(
 
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.SetCustomFilterTagAsync(999999999, new CustomFilterParameters(true), TestContext.Current.CancellationToken));
+            async () => await _filesApi.SetCustomFilterTagAsync(999999999, new CustomFilterRequest(true), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(404);
     }

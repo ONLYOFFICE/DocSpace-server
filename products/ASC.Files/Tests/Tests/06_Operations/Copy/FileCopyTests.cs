@@ -52,9 +52,9 @@ public class FileCopyTests(
         var targetFolder = await CreateFolderInMy("target_folder", Owner);
 
         // Act
-        var copyParams = new CopyAsJsonElement(
+        var copyParams = new CopyAsRequest(
             destTitle: sourceFile.Title,
-            destFolderId: new CopyAsJsonElementDestFolderId(targetFolder.Id)
+            destFolderId: new CopyAsRequestDestFolderId(targetFolder.Id)
         );
 
         var copiedFile = (await _filesApi.CopyFileAsAsync(sourceFile.Id, copyParams, TestContext.Current.CancellationToken)).Response;
@@ -112,9 +112,9 @@ public class FileCopyTests(
         var targetFolderId = await GetUserFolderIdAsync( Owner);
 
         // Act
-        var copyParams = new CopyAsJsonElement(
+        var copyParams = new CopyAsRequest(
             destTitle: newFileName,
-            destFolderId: new CopyAsJsonElementDestFolderId(targetFolderId)
+            destFolderId: new CopyAsRequestDestFolderId(targetFolderId)
         );
 
         var copiedFile = (await _filesApi.CopyFileAsAsync(sourceFile.Id, copyParams, TestContext.Current.CancellationToken)).Response;
@@ -368,7 +368,7 @@ public class FileCopyTests(
         await _filesClient.Authenticate(Owner);
         var createdRoom = await CreateVirtualRoom("room_to_lock");
         var sourceFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
-        var lockedFile = (await _filesApi.LockFileAsync(sourceFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
+        var lockedFile = (await _filesApi.LockFileAsync(sourceFile.Id, new LockFileRequest(true), TestContext.Current.CancellationToken)).Response;
 
         var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
@@ -400,7 +400,7 @@ public class FileCopyTests(
         await _filesClient.Authenticate(Owner);
         var createdRoom = await CreateVirtualRoom("room");
         var sourceFile = await CreateFile("file_to_edit.docx", createdRoom.Id);
-        await _filesApi.StartEditFileAsync(sourceFile.Id, new StartEdit(true), TestContext.Current.CancellationToken);
+        await _filesApi.StartEditFileAsync(sourceFile.Id, new StartEditRequest(true), TestContext.Current.CancellationToken);
 
         var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);

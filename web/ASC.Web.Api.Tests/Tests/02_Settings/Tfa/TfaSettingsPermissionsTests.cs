@@ -53,7 +53,7 @@ public class TfaSettingsPermissionsTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _tfaSettingsApi.UpdateTfaSettingsAsync(
-                new TfaRequestsDto(TfaRequestsDtoType.App), TestContext.Current.CancellationToken));
+                new TfaRequestDto(TfaType.App), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(401);
@@ -72,7 +72,7 @@ public class TfaSettingsPermissionsTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _tfaSettingsApi.UpdateTfaSettingsAsync(
-                new TfaRequestsDto(TfaRequestsDtoType.App), TestContext.Current.CancellationToken));
+                new TfaRequestDto(TfaType.App), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);
@@ -102,7 +102,7 @@ public class TfaSettingsPermissionsTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _tfaSettingsApi.UpdateTfaSettingsLinkAsync(
-                new TfaRequestsDto(TfaRequestsDtoType.App), TestContext.Current.CancellationToken));
+                new TfaRequestDto(TfaType.App), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(401);
@@ -121,7 +121,7 @@ public class TfaSettingsPermissionsTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _tfaSettingsApi.UpdateTfaSettingsLinkAsync(
-                new TfaRequestsDto(TfaRequestsDtoType.App), TestContext.Current.CancellationToken));
+                new TfaRequestDto(TfaType.App), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);
@@ -151,7 +151,7 @@ public class TfaSettingsPermissionsTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _tfaSettingsApi.TfaValidateAuthCodeAsync(
-                new TfaValidateRequestsDto("000000"), TestContext.Current.CancellationToken));
+                new TfaValidateRequestDto("000000"), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(401);

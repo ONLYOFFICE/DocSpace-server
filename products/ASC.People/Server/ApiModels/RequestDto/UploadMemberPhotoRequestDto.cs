@@ -43,7 +43,7 @@ public class UploadMemberPhotoRequestDto
     /// accepted, and it has to be the calling account, because a profile photo can only be changed by its owner.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromRoute(Name = "userid")]
+    [FromRoute(Name = "userId")]
     public required string UserId { get; set; }
 
     /// <summary>
@@ -58,7 +58,7 @@ public class UploadMemberPhotoRequestDto
     /// <summary>
     /// Set it to true to make the uploaded image the avatar right away. With the default false the image is only
     /// stored as a temporary file whose name comes back in `data`, and it has to be passed to
-    /// `POST api/2.0/people/{userid}/photo/thumbnails` to take effect.
+    /// `POST api/2.0/people/{userId}/photo/thumbnails` to take effect.
     /// </summary>
     /// <example>true</example>
     [FromForm(Name = "Autosave")]

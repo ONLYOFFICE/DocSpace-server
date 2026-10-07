@@ -34,6 +34,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { createGenerator } from "ts-json-schema-generator";
 import { toOpenApiSchemas } from "./draft-to-openapi.js";
+import { claim } from "./schema-names.js";
 import { applySchemaDocs, cleanOperationDescriptions } from "./schemaDocs.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -45,8 +46,8 @@ const SCHEMA_TYPES = path.resolve(__dirname, "..", "schema", "schemaTypes.ts");
 const TSCONFIG = path.resolve(__dirname, "..", "..", "tsconfig.json");
 
 // Prefix applied to shared/nested schema names (everything except the
-// already operation-scoped `Req_*` / `Res_*`) so component names cannot clash
-// with the .NET services' components when `OpenapiJoiner` merges the
+// already operation-scoped `Req_*` / `Res_*`) so the chat's component names
+// stay apart from the .NET services' components when `OpenapiJoiner` merges the
 // documents — it throws on a same-name-different-content collision (e.g. the
 // generic `ProviderType` / `ActionType`).
 const SCHEMA_NAMESPACE = "Ai";
@@ -55,8 +56,18 @@ function isOperationScoped(name: string): boolean {
   return name.startsWith("Req_") || name.startsWith("Res_");
 }
 
+// The chat library spells some of its types with a type-parameter-style `T`
+// (`TProvider`, `TMCPItem`); a published name drops it. A name that already
+// carries the namespace keeps it as is, so `AiActionArgs` does not become
+// `AiAiActionArgs`.
 function namespacedName(name: string): string {
-  return isOperationScoped(name) ? name : `${SCHEMA_NAMESPACE}${name}`;
+  if (isOperationScoped(name)) {
+    return name;
+  }
+  const bare = name.replace(/^T(?=[A-Z])/, "");
+  return bare.startsWith(SCHEMA_NAMESPACE) && /^[A-Z]/.test(bare.slice(SCHEMA_NAMESPACE.length))
+    ? bare
+    : `${SCHEMA_NAMESPACE}${bare}`;
 }
 
 function rewriteRefs(node: unknown, rename: (name: string) => string): unknown {
@@ -81,8 +92,11 @@ function rewriteRefs(node: unknown, rename: (name: string) => string): unknown {
 // Namespace shared schema names and rewrite every `$ref` accordingly.
 function namespaceSchemas(schemas: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
+  const owners = new Map<string, string>();
   for (const [name, schema] of Object.entries(schemas)) {
-    out[namespacedName(name)] = rewriteRefs(schema, namespacedName);
+    const published = namespacedName(name);
+    claim(owners, published, name);
+    out[published] = rewriteRefs(schema, namespacedName);
   }
   return out;
 }

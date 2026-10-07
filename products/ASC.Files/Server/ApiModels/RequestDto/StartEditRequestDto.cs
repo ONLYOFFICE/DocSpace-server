@@ -36,7 +36,7 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The body of an editing session request.
 /// </summary>
-public class StartEdit
+public class StartEditRequest
 {
     /// <summary>
     /// Claims the file for this caller alone: the session is opened without asking the document service to track
@@ -64,5 +64,5 @@ public class StartEditRequestDto<T>
     /// open an ordinary co-editing session.
     /// </summary>
     [FromBody]
-    public required StartEdit File { get; set; }
+    public required StartEditRequest File { get; set; }
 }

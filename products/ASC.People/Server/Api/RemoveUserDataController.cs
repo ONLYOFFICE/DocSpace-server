@@ -57,11 +57,11 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// Use `PUT api/2.0/people/remove/terminate` to cancel a job that is still running.
     /// </remarks>
     /// <summary>Get the deletion progress</summary>
-    /// <path>api/2.0/people/remove/progress/{userid}</path>
+    /// <path>api/2.0/people/remove/progress/{userId}</path>
     [Tags("People / User data")]
     [SwaggerResponse(200, "The state of the queued deletion, or an empty body when nothing is queued for the user", typeof(TaskProgressResponseDto))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpGet("remove/progress/{userid:guid}")]
+    [HttpGet("remove/progress/{userId:guid}")]
     public async Task<TaskProgressResponseDto> GetRemoveProgress(UserIdRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_EditUser);
@@ -76,7 +76,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// Emails the caller a confirmation link that lets them delete their own profile, and is the first step of the
     /// self-service profile removal.
     /// It acts on the authenticated account only and takes no parameters, so it cannot be used to remove somebody
-    /// else - an administrator removes another user through `DELETE api/2.0/people/{userid}`.
+    /// else - an administrator removes another user through `DELETE api/2.0/people/{userId}`.
     /// The caller has to be a regular portal account: the portal owner and an account imported from LDAP are
     /// rejected, because neither can delete itself.
     /// The call sends mail and does not change the profile; the deletion happens later, when the caller follows the
@@ -116,7 +116,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// `PUT api/2.0/people/status/{status}` first - and it cannot be the portal owner or the caller.
     /// The caller needs the permission to edit users, has to be a DocSpace admin to erase the data of a room admin,
     /// and has to be the portal owner to erase the data of another DocSpace admin.
-    /// The erasure does not finish within this call: poll `GET api/2.0/people/remove/progress/{userid}` with the same
+    /// The erasure does not finish within this call: poll `GET api/2.0/people/remove/progress/{userId}` with the same
     /// user ID until `isCompleted` is true, and cancel it through `PUT api/2.0/people/remove/terminate`.
     /// This operation destroys the data and cannot be undone; to keep the rooms and the shared files of the account
     /// instead, transfer them first through `POST api/2.0/people/reassign/start`.
@@ -173,7 +173,7 @@ public class RemoveUserDataController(PermissionContext permissionContext,
     /// Cancelling does not restore the data the job has already erased, and a cancelled job cannot be resumed - start
     /// a new one through `POST api/2.0/people/remove/start`.
     /// To find out whether the job is still running, read
-    /// `GET api/2.0/people/remove/progress/{userid}` before and after this call.
+    /// `GET api/2.0/people/remove/progress/{userId}` before and after this call.
     /// </remarks>
     /// <summary>Terminate the data deletion</summary>
     /// <path>api/2.0/people/remove/terminate</path>

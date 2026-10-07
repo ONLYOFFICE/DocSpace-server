@@ -36,7 +36,7 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The changes to make to a file: a new title, an earlier version to restore, or both.
 /// </summary>
-public class UpdateFile
+public class UpdateFileRequest
 {
     /// <summary>
     /// The new title of the file, without an extension - the stored extension is kept whatever the title says, so a
@@ -71,5 +71,5 @@ public class UpdateFileRequestDto<T>
     /// </summary>
     /// <example>{"title": "Price list", "lastVersion": 0}</example>
     [FromBody]
-    public required UpdateFile File { get; set; }
+    public required UpdateFileRequest File { get; set; }
 }

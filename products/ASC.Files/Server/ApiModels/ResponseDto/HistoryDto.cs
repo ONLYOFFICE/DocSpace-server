@@ -55,7 +55,7 @@ public record HistoryDto
     /// shared - with the key a client can key its own wording off.
     /// </summary>
     /// <example>0</example>
-    public required HistoryAction Action { get; init; }
+    public required HistoryActionDto Action { get; init; }
 
     /// <summary>
     /// Who caused the event. For an event caused by a visitor following an external link only the name they gave is
@@ -78,7 +78,7 @@ public record HistoryDto
     /// response, so a generated client threw on any history page holding one of those entries.
     /// </summary>
     /// <example>{"fileId": 123, "title": "document.docx"}</example>
-    public HistoryData Data { get; init; }
+    public HistoryDataDto Data { get; init; }
 
     /// <summary>
     /// The records folded into this one because they belong to the same action, the separate files of one upload for

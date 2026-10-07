@@ -127,4 +127,28 @@ public class ThirdPartyCredentialIsolationTests(
             return e.ErrorCode;
         }
     }
+
+    /// <summary>
+    /// GET /files/thirdparty must never hand out the credentials of a connection. Read raw: the generated client
+    /// drops properties its model does not declare, so it could not see `auth_data` coming back.
+    /// </summary>
+    [Fact]
+    public async Task GetThirdPartyAccounts_ConnectedAccount_HasNoCredentials()
+    {
+        // Arrange
+        RequireNextcloud();
+        await _filesClient.Authenticate(Owner);
+        await ConnectNextcloud(UniqueTitle("Autotest No Credentials"));
+
+        // Act
+        using var response = await _filesClient.GetAsync("api/2.0/files/thirdparty", TestContext.Current.CancellationToken);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
+        using var json = JsonDocument.Parse(body);
+        var accounts = json.RootElement.GetProperty("response").EnumerateArray().ToList();
+        accounts.Should().NotBeEmpty();
+        accounts.Should().AllSatisfy(a => a.TryGetProperty("auth_data", out _).Should().BeFalse());
+    }
 }

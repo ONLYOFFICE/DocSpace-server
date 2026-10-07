@@ -73,7 +73,7 @@ public class FolderHistoryFileActionsTests(
         beforeIds.Should().NotContain(MessageAction.FolderMovedToTrash);
 
         // Act
-        await _foldersApi.DeleteFolderAsync(subfolder.Id, new DeleteFolder(deleteAfter: false, immediately: false), TestContext.Current.CancellationToken);
+        await _foldersApi.DeleteFolderAsync(subfolder.Id, new DeleteFolderRequest(deleteAfter: false, immediately: false), TestContext.Current.CancellationToken);
         await WaitLongOperation();
 
         // Assert
@@ -92,7 +92,7 @@ public class FolderHistoryFileActionsTests(
         beforeIds.Should().NotContain(MessageAction.FolderDeleted);
 
         // Act
-        await _foldersApi.DeleteFolderAsync(subfolder.Id, new DeleteFolder(deleteAfter: false, immediately: true), TestContext.Current.CancellationToken);
+        await _foldersApi.DeleteFolderAsync(subfolder.Id, new DeleteFolderRequest(deleteAfter: false, immediately: true), TestContext.Current.CancellationToken);
         await WaitLongOperation();
 
         // Assert
@@ -110,7 +110,7 @@ public class FolderHistoryFileActionsTests(
         beforeIds.Should().NotContain(MessageAction.FileMovedToTrash);
 
         // Act
-        await _filesApi.DeleteFileAsync(file.Id, new Delete(immediately: false), cancellationToken: TestContext.Current.CancellationToken);
+        await _filesApi.DeleteFileAsync(file.Id, new DeleteFileRequest(immediately: false), cancellationToken: TestContext.Current.CancellationToken);
         await WaitLongOperation();
 
         // Assert
@@ -296,7 +296,7 @@ public class FolderHistoryFileActionsTests(
         beforeIds.Should().NotContain(MessageAction.FileRenamed);
 
         // Act
-        await _filesApi.UpdateFileAsync(file.Id, new UpdateFile(title: "File After Rename"), TestContext.Current.CancellationToken);
+        await _filesApi.UpdateFileAsync(file.Id, new UpdateFileRequest(title: "File After Rename"), TestContext.Current.CancellationToken);
 
         // Assert
         await AssertHistoryContainsAsync(room.Id, MessageAction.FileRenamed, displayName, timeoutSeconds: 30);
@@ -314,7 +314,7 @@ public class FolderHistoryFileActionsTests(
         beforeIds.Should().NotContain(MessageAction.FileDeleted);
 
         // Act
-        await _filesApi.DeleteFileAsync(file.Id, new Delete(immediately: true), cancellationToken: TestContext.Current.CancellationToken);
+        await _filesApi.DeleteFileAsync(file.Id, new DeleteFileRequest(immediately: true), cancellationToken: TestContext.Current.CancellationToken);
         await WaitLongOperation();
 
         // Assert
@@ -333,7 +333,7 @@ public class FolderHistoryFileActionsTests(
         beforeIds.Should().NotContain(MessageAction.FileLocked);
 
         // Act
-        await _filesApi.LockFileAsync(file.Id, new LockFileParameters(lockFile: true), TestContext.Current.CancellationToken);
+        await _filesApi.LockFileAsync(file.Id, new LockFileRequest(lockFile: true), TestContext.Current.CancellationToken);
 
         // Assert
         await AssertHistoryContainsAsync(room.Id, MessageAction.FileLocked, displayName);
@@ -346,13 +346,13 @@ public class FolderHistoryFileActionsTests(
         var displayName = await GetDisplayNameAsync();
         var room = await CreateCustomRoom("Autotest Folder History FileUnlocked");
         var file = await CreateFile("File To Unlock", room.Id);
-        await _filesApi.LockFileAsync(file.Id, new LockFileParameters(lockFile: true), TestContext.Current.CancellationToken);
+        await _filesApi.LockFileAsync(file.Id, new LockFileRequest(lockFile: true), TestContext.Current.CancellationToken);
 
         var beforeIds = await GetHistoryActionIdsAsync(room.Id);
         beforeIds.Should().NotContain(MessageAction.FileUnlocked);
 
         // Act
-        await _filesApi.LockFileAsync(file.Id, new LockFileParameters(lockFile: false), TestContext.Current.CancellationToken);
+        await _filesApi.LockFileAsync(file.Id, new LockFileRequest(lockFile: false), TestContext.Current.CancellationToken);
 
         // Assert
         await AssertHistoryContainsAsync(room.Id, MessageAction.FileUnlocked, displayName);

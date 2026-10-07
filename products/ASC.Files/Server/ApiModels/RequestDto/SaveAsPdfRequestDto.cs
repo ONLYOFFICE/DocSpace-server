@@ -36,7 +36,7 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The place and the name the PDF copy of a file is stored under.
 /// </summary>
-public class SaveAsPdf<T>
+public class SaveAsPdfRequest<T>
 {
     /// <summary>
     /// The folder the PDF is created in; the caller has to be allowed to create files there.
@@ -70,5 +70,5 @@ public class SaveAsPdfRequestDto<T>
     /// </summary>
     /// <example>{"folderId": 1, "title": "Contract signed"}</example>
     [FromBody]
-    public required SaveAsPdf<T> File { get; set; }
+    public required SaveAsPdfRequest<T> File { get; set; }
 }

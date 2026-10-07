@@ -58,7 +58,7 @@ public class SmtpOperation(IServiceProvider serviceProvider, IDistributedTaskQue
         await item.PublishChanges();
     }
 
-    public async Task<SmtpOperationStatusRequestsDto> GetStatus(Tenant tenant)
+    public async Task<SmtpOperationStatusDto> GetStatus(Tenant tenant)
     {
         var item = (await _progressQueue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenant.Id);
 
@@ -72,7 +72,7 @@ public class SmtpOperation(IServiceProvider serviceProvider, IDistributedTaskQue
             await _progressQueue.DequeueTask(item.Id);
         }
 
-        var result = new SmtpOperationStatusRequestsDto
+        var result = new SmtpOperationStatusDto
         {
             Id = item.Id,
             Completed = item.IsCompleted,
