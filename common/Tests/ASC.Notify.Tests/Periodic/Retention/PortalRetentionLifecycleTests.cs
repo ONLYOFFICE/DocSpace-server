@@ -224,6 +224,19 @@ public class PortalRetentionLifecycleTests
         var services = scope.ServiceProvider;
         var tenant = await BlockAsync(scope, portal.TenantId, new RecordingNotifyClient());
 
+        // A week before the deletion the owner is reminded; the deletion waits for that reminder.
+        var reminderClient = new RecordingNotifyClient();
+        var reminderDay = DateTime.UtcNow.Date.AddDays(23);
+
+        await ActivatorUtilities.CreateInstance<PortalRetentionJob>(services, new RecordingLogger<PortalRetentionJob>())
+            .ApplyAsync(Free(tenant, reminderDay, reminderDay.AddYears(-1)), reminderDay.AddYears(-2), reminderClient, _senderName);
+
+        reminderClient.Sent.Should().ContainSingle()
+            .Which.Action.Should().BeOfType<SaasOwnerRetentionDeletionReminderNotifyAction>();
+
+        (await services.GetRequiredService<SettingsManager>().LoadAsync<PortalRetentionBlockSettings>(portal.TenantId)).FinalNoticeSentOn
+            .Should().Be(reminderDay, "the deletion waits for the reminder, so the day it went out is kept");
+
         // Thirty days on, as the free schedule keeps a blocked portal.
         var client = new RecordingNotifyClient();
         var later = DateTime.UtcNow.Date.AddDays(30);

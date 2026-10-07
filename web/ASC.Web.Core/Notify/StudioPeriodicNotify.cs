@@ -107,7 +107,7 @@ public class StudioPeriodicNotify(
         }
 
         var nowDate = scheduleDate.Date;
-        var retentionStart = await portalRetentionJob.GetPolicyStartAsync(nowDate);
+        var (retentionStart, retentionLastRunOn) = await portalRetentionJob.BeginRunAsync(nowDate);
 
         // The paid add-ons the wallet is charged for, by quota id: their titles are what the upcoming
         // payment letter lists. Global and cached, so they are read once for all tenants.
@@ -123,7 +123,7 @@ public class StudioPeriodicNotify(
                 var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
 
                 // Before any letter: a portal blocked or removed here must not be written to afterwards.
-                if (await portalRetentionJob.ApplyAsync(context, retentionStart, client, senderName))
+                if (await portalRetentionJob.ApplyAsync(context, retentionStart, client, senderName, retentionLastRunOn))
                 {
                     continue;
                 }
@@ -139,6 +139,9 @@ public class StudioPeriodicNotify(
                 _log.ErrorSendSaasLettersAsync(tenant.Id, err);
             }
         }
+
+        // Only once every portal has been through it: a run that stops halfway is covered again by the next.
+        await portalRetentionJob.EndRunAsync(nowDate);
 
         _log.InformationEndSendSaasTariffLetters();
     }

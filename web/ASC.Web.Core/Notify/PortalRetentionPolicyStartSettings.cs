@@ -43,6 +43,12 @@ public class PortalRetentionPolicyStartSettings : ISettings<PortalRetentionPolic
     /// <summary>The day of the first run with the policy on, or null before it.</summary>
     public DateTime? StartedOn { get; set; }
 
+    /// <summary>
+    /// The last day the daily run got through every portal, or null before the first one finished. The
+    /// next run sends the letters of every day since, so a day the job did not run loses none of them.
+    /// </summary>
+    public DateTime? LastRunOn { get; set; }
+
     public static Guid ID => new("{26EEF35F-8069-4A32-BECE-3956FE9C245F}");
 
     public PortalRetentionPolicyStartSettings GetDefault()

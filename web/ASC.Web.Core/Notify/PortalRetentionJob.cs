@@ -54,33 +54,64 @@ public class PortalRetentionJob(
     SecurityContext securityContext,
     IServiceProvider serviceProvider)
 {
+    /// <summary>
+    /// How many days back a run looks for letters it has not sent. After a longer stop the older warnings
+    /// are not worth a pile of letters at once; the last reminder before a deletion is never lost to it.
+    /// </summary>
+    private const int MaxCatchUpDays = 7;
+
     public PortalRetentionOptions Options => configuration.Options;
 
     /// <summary>
-    /// The day the policy started counting in this installation, stamped on the first run.
+    /// Opens the daily run: the day the policy started counting in this installation, stamped on the
+    /// first run, and the last day a run got through, after which this one sends the letters.
     /// </summary>
-    public async Task<DateTime> GetPolicyStartAsync(DateTime today)
+    public async Task<(DateTime PolicyStart, DateTime? LastRunOn)> BeginRunAsync(DateTime today)
     {
+        today = today.Date;
+
         var settings = await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>();
 
         if (settings.StartedOn is not { } startedOn)
         {
-            startedOn = today.Date;
+            startedOn = today;
             settings.StartedOn = startedOn;
             await settingsManager.SaveForDefaultTenantAsync(settings);
         }
 
-        logger.InformationPolicyStart(startedOn);
+        var lastRunOn = settings.LastRunOn?.Date;
+        var earliest = today.AddDays(-MaxCatchUpDays);
 
-        return startedOn;
+        if (lastRunOn < earliest)
+        {
+            lastRunOn = earliest;
+        }
+
+        logger.InformationPolicyStart(startedOn);
+        logger.InformationRunCovers(lastRunOn ?? today.AddDays(-1), today);
+
+        return (startedOn, lastRunOn);
+    }
+
+    /// <summary>
+    /// Closes the daily run once every portal has been through it. A run that stops halfway leaves the
+    /// mark where it was, so the next one sends again what it could not.
+    /// </summary>
+    public async Task EndRunAsync(DateTime today)
+    {
+        var settings = await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>();
+
+        settings.LastRunOn = today.Date;
+        await settingsManager.SaveForDefaultTenantAsync(settings);
     }
 
     /// <summary>
     /// Applies the policy to the portal of <paramref name="context"/>, sending its letters through
     /// <paramref name="client"/>. Returns true when the caller must leave the portal alone for the rest of
-    /// the run: it is blocked, it was just blocked, or it is gone.
+    /// the run: it is blocked, it was just blocked, or it is gone. The letters of the days after
+    /// <paramref name="lastRunOn"/> (<see cref="BeginRunAsync"/>) are this run's; null means yesterday.
     /// </summary>
-    public async Task<bool> ApplyAsync(PeriodicLetterContext context, DateTime policyStart, INotifyClient client, string senderName)
+    public async Task<bool> ApplyAsync(PeriodicLetterContext context, DateTime policyStart, INotifyClient client, string senderName, DateTime? lastRunOn = null)
     {
         var tenant = context.Tenant;
         var blocked = tenant.Status == TenantStatus.Blocked;
@@ -95,9 +126,12 @@ public class PortalRetentionJob(
 
         // A blocked portal keeps the category it was blocked under: the letter about the block named the
         // deletion date of that category, and a balance that changes afterwards must not bring it forward.
-        if (blocked && (await settingsManager.LoadAsync<PortalRetentionBlockSettings>(tenant.Id)).Category is { } blockedCategory)
+        var blockSettings = blocked ? await settingsManager.LoadAsync<PortalRetentionBlockSettings>(tenant.Id) : null;
+
+        if (blockSettings?.Category is { } blockedCategory)
         {
-            var blockedDecision = PortalRetentionSchedule.Decide(Options.For(blockedCategory), tenant.StatusChangeDate, policyStart, tenant.StatusChangeDate.Date, context.NowDate);
+            var blockedDecision = PortalRetentionSchedule.Decide(Options.For(blockedCategory), tenant.StatusChangeDate, policyStart, tenant.StatusChangeDate.Date, context.NowDate,
+                lastRunOn: lastRunOn, finalNoticeSentOn: blockSettings.FinalNoticeSentOn);
 
             if (blockedDecision.Step == PortalRetentionStep.None || await IsForbiddenDomainAsync(tenant))
             {
@@ -118,8 +152,10 @@ public class PortalRetentionJob(
         // warning due while it was still in that period goes out on that day instead of never.
         var noticesFrom = formerPaying ? context.DueDate.Date.AddDays(tariffService.GetPaymentDelay() + 1) : DateTime.MinValue;
 
-        var plainDecision = PortalRetentionSchedule.Decide(Options.For(plain), anchor, policyStart, blockedOn, context.NowDate, noticesFrom);
-        var balanceDecision = PortalRetentionSchedule.Decide(Options.For(withBalance), anchor, policyStart, blockedOn, context.NowDate, noticesFrom);
+        var finalNoticeSentOn = blockSettings?.FinalNoticeSentOn;
+
+        var plainDecision = PortalRetentionSchedule.Decide(Options.For(plain), anchor, policyStart, blockedOn, context.NowDate, noticesFrom, lastRunOn, finalNoticeSentOn);
+        var balanceDecision = PortalRetentionSchedule.Decide(Options.For(withBalance), anchor, policyStart, blockedOn, context.NowDate, noticesFrom, lastRunOn, finalNoticeSentOn);
 
         if (plainDecision.Step == PortalRetentionStep.None && balanceDecision.Step == PortalRetentionStep.None)
         {
@@ -164,6 +200,12 @@ public class PortalRetentionJob(
         {
             case PortalRetentionStep.Notify:
                 await SendAsync(LetterFor(category, decision.Letter), context, category, decision, client, senderName);
+
+                if (decision.Letter == PortalRetentionLetter.FinalDeletionNotice)
+                {
+                    // The deletion waits for this letter, so the day it went out is kept with the block.
+                    await settingsManager.SaveAsync(new PortalRetentionBlockSettings { Category = category, FinalNoticeSentOn = context.NowDate }, tenant.Id);
+                }
 
                 return blocked;
 

@@ -177,18 +177,21 @@ public class PortalRetentionConfiguration(IConfiguration configuration)
 }
 
 /// <summary>
-/// Decides what happens to an unused portal today. It keeps no state of its own: everything it needs
-/// is already stored - the day the count starts, and for a blocked portal the day its status changed.
+/// Decides what happens to an unused portal today. It keeps no state of its own: the caller hands it
+/// what is stored - the day the count starts, for a blocked portal the day its status changed and the
+/// day its last reminder went out, and the last day the job got through.
 /// </summary>
 /// <remarks>
-/// Blocking and deletion catch up: a portal past its threshold is blocked (or deleted) on the first run
-/// that sees it, even if the job missed the exact day. The letter that goes with the block is sent at
-/// that moment, so the owner is always told, and the deletion is counted from the block, so the whole
-/// retention period lies between that letter and the deletion - whatever happened before, a change of
-/// category included. The reminders around them are sent on their exact day only, like every other
-/// periodic letter: a day the job did not run is a reminder that is not sent. The one exception is a
-/// warning due before the policy could see the portal at all - a lapsed tariff still in its grace
-/// period: it goes out on the first day the portal is the policy's.
+/// Blocking catches up: a portal past its threshold is blocked on the first run that sees it, even if
+/// the job missed the exact day. The letter that goes with the block is sent at that moment, so the
+/// owner is always told, and the deletion is counted from the block, so the whole retention period lies
+/// between that letter and the deletion. A warning or a reminder is sent on the first run after its day:
+/// a run covers every day since the last one the job got through, and when several letters fall into
+/// those days only the latest goes out, since it says everything the earlier ones would have. The last
+/// reminder before the deletion is never skipped: a portal is deleted only once it has gone out, a full
+/// notice period earlier, and one sent late moves the deletion back by as much. A warning due before the
+/// policy could see the portal at all - a lapsed tariff still in its grace period - goes out on the
+/// first day the portal is the policy's.
 /// </remarks>
 public static class PortalRetentionSchedule
 {
@@ -207,16 +210,26 @@ public static class PortalRetentionSchedule
     /// The first day the policy sees the portal: for a former paying one, the first day after the grace
     /// period of its tariff. A warning due earlier is sent on that day; the default puts no such limit.
     /// </param>
-    public static PortalRetentionDecision Decide(PortalRetentionScheduleOptions schedule, DateTime anchor, DateTime policyStart, DateTime? blockedOn, DateTime today, DateTime noticesFrom = default)
+    /// <param name="lastRunOn">
+    /// The last day the job got through. The letters of the days after it, up to today, are this run's;
+    /// the default is yesterday, so only today's are.
+    /// </param>
+    /// <param name="finalNoticeSentOn">
+    /// For a blocked portal, the day the last reminder before the deletion went out, or null while it has
+    /// not.
+    /// </param>
+    public static PortalRetentionDecision Decide(PortalRetentionScheduleOptions schedule, DateTime anchor, DateTime policyStart, DateTime? blockedOn, DateTime today, DateTime noticesFrom = default, DateTime? lastRunOn = null, DateTime? finalNoticeSentOn = null)
     {
         today = today.Date;
 
+        var coveredFrom = lastRunOn?.Date ?? today.AddDays(-1);
+
         return blockedOn.HasValue
-            ? DecideBlocked(schedule, blockedOn.Value.Date, today)
-            : DecideActive(schedule, anchor.Date > policyStart.Date ? anchor.Date : policyStart.Date, noticesFrom.Date, today);
+            ? DecideBlocked(schedule, blockedOn.Value.Date, today, coveredFrom, finalNoticeSentOn?.Date)
+            : DecideActive(schedule, anchor.Date > policyStart.Date ? anchor.Date : policyStart.Date, noticesFrom.Date, today, coveredFrom);
     }
 
-    private static PortalRetentionDecision DecideActive(PortalRetentionScheduleOptions schedule, DateTime start, DateTime noticesFrom, DateTime today)
+    private static PortalRetentionDecision DecideActive(PortalRetentionScheduleOptions schedule, DateTime start, DateTime noticesFrom, DateTime today, DateTime coveredFrom)
     {
         var blockOn = start.AddDays(schedule.BlockAfterDays);
         var deleteOn = blockOn.AddDays(schedule.RetentionDays);
@@ -227,7 +240,7 @@ public static class PortalRetentionSchedule
             return new PortalRetentionDecision(PortalRetentionStep.Block, PortalRetentionLetter.Blocked, today, today.AddDays(schedule.RetentionDays));
         }
 
-        var letter = WarningFor(schedule, start, noticesFrom, today);
+        var letter = WarningFor(schedule, start, noticesFrom, today, coveredFrom);
 
         return letter.HasValue
             ? new PortalRetentionDecision(PortalRetentionStep.Notify, letter, blockOn, deleteOn)
@@ -235,11 +248,11 @@ public static class PortalRetentionSchedule
     }
 
     /// <summary>
-    /// The warning that goes out today, if any. A warning due before <paramref name="noticesFrom"/> is moved
-    /// to that day; when several land there, only the latest is sent, since it says everything the earlier
-    /// ones would have.
+    /// The warning that goes out today, if any: one whose day falls after <paramref name="coveredFrom"/>, up
+    /// to today. A warning due before <paramref name="noticesFrom"/> is moved to that day. When several fall
+    /// into this run, only the latest is sent, since it says everything the earlier ones would have.
     /// </summary>
-    private static PortalRetentionLetter? WarningFor(PortalRetentionScheduleOptions schedule, DateTime start, DateTime noticesFrom, DateTime today)
+    private static PortalRetentionLetter? WarningFor(PortalRetentionScheduleOptions schedule, DateTime start, DateTime noticesFrom, DateTime today, DateTime coveredFrom)
     {
         PortalRetentionLetter? letter = null;
         var latest = DateTime.MinValue;
@@ -248,7 +261,7 @@ public static class PortalRetentionSchedule
         {
             var sendOn = dueOn < noticesFrom ? noticesFrom : dueOn;
 
-            if (sendOn == today && dueOn > latest)
+            if (sendOn > coveredFrom && sendOn <= today && dueOn > latest)
             {
                 letter = warning;
                 latest = dueOn;
@@ -279,35 +292,56 @@ public static class PortalRetentionSchedule
         }
     }
 
-    private static PortalRetentionDecision DecideBlocked(PortalRetentionScheduleOptions schedule, DateTime blockedOn, DateTime today)
+    private static PortalRetentionDecision DecideBlocked(PortalRetentionScheduleOptions schedule, DateTime blockedOn, DateTime today, DateTime coveredFrom, DateTime? finalNoticeSentOn)
     {
         var deleteOn = blockedOn.AddDays(schedule.RetentionDays);
-
-        if (today >= deleteOn)
-        {
-            return new PortalRetentionDecision(PortalRetentionStep.Delete, null, blockedOn, deleteOn);
-        }
-
-        PortalRetentionLetter? letter = null;
+        var noticeDays = schedule.FinalDeletionNoticeDays;
 
         // A reminder that would fall on the day of the block, or before it, is already covered by the
-        // letter that announced the block.
-        if (IsReminderDay(blockedOn, deleteOn, schedule.EarlyDeletionNoticeDays, today))
+        // letter that announced the block; otherwise the last one is owed before the portal may go.
+        var finalNoticeOwed = noticeDays > 0 && deleteOn.AddDays(-noticeDays) > blockedOn;
+
+        if (!finalNoticeOwed)
         {
-            letter = PortalRetentionLetter.EarlyDeletionNotice;
-        }
-        else if (IsReminderDay(blockedOn, deleteOn, schedule.FinalDeletionNoticeDays, today))
-        {
-            letter = PortalRetentionLetter.FinalDeletionNotice;
+            return today >= deleteOn
+                ? new PortalRetentionDecision(PortalRetentionStep.Delete, null, blockedOn, deleteOn)
+                : EarlyNoticeOrNothing(schedule, blockedOn, deleteOn, today, coveredFrom);
         }
 
-        return letter.HasValue
-            ? new PortalRetentionDecision(PortalRetentionStep.Notify, letter, blockedOn, deleteOn)
-            : PortalRetentionDecision.Nothing(blockedOn, deleteOn);
+        if (finalNoticeSentOn is { } sentOn)
+        {
+            // A reminder sent late moved the deletion back: the date it named is the one that holds.
+            var noticedDeleteOn = sentOn.AddDays(noticeDays);
+
+            if (noticedDeleteOn > deleteOn)
+            {
+                deleteOn = noticedDeleteOn;
+            }
+
+            return today >= deleteOn
+                ? new PortalRetentionDecision(PortalRetentionStep.Delete, null, blockedOn, deleteOn)
+                : PortalRetentionDecision.Nothing(blockedOn, deleteOn);
+        }
+
+        if (today >= deleteOn.AddDays(-noticeDays))
+        {
+            // Due today, or missed on its day: it goes now, and the deletion waits a full notice period
+            // after it.
+            var latestDeleteOn = today.AddDays(noticeDays);
+
+            return new PortalRetentionDecision(PortalRetentionStep.Notify, PortalRetentionLetter.FinalDeletionNotice, blockedOn, latestDeleteOn > deleteOn ? latestDeleteOn : deleteOn);
+        }
+
+        return EarlyNoticeOrNothing(schedule, blockedOn, deleteOn, today, coveredFrom);
     }
 
-    private static bool IsReminderDay(DateTime blockedOn, DateTime deleteOn, int daysBefore, DateTime today)
+    private static PortalRetentionDecision EarlyNoticeOrNothing(PortalRetentionScheduleOptions schedule, DateTime blockedOn, DateTime deleteOn, DateTime today, DateTime coveredFrom)
     {
-        return daysBefore > 0 && deleteOn.AddDays(-daysBefore) == today && today > blockedOn;
+        var daysBefore = schedule.EarlyDeletionNoticeDays;
+        var noticeOn = deleteOn.AddDays(-daysBefore);
+
+        return daysBefore > 0 && noticeOn > blockedOn && noticeOn > coveredFrom && noticeOn <= today
+            ? new PortalRetentionDecision(PortalRetentionStep.Notify, PortalRetentionLetter.EarlyDeletionNotice, blockedOn, deleteOn)
+            : PortalRetentionDecision.Nothing(blockedOn, deleteOn);
     }
 }

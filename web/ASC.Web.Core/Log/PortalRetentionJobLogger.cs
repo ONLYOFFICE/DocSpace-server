@@ -37,6 +37,9 @@ internal static partial class PortalRetentionJobLogger
     [LoggerMessage(LogLevel.Information, "Retention policy counts from {startedOn:yyyy-MM-dd}")]
     public static partial void InformationPolicyStart(this ILogger<PortalRetentionJob> logger, DateTime startedOn);
 
+    [LoggerMessage(LogLevel.Information, "Retention run sends the letters of the days after {coveredFrom:yyyy-MM-dd} up to {today:yyyy-MM-dd}")]
+    public static partial void InformationRunCovers(this ILogger<PortalRetentionJob> logger, DateTime coveredFrom, DateTime today);
+
     [LoggerMessage(LogLevel.Information, "Retention: tenant {tenantId} {tenantDomain}, {category}: {step} {letter}, block on {blockOn:yyyy-MM-dd}, delete on {deleteOn:yyyy-MM-dd}")]
     public static partial void InformationDecision(this ILogger<PortalRetentionJob> logger, int tenantId, string tenantDomain, PortalRetentionCategory category, PortalRetentionStep step, PortalRetentionLetter? letter, DateTime blockOn, DateTime deleteOn);
 

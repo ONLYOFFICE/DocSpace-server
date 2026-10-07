@@ -46,14 +46,23 @@ public class PortalRetentionScheduleTests
 
     private static readonly DateTime _policyStart = new(2025, 1, 1);
 
-    private static PortalRetentionDecision Active(PortalRetentionCategory category, int day, int noticesFromDay = 0)
+    /// <summary>A day of the active part. Unless <paramref name="lastRunDay"/> says otherwise, the job ran yesterday.</summary>
+    private static PortalRetentionDecision Active(PortalRetentionCategory category, int day, int noticesFromDay = 0, int? lastRunDay = null)
     {
-        return PortalRetentionSchedule.Decide(_options.For(category), _start, _policyStart, null, _start.AddDays(day), _start.AddDays(noticesFromDay));
+        return PortalRetentionSchedule.Decide(_options.For(category), _start, _policyStart, null, _start.AddDays(day), _start.AddDays(noticesFromDay),
+            lastRunOn: DayOrNull(lastRunDay));
     }
 
-    private static PortalRetentionDecision Blocked(PortalRetentionCategory category, int dayAfterBlock)
+    /// <summary>A day of the blocked part, with the day the last reminder went out if it has.</summary>
+    private static PortalRetentionDecision Blocked(PortalRetentionCategory category, int dayAfterBlock, int? finalNoticeDay = null, int? lastRunDay = null)
     {
-        return PortalRetentionSchedule.Decide(_options.For(category), _start, _policyStart, _start, _start.AddDays(dayAfterBlock));
+        return PortalRetentionSchedule.Decide(_options.For(category), _start, _policyStart, _start, _start.AddDays(dayAfterBlock),
+            lastRunOn: DayOrNull(lastRunDay), finalNoticeSentOn: DayOrNull(finalNoticeDay));
+    }
+
+    private static DateTime? DayOrNull(int? day)
+    {
+        return day.HasValue ? _start.AddDays(day.Value) : null;
     }
 
     /// <summary>Every day of the active part of a schedule that is not silent, as day → letter or block.</summary>
@@ -79,18 +88,27 @@ public class PortalRetentionScheduleTests
         return timeline;
     }
 
-    /// <summary>Every day of the blocked part of a schedule that is not silent.</summary>
+    /// <summary>
+    /// Every day of the blocked part of a schedule that is not silent, run day by day the way the job keeps
+    /// the day its last reminder went out.
+    /// </summary>
     private static Dictionary<int, string> BlockedTimeline(PortalRetentionCategory category)
     {
         var timeline = new Dictionary<int, string>();
+        int? finalNoticeDay = null;
 
         for (var day = 0; day <= 400; day++)
         {
-            var decision = Blocked(category, day);
+            var decision = Blocked(category, day, finalNoticeDay);
 
             if (decision.Step != PortalRetentionStep.None)
             {
                 timeline[day] = decision.Step == PortalRetentionStep.Notify ? $"{decision.Letter}" : decision.Step.ToString();
+            }
+
+            if (decision.Letter == PortalRetentionLetter.FinalDeletionNotice)
+            {
+                finalNoticeDay = day;
             }
 
             if (decision.Step == PortalRetentionStep.Delete)
@@ -224,14 +242,44 @@ public class PortalRetentionScheduleTests
     [Fact]
     public void Delete_CatchesUpAfterAMissedDay()
     {
-        Blocked(PortalRetentionCategory.Free, 31).Step.Should().Be(PortalRetentionStep.Delete);
+        Blocked(PortalRetentionCategory.Free, 31, finalNoticeDay: 23).Step.Should().Be(PortalRetentionStep.Delete);
     }
 
     [Fact]
-    public void Reminders_AreSentOnTheirDayOnly()
+    public void Warning_MissedOnItsDay_IsSentByTheNextRun()
     {
-        Active(PortalRetentionCategory.Free, 31).Step.Should().Be(PortalRetentionStep.None, "a missed reminder is not sent late");
-        Blocked(PortalRetentionCategory.Free, 24).Step.Should().Be(PortalRetentionStep.None);
+        Active(PortalRetentionCategory.Free, 32, lastRunDay: 28).Letter.Should().Be(PortalRetentionLetter.FirstNotice, "the job did not run on day 30");
+        Active(PortalRetentionCategory.Free, 31).Step.Should().Be(PortalRetentionStep.None, "a run that got through day 30 has sent it");
+    }
+
+    [Fact]
+    public void Warning_RunTwiceOnOneDay_IsSentOnce()
+    {
+        Active(PortalRetentionCategory.Free, 30, lastRunDay: 30).Step.Should().Be(PortalRetentionStep.None);
+    }
+
+    [Fact]
+    public void Warnings_SeveralMissed_OnlyTheLatestIsSent()
+    {
+        Active(PortalRetentionCategory.FormerPaying, 61, lastRunDay: 25).Letter.Should().Be(PortalRetentionLetter.SecondNotice);
+    }
+
+    [Fact]
+    public void FinalNotice_MissedOnItsDay_IsSentLate_AndMovesTheDeletionBack()
+    {
+        var late = Blocked(PortalRetentionCategory.Free, 31);
+
+        late.Letter.Should().Be(PortalRetentionLetter.FinalDeletionNotice, "the portal is never deleted without its last reminder");
+        late.DeleteOn.Should().Be(_start.AddDays(38), "the reminder names a deletion a full week away");
+
+        Blocked(PortalRetentionCategory.Free, 37, finalNoticeDay: 31).Step.Should().Be(PortalRetentionStep.None);
+        Blocked(PortalRetentionCategory.Free, 38, finalNoticeDay: 31).Step.Should().Be(PortalRetentionStep.Delete);
+    }
+
+    [Fact]
+    public void EarlyNotice_IsNotSentAfterTheFinalOne()
+    {
+        Blocked(PortalRetentionCategory.FormerPaying, 85, finalNoticeDay: 83, lastRunDay: 50).Step.Should().Be(PortalRetentionStep.None);
     }
 
     [Fact]

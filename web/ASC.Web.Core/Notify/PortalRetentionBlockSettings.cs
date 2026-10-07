@@ -34,9 +34,10 @@
 namespace ASC.Web.Studio.Core.Notify;
 
 /// <summary>
-/// The category a portal was blocked under, kept with the portal's settings. The letter about the block
-/// names the deletion date of that category, so the portal keeps it until it is deleted or unblocked,
-/// whatever its wallet shows in the meantime.
+/// What the retention policy keeps about a block, with the portal's settings: the category the portal
+/// was blocked under - the letter about the block names the deletion date of that category, so the
+/// portal keeps it until it is deleted or unblocked, whatever its wallet shows in the meantime - and
+/// the day the last reminder before the deletion went out.
 /// </summary>
 /// <remarks>
 /// Written on every block, cleared by <c>PUT api/2.0/portal/unblock</c> and read only while the portal is
@@ -47,6 +48,12 @@ public class PortalRetentionBlockSettings : ISettings<PortalRetentionBlockSettin
 {
     /// <summary>The category of the current block, or null for a portal that is not blocked by the policy.</summary>
     public PortalRetentionCategory? Category { get; set; }
+
+    /// <summary>
+    /// The day the last reminder before the deletion went out, or null while it has not: the portal is not
+    /// deleted before a full notice period has passed since.
+    /// </summary>
+    public DateTime? FinalNoticeSentOn { get; set; }
 
     public static Guid ID => new("{0FB77F96-4DFF-4CDF-BF86-A88AA6D0B531}");
 

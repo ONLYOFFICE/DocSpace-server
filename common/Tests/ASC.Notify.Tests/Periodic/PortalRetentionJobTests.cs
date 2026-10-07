@@ -140,6 +140,38 @@ public class PortalRetentionJobTests
     }
 
     [Fact]
+    public async Task Run_SendsTheLettersOfTheDaysSinceTheLastOne_AtMostAWeekBack()
+    {
+        using var scope = await OpenScopeAsync();
+        var job = CreateJob(scope, new RecordingLogger<PortalRetentionJob>());
+        var settingsManager = scope.Services.GetRequiredService<SettingsManager>();
+
+        var saved = await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>();
+
+        try
+        {
+            await settingsManager.SaveForDefaultTenantAsync(new PortalRetentionPolicyStartSettings { StartedOn = _policyStart, LastRunOn = _today.AddDays(-3) });
+
+            (await job.BeginRunAsync(_today)).Should().Be((_policyStart, (DateTime?)_today.AddDays(-3)), "the days the job did not run are this run's");
+
+            await settingsManager.SaveForDefaultTenantAsync(new PortalRetentionPolicyStartSettings { StartedOn = _policyStart, LastRunOn = _today.AddDays(-30) });
+
+            (await job.BeginRunAsync(_today)).LastRunOn.Should().Be(_today.AddDays(-7), "a long stop is caught up a week back only");
+
+            await job.EndRunAsync(_today);
+
+            var after = await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>();
+
+            after.LastRunOn.Should().Be(_today);
+            after.StartedOn.Should().Be(_policyStart, "closing a run does not move the start of the policy");
+        }
+        finally
+        {
+            await settingsManager.SaveForDefaultTenantAsync(saved);
+        }
+    }
+
+    [Fact]
     public async Task FormerPayingPortal_CountsFromTheDueDate()
     {
         using var scope = await OpenScopeAsync();
