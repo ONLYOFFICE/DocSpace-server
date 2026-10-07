@@ -42,13 +42,13 @@ public class TenantAuditSettingsRequestDto
     /// The login history and audit trail lifetimes to store.
     /// </summary>
     /// <example>{"loginHistoryLifeTime": 180, "auditTrailLifeTime": 90}</example>
-    public AuditLifetimeSettingsRequestDto Settings { get; set; }
+    public SetAuditLifetimeSettingsRequest Settings { get; set; }
 }
 
 /// <summary>
 /// How long the portal keeps its two security logs.
 /// </summary>
-public class AuditLifetimeSettingsRequestDto
+public class SetAuditLifetimeSettingsRequest
 {
     /// <summary>
     /// How many days login events are kept, from 1 to 180.
@@ -61,4 +61,10 @@ public class AuditLifetimeSettingsRequestDto
     /// </summary>
     /// <example>90</example>
     public int AuditTrailLifeTime { get; set; }
+
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>2026-01-01T10:00:00</example>
+    public DateTime LastModified { get; set; }
 }

@@ -35,8 +35,7 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Storage;
 
 /// <summary>
 /// GET /api/2.0/settings/encryption/settings — the stored encryption settings hold a password, and the response
-/// must never carry it. Read raw: the generated client drops properties its model does not declare, so it could
-/// not see the field coming back.
+/// must never reveal it: the `password` field stays in the answer for earlier clients, and it is always empty.
 /// </summary>
 [Trait("Category", "Settings")]
 public class EncryptionSettingsGetTests(
@@ -44,20 +43,16 @@ public class EncryptionSettingsGetTests(
     : BaseTest(fixture)
 {
     [Fact]
-    public async Task GetStorageEncryptionSettings_Owner_HasNoPassword()
+    public async Task GetStorageEncryptionSettings_Owner_PasswordIsEmpty()
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
 
         // Act
-        using var response = await _webApi.GetAsync("api/2.0/settings/encryption/settings", TestContext.Current.CancellationToken);
+        var settings = (await _encryptionApi.GetStorageEncryptionSettingsAsync(TestContext.Current.CancellationToken)).Response;
 
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.OK);
-        var body = await response.Content.ReadAsStringAsync(TestContext.Current.CancellationToken);
-        using var json = JsonDocument.Parse(body);
-        var settings = json.RootElement.GetProperty("response");
-        settings.ValueKind.Should().Be(JsonValueKind.Object);
-        settings.TryGetProperty("password", out _).Should().BeFalse();
+        settings.Should().NotBeNull();
+        settings.Password.Should().NotBeNull().And.BeEmpty();
     }
 }

@@ -80,6 +80,12 @@ public class CustomColorThemeRequestDto
     public int Id { get; set; }
 
     /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: a custom theme is always stored without a name.
+    /// </summary>
+    /// <example>Custom theme</example>
+    public string Name { get; set; }
+
+    /// <summary>
     /// The accent and button colours of the interface. Left out, a stored theme keeps its own.
     /// </summary>
     public ColorThemeColorsRequestDto Main { get; set; }
@@ -111,5 +117,6 @@ public class ColorThemeColorsRequestDto
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]
 public static partial class CustomColorThemeRequestDtoMapper
 {
+    [MapperIgnoreSource(nameof(CustomColorThemeRequestDto.Name))]
     public static partial CustomColorThemesSettingsItem Map(this CustomColorThemeRequestDto source);
 }

@@ -63,6 +63,12 @@ public class StorageSettingsDto
 public class EncryptionSettingsDto
 {
     /// <summary>
+    /// Always an empty string: the encryption password is never returned.
+    /// </summary>
+    /// <example></example>
+    public string Password { get; init; }
+
+    /// <summary>
     /// Whether the storage is encrypted, decrypted, or on its way to either.
     /// </summary>
     /// <example>0</example>
@@ -82,5 +88,6 @@ public static partial class StorageSettingsDtoMapper
 
     public static partial StorageSettingsDto Map(this CdnStorageSettings source);
 
+    [MapValue(nameof(EncryptionSettingsDto.Password), "")]
     public static partial EncryptionSettingsDto Map(this EncryptionSettings source);
 }

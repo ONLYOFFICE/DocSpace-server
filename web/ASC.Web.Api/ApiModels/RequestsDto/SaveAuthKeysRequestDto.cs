@@ -52,6 +52,36 @@ public class SaveAuthKeysRequestDto
     public string Name { get; set; }
 
     /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>Google</example>
+    public string Title { get; set; }
+
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>Lets users sign in with a Google account.</example>
+    public string Description { get; set; }
+
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>Create a project in the Google Cloud console and copy its OAuth client ID and secret.</example>
+    public string Instruction { get; set; }
+
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>true</example>
+    public bool CanSet { get; set; }
+
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>false</example>
+    public bool Paid { get; set; }
+
+    /// <summary>
     /// The keys of the provider with their new values, by the key names `GET api/2.0/settings/authservice` lists in
     /// `props`.
     /// </summary>
@@ -76,4 +106,34 @@ public class AuthKeyRequest
     /// <example>1234567890-abc.apps.googleusercontent.com</example>
     [StringLength(4000)]
     public required string Value { get; set; }
+
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>Client ID</example>
+    public string Title { get; set; }
+
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>text</example>
+    public string Type { get; set; }
+
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>["s3", "gcs"]</example>
+    public List<string> Options { get; set; }
+
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>storageType</example>
+    public string DependsOn { get; set; }
+
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>s3</example>
+    public string DependsOnValue { get; set; }
 }

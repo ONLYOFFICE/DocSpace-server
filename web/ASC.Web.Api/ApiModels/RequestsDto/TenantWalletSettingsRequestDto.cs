@@ -42,14 +42,14 @@ public class TenantWalletSettingsRequestDto
     /// The automatic top-up settings to store.
     /// </summary>
     /// <example>{"enabled": true, "minBalance": 10, "upToBalance": 100, "currency": "USD"}</example>
-    public WalletTopUpSettingsRequestDto Settings { get; set; }
+    public SetWalletTopUpSettingsRequest Settings { get; set; }
 }
 
 /// <summary>
 /// The part of the automatic top-up settings a payer chooses. The low-balance warning state is kept by the portal
 /// itself and cannot be set here.
 /// </summary>
-public class WalletTopUpSettingsRequestDto
+public class SetWalletTopUpSettingsRequest
 {
     /// <summary>
     /// Whether the payment method on file is charged automatically when the wallet balance runs low.
@@ -76,4 +76,21 @@ public class WalletTopUpSettingsRequestDto
     /// </summary>
     /// <example>USD</example>
     public string Currency { get; set; }
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>10</example>
+    public int LowBalanceThreshold { get; set; }
+
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>false</example>
+    public bool LowBalanceNotified { get; set; }
+
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>2026-01-01T10:00:00</example>
+    public DateTime LastModified { get; set; }
 }

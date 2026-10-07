@@ -43,10 +43,17 @@ public class EmailActivationSettingsRequestDto
     /// </summary>
     /// <example>false</example>
     public bool Show { get; set; }
+
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>2026-01-01T10:00:00</example>
+    public DateTime LastModified { get; set; }
 }
 
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]
 public static partial class EmailActivationSettingsRequestDtoMapper
 {
+    [MapperIgnoreSource(nameof(EmailActivationSettingsRequestDto.LastModified))]
     public static partial EmailActivationSettings Map(this EmailActivationSettingsRequestDto source);
 }

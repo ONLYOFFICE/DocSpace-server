@@ -43922,6 +43922,37 @@
             "type": "string",
             "description": "The user ID.",
             "format": "uuid"
+          },
+          "sequence": {
+            "examples": [
+              12
+            ],
+            "type": "integer",
+            "description": "The role sequence.",
+            "format": "int32"
+          },
+          "submitted": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "description": "Specifies if the role was submitted or not."
+          },
+          "openedAt": {
+            "examples": [
+              "2026-01-01T10:00:00Z"
+            ],
+            "type": "string",
+            "description": "The date and time when the role was opened.",
+            "format": "date-time"
+          },
+          "submissionDate": {
+            "examples": [
+              "2026-01-01T10:00:00Z"
+            ],
+            "type": "string",
+            "description": "The date and time when the role was submitted.",
+            "format": "date-time"
           }
         },
         "description": "The form role."

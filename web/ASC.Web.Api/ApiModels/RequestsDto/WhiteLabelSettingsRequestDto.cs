@@ -42,13 +42,13 @@ public class CompanyWhiteLabelSettingsRequestDto
     /// The company details to store.
     /// </summary>
     /// <example>{"companyName": "ONLYOFFICE", "site": "https://www.onlyoffice.com", "email": "support@onlyoffice.com", "address": "Lubanas st. 125a-25", "phone": "+7 843 2271372", "hideAbout": false}</example>
-    public CompanyInfoRequestDto Settings { get; set; }
+    public SaveCompanyInfoRequest Settings { get; set; }
 }
 
 /// <summary>
 /// The company the installation is branded for, as shown on the About page and in letters.
 /// </summary>
-public class CompanyInfoRequestDto
+public class SaveCompanyInfoRequest
 {
     /// <summary>
     /// The company name.
@@ -89,10 +89,23 @@ public class CompanyInfoRequestDto
     public string Phone { get; set; }
 
     /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: saved details are never those of the licensor, so the server always stores `false`.
+    /// </summary>
+    /// <example>false</example>
+    [JsonPropertyName("IsLicensor")]
+    public bool IsLicensor { get; set; }
+
+    /// <summary>
     /// Whether the About page is hidden.
     /// </summary>
     /// <example>false</example>
     public bool HideAbout { get; set; }
+
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>2026-01-01T10:00:00</example>
+    public DateTime LastModified { get; set; }
 }
 
 /// <summary>
@@ -104,13 +117,13 @@ public class AdditionalWhiteLabelSettingsRequestDto
     /// The resource flags to store.
     /// </summary>
     /// <example>{"startDocsEnabled": true, "helpCenterEnabled": true, "feedbackAndSupportEnabled": true, "userForumEnabled": true, "videoGuidesEnabled": true, "licenseAgreementsEnabled": true}</example>
-    public AdditionalResourcesRequestDto Settings { get; set; }
+    public SaveAdditionalResourcesRequest Settings { get; set; }
 }
 
 /// <summary>
 /// Which help and community resources the interface links to.
 /// </summary>
-public class AdditionalResourcesRequestDto
+public class SaveAdditionalResourcesRequest
 {
     /// <summary>
     /// Whether the getting-started documents are offered.
@@ -147,6 +160,12 @@ public class AdditionalResourcesRequestDto
     /// </summary>
     /// <example>true</example>
     public bool LicenseAgreementsEnabled { get; set; }
+
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>2026-01-01T10:00:00</example>
+    public DateTime LastModified { get; set; }
 }
 
 /// <summary>
@@ -158,13 +177,13 @@ public class MailWhiteLabelSettingsRequestDto
     /// The letter branding to store.
     /// </summary>
     /// <example>{"footerEnabled": true, "footerSocialEnabled": true}</example>
-    public MailFooterRequestDto Settings { get; set; }
+    public SaveMailFooterRequest Settings { get; set; }
 }
 
 /// <summary>
 /// Which footers the portal's letters carry.
 /// </summary>
-public class MailFooterRequestDto
+public class SaveMailFooterRequest
 {
     /// <summary>
     /// Whether letters carry the footer.
@@ -182,7 +201,8 @@ public class MailFooterRequestDto
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]
 public static partial class WhiteLabelSettingsRequestDtoMapper
 {
-    public static partial AdditionalWhiteLabelSettings Map(this AdditionalResourcesRequestDto source);
+    [MapperIgnoreSource(nameof(SaveAdditionalResourcesRequest.LastModified))]
+    public static partial AdditionalWhiteLabelSettings Map(this SaveAdditionalResourcesRequest source);
 
-    public static partial MailWhiteLabelSettings Map(this MailFooterRequestDto source);
+    public static partial MailWhiteLabelSettings Map(this SaveMailFooterRequest source);
 }

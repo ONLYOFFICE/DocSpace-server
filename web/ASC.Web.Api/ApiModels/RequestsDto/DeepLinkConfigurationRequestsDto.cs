@@ -62,4 +62,10 @@ public class DeepLinkSettingsRequestDto
     /// </summary>
     /// <example>ProvideChoice</example>
     public DeepLinkHandlingMode HandlingMode { get; set; }
+
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>2026-01-01T10:00:00</example>
+    public DateTime LastModified { get; set; }
 }

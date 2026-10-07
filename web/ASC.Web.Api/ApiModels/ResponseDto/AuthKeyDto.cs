@@ -60,20 +60,24 @@ public class AuthKeyDto
     /// <summary>
     /// The field type: "text", "password", "select", "toggle".
     /// </summary>
+    /// <example>password</example>
     public string Type { get; init; } = "text";
 
     /// <summary>
     /// The list of options for "select" type fields.
     /// </summary>
+    /// <example>["s3", "gcs"]</example>
     public List<string> Options { get; init; }
 
     /// <summary>
     /// The name of another key this field depends on for visibility.
     /// </summary>
+    /// <example>storageType</example>
     public string DependsOn { get; init; }
 
     /// <summary>
     /// The value of the `dependsOn` key that makes this field visible.
     /// </summary>
+    /// <example>s3</example>
     public string DependsOnValue { get; init; }
 }

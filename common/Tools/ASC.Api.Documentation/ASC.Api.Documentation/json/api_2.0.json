@@ -22552,7 +22552,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AdditionalWhiteLabelSettingsWrapper"
+                  "$ref": "#/components/schemas/AdditionalResourcesWrapper"
                 }
               }
             }
@@ -28937,7 +28937,16 @@
         },
         "description": "One wallet service the portal is running right now, with the allowance it grants where that is counted."
       },
-      "AdditionalResourcesRequestDto": {
+      "AdditionalResourcesDto": {
+        "required": [
+          "feedbackAndSupportEnabled",
+          "helpCenterEnabled",
+          "lastModified",
+          "licenseAgreementsEnabled",
+          "startDocsEnabled",
+          "userForumEnabled",
+          "videoGuidesEnabled"
+        ],
         "type": "object",
         "properties": {
           "startDocsEnabled": {
@@ -28945,45 +28954,95 @@
               true
             ],
             "type": "boolean",
-            "description": "Whether the getting-started documents are offered."
+            "description": "Whether the sample documents that ONLYOFFICE ships may be placed in a new user's Documents. Unlike the link\r\nflags below it depends on nothing that has to be configured, so its built-in value is always `true`."
           },
           "helpCenterEnabled": {
             "examples": [
               true
             ],
             "type": "boolean",
-            "description": "Whether the help center is linked."
+            "description": "Whether the interface may offer the Help Center entry. It is `false` both when the entry was switched off\r\nfor the installation and when the installation configures no Help Center address at all; the addresses\r\nthemselves are not part of this answer and arrive in `externalResources` of `GET api/2.0/settings`."
           },
           "feedbackAndSupportEnabled": {
             "examples": [
               true
             ],
             "type": "boolean",
-            "description": "Whether the feedback and support link is shown."
+            "description": "Whether the interface may offer the Feedback and Support entry, `false` for the same two reasons as\r\n`helpCenterEnabled`."
           },
           "userForumEnabled": {
             "examples": [
               true
             ],
             "type": "boolean",
-            "description": "Whether the user forum is linked."
+            "description": "Whether the interface may offer the user forum entry, `false` for the same two reasons as\r\n`helpCenterEnabled`."
           },
           "videoGuidesEnabled": {
             "examples": [
               true
             ],
             "type": "boolean",
-            "description": "Whether the video guides are linked."
+            "description": "Whether the interface may offer the Video Guides entry, `false` for the same two reasons as\r\n`helpCenterEnabled`."
           },
           "licenseAgreementsEnabled": {
             "examples": [
               true
             ],
             "type": "boolean",
-            "description": "Whether the license agreements are linked."
+            "description": "Whether the interface may offer the License Agreements entry, `false` for the same two reasons as\r\n`helpCenterEnabled`."
+          },
+          "lastModified": {
+            "examples": [
+              "2026-01-01T10:00:00"
+            ],
+            "type": "string",
+            "description": "When these flags were last stored. Nothing reads it back on the way in: it only reports the moment of the last\r\nchange.",
+            "format": "date-time"
           }
         },
-        "description": "Which help and community resources the interface links to."
+        "description": "Which of the ONLYOFFICE help and community entries the interface may offer, installation-wide, in the shape the\r\nreset of these flags returns."
+      },
+      "AdditionalResourcesWrapper": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "description": "The AdditionalResourcesDto object returned by the operation.",
+            "$ref": "#/components/schemas/AdditionalResourcesDto"
+          },
+          "count": {
+            "type": "integer",
+            "description": "The total number of items in the response",
+            "format": "int32"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "type": "string",
+                  "description": "URL of the link"
+                },
+                "action": {
+                  "type": "string",
+                  "description": "Action associated with the link"
+                }
+              }
+            },
+            "description": "List of links related to the response"
+          },
+          "status": {
+            "type": "integer",
+            "description": "HTTP status code of the response",
+            "format": "int32"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP status code of the response (duplicate of status)",
+            "format": "int32"
+          }
+        },
+        "description": "The successful API response containing the AdditionalResourcesDto object."
       },
       "AdditionalWhiteLabelSettingsDto": {
         "required": [
@@ -29054,7 +29113,7 @@
         "properties": {
           "settings": {
             "description": "The resource flags to store.",
-            "$ref": "#/components/schemas/AdditionalResourcesRequestDto"
+            "$ref": "#/components/schemas/SaveAdditionalResourcesRequest"
           }
         },
         "description": "The body of a change to the help and community resources the interface offers."
@@ -30220,28 +30279,6 @@
         },
         "description": "One entry of the portal audit trail: who changed what, from where, and where it belongs in the product."
       },
-      "AuditLifetimeSettingsRequestDto": {
-        "type": "object",
-        "properties": {
-          "loginHistoryLifeTime": {
-            "examples": [
-              180
-            ],
-            "type": "integer",
-            "description": "How many days login events are kept, from 1 to 180.",
-            "format": "int32"
-          },
-          "auditTrailLifeTime": {
-            "examples": [
-              90
-            ],
-            "type": "integer",
-            "description": "How many days audit trail events are kept, from 1 to 180.",
-            "format": "int32"
-          }
-        },
-        "description": "How long the portal keeps its two security logs."
-      },
       "AuditReportFormat": {
         "oneOf": [
           {
@@ -30572,6 +30609,9 @@
             "description": "The authorization key title."
           },
           "type": {
+            "examples": [
+              "password"
+            ],
             "type": [
               "null",
               "string"
@@ -30579,6 +30619,12 @@
             "description": "The field type: \"text\", \"password\", \"select\", \"toggle\"."
           },
           "options": {
+            "examples": [
+              [
+                "s3",
+                "gcs"
+              ]
+            ],
             "type": [
               "null",
               "array"
@@ -30589,6 +30635,9 @@
             "description": "The list of options for \"select\" type fields."
           },
           "dependsOn": {
+            "examples": [
+              "storageType"
+            ],
             "type": [
               "null",
               "string"
@@ -30596,6 +30645,9 @@
             "description": "The name of another key this field depends on for visibility."
           },
           "dependsOnValue": {
+            "examples": [
+              "s3"
+            ],
             "type": [
               "null",
               "string"
@@ -30633,6 +30685,62 @@
               "string"
             ],
             "description": "The value to store. An empty string clears the key."
+          },
+          "title": {
+            "examples": [
+              "Client ID"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Accepted for compatibility with earlier clients and not read: the server keeps its own value."
+          },
+          "type": {
+            "examples": [
+              "text"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Accepted for compatibility with earlier clients and not read: the server keeps its own value."
+          },
+          "options": {
+            "examples": [
+              [
+                "s3",
+                "gcs"
+              ]
+            ],
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            },
+            "description": "Accepted for compatibility with earlier clients and not read: the server keeps its own value."
+          },
+          "dependsOn": {
+            "examples": [
+              "storageType"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Accepted for compatibility with earlier clients and not read: the server keeps its own value."
+          },
+          "dependsOnValue": {
+            "examples": [
+              "s3"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Accepted for compatibility with earlier clients and not read: the server keeps its own value."
           }
         },
         "description": "One key of a provider and the value to store for it."
@@ -30814,7 +30922,7 @@
               "null",
               "string"
             ],
-            "description": "The provider name as it is shown in the interface. It is filled in by the portal when the providers are\r\nlisted and is ignored when keys are saved."
+            "description": "The provider name as it is shown in the interface."
           },
           "description": {
             "examples": [
@@ -30824,7 +30932,7 @@
               "null",
               "string"
             ],
-            "description": "A sentence about what connecting the provider gives the portal, shown next to it in the interface. It is\r\nfilled in by the portal and ignored when keys are saved."
+            "description": "A sentence about what connecting the provider gives the portal, shown next to it in the interface."
           },
           "instruction": {
             "examples": [
@@ -30834,14 +30942,14 @@
               "null",
               "string"
             ],
-            "description": "The steps an administrator has to take on the provider side to obtain the keys, shown in the interface. It is\r\nfilled in by the portal and ignored when keys are saved."
+            "description": "The steps an administrator has to take on the provider side to obtain the keys, shown in the interface."
           },
           "canSet": {
             "examples": [
               true
             ],
             "type": "boolean",
-            "description": "Whether this provider accepts keys through the API at all. A provider whose keys are fixed by the\r\ninstallation reports `false`, and saving keys for it is refused; the field is reported by the portal and\r\nignored on the way in."
+            "description": "Whether this provider accepts keys through the API at all. A provider whose keys are fixed by the\r\ninstallation reports `false`, and saving keys for it is refused."
           },
           "paid": {
             "examples": [
@@ -30854,8 +30962,10 @@
             "examples": [
               [
                 {
-                  "name": "key",
-                  "value": "value"
+                  "name": "googleClientId",
+                  "value": "1234567890-abc.apps.googleusercontent.com",
+                  "title": "Client ID",
+                  "type": "text"
                 }
               ]
             ],
@@ -30867,7 +30977,7 @@
               "description": "One key of an authorization provider or a storage, with how the settings form shows it.",
               "$ref": "#/components/schemas/AuthKeyDto"
             },
-            "description": "The keys the provider defines, with the values last saved and how the settings form shows each of them.\r\nIt is empty for a provider that forbids changes."
+            "description": "The keys the provider defines, with the values last saved and how the settings form shows each of them.\r\nIt is `null` for a provider that forbids changes (`canSet` is `false`): its keys are not read at all."
           }
         },
         "description": "One third-party authorization or storage provider and the keys the portal connects to it with."
@@ -31425,82 +31535,6 @@
         },
         "description": "A pair of colours of a theme."
       },
-      "CompanyInfoRequestDto": {
-        "type": "object",
-        "properties": {
-          "companyName": {
-            "examples": [
-              "ONLYOFFICE"
-            ],
-            "maxLength": 255,
-            "minLength": 0,
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The company name."
-          },
-          "site": {
-            "examples": [
-              "https://www.onlyoffice.com"
-            ],
-            "maxLength": 255,
-            "minLength": 0,
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The company website, as an absolute URL.",
-            "format": "uri"
-          },
-          "email": {
-            "examples": [
-              "support@onlyoffice.com"
-            ],
-            "maxLength": 255,
-            "minLength": 0,
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The contact email address.",
-            "format": "email"
-          },
-          "address": {
-            "examples": [
-              "Lubanas st. 125a-25"
-            ],
-            "maxLength": 255,
-            "minLength": 0,
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The postal address."
-          },
-          "phone": {
-            "examples": [
-              "+7 843 2271372"
-            ],
-            "maxLength": 255,
-            "minLength": 0,
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The contact phone number.",
-            "format": "tel"
-          },
-          "hideAbout": {
-            "examples": [
-              false
-            ],
-            "type": "boolean",
-            "description": "Whether the About page is hidden."
-          }
-        },
-        "description": "The company the installation is branded for, as shown on the About page and in letters."
-      },
       "CompanyWhiteLabelSettingsDto": {
         "required": [
           "address",
@@ -31594,7 +31628,7 @@
         "properties": {
           "settings": {
             "description": "The company details to store.",
-            "$ref": "#/components/schemas/CompanyInfoRequestDto"
+            "$ref": "#/components/schemas/SaveCompanyInfoRequest"
           }
         },
         "description": "The body of a company details change for the installation's branding."
@@ -32323,6 +32357,16 @@
             "type": "integer",
             "description": "The id of the custom theme to replace, or an id no stored theme has to add a new one.",
             "format": "int32"
+          },
+          "name": {
+            "examples": [
+              "Custom theme"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Accepted for compatibility with earlier clients and not read: a custom theme is always stored without a name."
           },
           "main": {
             "description": "The accent and button colours of the interface. Left out, a stored theme keeps its own.",
@@ -33122,6 +33166,14 @@
           "handlingMode": {
             "description": "Whether a link always opens in the browser, always in the native application, or asks the user each time.",
             "$ref": "#/components/schemas/DeepLinkHandlingMode"
+          },
+          "lastModified": {
+            "examples": [
+              "2026-01-01T10:00:00"
+            ],
+            "type": "string",
+            "description": "Accepted for compatibility with earlier clients and not read: the server keeps its own value.",
+            "format": "date-time"
           }
         },
         "description": "The deep link handling the portal applies on mobile devices."
@@ -34479,6 +34531,14 @@
             ],
             "type": "boolean",
             "description": "Whether the reminder is shown; send false to dismiss it for the calling user."
+          },
+          "lastModified": {
+            "examples": [
+              "2026-01-01T10:00:00"
+            ],
+            "type": "string",
+            "description": "Accepted for compatibility with earlier clients and not read: the server keeps its own value.",
+            "format": "date-time"
           }
         },
         "description": "Whether the calling user wants to keep seeing the reminder to confirm their email address."
@@ -34862,6 +34922,16 @@
       "EncryptionSettingsDto": {
         "type": "object",
         "properties": {
+          "password": {
+            "examples": [
+              ""
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Always an empty string: the encryption password is never returned."
+          },
           "status": {
             "description": "Whether the storage is encrypted, decrypted, or on its way to either.",
             "$ref": "#/components/schemas/EncryptionStatus"
@@ -35153,6 +35223,10 @@
             ],
             "description": "The engine of the external database: `mysql`, or `sqlite` on a Standalone installation."
           },
+          "databaseTypeEnum": {
+            "description": "Accepted for compatibility with earlier clients and not read: the engine is taken from `databaseType`.",
+            "$ref": "#/components/schemas/ExternalDatabaseType"
+          },
           "dbHost": {
             "examples": [
               "localhost"
@@ -35220,6 +35294,38 @@
           }
         },
         "description": "The connection parameters of an external database to test."
+      },
+      "ExternalDatabaseType": {
+        "oneOf": [
+          {
+            "examples": [
+              "MySql"
+            ],
+            "enum": [
+              "MySql",
+              "Sqlite"
+            ],
+            "type": "string",
+            "description": "[]"
+          },
+          {
+            "examples": [
+              0
+            ],
+            "enum": [
+              0,
+              1
+            ],
+            "type": "integer",
+            "description": "[]",
+            "x-enum-varnames": [
+              "MySql",
+              "Sqlite"
+            ]
+          }
+        ],
+        "description": "The engine of an external database.",
+        "x-enum-type": "integer"
       },
       "ExternalResourceDto": {
         "type": "object",
@@ -36607,8 +36713,8 @@
           "companyName",
           "email",
           "hideAbout",
-          "isDefault",
           "IsLicensor",
+          "lastModified",
           "phone",
           "site"
         ],
@@ -36618,6 +36724,8 @@
             "examples": [
               "My Own Corporation"
             ],
+            "maxLength": 255,
+            "minLength": 0,
             "type": [
               "null",
               "string"
@@ -36628,16 +36736,21 @@
             "examples": [
               "https://www.example.com"
             ],
+            "maxLength": 255,
+            "minLength": 0,
             "type": [
               "null",
               "string"
             ],
-            "description": "The address the vendor name links to, as an absolute URL with its scheme. Empty under the same conditions\r\nas `companyName`."
+            "description": "The address the vendor name links to, as an absolute URL with its scheme. Empty under the same conditions\r\nas `companyName`.",
+            "format": "uri"
           },
           "email": {
             "examples": [
               "contact@example.com"
             ],
+            "maxLength": 255,
+            "minLength": 0,
             "type": [
               "null",
               "string"
@@ -36649,6 +36762,8 @@
             "examples": [
               "123 Business St, New York, NY 10001"
             ],
+            "maxLength": 255,
+            "minLength": 0,
             "type": [
               "null",
               "string"
@@ -36659,11 +36774,14 @@
             "examples": [
               "+1-800-555-0123"
             ],
+            "maxLength": 255,
+            "minLength": 0,
             "type": [
               "null",
               "string"
             ],
-            "description": "The telephone number of the vendor in the shape it was saved in, with no dialling format enforced."
+            "description": "The telephone number of the vendor in the shape it was saved in, with no dialling format enforced.",
+            "format": "tel"
           },
           "IsLicensor": {
             "examples": [
@@ -36679,12 +36797,13 @@
             "type": "boolean",
             "description": "Whether the About page is hidden from the interface. A plan that does not include branding cannot switch it\r\non: the value is stored as `false` in that case, so it can come back different from what was saved."
           },
-          "isDefault": {
+          "lastModified": {
             "examples": [
-              true
+              "2026-01-01T10:00:00"
             ],
-            "type": "boolean",
-            "description": "Whether every field above still matches the installation's built-in vendor details. It turns `false` as\r\nsoon as one of them is saved differently and `true` again after\r\n`DELETE api/2.0/settings/rebranding/company`."
+            "type": "string",
+            "description": "When these details were last stored. Nothing reads it back on the way in: it only reports the moment of the\r\nlast change.",
+            "format": "date-time"
           }
         },
         "description": "The vendor details of the installation in the shape the licensor listing and the reset of the company details\r\nreturn, with the licensor flag spelled `IsLicensor`."
@@ -41203,6 +41322,62 @@
         },
         "description": "Who is writing to the ONLYOFFICE sales team, and what about."
       },
+      "SaveAdditionalResourcesRequest": {
+        "type": "object",
+        "properties": {
+          "startDocsEnabled": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Whether the getting-started documents are offered."
+          },
+          "helpCenterEnabled": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Whether the help center is linked."
+          },
+          "feedbackAndSupportEnabled": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Whether the feedback and support link is shown."
+          },
+          "userForumEnabled": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Whether the user forum is linked."
+          },
+          "videoGuidesEnabled": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Whether the video guides are linked."
+          },
+          "licenseAgreementsEnabled": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Whether the license agreements are linked."
+          },
+          "lastModified": {
+            "examples": [
+              "2026-01-01T10:00:00"
+            ],
+            "type": "string",
+            "description": "Accepted for compatibility with earlier clients and not read: the server keeps its own value.",
+            "format": "date-time"
+          }
+        },
+        "description": "Which help and community resources the interface links to."
+      },
       "SaveAuthKeysRequestDto": {
         "type": "object",
         "properties": {
@@ -41215,6 +41390,50 @@
               "string"
             ],
             "description": "The internal key of the provider, such as `google` or `box`. Take it from the `name` of\r\n`GET api/2.0/settings/authservice`."
+          },
+          "title": {
+            "examples": [
+              "Google"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Accepted for compatibility with earlier clients and not read: the server keeps its own value."
+          },
+          "description": {
+            "examples": [
+              "Lets users sign in with a Google account."
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Accepted for compatibility with earlier clients and not read: the server keeps its own value."
+          },
+          "instruction": {
+            "examples": [
+              "Create a project in the Google Cloud console and copy its OAuth client ID and secret."
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "Accepted for compatibility with earlier clients and not read: the server keeps its own value."
+          },
+          "canSet": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Accepted for compatibility with earlier clients and not read: the server keeps its own value."
+          },
+          "paid": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "description": "Accepted for compatibility with earlier clients and not read: the server keeps its own value."
           },
           "props": {
             "examples": [
@@ -41237,6 +41456,97 @@
           }
         },
         "description": "The keys to store for one third-party authorization or storage provider."
+      },
+      "SaveCompanyInfoRequest": {
+        "type": "object",
+        "properties": {
+          "companyName": {
+            "examples": [
+              "ONLYOFFICE"
+            ],
+            "maxLength": 255,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The company name."
+          },
+          "site": {
+            "examples": [
+              "https://www.onlyoffice.com"
+            ],
+            "maxLength": 255,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The company website, as an absolute URL.",
+            "format": "uri"
+          },
+          "email": {
+            "examples": [
+              "support@onlyoffice.com"
+            ],
+            "maxLength": 255,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The contact email address.",
+            "format": "email"
+          },
+          "address": {
+            "examples": [
+              "Lubanas st. 125a-25"
+            ],
+            "maxLength": 255,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The postal address."
+          },
+          "phone": {
+            "examples": [
+              "+7 843 2271372"
+            ],
+            "maxLength": 255,
+            "minLength": 0,
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The contact phone number.",
+            "format": "tel"
+          },
+          "IsLicensor": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "description": "Accepted for compatibility with earlier clients and not read: saved details are never those of the licensor, so the server always stores `false`."
+          },
+          "hideAbout": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "description": "Whether the About page is hidden."
+          },
+          "lastModified": {
+            "examples": [
+              "2026-01-01T10:00:00"
+            ],
+            "type": "string",
+            "description": "Accepted for compatibility with earlier clients and not read: the server keeps its own value.",
+            "format": "date-time"
+          }
+        },
+        "description": "The company the installation is branded for, as shown on the About page and in letters."
       },
       "SecurityArrayWrapper": {
         "type": "object",
@@ -41553,6 +41863,36 @@
         },
         "description": "The configuration document a portal application keeps."
       },
+      "SetAuditLifetimeSettingsRequest": {
+        "type": "object",
+        "properties": {
+          "loginHistoryLifeTime": {
+            "examples": [
+              180
+            ],
+            "type": "integer",
+            "description": "How many days login events are kept, from 1 to 180.",
+            "format": "int32"
+          },
+          "auditTrailLifeTime": {
+            "examples": [
+              90
+            ],
+            "type": "integer",
+            "description": "How many days audit trail events are kept, from 1 to 180.",
+            "format": "int32"
+          },
+          "lastModified": {
+            "examples": [
+              "2026-01-01T10:00:00"
+            ],
+            "type": "string",
+            "description": "Accepted for compatibility with earlier clients and not read: the server keeps its own value.",
+            "format": "date-time"
+          }
+        },
+        "description": "How long the portal keeps its two security logs."
+      },
       "SetRestrictedAiModelsRequestDto": {
         "required": [
           "models"
@@ -41575,6 +41915,72 @@
           }
         },
         "description": "The complete set of AI chat models that are to be barred on the portal."
+      },
+      "SetWalletTopUpSettingsRequest": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "examples": [
+              true
+            ],
+            "type": "boolean",
+            "description": "Whether the payment method on file is charged automatically when the wallet balance runs low."
+          },
+          "minBalance": {
+            "examples": [
+              10
+            ],
+            "maximum": 1000,
+            "minimum": 5,
+            "type": "integer",
+            "description": "The balance below which a top-up is charged, in `currency`.",
+            "format": "int32"
+          },
+          "upToBalance": {
+            "examples": [
+              100
+            ],
+            "maximum": 5000,
+            "minimum": 6,
+            "type": "integer",
+            "description": "The balance a top-up brings the wallet up to, in `currency`.",
+            "format": "int32"
+          },
+          "currency": {
+            "examples": [
+              "USD"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The three-letter ISO 4217 code both amounts are expressed in; it has to be the currency of the wallet."
+          },
+          "lowBalanceThreshold": {
+            "examples": [
+              10
+            ],
+            "type": "integer",
+            "description": "Accepted for compatibility with earlier clients and not read: the server keeps its own value.",
+            "format": "int32"
+          },
+          "lowBalanceNotified": {
+            "examples": [
+              false
+            ],
+            "type": "boolean",
+            "description": "Accepted for compatibility with earlier clients and not read: the server keeps its own value."
+          },
+          "lastModified": {
+            "examples": [
+              "2026-01-01T10:00:00"
+            ],
+            "type": "string",
+            "description": "Accepted for compatibility with earlier clients and not read: the server keeps its own value.",
+            "format": "date-time"
+          }
+        },
+        "description": "The part of the automatic top-up settings a payer chooses. The low-balance warning state is kept by the portal\r\nitself and cannot be set here."
       },
       "SettingsDto": {
         "required": [
@@ -44102,7 +44508,7 @@
         "properties": {
           "settings": {
             "description": "The login history and audit trail lifetimes to store.",
-            "$ref": "#/components/schemas/AuditLifetimeSettingsRequestDto"
+            "$ref": "#/components/schemas/SetAuditLifetimeSettingsRequest"
           }
         },
         "description": "The body of an audit lifetime change."
@@ -45631,7 +46037,7 @@
         "properties": {
           "settings": {
             "description": "The automatic top-up settings to store.",
-            "$ref": "#/components/schemas/WalletTopUpSettingsRequestDto"
+            "$ref": "#/components/schemas/SetWalletTopUpSettingsRequest"
           }
         },
         "description": "The body of an automatic top-up settings change."
@@ -46840,49 +47246,6 @@
           }
         },
         "description": "The successful API response containing the WalletServiceDto object."
-      },
-      "WalletTopUpSettingsRequestDto": {
-        "type": "object",
-        "properties": {
-          "enabled": {
-            "examples": [
-              true
-            ],
-            "type": "boolean",
-            "description": "Whether the payment method on file is charged automatically when the wallet balance runs low."
-          },
-          "minBalance": {
-            "examples": [
-              10
-            ],
-            "maximum": 1000,
-            "minimum": 5,
-            "type": "integer",
-            "description": "The balance below which a top-up is charged, in `currency`.",
-            "format": "int32"
-          },
-          "upToBalance": {
-            "examples": [
-              100
-            ],
-            "maximum": 5000,
-            "minimum": 6,
-            "type": "integer",
-            "description": "The balance a top-up brings the wallet up to, in `currency`.",
-            "format": "int32"
-          },
-          "currency": {
-            "examples": [
-              "USD"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The three-letter ISO 4217 code both amounts are expressed in; it has to be the currency of the wallet."
-          }
-        },
-        "description": "The part of the automatic top-up settings a payer chooses. The low-balance warning state is kept by the portal\r\nitself and cannot be set here."
       },
       "WebItemSecurityRequestDto": {
         "required": [

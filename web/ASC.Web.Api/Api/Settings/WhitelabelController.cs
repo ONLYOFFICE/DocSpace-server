@@ -50,8 +50,7 @@ public class WhitelabelController(
     TenantExtra tenantExtra,
     StorageFactory storageFactory,
     AdditionalWhiteLabelSettingsMapper additionalWhiteLabelSettingsMapper,
-    CompanyWhiteLabelSettingsDtoMapper companyWhiteLabelSettingsDtoMapper,
-    LicensorDetailsDtoMapper licensorDetailsDtoMapper)
+    CompanyWhiteLabelSettingsDtoMapper companyWhiteLabelSettingsDtoMapper)
     : BaseSettingsController(fusionCache, webItemManager)
 {
     #region Logos
@@ -621,11 +620,11 @@ public class WhitelabelController(
 
         var instance = await companyWhiteLabelSettingsHelper.InstanceAsync();
 
-        result.Add(licensorDetailsDtoMapper.Map(instance));
+        result.Add(instance.Map());
 
         if (!companyWhiteLabelSettingsHelper.IsDefault(instance) && !instance.IsLicensor)
         {
-            result.Add(licensorDetailsDtoMapper.Map(settingsManager.GetDefault<CompanyWhiteLabelSettings>()));
+            result.Add(settingsManager.GetDefault<CompanyWhiteLabelSettings>().Map());
         }
 
         return result;
@@ -747,7 +746,7 @@ public class WhitelabelController(
 
         messageService.Send(MessageAction.WhiteLabelCompanySettingsUpdated);
 
-        return licensorDetailsDtoMapper.Map(defaultSettings);
+        return defaultSettings.Map();
     }
 
     #endregion
@@ -831,10 +830,10 @@ public class WhitelabelController(
     /// <summary>Delete the additional white label settings</summary>
     /// <path>api/2.0/settings/rebranding/additional</path>
     [Tags("Settings / Rebranding")]
-    [SwaggerResponse(200, "The built-in resource flags that are now in effect", typeof(AdditionalWhiteLabelSettingsDto))]
+    [SwaggerResponse(200, "The built-in resource flags that are now in effect", typeof(AdditionalResourcesDto))]
     [SwaggerResponse(403, "The caller is not a DocSpace administrator, or the installation does not allow branding to be edited")]
     [HttpDelete("rebranding/additional")]
-    public async Task<AdditionalWhiteLabelSettingsDto> DeleteAdditionalWhiteLabelSettings()
+    public async Task<AdditionalResourcesDto> DeleteAdditionalWhiteLabelSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -846,7 +845,7 @@ public class WhitelabelController(
 
         messageService.Send(MessageAction.WhiteLabelAdditionalSettingsUpdated);
 
-        return additionalWhiteLabelSettingsMapper.Map(defaultSettings);
+        return defaultSettings.Map();
     }
 
     #endregion

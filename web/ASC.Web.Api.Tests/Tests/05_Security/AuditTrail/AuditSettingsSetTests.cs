@@ -53,7 +53,7 @@ public class AuditSettingsSetTests(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
-    private static readonly TenantAuditSettingsRequestDto _settingsUpdate = new(new AuditLifetimeSettingsRequestDto(180, 180));
+    private static readonly TenantAuditSettingsRequestDto _settingsUpdate = new(new SetAuditLifetimeSettingsRequest(180, 180));
 
     [Fact]
     public async Task SetAuditSettings_Owner_UpdatesSettings()

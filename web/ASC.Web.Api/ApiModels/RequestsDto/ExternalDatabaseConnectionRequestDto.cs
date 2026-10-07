@@ -46,6 +46,12 @@ public class ExternalDatabaseConnectionRequestDto
     public string DatabaseType { get; set; }
 
     /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the engine is taken from `databaseType`.
+    /// </summary>
+    /// <example>0</example>
+    public ExternalDatabaseType? DatabaseTypeEnum { get; set; }
+
+    /// <summary>
     /// The host name or the IP address of the database server.
     /// </summary>
     /// <example>localhost</example>
@@ -98,5 +104,6 @@ public class ExternalDatabaseConnectionRequestDto
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]
 public static partial class ExternalDatabaseConnectionRequestDtoMapper
 {
+    [MapperIgnoreSource(nameof(ExternalDatabaseConnectionRequestDto.DatabaseTypeEnum))]
     public static partial ExternalDatabaseSettings Map(this ExternalDatabaseConnectionRequestDto source);
 }

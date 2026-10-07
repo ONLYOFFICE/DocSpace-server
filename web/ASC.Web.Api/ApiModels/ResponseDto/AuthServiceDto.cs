@@ -57,30 +57,26 @@ public class AuthServiceDto
     public string Name { get; set; }
 
     /// <summary>
-    /// The provider name as it is shown in the interface. It is filled in by the portal when the providers are
-    /// listed and is ignored when keys are saved.
+    /// The provider name as it is shown in the interface.
     /// </summary>
     /// <example>Google</example>
     public string Title { get; set; }
 
     /// <summary>
-    /// A sentence about what connecting the provider gives the portal, shown next to it in the interface. It is
-    /// filled in by the portal and ignored when keys are saved.
+    /// A sentence about what connecting the provider gives the portal, shown next to it in the interface.
     /// </summary>
     /// <example>Google OAuth authentication</example>
     public string Description { get; set; }
 
     /// <summary>
-    /// The steps an administrator has to take on the provider side to obtain the keys, shown in the interface. It is
-    /// filled in by the portal and ignored when keys are saved.
+    /// The steps an administrator has to take on the provider side to obtain the keys, shown in the interface.
     /// </summary>
     /// <example>Configure your Google OAuth credentials</example>
     public string Instruction { get; set; }
 
     /// <summary>
     /// Whether this provider accepts keys through the API at all. A provider whose keys are fixed by the
-    /// installation reports `false`, and saving keys for it is refused; the field is reported by the portal and
-    /// ignored on the way in.
+    /// installation reports `false`, and saving keys for it is refused.
     /// </summary>
     /// <example>true</example>
     public bool CanSet { get; set; }
@@ -94,9 +90,9 @@ public class AuthServiceDto
 
     /// <summary>
     /// The keys the provider defines, with the values last saved and how the settings form shows each of them.
-    /// It is empty for a provider that forbids changes.
+    /// It is `null` for a provider that forbids changes (`canSet` is `false`): its keys are not read at all.
     /// </summary>
-    /// <example>[{"name": "key", "value": "value"}]</example>
+    /// <example>[{"name": "googleClientId", "value": "1234567890-abc.apps.googleusercontent.com", "title": "Client ID", "type": "text"}]</example>
     public List<AuthKeyDto> Props { get; set; }
 
     public static async Task<AuthServiceDto> From(Consumer consumer, string logoText)

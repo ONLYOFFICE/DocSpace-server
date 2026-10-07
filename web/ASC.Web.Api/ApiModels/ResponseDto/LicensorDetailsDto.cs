@@ -44,6 +44,7 @@ public class LicensorDetailsDto
     /// whatever the installation ships as its built-in vendor, and it is empty on an installation that ships none.
     /// </summary>
     /// <example>My Own Corporation</example>
+    [StringLength(255)]
     public required string CompanyName { get; set; }
 
     /// <summary>
@@ -51,6 +52,8 @@ public class LicensorDetailsDto
     /// as `companyName`.
     /// </summary>
     /// <example>https://www.example.com</example>
+    [Url]
+    [StringLength(255)]
     public required string Site { get; set; }
 
     /// <summary>
@@ -59,6 +62,7 @@ public class LicensorDetailsDto
     /// </summary>
     /// <example>contact@example.com</example>
     [EmailAddress]
+    [StringLength(255)]
     public required string Email { get; set; }
 
     /// <summary>
@@ -66,12 +70,15 @@ public class LicensorDetailsDto
     /// imposed on it.
     /// </summary>
     /// <example>123 Business St, New York, NY 10001</example>
+    [StringLength(255)]
     public required string Address { get; set; }
 
     /// <summary>
     /// The telephone number of the vendor in the shape it was saved in, with no dialling format enforced.
     /// </summary>
     /// <example>+1-800-555-0123</example>
+    [Phone]
+    [StringLength(255)]
     public required string Phone { get; set; }
 
     /// <summary>
@@ -91,23 +98,15 @@ public class LicensorDetailsDto
     public required bool HideAbout { get; set; }
 
     /// <summary>
-    /// Whether every field above still matches the installation's built-in vendor details. It turns `false` as
-    /// soon as one of them is saved differently and `true` again after
-    /// `DELETE api/2.0/settings/rebranding/company`.
+    /// When these details were last stored. Nothing reads it back on the way in: it only reports the moment of the
+    /// last change.
     /// </summary>
-    /// <example>true</example>
-    public required bool IsDefault { get; set; }
+    /// <example>2026-01-01T10:00:00</example>
+    public required DateTime LastModified { get; set; }
 }
 
-[Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
-public partial class LicensorDetailsDtoMapper(CompanyWhiteLabelSettingsHelper companyWhiteLabelSettingsHelper)
+public static partial class LicensorDetailsDtoMapper
 {
-    [MapPropertyFromSource(nameof(LicensorDetailsDto.IsDefault), Use = nameof(GetIsDefault))]
-    public partial LicensorDetailsDto Map(CompanyWhiteLabelSettings source);
-
-    private bool GetIsDefault(CompanyWhiteLabelSettings source)
-    {
-        return companyWhiteLabelSettingsHelper.IsDefault(source);
-    }
+    public static partial LicensorDetailsDto Map(this CompanyWhiteLabelSettings source);
 }
