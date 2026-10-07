@@ -61,6 +61,10 @@ public class GroupsController(
     /// <path>api/2.0/files/group</path>
     [Tags("Rooms / Groups")]
     [SwaggerResponse(200, "The created room group with the rooms that were linked to it", typeof(RoomGroupDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `name`, `icon` or `rooms`, the name is blank or longer than 128 characters, the icon is not a built-in cover, `searchArea` names a section other than `Active` and `Forms`, a room identifier is neither a positive number nor a non-numeric string, a third-party room identifier refers to a storage account that is not connected, or none of the listed rooms can be added and the existing ones all belong to the other section than `searchArea`")]
+    [SwaggerResponse(403, "The `rooms` list is empty, the listed rooms exist but none of them is a room the caller can read, or only some of them could be added - the group is then created with those")]
+    [SwaggerResponse(404, "None of the listed rooms exists, or a string room identifier does not name a third-party storage")]
+    [SwaggerResponse(500, "A third-party room identifier carries a storage account number beyond the 32-bit range")]
     [HttpPost("")]
     public async Task<RoomGroupDto> AddRoomGroup(RoomGroupRequestDto inDto)
     {
@@ -113,6 +117,7 @@ public class GroupsController(
     /// <path>api/2.0/files/group/{id}</path>
     [Tags("Rooms / Groups")]
     [SwaggerResponse(200, "The room group with the rooms it gathers", typeof(RoomGroupDto))]
+    [SwaggerResponse(404, "The group does not exist or belongs to another account")]
     [HttpGet("{id:int}")]
     public async Task<RoomGroupDto> GetRoomGroupInfo(RoomGroupIdRequestDto inDto)
     {
@@ -138,6 +143,10 @@ public class GroupsController(
     /// <path>api/2.0/files/group/{id}</path>
     [Tags("Rooms / Groups")]
     [SwaggerResponse(200, "The room group as stored after the change", typeof(RoomGroupDto))]
+    [SwaggerResponse(400, "The request body cannot be read or names its members with every one of them null, the new name is blank or longer than 128 characters, a room identifier is neither a positive number nor a non-numeric string, a third-party room identifier refers to a storage account that is not connected, or none of the rooms of `roomsToAdd` can be added and the existing ones all belong to the other section than the group")]
+    [SwaggerResponse(403, "The rooms of `roomsToAdd`, or the rooms of `roomsToRemove` that are not in the group, exist but none of them is a room the caller can read, or only some of the rooms could be applied - the earlier steps stay applied")]
+    [SwaggerResponse(404, "The group does not exist or belongs to another account, none of the rooms of `roomsToAdd` or of the rooms of `roomsToRemove` that are not in the group exists, or a string room identifier does not name a third-party storage")]
+    [SwaggerResponse(500, "A third-party room identifier carries a storage account number beyond the 32-bit range")]
     [HttpPut("{id:int}")]
     public async Task<RoomGroupDto> UpdateRoomGroup(UpdateRoomGroupRequestDto inDto)
     {
@@ -201,6 +210,8 @@ public class GroupsController(
     /// <path>api/2.0/files/group/{id}/icon</path>
     [Tags("Rooms / Groups")]
     [SwaggerResponse(200, "The room group with the new icon", typeof(RoomGroupDto))]
+    [SwaggerResponse(400, "The request body cannot be read, or the icon is neither a built-in cover nor an empty string")]
+    [SwaggerResponse(404, "The group does not exist or belongs to another account")]
     [HttpPost("{id:int}/icon")]
     public async Task<RoomGroupDto> ChangeRoomGroupIcon(RoomGroupIconRequestDto inDto)
     {
@@ -226,6 +237,7 @@ public class GroupsController(
     /// <collection>list</collection>
     [Tags("Rooms / Groups")]
     [SwaggerResponse(200, "The room groups of the calling account", typeof(IAsyncEnumerable<RoomGroupDto>))]
+    [SwaggerResponse(400, "The `searchArea` names a section other than `Active` and `Forms`")]
     [HttpGet("")]
     public async IAsyncEnumerable<RoomGroupDto> GetRoomGroups(RoomGroupsRequestDto inDto)
     {
@@ -255,6 +267,8 @@ public class GroupsController(
     /// <path>api/2.0/files/group/{id}</path>
     [Tags("Rooms / Groups")]
     [SwaggerResponse(200, "The room group no longer exists; the body is empty and the rooms it gathered are left as they were")]
+    [SwaggerResponse(403, "The group belongs to another account")]
+    [SwaggerResponse(404, "The group does not exist")]
     [HttpDelete("{id:int}")]
     public async Task DeleteRoomGroup(RoomGroupIdRequestDto inDto)
     {

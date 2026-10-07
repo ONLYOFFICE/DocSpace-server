@@ -925,7 +925,11 @@ Poruka o izuzetku: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Zdravo, $UserName!
 
-Obaveštavamo vas da automatska obnova vašeg kupljenog tarifnog plana ili usluga nije uspešno izvršena. Ljubazno vas molimo da ga obnovite ručno.
+Obaveštavamo vas da automatska obnova vašeg kupljenog tarifnog plana ili usluga nije uspešno izvršena:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Ljubazno vas molimo da ga obnovite ručno.
 
 $OrangeButton
 

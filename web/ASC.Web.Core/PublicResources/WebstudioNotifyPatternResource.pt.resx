@@ -936,7 +936,11 @@ Mensagem de exceção: $Message</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Olá, $UserName!
 
-Estamos a contactá-lo para informar que a renovação automática do plano tarifário ou dos serviços adquiridos não pôde ser concluída. Solicitamos que o renove manualmente.
+Estamos a contactá-lo para informar que a renovação automática do plano tarifário ou dos serviços adquiridos não pôde ser concluída:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Solicitamos que o renove manualmente.
 
 $OrangeButton
 

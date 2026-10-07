@@ -208,12 +208,12 @@ public static class WebhooksPayloadExtension
                 entity.HasOne(e => e.Config)
                     .WithMany()
                     .HasForeignKey(e => e.ConfigId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasOne(e => e.Tenant)
                     .WithMany()
                     .HasForeignKey(e => e.TenantId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

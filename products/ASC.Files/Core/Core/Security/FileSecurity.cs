@@ -1212,7 +1212,19 @@ public class FileSecurity(
             }
         }
 
-
+        if (room is { FolderType: FolderType.FillingFormsRoom } && file is { IsPdf: true } &&
+            !parentFolders.Exists(f => DocSpaceHelper.IsFormsFillingSystemFolder(f.FolderType)))
+        {
+            var shareRecord = await GetShareRecordAsync(room, userId, isDocSpaceAdmin, shares);
+            if (shareRecord is { Share: FileShare.FillForms })
+            {
+                var properties = await cacheFileDao.GetProperties(file.Id);
+                if (properties?.FormFilling?.StartFilling != true)
+                {
+                    return false;
+                }
+            }
+        }
 
         if (folder is { FolderType: FolderType.AiRoom } &&
             action is FilesSecurityActions.Create or
