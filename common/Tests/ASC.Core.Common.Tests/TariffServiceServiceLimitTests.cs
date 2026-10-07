@@ -162,6 +162,34 @@ public class TariffServiceServiceLimitTests
         handler.CallCount.Should().Be(1);
     }
 
+    [Fact]
+    public async Task DeleteServiceLimit_LimitOfThisPortal_DeletesAndReturnsIt()
+    {
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request => request.Method == HttpMethod.Delete ? new HttpResponseMessage(HttpStatusCode.NoContent) : ServiceLimitResponse(OwnAccountNumber));
+
+        var deleted = await tariffService.DeleteServiceLimitAsync(TenantId, 42);
+
+        deleted.Should().NotBeNull();
+        deleted.Id.Should().Be(42);
+        handler.CallCount.Should().Be(2);
+        handler.LastMethod.Should().Be(HttpMethod.Delete);
+    }
+
+    [Fact]
+    public async Task DeleteServiceLimit_LimitOfAnotherPortal_ReturnsNullWithoutDeleting()
+    {
+        // A limit is deleted by its global ID, so the owner is checked first and a foreign limit is never deleted.
+        var (tariffService, handler) = await CreateTariffServiceAsync(new Balance { AccountNumber = OwnAccountNumber, SubAccounts = [] },
+            request => request.Method == HttpMethod.Delete ? new HttpResponseMessage(HttpStatusCode.NoContent) : ServiceLimitResponse(OtherAccountNumber));
+
+        var deleted = await tariffService.DeleteServiceLimitAsync(TenantId, 42);
+
+        deleted.Should().BeNull();
+        handler.CallCount.Should().Be(1);
+        handler.LastMethod.Should().Be(HttpMethod.Get);
+    }
+
     private static async Task<(TariffService tariffService, AccountingClientTests.CapturingHandler handler)> CreateTariffServiceAsync(
         Balance balance, Func<HttpRequestMessage, HttpResponseMessage> responder)
     {

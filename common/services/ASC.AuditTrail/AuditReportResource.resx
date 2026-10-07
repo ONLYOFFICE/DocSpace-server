@@ -276,6 +276,15 @@
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
     <value>Customer service limit updated: {0}</value>
   </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Customer service limit deleted: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Customer service limits set for users: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Customer service limits of all users disabled: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Customer subscription updated: {0}</value>
   </data>

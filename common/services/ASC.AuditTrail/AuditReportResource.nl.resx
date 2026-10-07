@@ -249,6 +249,15 @@
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
     <value>Uitgavenlimiet voor dienst bijgewerkt: {0}</value>
   </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Uitgavenlimiet voor dienst verwijderd: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Uitgavenlimieten voor dienst ingesteld voor gebruikers: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Uitgavenlimieten voor dienst uitgeschakeld voor alle gebruikers: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Klantabonnement bijgewerkt: {0}</value>
   </data>

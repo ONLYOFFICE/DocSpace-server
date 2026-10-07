@@ -579,6 +579,61 @@ public class UpdateServiceLimitRequestDto
     public bool? Enabled { get; init; }
 }
 
+/// <summary>
+/// The spending limit to set on a wallet service for each of several portal users.
+/// </summary>
+/// <example>
+/// {
+///   "serviceName": "ai-tools",
+///   "userIds": ["3f2504e0-4f89-11d3-9a0c-0305e82c3301", "7c9e6679-7425-40de-944b-e07fc1f90ae7"],
+///   "amountValue": 40,
+///   "period": "Day"
+/// }
+/// </example>
+public class SetParticipantServiceLimitsRequestDto
+{
+    /// <summary>
+    /// The pay-as-you-go wallet service to limit, named the way the billing catalogue names it, such as `ai-tools`.
+    /// Take the value from the `serviceName` field of `GET api/2.0/portal/payment/walletservices`; the match ignores
+    /// case.
+    /// </summary>
+    /// <example>ai-tools</example>
+    [Required]
+    [StringLength(255)]
+    public string ServiceName { get; init; }
+
+    /// <summary>
+    /// The IDs of the portal users the limit is set for, as returned in `id` by the people operations.
+    /// </summary>
+    /// <example>["3f2504e0-4f89-11d3-9a0c-0305e82c3301", "7c9e6679-7425-40de-944b-e07fc1f90ae7"]</example>
+    [Required]
+    [MinLength(1)]
+    public List<Guid> UserIds { get; init; }
+
+    /// <summary>
+    /// The most money the service may cost each user per period, in the currency of the service; the currency is the
+    /// one the service is sold in and cannot be chosen. Zero blocks the service completely.
+    /// </summary>
+    /// <example>40</example>
+    [Range(0, ServiceLimitConstraints.MaxAmountValue)]
+    public decimal? AmountValue { get; init; }
+
+    /// <summary>
+    /// The largest quantity of the service each user may consume per period, in the unit the service is sold in, such
+    /// as pages, requests or gigabytes. Zero blocks the service completely.
+    /// </summary>
+    /// <example>1000</example>
+    [Range(0, int.MaxValue)]
+    public int? QuantityValue { get; init; }
+
+    /// <summary>
+    /// The calendar period the thresholds apply to, counted in UTC.
+    /// </summary>
+    /// <example>Day</example>
+    [EnumDataType(typeof(ServiceLimitPeriod))]
+    public ServiceLimitPeriod Period { get; init; } = ServiceLimitPeriod.Day;
+}
+
 
 /// <summary>
 /// Deserializes a value that historically was a single JSON string but is now a list:

@@ -243,6 +243,15 @@
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
     <value>서비스 지출 한도가 업데이트되었습니다: {0}</value>
   </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>서비스 지출 한도가 삭제되었습니다: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>사용자의 서비스 지출 한도가 설정되었습니다: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>모든 사용자의 서비스 지출 한도가 비활성화되었습니다: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>고객 구독이 업데이트되었습니다: {0}</value>
   </data>

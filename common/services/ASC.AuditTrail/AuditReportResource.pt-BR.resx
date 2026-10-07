@@ -249,6 +249,15 @@
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
     <value>Limite de gastos do serviço atualizado: {0}</value>
   </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Limite de gastos do serviço excluído: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Limites de gastos do serviço definidos para usuários: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Limites de gastos do serviço desativados para todos os usuários: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Assinatura do cliente atualizada: {0}</value>
   </data>

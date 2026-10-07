@@ -249,6 +249,15 @@
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
     <value>Το όριο δαπανών υπηρεσίας ενημερώθηκε: {0}</value>
   </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Το όριο δαπανών υπηρεσίας διαγράφηκε: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Ορίστηκαν όρια δαπανών υπηρεσίας για χρήστες: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Απενεργοποιήθηκαν τα όρια δαπανών υπηρεσίας για όλους τους χρήστες: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Η συνδρομή πελάτη ενημερώθηκε: {0}</value>
   </data>

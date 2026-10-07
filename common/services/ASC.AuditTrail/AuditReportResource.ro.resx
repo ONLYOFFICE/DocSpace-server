@@ -249,6 +249,15 @@
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
     <value>Limita de cheltuieli pentru serviciu a fost actualizată: {0}</value>
   </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Limita de cheltuieli pentru serviciu a fost ștearsă: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Limitele de cheltuieli pentru serviciu au fost setate pentru utilizatori: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Limitele de cheltuieli pentru serviciu au fost dezactivate pentru toți utilizatorii: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Abonamentrul clientului a fost actualizat: {0}</value>
   </data>

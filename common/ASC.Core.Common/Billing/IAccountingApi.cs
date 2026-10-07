@@ -90,4 +90,13 @@ public interface IAccountingApi
 
     [Put("/serviceLimit")]
     Task<ServiceLimit> UpdateServiceLimitAsync([Body] ServiceLimitUpdateOperation data);
+
+    [Put("/serviceLimit/participants")]
+    Task<int> SetParticipantServiceLimitsAsync([Body] ServiceLimitParticipantSetOperation data);
+
+    [Put("/serviceLimit/customer/{portalId}/{serviceName}/participants/disable")]
+    Task<int> DisableParticipantServiceLimitsAsync(string portalId, string serviceName);
+
+    [Delete("/serviceLimit/{id}")]
+    Task DeleteServiceLimitAsync(int id);
 }

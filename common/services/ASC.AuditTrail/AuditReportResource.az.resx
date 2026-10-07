@@ -243,6 +243,15 @@
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
     <value>Xidmət üzrə xərc limiti yeniləndi: {0}</value>
   </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Xidmət üzrə xərc limiti silindi: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>İstifadəçilər üçün xidmət üzrə xərc limitləri təyin edildi: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Bütün istifadəçilər üçün xidmət üzrə xərc limitləri söndürüldü: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Müştəri abunəliyi yeniləndi: {0}</value>
   </data>

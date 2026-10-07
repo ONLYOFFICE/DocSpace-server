@@ -255,6 +255,15 @@
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
     <value>Изменен лимит расходов на услугу: {0}</value>
   </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Удален лимит расходов на услугу: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Установлены лимиты расходов на услугу для пользователей: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Отключены лимиты расходов на услугу для всех пользователей: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Подписка клиента обновлена: {0}</value>
   </data>

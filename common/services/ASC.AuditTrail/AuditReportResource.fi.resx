@@ -249,6 +249,15 @@
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
     <value>Palvelun kulutusraja päivitetty: {0}</value>
   </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Palvelun kulutusraja poistettu: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Palvelun kulutusrajat asetettu käyttäjille: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Palvelun kulutusrajat poistettu käytöstä kaikilta käyttäjiltä: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Asiakkaan tilaus päivitetty: {0}</value>
   </data>

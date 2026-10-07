@@ -1054,6 +1054,15 @@ public enum MessageAction
     [Description("Customer service limit updated")]
     CustomerServiceLimitUpdated = 6111,
 
+    [Description("Customer service limits set for users")]
+    CustomerServiceLimitsSet = 6112,
+
+    [Description("Customer service limits of users disabled")]
+    CustomerServiceLimitsDisabled = 6113,
+
+    [Description("Customer service limit deleted")]
+    CustomerServiceLimitDeleted = 6114,
+
     #endregion
 
     #region others

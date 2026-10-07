@@ -189,6 +189,37 @@ public class AccountingClient(IOptions<AccountingConfiguration> configuration, I
         return await accountingApi.UpdateServiceLimitAsync(new ServiceLimitUpdateOperation(id, amountValue, quantityValue, enabled));
     }
 
+    /// <summary>
+    /// Sets the same service limit for each of the participants, overwriting the limits they already have, and
+    /// returns the number of limits set.
+    /// </summary>
+    public async Task<int> SetParticipantServiceLimitsAsync(string portalId, string serviceName, List<string> customerParticipantNames,
+        decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.SetParticipantServiceLimitsAsync(new ServiceLimitParticipantSetOperation(portalId, serviceName,
+            customerParticipantNames, amountValue, quantityValue, period));
+    }
+
+    /// <summary>
+    /// Disables every limit set on the service for the participants of the customer and returns the number of limits
+    /// disabled.
+    /// </summary>
+    public async Task<int> DisableParticipantServiceLimitsAsync(string portalId, string serviceName)
+    {
+        EnsureConfigured();
+
+        return await accountingApi.DisableParticipantServiceLimitsAsync(portalId, serviceName);
+    }
+
+    public async Task DeleteServiceLimitAsync(int id)
+    {
+        EnsureConfigured();
+
+        await accountingApi.DeleteServiceLimitAsync(id);
+    }
+
     private static string GetServicePricesCacheKey(string serviceName, bool active)
     {
         return $"accounting-service-prices-{serviceName}-{active}";
@@ -1387,6 +1418,14 @@ public record ServiceLimitUpdateOperation(
     decimal? AmountValue,
     int? QuantityValue,
     bool? Enabled);
+
+public record ServiceLimitParticipantSetOperation(
+    string CustomerName,
+    string ServiceName,
+    List<string> CustomerParticipantNames,
+    decimal? AmountValue,
+    int? QuantityValue,
+    ServiceLimitPeriod Period);
 
 public record SessionOpenOperation(
     string CustomerName,

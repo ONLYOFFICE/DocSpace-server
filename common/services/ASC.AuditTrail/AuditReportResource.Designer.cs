@@ -547,6 +547,33 @@ namespace ASC.AuditTrail {
         }
 
         /// <summary>
+        ///   Looks up a localized string similar to Customer service limit deleted: {0}.
+        /// </summary>
+        public static string CustomerServiceLimitDeleted {
+            get {
+                return ResourceManager.GetString("CustomerServiceLimitDeleted", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Customer service limits of all users disabled: {0}.
+        /// </summary>
+        public static string CustomerServiceLimitsDisabled {
+            get {
+                return ResourceManager.GetString("CustomerServiceLimitsDisabled", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Customer service limits set for users: {0}.
+        /// </summary>
+        public static string CustomerServiceLimitsSet {
+            get {
+                return ResourceManager.GetString("CustomerServiceLimitsSet", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Customer service limit updated: {0}.
         /// </summary>
         public static string CustomerServiceLimitUpdated {

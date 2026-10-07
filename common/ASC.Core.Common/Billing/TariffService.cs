@@ -1677,6 +1677,44 @@ public class TariffService(
         return await accountingClient.UpdateServiceLimitAsync(id, amountValue, quantityValue, enabled);
     }
 
+    public async Task<int> SetParticipantServiceLimitsAsync(int tenantId, string serviceName, List<string> customerParticipantNames, decimal? amountValue, int? quantityValue, ServiceLimitPeriod period)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        return await accountingClient.SetParticipantServiceLimitsAsync(portalId, serviceName, customerParticipantNames, amountValue, quantityValue, period);
+    }
+
+    public async Task<int> DisableParticipantServiceLimitsAsync(int tenantId, string serviceName)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+        return await accountingClient.DisableParticipantServiceLimitsAsync(portalId, serviceName);
+    }
+
+    /// <summary>
+    /// Deletes the service limit only when it belongs to the tenant, and returns the limit as it was before the
+    /// deletion; returns null when there is no such limit of the tenant.
+    /// </summary>
+    public async Task<ServiceLimit> DeleteServiceLimitAsync(int tenantId, int id)
+    {
+        var serviceLimit = await GetServiceLimitAsync(tenantId, id);
+        if (serviceLimit == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            await accountingClient.DeleteServiceLimitAsync(id);
+        }
+        catch (AccountingNotFoundException exception)
+        {
+            // Deleted by a concurrent request between the owner check and the deletion.
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
+            return null;
+        }
+
+        return serviceLimit;
+    }
+
     #endregion
 
 

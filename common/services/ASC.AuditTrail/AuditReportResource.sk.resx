@@ -249,6 +249,15 @@
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
     <value>Limit výdavkov na službu bol aktualizovaný: {0}</value>
   </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>Limit výdavkov na službu bol odstránený: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>Limity výdavkov na službu boli nastavené pre používateľov: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>Limity výdavkov na službu boli vypnuté pre všetkých používateľov: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>Predplatné zákazníka bolo aktualizované: {0}</value>
   </data>

@@ -249,6 +249,15 @@
   <data name="CustomerServiceLimitUpdated" xml:space="preserve">
     <value>تم تحديث حد الإنفاق على الخدمة: {0}</value>
   </data>
+  <data name="CustomerServiceLimitDeleted" xml:space="preserve">
+    <value>تم حذف حد الإنفاق على الخدمة: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsSet" xml:space="preserve">
+    <value>تم تعيين حدود الإنفاق على الخدمة للمستخدمين: {0}</value>
+  </data>
+  <data name="CustomerServiceLimitsDisabled" xml:space="preserve">
+    <value>تم تعطيل حدود الإنفاق على الخدمة لجميع المستخدمين: {0}</value>
+  </data>
   <data name="CustomerSubscriptionUpdated" xml:space="preserve">
     <value>تم تحديث اشتراك العميل: {0}</value>
   </data>

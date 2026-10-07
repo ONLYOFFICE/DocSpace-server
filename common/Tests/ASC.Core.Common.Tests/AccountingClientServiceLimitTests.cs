@@ -265,6 +265,66 @@ public class AccountingClientServiceLimitTests
     }
 
     [Fact]
+    public async Task SetParticipantServiceLimits_PutsBodyWithParticipantsAndReturnsCount()
+    {
+        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.OK, "2"));
+
+        var count = await client.SetParticipantServiceLimitsAsync("portal-1", "ai-tools",
+            ["3f2504e0-4f89-11d3-9a0c-0305e82c3301", "7c9e6679-7425-40de-944b-e07fc1f90ae7"], 40m, null, ServiceLimitPeriod.Day);
+
+        handler.LastMethod.Should().Be(HttpMethod.Put);
+        handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit/participants");
+
+        using var body = JsonDocument.Parse(handler.LastRequestBody!);
+        var root = body.RootElement;
+        root.GetProperty("customerName").GetString().Should().Be("portal-1");
+        root.GetProperty("serviceName").GetString().Should().Be("ai-tools");
+        root.GetProperty("customerParticipantNames").EnumerateArray().Select(name => name.GetString())
+            .Should().Equal("3f2504e0-4f89-11d3-9a0c-0305e82c3301", "7c9e6679-7425-40de-944b-e07fc1f90ae7");
+        root.GetProperty("amountValue").GetDecimal().Should().Be(40m);
+        root.TryGetProperty("quantityValue", out _).Should().BeFalse();
+        root.GetProperty("period").GetString().Should().Be("Day");
+
+        count.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task DisableParticipantServiceLimits_PutsToDisablePathAndReturnsCount()
+    {
+        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.OK, "5"));
+
+        var count = await client.DisableParticipantServiceLimitsAsync("portal-1", "ai-tools");
+
+        handler.LastMethod.Should().Be(HttpMethod.Put);
+        handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit/customer/portal-1/ai-tools/participants/disable");
+        count.Should().Be(5);
+    }
+
+    [Fact]
+    public async Task DeleteServiceLimit_SendsDeleteToIdPath()
+    {
+        var (client, handler) = AccountingClientTests.CreateClient(_ => new HttpResponseMessage(HttpStatusCode.NoContent));
+
+        await client.DeleteServiceLimitAsync(42);
+
+        handler.LastMethod.Should().Be(HttpMethod.Delete);
+        handler.LastUri!.AbsolutePath.Should().Be("/api/serviceLimit/42");
+        handler.CallCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task DeleteServiceLimit_UnknownId_ThrowsNotFoundWithoutRetry()
+    {
+        var (client, handler) = AccountingClientTests.CreateClient(_ => AccountingClientTests.Json(HttpStatusCode.NotFound,
+            """{"title":"Resource not found","status":404}"""));
+
+        var act = async () => await client.DeleteServiceLimitAsync(999999);
+
+        await act.Should().ThrowExactlyAsync<AccountingNotFoundException>();
+        handler.CallCount.Should().Be(1);
+    }
+
+    [Fact]
     public async Task GetCustomerServiceLimit_NoLimitSet_ThrowsNotFoundWithoutRetry()
     {
         // The accounting service answers 404 when the customer has no limit on the service. That is a definitive
