@@ -36,8 +36,8 @@ namespace ASC.Web.Studio.Core.Notify;
 /// <summary>
 /// Applies the retention policy to one portal on the daily run: works out its category, asks
 /// <see cref="PortalRetentionSchedule"/> what today brings, and tells the owner, blocks the portal or
-/// removes it when that is the answer. Nothing is stored per portal - see the schedule for why none of
-/// it is needed.
+/// removes it when that is the answer. The only thing stored per portal is the category it was blocked
+/// under (<see cref="PortalRetentionBlockSettings"/>); everything else the schedule needs is already there.
 /// </summary>
 [Scope]
 public class PortalRetentionJob(
@@ -93,6 +93,20 @@ public class PortalRetentionJob(
             return blocked;
         }
 
+        // A blocked portal keeps the category it was blocked under: the letter about the block named the
+        // deletion date of that category, and a balance that changes afterwards must not bring it forward.
+        if (blocked && (await settingsManager.LoadAsync<PortalRetentionBlockSettings>(tenant.Id)).Category is { } blockedCategory)
+        {
+            var blockedDecision = PortalRetentionSchedule.Decide(Options.For(blockedCategory), tenant.StatusChangeDate, policyStart, tenant.StatusChangeDate.Date, context.NowDate);
+
+            if (blockedDecision.Step == PortalRetentionStep.None || await IsForbiddenDomainAsync(tenant))
+            {
+                return true;
+            }
+
+            return await ActAsync(context, blockedCategory, blockedDecision, client, senderName, blocked);
+        }
+
         var anchor = await GetAnchorAsync(context, formerPaying);
         DateTime? blockedOn = blocked ? tenant.StatusChangeDate.Date : null;
 
@@ -112,10 +126,8 @@ public class PortalRetentionJob(
             return blocked;
         }
 
-        if (await tenantManager.IsForbiddenDomainAsync(tenant.Alias))
+        if (await IsForbiddenDomainAsync(tenant))
         {
-            logger.InformationForbiddenDomain(tenant.Id, tenant.GetTenantDomain(coreSettings));
-
             return blocked;
         }
 
@@ -134,6 +146,17 @@ public class PortalRetentionJob(
         {
             return blocked;
         }
+
+        return await ActAsync(context, category, decision, client, senderName, blocked);
+    }
+
+    /// <summary>
+    /// Carries out the decision of the day. Returns what <see cref="ApplyAsync"/> returns: true when the
+    /// portal is to be left alone for the rest of the run.
+    /// </summary>
+    private async Task<bool> ActAsync(PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName, bool blocked)
+    {
+        var tenant = context.Tenant;
 
         logger.InformationDecision(tenant.Id, tenant.GetTenantDomain(coreSettings), category, decision.Step, decision.Letter, decision.BlockOn, decision.DeleteOn);
 
@@ -157,6 +180,19 @@ public class PortalRetentionJob(
             default:
                 return blocked;
         }
+    }
+
+    /// <summary>A portal on a forbidden domain is kept alive on purpose and never touched by the policy.</summary>
+    private async Task<bool> IsForbiddenDomainAsync(Tenant tenant)
+    {
+        if (!await tenantManager.IsForbiddenDomainAsync(tenant.Alias))
+        {
+            return false;
+        }
+
+        logger.InformationForbiddenDomain(tenant.Id, tenant.GetTenantDomain(coreSettings));
+
+        return true;
     }
 
     /// <summary>
@@ -195,6 +231,9 @@ public class PortalRetentionJob(
     private async Task BlockAsync(PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName)
     {
         var tenant = context.Tenant;
+
+        // Before the status, so a blocked portal always finds the category its letter was written for.
+        await settingsManager.SaveAsync(new PortalRetentionBlockSettings { Category = category }, tenant.Id);
 
         tenant.SetStatus(TenantStatus.Blocked);
         await tenantManager.SaveTenantAsync(tenant);

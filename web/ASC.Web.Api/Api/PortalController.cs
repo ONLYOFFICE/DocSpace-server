@@ -1150,6 +1150,9 @@ public class PortalController(
         await tenantManager.SaveTenantAsync(tenant);
         messageService.Send(MessageAction.PortalUnblocked);
 
+        // The category of the block is over with it; the next block records its own.
+        await settingsManager.SaveAsync(new PortalRetentionBlockSettings());
+
         var current = await settingsManager.LoadAsync<CspSettings>();
         await cspSettingsHelper.SaveAsync(current.Domains, false);
         await cspSettingsHelper.UpdateBaseDomainAsync();

@@ -161,6 +161,9 @@ public class PortalRetentionLifecycleTests
         using (var scope = await OpenScopeAsync(stack, portal.TenantId))
         {
             (await HasStatusAsync(scope, portal.TenantId, TenantStatus.Active)).Should().BeTrue("the owner's link brings the portal back");
+
+            (await scope.ServiceProvider.GetRequiredService<SettingsManager>().LoadAsync<PortalRetentionBlockSettings>(portal.TenantId)).Category
+                .Should().BeNull("the category of the block goes with the block");
         }
 
         (await PollAsync(() => http.GetAsync("api/2.0/settings/cultures", cancellationToken), HttpStatusCode.OK))
@@ -237,5 +240,39 @@ public class PortalRetentionLifecycleTests
 
         client.Sent.Should().ContainSingle()
             .Which.Action.Should().BeOfType<SaasOwnerRetentionDeletedNotifyAction>("the owner hears of the deletion");
+    }
+
+    [Fact]
+    public async Task BlockedPortal_KeepsTheRetentionOfItsBlock_WhenItsWalletEmpties()
+    {
+        var stack = await GetStackAsync();
+
+        using var portal = await stack.CreatePortalAsync(TestContext.Current.CancellationToken);
+        using var scope = await OpenScopeAsync(stack, portal.TenantId);
+
+        var services = scope.ServiceProvider;
+        var settingsManager = services.GetRequiredService<SettingsManager>();
+        var tenant = await BlockAsync(scope, portal.TenantId, new RecordingNotifyClient());
+
+        (await settingsManager.LoadAsync<PortalRetentionBlockSettings>(portal.TenantId)).Category
+            .Should().Be(PortalRetentionCategory.Free, "the block records the category its letter was written for");
+
+        // As if it had been blocked with money on its wallet: its letter promised ninety days. The stack has
+        // no accounting service, so from here on its wallet reads as empty.
+        await settingsManager.SaveAsync(new PortalRetentionBlockSettings { Category = PortalRetentionCategory.FreeWithBalance }, portal.TenantId);
+
+        var client = new RecordingNotifyClient();
+        var later = DateTime.UtcNow.Date.AddDays(30);
+
+        var logger = new RecordingLogger<PortalRetentionJob>();
+        var job = ActivatorUtilities.CreateInstance<PortalRetentionJob>(services, logger);
+
+        var leaveAlone = await job.ApplyAsync(Free(tenant, later, later.AddYears(-1)), later.AddYears(-2), client, _senderName);
+
+        leaveAlone.Should().BeTrue("a blocked portal gets none of the ordinary letters");
+        logger.Messages.Should().BeEmpty("thirty days into a ninety-day retention is not a day of its schedule");
+        client.Sent.Should().BeEmpty();
+
+        (await HasStatusAsync(scope, portal.TenantId, TenantStatus.Blocked)).Should().BeTrue("the free schedule's thirty days do not apply to it");
     }
 }
