@@ -280,7 +280,7 @@
     <value>Dosja e kërkuar nuk u gjet</value>
   </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
-    <value>Ofruesi i pavlefshëm</value>
+    <value>ID e dosjes është e pavlefshme</value>
   </data>
   <data name="ErrorMessage_InvalidThirdPartyFolder" xml:space="preserve">
     <value>Nuk është e mundur të përdoret kjo dosje për të ruajtur dhomën</value>
