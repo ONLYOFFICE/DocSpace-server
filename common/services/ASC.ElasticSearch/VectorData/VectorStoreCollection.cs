@@ -147,7 +147,7 @@ public class VectorStoreCollection<TRecord>(
             Fields = lexicalFields
         };
 
-        QueryContainer knnQuery = new KnnQuery
+        var knnQuery = new KnnQuery
         {
             Field = vectorField,
             Vector = searchQuery.Vector,
@@ -160,7 +160,7 @@ public class VectorStoreCollection<TRecord>(
             var filter = translator.Translate(searchQuery.Filter);
 
             lexicalQuery = new BoolQuery { Must = [lexicalQuery], Filter = [filter] };
-            knnQuery = new BoolQuery { Must = [knnQuery], Filter = [filter] };
+            knnQuery.Filter = filter;
         }
 
         var request = new SearchRequest(name)
