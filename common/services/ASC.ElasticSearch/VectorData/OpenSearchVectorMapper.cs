@@ -62,31 +62,15 @@ internal static class OpenSearchVectorMapper
             throw new InvalidOperationException("The data type must contain at least one vector type");
         }
 
-        var walker = new PropertyWalker(model, new KnnVectorPropertyVisitor());
-        var properties = walker.GetProperties();
-
         foreach (var property in vectorProperties)
         {
             if (!IsVectorPropertyTypeValid(property.PropertyType))
             {
                 throw new NotSupportedException($"{property.PropertyType} is not supported. Supported types: {SupportedVectorTypes}");
             }
-            
-            var propertyExp = Expression.Property(Expression.Parameter(model), property);
-            var name = new PropertyName(propertyExp);
-
-            properties[name] = new KnnVectorProperty
-            {
-                Dimension = dimension,
-                Method = new KnnMethod
-                {
-                    Name = "hnsw",
-                    Engine = "faiss"
-                }
-            };
         }
 
-        return properties;
+        return new PropertyWalker(model, new KnnVectorPropertyVisitor(dimension)).GetProperties();
     }
     
     private static bool IsVectorPropertyTypeValid(Type type)
