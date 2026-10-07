@@ -31,7 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Notify.Tests.Periodic;
+namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
 /// The query the retention job walks portals with. It runs against the stack's real database, so it

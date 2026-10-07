@@ -72,6 +72,9 @@ global using ASC.Web.Studio.Utility;
 
 global using Autofac;
 
+global using DocSpace.API.SDK.Api.Settings;
+global using DocSpace.API.SDK.Client;
+
 global using FluentAssertions;
 
 global using MailKit.Net.Smtp;

@@ -31,13 +31,13 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.Notify.Tests.Periodic;
+namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
 /// How the retention job reads a portal - its category, the day its count starts, whether it is ours at
 /// all - against the stack's real services. The portals are built in memory and every case stops at a
 /// letter, so no portal in the stack is ever blocked or removed here; that is
-/// <see cref="Retention.PortalRetentionLifecycleTests"/>, on portals of its own.
+/// <see cref="PortalRetentionLifecycleTests"/>, on portals of its own.
 /// </summary>
 public class PortalRetentionJobTests
 {

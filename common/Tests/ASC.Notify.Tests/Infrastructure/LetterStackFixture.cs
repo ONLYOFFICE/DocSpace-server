@@ -48,6 +48,8 @@ namespace ASC.Notify.Tests.Infrastructure;
 /// </remarks>
 public sealed class LetterStackFixture : AspireHostFixture<LetterPortalClients>
 {
+    private static readonly JsonSerializerOptions _apiSystemJsonOptions = new(JsonSerializerDefaults.Web);
+
     private MailPitInbox? _inbox;
 
     // Held rather than passed straight into the inbox: MailPitInbox does not take ownership of the
@@ -138,7 +140,7 @@ public sealed class LetterStackFixture : AspireHostFixture<LetterPortalClients>
 
         var body = JsonSerializer.Serialize(
             new { TenantId = -1, Key = "BaseDomain", Value = LetterEnvironment.BaseDomain },
-            new JsonSerializerOptions(JsonSerializerDefaults.Web));
+            _apiSystemJsonOptions);
 
         using var request = new HttpRequestMessage(HttpMethod.Post, "settings/save")
         {

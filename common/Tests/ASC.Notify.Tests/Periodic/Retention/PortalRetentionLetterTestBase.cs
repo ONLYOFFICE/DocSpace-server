@@ -42,11 +42,11 @@ namespace ASC.Notify.Tests.Periodic.Retention;
 public abstract class PortalRetentionLetterTestBase<TAction> : LetterTestBase<TAction>
     where TAction : PortalRetentionNotifyAction
 {
-    protected static readonly DateTime DueOn = new(2026, 8, 4);
+    protected static DateTime DueOn { get; } = new(2026, 8, 4);
 
-    protected static readonly DateTime BlockOn = new(2026, 11, 2);
+    protected static DateTime BlockOn { get; } = new(2026, 11, 2);
 
-    protected static readonly DateTime DeleteOn = new(2026, 12, 3);
+    protected static DateTime DeleteOn { get; } = new(2026, 12, 3);
 
     protected abstract PortalRetentionCategory Category { get; }
 

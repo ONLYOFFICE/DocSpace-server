@@ -95,19 +95,32 @@ public class PortalRetentionLifecycleTests
         return tenants.Any(t => t.Id == tenantId);
     }
 
-    /// <summary>Asks Web.Api a question, again and again until the answer is the one expected or time is up.</summary>
-    private static async Task<HttpStatusCode> PollAsync(Func<Task<HttpResponseMessage>> request, HttpStatusCode expected)
+    /// <summary>
+    /// Asks Web.Api a question, again and again until the answer is the one expected or time is up, and
+    /// returns the status of the last answer - the SDK's own for a success, its <see cref="ApiException"/>'s
+    /// for a refusal.
+    /// </summary>
+    private static async Task<HttpStatusCode> PollAsync(Func<CancellationToken, Task<IApiResponse>> request, HttpStatusCode expected)
     {
         // The status reaches Web.Api through its tenant cache, which another process has just invalidated.
         var deadline = DateTime.UtcNow.AddSeconds(15);
 
         while (true)
         {
-            using var response = await request();
+            HttpStatusCode status;
 
-            if (response.StatusCode == expected || DateTime.UtcNow >= deadline)
+            try
             {
-                return response.StatusCode;
+                status = (await request(TestContext.Current.CancellationToken)).StatusCode;
+            }
+            catch (ApiException exception)
+            {
+                status = (HttpStatusCode)exception.ErrorCode;
+            }
+
+            if (status == expected || DateTime.UtcNow >= deadline)
+            {
+                return status;
             }
 
             await Task.Delay(500, TestContext.Current.CancellationToken);
@@ -141,19 +154,21 @@ public class PortalRetentionLifecycleTests
             confirm = new Uri(link).Query.TrimStart('?');
         }
 
-        var http = portal.WebApiHttpClient;
+        var settingsApi = portal.CommonSettingsApi;
 
-        (await PollAsync(() => http.GetAsync("api/2.0/settings/cultures", cancellationToken), HttpStatusCode.NotFound))
+        (await PollAsync(async token => await settingsApi.GetSupportedCulturesWithHttpInfoAsync(token), HttpStatusCode.NotFound))
             .Should().Be(HttpStatusCode.NotFound, "a blocked portal answers nothing but what its blocked page needs");
 
-        (await PollAsync(() => http.GetAsync("api/2.0/settings/colortheme", cancellationToken), HttpStatusCode.OK))
+        (await PollAsync(async token => await settingsApi.GetPortalColorThemeWithHttpInfoAsync(token), HttpStatusCode.OK))
             .Should().Be(HttpStatusCode.OK, "the blocked page is drawn in the portal's own colors");
 
+        // Raw for now: the pinned DocSpace.API.SDK predates PUT api/2.0/portal/unblock. Move these calls to
+        // the SDK once it is regenerated.
         using (var unblock = new HttpRequestMessage(HttpMethod.Put, "api/2.0/portal/unblock"))
         {
             unblock.Headers.Add("confirm", confirm);
 
-            using var response = await http.SendAsync(unblock, cancellationToken);
+            using var response = await portal.WebApiHttpClient.SendAsync(unblock, cancellationToken);
 
             response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync(cancellationToken));
         }
@@ -166,7 +181,7 @@ public class PortalRetentionLifecycleTests
                 .Should().BeNull("the category of the block goes with the block");
         }
 
-        (await PollAsync(() => http.GetAsync("api/2.0/settings/cultures", cancellationToken), HttpStatusCode.OK))
+        (await PollAsync(async token => await settingsApi.GetSupportedCulturesWithHttpInfoAsync(token), HttpStatusCode.OK))
             .Should().Be(HttpStatusCode.OK, "an unblocked portal answers as before");
     }
 
@@ -188,6 +203,7 @@ public class PortalRetentionLifecycleTests
             confirm = new Uri(link).Query.TrimStart('?');
         }
 
+        // Raw: the pinned SDK predates PUT api/2.0/portal/unblock.
         using var unblock = new HttpRequestMessage(HttpMethod.Put, "api/2.0/portal/unblock");
         unblock.Headers.Add("confirm", confirm);
 
@@ -208,6 +224,7 @@ public class PortalRetentionLifecycleTests
 
         using var portal = await stack.CreatePortalAsync(cancellationToken);
 
+        // Raw: the pinned SDK predates PUT api/2.0/portal/unblock.
         using var response = await portal.WebApiHttpClient.PutAsync("api/2.0/portal/unblock", null, cancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);

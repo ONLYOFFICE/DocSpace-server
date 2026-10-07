@@ -34,11 +34,20 @@
 namespace ASC.Notify.Tests.Infrastructure;
 
 /// <summary>
-/// The letter suite's portal bundle, which adds nothing to the base.
+/// The letter suite's portal bundle.
 ///
 /// A letter test calls no HTTP API: it resolves the real notify action out of the in-process service
-/// graph (<see cref="LetterHost"/>) and renders it. What it needs from a portal is the tenant id, the
-/// owner and the alias — all of which <see cref="PortalClientsBase"/> already carries — so there are
-/// no typed API clients to wire up here.
+/// graph (<see cref="LetterHost"/>) and renders it, and needs only the tenant id, the owner and the alias
+/// that <see cref="PortalClientsBase"/> already carries. The one exception is the retention lifecycle,
+/// which checks what Web.Api still answers for a blocked portal - through <see cref="CommonSettingsApi"/>.
 /// </summary>
-public sealed class LetterPortalClients(PortalContext context) : PortalClientsBase(context);
+public sealed class LetterPortalClients : PortalClientsBase
+{
+    public LetterPortalClients(PortalContext context) : base(context)
+    {
+        CommonSettingsApi = new CommonSettingsApi(WebApiHttpClient, new Configuration { BasePath = BasePathOf(ResourceNames.WebApi) });
+    }
+
+    /// <summary>The portal's common settings in ASC.Web.Api.</summary>
+    public CommonSettingsApi CommonSettingsApi { get; }
+}
