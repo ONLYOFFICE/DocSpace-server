@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Tələb olunan qovluq tapılmadı</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Qovluq ID-si etibarsızdır</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Etibarsız provayder</value>
   </data>
@@ -618,8 +621,5 @@ docx, xlsx, pptx ilə ən yüksək uyğunluq.</value>
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Qovluq metadatasında axtarış</value>
-  </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Qovluq ID-si etibarsızdır</value>
   </data>
 </root>

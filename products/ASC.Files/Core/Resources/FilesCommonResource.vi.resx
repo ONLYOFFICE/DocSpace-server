@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Không tìm thấy thư mục yêu cầu</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>ID thư mục không hợp lệ</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Nhà cung cấp không hợp lệ</value>
   </data>
@@ -609,9 +612,6 @@ Khả năng tương thích cao nhất với docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
     <value>Phòng đã chứa thư mục .ai</value>
-  </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>ID thư mục không hợp lệ</value>
   </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Không thể ngắt kết nối bộ nhớ trong khi phòng đang sử dụng. Hãy xóa phòng thay thế</value>

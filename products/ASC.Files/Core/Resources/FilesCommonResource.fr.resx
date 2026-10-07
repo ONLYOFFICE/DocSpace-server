@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Le dossier requis est introuvable</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>ID de dossier invalide</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Fournisseur non valide</value>
   </data>
@@ -618,8 +621,5 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Rechercher dans les métadonnées du dossier</value>
-  </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>ID de dossier invalide</value>
   </data>
 </root>

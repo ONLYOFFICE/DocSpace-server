@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>La carpeta solicitada no es encontrada</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>ID de carpeta no válido</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Proveedor no válido</value>
   </data>
@@ -609,9 +612,6 @@
   </data>
   <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
     <value>La sala ya contiene la carpeta .ai</value>
-  </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>ID de carpeta no válido</value>
   </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>El almacenamiento no puede desconectarse mientras una sala lo utiliza. Elimine la sala</value>

@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Dosja e kërkuar nuk u gjet</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>ID e dosjes është e pavlefshme</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Ofruesi i pavlefshëm</value>
   </data>
@@ -618,8 +621,5 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Kërko në meta të dhënat e dosjes</value>
-  </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>ID e dosjes është e pavlefshme</value>
   </data>
 </root>

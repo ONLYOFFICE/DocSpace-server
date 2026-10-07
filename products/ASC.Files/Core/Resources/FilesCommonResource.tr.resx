@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Gerekli klasör bulunamadı</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Geçersiz klasör kimliği</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Geçersiz sağlayıcı</value>
   </data>
@@ -606,9 +609,6 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   </data>
   <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
     <value>Oda zaten .ai klasörünü içeriyor</value>
-  </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Geçersiz klasör kimliği</value>
   </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Bir oda kullanırken depolama alanının bağlantısı kesilemez. Bunun yerine odayı silin</value>

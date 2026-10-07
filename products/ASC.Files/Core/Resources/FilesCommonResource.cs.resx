@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Požadovaná složka nebyla nalezena</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Neplatné ID složky</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Neplatný poskytovatel</value>
   </data>
@@ -618,8 +621,5 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Hledat v metadatech složky</value>
-  </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Neplatné ID složky</value>
   </data>
 </root>

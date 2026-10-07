@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Požadovaný priečinok nebol nájdený</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Neplatný identifikátor priečinka</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Neplatný poskytovateľ</value>
   </data>
@@ -606,9 +609,6 @@
   </data>
   <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
     <value>Miestnosť už obsahuje priečinok .ai</value>
-  </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Neplatný identifikátor priečinka</value>
   </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Úložisko nemožno odpojiť, kým ho miestnosť používa. Namiesto toho miestnosť odstráňte</value>

@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Potrebne mape ni bilo mogoče najti</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Neveljaven ID mape</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Napačen ponudnik</value>
   </data>
@@ -606,9 +609,6 @@ Najvišja združljivost z docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
     <value>Soba že vsebuje mapo .ai</value>
-  </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Neveljaven ID mape</value>
   </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Shrambe ni mogoče odklopiti, medtem ko jo uporablja soba. Namesto tega izbrišite sobo</value>

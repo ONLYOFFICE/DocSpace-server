@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>A pasta necessária não foi encontrada</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>ID de pasta inválido</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Fornecedor inválido</value>
   </data>
@@ -609,9 +612,6 @@ Alta compatibilidade com docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
     <value>A sala já contém a pasta .ai</value>
-  </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>ID de pasta inválido</value>
   </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>O armazenamento não pode ser desligado enquanto uma sala o utiliza. Elimine a sala</value>

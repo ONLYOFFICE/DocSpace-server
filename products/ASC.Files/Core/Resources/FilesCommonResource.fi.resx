@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Vaadittua kansiota ei löydy</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Virheellinen kansion tunnus</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Virheellinen palveluntarjoaja</value>
   </data>
@@ -618,8 +621,5 @@ Paras yhteensopivuus docx:n, xlsx:n, pptx:n kanssa.</value>
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Hae kansion metatiedoista</value>
-  </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Virheellinen kansion tunnus</value>
   </data>
 </root>

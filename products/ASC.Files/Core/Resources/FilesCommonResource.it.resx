@@ -276,6 +276,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Non è stata trovata la cartella richiesta</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>ID cartella non valido</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Fornitore non valido</value>
   </data>
@@ -618,8 +621,5 @@ Massima compatibilità con docx, xlsx, pptx.</value>
   </data>
   <data name="IndexTitleFileMetadata" xml:space="preserve">
     <value>Cerca nei metadati del file</value>
-  </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>ID cartella non valido</value>
   </data>
 </root>

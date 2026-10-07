@@ -285,6 +285,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>The required folder was not found</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Invalid folder ID</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Invalid provider</value>
   </data>
@@ -619,8 +622,5 @@ Highest compatibility with docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>An AI agent's instruction cannot be longer than {0} characters</value>
-  </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Invalid folder ID</value>
   </data>
 </root>

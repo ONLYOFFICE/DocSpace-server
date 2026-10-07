@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Ο απαιτούμενος φάκελος δεν βρέθηκε</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Μη έγκυρο αναγνωριστικό φακέλου</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Μη έγκυρος πάροχος</value>
   </data>
@@ -618,8 +621,5 @@
   </data>
   <data name="IndexTitleFolderMetadata" xml:space="preserve">
     <value>Αναζήτηση σε μεταδεδομένα φακέλου</value>
-  </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Μη έγκυρο αναγνωριστικό φακέλου</value>
   </data>
 </root>

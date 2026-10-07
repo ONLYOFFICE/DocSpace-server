@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Pieprasīta mape nebija atrasta</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Nederīgs mapes ID</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Nederīgs pakalpojuma sniedzējs</value>
   </data>
@@ -609,9 +612,6 @@ Visaugstākā saderība ar docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
     <value>Telpa jau satur mapi .ai</value>
-  </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Nederīgs mapes ID</value>
   </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Krātuvi nevar atvienot, kamēr to izmanto telpa. Tā vietā dzēsiet telpu</value>

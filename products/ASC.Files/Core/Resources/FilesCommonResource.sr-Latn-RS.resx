@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Potreban folder nije pronađen</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Nevažeći ID fascikle</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Nevažeći provajder</value>
   </data>
@@ -606,9 +609,6 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
     <value>Soba već sadrži fasciklu .ai</value>
-  </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Nevažeći ID fascikle</value>
   </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Skladište ne može biti isključeno dok ga soba koristi. Umesto toga izbrišite sobu</value>

@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Żądany folder nie został odnaleziony</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Nieprawidłowy identyfikator folderu</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Nieprawidłowy dostawca</value>
   </data>
@@ -609,9 +612,6 @@ Najwyższy poziom kompatybilności z docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
     <value>Pokój zawiera już folder .ai</value>
-  </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Nieprawidłowy identyfikator folderu</value>
   </data>
   <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
     <value>Nie można odłączyć magazynu, gdy pokój go używa. Zamiast tego usuń pokój</value>
