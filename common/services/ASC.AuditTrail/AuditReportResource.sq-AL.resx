@@ -1263,4 +1263,34 @@
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>Serveri MCP {0} i agjentit AI u përditësua</value>
   </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Filloi caktimi i meta të dhënave në kaskadë: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Fusha e meta të dhënave u krijua: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Fusha e meta të dhënave u fshi: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Fusha e meta të dhënave u përditësua: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Modeli i meta të dhënave u caktua: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Modeli i meta të dhënave u krijua: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Modeli i meta të dhënave u fshi: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Modeli i meta të dhënave u hoq nga caktimi: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Modeli i meta të dhënave u përditësua: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Vlerat e meta të dhënave u përditësuan: {0}</value>
+  </data>
 </root>

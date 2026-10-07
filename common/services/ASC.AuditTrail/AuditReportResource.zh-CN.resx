@@ -1263,4 +1263,34 @@
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>AI 代理的 MCP 服务器 {0} 已更新</value>
   </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>元数据级联分配已启动：{0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>元数据字段已创建：{0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>元数据字段已删除：{0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>元数据字段已更新：{0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>元数据模板已分配：{0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>元数据模板已创建：{0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>元数据模板已删除：{0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>元数据模板分配已取消：{0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>元数据模板已更新：{0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>元数据值已更新：{0}</value>
+  </data>
 </root>

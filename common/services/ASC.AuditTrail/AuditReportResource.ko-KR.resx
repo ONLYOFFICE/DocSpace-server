@@ -1263,4 +1263,34 @@
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>AI 에이전트의 MCP 서버 {0}이(가) 업데이트되었습니다</value>
   </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>메타데이터 계단식 할당이 시작되었습니다: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>메타데이터 필드가 생성되었습니다: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>메타데이터 필드가 삭제되었습니다: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>메타데이터 필드가 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>메타데이터 템플릿이 할당되었습니다: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>메타데이터 템플릿이 생성되었습니다: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>메타데이터 템플릿이 삭제되었습니다: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>메타데이터 템플릿 할당이 해제되었습니다: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>메타데이터 템플릿이 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>메타데이터 값이 업데이트되었습니다: {0}</value>
+  </data>
 </root>

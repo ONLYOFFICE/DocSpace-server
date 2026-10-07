@@ -1890,4 +1890,18 @@ $OrangeButton
 
 $TrulyYours</value>
   </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Sveiki, $UserName!
+
+Sazināmies ar jums, lai informētu, ka automātiskā papildināšana netiek atbalstīta jūsu pašreizējai maksājumu metodei: nauda nonāk ${LetterLogoText} Wallet tikai pēc bankas pārskaitījuma norēķināšanās, tāpēc atlikumu nevar papildināt uzreiz.
+
+Tāpēc automātiskā papildināšana ir izslēgta. Lai izvairītos no apmaksāto pakalpojumu pārtraukuma, lūdzu, papildiniet maka atlikumu manuāli vai pārslēdzieties uz maksājumu metodi, kas atbalsta automātisko papildināšanu.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Nepieciešama darbība: Automātiskā papildināšana nav pieejama jūsu ${LetterLogoText} Wallet</value>
+  </data>
 </root>

@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>A pasta solicitada não foi encontrada</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>ID de pasta inválido</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Provedor inválido</value>
   </data>
@@ -601,10 +604,22 @@
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>A instrução de um agente de IA não pode ter mais de {0} caracteres</value>
   </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>ID de pasta inválido</value>
-  </data>
   <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
     <value>Esta ação está disponível apenas em uma sala privada</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Saídas do chat</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>A sala já contém a pasta .ai</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>O armazenamento não pode ser desconectado enquanto uma sala o utiliza. Exclua a sala</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Pesquisar nos metadados do arquivo</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Pesquisar nos metadados da pasta</value>
   </data>
 </root>
