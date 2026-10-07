@@ -363,6 +363,10 @@ public class UserConfigDto
     public string CustomerId { get; set; }
 }
 
+/// <summary>
+/// The AI settings the editor opens with. They follow the portal-wide AI access setting, so every document of the
+/// portal gets the same value.
+/// </summary>
 public class AiConfigDto
 {
     /// <summary>
