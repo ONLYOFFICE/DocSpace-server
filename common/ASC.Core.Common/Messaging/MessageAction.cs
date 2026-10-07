@@ -1048,9 +1048,17 @@ public enum MessageAction
     [Description("MCP server of AI agent updated")]
     UpdatedServerOfAgent = 6109,
 
+    /// <summary>
+    /// The retention policy blocked the portal after a long period without use. Written by the system,
+    /// so the event names no user.
+    /// </summary>
     [Description("Portal blocked")]
     PortalBlocked = 6110,
 
+    /// <summary>
+    /// A portal blocked by the retention policy was made active again with the owner's unblocking link,
+    /// on behalf of the owner.
+    /// </summary>
     [Description("Portal unblocked")]
     PortalUnblocked = 6111,
 

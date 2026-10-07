@@ -61,10 +61,12 @@ public enum TenantStatus
     Encryption = 6,
 
     /// <summary>
-    /// Blocked by the retention policy after a long period without use: its users can no longer sign in
-    /// and its content is kept until the deletion date announced to the owner. The owner of a portal
-    /// that has paid before can unblock it from the link in the letter; a free portal is unblocked
-    /// through support. A blocked portal that nobody unblocks is deleted at the end of the retention period.
+    /// Blocked by the retention policy after a long period without use: its users can no longer sign in,
+    /// the API answers only what the blocked page and the unblocking need, and its content is kept until
+    /// the deletion date announced to the owner. A portal that has paid before or still has money on its
+    /// wallet becomes active again with the unblocking link from the letters about the block
+    /// (`PUT api/2.0/portal/unblock`); any other is made active again by support. A blocked portal that
+    /// nobody brings back is deleted at the end of its retention period.
     /// </summary>
     [Description("Blocked")]
     Blocked = 7

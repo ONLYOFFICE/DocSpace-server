@@ -158,8 +158,9 @@ public class TenantDto
     public bool Spam { get; set; }
 
     /// <summary>
-    /// The lifecycle state of the portal. Anything other than active means most operations are refused for the
-    /// moment, because the portal is being transferred, restored, encrypted or removed.
+    /// The lifecycle state of the portal. Anything other than active means most operations are refused: the
+    /// portal is being transferred, restored, encrypted or removed, its owner has deactivated it, or the
+    /// retention policy has blocked it after a long period without use.
     /// </summary>
     /// <example>Active</example>
     public TenantStatus Status { get; internal set; }
