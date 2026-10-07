@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Potreban folder nije pronađen</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Nevažeći ID fascikle</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Nevažeći provajder</value>
   </data>
@@ -600,5 +603,23 @@ Najviša kompatibilnost sa docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>Instrukcija AI agenta ne može biti duža od {0} znakova</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Izlazi čata</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>Soba već sadrži fasciklu .ai</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Skladište ne može biti isključeno dok ga soba koristi. Umesto toga izbrišite sobu</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Ova radnja je dostupna samo u privatnoj sobi</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Pretraži u metapodacima datoteke</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Pretraži u metapodacima fascikle</value>
   </data>
 </root>

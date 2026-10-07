@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Gerekli klasör bulunamadı</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Geçersiz klasör kimliği</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Geçersiz sağlayıcı</value>
   </data>
@@ -600,5 +603,23 @@ docx, xlsx, pptx ile en yüksek uyumluluk.</value>
   </data>
   <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
     <value>Bir AI ajanının talimatı {0} karakterden uzun olamaz</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Sohbet çıktıları</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>Oda zaten .ai klasörünü içeriyor</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Bir oda kullanırken depolama alanının bağlantısı kesilemez. Bunun yerine odayı silin</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Bu işlem yalnızca özel bir odada gerçekleştirilebilir</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Dosya meta verilerinde ara</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Klasör meta verilerinde ara</value>
   </data>
 </root>

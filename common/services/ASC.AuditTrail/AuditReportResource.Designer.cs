@@ -2014,6 +2014,96 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Metadata cascade assignment started: {0}.
+        /// </summary>
+        public static string MetadataCascadeStarted {
+            get {
+                return ResourceManager.GetString("MetadataCascadeStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Metadata field created: {0}.
+        /// </summary>
+        public static string MetadataFieldCreated {
+            get {
+                return ResourceManager.GetString("MetadataFieldCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Metadata field deleted: {0}.
+        /// </summary>
+        public static string MetadataFieldDeleted {
+            get {
+                return ResourceManager.GetString("MetadataFieldDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Metadata field updated: {0}.
+        /// </summary>
+        public static string MetadataFieldUpdated {
+            get {
+                return ResourceManager.GetString("MetadataFieldUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Metadata template assigned: {0}.
+        /// </summary>
+        public static string MetadataTemplateAssigned {
+            get {
+                return ResourceManager.GetString("MetadataTemplateAssigned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Metadata template created: {0}.
+        /// </summary>
+        public static string MetadataTemplateCreated {
+            get {
+                return ResourceManager.GetString("MetadataTemplateCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Metadata template deleted: {0}.
+        /// </summary>
+        public static string MetadataTemplateDeleted {
+            get {
+                return ResourceManager.GetString("MetadataTemplateDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Metadata template unassigned: {0}.
+        /// </summary>
+        public static string MetadataTemplateUnassigned {
+            get {
+                return ResourceManager.GetString("MetadataTemplateUnassigned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Metadata template updated: {0}.
+        /// </summary>
+        public static string MetadataTemplateUpdated {
+            get {
+                return ResourceManager.GetString("MetadataTemplateUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Metadata values updated: {0}.
+        /// </summary>
+        public static string MetadataValuesUpdated {
+            get {
+                return ResourceManager.GetString("MetadataValuesUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Module.
         /// </summary>
         public static string ModuleCol {
@@ -2329,7 +2419,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The report shows the {0} most recent of {1} events. Download it in CSV format to get all of them.
+        ///   Looks up a localized string similar to The report shows the {0} most recent of {1} events. Download it in CSV format to get all of them..
         /// </summary>
         public static string ReportRowLimitNote {
             get {
