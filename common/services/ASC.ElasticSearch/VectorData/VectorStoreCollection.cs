@@ -58,6 +58,9 @@ public class VectorStoreCollection<TRecord>(
     // ReSharper disable once StaticMemberInGenericType
     private static readonly IndexSettings _settings = new(new Dictionary<string, object> { { "index.knn", true } });
 
+    // ReSharper disable once StaticMemberInGenericType
+    private static readonly PropertyInfo[] _vectorProperties = OpenSearchVectorMapper.GetVectorProperties(typeof(TRecord));
+
     public async Task EnsureCollectionExistsAsync(CancellationToken cancellationToken = default)
     {
         EnsureClientConfigured();
@@ -118,7 +121,7 @@ public class VectorStoreCollection<TRecord>(
             name,
             "semantic_search",
             async () => await openSearchClient!.SearchAsync<TRecord>(
-                new SearchRequest(name) { Query = query, Size = top },
+                new SearchRequest(name) { Query = query, Size = top, Source = WithoutVectors() },
                 cancellationToken));
 
         foreach (var hit in response.Hits)
@@ -147,7 +150,7 @@ public class VectorStoreCollection<TRecord>(
             Fields = lexicalFields
         };
 
-        QueryContainer knnQuery = new KnnQuery
+        var knnQuery = new KnnQuery
         {
             Field = vectorField,
             Vector = searchQuery.Vector,
@@ -160,14 +163,15 @@ public class VectorStoreCollection<TRecord>(
             var filter = translator.Translate(searchQuery.Filter);
 
             lexicalQuery = new BoolQuery { Must = [lexicalQuery], Filter = [filter] };
-            knnQuery = new BoolQuery { Must = [knnQuery], Filter = [filter] };
+            knnQuery.Filter = filter;
         }
 
         var request = new SearchRequest(name)
         {
             Size = searchQuery.Top,
             SearchPipeline = HybridSearchPipeline.Name,
-            Query = new HybridQuery { Queries = [lexicalQuery, knnQuery] }
+            Query = new HybridQuery { Queries = [lexicalQuery, knnQuery] },
+            Source = WithoutVectors()
         };
 
         var response = await OperationHandler.RunAsync<ISearchResponse<TRecord>, OpenSearchClientException>(
@@ -250,6 +254,15 @@ public class VectorStoreCollection<TRecord>(
             async () => await openSearchClient!.Indices.ExistsAsync(name, ct: cancellationToken));
 
         return response.ApiCall.HttpStatusCode != 404 && response.Exists;
+    }
+
+    // Restoring a vector from k-NN derived source fails with "Already closed: MemorySegmentIndexInput" after
+    // segment merges, so search responses must not ask for it (OpenSearch 3.5, fixed in 3.6):
+    // https://github.com/opensearch-project/k-NN/issues/3191
+    // https://github.com/opensearch-project/k-NN/pull/3138
+    private static SourceFilter WithoutVectors()
+    {
+        return new SourceFilter { Excludes = _vectorProperties };
     }
 
     private void EnsureClientConfigured()
