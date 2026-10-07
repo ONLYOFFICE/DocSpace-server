@@ -1115,24 +1115,23 @@ public class PortalController(
 
     /// <remarks>
     /// Unblocks this portal after the retention policy blocked it for a long period without use, so its users can
-    /// sign in again and all of its rooms, files and accounts are there as before. It is reached only with the
-    /// unblocking link that the retention letters mail to the owner of a portal that has paid before or still has
-    /// money left on its wallet: that link authorizes the call in place of an authentication token, and no ordinary
-    /// token is accepted here. The call is mutating and idempotent - it makes a blocked portal active, records the
-    /// unblocking in the audit trail and refreshes the portal's Content Security Policy, and a portal that is not
-    /// blocked is left as it is. The retention count of the portal starts again from the unblocking. Nothing is
-    /// returned in the body; read the new state from `status` in `GET api/2.0/portal`. A portal whose paid tariff
-    /// lapsed is still unpaid once unblocked, so renewing the subscription is the next step. A free portal is not
-    /// unblocked this way - its owner is directed to support - and a portal already deleted at the end of its
-    /// retention period cannot be brought back by this call. To bring back a portal its owner deactivated, use
-    /// `PUT api/2.0/portal/continue` instead.
+    /// sign in again and find their rooms and files as before. The portal must be blocked. The call is
+    /// authorized only by the unblocking link in the retention letters of a portal that has paid before or still has
+    /// money on its wallet; the link is issued for the owner and also reaches the payer. No ordinary
+    /// token is accepted. The call is mutating: it makes the portal active, records the unblocking in the audit trail
+    /// and refreshes its Content Security Policy, and the retention count starts again from the unblocking.
+    /// Nothing is returned in the body; read the new state from `status` in `GET api/2.0/portal`. A portal whose
+    /// paid tariff lapsed stays unpaid once unblocked, so renewing the subscription is the next step. A free portal
+    /// is not unblocked this way, and a portal deleted at the end of its retention period cannot be brought back.
+    /// To bring back a portal its owner deactivated, use `PUT api/2.0/portal/continue` instead. An invalid link, or
+    /// a portal that is not blocked, a repeated call included, is refused with 401.
     /// </remarks>
     /// <summary>
     /// Unblock a portal
     /// </summary>
     /// <path>api/2.0/portal/unblock</path>
     [Tags("Portal / Settings")]
-    [SwaggerResponse(200, "The portal is active again and its users can sign in, or it was not blocked and is unchanged; the response carries no content")]
+    [SwaggerResponse(200, "The portal is active again and its users can sign in; the response carries no content")]
     [AllowBlocked]
     [AllowNotPayment]
     [HttpPut("unblock")]

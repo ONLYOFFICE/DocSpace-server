@@ -104,7 +104,7 @@ public enum ConfirmType
 
     /// <summary>
     /// Unblocks a portal the retention policy has blocked. The link is mailed to the owner with the
-    /// letters about the block and stays valid until the portal is deleted.
+    /// letters about the block. It has no expiry date but is accepted only while the portal is blocked.
     /// </summary>
     [Description("Portal unblock")]
     PortalUnblock

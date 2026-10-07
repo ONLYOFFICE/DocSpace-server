@@ -287,6 +287,14 @@ public class EmailValidationKeyModelHelper(
             case ConfirmType.PortalRemove:
             case ConfirmType.PortalContinue:
             case ConfirmType.PortalUnblock:
+                // The unblocking link does not expire, so it is honoured only while there is a block to lift:
+                // on an active portal it must not keep working as a credential of the owner.
+                if (type == ConfirmType.PortalUnblock && tenantManager.GetCurrentTenant().Status != TenantStatus.Blocked)
+                {
+                    checkKeyResult = ValidationResult.Invalid;
+                    break;
+                }
+
                 if (!await CheckOwnerRights(email))
                 {
                     checkKeyResult = ValidationResult.Invalid;

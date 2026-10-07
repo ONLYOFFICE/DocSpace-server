@@ -168,7 +168,7 @@ public class PortalRetentionLifecycleTests
     }
 
     [Fact]
-    public async Task UnblockLink_DoesNothingToAPortalThatIsNotBlocked()
+    public async Task UnblockLink_IsRefusedOnAPortalThatIsNotBlocked()
     {
         var stack = await GetStackAsync();
         var cancellationToken = TestContext.Current.CancellationToken;
@@ -190,7 +190,7 @@ public class PortalRetentionLifecycleTests
 
         using var response = await portal.WebApiHttpClient.SendAsync(unblock, cancellationToken);
 
-        response.StatusCode.Should().Be(HttpStatusCode.OK, "unblocking is idempotent");
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized, "the link only opens a blocked portal");
 
         using var after = await OpenScopeAsync(stack, portal.TenantId);
 
