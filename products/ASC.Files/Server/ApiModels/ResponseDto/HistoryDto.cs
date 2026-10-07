@@ -144,8 +144,7 @@ public class HistoryApiHelper(
     TenantUtil tenantUtil,
     AuditInterpreter interpreter,
     AuditEventMapper mapper,
-    CoreBaseSettings coreBaseSettings,
-    TenantManager tenantManager)
+    CoreBaseSettings coreBaseSettings)
 {
     public IAsyncEnumerable<HistoryDto> GetFileHistoryAsync(int fileId, ApiDateTime fromDate, ApiDateTime toDate, int offset, int count)
     {
@@ -258,9 +257,7 @@ public class HistoryApiHelper(
 
     public async Task DemandFolderHistoryReportPermissionAsync(int folderId)
     {
-        if (!coreBaseSettings.Standalone
-        && (!SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast())
-            || !(await tenantManager.GetCurrentTenantQuotaAsync()).Audit))
+        if (!coreBaseSettings.Standalone && !SetupInfo.IsVisibleSettings(ManagementType.LoginHistory.ToStringFast()))
         {
             throw new BillingException(Resource.ErrorNotAllowedOption);
         }

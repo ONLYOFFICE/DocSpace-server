@@ -111,8 +111,9 @@ public class FoldersControllerInternal(
     /// of the period. `from` and `to` limit the exported period; leaving both out exports the whole history. While a
     /// report for the same folder and caller is still running, this call joins it and answers with the running task
     /// instead of starting a second one, so retrying is safe. The caller needs read access to the folder and may not be
-    /// a guest, and the portal plan has to include the audit feature - otherwise the call is refused, with 403 for the
-    /// access rule and 404 for a folder that does not exist. Only a portal administrator gets the address, browser and
+    /// a guest - otherwise the call is refused with 403, and a folder that does not exist with 404; the report is
+    /// available on every pricing plan, and 402 comes only when the login history and audit trail section is turned
+    /// off for the portal. Only a portal administrator gets the address, browser and
     /// platform columns. Give up a running report with `DELETE api/2.0/files/folder/{folderId}/log/report`.
     /// </remarks>
     /// <summary>
@@ -121,7 +122,7 @@ public class FoldersControllerInternal(
     /// <path>api/2.0/files/folder/{folderId}/log/report</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The queued report task", typeof(DocumentBuilderTaskDto))]
-    [SwaggerResponse(402, "The portal's pricing plan has no audit option, or the login history and audit trail section is not enabled")]
+    [SwaggerResponse(402, "The login history and audit trail section is turned off for this portal")]
     [SwaggerResponse(403, "The caller may not export the history of this folder")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpPost("folder/{folderId:int}/log/report")]
@@ -157,8 +158,8 @@ public class FoldersControllerInternal(
     /// `resultFileName` and `resultFileUrl` name the file that was saved in the caller's "My documents". An empty
     /// answer means there is no report for this folder and caller, either because none was started or because a
     /// finished one has already been picked up by an earlier poll. The caller needs read access to the folder and may
-    /// not be a guest, and the portal plan has to include the audit feature; a caller who fails the access rule is
-    /// answered with 403 and a folder that does not exist with 404. The call is read-only, and each caller sees only
+    /// not be a guest; a caller who fails the access rule is answered with 403, a folder that does not exist with 404,
+    /// and a portal with the login history and audit trail section turned off with 402. The call is read-only, and each caller sees only
     /// their own report.
     /// </remarks>
     /// <summary>
@@ -169,7 +170,7 @@ public class FoldersControllerInternal(
     /// passed to the operation that started the report.</param>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The state of the report task, or nothing when there is none", typeof(DocumentBuilderTaskDto))]
-    [SwaggerResponse(402, "The portal's pricing plan has no audit option, or the login history and audit trail section is not enabled")]
+    [SwaggerResponse(402, "The login history and audit trail section is turned off for this portal")]
     [SwaggerResponse(403, "The caller may not export the history of this folder")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpGet("folder/{folderId:int}/log/report")]
@@ -191,9 +192,9 @@ public class FoldersControllerInternal(
     /// the answer carries no body, so a following `GET api/2.0/files/folder/{folderId}/log/report` is what shows the
     /// task ending as cancelled. Asking to terminate when nothing is running is accepted and changes nothing, which
     /// makes the call safe to repeat. A report that has already finished is not undone by this call and its file
-    /// stays in "My documents". The caller needs read access to the folder and may not be a guest, and the portal
-    /// plan has to include the audit feature; a caller who fails the access rule is answered with 403 and a folder
-    /// that does not exist with 404. Each caller can only terminate their own report.
+    /// stays in "My documents". The caller needs read access to the folder and may not be a guest; a caller who fails
+    /// the access rule is answered with 403, a folder that does not exist with 404, and a portal with the login history
+    /// and audit trail section turned off with 402. Each caller can only terminate their own report.
     /// </remarks>
     /// <summary>
     /// Terminate the folder history report generation
@@ -203,7 +204,7 @@ public class FoldersControllerInternal(
     /// was passed to the operation that started the report.</param>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The request to stop the report was accepted")]
-    [SwaggerResponse(402, "The portal's pricing plan has no audit option, or the login history and audit trail section is not enabled")]
+    [SwaggerResponse(402, "The login history and audit trail section is turned off for this portal")]
     [SwaggerResponse(403, "The caller may not export the history of this folder")]
     [SwaggerResponse(404, "The folder does not exist")]
     [HttpDelete("folder/{folderId:int}/log/report")]
