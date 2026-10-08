@@ -31,8 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using System.Collections.Concurrent;
-
 namespace ASC.Web.Api.Models;
 
 /// <summary>
@@ -188,12 +186,21 @@ public class EmployeeDtoHelper(
         result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
         result.Avatar = await _userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
 
-        if (result.Id != Guid.Empty)
+        // The profile link is a people search by email, so it would hand a guest the email of someone else
+        // (bug 81093); a guest cannot open the people list anyway.
+        if (result.Id != Guid.Empty && !await IsGuestViewingOtherAsync(userInfo.Id))
         {
             var profileUrl = await commonLinkUtility.GetUserProfileAsync(userInfo.Id);
             result.ProfileUrl = commonLinkUtility.GetFullAbsolutePath(profileUrl);
         }
 
         return result;
+    }
+
+    private async Task<bool> IsGuestViewingOtherAsync(Guid userId)
+    {
+        var currentId = _authContext.CurrentAccount.ID;
+
+        return currentId != userId && await _userManager.IsGuestAsync(currentId);
     }
 }
