@@ -818,7 +818,7 @@ $TrulyYours</value>
 
 Unless it is unblocked, the portal and all its data will be deleted on that date.
 
-To unblock it, open "Unblock the portal":"$URL1". The link does not expire, so it can also be forwarded to the owner.</value>
+If the owner asks to keep it, make the portal active again before that date.</value>
   </data>
   <data name="pattern_saas_owner_retention_blocked" xml:space="preserve">
     <value>h1.Your space is blocked, but nothing is lost yet

@@ -149,7 +149,7 @@ public class PortalRetentionLifecycleTests
 
             // The link the letters carry for a portal that may be unblocked from them.
             var owner = await scope.ServiceProvider.GetRequiredService<UserManager>().GetUsersAsync(tenant.OwnerId);
-            var link = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>().GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalUnblock);
+            var link = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>().GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalUnblock, CommonLinkUtility.GetPortalUnblockKeyPostfix(tenant));
 
             confirm = new Uri(link).Query.TrimStart('?');
         }
@@ -214,6 +214,41 @@ public class PortalRetentionLifecycleTests
         using var after = await OpenScopeAsync(stack, portal.TenantId);
 
         (await HasStatusAsync(after, portal.TenantId, TenantStatus.Active)).Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task UnblockLink_OfAnotherBlock_IsRefused()
+    {
+        var stack = await GetStackAsync();
+        var cancellationToken = TestContext.Current.CancellationToken;
+
+        using var portal = await stack.CreatePortalAsync(cancellationToken);
+
+        string confirm;
+
+        using (var scope = await OpenScopeAsync(stack, portal.TenantId))
+        {
+            var tenant = await BlockAsync(scope, portal.TenantId, new RecordingNotifyClient());
+
+            // The link a letter about an earlier block carried: the same owner, the day of that block.
+            var owner = await scope.ServiceProvider.GetRequiredService<UserManager>().GetUsersAsync(tenant.OwnerId);
+            var earlierBlock = tenant.StatusChangeDate.AddDays(-120).ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+            var link = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>().GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalUnblock, earlierBlock);
+
+            confirm = new Uri(link).Query.TrimStart('?');
+        }
+
+        // Raw: the pinned SDK predates PUT api/2.0/portal/unblock.
+        using var unblock = new HttpRequestMessage(HttpMethod.Put, "api/2.0/portal/unblock");
+        unblock.Headers.Add("confirm", confirm);
+
+        using var response = await portal.WebApiHttpClient.SendAsync(unblock, cancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized, "a link opens only the block it was mailed for");
+
+        using var after = await OpenScopeAsync(stack, portal.TenantId);
+
+        (await HasStatusAsync(after, portal.TenantId, TenantStatus.Blocked)).Should().BeTrue();
     }
 
     [Fact]

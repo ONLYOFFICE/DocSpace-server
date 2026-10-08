@@ -218,6 +218,17 @@ public class CommonLinkUtility(
         return GetFullAbsolutePath(GetConfirmationUrlRelative(email, confirmType, postfix, userId));
     }
 
+    /// <summary>
+    /// The postfix of a <see cref="ConfirmType.PortalUnblock"/> key, which ties the link to the block it was
+    /// mailed for: the day the portal's status last changed. The day rather than the moment, because the
+    /// database keeps the moment less precisely than it is set, and the policy blocks a portal at most once
+    /// a day.
+    /// </summary>
+    public static string GetPortalUnblockKeyPostfix(Tenant tenant)
+    {
+        return tenant.StatusChangeDate.ToString("yyyyMMdd", CultureInfo.InvariantCulture);
+    }
+
     public string GetConfirmationUrl(string key, ConfirmType confirmType, Guid userId = default)
     {
         return GetFullAbsolutePath(GetConfirmationUrlRelative(key, confirmType, userId));

@@ -287,9 +287,12 @@ public class EmailValidationKeyModelHelper(
             case ConfirmType.PortalRemove:
             case ConfirmType.PortalContinue:
             case ConfirmType.PortalUnblock:
-                // The unblocking link does not expire, so it is honoured only while there is a block to lift:
-                // on an active portal it must not keep working as a credential of the owner.
-                if (type == ConfirmType.PortalUnblock && tenantManager.GetCurrentTenant().Status != TenantStatus.Blocked)
+                // The unblocking link does not expire, so it is honoured only while there is a block to lift,
+                // and only for the block it was mailed for: on an active portal, or after a later block, it
+                // must not keep working as a credential of the owner.
+                var currentTenant = tenantManager.GetCurrentTenant();
+
+                if (type == ConfirmType.PortalUnblock && currentTenant.Status != TenantStatus.Blocked)
                 {
                     checkKeyResult = ValidationResult.Invalid;
                     break;
@@ -303,8 +306,9 @@ public class EmailValidationKeyModelHelper(
 
                 // The way back is open for as long as there is something to come back to.
                 var validTimeInterval = type is ConfirmType.PortalContinue or ConfirmType.PortalUnblock ? TimeSpan.MaxValue : provider.ValidEmailKeyInterval;
+                var keyPostfix = type == ConfirmType.PortalUnblock ? CommonLinkUtility.GetPortalUnblockKeyPostfix(currentTenant) : "";
 
-                checkKeyResult = provider.ValidateEmailKey(email + type, key, validTimeInterval);
+                checkKeyResult = provider.ValidateEmailKey(email + type + keyPostfix, key, validTimeInterval);
                 break;
 
             case ConfirmType.GuestShareLink:

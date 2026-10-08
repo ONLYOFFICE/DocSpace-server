@@ -1117,7 +1117,7 @@ public class PortalController(
     /// Unblocks this portal after the retention policy blocked it for a long period without use, so its users can
     /// sign in again and find their rooms and files as before. The portal must be blocked. The call is
     /// authorized only by the unblocking link in the retention letters of a portal that has paid before or still has
-    /// money on its wallet; the link is issued for the owner and also reaches the payer. No ordinary
+    /// money on its wallet; the link goes to the owner only and works for the current block. No ordinary
     /// token is accepted. The call is mutating: it makes the portal active, records the unblocking in the audit trail
     /// and refreshes its Content Security Policy, and the retention count starts again from the unblocking.
     /// Nothing is returned in the body; read the new state from `status` in `GET api/2.0/portal`. A portal whose

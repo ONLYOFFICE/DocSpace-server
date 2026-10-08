@@ -34,36 +34,37 @@
 namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
-/// The note to support that the retention policy has blocked a portal
-/// (<c>portal_retention_blocked_to_support</c>): who to call, by when, and the link that unblocks it.
+/// The block of a lapsed portal, as its payer reads it (<c>saas_owner_retention_blocked</c>): the payer is
+/// not the owner, so the letter carries no unblocking link - that link signs its holder in as the owner -
+/// and sends the payer to support instead.
 /// </summary>
-public class PortalRetentionBlockedToSupportLetterTests : LetterTestBase<PortalRetentionBlockedToSupportNotifyAction>
+public class SaasOwnerRetentionBlockedPayerLetterTests : PortalRetentionLetterTestBase<SaasOwnerRetentionBlockedNotifyAction>
 {
-    private const string Domain = "retention-blocked.example.com";
+    protected override PortalRetentionCategory Category => PortalRetentionCategory.FormerPaying;
 
-    private static readonly DateTime _deleteOn = new(2026, 12, 3);
+    protected override PortalRetentionLetter? Letter => PortalRetentionLetter.Blocked;
 
-    protected override Task InitAsync(PortalRetentionBlockedToSupportNotifyAction action, LetterScope scope)
+    protected override string PreviewName(SaasOwnerRetentionBlockedNotifyAction action) => action.ID + "_payer";
+
+    protected override UserInfo Reader(LetterScope scope)
     {
-        action.Init(scope.Recipient, Domain, PortalRetentionCategory.FormerPaying, _deleteOn);
+        var payer = (UserInfo)scope.Recipient.Clone();
+        payer.Id = Guid.NewGuid();
 
-        return Task.CompletedTask;
+        return payer;
     }
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(Domain)
-            .And.Contain(scope.Recipient.Email)
-            .And.Contain(nameof(PortalRetentionCategory.FormerPaying))
-            .And.Contain("2026-12-03", "support reads the date in one format, whatever the culture")
-            .And.NotContain(nameof(ConfirmType.PortalUnblock), "the owner's link signs its holder in as the owner, so support never gets it");
+        letter.Body.Should().Contain(Caption("ButtonContactSupport", scope), "the payer is sent to support")
+            .And.NotContain(Caption("ButtonUnblockPortal", scope))
+            .And.NotContain(nameof(ConfirmType.PortalUnblock), "the owner's link never goes to anyone but the owner");
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        letter.Subject.Should().Be($"{LetterEnvironment.LogoText} has been blocked by the retention policy");
-
-        letter.Body.Should().Contain("Unless it is unblocked, the portal and all its data will be deleted on that date.")
-            .And.Contain("make the portal active again before that date");
+        letter.Body.Should().Contain("has ended, we")
+            .And.Contain("Just get in touch with our support team before")
+            .And.NotContain("Just unblock your space");
     }
 }

@@ -103,9 +103,9 @@ public enum ConfirmType
     GuestShareLink,
 
     /// <summary>
-    /// Unblocks a portal the retention policy has blocked. The link is issued for the owner and goes out
-    /// with the letters about the block - to the owner, and for a portal that has paid before also to the
-    /// payer. It has no expiry date but is accepted only while the portal is blocked.
+    /// Unblocks a portal the retention policy has blocked. The link goes to the owner only, with the
+    /// letters about the block. It has no expiry date but is accepted only while the portal is blocked,
+    /// and only for the block it was mailed for.
     /// </summary>
     [Description("Portal unblock")]
     PortalUnblock

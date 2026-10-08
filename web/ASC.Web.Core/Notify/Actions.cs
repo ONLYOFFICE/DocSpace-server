@@ -1687,8 +1687,6 @@ public abstract class PortalRetentionNotifyAction(
     TenantManager tenantManager)
     : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
-    private readonly UserManager _userManager = userManager;
-
     protected PortalRetentionCategory Category { get; private set; }
 
     protected PortalRetentionDecision Decision { get; private set; }
@@ -1761,18 +1759,21 @@ public abstract class PortalRetentionNotifyAction(
     }
 
     /// <summary>
-    /// The unblocking button, or - for a free portal - the button that sends the owner to support instead.
-    /// The link is the owner's whoever the letter goes to: unblocking is the owner's decision.
+    /// The unblocking button, or the button that sends the reader to support instead. Only the owner of a
+    /// portal that may be unblocked from the letter gets the link: it signs its holder in as the owner, so
+    /// it never goes to anyone else - the payer of a lapsed portal is sent to support like the owner of a
+    /// free one. The link is tied to this block and stops working with the next one.
     /// </summary>
-    protected async Task AddUnblockTagsAsync(PeriodicLetterContext context, CultureInfo culture, List<ITagValue> tags, CommonLinkUtility commonLinkUtility, SettingsManager settingsManager)
+    protected async Task AddUnblockTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags, CommonLinkUtility commonLinkUtility, SettingsManager settingsManager)
     {
-        tags.Add(new TagValue("CanUnblock", CanUnblock ? "True" : "False"));
+        var canUnblock = CanUnblock && user.Id == context.Tenant.OwnerId;
 
-        if (CanUnblock)
+        tags.Add(new TagValue("CanUnblock", canUnblock ? "True" : "False"));
+
+        if (canUnblock)
         {
-            var owner = await _userManager.GetUsersAsync(context.Tenant.OwnerId);
-
-            tags.Add(TagValues.OrangeButton(Resource("ButtonUnblockPortal", culture), commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalUnblock)));
+            tags.Add(TagValues.OrangeButton(Resource("ButtonUnblockPortal", culture),
+                commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PortalUnblock, CommonLinkUtility.GetPortalUnblockKeyPostfix(context.Tenant))));
 
             return;
         }
@@ -1936,7 +1937,7 @@ public sealed class SaasOwnerRetentionBlockedNotifyAction(
         tags.Add(ShortDeadline("DeleteDateShort", Decision.DeleteOn, context, culture));
         tags.Add(new TagValue("Unpaid", FormerPaying ? "True" : "False"));
 
-        await AddUnblockTagsAsync(context, culture, tags, commonLinkUtility, settingsManager);
+        await AddUnblockTagsAsync(context, user, culture, tags, commonLinkUtility, settingsManager);
     }
 }
 
@@ -1972,7 +1973,7 @@ public sealed class SaasOwnerRetentionDeletionReminderNotifyAction(
         // The early reminder is followed by another one; only the final one is the last chance.
         tags.Add(new TagValue("FinalNotice", Decision.Letter == PortalRetentionLetter.FinalDeletionNotice ? "True" : "False"));
 
-        await AddUnblockTagsAsync(context, culture, tags, commonLinkUtility, settingsManager);
+        await AddUnblockTagsAsync(context, user, culture, tags, commonLinkUtility, settingsManager);
     }
 }
 
@@ -2015,13 +2016,12 @@ public sealed class SaasOwnerRetentionDeletedNotifyAction(
 
 /// <summary>
 /// Tells support that the retention policy has blocked a portal that has paid or still has money on its
-/// wallet, so a manager can step in before it is deleted. The letter carries the owner's unblocking link:
-/// support opens it, or forwards it to the owner once they have talked.
+/// wallet, so a manager can step in before it is deleted. It carries no unblocking link: that link signs
+/// its holder in as the owner, so it only ever goes to the owner.
 /// </summary>
 [Scope]
 public sealed class PortalRetentionBlockedToSupportNotifyAction(
     DisplayUserSettingsHelper displayUserSettingsHelper,
-    CommonLinkUtility commonLinkUtility,
     TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "portal_retention_blocked_to_support";
@@ -2043,7 +2043,6 @@ public sealed class PortalRetentionBlockedToSupportNotifyAction(
             new TagValue(CommonTags.UserName, owner.DisplayUserName(displayUserSettingsHelper)),
             new TagValue("Category", category.ToString()),
             new TagValue("DeleteDate", deleteOn.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)),
-            new TagValue("URL1", commonLinkUtility.GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalUnblock)),
             new TagValue(CommonTags.Footer, null),
             TagValues.WithoutUnsubscribe()
         ];

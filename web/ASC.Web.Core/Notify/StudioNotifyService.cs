@@ -561,7 +561,7 @@ public class StudioNotifyService(
 
     /// <summary>
     /// Tells support that the retention policy has blocked a portal that has paid or still has money on its
-    /// wallet, with the link that unblocks it, so a manager can step in before the deletion date. Nothing is
+    /// wallet, so a manager can step in before the deletion date. Nothing is
     /// sent when the installation has no support address.
     /// </summary>
     public async Task SendMsgPortalBlockedToSupportAsync(string tenantDomain, UserInfo owner, PortalRetentionCategory category, DateTime deleteOn)

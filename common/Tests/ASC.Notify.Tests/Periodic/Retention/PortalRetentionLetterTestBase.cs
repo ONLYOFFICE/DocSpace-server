@@ -61,6 +61,9 @@ public abstract class PortalRetentionLetterTestBase<TAction> : LetterTestBase<TA
     /// </summary>
     protected virtual string? PortalTimeZone => null;
 
+    /// <summary>Who reads the letter: the owner, unless the case is about another recipient of it.</summary>
+    protected virtual UserInfo Reader(LetterScope scope) => scope.Recipient;
+
     protected override async Task InitAsync(TAction action, LetterScope scope)
     {
         var tenant = PortalTimeZone is null
@@ -71,7 +74,7 @@ public abstract class PortalRetentionLetterTestBase<TAction> : LetterTestBase<TA
         var context = PeriodicLetterContexts.Lapsed(PeriodicLetterContexts.Fresh(tenant, DateTime.UtcNow.Date), DueOn);
 
         action.Init(Category, new PortalRetentionDecision(PortalRetentionStep.Notify, Letter, BlockOn, DeleteOn), PortalDomain);
-        action.Tags = await action.BuildTagsAsync(context, scope.Recipient, scope.Culture);
+        action.Tags = await action.BuildTagsAsync(context, Reader(scope), scope.Culture);
     }
 
     /// <summary>
