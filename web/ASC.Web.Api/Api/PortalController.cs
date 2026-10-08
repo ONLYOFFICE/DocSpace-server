@@ -880,6 +880,7 @@ public class PortalController(
     [SwaggerResponse(400, "Alias is empty")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [HttpPut("portalrename")]
+    [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
     public async Task<string> UpdatePortalName(PortalRenameRequestsDto inDto)
     {
         if (!SetupInfo.IsVisibleSettings(nameof(ManagementType.PortalSecurity)))
