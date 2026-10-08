@@ -98,6 +98,74 @@ public class RootFoldersPermissionsTests(
         titles.Should().Contain(["Files", "Rooms", "Trash"]);
     }
 
+    /// <summary>
+    /// A User or a Guest has no access to the contacts, yet the sections used to hand them the owner's
+    /// profile link, <c>/accounts/people/filter?search=&lt;email&gt;</c>, and with it the owner's email
+    /// address. The link is no longer filled in when either reads another user
+    /// (<c>EmployeeDtoHelper.InitAsync</c>).
+    /// </summary>
+    [Theory]
+    [InlineData(EmployeeType.User)]
+    [InlineData(EmployeeType.Guest)]
+    public async Task GetRootFolders_UserOrGuest_OwnerHasNoProfileUrl(EmployeeType employeeType)
+    {
+        // Arrange
+        var room = await CreateCustomRoom("Autotest Root Owner ProfileUrl Room");
+
+        var member = employeeType == EmployeeType.Guest ? await InviteGuest() : await InviteContact(employeeType);
+        await _roomsApi.SetRoomSecurityAsync(room.Id, new RoomInvitationRequest
+        {
+            Invitations = [new RoomInvitation { Id = member.Id, Access = FileShare.Read }]
+        }, TestContext.Current.CancellationToken);
+
+        await _filesClient.Authenticate(member);
+
+        // Act
+        var result = await _foldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        var ownerEntries = result.Response
+            .SelectMany(s => (s.Folders ?? []).Concat(s.Files ?? []).Append(s.Current))
+            .SelectMany(e => new[] { e.CreatedBy, e.UpdatedBy, e.OwnedBy, e.SharedBy })
+            .Where(p => p?.Id == Owner.Id)
+            .ToList();
+
+        ownerEntries.Should().NotBeEmpty();
+        ownerEntries.Should().AllSatisfy(p => p.ProfileUrl.Should().BeNullOrEmpty());
+    }
+
+    /// <summary>
+    /// The section roots shared by the whole portal (Rooms, Archive, Favorites, Recent, Shared with me...) are
+    /// system folders, created by whoever touched the section first - usually the owner. Their author is not
+    /// content, so a User or a Guest must not get the owner's name and avatar from them.
+    /// </summary>
+    [Theory]
+    [InlineData(EmployeeType.User)]
+    [InlineData(EmployeeType.Guest)]
+    public async Task GetRootFolders_UserOrGuest_SectionRootsDoNotNameOwner(EmployeeType employeeType)
+    {
+        // Arrange
+        var room = await CreateCustomRoom("Autotest Root Section Author Room");
+
+        var member = employeeType == EmployeeType.Guest ? await InviteGuest() : await InviteContact(employeeType);
+        await _roomsApi.SetRoomSecurityAsync(room.Id, new RoomInvitationRequest
+        {
+            Invitations = [new RoomInvitation { Id = member.Id, Access = FileShare.Read }]
+        }, TestContext.Current.CancellationToken);
+
+        await _filesClient.Authenticate(member);
+
+        // Act
+        var result = await _foldersApi.GetRootFoldersAsync(cancellationToken: TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Response.Should().AllSatisfy(section =>
+        {
+            section.Current.CreatedBy?.Id.Should().NotBe(Owner.Id, "section {0} must not name its author", section.Current.Title);
+            section.Current.UpdatedBy?.Id.Should().NotBe(Owner.Id, "section {0} must not name its author", section.Current.Title);
+        });
+    }
+
     [Fact]
     public async Task GetRootFolders_RoomMember_SeesTheirRoomInSections()
     {

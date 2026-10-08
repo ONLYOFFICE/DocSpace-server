@@ -117,7 +117,7 @@ public class FileLogPermissionsTests(
     /// <summary>
     /// A guest reading the log of a file shared with them used to receive the initiator's profile link,
     /// <c>/accounts/people/filter?search=&lt;email&gt;</c>, and with it the owner's email address. The link
-    /// is no longer filled in when a guest reads another user (<c>EmployeeDtoHelper.InitAsync</c>).
+    /// is no longer filled in when a Guest or a User reads another user (<c>EmployeeDtoHelper.InitAsync</c>).
     /// </summary>
     [Fact]
     [Trait("Bug", "81093")]
@@ -133,6 +133,32 @@ public class FileLogPermissionsTests(
         var file = await CreateFile("Autotest History Guest ProfileUrl File.docx", room.Id);
 
         await _filesClient.Authenticate(guest);
+
+        // Act
+        var history = await PollFileHistoryAsync(file.Id, TimeSpan.FromSeconds(30));
+
+        // Assert
+        history.Should().NotBeEmpty();
+        history.Should().AllSatisfy(entry => entry.Initiator.ProfileUrl.Should().BeNullOrEmpty());
+    }
+
+    /// <summary>
+    /// A User has no access to the contacts either, yet the log used to hand them the owner's profile link
+    /// and the email address in it; it is now left out for a User as it is for a Guest.
+    /// </summary>
+    [Fact]
+    public async Task GetFileHistory_UserWithRoomAccess_InitiatorHasNoProfileUrl()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var room = await CreateCustomRoom("Autotest History User ProfileUrl Room");
+
+        var user = await InviteContact(EmployeeType.User);
+        await InviteToRoom(room.Id, user, FileShare.Read);
+
+        var file = await CreateFile("Autotest History User ProfileUrl File.docx", room.Id);
+
+        await _filesClient.Authenticate(user);
 
         // Act
         var history = await PollFileHistoryAsync(file.Id, TimeSpan.FromSeconds(30));

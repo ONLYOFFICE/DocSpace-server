@@ -186,9 +186,9 @@ public class EmployeeDtoHelper(
         result.AvatarMedium = await _userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
         result.Avatar = await _userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
 
-        // The profile link is a people search by email, so it would hand a guest the email of someone else
-        // (bug 81093); a guest cannot open the people list anyway.
-        if (result.Id != Guid.Empty && !await IsGuestViewingOtherAsync(userInfo.Id))
+        // The profile link is a people search by email, so it would hand a User or a Guest the email of someone
+        // else (bug 81093); neither of them has access to the contacts anyway.
+        if (result.Id != Guid.Empty && !await IsWithoutContactsAccessAsync(userInfo.Id))
         {
             var profileUrl = await commonLinkUtility.GetUserProfileAsync(userInfo.Id);
             result.ProfileUrl = commonLinkUtility.GetFullAbsolutePath(profileUrl);
@@ -197,10 +197,10 @@ public class EmployeeDtoHelper(
         return result;
     }
 
-    private async Task<bool> IsGuestViewingOtherAsync(Guid userId)
+    private async Task<bool> IsWithoutContactsAccessAsync(Guid userId)
     {
         var currentId = _authContext.CurrentAccount.ID;
 
-        return currentId != userId && await _userManager.IsGuestAsync(currentId);
+        return currentId != userId && (await _userManager.IsUserAsync(currentId) || await _userManager.IsGuestAsync(currentId));
     }
 }
