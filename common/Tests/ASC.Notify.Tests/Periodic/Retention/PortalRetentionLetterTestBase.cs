@@ -55,10 +55,20 @@ public abstract class PortalRetentionLetterTestBase<TAction> : LetterTestBase<TA
     /// <summary>The address the job hands over for a portal it has just removed; null for every other letter.</summary>
     protected virtual string? PortalDomain => null;
 
+    /// <summary>
+    /// The portal's time zone, when the case is about one other than the stack portal's own. The portal is
+    /// then a copy, so the stack portal itself is never changed.
+    /// </summary>
+    protected virtual string? PortalTimeZone => null;
+
     protected override async Task InitAsync(TAction action, LetterScope scope)
     {
+        var tenant = PortalTimeZone is null
+            ? scope.Tenant
+            : new Tenant(scope.Tenant.Id, scope.Tenant.Alias) { OwnerId = scope.Tenant.OwnerId, TimeZone = PortalTimeZone };
+
         // A lapsed tariff, so the letters that quote the due date have one to quote.
-        var context = PeriodicLetterContexts.Lapsed(PeriodicLetterContexts.Fresh(scope.Tenant, DateTime.UtcNow.Date), DueOn);
+        var context = PeriodicLetterContexts.Lapsed(PeriodicLetterContexts.Fresh(tenant, DateTime.UtcNow.Date), DueOn);
 
         action.Init(Category, new PortalRetentionDecision(PortalRetentionStep.Notify, Letter, BlockOn, DeleteOn), PortalDomain);
         action.Tags = await action.BuildTagsAsync(context, scope.Recipient, scope.Culture);
