@@ -519,7 +519,8 @@ public class DbTenantService(
                 dbTenant.TrustedDomainsEnabled = tenant.TrustedDomainsType;
                 dbTenant.CreationDateTime = tenant.CreationDateTime;
                 dbTenant.Status = tenant.Status;
-                dbTenant.StatusChanged = tenant.StatusChangeDate;
+                // A status never changed is read as MinValue; writing it back keeps it unrecorded rather than 0001-01-01.
+                dbTenant.StatusChanged = tenant.StatusChangeDate == DateTime.MinValue ? null : tenant.StatusChangeDate;
                 dbTenant.PaymentId = tenant.PaymentId;
                 dbTenant.LastModified = tenant.LastModified = DateTime.UtcNow;
                 dbTenant.Industry = tenant.Industry;
