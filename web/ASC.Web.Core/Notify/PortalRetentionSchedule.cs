@@ -77,9 +77,16 @@ public enum PortalRetentionLetter
 /// <summary>What the daily job has to do with a portal today.</summary>
 public enum PortalRetentionStep
 {
+    /// <summary>Nothing today: the portal is left to the ordinary periodic letters, or left alone if blocked.</summary>
     None,
+
+    /// <summary>A warning or a reminder goes out; the portal stays as it is.</summary>
     Notify,
+
+    /// <summary>The portal is blocked and the owner is told when it will be deleted.</summary>
     Block,
+
+    /// <summary>The blocked portal is removed together with its data.</summary>
     Delete
 }
 
@@ -99,8 +106,10 @@ public readonly record struct PortalRetentionDecision(PortalRetentionStep Step, 
 /// </summary>
 public sealed class PortalRetentionScheduleOptions
 {
+    /// <summary>How many days into the count the first warning goes out.</summary>
     public int FirstNoticeDays { get; set; }
 
+    /// <summary>How many days into the count the second warning goes out. Zero means there is none.</summary>
     public int SecondNoticeDays { get; set; }
 
     /// <summary>The first month of the monthly reminders, inclusive. Zero means there are none.</summary>
@@ -109,6 +118,7 @@ public sealed class PortalRetentionScheduleOptions
     /// <summary>The last month of the monthly reminders, inclusive.</summary>
     public int MonthlyNoticeToMonth { get; set; }
 
+    /// <summary>How many days into the count the portal is blocked.</summary>
     public int BlockAfterDays { get; set; }
 
     /// <summary>How long a blocked portal is kept before it is deleted.</summary>

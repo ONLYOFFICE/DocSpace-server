@@ -84,7 +84,8 @@ public class PortalRetentionLifecycleTests
 
         leaveAlone.Should().BeTrue("a portal that has just been blocked gets none of the ordinary letters");
 
-        return tenant;
+        // The job blocks the portal as it reads it again, not the instance it was handed.
+        return await services.GetRequiredService<TenantManager>().GetTenantAsync(tenantId);
     }
 
     /// <summary>The portal's status as the database has it, past every cache.</summary>

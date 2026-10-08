@@ -272,13 +272,25 @@ public class PortalRetentionJob(
     /// </summary>
     private async Task BlockAsync(PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName)
     {
-        var tenant = context.Tenant;
+        // Read again rather than saved as the run found it: the run takes hours, and saving the whole portal
+        // as it was then would undo a rename, a change of owner or a deactivation made in the meantime - or
+        // block a portal that is no longer active at all.
+        var tenant = await tenantManager.GetTenantAsync(context.Tenant.Id);
+
+        if (tenant?.Status != TenantStatus.Active)
+        {
+            return;
+        }
 
         // Before the status, so a blocked portal always finds the category its letter was written for.
         await settingsManager.SaveAsync(new PortalRetentionBlockSettings { Category = category }, tenant.Id);
 
         tenant.SetStatus(TenantStatus.Blocked);
         await tenantManager.SaveTenantAsync(tenant);
+
+        // The letters name the portal and link back to it as it is now, with the status date that ties the
+        // unblocking link to this block.
+        context = context with { Tenant = tenant };
 
         // Written by the system: there is no request behind the daily job to take a user and an address from.
         messageService.Send(MessageInitiator.System, MessageAction.PortalBlocked);
