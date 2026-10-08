@@ -325,12 +325,13 @@ public class FileDtoHelper(
     FileSharing fileSharing,
     AiAccessibility aiAccessibility,
     ExternalDatabaseClient externalDatabaseClient,
+    BuiltinFormsDatabaseClient builtinFormsDatabaseClient,
     IFusionCache fusionCache,
     TenantManager tenantManager,
     FileTrackerHelper fileTracker,
     MetadataTemplatesCache metadataTemplatesCache,
     ILogger<FileEntryDtoHelper> logger)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, fusionCache, tenantManager, metadataTemplatesCache, logger)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, builtinFormsDatabaseClient, fusionCache, tenantManager, metadataTemplatesCache, logger)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
 
@@ -627,10 +628,10 @@ public class FileDtoHelper(
                 && (result.Security[FileSecurity.FilesSecurityActions.Edit] || file.Access == FileShare.ContentCreator);
 
             // The original form's responses can be analysed only when the user may update its report and the
-            // form's submissions table actually exists in the external database.
+            // form has responses in the forms database.
             result.Security[FileSecurity.FilesSecurityActions.AnalyzeResponses] =
                 result.Security[FileSecurity.FilesSecurityActions.UpdateXlsx]
-                && await FormHasExternalDbTableAsync(formFilling.ExternalDbTableName);
+                && await FormHasAnalysableResponsesAsync(formFilling);
 
             if (isOriginalForm && formFilling.ResultsFolderId is int resultsFolderId)
             {

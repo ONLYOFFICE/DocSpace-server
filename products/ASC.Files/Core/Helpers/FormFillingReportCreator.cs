@@ -47,7 +47,8 @@ public class FormFillingReportCreator(
     IEventBus eventBus,
     FactoryIndexerForm factoryIndexerForm,
     FactoryIndexerFormMetadata factoryIndexerFormMetadata,
-    CoreBaseSettings coreBaseSettings)
+    CoreBaseSettings coreBaseSettings,
+    IDistributedLockProvider distributedLockProvider)
 {
     private static readonly HashSet<string> _checkboxOffStates =
         new(StringComparer.OrdinalIgnoreCase) { "off", "false", "0", "no", "n", "unchecked" };
@@ -97,6 +98,16 @@ public class FormFillingReportCreator(
         await eventBus.PublishAsync(new BuiltinDbFormSubmissionIntegrationEvent(
             authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId(), originalFormId, originalFormVersion,
             roomId, fileId, resultFormNumber, formsDataUrl));
+
+        // The first submission makes the form's responses analysable.
+        if (resultFormNumber == 1)
+        {
+            var originalForm = await daoFactory.GetFileDao<int>().GetFileAsync(originalFormId);
+            if (originalForm != null)
+            {
+                await socketManager.UpdateFileAsync(originalForm);
+            }
+        }
     }
 
     public Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl)
@@ -104,18 +115,89 @@ public class FormFillingReportCreator(
 
     public async Task ExportToBuiltinDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, string formsDataUrl)
     {
-        var isNewTable = !await builtinFormsDatabaseClient.TableExistsAsync(GetTableName(originalFormId, originalFormVersion));
+        // A new table is filled from the search index, which already holds this submission; without the index it is
+        // left uncreated rather than created incomplete.
+        if (!await EnsureBuiltinDbTableAsync(originalFormId, originalFormVersion, roomId))
+        {
+            return;
+        }
 
         await ExportToDbAsync(builtinFormsDatabaseClient, fileId, originalFormId, originalFormVersion, formsDataUrl);
+    }
 
-        // Earlier submissions are copied once, when the form version gets its table.
-        if (isNewTable)
+    /// <summary>
+    /// Makes sure the form version has its built-in table, restoring it from the search index when it was dropped as
+    /// idle or never created. Returns false when there is nothing to restore.
+    /// </summary>
+    public async Task<bool> EnsureBuiltinDbTableAsync(int originalFormId, int originalFormVersion, int roomId)
+    {
+        var tableName = GetTableName(originalFormId, originalFormVersion);
+        if (await builtinFormsDatabaseClient.TableExistsAsync(tableName))
         {
-            await ExportMissingFromOpenSearchAsync(builtinFormsDatabaseClient, originalFormId, originalFormVersion, roomId);
+            return true;
+        }
+
+        await using (await AcquireBuiltinDbTableLockAsync(tableName))
+        {
+            return await builtinFormsDatabaseClient.TableExistsAsync(tableName)
+                || await RestoreBuiltinDbTableAsync(tableName, originalFormId, originalFormVersion, roomId);
         }
     }
 
-    private async Task ExportToDbAsync(IFormsDatabaseClient client, int fileId, int originalFormId, int originalFormVersion, string formsDataUrl)
+    // The table is created and filled in one transaction, so it is never seen incomplete.
+    private async Task<bool> RestoreBuiltinDbTableAsync(string tableName, int originalFormId, int originalFormVersion, int roomId)
+    {
+        await factoryIndexerForm.RefreshAsync();
+        var (countSuccess, count) = await factoryIndexerForm.TryCountAsync(r =>
+            r.Where(s => s.RoomId, roomId)
+             .Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.OriginalFormVersion, originalFormVersion));
+
+        if (!countSuccess || count == 0)
+        {
+            return false;
+        }
+
+        if (count >= BaseIndexer<DbFormsItemDataSearch>.QueryLimit)
+        {
+            logger.WarnBuiltinDbRestoreTooLarge(tableName, count);
+            return false;
+        }
+
+        var (success, submissions) = await factoryIndexerForm.TrySelectAsync(r =>
+            r.Where(s => s.RoomId, roomId)
+             .Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.OriginalFormVersion, originalFormVersion)
+             .Limit(0, BaseIndexer<DbFormsItemDataSearch>.QueryLimit));
+
+        if (!success || submissions.Count == 0)
+        {
+            return false;
+        }
+
+        var normalizedMeta = await GetExportMetadataAsync(originalFormId, originalFormVersion, submissions);
+        if (normalizedMeta.Count == 0)
+        {
+            return false;
+        }
+
+        var culture = tenantManager.GetCurrentTenant().GetCulture();
+        var rows = submissions
+            .Select(item => BuildIndexedRowData(item, normalizedMeta, culture, tableName))
+            .OfType<Dictionary<string, object>>()
+            .ToList();
+
+        await builtinFormsDatabaseClient.CreateTableAndUpsertAsync(tableName, BuildColumnDefinitions(normalizedMeta).ToList(), rows, keyColumn: "form_id");
+
+        return true;
+    }
+
+    private Task<IDistributedLockHandle> AcquireBuiltinDbTableLockAsync(string tableName)
+    {
+        return distributedLockProvider.TryAcquireFairLockAsync($"forms_db_table_{tenantManager.GetCurrentTenantId()}_{tableName}");
+    }
+
+    private async Task ExportToDbAsync(ExternalDatabaseClient client, int fileId, int originalFormId, int originalFormVersion, string formsDataUrl)
     {
 #pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
@@ -143,7 +225,7 @@ public class FormFillingReportCreator(
 
         await client.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
 
-        if (client is ExternalDatabaseClient)
+        if (client is not BuiltinFormsDatabaseClient)
         {
             await SetExternalDbTableNameAsync(originalFormId, tableName);
         }
@@ -168,14 +250,11 @@ public class FormFillingReportCreator(
         }
     }
 
-    public Task<bool> ExportMissingFromOpenSearchAsync(int originalFormId, int originalFormVersion, int roomId)
-        => ExportMissingFromOpenSearchAsync(externalDatabaseClient, originalFormId, originalFormVersion, roomId);
-
-    private async Task<bool> ExportMissingFromOpenSearchAsync(IFormsDatabaseClient client, int originalFormId, int originalFormVersion, int roomId)
+    public async Task<bool> ExportMissingFromOpenSearchAsync(int originalFormId, int originalFormVersion, int roomId)
     {
         var tableName = GetTableName(originalFormId, originalFormVersion);
 
-        var dbCount = await client.GetTableCountAsync(tableName);
+        var dbCount = await externalDatabaseClient.GetTableCountAsync(tableName);
 
         await factoryIndexerForm.RefreshAsync();
         var (osCountSuccess, osCount) = await factoryIndexerForm.TryCountAsync(r =>
@@ -193,7 +272,7 @@ public class FormFillingReportCreator(
             return true;
         }
 
-        var existingIds = await client.GetExistingFormIdsAsync(tableName);
+        var existingIds = await externalDatabaseClient.GetExistingFormIdsAsync(tableName);
 
         var (success, allSubmissions) = await factoryIndexerForm.TrySelectAsync(r =>
             r.Where(s => s.RoomId, roomId)
@@ -220,28 +299,10 @@ public class FormFillingReportCreator(
             return true;
         }
 
-        await factoryIndexerFormMetadata.RefreshAsync();
-        var (metaSuccess, metaResult) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
-            r.Where(s => s.OriginalFormId, originalFormId)
-             .Where(s => s.OriginalFormVersion, originalFormVersion));
-
-        var rawMetadata = metaSuccess ? metaResult.FirstOrDefault()?.Metadata ?? [] : [];
-        var normalizedMeta = NormalizeMetadata(rawMetadata).ToList();
-
+        var normalizedMeta = await GetExportMetadataAsync(originalFormId, originalFormVersion, missing);
         if (normalizedMeta.Count == 0)
         {
-            var derivedMeta = missing
-                .Where(s => s.FormsData != null)
-                .SelectMany(s => s.FormsData)
-                .Where(f => !string.IsNullOrEmpty(f.Key) && !string.IsNullOrEmpty(f.Type) && IsExportableField(f))
-                .GroupBy(f => f.Key)
-                .Select(g => new FormMetadata { Key = g.Key, Type = g.First().Type });
-            normalizedMeta = NormalizeMetadata(derivedMeta).ToList();
-
-            if (normalizedMeta.Count == 0)
-            {
-                return false;
-            }
+            return false;
         }
 
         var columnDefinitions = BuildColumnDefinitions(normalizedMeta).ToList();
@@ -252,24 +313,15 @@ public class FormFillingReportCreator(
 
         foreach (var item in missing)
         {
-            if (item.FormsData == null)
+            var rowData = BuildIndexedRowData(item, normalizedMeta, culture, tableName);
+            if (rowData == null)
             {
-                logger.WarnGapSyncSkippedNoData(item.Id, tableName);
                 continue;
             }
 
-            var filteredData = new SubmitFormsData
-            {
-                FormsData = item.FormsData
-                    .Where(IsExportableField)
-                    .ToList()
-            };
-
-            var rowData = BuildRowData(filteredData, normalizedMeta, item.Id, culture, coreBaseSettings.EnabledCultures, item.CreateOn);
-
             try
             {
-                await client.CreateTableAndUpsertAsync(
+                await externalDatabaseClient.CreateTableAndUpsertAsync(
                     tableName, columnDefinitions, rowData, keyColumn: "form_id");
                 exported = true;
             }
@@ -281,12 +333,54 @@ public class FormFillingReportCreator(
         }
 
         // The gap sync can be the first to create the table (e.g. from the sync button), so record it here too.
-        if (exported && client is ExternalDatabaseClient)
+        if (exported)
         {
             await SetExternalDbTableNameAsync(originalFormId, tableName);
         }
 
         return !hadFailure;
+    }
+
+    private async Task<List<FormMetadata>> GetExportMetadataAsync(int originalFormId, int originalFormVersion, IReadOnlyCollection<DbFormsItemDataSearch> submissions)
+    {
+        await factoryIndexerFormMetadata.RefreshAsync();
+        var (metaSuccess, metaResult) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
+            r.Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.OriginalFormVersion, originalFormVersion));
+
+        var rawMetadata = metaSuccess ? metaResult.FirstOrDefault()?.Metadata ?? [] : [];
+        var normalizedMeta = NormalizeMetadata(rawMetadata).ToList();
+
+        if (normalizedMeta.Count == 0)
+        {
+            var derivedMeta = submissions
+                .Where(s => s.FormsData != null)
+                .SelectMany(s => s.FormsData)
+                .Where(f => !string.IsNullOrEmpty(f.Key) && !string.IsNullOrEmpty(f.Type) && IsExportableField(f))
+                .GroupBy(f => f.Key)
+                .Select(g => new FormMetadata { Key = g.Key, Type = g.First().Type });
+            normalizedMeta = NormalizeMetadata(derivedMeta).ToList();
+        }
+
+        return normalizedMeta;
+    }
+
+    private Dictionary<string, object> BuildIndexedRowData(DbFormsItemDataSearch item, IEnumerable<FormMetadata> normalizedMeta, CultureInfo culture, string tableName)
+    {
+        if (item.FormsData == null)
+        {
+            logger.WarnGapSyncSkippedNoData(item.Id, tableName);
+            return null;
+        }
+
+        var filteredData = new SubmitFormsData
+        {
+            FormsData = item.FormsData
+                .Where(IsExportableField)
+                .ToList()
+        };
+
+        return BuildRowData(filteredData, normalizedMeta, item.Id, culture, coreBaseSettings.EnabledCultures, item.CreateOn);
     }
 
     public async Task<IEnumerable<FormsItemData>> GetFormsFields(int folderId)

@@ -35,7 +35,6 @@ namespace ASC.AI.Tools;
 
 [Scope(typeof(IAiToolFactory))]
 public class FormDataToolsFactory(
-    ExternalDatabaseClient externalDatabaseClient,
     FormSchemaProvider formSchemaProvider,
     FileSecurity fileSecurity) : IAiToolFactory
 {
@@ -205,7 +204,7 @@ public class FormDataToolsFactory(
         if (!context.FormSubAgent
             || !context.Analyze
             || context.Form is not File<int> form
-            || !externalDatabaseClient.IsEnabled()
+            || !formSchemaProvider.IsEnabled()
             || !await fileSecurity.CanUpdateXlsxAsync(form))
         {
             return ToolBundle.Empty;
@@ -217,7 +216,7 @@ public class FormDataToolsFactory(
             return ToolBundle.Empty;
         }
 
-        var (tableName, rowCount, columns, allowedColumns, pkColumn) = init;
+        var (tableName, rowCount, columns, allowedColumns, pkColumn, client) = init;
         var schemaText = FormatSchema(tableName, rowCount, columns);
 
         var prompt =
@@ -229,13 +228,13 @@ public class FormDataToolsFactory(
 
         var tools = new List<AiTool>
         {
-            new(AggregateName, MakeAggregateFunction(tableName, allowedColumns, columns)),
-            new(QueryName, MakeQueryFunction(tableName, allowedColumns, columns, rowCount))
+            new(AggregateName, MakeAggregateFunction(client, tableName, allowedColumns, columns)),
+            new(QueryName, MakeQueryFunction(client, tableName, allowedColumns, columns, rowCount))
         };
 
         if (columns.Count >= 2)
         {
-            tools.Add(new AiTool(SelfJoinName, MakeSelfJoinFunction(tableName, allowedColumns, columns, pkColumn)));
+            tools.Add(new AiTool(SelfJoinName, MakeSelfJoinFunction(client, tableName, allowedColumns, columns, pkColumn)));
         }
 
         return new ToolBundle(prompt, tools);
@@ -256,10 +255,11 @@ public class FormDataToolsFactory(
             ?? columns.FirstOrDefault(c => c.Type == DbColumnType.Integer)
             ?? columns.FirstOrDefault();
 
-        return new InitData(schema.TableName, schema.RowCount, columns, allowedColumns, pkColumn?.Name ?? string.Empty);
+        return new InitData(schema.TableName, schema.RowCount, columns, allowedColumns, pkColumn?.Name ?? string.Empty, schema.Client);
     }
 
-    private AIFunction MakeAggregateFunction(
+    private static AIFunction MakeAggregateFunction(
+        ExternalDatabaseClient client,
         string tableName,
         IReadOnlyCollection<string> allowedColumns,
         IReadOnlyList<DbColumnDefinition> columns)
@@ -342,7 +342,7 @@ public class FormDataToolsFactory(
             var parsedExcludeFilters = normalExcludeFilters.Select(QueryFilter.Parse);
             var parsedExcludeDatePartFilters = allExcludeDatePartFilters.Select(DatePartFilter.Parse);
 
-            return externalDatabaseClient.AggregateAsync(
+            return client.AggregateAsync(
                 tableName, allowedColumns, aggregateFunction, valueColumn, groupByColumn, parsedFilters,
                 groupByDatePart, secondGroupByColumn, secondGroupByDatePart,
                 parsedDatePartFilters, parsedDateDiffFilter, parsedDateDiffAggregate,
@@ -352,7 +352,8 @@ public class FormDataToolsFactory(
         }
     }
 
-    private AIFunction MakeQueryFunction(
+    private static AIFunction MakeQueryFunction(
+        ExternalDatabaseClient client,
         string tableName,
         IReadOnlyCollection<string> allowedColumns,
         IReadOnlyList<DbColumnDefinition> columns,
@@ -396,14 +397,15 @@ public class FormDataToolsFactory(
             var parsedDatePartFilters = allDatePartFilters.Select(DatePartFilter.Parse);
             var parsedDateDiffFilter = dateDiffFilter != null ? DateDiffFilter.Parse(dateDiffFilter) : null;
 
-            return externalDatabaseClient.QueryAsync(
+            return client.QueryAsync(
                 tableName, allowedColumns, selectColumns, parsedFilters,
                 orderByColumn, orderByDescending, thenByColumn, thenByDescending, limit, offset,
                 parsedDatePartFilters, parsedDateDiffFilter);
         }
     }
 
-    private AIFunction MakeSelfJoinFunction(
+    private static AIFunction MakeSelfJoinFunction(
+        ExternalDatabaseClient client,
         string tableName,
         IReadOnlyCollection<string> allowedColumns,
         IReadOnlyList<DbColumnDefinition> columns,
@@ -459,7 +461,7 @@ public class FormDataToolsFactory(
 
             var parsedFilters = normalFilters.Select(QueryFilter.Parse);
             var parsedDatePartFilters = cleanDatePartFilters.Select(DatePartFilter.Parse);
-            return externalDatabaseClient.SelfJoinAsync(
+            return client.SelfJoinAsync(
                 tableName, allowedColumns, pkColumn, parsedJoinList, displayColumns, limit,
                 parsedFilters, parsedDatePartFilters, countDistinctColumn);
         }
@@ -628,7 +630,8 @@ public class FormDataToolsFactory(
         long RowCount,
         IReadOnlyList<DbColumnDefinition> Columns,
         IReadOnlyCollection<string> AllowedColumns,
-        string PkColumn);
+        string PkColumn,
+        ExternalDatabaseClient Client);
 
     private sealed class FlexibleStringArrayJsonConverter : JsonConverter<IEnumerable<string>>
     {

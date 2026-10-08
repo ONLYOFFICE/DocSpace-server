@@ -240,13 +240,10 @@ public record SelfJoinCondition(string LeftColumn, string Operator, string Right
 
 [Scope]
 public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<ExternalDatabaseClient> logger)
-    : IFormsDatabaseClient
 {
     private static readonly Regex _tableNameRegex = new(@"^[a-zA-Z0-9_]+$", RegexOptions.Compiled);
 
-    internal const string PgTableExistsSql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = @tableName";
-
-    internal static void ValidateTableName(string tableName)
+    private static void ValidateTableName(string tableName)
     {
         if (string.IsNullOrWhiteSpace(tableName) || !_tableNameRegex.IsMatch(tableName))
         {
@@ -256,14 +253,17 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
 
     private ExternalDatabaseProvider Provider => consumerFactory.Get<ExternalDatabaseProvider>();
 
-    public bool IsEnabled() => Provider.IsEnabled();
+    public virtual bool IsEnabled() => Provider.IsEnabled();
+
+    protected virtual ExternalDatabaseType DatabaseType => Provider.DatabaseTypeEnum;
+
+    protected virtual Task<DbConnection> CreateConnectionAsync(ExternalDatabaseType dbType) => Provider.CreateConnectionAsync(dbType);
 
     public async Task CreateTableIfNotExistsAsync(string tableName, IEnumerable<DbColumnDefinition> columns)
     {
         ValidateTableName(tableName);
-        var provider = Provider;
-        var dbType = provider.DatabaseTypeEnum;
-        await using var connection = await provider.CreateConnectionAsync(dbType);
+        var dbType = DatabaseType;
+        await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -273,7 +273,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             ExternalDatabaseType.MySql => BuildMySqlCreateTable(tableName, columns),
             ExternalDatabaseType.Sqlite => BuildSqliteCreateTable(tableName, columns),
             ExternalDatabaseType.PostgreSql => BuildPgCreateTable(tableName, columns),
-            _ => throw new NotSupportedException($"Database type '{provider.DatabaseType}' is not supported yet.")
+            _ => throw new NotSupportedException($"Database type '{dbType.ToStringFast()}' is not supported yet.")
         };
         await cmd.ExecuteNonQueryAsync();
     }
@@ -298,7 +298,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return $"CREATE TABLE IF NOT EXISTS \"{tableName}\" ({string.Join(", ", colDefs)});";
     }
 
-    internal static string BuildPgCreateTable(string tableName, IEnumerable<DbColumnDefinition> columns)
+    private static string BuildPgCreateTable(string tableName, IEnumerable<DbColumnDefinition> columns)
     {
         var colDefs = columns.Select(c =>
         {
@@ -347,9 +347,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
     public async Task<bool> TableExistsAsync(string tableName)
     {
         ValidateTableName(tableName);
-        var provider = Provider;
-        var dbType = provider.DatabaseTypeEnum;
-        await using var connection = await provider.CreateConnectionAsync(dbType);
+        var dbType = DatabaseType;
+        await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -358,8 +357,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         {
             ExternalDatabaseType.MySql => "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=@tableName",
             ExternalDatabaseType.Sqlite => "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=@tableName",
-            ExternalDatabaseType.PostgreSql => PgTableExistsSql,
-            _ => throw new NotSupportedException($"Database type '{provider.DatabaseType}' is not supported yet.")
+            ExternalDatabaseType.PostgreSql => "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = @tableName",
+            _ => throw new NotSupportedException($"Database type '{dbType.ToStringFast()}' is not supported yet.")
         };
         var param = cmd.CreateParameter();
         param.ParameterName = "@tableName";
@@ -373,9 +372,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
     public async Task<long> CountAsync(string tableName)
     {
         ValidateTableName(tableName);
-        var provider = Provider;
-        var dbType = provider.DatabaseTypeEnum;
-        await using var connection = await provider.CreateConnectionAsync(dbType);
+        var dbType = DatabaseType;
+        await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -384,7 +382,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         {
             ExternalDatabaseType.MySql => $"SELECT COUNT(*) FROM `{tableName}`",
             ExternalDatabaseType.Sqlite or ExternalDatabaseType.PostgreSql => $"SELECT COUNT(*) FROM \"{tableName}\"",
-            _ => throw new NotSupportedException($"Database type '{provider.DatabaseType}' is not supported yet.")
+            _ => throw new NotSupportedException($"Database type '{dbType.ToStringFast()}' is not supported yet.")
         };
 
         var result = await cmd.ExecuteScalarAsync();
@@ -422,6 +420,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
     };
 
     public const int MaxRowsPerRequest = 500;
+
+    private const int InsertBatchSize = 500;
 
     /// <summary>
     /// Strips table-alias prefixes that models sometimes attach to column names
@@ -821,8 +821,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         var excludeDatePartFilterList = MergeDatePartFilters(excludeDatePartFilters?.ToList() ?? []);
         ValidateDatePartFilters(excludeDatePartFilterList, allowedColumns);
 
-        var provider = Provider;
-        var dbType = provider.DatabaseTypeEnum;
+        var dbType = DatabaseType;
         var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
 
         string? innerExpr = dateDiffAggregate != null
@@ -924,7 +923,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         }
         // No GROUP BY → aggregate returns exactly one row; LIMIT is intentionally omitted.
 
-        await using var connection = await provider.CreateConnectionAsync(dbType);
+        await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -965,8 +964,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         DateDiffFilter? dateDiffFilter = null)
     {
         ValidateTableName(tableName);
-        var provider = Provider;
-        var dbType = provider.DatabaseTypeEnum;
+        var dbType = DatabaseType;
         var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
 
         var selectList = selectColumns?.ToList();
@@ -1039,7 +1037,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         var pageOffset = Math.Max(0, offset);
         sql.Append($" LIMIT {pageSize} OFFSET {pageOffset}");
 
-        await using var connection = await provider.CreateConnectionAsync(dbType);
+        await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -1148,8 +1146,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         ValidateDatePartFilters(datePartFilterList, allowedColumns);
 
         var pageSize = Math.Clamp(limit, 1, MaxRowsPerRequest);
-        var provider = Provider;
-        var dbType = provider.DatabaseTypeEnum;
+        var dbType = DatabaseType;
         var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
 
         List<string> selectParts;
@@ -1249,7 +1246,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
               $"WHERE {string.Join(" AND ", whereParts)} " +
               $"LIMIT {pageSize}";
 
-        await using var connection = await provider.CreateConnectionAsync(dbType);
+        await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -1281,23 +1278,32 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
     public Task UpsertDataAsync(string tableName, Dictionary<string, object> data, string keyColumn)
         => ExecuteInsertAsync(tableName, data, keyColumn);
 
-    public async Task CreateTableAndUpsertAsync(string tableName, IEnumerable<DbColumnDefinition> columns, Dictionary<string, object> data, string keyColumn)
+    public Task CreateTableAndUpsertAsync(string tableName, IEnumerable<DbColumnDefinition> columns, Dictionary<string, object> data, string keyColumn)
     {
-        ValidateTableName(tableName);
         if (data == null || data.Count == 0)
         {
             throw new ArgumentException("Data dictionary is empty.", nameof(data));
         }
 
-        var provider = Provider;
-        var dbType = provider.DatabaseTypeEnum;
-        await using var connection = await provider.CreateConnectionAsync(dbType);
+        return CreateTableAndUpsertAsync(tableName, columns, [data], keyColumn);
+    }
+
+    /// <summary>
+    /// Creates the table if needed and upserts the rows. On PostgreSQL and SQLite it is one transaction, so other sessions
+    /// see either no new table or all of its rows.
+    /// </summary>
+    public async Task CreateTableAndUpsertAsync(string tableName, IEnumerable<DbColumnDefinition> columns, IReadOnlyCollection<Dictionary<string, object>> rows, string keyColumn)
+    {
+        ValidateTableName(tableName);
+
+        var dbType = DatabaseType;
+        await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
-        // SQLite only: MySQL DDL (CREATE TABLE) causes an implicit commit,
+        // MySQL DDL (CREATE TABLE) causes an implicit commit,
         // making it impossible to wrap CREATE TABLE + INSERT in one atomic transaction.
-        DbTransaction? tx = dbType == ExternalDatabaseType.Sqlite ? await connection.BeginTransactionAsync() : null;
+        DbTransaction? tx = dbType != ExternalDatabaseType.MySql ? await connection.BeginTransactionAsync() : null;
 
         try
         {
@@ -1308,21 +1314,14 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
                 ExternalDatabaseType.MySql => BuildMySqlCreateTable(tableName, columns),
                 ExternalDatabaseType.Sqlite => BuildSqliteCreateTable(tableName, columns),
                 ExternalDatabaseType.PostgreSql => BuildPgCreateTable(tableName, columns),
-                _ => throw new NotSupportedException($"Database type '{provider.DatabaseType}' is not supported yet.")
+                _ => throw new NotSupportedException($"Database type '{dbType.ToStringFast()}' is not supported yet.")
             };
             await createCmd.ExecuteNonQueryAsync();
 
-            await using var insertCmd = connection.CreateCommand();
-            insertCmd.Transaction = tx;
-            insertCmd.CommandText = BuildInsertSql(tableName, data.Keys, keyColumn, dbType);
-            foreach (var kvp in data)
+            foreach (var chunk in rows.Chunk(InsertBatchSize))
             {
-                var param = insertCmd.CreateParameter();
-                param.ParameterName = "@" + kvp.Key;
-                param.Value = kvp.Value ?? DBNull.Value;
-                insertCmd.Parameters.Add(param);
+                await InsertRowsAsync(connection, tx, tableName, chunk, keyColumn, dbType);
             }
-            await insertCmd.ExecuteNonQueryAsync();
 
             if (tx != null)
             {
@@ -1346,6 +1345,46 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         }
     }
 
+    private static async Task InsertRowsAsync(DbConnection connection, DbTransaction? tx, string tableName, Dictionary<string, object>[] rows, string keyColumn, ExternalDatabaseType dbType)
+    {
+        if (rows.Length == 1 || !connection.CanCreateBatch)
+        {
+            foreach (var row in rows)
+            {
+                await using var insertCmd = connection.CreateCommand();
+                insertCmd.Transaction = tx;
+                insertCmd.CommandText = BuildInsertSql(tableName, row.Keys, keyColumn, dbType);
+                AddRowParameters(insertCmd.Parameters, insertCmd.CreateParameter, row);
+                await insertCmd.ExecuteNonQueryAsync();
+            }
+
+            return;
+        }
+
+        await using var batch = connection.CreateBatch();
+        batch.Transaction = tx;
+        foreach (var row in rows)
+        {
+            var insertCmd = batch.CreateBatchCommand();
+            insertCmd.CommandText = BuildInsertSql(tableName, row.Keys, keyColumn, dbType);
+            AddRowParameters(insertCmd.Parameters, insertCmd.CreateParameter, row);
+            batch.BatchCommands.Add(insertCmd);
+        }
+
+        await batch.ExecuteNonQueryAsync();
+    }
+
+    private static void AddRowParameters(DbParameterCollection parameters, Func<DbParameter> createParameter, Dictionary<string, object> row)
+    {
+        foreach (var kvp in row)
+        {
+            var param = createParameter();
+            param.ParameterName = "@" + kvp.Key;
+            param.Value = kvp.Value ?? DBNull.Value;
+            parameters.Add(param);
+        }
+    }
+
     public async Task<long> GetTableCountAsync(string tableName) =>
         await TableExistsAsync(tableName) ? await CountAsync(tableName) : 0;
 
@@ -1357,11 +1396,10 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         }
 
         ValidateTableName(tableName);
-        var provider = Provider;
-        var dbType = provider.DatabaseTypeEnum;
+        var dbType = DatabaseType;
         var q = dbType == ExternalDatabaseType.MySql ? '`' : '"';
 
-        await using var connection = await provider.CreateConnectionAsync(dbType);
+        await using var connection = await CreateConnectionAsync(dbType);
         await connection.OpenAsync();
         await SetupSqliteAsync(connection, dbType);
 
@@ -1390,8 +1428,8 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             {
                 throw new ArgumentException("Data dictionary is empty.", nameof(data));
             }
-            var dbType = Provider.DatabaseTypeEnum;
-            await using var connection = await Provider.CreateConnectionAsync(dbType);
+            var dbType = DatabaseType;
+            await using var connection = await CreateConnectionAsync(dbType);
             await connection.OpenAsync();
             await SetupSqliteAsync(connection, dbType);
 
@@ -1433,7 +1471,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         }
     }
 
-    internal static string BuildInsertSql(string tableName, IEnumerable<string> keys, string? keyColumn, ExternalDatabaseType dbType)
+    private static string BuildInsertSql(string tableName, IEnumerable<string> keys, string? keyColumn, ExternalDatabaseType dbType)
     {
         var keyList = keys.ToList();
         var parameters = string.Join(", ", keyList.Select(k => $"@{k}"));

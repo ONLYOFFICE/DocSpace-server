@@ -33,20 +33,23 @@
 
 namespace ASC.AI.Tools.Core;
 
-/// <summary>Submission table of a started filling-form: name, row count and column definitions.</summary>
+/// <summary>Submission table of a started filling-form: name, row count, column definitions and the database holding it.</summary>
 public sealed record FormSchema(
     string TableName,
     long RowCount,
-    IReadOnlyList<DbColumnDefinition> Columns);
+    IReadOnlyList<DbColumnDefinition> Columns,
+    ExternalDatabaseClient Client);
 
 /// <summary>
-/// Reads the external-database submission table behind a filling-form. Shared by the form-data tools and
-/// the attachment pre-analysis so the "is this form analysable" rules stay in one place.
+/// Reads the submission table behind a filling-form: in the external database when the portal has one, otherwise in
+/// the built-in one. Shared by the form-data tools and the attachment pre-analysis so the "is this form analysable"
+/// rules stay in one place.
 /// </summary>
 [Scope]
 public class FormSchemaProvider(
     IDaoFactory daoFactory,
     ExternalDatabaseClient externalDatabaseClient,
+    BuiltinFormsDatabaseClient builtinFormsDatabaseClient,
     FormFillingReportCreator formFillingReportCreator,
     TenantManager tenantManager,
     IFusionCache fusionCache,
@@ -55,13 +58,35 @@ public class FormSchemaProvider(
     private static readonly TimeSpan _tableNameCacheDuration = TimeSpan.FromMinutes(30);
     private static readonly TimeSpan _noTableCacheDuration = TimeSpan.FromMinutes(1);
 
+    /// <summary>Whether a database for form submissions is configured: the external one or the built-in one.</summary>
+    public bool IsEnabled() => externalDatabaseClient.IsEnabled() || builtinFormsDatabaseClient.IsEnabled();
+
+    /// <summary>
+    /// Whether the form's responses can be analysed. For the built-in database it needs no database call: a dropped
+    /// table is restored when the schema is read.
+    /// </summary>
+    public async Task<bool> CanAnalyzeAsync(File<int> file)
+    {
+        if (externalDatabaseClient.IsEnabled())
+        {
+            return await TryGetTableNameAsync(file) is not null;
+        }
+
+        return builtinFormsDatabaseClient.IsEnabled() && await GetStartedFormFillingAsync(file) is { ResultFormNumber: > 0 };
+    }
+
     /// <summary>
     /// The cheap half: the submission table name, or null when this is not a started filling-form of its
     /// own or the table does not exist yet. Reads no rows and no metadata. Callers are expected to have
-    /// checked <see cref="ExternalDatabaseClient.IsEnabled"/>.
+    /// checked <see cref="IsEnabled"/>.
     /// </summary>
     public async Task<string?> TryGetTableNameAsync(File<int> file)
     {
+        if (!externalDatabaseClient.IsEnabled())
+        {
+            return await TryGetBuiltinTableNameAsync(file);
+        }
+
         var cacheKey = GetTableNameCacheKey(tenantManager.GetCurrentTenantId(), file);
 
         var cached = await fusionCache.TryGetAsync<string?>(cacheKey);
@@ -70,11 +95,8 @@ public class FormSchemaProvider(
             return cached.Value;
         }
 
-        var properties = await daoFactory.GetFileDao<int>().GetProperties(file.Id);
-        var formFilling = properties?.FormFilling;
-
         // Left uncached: filling starts at any moment, and this branch costs no external call anyway.
-        if (formFilling?.StartFilling != true || formFilling.OriginalFormId != file.Id)
+        if (await GetStartedFormFillingAsync(file) is null)
         {
             return null;
         }
@@ -90,6 +112,26 @@ public class FormSchemaProvider(
             opt => opt.SetDuration(exists ? _tableNameCacheDuration : _noTableCacheDuration));
 
         return exists ? tableName : null;
+    }
+
+    // Not cached: an idle built-in table may be dropped at any time, and it is restored here.
+    private async Task<string?> TryGetBuiltinTableNameAsync(File<int> file)
+    {
+        if (!builtinFormsDatabaseClient.IsEnabled() || await GetStartedFormFillingAsync(file) is not { ResultFormNumber: > 0 } formFilling)
+        {
+            return null;
+        }
+
+        return await formFillingReportCreator.EnsureBuiltinDbTableAsync(file.Id, file.Version, formFilling.RoomId)
+            ? FormFillingReportCreator.GetTableName(file.Id, file.Version)
+            : null;
+    }
+
+    private async Task<FormFillingProperties<int>?> GetStartedFormFillingAsync(File<int> file)
+    {
+        var formFilling = (await daoFactory.GetFileDao<int>().GetProperties(file.Id))?.FormFilling;
+
+        return formFilling?.StartFilling == true && formFilling.OriginalFormId == file.Id ? formFilling : null;
     }
 
     private static string GetTableNameCacheKey(int tenantId, File<int> file)
@@ -108,10 +150,11 @@ public class FormSchemaProvider(
                 return null;
             }
 
-            var rowCount = await externalDatabaseClient.CountAsync(tableName);
+            var client = externalDatabaseClient.IsEnabled() ? externalDatabaseClient : builtinFormsDatabaseClient;
+            var rowCount = await client.CountAsync(tableName);
             var columns = (await formFillingReportCreator.GetColumnDefinitionsAsync(file.Id, file.Version)).ToList();
 
-            return new FormSchema(tableName, rowCount, columns);
+            return new FormSchema(tableName, rowCount, columns, client);
         }
         catch (Exception e)
         {

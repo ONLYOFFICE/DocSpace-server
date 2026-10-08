@@ -273,10 +273,11 @@ public class FolderDtoHelper(
     FileSharing fileSharing,
     EntryStatusManager entryStatusManager,
     ExternalDatabaseClient externalDatabaseClient,
+    BuiltinFormsDatabaseClient builtinFormsDatabaseClient,
     IFusionCache fusionCache,
     MetadataTemplatesCache metadataTemplatesCache,
     ILogger<FileEntryDtoHelper> logger)
-    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, fusionCache, tenantManager, metadataTemplatesCache, logger)
+    : FileEntryDtoHelper(apiDateTimeHelper, employeeWrapperHelper, fileSharingHelper, fileSecurity, globalFolderHelper, filesSettingsHelper, fileDateTime, securityContext, userManager, daoFactory, externalShare, fileSharing, urlShortener, externalDatabaseClient, builtinFormsDatabaseClient, fusionCache, tenantManager, metadataTemplatesCache, logger)
 {
     private readonly EmployeeDtoHelper _employeeWrapperHelper = employeeWrapperHelper;
     private readonly TenantManager _tenantManager = tenantManager;
@@ -518,9 +519,9 @@ public class FolderDtoHelper(
                     canUpdateXlsx = originalForm != null && await _fileSecurity.CanUpdateXlsxAsync(originalForm);
                     if (canUpdateXlsx)
                     {
-                        // Responses can be analysed only when the form's submissions table really exists in the external database.
+                        // Responses can be analysed only when the form has them in the forms database.
                         var originalFormProperties = await fileDao.GetProperties(originalFormId);
-                        canAnalyze = await FormHasExternalDbTableAsync(originalFormProperties?.FormFilling?.ExternalDbTableName);
+                        canAnalyze = await FormHasAnalysableResponsesAsync(originalFormProperties?.FormFilling);
                     }
                 }
             }
