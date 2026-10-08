@@ -59,7 +59,7 @@ public class SaasOwnerRetentionInactivityWarningLetterTests : PortalRetentionLet
         letter.Subject.Should().Be($"Your {logoText} space misses you (action needed by {ShortDay(BlockOn, scope)})");
 
         letter.Body.Should().Contain("since anyone signed in to your")
-            .And.Contain("we pause free spaces")
+            .And.Contain("we block free spaces")
             .And.Contain("the space and all its data will be permanently deleted")
             .And.Contain("Just sign in once before");
     }

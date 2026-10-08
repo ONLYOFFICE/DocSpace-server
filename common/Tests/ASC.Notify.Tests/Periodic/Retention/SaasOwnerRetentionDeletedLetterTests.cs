@@ -61,6 +61,7 @@ public class SaasOwnerRetentionDeletedLetterTests : PortalRetentionLetterTestBas
 
         letter.Body.Should().Contain("Your space has been deleted")
             .And.Contain("used for a long time")
+            .And.Contain("a try", "a free portal is thanked for trying the product")
             .And.Contain("Privacy Policy")
             .And.Contain("create a new space");
     }

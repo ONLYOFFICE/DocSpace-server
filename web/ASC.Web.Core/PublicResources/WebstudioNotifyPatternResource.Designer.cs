@@ -538,7 +538,7 @@ namespace ASC.Web.Core.PublicResources {
         }
 
         /// <summary>
-        ///   Looks up a localized string similar to Keep my ${LetterLogoText}.
+        ///   Looks up a localized string similar to Keep my space.
         /// </summary>
         public static string ButtonKeepPortal {
             get {
@@ -1917,7 +1917,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1.Your space is paused, but nothing is lost yet [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to h1.Your space is blocked, but nothing is lost yet [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_owner_retention_blocked {
             get {
@@ -3004,7 +3004,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} space is paused, but your data is safe until $DeleteDateShort.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} space is blocked, but your data is safe until $DeleteDateShort.
         /// </summary>
         public static string subject_saas_owner_retention_blocked {
             get {

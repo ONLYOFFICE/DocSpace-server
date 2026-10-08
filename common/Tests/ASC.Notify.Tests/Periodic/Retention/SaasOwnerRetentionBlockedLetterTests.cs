@@ -57,11 +57,12 @@ public class SaasOwnerRetentionBlockedLetterTests : PortalRetentionLetterTestBas
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        letter.Subject.Should().Be($"Your {LetterEnvironment.LogoText} space is paused, but your data is safe until {ShortDay(DeleteOn, scope)}");
+        letter.Subject.Should().Be($"Your {LetterEnvironment.LogoText} space is blocked, but your data is safe until {ShortDay(DeleteOn, scope)}");
 
-        letter.Body.Should().Contain("Your space is paused, but nothing is lost yet")
+        letter.Body.Should().Contain("Your space is blocked, but nothing is lost yet")
             .And.Contain("has ended, we", "a lapsed portal is blocked for its subscription, not for being unused")
             .And.Contain("Just unblock your space before")
+            .And.Contain("then renew your subscription to get back to work", "a portal that comes back unpaid has to be renewed to be used")
             .And.Contain("unblock your space and back it up", "a portal that comes back unpaid can only be backed up")
             .And.NotContain("used for a while")
             .And.NotContain("get in touch with our support team", "a portal that can be unblocked from the letter is not sent to support");

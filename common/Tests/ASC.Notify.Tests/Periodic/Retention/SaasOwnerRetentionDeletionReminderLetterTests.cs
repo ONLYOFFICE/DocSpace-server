@@ -61,6 +61,7 @@ public class SaasOwnerRetentionDeletionReminderLetterTests : PortalRetentionLett
 
         letter.Body.Should().Contain("is still blocked because its subscription has ended")
             .And.Contain("This is a friendly last reminder")
+            .And.Contain("then renew your subscription to get back to work", "a portal that comes back unpaid has to be renewed to be used")
             .And.Contain("unblock your space and back it up", "a portal that comes back unpaid can only be backed up");
     }
 }

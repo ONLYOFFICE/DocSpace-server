@@ -1682,6 +1682,7 @@ public abstract class PortalRetentionNotifyAction(
     UserManager userManager,
     StudioNotifyHelper studioNotifyHelper,
     ITariffService tariffService,
+    TenantUtil tenantUtil,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
     : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
@@ -1731,13 +1732,32 @@ public abstract class PortalRetentionNotifyAction(
     /// <summary>A day the letter discloses, written out in the recipient's culture.</summary>
     protected static TagValue Date(string tag, DateTime date, CultureInfo culture)
     {
-        return new TagValue(tag, date.ToString("D", culture));
+        return new TagValue(tag, date.ConvertNumerals("D", culture));
     }
 
-    /// <summary>A day the letter discloses, as month and day only, in the recipient's culture.</summary>
-    protected static TagValue ShortDate(string tag, DateTime date, CultureInfo culture)
+    /// <summary>
+    /// The day of the block or the deletion, written out in the recipient's culture and in the portal's
+    /// time zone. See <see cref="PortalDay"/>.
+    /// </summary>
+    protected TagValue Deadline(string tag, DateTime utcDay, PeriodicLetterContext context, CultureInfo culture)
     {
-        return new TagValue(tag, date.ToString("M", culture));
+        return new TagValue(tag, PortalDay(utcDay, context).ConvertNumerals("D", culture));
+    }
+
+    /// <summary>The same day as <see cref="Deadline"/>, as month and day only.</summary>
+    protected TagValue ShortDeadline(string tag, DateTime utcDay, PeriodicLetterContext context, CultureInfo culture)
+    {
+        return new TagValue(tag, PortalDay(utcDay, context).ConvertNumerals("M", culture));
+    }
+
+    /// <summary>
+    /// The policy counts in UTC days and acts on the first run of that day, so a deadline is the local day
+    /// on which that UTC day begins. West of UTC that is the day before: the letter then names a day that
+    /// ends before the job can act, never one it acts on before the reader's day is over.
+    /// </summary>
+    private DateTime PortalDay(DateTime utcDay, PeriodicLetterContext context)
+    {
+        return tenantUtil.DateTimeFromUtc(context.Tenant.TimeZone, DateTime.SpecifyKind(utcDay.Date, DateTimeKind.Utc)).Date;
     }
 
     /// <summary>
@@ -1773,9 +1793,10 @@ public sealed class SaasOwnerRetentionInactivityWarningNotifyAction(
     StudioNotifyHelper studioNotifyHelper,
     ITariffService tariffService,
     CommonLinkUtility commonLinkUtility,
+    TenantUtil tenantUtil,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
-    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, tenantUtil, periodicNotifyAction, tenantManager)
 {
     public override string ID => "saas_owner_retention_inactivity_warning";
 
@@ -1789,9 +1810,9 @@ public sealed class SaasOwnerRetentionInactivityWarningNotifyAction(
 
     protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
     {
-        tags.Add(Date("BlockDate", Decision.BlockOn, culture));
-        tags.Add(ShortDate("BlockDateShort", Decision.BlockOn, culture));
-        tags.Add(Date("DeleteDate", Decision.DeleteOn, culture));
+        tags.Add(Deadline("BlockDate", Decision.BlockOn, context, culture));
+        tags.Add(ShortDeadline("BlockDateShort", Decision.BlockOn, context, culture));
+        tags.Add(Deadline("DeleteDate", Decision.DeleteOn, context, culture));
         tags.Add(TagValues.OrangeButton(Resource("ButtonKeepPortal", culture), commonLinkUtility.GetFullAbsolutePath("~")));
 
         return Task.CompletedTask;
@@ -1805,9 +1826,10 @@ public sealed class SaasOwnerRetentionUnpaidWarningNotifyAction(
     StudioNotifyHelper studioNotifyHelper,
     ITariffService tariffService,
     CommonLinkUtility commonLinkUtility,
+    TenantUtil tenantUtil,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
-    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, tenantUtil, periodicNotifyAction, tenantManager)
 {
     public override string ID => "saas_owner_retention_unpaid_warning";
 
@@ -1822,9 +1844,9 @@ public sealed class SaasOwnerRetentionUnpaidWarningNotifyAction(
     protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
     {
         tags.Add(Date("DueDate", context.DueDate, culture));
-        tags.Add(Date("BlockDate", Decision.BlockOn, culture));
-        tags.Add(ShortDate("BlockDateShort", Decision.BlockOn, culture));
-        tags.Add(Date("DeleteDate", Decision.DeleteOn, culture));
+        tags.Add(Deadline("BlockDate", Decision.BlockOn, context, culture));
+        tags.Add(ShortDeadline("BlockDateShort", Decision.BlockOn, context, culture));
+        tags.Add(Deadline("DeleteDate", Decision.DeleteOn, context, culture));
         tags.Add(TagValues.OrangeButton(Resource("ButtonRenewNow", culture), commonLinkUtility.GetFullAbsolutePath("~/billing/overview")));
 
         return Task.CompletedTask;
@@ -1843,9 +1865,10 @@ public sealed class SaasOwnerRetentionWalletWarningNotifyAction(
     StudioNotifyHelper studioNotifyHelper,
     ITariffService tariffService,
     CommonLinkUtility commonLinkUtility,
+    TenantUtil tenantUtil,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
-    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, tenantUtil, periodicNotifyAction, tenantManager)
 {
     public override string ID => "saas_owner_retention_wallet_warning";
 
@@ -1862,9 +1885,9 @@ public sealed class SaasOwnerRetentionWalletWarningNotifyAction(
         var unpaid = Category == PortalRetentionCategory.FormerPayingWithBalance;
 
         tags.Add(new TagValue("Unpaid", unpaid ? "True" : "False"));
-        tags.Add(Date("BlockDate", Decision.BlockOn, culture));
-        tags.Add(ShortDate("BlockDateShort", Decision.BlockOn, culture));
-        tags.Add(Date("DeleteDate", Decision.DeleteOn, culture));
+        tags.Add(Deadline("BlockDate", Decision.BlockOn, context, culture));
+        tags.Add(ShortDeadline("BlockDateShort", Decision.BlockOn, context, culture));
+        tags.Add(Deadline("DeleteDate", Decision.DeleteOn, context, culture));
         tags.Add(new TagValue("URL1", commonLinkUtility.GetFullAbsolutePath("~/billing/wallet")));
 
         if (unpaid)
@@ -1892,9 +1915,10 @@ public sealed class SaasOwnerRetentionBlockedNotifyAction(
     ITariffService tariffService,
     CommonLinkUtility commonLinkUtility,
     SettingsManager settingsManager,
+    TenantUtil tenantUtil,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
-    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, tenantUtil, periodicNotifyAction, tenantManager)
 {
     public override string ID => "saas_owner_retention_blocked";
 
@@ -1908,8 +1932,8 @@ public sealed class SaasOwnerRetentionBlockedNotifyAction(
 
     protected override async Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
     {
-        tags.Add(Date("DeleteDate", Decision.DeleteOn, culture));
-        tags.Add(ShortDate("DeleteDateShort", Decision.DeleteOn, culture));
+        tags.Add(Deadline("DeleteDate", Decision.DeleteOn, context, culture));
+        tags.Add(ShortDeadline("DeleteDateShort", Decision.DeleteOn, context, culture));
         tags.Add(new TagValue("Unpaid", FormerPaying ? "True" : "False"));
 
         await AddUnblockTagsAsync(context, culture, tags, commonLinkUtility, settingsManager);
@@ -1924,9 +1948,10 @@ public sealed class SaasOwnerRetentionDeletionReminderNotifyAction(
     ITariffService tariffService,
     CommonLinkUtility commonLinkUtility,
     SettingsManager settingsManager,
+    TenantUtil tenantUtil,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
-    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, tenantUtil, periodicNotifyAction, tenantManager)
 {
     public override string ID => "saas_owner_retention_deletion_reminder";
 
@@ -1940,8 +1965,8 @@ public sealed class SaasOwnerRetentionDeletionReminderNotifyAction(
 
     protected override async Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
     {
-        tags.Add(Date("DeleteDate", Decision.DeleteOn, culture));
-        tags.Add(ShortDate("DeleteDateShort", Decision.DeleteOn, culture));
+        tags.Add(Deadline("DeleteDate", Decision.DeleteOn, context, culture));
+        tags.Add(ShortDeadline("DeleteDateShort", Decision.DeleteOn, context, culture));
         tags.Add(new TagValue("Unpaid", FormerPaying ? "True" : "False"));
 
         // The early reminder is followed by another one; only the final one is the last chance.
@@ -1959,9 +1984,10 @@ public sealed class SaasOwnerRetentionDeletedNotifyAction(
     ITariffService tariffService,
     ExternalResourceSettingsHelper externalResources,
     CommonLinkUtility commonLinkUtility,
+    TenantUtil tenantUtil,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
-    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, tenantUtil, periodicNotifyAction, tenantManager)
 {
     public override string ID => "saas_owner_retention_deleted";
 

@@ -58,7 +58,7 @@ public class SaasOwnerRetentionUnpaidWarningLetterTests : PortalRetentionLetterT
     {
         letter.Subject.Should().Be($"Your {LetterEnvironment.LogoText} space misses you (action needed by {ShortDay(BlockOn, scope)})");
 
-        letter.Body.Should().Contain("we pause spaces once their subscription has ended")
+        letter.Body.Should().Contain("we block spaces once their subscription has ended")
             .And.Contain("Just renew your subscription before")
             .And.Contain("the space and all its data will be permanently deleted")
             .And.NotContain("sign in once", "signing in does not move the count of a lapsed portal");

@@ -64,16 +64,19 @@ public abstract class PortalRetentionLetterTestBase<TAction> : LetterTestBase<TA
         action.Tags = await action.BuildTagsAsync(context, scope.Recipient, scope.Culture);
     }
 
-    /// <summary>A day as the letter writes it, in the culture under test.</summary>
+    /// <summary>
+    /// A day as the letter writes it, in the culture under test - with the numerals the letters use for it,
+    /// which in Arabic are the Eastern ones on the Gregorian calendar.
+    /// </summary>
     protected static string Day(DateTime date, LetterScope scope)
     {
-        return date.ToString("D", scope.Culture);
+        return ASC.Core.Common.ArabicNumeralHelper.ConvertNumerals(date, "D", scope.Culture);
     }
 
     /// <summary>A day as the letter writes it in short, month and day only, in the culture under test.</summary>
     protected static string ShortDay(DateTime date, LetterScope scope)
     {
-        return date.ToString("M", scope.Culture);
+        return ASC.Core.Common.ArabicNumeralHelper.ConvertNumerals(date, "M", scope.Culture);
     }
 
     /// <summary>A button caption with the branding resolved, the way the letter shows it.</summary>
