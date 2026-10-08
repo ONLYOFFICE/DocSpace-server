@@ -46,6 +46,7 @@ global using ASC.Common;
 global using ASC.Common.Log;
 global using ASC.Core;
 global using ASC.Core.Common.EF;
+global using ASC.Core.Tenants;
 global using ASC.Data.Storage;
 global using ASC.EventBus.Abstractions;
 global using ASC.EventBus.Log;

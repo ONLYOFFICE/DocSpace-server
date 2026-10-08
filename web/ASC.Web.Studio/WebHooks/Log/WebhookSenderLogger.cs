@@ -49,4 +49,7 @@ internal static partial class WebhookSenderLogger
 
     [LoggerMessage(LogLevel.Error, "Failed to send webhook tenant: {tenantId}, log: {logId}")]
     public static partial void ErrorFailedToSend(this ILogger<WebhookSender> logger, int tenantId, int logId, Exception exception);
+
+    [LoggerMessage(LogLevel.Error, "Failed to schedule the next attempt of webhook tenant: {tenantId}, log: {logId}")]
+    public static partial void ErrorFailedToRegisterAttempt(this ILogger<WebhookSender> logger, int tenantId, int logId, Exception exception);
 }
