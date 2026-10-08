@@ -43,18 +43,24 @@ public class SaasOwnerRetentionUnpaidWarningLetterTests : PortalRetentionLetterT
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
+        letter.Subject.Should().Contain(ShortDay(BlockOn, scope));
+
         letter.Body.Should().Contain(Day(DueOn, scope))
             .And.Contain(Day(BlockOn, scope))
+            .And.Contain(ShortDay(BlockOn, scope))
             .And.Contain(Day(DeleteOn, scope))
+            .And.Contain(scope.PortalUrl)
             .And.Contain($"{scope.PortalUrl}/billing/overview")
             .And.Contain(Caption("ButtonRenewNow", scope));
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        letter.Subject.Should().Be($"Your {LetterEnvironment.LogoText} will be blocked on {Day(BlockOn, scope)}");
+        letter.Subject.Should().Be($"Your {LetterEnvironment.LogoText} space misses you (action needed by {ShortDay(BlockOn, scope)})");
 
-        letter.Body.Should().Contain($"ended on {Day(DueOn, scope)} and has not been renewed")
-            .And.Contain("Renew the subscription to keep working with your data.");
+        letter.Body.Should().Contain("we pause spaces once their subscription has ended")
+            .And.Contain("Just renew your subscription before")
+            .And.Contain("the space and all its data will be permanently deleted")
+            .And.NotContain("sign in once", "signing in does not move the count of a lapsed portal");
     }
 }

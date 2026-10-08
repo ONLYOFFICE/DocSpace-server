@@ -34,35 +34,33 @@
 namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
-/// The reminder to an unused free portal with money left on its wallet
-/// (<c>saas_owner_retention_wallet_warning</c>): the money goes with the portal, the letter says by when,
-/// and signing in keeps both. The lapsed portal's variant is <see cref="SaasOwnerRetentionWalletWarningUnpaidLetterTests"/>.
+/// The earlier reminder that a blocked portal is about to be deleted
+/// (<c>saas_owner_retention_deletion_reminder</c>), here for a free portal with money left on its wallet.
+/// Another reminder follows it, so it does not call itself the last one.
 /// </summary>
-public class SaasOwnerRetentionWalletWarningLetterTests : PortalRetentionLetterTestBase<SaasOwnerRetentionWalletWarningNotifyAction>
+public class SaasOwnerRetentionDeletionReminderEarlyLetterTests : PortalRetentionLetterTestBase<SaasOwnerRetentionDeletionReminderNotifyAction>
 {
     protected override PortalRetentionCategory Category => PortalRetentionCategory.FreeWithBalance;
 
-    protected override PortalRetentionLetter? Letter => PortalRetentionLetter.MonthlyNotice;
+    protected override PortalRetentionLetter? Letter => PortalRetentionLetter.EarlyDeletionNotice;
+
+    protected override string PreviewName(SaasOwnerRetentionDeletionReminderNotifyAction action) => action.ID + "_early";
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Subject.Should().Contain(ShortDay(BlockOn, scope));
+        letter.Subject.Should().Contain(ShortDay(DeleteOn, scope));
 
-        letter.Body.Should().Contain(Day(BlockOn, scope))
-            .And.Contain(ShortDay(BlockOn, scope))
-            .And.Contain(Day(DeleteOn, scope))
-            .And.Contain(scope.PortalUrl)
-            .And.Contain($"{scope.PortalUrl}/billing/wallet")
-            .And.Contain(Caption("ButtonKeepSpaceAndFunds", scope));
+        letter.Body.Should().Contain(Day(DeleteOn, scope))
+            .And.Contain(Caption("ButtonUnblockPortal", scope))
+            .And.Contain(nameof(ConfirmType.PortalUnblock));
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        letter.Subject.Should().Be($"You still have funds in your {LetterEnvironment.LogoText} space (action needed by {ShortDay(BlockOn, scope)})");
+        letter.Subject.Should().Be($"Your {LetterEnvironment.LogoText} space will be deleted soon (deleted on {ShortDay(DeleteOn, scope)})");
 
-        letter.Body.Should().Contain("since anyone signed in to your")
-            .And.Contain("there are still funds left in its")
-            .And.Contain("along with the funds in your wallet")
-            .And.Contain("Just sign in once before");
+        letter.Body.Should().Contain("used for a while")
+            .And.Contain("This is a friendly reminder")
+            .And.Contain("unblock your space and download them");
     }
 }

@@ -46,17 +46,24 @@ public class SaasOwnerRetentionBlockedLetterTests : PortalRetentionLetterTestBas
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
+        letter.Subject.Should().Contain(ShortDay(DeleteOn, scope));
+
         letter.Body.Should().Contain(Day(DeleteOn, scope))
+            .And.Contain(ShortDay(DeleteOn, scope))
+            .And.Contain(scope.PortalUrl)
             .And.Contain(Caption("ButtonUnblockPortal", scope))
             .And.Contain(nameof(ConfirmType.PortalUnblock), "the button is the confirmation link that unblocks the portal");
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        letter.Subject.Should().Be($"Your {LetterEnvironment.LogoText} has been blocked");
+        letter.Subject.Should().Be($"Your {LetterEnvironment.LogoText} space is paused, but your data is safe until {ShortDay(DeleteOn, scope)}");
 
-        letter.Body.Should().Contain("has been blocked because it was not used")
-            .And.Contain("unblock it before that date")
-            .And.NotContain(", contact our", "a portal that can be unblocked from the letter is not sent to support");
+        letter.Body.Should().Contain("Your space is paused, but nothing is lost yet")
+            .And.Contain("has ended, we", "a lapsed portal is blocked for its subscription, not for being unused")
+            .And.Contain("Just unblock your space before")
+            .And.Contain("unblock your space and back it up", "a portal that comes back unpaid can only be backed up")
+            .And.NotContain("used for a while")
+            .And.NotContain("get in touch with our support team", "a portal that can be unblocked from the letter is not sent to support");
     }
 }

@@ -34,26 +34,34 @@
 namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
-/// The portal has been deleted by the retention policy (<c>saas_owner_retention_deleted</c>). It names no
-/// address: the removal renames the alias before the letter is rendered.
+/// The portal has been deleted by the retention policy (<c>saas_owner_retention_deleted</c>). The removal
+/// renames the alias before the letter is rendered, so the letter names the address the job captured
+/// before it, as text rather than a link.
 /// </summary>
 public class SaasOwnerRetentionDeletedLetterTests : PortalRetentionLetterTestBase<SaasOwnerRetentionDeletedNotifyAction>
 {
+    private const string Domain = "retention-deleted.example.com";
+
     protected override PortalRetentionCategory Category => PortalRetentionCategory.Free;
 
     protected override PortalRetentionLetter? Letter => null;
 
+    protected override string? PortalDomain => Domain;
+
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain(Caption("ButtonLeaveFeedback", scope))
+        letter.Body.Should().Contain(Domain, "the letter names the portal by the address it had")
+            .And.Contain(Caption("ButtonShareFeedback", scope))
             .And.Contain(LetterEnvironment.NotificationImageUrl(scope.PortalUrl, "docspace_deleted.gif"));
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        letter.Subject.Should().Be($"Your {LetterEnvironment.LogoText} has been deleted");
+        letter.Subject.Should().Be($"Your {LetterEnvironment.LogoText} space has been deleted");
 
-        letter.Body.Should().Contain("was not used and has been deleted together with all its data")
-            .And.Contain("Privacy Policy");
+        letter.Body.Should().Contain("Your space has been deleted")
+            .And.Contain("used for a long time")
+            .And.Contain("Privacy Policy")
+            .And.Contain("create a new space");
     }
 }

@@ -448,6 +448,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Contact support.
+        /// </summary>
+        public static string ButtonContactSupport {
+            get {
+                return ResourceManager.GetString("ButtonContactSupport", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Deactivate Portal.
         /// </summary>
         public static string ButtonDeactivatePortal {
@@ -527,7 +536,25 @@ namespace ASC.Web.Core.PublicResources {
                 return ResourceManager.GetString("ButtonJoinRoom", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Keep my ${LetterLogoText}.
+        /// </summary>
+        public static string ButtonKeepPortal {
+            get {
+                return ResourceManager.GetString("ButtonKeepPortal", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Keep my space and funds.
+        /// </summary>
+        public static string ButtonKeepSpaceAndFunds {
+            get {
+                return ResourceManager.GetString("ButtonKeepSpaceAndFunds", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Leave feedback.
         /// </summary>
@@ -619,6 +646,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Share my feedback.
+        /// </summary>
+        public static string ButtonShareFeedback {
+            get {
+                return ResourceManager.GetString("ButtonShareFeedback", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to Start free trial.
         /// </summary>
         public static string ButtonStartFreeTrial {
@@ -628,7 +664,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Unblock your ${LetterLogoText}.
+        ///   Looks up a localized string similar to Unblock my space.
         /// </summary>
         public static string ButtonUnblockPortal {
             get {
@@ -1881,7 +1917,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1.Your ${LetterLogoText} has been blocked [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to h1.Your space is paused, but nothing is lost yet [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_owner_retention_blocked {
             get {
@@ -1890,7 +1926,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1.Your ${LetterLogoText} has been deleted [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to h1.Your space has been deleted [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_owner_retention_deleted {
             get {
@@ -1899,7 +1935,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1.Your ${LetterLogoText} will be deleted [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to h1.Your space will be deleted soon [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_owner_retention_deletion_reminder {
             get {
@@ -1908,7 +1944,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1.Your ${LetterLogoText} is not in use [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to h1.We haven&apos;t seen you in a while [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_owner_retention_inactivity_warning {
             get {
@@ -1917,7 +1953,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1.Your subscription has ended [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to h1.Your subscription has ended, but your space is still here [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_owner_retention_unpaid_warning {
             get {
@@ -1926,7 +1962,8 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1.Funds on your wallet will be lost [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to #if($Unpaid == &quot;True&quot;)
+        ///h1.Your subscription has ended, but your space and funds are still here [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_owner_retention_wallet_warning {
             get {
@@ -2967,7 +3004,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} has been blocked.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} space is paused, but your data is safe until $DeleteDateShort.
         /// </summary>
         public static string subject_saas_owner_retention_blocked {
             get {
@@ -2976,7 +3013,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} has been deleted.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} space has been deleted.
         /// </summary>
         public static string subject_saas_owner_retention_deleted {
             get {
@@ -2985,7 +3022,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} will be deleted on $DeleteDate.
+        ///   Looks up a localized string similar to #if($FinalNotice == &quot;True&quot;)Last chance to keep your ${LetterLogoText} space#else#**#Your ${LetterLogoText} space will be deleted soon#end#**# (deleted on $DeleteDateShort).
         /// </summary>
         public static string subject_saas_owner_retention_deletion_reminder {
             get {
@@ -2994,7 +3031,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} will be blocked on $BlockDate.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} space misses you (action needed by $BlockDateShort).
         /// </summary>
         public static string subject_saas_owner_retention_inactivity_warning {
             get {
@@ -3003,7 +3040,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} will be blocked on $BlockDate.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} space misses you (action needed by $BlockDateShort).
         /// </summary>
         public static string subject_saas_owner_retention_unpaid_warning {
             get {
@@ -3012,7 +3049,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Funds on your ${LetterLogoText} wallet will be lost.
+        ///   Looks up a localized string similar to You still have funds in your ${LetterLogoText} space (action needed by $BlockDateShort).
         /// </summary>
         public static string subject_saas_owner_retention_wallet_warning {
             get {

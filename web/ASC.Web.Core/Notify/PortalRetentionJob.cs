@@ -257,11 +257,11 @@ public class PortalRetentionJob(
         };
     }
 
-    private async Task SendAsync(Type letter, PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName)
+    private async Task SendAsync(Type letter, PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName, string portalDomain = null)
     {
         var action = (PortalRetentionNotifyAction)serviceProvider.GetRequiredService(letter);
 
-        action.Init(category, decision);
+        action.Init(category, decision, portalDomain);
 
         await action.SendAsync(context, client, senderName);
     }
@@ -326,7 +326,7 @@ public class PortalRetentionJob(
             await securityContext.AuthenticateMeWithoutCookieAsync(tenant.OwnerId);
             await portalRemovalService.RemoveAsync(tenant, Guid.Empty, auto: true, async () =>
             {
-                await SendAsync(typeof(SaasOwnerRetentionDeletedNotifyAction), context, category, decision, client, senderName);
+                await SendAsync(typeof(SaasOwnerRetentionDeletedNotifyAction), context, category, decision, client, senderName, tenantDomain);
 
                 if (formerPaying)
                 {

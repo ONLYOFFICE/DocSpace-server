@@ -52,12 +52,15 @@ public abstract class PortalRetentionLetterTestBase<TAction> : LetterTestBase<TA
 
     protected virtual PortalRetentionLetter? Letter => PortalRetentionLetter.FirstNotice;
 
+    /// <summary>The address the job hands over for a portal it has just removed; null for every other letter.</summary>
+    protected virtual string? PortalDomain => null;
+
     protected override async Task InitAsync(TAction action, LetterScope scope)
     {
         // A lapsed tariff, so the letters that quote the due date have one to quote.
         var context = PeriodicLetterContexts.Lapsed(PeriodicLetterContexts.Fresh(scope.Tenant, DateTime.UtcNow.Date), DueOn);
 
-        action.Init(Category, new PortalRetentionDecision(PortalRetentionStep.Notify, Letter, BlockOn, DeleteOn));
+        action.Init(Category, new PortalRetentionDecision(PortalRetentionStep.Notify, Letter, BlockOn, DeleteOn), PortalDomain);
         action.Tags = await action.BuildTagsAsync(context, scope.Recipient, scope.Culture);
     }
 
@@ -65,6 +68,12 @@ public abstract class PortalRetentionLetterTestBase<TAction> : LetterTestBase<TA
     protected static string Day(DateTime date, LetterScope scope)
     {
         return date.ToString("D", scope.Culture);
+    }
+
+    /// <summary>A day as the letter writes it in short, month and day only, in the culture under test.</summary>
+    protected static string ShortDay(DateTime date, LetterScope scope)
+    {
+        return date.ToString("M", scope.Culture);
     }
 
     /// <summary>A button caption with the branding resolved, the way the letter shows it.</summary>

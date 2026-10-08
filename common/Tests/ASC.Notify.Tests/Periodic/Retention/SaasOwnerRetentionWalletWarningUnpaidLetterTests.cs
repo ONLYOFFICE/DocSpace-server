@@ -48,8 +48,11 @@ public class SaasOwnerRetentionWalletWarningUnpaidLetterTests : PortalRetentionL
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
+        letter.Subject.Should().Contain(ShortDay(BlockOn, scope));
+
         letter.Body.Should().Contain(Day(DueOn, scope))
             .And.Contain(Day(BlockOn, scope))
+            .And.Contain(ShortDay(BlockOn, scope))
             .And.Contain(Day(DeleteOn, scope))
             .And.Contain($"{scope.PortalUrl}/billing/wallet")
             .And.Contain($"{scope.PortalUrl}/billing/overview")
@@ -58,12 +61,15 @@ public class SaasOwnerRetentionWalletWarningUnpaidLetterTests : PortalRetentionL
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        letter.Subject.Should().Be($"Funds on your {LetterEnvironment.LogoText} wallet will be lost");
+        letter.Subject.Should().Be($"You still have funds in your {LetterEnvironment.LogoText} space (action needed by {ShortDay(BlockOn, scope)})");
 
-        letter.Body.Should().Contain("ended on <strong")
+        letter.Body.Should().Contain("Your subscription has ended, but your space and funds are still here")
+            .And.Contain("ended on <strong")
             .And.Contain($">{Day(DueOn, scope)}</strong>")
-            .And.Contain("Unless the subscription is renewed")
-            .And.Contain("The funds left on the wallet will be lost together with it.")
-            .And.NotContain("sign in", "signing in does not move the count of a lapsed portal");
+            .And.Contain("check your balance")
+            .And.Contain("Just renew your subscription before")
+            .And.Contain("Your wallet balance may even cover part of it.")
+            .And.Contain("along with the funds in your wallet")
+            .And.NotContain("sign in once", "signing in does not move the count of a lapsed portal");
     }
 }

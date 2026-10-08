@@ -48,13 +48,17 @@ public class SaasOwnerRetentionBlockedFreeLetterTests : PortalRetentionLetterTes
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
         letter.Body.Should().Contain(Day(DeleteOn, scope))
+            .And.Contain(ShortDay(DeleteOn, scope))
+            .And.Contain(Caption("ButtonContactSupport", scope), "the owner of a free portal is sent to support")
             .And.NotContain(Caption("ButtonUnblockPortal", scope))
             .And.NotContain(nameof(ConfirmType.PortalUnblock), "a free portal cannot be unblocked from the letter");
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        letter.Body.Should().Contain($"To keep your {LetterEnvironment.LogoText}, contact our")
-            .And.NotContain("unblock it before that date");
+        letter.Body.Should().Contain("used for a while, we")
+            .And.Contain("Just get in touch with our support team before")
+            .And.Contain("help you get access to them")
+            .And.NotContain("Just unblock your space");
     }
 }

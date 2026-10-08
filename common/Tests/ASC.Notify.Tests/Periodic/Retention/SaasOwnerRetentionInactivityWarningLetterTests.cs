@@ -43,22 +43,24 @@ public class SaasOwnerRetentionInactivityWarningLetterTests : PortalRetentionLet
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
-        letter.Subject.Should().Contain(Day(BlockOn, scope));
+        letter.Subject.Should().Contain(ShortDay(BlockOn, scope));
 
         letter.Body.Should().Contain(Day(BlockOn, scope))
+            .And.Contain(ShortDay(BlockOn, scope))
             .And.Contain(Day(DeleteOn, scope))
             .And.Contain(scope.PortalUrl)
-            .And.Contain(Caption("ButtonGoToDocSpace", scope));
+            .And.Contain(Caption("ButtonKeepPortal", scope));
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
         var logoText = LetterEnvironment.LogoText;
 
-        letter.Subject.Should().Be($"Your {logoText} will be blocked on {Day(BlockOn, scope)}");
+        letter.Subject.Should().Be($"Your {logoText} space misses you (action needed by {ShortDay(BlockOn, scope)})");
 
-        letter.Body.Should().Contain("has not been used for some time")
-            .And.Contain("Free portals that nobody uses are blocked and then deleted together with all their data")
-            .And.Contain("To keep it, just sign in and continue working.");
+        letter.Body.Should().Contain("since anyone signed in to your")
+            .And.Contain("we pause free spaces")
+            .And.Contain("the space and all its data will be permanently deleted")
+            .And.Contain("Just sign in once before");
     }
 }
