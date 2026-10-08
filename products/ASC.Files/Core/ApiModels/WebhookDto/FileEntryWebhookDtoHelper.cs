@@ -87,7 +87,7 @@ public class FileEntryWebhookDtoHelper(
             Encrypted = file.Encrypted.NullIfDefault(),
             Locked = file.Locked.NullIfDefault(),
             LockedBy = file.LockedBy,
-            IsPdf = file.IsPdf.NullIfDefault(),
+            IsForm = file.IsPdf.NullIfDefault(),
             CustomFilterEnabled = file.CustomFilterEnabled.NullIfDefault(),
             CustomFilterEnabledBy = file.CustomFilterEnabledBy,
             LastOpened = file.LastOpened,
