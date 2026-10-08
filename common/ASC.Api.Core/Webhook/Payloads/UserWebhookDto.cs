@@ -38,10 +38,10 @@ namespace ASC.Api.Core.Webhook.Payloads;
 /// </summary>
 /// <remarks>
 /// A copy of EmployeeFullDto, deliberately not derived from it: the webhook wire contract is versioned
-/// separately from the REST API and the two are free to diverge. Fields answering "what may the caller see"
-/// rather than "what is this user" are not copied, because a webhook has no caller - delivery is already gated
-/// by WebhookUserAccessChecker against the subscription owner. Session and authentication state is not copied
-/// either. Timestamps are UTC, matching the delivery envelope, rather than the tenant-local ApiDateTime the
+/// separately from the REST API and the two are free to diverge. Delivery is gated by WebhookUserAccessChecker
+/// against the subscription owner, and the fields the REST API shows by the reader's role (groups, quota,
+/// CreatedBy) are cut by the same rules for that owner (UserWebhookDtoHelper.RestrictForSubscriberAsync).
+/// Session and authentication state is not copied. Timestamps are UTC, matching the delivery envelope, rather than the tenant-local ApiDateTime the
 /// REST API uses.
 /// </remarks>
 [WebhookPayload(WebhookPayloadKind.User)]
@@ -107,13 +107,15 @@ public class UserWebhookDto
     public DateTime? Terminated { get; set; }
 
     /// <summary>
-    /// The comma-separated names of the groups the user belongs to.
+    /// The comma-separated names of the groups the user belongs to. Omitted when the subscription owner is a
+    /// `User` or a `Guest` and the event is about someone else.
     /// </summary>
     /// <example>Marketing Team, Sales</example>
     public string Department { get; set; }
 
     /// <summary>
-    /// The list of groups the user belongs to.
+    /// The list of groups the user belongs to. Omitted when the subscription owner is a `User` or a `Guest` and
+    /// the event is about someone else.
     /// </summary>
     public List<GroupSummaryWebhookDto> Groups { get; set; }
 
@@ -196,25 +198,26 @@ public class UserWebhookDto
     public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; set; }
 
     /// <summary>
-    /// The user quota limit in bytes.
+    /// The user quota limit in bytes. Sent only to a `DocSpaceAdmin` or to the user themselves.
     /// </summary>
     /// <example>0</example>
     public long? QuotaLimit { get; set; }
 
     /// <summary>
-    /// The portal space used by the user in bytes.
+    /// The portal space used by the user in bytes. Sent only to a `DocSpaceAdmin` or to the user themselves.
     /// </summary>
     /// <example>12345</example>
     public double? UsedSpace { get; set; }
 
     /// <summary>
-    /// Specifies whether the user has a custom quota or not.
+    /// Specifies whether the user has a custom quota or not. Sent only to a `DocSpaceAdmin` or to the user
+    /// themselves.
     /// </summary>
     /// <example>false</example>
     public bool? IsCustomQuota { get; set; }
 
     /// <summary>
-    /// The user who created this user.
+    /// The user who created this user. Sent only to a `DocSpaceAdmin`.
     /// </summary>
     public UserSummaryWebhookDto CreatedBy { get; set; }
 
@@ -265,6 +268,11 @@ public class UserWebhookDto
     /// </summary>
     /// <example>https://example.com/profile/user123</example>
     public string ProfileUrl { get; set; }
+
+    internal UserWebhookDto Clone()
+    {
+        return (UserWebhookDto)MemberwiseClone();
+    }
 }
 
 /// <summary>

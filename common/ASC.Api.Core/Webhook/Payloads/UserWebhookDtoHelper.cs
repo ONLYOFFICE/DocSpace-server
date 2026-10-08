@@ -37,10 +37,10 @@ namespace ASC.Api.Core.Webhook.Payloads;
 /// Builds the payload of a user.* webhook.
 /// </summary>
 /// <remarks>
-/// Deliberately not EmployeeFullDtoHelper. That helper answers "what may the current user see about this
-/// user" - it gates groups, quota, CreatedBy and TfaAppEnabled on the caller's role, and a webhook has no
-/// caller in that sense. This one answers "what is this user", the same way for every subscription, and
-/// leaves the question of who may receive it to WebhookUserAccessChecker.
+/// Deliberately not EmployeeFullDtoHelper, which reads the role of the current account: a webhook is built once
+/// per event, while it is published, and has no reader at that point. GetAsync builds the whole user once;
+/// RestrictForSubscriberAsync then cuts it for each subscription owner by the rules EmployeeFullDtoHelper applies
+/// to a reader. WebhookUserAccessChecker decides whether the owner gets the event at all.
 /// </remarks>
 [Scope]
 public class UserWebhookDtoHelper(
@@ -104,6 +104,34 @@ public class UserWebhookDtoHelper(
         if (userInfo.CreatedBy.HasValue)
         {
             result.CreatedBy = await GetSummaryAsync(userInfo.CreatedBy.Value);
+        }
+
+        return result;
+    }
+
+    public async Task<UserWebhookDto> RestrictForSubscriberAsync(UserWebhookDto payload, UserInfo userInfo, Guid? subscriberId)
+    {
+        if (!subscriberId.HasValue || await userManager.IsDocSpaceAdminAsync(subscriberId.Value))
+        {
+            return payload;
+        }
+
+        var isSelf = subscriberId.Value == userInfo.Id;
+        var result = payload.Clone();
+
+        result.CreatedBy = null;
+
+        if (!isSelf)
+        {
+            result.UsedSpace = null;
+            result.QuotaLimit = null;
+            result.IsCustomQuota = null;
+
+            if (await userManager.IsUserAsync(subscriberId.Value) || await userManager.IsGuestAsync(subscriberId.Value))
+            {
+                result.Groups = null;
+                result.Department = null;
+            }
         }
 
         return result;
