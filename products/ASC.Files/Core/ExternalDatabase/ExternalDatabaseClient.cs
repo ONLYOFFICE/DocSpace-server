@@ -240,10 +240,13 @@ public record SelfJoinCondition(string LeftColumn, string Operator, string Right
 
 [Scope]
 public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<ExternalDatabaseClient> logger)
+    : IFormsDatabaseClient
 {
     private static readonly Regex _tableNameRegex = new(@"^[a-zA-Z0-9_]+$", RegexOptions.Compiled);
 
-    private static void ValidateTableName(string tableName)
+    internal const string PgTableExistsSql = "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = @tableName";
+
+    internal static void ValidateTableName(string tableName)
     {
         if (string.IsNullOrWhiteSpace(tableName) || !_tableNameRegex.IsMatch(tableName))
         {
@@ -269,6 +272,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         {
             ExternalDatabaseType.MySql => BuildMySqlCreateTable(tableName, columns),
             ExternalDatabaseType.Sqlite => BuildSqliteCreateTable(tableName, columns),
+            ExternalDatabaseType.PostgreSql => BuildPgCreateTable(tableName, columns),
             _ => throw new NotSupportedException($"Database type '{provider.DatabaseType}' is not supported yet.")
         };
         await cmd.ExecuteNonQueryAsync();
@@ -293,6 +297,28 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         });
         return $"CREATE TABLE IF NOT EXISTS \"{tableName}\" ({string.Join(", ", colDefs)});";
     }
+
+    internal static string BuildPgCreateTable(string tableName, IEnumerable<DbColumnDefinition> columns)
+    {
+        var colDefs = columns.Select(c =>
+        {
+            var type = MapPgType(c);
+            return c.IsPrimaryKey ? $"\"{c.Name}\" {type} PRIMARY KEY" : $"\"{c.Name}\" {type}";
+        });
+        return $"CREATE TABLE IF NOT EXISTS \"{tableName}\" ({string.Join(", ", colDefs)});";
+    }
+
+    private static string MapPgType(DbColumnDefinition col) => col.Type switch
+    {
+        DbColumnType.Integer => "INTEGER",
+        DbColumnType.Boolean => "BOOLEAN",
+        DbColumnType.Date => "DATE",
+        DbColumnType.DateTime => "TIMESTAMP",
+        DbColumnType.Enum when col.EnumValues?.Count > 0 =>
+            $"TEXT CHECK (\"{col.Name}\" IN ({string.Join(", ", col.EnumValues.Select(v => $"'{v.Replace("'", "''")}'"))}))",
+        DbColumnType.Enum => "TEXT",
+        _ => "TEXT"
+    };
 
     private static string MapSqliteType(DbColumnDefinition col) => col.Type switch
     {
@@ -332,6 +358,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         {
             ExternalDatabaseType.MySql => "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME=@tableName",
             ExternalDatabaseType.Sqlite => "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=@tableName",
+            ExternalDatabaseType.PostgreSql => PgTableExistsSql,
             _ => throw new NotSupportedException($"Database type '{provider.DatabaseType}' is not supported yet.")
         };
         var param = cmd.CreateParameter();
@@ -356,7 +383,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         cmd.CommandText = dbType switch
         {
             ExternalDatabaseType.MySql => $"SELECT COUNT(*) FROM `{tableName}`",
-            ExternalDatabaseType.Sqlite => $"SELECT COUNT(*) FROM \"{tableName}\"",
+            ExternalDatabaseType.Sqlite or ExternalDatabaseType.PostgreSql => $"SELECT COUNT(*) FROM \"{tableName}\"",
             _ => throw new NotSupportedException($"Database type '{provider.DatabaseType}' is not supported yet.")
         };
 
@@ -521,6 +548,20 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             return $"{datePart.ToUpperInvariant()}({q}{column}{q})";
         }
 
+        if (dbType == ExternalDatabaseType.PostgreSql)
+        {
+            return datePart.ToUpperInvariant() switch
+            {
+                "YEAR"      => $"EXTRACT(YEAR FROM {q}{column}{q})::INTEGER",
+                "MONTH"     => $"EXTRACT(MONTH FROM {q}{column}{q})::INTEGER",
+                "WEEK"      => $"EXTRACT(WEEK FROM {q}{column}{q})::INTEGER",
+                "DAYOFYEAR" => $"EXTRACT(DOY FROM {q}{column}{q})::INTEGER",
+                "QUARTER"   => $"EXTRACT(QUARTER FROM {q}{column}{q})::INTEGER",
+                "DAYOFWEEK" => $"EXTRACT(DOW FROM {q}{column}{q})::INTEGER + 1",
+                _ => throw new ArgumentException($"Unsupported date part for PostgreSQL: {datePart}")
+            };
+        }
+
         return datePart.ToUpperInvariant() switch
         {
             "YEAR"      => $"CAST(strftime('%Y', {q}{column}{q}) AS INTEGER)",
@@ -544,6 +585,16 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
                 "HOURS"   => $"ABS(TIMESTAMPDIFF(HOUR, {q}{startCol}{q}, {q}{endCol}{q})){plus1}",
                 "MINUTES" => $"ABS(TIMESTAMPDIFF(MINUTE, {q}{startCol}{q}, {q}{endCol}{q})){plus1}",
                 _         => $"ABS(DATEDIFF({q}{startCol}{q}, {q}{endCol}{q})){plus1}"
+            };
+        }
+
+        if (dbType == ExternalDatabaseType.PostgreSql)
+        {
+            return unit switch
+            {
+                "HOURS"   => $"ABS(EXTRACT(EPOCH FROM ({q}{endCol}{q}::TIMESTAMP - {q}{startCol}{q}::TIMESTAMP)) / 3600)::INTEGER{plus1}",
+                "MINUTES" => $"ABS(EXTRACT(EPOCH FROM ({q}{endCol}{q}::TIMESTAMP - {q}{startCol}{q}::TIMESTAMP)) / 60)::INTEGER{plus1}",
+                _         => $"ABS(({q}{endCol}{q}::DATE - {q}{startCol}{q}::DATE)){plus1}"
             };
         }
 
@@ -881,13 +932,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         cmd.CommandText = sql.ToString();
         cmd.CommandTimeout = 60;
 
-        foreach (var (name, value) in parameters)
-        {
-            var param = cmd.CreateParameter();
-            param.ParameterName = name;
-            param.Value = value ?? DBNull.Value;
-            cmd.Parameters.Add(param);
-        }
+        AddParameters(cmd, parameters);
 
         await using var reader = await cmd.ExecuteReaderAsync();
         var results = new List<Dictionary<string, object?>>();
@@ -1002,13 +1047,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         cmd.CommandText = sql.ToString();
         cmd.CommandTimeout = 30;
 
-        foreach (var (name, value) in parameters)
-        {
-            var param = cmd.CreateParameter();
-            param.ParameterName = name;
-            param.Value = value ?? DBNull.Value;
-            cmd.Parameters.Add(param);
-        }
+        AddParameters(cmd, parameters);
 
         await using var reader = await cmd.ExecuteReaderAsync();
         var results = new List<Dictionary<string, object?>>();
@@ -1218,13 +1257,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         cmd.CommandText = sql;
         cmd.CommandTimeout = 120;
 
-        foreach (var (name, value) in parameters)
-        {
-            var param = cmd.CreateParameter();
-            param.ParameterName = name;
-            param.Value = value ?? DBNull.Value;
-            cmd.Parameters.Add(param);
-        }
+        AddParameters(cmd, parameters);
 
         await using var reader = await cmd.ExecuteReaderAsync();
         var results = new List<Dictionary<string, object?>>();
@@ -1274,6 +1307,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
             {
                 ExternalDatabaseType.MySql => BuildMySqlCreateTable(tableName, columns),
                 ExternalDatabaseType.Sqlite => BuildSqliteCreateTable(tableName, columns),
+                ExternalDatabaseType.PostgreSql => BuildPgCreateTable(tableName, columns),
                 _ => throw new NotSupportedException($"Database type '{provider.DatabaseType}' is not supported yet.")
             };
             await createCmd.ExecuteNonQueryAsync();
@@ -1381,7 +1415,25 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         }
     }
 
-    private static string BuildInsertSql(string tableName, IEnumerable<string> keys, string? keyColumn, ExternalDatabaseType dbType)
+    private static void AddParameters(DbCommand cmd, Dictionary<string, object?> parameters)
+    {
+        foreach (var (name, value) in parameters)
+        {
+            var param = cmd.CreateParameter();
+            param.ParameterName = name;
+            param.Value = value ?? DBNull.Value;
+
+            // Filter values arrive as strings: PostgreSQL, unlike MySQL and SQLite, must infer their type from the column.
+            if (value is string && param is NpgsqlParameter npgsqlParam)
+            {
+                npgsqlParam.NpgsqlDbType = NpgsqlDbType.Unknown;
+            }
+
+            cmd.Parameters.Add(param);
+        }
+    }
+
+    internal static string BuildInsertSql(string tableName, IEnumerable<string> keys, string? keyColumn, ExternalDatabaseType dbType)
     {
         var keyList = keys.ToList();
         var parameters = string.Join(", ", keyList.Select(k => $"@{k}"));
@@ -1389,7 +1441,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return dbType switch
         {
             ExternalDatabaseType.MySql => BuildMySqlInsert(tableName, keyList, parameters, keyColumn),
-            ExternalDatabaseType.Sqlite => BuildSqliteInsert(tableName, keyList, parameters, keyColumn),
+            ExternalDatabaseType.Sqlite or ExternalDatabaseType.PostgreSql => BuildSqliteInsert(tableName, keyList, parameters, keyColumn),
             _ => throw new NotSupportedException($"Database type '{dbType.ToStringFast()}' is not supported yet.")
         };
     }

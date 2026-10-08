@@ -38,6 +38,7 @@ public class FormFillingReportCreator(
     ILogger<FormFillingReportCreator> logger,
     ExportToXLSX exportToXLSX,
     ExternalDatabaseClient externalDatabaseClient,
+    BuiltinFormsDatabaseClient builtinFormsDatabaseClient,
     IDaoFactory daoFactory,
     SocketManager socketManager,
     IHttpClientFactory clientFactory,
@@ -59,6 +60,7 @@ public class FormFillingReportCreator(
 
         var fileId = formsDataFile.Id is int id ? id : 0;
         await PublishExternalDbSubmissionAsync(sendFormToExternalDB, originalFormId, originalFormVersion, roomId, fileId, resultFormNumber, formsDataUrl);
+        await PublishBuiltinDbSubmissionAsync(originalFormId, originalFormVersion, roomId, fileId, resultFormNumber, formsDataUrl);
 
         if (settingsSaveFormAsXLSX)
         {
@@ -84,7 +86,36 @@ public class FormFillingReportCreator(
             roomId, fileId, resultFormNumber, formsDataUrl));
     }
 
-    public async Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl)
+    // Unlike the external database, the built-in one ignores the room's send-to-database setting.
+    private async Task PublishBuiltinDbSubmissionAsync(int originalFormId, int originalFormVersion, int roomId, int fileId, int resultFormNumber, string formsDataUrl)
+    {
+        if (externalDatabaseClient.IsEnabled() || !builtinFormsDatabaseClient.IsEnabled())
+        {
+            return;
+        }
+
+        await eventBus.PublishAsync(new BuiltinDbFormSubmissionIntegrationEvent(
+            authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId(), originalFormId, originalFormVersion,
+            roomId, fileId, resultFormNumber, formsDataUrl));
+    }
+
+    public Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl)
+        => ExportToDbAsync(externalDatabaseClient, fileId, originalFormId, originalFormVersion, formsDataUrl);
+
+    public async Task ExportToBuiltinDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, string formsDataUrl)
+    {
+        var isNewTable = !await builtinFormsDatabaseClient.TableExistsAsync(GetTableName(originalFormId, originalFormVersion));
+
+        await ExportToDbAsync(builtinFormsDatabaseClient, fileId, originalFormId, originalFormVersion, formsDataUrl);
+
+        // Earlier submissions are copied once, when the form version gets its table.
+        if (isNewTable)
+        {
+            await ExportMissingFromOpenSearchAsync(builtinFormsDatabaseClient, originalFormId, originalFormVersion, roomId);
+        }
+    }
+
+    private async Task ExportToDbAsync(IFormsDatabaseClient client, int fileId, int originalFormId, int originalFormVersion, string formsDataUrl)
     {
 #pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
@@ -110,9 +141,12 @@ public class FormFillingReportCreator(
         var culture = tenantManager.GetCurrentTenant().GetCulture();
         var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId, culture, coreBaseSettings.EnabledCultures);
 
-        await externalDatabaseClient.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
+        await client.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
 
-        await SetExternalDbTableNameAsync(originalFormId, tableName);
+        if (client is ExternalDatabaseClient)
+        {
+            await SetExternalDbTableNameAsync(originalFormId, tableName);
+        }
     }
 
     private async Task SetExternalDbTableNameAsync(int originalFormId, string tableName)
@@ -134,11 +168,14 @@ public class FormFillingReportCreator(
         }
     }
 
-    public async Task<bool> ExportMissingFromOpenSearchAsync(int originalFormId, int originalFormVersion, int roomId)
+    public Task<bool> ExportMissingFromOpenSearchAsync(int originalFormId, int originalFormVersion, int roomId)
+        => ExportMissingFromOpenSearchAsync(externalDatabaseClient, originalFormId, originalFormVersion, roomId);
+
+    private async Task<bool> ExportMissingFromOpenSearchAsync(IFormsDatabaseClient client, int originalFormId, int originalFormVersion, int roomId)
     {
         var tableName = GetTableName(originalFormId, originalFormVersion);
 
-        var dbCount = await externalDatabaseClient.GetTableCountAsync(tableName);
+        var dbCount = await client.GetTableCountAsync(tableName);
 
         await factoryIndexerForm.RefreshAsync();
         var (osCountSuccess, osCount) = await factoryIndexerForm.TryCountAsync(r =>
@@ -156,7 +193,7 @@ public class FormFillingReportCreator(
             return true;
         }
 
-        var existingIds = await externalDatabaseClient.GetExistingFormIdsAsync(tableName);
+        var existingIds = await client.GetExistingFormIdsAsync(tableName);
 
         var (success, allSubmissions) = await factoryIndexerForm.TrySelectAsync(r =>
             r.Where(s => s.RoomId, roomId)
@@ -232,7 +269,7 @@ public class FormFillingReportCreator(
 
             try
             {
-                await externalDatabaseClient.CreateTableAndUpsertAsync(
+                await client.CreateTableAndUpsertAsync(
                     tableName, columnDefinitions, rowData, keyColumn: "form_id");
                 exported = true;
             }
@@ -244,7 +281,7 @@ public class FormFillingReportCreator(
         }
 
         // The gap sync can be the first to create the table (e.g. from the sync button), so record it here too.
-        if (exported)
+        if (exported && client is ExternalDatabaseClient)
         {
             await SetExternalDbTableNameAsync(originalFormId, tableName);
         }

@@ -250,6 +250,10 @@ global using NetEscapades.EnumGenerators;
 
 global using Newtonsoft.Json.Linq;
 
+global using Npgsql;
+
+global using NpgsqlTypes;
+
 global using OpenAI;
 
 global using OpenSearch.Client;

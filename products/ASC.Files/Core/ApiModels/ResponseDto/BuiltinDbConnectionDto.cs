@@ -1,75 +1,85 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
-namespace ASC.FederatedLogin.LoginProviders;
-
-public interface IConsumerKeyMetadataProvider
-{
-    AuthKeyMetadata GetKeyMetadata(string key);
-}
+namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The UI metadata for a consumer key field.
+/// The read-only PostgreSQL connection details for the portal's built-in forms database.
 /// </summary>
-public class AuthKeyMetadata
+public class BuiltinDbConnectionDto
 {
     /// <summary>
-    /// The display order of the field.
+    /// The database server host.
     /// </summary>
-    public int Order { get; init; } = int.MaxValue;
+    /// <example>db.example.com</example>
+    public string Host { get; set; }
 
     /// <summary>
-    /// The field type: "text", "password", "select", "toggle".
+    /// The database server port.
     /// </summary>
-    public string Type { get; init; } = "text";
+    /// <example>5432</example>
+    public int Port { get; set; }
 
     /// <summary>
-    /// The list of options for "select" type fields.
+    /// The database name.
     /// </summary>
-    public List<string> Options { get; init; }
+    /// <example>formsdb</example>
+    public string Database { get; set; }
 
     /// <summary>
-    /// The name of another key this field depends on for visibility.
+    /// The read-only account for this portal's schema; it can read the form tables but not change them.
     /// </summary>
-    public string DependsOn { get; init; }
+    /// <example>forms_t42_ro</example>
+    public string User { get; set; }
 
     /// <summary>
-    /// The value of <see cref="DependsOn"/> key that makes this field visible.
+    /// The read-only user password.
     /// </summary>
-    public string DependsOnValue { get; init; }
+    /// <example>xK9mR2pL...</example>
+    public string Password { get; set; }
 
     /// <summary>
-    /// All values of <see cref="DependsOn"/> key that make this field visible; when set, it supersedes <see cref="DependsOnValue"/>.
+    /// The full PostgreSQL connection string with read-only access restricted to this portal's schema.
     /// </summary>
-    public List<string> DependsOnValues { get; init; }
+    /// <example>Host=db.example.com;Port=5432;Database=formsdb;Username=forms_t42_ro;Password=xK9mR2pL...</example>
+    public string ConnectionString { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public static partial class BuiltinDbConnectionDtoMapper
+{
+    [MapProperty(nameof(FormsDbCredentials.RoUser), nameof(BuiltinDbConnectionDto.User))]
+    [MapProperty(nameof(FormsDbCredentials.RoPassword), nameof(BuiltinDbConnectionDto.Password))]
+    [MapProperty(nameof(FormsDbCredentials.RoConnectionString), nameof(BuiltinDbConnectionDto.ConnectionString))]
+    public static partial BuiltinDbConnectionDto Map(this FormsDbCredentials source);
 }

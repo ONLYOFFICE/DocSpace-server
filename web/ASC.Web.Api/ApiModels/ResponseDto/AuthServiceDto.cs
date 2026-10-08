@@ -131,7 +131,8 @@ public class AuthServiceDto
                 Type = meta != null ? meta.Type : "text",
                 Options = meta?.Options,
                 DependsOn = meta?.DependsOn,
-                DependsOnValue = meta?.DependsOnValue
+                DependsOnValue = meta?.DependsOnValue,
+                DependsOnValues = meta?.DependsOnValues
             });
         }
 
