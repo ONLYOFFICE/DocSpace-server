@@ -107,6 +107,7 @@ public class RootFoldersPermissionsTests(
     [Theory]
     [InlineData(EmployeeType.User)]
     [InlineData(EmployeeType.Guest)]
+    [Trait("Bug", "78952")]
     public async Task GetRootFolders_UserOrGuest_OwnerHasNoProfileUrl(EmployeeType employeeType)
     {
         // Arrange
@@ -142,6 +143,7 @@ public class RootFoldersPermissionsTests(
     [Theory]
     [InlineData(EmployeeType.User)]
     [InlineData(EmployeeType.Guest)]
+    [Trait("Bug", "78952")]
     public async Task GetRootFolders_UserOrGuest_SectionRootsDoNotNameOwner(EmployeeType employeeType)
     {
         // Arrange
