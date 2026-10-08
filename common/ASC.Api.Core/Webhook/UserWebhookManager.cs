@@ -45,7 +45,21 @@ public class UserWebhookManager(
 {
     public async Task PublishAsync(WebhookTrigger trigger, UserInfo userInfo)
     {
-        await webhookPublisher.PublishAsync(trigger, webhookUserAccessChecker, userInfo, () => userWebhookDtoHelper.GetAsync(userInfo), userInfo.Id);
+        var webhookConfigs = await webhookPublisher.GetWebhookConfigsAsync(trigger, webhookUserAccessChecker, userInfo);
+
+        if (webhookConfigs.Count == 0)
+        {
+            return;
+        }
+
+        var payload = await userWebhookDtoHelper.GetAsync(userInfo);
+
+        foreach (var subscriberConfigs in webhookConfigs.GroupBy(r => r.CreatedBy))
+        {
+            var subscriberPayload = await userWebhookDtoHelper.RestrictForSubscriberAsync(payload, userInfo, subscriberConfigs.Key);
+
+            await webhookPublisher.PublishAsync(trigger, subscriberConfigs, subscriberPayload, userInfo.Id);
+        }
     }
 
     public async Task PublishAsync(WebhookTrigger trigger, ASC.Core.Users.GroupInfo groupInfo)
