@@ -43,7 +43,7 @@ public enum Provider
 
 public class InstallerOptionsAction(string region, string nameConnectionString)
 {
-    private static Lazy<ServerVersion> _lazyServerVersion;
+    private static readonly MySqlServerVersionCache _serverVersions = new(ServerVersion.AutoDetect);
 
     public void OptionsAction(IServiceProvider sp, DbContextOptionsBuilder optionsBuilder)
     {
@@ -68,7 +68,7 @@ public class InstallerOptionsAction(string region, string nameConnectionString)
                 var mysqlVersionString = sp.GetRequiredService<IConfiguration>()["mysqlServerVersion"];
                 var serverVersion = !string.IsNullOrEmpty(mysqlVersionString)
                     ? ServerVersion.Parse(mysqlVersionString)
-                    : GetOrDetectServerVersion(connectionString.ConnectionString);
+                    : _serverVersions.Get(connectionString.ConnectionString);
 
                 optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
                 optionsBuilder.UseMySql(connectionString.ConnectionString, serverVersion, providerOptions =>
@@ -96,13 +96,27 @@ public class InstallerOptionsAction(string region, string nameConnectionString)
                 break;
         }
     }
+}
 
-    private static ServerVersion GetOrDetectServerVersion(string connectionString)
+/// <summary>
+/// Detects the MySQL server version once per connection string, so building the options of every
+/// DbContext type does not open a connection of its own.
+/// </summary>
+/// <remarks>
+/// A failed detection is not remembered: when the server does not accept connections yet (the service
+/// started before MySQL), the next options build detects again instead of failing until the process
+/// restarts. The options of a pooled context are a singleton that the container does not keep while
+/// its construction throws, so the next request comes back here.
+/// </remarks>
+public sealed class MySqlServerVersionCache(Func<string, ServerVersion> detect)
+{
+    private readonly ConcurrentDictionary<string, Lazy<ServerVersion>> _versions = new();
+
+    public ServerVersion Get(string connectionString)
     {
-        _lazyServerVersion ??= new Lazy<ServerVersion>(
-            () => ServerVersion.AutoDetect(connectionString));
-
-        return _lazyServerVersion.Value;
+        return _versions.GetOrAdd(
+            connectionString,
+            cs => new Lazy<ServerVersion>(() => detect(cs), LazyThreadSafetyMode.PublicationOnly)).Value;
     }
 }
 
