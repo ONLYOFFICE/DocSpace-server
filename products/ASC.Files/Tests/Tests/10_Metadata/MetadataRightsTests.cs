@@ -161,16 +161,18 @@ public class MetadataRightsTests(AspireAppFixture fixture) : BaseTest(fixture)
     }
 
     [Fact]
-    public async Task ValuesAndAssignments_ByAnEditor_AreAcceptedOnTheFile_AndRefusedOnTheRoom()
+    public async Task ValuesAndAssignments_ByAnEditor_AreAcceptedOnTheFile_AndRefusedOnTheFolderAndTheRoom()
     {
         var api = await ArrangeAsync();
         var suffix = Suffix();
         var template = await api.CreateTemplateAsync("Editor " + suffix, [new MetadataFieldPayload { Name = ClientField, Type = StringType }], TestContext.Current.CancellationToken);
         var room = await CreateCustomRoom($"Editor {suffix}");
+        var folder = await CreateFolder($"Sub {suffix}", room.Id);
         var file = await CreateFile($"doc-{suffix}.docx", room.Id);
         var value = new MetadataValuePayload { FieldId = template.Field(ClientField).Id, StringValue = "ACME" };
 
         await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+        await api.AssignFolderTemplatesAsync(folder.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
 
         var editor = await InviteContact(EmployeeType.User);
         await InviteToRoom(room.Id, editor, FileShare.Editing);
@@ -184,8 +186,78 @@ public class MetadataRightsTests(AspireAppFixture fixture) : BaseTest(fixture)
         using var roomValues = await api.SetFolderValuesResponseAsync(room.Id, [value], TestContext.Current.CancellationToken);
         roomValues.StatusCode.Should().Be(HttpStatusCode.Forbidden, "the room itself is edited by its manager only");
 
+        // the metadata of a folder is a property of the folder, like its name: it follows the right to create in the
+        // folder, which the editing role does not have, the same rule the client applies to show the editor
+        using var folderValues = await api.SetFolderValuesResponseAsync(folder.Id, [value], TestContext.Current.CancellationToken);
+        folderValues.StatusCode.Should().Be(HttpStatusCode.Forbidden, "an editing member edits the documents, not the folders");
+
+        using var folderCustomFields = await api.SetFolderCustomFieldsResponseAsync(folder.Id, [new CustomFieldPayload("Project code", "A-42")], TestContext.Current.CancellationToken);
+        folderCustomFields.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+
+        using var folderCascade = await api.UpdateFolderTemplateResponseAsync(folder.Id, template.Id, cascade: true, TestContext.Current.CancellationToken);
+        folderCascade.StatusCode.Should().Be(HttpStatusCode.Forbidden, "the cascade writes the whole subtree");
+
         var written = await api.GetFileMetadataAsync(file.Id, TestContext.Current.CancellationToken);
         written.Should().ContainSingle(t => t.Id == template.Id).Which.Field(ClientField).Value!.StringValue.Should().Be("ACME");
+    }
+
+    [Fact]
+    public async Task ValuesAndAssignments_ByAContentCreator_AreAcceptedOnTheFolder_AndRefusedOnTheRoom()
+    {
+        var api = await ArrangeAsync();
+        var suffix = Suffix();
+        var template = await api.CreateTemplateAsync("Creator " + suffix, [new MetadataFieldPayload { Name = ClientField, Type = StringType }], TestContext.Current.CancellationToken);
+        var room = await CreateCustomRoom($"Creator {suffix}");
+        var folder = await CreateFolder($"Sub {suffix}", room.Id);
+        var value = new MetadataValuePayload { FieldId = template.Field(ClientField).Id, StringValue = "ACME" };
+
+        await api.AssignFolderTemplatesAsync(room.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+
+        var creator = await InviteContact(EmployeeType.User);
+        await InviteToRoom(room.Id, creator, FileShare.ContentCreator);
+        await _filesClient.Authenticate(creator);
+
+        // a content creator may create in the folder, so the folder's metadata is theirs to write, cascade included
+        await api.AssignFolderTemplatesAsync(folder.Id, [template.Id], cascade: false, TestContext.Current.CancellationToken);
+        await api.SetFolderValuesAsync(folder.Id, [value], TestContext.Current.CancellationToken);
+
+        var cascade = await api.UpdateFolderTemplateAsync(folder.Id, template.Id, cascade: true, TestContext.Current.CancellationToken);
+        cascade.Id.Should().NotBeNullOrEmpty();
+
+        using var roomValues = await api.SetFolderValuesResponseAsync(room.Id, [value], TestContext.Current.CancellationToken);
+        roomValues.StatusCode.Should().Be(HttpStatusCode.Forbidden, "the room itself is edited by its manager only");
+
+        var written = await api.GetFolderMetadataAsync(folder.Id, TestContext.Current.CancellationToken);
+        written.Should().ContainSingle(t => t.Id == template.Id).Which.Field(ClientField).Value!.StringValue.Should().Be("ACME");
+    }
+
+    [Fact]
+    public async Task FolderMetadata_OnTheSectionRoots_IsRefused()
+    {
+        var api = await ArrangeAsync();
+        var template = await api.CreateTemplateAsync("Root " + Suffix(), [], TestContext.Current.CancellationToken);
+        var value = new CustomFieldPayload("Project code", "A-42");
+
+        // the roots answer the right to create with true for their owner and for every room admin, while nobody may
+        // edit them: a cascade queued from the rooms root would walk every room of the portal
+        var myDocuments = await GetSectionRootIdAsync("api/2.0/files/@my");
+
+        using var myAssign = await api.AssignFolderTemplatesResponseAsync(myDocuments, [template.Id], cascade: true, TestContext.Current.CancellationToken);
+        myAssign.StatusCode.Should().Be(HttpStatusCode.Forbidden, "the owner creates in My documents but does not write its metadata");
+
+        using var myFields = await api.SetFolderCustomFieldsResponseAsync(myDocuments, [value], TestContext.Current.CancellationToken);
+        myFields.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        await _filesClient.Authenticate(roomAdmin);
+
+        var rooms = await GetSectionRootIdAsync("api/2.0/files/rooms");
+
+        using var roomsAssign = await api.AssignFolderTemplatesResponseAsync(rooms, [template.Id], cascade: true, TestContext.Current.CancellationToken);
+        roomsAssign.StatusCode.Should().Be(HttpStatusCode.Forbidden, "a room admin creates rooms but does not write the metadata of the rooms root");
+
+        using var roomsFields = await api.SetFolderCustomFieldsResponseAsync(rooms, [value], TestContext.Current.CancellationToken);
+        roomsFields.StatusCode.Should().Be(HttpStatusCode.Forbidden);
     }
 
     #endregion

@@ -133,6 +133,16 @@ public class TemplateMetadata
 {
     public MetadataTemplate Template { get; set; }
     public List<MetadataValue> Values { get; set; } = [];
+
+    /// <summary>
+    /// Whether the template cascades from the entry to its content. Always false on a file.
+    /// </summary>
+    public bool Cascade { get; set; }
+
+    /// <summary>
+    /// How the cascade of the entry treats the values the sub-entries already hold. Meaningful while <see cref="Cascade"/> is set.
+    /// </summary>
+    public MetadataConflictResolveType CascadeConflict { get; set; }
 }
 
 /// <summary>

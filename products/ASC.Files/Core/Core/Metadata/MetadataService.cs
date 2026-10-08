@@ -432,9 +432,9 @@ public class MetadataService(
     /// </summary>
     private static async Task<EntryMetadata> LoadEntryMetadataAsync(IMetadataDao<int> metadataDao, int entryId, FileEntryType entryType)
     {
-        var templateIds = await metadataDao.GetLinksAsync(entryId, entryType)
-            .Select(l => l.TemplateId)
-            .ToListAsync();
+        // the links are kept whole: besides the template they say whether the entry cascades it and how
+        var links = await metadataDao.GetLinksAsync(entryId, entryType).ToDictionaryAsync(l => l.TemplateId);
+        var templateIds = links.Keys.ToList();
 
         var values = await metadataDao.GetValuesAsync(entryId, entryType).ToListAsync();
 
@@ -460,10 +460,14 @@ public class MetadataService(
                 continue;
             }
 
+            var link = links[templateId];
+
             result.Templates.Add(new TemplateMetadata
             {
                 Template = template,
-                Values = FilterValues(values, template)
+                Values = FilterValues(values, template),
+                Cascade = link.Cascade,
+                CascadeConflict = link.CascadeConflict
             });
         }
 
@@ -568,6 +572,75 @@ public class MetadataService(
             // links become direct assignments and the inherited values stay
             await metadataDao.ConvertCascadeLinksToDirectAsync(folderId, templateId);
         }
+    }
+
+    /// <summary>
+    /// Turns the cascade of a template the folder already carries on or off without touching the assignment itself.
+    /// On: the link is marked cascading with the given conflict rule and a pass over the subtree is queued, the way
+    /// <see cref="AssignTemplatesToFolderAsync"/> does it; the id of that pass is returned. Off: the link stays, the
+    /// folder keeps its values, the links the subtree inherited from this folder become direct assignments with their
+    /// values (the same the unassignment of a cascading folder does), and a pass still running stops at its next batch,
+    /// which re-reads the folder's links. Null is returned when nothing was queued.
+    /// </summary>
+    public async Task<string> SetFolderTemplateCascadeAsync(int folderId, int templateId, bool cascade, MetadataConflictResolveType conflict)
+    {
+        var entry = await DemandEntryAccessAsync(folderId, FileEntryType.Folder, edit: true);
+
+        var metadataDao = daoFactory.GetMetadataDao<int>();
+
+        _ = await GetUserTemplateAsync(metadataDao, templateId, withFields: false);
+
+        // the call changes an assignment, it does not create one: a template the folder does not carry is unknown here
+        var link = await metadataDao.GetLinksAsync(folderId, FileEntryType.Folder).FirstOrDefaultAsync(l => l.TemplateId == templateId)
+                   ?? throw new ItemNotFoundException();
+
+        if (!cascade)
+        {
+            if (link.Cascade)
+            {
+                await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLinksLockKey(folderId, FileEntryType.Folder)))
+                {
+                    await metadataDao.StopCascadeAsync(folderId, templateId);
+                }
+
+                await NotifyUpdateAsync(entry);
+            }
+
+            return null;
+        }
+
+        await using (await distributedLockProvider.TryAcquireFairLockAsync(GetLinksLockKey(folderId, FileEntryType.Folder)))
+        {
+            // the save upgrades the existing link: the flag goes on, the mode is replaced, an inherited link becomes the folder's own
+            await metadataDao.SaveLinksAsync(
+            [
+                new MetadataTemplateLink
+                {
+                    TemplateId = templateId,
+                    EntryId = folderId,
+                    EntryType = FileEntryType.Folder,
+                    Cascade = true,
+                    CascadeConflict = conflict
+                }
+            ]);
+        }
+
+        await NotifyUpdateAsync(entry);
+
+        var taskId = await cascadeWorker.StartAsync(tenantManager.GetCurrentTenantId(), authContext.CurrentAccount.ID, folderId, [templateId], conflict, MetadataCascadeMode.Assign);
+
+        await filesMessageService.SendAsync(MessageAction.MetadataCascadeStarted, entry, entry.Title);
+
+        return taskId;
+    }
+
+    /// <summary>
+    /// The operation a request of the caller has just queued, by its id: the status of the folder would report a pass
+    /// still running for other templates instead of the one the request started. The access was checked by that request.
+    /// </summary>
+    public async Task<MetadataCascadeOperation> GetCascadeOperationAsync(string taskId)
+    {
+        return await cascadeWorker.GetAsync(tenantManager.GetCurrentTenantId(), taskId);
     }
 
     public async Task<MetadataCascadeOperation> GetCascadeStatusAsync(int folderId)
@@ -764,7 +837,7 @@ public class MetadataService(
             throw new ItemNotFoundException();
         }
 
-        var allowed = edit ? await fileSecurity.CanEditAsync(entry) : await fileSecurity.CanReadAsync(entry);
+        var allowed = edit ? await fileSecurity.CanEditMetadataAsync(entry) : await fileSecurity.CanReadAsync(entry);
 
         if (!allowed)
         {

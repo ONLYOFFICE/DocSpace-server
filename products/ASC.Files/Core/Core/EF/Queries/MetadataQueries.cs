@@ -133,6 +133,20 @@ public partial class FilesDbContext
         return links.ExecuteUpdateAsync(s => s.SetProperty(r => r.SourceFolderId, (int?)null));
     }
 
+    /// <summary>
+    /// Takes the cascade off the folder's own link of the template: the flag goes down and the conflict rule back to its
+    /// default, the link itself stays. Not precompiled on purpose: an <c>ExecuteUpdate</c> inside <c>EF.CompileAsyncQuery</c>
+    /// fails to translate (see <see cref="ConvertMetadataCascadeLinksToDirectAsync"/>).
+    /// </summary>
+    public Task<int> StopMetadataCascadeAsync(int tenantId, int folderId, int templateId)
+    {
+        return MetadataLinks
+            .Where(r => r.TenantId == tenantId && r.TemplateId == templateId && r.EntryId == folderId && r.EntryType == FileEntryType.Folder)
+            .ExecuteUpdateAsync(s => s
+                .SetProperty(r => r.Cascade, false)
+                .SetProperty(r => r.CascadeConflict, MetadataConflictResolveType.Skip));
+    }
+
     [PreCompileQuery]
     public Task<int> DeleteMetadataValuesByFieldsAsync(int tenantId, int entryId, FileEntryType entryType, IEnumerable<int> fieldIds)
     {

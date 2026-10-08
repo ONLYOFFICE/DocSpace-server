@@ -670,6 +670,28 @@ internal class MetadataDao(
         await filesDbContext.ConvertMetadataCascadeLinksToDirectAsync(tenantId, sourceFolderId, templateId);
     }
 
+    public async Task StopCascadeAsync(int folderId, int templateId)
+    {
+        var tenantId = _tenantManager.GetCurrentTenantId();
+
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+
+        // the flag and the inherited links go together: a flag taken off alone would leave the subtree pointing at a
+        // folder that no longer cascades, and the links converted alone would let the next pass stamp them again
+        var strategy = filesDbContext.Database.CreateExecutionStrategy();
+
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var context = await _dbContextFactory.CreateDbContextAsync();
+            await using var tx = await context.Database.BeginTransactionAsync();
+
+            await context.StopMetadataCascadeAsync(tenantId, folderId, templateId);
+            await context.ConvertMetadataCascadeLinksToDirectAsync(tenantId, folderId, templateId);
+
+            await tx.CommitAsync();
+        });
+    }
+
     public async Task SetValuesAsync(int entryId, FileEntryType entryType, IEnumerable<MetadataValue> values)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();

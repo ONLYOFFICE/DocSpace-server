@@ -81,6 +81,15 @@ public class MetadataCascadeWorker(
     }
 
     /// <summary>
+    /// The operation with the given id, for the answer of the request that queued it. Null once the operation was
+    /// dropped from the queue.
+    /// </summary>
+    public async Task<MetadataCascadeOperation> GetAsync(int tenantId, string taskId)
+    {
+        return (await _queue.GetAllTasks()).FirstOrDefault(t => t.TenantId == tenantId && t.Id == taskId);
+    }
+
+    /// <summary>
     /// Returns the assignment operation of the folder to report: a running one first, otherwise the most recent.
     /// </summary>
     public async Task<MetadataCascadeOperation> GetStatusAsync(int tenantId, int folderId)

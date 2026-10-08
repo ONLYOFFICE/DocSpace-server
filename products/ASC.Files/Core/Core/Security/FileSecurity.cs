@@ -491,6 +491,30 @@ public class FileSecurity(
         return await CanEditAsync(entry, authContext.CurrentAccount.ID);
     }
 
+    /// <summary>
+    /// Whether the user may write the metadata of the entry: the templates, their values and the custom fields. The
+    /// metadata of a folder is a property of the folder, like its name, not the content of a document: it follows the
+    /// right to create in the folder (a room manager or a content creator), which a member who may only edit the
+    /// documents does not have. A room is written by its manager and a file by whoever may edit it, as before.
+    /// The roots of the sections and the knowledge folder of an agent answer the right to create with true for whole
+    /// classes of users while nobody may edit them; they carry no metadata, and a cascade from the rooms root would
+    /// walk every room of the portal.
+    /// </summary>
+    public async Task<bool> CanEditMetadataAsync<T>(FileEntry<T> entry)
+    {
+        if (entry is not Folder<T> { IsRoom: false } folder)
+        {
+            return await CanEditAsync(entry);
+        }
+
+        if (folder.IsRoot || folder.FolderType == FolderType.Knowledge)
+        {
+            return false;
+        }
+
+        return await CanCreateAsync(folder);
+    }
+
     public async Task<bool> CanDeleteAsync<T>(FileEntry<T> entry, Guid userId)
     {
         return await CanAsync(entry, userId, FilesSecurityActions.Delete);

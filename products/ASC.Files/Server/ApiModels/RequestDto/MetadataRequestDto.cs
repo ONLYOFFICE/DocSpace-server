@@ -347,6 +347,51 @@ public class UnassignFileMetadataTemplateRequestDto<T>
 }
 
 /// <summary>
+/// The request parameters for changing the assignment of a metadata template on a folder.
+/// </summary>
+public class UpdateFolderMetadataTemplateRequestDto<T>
+{
+    /// <summary>
+    /// The folder ID.
+    /// </summary>
+    /// <example>1</example>
+    [FromRoute(Name = "folderId")]
+    public required T FolderId { get; set; }
+
+    /// <summary>
+    /// The ID of a template the folder already carries.
+    /// </summary>
+    /// <example>1</example>
+    [FromRoute(Name = "templateId")]
+    public required int TemplateId { get; set; }
+
+    /// <summary>
+    /// The new state of the assignment.
+    /// </summary>
+    [FromBody]
+    public required UpdateFolderMetadataTemplateRequest Update { get; set; }
+}
+
+/// <summary>
+/// The new state of a template assignment on a folder: whether the template cascades to the content of the folder and how.
+/// </summary>
+public class UpdateFolderMetadataTemplateRequest
+{
+    /// <summary>
+    /// Whether the template cascades from the folder to the folders and files below it: true turns the cascade on,
+    /// false turns it off while the template stays on the folder.
+    /// </summary>
+    /// <example>true</example>
+    public bool Cascade { get; set; }
+
+    /// <summary>
+    /// How the cascade treats a value an entry below already holds.
+    /// </summary>
+    /// <example>0</example>
+    public MetadataConflictResolveType ConflictResolveType { get; set; } = MetadataConflictResolveType.Skip;
+}
+
+/// <summary>
 /// The request parameters for unassigning a metadata template from a folder.
 /// </summary>
 public class UnassignFolderMetadataTemplateRequestDto<T>

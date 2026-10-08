@@ -45,8 +45,10 @@ public class MetadataController(
     /// with. Any member of the portal can read it, the list is the same for everyone. The call is read-only. The templates
     /// come back ordered by their creation, each with its fields in their display order and the choice options of the choice
     /// fields; the `visible` parameter narrows the list to the templates shown in the pickers or to the hidden ones, without
-    /// it both are returned. An empty list means the portal has no templates yet. The custom text fields set on the entries
-    /// are not templates and are not listed here: read them on the entry with `GET api/2.0/files/metadata/file/{fileId}`.
+    /// it both are returned. The author and the last editor of a template come as user objects with the display name and
+    /// the avatar, so a list needs no lookup of its own per author. An empty list means the portal has no templates yet.
+    /// The custom text fields set on the entries are not templates and are not listed here: read them on the entry with
+    /// `GET api/2.0/files/metadata/file/{fileId}`.
     /// </remarks>
     /// <summary>Get metadata templates</summary>
     /// <path>api/2.0/files/metadata/templates</path>
@@ -57,7 +59,7 @@ public class MetadataController(
     {
         await foreach (var template in metadataService.GetTemplatesAsync(inDto.Visible, withFields: true))
         {
-            yield return metadataDtoMapper.Map(template);
+            yield return await metadataDtoMapper.MapAsync(template);
         }
     }
 
@@ -85,7 +87,7 @@ public class MetadataController(
 
         var template = await metadataService.CreateTemplateAsync(inDto.Name, inDto.Visible, fields);
 
-        return metadataDtoMapper.Map(template);
+        return await metadataDtoMapper.MapAsync(template);
     }
 
     /// <remarks>
@@ -104,7 +106,7 @@ public class MetadataController(
     {
         var template = await metadataService.GetTemplateAsync(inDto.TemplateId);
 
-        return metadataDtoMapper.Map(template);
+        return await metadataDtoMapper.MapAsync(template);
     }
 
     /// <remarks>
@@ -126,7 +128,7 @@ public class MetadataController(
     {
         var template = await metadataService.UpdateTemplateAsync(inDto.TemplateId, inDto.Update.Name, inDto.Update.Visible);
 
-        return metadataDtoMapper.Map(template);
+        return await metadataDtoMapper.MapAsync(template);
     }
 
     /// <remarks>
@@ -222,10 +224,12 @@ public class MetadataController(
     /// member of the portal, or an anonymous caller through an external link that grants access to the file or to a
     /// folder above it, with the link key in the `Request-Token` header or in the `share` query parameter. The call is
     /// read-only. A field carries its value inside it; a field the file holds no value for comes without a `value`.
-    /// The custom fields are name and value pairs and are not part of any template. A file without metadata is answered with
-    /// empty lists, not with an error. The same shape is returned by `PUT api/2.0/files/metadata/file/{fileId}/values`
-    /// after a write. A request with neither a session nor a link key is answered with 401; a file the caller cannot read
-    /// with 403, a file that does not exist with 404.
+    /// A file never cascades, so every template reports `cascade` false and no `conflictResolveType`; whether it was
+    /// inherited from a folder above is not told apart from a direct assignment. The custom fields are name and value
+    /// pairs and are not part of any template. A file without metadata is answered with empty lists, not with an error.
+    /// The same shape is returned by `PUT api/2.0/files/metadata/file/{fileId}/values` after a write. A request with
+    /// neither a session nor a link key is answered with 401; a file the caller cannot read with 403, a file that does
+    /// not exist with 404.
     /// </remarks>
     /// <summary>Get file metadata</summary>
     /// <path>api/2.0/files/metadata/file/{fileId}</path>
@@ -247,13 +251,15 @@ public class MetadataController(
     /// <remarks>
     /// Returns the metadata of a folder or a room: the templates assigned to it, directly or inherited from a cascading
     /// folder above it, each with its fields, and the custom text fields set on it. The caller needs read access to the
-    /// folder: a member of the portal, or an anonymous caller through an external link that grants access to the folder
-    /// or to a folder above it, with the link key in the `Request-Token` header or in the `share` query parameter. The
-    /// call is read-only. A field carries its value inside it; a field the folder holds no value for comes without a
-    /// `value`. The custom fields are name and value pairs and are not part of any template. A folder without metadata is
-    /// answered with empty lists, not with an error. Whether a template cascades from this folder to its content is not
-    /// reported here. A request with neither a session nor a link key is answered with 401; a folder the caller cannot
-    /// read with 403, a folder that does not exist with 404.
+    /// folder: a member of the portal, or an anonymous caller through an external link to the folder or to a folder
+    /// above it, with the link key in the `Request-Token` header or in the `share` query parameter. The call is
+    /// read-only. A field carries its value inside it; a field without a value on the folder comes without `value`. Each
+    /// template reports whether this folder cascades it to its content in `cascade`, with the rule of that cascade in
+    /// `conflictResolveType`, absent while it does not; an inherited template reports false unless this folder cascades it
+    /// on its own. The custom fields are name and value pairs outside any template. A folder without metadata is answered
+    /// with empty lists. The cascade is changed with `PUT api/2.0/files/metadata/folder/{folderId}/templates/{templateId}`.
+    /// A request with neither a session nor a link key is answered with 401; a folder the caller cannot read with 403, a
+    /// folder that does not exist with 404.
     /// </remarks>
     /// <summary>Get folder metadata</summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}</path>
@@ -296,23 +302,24 @@ public class MetadataController(
 
     /// <remarks>
     /// Assigns one or more metadata templates to a folder or a room and, with `cascade` set, propagates them to every
-    /// folder and file below it. The caller needs the right to edit the folder; for a room that is its manager. The
-    /// assignment of the folder itself finishes in the request and writes no values. The cascade is asynchronous: a pass is
-    /// queued that assigns the templates to the whole subtree and copies the values the folder holds for their fields, and
-    /// the answer is the status of that pass. Poll `GET api/2.0/files/metadata/folder/{folderId}/templates/progress`
-    /// until `isCompleted` is true; a failed pass reports its `error` there. The `conflictResolveType` decides what happens
-    /// to a value an entry already holds: `Skip` keeps it, `Overwrite` replaces it with the folder's value. A folder inside
-    /// the subtree that cascades the same template keeps its own values for its content. Entries created in or moved into
-    /// the folder later inherit the templates and the values on their own. Without a cascade the answer is a completed
-    /// operation without an identifier. A folder the caller cannot edit is answered with 403; a folder, or a template, that
-    /// does not exist with 404.
+    /// folder and file below it. The caller needs the right to create in the folder (a room manager or a content
+    /// creator); for a room that is its manager. The assignment itself finishes in the request and writes no values. The
+    /// cascade is asynchronous: a pass is queued that assigns the templates to the whole subtree and copies the values the
+    /// folder holds, and the answer is that pass with the `templateIds` it propagates. Poll
+    /// `GET api/2.0/files/metadata/folder/{folderId}/templates/progress` until `isCompleted` is true; a failed pass
+    /// reports its `error` there. The `conflictResolveType` decides what happens to a value an entry already holds: `Skip`
+    /// keeps it, `Overwrite` replaces it with the folder's value. A folder inside the subtree that cascades the same
+    /// template keeps its own values for its content. Without a cascade the answer is a completed operation without an identifier;
+    /// a template that already cascades keeps cascading, it is turned off with
+    /// `PUT api/2.0/files/metadata/folder/{folderId}/templates/{templateId}`. A caller without the right to create in the
+    /// folder is answered with 403; a folder, or a template, that does not exist with 404.
     /// </remarks>
     /// <summary>Assign templates to a folder</summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/templates</path>
     [Tags("Files / Metadata")]
     [SwaggerResponse(200, "Cascade operation status; a completed operation without an ID when no cascade is requested", typeof(MetadataOperationDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `templateIds`")]
-    [SwaggerResponse(403, "The caller cannot edit the folder")]
+    [SwaggerResponse(403, "The caller cannot create in the folder, or is not the manager of the room")]
     [SwaggerResponse(404, "The folder or one of the templates does not exist")]
     [HttpPut("metadata/folder/{folderId:int}/templates")]
     public async Task<MetadataOperationDto> AssignFolderTemplates(AssignFolderMetadataTemplatesRequestDto<int> inDto)
@@ -320,16 +327,18 @@ public class MetadataController(
         var taskId = await metadataService.AssignTemplatesToFolderAsync(inDto.FolderId, inDto.Assign.TemplateIds, inDto.Assign.Cascade, inDto.Assign.ConflictResolveType);
 
         // without a cascade the assignment is finished in this call, which the answer states as a completed operation instead of a null body
-        return metadataDtoMapper.Map(taskId == null ? null : await metadataService.GetCascadeStatusAsync(inDto.FolderId));
+        return metadataDtoMapper.Map(taskId == null ? null : await metadataService.GetCascadeOperationAsync(taskId));
     }
 
     /// <remarks>
-    /// Reports the cascade pass of a folder started by `PUT api/2.0/files/metadata/folder/{folderId}/templates`: the
-    /// running one, otherwise the most recent one. The caller needs read access to the folder, the call is read-only.
-    /// `progress` is the share of the subtree processed, `isCompleted` tells the pass is over and `error` carries the reason
-    /// of a failed one; a completed pass without an error has written every template and value it was asked for. A folder
-    /// that never cascaded, or whose passes were already dropped, is answered with a completed operation without an
-    /// identifier rather than with an error. A folder that does not exist is answered with 404.
+    /// Reports the cascade pass of a folder started by `PUT api/2.0/files/metadata/folder/{folderId}/templates` or by
+    /// `PUT api/2.0/files/metadata/folder/{folderId}/templates/{templateId}`: the running one, otherwise the most recent
+    /// one. The caller needs read access to the folder, the call is read-only. `templateIds` names the templates the pass
+    /// propagates, so a client can show the progress next to the right template; `progress` is the share of the subtree
+    /// processed, `isCompleted` tells the pass is over and `error` carries the reason of a failed one; a completed pass
+    /// without an error has written every template and value it was asked for. A folder that never cascaded, or whose
+    /// passes were already dropped, is answered with a completed operation without an identifier and with empty
+    /// `templateIds` rather than with an error. A folder that does not exist is answered with 404.
     /// </remarks>
     /// <summary>Get cascade progress</summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/templates/progress</path>
@@ -363,23 +372,55 @@ public class MetadataController(
 
     /// <remarks>
     /// Removes a metadata template from a folder or a room together with the values of its fields. The caller needs the
-    /// right to edit the folder; for a room that is its manager. When the template was cascaded from this folder, the
+    /// right to create content in the folder, that is a room manager or a content creator; for a room that is its
+    /// manager. When the template was cascaded from this folder, the
     /// cascade stops here: the folders and files below keep the template and their values as a direct assignment of their
     /// own, and there is no bulk rollback. To take the template off them as well, remove it entry by entry with
     /// `DELETE api/2.0/files/metadata/file/{fileId}/templates/{templateId}`. A pass of the cascade still running is stopped
-    /// for this template. A folder the caller cannot edit is answered with 403; a folder, or a template, that does not exist
-    /// with 404.
+    /// for this template. To stop the cascade and keep the template and its values on the folder use
+    /// `PUT api/2.0/files/metadata/folder/{folderId}/templates/{templateId}` with `cascade` false instead. A caller
+    /// without the right to create in the folder is answered with 403; a folder, or a template, that does not exist with 404.
     /// </remarks>
     /// <summary>Unassign a template from a folder</summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/templates/{templateId}</path>
     [Tags("Files / Metadata")]
     [SwaggerResponse(200, "OK")]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(403, "The caller cannot create in the folder, or is not the manager of the room")]
     [SwaggerResponse(404, "The folder or the template does not exist")]
     [HttpDelete("metadata/folder/{folderId:int}/templates/{templateId:int}")]
     public async Task UnassignFolderTemplate(UnassignFolderMetadataTemplateRequestDto<int> inDto)
     {
         await metadataService.UnassignTemplateFromFolderAsync(inDto.FolderId, inDto.TemplateId);
+    }
+
+    /// <remarks>
+    /// Turns the cascade of a metadata template the folder or the room already carries on or off, without taking the
+    /// template off the folder. The template must be assigned first, with `PUT api/2.0/files/metadata/folder/{folderId}/templates`
+    /// or inherited from a folder above. The caller needs the right to create in the folder (a room manager
+    /// or a content creator); for a room that is its manager. With `cascade` true the template is marked as cascading with
+    /// the given `conflictResolveType`, an inherited assignment becomes the folder's own, and the pass the assignment runs
+    /// is queued, also when the cascade was already on: the answer is that pass, poll
+    /// `GET api/2.0/files/metadata/folder/{folderId}/templates/progress` until `isCompleted` is true. With `cascade` false
+    /// the folder keeps the template and its values, the entries below keep them as their own, entries created later no
+    /// longer inherit the template from this folder, a running pass stops at its next batch, and the answer is a completed
+    /// operation without an identifier; `conflictResolveType` is ignored and a cascade already off stays so. A caller
+    /// without the right to create in the folder is answered with 403; a folder or a template that does not exist, or a
+    /// template the folder does not carry, with 404.
+    /// </remarks>
+    /// <summary>Update a template assignment on a folder</summary>
+    /// <path>api/2.0/files/metadata/folder/{folderId}/templates/{templateId}</path>
+    [Tags("Files / Metadata")]
+    [SwaggerResponse(200, "Cascade operation status; a completed operation without an ID when the cascade was turned off", typeof(MetadataOperationDto))]
+    [SwaggerResponse(400, "The request body cannot be read")]
+    [SwaggerResponse(403, "The caller cannot create in the folder, or is not the manager of the room")]
+    [SwaggerResponse(404, "The folder or the template does not exist, or the template is not assigned to the folder")]
+    [HttpPut("metadata/folder/{folderId:int}/templates/{templateId:int}")]
+    public async Task<MetadataOperationDto> UpdateFolderTemplate(UpdateFolderMetadataTemplateRequestDto<int> inDto)
+    {
+        var taskId = await metadataService.SetFolderTemplateCascadeAsync(inDto.FolderId, inDto.TemplateId, inDto.Update.Cascade, inDto.Update.ConflictResolveType);
+
+        // the cascade turned off is finished in this call, which the answer states as a completed operation instead of a null body
+        return metadataDtoMapper.Map(taskId == null ? null : await metadataService.GetCascadeOperationAsync(taskId));
     }
 
     /// <remarks>
@@ -417,25 +458,24 @@ public class MetadataController(
     }
 
     /// <remarks>
-    /// Writes the values of metadata fields on a folder or a room. The caller needs the right to edit the folder; for a
-    /// room that is its manager. Every field must belong to a template the folder carries, assigned with
-    /// `PUT api/2.0/files/metadata/folder/{folderId}/templates` or inherited from a cascading folder, and a field may be
-    /// listed once. A value carries exactly the member of its type: `stringValue` for a text field of at most 8000
-    /// characters, `numberValue` for a number, `dateValue` for a date, `optionIds` for a choice field; an empty value
-    /// clears the field. A date without a time zone offset is read as UTC. The write
-    /// finishes in the request and touches the folder only: to push the new values down a cascading folder run the
-    /// cascade again with `Overwrite`, while entries created or moved in later take them on their own. The custom text
-    /// fields are written with `PUT api/2.0/files/metadata/folder/{folderId}/customFields` instead. The answer is the
-    /// whole metadata of the folder after the write. A value of the wrong type, a field listed twice, a custom field or a
-    /// field of a template the folder does not carry is answered with 400; a folder the caller cannot edit with 403; a
-    /// folder or a field that does not exist with 404.
+    /// Writes the values of metadata fields on a folder or a room. The caller needs the right to create in the folder (a
+    /// room manager or a content creator); for a room that is its manager. Every field must belong to a template the
+    /// folder carries, assigned with `PUT api/2.0/files/metadata/folder/{folderId}/templates` or inherited from a
+    /// cascading folder, and a field may be listed once. A value carries exactly the member of its type: `stringValue` for
+    /// a text field of at most 8000 characters, `numberValue` for a number, `dateValue` for a date, `optionIds` for a
+    /// choice field; an empty value clears the field. The write finishes in the request and touches the folder only: to
+    /// push the new values down a cascading folder run the cascade again with `Overwrite`. The custom text fields are written with
+    /// `PUT api/2.0/files/metadata/folder/{folderId}/customFields`. The answer is the whole metadata of the folder after
+    /// the write. A value of the wrong type, a field listed twice, a custom field or a field of a template the folder
+    /// does not carry is answered with 400; a caller without the right to create in the folder with 403; a folder or a
+    /// field that does not exist with 404.
     /// </remarks>
     /// <summary>Set folder metadata values</summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/values</path>
     [Tags("Files / Metadata")]
     [SwaggerResponse(200, "The metadata of the folder after the write: the assigned templates with the values of their fields, and the custom fields", typeof(EntryMetadataDto))]
     [SwaggerResponse(400, "A value does not match the field type, a field is listed twice or is a custom field, or the field belongs to a template the folder does not have")]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(403, "The caller cannot create in the folder, or is not the manager of the room")]
     [SwaggerResponse(404, "The folder or a field does not exist")]
     [HttpPut("metadata/folder/{folderId:int}/values")]
     public async Task<EntryMetadataDto> SetFolderValues(SetFolderMetadataValuesRequestDto<int> inDto)
@@ -473,22 +513,21 @@ public class MetadataController(
 
     /// <remarks>
     /// Sets the custom text fields of a folder or a room: free-form name and value pairs that need no template. The
-    /// caller needs the right to edit the folder; for a room that is its manager. A field is addressed by its name
-    /// regardless of case: a listed name gets the value, a null or empty value removes the field, the names not listed
-    /// are left alone. A name the portal has not seen yet creates the field for the whole portal, and a name no entry
-    /// holds a value for any more is dropped. A name is at most 255 characters, a value at most
-    /// 8000, a name may be listed once and a folder holds at most 50 custom fields. The custom fields never cascade to the
-    /// content of the folder. The write finishes in the request; the values take part in the free text search and in the
-    /// `metadataFilters` of the listings. The answer is the custom fields of the folder after the write. An empty list, a
-    /// blank, repeated or over-long name, an over-long value or more than 50 fields is answered with 400; a folder the
-    /// caller cannot edit with 403; a folder that does not exist with 404.
+    /// caller needs the right to create in the folder (a room manager or a content creator); for a room that is its
+    /// manager. A field is addressed by its name regardless of case: a listed name gets the value, a null or empty value
+    /// removes the field, the names not listed are left alone. A new name creates the field for the whole portal, and a
+    /// name no entry holds a value for any more is dropped. A name is at most 255 characters, a value at most 8000, a name
+    /// may be listed once and a folder holds at most 50 custom fields. The custom fields never cascade to the content of
+    /// the folder. The write finishes in the request. The answer is the custom fields of the folder after the write. An empty list, a
+    /// blank, repeated or over-long name, an over-long value or more than 50 fields is answered with 400; a caller
+    /// without the right to create in the folder with 403; a folder that does not exist with 404.
     /// </remarks>
     /// <summary>Set folder custom fields</summary>
     /// <path>api/2.0/files/metadata/folder/{folderId}/customFields</path>
     [Tags("Files / Metadata")]
     [SwaggerResponse(200, "The custom fields of the folder with their values", typeof(List<CustomFieldValueDto>))]
     [SwaggerResponse(400, "Invalid custom fields or too many of them")]
-    [SwaggerResponse(403, "You don't have enough permission to perform the operation")]
+    [SwaggerResponse(403, "The caller cannot create in the folder, or is not the manager of the room")]
     [SwaggerResponse(404, "Folder not found")]
     [HttpPut("metadata/folder/{folderId:int}/customFields")]
     public async Task<List<CustomFieldValueDto>> SetFolderCustomFields(SetFolderCustomFieldsRequestDto<int> inDto)

@@ -79,6 +79,13 @@ public interface IMetadataDao<T>
 
     Task ConvertCascadeLinksToDirectAsync(int sourceFolderId, int? templateId = null);
 
+    /// <summary>
+    /// Turns the cascade of the template off on the folder's own link and, in the same transaction, makes the links the
+    /// subtree inherited from this folder direct assignments. The folder keeps the template and every value stays; a
+    /// folder above that still cascades the template keeps providing it to the entries created later.
+    /// </summary>
+    Task StopCascadeAsync(T folderId, int templateId);
+
     Task SetValuesAsync(T entryId, FileEntryType entryType, IEnumerable<MetadataValue> values);
     IAsyncEnumerable<MetadataValue> GetValuesAsync(T entryId, FileEntryType entryType, IEnumerable<int> fieldIds = null);
     IAsyncEnumerable<MetadataValue> GetValuesAsync(IEnumerable<T> entryIds, FileEntryType entryType);

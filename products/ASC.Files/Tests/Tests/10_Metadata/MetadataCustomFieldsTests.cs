@@ -245,11 +245,12 @@ public class MetadataCustomFieldsTests(AspireAppFixture fixture) : BaseTest(fixt
     }
 
     [Fact]
-    public async Task CustomFields_CanBeSetByAnEditor_OnTheFilesTheyEdit_ButNotOnTheRoom()
+    public async Task CustomFields_CanBeSetByAnEditor_OnTheFilesTheyEdit_ButNotOnTheFolderOrTheRoom()
     {
         var api = await ArrangeAsync();
         var suffix = Suffix();
         var room = await CreateCustomRoom($"Rights {suffix}");
+        var folder = await CreateFolder($"Sub {suffix}", room.Id);
         var file = await CreateFile($"doc-{suffix}.docx", room.Id);
 
         var member = await InviteContact(EmployeeType.User);
@@ -268,6 +269,9 @@ public class MetadataCustomFieldsTests(AspireAppFixture fixture) : BaseTest(fixt
 
         using var onRoom = await api.SetFolderCustomFieldsResponseAsync(room.Id, [new CustomFieldPayload("Project code", "A-42")], TestContext.Current.CancellationToken);
         onRoom.StatusCode.Should().Be(HttpStatusCode.Forbidden, "the room itself is edited by its manager only");
+
+        using var onFolder = await api.SetFolderCustomFieldsResponseAsync(folder.Id, [new CustomFieldPayload("Project code", "A-42")], TestContext.Current.CancellationToken);
+        onFolder.StatusCode.Should().Be(HttpStatusCode.Forbidden, "the fields of a folder follow the right to create in it, which the editing role lacks");
     }
 
     [Fact]
