@@ -34,8 +34,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using ASC.Core.Tenants;
-
 namespace ASC.Webhooks.Core;
 
 [Scope(typeof(IWebhookPublisher))]

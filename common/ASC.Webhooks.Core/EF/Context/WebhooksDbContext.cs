@@ -78,6 +78,18 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
     {
         return Queries.WebhooksLogAsync(this, tenantId, id);
     }
+
+    [PreCompileQuery]
+    public Task<int?> WebhooksLogAttemptsAsync(int tenantId, int id)
+    {
+        return Queries.WebhooksLogAttemptsAsync(this, tenantId, id);
+    }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<DueWebhooksLog> DueWebhooksLogsAsync(DateTime now, int count)
+    {
+        return Queries.DueWebhooksLogsAsync(this, now, count);
+    }
 }
 
 static file class Queries
@@ -115,4 +127,22 @@ static file class Queries
                     .Where(it => it.TenantId == tenantId && it.Id == id)
                     .Join(ctx.WebhooksConfigs, r => r.ConfigId, r => r.Id, (log, config) => new DbWebhooks { Log = log, Config = config })
                     .FirstOrDefault());
+
+    public static readonly Func<WebhooksDbContext, int, int, Task<int?>> WebhooksLogAttemptsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (WebhooksDbContext ctx, int tenantId, int id) =>
+                ctx.WebhooksLogs
+                    .Where(it => it.TenantId == tenantId && it.Id == id)
+                    .Select(it => (int?)it.Attempts)
+                    .FirstOrDefault());
+
+    public static readonly Func<WebhooksDbContext, DateTime, int, IAsyncEnumerable<DueWebhooksLog>> DueWebhooksLogsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (WebhooksDbContext ctx, DateTime now, int count) =>
+                ctx.WebhooksLogs
+                    .Where(r => r.NextAttemptOn != null && r.NextAttemptOn <= now && r.Tenant.Status == TenantStatus.Active)
+                    .OrderBy(r => r.NextAttemptOn)
+                    .ThenBy(r => r.Id)
+                    .Take(count)
+                    .Select(r => new DueWebhooksLog { TenantId = r.TenantId, Id = r.Id, NextAttemptOn = r.NextAttemptOn }));
 }

@@ -294,12 +294,7 @@ public class DbWorker(
 
         var now = DateTime.UtcNow;
 
-        var due = await webhooksDbContext.WebhooksLogs
-            .Where(r => r.NextAttemptOn != null && r.NextAttemptOn <= now)
-            .OrderBy(r => r.NextAttemptOn)
-            .Take(count)
-            .Select(r => new { r.TenantId, r.Id, r.NextAttemptOn })
-            .ToListAsync();
+        var due = await webhooksDbContext.DueWebhooksLogsAsync(now, count).ToListAsync();
 
         var leaseUntil = now + lease;
         var claimed = new List<(int TenantId, int Id)>(due.Count);
@@ -343,6 +338,24 @@ public class DbWorker(
         await webhooksDbContext.WebhooksLogs
             .Where(r => r.TenantId == tenantId && r.Id == id)
             .ExecuteUpdateAsync(q => q.SetProperty(p => p.NextAttemptOn, (DateTime?)null));
+    }
+
+    public async Task<int?> GetJournalAttemptsAsync(int tenantId, int id)
+    {
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        return await webhooksDbContext.WebhooksLogAttemptsAsync(tenantId, id);
+    }
+
+    public async Task ScheduleJournalAttemptAsync(int tenantId, int id, int attempts, DateTime? nextAttemptOn)
+    {
+        await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
+
+        await webhooksDbContext.WebhooksLogs
+            .Where(r => r.TenantId == tenantId && r.Id == id)
+            .ExecuteUpdateAsync(q => q
+                .SetProperty(p => p.Attempts, attempts)
+                .SetProperty(p => p.NextAttemptOn, nextAttemptOn));
     }
 
     private async Task<IQueryable<DbWebhooks>> GetQueryForJournal(
@@ -431,6 +444,13 @@ public class DbWebhooks
 {
     public DbWebhooksLog Log { get; init; }
     public DbWebhooksConfig Config { get; init; }
+}
+
+public class DueWebhooksLog
+{
+    public int TenantId { get; init; }
+    public int Id { get; init; }
+    public DateTime? NextAttemptOn { get; init; }
 }
 
 /// <summary>

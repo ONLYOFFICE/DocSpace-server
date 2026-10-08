@@ -62,16 +62,32 @@ public class WebhookSender(
 
     private static readonly TimeSpan _requestTimeout = TimeSpan.FromSeconds(30);
 
+    private const int MaxRequestPayloadLength = ushort.MaxValue;
+    private const int MaxResponsePayloadBytes = 8 * 1024;
+
     public async Task Send(int tenantId, int webhookLogId, CancellationToken cancellationToken)
     {
+        await using var scope = scopeFactory.CreateAsyncScope();
+        var dbWorker = scope.ServiceProvider.GetRequiredService<DbWorker>();
+        var journalUpdated = false;
+
         try
         {
-            await using var scope = scopeFactory.CreateAsyncScope();
-            var dbWorker = scope.ServiceProvider.GetRequiredService<DbWorker>();
             var tenantManager = scope.ServiceProvider.GetRequiredService<TenantManager>();
             var messageService = scope.ServiceProvider.GetRequiredService<MessageService>();
 
-            await tenantManager.SetCurrentTenantAsync(tenantId);
+            var tenant = await tenantManager.SetCurrentTenantAsync(tenantId);
+            if (tenant == null)
+            {
+                await dbWorker.CancelJournalAttemptsAsync(tenantId, webhookLogId);
+                return;
+            }
+
+            if (tenant.Status != TenantStatus.Active)
+            {
+                // the claim skips inactive portals, so the entry waits here until the portal is active again
+                return;
+            }
 
             var entry = await dbWorker.ReadJournal(tenantId, webhookLogId);
             if (entry == null)
@@ -154,13 +170,13 @@ public class WebhookSender(
                 using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                 timeoutCts.CancelAfter(_requestTimeout);
 
-                using var response = await httpClient.SendAsync(request, timeoutCts.Token);
+                using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, timeoutCts.Token);
 
                 response.EnsureSuccessStatusCode();
 
                 status = (int)response.StatusCode;
                 responseHeaders = JsonSerializer.Serialize(response.Headers.ToDictionary(r => r.Key, v => v.Value), _jsonSerializerOptions);
-                responsePayload = await response.Content.ReadAsStringAsync(timeoutCts.Token);
+                responsePayload = await ReadResponsePayloadAsync(response.Content, timeoutCts.Token);
 
                 entry.Config.LastSuccessOn = delivery = DateTime.UtcNow;
                 succeeded = true;
@@ -224,7 +240,14 @@ public class WebhookSender(
                 logger.WarningDeliveryGivenUp(entry.Id, attempts);
             }
 
-            await dbWorker.UpdateWebhookJournal(entry.Id, entry.TenantId, status, delivery, requestPayload, requestHeaders, responsePayload, responseHeaders, attempts, nextAttemptOn);
+            if (requestPayload.Length > MaxRequestPayloadLength)
+            {
+                requestPayload = entry.RequestPayload;
+            }
+
+            await dbWorker.UpdateWebhookJournal(entry.Id, entry.TenantId, status, delivery, requestPayload, requestHeaders, ToStorableText(responsePayload), responseHeaders, attempts, nextAttemptOn);
+            journalUpdated = true;
+
             await dbWorker.UpdateWebhookConfig(entry.Config, configDisabled);
 
             if (configDisabled)
@@ -239,7 +262,87 @@ public class WebhookSender(
         catch (Exception e)
         {
             logger.ErrorFailedToSend(tenantId, webhookLogId, e);
+
+            if (!journalUpdated)
+            {
+                await RegisterFailedAttemptAsync(dbWorker, tenantId, webhookLogId);
+            }
         }
+    }
+
+    private async Task RegisterFailedAttemptAsync(DbWorker dbWorker, int tenantId, int webhookLogId)
+    {
+        try
+        {
+            var attempts = await dbWorker.GetJournalAttemptsAsync(tenantId, webhookLogId);
+            if (attempts == null)
+            {
+                return;
+            }
+
+            var nextAttempts = attempts.Value + 1;
+            var nextAttemptOn = GetNextAttemptOn(nextAttempts);
+
+            if (nextAttemptOn.HasValue)
+            {
+                logger.DebugRetryScheduled(webhookLogId, nextAttempts, nextAttemptOn.Value);
+            }
+            else
+            {
+                logger.WarningDeliveryGivenUp(webhookLogId, nextAttempts);
+            }
+
+            await dbWorker.ScheduleJournalAttemptAsync(tenantId, webhookLogId, nextAttempts, nextAttemptOn);
+        }
+        catch (Exception e)
+        {
+            logger.ErrorFailedToRegisterAttempt(tenantId, webhookLogId, e);
+        }
+    }
+
+    private static async Task<string> ReadResponsePayloadAsync(HttpContent content, CancellationToken cancellationToken)
+    {
+        await using var stream = await content.ReadAsStreamAsync(cancellationToken);
+
+        var buffer = new byte[MaxResponsePayloadBytes];
+        var read = await stream.ReadAtLeastAsync(buffer, buffer.Length, throwOnEndOfStream: false, cancellationToken);
+
+        return Encoding.UTF8.GetString(buffer, 0, read);
+    }
+
+    private static string ToStorableText(string value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            return value;
+        }
+
+        var builder = new StringBuilder(value.Length);
+
+        for (var i = 0; i < value.Length; i++)
+        {
+            var c = value[i];
+
+            if (c == '\0')
+            {
+                continue;
+            }
+
+            if (char.IsSurrogate(c))
+            {
+                if (char.IsHighSurrogate(c) && i + 1 < value.Length && char.IsLowSurrogate(value[i + 1]))
+                {
+                    i++;
+                }
+
+                builder.Append('\uFFFD');
+                continue;
+            }
+
+            builder.Append(c);
+        }
+
+        return builder.ToString();
     }
 
     private DateTime? GetNextAttemptOn(int attempts)
