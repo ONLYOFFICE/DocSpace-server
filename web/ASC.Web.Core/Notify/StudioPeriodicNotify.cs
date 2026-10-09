@@ -67,7 +67,10 @@ public class StudioPeriodicNotify(
 {
     private readonly ILogger _log = loggerFactory.CreateLogger("ASC.Notify");
 
-    private const string CacheKey = "notification_date_for_unused_portals";
+    // A key of this schedule's own, not the one the yearly schedule before it kept: that date lies long
+    // before this schedule's first run, and counting from it would let the removal take a portal whose
+    // anniversary fell in the week before that run, when no warning of this schedule could go out yet.
+    private const string CacheKey = "notification_date_for_unused_portals_v4";
 
     /// <summary>
     /// The SaaS letters, and the only list of them. Order carries no meaning: every letter judges itself,
