@@ -4,9 +4,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | [**\OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId**](EntryId.md) |  | [optional]
-**parent_id** | [**\OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId**](EntryId.md) |  | [optional]
-**root_folder_id** | [**\OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId**](EntryId.md) |  | [optional]
+**id** | **mixed** |  | [optional]
+**parent_id** | **mixed** |  | [optional]
+**root_folder_id** | **mixed** |  | [optional]
 **title** | **string** |  | [optional]
 **file_entry_type** | **int** | 1 folder, 2 file. Present on every entry payload. | [optional]
 **created** | **\DateTime** |  | [optional]
@@ -15,8 +15,8 @@ Name | Type | Description | Notes
 **updated_by** | [**\OnlyOffice\DocSpace\Webhooks\Sdk\Model\UserSummaryPayload**](UserSummaryPayload.md) |  | [optional]
 **root_folder_type** | **int** | enum FolderType | [optional]
 **parent_room_type** | **int** | enum FolderType | [optional]
-**origin_id** | [**\OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId**](EntryId.md) |  | [optional]
-**origin_room_id** | [**\OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId**](EntryId.md) |  | [optional]
+**origin_id** | **mixed** |  | [optional]
+**origin_room_id** | **mixed** |  | [optional]
 **origin_title** | **string** |  | [optional]
 **origin_room_title** | **string** |  | [optional]
 **provider_item** | **bool** |  | [optional]

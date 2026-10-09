@@ -31,7 +31,7 @@ Name | Type | Description | Notes
 **MobilePhone** | **string** |  | [optional] 
 **MobilePhoneActivationStatus** | **int** | enum MobilePhoneActivationStatus | [optional] 
 **QuotaLimit** | **long** |  | [optional] 
-**UsedSpace** | **decimal** |  | [optional] 
+**UsedSpace** | **double** |  | [optional] 
 **IsCustomQuota** | **bool** |  | [optional] 
 **CreatedBy** | [**UserSummaryPayload**](UserSummaryPayload.md) |  | [optional] 
 **RegistrationDate** | **DateTime** |  | [optional] 

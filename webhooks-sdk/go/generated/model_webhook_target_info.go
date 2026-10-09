@@ -20,6 +20,7 @@ var _ MappedNullable = &WebhookTargetInfo{}
 // WebhookTargetInfo Present only when the subscription is scoped to one entity.
 type WebhookTargetInfo struct {
 	Id *EntryId `json:"id,omitempty"`
+	// The prefix of the trigger the delivery is for: user, group, file, folder, room, form or agent today. Deliberately not an enum -- every new trigger family adds a value, and a receiver built against an older contract must keep parsing it. 
 	Type *string `json:"type,omitempty"`
 }
 

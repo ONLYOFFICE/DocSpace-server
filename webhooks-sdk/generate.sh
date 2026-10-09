@@ -4,6 +4,7 @@
 #
 #   ./generate.sh              # all languages
 #   ./generate.sh python go    # just these
+#   VERIFY=0 ./generate.sh     # skip the build-and-run check
 #
 # Run from anywhere; paths resolve against this script's location. On Windows
 # use Git Bash -- the generator itself is OS-neutral.
@@ -23,7 +24,7 @@ spec="$here/../common/ASC.Webhooks.Core/Contract/docspace-webhooks.yaml"
 # and models-only output keeps them as long as modelDocs is not switched off.
 default_props="models,modelTests=false,modelDocs=true"
 
-# dirname|generator|global-properties|additional-properties|template-dir
+# dirname|generator|global-properties|additional-properties|template-dir|extra-cli-args
 #
 # typescript needs supportingFiles: its models import helpers from ../runtime
 # (mapValues, parseDateTime, ...), which models-only does not emit, so the
@@ -42,16 +43,37 @@ default_props="models,modelTests=false,modelDocs=true"
 # property in Option<T> and needs its converters registered by hand, both of
 # which live in the un-generated Client namespace; httpclient emits plain POCOs
 # that need only the two small shims in src/Compat.cs.
+#
+# go renames the hasAvatar field: the generator also emits a HasXxx() presence
+# method for every optional field, and a field called HasAvatar collides with
+# the method of that name, so the package does not compile. Only the Go field
+# name changes; the JSON key stays hasAvatar.
+#
+# java turns off disallowAdditionalPropertiesIfNotPresent. By default every
+# model's validateJsonElement throws on a property the contract does not list,
+# so a field added on the server breaks every receiver built before it.
+#
+# kotlin and php cannot render the EntryId oneOf (integer | string): both emit a
+# property-less class and the id is lost. Kotlin maps the schema onto the
+# hand-written onlyoffice.docspace.webhooks.sdk.EntryId (kotlin/src/), PHP onto
+# `mixed`, which ObjectSerializer passes through as the int or string it is.
+#
+# ruby needs supportingFiles for api_model_base.rb (every model inherits it),
+# version.rb, the gem entry point and the gemspec; templates/ruby overrides the
+# last two so that loading the gem does not pull in an HTTP client.
+#
+# swift needs supportingFiles for JSONValue.swift, the type of the untyped
+# envelope payload.
 targets=(
-  "csharp|csharp|models,modelTests=false,modelDocs=true,supportingFiles=README.md:RECEIVING.md|packageName=DocSpace.Webhooks.SDK,library=httpclient,targetFramework=net8.0|templates/csharp"
-  "go|go|models,modelTests=false,modelDocs=true,supportingFiles=README.md|packageName=docspace_webhooks_sdk|templates/go"
-  "java|java|models,modelTests=false,modelDocs=true,supportingFiles=README.md|modelPackage=com.onlyoffice.docspace.webhooks.sdk.model,invokerPackage=com.onlyoffice.docspace.webhooks.sdk,groupId=com.onlyoffice,artifactId=docspace-webhooks-sdk,hideGenerationTimestamp=true|templates/java"
-  "kotlin|kotlin|models,modelTests=false,modelDocs=true,supportingFiles=README.md|packageName=onlyoffice.docspace.webhooks.sdk|templates/kotlin"
-  "php|php|models,supportingFiles,modelTests=false,modelDocs=true|invokerPackage=OnlyOffice\DocSpace\Webhooks\Sdk,packageName=onlyoffice/docspace-webhooks-sdk|templates/php"
-  "python|python|models,modelTests=false,modelDocs=true,supportingFiles=README.md|packageName=docspace_webhooks_sdk|templates/python"
-  "ruby|ruby|models,modelTests=false,modelDocs=true,supportingFiles=README.md|gemName=docspace-webhooks-sdk,moduleName=DocspaceWebhooksSdk|templates/ruby"
-  "swift|swift6|models,modelTests=false,modelDocs=true,supportingFiles=README.md|projectName=DocSpaceWebhooksSDK|templates/swift"
-  "typescript|typescript-fetch|models,supportingFiles,modelTests=false,modelDocs=true||templates/typescript"
+  "csharp|csharp|models,modelTests=false,modelDocs=true,supportingFiles=README.md:RECEIVING.md|packageName=DocSpace.Webhooks.SDK,library=httpclient,targetFramework=net8.0|templates/csharp|"
+  "go|go|models,modelTests=false,modelDocs=true,supportingFiles=README.md|packageName=docspace_webhooks_sdk|templates/go|--name-mappings hasAvatar=HasAvatarFlag"
+  "java|java|models,modelTests=false,modelDocs=true,supportingFiles=README.md|modelPackage=com.onlyoffice.docspace.webhooks.sdk.model,invokerPackage=com.onlyoffice.docspace.webhooks.sdk,groupId=com.onlyoffice,artifactId=docspace-webhooks-sdk,hideGenerationTimestamp=true,disallowAdditionalPropertiesIfNotPresent=false|templates/java|"
+  "kotlin|kotlin|models,modelTests=false,modelDocs=true,supportingFiles=README.md|packageName=onlyoffice.docspace.webhooks.sdk|templates/kotlin|--schema-mappings EntryId=onlyoffice.docspace.webhooks.sdk.EntryId"
+  "php|php|models,supportingFiles,modelTests=false,modelDocs=true|invokerPackage=OnlyOffice\DocSpace\Webhooks\Sdk,packageName=onlyoffice/docspace-webhooks-sdk|templates/php|--schema-mappings EntryId=mixed --type-mappings EntryId=mixed"
+  "python|python|models,modelTests=false,modelDocs=true,supportingFiles=README.md|packageName=docspace_webhooks_sdk|templates/python|"
+  "ruby|ruby|models,modelTests=false,modelDocs=true,supportingFiles=README.md:api_model_base.rb:version.rb:docspace-webhooks-sdk.rb:docspace-webhooks-sdk.gemspec|gemName=docspace-webhooks-sdk,moduleName=DocspaceWebhooksSdk|templates/ruby|"
+  "swift|swift6|models,modelTests=false,modelDocs=true,supportingFiles=README.md:JSONValue.swift|projectName=DocSpaceWebhooksSDK|templates/swift|"
+  "typescript|typescript-fetch|models,supportingFiles,modelTests=false,modelDocs=true||templates/typescript|"
 )
 
 [ -f "$spec" ] || { echo "spec not found: $spec" >&2; exit 1; }
@@ -65,12 +87,14 @@ wanted=("$@")
 cd "$here"   # so the pinned openapitools.json here is the one that applies
 
 fail=0
+generated=()
 for t in "${targets[@]}"; do
   dir="$(echo "$t" | cut -d'|' -f1)"
   gen="$(echo "$t" | cut -d'|' -f2)"
   props="$(echo "$t" | cut -d'|' -f3)"
   extra="$(echo "$t" | cut -d'|' -f4)"
   tmpl="$(echo "$t" | cut -d'|' -f5)"
+  cli="$(echo "$t" | cut -d'|' -f6)"
   [ -n "$props" ] || props="$default_props"
 
   if [ ${#wanted[@]} -gt 0 ]; then
@@ -126,6 +150,7 @@ for t in "${targets[@]}"; do
        $extra_args \
        $tmpl_args \
        $cfg_args \
+       $cli \
        > "$here/$dir/generated/.generate.log" 2>&1
   then
     echo "    models: $(find "$here/$dir/generated" -type f ! -name '.generate.log' | wc -l) files"
@@ -145,6 +170,12 @@ for t in "${targets[@]}"; do
       python "$here/tools/gen-trigger-map.py" --lang java --spec "$spec" --package com.onlyoffice.docspace.webhooks.sdk --model-package com.onlyoffice.docspace.webhooks.sdk.model --out "$here/$dir/generated/src/main/java/com/onlyoffice/docspace/webhooks/sdk/JSON.java"
       echo "    shim+JSON: generated/src/main/java/com/onlyoffice/docspace/webhooks/sdk/"
       ;;
+    kotlin)
+      # The EntryId schema is mapped onto the hand-written class in kotlin/src/;
+      # its doc page is hand-written too, since the model docs link to it.
+      cp "$here/kotlin/docs/"*.md "$here/$dir/generated/docs/"
+      echo "    docs: generated/docs/onlyoffice.docspace.webhooks.sdk.EntryId.md"
+      ;;
     go)
       # Go requires every file of a package to sit in one directory, so the
       # utils.go stand-ins have to be copied into generated/ rather than kept
@@ -163,6 +194,93 @@ for t in "${targets[@]}"; do
       echo "    triggers: generated/triggers.ts"
       ;;
   esac
+
+  generated+=("$dir")
 done
+
+# ------------------------------------------------------------------ verify
+#
+# Generating is not the same as working: every SDK here once generated cleanly
+# and still failed to compile or to parse a real delivery. So each language that
+# was just generated is built and its sample is run over every signed fixture in
+# samples/ - the sample verifies the signature and parses the payload with the
+# generated models, which is exactly what a receiver does. A missing toolchain
+# skips its language and is reported, never silently passed.
+
+[ "${VERIFY:-1}" = "0" ] && exit $fail
+
+# Native tools on Windows (java, php, python, dotnet) cannot open /c/... paths.
+native() {
+  if command -v cygpath >/dev/null 2>&1; then cygpath -m "$1"; else echo "$1"; fi
+}
+
+need() {
+  for tool in "$@"; do
+    command -v "$tool" >/dev/null 2>&1 || { echo "    SKIPPED -- $tool not found"; return 1; }
+  done
+}
+
+# run_sample <dir> <fixture.json> <fixture.sig>; the secret is samples/SECRET
+run_sample() {
+  local body sig secret
+  body="$(native "$2")"; sig="$(cat "$3")"; secret="$(cat "$here/samples/SECRET")"
+  case "$1" in
+    csharp)     (cd "$here/csharp/samples/WebhookLogger" && dotnet run --no-build -- --file "$body" --secret "$secret" --signature "$sig") ;;
+    go)         (cd "$here/go" && go run ./samples "$body" "$secret" "$sig") ;;
+    java)       (cd "$here/java" && mvn -q exec:java -Dexec.args="$body $secret $sig") ;;
+    kotlin)     (cd "$here/kotlin" && mvn -q exec:java -Dexec.args="$body $secret $sig") ;;
+    php)        (cd "$here/php/samples" && php log_webhook.php "$body" "$secret" "$sig") ;;
+    python)     (cd "$here/python/samples" && python log_webhook.py "$body" "$secret" "$sig") ;;
+    ruby)       (cd "$here/ruby/samples" && ruby log_webhook.rb "$body" "$secret" "$sig") ;;
+    swift)      (cd "$here/swift" && swift run WebhookLogger "$body" "$secret" "$sig") ;;
+    typescript) (cd "$here/typescript" && node dist/samples/log-webhook.js "$body" "$secret" "$sig") ;;
+  esac
+}
+
+build() {
+  case "$1" in
+    csharp)     need dotnet && (cd "$here/csharp/samples/WebhookLogger" && dotnet build -nologo -v q) ;;
+    go)         need go && (cd "$here/go" && go vet ./...) ;;
+    java)       need mvn && (cd "$here/java" && mvn -q compile) ;;
+    kotlin)     need mvn && (cd "$here/kotlin" && mvn -q compile) ;;
+    php)        need php && find "$here/php/generated/lib" -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null ;;
+    python)     need python && python -m compileall -q "$(native "$here/python/generated")" ;;
+    ruby)       need ruby ;;
+    swift)      need swift && (cd "$here/swift" && swift build) ;;
+    typescript) need npm && (cd "$here/typescript" && { [ -d node_modules ] || npm ci --silent || npm install --silent; } && npm run -s build) ;;
+  esac
+}
+
+unverified=()
+for dir in "${generated[@]}"; do
+  echo "=== verify $dir"
+  log="$here/$dir/generated/.verify.log"
+  : > "$log"
+  if ! build "$dir" >> "$log" 2>&1; then
+    if grep -q '^    SKIPPED' "$log"; then
+      cat "$log"
+      unverified+=("$dir")
+    else
+      echo "    BUILD FAILED -- see $dir/generated/.verify.log" >&2
+      fail=1
+    fi
+    continue
+  fi
+
+  for fixture in "$here"/samples/*.json; do
+    name="$(basename "$fixture" .json)"
+    if run_sample "$dir" "$fixture" "${fixture%.json}.sig" >> "$log" 2>&1; then
+      echo "    $name: ok"
+    else
+      echo "    $name: FAILED -- see $dir/generated/.verify.log" >&2
+      fail=1
+    fi
+  done
+done
+
+if [ ${#unverified[@]} -gt 0 ]; then
+  echo
+  echo "NOT VERIFIED (toolchain missing): ${unverified[*]}" >&2
+fi
 
 exit $fail

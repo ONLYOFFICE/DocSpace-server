@@ -58,7 +58,7 @@ class WebhookTargetInfo implements ModelInterface, ArrayAccess, \JsonSerializabl
      * @var string[]
      */
     protected static $openAPITypes = [
-        'id' => '\OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId',
+        'id' => 'mixed',
         'type' => 'string'
     ];
 
@@ -235,31 +235,6 @@ class WebhookTargetInfo implements ModelInterface, ArrayAccess, \JsonSerializabl
         return self::$openAPIModelName;
     }
 
-    public const TYPE_USER = 'user';
-    public const TYPE_GROUP = 'group';
-    public const TYPE_FILE = 'file';
-    public const TYPE_FOLDER = 'folder';
-    public const TYPE_ROOM = 'room';
-    public const TYPE_FORM = 'form';
-    public const TYPE_AGENT = 'agent';
-
-    /**
-     * Gets allowable values of the enum
-     *
-     * @return string[]
-     */
-    public function getTypeAllowableValues()
-    {
-        return [
-            self::TYPE_USER,
-            self::TYPE_GROUP,
-            self::TYPE_FILE,
-            self::TYPE_FOLDER,
-            self::TYPE_ROOM,
-            self::TYPE_FORM,
-            self::TYPE_AGENT,
-        ];
-    }
 
     /**
      * Associative array for storing property values
@@ -307,15 +282,6 @@ class WebhookTargetInfo implements ModelInterface, ArrayAccess, \JsonSerializabl
     {
         $invalidProperties = [];
 
-        $allowedValues = $this->getTypeAllowableValues();
-        if (!is_null($this->container['type']) && !in_array($this->container['type'], $allowedValues, true)) {
-            $invalidProperties[] = sprintf(
-                "invalid value '%s' for 'type', must be one of '%s'",
-                $this->container['type'],
-                implode("', '", $allowedValues)
-            );
-        }
-
         return $invalidProperties;
     }
 
@@ -334,7 +300,7 @@ class WebhookTargetInfo implements ModelInterface, ArrayAccess, \JsonSerializabl
     /**
      * Gets id
      *
-     * @return \OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId|null
+     * @return mixed|null
      */
     public function getId()
     {
@@ -344,7 +310,7 @@ class WebhookTargetInfo implements ModelInterface, ArrayAccess, \JsonSerializabl
     /**
      * Sets id
      *
-     * @param \OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId|null $id id
+     * @param mixed|null $id id
      *
      * @return self
      */
@@ -371,7 +337,7 @@ class WebhookTargetInfo implements ModelInterface, ArrayAccess, \JsonSerializabl
     /**
      * Sets type
      *
-     * @param string|null $type type
+     * @param string|null $type The prefix of the trigger the delivery is for: user, group, file, folder, room, form or agent today. Deliberately not an enum -- every new trigger family adds a value, and a receiver built against an older contract must keep parsing it.
      *
      * @return self
      */
@@ -379,16 +345,6 @@ class WebhookTargetInfo implements ModelInterface, ArrayAccess, \JsonSerializabl
     {
         if (is_null($type)) {
             throw new \InvalidArgumentException('non-nullable type cannot be null');
-        }
-        $allowedValues = $this->getTypeAllowableValues();
-        if (!in_array($type, $allowedValues, true)) {
-            throw new \InvalidArgumentException(
-                sprintf(
-                    "Invalid value '%s' for 'type', must be one of '%s'",
-                    $type,
-                    implode("', '", $allowedValues)
-                )
-            );
         }
         $this->container['type'] = $type;
 

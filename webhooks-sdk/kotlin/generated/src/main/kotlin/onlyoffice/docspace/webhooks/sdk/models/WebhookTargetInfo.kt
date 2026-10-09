@@ -23,7 +23,6 @@
 
 package onlyoffice.docspace.webhooks.sdk.models
 
-import onlyoffice.docspace.webhooks.sdk.models.EntryId
 
 import com.squareup.moshi.Json
 import com.squareup.moshi.JsonClass
@@ -32,35 +31,21 @@ import com.squareup.moshi.JsonClass
  * Present only when the subscription is scoped to one entity.
  *
  * @param id 
- * @param type 
+ * @param type The prefix of the trigger the delivery is for: user, group, file, folder, room, form or agent today. Deliberately not an enum -- every new trigger family adds a value, and a receiver built against an older contract must keep parsing it. 
  */
 
 
 data class WebhookTargetInfo (
 
     @Json(name = "id")
-    val id: EntryId? = null,
+    val id: onlyoffice.docspace.webhooks.sdk.EntryId? = null,
 
+    /* The prefix of the trigger the delivery is for: user, group, file, folder, room, form or agent today. Deliberately not an enum -- every new trigger family adds a value, and a receiver built against an older contract must keep parsing it.  */
     @Json(name = "type")
-    val type: WebhookTargetInfo.Type? = null
+    val type: kotlin.String? = null
 
 ) {
 
-    /**
-     * 
-     *
-     * Values: user,group,file,folder,room,form,agent
-     */
-    @JsonClass(generateAdapter = false)
-    enum class Type(val value: kotlin.String) {
-        @Json(name = "user") user("user"),
-        @Json(name = "group") group("group"),
-        @Json(name = "file") file("file"),
-        @Json(name = "folder") folder("folder"),
-        @Json(name = "room") room("room"),
-        @Json(name = "form") form("form"),
-        @Json(name = "agent") agent("agent");
-    }
 
 }
 

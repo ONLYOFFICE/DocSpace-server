@@ -30,11 +30,11 @@ Name | Type | Description | Notes
 **MobilePhone** | Pointer to **string** |  | [optional] 
 **MobilePhoneActivationStatus** | Pointer to **int32** | enum MobilePhoneActivationStatus | [optional] 
 **QuotaLimit** | Pointer to **int64** |  | [optional] 
-**UsedSpace** | Pointer to **float32** |  | [optional] 
+**UsedSpace** | Pointer to **float64** |  | [optional] 
 **IsCustomQuota** | Pointer to **bool** |  | [optional] 
 **CreatedBy** | Pointer to [**UserSummaryPayload**](UserSummaryPayload.md) |  | [optional] 
 **RegistrationDate** | Pointer to **time.Time** |  | [optional] 
-**HasAvatar** | Pointer to **bool** |  | [optional] 
+**HasAvatarFlag** | Pointer to **bool** |  | [optional] 
 **Avatar** | Pointer to **string** |  | [optional] 
 **AvatarOriginal** | Pointer to **string** |  | [optional] 
 **AvatarMax** | Pointer to **string** |  | [optional] 
@@ -713,20 +713,20 @@ HasQuotaLimit returns a boolean if a field has been set.
 
 ### GetUsedSpace
 
-`func (o *UserPayload) GetUsedSpace() float32`
+`func (o *UserPayload) GetUsedSpace() float64`
 
 GetUsedSpace returns the UsedSpace field if non-nil, zero value otherwise.
 
 ### GetUsedSpaceOk
 
-`func (o *UserPayload) GetUsedSpaceOk() (*float32, bool)`
+`func (o *UserPayload) GetUsedSpaceOk() (*float64, bool)`
 
 GetUsedSpaceOk returns a tuple with the UsedSpace field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetUsedSpace
 
-`func (o *UserPayload) SetUsedSpace(v float32)`
+`func (o *UserPayload) SetUsedSpace(v float64)`
 
 SetUsedSpace sets UsedSpace field to given value.
 
@@ -811,30 +811,30 @@ SetRegistrationDate sets RegistrationDate field to given value.
 
 HasRegistrationDate returns a boolean if a field has been set.
 
-### GetHasAvatar
+### GetHasAvatarFlag
 
-`func (o *UserPayload) GetHasAvatar() bool`
+`func (o *UserPayload) GetHasAvatarFlag() bool`
 
-GetHasAvatar returns the HasAvatar field if non-nil, zero value otherwise.
+GetHasAvatarFlag returns the HasAvatarFlag field if non-nil, zero value otherwise.
 
-### GetHasAvatarOk
+### GetHasAvatarFlagOk
 
-`func (o *UserPayload) GetHasAvatarOk() (*bool, bool)`
+`func (o *UserPayload) GetHasAvatarFlagOk() (*bool, bool)`
 
-GetHasAvatarOk returns a tuple with the HasAvatar field if it's non-nil, zero value otherwise
+GetHasAvatarFlagOk returns a tuple with the HasAvatarFlag field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetHasAvatar
+### SetHasAvatarFlag
 
-`func (o *UserPayload) SetHasAvatar(v bool)`
+`func (o *UserPayload) SetHasAvatarFlag(v bool)`
 
-SetHasAvatar sets HasAvatar field to given value.
+SetHasAvatarFlag sets HasAvatarFlag field to given value.
 
-### HasHasAvatar
+### HasHasAvatarFlag
 
-`func (o *UserPayload) HasHasAvatar() bool`
+`func (o *UserPayload) HasHasAvatarFlag() bool`
 
-HasHasAvatar returns a boolean if a field has been set.
+HasHasAvatarFlag returns a boolean if a field has been set.
 
 ### GetAvatar
 

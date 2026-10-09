@@ -14,6 +14,9 @@ docs/WebhookConfigInfo.md
 docs/WebhookEnvelope.md
 docs/WebhookEventInfo.md
 docs/WebhookTargetInfo.md
+docspace-webhooks-sdk.gemspec
+lib/docspace-webhooks-sdk.rb
+lib/docspace-webhooks-sdk/api_model_base.rb
 lib/docspace-webhooks-sdk/models/contact_payload.rb
 lib/docspace-webhooks-sdk/models/entry_id.rb
 lib/docspace-webhooks-sdk/models/file_entry_payload.rb
@@ -29,3 +32,4 @@ lib/docspace-webhooks-sdk/models/webhook_config_info.rb
 lib/docspace-webhooks-sdk/models/webhook_envelope.rb
 lib/docspace-webhooks-sdk/models/webhook_event_info.rb
 lib/docspace-webhooks-sdk/models/webhook_target_info.rb
+lib/docspace-webhooks-sdk/version.rb

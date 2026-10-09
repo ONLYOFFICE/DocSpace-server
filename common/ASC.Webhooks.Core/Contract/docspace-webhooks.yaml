@@ -171,7 +171,11 @@ components:
           $ref: "#/components/schemas/EntryId"
         type:
           type: string
-          enum: [user, group, file, folder, room, form, agent]
+          description: >
+            The prefix of the trigger the delivery is for: user, group, file,
+            folder, room, form or agent today. Deliberately not an enum -- every
+            new trigger family adds a value, and a receiver built against an
+            older contract must keep parsing it.
 
     WebhookConfigInfo:
       type: object
@@ -286,6 +290,7 @@ components:
           format: int64
         usedSpace:
           type: number
+          format: double
         isCustomQuota:
           type: boolean
         createdBy:

@@ -33,66 +33,11 @@ namespace DocSpace.Webhooks.SDK.Model
     public partial class WebhookTargetInfo : IValidatableObject
     {
         /// <summary>
-        /// Defines Type
-        /// </summary>
-        [JsonConverter(typeof(StringEnumConverter))]
-        public enum TypeEnum
-        {
-            /// <summary>
-            /// Enum User for value: user
-            /// </summary>
-            [EnumMember(Value = "user")]
-            User = 1,
-
-            /// <summary>
-            /// Enum Group for value: group
-            /// </summary>
-            [EnumMember(Value = "group")]
-            Group = 2,
-
-            /// <summary>
-            /// Enum File for value: file
-            /// </summary>
-            [EnumMember(Value = "file")]
-            File = 3,
-
-            /// <summary>
-            /// Enum Folder for value: folder
-            /// </summary>
-            [EnumMember(Value = "folder")]
-            Folder = 4,
-
-            /// <summary>
-            /// Enum Room for value: room
-            /// </summary>
-            [EnumMember(Value = "room")]
-            Room = 5,
-
-            /// <summary>
-            /// Enum Form for value: form
-            /// </summary>
-            [EnumMember(Value = "form")]
-            Form = 6,
-
-            /// <summary>
-            /// Enum Agent for value: agent
-            /// </summary>
-            [EnumMember(Value = "agent")]
-            Agent = 7
-        }
-
-
-        /// <summary>
-        /// Gets or Sets Type
-        /// </summary>
-        [DataMember(Name = "type", EmitDefaultValue = false)]
-        public TypeEnum? Type { get; set; }
-        /// <summary>
         /// Initializes a new instance of the <see cref="WebhookTargetInfo" /> class.
         /// </summary>
         /// <param name="id">id.</param>
-        /// <param name="type">type.</param>
-        public WebhookTargetInfo(EntryId id = default, TypeEnum? type = default)
+        /// <param name="type">The prefix of the trigger the delivery is for: user, group, file, folder, room, form or agent today. Deliberately not an enum - - every new trigger family adds a value, and a receiver built against an older contract must keep parsing it. .</param>
+        public WebhookTargetInfo(EntryId id = default, string type = default)
         {
             this.Id = id;
             this.Type = type;
@@ -103,6 +48,13 @@ namespace DocSpace.Webhooks.SDK.Model
         /// </summary>
         [DataMember(Name = "id", EmitDefaultValue = false)]
         public EntryId Id { get; set; }
+
+        /// <summary>
+        /// The prefix of the trigger the delivery is for: user, group, file, folder, room, form or agent today. Deliberately not an enum - - every new trigger family adds a value, and a receiver built against an older contract must keep parsing it. 
+        /// </summary>
+        /// <value>The prefix of the trigger the delivery is for: user, group, file, folder, room, form or agent today. Deliberately not an enum - - every new trigger family adds a value, and a receiver built against an older contract must keep parsing it. </value>
+        [DataMember(Name = "type", EmitDefaultValue = false)]
+        public string Type { get; set; }
 
         /// <summary>
         /// Returns the string presentation of the object

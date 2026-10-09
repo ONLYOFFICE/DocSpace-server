@@ -58,9 +58,9 @@ class RoomPayload implements ModelInterface, ArrayAccess, \JsonSerializable
      * @var string[]
      */
     protected static $openAPITypes = [
-        'id' => '\OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId',
-        'parent_id' => '\OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId',
-        'root_folder_id' => '\OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId',
+        'id' => 'mixed',
+        'parent_id' => 'mixed',
+        'root_folder_id' => 'mixed',
         'title' => 'string',
         'file_entry_type' => 'int',
         'created' => '\DateTime',
@@ -69,8 +69,8 @@ class RoomPayload implements ModelInterface, ArrayAccess, \JsonSerializable
         'updated_by' => '\OnlyOffice\DocSpace\Webhooks\Sdk\Model\UserSummaryPayload',
         'root_folder_type' => 'int',
         'parent_room_type' => 'int',
-        'origin_id' => '\OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId',
-        'origin_room_id' => '\OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId',
+        'origin_id' => 'mixed',
+        'origin_room_id' => 'mixed',
         'origin_title' => 'string',
         'origin_room_title' => 'string',
         'provider_item' => 'bool',
@@ -503,7 +503,7 @@ class RoomPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Gets id
      *
-     * @return \OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId|null
+     * @return mixed|null
      */
     public function getId()
     {
@@ -513,7 +513,7 @@ class RoomPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets id
      *
-     * @param \OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId|null $id id
+     * @param mixed|null $id id
      *
      * @return self
      */
@@ -530,7 +530,7 @@ class RoomPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Gets parent_id
      *
-     * @return \OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId|null
+     * @return mixed|null
      */
     public function getParentId()
     {
@@ -540,7 +540,7 @@ class RoomPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets parent_id
      *
-     * @param \OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId|null $parent_id parent_id
+     * @param mixed|null $parent_id parent_id
      *
      * @return self
      */
@@ -557,7 +557,7 @@ class RoomPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Gets root_folder_id
      *
-     * @return \OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId|null
+     * @return mixed|null
      */
     public function getRootFolderId()
     {
@@ -567,7 +567,7 @@ class RoomPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets root_folder_id
      *
-     * @param \OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId|null $root_folder_id root_folder_id
+     * @param mixed|null $root_folder_id root_folder_id
      *
      * @return self
      */
@@ -800,7 +800,7 @@ class RoomPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Gets origin_id
      *
-     * @return \OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId|null
+     * @return mixed|null
      */
     public function getOriginId()
     {
@@ -810,7 +810,7 @@ class RoomPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets origin_id
      *
-     * @param \OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId|null $origin_id origin_id
+     * @param mixed|null $origin_id origin_id
      *
      * @return self
      */
@@ -827,7 +827,7 @@ class RoomPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Gets origin_room_id
      *
-     * @return \OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId|null
+     * @return mixed|null
      */
     public function getOriginRoomId()
     {
@@ -837,7 +837,7 @@ class RoomPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets origin_room_id
      *
-     * @param \OnlyOffice\DocSpace\Webhooks\Sdk\Model\EntryId|null $origin_room_id origin_room_id
+     * @param mixed|null $origin_room_id origin_room_id
      *
      * @return self
      */

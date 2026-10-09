@@ -12,8 +12,9 @@
 # =============================================================================
 
 # --- generator ---------------------------------------------------------------
-# Per-run log that generate.sh writes into each generated/ tree.
+# Per-run logs that generate.sh writes into each generated/ tree.
 .generate.log
+.verify.log
 
 # --- C# / .NET ---------------------------------------------------------------
 csharp/**/bin/

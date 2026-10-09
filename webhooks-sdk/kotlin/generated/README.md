@@ -38,6 +38,7 @@ import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.sun.net.httpserver.HttpServer
 
+import onlyoffice.docspace.webhooks.sdk.EntryIdAdapter
 import onlyoffice.docspace.webhooks.sdk.models.FileEntryPayload
 import onlyoffice.docspace.webhooks.sdk.models.UserPayload
 
@@ -64,7 +65,11 @@ fun verify(body: ByteArray, signature: String?): Boolean {
     )
 }
 
-private val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+// EntryIdAdapter reads an entry id, which is a number or a string on the wire.
+private val moshi = Moshi.Builder()
+    .add(EntryIdAdapter())
+    .add(KotlinJsonAdapterFactory())
+    .build()
 
 private val mapAdapter = moshi.adapter<Map<String, Any?>>(
     Types.newParameterizedType(Map::class.java, String::class.java, Any::class.java)
@@ -103,7 +108,7 @@ fun main() {
             // Decode FilePayload / FolderPayload / RoomPayload for the rest.
             val entry = moshi.adapter(FileEntryPayload::class.java).fromJsonValue(payload)
             val kind = if (entry?.fileEntryType == 2) "file" else "folder"
-            println("$trigger: $kind \"${entry?.title}\"")
+            println("$trigger: $kind \"${entry?.title}\" id=${entry?.id}")
         }
     }
 
@@ -130,7 +135,6 @@ New events are added over time. Treat an unfamiliar `event.trigger` as something
 ## Documentation for Models
 
  - [ContactPayload](docs/ContactPayload.md)
- - [EntryId](docs/EntryId.md)
  - [FileEntryPayload](docs/FileEntryPayload.md)
  - [FilePayload](docs/FilePayload.md)
  - [FolderPayload](docs/FolderPayload.md)

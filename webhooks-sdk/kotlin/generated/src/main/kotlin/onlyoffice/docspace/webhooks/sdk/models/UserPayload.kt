@@ -158,7 +158,7 @@ data class UserPayload (
     val quotaLimit: kotlin.Long? = null,
 
     @Json(name = "usedSpace")
-    val usedSpace: java.math.BigDecimal? = null,
+    val usedSpace: kotlin.Double? = null,
 
     @Json(name = "isCustomQuota")
     val isCustomQuota: kotlin.Boolean? = null,

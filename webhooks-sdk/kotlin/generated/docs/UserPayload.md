@@ -30,7 +30,7 @@
 | **mobilePhone** | **kotlin.String** |  |  [optional] |
 | **mobilePhoneActivationStatus** | **kotlin.Int** | enum MobilePhoneActivationStatus |  [optional] |
 | **quotaLimit** | **kotlin.Long** |  |  [optional] |
-| **usedSpace** | [**java.math.BigDecimal**](java.math.BigDecimal.md) |  |  [optional] |
+| **usedSpace** | **kotlin.Double** |  |  [optional] |
 | **isCustomQuota** | **kotlin.Boolean** |  |  [optional] |
 | **createdBy** | [**UserSummaryPayload**](UserSummaryPayload.md) |  |  [optional] |
 | **registrationDate** | [**java.time.OffsetDateTime**](java.time.OffsetDateTime.md) |  |  [optional] |

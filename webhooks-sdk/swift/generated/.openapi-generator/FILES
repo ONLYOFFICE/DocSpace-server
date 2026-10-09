@@ -1,4 +1,5 @@
 README.md
+Sources/DocSpaceWebhooksSDK/Infrastructure/JSONValue.swift
 Sources/DocSpaceWebhooksSDK/Models/ContactPayload.swift
 Sources/DocSpaceWebhooksSDK/Models/EntryId.swift
 Sources/DocSpaceWebhooksSDK/Models/FileEntryPayload.swift
