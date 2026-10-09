@@ -39,7 +39,7 @@ namespace ASC.Web.Api.Tests.Tests._02_Settings.Webhooks;
 [Trait("Category", "Settings")]
 public class RetryWebhooksTests(
     AspireAppFixture fixture)
-    : BaseTest(fixture)
+    : WebhookDeliveryTestBase(fixture)
 {
     [Fact]
     public async Task RetryWebhooks_EmptyIdList_ReturnsEmptyResult()
@@ -54,5 +54,58 @@ public class RetryWebhooksTests(
         // Assert
         result.StatusCode.Should().Be(200);
         result.Response.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task RetryWebhooks_SeveralDeliveries_RequeuesEachKeepingItsId()
+    {
+        // Arrange
+        var configId = await CreateSubscriptionAsync();
+        await FireEventAsync();
+        await FireEventAsync();
+        var deliveries = (await WaitForAttemptedDeliveriesAsync(configId, 2)).Where(l => l.Status != 0).ToList();
+        deliveries.Should().HaveCount(2, "both events should have been attempted by now");
+        var ids = deliveries.Select(d => d.Id).ToList();
+
+        // Act
+        var result = await _webhooksApi.RetryWebhooksAsync(new WebhookRetryRequestDto(ids), TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Response.Select(r => r.Id).Should().BeEquivalentTo(ids);
+        result.Response.Should().AllSatisfy(r =>
+        {
+            r.Status.Should().Be(0);
+            r.Delivery.Should().BeNull();
+        });
+    }
+
+    [Fact]
+    public async Task RetryWebhooks_UnknownId_IsSkippedInSilence()
+    {
+        // Arrange
+        var delivery = await CreateAttemptedDeliveryAsync();
+
+        // Act
+        var result = await _webhooksApi.RetryWebhooksAsync(
+            new WebhookRetryRequestDto([delivery.Id, int.MaxValue]), TestContext.Current.CancellationToken);
+
+        // Assert: a shorter response is the only sign that something was left out
+        result.Response.Select(r => r.Id).Should().Equal(delivery.Id);
+    }
+
+    [Fact]
+    public async Task RetryWebhooks_AnotherMembersSubscription_IsSkippedInSilence()
+    {
+        // Arrange
+        var delivery = await CreateAttemptedDeliveryAsync();
+        var roomAdmin = await InviteContact(EmployeeType.RoomAdmin);
+        await _webApiClient.Authenticate(roomAdmin);
+
+        // Act
+        var result = await _webhooksApi.RetryWebhooksAsync(
+            new WebhookRetryRequestDto([delivery.Id]), TestContext.Current.CancellationToken);
+
+        // Assert
+        result.Response.Should().BeEmpty();
     }
 }

@@ -28,6 +28,9 @@
     <ProjectReference Include="..\..\ASC.Core.Common\ASC.Core.Common.csproj" />
     <!-- ASC.FederatedLogin carries JsCallbackHelper: the validation of the values spliced into the OAuth callback page. -->
     <ProjectReference Include="..\..\ASC.FederatedLogin\ASC.FederatedLogin.csproj" />
+    <!-- ASC.Files.Core carries the file, folder and room webhook payloads: WebhookPayloadPairingTests checks every
+         trigger against them without starting the Aspire host the ASC.Files.Tests assembly needs. -->
+    <ProjectReference Include="..\..\..\products\ASC.Files\Core\ASC.Files.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

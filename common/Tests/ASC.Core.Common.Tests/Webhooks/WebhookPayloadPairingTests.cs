@@ -31,23 +31,14 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using System.Reflection;
-using System.Text.Json.Serialization;
-
-using ASC.Api.Core.Webhook.Payloads;
-using ASC.Files.Core.ApiModels.WebhookDto;
-using ASC.Webhooks.Core;
-
-using WebhookTrigger = ASC.Webhooks.Core.WebhookTrigger;
-
-namespace ASC.Files.Tests.Tests._07_Settings;
+namespace ASC.Core.Common.Tests.Webhooks;
 
 /// <summary>
 /// The trigger-to-payload pairing is declared twice - once on the <c>WebhookTrigger</c> field and once on the
 /// DTO - because <c>ASC.Webhooks.Core</c> sits below the product assemblies and cannot name their types. These
 /// tests are what keeps the two halves honest, and what the SDK contract generator relies on.
 /// </summary>
-[Trait("Category", "Settings")]
+[Trait("Category", "Webhooks")]
 public class WebhookPayloadPairingTests
 {
     private static readonly Assembly[] _payloadAssemblies =
@@ -112,12 +103,9 @@ public class WebhookPayloadPairingTests
     [Fact]
     public void EntryPayload_KeepsSubtypeFields_WhenPublished()
     {
-        // the same options WebhookPublisher serializes with
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
-        };
+        // The publisher's own options, so a change to them reaches this test. No TenantUtil: it is read only for a
+        // DateTimeKind.Local value, and every date in this body is UTC or default.
+        var options = WebhookPublisher.CreateSerializerOptions(null);
 
         object payload = new FileWebhookDto<int> { Id = 10, Title = "321.xlsx", Version = 3, ContentLength = 4096 };
 
