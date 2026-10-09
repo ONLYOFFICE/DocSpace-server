@@ -1682,11 +1682,14 @@ public abstract class PortalRetentionNotifyAction(
     UserManager userManager,
     StudioNotifyHelper studioNotifyHelper,
     ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
     TenantUtil tenantUtil,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
     : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
+    protected CommonLinkUtility CommonLinkUtility => commonLinkUtility;
+
     protected PortalRetentionCategory Category { get; private set; }
 
     protected PortalRetentionDecision Decision { get; private set; }
@@ -1727,6 +1730,12 @@ public abstract class PortalRetentionNotifyAction(
     /// </summary>
     protected bool CanUnblock => Category != PortalRetentionCategory.Free;
 
+    /// <summary>A switch the letter's text branches on, in the form its <c>#if</c> compares with.</summary>
+    protected static TagValue Flag(string tag, bool value)
+    {
+        return new TagValue(tag, value ? "True" : "False");
+    }
+
     /// <summary>A day the letter discloses, written out in the recipient's culture.</summary>
     protected static TagValue Date(string tag, DateTime date, CultureInfo culture)
     {
@@ -1757,34 +1766,35 @@ public abstract class PortalRetentionNotifyAction(
     {
         return tenantUtil.DateTimeFromUtc(context.Tenant.TimeZone, DateTime.SpecifyKind(utcDay.Date, DateTimeKind.Utc)).Date;
     }
+}
 
-    /// <summary>
-    /// The unblocking button, or the button that sends the reader to support instead. Only the owner of a
-    /// portal that may be unblocked from the letter gets the link: it signs its holder in as the owner, so
-    /// it never goes to anyone else - the payer of a lapsed portal is sent to support like the owner of a
-    /// free one. The link is tied to this block and stops working with the next one.
-    /// </summary>
-    protected async Task AddUnblockTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags, CommonLinkUtility commonLinkUtility, SettingsManager settingsManager)
+/// <summary>
+/// A warning before the block. Each names the day of the block and of the deletion; what differs is what
+/// the reader is asked to do, which is the letter's own part.
+/// </summary>
+public abstract class PortalRetentionWarningNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    TenantUtil tenantUtil,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, tenantUtil, periodicNotifyAction, tenantManager)
+{
+    protected sealed override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
     {
-        var canUnblock = CanUnblock && user.Id == context.Tenant.OwnerId;
+        tags.Add(Deadline("BlockDate", Decision.BlockOn, context, culture));
+        tags.Add(ShortDeadline("BlockDateShort", Decision.BlockOn, context, culture));
+        tags.Add(Deadline("DeleteDate", Decision.DeleteOn, context, culture));
 
-        tags.Add(new TagValue("CanUnblock", canUnblock ? "True" : "False"));
+        AddWarningTags(context, culture, tags);
 
-        if (canUnblock)
-        {
-            tags.Add(TagValues.OrangeButton(Resource("ButtonUnblockPortal", culture),
-                commonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PortalUnblock, CommonLinkUtility.GetPortalUnblockKeyPostfix(context.Tenant))));
-
-            return;
-        }
-
-        // An installation with support links switched off gets no button rather than one that leads nowhere.
-        var supportLink = await commonLinkUtility.GetSupportLinkAsync(settingsManager);
-
-        tags.Add(string.IsNullOrEmpty(supportLink)
-            ? new TagValue("OrangeButton", string.Empty)
-            : TagValues.OrangeButton(Resource("ButtonContactSupport", culture), supportLink));
+        return Task.CompletedTask;
     }
+
+    /// <summary>What the reader is asked to do, and anything else only this warning says.</summary>
+    protected abstract void AddWarningTags(PeriodicLetterContext context, CultureInfo culture, List<ITagValue> tags);
 }
 
 /// <summary>A free portal nobody has used for a month: when it is blocked, and when it is deleted.</summary>
@@ -1797,7 +1807,7 @@ public sealed class SaasOwnerRetentionInactivityWarningNotifyAction(
     TenantUtil tenantUtil,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
-    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, tenantUtil, periodicNotifyAction, tenantManager)
+    : PortalRetentionWarningNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, tenantUtil, periodicNotifyAction, tenantManager)
 {
     public override string ID => "saas_owner_retention_inactivity_warning";
 
@@ -1809,14 +1819,9 @@ public sealed class SaasOwnerRetentionInactivityWarningNotifyAction(
         ];
     }
 
-    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    protected override void AddWarningTags(PeriodicLetterContext context, CultureInfo culture, List<ITagValue> tags)
     {
-        tags.Add(Deadline("BlockDate", Decision.BlockOn, context, culture));
-        tags.Add(ShortDeadline("BlockDateShort", Decision.BlockOn, context, culture));
-        tags.Add(Deadline("DeleteDate", Decision.DeleteOn, context, culture));
-        tags.Add(TagValues.OrangeButton(Resource("ButtonKeepPortal", culture), commonLinkUtility.GetFullAbsolutePath("~")));
-
-        return Task.CompletedTask;
+        tags.Add(TagValues.OrangeButton(Resource("ButtonKeepPortal", culture), CommonLinkUtility.GetFullAbsolutePath("~")));
     }
 }
 
@@ -1830,7 +1835,7 @@ public sealed class SaasOwnerRetentionUnpaidWarningNotifyAction(
     TenantUtil tenantUtil,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
-    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, tenantUtil, periodicNotifyAction, tenantManager)
+    : PortalRetentionWarningNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, tenantUtil, periodicNotifyAction, tenantManager)
 {
     public override string ID => "saas_owner_retention_unpaid_warning";
 
@@ -1842,15 +1847,10 @@ public sealed class SaasOwnerRetentionUnpaidWarningNotifyAction(
         ];
     }
 
-    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    protected override void AddWarningTags(PeriodicLetterContext context, CultureInfo culture, List<ITagValue> tags)
     {
         tags.Add(Date("DueDate", context.DueDate, culture));
-        tags.Add(Deadline("BlockDate", Decision.BlockOn, context, culture));
-        tags.Add(ShortDeadline("BlockDateShort", Decision.BlockOn, context, culture));
-        tags.Add(Deadline("DeleteDate", Decision.DeleteOn, context, culture));
-        tags.Add(TagValues.OrangeButton(Resource("ButtonRenewNow", culture), commonLinkUtility.GetFullAbsolutePath("~/billing/overview")));
-
-        return Task.CompletedTask;
+        tags.Add(TagValues.OrangeButton(Resource("ButtonRenewNow", culture), CommonLinkUtility.GetFullAbsolutePath("~/billing/overview")));
     }
 }
 
@@ -1869,7 +1869,7 @@ public sealed class SaasOwnerRetentionWalletWarningNotifyAction(
     TenantUtil tenantUtil,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
-    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, tenantUtil, periodicNotifyAction, tenantManager)
+    : PortalRetentionWarningNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, tenantUtil, periodicNotifyAction, tenantManager)
 {
     public override string ID => "saas_owner_retention_wallet_warning";
 
@@ -1881,27 +1881,74 @@ public sealed class SaasOwnerRetentionWalletWarningNotifyAction(
         ];
     }
 
-    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    protected override void AddWarningTags(PeriodicLetterContext context, CultureInfo culture, List<ITagValue> tags)
     {
-        var unpaid = Category == PortalRetentionCategory.FormerPayingWithBalance;
+        tags.Add(Flag("Unpaid", FormerPaying));
+        tags.Add(new TagValue("URL1", CommonLinkUtility.GetFullAbsolutePath("~/billing/wallet")));
 
-        tags.Add(new TagValue("Unpaid", unpaid ? "True" : "False"));
-        tags.Add(Deadline("BlockDate", Decision.BlockOn, context, culture));
-        tags.Add(ShortDeadline("BlockDateShort", Decision.BlockOn, context, culture));
-        tags.Add(Deadline("DeleteDate", Decision.DeleteOn, context, culture));
-        tags.Add(new TagValue("URL1", commonLinkUtility.GetFullAbsolutePath("~/billing/wallet")));
-
-        if (unpaid)
+        if (FormerPaying)
         {
             tags.Add(Date("DueDate", context.DueDate, culture));
-            tags.Add(TagValues.OrangeButton(Resource("ButtonRenewNow", culture), commonLinkUtility.GetFullAbsolutePath("~/billing/overview")));
+            tags.Add(TagValues.OrangeButton(Resource("ButtonRenewNow", culture), CommonLinkUtility.GetFullAbsolutePath("~/billing/overview")));
         }
         else
         {
-            tags.Add(TagValues.OrangeButton(Resource("ButtonKeepSpaceAndFunds", culture), commonLinkUtility.GetFullAbsolutePath("~")));
+            tags.Add(TagValues.OrangeButton(Resource("ButtonKeepSpaceAndFunds", culture), CommonLinkUtility.GetFullAbsolutePath("~")));
+        }
+    }
+}
+
+/// <summary>
+/// A letter about a blocked portal: the block itself and the reminders before the deletion. Each names
+/// the day of the deletion and the way back - the unblocking link for the owner of a portal that has
+/// paid or still has money on its wallet, support for everyone else.
+/// </summary>
+public abstract class PortalRetentionBlockedLetterNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    SettingsManager settingsManager,
+    TenantUtil tenantUtil,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, tenantUtil, periodicNotifyAction, tenantManager)
+{
+    protected override async Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(Deadline("DeleteDate", Decision.DeleteOn, context, culture));
+        tags.Add(ShortDeadline("DeleteDateShort", Decision.DeleteOn, context, culture));
+        tags.Add(Flag("Unpaid", FormerPaying));
+
+        await AddWayBackTagsAsync(context, user, culture, tags);
+    }
+
+    /// <summary>
+    /// The unblocking button, or the button that sends the reader to support instead. Only the owner of a
+    /// portal that may be unblocked from the letter gets the link: it signs its holder in as the owner, so
+    /// it never goes to anyone else - the payer of a lapsed portal is sent to support like the owner of a
+    /// free one. The link is tied to this block and stops working with the next one.
+    /// </summary>
+    private async Task AddWayBackTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        var canUnblock = CanUnblock && user.Id == context.Tenant.OwnerId;
+
+        tags.Add(Flag("CanUnblock", canUnblock));
+
+        if (canUnblock)
+        {
+            tags.Add(TagValues.OrangeButton(Resource("ButtonUnblockPortal", culture),
+                CommonLinkUtility.GetConfirmationEmailUrl(user.Email, ConfirmType.PortalUnblock, CommonLinkUtility.GetPortalUnblockKeyPostfix(context.Tenant))));
+
+            return;
         }
 
-        return Task.CompletedTask;
+        // An installation with support links switched off gets no button rather than one that leads nowhere.
+        var supportLink = await CommonLinkUtility.GetSupportLinkAsync(settingsManager);
+
+        tags.Add(string.IsNullOrEmpty(supportLink)
+            ? new TagValue("OrangeButton", string.Empty)
+            : TagValues.OrangeButton(Resource("ButtonContactSupport", culture), supportLink));
     }
 }
 
@@ -1919,7 +1966,7 @@ public sealed class SaasOwnerRetentionBlockedNotifyAction(
     TenantUtil tenantUtil,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
-    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, tenantUtil, periodicNotifyAction, tenantManager)
+    : PortalRetentionBlockedLetterNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, settingsManager, tenantUtil, periodicNotifyAction, tenantManager)
 {
     public override string ID => "saas_owner_retention_blocked";
 
@@ -1929,15 +1976,6 @@ public sealed class SaasOwnerRetentionBlockedNotifyAction(
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_retention_blocked, () => WebstudioNotifyPatternResource.pattern_saas_owner_retention_blocked)
         ];
-    }
-
-    protected override async Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
-    {
-        tags.Add(Deadline("DeleteDate", Decision.DeleteOn, context, culture));
-        tags.Add(ShortDeadline("DeleteDateShort", Decision.DeleteOn, context, culture));
-        tags.Add(new TagValue("Unpaid", FormerPaying ? "True" : "False"));
-
-        await AddUnblockTagsAsync(context, user, culture, tags, commonLinkUtility, settingsManager);
     }
 }
 
@@ -1959,19 +1997,16 @@ public abstract class PortalRetentionDeletionReminderNotifyAction(
     TenantUtil tenantUtil,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
-    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, tenantUtil, periodicNotifyAction, tenantManager)
+    : PortalRetentionBlockedLetterNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, settingsManager, tenantUtil, periodicNotifyAction, tenantManager)
 {
     /// <summary>Whether this is the last reminder before the deletion rather than the earlier one.</summary>
     protected abstract bool Final { get; }
 
-    protected override async Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    protected sealed override async Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
     {
-        tags.Add(Deadline("DeleteDate", Decision.DeleteOn, context, culture));
-        tags.Add(ShortDeadline("DeleteDateShort", Decision.DeleteOn, context, culture));
-        tags.Add(new TagValue("Unpaid", FormerPaying ? "True" : "False"));
-        tags.Add(new TagValue("FinalNotice", Final ? "True" : "False"));
+        await base.AddTagsAsync(context, user, culture, tags);
 
-        await AddUnblockTagsAsync(context, user, culture, tags, commonLinkUtility, settingsManager);
+        tags.Add(Flag("FinalNotice", Final));
     }
 }
 
@@ -2038,7 +2073,7 @@ public sealed class SaasOwnerRetentionDeletedNotifyAction(
     TenantUtil tenantUtil,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
-    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, tenantUtil, periodicNotifyAction, tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, tenantUtil, periodicNotifyAction, tenantManager)
 {
     public override string ID => "saas_owner_retention_deleted";
 
@@ -2053,8 +2088,8 @@ public sealed class SaasOwnerRetentionDeletedNotifyAction(
     protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
     {
         // The portal is gone, so it is named by the address it had, not linked to.
-        tags.Add(new TagValue("PortalName", PortalDomain ?? new Uri(commonLinkUtility.GetFullAbsolutePath("~")).Host));
-        tags.Add(new TagValue("Unpaid", FormerPaying ? "True" : "False"));
+        tags.Add(new TagValue("PortalName", PortalDomain ?? new Uri(CommonLinkUtility.GetFullAbsolutePath("~")).Host));
+        tags.Add(Flag("Unpaid", FormerPaying));
         tags.Add(TagValues.OrangeButton(Resource("ButtonShareFeedback", culture), externalResources.Site.GetRegionalFullEntry("registrationcanceled", culture)));
         tags.Add(new TagValue("URL1", externalResources.Common.GetRegionalFullEntry("legalterms", culture)));
         tags.Add(new TagValue("URL2", externalResources.Site.GetRegionalDomain(culture)));
