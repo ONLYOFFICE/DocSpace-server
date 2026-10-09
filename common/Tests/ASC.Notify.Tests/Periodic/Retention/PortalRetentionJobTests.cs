@@ -271,8 +271,8 @@ public class PortalRetentionJobTests
         await CreateJob(scope, logger).ApplyAsync(signedIn, _policyStart, new RecordingNotifyClient(), _senderName);
 
         logger.Messages.Should().BeEmpty("twenty days after the sign-in nothing is due");
-        (await settingsManager.LoadAsync<PortalRetentionSettings>(tenant.Id)).LastLoginOn
-            .Should().Be(_today.AddDays(-20), "a sign-in later than the audit trail is kept, since the login history is purged");
+        (await settingsManager.LoadAsync<PortalRetentionSettings>(tenant.Id)).LastActivityOn
+            .Should().Be(_today.AddDays(-20), "the latest activity is kept, since the login history is purged");
 
         // The next day the portal's audit settings purge its login history: the last sign-in reads as the
         // year-old audit event, which on its own would put the portal past the block it was warned of.
@@ -286,6 +286,68 @@ public class PortalRetentionJobTests
         leaveAlone.Should().BeFalse();
         logger.Messages.Should().BeEmpty("the kept sign-in still starts the count, so the earlier warning is of a count that is over");
         client.Sent.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task FreePortal_ActivityIsReadOnlyOnADayTheScheduleMayAct()
+    {
+        using var portal = await CreatePortalAsync();
+        using var scope = await OpenScopeAsync();
+        var settingsManager = scope.Services.GetRequiredService<SettingsManager>();
+        var tenant = InMemoryTenant(scope, id: portal.TenantId);
+        var job = CreateJob(scope, new RecordingLogger<PortalRetentionJob>());
+
+        // Seen in use ten days ago: counted from there nothing is due for another twenty days, and later
+        // activity would only move that further, so the database is not asked.
+        (await settingsManager.SaveAsync(new PortalRetentionSettings { LastActivityOn = _today.AddDays(-10) }, tenant.Id)).Should().BeTrue();
+
+        var quiet = Free(tenant, _today.AddDays(-10));
+
+        (await job.ApplyAsync(quiet, _policyStart, new RecordingNotifyClient(), _senderName)).Should().BeFalse();
+        quiet.LastActivity.IsValueCreated.Should().BeFalse("nothing can be due today, so the activity is not read");
+
+        // Seen thirty days ago: the first warning would be due today, so the activity is read first.
+        (await settingsManager.SaveAsync(new PortalRetentionSettings { LastActivityOn = _today.AddDays(-30) }, tenant.Id)).Should().BeTrue();
+
+        var logger = new RecordingLogger<PortalRetentionJob>();
+        var due = Free(tenant, _today.AddDays(-30));
+
+        await CreateJob(scope, logger).ApplyAsync(due, _policyStart, new RecordingNotifyClient(), _senderName);
+
+        due.LastActivity.IsValueCreated.Should().BeTrue("a day the schedule may act on is decided on the real activity");
+        logger.Messages.Should().ContainSingle(m => m.Contains("Free: Notify FirstNotice"), string.Join(" | ", logger.Messages));
+    }
+
+    [Fact]
+    public async Task FreePortal_WithAShortLoginHistory_HasItsActivityReadEveryRun()
+    {
+        using var portal = await CreatePortalAsync();
+        using var scope = await OpenScopeAsync();
+        var settingsManager = scope.Services.GetRequiredService<SettingsManager>();
+        var tenant = InMemoryTenant(scope, id: portal.TenantId);
+        var job = CreateJob(scope, new RecordingLogger<PortalRetentionJob>());
+
+        // A login history kept for ten days could lose a sign-in between two of the monthly reads.
+        (await settingsManager.SaveAsync(new TenantAuditSettings { LoginHistoryLifeTime = 10, AuditTrailLifeTime = TenantAuditSettings.MaxLifeTime }, tenant.Id))
+            .Should().BeTrue();
+        (await settingsManager.SaveAsync(new PortalRetentionSettings { LastActivityOn = _today.AddDays(-10) }, tenant.Id)).Should().BeTrue();
+
+        var saved = await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>();
+
+        try
+        {
+            await job.BeginRunAsync(_today);
+        }
+        finally
+        {
+            await settingsManager.SaveForDefaultTenantAsync(saved);
+        }
+
+        var context = Free(tenant, _today.AddDays(-10));
+
+        await job.ApplyAsync(context, _policyStart, new RecordingNotifyClient(), _senderName);
+
+        context.LastActivity.IsValueCreated.Should().BeTrue("the run reads the activity of such a portal every day");
     }
 
     [Fact]

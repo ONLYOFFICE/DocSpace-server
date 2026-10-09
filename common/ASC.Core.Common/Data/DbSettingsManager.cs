@@ -119,6 +119,24 @@ public class SettingsManager(
         return SaveAsync(data, tenantId, Guid.Empty);
     }
 
+    /// <summary>
+    /// The portal-wide settings of every portal that keeps its own, by portal. A portal on the defaults keeps no
+    /// row and is not in the result. One query past the cache, for a job that walks the whole installation.
+    /// </summary>
+    public async Task<Dictionary<int, T>> LoadOfAllTenantsAsync<T>() where T : class, ISettings<T>
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        var result = new Dictionary<int, T>();
+
+        await foreach (var row in context.WebStudioSettingsOfAllTenantsAsync(T.ID))
+        {
+            result[row.TenantId] = Deserialize<T>(row.Data);
+        }
+
+        return result;
+    }
+
     public Task<bool> SaveForDefaultTenantAsync<T>(T data) where T : class, ISettings<T>
     {
         return SaveAsync(data, Tenant.DefaultTenant);

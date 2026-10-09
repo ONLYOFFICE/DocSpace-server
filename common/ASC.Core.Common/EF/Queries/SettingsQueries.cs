@@ -40,6 +40,12 @@ public partial class WebstudioDbContext
     {
         return Queries.WebStudioSettingsAsync(this, tenantId, id, userId);
     }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<DbWebstudioSettings> WebStudioSettingsOfAllTenantsAsync(Guid id)
+    {
+        return Queries.WebStudioSettingsOfAllTenantsAsync(this, id);
+    }
 }
 
 static file class Queries
@@ -49,4 +55,13 @@ static file class Queries
             (WebstudioDbContext ctx, int tenantId, Guid id, Guid userId) =>
                 ctx.WebstudioSettings
                     .FirstOrDefault(r => r.Id == id && r.TenantId == tenantId && r.UserId == userId));
+
+    // One kind of portal-wide settings across the installation, through the index on the settings id. The rows
+    // the same settings keep for single users are left out, and a portal on the defaults keeps no row, so only
+    // the portals that changed them come back.
+    public static readonly Func<WebstudioDbContext, Guid, IAsyncEnumerable<DbWebstudioSettings>> WebStudioSettingsOfAllTenantsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (WebstudioDbContext ctx, Guid id) =>
+                ctx.WebstudioSettings
+                    .Where(r => r.Id == id && r.UserId == Guid.Empty));
 }

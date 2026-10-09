@@ -64,6 +64,13 @@ public class PortalRetentionJob(
     public PortalRetentionOptions Options => configuration.Options;
 
     /// <summary>
+    /// The portals whose activity is read on every run, set by <see cref="BeginRunAsync"/>: those keeping their
+    /// login history shorter than the default, where a sign-in could come and go between two of the days the
+    /// activity is otherwise read on.
+    /// </summary>
+    private HashSet<int> _activityReadDaily = [];
+
+    /// <summary>
     /// Opens the daily run: the day the policy started counting in this installation, stamped on the
     /// first run, and the last day a run got through, after which this one sends the letters.
     /// </summary>
@@ -87,6 +94,12 @@ public class PortalRetentionJob(
         {
             lastRunOn = earliest;
         }
+
+        // Portals on the default audit settings keep no row, so this reads the few that changed them.
+        _activityReadDaily = (await settingsManager.LoadOfAllTenantsAsync<TenantAuditSettings>())
+            .Where(s => s.Value.LoginHistoryLifeTime < TenantAuditSettings.MaxLifeTime)
+            .Select(s => s.Key)
+            .ToHashSet();
 
         logger.InformationPolicyStart(startedOn);
         logger.InformationRunCovers(lastRunOn ?? today.AddDays(-1), today);
@@ -160,6 +173,18 @@ public class PortalRetentionJob(
     /// <summary>An active portal: warned, or blocked. Returns true when it has just been blocked.</summary>
     private async Task<bool> ApplyActiveAsync(PeriodicLetterContext context, bool formerPaying, PortalRetentionSettings kept, DateTime policyStart, INotifyClient client, string senderName, DateTime? lastRunOn)
     {
+        var tenant = context.Tenant;
+
+        // A lapsed tariff is the policy's only from its first unpaid day, once the grace period is over; a
+        // warning due while it was still in that period goes out on that day instead of never.
+        var noticesFrom = formerPaying ? context.DueDate.Date.AddDays(tariffService.GetPaymentDelay() + 1) : DateTime.MinValue;
+        var lastWarning = kept.LastWarning;
+
+        // The count starts no earlier than the last change of status, which is what an unblocked portal starts
+        // again from.
+        Func<PortalRetentionCategory, PortalRetentionDecision> CountedFrom(DateTime day) => category =>
+            PortalRetentionSchedule.DecideActive(Options.For(category), Later(day, tenant.StatusChangeDate), policyStart, context.NowDate, noticesFrom, lastRunOn, lastWarning);
+
         DateTime anchor;
 
         if (formerPaying)
@@ -169,24 +194,23 @@ public class PortalRetentionJob(
         }
         else
         {
+            // Activity only moves the count forward, so the latest activity already seen bounds it from below:
+            // with nothing due counted from there, nothing is due counted from the real one either. The
+            // database is asked only on a day the schedule may act on - about once a month for a portal in use.
+            var seen = kept.LastActivityOn ?? DateTime.MinValue;
+
+            if (!_activityReadDaily.Contains(tenant.Id) && NothingDue(formerPaying, CountedFrom(seen)))
+            {
+                return false;
+            }
+
             var activity = await context.GetLastActivityAsync();
 
-            kept = await KeepLastLoginAsync(context.Tenant.Id, activity, kept);
-            anchor = Later(activity.LastOn, kept.LastLoginOn);
+            kept = await KeepLastActivityAsync(tenant.Id, activity.LastOn, kept);
+            anchor = kept.LastActivityOn ?? activity.LastOn;
         }
 
-        // No earlier than the last change of status, which is what an unblocked portal starts again from.
-        anchor = Later(anchor, context.Tenant.StatusChangeDate);
-
-        // A lapsed tariff is the policy's only from its first unpaid day, once the grace period is over; a
-        // warning due while it was still in that period goes out on that day instead of never.
-        var noticesFrom = formerPaying ? context.DueDate.Date.AddDays(tariffService.GetPaymentDelay() + 1) : DateTime.MinValue;
-        var lastWarning = kept.LastWarning;
-
-        PortalRetentionDecision Decide(PortalRetentionCategory category) =>
-            PortalRetentionSchedule.DecideActive(Options.For(category), anchor, policyStart, context.NowDate, noticesFrom, lastRunOn, lastWarning);
-
-        if (await ChooseByWalletAsync(context.Tenant, formerPaying, Decide) is not { } step)
+        if (await ChooseByWalletAsync(tenant, formerPaying, CountedFrom(anchor)) is not { } step)
         {
             return false;
         }
@@ -203,8 +227,7 @@ public class PortalRetentionJob(
     /// </summary>
     private async Task<(PortalRetentionCategory Category, PortalRetentionDecision Decision)?> ChooseByWalletAsync(Tenant tenant, bool formerPaying, Func<PortalRetentionCategory, PortalRetentionDecision> decide)
     {
-        var plain = formerPaying ? PortalRetentionCategory.FormerPaying : PortalRetentionCategory.Free;
-        var withBalance = formerPaying ? PortalRetentionCategory.FormerPayingWithBalance : PortalRetentionCategory.FreeWithBalance;
+        var (plain, withBalance) = Categories(formerPaying);
 
         var plainDecision = decide(plain);
         var balanceDecision = decide(withBalance);
@@ -223,6 +246,22 @@ public class PortalRetentionJob(
         }
 
         return hasBalance ? DueOrNull(withBalance, balanceDecision) : DueOrNull(plain, plainDecision);
+    }
+
+    /// <summary>The two categories a portal may be in, by whether money is left on its wallet.</summary>
+    private static (PortalRetentionCategory Plain, PortalRetentionCategory WithBalance) Categories(bool formerPaying)
+    {
+        return formerPaying
+            ? (PortalRetentionCategory.FormerPaying, PortalRetentionCategory.FormerPayingWithBalance)
+            : (PortalRetentionCategory.Free, PortalRetentionCategory.FreeWithBalance);
+    }
+
+    /// <summary>Whether neither schedule the wallet may choose has anything for the portal today.</summary>
+    private static bool NothingDue(bool formerPaying, Func<PortalRetentionCategory, PortalRetentionDecision> decide)
+    {
+        var (plain, withBalance) = Categories(formerPaying);
+
+        return decide(plain).Step == PortalRetentionStep.None && decide(withBalance).Step == PortalRetentionStep.None;
     }
 
     /// <summary>What today brings a portal of a known category, or null when nothing does.</summary>
@@ -365,19 +404,19 @@ public class PortalRetentionJob(
     }
 
     /// <summary>
-    /// Keeps the last sign-in with the portal while it is later than the last audit event. The portal's
-    /// audit settings purge its login history, down to a day, while the audit trail stays: a portal whose
-    /// last sign of life is a sign-in would otherwise see its count jump back, and its block come at once,
-    /// the day that row goes.
+    /// Keeps the latest activity with the portal when it is later than the one kept. It is the lower bound the
+    /// next runs count from without asking the database, and it outlives the login history: the portal's audit
+    /// settings purge that, down to a day, and a count started from what is left would jump back and bring the
+    /// block at once.
     /// </summary>
-    private async Task<PortalRetentionSettings> KeepLastLoginAsync(int tenantId, PortalActivity activity, PortalRetentionSettings kept)
+    private async Task<PortalRetentionSettings> KeepLastActivityAsync(int tenantId, DateTime lastActivityOn, PortalRetentionSettings kept)
     {
-        if (activity.LastLoginOn <= activity.LastEventOn || activity.LastLoginOn <= kept.LastLoginOn)
+        if (lastActivityOn <= kept.LastActivityOn)
         {
             return kept;
         }
 
-        kept = kept with { LastLoginOn = activity.LastLoginOn };
+        kept = kept with { LastActivityOn = lastActivityOn };
 
         await settingsManager.SaveAsync(kept, tenantId);
 

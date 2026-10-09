@@ -36,7 +36,7 @@ namespace ASC.Web.Studio.Core.Notify;
 /// <summary>
 /// What the retention policy keeps about a portal, with the portal's settings. While the portal is active:
 /// the last warning it was sent - the block keeps to the day that warning named, whatever schedule the
-/// portal falls under afterwards - and the last sign-in the policy has seen, which outlives the login
+/// portal falls under afterwards - and the latest activity the policy has seen, which outlives the login
 /// history the portal's audit settings purge. Once it is blocked: the category it was blocked under - the
 /// letter about the block names the deletion date of that category, so the portal keeps it until it is
 /// deleted or unblocked, whatever its wallet shows in the meantime - and the day the last reminder before
@@ -60,10 +60,11 @@ public record PortalRetentionSettings : ISettings<PortalRetentionSettings>
     public DateTime? FinalNoticeSentOn { get; init; }
 
     /// <summary>
-    /// The last successful sign-in the policy has seen on the active portal, kept only while it is later
-    /// than the last audit event: the audit trail is never purged, the login history is.
+    /// The latest sign of life of the active portal the policy has seen - an audit event or a sign-in. The
+    /// count never starts earlier than it, so a sign-in the login history purges later still counts, and the
+    /// activity is read again only on a day the schedule counted from it may act on.
     /// </summary>
-    public DateTime? LastLoginOn { get; init; }
+    public DateTime? LastActivityOn { get; init; }
 
     /// <summary>The last warning before the block the active portal was sent, or null while none has.</summary>
     public PortalRetentionWarning? LastWarning { get; init; }
