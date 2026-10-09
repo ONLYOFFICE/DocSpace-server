@@ -232,7 +232,8 @@ public class StudioPeriodicNotify(
             DelayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue,
             DefaultRebranding = !enterprise || await tenantLogoManager.IsDefaultLogoSettingsAsync(),
             UnusedPortalNotifyFrom = notifyUnusedFrom,
-            LastActivity = new Lazy<Task<DateTime>>(() => GetLastActivityDateAsync(tenant))
+            LastActivity = new Lazy<Task<DateTime>>(() => GetLastActivityDateAsync(tenant)),
+            ForbiddenDomain = new Lazy<Task<bool>>(() => tenantManager.IsForbiddenDomainAsync(tenant.Alias))
         };
     }
 
@@ -289,7 +290,8 @@ public class StudioPeriodicNotify(
             return false;
         }
 
-        if (await tenantManager.IsForbiddenDomainAsync(tenant.Alias))
+        // A free portal on a forbidden domain is already left out by the reason; a lapsed one is not.
+        if (await context.IsForbiddenDomainAsync())
         {
             // Kept alive on purpose, but still out of the running for today's letters.
             return true;

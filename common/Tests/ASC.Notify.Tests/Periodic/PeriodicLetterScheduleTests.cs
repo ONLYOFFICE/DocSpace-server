@@ -244,6 +244,18 @@ public class PeriodicLetterScheduleTests
     }
 
     [Fact]
+    public async Task StartupWarningAfterHalfYear_StaysOnPastSevenMonths_ButNotOnAForbiddenDomain()
+    {
+        var idle = Idle(Fresh, months: 9) with { Quota = Quota(free: true) };
+
+        (await AsksToSendAsync<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>(idle))
+            .Should().BeTrue("a portal idle for longer is deleted a week later all the same, so it is warned first");
+
+        (await AsksToSendAsync<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>(idle with { ForbiddenDomain = PeriodicLetterContexts.Forbidden(true) }))
+            .Should().BeFalse("a portal on a forbidden domain is never deleted, so it is not told it will be");
+    }
+
+    [Fact]
     public async Task GracePeriodBeforeActivation_GoesOutThreeDaysBeforeTheTariffEnds()
     {
         var context = Fresh;
@@ -484,13 +496,14 @@ public class PeriodicLetterScheduleTests
 
     /// <summary>
     /// The two inactivity warnings divide the timeline between them: the second one takes over where the
-    /// first stops, and neither covers a portal that is still in use.
+    /// first stops and stays on for as long as the portal is idle, and neither covers a portal that is still
+    /// in use.
     /// </summary>
     [Theory]
     [InlineData(1, 0)]
     [InlineData(3, 1)]
     [InlineData(6, 1)]
-    [InlineData(9, 0)]
+    [InlineData(9, 1)]
     public async Task InactivityWarningsDoNotOverlap(int idleMonths, int expected)
     {
         var context = Idle(Fresh, idleMonths) with { Quota = Quota(free: true) };
@@ -660,6 +673,35 @@ public class PeriodicLetterScheduleTests
 
         (await (context with { LastActivity = Activity(Date("2025-12-10")) }).GetAbandonedReasonAsync())
             .Should().BeNull("a day short of six months and a week is not yet");
+    }
+
+    [Fact]
+    public async Task AbandonedPortal_FreeOneOnAForbiddenDomainIsKept()
+    {
+        var context = FreeIdleSince("2024-06-09", "2026-06-16", Date("2025-12-09")) with { ForbiddenDomain = PeriodicLetterContexts.Forbidden(true) };
+
+        (await context.GetAbandonedReasonAsync()).Should().BeNull("a portal on a forbidden domain is kept alive on purpose");
+    }
+
+    /// <summary>
+    /// The last warning goes out on an anniversary exactly when the removal takes the portal a week later,
+    /// across the whole range of idleness and with or without a forbidden domain.
+    /// </summary>
+    [Theory]
+    [InlineData("2025-12-15", false)]
+    [InlineData("2025-12-09", false)]
+    [InlineData("2025-12-08", false)]
+    [InlineData("2025-09-01", false)]
+    [InlineData("2024-01-01", false)]
+    [InlineData("2025-09-01", true)]
+    public async Task AbandonedPortal_FreeOneIsWarnedExactlyWhenItIsRemovedAWeekLater(string lastActivity, bool forbidden)
+    {
+        // The warning on the anniversary, 2026-06-09; the removal a week later.
+        var warned = FreeIdleSince("2024-06-09", "2026-06-09", Date(lastActivity)) with { ForbiddenDomain = PeriodicLetterContexts.Forbidden(forbidden) };
+        var removed = warned with { NowDate = Date("2026-06-16") };
+
+        (await AsksToSendAsync<SaasAdminStartupWarningAfterHalfYearV1NotifyAction>(warned))
+            .Should().Be(await removed.GetAbandonedReasonAsync() == AbandonedPortalReason.Inactive);
     }
 
     [Fact]

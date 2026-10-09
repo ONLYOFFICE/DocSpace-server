@@ -90,6 +90,17 @@ public sealed record PeriodicLetterContext
     }
 
     /// <summary>
+    /// Whether the portal's address is on the forbidden list. Such a portal is kept alive on purpose. A
+    /// database query, so it is resolved on first use and only when a removal is in question.
+    /// </summary>
+    public required Lazy<Task<bool>> ForbiddenDomain { get; init; }
+
+    public Task<bool> IsForbiddenDomainAsync()
+    {
+        return ForbiddenDomain.Value;
+    }
+
+    /// <summary>
     /// True when <see cref="NowDate"/>, shifted by <paramref name="offsetDays"/>, is the monthly
     /// anniversary of the portal's creation. The day is clamped to the length of the month, so a portal
     /// created on the 29th-31st still gets its check in February and in the 30-day months instead of
@@ -117,20 +128,42 @@ public sealed record PeriodicLetterContext
     {
         if (Quota.Free)
         {
-            // The check runs a week after the anniversary the last warning was sent on.
-            if (NowDate < UnusedPortalNotifyFrom.AddDays(7) || !IsCreationAnniversary(-7))
-            {
-                return null;
-            }
-
-            var lastActivity = await GetLastActivityDateAsync();
-
-            return lastActivity.AddMonths(6).AddDays(7) <= NowDate ? AbandonedPortalReason.Inactive : null;
+            return await IsUnusedPortalRemovedAsync() ? AbandonedPortalReason.Inactive : null;
         }
 
         return Tariff.State == TariffState.NotPaid && DueDateIsNotMax && DueDate.AddMonths(6).AddDays(7) <= NowDate
             ? AbandonedPortalReason.Unpaid
             : null;
+    }
+
+    /// <summary>
+    /// Whether this free portal is removed for being unused <paramref name="daysAhead"/> days from
+    /// <see cref="NowDate"/>. The removal asks it for today; the last warning asks it for a week ahead, and
+    /// is sent exactly when the answer is yes, so a portal is never removed without that warning and never
+    /// warned of a removal that does not come.
+    /// </summary>
+    /// <remarks>
+    /// The removal runs a week after a monthly anniversary of the portal's creation, from a week after the
+    /// installation started counting, on a portal left idle for six months and a week by then. A portal on a
+    /// forbidden domain is kept alive on purpose, so it is neither removed nor warned.
+    /// </remarks>
+    public async Task<bool> IsUnusedPortalRemovedAsync(int daysAhead = 0)
+    {
+        var day = NowDate.AddDays(daysAhead);
+
+        if (!Quota.Free || day < UnusedPortalNotifyFrom.AddDays(7) || !IsCreationAnniversary(daysAhead - 7))
+        {
+            return false;
+        }
+
+        var lastActivity = await GetLastActivityDateAsync();
+
+        if (lastActivity.AddMonths(6).AddDays(7) > day)
+        {
+            return false;
+        }
+
+        return !await IsForbiddenDomainAsync();
     }
 }
 

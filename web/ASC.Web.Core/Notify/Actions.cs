@@ -1778,16 +1778,13 @@ public sealed class SaasAdminStartupWarningAfterHalfYearV1NotifyAction(
     protected override bool ToOwner => true;
     protected override bool TrulyYoursAsTableRow => true;
 
-    public override async Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    /// <summary>
+    /// Exactly the portals removed a week from now: every one the removal takes is told first, however long
+    /// it has been idle, and none it spares is told it will go.
+    /// </summary>
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
     {
-        if (!context.Quota.Free || context.NowDate < context.UnusedPortalNotifyFrom || !context.IsCreationAnniversary())
-        {
-            return false;
-        }
-
-        var lastActivity = await context.GetLastActivityDateAsync();
-
-        return lastActivity.AddMonths(6) <= context.NowDate && lastActivity.AddMonths(7) > context.NowDate;
+        return context.IsUnusedPortalRemovedAsync(daysAhead: 7);
     }
 
     protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)

@@ -65,7 +65,8 @@ internal static class PeriodicLetterContexts
             DelayDueDateIsNotMax = false,
             DefaultRebranding = true,
             UnusedPortalNotifyFrom = today.AddYears(-1),
-            LastActivity = Activity(today)
+            LastActivity = Activity(today),
+            ForbiddenDomain = Forbidden(false)
         };
     }
 
@@ -77,6 +78,11 @@ internal static class PeriodicLetterContexts
     public static Lazy<Task<DateTime>> Activity(DateTime date)
     {
         return new Lazy<Task<DateTime>>(() => Task.FromResult(date));
+    }
+
+    public static Lazy<Task<bool>> Forbidden(bool forbidden)
+    {
+        return new Lazy<Task<bool>>(() => Task.FromResult(forbidden));
     }
 
     /// <summary>A portal on a paid tariff running out on <paramref name="due"/>.</summary>
