@@ -90,6 +90,48 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
     {
         return Queries.DueWebhooksLogsAsync(this, now, count);
     }
+
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    // Claims one due record by moving NextAttemptOn forward, only if no other instance has moved it since it was
+    // read; 1 means this caller owns the record until leaseUntil, 0 means another instance got there first.
+    public Task<int> ClaimWebhooksLogAsync(int id, DateTime? expectedNextAttemptOn, DateTime leaseUntil)
+    {
+        return WebhooksLogs
+            .Where(r => r.Id == id && r.NextAttemptOn == expectedNextAttemptOn)
+            .ExecuteUpdateAsync(q => q.SetProperty(p => p.NextAttemptOn, leaseUntil));
+    }
+
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    public Task<int> ResetWebhooksLogAttemptsAsync(int tenantId, int id, DateTime nextAttemptOn)
+    {
+        return WebhooksLogs
+            .Where(r => r.TenantId == tenantId && r.Id == id)
+            .ExecuteUpdateAsync(q => q
+                .SetProperty(p => p.Attempts, 0)
+                .SetProperty(p => p.NextAttemptOn, nextAttemptOn)
+                .SetProperty(p => p.Status, 0)
+                .SetProperty(p => p.Delivery, (DateTime?)null)
+                .SetProperty(p => p.ResponsePayload, (string)null)
+                .SetProperty(p => p.ResponseHeaders, (string)null));
+    }
+
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    public Task<int> CancelWebhooksLogAttemptsAsync(int tenantId, int id)
+    {
+        return WebhooksLogs
+            .Where(r => r.TenantId == tenantId && r.Id == id)
+            .ExecuteUpdateAsync(q => q.SetProperty(p => p.NextAttemptOn, (DateTime?)null));
+    }
+
+    // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
+    public Task<int> ScheduleWebhooksLogAttemptAsync(int tenantId, int id, int attempts, DateTime? nextAttemptOn)
+    {
+        return WebhooksLogs
+            .Where(r => r.TenantId == tenantId && r.Id == id)
+            .ExecuteUpdateAsync(q => q
+                .SetProperty(p => p.Attempts, attempts)
+                .SetProperty(p => p.NextAttemptOn, nextAttemptOn));
+    }
 }
 
 static file class Queries

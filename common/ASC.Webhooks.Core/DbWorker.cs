@@ -301,9 +301,7 @@ public class DbWorker(
 
         foreach (var entry in due)
         {
-            var updated = await webhooksDbContext.WebhooksLogs
-                .Where(r => r.Id == entry.Id && r.NextAttemptOn == entry.NextAttemptOn)
-                .ExecuteUpdateAsync(q => q.SetProperty(p => p.NextAttemptOn, leaseUntil));
+            var updated = await webhooksDbContext.ClaimWebhooksLogAsync(entry.Id, entry.NextAttemptOn, leaseUntil);
 
             if (updated == 1)
             {
@@ -318,15 +316,7 @@ public class DbWorker(
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        await webhooksDbContext.WebhooksLogs
-            .Where(r => r.TenantId == tenantId && r.Id == id)
-            .ExecuteUpdateAsync(q => q
-                .SetProperty(p => p.Attempts, 0)
-                .SetProperty(p => p.NextAttemptOn, DateTime.UtcNow)
-                .SetProperty(p => p.Status, 0)
-                .SetProperty(p => p.Delivery, (DateTime?)null)
-                .SetProperty(p => p.ResponsePayload, (string)null)
-                .SetProperty(p => p.ResponseHeaders, (string)null));
+        await webhooksDbContext.ResetWebhooksLogAttemptsAsync(tenantId, id, DateTime.UtcNow);
 
         return await ReadJournal(tenantId, id);
     }
@@ -335,9 +325,7 @@ public class DbWorker(
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        await webhooksDbContext.WebhooksLogs
-            .Where(r => r.TenantId == tenantId && r.Id == id)
-            .ExecuteUpdateAsync(q => q.SetProperty(p => p.NextAttemptOn, (DateTime?)null));
+        await webhooksDbContext.CancelWebhooksLogAttemptsAsync(tenantId, id);
     }
 
     public async Task<int?> GetJournalAttemptsAsync(int tenantId, int id)
@@ -351,11 +339,7 @@ public class DbWorker(
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        await webhooksDbContext.WebhooksLogs
-            .Where(r => r.TenantId == tenantId && r.Id == id)
-            .ExecuteUpdateAsync(q => q
-                .SetProperty(p => p.Attempts, attempts)
-                .SetProperty(p => p.NextAttemptOn, nextAttemptOn));
+        await webhooksDbContext.ScheduleWebhooksLogAttemptAsync(tenantId, id, attempts, nextAttemptOn);
     }
 
     private async Task<IQueryable<DbWebhooks>> GetQueryForJournal(
