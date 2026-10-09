@@ -4544,11 +4544,9 @@ public class FileStorageService //: IFileStorageService
                 return;
             }
 
-            // A caller who merely opened the entry through an external link may take it out of
-            // their own list; a directly shared member or a stranger has nothing to remove here.
-            var hasDirectShare = await fileSecurity.GetPureSharesAsync(entry, [authContext.CurrentAccount.ID]).AnyAsync();
-
-            if (hasDirectShare || !await fileSecurity.CanReadAsync(entry))
+            // Anyone who can read the entry (a directly shared member or a visitor through an
+            // external link) may take it out of their own list; a stranger has nothing to remove.
+            if (!await fileSecurity.CanReadAsync(entry))
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }
