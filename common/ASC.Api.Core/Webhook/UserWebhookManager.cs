@@ -45,26 +45,59 @@ public class UserWebhookManager(
 {
     public async Task PublishAsync(WebhookTrigger trigger, UserInfo userInfo)
     {
+        var publish = await PrepareAsync(trigger, userInfo);
+
+        await publish();
+    }
+
+    public async Task PublishAsync(WebhookTrigger trigger, ASC.Core.Users.GroupInfo groupInfo)
+    {
+        var publish = await PrepareAsync(trigger, groupInfo);
+
+        await publish();
+    }
+
+    public async Task<Func<Task>> PrepareAsync(WebhookTrigger trigger, UserInfo userInfo)
+    {
         var webhookConfigs = await webhookPublisher.GetWebhookConfigsAsync(trigger, webhookUserAccessChecker, userInfo);
 
         if (webhookConfigs.Count == 0)
         {
-            return;
+            return () => Task.CompletedTask;
         }
 
         var payload = await userWebhookDtoHelper.GetAsync(userInfo);
+
+        var publications = new List<Func<Task>>();
 
         foreach (var subscriberConfigs in webhookConfigs.GroupBy(r => r.CreatedBy))
         {
             var subscriberPayload = await userWebhookDtoHelper.RestrictForSubscriberAsync(payload, userInfo, subscriberConfigs.Key);
 
-            await webhookPublisher.PublishAsync(trigger, subscriberConfigs, subscriberPayload, userInfo.Id);
+            publications.Add(() => webhookPublisher.PublishAsync(trigger, subscriberConfigs, subscriberPayload, userInfo.Id));
         }
+
+        return async () =>
+        {
+            foreach (var publish in publications)
+            {
+                await publish();
+            }
+        };
     }
 
-    public async Task PublishAsync(WebhookTrigger trigger, ASC.Core.Users.GroupInfo groupInfo)
+    public async Task<Func<Task>> PrepareAsync(WebhookTrigger trigger, ASC.Core.Users.GroupInfo groupInfo)
     {
-        await webhookPublisher.PublishAsync(trigger, webhookGroupAccessChecker, groupInfo, () => groupWebhookDtoHelper.GetAsync(groupInfo), groupInfo.ID);
+        var webhookConfigs = await webhookPublisher.GetWebhookConfigsAsync(trigger, webhookGroupAccessChecker, groupInfo);
+
+        if (webhookConfigs.Count == 0)
+        {
+            return () => Task.CompletedTask;
+        }
+
+        var payload = await groupWebhookDtoHelper.GetAsync(groupInfo);
+
+        return () => webhookPublisher.PublishAsync(trigger, webhookConfigs, payload, groupInfo.ID);
     }
 }
 
