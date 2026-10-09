@@ -44,12 +44,22 @@ public class WebhookPublisher(
     AuthContext authContext)
     : IWebhookPublisher
 {
-    private readonly JsonSerializerOptions _serializerOptions = new()
+    private readonly JsonSerializerOptions _serializerOptions = CreateSerializerOptions(tenantUtil);
+
+    /// <summary>
+    /// The options every webhook body is serialized with. Public so the payload tests serialize exactly what goes
+    /// on the wire instead of a copy of these settings; <paramref name="tenantUtil"/> is only consulted for a
+    /// <see cref="DateTimeKind.Local"/> value.
+    /// </summary>
+    public static JsonSerializerOptions CreateSerializerOptions(TenantUtil tenantUtil)
     {
-        Converters = { new TenantToUtcDateTimeJsonConverter(tenantUtil) },
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
-    };
+        return new JsonSerializerOptions
+        {
+            Converters = { new TenantToUtcDateTimeJsonConverter(tenantUtil) },
+            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
+        };
+    }
 
     private class TenantToUtcDateTimeJsonConverter(TenantUtil tenantUtil) : JsonConverter<DateTime>
     {
