@@ -1468,7 +1468,7 @@ public class TariffService(
 
     #region Accounting
 
-    public async Task<bool?> HasPositiveBalanceAsync(int tenantId)
+    public async Task<bool?> HasPositiveBalanceAsync(int tenantId, CancellationToken cancellationToken = default)
     {
         if (!accountingClient.Configured)
         {
@@ -1481,13 +1481,18 @@ public class TariffService(
         try
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
-            var balance = await accountingClient.GetCustomerBalanceAsync(portalId);
+            var balance = await accountingClient.GetCustomerBalanceAsync(portalId, cancellationToken);
 
             return balance?.SubAccounts?.Any(s => s.Amount > 0) ?? false;
         }
         catch (AccountingCustomerNotFoundException)
         {
             return false;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            // The caller gave up waiting: not knowing is the answer, and the caller says so.
+            return null;
         }
         catch (Exception error)
         {

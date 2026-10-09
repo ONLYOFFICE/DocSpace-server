@@ -31,6 +31,7 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
+global using System.Diagnostics;
 global using System.Globalization;
 global using System.Net;
 global using System.Reflection;
@@ -44,6 +45,7 @@ global using System.Text.RegularExpressions;
 global using ASC.Api.Core.Extensions;
 global using ASC.AuditTrail.Models;
 global using ASC.AuditTrail.Repositories;
+global using ASC.Common.Caching;
 global using ASC.Common.DependencyInjection;
 global using ASC.Core;
 global using ASC.Core.Billing;

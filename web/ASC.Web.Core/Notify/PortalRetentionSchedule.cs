@@ -173,6 +173,19 @@ public sealed class PortalRetentionOptions
         FinalDeletionNoticeDays = 7
     };
 
+    /// <summary>
+    /// How long a run waits for the accounting service to say whether money is left on a portal's wallet, in
+    /// seconds. A portal it does not answer for in time waits for the next run.
+    /// </summary>
+    public int BalanceTimeoutSeconds { get; set; } = 5;
+
+    /// <summary>
+    /// After this many failed balance requests in a row the run stops asking for the rest of the night, so an
+    /// accounting service that is down does not hold up the run portal after portal; the portals it would have
+    /// asked about wait for the next run.
+    /// </summary>
+    public int BalanceFailuresBeforeStop { get; set; } = 20;
+
     public PortalRetentionScheduleOptions For(PortalRetentionCategory category)
     {
         return category switch

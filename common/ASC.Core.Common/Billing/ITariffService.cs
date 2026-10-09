@@ -62,9 +62,10 @@ public interface ITariffService
 
     /// <summary>
     /// Whether money is left on the portal's wallet: true or false when the accounting service answered
-    /// (a portal it does not know has no wallet, so false), null when it could not be asked.
+    /// (a portal it does not know has no wallet, so false), null when it could not be asked or did not answer
+    /// before <paramref name="cancellationToken"/> was cancelled.
     /// </summary>
-    Task<bool?> HasPositiveBalanceAsync(int tenantId);
+    Task<bool?> HasPositiveBalanceAsync(int tenantId, CancellationToken cancellationToken = default);
     Task<Session> OpenCustomerSessionAsync(int tenantId, string serviceName, string externalRef, int quantity, int duration);
     Task<bool> CloseCustomerSessionAsync(int tenantId, int sessionId);
     Task<Session> ExtendCustomerSessionAsync(int tenantId, int sessionId, int duration);

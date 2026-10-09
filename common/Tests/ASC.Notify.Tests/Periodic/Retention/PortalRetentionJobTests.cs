@@ -60,10 +60,77 @@ public class PortalRetentionJobTests
         return await LetterScope.OpenAsync(await GetStackAsync(), CultureInfo.GetCultureInfo(LetterCultures.DefaultCultureName));
     }
 
-    /// <summary>The job under test, with the default policy and a logger that keeps what it is told.</summary>
-    private static PortalRetentionJob CreateJob(LetterScope scope, RecordingLogger<PortalRetentionJob> logger)
+    /// <summary>
+    /// The job under test, with a logger that keeps what it is told, the policy's defaults overridden by
+    /// <paramref name="retention"/> (keys under <c>core:retention</c>), and <paramref name="tariffService"/> in
+    /// place of the stack's when given.
+    /// </summary>
+    private static PortalRetentionJob CreateJob(LetterScope scope, RecordingLogger<PortalRetentionJob> logger, Dictionary<string, string?>? retention = null,
+        ITariffService? tariffService = null)
     {
-        return ActivatorUtilities.CreateInstance<PortalRetentionJob>(scope.Services, logger, new PortalRetentionConfiguration(new ConfigurationBuilder().Build()));
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection((retention ?? []).ToDictionary(r => $"core:retention:{r.Key}", r => r.Value))
+            .Build();
+
+        object[] arguments = tariffService is null
+            ? [logger, new PortalRetentionConfiguration(configuration)]
+            : [logger, new PortalRetentionConfiguration(configuration), tariffService];
+
+        return ActivatorUtilities.CreateInstance<PortalRetentionJob>(scope.Services, arguments);
+    }
+
+    /// <summary>
+    /// The stack's tariff service in front of an accounting service whose answers the case writes. The stack runs
+    /// none, so - as <c>AccountingClientTests</c> do - the real <see cref="AccountingClient"/> is configured with
+    /// an address and its network handler is replaced: the request goes through the client's own retries and
+    /// error mapping, and the cancellation reaches the handler. The stack is standalone, where every portal has
+    /// the installation's accounting key, so a portal that exists only in memory is asked about as well.
+    /// </summary>
+    private static (ITariffService TariffService, ServiceProvider Accounting) WithAccounting(LetterScope scope,
+        Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> respond)
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["core:accounting:url"] = "https://accounting.example.com/api",
+                ["core:accounting:key"] = "test-key",
+                ["core:accounting:secret"] = "test-secret"
+            })
+            .Build();
+
+        var services = new ServiceCollection();
+        services.AddMemoryCache();
+        services.AddSingleton<IConfiguration>(configuration);
+        services.AddSingleton(typeof(ICache), typeof(AscCache));
+        services.AddScoped<AccountingClient>();
+        services.AddFusionCache();
+        services.AddAccountingHttpClient(configuration);
+
+        // AddRefitGeneratedClient sets the primary handler of its own named client, so the override targets it.
+        services.AddHttpClient(Refit.UniqueName.ForType<IAccountingApi>())
+                .ConfigurePrimaryHttpMessageHandler(() => new RespondingHandler(respond));
+
+        var accounting = services.BuildServiceProvider();
+        var tariffService = ActivatorUtilities.CreateInstance<TariffService>(scope.Services, accounting.GetRequiredService<AccountingClient>());
+
+        return (tariffService, accounting);
+    }
+
+    private sealed class RespondingHandler(Func<HttpRequestMessage, CancellationToken, Task<HttpResponseMessage>> respond) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            return respond(request, cancellationToken);
+        }
+    }
+
+    /// <summary>A balance with nothing left on it.</summary>
+    private static HttpResponseMessage EmptyBalance()
+    {
+        return new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("""{"accountNumber":1,"accountCurrency":"USD","subAccounts":[]}""", Encoding.UTF8, "application/json")
+        };
     }
 
     /// <summary>
@@ -348,6 +415,68 @@ public class PortalRetentionJobTests
         await job.ApplyAsync(context, _policyStart, new RecordingNotifyClient(), _senderName);
 
         context.LastActivity.IsValueCreated.Should().BeTrue("the run reads the activity of such a portal every day");
+    }
+
+    [Fact(Timeout = 60000)]
+    public async Task FreePortal_AccountingDoesNotAnswer_WaitsForTheNextRun()
+    {
+        using var scope = await OpenScopeAsync();
+        var logger = new RecordingLogger<PortalRetentionJob>();
+        var client = new RecordingNotifyClient();
+
+        // An accounting service that never answers: the request ends only when the job gives up on it - or when
+        // the test runs out of time, should the job never give up.
+        var testCancellation = TestContext.Current.CancellationToken;
+
+        var (tariffService, accounting) = WithAccounting(scope, async (_, cancellationToken) =>
+        {
+            using var waiting = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, testCancellation);
+
+            await Task.Delay(Timeout.Infinite, waiting.Token);
+
+            return EmptyBalance();
+        });
+
+        await using var accountingServices = accounting;
+
+        var job = CreateJob(scope, logger, new Dictionary<string, string?> { ["balanceTimeoutSeconds"] = "1" }, tariffService);
+        var waited = Stopwatch.StartNew();
+
+        var leaveAlone = await job.ApplyAsync(Free(InMemoryTenant(scope), _today.AddDays(-30)), _policyStart, client, _senderName);
+
+        waited.Elapsed.Should().BeLessThan(TimeSpan.FromSeconds(15), "the request is cut off after the configured second, not the client's minute");
+        leaveAlone.Should().BeFalse();
+        logger.Messages.Should().ContainSingle(m => m.Contains("the wallet balance could not be read"));
+        client.Sent.Should().BeEmpty("not knowing which schedule applies, the portal waits for the next run");
+    }
+
+    [Fact]
+    public async Task Accounting_FailingInARow_IsNotAskedForTheRestOfTheRun()
+    {
+        using var scope = await OpenScopeAsync();
+        var logger = new RecordingLogger<PortalRetentionJob>();
+
+        // Unreachable twice, answers once - which starts the count again - then unreachable for good. A refused
+        // connection is not retried by the client, so every failure is one request.
+        bool[] answers = [false, false, true, false, false, false, false];
+        var asked = 0;
+
+        var (tariffService, accounting) = WithAccounting(scope, (_, _) =>
+            answers[asked++] ? Task.FromResult(EmptyBalance()) : throw new HttpRequestException("Connection refused"));
+
+        await using var accountingServices = accounting;
+
+        var job = CreateJob(scope, logger, new Dictionary<string, string?> { ["balanceFailuresBeforeStop"] = "3" }, tariffService);
+
+        for (var run = 0; run < answers.Length; run++)
+        {
+            await job.ApplyAsync(Free(InMemoryTenant(scope), _today.AddDays(-30)), _policyStart, new RecordingNotifyClient(), _senderName);
+        }
+
+        asked.Should().Be(6, "after the third failure in a row the seventh portal is not asked about");
+        logger.Messages.Should().ContainSingle(m => m.Contains("requests in a row failed"));
+        logger.Messages.Count(m => m.Contains("the wallet balance could not be read")).Should().Be(5, "only a request that was made and failed is reported");
+        logger.Messages.Should().ContainSingle(m => m.Contains("Free: Notify FirstNotice"), "the portal it got an answer for is warned");
     }
 
     [Fact]

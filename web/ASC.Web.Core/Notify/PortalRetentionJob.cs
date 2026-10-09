@@ -70,6 +70,9 @@ public class PortalRetentionJob(
     /// </summary>
     private HashSet<int> _activityReadDaily = [];
 
+    /// <summary>The balance requests that failed in a row in this run; see <see cref="HasPositiveBalanceAsync"/>.</summary>
+    private int _balanceFailures;
+
     /// <summary>
     /// Opens the daily run: the day the policy started counting in this installation, stamped on the
     /// first run, and the last day a run got through, after which this one sends the letters.
@@ -237,15 +240,46 @@ public class PortalRetentionJob(
             return null;
         }
 
-        if (await tariffService.HasPositiveBalanceAsync(tenant.Id) is not { } hasBalance)
+        if (await HasPositiveBalanceAsync(tenant) is not { } hasBalance)
         {
             // Not knowing whether money is left is not knowing which schedule applies: wait for tomorrow.
-            logger.WarningBalanceUnknown(tenant.Id);
-
             return null;
         }
 
         return hasBalance ? DueOrNull(withBalance, balanceDecision) : DueOrNull(plain, plainDecision);
+    }
+
+    /// <summary>
+    /// Asks the accounting service whether money is left on the portal's wallet, waiting no longer than
+    /// <see cref="PortalRetentionOptions.BalanceTimeoutSeconds"/>; null when it could not tell. The run walks the
+    /// portals one by one, and every letter after the policy waits for it, so once
+    /// <see cref="PortalRetentionOptions.BalanceFailuresBeforeStop"/> requests in a row have failed the service is
+    /// not asked again until the next run.
+    /// </summary>
+    private async Task<bool?> HasPositiveBalanceAsync(Tenant tenant)
+    {
+        if (_balanceFailures >= Options.BalanceFailuresBeforeStop)
+        {
+            return null;
+        }
+
+        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(Options.BalanceTimeoutSeconds));
+
+        if (await tariffService.HasPositiveBalanceAsync(tenant.Id, deadline.Token) is { } hasBalance)
+        {
+            _balanceFailures = 0;
+
+            return hasBalance;
+        }
+
+        logger.WarningBalanceUnknown(tenant.Id);
+
+        if (++_balanceFailures == Options.BalanceFailuresBeforeStop)
+        {
+            logger.WarningAccountingUnavailable(_balanceFailures);
+        }
+
+        return null;
     }
 
     /// <summary>The two categories a portal may be in, by whether money is left on its wallet.</summary>
