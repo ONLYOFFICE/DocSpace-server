@@ -145,7 +145,7 @@
         "tags": [
           "AI / AI"
         ],
-        "operationId": "aiAiSend",
+        "operationId": "aiSend",
         "summary": "Run an AI action",
         "description": "Runs one AI action and returns the whole answer as a single JSON document. The model is the profile bound to `actionType`, falling back to the `Default` assignment slot, so this operation accepts no `profileId` of its own. Nothing is persisted - no thread is opened, no message is stored and no title is generated - which makes it the one to use for a stand-alone completion rather than for a conversation. `entityId` and `contextEntityId` set the scope of the round, which decides the workspace context and the custom MCP servers it may reach. For a conversation that keeps its history, use `POST api/2.0/ai/ai/send-with-stream` instead.",
         "responses": {
@@ -205,30 +205,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "actionType": {
-                    "$ref": "#/components/schemas/AiActionType",
-                    "description": "Which AI action to run — selects the assignment slot and action."
-                  },
-                  "userMessage": {
-                    "$ref": "#/components/schemas/AiThreadMessageLike",
-                    "description": "The user turn to send."
-                  },
-                  "actionArgs": {
-                    "$ref": "#/components/schemas/AiAiActionArgs",
-                    "description": "Per-request engine options: extra tools, reasoning, prompt override."
-                  },
-                  "entityId": {
-                    "type": "string",
-                    "description": "Optional entity (room) scope for profile resolution."
-                  }
-                },
-                "required": [
-                  "actionType",
-                  "userMessage"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiSendRequest"
               }
             }
           }
@@ -240,7 +217,7 @@
         "tags": [
           "AI / AI"
         ],
-        "operationId": "aiAiSendCustom",
+        "operationId": "aiSendCustom",
         "summary": "Send custom",
         "description": "Runs a free-form one-turn call against a system prompt supplied in the request, with no thread, no history and nothing persisted. The model is the explicit `profileId` when it resolves, otherwise the `Default` assignment slot. The shape of the answer depends on the body rather than on the route: with `isStream` set it arrives as a newline-delimited stream of chat events, and without it as a single JSON document, so a client has to handle both. Use `POST api/2.0/ai/ai/send` when the prompt should come from the portal's own action configuration instead of from the caller.",
         "responses": {
@@ -301,30 +278,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "isStream": {
-                    "type": "boolean",
-                    "description": "Stream the reply (ndjson) when true, else return a single message."
-                  },
-                  "systemPrompt": {
-                    "type": "string",
-                    "description": "Caller-supplied system prompt for this one-turn call."
-                  },
-                  "userMessage": {
-                    "$ref": "#/components/schemas/AiThreadMessageLike"
-                  },
-                  "actionArgs": {
-                    "$ref": "#/components/schemas/AiAiActionArgs",
-                    "description": "Per-request engine options: extra tools, reasoning, prompt override."
-                  }
-                },
-                "required": [
-                  "isStream",
-                  "systemPrompt",
-                  "userMessage"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiSendCustomRequest"
               }
             }
           }
@@ -336,7 +290,7 @@
         "tags": [
           "AI / AI"
         ],
-        "operationId": "aiAiSendWithStream",
+        "operationId": "aiSendWithStream",
         "summary": "Send with stream",
         "description": "Runs one chat round and streams it back as newline-delimited `ChatEvent` objects. Omitting `threadId` opens a new thread, which requires that `entityId` names a room the caller can open and that a profile resolves for it; the user message and the reply are persisted either way, and a new thread also gets a generated title. The model is settled in a fixed order - an agent's assignment in scope overrides everything, then the explicit `profileId`, then the one stored on the thread, then the `Chat` assignment - and the effective profile is checked before the stream opens, so an unknown one fails with 400 rather than as an error buried in a 200. A tool call pauses the round and ends the stream; resume it with `POST api/2.0/ai/ai/approve-tool-call` or `POST api/2.0/ai/ai/deny-tool-call`.",
         "responses": {
@@ -426,10 +380,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AiAiSendStreamBody"
+                "$ref": "#/components/schemas/AiSendStreamBody"
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiSendStreamBody"
         }
       }
     },
@@ -438,7 +393,7 @@
         "tags": [
           "AI / AI"
         ],
-        "operationId": "aiAiSendWithStreamOpenAI",
+        "operationId": "aiSendWithStreamOpenAI",
         "summary": "Stream a chat in OpenAI format",
         "description": "The same chat round as `send-with-stream`, re-encoded as a server-sent-events stream of OpenAI `chat.completion.chunk` objects terminated by a `[DONE]` sentinel. Thread handling, persistence, title generation and the profile pre-flight are identical, and a tool call ends the stream with `finish_reason: \"tool_calls\"` instead of a pause event - resume it through the same approve and deny operations. Unlike `send-with-stream` it does not reject an empty user message and does not enforce the per-kind attachment cap, so validate both before calling. Choose this route only for a client that already speaks the OpenAI wire format; `POST api/2.0/ai/ai/send-with-stream` is the native one.",
         "responses": {
@@ -518,10 +473,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AiAiSendStreamBody"
+                "$ref": "#/components/schemas/AiSendStreamBody"
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiSendStreamBody"
         }
       }
     },
@@ -530,7 +486,7 @@
         "tags": [
           "AI / AI"
         ],
-        "operationId": "aiAiRegenerateStream",
+        "operationId": "aiRegenerateStream",
         "summary": "Regenerate stream",
         "description": "Re-rolls the last assistant reply of an existing thread: every message after the last user message - the previous reply and any tool-call hops - is dropped, and a fresh reply is streamed as newline-delimited `ChatEvent` objects against the unchanged prompt. The thread has to exist already, `threadId` is required, and no title is generated. The dropped messages are gone for good, so this is a destructive operation on the thread's tail rather than a retry that keeps both answers. Unlike `send-with-stream` the profile is not verified before the stream opens, so an unusable model surfaces as an error frame inside the 200 rather than as a 4xx.",
         "responses": {
@@ -590,29 +546,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "threadId": {
-                    "type": "string",
-                    "description": "Target thread (must already exist)."
-                  },
-                  "actionArgs": {
-                    "$ref": "#/components/schemas/AiAiActionArgs",
-                    "description": "Per-request engine options: extra tools, reasoning, prompt override."
-                  },
-                  "entityId": {
-                    "type": "string",
-                    "description": "Optional entity (room) scope for profile resolution."
-                  },
-                  "profileId": {
-                    "type": "string",
-                    "description": "Session-level profile override for this request only."
-                  }
-                },
-                "required": [
-                  "threadId"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiRegenerateStreamRequest"
               }
             }
           }
@@ -624,7 +558,7 @@
         "tags": [
           "AI / AI"
         ],
-        "operationId": "aiAiApproveToolCall",
+        "operationId": "aiApproveToolCall",
         "summary": "Approve tool call",
         "description": "Resumes a chat round that a tool call has paused, and streams the continuation as newline-delimited `ChatEvent` objects. The result supplied in the request is persisted onto the assistant message that issued the call, so the tool is not executed here - the caller runs it and reports the outcome. The round continues against the augmented history and may pause again on a further tool call. Call `POST api/2.0/ai/ai/deny-tool-call` instead to refuse the call and let the model answer without it.",
         "responses": {
@@ -684,52 +618,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "result": {
-                    "description": "Final result of the tool call, as the model should see it."
-                  },
-                  "allowAlways": {
-                    "type": "boolean",
-                    "description": "Persist auto-approve for this tool's name."
-                  },
-                  "threadId": {
-                    "type": "string",
-                    "description": "Thread the assistant message belongs to."
-                  },
-                  "messageId": {
-                    "type": "string",
-                    "description": "Storage id of the assistant message holding the tool call."
-                  },
-                  "idx": {
-                    "type": "number",
-                    "description": "Index of the tool-call content part inside `message.content`."
-                  },
-                  "message": {
-                    "$ref": "#/components/schemas/AiThreadMessageLike",
-                    "description": "Snapshot of the assistant message at the time the tool call surfaced."
-                  },
-                  "actionArgs": {
-                    "$ref": "#/components/schemas/AiAiActionArgs",
-                    "description": "Per-request engine options: extra tools, reasoning, prompt override."
-                  },
-                  "entityId": {
-                    "type": "string",
-                    "description": "Optional entity (room) scope for profile resolution."
-                  },
-                  "profileId": {
-                    "type": "string",
-                    "description": "Session-level profile override for this request only."
-                  }
-                },
-                "required": [
-                  "idx",
-                  "message",
-                  "messageId",
-                  "result",
-                  "threadId"
-                ]
+                "$ref": "#/components/schemas/AiApproveToolCallRequest"
               }
             }
           }
@@ -741,7 +630,7 @@
         "tags": [
           "AI / AI"
         ],
-        "operationId": "aiAiDenyToolCall",
+        "operationId": "aiDenyToolCall",
         "summary": "Deny tool call",
         "description": "Refuses the tool call a chat round is paused on and resumes it immediately, streaming the continuation as newline-delimited `ChatEvent` objects. The literal `\"User deny tool call\"` is persisted in place of the tool result, so the model sees an explicit refusal rather than a missing answer and may reply without the tool or ask for something else. Nothing is executed and no result is accepted from the caller. Use `POST api/2.0/ai/ai/approve-tool-call` to supply a result instead.",
         "responses": {
@@ -801,10 +690,11 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AiAiToolCallData"
+                "$ref": "#/components/schemas/AiToolCallData"
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiToolCallData"
         }
       }
     },
@@ -1066,22 +956,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "actionType": {
-                    "$ref": "#/components/schemas/AiActionType",
-                    "description": "Action the assignment applies to."
-                  },
-                  "profileId": {
-                    "type": "string",
-                    "description": "Profile id to bind."
-                  }
-                },
-                "required": [
-                  "actionType",
-                  "profileId"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiAssignmentsAssignRequest"
               }
             }
           }
@@ -1166,7 +1041,8 @@
                 "$ref": "#/components/schemas/AiActionType"
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiActionType"
         }
       }
     },
@@ -1258,7 +1134,8 @@
                 ]
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiAssignmentsBulkAssignRequest"
         }
       }
     },
@@ -1496,25 +1373,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "profileId": {
-                    "type": "string",
-                    "description": "The profile whose assignments are removed. May be sent as the `profileId` query parameter instead of in the body.",
-                    "examples": [
-                      "00000000-0000-0000-0000-000000000000"
-                    ]
-                  }
-                },
-                "required": [
-                  "profileId"
-                ],
-                "additionalProperties": false,
-                "examples": [
-                  {
-                    "profileId": "00000000-0000-0000-0000-000000000000"
-                  }
-                ]
+                "$ref": "#/components/schemas/AiAssignmentsCascadeProfileDeleteRequest"
               }
             }
           }
@@ -1596,45 +1455,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "input": {
-                    "type": "object",
-                    "properties": {
-                      "path": {
-                        "type": "string",
-                        "description": "Storage path/key of the file."
-                      },
-                      "content": {
-                        "type": "string",
-                        "description": "File contents."
-                      },
-                      "type": {
-                        "type": "number",
-                        "description": "File type discriminator."
-                      },
-                      "title": {
-                        "type": "string",
-                        "description": "Optional display title."
-                      }
-                    },
-                    "required": [
-                      "path",
-                      "content",
-                      "type"
-                    ],
-                    "additionalProperties": false,
-                    "description": "A file attachment draft to persist."
-                  },
-                  "entityId": {
-                    "type": "string",
-                    "description": "Optional entity (room) scope."
-                  }
-                },
-                "required": [
-                  "input"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiAttachmentsSaveFileRequest"
               }
             }
           }
@@ -1719,47 +1540,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "inputs": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "path": {
-                          "type": "string",
-                          "description": "Storage path/key of the file."
-                        },
-                        "content": {
-                          "type": "string",
-                          "description": "File contents."
-                        },
-                        "type": {
-                          "type": "number",
-                          "description": "File type discriminator."
-                        },
-                        "title": {
-                          "type": "string",
-                          "description": "Optional display title."
-                        }
-                      },
-                      "required": [
-                        "path",
-                        "content",
-                        "type"
-                      ],
-                      "additionalProperties": false,
-                      "description": "A file attachment draft to persist."
-                    }
-                  },
-                  "entityId": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "inputs"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiAttachmentsSaveFilesManyRequest"
               }
             }
           }
@@ -1855,7 +1636,8 @@
                 ]
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiAttachmentsGetRequest"
         }
       }
     },
@@ -1957,7 +1739,8 @@
                 ]
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiAttachmentsGetManyRequest"
         }
       }
     },
@@ -2033,7 +1816,8 @@
                 ]
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiAttachmentsDeleteRequest"
         }
       }
     },
@@ -2115,7 +1899,8 @@
                 ]
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiAttachmentsDeleteManyRequest"
         }
       }
     },
@@ -2204,30 +1989,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "ids": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "Attachment ids to bind."
-                  },
-                  "messageId": {
-                    "type": "string",
-                    "description": "Owning message id."
-                  },
-                  "threadId": {
-                    "type": "string",
-                    "description": "Owning thread id."
-                  }
-                },
-                "required": [
-                  "ids",
-                  "messageId",
-                  "threadId"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiAttachmentsLinkToMessageRequest"
               }
             }
           }
@@ -2302,7 +2064,8 @@
                 "additionalProperties": true
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiAttachmentsGetSuggestedQuestionsRequest"
         }
       }
     },
@@ -2644,20 +2407,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "value": {
-                    "type": "boolean",
-                    "description": "New deep-mode value."
-                  },
-                  "entityId": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "value"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiPreferencesSetDeepModeRequest"
               }
             }
           }
@@ -2746,7 +2496,8 @@
                 ]
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiPreferencesClearDeepModeRequest"
         }
       }
     },
@@ -2830,7 +2581,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiAiReasoningLevel"
+                  "$ref": "#/components/schemas/AiReasoningLevel"
                 }
               }
             }
@@ -2957,20 +2708,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "value": {
-                    "$ref": "#/components/schemas/AiAiReasoningLevel",
-                    "description": "New extended-thinking depth; `off` turns deep mode off."
-                  },
-                  "entityId": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "value"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiPreferencesSetReasoningLevelRequest"
               }
             }
           }
@@ -2991,7 +2729,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiAiToolPermissionMode"
+                  "$ref": "#/components/schemas/AiChatToolPermissionMode"
                 }
               }
             }
@@ -3118,20 +2856,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "value": {
-                    "$ref": "#/components/schemas/AiAiToolPermissionMode",
-                    "description": "New tool permission mode."
-                  },
-                  "entityId": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "value"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiPreferencesSetToolPermissionModeRequest"
               }
             }
           }
@@ -3216,7 +2941,8 @@
                 "$ref": "#/components/schemas/AiCreateProfileInput"
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiCreateProfileInput"
         }
       }
     },
@@ -3298,7 +3024,8 @@
                 "$ref": "#/components/schemas/AiProfile"
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiProfile"
         }
       }
     },
@@ -3384,7 +3111,8 @@
                 ]
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiProfilesDeleteRequest"
         }
       }
     },
@@ -3593,29 +3321,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "providerType": {
-                    "$ref": "#/components/schemas/AiProviderType",
-                    "description": "Provider whose catalog to list."
-                  },
-                  "baseUrl": {
-                    "type": "string",
-                    "description": "Provider API base URL.",
-                    "examples": [
-                      "https://api.openai.com/v1"
-                    ]
-                  },
-                  "apiKey": {
-                    "type": "string",
-                    "description": "Provider API key. Omit it for a provider that needs none; the request is then made without one."
-                  }
-                },
-                "required": [
-                  "providerType",
-                  "baseUrl"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiProfilesListProviderModelsRequest"
               }
             }
           }
@@ -3718,7 +3424,8 @@
                 ]
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiProfilesTestConnectionRequest"
         }
       }
     },
@@ -3997,7 +3704,8 @@
                 "$ref": "#/components/schemas/AiCreatePromptInput"
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiCreatePromptInput"
         }
       }
     },
@@ -4066,37 +3774,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string",
-                    "description": "Prompt id to update."
-                  },
-                  "updates": {
-                    "type": "object",
-                    "properties": {
-                      "name": {
-                        "type": "string"
-                      },
-                      "text": {
-                        "type": "string"
-                      },
-                      "folderId": {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      }
-                    },
-                    "additionalProperties": false,
-                    "description": "Fields to change."
-                  }
-                },
-                "required": [
-                  "id",
-                  "updates"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiPromptsUpdateRequest"
               }
             }
           }
@@ -4168,25 +3846,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string",
-                    "description": "Prompt id to move."
-                  },
-                  "folderId": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "description": "Target folder id, or `null` for root."
-                  }
-                },
-                "required": [
-                  "id",
-                  "folderId"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiPromptsMoveRequest"
               }
             }
           }
@@ -4275,7 +3935,8 @@
                 ]
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiPromptsDeleteRequest"
         }
       }
     },
@@ -4420,7 +4081,8 @@
                 ]
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiPromptsCreateFolderRequest"
         }
       }
     },
@@ -4489,22 +4151,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "id": {
-                    "type": "string",
-                    "description": "Folder id to rename."
-                  },
-                  "name": {
-                    "type": "string",
-                    "description": "New folder name."
-                  }
-                },
-                "required": [
-                  "id",
-                  "name"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiPromptsRenameFolderRequest"
               }
             }
           }
@@ -4603,7 +4250,8 @@
                 ]
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiPromptsDeleteFolderRequest"
         }
       }
     },
@@ -4779,27 +4427,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "bundle": {
-                    "$ref": "#/components/schemas/AiPromptBundle",
-                    "description": "Bundle to restore."
-                  },
-                  "options": {
-                    "type": "object",
-                    "properties": {
-                      "mode": {
-                        "$ref": "#/components/schemas/AiImportMode"
-                      }
-                    },
-                    "additionalProperties": false,
-                    "description": "Import options."
-                  }
-                },
-                "required": [
-                  "bundle"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiPromptsImportBundleRequest"
               }
             }
           }
@@ -5047,25 +4675,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "title": {
-                    "type": "string",
-                    "description": "Thread title."
-                  },
-                  "profileId": {
-                    "type": "string",
-                    "description": "Optional profile to bind."
-                  },
-                  "entityId": {
-                    "type": "string",
-                    "description": "Optional entity (room) scope."
-                  }
-                },
-                "required": [
-                  "title"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiThreadsCreateRequest"
               }
             }
           }
@@ -5147,46 +4757,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "threadId": {
-                    "type": "string"
-                  },
-                  "profile": {
-                    "$ref": "#/components/schemas/AiProfile",
-                    "description": "Profile the title generation runs on."
-                  },
-                  "profileId": {
-                    "type": "string"
-                  },
-                  "firstMessage": {
-                    "$ref": "#/components/schemas/AiThreadMessageLike",
-                    "description": "First user message a fresh thread derives its title from."
-                  },
-                  "entityId": {
-                    "type": "string",
-                    "description": "Opaque scope token persisted on a freshly created thread."
-                  },
-                  "entityMeta": {
-                    "type": "object",
-                    "properties": {
-                      "entityId": {
-                        "type": "string"
-                      },
-                      "entityTitle": {
-                        "type": "string"
-                      }
-                    },
-                    "additionalProperties": false,
-                    "description": "Optional entity hint (lib 0.5.64): only `entityId` is read; the source (`source_id` / `source_type` / `source_title`) is re-resolved server-side before reaching the provider as metadata."
-                  }
-                },
-                "required": [
-                  "profile",
-                  "profileId",
-                  "firstMessage"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiThreadsOpenOrCreateRequest"
               }
             }
           }
@@ -5281,24 +4852,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "threadId": {
-                    "type": "string"
-                  },
-                  "message": {
-                    "$ref": "#/components/schemas/AiThreadMessageLike",
-                    "description": "Message to persist (id/createdAt are storage-assigned)."
-                  },
-                  "profileId": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "threadId",
-                  "message"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiThreadsAppendUserMessageRequest"
               }
             }
           }
@@ -5370,19 +4924,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "threadId": {
-                    "type": "string"
-                  },
-                  "profileId": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "threadId"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiThreadsTouchRequest"
               }
             }
           }
@@ -5464,21 +5006,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "threadId": {
-                    "type": "string"
-                  },
-                  "title": {
-                    "type": "string",
-                    "description": "New thread title."
-                  }
-                },
-                "required": [
-                  "threadId",
-                  "title"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiThreadsRenameRequest"
               }
             }
           }
@@ -5577,7 +5105,8 @@
                 ]
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiThreadsDeleteRequest"
         }
       }
     },
@@ -5663,7 +5192,8 @@
                 ]
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiThreadsClearMessagesRequest"
         }
       }
     },
@@ -5755,34 +5285,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "threadId": {
-                    "type": "string"
-                  },
-                  "profile": {
-                    "$ref": "#/components/schemas/AiProfile",
-                    "description": "Profile used to regenerate the title."
-                  },
-                  "entityMeta": {
-                    "type": "object",
-                    "properties": {
-                      "entityId": {
-                        "type": "string"
-                      },
-                      "entityTitle": {
-                        "type": "string"
-                      }
-                    },
-                    "additionalProperties": false,
-                    "description": "Optional entity hint (lib 0.5.64): only `entityId` is read; the source (`source_id` / `source_type` / `source_title`) is re-resolved server-side before reaching the provider as metadata."
-                  }
-                },
-                "required": [
-                  "threadId",
-                  "profile"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiThreadsRegenerateTitleRequest"
               }
             }
           }
@@ -6240,21 +5743,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "messageId": {
-                    "type": "string"
-                  },
-                  "message": {
-                    "$ref": "#/components/schemas/AiThreadMessageLike",
-                    "description": "Replacement message content."
-                  }
-                },
-                "required": [
-                  "messageId",
-                  "message"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiThreadsUpdateMessageRequest"
               }
             }
           }
@@ -6343,7 +5832,8 @@
                 ]
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiThreadsDeleteMessageRequest"
         }
       }
     },
@@ -6432,25 +5922,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "description": "Server name (unique within scope)."
-                  },
-                  "config": {
-                    "$ref": "#/components/schemas/AiMcpServerConfig",
-                    "description": "Server transport configuration."
-                  },
-                  "entityId": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "config"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiToolsAddCustomServerRequest"
               }
             }
           }
@@ -6542,23 +6014,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "config": {
-                    "$ref": "#/components/schemas/AiMcpServerConfig"
-                  },
-                  "entityId": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name",
-                  "config"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiToolsUpdateCustomServerRequest"
               }
             }
           }
@@ -6650,19 +6106,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string"
-                  },
-                  "entityId": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "name"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiToolsRemoveCustomServerRequest"
               }
             }
           }
@@ -6855,7 +6299,7 @@
                       "additionalProperties": {
                         "type": "array",
                         "items": {
-                          "$ref": "#/components/schemas/AiTMCPItem"
+                          "$ref": "#/components/schemas/AiMCPItem"
                         }
                       }
                     },
@@ -7016,23 +6460,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "map": {
-                    "type": "object",
-                    "additionalProperties": {
-                      "$ref": "#/components/schemas/AiMcpServerConfig"
-                    },
-                    "description": "Full replacement set, keyed by server name."
-                  },
-                  "entityId": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "map"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiToolsReplaceAllCustomServersRequest"
               }
             }
           }
@@ -7124,27 +6552,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "serverType": {
-                    "type": "string"
-                  },
-                  "toolNames": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "Tool names to disable."
-                  },
-                  "entityId": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "serverType",
-                  "toolNames"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiToolsSetDisabledRequest"
               }
             }
           }
@@ -7398,28 +6806,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "serverType": {
-                    "type": "string"
-                  },
-                  "toolName": {
-                    "type": "string"
-                  },
-                  "value": {
-                    "type": "boolean",
-                    "description": "Whether the tool is always allowed."
-                  },
-                  "entityId": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "serverType",
-                  "toolName",
-                  "value"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiToolsSetAllowAlwaysRequest"
               }
             }
           }
@@ -7866,7 +7253,8 @@
                 "$ref": "#/components/schemas/AiWebSearchConfig"
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiWebSearchConfig"
         }
       }
     },
@@ -7955,19 +7343,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "config": {
-                    "$ref": "#/components/schemas/AiWebSearchConfig"
-                  },
-                  "entityId": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "config"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiWebSearchConfigureRequest"
               }
             }
           }
@@ -8059,19 +7435,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "config": {
-                    "$ref": "#/components/schemas/AiWebSearchConfig"
-                  },
-                  "entityId": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "config"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiWebSearchSetActiveConfigRequest"
               }
             }
           }
@@ -8147,7 +7511,8 @@
                 "type": "string"
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiWebSearchClearRequest"
         }
       }
     },
@@ -8236,30 +7601,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "title": {
-                    "type": "string",
-                    "description": "Document title (also the file name)."
-                  },
-                  "content": {
-                    "type": "string",
-                    "description": "Markdown content to convert."
-                  },
-                  "folderId": {
-                    "type": [
-                      "string",
-                      "number"
-                    ],
-                    "description": "Target folder id (int or string)."
-                  }
-                },
-                "required": [
-                  "title",
-                  "content",
-                  "folderId"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiExportTextToDocxRequest"
               }
             }
           }
@@ -8525,80 +7867,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "profileId": {
-                    "type": "string",
-                    "description": "Profile id bound to the agent."
-                  },
-                  "prompt": {
-                    "type": "string",
-                    "description": "Agent system prompt; stored as the room's `chatSettings.prompt`."
-                  },
-                  "private": {
-                    "type": "boolean",
-                    "description": "Whether the agent room is private."
-                  },
-                  "share": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    },
-                    "description": "Initial share entries (`FileShareParams`)."
-                  },
-                  "attachDefaultTools": {
-                    "type": "boolean",
-                    "description": "Whether to attach the default DocSpace MCP tool server."
-                  },
-                  "title": {
-                    "type": "string",
-                    "description": "Agent (room) title."
-                  },
-                  "quota": {
-                    "type": "number",
-                    "description": "Room quota in bytes."
-                  },
-                  "indexing": {
-                    "type": "boolean",
-                    "description": "Whether room content is indexed for search."
-                  },
-                  "denyDownload": {
-                    "type": "boolean",
-                    "description": "Whether downloading room content is denied."
-                  },
-                  "lifetime": {
-                    "type": "object",
-                    "description": "Room data lifetime policy (`RoomDataLifetimeDto`)."
-                  },
-                  "watermark": {
-                    "type": "object",
-                    "description": "Watermark settings (`WatermarkRequestDto`)."
-                  },
-                  "logo": {
-                    "type": "object",
-                    "description": "Room logo (`LogoRequest`)."
-                  },
-                  "tags": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "Room tags."
-                  },
-                  "color": {
-                    "type": "string",
-                    "description": "Room accent color."
-                  },
-                  "cover": {
-                    "type": "string",
-                    "description": "Room cover image id."
-                  }
-                },
-                "required": [
-                  "profileId",
-                  "prompt"
-                ]
+                "$ref": "#/components/schemas/AiAgentsCreateRequest"
               }
             }
           }
@@ -8841,69 +8110,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": false,
-                "properties": {
-                  "profileId": {
-                    "type": "string",
-                    "description": "Profile id to rebind (optional)."
-                  },
-                  "chatSettings": {
-                    "type": "object",
-                    "description": "Chat settings (`ChatSettings`); requires a valid provider/model."
-                  },
-                  "sendFormToExternalDB": {
-                    "type": "boolean",
-                    "description": "Whether form results are sent to an external DB."
-                  },
-                  "saveFormAsXLSX": {
-                    "type": "boolean",
-                    "description": "Whether forms are saved as XLSX."
-                  },
-                  "title": {
-                    "type": "string",
-                    "description": "Agent (room) title."
-                  },
-                  "quota": {
-                    "type": "number",
-                    "description": "Room quota in bytes."
-                  },
-                  "indexing": {
-                    "type": "boolean",
-                    "description": "Whether room content is indexed for search."
-                  },
-                  "denyDownload": {
-                    "type": "boolean",
-                    "description": "Whether downloading room content is denied."
-                  },
-                  "lifetime": {
-                    "type": "object",
-                    "description": "Room data lifetime policy (`RoomDataLifetimeDto`)."
-                  },
-                  "watermark": {
-                    "type": "object",
-                    "description": "Watermark settings (`WatermarkRequestDto`)."
-                  },
-                  "logo": {
-                    "type": "object",
-                    "description": "Room logo (`LogoRequest`)."
-                  },
-                  "tags": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    },
-                    "description": "Room tags."
-                  },
-                  "color": {
-                    "type": "string",
-                    "description": "Room accent color."
-                  },
-                  "cover": {
-                    "type": "string",
-                    "description": "Room cover image id."
-                  }
-                }
+                "$ref": "#/components/schemas/AiAgentsUpdateRequest"
               }
             }
           }
@@ -8997,14 +8204,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "deleteAfter": {
-                    "type": "boolean",
-                    "description": "Delete the room after the editing session finishes."
-                  }
-                },
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiAgentsDeleteRequest"
               }
             }
           }
@@ -9076,29 +8276,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "roomIds": {
-                    "type": "array",
-                    "items": {
-                      "type": [
-                        "number",
-                        "string"
-                      ],
-                      "description": "A DocSpace room id: an integer for native rooms, a string for third-party-backed ones."
-                    },
-                    "description": "Agent (room) ids to update."
-                  },
-                  "quota": {
-                    "type": "number",
-                    "description": "New quota in bytes; a negative value disables the custom quota."
-                  }
-                },
-                "required": [
-                  "roomIds",
-                  "quota"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiAgentsUpdateQuotaRequest"
               }
             }
           }
@@ -9170,24 +8348,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "roomIds": {
-                    "type": "array",
-                    "items": {
-                      "type": [
-                        "number",
-                        "string"
-                      ],
-                      "description": "A DocSpace room id: an integer for native rooms, a string for third-party-backed ones."
-                    },
-                    "description": "Agent (room) ids to reset to the tenant default quota."
-                  }
-                },
-                "required": [
-                  "roomIds"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiAgentsResetQuotaRequest"
               }
             }
           }
@@ -9208,7 +8369,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiAiSettingsWrapper"
+                  "$ref": "#/components/schemas/AiSettingsWrapper"
                 }
               }
             }
@@ -9366,7 +8527,8 @@
                 "additionalProperties": true
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiSettingsSetVectorizationRequest"
         }
       }
     },
@@ -9384,7 +8546,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiAiUserSettingsWrapper"
+                  "$ref": "#/components/schemas/AiUserSettingsWrapper"
                 }
               }
             }
@@ -9434,7 +8596,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AiAiUserSettingsWrapper"
+                  "$ref": "#/components/schemas/AiUserSettingsWrapper"
                 }
               }
             }
@@ -9490,7 +8652,8 @@
                 "additionalProperties": true
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiSettingsSetUserRequest"
         }
       }
     },
@@ -9619,7 +8782,8 @@
                 ]
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiSettingsSetToolModeRequest"
         }
       }
     },
@@ -9718,26 +8882,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "files": {
-                    "type": "array",
-                    "description": "Identifiers of the files to vectorize.",
-                    "items": {
-                      "type": "integer"
-                    },
-                    "examples": [
-                      [
-                        1234,
-                        1235
-                      ]
-                    ]
-                  }
-                },
-                "required": [
-                  "files"
-                ],
-                "additionalProperties": false
+                "$ref": "#/components/schemas/AiVectorizationStartTaskRequest"
               }
             }
           }
@@ -10106,7 +9251,8 @@
                 "additionalProperties": true
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiOpenaiChatCompletionsRequest"
         }
       }
     },
@@ -10472,7 +9618,8 @@
                 "additionalProperties": true
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiOpenaiImagesGenerationsRequest"
         }
       }
     },
@@ -10659,46 +9806,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "name": {
-                    "type": "string",
-                    "description": "Name of the tool to run, as listed by the tools endpoint. A name that is unknown or excluded from the editor is rejected with 400.",
-                    "examples": [
-                      "docspace_get_folder"
-                    ]
-                  },
-                  "arguments": {
-                    "type": "object",
-                    "description": "Arguments for the tool, shaped by that tool's own input schema. Treated as empty when it is not an object.",
-                    "additionalProperties": true,
-                    "examples": [
-                      {
-                        "folderId": "1234"
-                      }
-                    ]
-                  },
-                  "entityId": {
-                    "type": "string",
-                    "description": "Room the call is scoped to. Left out for a portal-wide call.",
-                    "examples": [
-                      "1234"
-                    ]
-                  }
-                },
-                "required": [
-                  "name"
-                ],
-                "additionalProperties": false,
-                "examples": [
-                  {
-                    "name": "docspace_get_folder",
-                    "arguments": {
-                      "folderId": "1234"
-                    },
-                    "entityId": "1234"
-                  }
-                ]
+                "$ref": "#/components/schemas/AiEditorToolsCallRequest"
               }
             }
           }
@@ -10807,7 +9915,8 @@
                 "additionalProperties": true
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiWebSearchPassthroughSearchRequest"
         }
       }
     },
@@ -10913,7 +10022,8 @@
                 "additionalProperties": true
               }
             }
-          }
+          },
+          "x-codegen-request-body-name": "AiWebSearchPassthroughContentsRequest"
         }
       }
     }
@@ -10967,7 +10077,7 @@
         "additionalProperties": false,
         "description": "Error body — a single human-readable message."
       },
-      "AiAiReasoningLevel": {
+      "AiReasoningLevel": {
         "type": "string",
         "enum": [
           "off",
@@ -10978,7 +10088,7 @@
         ],
         "description": "Provider-neutral extended-thinking depth. `off` disables thinking where the model allows it."
       },
-      "AiAiToolPermissionMode": {
+      "AiChatToolPermissionMode": {
         "type": "string",
         "enum": [
           "ask",
@@ -10987,13 +10097,13 @@
         ],
         "description": "How a tool call the model makes is approved: ask every time, auto-approve opted-out tools, or allow all."
       },
-      "AiAiActionArgs": {
+      "AiActionArgs": {
         "type": "object",
         "properties": {
           "tools": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AiTMCPItem"
+              "$ref": "#/components/schemas/AiMCPItem"
             },
             "description": "Extra tools offered to the model for this request.",
             "examples": [
@@ -11008,7 +10118,7 @@
             ]
           },
           "reasoningLevel": {
-            "$ref": "#/components/schemas/AiAiReasoningLevel",
+            "$ref": "#/components/schemas/AiReasoningLevel",
             "description": "Depth of extended thinking for the round; providers clamp it to what the model accepts."
           },
           "prompt": {
@@ -11041,7 +10151,7 @@
         },
         "additionalProperties": false
       },
-      "AiTMCPItem": {
+      "AiMCPItem": {
         "type": "object",
         "properties": {
           "name": {
@@ -11248,7 +10358,7 @@
         "additionalProperties": false,
         "description": "A single chat message as it travels on the wire."
       },
-      "AiAiSendStreamBody": {
+      "AiSendStreamBody": {
         "type": "object",
         "properties": {
           "threadId": {
@@ -11269,7 +10379,7 @@
             ]
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/AiAiActionArgs",
+            "$ref": "#/components/schemas/AiActionArgs",
             "description": "Per-request engine options: extra tools, reasoning, prompt override.",
             "examples": [
               {
@@ -11342,7 +10452,7 @@
           },
           "autoAllow": {
             "type": "boolean",
-            "description": "The consumer should execute the tool without prompting the user. Decided by the tool permission mode (`resolveAutoAllow`): under \"ask\" only a tool in the persisted \"always-allow\" list; under \"auto\" also one that opts in via `TMCPItem.requireApproval === false` (host tools default to this); under \"allow\" every tool. For a client-side tool with a server-side engine, this lets the engine return the pending call already flagged auto-allow so the client runs it and streams the result back without a dialog round-trip."
+            "description": "The consumer should execute the tool without prompting the user. Decided by the tool permission mode (`resolveAutoAllow`): under \"ask\" never; under \"auto\" a tool in the persisted \"always-allow\" list or one that opts in via `TMCPItem.requireApproval === false` (host tools default to this); under \"allow\" every tool. For a client-side tool with a server-side engine, this lets the engine return the pending call already flagged auto-allow so the client runs it and streams the result back without a dialog round-trip."
           },
           "serverExecuted": {
             "type": "boolean",
@@ -11551,7 +10661,7 @@
         "additionalProperties": false,
         "description": "OpenAI streaming error envelope. When the upstream request fails mid-stream the OpenAI API emits a single `data:` line carrying an `error` object (no `choices`), then closes the stream — the official SDK turns this into a thrown `APIError`. Mirrors that shape so a host exposing an OpenAI-compatible endpoint stays wire-compatible."
       },
-      "AiAiToolCallData": {
+      "AiToolCallData": {
         "type": "object",
         "properties": {
           "threadId": {
@@ -11586,7 +10696,7 @@
             ]
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/AiAiActionArgs",
+            "$ref": "#/components/schemas/AiActionArgs",
             "description": "Per-request engine options: extra tools, reasoning, prompt override.",
             "examples": [
               {
@@ -11852,7 +10962,7 @@
             ]
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData",
+            "$ref": "#/components/schemas/AiErrorData",
             "description": "Why the assignment was rejected. Present on failure."
           }
         },
@@ -11860,7 +10970,7 @@
           "success"
         ]
       },
-      "AiTErrorData": {
+      "AiErrorData": {
         "type": "object",
         "properties": {
           "field": {
@@ -11904,7 +11014,7 @@
                   "$ref": "#/components/schemas/AiActionType"
                 },
                 "error": {
-                  "$ref": "#/components/schemas/AiTErrorData"
+                  "$ref": "#/components/schemas/AiErrorData"
                 }
               },
               "required": [
@@ -12184,7 +11294,7 @@
             "description": "The persisted profile. Present on success."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData",
+            "$ref": "#/components/schemas/AiErrorData",
             "description": "Why the profile was rejected - the name check or the provider credential check. Present on failure."
           }
         },
@@ -12298,7 +11408,7 @@
             "description": "The persisted prompt. Present on success."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData",
+            "$ref": "#/components/schemas/AiErrorData",
             "description": "Why the prompt was rejected. Present on failure."
           }
         },
@@ -12378,7 +11488,7 @@
             "description": "The persisted folder. Present on success."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData",
+            "$ref": "#/components/schemas/AiErrorData",
             "description": "Why the folder was rejected. Present on failure."
           }
         },
@@ -12546,7 +11656,7 @@
             ]
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData",
+            "$ref": "#/components/schemas/AiErrorData",
             "description": "Why the entry was rejected.",
             "examples": [
               "a prompt of that name already exists"
@@ -12586,7 +11696,7 @@
             ]
           },
           "provider": {
-            "$ref": "#/components/schemas/AiTProvider",
+            "$ref": "#/components/schemas/AiProvider",
             "description": "Provider configuration at the time of last message. Used for thread-level provider display."
           },
           "model": {
@@ -12607,7 +11717,7 @@
         "additionalProperties": false,
         "description": "Chat conversation metadata. Represents a single chat session (thread)."
       },
-      "AiTProvider": {
+      "AiProvider": {
         "type": "object",
         "properties": {
           "type": {
@@ -12690,7 +11800,7 @@
             ]
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData",
+            "$ref": "#/components/schemas/AiErrorData",
             "description": "Why the MCP server was rejected. Present on failure."
           }
         },
@@ -12718,7 +11828,7 @@
                   "type": "string"
                 },
                 "error": {
-                  "$ref": "#/components/schemas/AiTErrorData"
+                  "$ref": "#/components/schemas/AiErrorData"
                 }
               },
               "required": [
@@ -12801,7 +11911,7 @@
             "description": "The persisted web-search configuration. Present on success."
           },
           "error": {
-            "$ref": "#/components/schemas/AiTErrorData",
+            "$ref": "#/components/schemas/AiErrorData",
             "description": "Why the configuration was rejected. Present on failure."
           }
         },
@@ -12809,12 +11919,12 @@
           "success"
         ]
       },
-      "AiAiUserSettingsWrapper": {
+      "AiUserSettingsWrapper": {
         "type": "object",
         "properties": {
           "response": {
             "description": "The AiUserSettingsDto object returned by the operation.",
-            "$ref": "#/components/schemas/AiAiUserSettingsDto"
+            "$ref": "#/components/schemas/AiUserSettingsDto"
           },
           "count": {
             "type": "integer",
@@ -12851,7 +11961,7 @@
         },
         "description": "The successful API response containing the AiUserSettingsDto object."
       },
-      "AiAiUserSettingsDto": {
+      "AiUserSettingsDto": {
         "type": "object",
         "properties": {
           "chatRecommendedModelVisible": {
@@ -12860,9 +11970,47 @@
             ],
             "type": "boolean",
             "description": "Indicates whether the recommended model banner is visible in the AI chat for the current user."
+          },
+          "toolPermissionMode": {
+            "description": "How tool calls made by the model are approved for the current user. The default applies while the user has stored nothing.",
+            "$ref": "#/components/schemas/AiToolPermissionMode"
           }
         },
         "description": "The per-user AI settings."
+      },
+      "AiToolPermissionMode": {
+        "oneOf": [
+          {
+            "examples": [
+              "Ask"
+            ],
+            "enum": [
+              "Ask",
+              "Auto",
+              "Allow"
+            ],
+            "type": "string",
+            "description": "[Ask - Ask, Auto - Auto, Allow - Allow]"
+          },
+          {
+            "examples": [
+              0
+            ],
+            "enum": [
+              0,
+              1,
+              2
+            ],
+            "type": "integer",
+            "description": "[0 - Ask, 1 - Auto, 2 - Allow]",
+            "x-enum-varnames": [
+              "Ask",
+              "Auto",
+              "Allow"
+            ]
+          }
+        ],
+        "x-enum-type": "integer"
       },
       "AiVectorizationSettingsWrapper": {
         "type": "object",
@@ -12961,12 +12109,12 @@
         "description": "The embedding provider type used for document vectorization.",
         "x-enum-type": "integer"
       },
-      "AiAiSettingsWrapper": {
+      "AiSettingsWrapper": {
         "type": "object",
         "properties": {
           "response": {
             "description": "The AiSettingsDto object returned by the operation.",
-            "$ref": "#/components/schemas/AiAiSettingsDto"
+            "$ref": "#/components/schemas/AiSettingsDto"
           },
           "count": {
             "type": "integer",
@@ -13003,7 +12151,7 @@
         },
         "description": "The successful API response containing the AiSettingsDto object."
       },
-      "AiAiSettingsDto": {
+      "AiSettingsDto": {
         "required": [
           "embeddingModel"
         ],
@@ -13056,6 +12204,10 @@
               "string"
             ],
             "description": "The identifier of the model recommended for form generation."
+          },
+          "toolPermissionMode": {
+            "description": "How tool calls made by the model are approved for the current user. The default applies while the user has stored nothing.",
+            "$ref": "#/components/schemas/AiToolPermissionMode"
           }
         },
         "description": "The AI module settings."
@@ -13180,7 +12332,7 @@
               },
               "logo": {
                 "description": "The addresses of the room logo in four sizes, together with the colour and the built-in cover that are drawn\r\nwhen no logo was uploaded. A room without a logo answers with four empty addresses rather than with null, and\r\nthe field is null for a folder that is not a room.",
-                "$ref": "#/components/schemas/AiLogo"
+                "$ref": "#/components/schemas/AiLogoDto"
               },
               "pinned": {
                 "examples": [
@@ -13244,7 +12396,7 @@
                   "null",
                   "integer"
                 ],
-                "description": "How much space the files of the room may take, in bytes. It is the limit set on this room, or the portal\r\ndefault for rooms when none was set. Null when the tariff of the portal does not count room statistics, when\r\nroom quotas are switched off, when the room lies in the archive or the trash, or when the caller may only read\r\nit.",
+                "description": "How much space the files of the room may take, in bytes. It is the limit set on this room, or the portal\r\ndefault for rooms when none was set. Null when the tariff of the portal does not count room statistics, when\r\nroom quotas are switched off, when the room lies in the archive or the trash, or when the role of the caller\r\nin the room carries no editing rights - a viewer, a commenter, a reviewer and a form filler do not see the\r\nfigure, a room manager, a content creator and an editor do.",
                 "format": "int64"
               },
               "isCustomQuota": {
@@ -13385,10 +12537,11 @@
               "ChatOutputs",
               "AiAgents",
               "DefaultTemplates",
-              "Forms"
+              "Forms",
+              "Ai"
             ],
             "type": "string",
-            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms]"
+            "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms, Ai - Ai]"
           },
           {
             "examples": [
@@ -13424,10 +12577,11 @@
               33,
               34,
               35,
-              36
+              36,
+              37
             ],
             "type": "integer",
-            "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms]",
+            "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms, 37 - Ai]",
             "x-enum-varnames": [
               "DEFAULT",
               "COMMON",
@@ -13458,7 +12612,8 @@
               "ChatOutputs",
               "AiAgents",
               "DefaultTemplates",
-              "Forms"
+              "Forms",
+              "Ai"
             ]
           }
         ],
@@ -13694,7 +12849,7 @@
         "description": "The room type.",
         "x-enum-type": "integer"
       },
-      "AiLogo": {
+      "AiLogoDto": {
         "required": [
           "large",
           "medium",
@@ -13755,12 +12910,12 @@
           },
           "cover": {
             "description": "The logo cover.",
-            "$ref": "#/components/schemas/AiLogoCover"
+            "$ref": "#/components/schemas/AiLogoCoverDto"
           }
         },
         "description": "The room logo information."
       },
-      "AiLogoCover": {
+      "AiLogoCoverDto": {
         "required": [
           "data",
           "id"
@@ -14129,6 +13284,17 @@
                   "boolean"
                 ],
                 "description": "Set when the link being used has already passed its expiration date, which is why the entry cannot be opened\r\neven though it is described here. It is null when no link is involved."
+              },
+              "assignedMetadataTemplates": {
+                "type": [
+                  "null",
+                  "array"
+                ],
+                "items": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "description": "The IDs of the metadata templates assigned to the file entry."
               }
             }
           }
@@ -15032,6 +14198,1047 @@
           }
         },
         "description": "One page of the contents of a folder or of a section: its entries split into files and folders, the folder itself,\r\nand the counters needed to page through the rest."
+      },
+      "AiSendRequest": {
+        "type": "object",
+        "properties": {
+          "actionType": {
+            "$ref": "#/components/schemas/AiActionType",
+            "description": "Which AI action to run — selects the assignment slot and action."
+          },
+          "userMessage": {
+            "$ref": "#/components/schemas/AiThreadMessageLike",
+            "description": "The user turn to send."
+          },
+          "actionArgs": {
+            "$ref": "#/components/schemas/AiActionArgs",
+            "description": "Per-request engine options: extra tools, reasoning, prompt override."
+          },
+          "entityId": {
+            "type": "string",
+            "description": "Optional entity (room) scope for profile resolution."
+          }
+        },
+        "required": [
+          "actionType",
+          "userMessage"
+        ],
+        "additionalProperties": false
+      },
+      "AiSendCustomRequest": {
+        "type": "object",
+        "properties": {
+          "isStream": {
+            "type": "boolean",
+            "description": "Stream the reply (ndjson) when true, else return a single message."
+          },
+          "systemPrompt": {
+            "type": "string",
+            "description": "Caller-supplied system prompt for this one-turn call."
+          },
+          "userMessage": {
+            "$ref": "#/components/schemas/AiThreadMessageLike"
+          },
+          "actionArgs": {
+            "$ref": "#/components/schemas/AiActionArgs",
+            "description": "Per-request engine options: extra tools, reasoning, prompt override."
+          }
+        },
+        "required": [
+          "isStream",
+          "systemPrompt",
+          "userMessage"
+        ],
+        "additionalProperties": false
+      },
+      "AiRegenerateStreamRequest": {
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "type": "string",
+            "description": "Target thread (must already exist)."
+          },
+          "actionArgs": {
+            "$ref": "#/components/schemas/AiActionArgs",
+            "description": "Per-request engine options: extra tools, reasoning, prompt override."
+          },
+          "entityId": {
+            "type": "string",
+            "description": "Optional entity (room) scope for profile resolution."
+          },
+          "profileId": {
+            "type": "string",
+            "description": "Session-level profile override for this request only."
+          }
+        },
+        "required": [
+          "threadId"
+        ],
+        "additionalProperties": false
+      },
+      "AiApproveToolCallRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "result": {
+            "description": "Final result of the tool call, as the model should see it."
+          },
+          "allowAlways": {
+            "type": "boolean",
+            "description": "Persist auto-approve for this tool's name."
+          },
+          "threadId": {
+            "type": "string",
+            "description": "Thread the assistant message belongs to."
+          },
+          "messageId": {
+            "type": "string",
+            "description": "Storage id of the assistant message holding the tool call."
+          },
+          "idx": {
+            "type": "number",
+            "description": "Index of the tool-call content part inside `message.content`."
+          },
+          "message": {
+            "$ref": "#/components/schemas/AiThreadMessageLike",
+            "description": "Snapshot of the assistant message at the time the tool call surfaced."
+          },
+          "actionArgs": {
+            "$ref": "#/components/schemas/AiActionArgs",
+            "description": "Per-request engine options: extra tools, reasoning, prompt override."
+          },
+          "entityId": {
+            "type": "string",
+            "description": "Optional entity (room) scope for profile resolution."
+          },
+          "profileId": {
+            "type": "string",
+            "description": "Session-level profile override for this request only."
+          }
+        },
+        "required": [
+          "idx",
+          "message",
+          "messageId",
+          "result",
+          "threadId"
+        ]
+      },
+      "AiAssignmentsAssignRequest": {
+        "type": "object",
+        "properties": {
+          "actionType": {
+            "$ref": "#/components/schemas/AiActionType",
+            "description": "Action the assignment applies to."
+          },
+          "profileId": {
+            "type": "string",
+            "description": "Profile id to bind."
+          }
+        },
+        "required": [
+          "actionType",
+          "profileId"
+        ],
+        "additionalProperties": false
+      },
+      "AiAssignmentsCascadeProfileDeleteRequest": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "description": "The profile whose assignments are removed. May be sent as the `profileId` query parameter instead of in the body.",
+            "examples": [
+              "00000000-0000-0000-0000-000000000000"
+            ]
+          }
+        },
+        "required": [
+          "profileId"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "profileId": "00000000-0000-0000-0000-000000000000"
+          }
+        ]
+      },
+      "AiAttachmentsSaveFileRequest": {
+        "type": "object",
+        "properties": {
+          "input": {
+            "type": "object",
+            "properties": {
+              "path": {
+                "type": "string",
+                "description": "Storage path/key of the file."
+              },
+              "content": {
+                "type": "string",
+                "description": "File contents."
+              },
+              "type": {
+                "type": "number",
+                "description": "File type discriminator."
+              },
+              "title": {
+                "type": "string",
+                "description": "Optional display title."
+              }
+            },
+            "required": [
+              "path",
+              "content",
+              "type"
+            ],
+            "additionalProperties": false,
+            "description": "A file attachment draft to persist."
+          },
+          "entityId": {
+            "type": "string",
+            "description": "Optional entity (room) scope."
+          }
+        },
+        "required": [
+          "input"
+        ],
+        "additionalProperties": false
+      },
+      "AiAttachmentsSaveFilesManyRequest": {
+        "type": "object",
+        "properties": {
+          "inputs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "description": "Storage path/key of the file."
+                },
+                "content": {
+                  "type": "string",
+                  "description": "File contents."
+                },
+                "type": {
+                  "type": "number",
+                  "description": "File type discriminator."
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Optional display title."
+                }
+              },
+              "required": [
+                "path",
+                "content",
+                "type"
+              ],
+              "additionalProperties": false,
+              "description": "A file attachment draft to persist."
+            }
+          },
+          "entityId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "inputs"
+        ],
+        "additionalProperties": false
+      },
+      "AiAttachmentsLinkToMessageRequest": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Attachment ids to bind."
+          },
+          "messageId": {
+            "type": "string",
+            "description": "Owning message id."
+          },
+          "threadId": {
+            "type": "string",
+            "description": "Owning thread id."
+          }
+        },
+        "required": [
+          "ids",
+          "messageId",
+          "threadId"
+        ],
+        "additionalProperties": false
+      },
+      "AiPreferencesSetDeepModeRequest": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "boolean",
+            "description": "New deep-mode value."
+          },
+          "entityId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "additionalProperties": false
+      },
+      "AiPreferencesSetReasoningLevelRequest": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/AiReasoningLevel",
+            "description": "New extended-thinking depth; `off` turns deep mode off."
+          },
+          "entityId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "additionalProperties": false
+      },
+      "AiPreferencesSetToolPermissionModeRequest": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "$ref": "#/components/schemas/AiChatToolPermissionMode",
+            "description": "New tool permission mode."
+          },
+          "entityId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "additionalProperties": false
+      },
+      "AiProfilesListProviderModelsRequest": {
+        "type": "object",
+        "properties": {
+          "providerType": {
+            "$ref": "#/components/schemas/AiProviderType",
+            "description": "Provider whose catalog to list."
+          },
+          "baseUrl": {
+            "type": "string",
+            "description": "Provider API base URL.",
+            "examples": [
+              "https://api.openai.com/v1"
+            ]
+          },
+          "apiKey": {
+            "type": "string",
+            "description": "Provider API key. Omit it for a provider that needs none; the request is then made without one."
+          }
+        },
+        "required": [
+          "providerType",
+          "baseUrl"
+        ],
+        "additionalProperties": false
+      },
+      "AiPromptsUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Prompt id to update."
+          },
+          "updates": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              },
+              "folderId": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "additionalProperties": false,
+            "description": "Fields to change."
+          }
+        },
+        "required": [
+          "id",
+          "updates"
+        ],
+        "additionalProperties": false
+      },
+      "AiPromptsMoveRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Prompt id to move."
+          },
+          "folderId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Target folder id, or `null` for root."
+          }
+        },
+        "required": [
+          "id",
+          "folderId"
+        ],
+        "additionalProperties": false
+      },
+      "AiPromptsRenameFolderRequest": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Folder id to rename."
+          },
+          "name": {
+            "type": "string",
+            "description": "New folder name."
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "AiPromptsImportBundleRequest": {
+        "type": "object",
+        "properties": {
+          "bundle": {
+            "$ref": "#/components/schemas/AiPromptBundle",
+            "description": "Bundle to restore."
+          },
+          "options": {
+            "type": "object",
+            "properties": {
+              "mode": {
+                "$ref": "#/components/schemas/AiImportMode"
+              }
+            },
+            "additionalProperties": false,
+            "description": "Import options."
+          }
+        },
+        "required": [
+          "bundle"
+        ],
+        "additionalProperties": false
+      },
+      "AiThreadsCreateRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Thread title."
+          },
+          "profileId": {
+            "type": "string",
+            "description": "Optional profile to bind."
+          },
+          "entityId": {
+            "type": "string",
+            "description": "Optional entity (room) scope."
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "AiThreadsOpenOrCreateRequest": {
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "type": "string"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/AiProfile",
+            "description": "Profile the title generation runs on."
+          },
+          "profileId": {
+            "type": "string"
+          },
+          "firstMessage": {
+            "$ref": "#/components/schemas/AiThreadMessageLike",
+            "description": "First user message a fresh thread derives its title from."
+          },
+          "entityId": {
+            "type": "string",
+            "description": "Opaque scope token persisted on a freshly created thread."
+          },
+          "entityMeta": {
+            "type": "object",
+            "properties": {
+              "entityId": {
+                "type": "string"
+              },
+              "entityTitle": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "description": "Optional entity hint (lib 0.5.64): only `entityId` is read; the source (`source_id` / `source_type` / `source_title`) is re-resolved server-side before reaching the provider as metadata."
+          }
+        },
+        "required": [
+          "profile",
+          "profileId",
+          "firstMessage"
+        ],
+        "additionalProperties": false
+      },
+      "AiThreadsAppendUserMessageRequest": {
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "type": "string"
+          },
+          "message": {
+            "$ref": "#/components/schemas/AiThreadMessageLike",
+            "description": "Message to persist (id/createdAt are storage-assigned)."
+          },
+          "profileId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "threadId",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "AiThreadsTouchRequest": {
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "type": "string"
+          },
+          "profileId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "threadId"
+        ],
+        "additionalProperties": false
+      },
+      "AiThreadsRenameRequest": {
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "description": "New thread title."
+          }
+        },
+        "required": [
+          "threadId",
+          "title"
+        ],
+        "additionalProperties": false
+      },
+      "AiThreadsRegenerateTitleRequest": {
+        "type": "object",
+        "properties": {
+          "threadId": {
+            "type": "string"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/AiProfile",
+            "description": "Profile used to regenerate the title."
+          },
+          "entityMeta": {
+            "type": "object",
+            "properties": {
+              "entityId": {
+                "type": "string"
+              },
+              "entityTitle": {
+                "type": "string"
+              }
+            },
+            "additionalProperties": false,
+            "description": "Optional entity hint (lib 0.5.64): only `entityId` is read; the source (`source_id` / `source_type` / `source_title`) is re-resolved server-side before reaching the provider as metadata."
+          }
+        },
+        "required": [
+          "threadId",
+          "profile"
+        ],
+        "additionalProperties": false
+      },
+      "AiThreadsUpdateMessageRequest": {
+        "type": "object",
+        "properties": {
+          "messageId": {
+            "type": "string"
+          },
+          "message": {
+            "$ref": "#/components/schemas/AiThreadMessageLike",
+            "description": "Replacement message content."
+          }
+        },
+        "required": [
+          "messageId",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "AiToolsAddCustomServerRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Server name (unique within scope)."
+          },
+          "config": {
+            "$ref": "#/components/schemas/AiMcpServerConfig",
+            "description": "Server transport configuration."
+          },
+          "entityId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "config"
+        ],
+        "additionalProperties": false
+      },
+      "AiToolsUpdateCustomServerRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "config": {
+            "$ref": "#/components/schemas/AiMcpServerConfig"
+          },
+          "entityId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "config"
+        ],
+        "additionalProperties": false
+      },
+      "AiToolsRemoveCustomServerRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "entityId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
+      },
+      "AiToolsReplaceAllCustomServersRequest": {
+        "type": "object",
+        "properties": {
+          "map": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AiMcpServerConfig"
+            },
+            "description": "Full replacement set, keyed by server name."
+          },
+          "entityId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "map"
+        ],
+        "additionalProperties": false
+      },
+      "AiToolsSetDisabledRequest": {
+        "type": "object",
+        "properties": {
+          "serverType": {
+            "type": "string"
+          },
+          "toolNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tool names to disable."
+          },
+          "entityId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "serverType",
+          "toolNames"
+        ],
+        "additionalProperties": false
+      },
+      "AiToolsSetAllowAlwaysRequest": {
+        "type": "object",
+        "properties": {
+          "serverType": {
+            "type": "string"
+          },
+          "toolName": {
+            "type": "string"
+          },
+          "value": {
+            "type": "boolean",
+            "description": "Whether the tool is always allowed."
+          },
+          "entityId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "serverType",
+          "toolName",
+          "value"
+        ],
+        "additionalProperties": false
+      },
+      "AiWebSearchConfigureRequest": {
+        "type": "object",
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/AiWebSearchConfig"
+          },
+          "entityId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "config"
+        ],
+        "additionalProperties": false
+      },
+      "AiWebSearchSetActiveConfigRequest": {
+        "type": "object",
+        "properties": {
+          "config": {
+            "$ref": "#/components/schemas/AiWebSearchConfig"
+          },
+          "entityId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "config"
+        ],
+        "additionalProperties": false
+      },
+      "AiExportTextToDocxRequest": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Document title (also the file name)."
+          },
+          "content": {
+            "type": "string",
+            "description": "Markdown content to convert."
+          },
+          "folderId": {
+            "type": [
+              "string",
+              "number"
+            ],
+            "description": "Target folder id (int or string)."
+          }
+        },
+        "required": [
+          "title",
+          "content",
+          "folderId"
+        ],
+        "additionalProperties": false
+      },
+      "AiAgentsCreateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "description": "Profile id bound to the agent."
+          },
+          "prompt": {
+            "type": "string",
+            "description": "Agent system prompt; stored as the room's `chatSettings.prompt`."
+          },
+          "private": {
+            "type": "boolean",
+            "description": "Whether the agent room is private."
+          },
+          "share": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "Initial share entries (`FileShareParams`)."
+          },
+          "attachDefaultTools": {
+            "type": "boolean",
+            "description": "Whether to attach the default DocSpace MCP tool server."
+          },
+          "title": {
+            "type": "string",
+            "description": "Agent (room) title."
+          },
+          "quota": {
+            "type": "number",
+            "description": "Room quota in bytes."
+          },
+          "indexing": {
+            "type": "boolean",
+            "description": "Whether room content is indexed for search."
+          },
+          "denyDownload": {
+            "type": "boolean",
+            "description": "Whether downloading room content is denied."
+          },
+          "lifetime": {
+            "type": "object",
+            "description": "Room data lifetime policy (`RoomDataLifetimeDto`)."
+          },
+          "watermark": {
+            "type": "object",
+            "description": "Watermark settings (`WatermarkRequestDto`)."
+          },
+          "logo": {
+            "type": "object",
+            "description": "Room logo (`LogoRequest`)."
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Room tags."
+          },
+          "color": {
+            "type": "string",
+            "description": "Room accent color."
+          },
+          "cover": {
+            "type": "string",
+            "description": "Room cover image id."
+          }
+        },
+        "required": [
+          "profileId",
+          "prompt"
+        ]
+      },
+      "AiAgentsUpdateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "profileId": {
+            "type": "string",
+            "description": "Profile id to rebind (optional)."
+          },
+          "chatSettings": {
+            "type": "object",
+            "description": "Chat settings (`ChatSettings`); requires a valid provider/model."
+          },
+          "sendFormToExternalDB": {
+            "type": "boolean",
+            "description": "Whether form results are sent to an external DB."
+          },
+          "saveFormAsXLSX": {
+            "type": "boolean",
+            "description": "Whether forms are saved as XLSX."
+          },
+          "title": {
+            "type": "string",
+            "description": "Agent (room) title."
+          },
+          "quota": {
+            "type": "number",
+            "description": "Room quota in bytes."
+          },
+          "indexing": {
+            "type": "boolean",
+            "description": "Whether room content is indexed for search."
+          },
+          "denyDownload": {
+            "type": "boolean",
+            "description": "Whether downloading room content is denied."
+          },
+          "lifetime": {
+            "type": "object",
+            "description": "Room data lifetime policy (`RoomDataLifetimeDto`)."
+          },
+          "watermark": {
+            "type": "object",
+            "description": "Watermark settings (`WatermarkRequestDto`)."
+          },
+          "logo": {
+            "type": "object",
+            "description": "Room logo (`LogoRequest`)."
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Room tags."
+          },
+          "color": {
+            "type": "string",
+            "description": "Room accent color."
+          },
+          "cover": {
+            "type": "string",
+            "description": "Room cover image id."
+          }
+        }
+      },
+      "AiAgentsDeleteRequest": {
+        "type": "object",
+        "properties": {
+          "deleteAfter": {
+            "type": "boolean",
+            "description": "Delete the room after the editing session finishes."
+          }
+        },
+        "additionalProperties": false
+      },
+      "AiAgentsUpdateQuotaRequest": {
+        "type": "object",
+        "properties": {
+          "roomIds": {
+            "type": "array",
+            "items": {
+              "type": [
+                "number",
+                "string"
+              ],
+              "description": "A DocSpace room id: an integer for native rooms, a string for third-party-backed ones."
+            },
+            "description": "Agent (room) ids to update."
+          },
+          "quota": {
+            "type": "number",
+            "description": "New quota in bytes; a negative value disables the custom quota."
+          }
+        },
+        "required": [
+          "roomIds",
+          "quota"
+        ],
+        "additionalProperties": false
+      },
+      "AiAgentsResetQuotaRequest": {
+        "type": "object",
+        "properties": {
+          "roomIds": {
+            "type": "array",
+            "items": {
+              "type": [
+                "number",
+                "string"
+              ],
+              "description": "A DocSpace room id: an integer for native rooms, a string for third-party-backed ones."
+            },
+            "description": "Agent (room) ids to reset to the tenant default quota."
+          }
+        },
+        "required": [
+          "roomIds"
+        ],
+        "additionalProperties": false
+      },
+      "AiVectorizationStartTaskRequest": {
+        "type": "object",
+        "properties": {
+          "files": {
+            "type": "array",
+            "description": "Identifiers of the files to vectorize.",
+            "items": {
+              "type": "integer"
+            },
+            "examples": [
+              [
+                1234,
+                1235
+              ]
+            ]
+          }
+        },
+        "required": [
+          "files"
+        ],
+        "additionalProperties": false
+      },
+      "AiEditorToolsCallRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the tool to run, as listed by the tools endpoint. A name that is unknown or excluded from the editor is rejected with 400.",
+            "examples": [
+              "docspace_get_folder"
+            ]
+          },
+          "arguments": {
+            "type": "object",
+            "description": "Arguments for the tool, shaped by that tool's own input schema. Treated as empty when it is not an object.",
+            "additionalProperties": true,
+            "examples": [
+              {
+                "folderId": "1234"
+              }
+            ]
+          },
+          "entityId": {
+            "type": "string",
+            "description": "Room the call is scoped to. Left out for a portal-wide call.",
+            "examples": [
+              "1234"
+            ]
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false,
+        "examples": [
+          {
+            "name": "docspace_get_folder",
+            "arguments": {
+              "folderId": "1234"
+            },
+            "entityId": "1234"
+          }
+        ]
       }
     }
   }

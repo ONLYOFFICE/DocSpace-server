@@ -43,6 +43,6 @@ public class UserIdRequestDto
     /// same ID that was passed when the job was started.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromRoute(Name = "userid")]
+    [FromRoute(Name = "userId")]
     public required Guid UserId { get; set; }
 }

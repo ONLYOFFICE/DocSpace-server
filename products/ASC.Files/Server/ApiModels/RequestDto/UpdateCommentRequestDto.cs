@@ -36,7 +36,7 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The comment to store on one version of a file.
 /// </summary>
-public class UpdateComment
+public class UpdateCommentRequest
 {
     /// <summary>The longest a version comment may be — the width of the `comment` column.</summary>
     public const int MaxCommentLength = 255;
@@ -75,5 +75,5 @@ public class UpdateCommentRequestDto<T>
     /// </summary>
     /// <example>{"version": 1, "comment": "Prices updated for Q3"}</example>
     [FromBody]
-    public required UpdateComment File { get; set; }
+    public required UpdateCommentRequest File { get; set; }
 }

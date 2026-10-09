@@ -7,10 +7,10 @@ use OpenAPI\Client\Api\Authentication\AuthenticationApi;
 use OpenAPI\Client\Api\Files\FoldersApi;
 use OpenAPI\Client\Api\Rooms\RoomsApi;
 use OpenAPI\Client\Api\Backup\BackupApi;
-use OpenAPI\Client\Model\AuthRequestsDto;
-use OpenAPI\Client\Model\CreateFolder;
-use OpenAPI\Client\Model\DeleteFolder;
-use OpenAPI\Client\Model\BackupDto;
+use OpenAPI\Client\Model\AuthRequestDto;
+use OpenAPI\Client\Model\CreateFolderRequest;
+use OpenAPI\Client\Model\DeleteFolderRequest;
+use OpenAPI\Client\Model\StartBackupRequestDto;
 use OpenAPI\Client\Model\BackupStorageType;
 use OpenAPI\Client\Model\SearchArea;
 use OpenAPI\Client\Model\SortOrder;
@@ -24,7 +24,7 @@ function main(): void
     // --- AUTH ---
     $authApi = new AuthenticationApi(null, $config);
 
-    $authDto = new AuthRequestsDto();
+    $authDto = new AuthRequestDto();
     $authDto->setUserName("example@onlyoffice.com");
     $authDto->setPassword("11111111");
 
@@ -40,20 +40,20 @@ function main(): void
     $myFolderId = $myFolder->getResponse()->getCurrent()->getId();
     echo "My folder id: " . $myFolderId . PHP_EOL;
 
-    $createDto = new CreateFolder();
+    $createDto = new CreateFolderRequest();
     $createDto->setTitle("TestTitle");
 
     $created = $foldersApi->createFolder($myFolderId, $createDto);
     $newFolderId = $created->getResponse()->getId();
     echo "Created folder: " . $newFolderId . PHP_EOL;
 
-    $renameDto = new CreateFolder();
+    $renameDto = new CreateFolderRequest();
     $renameDto->setTitle("Updated title");
 
     $renamed = $foldersApi->renameFolder($newFolderId, $renameDto);
     echo "My folder title: " . $renamed->getResponse()->getTitle() . PHP_EOL;
 
-    $deleteDto = new DeleteFolder();
+    $deleteDto = new DeleteFolderRequest();
     $deleteDto->setImmediately(true);
     $deleteDto->setDeleteAfter(false);
 
@@ -79,7 +79,7 @@ function main(): void
     // --- BACKUP ---
     $backupApi = new BackupApi(null, $config);
 
-    $backupDto = new BackupDto();
+    $backupDto = new StartBackupRequestDto();
     $backupDto->setDump(false);
     $backupDto->setStorageType(BackupStorageType::DATA_STORE);
 

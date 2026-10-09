@@ -34,7 +34,7 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>The room to be created out of a folder of a connected third-party storage account.</summary>
-public class CreateThirdPartyRoom
+public class CreateThirdPartyRoomRequest
 {
     /// <summary>
     /// Creates a new folder named after `title` inside the folder named in the path and turns that subfolder into the
@@ -130,5 +130,5 @@ public class CreateThirdPartyRoomRequestDto
     /// "FF5733", "cover": "bookmark", "tags": ["Marketing"]}
     /// </example>
     [FromBody]
-    public required CreateThirdPartyRoom Room { get; set; }
+    public required CreateThirdPartyRoomRequest Room { get; set; }
 }

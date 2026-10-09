@@ -41,9 +41,9 @@ public class MentionWrapper
     internal MentionWrapper() { }
 
     /// <summary>
-    /// The account itself, in the shape the people listings use.
+    /// The account itself. Service-side only: the API publishes it as <c>MentionDto</c> with an <c>EmployeeDto</c> in
+    /// its place, so none of the account's private fields leave the server.
     /// </summary>
-    /// <example>{"id": "00000000-0000-0000-0000-000000000000", "firstName": "John", "lastName": "Doe"}</example>
     public UserInfo User { get; internal set; }
 
     /// <summary>
@@ -79,52 +79,4 @@ public class MentionWrapper
     /// </summary>
     /// <example>John Doe</example>
     public string Name { get; internal set; }
-}
-
-/// <summary>
-/// The mention notification to send: what to say, whom to tell and where in the document the mention sits.
-/// </summary>
-public class MentionMessageWrapper
-{
-    /// <summary>
-    /// The place in the document the notification link should open at, as the editor reports it when the mention is
-    /// made. Left out, the link opens the file at its beginning.
-    /// </summary>
-    /// <example>{"action": {"data": "section-42", "type": "comment"}}</example>
-    public ActionLinkConfig ActionLink { get; set; }
-
-    /// <summary>
-    /// The addresses to notify. Only an address that belongs to a portal account receives a mail; an unknown address
-    /// is skipped, and the answer then carries the access list of the file so that the client can invite its owner.
-    /// </summary>
-    /// <example>["user1@example.com", "user2@example.com"]</example>
-    public List<string> Emails { get; set; }
-
-    /// <summary>
-    /// The note shown next to the link in the mail. Only its first 200 characters are sent, and a value longer than
-    /// the field allows is refused.
-    /// </summary>
-    /// <example>Please take a look at the second paragraph</example>
-    [StringLength(255)]
-    public string Message { get; set; }
-}
-
-/// <summary>
-/// The request that names the file a mention was made in, and the notification to send.
-/// </summary>
-public class MentionMessageWrapperRequestDto<T>
-{
-    /// <summary>
-    /// The file the mention was made in. A file stored on the portal is numbered, while a file in a connected
-    /// third-party account is named by an opaque string.
-    /// </summary>
-    /// <example>10</example>
-    [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
-
-    /// <summary>
-    /// The notification to send.
-    /// </summary>
-    [FromBody]
-    public MentionMessageWrapper MentionMessage { get; set; }
 }

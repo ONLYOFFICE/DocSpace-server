@@ -227,11 +227,14 @@ public class LicenseReader(
             throw new ArgumentOutOfRangeException(nameof(license.StartDate));
         }
 
-        var invalidLicenseType = _licenseType == LicenseType.Enterprise ? license.Developer : !license.Developer;
-        if (invalidLicenseType)
-        {
-            throw new BillingLicenseTypeException("License type is not correct");
-        }
+        // The edition check (docspace_dev flag against license:type) is disabled: Docs Developer Edition licenses
+        // are issued without docspace_dev, so DocSpace could not be added to an existing Docs DE installation
+        // even though Docs itself accepts the same license file (Bug 84212).
+        //var invalidLicenseType = _licenseType == LicenseType.Enterprise ? license.Developer : !license.Developer;
+        //if (invalidLicenseType)
+        //{
+        //    throw new BillingLicenseTypeException("License type is not correct");
+        //}
 
         return license.DueDate.Date;
     }

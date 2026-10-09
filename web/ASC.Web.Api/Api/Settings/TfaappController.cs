@@ -250,7 +250,7 @@ public class TfaappController(
 
         switch (inDto.Type)
         {
-            case TfaRequestsDtoType.Sms:
+            case TfaType.Sms:
                 if (!await studioSmsNotificationSettingsHelper.IsVisibleAndAvailableSettingsAsync())
                 {
                     throw new CustomHttpException(HttpStatusCode.MethodNotAllowed, Resource.SmsNotAvailable);
@@ -276,7 +276,7 @@ public class TfaappController(
 
                 break;
 
-            case TfaRequestsDtoType.App:
+            case TfaType.App:
                 if (!tfaAppAuthSettingsHelper.IsVisibleSettings)
                 {
                     throw new CustomHttpException(HttpStatusCode.MethodNotAllowed, Resource.TfaAppNotAvailable);

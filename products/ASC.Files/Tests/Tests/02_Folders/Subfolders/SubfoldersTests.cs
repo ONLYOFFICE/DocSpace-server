@@ -152,7 +152,7 @@ public class SubfoldersTests(
     {
         var folder = await CreateFolderInMy("Autotest Folder For Subfolders After Delete", Owner);
 
-        await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder(deleteAfter: true, immediately: true), TestContext.Current.CancellationToken);
+        await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest(deleteAfter: true, immediately: true), TestContext.Current.CancellationToken);
 
         // Deletion runs as a background operation, so poll until the folder is actually gone
         // before asserting on the endpoint under test.

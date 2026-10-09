@@ -491,7 +491,7 @@ public class AuthenticationController(
     [SwaggerResponse(403, "The portal's IP restrictions do not allow this address to check an invitation link")]
     [AllowNotPayment, AllowSuspended, AllowBlocked, AllowAnonymous]
     [HttpPost("confirm")]
-    public async Task<ConfirmDto> CheckConfirm(EmailValidationKeyModel inDto)
+    public async Task<ConfirmDto> CheckConfirm(CheckConfirmRequestDto inDto)
     {
         if (string.IsNullOrEmpty(inDto.Key))
         {
@@ -500,7 +500,7 @@ public class AuthenticationController(
 
         if (inDto.Type != ConfirmType.LinkInvite)
         {
-            var (validationResult, validationEmail) = await emailValidationKeyModelHelper.ValidateAsync(inDto);
+            var (validationResult, validationEmail) = await emailValidationKeyModelHelper.ValidateAsync(inDto.Map());
             return new ConfirmDto { Result = validationResult, Email = validationEmail };
         }
 

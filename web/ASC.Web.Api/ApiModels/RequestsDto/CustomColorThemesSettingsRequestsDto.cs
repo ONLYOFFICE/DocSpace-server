@@ -48,7 +48,6 @@ public class CustomColorThemesSettingsRequestsDto
     /// <example>
     /// {
     ///   "id": 1,
-    ///   "name": "blue",
     ///   "main": {
     ///     "accent": "#4781D1",
     ///     "buttons": "#5299E0"
@@ -59,7 +58,7 @@ public class CustomColorThemesSettingsRequestsDto
     ///   }
     /// }
     /// </example>
-    public CustomColorThemesSettingsItem Theme { get; set; }
+    public CustomColorThemeRequestDto Theme { get; set; }
 
     /// <summary>
     /// The theme the whole portal switches to, by theme ID. An ID matching no stored theme is ignored rather than
@@ -67,4 +66,57 @@ public class CustomColorThemesSettingsRequestsDto
     /// </summary>
     /// <example>1</example>
     public int? Selected { get; set; }
+}
+
+/// <summary>
+/// A colour theme to store.
+/// </summary>
+public class CustomColorThemeRequestDto
+{
+    /// <summary>
+    /// The id of the custom theme to replace, or an id no stored theme has to add a new one.
+    /// </summary>
+    /// <example>1</example>
+    public int Id { get; set; }
+
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: a custom theme is always stored without a name.
+    /// </summary>
+    /// <example>Custom theme</example>
+    public string Name { get; set; }
+
+    /// <summary>
+    /// The accent and button colours of the interface. Left out, a stored theme keeps its own.
+    /// </summary>
+    public ColorThemeColorsRequestDto Main { get; set; }
+
+    /// <summary>
+    /// The colours of the text shown on the accent and on the buttons. Left out, a stored theme keeps its own.
+    /// </summary>
+    public ColorThemeColorsRequestDto Text { get; set; }
+}
+
+/// <summary>
+/// A pair of colours of a theme.
+/// </summary>
+public class ColorThemeColorsRequestDto
+{
+    /// <summary>
+    /// The accent colour, as a hex code.
+    /// </summary>
+    /// <example>#4781D1</example>
+    public string Accent { get; set; }
+
+    /// <summary>
+    /// The button colour, as a hex code.
+    /// </summary>
+    /// <example>#5299E0</example>
+    public string Buttons { get; set; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Source)]
+public static partial class CustomColorThemeRequestDtoMapper
+{
+    [MapperIgnoreSource(nameof(CustomColorThemeRequestDto.Name))]
+    public static partial CustomColorThemesSettingsItem Map(this CustomColorThemeRequestDto source);
 }

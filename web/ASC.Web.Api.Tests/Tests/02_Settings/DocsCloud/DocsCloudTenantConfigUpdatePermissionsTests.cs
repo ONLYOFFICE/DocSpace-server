@@ -49,7 +49,7 @@ public class DocsCloudTenantConfigUpdatePermissionsTests(
     {
         await ExpectAccessDeniedAsync(employeeType,
             async () => await _docsCloudApi.UpdateTenantConfigAsync(
-                new DocsCloudConfig { Wopi = new DocsCloudWopiConfig { Enable = true } }, TestContext.Current.CancellationToken));
+                new DocsCloudConfigRequestDto { Wopi = new DocsCloudWopiConfigRequest { Enable = true } }, TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -57,6 +57,6 @@ public class DocsCloudTenantConfigUpdatePermissionsTests(
     {
         await ExpectUnauthorizedAsync(
             async () => await _docsCloudApi.UpdateTenantConfigAsync(
-                new DocsCloudConfig { Wopi = new DocsCloudWopiConfig { Enable = true } }, TestContext.Current.CancellationToken));
+                new DocsCloudConfigRequestDto { Wopi = new DocsCloudWopiConfigRequest { Enable = true } }, TestContext.Current.CancellationToken));
     }
 }

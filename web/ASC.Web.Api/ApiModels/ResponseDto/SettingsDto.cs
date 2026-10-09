@@ -171,7 +171,7 @@ public class SettingsDto
     /// `passwordHash`, since the portal cannot reproduce the hash from a different set.
     /// </summary>
     /// <example>{ "size": 256, "iterations": 100000, "salt": "base64string" }</example>
-    public PasswordHasher PasswordHash { get; set; }
+    public PasswordHashSettingsDto PasswordHash { get; set; }
 
     /// <summary>
     /// The Firebase project a mobile or web client sends push registrations to. Filled in for a signed-in caller
@@ -243,7 +243,7 @@ public class SettingsDto
     /// client can validate a rename before sending it. Filled in for a signed-in caller only.
     /// </summary>
     /// <example>{ "minLength": 3, "maxLength": 63 }</example>
-    public TenantDomainValidator DomainValidator { get; set; }
+    public DomainNameRulesDto DomainValidator { get; set; }
 
     /// <summary>
     /// The key that lets the client open the vendor's support chat, empty when the installation configures none.
@@ -358,7 +358,7 @@ public class SettingsDto
     /// switched off, which `GET api/2.0/settings/rebranding/additional` reports flag by flag.
     /// </summary>
     /// <example>{ "helpLink": "https://help.example.com", "feedbackLink": "https://feedback.example.com" }</example>
-    public CultureSpecificExternalResources ExternalResources { get; set; }
+    public ExternalResourcesDto ExternalResources { get; set; }
 
     /// <summary>
     /// The section the client should open after sign-in, which is the caller's own preference rather than a

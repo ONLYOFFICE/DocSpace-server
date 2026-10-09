@@ -53,7 +53,7 @@ public class EditingStartPermissionsTests(AspireAppFixture fixture) : EditingTes
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.StartEditFileAsync(file.Id, new StartEdit(editingAlone: true), TestContext.Current.CancellationToken));
+            async () => await _filesApi.StartEditFileAsync(file.Id, new StartEditRequest(editingAlone: true), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(401);
@@ -73,7 +73,7 @@ public class EditingStartPermissionsTests(AspireAppFixture fixture) : EditingTes
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.StartEditFileAsync(file.Id, new StartEdit(editingAlone: false), TestContext.Current.CancellationToken));
+            async () => await _filesApi.StartEditFileAsync(file.Id, new StartEditRequest(editingAlone: false), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);
@@ -94,7 +94,7 @@ public class EditingStartPermissionsTests(AspireAppFixture fixture) : EditingTes
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.StartEditFileAsync(file.Id, new StartEdit(editingAlone: false), TestContext.Current.CancellationToken));
+            async () => await _filesApi.StartEditFileAsync(file.Id, new StartEditRequest(editingAlone: false), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);

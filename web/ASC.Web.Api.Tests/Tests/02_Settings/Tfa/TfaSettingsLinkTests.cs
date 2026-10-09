@@ -50,7 +50,7 @@ public class TfaSettingsLinkTests(
     {
         // Act
         var result = await _tfaSettingsApi.UpdateTfaSettingsLinkAsync(
-            new TfaRequestsDto(TfaRequestsDtoType.App), TestContext.Current.CancellationToken);
+            new TfaRequestDto(TfaType.App), TestContext.Current.CancellationToken);
 
         // Assert
         result.Response.Should().NotBeNullOrEmpty();
@@ -65,7 +65,7 @@ public class TfaSettingsLinkTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _tfaSettingsApi.UpdateTfaSettingsLinkAsync(
-                new TfaRequestsDto(TfaRequestsDtoType.Sms), TestContext.Current.CancellationToken));
+                new TfaRequestDto(TfaType.Sms), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(405);

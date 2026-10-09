@@ -59,7 +59,7 @@ public abstract class UserDataTestBase(AspireAppFixture fixture) : BaseTest(fixt
     {
         await _filesClient.Authenticate(owner);
         var room = await CreateCustomRoom(roomTitle);
-        await _filesApi.CreateFileAsync(room.Id, new CreateFileJsonElement(fileTitle), TestContext.Current.CancellationToken);
+        await _filesApi.CreateFileAsync(room.Id, new CreateFileRequest(fileTitle), TestContext.Current.CancellationToken);
 
         return room;
     }

@@ -34,7 +34,7 @@
       "additionalProperties": false,
       "description": "Error body — a single human-readable message."
     },
-    "AiAiReasoningLevel": {
+    "AiReasoningLevel": {
       "type": "string",
       "enum": [
         "off",
@@ -45,7 +45,7 @@
       ],
       "description": "Provider-neutral extended-thinking depth. `off` disables thinking where the model allows it."
     },
-    "AiAiToolPermissionMode": {
+    "AiChatToolPermissionMode": {
       "type": "string",
       "enum": [
         "ask",
@@ -54,13 +54,13 @@
       ],
       "description": "How a tool call the model makes is approved: ask every time, auto-approve opted-out tools, or allow all."
     },
-    "AiAiActionArgs": {
+    "AiActionArgs": {
       "type": "object",
       "properties": {
         "tools": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/AiTMCPItem"
+            "$ref": "#/components/schemas/AiMCPItem"
           },
           "description": "Extra tools offered to the model for this request.",
           "examples": [
@@ -75,7 +75,7 @@
           ]
         },
         "reasoningLevel": {
-          "$ref": "#/components/schemas/AiAiReasoningLevel",
+          "$ref": "#/components/schemas/AiReasoningLevel",
           "description": "Depth of extended thinking for the round; providers clamp it to what the model accepts."
         },
         "prompt": {
@@ -108,7 +108,7 @@
       },
       "additionalProperties": false
     },
-    "AiTMCPItem": {
+    "AiMCPItem": {
       "type": "object",
       "properties": {
         "name": {
@@ -315,7 +315,7 @@
       "additionalProperties": false,
       "description": "A single chat message as it travels on the wire."
     },
-    "AiAiSendStreamBody": {
+    "AiSendStreamBody": {
       "type": "object",
       "properties": {
         "threadId": {
@@ -336,7 +336,7 @@
           ]
         },
         "actionArgs": {
-          "$ref": "#/components/schemas/AiAiActionArgs",
+          "$ref": "#/components/schemas/AiActionArgs",
           "description": "Per-request engine options: extra tools, reasoning, prompt override.",
           "examples": [
             {
@@ -409,7 +409,7 @@
         },
         "autoAllow": {
           "type": "boolean",
-          "description": "The consumer should execute the tool without prompting the user. Decided by the tool permission mode (`resolveAutoAllow`): under \"ask\" only a tool in the persisted \"always-allow\" list; under \"auto\" also one that opts in via `TMCPItem.requireApproval === false` (host tools default to this); under \"allow\" every tool. For a client-side tool with a server-side engine, this lets the engine return the pending call already flagged auto-allow so the client runs it and streams the result back without a dialog round-trip."
+          "description": "The consumer should execute the tool without prompting the user. Decided by the tool permission mode (`resolveAutoAllow`): under \"ask\" never; under \"auto\" a tool in the persisted \"always-allow\" list or one that opts in via `TMCPItem.requireApproval === false` (host tools default to this); under \"allow\" every tool. For a client-side tool with a server-side engine, this lets the engine return the pending call already flagged auto-allow so the client runs it and streams the result back without a dialog round-trip."
         },
         "serverExecuted": {
           "type": "boolean",
@@ -618,7 +618,7 @@
       "additionalProperties": false,
       "description": "OpenAI streaming error envelope. When the upstream request fails mid-stream the OpenAI API emits a single `data:` line carrying an `error` object (no `choices`), then closes the stream — the official SDK turns this into a thrown `APIError`. Mirrors that shape so a host exposing an OpenAI-compatible endpoint stays wire-compatible."
     },
-    "AiAiToolCallData": {
+    "AiToolCallData": {
       "type": "object",
       "properties": {
         "threadId": {
@@ -653,7 +653,7 @@
           ]
         },
         "actionArgs": {
-          "$ref": "#/components/schemas/AiAiActionArgs",
+          "$ref": "#/components/schemas/AiActionArgs",
           "description": "Per-request engine options: extra tools, reasoning, prompt override.",
           "examples": [
             {
@@ -919,7 +919,7 @@
           ]
         },
         "error": {
-          "$ref": "#/components/schemas/AiTErrorData",
+          "$ref": "#/components/schemas/AiErrorData",
           "description": "Why the assignment was rejected. Present on failure."
         }
       },
@@ -927,7 +927,7 @@
         "success"
       ]
     },
-    "AiTErrorData": {
+    "AiErrorData": {
       "type": "object",
       "properties": {
         "field": {
@@ -971,7 +971,7 @@
                 "$ref": "#/components/schemas/AiActionType"
               },
               "error": {
-                "$ref": "#/components/schemas/AiTErrorData"
+                "$ref": "#/components/schemas/AiErrorData"
               }
             },
             "required": [
@@ -1251,7 +1251,7 @@
           "description": "The persisted profile. Present on success."
         },
         "error": {
-          "$ref": "#/components/schemas/AiTErrorData",
+          "$ref": "#/components/schemas/AiErrorData",
           "description": "Why the profile was rejected - the name check or the provider credential check. Present on failure."
         }
       },
@@ -1365,7 +1365,7 @@
           "description": "The persisted prompt. Present on success."
         },
         "error": {
-          "$ref": "#/components/schemas/AiTErrorData",
+          "$ref": "#/components/schemas/AiErrorData",
           "description": "Why the prompt was rejected. Present on failure."
         }
       },
@@ -1445,7 +1445,7 @@
           "description": "The persisted folder. Present on success."
         },
         "error": {
-          "$ref": "#/components/schemas/AiTErrorData",
+          "$ref": "#/components/schemas/AiErrorData",
           "description": "Why the folder was rejected. Present on failure."
         }
       },
@@ -1613,7 +1613,7 @@
           ]
         },
         "error": {
-          "$ref": "#/components/schemas/AiTErrorData",
+          "$ref": "#/components/schemas/AiErrorData",
           "description": "Why the entry was rejected.",
           "examples": [
             "a prompt of that name already exists"
@@ -1653,7 +1653,7 @@
           ]
         },
         "provider": {
-          "$ref": "#/components/schemas/AiTProvider",
+          "$ref": "#/components/schemas/AiProvider",
           "description": "Provider configuration at the time of last message. Used for thread-level provider display."
         },
         "model": {
@@ -1674,7 +1674,7 @@
       "additionalProperties": false,
       "description": "Chat conversation metadata. Represents a single chat session (thread)."
     },
-    "AiTProvider": {
+    "AiProvider": {
       "type": "object",
       "properties": {
         "type": {
@@ -1757,7 +1757,7 @@
           ]
         },
         "error": {
-          "$ref": "#/components/schemas/AiTErrorData",
+          "$ref": "#/components/schemas/AiErrorData",
           "description": "Why the MCP server was rejected. Present on failure."
         }
       },
@@ -1785,7 +1785,7 @@
                 "type": "string"
               },
               "error": {
-                "$ref": "#/components/schemas/AiTErrorData"
+                "$ref": "#/components/schemas/AiErrorData"
               }
             },
             "required": [
@@ -1868,7 +1868,7 @@
           "description": "The persisted web-search configuration. Present on success."
         },
         "error": {
-          "$ref": "#/components/schemas/AiTErrorData",
+          "$ref": "#/components/schemas/AiErrorData",
           "description": "Why the configuration was rejected. Present on failure."
         }
       },
@@ -1876,12 +1876,12 @@
         "success"
       ]
     },
-    "AiAiUserSettingsWrapper": {
+    "AiUserSettingsWrapper": {
       "type": "object",
       "properties": {
         "response": {
           "description": "The AiUserSettingsDto object returned by the operation.",
-          "$ref": "#/components/schemas/AiAiUserSettingsDto"
+          "$ref": "#/components/schemas/AiUserSettingsDto"
         },
         "count": {
           "type": "integer",
@@ -1918,7 +1918,7 @@
       },
       "description": "The successful API response containing the AiUserSettingsDto object."
     },
-    "AiAiUserSettingsDto": {
+    "AiUserSettingsDto": {
       "type": "object",
       "properties": {
         "chatRecommendedModelVisible": {
@@ -1927,9 +1927,47 @@
           ],
           "type": "boolean",
           "description": "Indicates whether the recommended model banner is visible in the AI chat for the current user."
+        },
+        "toolPermissionMode": {
+          "description": "How tool calls made by the model are approved for the current user. The default applies while the user has stored nothing.",
+          "$ref": "#/components/schemas/AiToolPermissionMode"
         }
       },
       "description": "The per-user AI settings."
+    },
+    "AiToolPermissionMode": {
+      "oneOf": [
+        {
+          "examples": [
+            "Ask"
+          ],
+          "enum": [
+            "Ask",
+            "Auto",
+            "Allow"
+          ],
+          "type": "string",
+          "description": "[Ask - Ask, Auto - Auto, Allow - Allow]"
+        },
+        {
+          "examples": [
+            0
+          ],
+          "enum": [
+            0,
+            1,
+            2
+          ],
+          "type": "integer",
+          "description": "[0 - Ask, 1 - Auto, 2 - Allow]",
+          "x-enum-varnames": [
+            "Ask",
+            "Auto",
+            "Allow"
+          ]
+        }
+      ],
+      "x-enum-type": "integer"
     },
     "AiVectorizationSettingsWrapper": {
       "type": "object",
@@ -2028,12 +2066,12 @@
       "description": "The embedding provider type used for document vectorization.",
       "x-enum-type": "integer"
     },
-    "AiAiSettingsWrapper": {
+    "AiSettingsWrapper": {
       "type": "object",
       "properties": {
         "response": {
           "description": "The AiSettingsDto object returned by the operation.",
-          "$ref": "#/components/schemas/AiAiSettingsDto"
+          "$ref": "#/components/schemas/AiSettingsDto"
         },
         "count": {
           "type": "integer",
@@ -2070,7 +2108,7 @@
       },
       "description": "The successful API response containing the AiSettingsDto object."
     },
-    "AiAiSettingsDto": {
+    "AiSettingsDto": {
       "required": [
         "embeddingModel"
       ],
@@ -2123,6 +2161,10 @@
             "string"
           ],
           "description": "The identifier of the model recommended for form generation."
+        },
+        "toolPermissionMode": {
+          "description": "How tool calls made by the model are approved for the current user. The default applies while the user has stored nothing.",
+          "$ref": "#/components/schemas/AiToolPermissionMode"
         }
       },
       "description": "The AI module settings."
@@ -2247,7 +2289,7 @@
             },
             "logo": {
               "description": "The addresses of the room logo in four sizes, together with the colour and the built-in cover that are drawn\r\nwhen no logo was uploaded. A room without a logo answers with four empty addresses rather than with null, and\r\nthe field is null for a folder that is not a room.",
-              "$ref": "#/components/schemas/AiLogo"
+              "$ref": "#/components/schemas/AiLogoDto"
             },
             "pinned": {
               "examples": [
@@ -2311,7 +2353,7 @@
                 "null",
                 "integer"
               ],
-              "description": "How much space the files of the room may take, in bytes. It is the limit set on this room, or the portal\r\ndefault for rooms when none was set. Null when the tariff of the portal does not count room statistics, when\r\nroom quotas are switched off, when the room lies in the archive or the trash, or when the caller may only read\r\nit.",
+              "description": "How much space the files of the room may take, in bytes. It is the limit set on this room, or the portal\r\ndefault for rooms when none was set. Null when the tariff of the portal does not count room statistics, when\r\nroom quotas are switched off, when the room lies in the archive or the trash, or when the role of the caller\r\nin the room carries no editing rights - a viewer, a commenter, a reviewer and a form filler do not see the\r\nfigure, a room manager, a content creator and an editor do.",
               "format": "int64"
             },
             "isCustomQuota": {
@@ -2452,10 +2494,11 @@
             "ChatOutputs",
             "AiAgents",
             "DefaultTemplates",
-            "Forms"
+            "Forms",
+            "Ai"
           ],
           "type": "string",
-          "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms]"
+          "description": "[DEFAULT - Default, COMMON - Coomon, BUNCH - Bunch, TRASH - Trash, USER - User, SHARE - Share, Projects - Projects, Favorites - Favourites, Recent - Recent, Templates - Templates, Privacy - Privacy, VirtualRooms - Virtual rooms, FillingFormsRoom - Filling forms room, EditingRoom - Editing room, CustomRoom - Custom room, Archive - Archive, ThirdpartyBackup - Thirdparty backup, PublicRoom - Public room, ReadyFormFolder - Ready form folder, InProcessFormFolder - In process form folder, FormFillingFolderDone - Form filling folder done, FormFillingFolderInProgress - Form filling folder in progress, VirtualDataRoom - Virtual Data Room, RoomTemplates - Room templates folder, AiRoom - AI Room, Knowledge - Knowledge, ChatOutputs - Chat outputs, AiAgents - AI Agents, DefaultTemplates - Default Templates, Forms - Forms, Ai - Ai]"
         },
         {
           "examples": [
@@ -2491,10 +2534,11 @@
             33,
             34,
             35,
-            36
+            36,
+            37
           ],
           "type": "integer",
-          "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms]",
+          "description": "[0 - Default, 1 - Coomon, 2 - Bunch, 3 - Trash, 5 - User, 6 - Share, 8 - Projects, 10 - Favourites, 11 - Recent, 12 - Templates, 13 - Privacy, 14 - Virtual rooms, 15 - Filling forms room, 16 - Editing room, 19 - Custom room, 20 - Archive, 21 - Thirdparty backup, 22 - Public room, 25 - Ready form folder, 26 - In process form folder, 27 - Form filling folder done, 28 - Form filling folder in progress, 29 - Virtual Data Room, 30 - Room templates folder, 31 - AI Room, 32 - Knowledge, 33 - Chat outputs, 34 - AI Agents, 35 - Default Templates, 36 - Forms, 37 - Ai]",
           "x-enum-varnames": [
             "DEFAULT",
             "COMMON",
@@ -2525,7 +2569,8 @@
             "ChatOutputs",
             "AiAgents",
             "DefaultTemplates",
-            "Forms"
+            "Forms",
+            "Ai"
           ]
         }
       ],
@@ -2761,7 +2806,7 @@
       "description": "The room type.",
       "x-enum-type": "integer"
     },
-    "AiLogo": {
+    "AiLogoDto": {
       "required": [
         "large",
         "medium",
@@ -2822,12 +2867,12 @@
         },
         "cover": {
           "description": "The logo cover.",
-          "$ref": "#/components/schemas/AiLogoCover"
+          "$ref": "#/components/schemas/AiLogoCoverDto"
         }
       },
       "description": "The room logo information."
     },
-    "AiLogoCover": {
+    "AiLogoCoverDto": {
       "required": [
         "data",
         "id"
@@ -3196,6 +3241,17 @@
                 "boolean"
               ],
               "description": "Set when the link being used has already passed its expiration date, which is why the entry cannot be opened\r\neven though it is described here. It is null when no link is involved."
+            },
+            "assignedMetadataTemplates": {
+              "type": [
+                "null",
+                "array"
+              ],
+              "items": {
+                "type": "integer",
+                "format": "int32"
+              },
+              "description": "The IDs of the metadata templates assigned to the file entry."
             }
           }
         }
@@ -4102,7 +4158,7 @@
     }
   },
   "operations": {
-    "aiAiSend": {
+    "aiSend": {
       "request": {
         "type": "object",
         "properties": {
@@ -4115,7 +4171,7 @@
             "description": "The user turn to send."
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/AiAiActionArgs",
+            "$ref": "#/components/schemas/AiActionArgs",
             "description": "Per-request engine options: extra tools, reasoning, prompt override."
           },
           "entityId": {
@@ -4133,7 +4189,7 @@
         "$ref": "#/components/schemas/AiThreadMessageLike"
       }
     },
-    "aiAiSendCustom": {
+    "aiSendCustom": {
       "request": {
         "type": "object",
         "properties": {
@@ -4149,7 +4205,7 @@
             "$ref": "#/components/schemas/AiThreadMessageLike"
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/AiAiActionArgs",
+            "$ref": "#/components/schemas/AiActionArgs",
             "description": "Per-request engine options: extra tools, reasoning, prompt override."
           }
         },
@@ -4165,23 +4221,23 @@
         "description": "One-shot mode (`isStream: false`) returns the assistant message shown here; streaming mode instead emits a newline-delimited `ChatEvent` stream."
       }
     },
-    "aiAiSendWithStream": {
+    "aiSendWithStream": {
       "request": {
-        "$ref": "#/components/schemas/AiAiSendStreamBody"
+        "$ref": "#/components/schemas/AiSendStreamBody"
       },
       "response": {
         "$ref": "#/components/schemas/AiChatEvent"
       }
     },
-    "aiAiSendWithStreamOpenAI": {
+    "aiSendWithStreamOpenAI": {
       "request": {
-        "$ref": "#/components/schemas/AiAiSendStreamBody"
+        "$ref": "#/components/schemas/AiSendStreamBody"
       },
       "response": {
         "$ref": "#/components/schemas/AiOpenAIStreamChunk"
       }
     },
-    "aiAiRegenerateStream": {
+    "aiRegenerateStream": {
       "request": {
         "type": "object",
         "properties": {
@@ -4190,7 +4246,7 @@
             "description": "Target thread (must already exist)."
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/AiAiActionArgs",
+            "$ref": "#/components/schemas/AiActionArgs",
             "description": "Per-request engine options: extra tools, reasoning, prompt override."
           },
           "entityId": {
@@ -4211,7 +4267,7 @@
         "$ref": "#/components/schemas/AiChatEvent"
       }
     },
-    "aiAiApproveToolCall": {
+    "aiApproveToolCall": {
       "request": {
         "type": "object",
         "additionalProperties": false,
@@ -4240,7 +4296,7 @@
             "description": "Snapshot of the assistant message at the time the tool call surfaced."
           },
           "actionArgs": {
-            "$ref": "#/components/schemas/AiAiActionArgs",
+            "$ref": "#/components/schemas/AiActionArgs",
             "description": "Per-request engine options: extra tools, reasoning, prompt override."
           },
           "entityId": {
@@ -4264,9 +4320,9 @@
         "$ref": "#/components/schemas/AiChatEvent"
       }
     },
-    "aiAiDenyToolCall": {
+    "aiDenyToolCall": {
       "request": {
-        "$ref": "#/components/schemas/AiAiToolCallData"
+        "$ref": "#/components/schemas/AiToolCallData"
       },
       "response": {
         "$ref": "#/components/schemas/AiChatEvent"
@@ -4644,7 +4700,7 @@
     },
     "aiPreferencesGetReasoningLevel": {
       "response": {
-        "$ref": "#/components/schemas/AiAiReasoningLevel"
+        "$ref": "#/components/schemas/AiReasoningLevel"
       }
     },
     "aiPreferencesSetReasoningLevel": {
@@ -4652,7 +4708,7 @@
         "type": "object",
         "properties": {
           "value": {
-            "$ref": "#/components/schemas/AiAiReasoningLevel",
+            "$ref": "#/components/schemas/AiReasoningLevel",
             "description": "New extended-thinking depth; `off` turns deep mode off."
           },
           "entityId": {
@@ -4667,7 +4723,7 @@
     },
     "aiPreferencesGetToolPermissionMode": {
       "response": {
-        "$ref": "#/components/schemas/AiAiToolPermissionMode"
+        "$ref": "#/components/schemas/AiChatToolPermissionMode"
       }
     },
     "aiPreferencesSetToolPermissionMode": {
@@ -4675,7 +4731,7 @@
         "type": "object",
         "properties": {
           "value": {
-            "$ref": "#/components/schemas/AiAiToolPermissionMode",
+            "$ref": "#/components/schemas/AiChatToolPermissionMode",
             "description": "New tool permission mode."
           },
           "entityId": {
@@ -5371,7 +5427,7 @@
         "additionalProperties": {
           "type": "array",
           "items": {
-            "$ref": "#/components/schemas/AiTMCPItem"
+            "$ref": "#/components/schemas/AiMCPItem"
           }
         }
       }
@@ -5840,7 +5896,7 @@
     },
     "aiSettingsGet": {
       "response": {
-        "$ref": "#/components/schemas/AiAiSettingsWrapper"
+        "$ref": "#/components/schemas/AiSettingsWrapper"
       }
     },
     "aiSettingsGetVectorization": {
@@ -5855,12 +5911,12 @@
     },
     "aiSettingsGetUser": {
       "response": {
-        "$ref": "#/components/schemas/AiAiUserSettingsWrapper"
+        "$ref": "#/components/schemas/AiUserSettingsWrapper"
       }
     },
     "aiSettingsSetUser": {
       "response": {
-        "$ref": "#/components/schemas/AiAiUserSettingsWrapper"
+        "$ref": "#/components/schemas/AiUserSettingsWrapper"
       }
     }
   }

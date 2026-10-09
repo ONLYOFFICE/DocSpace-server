@@ -206,7 +206,7 @@ public class OperationDto
     /// reasoning, images. It is `null` on any movement that is not an AI charge, and on an AI charge the billing
     /// service recorded without token counts.
     /// </summary>
-    public OperationTokenUsage TokenUsage { get; set; }
+    public OperationTokenUsageDto TokenUsage { get; set; }
     /// <summary>
     /// What kind of movement this is - a payment, a charge, a refund, a correction. It is what the `type` filter
     /// matches on, and `Unknown` covers a movement the billing service reported under a kind this build does not
@@ -237,7 +237,7 @@ public class OperationDto
         SourceType = sourceType;
         SourceTitle = sourceTitle;
         SourceId = sourceId;
-        TokenUsage = WalletServiceDescriptionManager.GetTokenUsage(operation.Metadata);
+        TokenUsage = WalletServiceDescriptionManager.GetTokenUsage(operation.Metadata)?.Map();
         Type = operation.Type;
     }
 }

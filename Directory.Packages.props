@@ -162,8 +162,8 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Process" Version="1.18.0-rc.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.18.0" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.StackExchangeRedis" Version="1.18.0-beta.1" />
-    <PackageVersion Include="OpenSearch.Client" Version="2.0.0" />
-    <PackageVersion Include="OpenSearch.Net" Version="2.0.0" />
+    <PackageVersion Include="OpenSearch.Client" Version="2.2.0" />
+    <PackageVersion Include="OpenSearch.Net" Version="2.2.0" />
     <PackageVersion Include="protobuf-net" Version="3.2.56" />
     <PackageVersion Include="RabbitMQ.Client" Version="7.2.2" />
     <PackageVersion Include="Rackspace" Version="1.0.0" />

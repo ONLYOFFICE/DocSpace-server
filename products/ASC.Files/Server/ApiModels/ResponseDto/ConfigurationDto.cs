@@ -163,7 +163,7 @@ public class EditorConfigurationDto
     /// <summary>
     /// How co-editing starts out for this session and whether the user may switch it in the interface.
     /// </summary>
-    public CoEditingConfig CoEditing { get; set; }
+    public CoEditingConfigDto CoEditing { get; set; }
 
     /// <summary>
     /// Where the editor sends the user when they ask for a new document of the same type. It is empty when creating
@@ -180,7 +180,7 @@ public class EditorConfigurationDto
     /// <summary>
     /// The addresses the framed viewer needs. It is filled in only for the embedded layout.
     /// </summary>
-    public EmbeddedConfig Embedded { get; set; }
+    public EmbeddedConfigDto Embedded { get; set; }
 
     /// <summary>
     /// The caller's end-to-end encryption keys, added only when the document lies in a private room, so that the
@@ -209,25 +209,25 @@ public class EditorConfigurationDto
     /// <summary>
     /// Which editor plugins are offered. The portal currently offers none, so the list inside comes back empty.
     /// </summary>
-    public PluginsConfig Plugins { get; set; }
+    public PluginsConfigDto Plugins { get; set; }
 
     /// <summary>
     /// The documents offered in the editor's recent list. It is left out altogether when there is nothing to offer.
     /// </summary>
     /// <example>[]</example>
-    public List<RecentConfig> Recent { get; set; }
+    public List<RecentConfigDto> Recent { get; set; }
 
     /// <summary>
     /// Always empty: the portal no longer passes creation templates through the editor configuration.
     /// </summary>
     /// <example>[]</example>
-    public List<TemplatesConfig> Templates { get; set; }
+    public List<TemplatesConfigDto> Templates { get; set; }
 
     /// <summary>
     /// The account the editors attribute changes to. It is empty for an anonymous session opened through an external
     /// link, and the editors then ask for a name themselves.
     /// </summary>
-    public UserConfig User { get; set; }
+    public UserConfigDto User { get; set; }
 
 }
 
@@ -258,7 +258,7 @@ public class CustomizationConfigDto
     /// <summary>
     /// The support link the editor offers behind its feedback button.
     /// </summary>
-    public FeedbackConfig Feedback { get; set; }
+    public FeedbackConfigDto Feedback { get; set; }
 
     /// <summary>
     /// Whether the editors write intermediate revisions while the document stays open. It is empty when the portal
@@ -271,12 +271,12 @@ public class CustomizationConfigDto
     /// Where the editor returns the user to when they leave the document. It is empty when there is nowhere to go
     /// back to, as in an embedded opening.
     /// </summary>
-    public GobackConfig Goback { get; set; }
+    public GobackConfigDto Goback { get; set; }
 
     /// <summary>
     /// How tracked changes are displayed when the document opens; it depends on whether this session may write.
     /// </summary>
-    public ReviewConfig Review { get; set; }
+    public ReviewConfigDto Review { get; set; }
 
     /// <summary>
     /// The logo the editor shows, in the variants the current layout and file type need.
@@ -293,7 +293,7 @@ public class CustomizationConfigDto
     /// <summary>
     /// The submit button of a form: whether it is shown and what it says.
     /// </summary>
-    public SubmitForm SubmitForm { get; set; }
+    public SubmitFormDto SubmitForm { get; set; }
 
     /// <summary>
     /// The button that starts filling out the form. It is empty when this opening offers no such button.
@@ -304,7 +304,7 @@ public class CustomizationConfigDto
     /// The AI configuration settings.
     /// </summary>
     /// <example>{"disabled": false}</example>
-    public AIConfig Ai { get; set; }
+    public AiConfigDto Ai { get; set; }
 }
 
 /// <summary>
@@ -456,7 +456,7 @@ public class DocumentConfigDto
     /// <summary>
     /// What this caller may do inside the editor - edit, comment, review, fill, download, print, copy and chat.
     /// </summary>
-    public PermissionsConfig Permissions { get; set; }
+    public PermissionsConfigDto Permissions { get; set; }
 
     /// <summary>
     /// The name of the query parameter that carries the external share key. It is set only when the document was
@@ -476,7 +476,7 @@ public class DocumentConfigDto
     /// How another spreadsheet names this document in a formula. Pass it to `POST api/2.0/files/file/referencedata`
     /// to resolve such a reference.
     /// </summary>
-    public FileReferenceData ReferenceData { get; set; }
+    public FileReferenceDataDto ReferenceData { get; set; }
 
     /// <summary>
     /// The name the editors display. When a past version was opened, the moment that version was created is appended
@@ -504,7 +504,7 @@ public class DocumentConfigDto
     /// Extra instructions for the editors, currently the watermark to draw over the document. It is empty when the
     /// room sets no watermark.
     /// </summary>
-    public Options Options { get; set; }
+    public DocumentOptionsDto Options { get; set; }
 }
 
 /// <summary>
@@ -538,7 +538,7 @@ public class InfoConfigDto
     /// nobody beyond its owner.
     /// </summary>
     /// <example>[]</example>
-    public List<AceShortWrapper> SharingSettings { get; set; }
+    public List<AceShortDto> SharingSettings { get; set; }
 
     /// <summary>
     /// The layout the information panel is rendered for.
@@ -781,7 +781,7 @@ public class DocumentConfigConverter<T>(InfoConfigConverter<T> configConverter, 
             ReferenceData = source.GetReferenceData(file),
             Title = source.Title ?? file.Title,
             Url = source.GetUrl(file),
-            Options = source.Options
+            Options = source.Options?.Map()
         };
 
         result.IsForm = file.IsPdf && await fileChecker.IsFormPDFFile(file);

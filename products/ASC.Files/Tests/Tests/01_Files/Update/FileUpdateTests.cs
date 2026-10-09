@@ -61,7 +61,7 @@ public class FileUpdateTests(
         var newTitle = "renamed_file.docx";
         
         // Act
-        var updateParams = new UpdateFile { Title = newTitle };
+        var updateParams = new UpdateFileRequest { Title = newTitle };
         var updatedFile = (await _filesApi.UpdateFileAsync(createdFile.Id, updateParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
@@ -79,7 +79,7 @@ public class FileUpdateTests(
         
         var createdFile = await CreateFileInMy("file_to_rename.docx", Owner);
         var longFileName = new string('a', 166) + ".docx"; // 166 characters + 5 for extension = 171 characters
-        var updateParams = new UpdateFile { Title = longFileName };
+        var updateParams = new UpdateFileRequest { Title = longFileName };
         
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -100,7 +100,7 @@ public class FileUpdateTests(
         var createdFile = await CreateFileInMy("file_to_lock.docx", Owner);
         
         // Act & Assert
-        var result =  (await _filesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
+        var result =  (await _filesApi.LockFileAsync(createdFile.Id, new LockFileRequest(true), TestContext.Current.CancellationToken)).Response;
         
         result.Locked.Should().BeTrue();
     }
@@ -115,7 +115,7 @@ public class FileUpdateTests(
         var createdFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
         
         // Act
-        var result = (await _filesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.LockFileAsync(createdFile.Id, new LockFileRequest(true), TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -126,7 +126,7 @@ public class FileUpdateTests(
         fileInfo.Locked.Should().BeTrue();
         
         // Act
-        result = (await _filesApi.LockFileAsync(createdFile.Id, new LockFileParameters(), TestContext.Current.CancellationToken)).Response;
+        result = (await _filesApi.LockFileAsync(createdFile.Id, new LockFileRequest(), TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -159,7 +159,7 @@ public class FileUpdateTests(
         var createdFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
         
         // Act
-        var result = (await _filesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.LockFileAsync(createdFile.Id, new LockFileRequest(true), TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -170,7 +170,7 @@ public class FileUpdateTests(
         fileInfo.Locked.Should().BeTrue();
         
         // Act
-        result = (await _filesApi.LockFileAsync(createdFile.Id, new LockFileParameters(), TestContext.Current.CancellationToken)).Response;
+        result = (await _filesApi.LockFileAsync(createdFile.Id, new LockFileRequest(), TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -203,7 +203,7 @@ public class FileUpdateTests(
         await _filesClient.Authenticate(roomAdmin);
         
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken));
+            async () => await _filesApi.LockFileAsync(createdFile.Id, new LockFileRequest(true), TestContext.Current.CancellationToken));
         
         exception.ErrorCode.Should().Be(403);
     }
@@ -230,12 +230,12 @@ public class FileUpdateTests(
         
         var createdFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
 
-        await _filesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken);
+        await _filesApi.LockFileAsync(createdFile.Id, new LockFileRequest(true), TestContext.Current.CancellationToken);
         
         await _filesClient.Authenticate(roomAdmin2);
 
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.LockFileAsync(createdFile.Id, new LockFileParameters(), TestContext.Current.CancellationToken));
+            async () => await _filesApi.LockFileAsync(createdFile.Id, new LockFileRequest(), TestContext.Current.CancellationToken));
         
         exception.ErrorCode.Should().Be(403);
     }
@@ -264,11 +264,11 @@ public class FileUpdateTests(
         var createdFile = await CreateFile("file_to_lock.docx", createdRoom.Id);
         
         // Act
-        await _filesApi.LockFileAsync(createdFile.Id, new LockFileParameters(true), TestContext.Current.CancellationToken);
+        await _filesApi.LockFileAsync(createdFile.Id, new LockFileRequest(true), TestContext.Current.CancellationToken);
         
         await _filesClient.Authenticate(roomAdmin2);
         
-        var result = (await _filesApi.LockFileAsync(createdFile.Id, new LockFileParameters(), TestContext.Current.CancellationToken)).Response;
+        var result = (await _filesApi.LockFileAsync(createdFile.Id, new LockFileRequest(), TestContext.Current.CancellationToken)).Response;
         
         // Assert
         result.Should().NotBeNull();
@@ -289,7 +289,7 @@ public class FileUpdateTests(
         var newComment = "This is a test comment";
         
         // Act
-        var commentParams = new UpdateComment(1, newComment);
+        var commentParams = new UpdateCommentRequest(1, newComment);
         var result = (await _filesOperationsApi.UpdateFileCommentAsync(file.Id, commentParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert

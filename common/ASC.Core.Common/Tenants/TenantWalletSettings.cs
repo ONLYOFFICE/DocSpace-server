@@ -34,18 +34,6 @@
 namespace ASC.Core.Tenants;
 
 /// <summary>
-/// The wrapper for the tenant wallet settings.
-/// </summary>
-public class TenantWalletSettingsWrapper
-{
-    /// <summary>
-    /// The tenant wallet settings.
-    /// </summary>
-    /// <example>{"enabled": true, "minBalance": 10, "upToBalance": 100, "currency": "USD", "lowBalanceThreshold": 1, "lowBalanceNotified": false}</example>
-    public TenantWalletSettings Settings { get; set; }
-}
-
-/// <summary>
 /// The tenant wallet settings.
 /// </summary>
 [Scope]

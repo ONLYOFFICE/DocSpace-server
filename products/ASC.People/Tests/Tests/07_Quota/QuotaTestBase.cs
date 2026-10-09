@@ -93,7 +93,7 @@ public abstract class QuotaTestBase(AspireAppFixture fixture) : BaseTest(fixture
         var tenantId = await GetTenantIdAsync();
 
         await _settingsQuotaApi.SetTenantQuotaSettingsAsync(
-            new TenantQuotaSettingsRequestsDto(tenantId, quotaBytes),
+            new TenantQuotaSettingsRequestDto(tenantId, quotaBytes),
             TestContext.Current.CancellationToken);
     }
 }

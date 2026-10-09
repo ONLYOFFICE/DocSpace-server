@@ -221,12 +221,12 @@ public class SmtpSettingsController(
     /// </summary>
     /// <path>api/2.0/smtpsettings/smtp/test</path>
     [Tags("Security / SMTP settings")]
-    [SwaggerResponse(200, "The state of the queued test message, to be polled until `completed` is true", typeof(SmtpOperationStatusRequestsDto))]
+    [SwaggerResponse(200, "The state of the queued test message, to be polled until `completed` is true", typeof(SmtpOperationStatusDto))]
     [SwaggerResponse(402, "The SMTP settings section is not enabled for this portal")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("test")]
     [EnableRateLimiting(RateLimiterPolicy.SensitiveApi)]
-    public async Task<SmtpOperationStatusRequestsDto> TestSmtpSettings()
+    public async Task<SmtpOperationStatusDto> TestSmtpSettings()
     {
         await CheckSmtpPermissionsAsync();
 
@@ -256,11 +256,11 @@ public class SmtpSettingsController(
     /// </summary>
     /// <path>api/2.0/smtpsettings/smtp/test/status</path>
     [Tags("Security / SMTP settings")]
-    [SwaggerResponse(200, "The state of the test message of the portal, or an empty answer when no test is on record", typeof(SmtpOperationStatusRequestsDto))]
+    [SwaggerResponse(200, "The state of the test message of the portal, or an empty answer when no test is on record", typeof(SmtpOperationStatusDto))]
     [SwaggerResponse(402, "The SMTP settings section is not enabled for this portal")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("test/status")]
-    public async Task<SmtpOperationStatusRequestsDto> GetSmtpOperationStatus()
+    public async Task<SmtpOperationStatusDto> GetSmtpOperationStatus()
     {
         await CheckSmtpPermissionsAsync();
 

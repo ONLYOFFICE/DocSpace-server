@@ -532,7 +532,7 @@ public class RoomsApiTests(
         // Delete the room
         var deleteResults = (await _foldersApi.DeleteFolderAsync(
             createdRoom.Id,
-            new DeleteFolder(deleteAfter: false, immediately: true),
+            new DeleteFolderRequest(deleteAfter: false, immediately: true),
             TestContext.Current.CancellationToken)).Response;
 
         if (deleteResults.Any(r => !r.Finished))

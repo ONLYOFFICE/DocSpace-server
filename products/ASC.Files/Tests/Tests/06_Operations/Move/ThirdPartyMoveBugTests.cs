@@ -70,7 +70,7 @@ public class ThirdPartyMoveBugTests(
         var connected = await ConnectNextcloud("Autotest MoveBatch TP Collab Folder");
         var destRoom = (await _roomsApi.CreateRoomThirdPartyAsync(
             connected.Id,
-            new CreateThirdPartyRoom(title: "Autotest MoveBatch ThirdParty Collab Room", roomType: RoomType.CustomRoom),
+            new CreateThirdPartyRoomRequest(title: "Autotest MoveBatch ThirdParty Collab Room", roomType: RoomType.CustomRoom),
             TestContext.Current.CancellationToken)).Response;
 
         // Act

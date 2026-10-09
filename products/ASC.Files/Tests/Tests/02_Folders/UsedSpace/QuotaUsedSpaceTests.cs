@@ -438,7 +438,7 @@ public class QuotaUsedSpaceTests(
 
         // Act - start every delete operation at once so their counter updates overlap
         var started = await Task.WhenAll(roots.Select(r =>
-            _foldersApi.DeleteFolderAsync(r.Id, new DeleteFolder { Immediately = true }, TestContext.Current.CancellationToken)));
+            _foldersApi.DeleteFolderAsync(r.Id, new DeleteFolderRequest { Immediately = true }, TestContext.Current.CancellationToken)));
 
         foreach (var operation in started)
         {

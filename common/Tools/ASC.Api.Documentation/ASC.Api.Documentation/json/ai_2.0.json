@@ -3683,7 +3683,7 @@
               },
               "logo": {
                 "description": "The addresses of the room logo in four sizes, together with the colour and the built-in cover that are drawn\r\nwhen no logo was uploaded. A room without a logo answers with four empty addresses rather than with null, and\r\nthe field is null for a folder that is not a room.",
-                "$ref": "#/components/schemas/Logo"
+                "$ref": "#/components/schemas/LogoDto"
               },
               "pinned": {
                 "examples": [
@@ -3997,7 +3997,37 @@
         },
         "description": "The successful API response containing the FolderDto object."
       },
-      "Logo": {
+      "LogoCoverDto": {
+        "required": [
+          "data",
+          "id"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "examples": [
+              "default_cover"
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The logo cover ID."
+          },
+          "data": {
+            "examples": [
+              "base64-image-data..."
+            ],
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "The logo cover data."
+          }
+        },
+        "description": "The logo cover information."
+      },
+      "LogoDto": {
         "required": [
           "large",
           "medium",
@@ -4058,40 +4088,10 @@
           },
           "cover": {
             "description": "The logo cover.",
-            "$ref": "#/components/schemas/LogoCover"
+            "$ref": "#/components/schemas/LogoCoverDto"
           }
         },
         "description": "The room logo information."
-      },
-      "LogoCover": {
-        "required": [
-          "data",
-          "id"
-        ],
-        "type": "object",
-        "properties": {
-          "id": {
-            "examples": [
-              "default_cover"
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The logo cover ID."
-          },
-          "data": {
-            "examples": [
-              "base64-image-data..."
-            ],
-            "type": [
-              "null",
-              "string"
-            ],
-            "description": "The logo cover data."
-          }
-        },
-        "description": "The logo cover information."
       },
       "LogoRequest": {
         "required": [

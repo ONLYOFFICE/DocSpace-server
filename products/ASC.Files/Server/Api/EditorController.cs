@@ -331,7 +331,7 @@ public abstract class EditorController<T>(
         if (formOpenSetup != null)
         {
             // the editor needs an explicit null in user.roles to let the form be filled without role restrictions
-            result.EditorConfig.User ??= new UserConfig();
+            result.EditorConfig.User ??= new UserConfigDto();
 
             if (formOpenSetup.RootFolder.FolderType is FolderType.VirtualDataRoom)
             {
@@ -401,11 +401,11 @@ public abstract class EditorController<T>(
     /// </summary>
     /// <path>api/2.0/files/file/{fileId}/presigned</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "The download address of the file with its signature token", typeof(DocumentService.FileLink))]
+    [SwaggerResponse(200, "The download address of the file with its signature token", typeof(FileLinkDto))]
     [SwaggerResponse(403, "The caller cannot read the file")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpGet("{fileId}/presigned")]
-    public async Task<DocumentService.FileLink> GetPresignedFileUri(FileIdRequestDto<T> inDto)
+    public async Task<FileLinkDto> GetPresignedFileUri(FileIdRequestDto<T> inDto)
     {
         return await fileStorageService.GetPresignedUriAsync(inDto.FileId);
     }
@@ -427,18 +427,18 @@ public abstract class EditorController<T>(
     /// <path>api/2.0/files/file/{fileId}/sharedusers</path>
     /// <collection>list</collection>
     [Tags("Files / Sharing")]
-    [SwaggerResponse(200, "The portal members who can read the file, ordered by display name", typeof(List<MentionWrapper>))]
+    [SwaggerResponse(200, "The portal members who can read the file, ordered by display name", typeof(List<MentionDto>))]
     [SwaggerResponse(403, "The caller cannot read the file")]
     [SwaggerResponse(404, "The file id resolves to nothing")]
     [HttpGet("{fileId}/sharedusers")]
-    public Task<List<MentionWrapper>> GetSharedUsers(FileIdRequestDto<T> inDto)
+    public async Task<List<MentionDto>> GetSharedUsers(FileIdRequestDto<T> inDto)
     {
         if (!securityContext.IsAuthenticated)
         {
-            return Task.FromResult<List<MentionWrapper>>(null);
+            return null;
         }
 
-        return fileStorageService.SharedUsersAsync(inDto.FileId);
+        return (await fileStorageService.SharedUsersAsync(inDto.FileId))?.Select(r => r.Map()).ToList();
     }
 
     /// <remarks>
@@ -449,11 +449,11 @@ public abstract class EditorController<T>(
     /// <collection>list</collection>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "List of users with their access rights to the file", typeof(List<MentionWrapper>))]
+    [SwaggerResponse(200, "List of users with their access rights to the file", typeof(List<MentionDto>))]
     [HttpPost("infousers")]
-    public async Task<List<MentionWrapper>> GetInfoUsers(GetInfoUsersRequestDto inDto)
+    public async Task<List<MentionDto>> GetInfoUsers(GetInfoUsersRequestDto inDto)
     {
-        return await fileStorageService.GetInfoUsersAsync(inDto.UserIds);
+        return (await fileStorageService.GetInfoUsersAsync(inDto.UserIds))?.Select(r => r.Map()).ToList();
     }
 
     /// <remarks>
@@ -473,12 +473,12 @@ public abstract class EditorController<T>(
     /// </summary>
     /// <path>api/2.0/files/file/referencedata</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "The reference descriptor, or the same object with the error text set when nothing resolved", typeof(FileReference))]
+    [SwaggerResponse(200, "The reference descriptor, or the same object with the error text set when nothing resolved", typeof(FileReferenceDto))]
     [SwaggerResponse(400, "The request body cannot be read or has no `fileKey` or `instanceId`")]
     [SwaggerResponse(403, "The caller cannot read the source file, its folder or the referenced file")]
     [SwaggerResponse(500, "`fileKey` is empty or not a number while `instanceId` names this portal")]
     [HttpPost("referencedata")]
-    public async Task<FileReference> GetReferenceData(GetReferenceDataDto<T> inDto)
+    public async Task<FileReferenceDto> GetReferenceData(GetReferenceDataDto<T> inDto)
     {
         return await fileStorageService.GetReferenceDataAsync(inDto.FileKey, inDto.InstanceId, inDto.SourceFileId, inDto.Path, inDto.Link);
     }
@@ -499,12 +499,12 @@ public abstract class EditorController<T>(
     /// <path>api/2.0/files/file/{fileId}/protectusers</path>
     /// <collection>list</collection>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "The users the file is shared with, ordered by display name", typeof(List<MentionWrapper>))]
+    [SwaggerResponse(200, "The users the file is shared with, ordered by display name", typeof(List<MentionDto>))]
     [SwaggerResponse(403, "The caller is a guest, or the file id resolves to nothing")]
     [HttpGet("{fileId}/protectusers")]
-    public async Task<List<MentionWrapper>> GetProtectedFileUsers(FileIdRequestDto<T> inDto)
+    public async Task<List<MentionDto>> GetProtectedFileUsers(FileIdRequestDto<T> inDto)
     {
-        return await fileStorageService.ProtectUsersAsync(inDto.FileId);
+        return (await fileStorageService.ProtectUsersAsync(inDto.FileId))?.Select(r => r.Map()).ToList();
     }
 
     /// <remarks>

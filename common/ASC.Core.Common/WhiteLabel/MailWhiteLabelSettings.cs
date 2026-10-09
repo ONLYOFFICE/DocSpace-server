@@ -34,18 +34,6 @@
 namespace ASC.Web.Core.WhiteLabel;
 
 /// <summary>
-/// The mail white label settings wrapper.
-/// </summary>
-public class MailWhiteLabelSettingsWrapper
-{
-    /// <summary>
-    /// The mail white label settings.
-    /// </summary>
-    /// <example>{"footerEnabled": true, "footerSocialEnabled": true}</example>
-    public MailWhiteLabelSettings Settings { get; set; }
-}
-
-/// <summary>
 /// The mail white label settings.
 /// </summary>
 public class MailWhiteLabelSettings : ISettings<MailWhiteLabelSettings>

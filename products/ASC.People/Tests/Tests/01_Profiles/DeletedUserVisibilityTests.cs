@@ -64,7 +64,7 @@ public class DeletedUserVisibilityTests(AspireAppFixture fixture) : BaseTest(fix
 
         await _filesClient.Authenticate(roomAdmin);
         var room = await CreateCustomRoom("Autotest Delete User Room");
-        await _filesApi.CreateFileAsync(room.Id, new CreateFileJsonElement("Autotest Delete User File"), TestContext.Current.CancellationToken);
+        await _filesApi.CreateFileAsync(room.Id, new CreateFileRequest("Autotest Delete User File"), TestContext.Current.CancellationToken);
         await _filesClient.Authenticate(Owner);
 
         await TerminateUser(roomAdmin);

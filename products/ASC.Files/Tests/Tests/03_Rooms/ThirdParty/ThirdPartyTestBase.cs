@@ -161,7 +161,7 @@ public abstract class ThirdPartyTestBase(AspireAppFixture fixture) : BaseTest(fi
 
         var room = await _roomsApi.CreateRoomThirdPartyAsync(
             connection.Id,
-            new CreateThirdPartyRoom(title: title, roomType: roomType, createAsNewFolder: createAsNewFolder),
+            new CreateThirdPartyRoomRequest(title: title, roomType: roomType, createAsNewFolder: createAsNewFolder),
             TestContext.Current.CancellationToken);
 
         if (createAsNewFolder)
@@ -226,7 +226,7 @@ public abstract class ThirdPartyTestBase(AspireAppFixture fixture) : BaseTest(fi
     protected async Task<ThirdPartyFileDto> CreateThirdPartyFile(string folderId, string title)
     {
         return (await _filesApi.CreateFileAsync(
-            folderId, new CreateFileJsonElement(title), TestContext.Current.CancellationToken)).Response;
+            folderId, new CreateFileRequest(title), TestContext.Current.CancellationToken)).Response;
     }
 
     /// <summary>
@@ -249,7 +249,7 @@ public abstract class ThirdPartyTestBase(AspireAppFixture fixture) : BaseTest(fi
         try
         {
             var results = (await _foldersApi.DeleteFolderAsync(
-                folderId, new DeleteFolder(false, true), TestContext.Current.CancellationToken)).Response;
+                folderId, new DeleteFolderRequest(false, true), TestContext.Current.CancellationToken)).Response;
 
             await WaitLongOperation(results.FirstOrDefault()?.Id);
         }

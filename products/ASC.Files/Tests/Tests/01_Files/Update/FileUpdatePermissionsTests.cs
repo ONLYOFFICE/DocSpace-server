@@ -64,7 +64,7 @@ public class FileUpdatePermissionsTests(
 
         // Act
         var updated = (await _filesApi.UpdateFileAsync(
-            file.Id, new UpdateFile { Title = "Autotest Admin Updated File" }, TestContext.Current.CancellationToken)).Response;
+            file.Id, new UpdateFileRequest { Title = "Autotest Admin Updated File" }, TestContext.Current.CancellationToken)).Response;
 
         // Assert
         updated.Id.Should().Be(file.Id);
@@ -97,7 +97,7 @@ public class FileUpdatePermissionsTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.UpdateFileAsync(
-                file.Id, new UpdateFile { Title = "Autotest Room Admin Updated File" }, TestContext.Current.CancellationToken));
+                file.Id, new UpdateFileRequest { Title = "Autotest Room Admin Updated File" }, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
@@ -127,7 +127,7 @@ public class FileUpdatePermissionsTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.UpdateFileAsync(
-                file.Id, new UpdateFile { Title = "Autotest User Updated File" }, TestContext.Current.CancellationToken));
+                file.Id, new UpdateFileRequest { Title = "Autotest User Updated File" }, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
@@ -152,7 +152,7 @@ public class FileUpdatePermissionsTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.UpdateFileAsync(
-                file.Id, new UpdateFile { Title = "Autotest Read-only Renamed" }, TestContext.Current.CancellationToken));
+                file.Id, new UpdateFileRequest { Title = "Autotest Read-only Renamed" }, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
@@ -172,7 +172,7 @@ public class FileUpdatePermissionsTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.UpdateFileAsync(
-                file.Id, new UpdateFile { Title = "Autotest No Access Renamed" }, TestContext.Current.CancellationToken));
+                file.Id, new UpdateFileRequest { Title = "Autotest No Access Renamed" }, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
@@ -196,7 +196,7 @@ public class FileUpdatePermissionsTests(
 
         // Act
         var updated = (await _filesApi.UpdateFileAsync(
-            file.Id, new UpdateFile { Title = "Autotest User Own File Renamed" }, TestContext.Current.CancellationToken)).Response;
+            file.Id, new UpdateFileRequest { Title = "Autotest User Own File Renamed" }, TestContext.Current.CancellationToken)).Response;
 
         // Assert
         updated.Id.Should().Be(file.Id);
@@ -222,7 +222,7 @@ public class FileUpdatePermissionsTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.UpdateFileAsync(
-                file.Id, new UpdateFile { Title = "Autotest Guest Renamed" }, TestContext.Current.CancellationToken));
+                file.Id, new UpdateFileRequest { Title = "Autotest Guest Renamed" }, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
@@ -242,7 +242,7 @@ public class FileUpdatePermissionsTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.UpdateFileAsync(
-                file.Id, new UpdateFile { Title = "Autotest Admin No Room Renamed" }, TestContext.Current.CancellationToken));
+                file.Id, new UpdateFileRequest { Title = "Autotest Admin No Room Renamed" }, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
@@ -267,7 +267,7 @@ public class FileUpdatePermissionsTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.UpdateFileAsync(
-                file.Id, new UpdateFile { Title = "Autotest Anon Renamed" }, TestContext.Current.CancellationToken));
+                file.Id, new UpdateFileRequest { Title = "Autotest Anon Renamed" }, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(401);
     }

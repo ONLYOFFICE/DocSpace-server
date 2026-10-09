@@ -62,7 +62,7 @@ public class GetEditDiffTests(
     {
         // Arrange
         var file = await CreateFileInMy("Autotest Edit Diff URL Specific Version", Owner);
-        await _filesApi.UpdateFileAsync(file.Id, new UpdateFile { LastVersion = 2 }, TestContext.Current.CancellationToken);
+        await _filesApi.UpdateFileAsync(file.Id, new UpdateFileRequest { LastVersion = 2 }, TestContext.Current.CancellationToken);
 
         // Act
         var diff = (await _filesApi.GetEditDiffUrlAsync(file.Id, 1, TestContext.Current.CancellationToken)).Response;
@@ -80,7 +80,7 @@ public class GetEditDiffTests(
         // UpdateFile with lastVersion only increments version metadata; it does not record real
         // editing history, which only the document editor produces via Document Server.
         var file = await CreateFileInMy("Autotest Edit Diff URL With Previous", Owner);
-        await _filesApi.UpdateFileAsync(file.Id, new UpdateFile { LastVersion = 2 }, TestContext.Current.CancellationToken);
+        await _filesApi.UpdateFileAsync(file.Id, new UpdateFileRequest { LastVersion = 2 }, TestContext.Current.CancellationToken);
 
         // Act
         var diff = (await _filesApi.GetEditDiffUrlAsync(file.Id, 2, TestContext.Current.CancellationToken)).Response;

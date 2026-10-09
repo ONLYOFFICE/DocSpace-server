@@ -106,7 +106,7 @@ public class RestoreVersionPermissionsTests(
         await InviteToRoom(room.Id, user, FileShare.Editing);
 
         var file = await CreateFile("Autotest Restore Editing File", room.Id);
-        await _filesApi.UpdateFileAsync(file.Id, new UpdateFile { LastVersion = 2 }, TestContext.Current.CancellationToken);
+        await _filesApi.UpdateFileAsync(file.Id, new UpdateFileRequest { LastVersion = 2 }, TestContext.Current.CancellationToken);
 
         await _filesClient.Authenticate(user);
 
@@ -131,7 +131,7 @@ public class RestoreVersionPermissionsTests(
         await InviteToRoom(room.Id, user, FileShare.Read);
 
         var file = await CreateFile("Autotest Restore Read File", room.Id);
-        await _filesApi.UpdateFileAsync(file.Id, new UpdateFile { LastVersion = 2 }, TestContext.Current.CancellationToken);
+        await _filesApi.UpdateFileAsync(file.Id, new UpdateFileRequest { LastVersion = 2 }, TestContext.Current.CancellationToken);
 
         await _filesClient.Authenticate(user);
 
@@ -156,7 +156,7 @@ public class RestoreVersionPermissionsTests(
         await InviteToRoom(room.Id, guest, FileShare.Read);
 
         var file = await CreateFile("Autotest Restore Guest File", room.Id);
-        await _filesApi.UpdateFileAsync(file.Id, new UpdateFile { LastVersion = 2 }, TestContext.Current.CancellationToken);
+        await _filesApi.UpdateFileAsync(file.Id, new UpdateFileRequest { LastVersion = 2 }, TestContext.Current.CancellationToken);
 
         await _filesClient.Authenticate(guest);
 

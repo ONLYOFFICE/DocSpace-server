@@ -50,7 +50,7 @@ public class NotificationSettingsGetTests(
         await AuthenticateAsAsync(actor);
 
         await _notificationsApi.SetNotificationSettingsAsync(
-            new NotificationSettingsRequestsDto(type, true), TestContext.Current.CancellationToken);
+            new NotificationSettingsRequestDto(type, true), TestContext.Current.CancellationToken);
 
         // Act
         var settings = await _notificationsApi.GetNotificationSettingsWithHttpInfoAsync(type, TestContext.Current.CancellationToken);
@@ -59,5 +59,36 @@ public class NotificationSettingsGetTests(
         settings.StatusCode.Should().Be(HttpStatusCode.OK);
         settings.Data.Response.Type.Should().Be(type);
         settings.Data.Response.IsEnabled.Should().BeTrue();
+    }
+
+    /// <summary>
+    /// The first POST for a user used to be invisible to GET until the subscription cache expired:
+    /// the record was added to the cached store with a null object id while the lookup compared
+    /// against "", so the read fell back to the group default and still reported the type as enabled.
+    /// </summary>
+    [Theory]
+    [InlineData(NotificationType.Badges)]
+    [InlineData(NotificationType.RoomsActivity)]
+    [InlineData(NotificationType.DailyFeed)]
+    [InlineData(NotificationType.UsefullTips)]
+    public async Task GetNotificationSettings_AfterDisabling_ReturnsDisabled(NotificationType type)
+    {
+        // Arrange
+        await AuthenticateAsAsync(NotificationActor.Owner);
+
+        await _notificationsApi.SetNotificationSettingsAsync(
+            new NotificationSettingsRequestDto(type, false), TestContext.Current.CancellationToken);
+
+        // Act
+        var disabled = await _notificationsApi.GetNotificationSettingsAsync(type, TestContext.Current.CancellationToken);
+
+        await _notificationsApi.SetNotificationSettingsAsync(
+            new NotificationSettingsRequestDto(type, true), TestContext.Current.CancellationToken);
+
+        var enabled = await _notificationsApi.GetNotificationSettingsAsync(type, TestContext.Current.CancellationToken);
+
+        // Assert
+        disabled.Response.IsEnabled.Should().BeFalse();
+        enabled.Response.IsEnabled.Should().BeTrue();
     }
 }

@@ -36,7 +36,7 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The lock state a file is to be put into.
 /// </summary>
-public class LockFileParameters
+public class LockFileRequest
 {
     /// <summary>
     /// The state to reach: `true` locks the file, which blocks editing, renaming and deleting for everybody but the
@@ -64,5 +64,5 @@ public class LockFileRequestDto<T>
     /// </summary>
     /// <example>{"lockFile": true}</example>
     [FromBody]
-    public required LockFileParameters File { get; set; }
+    public required LockFileRequest File { get; set; }
 }

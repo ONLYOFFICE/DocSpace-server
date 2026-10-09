@@ -52,7 +52,7 @@ public class AuthenticateTests(
 
         // Act
         var result = await _authenticationApi.AuthenticateMeAsync(
-            new AuthRequestsDto(userName: Owner.Email, password: Owner.Password),
+            new AuthRequestDto(userName: Owner.Email, password: Owner.Password),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -72,7 +72,7 @@ public class AuthenticateTests(
 
         // Act
         var result = await _authenticationApi.AuthenticateMeAsync(
-            new AuthRequestsDto(userName: member.Email, password: member.Password),
+            new AuthRequestDto(userName: member.Email, password: member.Password),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -84,7 +84,7 @@ public class AuthenticateTests(
     {
         // Arrange
         await _webApiClient.Authenticate(null);
-        var request = new AuthRequestsDto(userName: Owner.Email, password: Owner.Password);
+        var request = new AuthRequestDto(userName: Owner.Email, password: Owner.Password);
 
         // Act
         var first = await _authenticationApi.AuthenticateMeAsync(request, TestContext.Current.CancellationToken);
@@ -104,7 +104,7 @@ public class AuthenticateTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _authenticationApi.AuthenticateMeAsync(
-                new AuthRequestsDto(userName: Owner.Email, password: "wrongpassword"),
+                new AuthRequestDto(userName: Owner.Email, password: "wrongpassword"),
                 TestContext.Current.CancellationToken));
 
         // Assert
@@ -121,7 +121,7 @@ public class AuthenticateTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _authenticationApi.AuthenticateMeAsync(
-                new AuthRequestsDto(userName: "nonexistent@example.com", password: "somepassword123"),
+                new AuthRequestDto(userName: "nonexistent@example.com", password: "somepassword123"),
                 TestContext.Current.CancellationToken));
 
         // Assert

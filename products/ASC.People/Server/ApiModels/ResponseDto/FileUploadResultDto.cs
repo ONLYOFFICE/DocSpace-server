@@ -49,7 +49,7 @@ public class FileUploadResultDto
     /// The result of a successful upload, whose shape depends on `autosave`. With `autosave` on it holds the URLs of
     /// the stored avatar in every size - `main`, `retina`, `max`, `big`, `medium` and `small` - each carrying a
     /// `hash` query parameter that changes with the avatar. With `autosave` off it holds the name of the temporary
-    /// file to pass to `POST api/2.0/people/{userid}/photo/thumbnails`. It is empty when the upload failed.
+    /// file to pass to `POST api/2.0/people/{userId}/photo/thumbnails`. It is empty when the upload failed.
     /// </summary>
     /// <example>{"main": "/storage/userphotos/photo.png?hash=123456", "retina": "/storage/userphotos/photo_retina.png?hash=123456"}</example>
     public object Data { get; set; }

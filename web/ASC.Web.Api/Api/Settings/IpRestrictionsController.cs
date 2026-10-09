@@ -60,11 +60,11 @@ public class IpRestrictionsController(
     /// <path>api/2.0/settings/iprestrictions</path>
     /// <collection>list</collection>
     [Tags("Settings / IP restrictions")]
-    [SwaggerResponse(200, "The IP addresses allowed to reach the portal, each with its ID and administrators-only flag; an empty list when the portal has no restrictions", typeof(IEnumerable<IPRestriction>))]
+    [SwaggerResponse(200, "The IP addresses allowed to reach the portal, each with its ID and administrators-only flag; an empty list when the portal has no restrictions", typeof(IEnumerable<IpRestrictionDto>))]
     [SwaggerResponse(304, "The addresses have not changed since the `ETag` sent back in `If-None-Match`, which ignores the administrators-only flags; the body is empty")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("")]
-    public async Task<IEnumerable<IPRestriction>> GetIpRestrictions()
+    public async Task<IEnumerable<IpRestrictionDto>> GetIpRestrictions()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -72,7 +72,7 @@ public class IpRestrictionsController(
         var etagFromRequest = HttpContext.Request.Headers.IfNoneMatch;
         var result = await iPRestrictionsService.GetAsync(tenant.Id, etagFromRequest);
 
-        return HttpContext.TryGetFromCache(await HttpContextExtension.CalculateEtagAsync(result.Select(r => r.Ip))) ? null : result;
+        return HttpContext.TryGetFromCache(await HttpContextExtension.CalculateEtagAsync(result.Select(r => r.Ip))) ? null : result.Select(r => r.Map());
     }
 
     /// <remarks>
@@ -99,7 +99,7 @@ public class IpRestrictionsController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        inDto.IpRestrictions ??= new List<IpRestrictionBase>();
+        inDto.IpRestrictions ??= new List<IpRestrictionEntryDto>();
         var isEmpty = !inDto.IpRestrictions.Any();
 
         bool enable;
@@ -123,7 +123,7 @@ public class IpRestrictionsController(
         }
 
         var tenant = tenantManager.GetCurrentTenant();
-        await iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
+        await iPRestrictionsService.SaveAsync(inDto.IpRestrictions.Select(r => r.Map()), tenant.Id);
 
         var settings = new IPRestrictionsSettings { Enable = enable };
         await settingsManager.SaveAsync(settings);
@@ -148,17 +148,17 @@ public class IpRestrictionsController(
     /// <summary>Get IP restriction settings</summary>
     /// <path>api/2.0/settings/iprestrictions/settings</path>
     [Tags("Settings / IP restrictions")]
-    [SwaggerResponse(200, "The enforcement flag of the IP restrictions and the date the setting was last modified", typeof(IPRestrictionsSettings))]
+    [SwaggerResponse(200, "The enforcement flag of the IP restrictions and the date the setting was last modified", typeof(IpRestrictionsSettingsDto))]
     [SwaggerResponse(304, "The enforcement flag has not changed since the `Last-Modified` value sent back in `If-Modified-Since`; the body is empty")]
     [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("settings")]
-    public async Task<IPRestrictionsSettings> ReadIpRestrictionsSettings()
+    public async Task<IpRestrictionsSettingsDto> ReadIpRestrictionsSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var settings = await settingsManager.LoadAsync<IPRestrictionsSettings>(HttpContext.GetIfModifiedSince());
 
-        return HttpContext.TryGetFromCache(settings.LastModified) ? null : settings;
+        return HttpContext.TryGetFromCache(settings.LastModified) ? null : settings.Map();
     }
 
     /// <remarks>
@@ -185,7 +185,7 @@ public class IpRestrictionsController(
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        inDto.IpRestrictions ??= new List<IpRestrictionBase>();
+        inDto.IpRestrictions ??= new List<IpRestrictionEntryDto>();
         var isEmpty = !inDto.IpRestrictions.Any();
 
         bool enable;
@@ -209,7 +209,7 @@ public class IpRestrictionsController(
         }
 
         var tenant = tenantManager.GetCurrentTenant();
-        await iPRestrictionsService.SaveAsync(inDto.IpRestrictions, tenant.Id);
+        await iPRestrictionsService.SaveAsync(inDto.IpRestrictions.Select(r => r.Map()), tenant.Id);
 
         var settings = new IPRestrictionsSettings { Enable = enable };
         await settingsManager.SaveAsync(settings);

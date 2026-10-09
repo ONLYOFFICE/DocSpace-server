@@ -290,7 +290,7 @@ public class FilesUsedSpaceTests(
         var before = await GetBaselineUsedSpaceAsync();
 
         // Act
-        await _filesApi.UpdateFileAsync(file.Id, new UpdateFile("used_space_rename_after.docx"), TestContext.Current.CancellationToken);
+        await _filesApi.UpdateFileAsync(file.Id, new UpdateFileRequest("used_space_rename_after.docx"), TestContext.Current.CancellationToken);
 
         // Assert
         var after = await GetUsedSpaceAsync();

@@ -36,7 +36,7 @@ namespace ASC.Files.ApiModels.RequestDto;
 /// <summary>
 /// The revision of the form to open and what the caller intends to do with it.
 /// </summary>
-public class CheckFillFormDraft
+public class CheckFillFormDraftRequest
 {
     /// <summary>
     /// The revision of the form to open. Pass 0 for the current revision; a positive number addresses that entry of
@@ -89,5 +89,5 @@ public class CheckFillFormDraftRequestDto<T>
     /// </summary>
     /// <example>{"version": 0, "action": "view"}</example>
     [FromBody]
-    public required CheckFillFormDraft File { get; set; }
+    public required CheckFillFormDraftRequest File { get; set; }
 }

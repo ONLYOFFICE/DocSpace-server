@@ -646,7 +646,8 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
                 }
 
                 var props = propsNode as JsonObject;
-                if (props == null || !props.ContainsKey("FormCollection"))
+                // the services publish parameter names in camelCase, older documents in PascalCase
+                if (props == null || !props.Any(p => string.Equals(p.Key, "FormCollection", StringComparison.OrdinalIgnoreCase)))
                 {
                     continue;
                 }

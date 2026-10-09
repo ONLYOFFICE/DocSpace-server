@@ -57,9 +57,17 @@ public static class DocSpaceHelper
             return folderType == FolderType.AiRoom;
         }
 
+        /// <summary>
+        /// A section root the whole portal shares (created without a user, see <c>FolderDao.GetFolderID*</c>):
+        /// whoever happened to touch the section first is recorded as its author, so that author is not reported.
+        /// The roots every account owns itself - My documents, Trash, Privacy - are not among them.
+        /// </summary>
         public bool IsPublicSystemFolder()
         {
-            return folderType is FolderType.AiAgents or FolderType.Forms;
+            return folderType is FolderType.AiAgents or FolderType.Forms
+                or FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates
+                or FolderType.SHARE or FolderType.Recent or FolderType.Favorites
+                or FolderType.COMMON or FolderType.Templates or FolderType.DefaultTemplates;
         }
     }
 

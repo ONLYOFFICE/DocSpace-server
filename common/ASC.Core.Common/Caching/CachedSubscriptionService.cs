@@ -236,12 +236,16 @@ internal class SubscriptionsStore
     public SubscriptionRecord GetSubscription(string recipientId, string objectId)
     {
         return _recordsByRec.TryGetValue(recipientId, out var value) ?
-            value.Find(s => s.ObjectId == (objectId ?? "")) :
+            value.Find(s => (s.ObjectId ?? string.Empty) == (objectId ?? string.Empty)) :
             null;
     }
 
     public void SaveSubscription(SubscriptionRecord s)
     {
+        // The DB stores a missing object as "", and a record built by SubscriptionManager carries null:
+        // keep both forms identical in the store, otherwise the record added here is never found again.
+        s.ObjectId ??= string.Empty;
+
         var old = GetSubscription(s.RecipientId, s.ObjectId);
         if (old != null)
         {
@@ -262,7 +266,7 @@ internal class SubscriptionsStore
 
     public void RemoveSubscriptions(string objectId)
     {
-        _records.RemoveAll(s => s.ObjectId == (objectId ?? ""));
+        _records.RemoveAll(s => (s.ObjectId ?? string.Empty) == (objectId ?? string.Empty));
         BuildSubscriptionsIndex(_records);
     }
 

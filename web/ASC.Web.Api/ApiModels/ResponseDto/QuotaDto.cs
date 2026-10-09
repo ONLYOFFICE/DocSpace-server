@@ -122,27 +122,27 @@ public class QuotaDto
     /// statistics.
     /// </summary>
     /// <example>{"enableQuota": true, "defaultQuota": 1073741824}</example>
-    public TenantEntityQuotaSettings UsersQuota { get; set; }
+    public EntityQuotaDto UsersQuota { get; set; }
 
     /// <summary>
     /// The same kind of per-room storage override, filled in and read the same way as `usersQuota`.
     /// </summary>
     /// <example>{"enableQuota": true, "defaultQuota": 1073741824}</example>
-    public TenantEntityQuotaSettings RoomsQuota { get; set; }
+    public EntityQuotaDto RoomsQuota { get; set; }
 
     /// <summary>
     /// The same kind of per-agent storage override for AI agents, filled in and read the same way as
     /// `usersQuota`.
     /// </summary>
     /// <example>{"enableQuota": true, "defaultQuota": 1073741824}</example>
-    public TenantEntityQuotaSettings AiAgentsQuota { get; set; }
+    public EntityQuotaDto AiAgentsQuota { get; set; }
 
     /// <summary>
     /// The storage allowance an administrator has set for the portal as a whole, which caps it below what the
     /// quota grants. Filled in under the same conditions as `usersQuota`.
     /// </summary>
     /// <example>{"enableQuota": true, "quota": 10737418240}</example>
-    public TenantQuotaSettings TenantCustomQuota { get; set; }
+    public TenantQuotaSettingsDto TenantCustomQuota { get; set; }
 
     /// <summary>
     /// When the quota runs out, in UTC. It is empty on a quota from the catalogue, which has no date until it is
