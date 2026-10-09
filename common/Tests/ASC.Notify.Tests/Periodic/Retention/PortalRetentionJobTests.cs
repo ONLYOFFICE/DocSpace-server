@@ -222,8 +222,7 @@ public class PortalRetentionJobTests
 
         var kept = await settingsManager.LoadAsync<PortalRetentionSettings>(tenant.Id);
 
-        kept.WarnedOn.Should().Be(_today);
-        kept.WarnedBlockOn.Should().Be(_today.AddDays(30), "the block waits as long after the warning as the free schedule keeps them apart");
+        kept.LastWarning.Should().Be(new PortalRetentionWarning(_today, _today.AddDays(30)), "the block waits as long after the warning as the free schedule keeps them apart");
     }
 
     [Fact]
@@ -239,7 +238,7 @@ public class PortalRetentionJobTests
         // Told eighteen days ago, with money on its wallet, that it is blocked in 165 days. The stack has no
         // accounting service, so the wallet reads empty now, and the free schedule's own block day is long
         // past.
-        (await settingsManager.SaveAsync(new PortalRetentionSettings { WarnedOn = _today.AddDays(-18), WarnedBlockOn = _today.AddDays(165) }, tenant.Id))
+        (await settingsManager.SaveAsync(new PortalRetentionSettings { LastWarning = new PortalRetentionWarning(_today.AddDays(-18), _today.AddDays(165)) }, tenant.Id))
             .Should().BeTrue();
 
         var leaveAlone = await CreateJob(scope, logger).ApplyAsync(Free(tenant, _today.AddDays(-200)), _policyStart, client, _senderName);
@@ -259,7 +258,7 @@ public class PortalRetentionJobTests
 
         // Warned forty days ago of a block ten days ago, but the owner signed in twenty days ago; the audit
         // trail has nothing newer than a year.
-        (await settingsManager.SaveAsync(new PortalRetentionSettings { WarnedOn = _today.AddDays(-40), WarnedBlockOn = _today.AddDays(-10) }, tenant.Id))
+        (await settingsManager.SaveAsync(new PortalRetentionSettings { LastWarning = new PortalRetentionWarning(_today.AddDays(-40), _today.AddDays(-10)) }, tenant.Id))
             .Should().BeTrue();
 
         var signedIn = Free(tenant, _today.AddYears(-1)) with

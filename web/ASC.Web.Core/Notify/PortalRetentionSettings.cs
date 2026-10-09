@@ -48,28 +48,25 @@ namespace ASC.Web.Studio.Core.Notify;
 /// is blocked; a portal unblocked some other way keeps it, but the next block overwrites it before it is
 /// read again.
 /// </remarks>
-public class PortalRetentionSettings : ISettings<PortalRetentionSettings>
+public record PortalRetentionSettings : ISettings<PortalRetentionSettings>
 {
     /// <summary>The category of the current block, or null for a portal that is not blocked by the policy.</summary>
-    public PortalRetentionCategory? Category { get; set; }
+    public PortalRetentionCategory? Category { get; init; }
 
     /// <summary>
     /// The day the last reminder before the deletion went out, or null while it has not: the portal is not
     /// deleted before a full notice period has passed since.
     /// </summary>
-    public DateTime? FinalNoticeSentOn { get; set; }
+    public DateTime? FinalNoticeSentOn { get; init; }
 
     /// <summary>
     /// The last successful sign-in the policy has seen on the active portal, kept only while it is later
     /// than the last audit event: the audit trail is never purged, the login history is.
     /// </summary>
-    public DateTime? LastLoginOn { get; set; }
+    public DateTime? LastLoginOn { get; init; }
 
-    /// <summary>The day the last warning before the block went out, or null while none has.</summary>
-    public DateTime? WarnedOn { get; set; }
-
-    /// <summary>The day of the block that warning named.</summary>
-    public DateTime? WarnedBlockOn { get; set; }
+    /// <summary>The last warning before the block the active portal was sent, or null while none has.</summary>
+    public PortalRetentionWarning? LastWarning { get; init; }
 
     public static Guid ID => new("{0FB77F96-4DFF-4CDF-BF86-A88AA6D0B531}");
 

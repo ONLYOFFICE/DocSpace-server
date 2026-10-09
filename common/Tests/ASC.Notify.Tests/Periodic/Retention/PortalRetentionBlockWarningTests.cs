@@ -49,7 +49,7 @@ public class PortalRetentionBlockWarningTests
 
     private static PortalRetentionDecision Active(PortalRetentionCategory category, int day, PortalRetentionWarning? lastWarning = null)
     {
-        return PortalRetentionSchedule.Decide(_options.For(category), _start, _policyStart, null, _start.AddDays(day), lastWarning: lastWarning);
+        return PortalRetentionSchedule.DecideActive(_options.For(category), _start, _policyStart, _start.AddDays(day), lastWarning: lastWarning);
     }
 
     private static PortalRetentionWarning Warning(int sentDay, int blockDay)
@@ -134,7 +134,7 @@ public class PortalRetentionBlockWarningTests
     {
         var schedule = new PortalRetentionScheduleOptions { BlockAfterDays = 60, RetentionDays = 30, FinalDeletionNoticeDays = 7 };
 
-        PortalRetentionSchedule.Decide(schedule, _start, _policyStart, null, _start.AddDays(60))
+        PortalRetentionSchedule.DecideActive(schedule, _start, _policyStart, _start.AddDays(60))
             .Step.Should().Be(PortalRetentionStep.Block, "a configuration with every warning switched off asks for no warning");
     }
 }

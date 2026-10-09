@@ -114,9 +114,7 @@ public class PortalRetentionJob(
     /// </summary>
     public async Task<bool> ApplyAsync(PeriodicLetterContext context, DateTime policyStart, INotifyClient client, string senderName, DateTime? lastRunOn = null)
     {
-        var tenant = context.Tenant;
-        var blocked = tenant.Status == TenantStatus.Blocked;
-
+        var blocked = context.Tenant.Status == TenantStatus.Blocked;
         var formerPaying = !context.Quota.Free && context.Tariff.State == TariffState.NotPaid && context.DueDateIsNotMax;
 
         if (!context.Quota.Free && !formerPaying)
@@ -125,53 +123,95 @@ public class PortalRetentionJob(
             return blocked;
         }
 
-        var kept = await settingsManager.LoadAsync<PortalRetentionSettings>(tenant.Id);
+        var kept = await settingsManager.LoadAsync<PortalRetentionSettings>(context.Tenant.Id);
+
+        if (blocked)
+        {
+            await ApplyBlockedAsync(context, formerPaying, kept, client, senderName, lastRunOn);
+
+            // A blocked portal gets none of the ordinary letters, whatever today brought it.
+            return true;
+        }
+
+        return await ApplyActiveAsync(context, formerPaying, kept, policyStart, client, senderName, lastRunOn);
+    }
+
+    /// <summary>A blocked portal: reminded of its deletion, or deleted.</summary>
+    private async Task ApplyBlockedAsync(PeriodicLetterContext context, bool formerPaying, PortalRetentionSettings kept, INotifyClient client, string senderName, DateTime? lastRunOn)
+    {
+        var blockedOn = context.Tenant.StatusChangeDate;
+
+        PortalRetentionDecision Decide(PortalRetentionCategory category) =>
+            PortalRetentionSchedule.DecideBlocked(Options.For(category), blockedOn, context.NowDate, lastRunOn, kept.FinalNoticeSentOn);
 
         // A blocked portal keeps the category it was blocked under: the letter about the block named the
         // deletion date of that category, and a balance that changes afterwards must not bring it forward.
-        var blockSettings = blocked ? kept : null;
+        // One blocked without a category on record - not by this job - is placed by its wallet instead.
+        var due = kept.Category is { } category
+            ? await DueAsync(context.Tenant, category, Decide(category))
+            : await ChooseByWalletAsync(context.Tenant, formerPaying, Decide);
 
-        if (blockSettings?.Category is { } blockedCategory)
+        if (due is { } step)
         {
-            var blockedDecision = PortalRetentionSchedule.Decide(Options.For(blockedCategory), tenant.StatusChangeDate, policyStart, tenant.StatusChangeDate.Date, context.NowDate,
-                lastRunOn: lastRunOn, finalNoticeSentOn: blockSettings.FinalNoticeSentOn);
+            await ActAsync(context, step.Category, step.Decision, client, senderName, kept);
+        }
+    }
 
-            if (blockedDecision.Step == PortalRetentionStep.None || await IsForbiddenDomainAsync(tenant))
-            {
-                return true;
-            }
+    /// <summary>An active portal: warned, or blocked. Returns true when it has just been blocked.</summary>
+    private async Task<bool> ApplyActiveAsync(PeriodicLetterContext context, bool formerPaying, PortalRetentionSettings kept, DateTime policyStart, INotifyClient client, string senderName, DateTime? lastRunOn)
+    {
+        DateTime anchor;
 
-            return await ActAsync(context, blockedCategory, blockedDecision, client, senderName, blocked);
+        if (formerPaying)
+        {
+            // Counted from the end of the subscription: activity after it changes nothing.
+            anchor = context.DueDate;
+        }
+        else
+        {
+            var activity = await context.GetLastActivityAsync();
+
+            kept = await KeepLastLoginAsync(context.Tenant.Id, activity, kept);
+            anchor = Later(activity.LastOn, kept.LastLoginOn);
         }
 
-        (var anchor, kept) = await GetAnchorAsync(context, formerPaying, kept);
-        DateTime? blockedOn = blocked ? tenant.StatusChangeDate.Date : null;
+        // No earlier than the last change of status, which is what an unblocked portal starts again from.
+        anchor = Later(anchor, context.Tenant.StatusChangeDate);
 
-        PortalRetentionWarning? lastWarning = kept.WarnedOn is { } warnedOn && kept.WarnedBlockOn is { } warnedBlockOn
-            ? new PortalRetentionWarning(warnedOn, warnedBlockOn)
-            : null;
-
-        var plain = formerPaying ? PortalRetentionCategory.FormerPaying : PortalRetentionCategory.Free;
-        var withBalance = formerPaying ? PortalRetentionCategory.FormerPayingWithBalance : PortalRetentionCategory.FreeWithBalance;
-
-        // Both schedules first, so the accounting service is only asked on a day one of them has something.
         // A lapsed tariff is the policy's only from its first unpaid day, once the grace period is over; a
         // warning due while it was still in that period goes out on that day instead of never.
         var noticesFrom = formerPaying ? context.DueDate.Date.AddDays(tariffService.GetPaymentDelay() + 1) : DateTime.MinValue;
+        var lastWarning = kept.LastWarning;
 
-        var finalNoticeSentOn = blockSettings?.FinalNoticeSentOn;
+        PortalRetentionDecision Decide(PortalRetentionCategory category) =>
+            PortalRetentionSchedule.DecideActive(Options.For(category), anchor, policyStart, context.NowDate, noticesFrom, lastRunOn, lastWarning);
 
-        var plainDecision = PortalRetentionSchedule.Decide(Options.For(plain), anchor, policyStart, blockedOn, context.NowDate, noticesFrom, lastRunOn, finalNoticeSentOn, lastWarning);
-        var balanceDecision = PortalRetentionSchedule.Decide(Options.For(withBalance), anchor, policyStart, blockedOn, context.NowDate, noticesFrom, lastRunOn, finalNoticeSentOn, lastWarning);
-
-        if (plainDecision.Step == PortalRetentionStep.None && balanceDecision.Step == PortalRetentionStep.None)
+        if (await ChooseByWalletAsync(context.Tenant, formerPaying, Decide) is not { } step)
         {
-            return blocked;
+            return false;
         }
 
-        if (await IsForbiddenDomainAsync(tenant))
+        await ActAsync(context, step.Category, step.Decision, client, senderName, kept);
+
+        return step.Decision.Step == PortalRetentionStep.Block;
+    }
+
+    /// <summary>
+    /// What today brings a portal whose wallet decides its category, or null when nothing does. Both
+    /// schedules are asked first, so the accounting service is only asked on a day one of them has
+    /// something.
+    /// </summary>
+    private async Task<(PortalRetentionCategory Category, PortalRetentionDecision Decision)?> ChooseByWalletAsync(Tenant tenant, bool formerPaying, Func<PortalRetentionCategory, PortalRetentionDecision> decide)
+    {
+        var plain = formerPaying ? PortalRetentionCategory.FormerPaying : PortalRetentionCategory.Free;
+        var withBalance = formerPaying ? PortalRetentionCategory.FormerPayingWithBalance : PortalRetentionCategory.FreeWithBalance;
+
+        var plainDecision = decide(plain);
+        var balanceDecision = decide(withBalance);
+
+        if ((plainDecision.Step == PortalRetentionStep.None && balanceDecision.Step == PortalRetentionStep.None) || await IsForbiddenDomainAsync(tenant))
         {
-            return blocked;
+            return null;
         }
 
         if (await tariffService.HasPositiveBalanceAsync(tenant.Id) is not { } hasBalance)
@@ -179,26 +219,28 @@ public class PortalRetentionJob(
             // Not knowing whether money is left is not knowing which schedule applies: wait for tomorrow.
             logger.WarningBalanceUnknown(tenant.Id);
 
-            return blocked;
+            return null;
         }
 
-        var category = hasBalance ? withBalance : plain;
-        var decision = hasBalance ? balanceDecision : plainDecision;
+        return hasBalance ? DueOrNull(withBalance, balanceDecision) : DueOrNull(plain, plainDecision);
+    }
 
-        if (decision.Step == PortalRetentionStep.None)
-        {
-            return blocked;
-        }
+    /// <summary>What today brings a portal of a known category, or null when nothing does.</summary>
+    private async Task<(PortalRetentionCategory Category, PortalRetentionDecision Decision)?> DueAsync(Tenant tenant, PortalRetentionCategory category, PortalRetentionDecision decision)
+    {
+        return decision.Step == PortalRetentionStep.None || await IsForbiddenDomainAsync(tenant) ? null : (category, decision);
+    }
 
-        return await ActAsync(context, category, decision, client, senderName, blocked, kept);
+    private static (PortalRetentionCategory Category, PortalRetentionDecision Decision)? DueOrNull(PortalRetentionCategory category, PortalRetentionDecision decision)
+    {
+        return decision.Step == PortalRetentionStep.None ? null : (category, decision);
     }
 
     /// <summary>
-    /// Carries out the decision of the day. Returns what <see cref="ApplyAsync"/> returns: true when the
-    /// portal is to be left alone for the rest of the run. <paramref name="kept"/> is what is kept about the
-    /// portal, null for a portal blocked under a recorded category.
+    /// Carries out the decision of the day, and keeps with the portal what the next days depend on: the
+    /// day a warning named for the block, the day the last reminder before the deletion went out.
     /// </summary>
-    private async Task<bool> ActAsync(PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName, bool blocked, PortalRetentionSettings kept = null)
+    private async Task ActAsync(PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName, PortalRetentionSettings kept)
     {
         var tenant = context.Tenant;
 
@@ -209,36 +251,32 @@ public class PortalRetentionJob(
             case PortalRetentionStep.Notify:
                 await SendAsync(LetterFor(category, decision.Letter), context, category, decision, client, senderName);
 
-                if (decision.Letter == PortalRetentionLetter.FinalDeletionNotice)
+                var keep = decision.Letter switch
                 {
-                    // The deletion waits for this letter, so the day it went out is kept with the block.
-                    await settingsManager.SaveAsync(new PortalRetentionSettings { Category = category, FinalNoticeSentOn = context.NowDate }, tenant.Id);
-                }
-                else if (!blocked && decision.Letter is PortalRetentionLetter.FirstNotice or PortalRetentionLetter.SecondNotice or PortalRetentionLetter.MonthlyNotice)
+                    // The block waits for the day this warning names.
+                    PortalRetentionLetter.FirstNotice or PortalRetentionLetter.SecondNotice or PortalRetentionLetter.MonthlyNotice =>
+                        kept with { LastWarning = new PortalRetentionWarning(context.NowDate, decision.BlockOn) },
+
+                    // The deletion waits a full notice period after this reminder.
+                    PortalRetentionLetter.FinalDeletionNotice => kept with { Category = category, FinalNoticeSentOn = context.NowDate },
+
+                    _ => null
+                };
+
+                if (keep is not null)
                 {
-                    // The block waits for the day this letter names, so the letter is kept with the portal.
-                    await settingsManager.SaveAsync(new PortalRetentionSettings
-                    {
-                        LastLoginOn = kept?.LastLoginOn,
-                        WarnedOn = context.NowDate,
-                        WarnedBlockOn = decision.BlockOn
-                    }, tenant.Id);
+                    await settingsManager.SaveAsync(keep, tenant.Id);
                 }
 
-                return blocked;
+                break;
 
             case PortalRetentionStep.Block:
                 await BlockAsync(context, category, decision, client, senderName);
-
-                return true;
+                break;
 
             case PortalRetentionStep.Delete:
                 await RemoveAsync(context, category, decision, client, senderName);
-
-                return true;
-
-            default:
-                return blocked;
+                break;
         }
     }
 
@@ -327,49 +365,29 @@ public class PortalRetentionJob(
     }
 
     /// <summary>
-    /// The day the count starts: the last activity for a free portal, the due date for a former paying
-    /// one - and in both cases no earlier than the last change of status, which is what an unblocked
-    /// portal starts again from.
+    /// Keeps the last sign-in with the portal while it is later than the last audit event. The portal's
+    /// audit settings purge its login history, down to a day, while the audit trail stays: a portal whose
+    /// last sign of life is a sign-in would otherwise see its count jump back, and its block come at once,
+    /// the day that row goes.
     /// </summary>
-    /// <remarks>
-    /// The portal's audit settings purge its login history, down to a day, while the audit trail stays. A
-    /// portal whose last sign of life is a sign-in would see its count jump back, and its block come at
-    /// once, the day that row goes - so the last sign-in is kept with the portal while it is the later of
-    /// the two, and the count never starts earlier than it.
-    /// </remarks>
-    private async Task<(DateTime Anchor, PortalRetentionSettings Kept)> GetAnchorAsync(PeriodicLetterContext context, bool formerPaying, PortalRetentionSettings kept)
+    private async Task<PortalRetentionSettings> KeepLastLoginAsync(int tenantId, PortalActivity activity, PortalRetentionSettings kept)
     {
-        DateTime anchor;
-
-        if (formerPaying)
+        if (activity.LastLoginOn <= activity.LastEventOn || activity.LastLoginOn <= kept.LastLoginOn)
         {
-            anchor = context.DueDate;
-        }
-        else
-        {
-            var activity = await context.GetLastActivityAsync();
-            var keptLoginOn = kept.LastLoginOn?.Date ?? DateTime.MinValue;
-
-            // Nobody signs in to a blocked portal, and its record belongs to the block.
-            if (context.Tenant.Status != TenantStatus.Blocked && activity.LastLoginOn > activity.LastEventOn && activity.LastLoginOn > keptLoginOn)
-            {
-                keptLoginOn = activity.LastLoginOn;
-                kept = new PortalRetentionSettings
-                {
-                    LastLoginOn = keptLoginOn,
-                    WarnedOn = kept.WarnedOn,
-                    WarnedBlockOn = kept.WarnedBlockOn
-                };
-
-                await settingsManager.SaveAsync(kept, context.Tenant.Id);
-            }
-
-            anchor = keptLoginOn > activity.LastOn ? keptLoginOn : activity.LastOn;
+            return kept;
         }
 
-        var statusChanged = context.Tenant.StatusChangeDate.Date;
+        kept = kept with { LastLoginOn = activity.LastLoginOn };
 
-        return (statusChanged > anchor ? statusChanged : anchor, kept);
+        await settingsManager.SaveAsync(kept, tenantId);
+
+        return kept;
+    }
+
+    /// <summary>The later of two days.</summary>
+    private static DateTime Later(DateTime day, DateTime? other)
+    {
+        return other?.Date > day.Date ? other.Value.Date : day.Date;
     }
 
     /// <summary>

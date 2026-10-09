@@ -52,14 +52,14 @@ public class PortalRetentionScheduleTests
     /// </summary>
     private static PortalRetentionDecision Active(PortalRetentionCategory category, int day, int noticesFromDay = 0, int? lastRunDay = null, PortalRetentionWarning? lastWarning = null)
     {
-        return PortalRetentionSchedule.Decide(_options.For(category), _start, _policyStart, null, _start.AddDays(day), _start.AddDays(noticesFromDay),
+        return PortalRetentionSchedule.DecideActive(_options.For(category), _start, _policyStart, _start.AddDays(day), _start.AddDays(noticesFromDay),
             lastRunOn: DayOrNull(lastRunDay), lastWarning: lastWarning);
     }
 
     /// <summary>A day of the blocked part, with the day the last reminder went out if it has.</summary>
     private static PortalRetentionDecision Blocked(PortalRetentionCategory category, int dayAfterBlock, int? finalNoticeDay = null, int? lastRunDay = null)
     {
-        return PortalRetentionSchedule.Decide(_options.For(category), _start, _policyStart, _start, _start.AddDays(dayAfterBlock),
+        return PortalRetentionSchedule.DecideBlocked(_options.For(category), _start, _start.AddDays(dayAfterBlock),
             lastRunOn: DayOrNull(lastRunDay), finalNoticeSentOn: DayOrNull(finalNoticeDay));
     }
 
@@ -301,19 +301,19 @@ public class PortalRetentionScheduleTests
         var schedule = _options.For(PortalRetentionCategory.Free);
 
         // Idle for years when the policy first runs: nothing happens on the first night ...
-        PortalRetentionSchedule.Decide(schedule, new DateTime(2023, 1, 1), policyStart, null, policyStart)
+        PortalRetentionSchedule.DecideActive(schedule, new DateTime(2023, 1, 1), policyStart, policyStart)
             .Step.Should().Be(PortalRetentionStep.None);
 
         // ... it gets the whole chain counted from the first run ...
-        PortalRetentionSchedule.Decide(schedule, new DateTime(2023, 1, 1), policyStart, null, policyStart.AddDays(30))
+        PortalRetentionSchedule.DecideActive(schedule, new DateTime(2023, 1, 1), policyStart, policyStart.AddDays(30))
             .Letter.Should().Be(PortalRetentionLetter.FirstNotice);
 
-        PortalRetentionSchedule.Decide(schedule, new DateTime(2023, 1, 1), policyStart, null, policyStart.AddDays(60),
+        PortalRetentionSchedule.DecideActive(schedule, new DateTime(2023, 1, 1), policyStart, policyStart.AddDays(60),
                 lastWarning: new PortalRetentionWarning(policyStart.AddDays(30), policyStart.AddDays(60)))
             .Step.Should().Be(PortalRetentionStep.Block);
 
         // ... while a portal active after the first run is counted from its own activity.
-        PortalRetentionSchedule.Decide(schedule, policyStart.AddDays(10), policyStart, null, policyStart.AddDays(60))
+        PortalRetentionSchedule.DecideActive(schedule, policyStart.AddDays(10), policyStart, policyStart.AddDays(60))
             .Step.Should().Be(PortalRetentionStep.None);
     }
 
@@ -323,7 +323,7 @@ public class PortalRetentionScheduleTests
         var schedule = _options.For(PortalRetentionCategory.Free);
         var today = _start.AddDays(59);
 
-        PortalRetentionSchedule.Decide(schedule, today.AddDays(-1), _policyStart, null, today)
+        PortalRetentionSchedule.DecideActive(schedule, today.AddDays(-1), _policyStart, today)
             .Step.Should().Be(PortalRetentionStep.None, "yesterday's activity puts the block two months away again");
     }
 
