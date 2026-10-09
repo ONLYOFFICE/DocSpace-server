@@ -46,7 +46,7 @@ public record FormsDbCredentials(
 
 [Scope]
 public class FormsDbProvisioningService(
-    IConfiguration configuration,
+    ConfigurationExtension configurationExtension,
     SettingsManager settingsManager,
     IDistributedLockProvider distributedLockProvider,
     InstanceCrypto instanceCrypto,
@@ -64,7 +64,9 @@ public class FormsDbProvisioningService(
 
     private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
 
-    private string? AdminConnectionString => configuration["ConnectionStrings:formsAdmin:connectionString"];
+    private const string AdminConnectionStringName = "formsAdmin";
+
+    private string? AdminConnectionString => configurationExtension.GetConnectionStrings(AdminConnectionStringName)?.ConnectionString;
 
     public bool IsEnabled() => !string.IsNullOrWhiteSpace(AdminConnectionString);
 
@@ -162,8 +164,8 @@ public class FormsDbProvisioningService(
         var schemaName = GetSchemaName(tenantId);
         var rwUser = GetRwUser(tenantId);
         var roUser = GetRoUser(tenantId);
-        var rwPassword = GeneratePassword();
-        var roPassword = GeneratePassword();
+        var rwPassword = UserManagerWrapper.GeneratePassword();
+        var roPassword = UserManagerWrapper.GeneratePassword();
 
         await using var connection = new NpgsqlConnection(AdminConnectionString);
         await connection.OpenAsync();
@@ -271,10 +273,6 @@ public class FormsDbProvisioningService(
         cmd.CommandText = sql;
         await cmd.ExecuteNonQueryAsync();
     }
-
-    private static string GeneratePassword() =>
-        Convert.ToBase64String(RandomNumberGenerator.GetBytes(24))
-               .Replace("+", "A").Replace("/", "B").Replace("=", "C");
 }
 
 internal static partial class FormsDbProvisioningServiceLogger

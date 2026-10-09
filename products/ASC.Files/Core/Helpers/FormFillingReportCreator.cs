@@ -132,6 +132,18 @@ public class FormFillingReportCreator(
     public async Task<bool> EnsureBuiltinDbTableAsync(int originalFormId, int originalFormVersion, int roomId)
     {
         var tableName = GetTableName(originalFormId, originalFormVersion);
+
+        // Marked as used before the check, so the idle-table cleanup cannot drop it in between. Best effort: a failed
+        // mark must not fail the submission or the analysis.
+        try
+        {
+            await builtinFormsDatabaseClient.TouchTableAsync(tableName);
+        }
+        catch (Exception e)
+        {
+            logger.WarnBuiltinDbTouchFailed(e, tableName);
+        }
+
         if (await builtinFormsDatabaseClient.TableExistsAsync(tableName))
         {
             return true;

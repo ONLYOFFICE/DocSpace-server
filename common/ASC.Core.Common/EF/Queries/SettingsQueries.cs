@@ -40,6 +40,12 @@ public partial class WebstudioDbContext
     {
         return Queries.WebStudioSettingsAsync(this, tenantId, id, userId);
     }
+
+    [PreCompileQuery]
+    public IAsyncEnumerable<int> ActiveTenantsWithSettingsAsync(Guid id)
+    {
+        return Queries.ActiveTenantsWithSettingsAsync(this, id);
+    }
 }
 
 static file class Queries
@@ -49,4 +55,13 @@ static file class Queries
             (WebstudioDbContext ctx, int tenantId, Guid id, Guid userId) =>
                 ctx.WebstudioSettings
                     .FirstOrDefault(r => r.Id == id && r.TenantId == tenantId && r.UserId == userId));
+
+    public static readonly Func<WebstudioDbContext, Guid, IAsyncEnumerable<int>> ActiveTenantsWithSettingsAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (WebstudioDbContext ctx, Guid id) =>
+                ctx.WebstudioSettings
+                    .Where(r => r.Id == id && r.UserId == Guid.Empty)
+                    .Join(ctx.Tenants, r => r.TenantId, t => t.Id, (settings, tenant) => new { settings, tenant })
+                    .Where(r => r.tenant.Status == TenantStatus.Active)
+                    .Select(r => r.settings.TenantId));
 }

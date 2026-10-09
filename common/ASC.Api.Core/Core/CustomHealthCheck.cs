@@ -98,6 +98,17 @@ public static class CustomHealthCheck
                     timeout: new TimeSpan(0, 0, 30));
             }
 
+            // The built-in forms database is optional: when it is down, only form analysis is affected.
+            var formsConnectionString = configurationExtension.GetConnectionStrings("formsAdmin")?.ConnectionString;
+            if (!string.IsNullOrEmpty(formsConnectionString))
+            {
+                hcBuilder.AddNpgSql(formsConnectionString,
+                    name: "formsdb",
+                    failureStatus: HealthStatus.Degraded,
+                    tags: ["formsdb"],
+                    timeout: new TimeSpan(0, 0, 30));
+            }
+
             return hcBuilder;
         }
 

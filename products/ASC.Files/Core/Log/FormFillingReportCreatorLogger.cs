@@ -42,4 +42,12 @@ internal static partial class FormFillingReportCreatorLogger
     [LoggerMessage(LogLevel.Error, "Gap sync: failed to upsert form_id={FormId} into table {TableName}")]
     public static partial void ErrorGapSyncUpsertFailed(
         this ILogger<FormFillingReportCreator> logger, Exception exception, int formId, string tableName);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: table {TableName} is not restored, {Count} submissions exceed the search index query limit")]
+    public static partial void WarnBuiltinDbRestoreTooLarge(
+        this ILogger<FormFillingReportCreator> logger, string tableName, long count);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: failed to record the use of table {TableName}")]
+    public static partial void WarnBuiltinDbTouchFailed(
+        this ILogger<FormFillingReportCreator> logger, Exception exception, string tableName);
 }

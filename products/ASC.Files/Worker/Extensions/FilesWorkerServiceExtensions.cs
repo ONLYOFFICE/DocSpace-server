@@ -70,6 +70,7 @@ public static class FilesWorkerServiceExtensions
 
             services.AddHostedService<ThumbnailBuilderService>();
             services.AddActivePassiveHostedService<AutoCleanTrashService>(configuration);
+            services.AddActivePassiveHostedService<BuiltinFormsDbCleanerService>(configuration);
             services.AddActivePassiveHostedService<AutoDeletePersonalFolderService>(configuration);
             services.AddActivePassiveHostedService<AutoDeactivateExpiredApiKeysService>(configuration);
             services.AddActivePassiveHostedService<DeleteExpiredService>(configuration);
