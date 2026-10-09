@@ -1,0 +1,33 @@
+{{#apiInfo}}
+{{#apis}}
+{{#operations}}
+{{#operation}}
+{{^vendorExtensions.x-is-thirdparty-variant}}
+<!--snippet:{{{operationIdOriginal}}}-->
+```python
+{{{vendorExtensions.x-snippet-imports}}}
+
+configuration = Configuration(
+    host="{{{snippetsServerUrl}}}",
+    access_token="YOUR_API_KEY",
+)
+
+with ApiClient(configuration) as api_client:
+    api = {{x-classname}}(api_client)
+{{#vendorExtensions.x-snippet-body}}
+
+    body = {{{.}}}
+{{/vendorExtensions.x-snippet-body}}
+
+    {{#returnType}}result = {{/returnType}}api.{{operationId}}({{{vendorExtensions.x-snippet-arguments}}})
+{{#returnType}}
+    print(result)
+{{/returnType}}
+```
+
+{{/vendorExtensions.x-is-thirdparty-variant}}
+{{/operation}}
+{{/operations}}
+{{/apis}}
+{{/apiInfo}}
+<!--/snippets-->
