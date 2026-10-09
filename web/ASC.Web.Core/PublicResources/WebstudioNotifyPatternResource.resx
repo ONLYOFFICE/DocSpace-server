@@ -897,7 +897,11 @@ Since the subscription of your ${LetterLogoText} space, *$PortalName*, ended and
 Since your ${LetterLogoText} space, *$PortalName*, hasn't been used for a long time, we've now deleted it along with all its data, as described in our "Privacy Policy":"$URL1".
 #end
 
-#if($Unpaid == "True")Thank you for working with us.#else#**#Thank you for giving ${LetterLogoText} a try.#end#**# We'd really love to know what made you stop using it, whether something didn't work for you, you found a better fit, or you simply didn't need it anymore. It only takes a minute, and every answer helps us improve.
+#if($Unpaid == "True")
+Thank you for working with us. We'd really love to know what made you stop using it, whether something didn't work for you, you found a better fit, or you simply didn't need it anymore. It only takes a minute, and every answer helps us improve.
+#else
+Thank you for giving ${LetterLogoText} a try. We'd really love to know what made you stop using it, whether something didn't work for you, you found a better fit, or you simply didn't need it anymore. It only takes a minute, and every answer helps us improve.
+#end
 
 $OrangeButton
 
@@ -912,7 +916,11 @@ Since the subscription of your ${LetterLogoText} space, $PortalName, ended and w
 Since your ${LetterLogoText} space, $PortalName, hasn't been used for a long time, we've now deleted it along with all its data, as described in our Privacy Policy.
 #end
 
-#if($Unpaid == "True")Thank you for working with us.#else#**#Thank you for giving ${LetterLogoText} a try.#end#**# We'd really love to know what made you stop using it, whether something didn't work for you, you found a better fit, or you simply didn't need it anymore. It only takes a minute, and every answer helps us improve.
+#if($Unpaid == "True")
+Thank you for working with us. We'd really love to know what made you stop using it, whether something didn't work for you, you found a better fit, or you simply didn't need it anymore. It only takes a minute, and every answer helps us improve.
+#else
+Thank you for giving ${LetterLogoText} a try. We'd really love to know what made you stop using it, whether something didn't work for you, you found a better fit, or you simply didn't need it anymore. It only takes a minute, and every answer helps us improve.
+#end
 
 $OrangeButton
 
@@ -924,9 +932,17 @@ $TrulyYours</comment>
     <value>h1.Your space will be deleted soon
 
 #if($Unpaid == "True")
-Your ${LetterLogoText} space, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, is still blocked because its subscription has ended. This is a friendly #if($FinalNotice == "True")last #end#**#reminder: on *$DeleteDate*, the space and all its data will be permanently deleted.
+#if($FinalNotice == "True")
+Your ${LetterLogoText} space, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, is still blocked because its subscription has ended. This is a friendly last reminder: on *$DeleteDate*, the space and all its data will be permanently deleted.
 #else
-Your ${LetterLogoText} space, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, is still blocked because it hasn't been used for a while. This is a friendly #if($FinalNotice == "True")last #end#**#reminder: on *$DeleteDate*, the space and all its data will be permanently deleted.
+Your ${LetterLogoText} space, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, is still blocked because its subscription has ended. This is a friendly reminder: on *$DeleteDate*, the space and all its data will be permanently deleted.
+#end
+#else
+#if($FinalNotice == "True")
+Your ${LetterLogoText} space, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, is still blocked because it hasn't been used for a while. This is a friendly last reminder: on *$DeleteDate*, the space and all its data will be permanently deleted.
+#else
+Your ${LetterLogoText} space, *"${__VirtualRootPath}":"${__VirtualRootPath}"*, is still blocked because it hasn't been used for a while. This is a friendly reminder: on *$DeleteDate*, the space and all its data will be permanently deleted.
+#end
 #end
 
 #if($CanUnblock == "True")
@@ -955,9 +971,17 @@ $TrulyYours</value>
     <comment>Your space will be deleted soon
 
 #if($Unpaid == "True")
-Your ${LetterLogoText} space, ${__VirtualRootPath}, is still blocked because its subscription has ended. This is a friendly #if($FinalNotice == "True")last #end#**#reminder: on $DeleteDate, the space and all its data will be permanently deleted.
+#if($FinalNotice == "True")
+Your ${LetterLogoText} space, ${__VirtualRootPath}, is still blocked because its subscription has ended. This is a friendly last reminder: on $DeleteDate, the space and all its data will be permanently deleted.
 #else
-Your ${LetterLogoText} space, ${__VirtualRootPath}, is still blocked because it hasn't been used for a while. This is a friendly #if($FinalNotice == "True")last #end#**#reminder: on $DeleteDate, the space and all its data will be permanently deleted.
+Your ${LetterLogoText} space, ${__VirtualRootPath}, is still blocked because its subscription has ended. This is a friendly reminder: on $DeleteDate, the space and all its data will be permanently deleted.
+#end
+#else
+#if($FinalNotice == "True")
+Your ${LetterLogoText} space, ${__VirtualRootPath}, is still blocked because it hasn't been used for a while. This is a friendly last reminder: on $DeleteDate, the space and all its data will be permanently deleted.
+#else
+Your ${LetterLogoText} space, ${__VirtualRootPath}, is still blocked because it hasn't been used for a while. This is a friendly reminder: on $DeleteDate, the space and all its data will be permanently deleted.
+#end
 #end
 
 #if($CanUnblock == "True")
@@ -2282,7 +2306,10 @@ $TrulyYours</value>
     <value>Your ${LetterLogoText} space has been deleted</value>
   </data>
   <data name="subject_saas_owner_retention_deletion_reminder" xml:space="preserve">
-    <value>#if($FinalNotice == "True")Last chance to keep your ${LetterLogoText} space#else#**#Your ${LetterLogoText} space will be deleted soon#end#**# (deleted on $DeleteDateShort)</value>
+    <value>Your ${LetterLogoText} space will be deleted soon (deleted on $DeleteDateShort)</value>
+  </data>
+  <data name="subject_saas_owner_retention_final_reminder" xml:space="preserve">
+    <value>Last chance to keep your ${LetterLogoText} space (deleted on $DeleteDateShort)</value>
   </data>
   <data name="subject_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>Your ${LetterLogoText} space misses you (action needed by $BlockDateShort)</value>

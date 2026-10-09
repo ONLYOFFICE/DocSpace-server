@@ -285,7 +285,7 @@ public class PortalRetentionLifecycleTests
             .ApplyAsync(Free(tenant, reminderDay, reminderDay.AddYears(-1)), reminderDay.AddYears(-2), reminderClient, _senderName);
 
         reminderClient.Sent.Should().ContainSingle()
-            .Which.Action.Should().BeOfType<SaasOwnerRetentionDeletionReminderNotifyAction>();
+            .Which.Action.Should().BeOfType<SaasOwnerRetentionFinalReminderNotifyAction>();
 
         (await services.GetRequiredService<SettingsManager>().LoadAsync<PortalRetentionBlockSettings>(portal.TenantId)).FinalNoticeSentOn
             .Should().Be(reminderDay, "the deletion waits for the reminder, so the day it went out is kept");

@@ -136,7 +136,7 @@ public class PortalRetentionJobTests
         leaveAlone.Should().BeTrue("a blocked portal gets none of the ordinary letters");
         logger.Messages.Should().ContainSingle(m => m.Contains("Free: Notify FinalDeletionNotice"));
         client.Sent.Should().ContainSingle()
-            .Which.Action.Should().BeOfType<SaasOwnerRetentionDeletionReminderNotifyAction>();
+            .Which.Action.Should().BeOfType<SaasOwnerRetentionFinalReminderNotifyAction>();
     }
 
     [Fact]

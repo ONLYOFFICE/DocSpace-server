@@ -247,7 +247,8 @@ public class PortalRetentionJob(
         return letter switch
         {
             PortalRetentionLetter.Blocked => typeof(SaasOwnerRetentionBlockedNotifyAction),
-            PortalRetentionLetter.EarlyDeletionNotice or PortalRetentionLetter.FinalDeletionNotice => typeof(SaasOwnerRetentionDeletionReminderNotifyAction),
+            PortalRetentionLetter.EarlyDeletionNotice => typeof(SaasOwnerRetentionDeletionReminderNotifyAction),
+            PortalRetentionLetter.FinalDeletionNotice => typeof(SaasOwnerRetentionFinalReminderNotifyAction),
             _ => category switch
             {
                 PortalRetentionCategory.Free => typeof(SaasOwnerRetentionInactivityWarningNotifyAction),

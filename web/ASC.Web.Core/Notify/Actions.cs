@@ -1941,7 +1941,41 @@ public sealed class SaasOwnerRetentionBlockedNotifyAction(
     }
 }
 
-/// <summary>A blocked portal is about to be deleted.</summary>
+/// <summary>
+/// A blocked portal is about to be deleted. The two reminders share their text, which says whether this
+/// is the last one; each has a subject of its own.
+/// </summary>
+/// <remarks>
+/// Two actions rather than one with a subject chosen from its state: the engine reads an action's
+/// patterns when it processes the queued letter, by which time the same instance may already be
+/// preparing the letter of another portal.
+/// </remarks>
+public abstract class PortalRetentionDeletionReminderNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    SettingsManager settingsManager,
+    TenantUtil tenantUtil,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, tenantUtil, periodicNotifyAction, tenantManager)
+{
+    /// <summary>Whether this is the last reminder before the deletion rather than the earlier one.</summary>
+    protected abstract bool Final { get; }
+
+    protected override async Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(Deadline("DeleteDate", Decision.DeleteOn, context, culture));
+        tags.Add(ShortDeadline("DeleteDateShort", Decision.DeleteOn, context, culture));
+        tags.Add(new TagValue("Unpaid", FormerPaying ? "True" : "False"));
+        tags.Add(new TagValue("FinalNotice", Final ? "True" : "False"));
+
+        await AddUnblockTagsAsync(context, user, culture, tags, commonLinkUtility, settingsManager);
+    }
+}
+
+/// <summary>The earlier reminder, a month before the deletion; another one follows it.</summary>
 [Scope]
 public sealed class SaasOwnerRetentionDeletionReminderNotifyAction(
     UserManager userManager,
@@ -1952,7 +1986,7 @@ public sealed class SaasOwnerRetentionDeletionReminderNotifyAction(
     TenantUtil tenantUtil,
     PeriodicNotifyAction periodicNotifyAction,
     TenantManager tenantManager)
-    : PortalRetentionNotifyAction(userManager, studioNotifyHelper, tariffService, tenantUtil, periodicNotifyAction, tenantManager)
+    : PortalRetentionDeletionReminderNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, settingsManager, tenantUtil, periodicNotifyAction, tenantManager)
 {
     public override string ID => "saas_owner_retention_deletion_reminder";
 
@@ -1964,17 +1998,33 @@ public sealed class SaasOwnerRetentionDeletionReminderNotifyAction(
         ];
     }
 
-    protected override async Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    protected override bool Final => false;
+}
+
+/// <summary>The last reminder, a week before the deletion: the last chance to keep the portal.</summary>
+[Scope]
+public sealed class SaasOwnerRetentionFinalReminderNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    SettingsManager settingsManager,
+    TenantUtil tenantUtil,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : PortalRetentionDeletionReminderNotifyAction(userManager, studioNotifyHelper, tariffService, commonLinkUtility, settingsManager, tenantUtil, periodicNotifyAction, tenantManager)
+{
+    public override string ID => "saas_owner_retention_final_reminder";
+
+    public override List<Pattern> Patterns
     {
-        tags.Add(Deadline("DeleteDate", Decision.DeleteOn, context, culture));
-        tags.Add(ShortDeadline("DeleteDateShort", Decision.DeleteOn, context, culture));
-        tags.Add(new TagValue("Unpaid", FormerPaying ? "True" : "False"));
-
-        // The early reminder is followed by another one; only the final one is the last chance.
-        tags.Add(new TagValue("FinalNotice", Decision.Letter == PortalRetentionLetter.FinalDeletionNotice ? "True" : "False"));
-
-        await AddUnblockTagsAsync(context, user, culture, tags, commonLinkUtility, settingsManager);
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_retention_final_reminder, () => WebstudioNotifyPatternResource.pattern_saas_owner_retention_deletion_reminder)
+        ];
     }
+
+    protected override bool Final => true;
 }
 
 /// <summary>The portal has been deleted by the retention policy.</summary>

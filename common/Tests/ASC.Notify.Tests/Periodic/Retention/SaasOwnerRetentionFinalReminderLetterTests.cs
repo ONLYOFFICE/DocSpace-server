@@ -34,33 +34,34 @@
 namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
-/// The earlier reminder that a blocked portal is about to be deleted
-/// (<c>saas_owner_retention_deletion_reminder</c>), here for a free portal with money left on its wallet.
-/// Another reminder follows it, so it does not call itself the last one.
+/// The last reminder that a blocked portal is about to be deleted
+/// (<c>saas_owner_retention_final_reminder</c>), here for a lapsed portal that may still be unblocked
+/// from it. The earlier reminder is <see cref="SaasOwnerRetentionDeletionReminderLetterTests"/>.
 /// </summary>
-public class SaasOwnerRetentionDeletionReminderEarlyLetterTests : PortalRetentionLetterTestBase<SaasOwnerRetentionDeletionReminderNotifyAction>
+public class SaasOwnerRetentionFinalReminderLetterTests : PortalRetentionLetterTestBase<SaasOwnerRetentionFinalReminderNotifyAction>
 {
-    protected override PortalRetentionCategory Category => PortalRetentionCategory.FreeWithBalance;
+    protected override PortalRetentionCategory Category => PortalRetentionCategory.FormerPayingWithBalance;
 
-    protected override PortalRetentionLetter? Letter => PortalRetentionLetter.EarlyDeletionNotice;
-
-    protected override string PreviewName(SaasOwnerRetentionDeletionReminderNotifyAction action) => action.ID + "_early";
+    protected override PortalRetentionLetter? Letter => PortalRetentionLetter.FinalDeletionNotice;
 
     protected override void AssertContent(RenderedLetter letter, LetterScope scope)
     {
         letter.Subject.Should().Contain(ShortDay(DeleteOn, scope));
 
         letter.Body.Should().Contain(Day(DeleteOn, scope))
+            .And.Contain(ShortDay(DeleteOn, scope))
+            .And.Contain(scope.PortalUrl)
             .And.Contain(Caption("ButtonUnblockPortal", scope))
             .And.Contain(nameof(ConfirmType.PortalUnblock));
     }
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        letter.Subject.Should().Be($"Your {LetterEnvironment.LogoText} space will be deleted soon (deleted on {ShortDay(DeleteOn, scope)})");
+        letter.Subject.Should().Be($"Last chance to keep your {LetterEnvironment.LogoText} space (deleted on {ShortDay(DeleteOn, scope)})");
 
-        letter.Body.Should().Contain("used for a while")
-            .And.Contain("This is a friendly reminder")
-            .And.Contain("unblock your space and download them");
+        letter.Body.Should().Contain("is still blocked because its subscription has ended")
+            .And.Contain("This is a friendly last reminder")
+            .And.Contain("then renew your subscription to get back to work", "a portal that comes back unpaid has to be renewed to be used")
+            .And.Contain("unblock your space and back it up", "a portal that comes back unpaid can only be backed up");
     }
 }

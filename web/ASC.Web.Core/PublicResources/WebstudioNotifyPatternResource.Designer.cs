@@ -3022,14 +3022,23 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to #if($FinalNotice == &quot;True&quot;)Last chance to keep your ${LetterLogoText} space#else#**#Your ${LetterLogoText} space will be deleted soon#end#**# (deleted on $DeleteDateShort).
+        ///   Looks up a localized string similar to Your ${LetterLogoText} space will be deleted soon (deleted on $DeleteDateShort).
         /// </summary>
         public static string subject_saas_owner_retention_deletion_reminder {
             get {
                 return ResourceManager.GetString("subject_saas_owner_retention_deletion_reminder", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Last chance to keep your ${LetterLogoText} space (deleted on $DeleteDateShort).
+        /// </summary>
+        public static string subject_saas_owner_retention_final_reminder {
+            get {
+                return ResourceManager.GetString("subject_saas_owner_retention_final_reminder", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Your ${LetterLogoText} space misses you (action needed by $BlockDateShort).
         /// </summary>
