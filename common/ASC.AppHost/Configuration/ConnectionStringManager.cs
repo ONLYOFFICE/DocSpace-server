@@ -70,10 +70,10 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
     /// <summary>
     /// DbGate, RedisInsight, the OpenSearch dashboard and the RabbitMQ management UI together cost
-    /// ~450 MiB of the Docker VM and nothing in the graph depends on them, so they only start when the
-    /// developer asks for them with DEV_TOOLS=true.
+    /// ~450 MiB of the Docker VM and nothing in the graph depends on them. They are on by default;
+    /// DEV_TOOLS=false leaves them out when the memory matters more than the UIs.
     /// </summary>
-    private bool DevTools => string.Compare(builder.Configuration["DEV_TOOLS"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+    private bool DevTools => string.Compare(builder.Configuration["DEV_TOOLS"], "false", StringComparison.OrdinalIgnoreCase) != 0;
 
 
     public ConnectionStringManager AddMySql(bool withDbGate = false, bool withDataVolume = true, bool withTmpfs = false)
