@@ -14,9 +14,11 @@
  * if (!isKnownWebhook(hook)) return ack();   // trigger added after this build
  * ```
  *
- * Acknowledge before doing any real work: DocSpace retries 5 times with
- * exponential backoff from 1s and then gives up for good -- about 31 seconds
- * in total -- so a slow receiver loses events permanently.
+ * Acknowledge before doing any real work: DocSpace waits 30 seconds for a
+ * response, counts a timeout as a failed attempt, and gives up for good after
+ * seven attempts over roughly 18 hours -- so a slow receiver both gets the same
+ * event again and, after three days without a success, has its subscription
+ * switched off.
  */
 export {
     SIGNATURE_HEADER,

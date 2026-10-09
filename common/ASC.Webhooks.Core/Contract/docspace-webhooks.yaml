@@ -29,8 +29,14 @@ info:
 
     TRANSPORT
       POST, Content-Type: application/json; charset=utf-8
-      Redirects are not followed. Retry budget is ~31s (5 attempts, exponential
-      from 1s), so receivers must acknowledge fast and process out of band.
+      Redirects are not followed. Each request waits 30s for a response, so
+      receivers must acknowledge fast and process out of band. Any non-2xx
+      answer, timeout or network error is a failed attempt; a failed delivery
+      is retried after 1m, 5m, 30m, 2h, 5h and 10h (each +-10% jitter), i.e.
+      7 attempts over ~18h by default (WebHooks/Settings.cs, configurable per
+      installation as webhooks:retryIntervals), and then abandoned. A portal
+      admin or the subscription's creator can retry it manually from the
+      delivery log, which starts a fresh series under the same event.id.
 
       Headers:
         x-docspace-signature-256  sha256=<UPPERCASE hex HMAC-SHA256 of the raw
@@ -140,8 +146,9 @@ components:
           type: string
           format: date-time
           description: >
-            UTC, whole seconds. No header timestamp exists, so replay defence
-            must read this from the verified body.
+            UTC, whole seconds. Echoed in x-docspace-event-timestamp, but that
+            header is not signed, so replay defence must read this from the
+            verified body.
         createBy:
           type: string
           format: uuid

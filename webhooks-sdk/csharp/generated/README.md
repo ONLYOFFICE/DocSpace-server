@@ -31,7 +31,7 @@ var hook = WebhookParser.Parse(body);
 
 `secret` is the secret key of the subscription the delivery belongs to, as set when it was created through `POST api/2.0/settings/webhook`. It is never included in a delivery, so keep it alongside your endpoint configuration.
 
-Answer as soon as the signature checks out and do the real work afterwards. A delivery gets five attempts over roughly 31 seconds, after which it is abandoned; a subscription that goes three days without a single successful delivery is switched off.
+Answer as soon as the signature checks out and do the real work afterwards: the server waits 30 seconds for a response. A failed delivery is retried after about 1 min, 5 min, 30 min, 2 h, 5 h and 10 h (each ±10%) — seven attempts over roughly 18 hours by default — after which it is abandoned; a subscription that goes three days without a single successful delivery is switched off.
 
 ## Getting Started
 

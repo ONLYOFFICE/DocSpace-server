@@ -31,7 +31,7 @@ import com.squareup.moshi.JsonClass
  * 
  *
  * @param id Delivery-log record id, and the idempotency key. Stable across every resend of one delivery -- the server's automatic retries and a manual retry from the admin UI alike, since a manual retry requeues the same record rather than minting a new one. The same id therefore means the same logical event, always. It is also echoed in x-docspace-event-id. The delivery log keeps only the latest attempt of a record, so a manual retry overwrites the outcome of the previous one. 
- * @param createOn UTC, whole seconds. No header timestamp exists, so replay defence must read this from the verified body. 
+ * @param createOn UTC, whole seconds. Echoed in x-docspace-event-timestamp, but that header is not signed, so replay defence must read this from the verified body. 
  * @param createBy Acting user. Omitted when the empty guid (background jobs).
  * @param trigger e.g. \"file.created\". \"*\" only in the legacy-payload fallback.
  * @param triggerId Bit value of the trigger. Omitted when 0 (the \"*\" fallback).
@@ -44,7 +44,7 @@ data class WebhookEventInfo (
     @Json(name = "id")
     val id: kotlin.Int? = null,
 
-    /* UTC, whole seconds. No header timestamp exists, so replay defence must read this from the verified body.  */
+    /* UTC, whole seconds. Echoed in x-docspace-event-timestamp, but that header is not signed, so replay defence must read this from the verified body.  */
     @Json(name = "createOn")
     val createOn: java.time.OffsetDateTime? = null,
 
