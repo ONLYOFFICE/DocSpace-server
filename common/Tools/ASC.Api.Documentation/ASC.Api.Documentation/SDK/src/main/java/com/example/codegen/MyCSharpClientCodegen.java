@@ -16,6 +16,7 @@
 
 package com.example.codegen;
 
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.servers.*;
 import io.swagger.v3.oas.models.headers.*;
@@ -38,6 +39,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 import java.io.File;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.Map.Entry;
 import java.util.*;
@@ -52,9 +54,23 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
         this.embeddedTemplateDir = "csharp";
     }
 
+    /**
+     * The call snippets of the reference pages instead of the SDK: one file, with a snippet per
+     * operation, written into the folder the run was given with -o.
+     */
+    private boolean snippetsOnly;
+
+    private Snippets snippets;
+
     @Override
     public void processOpts() {
         super.processOpts();
+
+        // Returns before the output folder is pointed at the SDK checkout (see CallSnippets.configure).
+        snippetsOnly = CallSnippets.configure(this);
+        if (snippetsOnly) {
+            return;
+        }
 
         this.outputFolder = "../../../../../sdk/docspace-api-sdk-csharp";
 
@@ -178,8 +194,33 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
     @Override
     public void postProcess() {
         super.postProcess();
+
+        if (snippetsOnly) {
+            if (snippets != null) {
+                CallSnippets.report(snippets.placeholders());
+            }
+            return;
+        }
+
         StaleOutput.delete(this);
         LineEndings.normalize(this);
+    }
+
+    /**
+     * Gives every operation what its call snippet needs. The third-party twin of an operation
+     * (see ThirdPartyVariants) gets none: it is an overload of the same method, on the same page.
+     */
+    private void attachSnippets(OperationsMap objs, List<ModelMap> allModels) {
+        if (snippets == null) {
+            // The name a property takes as a parameter of its model's constructor, spelled by the
+            // same lambda the model template spells it with.
+            Mustache.Lambda lambda = addMustacheLambdas().build().get("camelcase_sanitize_param");
+            Template template = Mustache.compiler().escapeHTML(false).compile("{{#lambda}}{{name}}{{/lambda}}");
+
+            snippets = new Snippets(openAPI, allModels, name -> template.execute(Map.of("lambda", lambda, "name", name)));
+        }
+
+        CallSnippets.attach(objs, snippets::attach);
     }
 
     @Override
@@ -294,6 +335,10 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
             }
             operationMap.put("x-supportsFields", shouldSupportFields);
             operationMap.put("x-supportsUseAt", supportUseAt);
+
+            if (snippetsOnly) {
+                attachSnippets(objs, allModels);
+            }
         }
 
         return objs;
@@ -529,4 +574,526 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
         return value;
     }
 
+    /**
+     * Builds what the call snippet of one operation needs beyond the template: the arguments of the
+     * call and the request body, as C# expressions.
+     * <p>
+     * The body is the minimal one: a model gets its required properties only, with the values the
+     * document states for them. Optional parameters are left out of the call, because the methods of
+     * the SDK default them.
+     */
+    private static final class Snippets {
+
+        static final String ARGUMENTS = "x-snippet-arguments";
+        static final String BODY = "x-snippet-body";
+        static final String USES_MODEL = "x-snippet-uses-model";
+
+        /** Beyond this length the arguments are put one per line. */
+        private static final int LINE_LENGTH = 60;
+
+        private static final int MAX_DEPTH = 4;
+
+        private static final String FILE = "new FileParameter(\"file.docx\", File.OpenRead(\"file.docx\"))";
+
+        private final OpenAPI openAPI;
+        private final Map<String, CodegenModel> models;
+        private final UnaryOperator<String> constructorParameter;
+
+        /** Values the document states no example for, as "operationId: name", for the run's log. */
+        private final List<String> placeholders = new ArrayList<>();
+
+        private boolean usesModel;
+
+        Snippets(OpenAPI openAPI, List<ModelMap> allModels, UnaryOperator<String> constructorParameter) {
+            this.openAPI = openAPI;
+            this.constructorParameter = constructorParameter;
+            this.models = CallSnippets.models(allModels);
+        }
+
+        List<String> placeholders() {
+            return placeholders;
+        }
+
+        void attach(CodegenOperation operation) {
+            usesModel = false;
+
+            List<String> arguments = new ArrayList<>();
+            String body = null;
+
+            for (CodegenParameter parameter : operation.allParams) {
+                String where = operation.operationIdOriginal + ": " + parameter.baseName;
+
+                if (parameter.isBodyParam) {
+                    body = body(Shape.of(parameter), CallSnippets.plain(SpecExamples.requestBody(openAPI, operation)), where);
+                    arguments.add(parameter.paramName + ": body");
+                    continue;
+                }
+
+                if (!parameter.required && !parameter.isFile && !parameter.isBinary) {
+                    continue;
+                }
+
+                Object example = CallSnippets.plain(parameter.isFormParam
+                        ? SpecExamples.formField(openAPI, operation, parameter.baseName)
+                        : SpecExamples.parameter(openAPI, operation, parameter.baseName, SpecExamples.location(parameter)));
+
+                arguments.add(parameter.paramName + ": " + value(Shape.of(parameter), example, parameter.baseName, where, 0));
+            }
+
+            operation.vendorExtensions.put(ARGUMENTS, list(arguments));
+            if (body != null) {
+                operation.vendorExtensions.put(BODY, body);
+            }
+            operation.vendorExtensions.put(USES_MODEL, usesModel);
+        }
+
+        /**
+         * The request body. A model gets its required properties only, whatever the document states
+         * for the body as a whole; an array or a scalar takes the example the document states for it.
+         */
+        private String body(Shape shape, Object example, String where) {
+            CodegenModel model = shape.isArray ? null : model(shape);
+            if (model != null && !model.isEnum) {
+                return CallSnippets.isComposed(model) ? composed(model, null, where, 0) : construct(model, where, 0);
+            }
+
+            String value = value(shape, example, "body", where, 0);
+
+            // `var` takes its type from the value, and a bare default has none.
+            return "default".equals(value) ? "default(" + shape.type() + ")" : value;
+        }
+
+        /**
+         * The model with its required properties set: the constructor of a generated model checks its
+         * required reference-typed properties for null, so an object initializer cannot be used.
+         * <p>
+         * A model composed with allOf is the exception: its constructor takes only the properties it
+         * declares itself and leaves the parent's to an initializer, because it calls the parameterless
+         * constructor of the parent.
+         */
+        private String construct(CodegenModel model, String where, int depth) {
+            usesModel = true;
+
+            List<String> arguments = new ArrayList<>();
+            List<String> initializers = new ArrayList<>();
+
+            if (depth < MAX_DEPTH && model.readWriteVars != null) {
+                List<String> own = ownProperties(model);
+
+                for (CodegenProperty property : model.readWriteVars) {
+                    if (!property.required) {
+                        continue;
+                    }
+
+                    Object example = CallSnippets.plain(SpecExamples.inheritedProperty(openAPI, model.name, property.baseName));
+                    String value = value(Shape.of(property, model.classname), example, property.baseName,
+                            where + "." + property.baseName, depth + 1);
+
+                    if (own == null || own.contains(property.baseName)) {
+                        arguments.add(constructorParameter.apply(property.name) + ": " + value);
+                    } else {
+                        initializers.add(property.name + " = " + value);
+                    }
+                }
+            }
+
+            String construction = "new " + model.classname + "("
+                    + (depth == 0 ? list(arguments) : String.join(", ", arguments)) + ")";
+
+            if (initializers.isEmpty()) {
+                return construction;
+            }
+
+            return construction + " { " + String.join(", ", initializers) + " }";
+        }
+
+        /**
+         * The properties the constructor of an allOf model takes, or null for a model whose constructor
+         * takes all of them.
+         */
+        private static List<String> ownProperties(CodegenModel model) {
+            Object localVars = model.vendorExtensions.get("x-localVars");
+            if (!Boolean.TRUE.equals(model.vendorExtensions.get("x-uses-allOf")) || !(localVars instanceof List)) {
+                return null;
+            }
+
+            List<String> names = new ArrayList<>();
+            for (Object item : (List<?>) localVars) {
+                names.add(((CodegenProperty) item).baseName);
+            }
+
+            return names;
+        }
+
+        /**
+         * A oneOf or anyOf model: a wrapper with a constructor per variant. The variant is the one the
+         * example fits, or the first one when there is no example.
+         */
+        private String composed(CodegenModel model, Object example, String where, int depth) {
+            usesModel = true;
+
+            // A variant can be a oneOf of its own and lead back here, so the wrapper stops at the depth
+            // the models do. It has no constructor without a variant, hence the default.
+            if (depth >= MAX_DEPTH) {
+                return "default(" + model.classname + ")";
+            }
+
+            List<String> variants = new ArrayList<>(model.oneOf != null && !model.oneOf.isEmpty() ? model.oneOf : model.anyOf);
+
+            String chosen = null;
+            for (String variant : variants) {
+                if (fits(variant, example)) {
+                    chosen = variant;
+                    break;
+                }
+            }
+
+            if (chosen == null) {
+                chosen = variants.get(0);
+                example = null;
+            }
+
+            return "new " + model.classname + "(" + typed(chosen, example, where, depth + 1) + ")";
+        }
+
+        private boolean fits(String type, Object example) {
+            if (example == null) {
+                return false;
+            }
+
+            if (type.startsWith("List<")) {
+                return example instanceof List;
+            }
+
+            switch (type) {
+                case "string":
+                    return example instanceof String;
+                case "int":
+                case "long":
+                    return example instanceof Integer || example instanceof Long;
+                case "double":
+                case "float":
+                case "decimal":
+                    return example instanceof Number;
+                case "bool":
+                    return example instanceof Boolean;
+                default:
+                    CodegenModel model = models.get(stripNullable(type));
+                    if (model == null) {
+                        return false;
+                    }
+
+                    // An enum fits only an example that names one of its members; any other is left to
+                    // a variant beside it, such as a string.
+                    return model.isEnum ? CallSnippets.member(model.allowableValues, example) != null : example instanceof Map;
+            }
+        }
+
+        /** A value of a type the generator names by its C# spelling only, as the variants of a oneOf. */
+        private String typed(String type, Object example, String where, int depth) {
+            if (type.startsWith("List<") && type.endsWith(">")) {
+                String itemType = type.substring("List<".length(), type.length() - 1);
+
+                List<String> items = new ArrayList<>();
+                if (example instanceof List) {
+                    for (Object item : (List<?>) example) {
+                        items.add(typed(itemType, item, where, depth + 1));
+                    }
+                }
+
+                if (items.isEmpty()) {
+                    placeholders.add(where);
+                    if (models.containsKey(itemType)) {
+                        usesModel = true;
+                    }
+                    return "new " + type + "()";
+                }
+
+                return "new " + type + " { " + String.join(", ", items) + " }";
+            }
+
+            String text = example == null ? null : SpecExamples.text(example);
+
+            switch (stripNullable(type)) {
+                case "string":
+                    return text == null ? placeholderString(where) : CallSnippets.quote(text);
+                case "int":
+                case "long":
+                case "double":
+                    return text == null ? "0" : text;
+                case "float":
+                    return (text == null ? "0" : text) + "f";
+                case "decimal":
+                    return (text == null ? "0" : text) + "m";
+                case "bool":
+                    return text == null ? "false" : text.toLowerCase(Locale.ROOT);
+                default:
+                    CodegenModel model = models.get(stripNullable(type));
+                    if (model == null) {
+                        return "default(" + type + ")";
+                    }
+                    if (model.isEnum) {
+                        Shape shape = new Shape();
+                        shape.complexType = type;
+                        return enumValue(shape, example, where);
+                    }
+                    return CallSnippets.isComposed(model) ? composed(model, example, where, depth) : construct(model, where, depth);
+            }
+        }
+
+        private String placeholderString(String where) {
+            placeholders.add(where);
+            return CallSnippets.quote("YOUR_VALUE");
+        }
+
+        private String value(Shape shape, Object example, String name, String where, int depth) {
+            if (shape.isArray && shape.items != null && (shape.items.isFile || shape.items.isBinary)) {
+                return "new List<FileParameter> { " + FILE + " }";
+            }
+
+            if (shape.isFile) {
+                return FILE;
+            }
+
+            String enumValue = enumValue(shape, example, where);
+            if (enumValue != null) {
+                return enumValue;
+            }
+
+            if (shape.isArray) {
+                // A body parameter carries no item description, only the C# type.
+                if (shape.items == null) {
+                    return typed(shape.type(), example, where, depth);
+                }
+
+                if (example instanceof List) {
+                    List<String> items = new ArrayList<>();
+                    for (Object item : (List<?>) example) {
+                        items.add(value(Shape.of(shape.items, shape.owner), item, name, where, depth + 1));
+                    }
+
+                    return "new " + shape.type() + " { " + String.join(", ", items) + " }";
+                }
+
+                placeholders.add(where);
+                if (model(Shape.of(shape.items, shape.owner)) != null) {
+                    usesModel = true;
+                }
+                return "new " + shape.type() + "()";
+            }
+
+            if (shape.isMap) {
+                return "new " + shape.type() + "()";
+            }
+
+            CodegenModel model = model(shape);
+            if (model != null) {
+                return CallSnippets.isComposed(model) ? composed(model, example, where, depth) : construct(model, where, depth);
+            }
+
+            if (example == null) {
+                placeholders.add(where);
+                return placeholder(shape, name);
+            }
+
+            String text = SpecExamples.text(example);
+
+            if (shape.isBoolean) {
+                return text.toLowerCase(Locale.ROOT);
+            }
+            if (shape.isUuid) {
+                return "Guid.Parse(" + CallSnippets.quote(text) + ")";
+            }
+            if (shape.isDateTime || shape.isDate) {
+                return "DateTime.Parse(" + CallSnippets.quote(text) + ")";
+            }
+            if (shape.isFloat) {
+                return text + "f";
+            }
+            if (shape.isDecimal) {
+                return text + "m";
+            }
+            if (shape.isNumeric) {
+                return text;
+            }
+
+            return CallSnippets.quote(text);
+        }
+
+        /**
+         * An enum member: the one whose value the example states, or the first one when it states none.
+         */
+        private String enumValue(Shape shape, Object example, String where) {
+            if (shape.isArray) {
+                return null;
+            }
+
+            String type;
+            Map<String, Object> allowableValues;
+
+            // A parameter typed by an enum schema names it in its type rather than as a model.
+            CodegenModel model = model(shape);
+            if (model == null && shape.dataType != null) {
+                model = models.get(stripNullable(shape.dataType));
+            }
+
+            if (model != null && model.isEnum) {
+                type = model.classname;
+                allowableValues = model.allowableValues;
+            } else if (shape.isEnum && shape.owner != null) {
+                // An enum declared in place is a nested type of the model that holds it; anywhere else
+                // the SDK takes the underlying value, as List<int> for the access levels of a request.
+                String enumType = shape.datatypeWithEnum != null ? shape.datatypeWithEnum : shape.dataType;
+                type = shape.isInnerEnum ? shape.owner + "." + enumType : enumType;
+                allowableValues = shape.allowableValues;
+            } else {
+                return null;
+            }
+
+            Object values = allowableValues == null ? null : allowableValues.get("enumVars");
+            if (!(values instanceof List) || ((List<?>) values).isEmpty()) {
+                return null;
+            }
+
+            usesModel = true;
+
+            Map<?, ?> chosen = CallSnippets.member(allowableValues, example);
+            if (chosen == null) {
+                placeholders.add(where);
+                chosen = (Map<?, ?>) ((List<?>) values).get(0);
+            }
+
+            return stripNullable(type) + "." + chosen.get("name");
+        }
+
+        private CodegenModel model(Shape shape) {
+            if (shape.complexType != null && models.containsKey(shape.complexType)) {
+                return models.get(shape.complexType);
+            }
+
+            return shape.isModel ? models.get(stripNullable(shape.dataType)) : null;
+        }
+
+        private static String placeholder(Shape shape, String name) {
+            if (shape.isBoolean) {
+                return "false";
+            }
+            if (shape.isUuid) {
+                return "Guid.Empty";
+            }
+            if (shape.isDateTime || shape.isDate) {
+                return "DateTime.UtcNow";
+            }
+            if (shape.isNumeric) {
+                return "0";
+            }
+            if (shape.isString || "string".equals(shape.type())) {
+                return CallSnippets.quote(CallSnippets.placeholderName(name));
+            }
+
+            return "default";
+        }
+
+        /**
+         * Arguments on one line, or one per line once they get long.
+         */
+        private static String list(List<String> items) {
+            String line = String.join(", ", items);
+            if (line.length() <= LINE_LENGTH && !line.contains("\n")) {
+                return line;
+            }
+
+            StringBuilder builder = new StringBuilder();
+            for (int i = 0; i < items.size(); i++) {
+                builder.append("\n    ").append(items.get(i));
+                if (i < items.size() - 1) {
+                    builder.append(',');
+                }
+            }
+
+            return builder.toString();
+        }
+
+        private static String stripNullable(String type) {
+            return type != null && type.endsWith("?") ? type.substring(0, type.length() - 1) : type;
+        }
+
+        /** What the snippet needs to know about the type of a parameter or a property. */
+        private static final class Shape {
+            String dataType;
+            String datatypeWithEnum;
+            String complexType;
+            String owner;
+            boolean isString;
+            boolean isNumeric;
+            boolean isFloat;
+            boolean isDecimal;
+            boolean isBoolean;
+            boolean isDate;
+            boolean isDateTime;
+            boolean isUuid;
+            boolean isEnum;
+            boolean isInnerEnum;
+            boolean isArray;
+            boolean isMap;
+            boolean isModel;
+            boolean isFile;
+            Map<String, Object> allowableValues;
+            CodegenProperty items;
+
+            String type() {
+                return stripNullable(dataType);
+            }
+
+            static Shape of(CodegenParameter parameter) {
+                Shape shape = new Shape();
+                shape.dataType = parameter.dataType;
+                shape.datatypeWithEnum = parameter.datatypeWithEnum;
+                shape.complexType = stripNullable(parameter.baseType);
+                shape.isString = parameter.isString;
+                shape.isNumeric = parameter.isNumeric || parameter.isInteger || parameter.isLong || parameter.isNumber
+                        || parameter.isFloat || parameter.isDouble || parameter.isDecimal;
+                shape.isFloat = parameter.isFloat;
+                shape.isDecimal = parameter.isDecimal;
+                shape.isBoolean = parameter.isBoolean;
+                shape.isDate = parameter.isDate;
+                shape.isDateTime = parameter.isDateTime;
+                shape.isUuid = parameter.isUuid;
+                shape.isEnum = parameter.isEnum;
+                shape.isArray = parameter.isArray;
+                shape.isMap = parameter.isMap;
+                shape.isModel = parameter.isModel;
+                shape.isFile = parameter.isFile || parameter.isBinary;
+                shape.allowableValues = parameter.allowableValues;
+                shape.items = parameter.items;
+                return shape;
+            }
+
+            static Shape of(CodegenProperty property, String owner) {
+                Shape shape = new Shape();
+                shape.dataType = property.dataType;
+                shape.datatypeWithEnum = property.datatypeWithEnum;
+                shape.complexType = property.complexType;
+                shape.owner = owner;
+                shape.isString = property.isString;
+                shape.isNumeric = property.isNumeric || property.isInteger || property.isLong || property.isNumber
+                        || property.isFloat || property.isDouble || property.isDecimal;
+                shape.isFloat = property.isFloat;
+                shape.isDecimal = property.isDecimal;
+                shape.isBoolean = property.isBoolean;
+                shape.isDate = property.isDate;
+                shape.isDateTime = property.isDateTime;
+                shape.isUuid = property.isUuid;
+                shape.isEnum = property.isEnum;
+                shape.isInnerEnum = property.isInnerEnum;
+                shape.isArray = property.isArray;
+                shape.isMap = property.isMap;
+                shape.isModel = property.isModel;
+                shape.isFile = property.isFile || property.isBinary;
+                shape.allowableValues = property.allowableValues;
+                shape.items = property.items;
+                return shape;
+            }
+        }
+    }
 }

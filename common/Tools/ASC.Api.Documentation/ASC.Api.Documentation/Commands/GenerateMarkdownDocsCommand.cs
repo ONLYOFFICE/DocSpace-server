@@ -117,6 +117,17 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
 
         AnsiConsole.MarkupLine($"Cut [green]{models.Count}[/] model pages");
 
+        // Once for the whole API rather than per section: a language's generator names its classes
+        // and methods looking at the whole document, the way the SDK it documents was generated.
+        var examples = await RenderExamplesAsync(joinedDocument, outputDirectory, markdown, cancellationToken);
+
+        if (examples == null)
+        {
+            return 1;
+        }
+
+        var placed = new HashSet<(string Tab, string OperationId)>();
+
         foreach (var document in sections)
         {
             AnsiConsole.MarkupLine($"Rendering [green]{Markup.Escape(document.Section)}[/]");
@@ -147,6 +158,14 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
                 sectionDirectory,
                 modelPages.GetValueOrDefault,
                 operationId => MarkdownSettings.NameFor(groups.GetValueOrDefault(operationId, string.Empty)),
+                cancellationToken);
+
+            // Onto the cut pages, past the escaping and the heading promotion, both of which would
+            // break the tabs (see ExampleTabs).
+            var exampled = await ExampleTabs.ApplyAsync(
+                sliced,
+                markdown.Examples.GroupId,
+                ForSection(examples, sliced, placed),
                 cancellationToken);
 
             await WriteCategoryAsync(sectionDirectory, document.Section, cancellationToken);
@@ -192,8 +211,12 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
                     operation.Summary));
             }
 
-            AnsiConsole.MarkupLine($"  cut into [green]{sliced.Count}[/] endpoint pages");
+            AnsiConsole.MarkupLine(markdown.Examples.Tabs.Count == 0
+                ? $"  cut into [green]{sliced.Count}[/] endpoint pages"
+                : $"  cut into [green]{sliced.Count}[/] endpoint pages, [green]{exampled}[/] with examples");
         }
+
+        CheckPlaced(examples, placed);
 
         if (!string.IsNullOrWhiteSpace(markdown.BundleDirectory))
         {
@@ -328,7 +351,139 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
             ReadBundleDirectory(section),
             section["siteUrl"],
             section["indexTitle"] ?? "ONLYOFFICE DocSpace API",
-            titles);
+            titles,
+            ReadExampleSettings(section.GetSection("examples")));
+    }
+
+    /// <summary>
+    /// The tabs the endpoint pages show their examples in, in the order they are shown. With none
+    /// configured the pages are published without an example section.
+    /// </summary>
+    private static ExampleSettings ReadExampleSettings(IConfigurationSection section)
+    {
+        var tabs = new List<ExampleSource>();
+
+        foreach (var tab in section.GetSection("tabs").GetChildren())
+        {
+            var value = tab["value"];
+            var label = tab["label"];
+            var generator = tab["generator"];
+
+            if (string.IsNullOrWhiteSpace(value) || string.IsNullOrWhiteSpace(label) || string.IsNullOrWhiteSpace(generator))
+            {
+                throw new Exception($"The example tab at {tab.Path} needs a 'value', a 'label' and a 'generator'");
+            }
+
+            // The value names the snippet file a tab is read from, so two tabs sharing one would
+            // print the same examples twice under different labels.
+            if (tabs.Exists(existing => string.Equals(existing.Tab.Value, value, StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new Exception($"Two example tabs share the value '{value}'");
+            }
+
+            tabs.Add(new ExampleSource(new ExampleTabs.Tab(value, label), generator));
+        }
+
+        return new ExampleSettings(section["groupId"] ?? "api-example", tabs);
+    }
+
+    /// <summary>
+    /// Runs the generator of every tab's language over the whole API in its snippet mode, and reads
+    /// the snippets it wrote. Null when a generator refused the document.
+    /// </summary>
+    /// <remarks>
+    /// The generator writes into the directory of the section documents rather than into the SDK it
+    /// normally generates, and the file is deleted once read, because it exists only to be put on
+    /// the pages. A run that leaves no file is an error rather than a tab left off: the language
+    /// would otherwise disappear from every page without a word.
+    /// </remarks>
+    private async Task<IReadOnlyList<ExampleTabs.TabSnippets>?> RenderExamplesAsync(
+        string joinedDocument,
+        string outputDirectory,
+        MarkdownSettings markdown,
+        CancellationToken cancellationToken)
+    {
+        var examples = new List<ExampleTabs.TabSnippets>();
+
+        foreach (var source in markdown.Examples.Tabs)
+        {
+            var fileName = $"snippets.{source.Tab.Value}.md";
+            var path = Path.Combine(outputDirectory, fileName);
+
+            AnsiConsole.MarkupLine($"Rendering [green]{Markup.Escape(source.Tab.Label)}[/] examples");
+
+            var arguments = new List<string> { "-i", joinedDocument, "-o", outputDirectory };
+
+            AddProperty(arguments, "snippetsOnly", "true");
+            AddProperty(arguments, "snippetsFile", fileName);
+            AddProperty(arguments, "snippetsServerUrl", markdown.ServerUrl);
+
+            if (await RunGeneratorAsync(source.Generator, arguments, cancellationToken) != 0)
+            {
+                return null;
+            }
+
+            if (!File.Exists(path))
+            {
+                throw new Exception($"The {source.Generator} generator wrote no {source.Tab.Label} examples: {path} does not exist");
+            }
+
+            examples.Add(new ExampleTabs.TabSnippets(source.Tab, await ExampleTabs.ReadSnippetsAsync(path, cancellationToken)));
+
+            File.Delete(path);
+        }
+
+        return examples;
+    }
+
+    /// <summary>
+    /// The examples of the operations one section holds, out of those rendered for the whole API.
+    /// Each one handed out is recorded in <paramref name="placed"/>.
+    /// </summary>
+    private static List<ExampleTabs.TabSnippets> ForSection(
+        IReadOnlyList<ExampleTabs.TabSnippets> examples,
+        IReadOnlyList<MarkdownSlicer.SlicedOperation> operations,
+        HashSet<(string Tab, string OperationId)> placed)
+    {
+        var pages = operations.Select(operation => operation.OperationId).ToHashSet(StringComparer.Ordinal);
+        var section = new List<ExampleTabs.TabSnippets>();
+
+        foreach (var tab in examples)
+        {
+            var snippets = tab.Snippets
+                .Where(snippet => pages.Contains(snippet.Key))
+                .ToDictionary(snippet => snippet.Key, snippet => snippet.Value, StringComparer.Ordinal);
+
+            foreach (var operationId in snippets.Keys)
+            {
+                placed.Add((tab.Tab.Value, operationId));
+            }
+
+            section.Add(tab with { Snippets = snippets });
+        }
+
+        return section;
+    }
+
+    /// <summary>
+    /// Fails on an example no section had a page for: the generator of the language and the
+    /// Markdown generator then disagree about the operation ids, and the example would be lost
+    /// unseen.
+    /// </summary>
+    private static void CheckPlaced(
+        IReadOnlyList<ExampleTabs.TabSnippets> examples,
+        HashSet<(string Tab, string OperationId)> placed)
+    {
+        foreach (var tab in examples)
+        {
+            foreach (var operationId in tab.Snippets.Keys)
+            {
+                if (!placed.Contains((tab.Tab.Value, operationId)))
+                {
+                    throw new Exception($"The {tab.Tab.Label} example of '{operationId}' has no page to go on");
+                }
+            }
+        }
     }
 
     /// <summary>
@@ -562,7 +717,8 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
         string? BundleDirectory,
         string? SiteUrl,
         string IndexTitle,
-        IReadOnlyDictionary<string, string> Titles)
+        IReadOnlyDictionary<string, string> Titles,
+        ExampleSettings Examples)
     {
         /// <summary>
         /// Titles are keyed by the published document name, so a section added to the API without
@@ -596,4 +752,15 @@ public class GenerateMarkdownDocsCommand : SdkCommandBase
             return slug.ToString().TrimEnd('-');
         }
     }
+
+    /// <summary>
+    /// The example tabs of the endpoint pages. <paramref name="GroupId"/> is shared by the tabs of
+    /// every page, so a language picked on one page stays picked on the next and travels in its URL.
+    /// </summary>
+    private sealed record ExampleSettings(string GroupId, IReadOnlyList<ExampleSource> Tabs);
+
+    /// <summary>
+    /// One example tab and the generator its snippets come from, named as its `tools{Generator}.json`.
+    /// </summary>
+    private sealed record ExampleSource(ExampleTabs.Tab Tab, string Generator);
 }

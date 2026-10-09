@@ -1,0 +1,60 @@
+{{#apiInfo}}
+{{#apis}}
+{{#operations}}
+{{#operation}}
+{{^vendorExtensions.x-is-thirdparty-variant}}
+<!--snippet:{{{operationIdOriginal}}}-->
+```go
+package main
+
+import (
+{{#vendorExtensions.x-snippet-imports}}
+	"{{{.}}}"
+{{/vendorExtensions.x-snippet-imports}}
+
+	{{packageName}} "{{{goModulePath}}}"
+)
+
+func main() {
+	cfg := {{packageName}}.NewConfiguration()
+	cfg.Servers = {{packageName}}.ServerConfigurations{
+		{URL: "{{{snippetsServerUrl}}}"},
+	}
+
+	client := {{packageName}}.NewAPIClient(cfg)
+	ctx := context.WithValue(context.Background(), {{packageName}}.ContextAccessToken, "YOUR_API_KEY")
+{{#vendorExtensions.x-snippet-opens-file}}
+
+	file, err := os.Open("file.docx")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+{{/vendorExtensions.x-snippet-opens-file}}
+{{#vendorExtensions.x-snippet-body}}
+
+	body := {{{.}}}
+{{/vendorExtensions.x-snippet-body}}
+
+{{#returnType}}
+	result, _, err := client.{{classname}}.{{{vendorExtensions.x-snippet-call}}}
+{{/returnType}}
+{{^returnType}}
+	_, err {{#vendorExtensions.x-snippet-opens-file}}={{/vendorExtensions.x-snippet-opens-file}}{{^vendorExtensions.x-snippet-opens-file}}:={{/vendorExtensions.x-snippet-opens-file}} client.{{classname}}.{{{vendorExtensions.x-snippet-call}}}
+{{/returnType}}
+	if err != nil {
+		log.Fatal(err)
+	}
+{{#returnType}}
+
+	fmt.Println(result)
+{{/returnType}}
+}
+```
+
+{{/vendorExtensions.x-is-thirdparty-variant}}
+{{/operation}}
+{{/operations}}
+{{/apis}}
+{{/apiInfo}}
+<!--/snippets-->

@@ -63,7 +63,16 @@ public abstract class SdkCommandBase<TSettings> : AsyncCommand<TSettings>
     /// Runs openapi-generator-cli against `tools{Name}.json`. Commands that need more than one
     /// pass - a document per service, say - call this repeatedly with the differing options.
     /// </summary>
+    protected Task<int> RunGeneratorAsync(
+        IReadOnlyList<string> extraArguments,
+        CancellationToken cancellationToken) =>
+        RunGeneratorAsync(Name, extraArguments, cancellationToken);
+
+    /// <summary>
+    /// Runs openapi-generator-cli against the config of another command: `tools{tools}.json`.
+    /// </summary>
     protected async Task<int> RunGeneratorAsync(
+        string tools,
         IReadOnlyList<string> extraArguments,
         CancellationToken cancellationToken)
     {
@@ -73,7 +82,7 @@ public abstract class SdkCommandBase<TSettings> : AsyncCommand<TSettings>
             OpenApiToolsConfig,
             "generate",
             "-c",
-            Path.Combine("tools", $"tools{Name}.json"),
+            Path.Combine("tools", $"tools{tools}.json"),
             "--custom-generator",
             Path.Combine("target", "sdk-1.0-jar-with-dependencies.jar")
         };
@@ -85,7 +94,7 @@ public abstract class SdkCommandBase<TSettings> : AsyncCommand<TSettings>
              arguments,
              WorkingDirectory,
              cancellationToken,
-             $"Failed to start openapi-generator-cli for {Name}.");
+             $"Failed to start openapi-generator-cli for {tools}.");
     }
 }
 

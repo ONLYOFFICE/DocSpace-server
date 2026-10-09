@@ -426,7 +426,7 @@ internal static class MarkdownSlicer
             : line;
     }
 
-    private static List<string> Trim(List<string> body)
+    internal static List<string> Trim(List<string> body)
     {
         var first = 0;
         var last = body.Count - 1;

@@ -27,8 +27,6 @@ import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.servers.*;
 import io.swagger.v3.oas.models.tags.*;
 
-import java.time.*;
-import java.time.format.*;
 import java.util.*;
 
 public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen {
@@ -237,177 +235,18 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
     }
 
     /**
-     * The example a property actually states, read straight from the document.
-     * <p>
-     * CodegenProperty.example cannot be used: when the document states no example the generator
-     * invents one (56 for integers, and so on), and the page would then present a fabricated
-     * value as documentation. Nothing distinguishes the two once they are in that field.
+     * The example a property actually states, read straight from the document (see SpecExamples:
+     * the generator invents one where the document states none).
      */
     private String statedExample(String modelName, String propertyName) {
-        if (openAPI == null || openAPI.getComponents() == null || openAPI.getComponents().getSchemas() == null) {
-            return null;
-        }
-
-        Schema<?> schema = openAPI.getComponents().getSchemas().get(modelName);
-        if (schema == null || schema.getProperties() == null) {
-            return null;
-        }
-
-        Object property = schema.getProperties().get(propertyName);
-        if (!(property instanceof Schema)) {
-            return null;
-        }
-
-        return exampleText(schemaExample((Schema<?>) property));
+        return SpecExamples.text(SpecExamples.property(openAPI, modelName, propertyName));
     }
 
     /**
-     * The example a schema states, in either spelling.
-     * <p>
-     * OpenAPI 3.1 replaced the single `example` with an `examples` array, and the documents the
-     * services emit use the array form. Reading `example` alone leaves the pages with no examples
-     * at all, which looks exactly like a document that states none.
-     */
-    private static Object schemaExample(Schema<?> schema) {
-        if (schema == null) {
-            return null;
-        }
-
-        if (schema.getExample() != null) {
-            return schema.getExample();
-        }
-
-        List<?> examples = schema.getExamples();
-        if (examples != null) {
-            for (Object example : examples) {
-                if (example != null) {
-                    return example;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * The example a parameter actually states, read straight from the document.
-     * <p>
-     * Matched on name and location together: an operation may carry two parameters of the same
-     * name in different places - `tagName` in the path and in the query, for one - and matching
-     * on the name alone would hand one parameter's example to the other.
+     * The example a parameter actually states, read straight from the document (see SpecExamples).
      */
     private String statedExample(CodegenOperation operation, String parameterName, String location) {
-        if (openAPI == null || openAPI.getPaths() == null || operation.httpMethod == null) {
-            return null;
-        }
-
-        PathItem pathItem = openAPI.getPaths().get(operation.path);
-        if (pathItem == null) {
-            return null;
-        }
-
-        Operation raw = pathItem.readOperationsMap()
-                .get(PathItem.HttpMethod.valueOf(operation.httpMethod.toUpperCase(Locale.ROOT)));
-        if (raw == null || raw.getParameters() == null) {
-            return null;
-        }
-
-        // The third-party twin shares the path and the method of its operation, so the lookup below would
-        // hand it the portal parameter's example ("1" for an id that is "sbox-42" there). What the twin
-        // changes is stated in the extension, and that is where its examples are.
-        if (operation.vendorExtensions.containsKey(ThirdPartyVariants.IS_VARIANT)) {
-            String variantExample = variantExample(raw, parameterName, location);
-            if (variantExample != null) {
-                return variantExample;
-            }
-        }
-
-        for (Parameter parameter : raw.getParameters()) {
-            if (!parameterName.equals(parameter.getName())) {
-                continue;
-            }
-            if (location != null && !location.isEmpty() && !location.equals(parameter.getIn())) {
-                continue;
-            }
-
-            if (parameter.getExample() != null) {
-                return exampleText(parameter.getExample());
-            }
-
-            Object schemaExample = schemaExample(parameter.getSchema());
-            if (schemaExample != null) {
-                return exampleText(schemaExample);
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * The example the third-party twin of an operation states for a parameter it changes, read from the
-     * {@code x-thirdparty-variant} extension; null when the twin leaves that parameter as it is.
-     */
-    private static String variantExample(Operation raw, String parameterName, String location) {
-        Object extension = raw.getExtensions() == null ? null : raw.getExtensions().get(ThirdPartyVariants.EXTENSION);
-        if (!(extension instanceof Map)) {
-            return null;
-        }
-
-        Object parameters = ((Map<?, ?>) extension).get("parameters");
-        if (!(parameters instanceof List)) {
-            return null;
-        }
-
-        for (Object item : (List<?>) parameters) {
-            if (!(item instanceof Map)) {
-                continue;
-            }
-
-            Map<?, ?> parameter = (Map<?, ?>) item;
-            if (!parameterName.equals(parameter.get("name"))) {
-                continue;
-            }
-            if (location != null && !location.isEmpty() && !location.equals(parameter.get("in"))) {
-                continue;
-            }
-
-            if (parameter.get("example") != null) {
-                return exampleText(parameter.get("example"));
-            }
-
-            if (parameter.get("schema") instanceof Map) {
-                Map<?, ?> schema = (Map<?, ?>) parameter.get("schema");
-                if (schema.get("example") != null) {
-                    return exampleText(schema.get("example"));
-                }
-                if (schema.get("examples") instanceof List) {
-                    for (Object example : (List<?>) schema.get("examples")) {
-                        if (example != null) {
-                            return exampleText(example);
-                        }
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Renders an example value. Date-times arrive already parsed, and their toString() drops
-     * zero seconds - "2025-01-01T00:00Z" instead of the "2025-01-01T00:00:00Z" the document
-     * spells out - so they are formatted back to full ISO-8601.
-     */
-    private static String exampleText(Object example) {
-        if (example == null) {
-            return null;
-        }
-
-        if (example instanceof OffsetDateTime) {
-            return ((OffsetDateTime) example).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
-        }
-
-        return String.valueOf(example);
+        return SpecExamples.text(SpecExamples.parameter(openAPI, operation, parameterName, location));
     }
 
     /** Scopes the operation requires from this scheme, empty when it requires none. */
@@ -434,26 +273,7 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
 
     /** Where a parameter travels: the `in` field of the OpenAPI document. */
     private static String parameterLocation(CodegenParameter parameter) {
-        if (parameter.isPathParam) {
-            return "path";
-        }
-        if (parameter.isQueryParam) {
-            return "query";
-        }
-        if (parameter.isHeaderParam) {
-            return "header";
-        }
-        if (parameter.isCookieParam) {
-            return "cookie";
-        }
-        if (parameter.isBodyParam) {
-            return "body";
-        }
-        if (parameter.isFormParam) {
-            return "form";
-        }
-
-        return "";
+        return SpecExamples.location(parameter);
     }
 
     public MyMarkdownDocumentationCodegen() {

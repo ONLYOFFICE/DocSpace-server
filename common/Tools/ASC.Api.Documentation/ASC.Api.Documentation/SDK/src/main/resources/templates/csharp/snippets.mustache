@@ -1,0 +1,37 @@
+{{#apiInfo}}
+{{#apis}}
+{{#operations}}
+{{#operation}}
+{{^vendorExtensions.x-is-thirdparty-variant}}
+<!--snippet:{{{operationIdOriginal}}}-->
+```csharp
+using {{packageName}}.{{apiPackage}}.{{x-folder}};
+using {{packageName}}.Client;
+{{#vendorExtensions.x-snippet-uses-model}}
+using {{packageName}}.{{modelPackage}};
+{{/vendorExtensions.x-snippet-uses-model}}
+
+var config = new Configuration
+{
+    BasePath = "{{{snippetsServerUrl}}}",
+    AccessToken = "YOUR_API_KEY"
+};
+
+var api = new {{x-classname}}(config);
+{{#vendorExtensions.x-snippet-body}}
+
+var body = {{{.}}};
+{{/vendorExtensions.x-snippet-body}}
+
+{{#returnType}}var result = {{/returnType}}await api.{{operationId}}Async({{{vendorExtensions.x-snippet-arguments}}});
+{{#returnType}}
+Console.WriteLine(result);
+{{/returnType}}
+```
+
+{{/vendorExtensions.x-is-thirdparty-variant}}
+{{/operation}}
+{{/operations}}
+{{/apis}}
+{{/apiInfo}}
+<!--/snippets-->
