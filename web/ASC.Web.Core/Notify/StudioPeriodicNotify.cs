@@ -228,12 +228,12 @@ public class StudioPeriodicNotify(
     /// </summary>
     private async Task<PortalActivity> GetLastActivityAsync(Tenant tenant)
     {
-        var lastAuditEvent = await auditEventsRepository.GetLastEventAsync(tenant.Id);
-        var lastLoginEvent = await loginEventsRepository.GetLastSuccessEventAsync(tenant.Id);
+        var lastEventOn = await auditEventsRepository.GetLastEventDateAsync(tenant.Id);
+        var lastLoginOn = await loginEventsRepository.GetLastSuccessEventDateAsync(tenant.Id);
 
         return new PortalActivity(
-            lastAuditEvent?.Date.Date ?? tenant.CreationDateTime.Date,
-            lastLoginEvent?.Date.Date ?? tenant.CreationDateTime.Date);
+            (lastEventOn ?? tenant.CreationDateTime).Date,
+            (lastLoginOn ?? tenant.CreationDateTime).Date);
     }
 
     /// <summary>

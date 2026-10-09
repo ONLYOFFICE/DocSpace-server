@@ -43,6 +43,7 @@ global using System.Text.RegularExpressions;
 
 global using ASC.Api.Core.Extensions;
 global using ASC.AuditTrail.Models;
+global using ASC.AuditTrail.Repositories;
 global using ASC.Common.DependencyInjection;
 global using ASC.Core;
 global using ASC.Core.Billing;
@@ -54,6 +55,9 @@ global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.Data.Backup;
 global using ASC.Files.Core.EF;
+global using ASC.MessagingSystem.Core;
+global using ASC.MessagingSystem.EF.Context;
+global using ASC.MessagingSystem.EF.Model;
 global using ASC.Notify.Engine;
 global using ASC.Notify.Extension;
 global using ASC.Notify.Messages;

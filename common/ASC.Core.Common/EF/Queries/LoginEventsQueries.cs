@@ -36,6 +36,18 @@ namespace ASC.MessagingSystem.EF.Context;
 public partial class MessagesContext
 {
     [PreCompileQuery]
+    public Task<DateTime?> LastAuditEventDateAsync(int tenantId)
+    {
+        return Queries.LastAuditEventDateAsync(this, tenantId);
+    }
+
+    [PreCompileQuery]
+    public Task<DateTime?> LastSuccessLoginDateAsync(int tenantId)
+    {
+        return Queries.LastSuccessLoginDateAsync(this, tenantId);
+    }
+
+    [PreCompileQuery]
     public IAsyncEnumerable<DbLoginEvent> LoginEventsAsync(int tenantId, Guid userId, IEnumerable<int> loginActions, DateTime date)
     {
         return Queries.LoginEventsAsync(this, tenantId, userId, loginActions, date);
@@ -104,6 +116,46 @@ public partial class MessagesContext
 
 static file class Queries
 {
+    // The last activity of a portal: the date only, newest by date. The (tenant_id, date) index serves that order
+    // as a reverse range that stops at the first entry. Newest by id instead reads every event of the portal from
+    // the table to sort them, or walks the primary key back through the events of every other portal.
+    public static readonly Func<MessagesContext, int, Task<DateTime?>> LastAuditEventDateAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (MessagesContext ctx, int tenantId) =>
+                ctx.AuditEvents
+                    .Where(r => r.TenantId == tenantId)
+                    .OrderByDescending(r => r.Date)
+                    .Select(r => (DateTime?)r.Date)
+                    .FirstOrDefault());
+
+    // The same for the last successful sign-in. The actions are constants of the query, so they reach the database
+    // as a plain IN list rather than a collection parameter.
+    public static readonly Func<MessagesContext, int, Task<DateTime?>> LastSuccessLoginDateAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (MessagesContext ctx, int tenantId) =>
+                ctx.LoginEvents
+                    .Where(r => r.TenantId == tenantId
+                                && new[]
+                                {
+                                    (int)MessageAction.LoginSuccess,
+                                    (int)MessageAction.LoginSuccessViaSocialAccount,
+                                    (int)MessageAction.LoginSuccessViaSms,
+                                    (int)MessageAction.LoginSuccessViaApi,
+                                    (int)MessageAction.LoginSuccessViaSocialApp,
+                                    (int)MessageAction.LoginSuccessViaApiSms,
+                                    (int)MessageAction.LoginSuccessViaSSO,
+                                    (int)MessageAction.LoginSuccessViaApiSocialAccount,
+                                    (int)MessageAction.LoginSuccesViaTfaApp,
+                                    (int)MessageAction.LoginSuccessViaApiTfa,
+                                    (int)MessageAction.LoginSuccessViaOAuth,
+                                    (int)MessageAction.LoginSuccessViaPassword,
+                                    (int)MessageAction.AuthLinkActivated,
+                                    (int)MessageAction.Logout
+                                }.Contains(r.Action ?? 0))
+                    .OrderByDescending(r => r.Date)
+                    .Select(r => (DateTime?)r.Date)
+                    .FirstOrDefault());
+
     public static readonly Func<MessagesContext, int, Guid, IEnumerable<int>, DateTime, IAsyncEnumerable<DbLoginEvent>> LoginEventsAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (MessagesContext ctx, int tenantId, Guid userId, IEnumerable<int> loginActions, DateTime date) =>
