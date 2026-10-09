@@ -4,8 +4,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import com.onlyoffice.docspace.webhooks.sdk.JSON;
-import com.onlyoffice.docspace.webhooks.sdk.model.FileEntryPayload;
+import com.onlyoffice.docspace.webhooks.sdk.model.FilePayload;
+import com.onlyoffice.docspace.webhooks.sdk.model.FolderPayload;
+import com.onlyoffice.docspace.webhooks.sdk.model.FormSubmitPayload;
 import com.onlyoffice.docspace.webhooks.sdk.model.GroupPayload;
+import com.onlyoffice.docspace.webhooks.sdk.model.RoomPayload;
 import com.onlyoffice.docspace.webhooks.sdk.model.UserPayload;
 import com.onlyoffice.docspace.webhooks.sdk.model.WebhookConfigInfo;
 import com.onlyoffice.docspace.webhooks.sdk.model.WebhookEventInfo;
@@ -105,13 +108,27 @@ public final class LogWebhook {
         } else if (trigger.startsWith("group.")) {
             GroupPayload g = GroupPayload.fromJson(payloadJson);
             System.out.printf("  group: %s%n", g.getName());
+        } else if (trigger.equals("form.submit")) {
+            // The one wrapper payload: the original form and the submitted copy.
+            FormSubmitPayload f = FormSubmitPayload.fromJson(payloadJson);
+            System.out.printf("  form: %s  submitted as %s%n",
+                    f.getOriginalForm() == null ? null : f.getOriginalForm().getTitle(),
+                    f.getSubmittedForm() == null ? null : f.getSubmittedForm().getTitle());
+        } else if (trigger.startsWith("folder.")) {
+            FolderPayload d = FolderPayload.fromJson(payloadJson);
+            System.out.printf("  folder: %s  id=%s  parent=%s%n",
+                    d.getTitle(), d.getId(), d.getParentId());
+        } else if (trigger.startsWith("room.") || trigger.startsWith("agent.")) {
+            // An agent is an AI room and arrives in the same shape.
+            RoomPayload r = RoomPayload.fromJson(payloadJson);
+            System.out.printf("  room: %s  id=%s  parent=%s%n",
+                    r.getTitle(), r.getId(), r.getParentId());
         } else {
-            // file.*, folder.*, room.*, agent.* and form.* all arrive as the
-            // FileEntry<T> base; fileEntryType is the only discriminator.
-            FileEntryPayload e = FileEntryPayload.fromJson(payloadJson);
-            String kind = Integer.valueOf(2).equals(e.getFileEntryType()) ? "file" : "folder";
-            System.out.printf("  %s: %s  id=%s  parent=%s%n",
-                    kind, e.getTitle(), e.getId(), e.getParentId());
+            // file.*, form.filled.out and form.stopped. Match on the concrete
+            // payload, never on FileEntryPayload: that is only the shared part.
+            FilePayload e = FilePayload.fromJson(payloadJson);
+            System.out.printf("  file: %s  id=%s  parent=%s%n",
+                    e.getTitle(), e.getId(), e.getParentId());
         }
 
         System.out.println();

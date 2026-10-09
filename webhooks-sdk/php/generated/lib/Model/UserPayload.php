@@ -131,7 +131,7 @@ class UserPayload implements ModelInterface, ArrayAccess, \JsonSerializable
         'mobile_phone' => null,
         'mobile_phone_activation_status' => null,
         'quota_limit' => 'int64',
-        'used_space' => null,
+        'used_space' => 'double',
         'is_custom_quota' => null,
         'created_by' => null,
         'registration_date' => 'date-time',

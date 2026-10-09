@@ -50,11 +50,11 @@ type UserPayload struct {
 	// enum MobilePhoneActivationStatus
 	MobilePhoneActivationStatus *int32 `json:"mobilePhoneActivationStatus,omitempty"`
 	QuotaLimit *int64 `json:"quotaLimit,omitempty"`
-	UsedSpace *float32 `json:"usedSpace,omitempty"`
+	UsedSpace *float64 `json:"usedSpace,omitempty"`
 	IsCustomQuota *bool `json:"isCustomQuota,omitempty"`
 	CreatedBy *UserSummaryPayload `json:"createdBy,omitempty"`
 	RegistrationDate *time.Time `json:"registrationDate,omitempty"`
-	HasAvatar *bool `json:"hasAvatar,omitempty"`
+	HasAvatarFlag *bool `json:"hasAvatar,omitempty"`
 	Avatar *string `json:"avatar,omitempty"`
 	AvatarOriginal *string `json:"avatarOriginal,omitempty"`
 	AvatarMax *string `json:"avatarMax,omitempty"`
@@ -913,9 +913,9 @@ func (o *UserPayload) SetQuotaLimit(v int64) {
 }
 
 // GetUsedSpace returns the UsedSpace field value if set, zero value otherwise.
-func (o *UserPayload) GetUsedSpace() float32 {
+func (o *UserPayload) GetUsedSpace() float64 {
 	if o == nil || IsNil(o.UsedSpace) {
-		var ret float32
+		var ret float64
 		return ret
 	}
 	return *o.UsedSpace
@@ -923,7 +923,7 @@ func (o *UserPayload) GetUsedSpace() float32 {
 
 // GetUsedSpaceOk returns a tuple with the UsedSpace field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserPayload) GetUsedSpaceOk() (*float32, bool) {
+func (o *UserPayload) GetUsedSpaceOk() (*float64, bool) {
 	if o == nil || IsNil(o.UsedSpace) {
 		return nil, false
 	}
@@ -939,8 +939,8 @@ func (o *UserPayload) HasUsedSpace() bool {
 	return false
 }
 
-// SetUsedSpace gets a reference to the given float32 and assigns it to the UsedSpace field.
-func (o *UserPayload) SetUsedSpace(v float32) {
+// SetUsedSpace gets a reference to the given float64 and assigns it to the UsedSpace field.
+func (o *UserPayload) SetUsedSpace(v float64) {
 	o.UsedSpace = &v
 }
 
@@ -1040,36 +1040,36 @@ func (o *UserPayload) SetRegistrationDate(v time.Time) {
 	o.RegistrationDate = &v
 }
 
-// GetHasAvatar returns the HasAvatar field value if set, zero value otherwise.
-func (o *UserPayload) GetHasAvatar() bool {
-	if o == nil || IsNil(o.HasAvatar) {
+// GetHasAvatarFlag returns the HasAvatarFlag field value if set, zero value otherwise.
+func (o *UserPayload) GetHasAvatarFlag() bool {
+	if o == nil || IsNil(o.HasAvatarFlag) {
 		var ret bool
 		return ret
 	}
-	return *o.HasAvatar
+	return *o.HasAvatarFlag
 }
 
-// GetHasAvatarOk returns a tuple with the HasAvatar field value if set, nil otherwise
+// GetHasAvatarFlagOk returns a tuple with the HasAvatarFlag field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *UserPayload) GetHasAvatarOk() (*bool, bool) {
-	if o == nil || IsNil(o.HasAvatar) {
+func (o *UserPayload) GetHasAvatarFlagOk() (*bool, bool) {
+	if o == nil || IsNil(o.HasAvatarFlag) {
 		return nil, false
 	}
-	return o.HasAvatar, true
+	return o.HasAvatarFlag, true
 }
 
-// HasHasAvatar returns a boolean if a field has been set.
-func (o *UserPayload) HasHasAvatar() bool {
-	if o != nil && !IsNil(o.HasAvatar) {
+// HasHasAvatarFlag returns a boolean if a field has been set.
+func (o *UserPayload) HasHasAvatarFlag() bool {
+	if o != nil && !IsNil(o.HasAvatarFlag) {
 		return true
 	}
 
 	return false
 }
 
-// SetHasAvatar gets a reference to the given bool and assigns it to the HasAvatar field.
-func (o *UserPayload) SetHasAvatar(v bool) {
-	o.HasAvatar = &v
+// SetHasAvatarFlag gets a reference to the given bool and assigns it to the HasAvatarFlag field.
+func (o *UserPayload) SetHasAvatarFlag(v bool) {
+	o.HasAvatarFlag = &v
 }
 
 // GetAvatar returns the Avatar field value if set, zero value otherwise.
@@ -1364,8 +1364,8 @@ func (o UserPayload) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.RegistrationDate) {
 		toSerialize["registrationDate"] = o.RegistrationDate
 	}
-	if !IsNil(o.HasAvatar) {
-		toSerialize["hasAvatar"] = o.HasAvatar
+	if !IsNil(o.HasAvatarFlag) {
+		toSerialize["hasAvatar"] = o.HasAvatarFlag
 	}
 	if !IsNil(o.Avatar) {
 		toSerialize["avatar"] = o.Avatar

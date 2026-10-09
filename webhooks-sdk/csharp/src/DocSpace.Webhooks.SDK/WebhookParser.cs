@@ -87,25 +87,29 @@ public static class WebhookParser
             && payloadToken.Type != JTokenType.Null
             && WebhookTriggers.PayloadTypes.TryGetValue(trigger, out var payloadType))
         {
-            try
-            {
-                payload = payloadToken.ToObject(payloadType);
-            }
-            catch (JsonException ex)
-            {
-                throw new WebhookParseException(
-                    $"payload did not match the schema for '{trigger}'", ex);
-            }
+            payload = ToObject(payloadToken, payloadType, $"payload did not match the schema for '{trigger}'");
         }
 
         return new DocSpaceWebhook
         {
             Trigger = trigger,
-            Event = root["event"]?.ToObject<WebhookEventInfo>(),
-            Webhook = root["webhook"]?.ToObject<WebhookConfigInfo>(),
+            Event = (WebhookEventInfo?)ToObject(root["event"], typeof(WebhookEventInfo), "event did not match the schema"),
+            Webhook = (WebhookConfigInfo?)ToObject(root["webhook"], typeof(WebhookConfigInfo), "webhook did not match the schema"),
             Payload = payload,
             RawPayloadJson = payloadToken?.ToString(Formatting.Indented) ?? "null",
         };
+    }
+
+    private static object? ToObject(JToken? token, Type type, string message)
+    {
+        try
+        {
+            return token?.ToObject(type);
+        }
+        catch (JsonException ex)
+        {
+            throw new WebhookParseException(message, ex);
+        }
     }
 
     /// <inheritdoc cref="Parse(string)"/>

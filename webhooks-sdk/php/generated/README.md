@@ -80,7 +80,7 @@ if (str_starts_with($trigger, 'user.')) {
 }
 ```
 
-Entry identifiers are the one field the generated models do not carry: `id` and `parentId` are declared as `oneOf(integer, string)`, which this generator renders as a property-less class. Read them from the decoded envelope — `$envelope->payload->id` — rather than from the model.
+Entry identifiers — `id`, `parentId` and the other ids of an entry, and `webhook.target.id` — are typed `mixed`: an `int` for entries in DocSpace's own storage, a `string` for entries backed by a third-party provider. Both occur on the same portal.
 
 ## Documentation for Verification
 
@@ -101,7 +101,6 @@ New events are added over time. Treat an unfamiliar `event.trigger` as something
 ## Documentation for Models
 
  - [ContactPayload](docs/Model/ContactPayload.md)
- - [EntryId](docs/Model/EntryId.md)
  - [FileEntryPayload](docs/Model/FileEntryPayload.md)
  - [FilePayload](docs/Model/FilePayload.md)
  - [FolderPayload](docs/Model/FolderPayload.md)

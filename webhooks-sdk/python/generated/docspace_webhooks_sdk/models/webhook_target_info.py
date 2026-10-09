@@ -17,7 +17,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, StrictStr, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from docspace_webhooks_sdk.models.entry_id import EntryId
 from typing import Optional, Set
@@ -29,18 +29,8 @@ class WebhookTargetInfo(BaseModel):
     Present only when the subscription is scoped to one entity.
     """ # noqa: E501
     id: Optional[EntryId] = None
-    type: Optional[StrictStr] = None
+    type: Optional[StrictStr] = Field(default=None, description="The prefix of the trigger the delivery is for: user, group, file, folder, room, form or agent today. Deliberately not an enum -- every new trigger family adds a value, and a receiver built against an older contract must keep parsing it. ")
     __properties: ClassVar[List[str]] = ["id", "type"]
-
-    @field_validator('type')
-    def type_validate_enum(cls, value):
-        """Validates the enum"""
-        if value is None:
-            return value
-
-        if value not in set(['user', 'group', 'file', 'folder', 'room', 'form', 'agent']):
-            raise ValueError("must be one of enum values ('user', 'group', 'file', 'folder', 'room', 'form', 'agent')")
-        return value
 
     model_config = ConfigDict(
         validate_by_name=True,

@@ -10,19 +10,11 @@ import Foundation
 /** Present only when the subscription is scoped to one entity. */
 public struct WebhookTargetInfo: Sendable, Codable, Hashable {
 
-    public enum ModelType: String, Sendable, Codable, CaseIterable {
-        case user = "user"
-        case group = "group"
-        case file = "file"
-        case folder = "folder"
-        case room = "room"
-        case form = "form"
-        case agent = "agent"
-    }
     public var id: EntryId?
-    public var type: ModelType?
+    /** The prefix of the trigger the delivery is for: user, group, file, folder, room, form or agent today. Deliberately not an enum -- every new trigger family adds a value, and a receiver built against an older contract must keep parsing it.  */
+    public var type: String?
 
-    public init(id: EntryId? = nil, type: ModelType? = nil) {
+    public init(id: EntryId? = nil, type: String? = nil) {
         self.id = id
         self.type = type
     }

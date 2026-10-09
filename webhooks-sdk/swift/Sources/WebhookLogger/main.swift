@@ -5,9 +5,8 @@
 //
 // Swift has no src/ runtime yet, so signature checking lives here.
 //
-// NOT VERIFIED: no Swift toolchain was available when this was written. It is
-// written against the generated models' actual shapes (the EntryId enum, Date
-// and UUID properties), but it has never been compiled or executed.
+// ../generate.sh builds this and runs it over every fixture in ../samples
+// after each generation.
 
 import Foundation
 import Crypto
@@ -59,7 +58,7 @@ func verifySignature(body: Data, secret: String, signature: String?) -> Bool {
 
 /// Minimal shape of the envelope; `payload` stays raw so it can be decoded
 /// against whichever model the trigger calls for.
-private struct Envelope: Decodable {
+struct Envelope: Decodable {
     let event: WebhookEventInfo?
     let webhook: WebhookConfigInfo?
 }
@@ -142,13 +141,25 @@ if trigger.hasPrefix("user.") {
 } else if trigger.hasPrefix("group.") {
     let group = try decoder.decode(GroupPayload.self, from: payloadData)
     print("  group: \(group.name ?? "")")
+} else if trigger == "form.submit" {
+    // The one wrapper payload: the original form and the submitted copy.
+    let form = try decoder.decode(FormSubmitPayload.self, from: payloadData)
+    print("  form: \(form.originalForm?.title ?? "")  submitted as \(form.submittedForm?.title ?? "")")
+} else if trigger.hasPrefix("folder.") {
+    let folder = try decoder.decode(FolderPayload.self, from: payloadData)
+    print("  folder: \(folder.title ?? "")"
+          + "  id=\(describe(folder.id))  parent=\(describe(folder.parentId))")
+} else if trigger.hasPrefix("room.") || trigger.hasPrefix("agent.") {
+    // An agent is an AI room and arrives in the same shape.
+    let room = try decoder.decode(RoomPayload.self, from: payloadData)
+    print("  room: \(room.title ?? "")"
+          + "  id=\(describe(room.id))  parent=\(describe(room.parentId))")
 } else {
-    // file.*, folder.*, room.*, agent.* and form.* all arrive as the
-    // FileEntry<T> base; fileEntryType is the only discriminator.
-    let entry = try decoder.decode(FileEntryPayload.self, from: payloadData)
-    let kind = entry.fileEntryType == 2 ? "file" : "folder"
-    print("  \(kind): \(entry.title ?? "")"
-          + "  id=\(describe(entry.id))  parent=\(describe(entry.parentId))")
+    // file.*, form.filled.out and form.stopped. Match on the concrete payload,
+    // never on FileEntryPayload: that is only the part the three share.
+    let file = try decoder.decode(FilePayload.self, from: payloadData)
+    print("  file: \(file.title ?? "")"
+          + "  id=\(describe(file.id))  parent=\(describe(file.parentId))")
 }
 
 print()

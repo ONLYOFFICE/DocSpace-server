@@ -34,7 +34,7 @@ ASC.Api.Core/Webhook/Payloads/UserWebhookDto.cs. A copy of the REST EmployeeFull
 |**mobilePhone** | **String** |  |  [optional] |
 |**mobilePhoneActivationStatus** | **Integer** | enum MobilePhoneActivationStatus |  [optional] |
 |**quotaLimit** | **Long** |  |  [optional] |
-|**usedSpace** | **BigDecimal** |  |  [optional] |
+|**usedSpace** | **Double** |  |  [optional] |
 |**isCustomQuota** | **Boolean** |  |  [optional] |
 |**createdBy** | [**UserSummaryPayload**](UserSummaryPayload.md) |  |  [optional] |
 |**registrationDate** | **OffsetDateTime** |  |  [optional] |

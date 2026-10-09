@@ -9,7 +9,7 @@
   <version>0.1.0</version>
 
   <properties>
-    <kotlin.version>2.0.21</kotlin.version>
+    <kotlin.version>2.4.21</kotlin.version>
     <moshi.version>1.15.1</moshi.version>
     <maven.compiler.release>17</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -33,6 +33,12 @@
       <groupId>com.squareup.moshi</groupId>
       <artifactId>moshi-kotlin</artifactId>
       <version>${moshi.version}</version>
+    </dependency>
+    <!-- moshi-kotlin brings an older kotlin-reflect; keep it on the compiler's version. -->
+    <dependency>
+      <groupId>org.jetbrains.kotlin</groupId>
+      <artifactId>kotlin-reflect</artifactId>
+      <version>${kotlin.version}</version>
     </dependency>
   </dependencies>
 

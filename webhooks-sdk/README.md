@@ -56,8 +56,9 @@ declared through `templates/typescript/files.yaml` instead.
 
 Every Getting Started sample was extracted from the generated README and
 checked: C#, Go, Java and Kotlin compile, Python and PHP pass a syntax check,
-and the C# one was additionally run against the shared fixture end to end. Ruby
-and Swift are unverified — no toolchain available.
+and the C# one was additionally run against the shared fixture end to end. The
+Ruby and Swift snippets have not been extracted and checked this way; the full
+samples in `ruby/samples` and `swift/` have (see *Samples*).
 
 A caveat found while writing them: `packageName` is not the variable that names
 the package everywhere. Java uses `artifactId`, Ruby `gemName`, Swift
@@ -151,11 +152,18 @@ either shows up in the same review as the contract change it implies.
 ```bash
 ./generate.sh              # all languages
 ./generate.sh python go    # a subset
+VERIFY=0 ./generate.sh     # generate only
 ```
 
 Needs `openapi-generator-cli` (`npm i -g @openapitools/openapi-generator-cli`) and a
 JDK. Takes ~90 s for all nine. `generated/` is wiped and rewritten; `src/` is never
 touched.
+
+After generating, each language is built and its sample is run over every
+fixture in `samples/` (see *Samples*); the outcome is in
+`<lang>/generated/.verify.log`, and any failure makes the script exit non-zero.
+A clean generation proves nothing on its own: every SDK here once generated
+without a warning and still failed to compile or to parse a real delivery.
 
 ## Why not the generate-sdk tool
 
@@ -239,15 +247,31 @@ real production `file.created` delivery — and print identical output.
 | PHP | `php/samples` | `php log_webhook.php` | tested |
 | Java | `java` | `mvn -q compile exec:java` | tested |
 | Kotlin | `kotlin` | `mvn -q compile exec:java` | tested |
-| Ruby | `ruby/samples` | `ruby log_webhook.rb` | **unverified** |
-| Swift | `swift` | `swift run WebhookLogger` | **unverified** |
+| Ruby | `ruby/samples` | `ruby log_webhook.rb` | tested |
+| Swift | `swift` | `swift run WebhookLogger` | tested |
 
 Kotlin needs no local `kotlinc`: the compiler comes down as a Maven artifact.
+The pinned Kotlin (2.4.21) builds on JDK 17 through 25; 2.0.x fails on JDK 25
+while parsing the runtime version string.
 
-The Ruby and Swift samples have **never been executed** — neither toolchain was
-available. They are written against the generated APIs rather than guessed, and
-every symbol they reference was checked to exist, but expect to fix something on
-first run. Each says so in its own header comment.
+`generate.sh` runs every sample after generating, over **every** signed fixture
+in `samples/`:
+
+| Fixture | What it exercises |
+|---|---|
+| `file.created` | a real production delivery: integer ids, file fields beyond the shared entry part |
+| `user.updated` | a user payload (`usedSpace`, `hasAvatar`, groups) on a subscription scoped to that user, so `webhook.target` carries a string id and a type |
+| `unknown.trigger` | a trigger family and target type this contract does not know, as after a server upgrade |
+
+A language whose toolchain is missing is reported as `NOT VERIFIED` at the end
+rather than passed; `VERIFY=0 ./generate.sh` skips the check. Ruby and Swift
+have no toolchain on the machine this was last run on and were checked in the
+`ruby:3.4-slim` and `swift:6.1` images instead. Kotlin was also checked on
+`maven:3-eclipse-temurin-25`.
+
+A fixture is the raw body plus `<name>.sig`, the signature over those exact
+bytes keyed with `samples/SECRET`; regenerate the `.sig` whenever the body
+changes.
 
 ### `oneOf` support varies sharply by generator
 
@@ -257,11 +281,12 @@ where the generators differ most. This is worth knowing before trusting an id:
 | Quality | Languages | Behaviour |
 |---|---|---|
 | Correct | Swift, Go, Ruby, TypeScript, C#, Java, Python | Value preserved — Swift's enum with associated values is the cleanest |
-| **Broken** | **PHP, Kotlin** | Rendered as an empty class; the scalar is **silently dropped** |
+| Mapped | PHP, Kotlin | The generator renders an empty class that drops the value, so `generate.sh` maps the schema away from it |
 
-Both samples for the broken pair read ids from the raw envelope instead, and say
-why inline. Kotlin additionally needs a custom Moshi adapter or it throws, since
-Moshi walks into a bare number expecting an object.
+PHP maps `EntryId` to `mixed`, so `getId()` returns the `int` or `string` as it
+arrived. Kotlin maps it to the hand-written `onlyoffice.docspace.webhooks.sdk.EntryId`
+in `kotlin/src/`, whose `value` is a `Long` or a `String`; register its
+`EntryIdAdapter()` with Moshi before `KotlinJsonAdapterFactory`.
 
 The C# sample doubles as a listener: `dotnet run -- --port 5555 --secret '<key>'`.
 
@@ -277,15 +302,24 @@ needed, all of it applied automatically by `generate.sh`:
 |---|---|
 | C# | `library=httpclient` (the default wraps every property in `Option<T>`), plus `FileParameter`, `OpenAPIDateConverter`, `AbstractOpenAPISchema` in `src/` |
 | TypeScript | `supportingFiles` for `runtime.ts` |
-| Go | `MappedNullable`, `newStrictDecoder`, `IsNil` copied into `generated/` (Go packages are one directory) |
-| PHP | `supportingFiles` for `ObjectSerializer`; too large to stand in for |
-| Java | `AbstractOpenApiSchema` shim, a generated `JSON` class registering all nine type-adapter factories, and three deps: gson, jsr305, `jackson-databind-nullable` |
-| Kotlin | moshi + moshi-kotlin; a Moshi adapter for the broken `EntryId`, plus `OffsetDateTime`/`UUID` adapters |
-| Swift | `Package.swift` and swift-crypto — Foundation has no HMAC |
-| Python, Ruby | nothing — both generate cleanly as-is |
+| Go | `MappedNullable`, `newStrictDecoder`, `IsNil` copied into `generated/` (Go packages are one directory); `--name-mappings hasAvatar=HasAvatarFlag`, since the field `HasAvatar` collides with the generated presence method `HasAvatar()` |
+| PHP | `supportingFiles` for `ObjectSerializer`; too large to stand in for. `EntryId` mapped to `mixed` |
+| Java | `AbstractOpenApiSchema` shim, a generated `JSON` class registering all nine type-adapter factories, and three deps: gson, jsr305, `jackson-databind-nullable`; `disallowAdditionalPropertiesIfNotPresent=false`, without which any field the contract does not list fails the whole payload |
+| Kotlin | moshi + moshi-kotlin; `EntryId` mapped to the hand-written class in `kotlin/src/`, plus `OffsetDateTime`/`UUID` adapters |
+| Ruby | `supportingFiles` for `api_model_base.rb` (every model inherits it), `version.rb`, the gem entry point and the gemspec; the last two are overridden in `templates/ruby` so the gem loads without an HTTP client |
+| Swift | `Package.swift` and swift-crypto — Foundation has no HMAC; `supportingFiles` for `JSONValue.swift`, the type of the untyped envelope `payload` |
+| Python | nothing — generates cleanly as-is |
 
-Two languages needed no help at all: Python and Ruby. Every other target needed
-a flag, a shim or both.
+Only Python needed no help at all. Every other target needed a flag, a shim or
+both.
+
+The contract itself carries two choices made for the generators.
+`webhook.target.type` is a plain string, not an enum: its value is the prefix of
+the trigger, so every new trigger family adds one, and a closed enum made C#,
+Python, Java, Kotlin, PHP, Ruby and Swift reject the whole delivery on a value
+they did not know. And `usedSpace` declares `format: double` — a bare `number`
+becomes `BigDecimal` in Kotlin, which Moshi has no adapter for, so every
+`user.*` delivery failed to parse.
 
 DocSpace validates a subscription's URL before storing it and rejects anything
 resolving into a loopback or private range, so `http://localhost:5555` cannot be
@@ -339,11 +373,6 @@ needs a one-off URL reservation or an elevated shell; the app prints the exact
 - Only TypeScript and C# have reusable runtimes in `src/`. The other samples
   carry their signature check inline; that logic wants lifting into a per
   language `src/` once the shape has settled.
-- Swift renames the reserved word `Type`, so `WebhookTargetInfo.type` is typed
-  `ModelType`. The property name and wire key are unaffected.
-- The PHP generator renders the `EntryId` oneOf as a property-less class, so
-  `getId()` returns an empty object and the value is lost. The sample reads ids
-  from the raw envelope instead. Every other field maps correctly.
 - Package names now follow the API SDK convention in every language; see
   *Package naming*. The same fix is outstanding in the API SDKs themselves for
   Java, PHP and Swift, where the configured `packageName` never took effect.

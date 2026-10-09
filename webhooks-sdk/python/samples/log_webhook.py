@@ -5,8 +5,9 @@ Logs a DocSpace webhook delivery to the console.
     python log_webhook.py                          # replay the shared fixture
     python log_webhook.py <body> <secret> <sig>
 
-Python has no src/ runtime yet, so signature checking lives here. The trigger ->
-payload mapping is read from the generated contract rather than retyped.
+Python has no src/ runtime yet, so signature checking and the trigger ->
+payload mapping live here. ../generate.sh runs this over every fixture in
+../../samples after each generation.
 """
 
 import hashlib
@@ -20,23 +21,29 @@ FIXTURES = HERE.parents[1] / "samples"
 
 sys.path.insert(0, str(HERE.parent / "generated"))
 
-from docspace_webhooks_sdk.models.file_entry_payload import FileEntryPayload  # noqa: E402
+from docspace_webhooks_sdk.models.file_payload import FilePayload  # noqa: E402
+from docspace_webhooks_sdk.models.folder_payload import FolderPayload  # noqa: E402
 from docspace_webhooks_sdk.models.form_submit_payload import FormSubmitPayload  # noqa: E402
 from docspace_webhooks_sdk.models.group_payload import GroupPayload  # noqa: E402
+from docspace_webhooks_sdk.models.room_payload import RoomPayload  # noqa: E402
 from docspace_webhooks_sdk.models.user_payload import UserPayload  # noqa: E402
 from docspace_webhooks_sdk.models.webhook_config_info import WebhookConfigInfo  # noqa: E402
 from docspace_webhooks_sdk.models.webhook_event_info import WebhookEventInfo  # noqa: E402
 
 SIGNATURE_HEADER = "x-docspace-signature-256"
 
-# Kept in step with x-docspace-trigger-payloads in the contract.
+# Kept in step with x-docspace-trigger-payloads in the contract. Never match on
+# FileEntryPayload: that is only the part files, folders and rooms share.
 PAYLOAD_TYPES = {
     "user.": UserPayload,
     "group.": GroupPayload,
-    "form.submit": FormSubmitPayload,
-    # Everything else about an entry -- file.*, folder.*, room.*, agent.*, and
-    # the other form.* triggers -- arrives as the FileEntry<T> base.
-    "": FileEntryPayload,
+    "file.": FilePayload,
+    "folder.": FolderPayload,
+    "room.": RoomPayload,
+    # An agent is an AI room and arrives in the same shape.
+    "agent.": RoomPayload,
+    "form.filled.out": FilePayload,
+    "form.stopped": FilePayload,
 }
 
 
@@ -61,12 +68,18 @@ def verify_signature(body: bytes, secret: str, signature: str | None) -> bool:
 
 
 def payload_model(trigger: str):
+    """The payload model, or None for a trigger newer than this SDK."""
     if trigger == "form.submit":
         return FormSubmitPayload
     for prefix, model in PAYLOAD_TYPES.items():
-        if prefix and trigger.startswith(prefix):
+        if trigger.startswith(prefix):
             return model
-    return FileEntryPayload
+    return None
+
+
+def entry_id(value) -> str:
+    """An EntryId oneOf: int for DocSpace storage, str for third-party entries."""
+    return "<none>" if value is None else str(value.actual_instance)
 
 
 def main() -> int:
@@ -92,18 +105,26 @@ def main() -> int:
 
     event = WebhookEventInfo.from_dict(envelope.get("event") or {})
     config = WebhookConfigInfo.from_dict(envelope.get("webhook") or {})
-    payload = payload_model(trigger).from_dict(envelope.get("payload") or {})
+    model = payload_model(trigger)
+    payload = model.from_dict(envelope.get("payload") or {}) if model else None
 
     print(trigger)
     print("  signature ok")
     print(f"  event #{event.id}  at {event.create_on}  by {event.create_by}")
     print(f'  subscription #{config.id} "{config.name}"')
 
-    if isinstance(payload, FileEntryPayload):
-        # fileEntryType is the only file/folder discriminator: 1 folder, 2 file.
-        kind = "file" if payload.file_entry_type == 2 else "folder"
-        print(f"  {kind}: {payload.title}  id={payload.id.actual_instance}"
-              f"  parent={payload.parent_id.actual_instance}")
+    if model is None:
+        # A trigger family added on the server after this SDK was generated:
+        # acknowledge it and keep the raw payload rather than failing.
+        print("  no payload model for this trigger; raw payload below")
+    elif isinstance(payload, (FilePayload, FolderPayload, RoomPayload)):
+        kind = {RoomPayload: "room", FolderPayload: "folder"}.get(type(payload), "file")
+        print(f"  {kind}: {payload.title}  id={entry_id(payload.id)}"
+              f"  parent={entry_id(payload.parent_id)}")
+    elif isinstance(payload, FormSubmitPayload):
+        original = payload.original_form.title if payload.original_form else None
+        submitted = payload.submitted_form.title if payload.submitted_form else None
+        print(f"  form: {original}  submitted as {submitted}")
     elif isinstance(payload, UserPayload):
         print(f"  user: {payload.user_name} <{payload.email}>")
     elif isinstance(payload, GroupPayload):

@@ -1,13 +1,11 @@
 package com.onlyoffice.docspace.webhooks.samples
 
 import com.squareup.moshi.JsonAdapter
-import com.squareup.moshi.JsonReader
-import com.squareup.moshi.JsonWriter
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 
-import onlyoffice.docspace.webhooks.sdk.models.EntryId
+import onlyoffice.docspace.webhooks.sdk.EntryIdAdapter
 import onlyoffice.docspace.webhooks.sdk.models.FileEntryPayload
 import onlyoffice.docspace.webhooks.sdk.models.GroupPayload
 import onlyoffice.docspace.webhooks.sdk.models.UserPayload
@@ -52,23 +50,6 @@ fun verifySignature(body: ByteArray, secret: String, signature: String?): Boolea
     )
 }
 
-/**
- * The Kotlin generator renders the EntryId oneOf as an empty class, so the
- * scalar it wraps has nowhere to go. Without this adapter Moshi walks into a
- * bare number expecting an object and throws. The value is read from the raw
- * JSON instead -- see the id/parent line below.
- */
-private val entryIdAdapter = object : JsonAdapter<EntryId>() {
-    override fun fromJson(reader: JsonReader): EntryId {
-        reader.skipValue()
-        return EntryId()
-    }
-
-    override fun toJson(writer: JsonWriter, value: EntryId?) {
-        writer.nullValue()
-    }
-}
-
 private class TimeAdapters {
     @com.squareup.moshi.FromJson
     fun dateFromJson(value: String): OffsetDateTime = OffsetDateTime.parse(value)
@@ -84,7 +65,8 @@ private class TimeAdapters {
 }
 
 private val moshi: Moshi = Moshi.Builder()
-    .add(EntryId::class.java, entryIdAdapter)
+    // Ids are a number or a string on the wire; see EntryId.
+    .add(EntryIdAdapter())
     .add(TimeAdapters())
     // Reflection-based: the models carry no @JsonClass(generateAdapter = true),
     // so no kapt/KSP codegen step is needed.
@@ -151,11 +133,7 @@ fun main(args: Array<String>) {
             // FileEntry<T> base; fileEntryType is the only discriminator.
             val e = moshi.adapter(FileEntryPayload::class.java).fromJsonValue(payloadValue)
             val kind = if (e?.fileEntryType == 2) "file" else "folder"
-            // Ids come from the raw map, not the model: see entryIdAdapter.
-            println(
-                "  $kind: ${e?.title}  id=${fmt(payloadMap["id"])}" +
-                    "  parent=${fmt(payloadMap["parentId"])}"
-            )
+            println("  $kind: ${e?.title}  id=${e?.id ?: "<none>"}  parent=${e?.parentId ?: "<none>"}")
         }
     }
 
@@ -177,9 +155,3 @@ private fun normalize(value: Any?): Any? = when (value) {
     else -> value
 }
 
-/** Moshi decodes every JSON number as Double; print integral ids without the .0 */
-private fun fmt(value: Any?): String = when (value) {
-    null -> "<none>"
-    is Double -> if (value == Math.floor(value)) value.toLong().toString() else value.toString()
-    else -> value.toString()
-}

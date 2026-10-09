@@ -25,8 +25,11 @@ spl_autoload_register(static function (string $class): void {
     }
 });
 
-use OnlyOffice\DocSpace\Webhooks\Sdk\Model\FileEntryPayload;
+use OnlyOffice\DocSpace\Webhooks\Sdk\Model\FilePayload;
+use OnlyOffice\DocSpace\Webhooks\Sdk\Model\FolderPayload;
+use OnlyOffice\DocSpace\Webhooks\Sdk\Model\FormSubmitPayload;
 use OnlyOffice\DocSpace\Webhooks\Sdk\Model\GroupPayload;
+use OnlyOffice\DocSpace\Webhooks\Sdk\Model\RoomPayload;
 use OnlyOffice\DocSpace\Webhooks\Sdk\Model\UserPayload;
 use OnlyOffice\DocSpace\Webhooks\Sdk\Model\WebhookConfigInfo;
 use OnlyOffice\DocSpace\Webhooks\Sdk\Model\WebhookEventInfo;
@@ -64,9 +67,19 @@ function payload_class(string $trigger): string
     if (str_starts_with($trigger, 'group.')) {
         return GroupPayload::class;
     }
-    // file.*, folder.*, room.*, agent.* and form.* all arrive as the
-    // FileEntry<T> base -- no subtype-specific field is ever sent.
-    return FileEntryPayload::class;
+    if ($trigger === 'form.submit') {
+        return FormSubmitPayload::class;
+    }
+    if (str_starts_with($trigger, 'folder.')) {
+        return FolderPayload::class;
+    }
+    // An agent is an AI room and arrives in the same shape.
+    if (str_starts_with($trigger, 'room.') || str_starts_with($trigger, 'agent.')) {
+        return RoomPayload::class;
+    }
+    // file.*, form.filled.out and form.stopped. Match on the concrete payload,
+    // never on FileEntryPayload: that is only the part the three share.
+    return FilePayload::class;
 }
 
 $fixtures  = __DIR__ . '/../../samples';
@@ -101,18 +114,22 @@ printf("  event #%d  at %s  by %s\n",
     $event->getCreateBy());
 printf("  subscription #%d \"%s\"\n", $config->getId(), $config->getName());
 
-if ($payload instanceof FileEntryPayload) {
-    // 1 = folder, 2 = file. The only discriminator there is.
-    $kind = $payload->getFileEntryType() === 2 ? 'file' : 'folder';
-
-    // Ids come from the raw envelope, not from the model. The PHP generator
-    // renders the EntryId oneOf as a property-less class, so getId() yields an
-    // empty object and the value is lost. Every other field maps correctly.
+if ($payload instanceof FilePayload || $payload instanceof FolderPayload || $payload instanceof RoomPayload) {
+    // Ids are an int for DocSpace storage and a string for third-party entries.
+    $kind = match (true) {
+        $payload instanceof RoomPayload => 'room',
+        $payload instanceof FolderPayload => 'folder',
+        default => 'file',
+    };
     printf("  %s: %s  id=%s  parent=%s\n",
         $kind,
         $payload->getTitle(),
-        var_export($envelope->payload->id ?? null, true),
-        var_export($envelope->payload->parentId ?? null, true));
+        var_export($payload->getId(), true),
+        var_export($payload->getParentId(), true));
+} elseif ($payload instanceof FormSubmitPayload) {
+    printf("  form: %s  submitted as %s\n",
+        $payload->getOriginalForm()?->getTitle(),
+        $payload->getSubmittedForm()?->getTitle());
 } elseif ($payload instanceof UserPayload) {
     printf("  user: %s <%s>\n", $payload->getUserName(), $payload->getEmail());
 } elseif ($payload instanceof GroupPayload) {

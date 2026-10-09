@@ -32,26 +32,11 @@ export interface WebhookTargetInfo {
      */
     id?: EntryId;
     /**
+     * The prefix of the trigger the delivery is for: user, group, file, folder, room, form or agent today. Deliberately not an enum -- every new trigger family adds a value, and a receiver built against an older contract must keep parsing it.
      * 
      */
-    type?: WebhookTargetInfoTypeEnum;
+    type?: string;
 }
-
-
-/**
- * @export
- */
-export const WebhookTargetInfoTypeEnum = {
-    User: 'user',
-    Group: 'group',
-    File: 'file',
-    Folder: 'folder',
-    Room: 'room',
-    Form: 'form',
-    Agent: 'agent',
-} as const;
-export type WebhookTargetInfoTypeEnum = typeof WebhookTargetInfoTypeEnum[keyof typeof WebhookTargetInfoTypeEnum];
-
 
 /**
  * Check if a given object implements the WebhookTargetInfo interface.

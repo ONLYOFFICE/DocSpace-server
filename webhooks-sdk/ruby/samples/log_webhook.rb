@@ -8,9 +8,8 @@
 #
 # Ruby has no src/ runtime yet, so signature checking lives here.
 #
-# NOT VERIFIED: no Ruby toolchain was available when this was written. It is
-# written against the generated models' actual API (build_from_hash, and the
-# EntryId oneOf module), but it has never been executed.
+# ../generate.sh runs this over every fixture in ../../samples after each
+# generation.
 
 require 'json'
 require 'openssl'
@@ -19,11 +18,10 @@ require 'pathname'
 ROOT     = Pathname.new(__dir__).parent
 FIXTURES = ROOT.parent.join('samples')
 
-# The models cross-reference each other through DocspaceWebhooksSdk.const_get at
-# deserialization time, so every one of them has to be loaded up front.
-Dir[ROOT.join('generated', 'lib', 'docspace-webhooks-sdk', 'models', '*.rb').to_s].sort.each do |f|
-  require f
-end
+# The gem entry point loads ApiModelBase and then every model; the models
+# cross-reference each other through const_get, so all of them must be loaded.
+$LOAD_PATH.unshift(ROOT.join('generated', 'lib').to_s)
+require 'docspace-webhooks-sdk'
 
 SIGNATURE_HEADER = 'x-docspace-signature-256'
 
@@ -51,9 +49,13 @@ def payload_class(trigger)
   return DocspaceWebhooksSdk::GroupPayload if trigger.start_with?('group.')
   return DocspaceWebhooksSdk::FormSubmitPayload if trigger == 'form.submit'
 
-  # file.*, folder.*, room.*, agent.* and the other form.* triggers all arrive
-  # as the FileEntry<T> base -- no subtype-specific field is ever sent.
-  DocspaceWebhooksSdk::FileEntryPayload
+  return DocspaceWebhooksSdk::FolderPayload if trigger.start_with?('folder.')
+  # An agent is an AI room and arrives in the same shape.
+  return DocspaceWebhooksSdk::RoomPayload if trigger.start_with?('room.', 'agent.')
+
+  # file.*, form.filled.out and form.stopped. Match on the concrete payload,
+  # never on FileEntryPayload: that is only the part the three share.
+  DocspaceWebhooksSdk::FilePayload
 end
 
 body_path = ARGV[0] || FIXTURES.join('file.created.json').to_s
@@ -86,13 +88,16 @@ puts format('  event #%s  at %s  by %s', event.id, event.create_on, event.create
 puts format('  subscription #%s "%s"', config.id, config.name)
 
 case payload
-when DocspaceWebhooksSdk::FileEntryPayload
-  # fileEntryType is the only file/folder discriminator: 1 folder, 2 file.
-  # EntryId.build returns the scalar itself, so id needs no unwrapping here
-  # (unlike PHP and Kotlin, where the oneOf value is dropped).
-  kind = payload.file_entry_type == 2 ? 'file' : 'folder'
+when DocspaceWebhooksSdk::FilePayload, DocspaceWebhooksSdk::FolderPayload, DocspaceWebhooksSdk::RoomPayload
+  # EntryId.build returns the scalar itself: an Integer, or a String for a
+  # third-party entry.
+  kind = { DocspaceWebhooksSdk::RoomPayload => 'room', DocspaceWebhooksSdk::FolderPayload => 'folder' }
+         .fetch(payload.class, 'file')
   puts format('  %s: %s  id=%s  parent=%s',
               kind, payload.title, payload.id, payload.parent_id)
+when DocspaceWebhooksSdk::FormSubmitPayload
+  puts format('  form: %s  submitted as %s',
+              payload.original_form&.title, payload.submitted_form&.title)
 when DocspaceWebhooksSdk::UserPayload
   puts format('  user: %s <%s>', payload.user_name, payload.email)
 when DocspaceWebhooksSdk::GroupPayload

@@ -1,6 +1,5 @@
 README.md
 docs/ContactPayload.md
-docs/EntryId.md
 docs/FileEntryPayload.md
 docs/FilePayload.md
 docs/FolderPayload.md
@@ -15,7 +14,6 @@ docs/WebhookEnvelope.md
 docs/WebhookEventInfo.md
 docs/WebhookTargetInfo.md
 src/main/kotlin/onlyoffice/docspace/webhooks/sdk/models/ContactPayload.kt
-src/main/kotlin/onlyoffice/docspace/webhooks/sdk/models/EntryId.kt
 src/main/kotlin/onlyoffice/docspace/webhooks/sdk/models/FileEntryPayload.kt
 src/main/kotlin/onlyoffice/docspace/webhooks/sdk/models/FilePayload.kt
 src/main/kotlin/onlyoffice/docspace/webhooks/sdk/models/FolderPayload.kt

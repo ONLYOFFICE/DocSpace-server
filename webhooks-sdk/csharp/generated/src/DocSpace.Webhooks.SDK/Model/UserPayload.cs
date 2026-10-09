@@ -72,7 +72,7 @@ namespace DocSpace.Webhooks.SDK.Model
         /// <param name="avatarMedium">avatarMedium.</param>
         /// <param name="avatarSmall">avatarSmall.</param>
         /// <param name="profileUrl">profileUrl.</param>
-        public UserPayload(Guid id = default, string displayName = default, string firstName = default, string lastName = default, string userName = default, string email = default, List<ContactPayload> contacts = default, int status = default, int activationStatus = default, DateTime terminated = default, string department = default, List<GroupSummaryPayload> groups = default, string location = default, string notes = default, bool isAdmin = default, bool isRoomAdmin = default, bool isOwner = default, bool isVisitor = default, bool isCollaborator = default, bool isLDAP = default, bool isSSO = default, List<string> listAdminModules = default, string cultureName = default, string mobilePhone = default, int mobilePhoneActivationStatus = default, long quotaLimit = default, decimal usedSpace = default, bool isCustomQuota = default, UserSummaryPayload createdBy = default, DateTime registrationDate = default, bool hasAvatar = default, string avatar = default, string avatarOriginal = default, string avatarMax = default, string avatarMedium = default, string avatarSmall = default, string profileUrl = default)
+        public UserPayload(Guid id = default, string displayName = default, string firstName = default, string lastName = default, string userName = default, string email = default, List<ContactPayload> contacts = default, int status = default, int activationStatus = default, DateTime terminated = default, string department = default, List<GroupSummaryPayload> groups = default, string location = default, string notes = default, bool isAdmin = default, bool isRoomAdmin = default, bool isOwner = default, bool isVisitor = default, bool isCollaborator = default, bool isLDAP = default, bool isSSO = default, List<string> listAdminModules = default, string cultureName = default, string mobilePhone = default, int mobilePhoneActivationStatus = default, long quotaLimit = default, double usedSpace = default, bool isCustomQuota = default, UserSummaryPayload createdBy = default, DateTime registrationDate = default, bool hasAvatar = default, string avatar = default, string avatarOriginal = default, string avatarMax = default, string avatarMedium = default, string avatarSmall = default, string profileUrl = default)
         {
             this.Id = id;
             this.DisplayName = displayName;
@@ -277,7 +277,7 @@ namespace DocSpace.Webhooks.SDK.Model
         /// Gets or Sets UsedSpace
         /// </summary>
         [DataMember(Name = "usedSpace", EmitDefaultValue = false)]
-        public decimal UsedSpace { get; set; }
+        public double UsedSpace { get; set; }
 
         /// <summary>
         /// Gets or Sets IsCustomQuota

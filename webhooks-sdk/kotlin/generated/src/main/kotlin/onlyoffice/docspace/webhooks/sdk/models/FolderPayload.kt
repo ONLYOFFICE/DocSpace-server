@@ -23,7 +23,6 @@
 
 package onlyoffice.docspace.webhooks.sdk.models
 
-import onlyoffice.docspace.webhooks.sdk.models.EntryId
 import onlyoffice.docspace.webhooks.sdk.models.UserSummaryPayload
 
 import com.squareup.moshi.Json
@@ -61,13 +60,13 @@ import com.squareup.moshi.JsonClass
 data class FolderPayload (
 
     @Json(name = "id")
-    val id: EntryId? = null,
+    val id: onlyoffice.docspace.webhooks.sdk.EntryId? = null,
 
     @Json(name = "parentId")
-    val parentId: EntryId? = null,
+    val parentId: onlyoffice.docspace.webhooks.sdk.EntryId? = null,
 
     @Json(name = "rootFolderId")
-    val rootFolderId: EntryId? = null,
+    val rootFolderId: onlyoffice.docspace.webhooks.sdk.EntryId? = null,
 
     @Json(name = "title")
     val title: kotlin.String? = null,
@@ -97,10 +96,10 @@ data class FolderPayload (
     val parentRoomType: kotlin.Int? = null,
 
     @Json(name = "originId")
-    val originId: EntryId? = null,
+    val originId: onlyoffice.docspace.webhooks.sdk.EntryId? = null,
 
     @Json(name = "originRoomId")
-    val originRoomId: EntryId? = null,
+    val originRoomId: onlyoffice.docspace.webhooks.sdk.EntryId? = null,
 
     @Json(name = "originTitle")
     val originTitle: kotlin.String? = null,

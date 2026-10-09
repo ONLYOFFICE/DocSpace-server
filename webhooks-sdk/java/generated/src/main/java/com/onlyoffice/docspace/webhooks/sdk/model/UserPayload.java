@@ -23,7 +23,6 @@ import com.onlyoffice.docspace.webhooks.sdk.model.ContactPayload;
 import com.onlyoffice.docspace.webhooks.sdk.model.GroupSummaryPayload;
 import com.onlyoffice.docspace.webhooks.sdk.model.UserSummaryPayload;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -192,7 +191,7 @@ public class UserPayload {
   public static final String SERIALIZED_NAME_USED_SPACE = "usedSpace";
   @SerializedName(SERIALIZED_NAME_USED_SPACE)
   @javax.annotation.Nullable
-  private BigDecimal usedSpace;
+  private Double usedSpace;
 
   public static final String SERIALIZED_NAME_IS_CUSTOM_QUOTA = "isCustomQuota";
   @SerializedName(SERIALIZED_NAME_IS_CUSTOM_QUOTA)
@@ -765,7 +764,7 @@ public class UserPayload {
   }
 
 
-  public UserPayload usedSpace(@javax.annotation.Nullable BigDecimal usedSpace) {
+  public UserPayload usedSpace(@javax.annotation.Nullable Double usedSpace) {
     this.usedSpace = usedSpace;
     return this;
   }
@@ -775,11 +774,11 @@ public class UserPayload {
    * @return usedSpace
    */
   @javax.annotation.Nullable
-  public BigDecimal getUsedSpace() {
+  public Double getUsedSpace() {
     return usedSpace;
   }
 
-  public void setUsedSpace(@javax.annotation.Nullable BigDecimal usedSpace) {
+  public void setUsedSpace(@javax.annotation.Nullable Double usedSpace) {
     this.usedSpace = usedSpace;
   }
 
@@ -973,6 +972,50 @@ public class UserPayload {
     this.profileUrl = profileUrl;
   }
 
+  /**
+   * A container for additional, undeclared properties.
+   * This is a holder for any undeclared properties as specified with
+   * the 'additionalProperties' keyword in the OAS document.
+   */
+  private Map<String, Object> additionalProperties;
+
+  /**
+   * Set the additional (undeclared) property with the specified name and value.
+   * If the property does not already exist, create it otherwise replace it.
+   *
+   * @param key name of the property
+   * @param value value of the property
+   * @return the UserPayload instance itself
+   */
+  public UserPayload putAdditionalProperty(String key, Object value) {
+    if (this.additionalProperties == null) {
+        this.additionalProperties = new HashMap<String, Object>();
+    }
+    this.additionalProperties.put(key, value);
+    return this;
+  }
+
+  /**
+   * Return the additional (undeclared) property.
+   *
+   * @return a map of objects
+   */
+  public Map<String, Object> getAdditionalProperties() {
+    return additionalProperties;
+  }
+
+  /**
+   * Return the additional (undeclared) property with the specified name.
+   *
+   * @param key name of the property
+   * @return an object
+   */
+  public Object getAdditionalProperty(String key) {
+    if (this.additionalProperties == null) {
+        return null;
+    }
+    return this.additionalProperties.get(key);
+  }
 
 
   @Override
@@ -1020,12 +1063,13 @@ public class UserPayload {
         Objects.equals(this.avatarMax, userPayload.avatarMax) &&
         Objects.equals(this.avatarMedium, userPayload.avatarMedium) &&
         Objects.equals(this.avatarSmall, userPayload.avatarSmall) &&
-        Objects.equals(this.profileUrl, userPayload.profileUrl);
+        Objects.equals(this.profileUrl, userPayload.profileUrl)&&
+        Objects.equals(this.additionalProperties, userPayload.additionalProperties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, displayName, firstName, lastName, userName, email, contacts, status, activationStatus, terminated, department, groups, location, notes, isAdmin, isRoomAdmin, isOwner, isVisitor, isCollaborator, isLDAP, isSSO, listAdminModules, cultureName, mobilePhone, mobilePhoneActivationStatus, quotaLimit, usedSpace, isCustomQuota, createdBy, registrationDate, hasAvatar, avatar, avatarOriginal, avatarMax, avatarMedium, avatarSmall, profileUrl);
+    return Objects.hash(id, displayName, firstName, lastName, userName, email, contacts, status, activationStatus, terminated, department, groups, location, notes, isAdmin, isRoomAdmin, isOwner, isVisitor, isCollaborator, isLDAP, isSSO, listAdminModules, cultureName, mobilePhone, mobilePhoneActivationStatus, quotaLimit, usedSpace, isCustomQuota, createdBy, registrationDate, hasAvatar, avatar, avatarOriginal, avatarMax, avatarMedium, avatarSmall, profileUrl, additionalProperties);
   }
 
   @Override
@@ -1069,6 +1113,7 @@ public class UserPayload {
     sb.append("    avatarMedium: ").append(toIndentedString(avatarMedium)).append("\n");
     sb.append("    avatarSmall: ").append(toIndentedString(avatarSmall)).append("\n");
     sb.append("    profileUrl: ").append(toIndentedString(profileUrl)).append("\n");
+    sb.append("    additionalProperties: ").append(toIndentedString(additionalProperties)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -1103,14 +1148,6 @@ public class UserPayload {
       if (jsonElement == null) {
         if (!UserPayload.openapiRequiredFields.isEmpty()) { // has required fields but JSON element is null
           throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The required field(s) %s in UserPayload is not found in the empty JSON string", UserPayload.openapiRequiredFields.toString()));
-        }
-      }
-
-      Set<Map.Entry<String, JsonElement>> entries = jsonElement.getAsJsonObject().entrySet();
-      // check to see if the JSON string contains additional fields
-      for (Map.Entry<String, JsonElement> entry : entries) {
-        if (!UserPayload.openapiFields.contains(entry.getKey())) {
-          throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` in the JSON string is not defined in the `UserPayload` properties. JSON: %s", entry.getKey(), jsonElement.toString()));
         }
       }
         JsonObject jsonObj = jsonElement.getAsJsonObject();
@@ -1218,6 +1255,30 @@ public class UserPayload {
            @Override
            public void write(JsonWriter out, UserPayload value) throws IOException {
              JsonObject obj = thisAdapter.toJsonTree(value).getAsJsonObject();
+             obj.remove("additionalProperties");
+             // serialize additional properties
+             if (value.getAdditionalProperties() != null) {
+               for (Map.Entry<String, Object> entry : value.getAdditionalProperties().entrySet()) {
+                 if (entry.getValue() instanceof String)
+                   obj.addProperty(entry.getKey(), (String) entry.getValue());
+                 else if (entry.getValue() instanceof Number)
+                   obj.addProperty(entry.getKey(), (Number) entry.getValue());
+                 else if (entry.getValue() instanceof Boolean)
+                   obj.addProperty(entry.getKey(), (Boolean) entry.getValue());
+                 else if (entry.getValue() instanceof Character)
+                   obj.addProperty(entry.getKey(), (Character) entry.getValue());
+                 else {
+                   JsonElement jsonElement = gson.toJsonTree(entry.getValue());
+                   if (jsonElement.isJsonNull()) {
+                     obj.add(entry.getKey(), JsonNull.INSTANCE);
+                   } else if (jsonElement.isJsonArray()) {
+                     obj.add(entry.getKey(), jsonElement.getAsJsonArray());
+                   } else {
+                     obj.add(entry.getKey(), jsonElement.getAsJsonObject());
+                   }
+                 }
+               }
+             }
              elementAdapter.write(out, obj);
            }
 
@@ -1225,7 +1286,28 @@ public class UserPayload {
            public UserPayload read(JsonReader in) throws IOException {
              JsonElement jsonElement = elementAdapter.read(in);
              validateJsonElement(jsonElement);
-             return thisAdapter.fromJsonTree(jsonElement);
+             JsonObject jsonObj = jsonElement.getAsJsonObject();
+             // store additional fields in the deserialized instance
+             UserPayload instance = thisAdapter.fromJsonTree(jsonObj);
+             for (Map.Entry<String, JsonElement> entry : jsonObj.entrySet()) {
+               if (!openapiFields.contains(entry.getKey())) {
+                 if (entry.getValue().isJsonPrimitive()) { // primitive type
+                   if (entry.getValue().getAsJsonPrimitive().isString())
+                     instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsString());
+                   else if (entry.getValue().getAsJsonPrimitive().isNumber())
+                     instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsNumber());
+                   else if (entry.getValue().getAsJsonPrimitive().isBoolean())
+                     instance.putAdditionalProperty(entry.getKey(), entry.getValue().getAsBoolean());
+                   else
+                     throw new IllegalArgumentException(String.format(java.util.Locale.ROOT, "The field `%s` has unknown primitive type. Value: %s", entry.getKey(), entry.getValue().toString()));
+                 } else if (entry.getValue().isJsonArray()) {
+                     instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), List.class));
+                 } else { // JSON object
+                     instance.putAdditionalProperty(entry.getKey(), gson.fromJson(entry.getValue(), HashMap.class));
+                 }
+               }
+             }
+             return instance;
            }
 
        }.nullSafe();
