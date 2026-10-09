@@ -2,8 +2,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy manifests and the local @onlyoffice/ai-chat tarball (a file: dependency resolved at install time)
-COPY package.json yarn.lock .yarnrc.yml onlyoffice-ai-chat-*.tgz ./
+# Copy manifests
+COPY package.json yarn.lock .yarnrc.yml ./
 COPY .yarn ./.yarn
 
 # Install dependencies; drop the fetch cache so the archives do not stay in the layer
