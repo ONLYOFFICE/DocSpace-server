@@ -122,8 +122,11 @@ Rules:
   Forgetting this gives "no such member" at the `Patterns` getter.
 - The resx value is XML-escaped HTML: write `&lt;tr …&gt;`, and `&amp;amp;` when the rendered HTML
   needs `&amp;`. `&#8226;` / `&#8211;` decode straight to • / – .
-- Mirror the text in `<comment>` (plain-text version) as the existing letters do — translators and
-  the Designer doc-comment use it.
+- A `<comment>` with the plain text goes only with an HTML-row letter (§3), where the words are
+  buried in markup and translators read them from the comment. A textile letter needs none: its value
+  already reads as text, and a copy beside it only goes stale with the next edit and misleads the
+  translator. 93 of the 96 textile patterns carry no comment. The `Designer.cs` doc comment is taken
+  from the value, never from the comment.
 
 ## 3. Markup
 

@@ -854,39 +854,6 @@ If you've decided to move on, that's completely fine. If there are any files you
 #end
 
 $TrulyYours</value>
-    <comment>Your space is blocked, but nothing is lost yet
-
-#if($Unpaid == "True")
-Since the subscription of your ${LetterLogoText} space, ${__VirtualRootPath}, has ended, we've blocked it for now. That means no one on your team can sign in at the moment, but all your documents and settings are still safe.
-#else
-Since your ${LetterLogoText} space, ${__VirtualRootPath}, hasn't been used for a while, we've blocked it for now. That means no one on your team can sign in at the moment, but all your documents and settings are still safe.
-#end
-
-Your data will stay with us until $DeleteDate. After that, the space and everything in it will be permanently deleted.
-
-#if($CanUnblock == "True")
-#if($Unpaid == "True")
-The good news: it's not too late. Just unblock your space before $DeleteDateShort, then renew your subscription to get back to work. Everything will be right where you left it.
-#else
-The good news: it's not too late. Just unblock your space before $DeleteDateShort, and everything will be right where you left it.
-#end
-
-$OrangeButton
-
-#if($Unpaid == "True")
-If you've decided to move on, that's completely fine. If there is any data you'd like to keep, unblock your space and back it up before $DeleteDateShort.
-#else
-If you've decided to move on, that's completely fine. If there are any files you'd like to keep, unblock your space and download them before $DeleteDateShort.
-#end
-#else
-The good news: it's not too late. Just get in touch with our support team before $DeleteDateShort, and we'll help you get your space back, exactly as you left it.
-
-$OrangeButton
-
-If you've decided to move on, that's completely fine. If there are any files you'd like to keep, let us know before $DeleteDateShort and we'll help you get access to them.
-#end
-
-$TrulyYours</comment>
   </data>
   <data name="pattern_saas_owner_retention_deleted" xml:space="preserve">
     <value>h1.Your space has been deleted
@@ -908,25 +875,6 @@ $OrangeButton
 If you ever want to come back, you're always welcome. You can "create a new space":"$URL2" anytime.
 
 $TrulyYours</value>
-    <comment>Your space has been deleted
-
-#if($Unpaid == "True")
-Since the subscription of your ${LetterLogoText} space, $PortalName, ended and was not renewed, we've now deleted it along with all its data, as described in our Privacy Policy.
-#else
-Since your ${LetterLogoText} space, $PortalName, hasn't been used for a long time, we've now deleted it along with all its data, as described in our Privacy Policy.
-#end
-
-#if($Unpaid == "True")
-Thank you for working with us. We'd really love to know what made you stop using it, whether something didn't work for you, you found a better fit, or you simply didn't need it anymore. It only takes a minute, and every answer helps us improve.
-#else
-Thank you for giving ${LetterLogoText} a try. We'd really love to know what made you stop using it, whether something didn't work for you, you found a better fit, or you simply didn't need it anymore. It only takes a minute, and every answer helps us improve.
-#end
-
-$OrangeButton
-
-If you ever want to come back, you're always welcome. You can create a new space anytime.
-
-$TrulyYours</comment>
   </data>
   <data name="pattern_saas_owner_retention_deletion_reminder" xml:space="preserve">
     <value>h1.Your space will be deleted soon
@@ -968,45 +916,6 @@ If you've decided to move on, that's completely fine. If there are any files you
 #end
 
 $TrulyYours</value>
-    <comment>Your space will be deleted soon
-
-#if($Unpaid == "True")
-#if($FinalNotice == "True")
-Your ${LetterLogoText} space, ${__VirtualRootPath}, is still blocked because its subscription has ended. This is a friendly last reminder: on $DeleteDate, the space and all its data will be permanently deleted.
-#else
-Your ${LetterLogoText} space, ${__VirtualRootPath}, is still blocked because its subscription has ended. This is a friendly reminder: on $DeleteDate, the space and all its data will be permanently deleted.
-#end
-#else
-#if($FinalNotice == "True")
-Your ${LetterLogoText} space, ${__VirtualRootPath}, is still blocked because it hasn't been used for a while. This is a friendly last reminder: on $DeleteDate, the space and all its data will be permanently deleted.
-#else
-Your ${LetterLogoText} space, ${__VirtualRootPath}, is still blocked because it hasn't been used for a while. This is a friendly reminder: on $DeleteDate, the space and all its data will be permanently deleted.
-#end
-#end
-
-#if($CanUnblock == "True")
-#if($Unpaid == "True")
-If you'd like to keep it, there's still time. Just unblock your space before $DeleteDateShort, then renew your subscription to get back to work. Everything will be right where you left it.
-#else
-If you'd like to keep it, there's still time. Just unblock your space before $DeleteDateShort, and everything will be right where you left it.
-#end
-
-$OrangeButton
-
-#if($Unpaid == "True")
-If you've decided to move on, that's completely fine. If there is any data you'd like to keep, unblock your space and back it up before $DeleteDateShort, since we won't be able to recover it after that.
-#else
-If you've decided to move on, that's completely fine. If there are any files you'd like to keep, unblock your space and download them before $DeleteDateShort, since we won't be able to recover them after that.
-#end
-#else
-If you'd like to keep it, there's still time. Just get in touch with our support team before $DeleteDateShort, and we'll help you get your space back, exactly as you left it.
-
-$OrangeButton
-
-If you've decided to move on, that's completely fine. If there are any files you'd like to keep, let us know before $DeleteDateShort and we'll help you get access to them, since we won't be able to recover them after that.
-#end
-
-$TrulyYours</comment>
   </data>
   <data name="pattern_saas_owner_retention_inactivity_warning" xml:space="preserve">
     <value>h1.We haven't seen you in a while
@@ -1025,22 +934,6 @@ $OrangeButton
 If you don't need the space anymore, you don't have to do anything. Just make sure to download any files you want to keep before $BlockDateShort.
 
 $TrulyYours</value>
-    <comment>We haven't seen you in a while
-
-It's been some time since anyone signed in to your ${LetterLogoText} space, ${__VirtualRootPath}. We wanted to reach out before anything happens to your documents and settings.
-
-To keep things running smoothly for everyone, we block free spaces that haven't been used for a while. Here's what that means for yours:
-
-$BlockDate: your space will be blocked, and you won't be able to sign in.
-$DeleteDate: the space and all its data will be permanently deleted.
-
-The good news: keeping it is easy. Just sign in once before $BlockDateShort, and everything will stay exactly as you left it.
-
-$OrangeButton
-
-If you don't need the space anymore, you don't have to do anything. Just make sure to download any files you want to keep before $BlockDateShort.
-
-$TrulyYours</comment>
   </data>
   <data name="pattern_saas_owner_retention_unpaid_warning" xml:space="preserve">
     <value>h1.Your subscription has ended, but your space is still here
@@ -1059,22 +952,6 @@ $OrangeButton
 If you've decided to move on, that's completely fine. Just remember to back up any data you want to keep before $BlockDateShort.
 
 $TrulyYours</value>
-    <comment>Your subscription has ended, but your space is still here
-
-Your ${LetterLogoText} subscription for ${__VirtualRootPath} ended on $DueDate. Thank you for working with us. We hope ${LetterLogoText} made your work a little easier.
-
-To keep things running smoothly, we block spaces once their subscription has ended. Here's what that means for yours:
-
-$BlockDate: your space will be blocked, and you won't be able to sign in.
-$DeleteDate: the space and all its data will be permanently deleted.
-
-The good news: keeping it is easy. Just renew your subscription before $BlockDateShort, and your documents, settings, and team will stay right where you left them.
-
-$OrangeButton
-
-If you've decided to move on, that's completely fine. Just remember to back up any data you want to keep before $BlockDateShort.
-
-$TrulyYours</comment>
   </data>
   <data name="pattern_saas_owner_retention_wallet_warning" xml:space="preserve">
     <value>#if($Unpaid == "True")
@@ -1110,39 +987,6 @@ If you've decided to move on, that's completely fine. Just remember to download 
 #end
 
 $TrulyYours</value>
-    <comment>#if($Unpaid == "True")
-Your subscription has ended, but your space and funds are still here
-
-Your ${LetterLogoText} subscription for ${__VirtualRootPath} ended on $DueDate. Thank you for working with us. There are still funds left in your wallet (check your balance), and we didn't want you to lose them without knowing.
-
-To keep things running smoothly, we block spaces once their subscription has ended. Here's what that means for yours:
-
-$BlockDate: your space will be blocked, and you won't be able to sign in.
-$DeleteDate: the space and all its data will be permanently deleted, along with the funds in your wallet.
-
-The good news: keeping both is easy. Just renew your subscription before $BlockDateShort, and your documents, settings, and funds will stay right where you left them. Your wallet balance may even cover part of it.
-
-$OrangeButton
-
-If you've decided to move on, that's completely fine. Just remember to back up any data you want to keep before $BlockDateShort.
-#else
-Your space still has funds waiting for you
-
-It's been some time since anyone signed in to your ${LetterLogoText} space, ${__VirtualRootPath}, but there are still funds left in its wallet. We didn't want you to lose them without knowing.
-
-To keep things running smoothly, we block inactive spaces. Here's what that means for yours:
-
-$BlockDate: your space will be blocked, and you won't be able to sign in.
-$DeleteDate: the space and all its data will be permanently deleted, along with the funds in your wallet.
-
-The good news: keeping both is easy. Just sign in once before $BlockDateShort, and your documents, settings, and funds will stay right where you left them.
-
-$OrangeButton
-
-If you've decided to move on, that's completely fine. Just remember to download any files you want to keep before $BlockDateShort.
-#end
-
-$TrulyYours</comment>
   </data>
   <data name="pattern_suspicious_login" xml:space="preserve">
     <value>h1.Suspicious login detected
