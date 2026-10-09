@@ -269,19 +269,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
         var tag = builder.Configuration["APP_EDITOR_VERSION"] ?? "latest";
 
-        // The image ships no AllFonts.js and an empty fonts directory: documentserver-generate-allfonts
-        // builds them on every start (~100 s of CPU, measured 2026-10-08) into exactly three directories -
-        // sdkjs/common (AllFonts.js, Images), server/FileConverter/bin (AllFonts.js, font_selection.bin, js
-        // cache) and fonts. Keeping those three on named volumes makes the pass a one-time cost: on the first
-        // start the volumes are empty, Docker seeds them from the image, the start script finds no
-        // AllFonts.js and generates regardless of GENERATE_FONTS; every later start finds the file and skips
-        // (healthy in 6 s instead of ~2 min, 665 MiB instead of 940). GENERATE_FONTS=false alone, without the
-        // volumes, leaves the editor answering 404 for sdkjs/common/AllFonts.js.
-        // The image name and tag are part of the volume names so a version change gets fresh directories -
-        // sdkjs/common must match the rest of sdkjs. A moving tag (the default "latest") does not change the
-        // name, so after pulling a newer image under the same tag remove the volumes:
-        //   docker volume ls -q --filter name=docspace-editors- | xargs docker volume rm
-        var volumePrefix = $"docspace-editors-{image.Replace('/', '-')}-{tag}";
+        // No font-generation shortcut here on purpose: the image regenerates AllFonts.js and the font
+        // thumbnails on every start (~30-100 s depending on the version). Caching them needs knowledge of the
+        // image's internals (output paths, start-script behaviour per version), which is not worth carrying.
 
         EditorResource = builder
             .AddContainer(Constants.EditorsContainer, image, tag)
@@ -290,10 +280,16 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithEnvironment("JWT_SECRET", "secret")
             .WithEnvironment("JWT_HEADER", "AuthorizationJwt")
             .WithBindMount(Path.Combine(basePath, "Data"), "/var/www/onlyoffice/Data")
-            .WithVolume($"{volumePrefix}-sdkjs-common", "/var/www/onlyoffice/documentserver/sdkjs/common")
-            .WithVolume($"{volumePrefix}-converter-bin", "/var/www/onlyoffice/documentserver/server/FileConverter/bin")
-            .WithVolume($"{volumePrefix}-fonts", "/var/www/onlyoffice/documentserver/fonts")
-            .WithEnvironment("GENERATE_FONTS", "false")
+            // Editing state has two halves that must survive a restart together: the task_result/doc_changes
+            // rows (in the AppHost MySQL since the external-DB change above, so they persist) and the cached
+            // document files under /var/lib/onlyoffice (an anonymous volume on the image, so a new container
+            // starts without them). Rows without files made every document that was open at shutdown fail
+            // to reopen and get re-saved damaged (2026-10-09). Production mounts the same path as ds_state
+            // (buildtools/install/docker/ds.yml); the name carries no tag because the data is not version-bound.
+            .WithVolume("docspace-editors-state", "/var/lib/onlyoffice")
+            // Give the document service time to finish the saves in flight before the container is killed -
+            // the production compose uses the same 60 s stop_grace_period.
+            .WithContainerRuntimeArgs("--stop-timeout", "60")
             .WithMemoryLimit(ContainerMemoryExtensions.EditorsLimit);
 
         // The image bundles its own PostgreSQL, RabbitMQ and Redis and starts each one only when the matching
