@@ -247,6 +247,8 @@ public class ReassignProgressItem : DistributedTaskProgress
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         var groups = await userManager.GetUserGroupsAsync(user.Id);
 
+        var publishWebhook = await webhookManager.PrepareAsync(WebhookTrigger.UserDeleted, user);
+
         await userPhotoManager.RemovePhotoAsync(user.Id);
         await userManager.DeleteUserAsync(user.Id);
 
@@ -273,7 +275,7 @@ public class ReassignProgressItem : DistributedTaskProgress
             messageService.Send(MessageAction.UserDeleted, MessageTarget.Create(FromUser), userName);
         }
 
-        await webhookManager.PublishAsync(WebhookTrigger.UserDeleted, user);
+        await publishWebhook();
     }
 }
 

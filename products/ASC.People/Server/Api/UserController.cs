@@ -788,6 +788,8 @@ public class UserController(
         var userName = user.DisplayUserName(false, displayUserSettingsHelper);
         var groups = await _userManager.GetUserGroupsAsync(user.Id);
 
+        var publishWebhook = await webhookManager.PrepareAsync(WebhookTrigger.UserDeleted, user);
+
         if (!isGuest)
         {
             await client.DeleteClientsAsync(user.Id);
@@ -815,7 +817,7 @@ public class UserController(
             }
         }
 
-        await webhookManager.PublishAsync(WebhookTrigger.UserDeleted, user);
+        await publishWebhook();
 
         return await employeeFullDtoHelper.GetFullAsync(user);
     }
@@ -1598,6 +1600,8 @@ public class UserController(
 
             var isGuest = userType == EmployeeType.Guest;
 
+            var publishWebhook = await webhookManager.PrepareAsync(WebhookTrigger.UserDeleted, user);
+
             if (!isGuest)
             {
                 await client.DeleteClientsAsync(user.Id);
@@ -1608,7 +1612,7 @@ public class UserController(
             await fileSecurity.RemoveSubjectAsync(user.Id, true);
             await queueWorkerRemove.StartAsync(tenant.Id, user, securityContext.CurrentAccount.ID, false, false, isGuest);
 
-            await webhookManager.PublishAsync(WebhookTrigger.UserDeleted, user);
+            await publishWebhook();
         }
 
         messageService.Send(MessageAction.UsersDeleted, MessageTarget.Create(users.Select(x => x.Id)), userNames);

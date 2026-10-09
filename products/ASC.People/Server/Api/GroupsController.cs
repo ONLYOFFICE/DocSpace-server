@@ -311,6 +311,8 @@ public class GroupController(
 
         var group = await GetGroupInfoAsync(inDto.Id);
 
+        var publishWebhook = await webhookManager.PrepareAsync(WebhookTrigger.GroupDeleted, group);
+
         await userManager.DeleteGroupAsync(inDto.Id);
         await fileSecurity.RemoveSubjectAsync(inDto.Id, false);
 
@@ -318,7 +320,7 @@ public class GroupController(
 
         await socketManager.DeleteGroupAsync(inDto.Id);
 
-        await webhookManager.PublishAsync(WebhookTrigger.GroupDeleted, group);
+        await publishWebhook();
 
         return NoContent();
     }
