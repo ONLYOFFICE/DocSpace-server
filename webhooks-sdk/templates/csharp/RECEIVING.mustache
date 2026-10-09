@@ -64,9 +64,12 @@ the next server upgrade. The raw JSON stays available on `RawPayloadJson`.
 
 Return 200 as soon as the signature checks out, and do the real work afterwards.
 
-A delivery gets five attempts with exponential backoff from one second — about
-31 seconds in total — after which it is abandoned, and only an administrator can
-replay it from the delivery log.
+The server waits 30 seconds for a response; a timeout, a network error or any
+non-2xx status counts as a failed attempt. A failed delivery is retried after
+about 1 minute, 5 minutes, 30 minutes, 2 hours, 5 hours and 10 hours (each ±10%)
+— seven attempts over roughly 18 hours by default — after which it is abandoned.
+From then on only a portal administrator or the member who created the
+subscription can replay it from the delivery log.
 
 Sustained failures cost the subscription itself, not just the delivery:
 
@@ -81,14 +84,14 @@ Sustained failures cost the subscription itself, not just the delivery:
 ## 5. Deduplicate on `event.id`
 
 It is stable across every resend of one delivery — the server's automatic retries
-and a manual retry from the admin UI alike, because a manual retry requeues the
-same delivery record rather than creating a new one. The same id always means the
-same logical event, so it is a sound idempotency key on its own.
+and a manual retry from the delivery log alike, because a manual retry requeues
+the same delivery record rather than creating a new one. The same id always means
+the same logical event, so it is a sound idempotency key on its own.
 
 Note what that implies: a delivery you have already processed can arrive again at
-any time, days later, if an administrator presses retry. Keep the ids you have
-seen for longer than the retry budget, not just for the ~31 seconds the automatic
-retries span.
+any time, days later, if someone presses retry. Keep the ids you have seen for
+longer than the retry budget, not just for the ~18 hours the automatic retries
+span.
 
 ## Models
 

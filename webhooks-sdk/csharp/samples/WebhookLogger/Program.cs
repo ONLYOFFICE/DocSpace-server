@@ -142,8 +142,8 @@ while (!cancel.IsCancellationRequested)
     await context.Request.InputStream.CopyToAsync(ms);
     var body = ms.ToArray();
 
-    // Acknowledge first. DocSpace gives a delivery about 31 seconds across all
-    // its retries, so anything slow belongs after the response, not before it.
+    // Acknowledge first. DocSpace waits 30 seconds for a response and treats a
+    // timeout as a failed attempt, so anything slow belongs after the response.
     response.StatusCode = 200;
     response.Close();
 

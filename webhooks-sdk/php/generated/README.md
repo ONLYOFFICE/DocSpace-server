@@ -22,7 +22,7 @@ A receiver does two things, in this order: verify the signature, then decode.
 
 Verify against the **raw request body** — `file_get_contents('php://input')`, not `$_POST`. A body that has been parsed and re-encoded is a different byte sequence and will never match.
 
-Answer as soon as the signature checks out and do the real work afterwards. A delivery gets five attempts over roughly 31 seconds, after which it is abandoned; a subscription that goes three days without a single successful delivery is switched off.
+Answer as soon as the signature checks out and do the real work afterwards: the server waits 30 seconds for a response. A failed delivery is retried after about 1 min, 5 min, 30 min, 2 h, 5 h and 10 h (each ±10%) — seven attempts over roughly 18 hours by default — after which it is abandoned; a subscription that goes three days without a single successful delivery is switched off.
 
 ## Getting Started
 
@@ -88,7 +88,7 @@ Every delivery carries `x-docspace-signature-256`, an HMAC-SHA256 of the raw bod
 
 Two further headers, `x-docspace-event-id` and `x-docspace-event-timestamp`, repeat `event.id` and `event.createOn` so a stale or already-seen delivery can be dropped without reading the body. They are **not** covered by the signature: reject on them freely, but never accept on them. The values inside the verified body are the authoritative ones.
 
-Deduplicate on `event.id`. It is stable across the server's automatic retries, though a manual retry by an administrator creates a new record and therefore a new id.
+Deduplicate on `event.id`. It is stable across every resend of one delivery — the server's automatic retries and a manual retry from the delivery log alike — so keep the ids you have seen for longer than the ~18-hour retry window: a manual retry can bring the same event back days later.
 
 ## Documentation for Events
 

@@ -219,12 +219,15 @@ kept honest by `WebhookPayloadPairingTests`.
   timestamp; check freshness against it after verifying. Comparing it with the
   header value also detects tampering for free.
 - **Idempotency.** Dedupe on `event.id` **from the body**. It is stable across the
-  server's automatic retries, but a *manual* retry from the admin UI creates a new
-  delivery record and therefore a new id — the same logical event arrives with a
-  different key.
-- **Answer fast.** A delivery gets 5 attempts with exponential backoff from 1 s —
-  about 31 seconds in total — after which it is abandoned and only an
-  administrator can replay it from the delivery log. Acknowledge immediately and
+  server's automatic retries and a *manual* retry from the delivery log alike —
+  a manual retry requeues the same delivery record, so the same logical event
+  always arrives with the same key, possibly days later.
+- **Answer fast.** The server waits 30 s for a response; a timeout, network error
+  or non-2xx status is a failed attempt. A failed delivery is retried after
+  ~1 min, 5 min, 30 min, 2 h, 5 h and 10 h (±10% jitter) — 7 attempts over
+  roughly 18 hours by default (`webhooks:retryIntervals` in the server config) —
+  after which it is abandoned; a portal administrator or the subscription's
+  creator can still replay it from the delivery log. Acknowledge immediately and
   process out of band.
 - **Sustained failure disables the subscription.** Three days without a single
   successful delivery and it is switched off until someone re-enables it; the
