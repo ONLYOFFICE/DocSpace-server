@@ -43,16 +43,10 @@ public class GroupWebhookDtoHelper(UserManager userManager, UserWebhookDtoHelper
 {
     public async Task<GroupWebhookDto> GetAsync(GroupInfo group)
     {
-        var result = new GroupWebhookDto
-        {
-            Id = group.ID,
-            Name = group.Name,
-            Category = group.CategoryID,
-            Parent = group.Parent?.ID ?? Guid.Empty,
-            IsLDAP = !string.IsNullOrEmpty(group.Sid),
-            IsSystem = await userManager.IsSystemGroup(group.ID) ? true : null,
-            MembersCount = (await userManager.GetUsersByGroupAsync(group.ID)).Length
-        };
+        var result = group.MapToWebhookDto();
+
+        result.IsSystem = await userManager.IsSystemGroup(group.ID) ? true : null;
+        result.MembersCount = (await userManager.GetUsersByGroupAsync(group.ID)).Length;
 
         var manager = await userManager.GetUsersAsync(await userManager.GetDepartmentManagerAsync(group.ID));
 
