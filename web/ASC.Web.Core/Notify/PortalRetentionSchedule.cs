@@ -101,6 +101,12 @@ public readonly record struct PortalRetentionDecision(PortalRetentionStep Step, 
 }
 
 /// <summary>
+/// The last warning an active portal was sent: the day it went out and the day of the block it named.
+/// The block keeps to that day, whatever the portal's category has become since.
+/// </summary>
+public readonly record struct PortalRetentionWarning(DateTime SentOn, DateTime BlockOn);
+
+/// <summary>
 /// The thresholds of one category, in days (or months) from the day the count starts. Zero switches a
 /// letter off.
 /// </summary>
@@ -188,13 +194,17 @@ public class PortalRetentionConfiguration(IConfiguration configuration)
 
 /// <summary>
 /// Decides what happens to an unused portal today. It keeps no state of its own: the caller hands it
-/// what is stored - the day the count starts, for a blocked portal the day its status changed and the
-/// day its last reminder went out, and the last day the job got through.
+/// what is stored - the day the count starts, for an active portal its last warning, for a blocked portal
+/// the day its status changed and the day its last reminder went out, and the last day the job got through.
 /// </summary>
 /// <remarks>
-/// Blocking catches up: a portal past its threshold is blocked on the first run that sees it, even if
-/// the job missed the exact day. The letter that goes with the block is sent at that moment, so the
-/// owner is always told, and the deletion is counted from the block, so the whole retention period lies
+/// A portal is never blocked earlier than the day its last warning named, nor without a warning naming
+/// the day at all: the count can reach the block before any warning of it went out - the warning was
+/// missed in a long stop of the job, or the wallet emptied and the portal fell under a shorter schedule -
+/// and then the warning goes out first and the block follows it as far apart as the schedule keeps its
+/// last warning from its block. Blocking catches up: a portal past the day it was warned of is blocked on
+/// the first run that sees it. The letter that goes with the block is sent at that moment, so the owner
+/// is always told, and the deletion is counted from the block, so the whole retention period lies
 /// between that letter and the deletion. A warning or a reminder is sent on the first run after its day:
 /// a run covers every day since the last one the job got through, and when several letters fall into
 /// those days only the latest goes out, since it says everything the earlier ones would have. The last
@@ -228,7 +238,11 @@ public static class PortalRetentionSchedule
     /// For a blocked portal, the day the last reminder before the deletion went out, or null while it has
     /// not.
     /// </param>
-    public static PortalRetentionDecision Decide(PortalRetentionScheduleOptions schedule, DateTime anchor, DateTime policyStart, DateTime? blockedOn, DateTime today, DateTime noticesFrom = default, DateTime? lastRunOn = null, DateTime? finalNoticeSentOn = null)
+    /// <param name="lastWarning">
+    /// For an active portal, the last warning it was sent, or null when it has none. A warning sent before
+    /// the count started belongs to an earlier count and is not taken into account.
+    /// </param>
+    public static PortalRetentionDecision Decide(PortalRetentionScheduleOptions schedule, DateTime anchor, DateTime policyStart, DateTime? blockedOn, DateTime today, DateTime noticesFrom = default, DateTime? lastRunOn = null, DateTime? finalNoticeSentOn = null, PortalRetentionWarning? lastWarning = null)
     {
         today = today.Date;
 
@@ -236,18 +250,17 @@ public static class PortalRetentionSchedule
 
         return blockedOn.HasValue
             ? DecideBlocked(schedule, blockedOn.Value.Date, today, coveredFrom, finalNoticeSentOn?.Date)
-            : DecideActive(schedule, anchor.Date > policyStart.Date ? anchor.Date : policyStart.Date, noticesFrom.Date, today, coveredFrom);
+            : DecideActive(schedule, anchor.Date > policyStart.Date ? anchor.Date : policyStart.Date, noticesFrom.Date, today, coveredFrom, lastWarning);
     }
 
-    private static PortalRetentionDecision DecideActive(PortalRetentionScheduleOptions schedule, DateTime start, DateTime noticesFrom, DateTime today, DateTime coveredFrom)
+    private static PortalRetentionDecision DecideActive(PortalRetentionScheduleOptions schedule, DateTime start, DateTime noticesFrom, DateTime today, DateTime coveredFrom, PortalRetentionWarning? lastWarning)
     {
         var blockOn = start.AddDays(schedule.BlockAfterDays);
         var deleteOn = blockOn.AddDays(schedule.RetentionDays);
 
         if (today >= blockOn)
         {
-            // Blocked today, so the count of the retention period starts today as well.
-            return new PortalRetentionDecision(PortalRetentionStep.Block, PortalRetentionLetter.Blocked, today, today.AddDays(schedule.RetentionDays));
+            return BlockOrWarn(schedule, start, today, lastWarning);
         }
 
         var letter = WarningFor(schedule, start, noticesFrom, today, coveredFrom);
@@ -255,6 +268,58 @@ public static class PortalRetentionSchedule
         return letter.HasValue
             ? new PortalRetentionDecision(PortalRetentionStep.Notify, letter, blockOn, deleteOn)
             : PortalRetentionDecision.Nothing(blockOn, deleteOn);
+    }
+
+    /// <summary>
+    /// The count has reached the block. The portal is blocked once the day its last warning of this count
+    /// named has come; with no such warning, it is warned now, and the block it is warned of is as far
+    /// away as the schedule keeps its last warning from its block.
+    /// </summary>
+    private static PortalRetentionDecision BlockOrWarn(PortalRetentionScheduleOptions schedule, DateTime start, DateTime today, PortalRetentionWarning? lastWarning)
+    {
+        if (lastWarning is { } warning && warning.SentOn.Date > start)
+        {
+            // The day a wallet schedule promised stays when the wallet empties and the free schedule's
+            // own day has long passed: the owner was told that day, and only that day.
+            var warnedBlockOn = warning.BlockOn.Date;
+
+            return today >= warnedBlockOn
+                ? BlockToday(schedule, today)
+                : PortalRetentionDecision.Nothing(warnedBlockOn, warnedBlockOn.AddDays(schedule.RetentionDays));
+        }
+
+        if (LastWarningBeforeBlock(schedule, start) is not { } last)
+        {
+            // A schedule configured without warnings blocks unannounced.
+            return BlockToday(schedule, today);
+        }
+
+        var blockOn = today.AddDays((start.AddDays(schedule.BlockAfterDays) - last.DueOn).Days);
+
+        return new PortalRetentionDecision(PortalRetentionStep.Notify, last.Letter, blockOn, blockOn.AddDays(schedule.RetentionDays));
+    }
+
+    private static PortalRetentionDecision BlockToday(PortalRetentionScheduleOptions schedule, DateTime today)
+    {
+        // Blocked today, so the count of the retention period starts today as well.
+        return new PortalRetentionDecision(PortalRetentionStep.Block, PortalRetentionLetter.Blocked, today, today.AddDays(schedule.RetentionDays));
+    }
+
+    /// <summary>The last warning the schedule sends before its block, or null when it sends none.</summary>
+    private static (PortalRetentionLetter Letter, DateTime DueOn)? LastWarningBeforeBlock(PortalRetentionScheduleOptions schedule, DateTime start)
+    {
+        var blockOn = start.AddDays(schedule.BlockAfterDays);
+        (PortalRetentionLetter Letter, DateTime DueOn)? last = null;
+
+        foreach (var warning in WarningDays(schedule, start))
+        {
+            if (warning.DueOn < blockOn && (last is null || warning.DueOn > last.Value.DueOn))
+            {
+                last = warning;
+            }
+        }
+
+        return last;
     }
 
     /// <summary>

@@ -66,11 +66,6 @@ public class PeriodicLetterScheduleTests
         return PeriodicLetterContexts.Quota(free, trial, lifetime, customization);
     }
 
-    private static Lazy<Task<DateTime>> Activity(DateTime date)
-    {
-        return PeriodicLetterContexts.Activity(date);
-    }
-
     /// <summary>A portal on a paid tariff running out on <paramref name="due"/>.</summary>
     private static PeriodicLetterContext Paid(PeriodicLetterContext context, DateTime due, DateTime? delay = null)
     {

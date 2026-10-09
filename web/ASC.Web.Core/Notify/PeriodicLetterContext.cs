@@ -72,14 +72,24 @@ public sealed record PeriodicLetterContext
     public required bool DefaultRebranding { get; init; }
 
     /// <summary>
-    /// The last time anyone did anything on the portal — the later of the last audit event and the last
-    /// successful login, falling back to the creation date. Two database queries, so it is resolved on
-    /// first use and only when the retention policy asks.
+    /// The last time anyone did anything on the portal — its last audit event and its last successful
+    /// login, each falling back to the creation date. Two database queries, so it is resolved on first use
+    /// and only when the retention policy asks.
     /// </summary>
-    public required Lazy<Task<DateTime>> LastActivity { get; init; }
+    public required Lazy<Task<PortalActivity>> LastActivity { get; init; }
 
-    public Task<DateTime> GetLastActivityDateAsync()
+    public Task<PortalActivity> GetLastActivityAsync()
     {
         return LastActivity.Value;
     }
+}
+
+/// <summary>
+/// The last signs of life of a portal, by day. Both are kept apart because only the login history is
+/// purged by the portal's audit settings, so only the last login can go missing later.
+/// </summary>
+public readonly record struct PortalActivity(DateTime LastEventOn, DateTime LastLoginOn)
+{
+    /// <summary>The later of the two.</summary>
+    public DateTime LastOn => LastEventOn > LastLoginOn ? LastEventOn : LastLoginOn;
 }

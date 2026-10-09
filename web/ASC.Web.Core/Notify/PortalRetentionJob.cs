@@ -36,8 +36,9 @@ namespace ASC.Web.Studio.Core.Notify;
 /// <summary>
 /// Applies the retention policy to one portal on the daily run: works out its category, asks
 /// <see cref="PortalRetentionSchedule"/> what today brings, and tells the owner, blocks the portal or
-/// removes it when that is the answer. The only thing stored per portal is the category it was blocked
-/// under (<see cref="PortalRetentionBlockSettings"/>); everything else the schedule needs is already there.
+/// removes it when that is the answer. Stored per portal (<see cref="PortalRetentionSettings"/>) is
+/// only what the schedule cannot read anywhere else: while it is active, its last warning and its last
+/// sign-in; once it is blocked, the category it was blocked under and the day of its last reminder.
 /// </summary>
 [Scope]
 public class PortalRetentionJob(
@@ -124,9 +125,11 @@ public class PortalRetentionJob(
             return blocked;
         }
 
+        var kept = await settingsManager.LoadAsync<PortalRetentionSettings>(tenant.Id);
+
         // A blocked portal keeps the category it was blocked under: the letter about the block named the
         // deletion date of that category, and a balance that changes afterwards must not bring it forward.
-        var blockSettings = blocked ? await settingsManager.LoadAsync<PortalRetentionBlockSettings>(tenant.Id) : null;
+        var blockSettings = blocked ? kept : null;
 
         if (blockSettings?.Category is { } blockedCategory)
         {
@@ -141,8 +144,12 @@ public class PortalRetentionJob(
             return await ActAsync(context, blockedCategory, blockedDecision, client, senderName, blocked);
         }
 
-        var anchor = await GetAnchorAsync(context, formerPaying);
+        (var anchor, kept) = await GetAnchorAsync(context, formerPaying, kept);
         DateTime? blockedOn = blocked ? tenant.StatusChangeDate.Date : null;
+
+        PortalRetentionWarning? lastWarning = kept.WarnedOn is { } warnedOn && kept.WarnedBlockOn is { } warnedBlockOn
+            ? new PortalRetentionWarning(warnedOn, warnedBlockOn)
+            : null;
 
         var plain = formerPaying ? PortalRetentionCategory.FormerPaying : PortalRetentionCategory.Free;
         var withBalance = formerPaying ? PortalRetentionCategory.FormerPayingWithBalance : PortalRetentionCategory.FreeWithBalance;
@@ -154,8 +161,8 @@ public class PortalRetentionJob(
 
         var finalNoticeSentOn = blockSettings?.FinalNoticeSentOn;
 
-        var plainDecision = PortalRetentionSchedule.Decide(Options.For(plain), anchor, policyStart, blockedOn, context.NowDate, noticesFrom, lastRunOn, finalNoticeSentOn);
-        var balanceDecision = PortalRetentionSchedule.Decide(Options.For(withBalance), anchor, policyStart, blockedOn, context.NowDate, noticesFrom, lastRunOn, finalNoticeSentOn);
+        var plainDecision = PortalRetentionSchedule.Decide(Options.For(plain), anchor, policyStart, blockedOn, context.NowDate, noticesFrom, lastRunOn, finalNoticeSentOn, lastWarning);
+        var balanceDecision = PortalRetentionSchedule.Decide(Options.For(withBalance), anchor, policyStart, blockedOn, context.NowDate, noticesFrom, lastRunOn, finalNoticeSentOn, lastWarning);
 
         if (plainDecision.Step == PortalRetentionStep.None && balanceDecision.Step == PortalRetentionStep.None)
         {
@@ -183,14 +190,15 @@ public class PortalRetentionJob(
             return blocked;
         }
 
-        return await ActAsync(context, category, decision, client, senderName, blocked);
+        return await ActAsync(context, category, decision, client, senderName, blocked, kept);
     }
 
     /// <summary>
     /// Carries out the decision of the day. Returns what <see cref="ApplyAsync"/> returns: true when the
-    /// portal is to be left alone for the rest of the run.
+    /// portal is to be left alone for the rest of the run. <paramref name="kept"/> is what is kept about the
+    /// portal, null for a portal blocked under a recorded category.
     /// </summary>
-    private async Task<bool> ActAsync(PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName, bool blocked)
+    private async Task<bool> ActAsync(PeriodicLetterContext context, PortalRetentionCategory category, PortalRetentionDecision decision, INotifyClient client, string senderName, bool blocked, PortalRetentionSettings kept = null)
     {
         var tenant = context.Tenant;
 
@@ -204,7 +212,17 @@ public class PortalRetentionJob(
                 if (decision.Letter == PortalRetentionLetter.FinalDeletionNotice)
                 {
                     // The deletion waits for this letter, so the day it went out is kept with the block.
-                    await settingsManager.SaveAsync(new PortalRetentionBlockSettings { Category = category, FinalNoticeSentOn = context.NowDate }, tenant.Id);
+                    await settingsManager.SaveAsync(new PortalRetentionSettings { Category = category, FinalNoticeSentOn = context.NowDate }, tenant.Id);
+                }
+                else if (!blocked && decision.Letter is PortalRetentionLetter.FirstNotice or PortalRetentionLetter.SecondNotice or PortalRetentionLetter.MonthlyNotice)
+                {
+                    // The block waits for the day this letter names, so the letter is kept with the portal.
+                    await settingsManager.SaveAsync(new PortalRetentionSettings
+                    {
+                        LastLoginOn = kept?.LastLoginOn,
+                        WarnedOn = context.NowDate,
+                        WarnedBlockOn = decision.BlockOn
+                    }, tenant.Id);
                 }
 
                 return blocked;
@@ -284,7 +302,7 @@ public class PortalRetentionJob(
         }
 
         // Before the status, so a blocked portal always finds the category its letter was written for.
-        await settingsManager.SaveAsync(new PortalRetentionBlockSettings { Category = category }, tenant.Id);
+        await settingsManager.SaveAsync(new PortalRetentionSettings { Category = category }, tenant.Id);
 
         tenant.SetStatus(TenantStatus.Blocked);
         await tenantManager.SaveTenantAsync(tenant);
@@ -313,12 +331,45 @@ public class PortalRetentionJob(
     /// one - and in both cases no earlier than the last change of status, which is what an unblocked
     /// portal starts again from.
     /// </summary>
-    private static async Task<DateTime> GetAnchorAsync(PeriodicLetterContext context, bool formerPaying)
+    /// <remarks>
+    /// The portal's audit settings purge its login history, down to a day, while the audit trail stays. A
+    /// portal whose last sign of life is a sign-in would see its count jump back, and its block come at
+    /// once, the day that row goes - so the last sign-in is kept with the portal while it is the later of
+    /// the two, and the count never starts earlier than it.
+    /// </remarks>
+    private async Task<(DateTime Anchor, PortalRetentionSettings Kept)> GetAnchorAsync(PeriodicLetterContext context, bool formerPaying, PortalRetentionSettings kept)
     {
-        var anchor = formerPaying ? context.DueDate : await context.GetLastActivityDateAsync();
+        DateTime anchor;
+
+        if (formerPaying)
+        {
+            anchor = context.DueDate;
+        }
+        else
+        {
+            var activity = await context.GetLastActivityAsync();
+            var keptLoginOn = kept.LastLoginOn?.Date ?? DateTime.MinValue;
+
+            // Nobody signs in to a blocked portal, and its record belongs to the block.
+            if (context.Tenant.Status != TenantStatus.Blocked && activity.LastLoginOn > activity.LastEventOn && activity.LastLoginOn > keptLoginOn)
+            {
+                keptLoginOn = activity.LastLoginOn;
+                kept = new PortalRetentionSettings
+                {
+                    LastLoginOn = keptLoginOn,
+                    WarnedOn = kept.WarnedOn,
+                    WarnedBlockOn = kept.WarnedBlockOn
+                };
+
+                await settingsManager.SaveAsync(kept, context.Tenant.Id);
+            }
+
+            anchor = keptLoginOn > activity.LastOn ? keptLoginOn : activity.LastOn;
+        }
+
         var statusChanged = context.Tenant.StatusChangeDate.Date;
 
-        return statusChanged > anchor ? statusChanged : anchor;
+        return (statusChanged > anchor ? statusChanged : anchor, kept);
     }
 
     /// <summary>

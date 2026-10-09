@@ -71,9 +71,9 @@ public class PortalRetentionJobTests
     /// someone to go to, with its status last changed long ago, so only what the case sets decides where
     /// its count starts.
     /// </summary>
-    private static Tenant InMemoryTenant(LetterScope scope, TenantStatus status = TenantStatus.Active, DateTime? statusChanged = null)
+    private static Tenant InMemoryTenant(LetterScope scope, TenantStatus status = TenantStatus.Active, DateTime? statusChanged = null, int id = int.MaxValue - 1)
     {
-        return new Tenant(int.MaxValue - 1, "retention-in-memory")
+        return new Tenant(id, "retention-in-memory")
         {
             OwnerId = scope.Tenant.OwnerId,
             Status = status,
@@ -190,6 +190,103 @@ public class PortalRetentionJobTests
         logger.Messages.Should().ContainSingle(m => m.Contains("FormerPaying: Notify SecondNotice"));
         client.Sent.Should().ContainSingle()
             .Which.Action.Should().BeOfType<SaasOwnerRetentionUnpaidWarningNotifyAction>("a lapsed portal is told to renew");
+    }
+
+    /// <summary>
+    /// A portal of the stack's own for a case that keeps something with the portal - a warning, a sign-in -
+    /// since settings are stored only for a portal that exists. It is handed to the job in memory all the
+    /// same, so only what the case sets decides where its count starts; none of these cases blocks it.
+    /// </summary>
+    private static async Task<LetterPortalClients> CreatePortalAsync()
+    {
+        return await (await GetStackAsync()).CreatePortalAsync(TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
+    public async Task FreePortal_PastItsBlockWithoutAWarning_IsWarnedOfABlockAMonthAway()
+    {
+        using var portal = await CreatePortalAsync();
+        using var scope = await OpenScopeAsync();
+        var settingsManager = scope.Services.GetRequiredService<SettingsManager>();
+        var tenant = InMemoryTenant(scope, id: portal.TenantId);
+        var logger = new RecordingLogger<PortalRetentionJob>();
+        var client = new RecordingNotifyClient();
+
+        // Idle for seventy-five days, and no warning on record: lost in a long stop of the job.
+        var leaveAlone = await CreateJob(scope, logger).ApplyAsync(Free(tenant, _today.AddDays(-75)), _policyStart, client, _senderName);
+
+        leaveAlone.Should().BeFalse("the portal is not blocked");
+        logger.Messages.Should().ContainSingle(m => m.Contains("Free: Notify FirstNotice"), string.Join(" | ", logger.Messages));
+        client.Sent.Should().ContainSingle()
+            .Which.Action.Should().BeOfType<SaasOwnerRetentionInactivityWarningNotifyAction>();
+
+        var kept = await settingsManager.LoadAsync<PortalRetentionSettings>(tenant.Id);
+
+        kept.WarnedOn.Should().Be(_today);
+        kept.WarnedBlockOn.Should().Be(_today.AddDays(30), "the block waits as long after the warning as the free schedule keeps them apart");
+    }
+
+    [Fact]
+    public async Task FreePortal_WarnedOnTheWalletSchedule_IsNotBlockedBeforeTheDayItWasTold()
+    {
+        using var portal = await CreatePortalAsync();
+        using var scope = await OpenScopeAsync();
+        var settingsManager = scope.Services.GetRequiredService<SettingsManager>();
+        var tenant = InMemoryTenant(scope, id: portal.TenantId);
+        var logger = new RecordingLogger<PortalRetentionJob>();
+        var client = new RecordingNotifyClient();
+
+        // Told eighteen days ago, with money on its wallet, that it is blocked in 165 days. The stack has no
+        // accounting service, so the wallet reads empty now, and the free schedule's own block day is long
+        // past.
+        (await settingsManager.SaveAsync(new PortalRetentionSettings { WarnedOn = _today.AddDays(-18), WarnedBlockOn = _today.AddDays(165) }, tenant.Id))
+            .Should().BeTrue();
+
+        var leaveAlone = await CreateJob(scope, logger).ApplyAsync(Free(tenant, _today.AddDays(-200)), _policyStart, client, _senderName);
+
+        leaveAlone.Should().BeFalse();
+        logger.Messages.Should().BeEmpty("the block keeps to the day the owner was told");
+        client.Sent.Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task FreePortal_SignInPurgedFromItsHistory_KeepsItsCount()
+    {
+        using var portal = await CreatePortalAsync();
+        using var scope = await OpenScopeAsync();
+        var settingsManager = scope.Services.GetRequiredService<SettingsManager>();
+        var tenant = InMemoryTenant(scope, id: portal.TenantId);
+
+        // Warned forty days ago of a block ten days ago, but the owner signed in twenty days ago; the audit
+        // trail has nothing newer than a year.
+        (await settingsManager.SaveAsync(new PortalRetentionSettings { WarnedOn = _today.AddDays(-40), WarnedBlockOn = _today.AddDays(-10) }, tenant.Id))
+            .Should().BeTrue();
+
+        var signedIn = Free(tenant, _today.AddYears(-1)) with
+        {
+            LastActivity = PeriodicLetterContexts.Activity(_today.AddYears(-1), _today.AddDays(-20))
+        };
+
+        var logger = new RecordingLogger<PortalRetentionJob>();
+
+        await CreateJob(scope, logger).ApplyAsync(signedIn, _policyStart, new RecordingNotifyClient(), _senderName);
+
+        logger.Messages.Should().BeEmpty("twenty days after the sign-in nothing is due");
+        (await settingsManager.LoadAsync<PortalRetentionSettings>(tenant.Id)).LastLoginOn
+            .Should().Be(_today.AddDays(-20), "a sign-in later than the audit trail is kept, since the login history is purged");
+
+        // The next day the portal's audit settings purge its login history: the last sign-in reads as the
+        // year-old audit event, which on its own would put the portal past the block it was warned of.
+        var purged = Free(tenant, _today.AddYears(-1)) with { NowDate = _today.AddDays(1) };
+
+        logger = new RecordingLogger<PortalRetentionJob>();
+        var client = new RecordingNotifyClient();
+
+        var leaveAlone = await CreateJob(scope, logger).ApplyAsync(purged, _policyStart, client, _senderName);
+
+        leaveAlone.Should().BeFalse();
+        logger.Messages.Should().BeEmpty("the kept sign-in still starts the count, so the earlier warning is of a count that is over");
+        client.Sent.Should().BeEmpty();
     }
 
     [Fact]

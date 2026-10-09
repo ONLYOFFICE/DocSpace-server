@@ -218,23 +218,22 @@ public class StudioPeriodicNotify(
             DelayDueDate = tariff.DelayDueDate.Date,
             DelayDueDateIsNotMax = tariff.DelayDueDate != DateTime.MaxValue,
             DefaultRebranding = !enterprise || await tenantLogoManager.IsDefaultLogoSettingsAsync(),
-            LastActivity = new Lazy<Task<DateTime>>(() => GetLastActivityDateAsync(tenant))
+            LastActivity = new Lazy<Task<PortalActivity>>(() => GetLastActivityAsync(tenant))
         };
     }
 
     /// <summary>
-    /// The later of the last audit event and the last successful login, or the creation date when the
-    /// portal has neither. Two queries, so it is only run for the letters that ask.
+    /// The day of the last audit event and of the last successful login, each the creation date when the
+    /// portal has none. Two queries, so they are only run when the retention policy asks.
     /// </summary>
-    private async Task<DateTime> GetLastActivityDateAsync(Tenant tenant)
+    private async Task<PortalActivity> GetLastActivityAsync(Tenant tenant)
     {
         var lastAuditEvent = await auditEventsRepository.GetLastEventAsync(tenant.Id);
         var lastLoginEvent = await loginEventsRepository.GetLastSuccessEventAsync(tenant.Id);
 
-        var lastAuditEventDate = lastAuditEvent?.Date.Date ?? tenant.CreationDateTime.Date;
-        var lastLoginEventDate = lastLoginEvent?.Date.Date ?? tenant.CreationDateTime.Date;
-
-        return lastAuditEventDate > lastLoginEventDate ? lastAuditEventDate : lastLoginEventDate;
+        return new PortalActivity(
+            lastAuditEvent?.Date.Date ?? tenant.CreationDateTime.Date,
+            lastLoginEvent?.Date.Date ?? tenant.CreationDateTime.Date);
     }
 
     /// <summary>

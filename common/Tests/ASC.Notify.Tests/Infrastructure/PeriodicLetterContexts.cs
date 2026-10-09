@@ -73,9 +73,19 @@ internal static class PeriodicLetterContexts
         return new TenantQuota { Free = free, Trial = trial, Lifetime = lifetime, Customization = customization };
     }
 
-    public static Lazy<Task<DateTime>> Activity(DateTime date)
+    /// <summary>A portal whose last audit event and last sign-in were both on <paramref name="date"/>.</summary>
+    public static Lazy<Task<PortalActivity>> Activity(DateTime date)
     {
-        return new Lazy<Task<DateTime>>(() => Task.FromResult(date));
+        return Activity(date, date);
+    }
+
+    /// <summary>
+    /// A portal whose last audit event and last sign-in fell on different days - or whose sign-in history
+    /// has been purged, so its last sign-in reads as the creation date.
+    /// </summary>
+    public static Lazy<Task<PortalActivity>> Activity(DateTime lastEventOn, DateTime lastLoginOn)
+    {
+        return new Lazy<Task<PortalActivity>>(() => Task.FromResult(new PortalActivity(lastEventOn, lastLoginOn)));
     }
 
     /// <summary>A portal on a paid tariff running out on <paramref name="due"/>.</summary>

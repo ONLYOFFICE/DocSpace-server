@@ -72,15 +72,20 @@ public class PortalRetentionLifecycleTests
         };
     }
 
-    /// <summary>Blocks the portal the way the daily job does when it has been idle past its threshold.</summary>
+    /// <summary>
+    /// Blocks the portal the way the daily job does when it has been idle past its threshold: warned on the
+    /// thirtieth day of a block on the sixtieth, and blocked on that day.
+    /// </summary>
     private static async Task<Tenant> BlockAsync(IServiceScope scope, int tenantId, RecordingNotifyClient client)
     {
         var services = scope.ServiceProvider;
         var today = DateTime.UtcNow.Date;
         var tenant = await services.GetRequiredService<TenantManager>().GetTenantAsync(tenantId);
+        var job = services.GetRequiredService<PortalRetentionJob>();
 
-        var leaveAlone = await services.GetRequiredService<PortalRetentionJob>()
-            .ApplyAsync(Free(tenant, today, today.AddDays(-60)), today.AddYears(-1), client, _senderName);
+        await job.ApplyAsync(Free(tenant, today.AddDays(-30), today.AddDays(-60)), today.AddYears(-1), new RecordingNotifyClient(), _senderName);
+
+        var leaveAlone = await job.ApplyAsync(Free(tenant, today, today.AddDays(-60)), today.AddYears(-1), client, _senderName);
 
         leaveAlone.Should().BeTrue("a portal that has just been blocked gets none of the ordinary letters");
 
@@ -178,7 +183,7 @@ public class PortalRetentionLifecycleTests
         {
             (await HasStatusAsync(scope, portal.TenantId, TenantStatus.Active)).Should().BeTrue("the owner's link brings the portal back");
 
-            (await scope.ServiceProvider.GetRequiredService<SettingsManager>().LoadAsync<PortalRetentionBlockSettings>(portal.TenantId)).Category
+            (await scope.ServiceProvider.GetRequiredService<SettingsManager>().LoadAsync<PortalRetentionSettings>(portal.TenantId)).Category
                 .Should().BeNull("the category of the block goes with the block");
         }
 
@@ -287,7 +292,7 @@ public class PortalRetentionLifecycleTests
         reminderClient.Sent.Should().ContainSingle()
             .Which.Action.Should().BeOfType<SaasOwnerRetentionFinalReminderNotifyAction>();
 
-        (await services.GetRequiredService<SettingsManager>().LoadAsync<PortalRetentionBlockSettings>(portal.TenantId)).FinalNoticeSentOn
+        (await services.GetRequiredService<SettingsManager>().LoadAsync<PortalRetentionSettings>(portal.TenantId)).FinalNoticeSentOn
             .Should().Be(reminderDay, "the deletion waits for the reminder, so the day it went out is kept");
 
         // Thirty days on, as the free schedule keeps a blocked portal.
@@ -320,12 +325,12 @@ public class PortalRetentionLifecycleTests
         var settingsManager = services.GetRequiredService<SettingsManager>();
         var tenant = await BlockAsync(scope, portal.TenantId, new RecordingNotifyClient());
 
-        (await settingsManager.LoadAsync<PortalRetentionBlockSettings>(portal.TenantId)).Category
+        (await settingsManager.LoadAsync<PortalRetentionSettings>(portal.TenantId)).Category
             .Should().Be(PortalRetentionCategory.Free, "the block records the category its letter was written for");
 
         // As if it had been blocked with money on its wallet: its letter promised ninety days. The stack has
         // no accounting service, so from here on its wallet reads as empty.
-        await settingsManager.SaveAsync(new PortalRetentionBlockSettings { Category = PortalRetentionCategory.FreeWithBalance }, portal.TenantId);
+        await settingsManager.SaveAsync(new PortalRetentionSettings { Category = PortalRetentionCategory.FreeWithBalance }, portal.TenantId);
 
         var client = new RecordingNotifyClient();
         var later = DateTime.UtcNow.Date.AddDays(30);
