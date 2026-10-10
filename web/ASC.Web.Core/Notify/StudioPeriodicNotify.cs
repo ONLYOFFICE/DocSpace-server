@@ -67,9 +67,10 @@ public class StudioPeriodicNotify(
 {
     private readonly ILogger _log = loggerFactory.CreateLogger("ASC.Notify");
 
-    // A key of this schedule's own, not the one the yearly schedule before it kept: that date lies long
-    // before this schedule's first run, and counting from it would let the removal take a portal whose
-    // anniversary fell in the week before that run, when no warning of this schedule could go out yet.
+    // A key of the six-month rule's own, not the one the one-year inactivity rule of the previous version
+    // kept: that date lies long before the six-month rule's first run, and counting from it would let the
+    // removal take a portal whose anniversary fell in the week before that run, when the previous version
+    // was still deciding and did not warn a portal idle for less than a year.
     private const string CacheKey = "notification_date_for_unused_portals_v4";
 
     /// <summary>
