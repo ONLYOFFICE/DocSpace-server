@@ -158,7 +158,36 @@ public class EncryptionKeyPairDtoHelper(
             return null;
         }
 
-        return JsonSerializer.Deserialize<List<EncryptionKeyDto>>(currentAddressString, JsonSerializerOptions.Web);
+        return ParseKeys(currentAddressString, authContext.CurrentAccount.ID);
+    }
+
+    /// <summary>
+    /// Reads a user's stored key set. Before key sets existed a user had exactly one pair, stored as
+    /// a single <c>{PrivateKeyEnc, PublicKey, UserId}</c> object rather than an array; such a pair is
+    /// read as a one-element set with the all-zero identifier, and ignored when it names another
+    /// user, as the single-pair code did.
+    /// </summary>
+    private static List<EncryptionKeyDto> ParseKeys(string json, Guid ownerId)
+    {
+        using var document = JsonDocument.Parse(json);
+        var root = document.RootElement;
+
+        switch (root.ValueKind)
+        {
+            case JsonValueKind.Array:
+                return root.Deserialize<List<EncryptionKeyDto>>(JsonSerializerOptions.Web);
+            case JsonValueKind.Object:
+                var legacyKeyPair = root.Deserialize<EncryptionKeyDto>(JsonSerializerOptions.Web);
+                if (legacyKeyPair.UserId != ownerId)
+                {
+                    return [];
+                }
+
+                legacyKeyPair.Id = Guid.Empty;
+                return [legacyKeyPair];
+            default:
+                return [];
+        }
     }
 
     public async Task<List<EncryptionKeyDto>> GetKeyPairAsync<T>(T fileId)
@@ -199,7 +228,7 @@ public class EncryptionKeyPairDtoHelper(
                 return null;
             }
 
-            var fileKeyPair = JsonSerializer.Deserialize<List<EncryptionKeyDto>>(fileKeyPairString, JsonSerializerOptions.Web)
+            var fileKeyPair = ParseKeys(fileKeyPairString, share.Id)
                 .ToList();
 
             return fileKeyPair;
@@ -246,7 +275,7 @@ public class EncryptionKeyPairDtoHelper(
                 return null;
             }
 
-            var fileKeyPair = JsonSerializer.Deserialize<List<EncryptionKeyDto>>(fileKeyPairString, JsonSerializerOptions.Web)
+            var fileKeyPair = ParseKeys(fileKeyPairString, share.Id)
                 .ToList();
 
             return fileKeyPair;
