@@ -56,6 +56,8 @@ global using DocSpace.API.SDK.Client;
 global using DocSpace.API.SDK.Model;
 
 global using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+global using Microsoft.Extensions.Configuration;
+global using Microsoft.Extensions.DependencyInjection;
 
 global using MySqlConnector;
 
