@@ -58,6 +58,22 @@ public class LegacyKeysFormatTests(AspireAppFixture fixture) : PrivacyRoomTestBa
         key.UserId.Should().Be(Owner.Id);
         key.PublicKey.Should().Be("pk-legacy");
         key.PrivateKeyEnc.Should().Be("prv-legacy");
+        key.Date.Should().Be(DateTime.MinValue);
+    }
+
+    [Fact]
+    public async Task GetUserKeys_LegacySingleObject_ReportsTheSameDateOnEveryRead()
+    {
+        // The old object carries no date, and the DTO initializer used to fill in the time of the
+        // read, so two GETs in a row reported two different dates for the same pair.
+        await PlantLegacyKeys(Owner.Id, "pk-legacy", "prv-legacy");
+        await _filesClient.Authenticate(Owner);
+
+        var first = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response.Single();
+        await Task.Delay(1100, TestContext.Current.CancellationToken);
+        var second = (await _privacyRoomApi.GetUserKeysAsync(TestContext.Current.CancellationToken)).Response.Single();
+
+        second.Date.Should().Be(first.Date);
     }
 
     [Fact]

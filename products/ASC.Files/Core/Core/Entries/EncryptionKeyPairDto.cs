@@ -164,8 +164,8 @@ public class EncryptionKeyPairDtoHelper(
     /// <summary>
     /// Reads a user's stored key set. Before key sets existed a user had exactly one pair, stored as
     /// a single <c>{PrivateKeyEnc, PublicKey, UserId}</c> object rather than an array; such a pair is
-    /// read as a one-element set with the all-zero identifier, and ignored when it names another
-    /// user, as the single-pair code did.
+    /// read as a one-element set with the all-zero identifier and the minimal date, since it was
+    /// stored without either, and ignored when it names another user, as the single-pair code did.
     /// </summary>
     private static List<EncryptionKeyDto> ParseKeys(string json, Guid ownerId)
     {
@@ -184,6 +184,7 @@ public class EncryptionKeyPairDtoHelper(
                 }
 
                 legacyKeyPair.Id = Guid.Empty;
+                legacyKeyPair.Date = DateTime.MinValue;
                 return [legacyKeyPair];
             default:
                 return [];

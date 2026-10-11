@@ -58,7 +58,8 @@ public class EncryptionKeyDto
 
     /// <summary>
     /// When this key material was written. Rotating the pair refreshes it, so it dates the material that is being
-    /// reported rather than the first appearance of the identifier.
+    /// reported rather than the first appearance of the identifier. A pair stored before key sets existed (the one with
+    /// the all-zero identifier) has no recorded date and reports <c>0001-01-01T00:00:00</c> until it is rotated.
     /// </summary>
     /// <example>2025-01-01T00:00:00</example>
     public DateTime Date { get; set; } = DateTime.Now;
