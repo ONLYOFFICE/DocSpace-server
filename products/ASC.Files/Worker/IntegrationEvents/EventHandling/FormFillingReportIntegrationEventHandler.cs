@@ -39,6 +39,7 @@ public class FormFillingReportIntegrationEventHandler(
     CommonLinkUtility commonLinkUtility,
     TenantManager tenantManager,
     DocumentBuilderTaskManager<FormFillingReportTask, int, FormFillingReportTaskData> documentBuilderTaskManager,
+    FormRecoveryTaskManager formRecoveryTaskManager,
     IServiceProvider serviceProvider)
     : IIntegrationEventHandler<FormFillingReportIntegrationEvent>
 {
@@ -66,10 +67,23 @@ public class FormFillingReportIntegrationEventHandler(
 
                 await tenantManager.SetCurrentTenantAsync(@event.TenantId);
 
+                var reportData = new FormFillingReportTaskData(@event.RoomId, @event.OriginalFormId, @event.OriginalFormVersion, @event.IsNewFile, @event.Headers);
+
+                // The recovery starts the report when it is done; while one runs for the form, the report starts now.
+                if (@event.Recover)
+                {
+                    var recoveryTask = serviceProvider.GetService<FormRecoveryTask>();
+                    recoveryTask.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, reportData);
+                    if (await formRecoveryTaskManager.TryEnqueueAsync(recoveryTask))
+                    {
+                        return;
+                    }
+                }
+
                 var task = serviceProvider.GetService<FormFillingReportTask>();
 
                 var taskId = DocumentBuilderTaskManager.GetTaskId(@event.TenantId, @event.CreateBy, @event.OriginalFormId);
-                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, new FormFillingReportTaskData(@event.RoomId, @event.OriginalFormId, @event.OriginalFormVersion, @event.IsNewFile, @event.Headers), taskId);
+                task.Init(@event.BaseUri, @event.TenantId, @event.CreateBy, reportData, taskId);
 
                 await documentBuilderTaskManager.StartTask(task);
             }

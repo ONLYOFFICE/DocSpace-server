@@ -427,6 +427,57 @@ public class FormFillingReportCreator(
         response.EnsureSuccessStatusCode();
         var data = await response.Content.ReadAsStringAsync();
 
+        return await IndexSubmissionAsync(formsDataFile, originalFormId, originalFormVersion, roomId, resultFormNumber, data, DateTime.UtcNow);
+    }
+
+    /// <summary>
+    /// Indexes a completed form missing from the search index, with the forms data read from the file.
+    /// </summary>
+    public Task IndexRecoveredSubmissionAsync(File<int> formsDataFile, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataJson, DateTime filledOn)
+    {
+        return IndexSubmissionAsync(formsDataFile, originalFormId, originalFormVersion, roomId, resultFormNumber, formsDataJson, filledOn);
+    }
+
+    /// <summary>
+    /// The keys of the fields indexed for the form version; null when the version has no indexed description.
+    /// </summary>
+    public async Task<HashSet<string>> TryGetIndexedFieldKeysAsync(int originalFormId, int originalFormVersion)
+    {
+        await factoryIndexerFormMetadata.RefreshAsync();
+        var (metaSuccess, metaResult) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
+            r.Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.OriginalFormVersion, originalFormVersion));
+
+        var keys = GetExportableKeys(metaSuccess ? metaResult.FirstOrDefault()?.Metadata ?? [] : []);
+
+        return keys.Count > 0 ? keys : null;
+    }
+
+    /// <summary>
+    /// The keys of the fields in forms data JSON, as the report lays out its columns.
+    /// </summary>
+    public HashSet<string> GetFieldKeys(string formsDataJson)
+    {
+        return GetExportableKeys(ParseSubmitAndMetadata(formsDataJson).MetaData);
+    }
+
+    private static HashSet<string> GetExportableKeys(IEnumerable<FormMetadata> metadata)
+    {
+        return metadata
+            .Where(m => !string.IsNullOrEmpty(m.Key) && m.Type != "picture" && m.Type != "signature")
+            .Select(m => m.Key)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+    }
+
+    private async Task<(SubmitFormsData fromData, List<FormMetadata> fromMetaData)> IndexSubmissionAsync<T>(
+        File<T> formsDataFile,
+        int originalFormId,
+        int originalFormVersion,
+        int roomId,
+        int resultFormNumber,
+        string data,
+        DateTime createOn)
+    {
         var formNumber = new List<FormsItemData>
         {
             new()
@@ -445,7 +496,6 @@ public class FormFillingReportCreator(
             .Where(f => f.Type != "picture" && f.Type != "signature")
             .ToList();
 
-        var now = DateTime.UtcNow;
         var tenantId = tenantManager.GetCurrentTenantId();
 
         if (formsDataFile.Id is int id && formsDataFile.ParentId is int parentId)
@@ -458,7 +508,7 @@ public class FormFillingReportCreator(
                 OriginalFormId = originalFormId,
                 OriginalFormVersion = originalFormVersion,
                 RoomId = roomId,
-                CreateOn = now,
+                CreateOn = createOn,
                 FormsData = formNumber.Concat(fromData.FormsData)
             };
 

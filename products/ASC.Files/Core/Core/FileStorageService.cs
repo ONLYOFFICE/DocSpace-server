@@ -6176,7 +6176,7 @@ public class FileStorageService //: IFileStorageService
         var isNewFile = await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
         await formFillingReportCreator.MigrateFormVersionAsync(room.Id, form.Id, form.Version);
-        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile);
+        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile, recover: true);
         await formFillingReportCreator.SyncExternalDbAsync(room, form.Id, form.Version);
 
         return (task, form, isNewFile);
@@ -6253,7 +6253,7 @@ public class FileStorageService //: IFileStorageService
         var isNewFile = await entryManager.EnsureFormFillingOutputAsync(form, room, resultsFile, resultFolder, properties, folderDao, fileDao);
 
         await formFillingReportCreator.MigrateFormVersionAsync(room.Id, form.Id, form.Version);
-        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile);
+        var task = await exportToXLSX.UpdateXlsxReport(room.Id, form.Id, form.Version, isNewFile, recover: true);
         await formFillingReportCreator.SyncExternalDbAsync(room, form.Id, form.Version);
 
         return (task, form, isNewFile);
