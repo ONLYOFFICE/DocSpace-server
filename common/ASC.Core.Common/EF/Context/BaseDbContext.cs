@@ -103,20 +103,98 @@ public class InstallerOptionsAction(string region, string nameConnectionString)
 /// DbContext type does not open a connection of its own.
 /// </summary>
 /// <remarks>
-/// A failed detection is not remembered: when the server does not accept connections yet (the service
-/// started before MySQL), the next options build detects again instead of failing until the process
-/// restarts. The options of a pooled context are a singleton that the container does not keep while
-/// its construction throws, so the next request comes back here.
+/// A failed detection is not final: when the server does not accept connections yet (the service started
+/// before MySQL), a later options build detects again, so the service recovers once MySQL is up instead of
+/// failing until the process restarts. The options of a pooled context are a singleton that the container
+/// does not keep while its construction throws, so the next request comes back here.
+/// <para>
+/// Detection is synchronous and, against a server that is down, lasts the whole connect timeout of the
+/// connection string. So after a failure the server is asked again no more often than once per retry delay
+/// and by one caller at a time; every other caller fails at once instead of holding a thread pool thread
+/// for that timeout. The very first detection is awaited by everyone: on a normal start it takes
+/// milliseconds, and the contexts resolved in parallel must not fail because of it.
+/// </para>
 /// </remarks>
-public sealed class MySqlServerVersionCache(Func<string, ServerVersion> detect)
+public sealed class MySqlServerVersionCache(Func<string, ServerVersion> detect, TimeProvider timeProvider, TimeSpan retryDelay)
 {
-    private readonly ConcurrentDictionary<string, Lazy<ServerVersion>> _versions = new();
+    private readonly ConcurrentDictionary<string, Detection> _detections = new();
+
+    public MySqlServerVersionCache(Func<string, ServerVersion> detect)
+        : this(detect, TimeProvider.System, TimeSpan.FromSeconds(5))
+    {
+    }
 
     public ServerVersion Get(string connectionString)
     {
-        return _versions.GetOrAdd(
-            connectionString,
-            cs => new Lazy<ServerVersion>(() => detect(cs), LazyThreadSafetyMode.PublicationOnly)).Value;
+        return _detections
+            .GetOrAdd(connectionString, cs => new Detection(() => detect(cs), timeProvider, retryDelay))
+            .Get();
+    }
+
+    private sealed class Detection(Func<ServerVersion> detect, TimeProvider timeProvider, TimeSpan retryDelay)
+    {
+        private readonly Lock _lock = new();
+        private ServerVersion _version;
+        private Exception _lastFailure;
+        private DateTimeOffset _retryAt;
+        private bool _retrying;
+
+        public ServerVersion Get()
+        {
+            lock (_lock)
+            {
+                if (_version is not null)
+                {
+                    return _version;
+                }
+
+                if (_lastFailure is null)
+                {
+                    return Detect();
+                }
+
+                if (_retrying || timeProvider.GetUtcNow() < _retryAt)
+                {
+                    throw new InvalidOperationException(
+                        $"The MySQL server version is not detected yet: the last attempt failed, the next one is made after {_retryAt:O}.",
+                        _lastFailure);
+                }
+
+                _retrying = true;
+            }
+
+            // A retry runs outside the lock, so the other callers fail at once instead of waiting for it.
+            return Detect();
+        }
+
+        // Records the outcome under the lock: the first detection calls it while holding the lock (Lock is
+        // reentrant), a retry calls it without.
+        private ServerVersion Detect()
+        {
+            try
+            {
+                var version = detect();
+
+                lock (_lock)
+                {
+                    _version = version;
+                    _retrying = false;
+                }
+
+                return version;
+            }
+            catch (Exception e)
+            {
+                lock (_lock)
+                {
+                    _lastFailure = e;
+                    _retryAt = timeProvider.GetUtcNow() + retryDelay;
+                    _retrying = false;
+                }
+
+                throw;
+            }
+        }
     }
 }
 
