@@ -250,16 +250,17 @@ public class BillingClientTests
     }
 
     [Fact]
-    public async Task TransportFailure_IsMappedToBillingException()
+    public async Task TransportFailure_IsMappedToBillingTransportException()
     {
         // A transport failure never reaches ExceptionFactory, which only sees HTTP responses; the
         // TransportExceptionFactory keeps it inside the BillingException hierarchy instead of leaking
-        // Refit.ApiRequestException to the callers.
+        // Refit.ApiRequestException to the callers. It gets its own type because no answer is not a
+        // rejection: a timed-out request may still have been applied on the billing side.
         var (client, _) = CreateClient(_ => throw new HttpRequestException("connection refused"));
 
         var act = async () => await client.GetPaymentsAsync("portal-1");
 
-        (await act.Should().ThrowExactlyAsync<BillingException>())
+        (await act.Should().ThrowExactlyAsync<BillingTransportException>())
             .WithInnerException<HttpRequestException>();
     }
     [Fact]
