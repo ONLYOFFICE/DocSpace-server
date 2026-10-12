@@ -105,6 +105,9 @@ public interface JpaConsentRepository
    *
    * <p>The inner query is wrapped in a derived table so that MySQL materializes it, which both
    * allows reading {@code identity_consents} while deleting from it and allows the {@code LIMIT}.
+   * The pairs are {@code DISTINCT} because one consent usually has many authorizations: without it
+   * a batch of {@code limit} join rows could delete far fewer consents than {@code limit} and end
+   * the chunked removal while consents are still left.
    *
    * @param tenantId The unique identifier of the tenant whose users' consents are to be deleted.
    * @param limit The maximum number of consents to delete.
@@ -117,7 +120,7 @@ public interface JpaConsentRepository
           DELETE FROM identity_consents
           WHERE (registered_client_id, principal_id) IN (
             SELECT registered_client_id, principal_id FROM (
-              SELECT c.registered_client_id, c.principal_id
+              SELECT DISTINCT c.registered_client_id, c.principal_id
               FROM identity_authorizations a
               JOIN identity_consents c
                 ON c.registered_client_id = a.registered_client_id
