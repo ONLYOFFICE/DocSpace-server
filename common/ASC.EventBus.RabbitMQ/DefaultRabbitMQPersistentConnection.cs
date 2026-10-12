@@ -41,7 +41,11 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
     private readonly ILogger<DefaultRabbitMQPersistentConnection> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private IConnection _connection;
     private bool _disposed;
-    private long _disconnectedAt;
+    // running from the first connection attempt or the first shutdown until a connection is acquired or recovered,
+    // null while the connection is up. Only the connection code writes it, the health check just reads: a reader
+    // that started the clock could race the acquisition and leave it running on a live connection. A reference
+    // swaps atomically, so no lock: two writers that both find it stopped start two clocks microseconds apart
+    private volatile Stopwatch _outage;
 
     public bool IsConnected => _connection is { IsOpen: true } && !_disposed;
 
@@ -49,22 +53,18 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
     {
         // driven by the connection events rather than IsConnected: every failed recovery attempt opens a new
         // connection before it aborts it, and a check landing in that moment must not restart the clock
-        var at = Interlocked.Read(ref _disconnectedAt);
+        return _outage?.Elapsed;
+    }
 
-        if (at != 0)
-        {
-            return Stopwatch.GetElapsedTime(at);
-        }
+    private void MarkDisconnected()
+    {
+        // the failed recovery attempts raise the shutdown again: the clock keeps the first outage moment
+        _outage ??= Stopwatch.StartNew();
+    }
 
-        if (IsConnected)
-        {
-            return null;
-        }
-
-        // never connected at all, so no event will ever start the clock
-        at = Interlocked.CompareExchange(ref _disconnectedAt, Stopwatch.GetTimestamp(), 0);
-
-        return at == 0 ? TimeSpan.Zero : Stopwatch.GetElapsedTime(at);
+    private void MarkConnected()
+    {
+        _outage = null;
     }
 
     public async Task<IChannel> CreateModelAsync()
@@ -123,6 +123,9 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
             return true;
         }
 
+        // no connection yet: the clock runs from here, and a failed attempt leaves it running
+        MarkDisconnected();
+
         var builder = new ResiliencePipelineBuilder();
 
         var pipeline = builder.AddRetry(new RetryStrategyOptions
@@ -151,7 +154,7 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
             _connection.RecoverySucceededAsync += OnRecoverySucceededAsync;
             _connection.ConnectionRecoveryErrorAsync += OnConnectionRecoveryErrorAsync;
 
-            Interlocked.Exchange(ref _disconnectedAt, 0);
+            MarkConnected();
 
             _logger.InformationRabbitMQAcquiredPersistentConnection(_connection.Endpoint.HostName);
 
@@ -195,8 +198,7 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
     {
         if (!_disposed)
         {
-            // the failed recovery attempts raise this again: the clock keeps the first outage moment
-            Interlocked.CompareExchange(ref _disconnectedAt, Stopwatch.GetTimestamp(), 0);
+            MarkDisconnected();
 
             _logger.WarningRabbitMQConnectionIsOnShutDown(reason.ReplyCode, reason.ReplyText);
         }
@@ -208,7 +210,7 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
     {
         if (!_disposed)
         {
-            Interlocked.Exchange(ref _disconnectedAt, 0);
+            MarkConnected();
 
             _logger.InformationRabbitMQConnectionRecovered();
         }

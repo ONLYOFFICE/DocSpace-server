@@ -40,7 +40,7 @@ public interface IRabbitMQPersistentConnection
 
     /// <summary>
     /// How long the connection has been lost, from the first shutdown until the automatic recovery completes
-    /// (or, if it never connected, from the first call); null while it is up.
+    /// (or, if it never connected, from the first connection attempt); null while it is up.
     /// </summary>
     TimeSpan? GetDisconnectedTime();
 

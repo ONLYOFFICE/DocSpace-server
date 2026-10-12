@@ -67,7 +67,8 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
     private int _pooledPublisherChannelCount;
     private readonly ResiliencePipeline _publishPipeline;
     private volatile bool _disposing;
-    private long _consumerLostAt;
+    // running while the consumer is missing on a live connection, null otherwise; a reference, so no lock
+    private volatile Stopwatch _consumerOutage;
 
     private static readonly ResiliencePropertyKey<Guid> _eventIdPropertyKey = new("event-id");
 
@@ -341,7 +342,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
         if (_persistentConnection.GetDisconnectedTime() is { } disconnectedTime)
         {
             // the consumer cannot come back before the connection does, so its own clock starts only after that
-            Interlocked.Exchange(ref _consumerLostAt, 0);
+            _consumerOutage = null;
 
             return (false, disconnectedTime);
         }
@@ -352,14 +353,14 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
         if (_subsManager.IsEmpty
             || _consumerChannel is { IsOpen: true } && _consumer is { CancelledByBroker: false } && !string.IsNullOrEmpty(_consumerTag))
         {
-            Interlocked.Exchange(ref _consumerLostAt, 0);
+            _consumerOutage = null;
 
             return null;
         }
 
-        var lostAt = Interlocked.CompareExchange(ref _consumerLostAt, Stopwatch.GetTimestamp(), 0);
+        var outage = _consumerOutage ??= Stopwatch.StartNew();
 
-        return (true, lostAt == 0 ? TimeSpan.Zero : Stopwatch.GetElapsedTime(lostAt));
+        return (true, outage.Elapsed);
     }
 
     public void Dispose()
