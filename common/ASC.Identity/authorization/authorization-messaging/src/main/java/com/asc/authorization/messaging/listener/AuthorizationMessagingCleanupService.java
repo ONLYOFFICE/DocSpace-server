@@ -15,9 +15,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 @Service
 @RequiredArgsConstructor
 public class AuthorizationMessagingCleanupService {
-  private final int AUTHORIZATION_CHUNK_SIZE = 1000;
-  private final int CONSENT_CHUNK_SIZE = 500;
-  private final int TIMEOUT_SECONDS = 5;
+  private static final int AUTHORIZATION_CHUNK_SIZE = 1000;
+  private static final int CONSENT_CHUNK_SIZE = 500;
+  private static final int TIMEOUT_SECONDS = 5;
 
   private final PlatformTransactionManager transactionManager;
   private final JpaAuthorizationRepository jpaAuthorizationRepository;
