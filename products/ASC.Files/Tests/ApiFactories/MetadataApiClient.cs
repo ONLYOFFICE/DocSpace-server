@@ -181,6 +181,16 @@ public class MetadataApiClient(HttpClient client)
     }
 
     /// <summary>
+    /// Assigns the templates to the folder. Returns the raw response so the error cases can be asserted on the status code.
+    /// </summary>
+    public Task<HttpResponseMessage> AssignFolderTemplatesResponseAsync(int folderId, IEnumerable<int> templateIds, bool cascade, CancellationToken cancellationToken)
+    {
+        var body = new { templateIds = templateIds.ToList(), cascade, conflictResolveType = 0 };
+
+        return PutAsync($"api/2.0/files/metadata/folder/{folderId}/templates", body, cancellationToken);
+    }
+
+    /// <summary>
     /// Assigns the templates to the file. Returns the raw response so the error cases can be asserted on the status code.
     /// </summary>
     public Task<HttpResponseMessage> AssignFileTemplatesResponseAsync(int fileId, IEnumerable<int> templateIds, CancellationToken cancellationToken)
@@ -209,6 +219,24 @@ public class MetadataApiClient(HttpClient client)
         var wrapper = await response.Content.ReadFromJsonAsync<MetadataApiResponse<MetadataOperationResponse>>(_jsonOptions, cancellationToken);
 
         return wrapper?.Response;
+    }
+
+    /// <summary>
+    /// Turns the cascade of a template the folder carries on or off. Returns the raw response so the error cases can be
+    /// asserted on the status code. <paramref name="conflictResolveType"/>: Skip = 0, Overwrite = 1.
+    /// </summary>
+    public Task<HttpResponseMessage> UpdateFolderTemplateResponseAsync(int folderId, int templateId, bool cascade, CancellationToken cancellationToken, int conflictResolveType = 0)
+    {
+        var body = new { cascade, conflictResolveType };
+
+        return PutAsync($"api/2.0/files/metadata/folder/{folderId}/templates/{templateId}", body, cancellationToken);
+    }
+
+    public async Task<MetadataOperationResponse> UpdateFolderTemplateAsync(int folderId, int templateId, bool cascade, CancellationToken cancellationToken, int conflictResolveType = 0)
+    {
+        using var response = await UpdateFolderTemplateResponseAsync(folderId, templateId, cascade, cancellationToken, conflictResolveType);
+
+        return await ReadAsync<MetadataOperationResponse>(response, cancellationToken);
     }
 
     public async Task UnassignFolderTemplateAsync(int folderId, int templateId, CancellationToken cancellationToken)
@@ -691,6 +719,17 @@ public class EntryTemplateResponse
     public int Id { get; init; }
     public string Name { get; init; } = "";
     public bool Visible { get; init; }
+
+    /// <summary>
+    /// Whether the template cascades from the entry; always false on a file.
+    /// </summary>
+    public bool Cascade { get; init; }
+
+    /// <summary>
+    /// The <c>MetadataConflictResolveType</c> of the cascade (Skip = 0, Overwrite = 1), null while the template does not cascade.
+    /// </summary>
+    public int? ConflictResolveType { get; init; }
+
     public List<EntryFieldResponse> Fields { get; init; } = [];
 
     public EntryFieldResponse Field(string name)
@@ -745,6 +784,20 @@ public class MetadataOperationResponse
     public double Progress { get; init; }
     public bool IsCompleted { get; init; }
     public string? Error { get; init; }
+
+    /// <summary>
+    /// The templates the pass propagates; empty when there is no pass to report.
+    /// </summary>
+    public List<int> TemplateIds { get; init; } = [];
+}
+
+/// <summary>
+/// The user object a template reports as its author: the part of the EmployeeDto the assertions need.
+/// </summary>
+public class MetadataUserResponse
+{
+    public Guid Id { get; init; }
+    public string DisplayName { get; init; } = "";
 }
 
 public class MetadataTemplateResponse
@@ -752,6 +805,8 @@ public class MetadataTemplateResponse
     public int Id { get; init; }
     public string Name { get; init; } = "";
     public bool Visible { get; init; }
+    public MetadataUserResponse? CreateBy { get; init; }
+    public MetadataUserResponse? ModifiedBy { get; init; }
     public List<MetadataFieldResponse> Fields { get; init; } = [];
 
     public MetadataFieldResponse Field(string name)

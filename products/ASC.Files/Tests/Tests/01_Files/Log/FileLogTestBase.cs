@@ -41,4 +41,25 @@ public abstract class FileLogTestBase(
     AspireAppFixture fixture)
     : BaseTest(fixture)
 {
+    /// <summary>
+    /// Polls a file's log until it holds at least one entry, since audit entries are written after
+    /// the request that caused them returns. Returns the last observed page, empty if nothing landed
+    /// before the deadline.
+    /// </summary>
+    protected async Task<List<HistoryDto>> PollFileHistoryAsync(int fileId, TimeSpan timeout)
+    {
+        var deadline = DateTime.UtcNow.Add(timeout);
+
+        while (true)
+        {
+            var history = (await _filesApi.GetFileHistoryAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+            if (history.Count > 0 || DateTime.UtcNow >= deadline)
+            {
+                return history;
+            }
+
+            await Task.Delay(1_000, TestContext.Current.CancellationToken);
+        }
+    }
 }

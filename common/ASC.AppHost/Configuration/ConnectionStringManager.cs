@@ -245,14 +245,35 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
         var tag = builder.Configuration["APP_EDITOR_VERSION"] ?? "latest";
 
+        // Password of the editors' Admin Panel (/ds-vpath/admin). Generated once, kept in the AppHost user secrets
+        // and shown under Parameters in the dashboard. The panel's own rules: 8+ chars, a digit, an uppercase letter
+        // and a special character.
+        var adminPanelPassword = builder.AddParameter("editors-admin-password",
+            new GenerateParameterDefault { MinLength = 16, MinLower = 1, MinUpper = 1, MinNumeric = 1, MinSpecial = 1 },
+            secret: true, persist: true);
+
         EditorResource = builder
             .AddContainer(Constants.EditorsContainer, image, tag)
             //TODO:get from config or set for the rest projects
             .WithEnvironment("JWT_ENABLED", "true")
             .WithEnvironment("JWT_SECRET", "secret")
             .WithEnvironment("JWT_HEADER", "AuthorizationJwt")
-            .WithBindMount(Path.Combine(basePath, "Data"), "/var/www/onlyoffice/Data");
-
+            .WithEnvironment("ADMINPANEL_PASSWORD", adminPanelPassword)
+            .WithBindMount(Path.Combine(basePath, "Data"), "/var/www/onlyoffice/Data")
+            // The Admin Panel has no first administrator until `documentserver-admin` creates one, and the CLI needs
+            // the configuration the image's entrypoint writes at startup - so it runs in the background once
+            // supervisor reports the panel running. reset-admin-password on later starts keeps the parameter the
+            // source of truth (the hash lives in the bind-mounted Data/runtime.json). Editions without the panel
+            // (community image) skip it.
+            .WithEntrypoint("/bin/bash")
+            .WithArgs("-c",
+                "( command -v documentserver-admin >/dev/null || exit 0; " +
+                "for i in $(seq 150); do supervisorctl status ds:adminpanel 2>/dev/null | grep -q RUNNING && break; sleep 2; done; " +
+                "f=$(mktemp) && chmod 644 \"$f\" && printf '%s' \"$ADMINPANEL_PASSWORD\" > \"$f\"; " +
+                "if grep -q passwordHash /var/www/onlyoffice/Data/runtime.json 2>/dev/null; then cmd=reset-admin-password; else cmd=create-admin; fi; " +
+                "documentserver-admin $cmd --password-file \"$f\" </dev/null; rm -f \"$f\" ) & " +
+                "exec /app/ds/run-document-server.sh")
+            .WithResetAdminPasswordCommand(adminPanelPassword, builder.Configuration["ASPIRE_CONTAINER_RUNTIME"] ?? "docker");
 
         return this;
     }
@@ -544,7 +565,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         resourceBuilder
             .WithEnvironment("openTelemetry:enable", "true")
             .WithEnvironment("files:docservice:url:portal", SubstituteLocalhost("http://localhost") + ":" + Constants.AppHostPort)
-            .WithEnvironment("files:docservice:url:public", $"http://localhost:{Constants.AppHostPort.ToString()}/ds-vpath");
+            .WithEnvironment("files:docservice:url:public", $"http://localhost:{Constants.AppHostPort.ToString()}/ds-vpath")
+            // The editors' admin panel is served by the editors container at /admin, reachable only through the proxy.
+            .WithEnvironment("externalresources:adminpanel:default:domain", $"http://localhost:{Constants.AppHostPort.ToString()}/ds-vpath/admin");
 
         if (MySqlDatabaseResource != null)
         {
@@ -642,6 +665,94 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     }
 
     public static string? SubstituteLocalhost(string? host) => host?.Replace(KnownHostNames.Localhost, KnownHostNames.DockerDesktopHostBridge);
+}
+
+internal static class EditorsResourceBuilderExtensions
+{
+    // Snapshot property DCP fills with the runtime's container id (the dashboard's KnownProperties.Container.Id,
+    // which the hosting package does not expose).
+    private const string ContainerIdProperty = "container.id";
+
+    // The container's env var is fixed at creation, so a value set through the dashboard's "Set parameter" reaches
+    // the Admin Panel only through this command (or a restart of the container).
+    public static IResourceBuilder<ContainerResource> WithResetAdminPasswordCommand(
+        this IResourceBuilder<ContainerResource> builder,
+        IResourceBuilder<ParameterResource> password,
+        string containerRuntime)
+    {
+        builder.WithCommand(
+            name: "reset-admin-password",
+            displayName: "Reset admin password",
+            executeCommand: context => OnResetAdminPasswordAsync(password.Resource, containerRuntime, context),
+            commandOptions: new CommandOptions
+            {
+                UpdateState = context => context.ResourceSnapshot.State?.Text == KnownResourceStates.Running
+                    ? ResourceCommandState.Enabled
+                    : ResourceCommandState.Disabled,
+                Description = "Apply the current editors-admin-password parameter to the editors' Admin Panel",
+                ConfirmationMessage = "Set the Admin Panel password to the current value of editors-admin-password?",
+                IconName = "Key",
+                IconVariant = IconVariant.Regular
+            });
+
+        return builder;
+    }
+
+    private static async Task<ExecuteCommandResult> OnResetAdminPasswordAsync(
+        ParameterResource password,
+        string containerRuntime,
+        ExecuteCommandContext context)
+    {
+        var notifications = context.Services.GetRequiredService<ResourceNotificationService>();
+        if (!notifications.TryGetCurrentState(context.ResourceName, out var resourceEvent) ||
+            resourceEvent.Snapshot.Properties.FirstOrDefault(p => p.Name == ContainerIdProperty)?.Value is not string containerId)
+        {
+            return CommandResults.Failure($"The container of '{context.ResourceName}' is not running.");
+        }
+
+        var value = await password.GetValueAsync(context.CancellationToken);
+        if (string.IsNullOrEmpty(value))
+        {
+            return CommandResults.Failure($"The '{password.Name}' parameter has no value.");
+        }
+
+        // The password goes in through stdin, never through the command line, and the CLI reads it from a file
+        // only the container sees for the duration of the call.
+        var psi = new ProcessStartInfo
+        {
+            FileName = containerRuntime,
+            UseShellExecute = false,
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+        foreach (var arg in new[]
+                 {
+                     "exec", "-i", containerId, "bash", "-c",
+                     "f=$(mktemp) && chmod 644 \"$f\" && cat > \"$f\" && " +
+                     "documentserver-admin reset-admin-password --password-file \"$f\" </dev/null; rc=$?; rm -f \"$f\"; exit $rc"
+                 })
+        {
+            psi.ArgumentList.Add(arg);
+        }
+
+        using var process = Process.Start(psi);
+        if (process is null)
+        {
+            return CommandResults.Failure($"Could not start '{containerRuntime}'.");
+        }
+
+        await process.StandardInput.WriteAsync(value);
+        process.StandardInput.Close();
+
+        var stdout = process.StandardOutput.ReadToEndAsync(context.CancellationToken);
+        var stderr = process.StandardError.ReadToEndAsync(context.CancellationToken);
+        await process.WaitForExitAsync(context.CancellationToken);
+
+        return process.ExitCode == 0
+            ? CommandResults.Success()
+            : CommandResults.Failure(((await stderr).Trim() + Environment.NewLine + (await stdout).Trim()).Trim());
+    }
 }
 
 internal static class RedisResourceBuilderExtensions
