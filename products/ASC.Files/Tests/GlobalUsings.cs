@@ -67,6 +67,7 @@ global using DocSpace.API.SDK.Model;
 
 global using FluentAssertions;
 
+global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
 
 global using Xunit;
@@ -80,7 +81,10 @@ global using FileLinkRequest = DocSpace.API.SDK.Model.FileLinkRequest;
 global using FileOperationDto = DocSpace.API.SDK.Model.FileOperationDto;
 global using FileShare = DocSpace.API.SDK.Model.FileShare;
 global using FolderType = DocSpace.API.SDK.Model.FolderType;
+global using HashHelper = ASC.FederatedLogin.Helpers.HashHelper;
+global using InstanceCrypto = ASC.Security.Cryptography.InstanceCrypto;
 global using LinkType = DocSpace.API.SDK.Model.LinkType;
+global using MachinePseudoKeys = ASC.Security.Cryptography.MachinePseudoKeys;
 global using MetadataCascadeResolver = ASC.Files.Core.MetadataCascadeResolver;
 global using MetadataField = ASC.Files.Core.MetadataField;
 global using MetadataFieldOption = ASC.Files.Core.MetadataFieldOption;
