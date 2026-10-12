@@ -292,24 +292,26 @@ public class DbWorker(
     {
         await using var webhooksDbContext = await dbContextFactory.CreateDbContextAsync();
 
-        var now = DateTime.UtcNow;
+        var strategy = webhooksDbContext.Database.CreateExecutionStrategy();
 
-        var due = await webhooksDbContext.DueWebhooksLogsAsync(now, count).ToListAsync();
-
-        var leaseUntil = now + lease;
-        var claimed = new List<(int TenantId, int Id)>(due.Count);
-
-        foreach (var entry in due)
+        return await strategy.ExecuteAsync(async () =>
         {
-            var updated = await webhooksDbContext.ClaimWebhooksLogAsync(entry.Id, entry.NextAttemptOn, leaseUntil);
+            await using var tx = await webhooksDbContext.Database.BeginTransactionAsync();
 
-            if (updated == 1)
+            var now = DateTime.UtcNow;
+
+            // Rows held by another instance are skipped, so concurrent instances take disjoint batches.
+            var due = await webhooksDbContext.LockDueWebhooksLogsAsync(now, count);
+
+            if (due.Count > 0)
             {
-                claimed.Add((entry.TenantId, entry.Id));
+                await webhooksDbContext.ClaimWebhooksLogsAsync(due.Select(r => r.Id).ToList(), now + lease);
             }
-        }
 
-        return claimed;
+            await tx.CommitAsync();
+
+            return due.Select(r => (r.TenantId, r.Id)).ToList();
+        });
     }
 
     public async Task<DbWebhooksLog> ResetJournalAttemptsAsync(int tenantId, int id)
@@ -432,9 +434,11 @@ public class DbWebhooks
 
 public class DueWebhooksLog
 {
+    [Column("tenant_id")]
     public int TenantId { get; init; }
+
+    [Column("id")]
     public int Id { get; init; }
-    public DateTime? NextAttemptOn { get; init; }
 }
 
 /// <summary>

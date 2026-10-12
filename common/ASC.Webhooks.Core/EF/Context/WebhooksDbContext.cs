@@ -85,19 +85,28 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
         return Queries.WebhooksLogAttemptsAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery]
-    public IAsyncEnumerable<DueWebhooksLog> DueWebhooksLogsAsync(DateTime now, int count)
+    // Not precompiled on purpose: FOR UPDATE ... SKIP LOCKED has no LINQ translation. Must run inside a transaction:
+    // the selected rows stay locked until it ends, and rows another instance holds are skipped instead of waited on.
+    // The SQL is the same for MySQL 8+ and PostgreSQL (lowercase identifiers, no quoting needed).
+    public Task<List<DueWebhooksLog>> LockDueWebhooksLogsAsync(DateTime now, int count)
     {
-        return Queries.DueWebhooksLogsAsync(this, now, count);
+        return Database.SqlQuery<DueWebhooksLog>($"""
+            SELECT l.tenant_id, l.id
+            FROM webhooks_logs l
+            JOIN tenants_tenants t ON t.id = l.tenant_id
+            WHERE l.next_attempt_on IS NOT NULL AND l.next_attempt_on <= {now} AND t.status = {(int)TenantStatus.Active}
+            ORDER BY l.next_attempt_on, l.id
+            LIMIT {count}
+            FOR UPDATE OF l SKIP LOCKED
+            """).ToListAsync();
     }
 
     // Not precompiled on purpose: ExecuteUpdate does not translate inside EF.CompileAsyncQuery.
-    // Claims one due record by moving NextAttemptOn forward, only if no other instance has moved it since it was
-    // read; 1 means this caller owns the record until leaseUntil, 0 means another instance got there first.
-    public Task<int> ClaimWebhooksLogAsync(int id, DateTime? expectedNextAttemptOn, DateTime leaseUntil)
+    // Moves NextAttemptOn of rows locked by LockDueWebhooksLogsAsync forward to leaseUntil in one statement.
+    public Task<int> ClaimWebhooksLogsAsync(List<int> ids, DateTime leaseUntil)
     {
         return WebhooksLogs
-            .Where(r => r.Id == id && r.NextAttemptOn == expectedNextAttemptOn)
+            .Where(r => ids.Contains(r.Id))
             .ExecuteUpdateAsync(q => q.SetProperty(p => p.NextAttemptOn, leaseUntil));
     }
 
@@ -177,14 +186,4 @@ static file class Queries
                     .Where(it => it.TenantId == tenantId && it.Id == id)
                     .Select(it => (int?)it.Attempts)
                     .FirstOrDefault());
-
-    public static readonly Func<WebhooksDbContext, DateTime, int, IAsyncEnumerable<DueWebhooksLog>> DueWebhooksLogsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (WebhooksDbContext ctx, DateTime now, int count) =>
-                ctx.WebhooksLogs
-                    .Where(r => r.NextAttemptOn != null && r.NextAttemptOn <= now && r.Tenant.Status == TenantStatus.Active)
-                    .OrderBy(r => r.NextAttemptOn)
-                    .ThenBy(r => r.Id)
-                    .Take(count)
-                    .Select(r => new DueWebhooksLog { TenantId = r.TenantId, Id = r.Id, NextAttemptOn = r.NextAttemptOn }));
 }
