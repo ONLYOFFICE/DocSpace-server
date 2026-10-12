@@ -1,0 +1,456 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+// The document agent as one tool of the chat: `document_agent` hands a
+// request, the files attached to the message and the files the model names
+// to the external agent, which creates or edits office documents with
+// ONLYOFFICE Document Builder in a sandbox of its own, and brings the result
+// back as files in the user's workspace. The agent runs on the chat's own
+// model profile and sees the custom MCP servers of the current scope, so the
+// delegated task has the same tools and the same model the chat does.
+//
+// Like `formAnalysisSubAgent`, this is a ToolsAdapter with a single tool
+// whose work happens elsewhere; unlike it, the work lives in another
+// process, reached over A2A (see documentAgentClient).
+
+import { ActionType } from "@onlyoffice/ai-chat/core";
+import type { Profile, TMCPItem, ToolsAdapter } from "@onlyoffice/ai-chat/core";
+import { DOCUMENT_AGENT_TYPE, getDocumentAgent } from "../../config/index.js";
+import type { DocumentAgentConfig } from "../../config/index.js";
+import { storage } from "../storage/index.js";
+import {
+  canTakeUpload,
+  getAgentResultStorageId,
+  getFolderInfo,
+  getMyDocumentsFolderId,
+  resolveAgentEntityId,
+} from "../storage/docspaceFilesApi.js";
+import {
+  downloadFile,
+  FileTooLargeError,
+  mediaTypeOf,
+  uploadFile,
+} from "../storage/docspaceFileTransfer.js";
+import { DocspaceApiHttpError } from "../storage/docspaceFilesApi.js";
+import {
+  getForwardedHeaders,
+  getRoundAttachmentIds,
+  getRoundProfileId,
+  reportToolProgress,
+} from "../requestContext.js";
+import { resolveCustomServers } from "./customTools.js";
+import { agentServerWhitelist, getSystemServerConfig, systemServerHeaders } from "./systemTools.js";
+import { getMcpServers } from "../../config/index.js";
+import { fileEditorUrl } from "./httpToolsAdapter.js";
+import { agentAssignedProfileId } from "../controllers/agentProfile.js";
+import { runDocumentTask, DocumentAgentError } from "./documentAgentClient.js";
+import type { DocumentAgentSettings } from "./documentAgentClient.js";
+import { getArray, getString, isObject } from "../narrow.js";
+import { aiServiceBaseUrl } from "../storage/httpClient.js";
+import logger from "../log.js";
+
+export const DOCUMENT_AGENT_TOOL_NAME = "document_agent";
+
+// One input or output file; the agent's own default ceiling is the same.
+const MAX_FILE_BYTES = 32 * 1024 * 1024;
+// All input files together: they travel base64 in one request body, which the
+// agent takes up to four times its file ceiling (see its requestBodyLimit).
+const MAX_INPUT_BYTES = 3 * MAX_FILE_BYTES;
+// Past the task timeout the agent reports a failure itself; the margin
+// covers the sandbox teardown and the files on their way back.
+const ABORT_MARGIN_MS = 60_000;
+
+// Server names the agent accepts, and the two it keeps for itself.
+const SERVER_NAME = /^[a-z0-9_-]+$/;
+const RESERVED_SERVER_NAMES = new Set(["host", "docbuilder"]);
+
+const TOOL: TMCPItem = {
+  name: DOCUMENT_AGENT_TOOL_NAME,
+  description:
+    "Delegate the creation or editing of office documents (docx, xlsx, pptx, pdf) to the " +
+    "document agent, which works autonomously with ONLYOFFICE Document Builder and saves the " +
+    "resulting files into the workspace. Use it when the user asks for a real file with content: " +
+    "a report, a letter, a spreadsheet with data and charts, a presentation, a filled template. " +
+    "The files attached to the current message are passed on automatically; name other workspace " +
+    "files by id in `fileIds`. The call returns the agent's summary and the saved files with " +
+    "`url`; when you mention a file, link it exactly as `[<title>](<url>)`, copying `url` " +
+    "verbatim. The task may take several minutes.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      task: {
+        type: "string",
+        description:
+          "The complete request for the agent, in the user's language: what to produce or " +
+          "change, the content or data to use, the format, the file name. Include everything " +
+          "the agent needs; it cannot ask questions.",
+      },
+      fileIds: {
+        type: "array",
+        items: { type: "string" },
+        description:
+          "Ids of workspace files to hand to the agent as input, in addition to the message's " +
+          "attachments.",
+      },
+    },
+    required: ["task"],
+  },
+  serverType: DOCUMENT_AGENT_TYPE,
+  requireApproval: true,
+  enabled: true,
+};
+
+type InputFile = { name: string; bytes: Uint8Array; mediaType: string };
+
+export const documentAgentTools: ToolsAdapter = {
+  async getTools(): Promise<Record<string, TMCPItem[]>> {
+    return getDocumentAgent() ? { [DOCUMENT_AGENT_TYPE]: [TOOL] } : {};
+  },
+
+  async callTool(
+    toolName: string,
+    args: Record<string, unknown>,
+    entityId?: string,
+  ): Promise<unknown> {
+    if (toolName !== DOCUMENT_AGENT_TOOL_NAME) {
+      return `Unknown tool "${toolName}"`;
+    }
+    const config = getDocumentAgent();
+    if (!config) {
+      return "The document agent is not configured on this server.";
+    }
+    const task = getString(isObject(args) ? args : {}, "task")?.trim();
+    if (!task) {
+      return `${DOCUMENT_AGENT_TOOL_NAME} requires a non-empty 'task'.`;
+    }
+    try {
+      return JSON.stringify(await run(config, task, fileIdsOf(args), entityId));
+    } catch (err) {
+      // Contract: a failure is a result, never a throw — a throw aborts the chat stream.
+      const message = err instanceof Error ? err.message : String(err);
+      logger.warn(`${DOCUMENT_AGENT_TOOL_NAME} failed: ${message}`);
+      if (err instanceof FileTooLargeError) {
+        return `The document agent could not take an input file: ${message}.`;
+      }
+      if (err instanceof DocspaceApiHttpError) {
+        return `A workspace file could not be read: ${message}.`;
+      }
+      if (err instanceof DocumentAgentError) {
+        return `The document agent is unavailable: ${message}.`;
+      }
+      if (err instanceof Error && err.name === "TimeoutError") {
+        return "The document task timed out before the agent finished.";
+      }
+      return "The document task could not be completed due to an internal error.";
+    }
+  },
+};
+
+function fileIdsOf(args: Record<string, unknown>): string[] {
+  const raw = getArray(args, "fileIds") ?? [];
+  const ids: string[] = [];
+  for (const value of raw) {
+    if (typeof value === "string" && value.trim() !== "") {
+      ids.push(value.trim());
+    } else if (typeof value === "number" && Number.isFinite(value)) {
+      ids.push(String(value));
+    }
+  }
+  return ids;
+}
+
+async function run(
+  config: DocumentAgentConfig,
+  task: string,
+  fileIds: string[],
+  entityId: string | undefined,
+): Promise<unknown> {
+  const profile = await resolveProfile(entityId);
+  if (!profile) {
+    return { error: "No model is configured for this chat, the document agent cannot run." };
+  }
+  const [files, mcpServers, targetFolderId] = await Promise.all([
+    collectInputs(fileIds),
+    collectServers(config, entityId),
+    resolveUploadTarget(entityId),
+  ]);
+  if (!targetFolderId) {
+    return { error: "There is no folder the resulting files could be saved into." };
+  }
+
+  const settings: DocumentAgentSettings = {
+    model: modelSettings(profile, config),
+    mcpServers,
+    limits: {
+      taskTimeoutSeconds: config.taskTimeoutSeconds,
+      maxFileBytes: MAX_FILE_BYTES,
+      ...(config.maxToolCalls === undefined ? {} : { maxToolCalls: config.maxToolCalls }),
+    },
+  };
+  logger.info(
+    `${DOCUMENT_AGENT_TOOL_NAME}: start entityId=${entityId ?? "-"} profile=${profile.id} ` +
+      `model=${profile.modelId} files=[${files.map((f) => f.name).join(",")}] ` +
+      `servers=[${Object.keys(mcpServers).join(",")}] target=${targetFolderId}`,
+  );
+
+  // The steps shown live are the agent's own, in the language of the request.
+  const result = await runDocumentTask(config, {
+    task,
+    files,
+    settings,
+    signal: AbortSignal.timeout(config.taskTimeoutSeconds * 1000 + ABORT_MARGIN_MS),
+    onStatus: reportToolProgress,
+  });
+
+  const saved: { id: string; title: string; url: string }[] = [];
+  const notSaved: string[] = [];
+  for (const artifact of result.artifacts) {
+    try {
+      const file = await uploadFile(
+        targetFolderId,
+        artifact.name,
+        artifact.bytes,
+        artifact.mediaType === "application/octet-stream"
+          ? mediaTypeOf(artifact.name)
+          : artifact.mediaType,
+      );
+      saved.push({ id: file.id, title: file.title, url: fileEditorUrl(file.id) });
+    } catch (err) {
+      logger.warn(
+        `${DOCUMENT_AGENT_TOOL_NAME}: ${artifact.name} not saved into ${targetFolderId}: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+      notSaved.push(artifact.name);
+    }
+  }
+
+  if (result.state !== "completed") {
+    return {
+      error: `The document agent did not finish the task (${result.state}): ${result.text || "no details"}`,
+      ...(saved.length > 0 ? { data: { files: saved } } : {}),
+    };
+  }
+  return {
+    data: {
+      summary: result.text,
+      files: saved,
+      ...(notSaved.length > 0 ? { notSaved } : {}),
+    },
+  };
+}
+
+// The chat's own model: the round's profile when the handler recorded one,
+// else the agent room's assignment, else the portal's chat default. Read raw,
+// as the C# storage serves it: the in-process override would point an
+// `onlyoffice` profile at this service's own address, which the agent, on
+// another host, cannot reach (see modelSettings).
+async function resolveProfile(entityId: string | undefined): Promise<Profile | undefined> {
+  const roundProfileId = getRoundProfileId();
+  if (roundProfileId) {
+    const profile = await storage.profiles.readByIdRaw(roundProfileId);
+    if (profile) {
+      return profile;
+    }
+  }
+  const profileId =
+    (await agentAssignedProfileId(entityId)) ??
+    (await storage.assignments.readByType(ActionType.Chat ?? ActionType.Default));
+  return profileId ? storage.profiles.readByIdRaw(profileId) : undefined;
+}
+
+// The portal's own provider is reached through the portal API, where the
+// gateway proxy lives at `/api/2.0/ai/gateway`, authenticated as the user.
+// The C# side stores the portal's public root as the profile's `baseUrl`,
+// which from inside the deployment may be a dev host with a self-signed
+// certificate or a name that does not resolve; so, unless the host names
+// the portal address for the agent, it gets the AI service's own address,
+// the one this service uses for the same calls.
+const ONLYOFFICE_PROVIDER = "onlyoffice";
+const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
+
+// The profile as the agent's settings want it. A third-party provider goes
+// as stored, key included. For the portal's own provider the key is a
+// placeholder and the session is what authenticates: the caller's cookie
+// goes along (the portal API reads the session from it, the key stays a
+// harmless bearer), or, for a caller that sent a header instead, that
+// header in place of the key.
+function modelSettings(
+  profile: Profile,
+  config: DocumentAgentConfig,
+): DocumentAgentSettings["model"] {
+  const model: DocumentAgentSettings["model"] = {
+    provider: profile.providerType,
+    baseUrl: profile.baseUrl,
+    modelId: profile.modelId,
+    reasoning: reasoningOf(profile),
+  };
+  if (profile.key) {
+    model.apiKey = profile.key;
+  }
+  if (profile.headers && Object.keys(profile.headers).length > 0) {
+    model.headers = { ...profile.headers };
+  }
+  if (profile.useResponsesApi !== undefined) {
+    model.responsesApi = profile.useResponsesApi;
+  }
+  if (profile.providerType === ONLYOFFICE_PROVIDER) {
+    model.baseUrl = `${config.portalUrl ?? aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}`;
+    const forwarded = getForwardedHeaders();
+    const cookie = forwarded["cookie"];
+    const authorization = forwarded["authorization"];
+    if (cookie) {
+      model.headers = { ...model.headers, cookie };
+    } else if (authorization) {
+      delete model.apiKey;
+      model.headers = { ...model.headers, authorization };
+    }
+  }
+  return model;
+}
+
+function reasoningOf(profile: Profile): DocumentAgentSettings["model"]["reasoning"] {
+  const support = profile.reasoningSupport;
+  const thinks = support
+    ? support.thinks && (!support.canDisable || profile.reasoning === true)
+    : profile.reasoning === true;
+  if (!thinks) {
+    return "off";
+  }
+  return support?.defaultDepth ?? "medium";
+}
+
+// The attached files of the message plus the ids the model named, each read
+// under the caller's credentials. A file the user cannot read is refused by
+// DocSpace, and that failure ends the task before the agent is involved.
+async function collectInputs(fileIds: string[]): Promise<InputFile[]> {
+  const ids = new Set<string>(fileIds);
+  const refs = getRoundAttachmentIds();
+  if (refs.length > 0) {
+    const records = await storage.attachments.readManyByIds(refs);
+    for (const record of records) {
+      const entryId = record?.path?.split("/", 1)[0];
+      if (entryId) {
+        ids.add(entryId);
+      }
+    }
+  }
+  const files: InputFile[] = [];
+  const names = new Set<string>();
+  let total = 0;
+  for (const id of ids) {
+    const file = await downloadFile(id, Math.min(MAX_FILE_BYTES, MAX_INPUT_BYTES - total));
+    total += file.bytes.byteLength;
+    // The agent refuses two inputs of one name; keep the first.
+    if (names.has(file.title)) {
+      logger.warn(
+        `${DOCUMENT_AGENT_TOOL_NAME}: duplicate input name ${file.title}, file ${id} skipped`,
+      );
+      continue;
+    }
+    names.add(file.title);
+    files.push({ name: file.title, bytes: file.bytes, mediaType: file.mediaType });
+  }
+  return files;
+}
+
+// The MCP servers the agent gets: the custom servers of the round's scope,
+// as the chat itself sees them, and, when the host shares them, the
+// host-configured system servers (the portal's own among them) under the
+// same whitelist the chat applies to an agent room, with the caller's
+// session as their headers. The agent connects to every server it is given
+// before it starts, so a server it cannot reach fails the task.
+async function collectServers(
+  config: DocumentAgentConfig,
+  entityId: string | undefined,
+): Promise<NonNullable<DocumentAgentSettings["mcpServers"]>> {
+  const out: NonNullable<DocumentAgentSettings["mcpServers"]> = {};
+  const add = (name: string, url: string, headers: Record<string, string> | undefined): void => {
+    if (!SERVER_NAME.test(name) || RESERVED_SERVER_NAMES.has(name)) {
+      logger.warn(
+        `${DOCUMENT_AGENT_TOOL_NAME}: MCP server "${name}" skipped, the agent cannot take that name`,
+      );
+      return;
+    }
+    out[name] = {
+      url,
+      ...(headers && Object.keys(headers).length > 0 ? { headers } : {}),
+    };
+  };
+
+  if (config.shareSystemServers) {
+    const whitelist = await agentServerWhitelist(entityId);
+    const headers = systemServerHeaders();
+    for (const server of getMcpServers()) {
+      if (whitelist && !whitelist.has(server.name)) {
+        continue;
+      }
+      const url = getSystemServerConfig(server.name)?.url ?? server.endpoint;
+      add(server.name, url, headers);
+    }
+  }
+
+  const custom = await resolveCustomServers(entityId);
+  for (const [name, server] of Object.entries(custom)) {
+    const headers = isObject(server.headers) ? stringHeaders(server.headers) : undefined;
+    add(name, server.url, headers);
+  }
+  return out;
+}
+
+function stringHeaders(headers: Record<string, unknown>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [key, value] of Object.entries(headers)) {
+    if (typeof value === "string") {
+      out[key] = value;
+    }
+  }
+  return out;
+}
+
+// Where the files go: an agent room's Result Storage, else the current
+// folder when the user may create there, else My documents.
+async function resolveUploadTarget(entityId: string | undefined): Promise<string | undefined> {
+  if (entityId) {
+    const agentId = await resolveAgentEntityId(entityId);
+    if (agentId) {
+      const resultStorageId = await getAgentResultStorageId(agentId);
+      if (resultStorageId) {
+        return resultStorageId;
+      }
+    } else if (canTakeUpload(await getFolderInfo(entityId))) {
+      return entityId;
+    }
+  }
+  return getMyDocumentsFolderId();
+}

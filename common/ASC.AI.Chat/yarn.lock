@@ -5,6 +5,40 @@ __metadata:
   version: 8
   cacheKey: 10
 
+"@a2a-js/sdk@npm:^1.3.0":
+  version: 1.3.0
+  resolution: "@a2a-js/sdk@npm:1.3.0"
+  dependencies:
+    jose: "npm:^6.2.3"
+  peerDependencies:
+    "@bufbuild/protobuf": ^2.10.2
+    "@grpc/grpc-js": ^1.11.0
+    better-sqlite3: ^12.0.0 || ^13.0.0
+    express: ^4.21.2 || ^5.1.0
+    kysely: ^0.28.17 || ^0.29.0
+    mysql2: ^3.0.0
+    pg: ^8.0.0
+  peerDependenciesMeta:
+    "@bufbuild/protobuf":
+      optional: true
+    "@grpc/grpc-js":
+      optional: true
+    better-sqlite3:
+      optional: true
+    express:
+      optional: true
+    kysely:
+      optional: true
+    mysql2:
+      optional: true
+    pg:
+      optional: true
+  bin:
+    a2a-db: dist/cli/a2a_db.js
+  checksum: 10/8a468b79b241d68030cc0f7637cc84e890ef95f01a1fe8e2d69d20b2d33f57f1c0f5bcc68073b3a61a6a118c46cd43c88e3228d12e919aad922cd51bed8f290e
+  languageName: node
+  linkType: hard
+
 "@anthropic-ai/sdk@npm:^0.60.0":
   version: 0.60.0
   resolution: "@anthropic-ai/sdk@npm:0.60.0"
@@ -1402,6 +1436,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "asc-ai-chat@workspace:."
   dependencies:
+    "@a2a-js/sdk": "npm:^1.3.0"
     "@anthropic-ai/sdk": "npm:^0.60.0"
     "@aws-sdk/client-cloudwatch-logs": "npm:^3.199.0"
     "@google/genai": "npm:^1.30.0"
@@ -2308,6 +2343,13 @@ __metadata:
   version: 4.0.0
   resolution: "isexe@npm:4.0.0"
   checksum: 10/2ead327ef596042ef9c9ec5f236b316acfaedb87f4bb61b3c3d574fb2e9c8a04b67305e04733bde52c24d9622fdebd3270aadb632adfbf9cadef88fe30f479e5
+  languageName: node
+  linkType: hard
+
+"jose@npm:^6.2.3":
+  version: 6.2.12
+  resolution: "jose@npm:6.2.12"
+  checksum: 10/42ef7b598d22fe4ed0a4d0407f9dd9ae9f56dabd31cbad6cb4f67e296953a46b5d63603f8a599a3ee4c5659bf29bb14e846237f0381ea679116520b53e71e4ea
   languageName: node
   linkType: hard
 

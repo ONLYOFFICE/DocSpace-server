@@ -311,6 +311,75 @@ public class ProjectConfigurator(
         return this;
     }
 
+    // Set by AddDocumentAgent; read lazily by AddAiChat's environment, so the order of the two does not matter.
+    private string? _documentAgentUrl;
+    private string? _documentAgentToken;
+
+    /// <summary>
+    /// The document agent (the sibling `document-agent` repository, its `agent/` service) next to the
+    /// AI chat, without a sandbox: tasks run on the model and the request's MCP servers and answer in
+    /// text, which is enough to exercise the chat's `document_agent` tool end to end. Skipped, with a
+    /// note, when the sources are not there. `DOCUMENT_AGENT_PATH` names another checkout;
+    /// `DOCUMENT_AGENT_SANDBOX_URL` and `DOCUMENT_AGENT_SANDBOX_TOKEN` hand it a real sandbox side.
+    /// </summary>
+    public ProjectConfigurator AddDocumentAgent()
+    {
+        var name = Constants.DocumentAgentContainer;
+        var path = builder.Configuration["DOCUMENT_AGENT_PATH"]
+                   ?? Path.GetFullPath(Path.Combine(basePath, "..", "document-agent", "agent"));
+        var port = Constants.DocumentAgentPort;
+        var token = builder.Configuration["DOCUMENT_AGENT_TOKEN"] ?? "dev-document-agent";
+        var sandboxUrl = builder.Configuration["DOCUMENT_AGENT_SANDBOX_URL"] ?? "";
+        var sandboxToken = builder.Configuration["DOCUMENT_AGENT_SANDBOX_TOKEN"] ?? "";
+
+        if (!Directory.Exists(path))
+        {
+            Console.WriteLine($"document agent: no sources at {path}, not started (set DOCUMENT_AGENT_PATH)");
+            return this;
+        }
+
+        if (isDocker)
+        {
+            var nodeVersion = File.ReadAllText(Path.Combine(path, ".node-version")).Trim();
+            var resourceBuilder = builder
+                .AddDockerfile(name, path)
+                .WithImageTag("dev")
+                .WithBuildArg("NODE_VERSION", nodeVersion)
+                .WithEnvironment("AGENT_PUBLIC_URL", new UriBuilder(Uri.UriSchemeHttp, name, Constants.AgentContainerPort).ToString())
+                .WithEnvironment("AGENT_AUTH_TOKEN", token)
+                .WithEnvironment("AGENT_SANDBOX_URL", sandboxUrl)
+                .WithEnvironment("AGENT_SANDBOX_TOKEN", sandboxToken)
+                .WithEnvironment("AGENT_LOG_LEVEL", "info")
+                .WithHttpEndpoint(port, Constants.AgentContainerPort, isProxied: false)
+                .WithHttpHealthCheck("/healthz")
+                .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+
+            ApplyServiceName(resourceBuilder);
+            _documentAgentUrl = new UriBuilder(Uri.UriSchemeHttp, name, Constants.AgentContainerPort).ToString();
+        }
+        else
+        {
+            var resourceBuilder = builder.AddJavaScriptApp(name, path, "dev")
+                .WithPnpm()
+                .WithEnvironment("AGENT_PORT", port.ToString())
+                .WithEnvironment("AGENT_PUBLIC_URL", $"http://localhost:{port.ToString()}")
+                .WithEnvironment("AGENT_AUTH_TOKEN", token)
+                .WithEnvironment("AGENT_SANDBOX_URL", sandboxUrl)
+                .WithEnvironment("AGENT_SANDBOX_TOKEN", sandboxToken)
+                .WithEnvironment("AGENT_LOG_LEVEL", "info")
+                .WithHttpEndpoint(targetPort: port)
+                .WithHttpHealthCheck("/healthz")
+                .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+
+            ApplyServiceName(resourceBuilder);
+            _documentAgentUrl = $"http://localhost:{port}";
+        }
+
+        _documentAgentToken = token;
+
+        return this;
+    }
+
     public ProjectConfigurator AddAiChat()
     {
         var name = "onlyoffice-aiChat";
@@ -330,6 +399,12 @@ public class ProjectConfigurator(
                 // `__` form, not `:` — AI.Chat's nconf would otherwise nest a
                 // `:`-keyed var and turn the `ai.mcp` array into an object.
                 .WithEnvironment("AI__MCP__0__ENDPOINT", new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort).ToString() + "mcp")
+                // The document agent (see ASC.AI.Chat/README.md): the one AddDocumentAgent started, else
+                // AI__DOCUMENT_AGENT__URL and AI__DOCUMENT_AGENT__TOKEN from the AppHost environment; empty leaves the tool out.
+                .WithEnvironment("AI__DOCUMENT_AGENT__URL", () => _documentAgentUrl ?? builder.Configuration["AI:DOCUMENT_AGENT:URL"] ?? "")
+                .WithEnvironment("AI__DOCUMENT_AGENT__TOKEN", () => _documentAgentToken ?? builder.Configuration["AI:DOCUMENT_AGENT:TOKEN"] ?? "")
+                // The agent runs on the same network as the portal's MCP server, so it gets it too (see ASC.AI.Chat/README.md).
+                .WithEnvironment("AI__DOCUMENT_AGENT__SHARE_SYSTEM_SERVERS", "true")
                 .WithHttpEndpoint(port, port, isProxied: false)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
@@ -349,6 +424,10 @@ public class ProjectConfigurator(
                 // `__` form, not `:` — AI.Chat's nconf would otherwise nest a
                 // `:`-keyed var and turn the `ai.mcp` array into an object.
                 .WithEnvironment("AI__MCP__0__ENDPOINT", new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort) + "mcp")
+                .WithEnvironment("AI__DOCUMENT_AGENT__URL", () => _documentAgentUrl ?? builder.Configuration["AI:DOCUMENT_AGENT:URL"] ?? "")
+                .WithEnvironment("AI__DOCUMENT_AGENT__TOKEN", () => _documentAgentToken ?? builder.Configuration["AI:DOCUMENT_AGENT:TOKEN"] ?? "")
+                // The agent runs on the same network as the portal's MCP server, so it gets it too (see ASC.AI.Chat/README.md).
+                .WithEnvironment("AI__DOCUMENT_AGENT__SHARE_SYSTEM_SERVERS", "true")
                 .WithHttpEndpoint(targetPort: port)
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);

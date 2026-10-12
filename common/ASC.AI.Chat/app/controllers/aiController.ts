@@ -48,6 +48,8 @@ import {
   getCustomServerNames,
   getChatContextSnapshot,
   getSourceMeta,
+  setRoundAttachmentIds,
+  setRoundProfileId,
 } from "../requestContext.js";
 import { primeChatContext, describeChatContextUsage } from "../storage/chatContext.js";
 import { customToolsSource, primeCustomServers } from "../tools/customTools.js";
@@ -66,6 +68,9 @@ import {
 } from "../tools/httpToolsAdapter.js";
 import { systemToolsSource } from "../tools/systemTools.js";
 import { formAnalysisSubAgent } from "../tools/formAnalysisSubAgent.js";
+import { documentAgentTools } from "../tools/documentAgent.js";
+import { progressBaseOf, withToolProgress } from "../tools/toolProgress.js";
+import { DOCUMENT_AGENT_TYPE } from "../../config/index.js";
 import { primeSourceMeta, safeGetAgentInstruction } from "../storage/docspaceFilesApi.js";
 
 // Client-side code passes `actionArgs.signal: AbortSignal` so it can
@@ -144,6 +149,46 @@ function contextScopeOf(body: unknown): string | undefined {
   return typeof body["entityId"] === "string" ? body["entityId"] : undefined;
 }
 
+// The round's profile and attachments for a request that resumes a round
+// (tool-call approval): the profile the round runs on, ranked as
+// sendWithStream ranks it (the agent in scope, the caller's explicit choice,
+// the thread's own), and the attachments of the thread's last user message,
+// the one the resumed round answers. Best-effort: a failed read leaves the
+// document agent tool to its own fallbacks.
+async function primeRoundFromThread(
+  threadId: unknown,
+  scope: string | undefined,
+  requestedProfileId: unknown,
+): Promise<void> {
+  if (typeof threadId !== "string" || threadId.length === 0) {
+    return;
+  }
+  try {
+    const [thread, agentProfileId, history] = await Promise.all([
+      storage.threads.readById(threadId),
+      agentAssignedProfileId(scope),
+      storage.messages.readByThread(threadId),
+    ]);
+    const requested = typeof requestedProfileId === "string" ? requestedProfileId : undefined;
+    setRoundProfileId(agentProfileId ?? requested ?? thread?.profileId ?? undefined);
+    let lastUser: unknown;
+    for (let i = history.length - 1; i >= 0; i--) {
+      const message: unknown = history[i];
+      if (isObject(message) && message["role"] === "user") {
+        lastUser = message;
+        break;
+      }
+    }
+    setRoundAttachmentIds(lastUser ? extractAttachmentRefIds(lastUser) : []);
+  } catch (err) {
+    logger.warn(
+      `primeRoundFromThread: thread ${threadId} not resolved: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
+  }
+}
+
 // Attachment refs from the thread's persisted history, newest message first
 // so the most recently attached form wins. Best-effort — a failed read carries
 // no prior context rather than erroring the round.
@@ -187,6 +232,9 @@ async function withToolsPrompt<T>(body: T): Promise<T> {
   // message has no attachment of its own, fall back to the form(s) already in
   // the thread history so follow-up questions still resolve it.
   let attachmentId = extractAttachmentRefIds(body["userMessage"]);
+  // The message's own attachments, for the document agent tool: it hands
+  // them to the agent, and `callTool` carries no refs of its own.
+  setRoundAttachmentIds(attachmentId);
   if (attachmentId.length === 0) {
     attachmentId = await historyAttachmentRefIds(body["threadId"]);
   }
@@ -342,11 +390,14 @@ const engine = new AIEngine({
   // tools never reached the model (Bugs 82989 / 82990).
   // formAnalysisSubAgent adds the `analyze_form` delegating tool; its serverType is silent
   // (absent from systemServerTypes), so it runs without UI approval.
+  // documentAgentTools adds the `document_agent` delegating tool when an agent is configured;
+  // its serverType is approval-required, a delegated task may run for minutes.
   toolsAdapter: composeToolsAdapters(
     systemToolsSource,
     customToolsSource,
     toolsAdapter,
     formAnalysisSubAgent,
+    documentAgentTools,
   ),
   // Approval-required server types: the MCP servers (host-configured and
   // custom — the latter resolved per request, see primeCustomServers) plus
@@ -356,6 +407,7 @@ const engine = new AIEngine({
     ...systemToolsSource.getServerTypes(),
     ...getCustomServerNames(),
     DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
+    DOCUMENT_AGENT_TYPE,
   ],
 });
 
@@ -794,6 +846,9 @@ export const aiController = {
         req.body.profileId = agentProfileId;
       }
     }
+    // The effective profile, for the document agent tool: it runs the agent
+    // on the chat's own model, and `callTool` carries no profile.
+    setRoundProfileId(req.body.profileId);
     // The effective profileId must reference an existing profile BEFORE the
     // stream opens: a malformed or unknown id otherwise surfaces only as an
     // opaque {"type":"error"} frame inside a 200 stream (Bug 83045), or the
@@ -827,7 +882,7 @@ export const aiController = {
     );
     await streamNdjson(
       res,
-      tapStream("ai/send-with-stream", engine.sendWithStream(body)),
+      tapStream("ai/send-with-stream", withToolProgress(engine.sendWithStream(body), undefined)),
     );
   }),
 
@@ -861,6 +916,7 @@ export const aiController = {
         req.body.profileId = agentProfileId;
       }
     }
+    setRoundProfileId(req.body.profileId);
     // Same pre-flight as sendWithStream (Bugs 83045 / 83160).
     {
       const profileError = await unknownProfileIdError(req.body.profileId);
@@ -904,7 +960,7 @@ export const aiController = {
     );
     await streamNdjson(
       res,
-      tapStream("ai/regenerate-stream", engine.regenerateStream(body)),
+      tapStream("ai/regenerate-stream", withToolProgress(engine.regenerateStream(body), undefined)),
     );
   }),
 
@@ -919,10 +975,19 @@ export const aiController = {
     // the engine's sync systemServerTypes callback sees their names
     // (approval gating) before the tools adapter fires.
     await primeCustomServers(contextScopeOf(req.body));
+    // An approved tool runs in THIS request, not in the one that streamed the
+    // round: the document agent tool needs the round's profile and the
+    // attachments of the message it answers, resolved from the thread.
+    await primeRoundFromThread(req.body.threadId, contextScopeOf(req.body), req.body.profileId);
     const body = await withSourceMetadata(withRequestSignal(res, req.body));
+    // A long tool approved here runs in this request: its progress is drawn on
+    // the assistant message the client sent back with the call.
     await streamNdjson(
       res,
-      tapStream("ai/approve-tool-call", engine.approveToolCall(body)),
+      tapStream(
+        "ai/approve-tool-call",
+        withToolProgress(engine.approveToolCall(body), progressBaseOf(req.body)),
+      ),
     );
   }),
 

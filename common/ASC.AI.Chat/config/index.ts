@@ -35,7 +35,7 @@ import nconf from "nconf";
 import path from "path";
 import fs from "fs";
 import { fileURLToPath } from "url";
-import type { AppConfig, McpServerSetting, RootConfig } from "../app/types.js";
+import type { AppConfig, DocumentAgentSetting, McpServerSetting, RootConfig } from "../app/types.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -137,6 +137,77 @@ export const DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE =
 // @onlyoffice/ai-chat core). Used to validate tool-pref serverTypes.
 export const WEB_SEARCH_TYPE = "web-search";
 export const IMAGE_GENERATION_TYPE = "image-generation";
+
+// Group key of the document agent's single delegating tool
+// (`document_agent`). Listed in `systemServerTypes`, so the engine asks the
+// user before a task that may run for many minutes is started.
+export const DOCUMENT_AGENT_TYPE = "document-agent";
+
+export interface DocumentAgentConfig {
+    url: string;
+    token: string;
+    /** The whole task, sandbox start to final answer; the agent's own ceiling still applies. */
+    taskTimeoutSeconds: number;
+    /** Tool calls the agent may make for one task; undefined leaves the agent's default. */
+    maxToolCalls: number | undefined;
+    /**
+     * Whether the host-configured MCP servers (`ai.mcp`, the portal's own among them) are handed
+     * to the agent with the caller's session, so a task can read and write the workspace. Their
+     * endpoints must then be reachable from the agent: it refuses a task whose server it cannot
+     * connect to.
+     */
+    shareSystemServers: boolean;
+    /**
+     * Where the agent reaches the portal API for the portal's own model provider (`onlyoffice`
+     * profiles): the gateway proxy lives under it at `/api/2.0/ai/gateway`. Undefined means the
+     * address this service itself uses, the AI service's own, which an agent on the same network
+     * reaches; an agent elsewhere needs the public portal address here.
+     */
+    portalUrl: string | undefined;
+}
+
+const DOCUMENT_AGENT_DEFAULT_TIMEOUT_SECONDS = 1800;
+
+// The document agent from the shared `appsettings.json` (`ai.documentAgent`),
+// each field overridable from the environment in the same `__` form as the
+// MCP endpoints (`AI__DOCUMENT_AGENT__URL`, `AI__DOCUMENT_AGENT__TOKEN`,
+// `AI__DOCUMENT_AGENT__TASK_TIMEOUT_SECONDS`, `AI__DOCUMENT_AGENT__MAX_TOOL_CALLS`,
+// `AI__DOCUMENT_AGENT__SHARE_SYSTEM_SERVERS`, `AI__DOCUMENT_AGENT__PORTAL_URL`).
+// Undefined without a URL and a token: the tool is then simply not offered.
+export function getDocumentAgent(): DocumentAgentConfig | undefined {
+    const ai: RootConfig["ai"] = nconf.get("ai");
+    const setting: DocumentAgentSetting | undefined =
+        ai?.documentAgent && typeof ai.documentAgent === "object" ? ai.documentAgent : undefined;
+    const url = (process.env["AI__DOCUMENT_AGENT__URL"] || setting?.url || "").trim();
+    const token = (process.env["AI__DOCUMENT_AGENT__TOKEN"] || setting?.token || "").trim();
+    if (!url || !token) {
+        return undefined;
+    }
+    const timeout =
+        positiveInt(process.env["AI__DOCUMENT_AGENT__TASK_TIMEOUT_SECONDS"]) ??
+        positiveInt(setting?.taskTimeoutSeconds) ??
+        DOCUMENT_AGENT_DEFAULT_TIMEOUT_SECONDS;
+    const maxToolCalls =
+        positiveInt(process.env["AI__DOCUMENT_AGENT__MAX_TOOL_CALLS"]) ??
+        positiveInt(setting?.maxToolCalls);
+    const share = process.env["AI__DOCUMENT_AGENT__SHARE_SYSTEM_SERVERS"];
+    const shareSystemServers =
+        share !== undefined && share !== "" ? share === "true" || share === "1" : setting?.shareSystemServers === true;
+    const portalUrl = (process.env["AI__DOCUMENT_AGENT__PORTAL_URL"] || setting?.portalUrl || "").trim();
+    return {
+        url: url.replace(/\/+$/, ""),
+        token,
+        taskTimeoutSeconds: timeout,
+        maxToolCalls,
+        shareSystemServers,
+        portalUrl: portalUrl === "" ? undefined : portalUrl.replace(/\/+$/, ""),
+    };
+}
+
+function positiveInt(value: unknown): number | undefined {
+    const n = typeof value === "number" ? value : typeof value === "string" ? Number(value) : NaN;
+    return Number.isInteger(n) && n > 0 ? n : undefined;
+}
 
 // Group key for the form-analysis sub-agent's single delegating tool
 // (`analyze_form`). Kept out of `systemServerTypes` so the tool runs silently.

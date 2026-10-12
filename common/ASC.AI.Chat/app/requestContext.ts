@@ -162,6 +162,48 @@ export function getAnalyzeEntryIds(): string[] {
   return als.getStore()?.analyzeEntryIds ?? [];
 }
 
+// The profile the current chat round runs on (see RequestContext.roundProfileId).
+// Set by the send handlers once the effective profileId is known; read by the
+// document agent tool, which runs the agent on the same model as the chat.
+export function setRoundProfileId(profileId: string | undefined): void {
+  const store = als.getStore();
+  if (store && typeof profileId === "string" && profileId.length > 0) {
+    store.roundProfileId = profileId;
+  }
+}
+
+export function getRoundProfileId(): string | undefined {
+  return als.getStore()?.roundProfileId;
+}
+
+// Attachment ref ids of the current user message (see RequestContext.roundAttachmentIds).
+export function setRoundAttachmentIds(ids: string[]): void {
+  const store = als.getStore();
+  if (store) {
+    store.roundAttachmentIds = ids;
+  }
+}
+
+export function getRoundAttachmentIds(): string[] {
+  return als.getStore()?.roundAttachmentIds ?? [];
+}
+
+// The progress sink of the current stream (see RequestContext.toolProgressSink):
+// a tool reports a line of its work, the stream wrapper shows it live.
+export function setToolProgressSink(sink: ((line: string) => void) | undefined): void {
+  const store = als.getStore();
+  if (store) {
+    store.toolProgressSink = sink;
+  }
+}
+
+export function reportToolProgress(line: string): void {
+  const text = line.trim();
+  if (text.length > 0) {
+    als.getStore()?.toolProgressSink?.(text);
+  }
+}
+
 // Names of the custom MCP servers resolved for the current round's scope.
 // Set by the custom-tools resolver (app/tools/customTools.ts) whenever it
 // runs; read by the engine's `systemServerTypes` callback, which is

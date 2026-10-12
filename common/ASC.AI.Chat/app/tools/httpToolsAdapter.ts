@@ -56,6 +56,7 @@ const CALL_PATH = "/tools/call";
 import {
   DOCSPACE_INTEGRATION_SERVER_TYPE as SERVER_TYPE,
   DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
+  getDocumentAgent,
 } from "../../config/index.js";
 
 export { DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE };
@@ -417,6 +418,11 @@ export class HttpToolsAdapter implements ToolsAdapter {
             `docspaceTools.list raw response: ${JSON.stringify(raw).slice(0, 1000)}`,
         );
         const parsed = parseList(raw);
+        // The generate tools only create an empty file; with a document agent
+        // configured the model gets `document_agent` instead, which fills it.
+        if (getDocumentAgent()) {
+            parsed.tools = parsed.tools.filter((tool) => !APPROVAL_TOOL_NAMES.has(tool.name));
+        }
         parsed.tools = withLinkHints(parsed.tools);
         const names = parsed.tools.map((t) => t.name).join(", ") || "<none>";
         logger.info(

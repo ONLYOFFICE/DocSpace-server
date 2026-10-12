@@ -39,6 +39,7 @@ import {
   DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
   WEB_SEARCH_TYPE,
   IMAGE_GENERATION_TYPE,
+  DOCUMENT_AGENT_TYPE,
 } from "../../config/index.js";
 import {
   customToolsSource,
@@ -287,6 +288,7 @@ export const toolsController = {
       DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
       WEB_SEARCH_TYPE,
       IMAGE_GENERATION_TYPE,
+      DOCUMENT_AGENT_TYPE,
       ...Object.keys(await resolveCustomServers(entityId)),
     ]);
     if (typeof serverType !== "string" || !validTypes.has(serverType)) {

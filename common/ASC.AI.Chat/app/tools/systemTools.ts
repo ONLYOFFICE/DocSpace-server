@@ -154,6 +154,20 @@ function stripNegotiation(
   return out;
 }
 
+// The headers a system MCP server wants on a request made on the caller's
+// behalf, for a client outside this process (the document agent): the
+// `Authorization` derived from the session cookie and the portal `Referer`,
+// the same two the C# transport sends.
+export function systemServerHeaders(): Record<string, string> {
+  const forwarded = getForwardedHeaders();
+  const referer = portalReferer(forwarded);
+  const authorization = authorizationValue(forwarded);
+  return {
+    ...(referer ? { referer } : {}),
+    ...(authorization ? { authorization } : {}),
+  };
+}
+
 // Forward the caller's DocSpace auth/context headers to the MCP server so
 // it acts on behalf of the current user, plus an `Authorization` header
 // derived from the auth cookie and a `Referer` pointing at the portal root.
@@ -276,7 +290,7 @@ const source = new SystemToolsSource({
 // Bug 82991) — no filtering, the full configured set stays available. Fails
 // closed only on a resolution ERROR: then an agent gets just the portal MCP
 // server rather than everything.
-async function agentServerWhitelist(
+export async function agentServerWhitelist(
   entityId: string | undefined,
 ): Promise<Set<string> | undefined> {
   if (!entityId) {

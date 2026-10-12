@@ -44,6 +44,9 @@ public static class Constants
     public const int SocketIoPort = 9899;
     public const int SsoAuthPort = 9834;
     public const int AiChatPort = 9837;
+    public const int DocumentAgentPort = 9838;
+    /// <summary>The port the agent image listens on inside its container (its Dockerfile's default).</summary>
+    public const int AgentContainerPort = 8081;
     public const int WebDavPort = 1900;
     public const int IdentityRegistrationPort = 9090;
     public const int IdentityAuthorizationPort = 8080;
@@ -83,6 +86,7 @@ public static class Constants
     public const string OpensearchVersion = "3.5.0";
     public const string SocketIoContainer = "onlyoffice-socketIO";
     public const string DocSpaceMcpContainer = "onlyoffice-docspace-mcp";
+    public const string DocumentAgentContainer = "onlyoffice-document-agent";
     public const string OtelCollectorContainer = "onlyoffice-otel-collector";
 
     public const string IdentityRegistrationContainer = "onlyoffice-identity-registration";
