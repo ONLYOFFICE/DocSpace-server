@@ -86,11 +86,16 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             // buffer pool is pinned at the server default so the figure does not drift with the image.
             .WithArgs("--performance-schema=OFF", "--innodb-buffer-pool-size=128M");
 
+        // The datadir lives in exactly one place: a data volume when asked for, otherwise tmpfs when asked
+        // for, otherwise the container's writable layer. The same flag drives the cap below, so a caller
+        // passing both withDataVolume and withTmpfs gets the volume and keeps the cap.
+        var datadirOnTmpfs = !withDataVolume && withTmpfs;
+
         if (withDataVolume)
         {
             mysqlResourceBuilder = mysqlResourceBuilder.WithDataVolume("docspace-mysql-data");
         }
-        else if (withTmpfs)
+        else if (datadirOnTmpfs)
         {
             // Keep the whole MySQL datadir in RAM: throwaway databases (integration tests) pay a lot
             // for InnoDB fsync-heavy init and migrations when the datadir sits on the virtualized
@@ -100,7 +105,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
         // The cap stays off the tmpfs variant: tmpfs pages are charged to the container's cgroup, so a cap
         // would count the datadir of every test portal and kill the server mid-run.
-        if (!withTmpfs)
+        if (!datadirOnTmpfs)
         {
             mysqlResourceBuilder = mysqlResourceBuilder.WithMemoryLimit(ContainerMemoryExtensions.MySqlLimit);
         }
