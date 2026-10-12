@@ -44,8 +44,12 @@ namespace ASC.AppHost.Configuration;
 /// </summary>
 public static class ContainerMemoryExtensions
 {
-    /// <summary>A .NET service on Workstation GC idles at 150-300 MiB; this leaves room for uploads and conversions.</summary>
-    public const string DotNetServiceLimit = "768m";
+    /// <summary>
+    /// A .NET service on Workstation GC idles at 150-300 MiB, but under the Files integration suite the Files
+    /// container peaked at 738 MiB (2026-10-12), 96 % of the former 768m cap, with no large uploads in that
+    /// traffic; the workers (backup restore, conversions) are driven by the job, not by idle.
+    /// </summary>
+    public const string DotNetServiceLimit = "1g";
 
     /// <summary>One Identity JVM, 492 MiB measured idle with <see cref="IdentityJavaOptions"/>.</summary>
     public const string IdentityLimit = "768m";
@@ -53,15 +57,20 @@ public static class ContainerMemoryExtensions
     /// <summary>OpenSearch: 512 MiB heap plus Lucene off-heap and the ingest-attachment (Tika) parsers.</summary>
     public const string OpensearchLimit = "1536m";
 
-    /// <summary>MySQL with performance_schema off idles at ~210 MiB.</summary>
-    public const string MySqlLimit = "768m";
+    /// <summary>
+    /// MySQL with performance_schema off idles at ~210 MiB, but ~14 services with 300-connection pools push it
+    /// to 791-962 MiB under the Files integration suite (2026-10-12, the higher figure on tmpfs includes the
+    /// datadir); a kill with a data volume costs an InnoDB crash recovery on the next start.
+    /// </summary>
+    public const string MySqlLimit = "1g";
 
     /// <summary>
-    /// Document Server: ~920 MiB anonymous memory measured with the bundled broker and database, ~720 without
-    /// them (AddEditors moves both to the AppHost containers); the rest of its 1.5 GiB was the page cache of
-    /// web-apps, sdkjs and fonts, which the cap lets the kernel reclaim.
+    /// Document Server: ~720 MiB anonymous memory idle once the broker and database live in the AppHost
+    /// containers, the rest of its 1.5 GiB being page cache the cap lets the kernel reclaim. Conversions are
+    /// what sets the cap: a 59 MB CSV to XLSX was OOM-killed under 1280m (x2t SIGKILL, DS error -3) and passed
+    /// under 2g in 35 s (2026-10-12).
     /// </summary>
-    public const string EditorsLimit = "1280m";
+    public const string EditorsLimit = "2g";
 
     /// <summary>
     /// Measured on identity-authorization: 706 -> 492 MiB idle, health UP. Serial GC and a small
