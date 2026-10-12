@@ -70,6 +70,15 @@ public class ChunkedUploadSessionHolder(
     public async Task<ChunkedUploadSession<T>> GetSessionAsync<T>(string sessionId)
     {
         var session = await cache.GetOrDefaultAsync<ChunkedUploadSession<T>>(sessionId);
+
+        // A session id that is not in the cache - never created, already finalized, or expired - used
+        // to dereference null right below and end the request as 500. Every caller (abort, upload a
+        // chunk, finalize) is asking for a resource that is not there.
+        if (session == null)
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
         session.File.ServiceProvider = serviceProvider;
         session.TransformItems();
         return session;

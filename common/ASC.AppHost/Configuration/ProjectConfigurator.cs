@@ -39,7 +39,8 @@ public class ProjectConfigurator(
     IDistributedApplicationBuilder builder,
     ConnectionStringManager connectionManager,
     string basePath,
-    bool isDocker)
+    bool isDocker,
+    bool isIntegrationTest = false)
 {
     public static string GetProjectName<TProject>() where TProject : IProjectMetadata, new()
     {
@@ -85,8 +86,27 @@ public class ProjectConfigurator(
         ConfigureForwardedHeadersNetworks(project);
 
         // Map the dev HTTPS host to the default standalone tenant.
-        project.WithEnvironment("CORE__LOCAL_ADDRESSES", Constants.AppHostHttpsHost);
+        project.WithEnvironment("CORE__LOCAL_ADDRESSES", $"{Constants.AppHostHttpsHost},{Constants.HostDockerInternal}");
 
+        // Every launch profile points $STORAGE_ROOT/log__dir at <root>/Data and <root>/Logs, and the
+        // integration tests reuse those very profiles. Redirect them into a `test` subfolder so a test
+        // run stays out of the developer's own trees. `web:temp` goes there too — no launch profile
+        // sets it, so services would otherwise write into <ContentRoot>/temp inside the sources.
+        // Applied after AddProject, so it wins over the same keys coming from the launch profile.
+        if (isIntegrationTest)
+        {
+            project.WithEnvironment("$STORAGE_ROOT", AppPaths.GetTestStorageRoot(basePath))
+                .WithEnvironment("log__dir", AppPaths.GetTestLogsDirectory(basePath))
+                .WithEnvironment("web:temp", AppPaths.GetTestTempDirectory(basePath))
+
+                // Read by HostOptions.Initialize — the generic host's grace period for hosted services
+                // to observe their stopping token. The default is 30 s, and ASC.Files.Worker reaches it
+                // exactly: its ElasticSearch indexer is usually mid-IndexAll when the run ends, and that
+                // loop does not observe the token, so every Files run paid a measured 31.3 s of teardown.
+                // Nothing here needs a graceful stop — the portals and their storage are thrown away —
+                // and an honest shutdown takes ~0.5 s, so this only trims the hang.
+                .WithEnvironment("shutdownTimeoutSeconds", "3");
+        }
 
         switch (builder.Configuration["APP_EDITION"])
         {
@@ -162,7 +182,7 @@ public class ProjectConfigurator(
 
         ConfigureForwardedHeadersNetworks(resourceBuilder);
 
-        resourceBuilder.WithEnvironment("CORE__LOCAL_ADDRESSES", Constants.AppHostHttpsHost);
+        resourceBuilder.WithEnvironment("CORE__LOCAL_ADDRESSES", $"{Constants.AppHostHttpsHost},{Constants.HostDockerInternal}");
 
         AddBaseBind(resourceBuilder);
 
@@ -240,6 +260,12 @@ public class ProjectConfigurator(
                 .WithHttpHealthCheck("/health")
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
+            if (isIntegrationTest)
+            {
+                // Same idea as for the projects, but socket.io reads its own `logPath` key.
+                resourceBuilder.WithEnvironment("logPath", AppPaths.GetTestLogsDirectory(basePath));
+            }
+
             connectionManager.AddWaitFor(resourceBuilder);
             ApplyServiceName(resourceBuilder);
         }
@@ -280,6 +306,57 @@ public class ProjectConfigurator(
                 .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
             ApplyServiceName(resourceBuilder);
+        }
+
+        return this;
+    }
+
+    public ProjectConfigurator AddAiChat()
+    {
+        var name = "onlyoffice-aiChat";
+        var path = Path.Combine("..", "ASC.AI.Chat");
+        var port = Constants.AiChatPort;
+
+        if (isDocker)
+        {
+            var resourceBuilder = builder
+                .AddDockerfile(name, path)
+                .WithImageTag("dev")
+                .WithEnvironment("log:dir", "/logs")
+                .WithEnvironment("log:name", "aiChat")
+                .WithEnvironment("API_HOST", new UriBuilder(Uri.UriSchemeHttp, Constants.OpenRestyContainer, Constants.RestyPort).ToString())
+                .WithEnvironment("AI_SERVICE_URL", new UriBuilder(Uri.UriSchemeHttp, GetProjectName<ASC_AI>(), Constants.AiPort).ToString())
+                .WithEnvironment("app:appsettings", "/buildtools/config")
+                // `__` form, not `:` — AI.Chat's nconf would otherwise nest a
+                // `:`-keyed var and turn the `ai.mcp` array into an object.
+                .WithEnvironment("AI__MCP__0__ENDPOINT", new UriBuilder(Uri.UriSchemeHttp, Constants.DocSpaceMcpContainer, Constants.DocSpaceMcpPort).ToString() + "mcp")
+                .WithHttpEndpoint(port, port, isProxied: false)
+                .WithHttpHealthCheck("/health")
+                .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+
+            AddBaseBind(resourceBuilder);
+
+            resourceBuilder.WithEnvironment("openTelemetry:enable", "true");
+            resourceBuilder.WithOtlpExporter();
+            ApplyServiceName(resourceBuilder);
+            ApplyCustomOtlpEndpoint(resourceBuilder);
+        }
+        else
+        {
+            var resourceBuilder = builder.AddJavaScriptApp(name, path, "dev")
+                .WithYarn()
+                .WithEnvironment("NODE_ENV", "development")
+                // `__` form, not `:` — AI.Chat's nconf would otherwise nest a
+                // `:`-keyed var and turn the `ai.mcp` array into an object.
+                .WithEnvironment("AI__MCP__0__ENDPOINT", new UriBuilder(Uri.UriSchemeHttp, "localhost", Constants.DocSpaceMcpPort) + "mcp")
+                .WithHttpEndpoint(targetPort: port)
+                .WithHttpHealthCheck("/health")
+                .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
+
+            resourceBuilder.WithEnvironment("openTelemetry:enable", "true");
+            resourceBuilder.WithOtlpExporter();
+            ApplyServiceName(resourceBuilder);
+            ApplyCustomOtlpEndpoint(resourceBuilder);
         }
 
         return this;
@@ -336,6 +413,9 @@ public class ProjectConfigurator(
             .WithEnvironment("GRPC_CLIENT_AUTHORIZATION_ADDRESS", new UriBuilder("static", Constants.IdentityAuthorizationContainer, 9999).ToString())
             .WithHttpEndpoint(Constants.IdentityRegistrationPort, Constants.IdentityRegistrationPort, isProxied: false)
             .WithBuildArg("MODULE", "registration/registration-container")
+            // Spring boots long after the container reports Running; without this, anything waiting
+            // for the resource to go healthy (the integration-test fixtures) starts too early.
+            .WithHttpHealthCheck("/health")
             .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
         connectionManager.AddIdentityEnv(registrationBuilder);
@@ -353,6 +433,7 @@ public class ProjectConfigurator(
             .WithEnvironment("GRPC_CLIENT_REGISTRATION_ADDRESS", new UriBuilder("static", Constants.IdentityRegistrationContainer, 8888).ToString())
             .WithHttpEndpoint(Constants.IdentityAuthorizationPort, Constants.IdentityAuthorizationPort, isProxied: false)
             .WithBuildArg("MODULE", "authorization/authorization-container")
+            .WithHttpHealthCheck("/health")
             .WithUrlForEndpoint("http", url => url.DisplayLocation = UrlDisplayLocation.DetailsOnly);
 
         connectionManager.AddIdentityEnv(authorizationBuilder);

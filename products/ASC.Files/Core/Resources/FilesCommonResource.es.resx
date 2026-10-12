@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>La carpeta solicitada no es encontrada</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>ID de carpeta no válido</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Proveedor no válido</value>
   </data>
@@ -376,7 +379,7 @@
     <value>No tiene permiso para mover la carpeta</value>
   </data>
   <data name="ErrorMessage_SecurityException_MoveToFolder" xml:space="preserve">
-    <value>No tiene permisos suficientes para copiar la carpeta</value>
+    <value>No tiene permisos para mover algo a esta carpeta</value>
   </data>
   <data name="ErrorMessage_SecurityException_ReadFile" xml:space="preserve">
     <value>No hay permiso suficiente para ver el archivo</value>
@@ -500,7 +503,7 @@
     <value>Creador de contenido</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>Administrador de DocSpace</value>
+    <value>Administrador completo</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>
@@ -594,5 +597,29 @@
   </data>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Error al sincronizar los datos del formulario con la base de datos externa.</value>
+  </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>El formulario ha sido modificado. Este borrador está desactualizado y no puede enviarse.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>La instrucción de un agente de IA no puede tener más de {0} caracteres</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Esta acción solo está disponible en una sala privada</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Salidas del chat</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>La sala ya contiene la carpeta .ai</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>El almacenamiento no puede desconectarse mientras una sala lo utiliza. Elimine la sala</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Buscar en metadatos del archivo</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Buscar en metadatos de la carpeta</value>
   </data>
 </root>

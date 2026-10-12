@@ -39,21 +39,23 @@ namespace ASC.People.ApiModels.RequestDto;
 public class GetByStatusRequestDto
 {
     /// <summary>
-    /// The user status.
+    /// The account state to list, taken from the route: `Active` for working accounts, `Terminated` for disabled
+    /// ones, `Pending` for open invitations, or `All` for every state.
     /// </summary>
-    /// <example>1</example>
+    /// <example>Active</example>
     [FromRoute(Name = "status")]
     public required EmployeeStatus Status { get; set; }
 
     /// <summary>
-    /// Specifies the criteria used to filter the profiles in the request.
+    /// The only recognised value is `group`, which makes `filterValue` the ID of the group to keep the members of.
+    /// Any other value, and omitting the field, applies no group filter.
     /// </summary>
-    /// <example>displayName</example>
+    /// <example>group</example>
     [FromQuery(Name = "filterBy")]
     public string FilterBy { get; set; }
 
     /// <summary>
-    /// The maximum number of user profiles to retrieve.
+    /// The size of the page. It defaults to 100, which is also the largest value the operation accepts.
     /// </summary>
     /// <example>25</example>
     [FromQuery(Name = "count")]
@@ -61,35 +63,39 @@ public class GetByStatusRequestDto
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
-    /// The starting index for retrieving data in a paginated request.
+    /// The number of matches to skip before the page starts. It defaults to 0, and the total number of matches is
+    /// reported in the total count of the response.
     /// </summary>
     /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
-    /// Specifies the property or field name by which the results should be sorted.
+    /// What to order the accounts by, compared without regard to case: `FirstName`, `LastName`, `DisplayName`,
+    /// `Type`, `Email`, `Department`, `UsedSpace`, `CreatedBy` or `RegistrationDate`.
     /// </summary>
-    /// <example>displayName</example>
+    /// <example>DisplayName</example>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
 
     /// <summary>
-    /// The order in which the results are sorted.
+    /// The direction of the ordering: `Ascending`, which is the default, or `Descending`.
     /// </summary>
-    /// <example>0</example>
+    /// <example>Ascending</example>
     [FromQuery(Name = "sortOrder")]
     public SortOrder SortOrder { get; set; }
 
     /// <summary>
-    /// Represents the separator used to split multiple filter criteria in a query string.
+    /// The character that splits `filterValue` into several terms, of which any one may match. Omit it to split
+    /// the value on spaces instead, in which case every term has to match.
     /// </summary>
     /// <example>,</example>
     [FromQuery(Name = "filterSeparator")]
     public string FilterSeparator { get; set; }
 
     /// <summary>
-    /// A string value representing additional filter criteria used in query parameters.
+    /// The text to match against the name and the email of the account, case-insensitively. Omit it to apply no
+    /// text filter.
     /// </summary>
     /// <example>John</example>
     [FromQuery(Name = "filterValue")]

@@ -205,6 +205,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Chat outputs.
+        /// </summary>
+        public static string ChatOutputsFolder {
+            get {
+                return ResourceManager.GetString("ChatOutputsFolder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Autosaved.
         /// </summary>
         public static string CommentAutosave {
@@ -430,6 +439,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The room already contains the .ai folder.
+        /// </summary>
+        public static string ErrorMessage_AppsFolderExists {
+            get {
+                return ResourceManager.GetString("ErrorMessage_AppsFolderExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bad request..
         /// </summary>
         public static string ErrorMessage_BadRequest {
@@ -547,6 +565,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The form has been changed. This draft is outdated and cannot be submitted..
+        /// </summary>
+        public static string ErrorMessage_FillFormDraftObsolete {
+            get {
+                return ResourceManager.GetString("ErrorMessage_FillFormDraftObsolete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to You cannot copy the folder to its subfolder.
         /// </summary>
         public static string ErrorMessage_FolderCopyError {
@@ -570,6 +597,15 @@ namespace ASC.Files.Core.Resources {
         public static string ErrorMessage_FolderNotFound {
             get {
                 return ResourceManager.GetString("ErrorMessage_FolderNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid folder ID.
+        /// </summary>
+        public static string ErrorMessage_InvalidFolderId {
+            get {
+                return ResourceManager.GetString("ErrorMessage_InvalidFolderId", resourceCulture);
             }
         }
         
@@ -664,11 +700,38 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This action is only available in a private room.
+        /// </summary>
+        public static string ErrorMessage_PrivateRoomOnly {
+            get {
+                return ResourceManager.GetString("ErrorMessage_PrivateRoomOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An AI agent&apos;s instruction cannot be longer than {0} characters.
+        /// </summary>
+        public static string ErrorMessage_PromptTooLong {
+            get {
+                return ResourceManager.GetString("ErrorMessage_PromptTooLong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This provider is already connected to the room.
         /// </summary>
         public static string ErrorMessage_ProviderAlreadyConnect {
             get {
                 return ResourceManager.GetString("ErrorMessage_ProviderAlreadyConnect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The storage cannot be disconnected while a room uses it. Delete the room instead.
+        /// </summary>
+        public static string ErrorMessage_ProviderUsedByRoom {
+            get {
+                return ResourceManager.GetString("ErrorMessage_ProviderUsedByRoom", resourceCulture);
             }
         }
         
@@ -1078,6 +1141,24 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Search in file metadata.
+        /// </summary>
+        public static string IndexTitleFileMetadata {
+            get {
+                return ResourceManager.GetString("IndexTitleFileMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search in folder metadata.
+        /// </summary>
+        public static string IndexTitleFolderMetadata {
+            get {
+                return ResourceManager.GetString("IndexTitleFolderMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Knowledge.
         /// </summary>
         public static string KnowledgeFolder {
@@ -1123,15 +1204,6 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The form has been changed. This draft is outdated and cannot be submitted..
-        /// </summary>
-        public static string ErrorMessage_FillFormDraftObsolete {
-            get {
-                return ResourceManager.GetString("ErrorMessage_FillFormDraftObsolete", resourceCulture);
-            }
-        }
-
-        /// <summary>
         ///   Looks up a localized string similar to The file is no longer a draft to fill in the form..
         /// </summary>
         public static string MessageFillFormDraftDiscard {
@@ -1168,7 +1240,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Edit, share and collaborate on office documents in real-time. Create and manage common docs for the whole team to access. 
+        ///   Looks up a localized string similar to Edit, share and collaborate on office documents in real-time. Create and manage common docs for the whole team to access.
         ///Highest compatibility with docx, xlsx, pptx..
         /// </summary>
         public static string ProductDescriptionEx {
@@ -1241,7 +1313,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DocSpace Administrator.
+        ///   Looks up a localized string similar to Full admin.
         /// </summary>
         public static string RoleEnum_DocSpaceAdmin {
             get {

@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.ElasticSearch;
@@ -77,15 +77,22 @@ public abstract class BaseIndexer<T>(Client client,
     protected internal T Wrapper => serviceProvider.GetService<T>();
     internal string IndexName => Wrapper.IndexName;
 
-    private bool _isExist;
     private readonly ILogger _logger = logger;
     protected readonly TenantManager _tenantManager = tenantManager;
     private static readonly Lock _locker = new();
 
-    public async IAsyncEnumerable<List<T>> IndexAllAsync(
+    public IAsyncEnumerable<List<T>> IndexAllAsync(
         Func<DateTime, (int, int, int)> getCount,
         Func<DateTime, List<int>> getIds,
         Func<long, long, DateTime, List<T>> getData)
+    {
+        return IndexAllAsync(getCount, getIds, (start, stop, lastIndexed) => Task.FromResult(getData(start, stop, lastIndexed)));
+    }
+
+    public async IAsyncEnumerable<List<T>> IndexAllAsync(
+        Func<DateTime, (int, int, int)> getCount,
+        Func<DateTime, List<int>> getIds,
+        Func<long, long, DateTime, Task<List<T>>> getData)
     {
         DateTime lastIndexed;
 
@@ -108,7 +115,7 @@ public abstract class BaseIndexer<T>(Client client,
 
         for (var i = 0; i < ids.Count - 1; i++)
         {
-            yield return getData(ids[i], ids[i + 1], lastIndexed);
+            yield return await getData(ids[i], ids[i + 1], lastIndexed);
         }
     }
 
@@ -144,42 +151,19 @@ public abstract class BaseIndexer<T>(Client client,
 
             lock (_locker)
             {
-                IPromise<IAnalyzers> analyzers(AnalyzersDescriptor b)
+                // another thread may have created it while this one was waiting for the lock
+                if (client.Instance.Indices.Exists(data.IndexName).Exists)
                 {
-                    foreach (var c in AnalyzerExtensions.GetNames())
-                    {
-                        var c1 = c;
-                        b.Custom(c1 + "custom", ca => ca.Tokenizer(c1).Filters(nameof(Filter.lowercase)).CharFilters(nameof(CharFilter.io)));
-                    }
+                    baseIndexerHelper.IsExist[data.IndexName] = true;
 
-                    foreach (var c in CharFilterExtensions.GetNames())
-                    {
-                        if (c == nameof(CharFilter.io))
-                        {
-                            continue;
-                        }
-
-                        var charFilters = new List<string> { nameof(CharFilter.io), c };
-                        b.Custom(c + "custom", ca => ca.Tokenizer(nameof(Analyzer.whitespace)).Filters(nameof(Filter.lowercase)).CharFilters(charFilters));
-                    }
-
-                    if (data is ISearchItemDocument)
-                    {
-                        b.Custom("document", ca => ca.Tokenizer(Analyzer.whitespace.ToStringFast()).Filters(nameof(Filter.lowercase)).CharFilters(nameof(CharFilter.io)));
-                    }
-
-                    return b;
+                    return;
                 }
 
-                client.Instance.Indices.Create(data.IndexName,
-                    c =>
-                    c.Map<T>(m => m.AutoMap())
-                    .Settings(r => r.Analysis(a =>
-                                    a.Analyzers(analyzers)
-                                    .CharFilters(d => d.HtmlStrip(CharFilter.html.ToStringFast())
-                                    .Mapping(CharFilter.io.ToStringFast(), m => m.Mappings("ё => е", "Ё => Е"))))));
-
-                _isExist = true;
+                var response = CreateIndex(data);
+                if (!response.IsValid)
+                {
+                    _logger.ErrorCreateIndex(data.IndexName, response.ServerError?.Error?.Reason ?? response.DebugInformation);
+                }
             }
         }
         catch (Exception e)
@@ -188,14 +172,158 @@ public abstract class BaseIndexer<T>(Client client,
         }
     }
 
+    /// <summary>
+    /// Recreates the index right after it was deleted, without asking the "exists" cache.
+    /// The cache of every node still says "exists" until the clear notification reaches it, and a document write behind
+    /// that stale flag makes OpenSearch auto-create the index with a dynamic mapping: the standard analyzer instead of the
+    /// declared ones, so a title like "QA-R-Custom" is split on the hyphens and no wildcard with a hyphen matches it again.
+    /// Such an index is never fixed by itself, since from then on it "exists". So it is created here at once, and one that a
+    /// racing write managed to auto-create in between is dropped and created again. A transient failure is retried the
+    /// same way: no answer at all (a timeout, a broken connection), 429 (an overloaded node: circuit breaker, rejected
+    /// execution) or any 5xx; any other 4xx is a problem with the request itself (mapping, settings) and is not retried.
+    /// Never throws, so the caller goes on to notify the other nodes. If it gives up, for whatever reason, the error log
+    /// says which of two states the index is left in:
+    /// - absent: safe - reads fall back to SQL, writes are skipped while it is missing, the next IndexAll creates it;
+    /// - auto-created by a write: broken - CheckExist sees it as existing, so writes and searches go to it with the
+    ///   dynamic mapping until it is reindexed.
+    /// </summary>
+    private void RecreateIndex(T data)
+    {
+        const int attempts = 3;
+
+        lock (_locker)
+        {
+            for (var attempt = 1; attempt <= attempts; attempt++)
+            {
+                try
+                {
+                    if (attempt > 1 && client.Instance.Indices.Exists(data.IndexName).Exists)
+                    {
+                        client.Instance.Indices.Delete(data.IndexName);
+                    }
+
+                    var response = CreateIndex(data);
+                    if (response.IsValid)
+                    {
+                        return;
+                    }
+
+                    _logger.ErrorCreateIndex(data.IndexName, response.ServerError?.Error?.Reason ?? response.DebugInformation);
+
+                    if (!IsRetryable(response))
+                    {
+                        break;
+                    }
+                }
+                catch (Exception e)
+                {
+                    _logger.ErrorRecreateIndex(data.IndexName, e);
+                }
+            }
+
+            try
+            {
+                _logger.ErrorCreateIndex(data.IndexName, client.Instance.Indices.Exists(data.IndexName).Exists
+                    ? "gave up; the index was auto-created by a write, it has a dynamic mapping and must be reindexed"
+                    : "gave up; the index is absent until the next IndexAll creates it");
+            }
+            catch (Exception e)
+            {
+                _logger.ErrorRecreateIndex(data.IndexName, e);
+            }
+        }
+    }
+
+    private async Task<bool> PingAsync()
+    {
+        try
+        {
+            var instance = client.Instance;
+            if (instance == null)
+            {
+                return false;
+            }
+
+            // a short deadline of its own: the client-wide request timeout is 5 minutes
+            var response = await instance.PingAsync(p => p.RequestConfiguration(r => r.RequestTimeout(TimeSpan.FromSeconds(10)).ThrowExceptions(false)));
+
+            return response.IsValid;
+        }
+        catch (Exception e)
+        {
+            _logger.ErrorPing(IndexName, e);
+
+            return false;
+        }
+    }
+
+    private static bool IsRetryable(CreateIndexResponse response)
+    {
+        if (response.ServerError?.Error?.Type == "resource_already_exists_exception")
+        {
+            return true;
+        }
+
+        // no status: the request got no answer at all
+        return response.ApiCall?.HttpStatusCode is null or 429 or >= 500;
+    }
+
+    private CreateIndexResponse CreateIndex(T data)
+    {
+        IPromise<IAnalyzers> analyzers(AnalyzersDescriptor b)
+        {
+            foreach (var c in AnalyzerExtensions.GetNames())
+            {
+                var c1 = c;
+                b.Custom(c1 + "custom", ca => ca.Tokenizer(c1).Filters(nameof(Filter.lowercase)).CharFilters(nameof(CharFilter.io)));
+            }
+
+            foreach (var c in CharFilterExtensions.GetNames())
+            {
+                if (c == nameof(CharFilter.io))
+                {
+                    continue;
+                }
+
+                var charFilters = new List<string> { nameof(CharFilter.io), c };
+                b.Custom(c + "custom", ca => ca.Tokenizer(nameof(Analyzer.whitespace)).Filters(nameof(Filter.lowercase)).CharFilters(charFilters));
+            }
+
+            if (data is ISearchItemDocument)
+            {
+                b.Custom("document", ca => ca.Tokenizer(Analyzer.whitespace.ToStringFast()).Filters(nameof(Filter.lowercase)).CharFilters(nameof(CharFilter.io)));
+            }
+
+            return b;
+        }
+
+        // the client is built with ThrowExceptions(): without this override a refused create ("already exists" included)
+        // would throw instead of returning a response the callers can read
+        var response = client.Instance.Indices.Create(data.IndexName,
+            c =>
+            c.RequestConfiguration(r => r.ThrowExceptions(false))
+            .Map<T>(m => m.AutoMap())
+            .Settings(r => r.Analysis(a =>
+                            a.Analyzers(analyzers)
+                            .CharFilters(d => d.HtmlStrip(CharFilter.html.ToStringFast())
+                            .Mapping(CharFilter.io.ToStringFast(), m => m.Mappings("ё => е", "Ё => Е"))))));
+
+        if (response.IsValid)
+        {
+            baseIndexerHelper.IsExist[data.IndexName] = true;
+        }
+
+        return response;
+    }
+
     public void Flush()
     {
         client.Instance.Indices.Flush(new FlushRequest(IndexName));
     }
 
-    public void Refresh()
+    public async Task RefreshAsync()
     {
-        client.Instance.Indices.Refresh(new RefreshRequest(IndexName));
+        await client.Instance.Indices.RefreshAsync(new RefreshRequest(IndexName));
     }
 
     internal async Task IndexAsync(T data, bool immediately = true)
@@ -284,7 +412,7 @@ public abstract class BaseIndexer<T>(Client client,
                 if (runBulk)
                 {
                     var portion1 = portion.ToList();
-                    await client.Instance.BulkAsync(r => r.IndexMany(portion1, GetMeta).SourceExcludes("attachments"));
+                    LogBulkErrors(await client.Instance.BulkAsync(r => r.IndexMany(portion1, GetMeta).SourceExcludes("attachments")));
                     for (var j = portionStart; j < i; j++)
                     {
                         if (data[j] is ISearchItemDocument { Document: not null } doc)
@@ -312,66 +440,69 @@ public abstract class BaseIndexer<T>(Client client,
                 await BeforeIndexAsync(item);
             }
 
-            await client.Instance.BulkAsync(r => r.IndexMany(data, GetMeta));
+            LogBulkErrors(await client.Instance.BulkAsync(r => r.IndexMany(data, GetMeta)));
         }
     }
 
-    internal void Update(T data, bool immediately = true, params Expression<Func<T, object>>[] fields)
+    /// <summary>
+    /// A bulk request answers 200 even when some of its documents were refused (a keyword term over the 32766 byte
+    /// limit, a mapping conflict): the refusal is per item, in the body. It used to be dropped unread, so a document
+    /// that never made it into the index left no trace anywhere.
+    /// </summary>
+    private void LogBulkErrors(BulkResponse response)
+    {
+        if (!response.Errors)
+        {
+            return;
+        }
+
+        foreach (var item in response.ItemsWithErrors)
+        {
+            _logger.ErrorBulkItem(IndexName, item.Id, item.Error?.Reason);
+        }
+    }
+
+    internal async Task UpdateAsync(T data, bool immediately = true, params Expression<Func<T, object>>[] fields)
     {
         if (!CheckExist(data))
         {
             return;
         }
 
-        client.Instance.Update(DocumentPath<T>.Id(data), r => GetMetaForUpdate(r, data, immediately, fields));
+        await client.Instance.UpdateAsync(DocumentPath<T>.Id(data), r => GetMetaForUpdate(r, data, immediately, fields));
     }
 
-    internal void Update(T data, UpdateAction action, Expression<Func<T, IList>> fields, bool immediately = true)
+    internal async Task UpdateAsync(T data, UpdateAction action, Expression<Func<T, IList>> fields, bool immediately = true)
     {
         if (!CheckExist(data))
         {
             return;
         }
 
-        client.Instance.Update(DocumentPath<T>.Id(data), r => GetMetaForUpdate(r, data, action, fields, immediately));
+        await client.Instance.UpdateAsync(DocumentPath<T>.Id(data), r => GetMetaForUpdate(r, data, action, fields, immediately));
     }
 
-    internal void Update(T data, Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, bool immediately = true, params Expression<Func<T, object>>[] fields)
+    internal async Task UpdateAsync(T data, Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, bool immediately = true, params Expression<Func<T, object>>[] fields)
     {
         if (!CheckExist(data))
         {
             return;
         }
 
-        client.Instance.UpdateByQuery(GetDescriptorForUpdate(data, expression, tenantId, immediately, fields));
+        await client.Instance.UpdateByQueryAsync(GetDescriptorForUpdate(data, expression, tenantId, immediately, fields));
     }
 
-    internal void Update(T data, Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, UpdateAction action, Expression<Func<T, IList>> fields, bool immediately = true)
-    {
-        if (!CheckExist(data))
-        {
-            return;
-        }
 
-        client.Instance.UpdateByQuery(GetDescriptorForUpdate(data, expression, tenantId, action, fields, immediately));
-    }
-
-    internal void Delete(T data, bool immediately = true)
+    internal async Task DeleteAsync(Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, bool immediately = true)
     {
-        client.Instance.Delete<T>(data, r => GetMetaForDelete(r, immediately));
-    }
-
-    internal void Delete(Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, bool immediately = true)
-    {
-        client.Instance.DeleteByQuery(GetDescriptorForDelete(expression, tenantId, immediately));
+        await client.Instance.DeleteByQueryAsync(GetDescriptorForDelete(expression, tenantId, immediately));
     }
 
     internal bool CheckExist(T data)
     {
         try
         {
-            var isExist = baseIndexerHelper.IsExist.GetOrAdd(data.IndexName, k => client.Instance.Indices.Exists(k).Exists);
-            if (isExist)
+            if (baseIndexerHelper.IsExist.TryGetValue(data.IndexName, out var isExist) && isExist)
             {
                 return true;
             }
@@ -380,10 +511,11 @@ public abstract class BaseIndexer<T>(Client client,
             {
                 isExist = client.Instance.Indices.Exists(data.IndexName).Exists;
 
-                baseIndexerHelper.IsExist.TryUpdate(data.IndexName, _isExist, false);
-
+                // only "exists" is cached: a missing index is asked about again, so it is picked up as soon as it is created
                 if (isExist)
                 {
+                    baseIndexerHelper.IsExist[data.IndexName] = true;
+
                     return true;
                 }
             }
@@ -424,18 +556,6 @@ public abstract class BaseIndexer<T>(Client client,
         return response.Count;
     }
 
-    internal (IReadOnlyCollection<T>, long) SelectWithTotal(Expression<Func<Selector<T>, Selector<T>>> expression, bool onlyId)
-    {
-        var func = expression.Compile();
-        var selector = new Selector<T>(serviceProvider);
-        var tenant = _tenantManager.GetCurrentTenant();
-        var descriptor = func(selector).Where(r => r.TenantId, tenant.Id);
-        var result = client.Instance.Search(descriptor.GetDescriptor(this, onlyId));
-        var total = result.Total;
-
-        return (result.Documents, total);
-    }
-
     protected virtual Task<bool> BeforeIndexAsync(T data)
     {
         return Task.FromResult(CheckExist(data));
@@ -443,6 +563,16 @@ public abstract class BaseIndexer<T>(Client client,
 
     private async Task ClearAsync()
     {
+        // With OpenSearch down nothing below can succeed, and against an unreachable host every request waits for the
+        // client's 5-minute timeout while RecreateIndex holds the lock CheckExist needs - up to half an hour of blocked
+        // writes. So the reindex is refused up front, before the stored "last indexed" mark or the index is touched.
+        if (!await PingAsync())
+        {
+            _logger.WarningReindexSkipped(Wrapper.IndexName);
+
+            return;
+        }
+
         await using var webstudioDbContext = await dbContextFactory.CreateDbContextAsync();
         var index = await Queries.IndexAsync(webstudioDbContext, Wrapper.IndexName);
 
@@ -453,9 +583,25 @@ public abstract class BaseIndexer<T>(Client client,
         }
 
         _logger.DebugIndexDeleted(Wrapper.IndexName);
-        await client.Instance.Indices.DeleteAsync(Wrapper.IndexName);
+
+        // writes of this process stop trusting the flag before the index goes away, not when the notification comes back
+        baseIndexerHelper.IsExist[Wrapper.IndexName] = false;
+
+        // a failed delete does not stop the reindex: it may have gone through on the server anyway (a timeout), and if it
+        // did not, the first create in RecreateIndex finds the old index and the retry drops it
+        try
+        {
+            await client.Instance.Indices.DeleteAsync(Wrapper.IndexName);
+        }
+        catch (Exception e)
+        {
+            _logger.ErrorRecreateIndex(Wrapper.IndexName, e);
+        }
+
+        RecreateIndex(Wrapper);
+
+        // the other nodes drop their cached flag and ask OpenSearch again; RecreateIndex never throws, so this always runs
         await baseIndexerHelper.ClearAsync(Wrapper);
-        CreateIfNotExist(Wrapper);
     }
 
     private IIndexRequest<T> GetMeta(IndexDescriptor<T> request, T data, bool immediately = true)
@@ -469,7 +615,7 @@ public abstract class BaseIndexer<T>(Client client,
 
         if (data is ISearchItemDocument)
         {
-            result.Pipeline("attachments");
+            result.Pipeline(AttachmentPipeline.Name);
         }
 
         return result;
@@ -480,7 +626,7 @@ public abstract class BaseIndexer<T>(Client client,
 
         if (data is ISearchItemDocument { Document: not null })
         {
-            result.Pipeline("attachments");
+            result.Pipeline(AttachmentPipeline.Name);
         }
 
         return result;
@@ -628,17 +774,6 @@ public abstract class BaseIndexer<T>(Client client,
         }
 
         return member == null ? "" : member.Member.Name.ToLowerCamelCase();
-    }
-
-    private IDeleteRequest GetMetaForDelete(DeleteDescriptor<T> request, bool immediately = true)
-    {
-        var result = request.Index(IndexName);
-        if (immediately)
-        {
-            result.Refresh(OpenSearch.Net.Refresh.True);
-        }
-
-        return result;
     }
 
     private Func<DeleteByQueryDescriptor<T>, IDeleteByQueryRequest> GetDescriptorForDelete(Expression<Func<Selector<T>, Selector<T>>> expression, int tenantId, bool immediately = true)

@@ -50,7 +50,11 @@ import java.time.Instant;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
+import net.devh.boot.grpc.client.autoconfigure.GrpcClientMetricAutoConfiguration;
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerMetricAutoConfiguration;
+import net.devh.boot.grpc.server.autoconfigure.GrpcServerSecurityAutoConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -147,7 +151,13 @@ public class AuthorizationServiceIT {
   @LocalServerPort int randomServerPort;
 
   @EntityScan(basePackages = {"com.asc.authorization.data", "com.asc.common.data"})
-  @SpringBootApplication(scanBasePackages = {"com.asc.authorization", "com.asc.common"})
+  @SpringBootApplication(
+      scanBasePackages = {"com.asc.authorization", "com.asc.common"},
+      exclude = {
+        GrpcServerSecurityAutoConfiguration.class,
+        GrpcServerMetricAutoConfiguration.class,
+        GrpcClientMetricAutoConfiguration.class
+      })
   @EnableJpaRepositories(basePackages = {"com.asc.authorization.data", "com.asc.common.data"})
   static class TestApplication {}
 
@@ -181,8 +191,11 @@ public class AuthorizationServiceIT {
 
   @BeforeEach
   void setUp() {
-    Mockito.when(registeredClientService.validateClientAccessibility(Mockito.anyString()))
-        .thenReturn(true);
+    Mockito.when(registeredClientService.findAccessibleClient(Mockito.anyString()))
+        .thenAnswer(
+            invocation ->
+                Optional.ofNullable(
+                    registeredClientService.findByClientId(invocation.getArgument(0))));
     Mockito.when(hashingService.hash(Mockito.anyString()))
         .thenAnswer(invocation -> invocation.getArgument(0));
   }

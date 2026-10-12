@@ -35,61 +35,67 @@ namespace ASC.MessagingSystem.EF.Context;
 
 public partial class MessagesContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, new int[0], PreCompileQuery.DefaultDateTime])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbLoginEvent> LoginEventsAsync(int tenantId, Guid userId, IEnumerable<int> loginActions, DateTime date)
     {
         return Queries.LoginEventsAsync(this, tenantId, userId, loginActions, date);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> DeleteLoginEventsAsync(int tenantId, int loginEventId)
     {
         return Queries.DeleteLoginEventsAsync(this, tenantId, loginEventId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbLoginEvent> LoginEventsByUserIdAsync(int tenantId, Guid userId)
     {
         return Queries.LoginEventsByUserIdAsync(this, tenantId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbLoginEvent> LoginEventsByTenantIdAsync(int tenantId)
     {
         return Queries.LoginEventsByTenantIdAsync(this, tenantId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<DbLoginEvent> LoginEventsByIdAsync(int tenantId, int id)
     {
         return Queries.LoginEventsByIdAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbLoginEvent> LoginEventsExceptThisAsync(int tenantId, Guid userId, int loginEventId)
     {
         return Queries.LoginEventsExceptThisAsync(this, tenantId, userId, loginEventId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, 0, 0, null, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<Tuple<DbAuditEvent, DbFilesAuditReference>> GetAuditEventsByReferences(int tenantId, int entryId, byte entryType, int offset, int count, DateTime? fromDate, DateTime? toDate)
     {
         return Queries.GetAuditEventsByReferences(this, tenantId, entryId, entryType, offset, count, fromDate, toDate);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, 0, 0, null, null, null, null, null, null])]
+    [PreCompileQuery]
+    public IAsyncEnumerable<Tuple<DbAuditEvent, DbFilesAuditReference>> GetAuditEventsByReferencesBefore(int tenantId, int entryId, byte entryType, int beforeEventId, int count, DateTime? fromDate, DateTime? toDate)
+    {
+        return Queries.GetAuditEventsByReferencesBefore(this, tenantId, entryId, entryType, beforeEventId, count, fromDate, toDate);
+    }
+
+    [PreCompileQuery]
     public IAsyncEnumerable<Tuple<DbAuditEvent, DbFilesAuditReference>> GetFilteredAuditEventsByReferences(int tenantId, int entryId, byte entryType, int offset, int count, IEnumerable<int> filterFolderIds, IEnumerable<int> filterFilesIds, IEnumerable<int> filterFolderActions, IEnumerable<int> filterFileActions, DateTime? fromDate, DateTime? toDate)
     {
         return Queries.GetFilteredAuditEventsByReferences(this, tenantId, entryId, entryType, offset, count, filterFolderIds, filterFilesIds, filterFolderActions, filterFileActions, fromDate, toDate);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, null, null])]
+    [PreCompileQuery]
     public Task<int> GetAuditEventsByReferencesTotalCount(int tenantId, int entryId, byte entryType, DateTime? fromDate, DateTime? toDate)
     {
         return Queries.GetAuditEventsByReferencesTotalCount(this, tenantId, entryId, entryType, fromDate, toDate);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, (byte)0, null, null, null, null, null, null])]
+    [PreCompileQuery]
     public Task<int> GetFilteredAuditEventsByReferencesTotalCount(int tenantId, int entryId, byte entryType, IEnumerable<int> filterFolderIds, IEnumerable<int> filterFilesIds, IEnumerable<int> filterFolderActions, IEnumerable<int> filterFileActions, DateTime? fromDate, DateTime? toDate)
     {
         return Queries.GetFilteredAuditEventsByReferencesTotalCount(this, tenantId, entryId, entryType, filterFolderIds, filterFilesIds, filterFolderActions, filterFileActions, fromDate, toDate);
@@ -111,11 +117,10 @@ static file class Queries
                     .AsQueryable());
 
     public static readonly Func<MessagesContext, int, int, Task<int>> DeleteLoginEventsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (MessagesContext ctx, int tenantId, int loginEventId) =>
-                ctx.LoginEvents
-                    .Where(r => r.TenantId == tenantId && r.Id == loginEventId)
-                    .ExecuteUpdate(r => r.SetProperty(p => p.Active, false)));
+        (MessagesContext ctx, int tenantId, int loginEventId) =>
+            ctx.LoginEvents
+                .Where(r => r.TenantId == tenantId && r.Id == loginEventId)
+                .ExecuteUpdateAsync(r => r.SetProperty(p => p.Active, false));
 
     public static readonly Func<MessagesContext, int, Guid, IAsyncEnumerable<DbLoginEvent>> LoginEventsByUserIdAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -157,6 +162,28 @@ static file class Queries
                         (toDate == null || x.@event.Date <= toDate))
                     .OrderByDescending(x => x.@event.Id)
                     .Skip(offset)
+                    .Take(count)
+                    .Select(x => new Tuple<DbAuditEvent, DbFilesAuditReference>(x.@event, x.reference)));
+
+    // The history of an entry, newest first, resuming below an event id instead of skipping an offset. The cursor
+    // and the order are on the reference's event id, equal to the event's own through the join: the reference key
+    // (entry_id, entry_type, audit_event_id) serves them as a reverse range that stops at the batch size, while an
+    // order on the event's id is sorted over every event of the portal.
+    public static readonly Func<MessagesContext, int, int, byte, int, int, DateTime?, DateTime?, IAsyncEnumerable<Tuple<DbAuditEvent, DbFilesAuditReference>>> GetAuditEventsByReferencesBefore =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (MessagesContext ctx, int tenantId, int entryId, byte entryType, int beforeEventId, int count, DateTime? fromDate, DateTime? toDate) =>
+                ctx.AuditEvents.Join(
+                        ctx.FilesAuditReferences,
+                        e => e.Id,
+                        r => r.AuditEventId, (@event, reference) => new { @event, reference })
+                    .Where(x =>
+                        x.@event.TenantId == tenantId &&
+                        x.reference.EntryId == entryId &&
+                        x.reference.EntryType == entryType &&
+                        x.reference.AuditEventId < beforeEventId &&
+                        (fromDate == null || x.@event.Date >= fromDate) &&
+                        (toDate == null || x.@event.Date <= toDate))
+                    .OrderByDescending(x => x.reference.AuditEventId)
                     .Take(count)
                     .Select(x => new Tuple<DbAuditEvent, DbFilesAuditReference>(x.@event, x.reference)));
 

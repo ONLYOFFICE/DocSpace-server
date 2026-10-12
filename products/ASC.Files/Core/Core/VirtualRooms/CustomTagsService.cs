@@ -202,11 +202,11 @@ public class CustomTagsService(
         return folder;
     }
 
-    public async IAsyncEnumerable<object> GetTagsInfoAsync<T>(string searchText, TagType tagType, int from, int count)
+    public async IAsyncEnumerable<string> GetTagsInfoAsync<T>(string searchText, TagType tagType, int from, int count)
     {
         if (!await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
         {
-            var rooms = await fileSecurity.GetVirtualRoomsAsync(null, Guid.Empty, string.Empty, false, false, SearchArea.Active, false, [], false, ProviderFilter.None, null, Guid.Empty, QuotaFilter.All, StorageFilter.None);
+            var rooms = await fileSecurity.GetVirtualRoomsAsync(null, Guid.Empty, string.Empty, false, false, SearchArea.Active, false, [], false, ProviderFilter.None, Guid.Empty, QuotaFilter.All, StorageFilter.None);
             var tags = rooms.SelectMany(r => r.Tags)
                 .Where(r => r.Type == tagType).Select(r => r.Name).Distinct();
 

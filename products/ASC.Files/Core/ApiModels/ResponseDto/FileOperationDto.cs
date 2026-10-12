@@ -33,71 +33,79 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// The file operation information.
-/// </summary>
+/// <summary>One background file operation of the caller, as it stood when the answer was built.</summary>
 public class FileOperationDto
 {
     /// <summary>
-    /// The file operation ID.
+    /// The identifier of the operation, the one to pass to `PUT api/2.0/files/fileops/terminate/{id}` to stop it.
+    /// Operations belong to the account that started them, so an identifier of somebody else is never listed here.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
+    /// <example>a1f4c9b2-3d8e-4f77-9b16-2c5de8f0a913</example>
     public required string Id { get; set; }
 
     /// <summary>
-    /// The file operation type.
+    /// What the operation does with the entries, which also decides what else is reported: only a download fills
+    /// `url`, and a deletion leaves `files` and `folders` empty.
     /// </summary>
-    /// <example>0</example>
+    /// <example>3</example>
     [JsonPropertyName("Operation")]
     public required FileOperationType OperationType { get; init; }
 
     /// <summary>
-    /// The file operation progress in percentage.
+    /// How far the operation has come, from 0 to 100. Reaching 100 only means it stopped; whether it did what it was
+    /// asked for is told by `error`.
     /// </summary>
     /// <example>100</example>
     public required int Progress { get; set; }
 
     /// <summary>
-    /// The file operation error message.
+    /// The reason the operation could not finish its work, in the language of the request. Empty when nothing went
+    /// wrong, which is the only way to tell a successful operation from a failed one.
     /// </summary>
-    /// <example>File not found.</example>
+    /// <example>Folder not found.</example>
     public required string Error { get; set; }
 
     /// <summary>
-    /// The file operation processing status.
+    /// How many entries the operation has handled so far, written as a decimal number in a string. It counts items,
+    /// not percent, and stays behind `progress` on operations that walk into subfolders.
     /// </summary>
-    /// <example>1</example>
+    /// <example>12</example>
     public required string Processed { get; set; }
 
     /// <summary>
-    /// Specifies if the file operation is finished or not.
+    /// Whether the operation has stopped running. A finished operation is reported once and then dropped, so the next
+    /// read of the operation list no longer contains it.
     /// </summary>
     /// <example>true</example>
     public required bool Finished { get; set; }
 
     /// <summary>
-    /// The file operation URL.
+    /// The address the packed archive can be downloaded from once a bulk download has finished. Empty for every other
+    /// kind of operation.
     /// </summary>
-    /// <example>http://localhost/download</example>
+    /// <example>https://portal.example.com/filehandler.ashx?action=bulk</example>
     [Url]
     public string Url { get; set; }
 
     /// <summary>
-    /// The list of files of the file operation.
+    /// The files the operation produced or moved, in the order it wrote them down. Empty while nothing has been
+    /// written yet and for a deletion, which reports no entries at all.
     /// </summary>
     /// <example>[{"id": 10, "title": "document.docx"}]</example>
     public List<FileEntryBaseDto> Files { get; set; }
 
     /// <summary>
-    /// The list of folders of the file operation.
+    /// The folders the operation produced or moved, in the order it wrote them down. Empty while nothing has been
+    /// written yet and for a deletion.
     /// </summary>
-    /// <example>[{"id": 20, "title": "My Folder"}]</example>
+    /// <example>[{"id": 20, "title": "Reports"}]</example>
     public List<FileEntryBaseDto> Folders { get; set; }
 
     /// <summary>
-    /// The status of the distributed task related to the file operation.
+    /// The state of the background task behind the operation, which tells a task that was cancelled or that crashed
+    /// from one that ran to its end.
     /// </summary>
-    /// <example>0</example>
+    /// <example>2</example>
     public DistributedTaskStatus Status { get; set; }
 }
 

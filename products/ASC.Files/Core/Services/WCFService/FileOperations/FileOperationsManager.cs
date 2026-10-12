@@ -140,7 +140,11 @@ public class FileOperationsManagerHolder<T> : IDisposable where T : FileOperatio
         try
         {
             var instanceTasks = await _tasks.GetAllTasks(DistributedTaskQueue<T>.INSTANCE_ID);
-            return _tasks.MaxThreadsCount < instanceTasks.Count;
+
+            // finished tasks stay in the queue until their client reads the result or the cleaner
+            // drops them (up to TimeUntilUnregisterInSeconds), so counting them would report a busy
+            // instance while nothing is actually running
+            return _tasks.MaxThreadsCount < instanceTasks.Count(t => t.Status <= DistributedTaskStatus.Running);
         }
         finally
         {
@@ -363,6 +367,13 @@ public class FileDownloadOperationsManager(
 {
     public async Task<string> Publish(List<JsonElement> folders, List<FilesDownloadOperationItem<JsonElement>> files, string baseUri)
     {
+        // The endpoint is [AllowAnonymous] for link-based download sessions; a caller with neither
+        // a session nor a link key must get 401 instead of the 404 the empty security filter produces.
+        if (!_authContext.IsAuthenticated && await _externalShare.GetLinkIdAsync() == Guid.Empty)
+        {
+            throw new AuthenticationException();
+        }
+
         await _fileOperationsManagerHolder.CheckRunning(await GetUserIdAsync(), FileOperationType.Download);
         if ((folders == null || folders.Count == 0) && (files == null || files.Count == 0))
         {

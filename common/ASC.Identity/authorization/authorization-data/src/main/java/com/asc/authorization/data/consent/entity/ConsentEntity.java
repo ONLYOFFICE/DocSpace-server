@@ -74,6 +74,17 @@ public class ConsentEntity {
   private String principalId;
 
   /**
+   * The tenant owning the client the consent was given to, which is not necessarily the tenant of
+   * {@link #principalId}.
+   */
+  @Column(name = "owner_tenant_id")
+  private Long ownerTenantId;
+
+  /** The user who created the client the consent was given to. */
+  @Column(name = "owner_user_id")
+  private String ownerUserId;
+
+  /**
    * The set of scopes consented to by the principal for the registered client. This data is stored
    * in the `identity_consent_scopes` table.
    */

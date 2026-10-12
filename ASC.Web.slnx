@@ -11,6 +11,7 @@
     <File Path="Directory.Packages.props" />
   </Folder>
   <Project Path="common/ASC.ActiveDirectory/ASC.ActiveDirectory.csproj" />
+  <Project Path="common/ASC.AI.Integration/ASC.AI.Integration.csproj" />
   <Project Path="common/ASC.Analyzers/ASC.Analyzers.csproj" />
   <Project Path="common/ASC.Api.Core/ASC.Api.Core.csproj" />
   <Project Path="common/ASC.AppHost/ASC.AppHost.csproj" />

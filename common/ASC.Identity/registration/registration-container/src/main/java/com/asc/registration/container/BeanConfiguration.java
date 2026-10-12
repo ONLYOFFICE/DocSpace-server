@@ -186,10 +186,14 @@ public class BeanConfiguration {
    * client-related operations.
    *
    * @param validator the Jakarta Bean Validation validator.
+   * @param clientCacheService the cache service for client resilience operations.
+   * @param scopeApplicationService the service for scope validation.
    * @param tenantClientsRemovedEventAuthorizationMessagePublisher the message publisher for tenant
    *     client removal events.
    * @param userClientsRemovedEventAuthorizationMessagePublisher the message publisher for user
    *     client removal events.
+   * @param clientCacheTenantRemoveEventAuthorizationMessagePublisher the message publisher for
+   *     tenant client cache removal events.
    * @param clientCreateCommandHandler the handler for client creation commands.
    * @param clientUpdateCommandHandler the handler for client update commands.
    * @param clientQueryHandler the handler for client query operations.
@@ -199,6 +203,7 @@ public class BeanConfiguration {
   public ClientApplicationService clientApplicationService(
       Validator validator,
       ClientCacheService clientCacheService,
+      ScopeApplicationService scopeApplicationService,
       AuthorizationMessagePublisher<TenantClientsRemovedEvent>
           tenantClientsRemovedEventAuthorizationMessagePublisher,
       AuthorizationMessagePublisher<UserClientsRemovedEvent>
@@ -211,6 +216,7 @@ public class BeanConfiguration {
     return new CoreClientApplicationService(
         validator,
         clientCacheService,
+        scopeApplicationService,
         tenantClientsRemovedEventAuthorizationMessagePublisher,
         userClientsRemovedEventAuthorizationMessagePublisher,
         clientCacheTenantRemoveEventAuthorizationMessagePublisher,

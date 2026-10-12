@@ -42,13 +42,19 @@ public class CustomSynchronizationContext
     private static readonly AsyncLocal<CustomSynchronizationContext> _context = new();
     public static CustomSynchronizationContext CurrentContext => _context.Value;
 
+    /// <summary>
+    /// Always starts a fresh context for the current logical flow.
+    /// </summary>
+    /// <remarks>
+    /// The value is an <see cref="AsyncLocal{T}"/> reference, so it is inherited by every downstream flow.
+    /// A context is created in the application root (see RunWithTasksAsync), which means hosted services,
+    /// event bus consumers and queued jobs all inherit the very same instance. Reusing it would turn
+    /// <see cref="CurrentPrincipal"/> into a process-wide mutable field shared by concurrent handlers,
+    /// so each entry point must get its own instance instead.
+    /// </remarks>
     public static void CreateContext()
     {
-        if (CurrentContext == null)
-        {
-            var context = new CustomSynchronizationContext();
-            _context.Value = context;
-        }
+        _context.Value = new CustomSynchronizationContext { CurrentPrincipal = CurrentContext?.CurrentPrincipal };
     }
 }
 

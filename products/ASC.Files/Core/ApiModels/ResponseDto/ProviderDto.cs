@@ -33,50 +33,52 @@
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
-/// <summary>
-/// The provider information.
-/// </summary>
+/// <summary>One storage service this portal can connect, with the values a connection form needs.</summary>
 public record ProviderDto(string Name, string Key, bool Connected, bool Oauth = false, string RedirectUrl = null, bool RequiredConnectionUrl = false, string ClientId = null)
 {
     /// <summary>
-    /// The provider name.
+    /// The display name of the service, and the only thing that tells the WebDAV presets apart: `kDrive`, `Yandex`,
+    /// `WebDav`, `Nextcloud` and `ownCloud` all report the same key.
     /// </summary>
-    /// <example>GoogleDrive</example>
+    /// <example>Nextcloud</example>
     public string Name { get; init; } = Name;
 
-    /// <summary>
-    /// The provider key.
-    /// </summary>
-    /// <example>google-drive</example>
+    /// <summary>The value to send as `providerKey` when an account of this service is connected.</summary>
+    /// <example>WebDav</example>
     public string Key { get; init; } = Key;
 
     /// <summary>
-    /// Specifies whether the provider is connected.
+    /// Whether the service can be used on this portal: it is enabled in the configuration and, for an OAuth service,
+    /// its application is registered. It says nothing about whether an account of it is connected.
     /// </summary>
     /// <example>true</example>
     public bool Connected { get; init; } = Connected;
 
     /// <summary>
-    /// Specifies if the provider is OAuth.
+    /// Whether an account of this service is connected with an OAuth 2.0 authorization code in `token`; when false,
+    /// it is connected with `login` and `password`.
     /// </summary>
     /// <example>true</example>
     public bool Oauth { get; init; } = Oauth;
 
     /// <summary>
-    /// The provider redirect URL.
+    /// The redirect URL this portal is registered with at the service, to build the consent screen URL from. It comes
+    /// back as null for the services that do not use OAuth.
     /// </summary>
-    /// <example>http://localhost/redirect</example>
+    /// <example>https://example.com/thirdparty</example>
     public string RedirectUrl { get; init; } = RedirectUrl;
 
     /// <summary>
-    /// The required connection URL flag.
+    /// Whether an account of this service cannot be connected without `url`, which is the case for the WebDAV servers
+    /// whose address is not known in advance. The presets with a fixed address and the OAuth services do not need it.
     /// </summary>
     /// <example>false</example>
     public bool RequiredConnectionUrl { get; init; } = RequiredConnectionUrl;
 
     /// <summary>
-    /// The provider OAuth client ID.
+    /// The OAuth 2.0 client ID this portal is registered with at the service, to build the consent screen URL from.
+    /// It comes back as null for the services that do not use OAuth.
     /// </summary>
-    /// <example>client-id-123</example>
+    /// <example>l1s2h3d4f5g6h7j8k9l0</example>
     public string ClientId { get; init; } = ClientId;
 }

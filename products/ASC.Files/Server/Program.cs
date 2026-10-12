@@ -76,6 +76,8 @@ try
 
     builder.Host.ConfigureContainer<ContainerBuilder>(startup.ConfigureContainer);
 
+    builder.Services.SkipBackgroundServicesForDocumentGeneration();
+
     var app = builder.Build();
 
     ((IApplicationBuilder)app).ApplicationServices.GetRequiredService<FileTrackerHelper>().Subscribe();

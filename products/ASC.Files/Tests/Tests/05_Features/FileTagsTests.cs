@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._05_Features;
 
-[Collection("Test Collection")]
 [Trait("Category", "Features")]
 public class FileTagsTests(
     AspireAppFixture fixture)
@@ -43,7 +42,7 @@ public class FileTagsTests(
     public async Task CreateTag_ValidData_TagCreated()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         var tagName = "TestTag" + Guid.NewGuid().ToString()[..5];
 
         var createTagRequest = new CreateTagRequestDto(tagName);
@@ -64,7 +63,7 @@ public class FileTagsTests(
     public async Task GetTagsInfo_ReturnsAllTags()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         // Create a tag to ensure we have at least one
         var tagName = "ListableTag" + Guid.NewGuid().ToString()[..5];
@@ -85,7 +84,7 @@ public class FileTagsTests(
     public async Task DeleteCustomTags_RemovesTags()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         // Create a tag
         var tagName = "DeletableTag" + Guid.NewGuid().ToString()[..5];
@@ -107,7 +106,7 @@ public class FileTagsTests(
     public async Task TagLifecycle_CreateAddDeleteTag_WorksCorrectly()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         // Create a room
         var roomTitle = "Room for Tags " + Guid.NewGuid().ToString()[..8];
@@ -151,7 +150,7 @@ public class FileTagsTests(
     public async Task AddTags_SingleAndMultipleTags_TagsAddedToRoom()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         // Create a test room
         var roomTitle = "Room for Tags Test " + Guid.NewGuid().ToString()[..8];

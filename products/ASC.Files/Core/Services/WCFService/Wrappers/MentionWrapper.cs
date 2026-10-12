@@ -34,90 +34,49 @@
 namespace ASC.Web.Files.Services.WCFService;
 
 /// <summary>
-/// The parameters of a user mentioned in a message.
+/// A user the editor may offer: to be mentioned in a comment, or to be picked when protecting a document.
 /// </summary>
 public class MentionWrapper
 {
     internal MentionWrapper() { }
 
     /// <summary>
-    /// The user information.
+    /// The account itself. Service-side only: the API publishes it as <c>MentionDto</c> with an <c>EmployeeDto</c> in
+    /// its place, so none of the account's private fields leave the server.
     /// </summary>
-    /// <example>{"id": "00000000-0000-0000-0000-000000000000", "firstName": "John", "lastName": "Doe"}</example>
     public UserInfo User { get; internal set; }
 
     /// <summary>
-    /// The user email address.
+    /// Where a mention notification for this user is delivered.
     /// </summary>
     /// <example>user@example.com</example>
     [EmailAddress]
     public string Email { get; internal set; }
 
     /// <summary>
-    /// The user unique identification.
+    /// The account id as text, the same value the account object carries; it is what identifies the user in a sharing
+    /// request built from this list.
     /// </summary>
     /// <example>user_0001</example>
     public string Id { get; internal set; }
 
     /// <summary>
-    /// The path to the user's avatar.
+    /// An absolute address of the medium-sized avatar. A generated default avatar is reported when the user never
+    /// uploaded one, so the field is never empty.
     /// </summary>
     /// <example>https://portal.example.com/avatar/user_0001.png</example>
     public string Image { get; internal set; }
 
     /// <summary>
-    /// Specifies whether the user has the access to the file where they are mentioned.
+    /// Not filled in by the operations that return this list: it always comes back false. Whether a user can already
+    /// open the document has to be read from the sharing settings of the file.
     /// </summary>
     /// <example>true</example>
     public bool HasAccess { get; internal set; }
 
     /// <summary>
-    /// The user full name.
+    /// The name to display, assembled the way the portal is configured to show names.
     /// </summary>
     /// <example>John Doe</example>
     public string Name { get; internal set; }
-}
-
-/// <summary>
-/// The mention message parameters.
-/// </summary>
-public class MentionMessageWrapper
-{
-    /// <summary>
-    /// The config parameter which contains the information about the action in the document that will be scrolled to.
-    /// </summary>
-    /// <example>{"action": {"data": "section-42", "type": "scroll"}}</example>
-    public ActionLinkConfig ActionLink { get; set; }
-
-    /// <summary>
-    /// A list of emails that will receive the mention message.
-    /// </summary>
-    /// <example>["user1@example.com", "user2@example.com"]</example>
-    public List<string> Emails { get; set; }
-
-    /// <summary>
-    /// The mention message.
-    /// </summary>
-    /// <example>Hello</example>
-    [StringLength(255)]
-    public string Message { get; set; }
-}
-
-/// <summary>
-/// The request parameters for sending the mention message.
-/// </summary>
-public class MentionMessageWrapperRequestDto<T>
-{
-    /// <summary>
-    /// The file ID with the mention message.
-    /// </summary>
-    /// <example>file-id</example>
-    [FromRoute(Name = "fileId")]
-    public T FileId { get; set; }
-
-    /// <summary>
-    /// The mention message.
-    /// </summary>
-    [FromBody]
-    public MentionMessageWrapper MentionMessage { get; set; }
 }

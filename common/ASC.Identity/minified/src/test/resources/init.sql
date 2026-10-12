@@ -70,6 +70,8 @@ CREATE TABLE identity_authorizations (
     registered_client_id varchar(36) not null,
     principal_id varchar(255) not null,
     tenant_id BIGINT not null,
+    owner_tenant_id BIGINT null,
+    owner_user_id varchar(255) null,
     state varchar(500),
     attributes text,
     authorization_grant_type varchar(255),
@@ -132,6 +134,8 @@ CREATE TABLE identity_client_scopes (
 CREATE TABLE identity_consents (
     registered_client_id varchar(36) not null,
     principal_id varchar(255) not null,
+    owner_tenant_id BIGINT null,
+    owner_user_id varchar(255) null,
     is_invalidated tinyint(1) default false,
     modified_at datetime(6),
     primary key (registered_client_id, principal_id)

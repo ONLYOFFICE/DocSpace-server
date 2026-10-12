@@ -31,8 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ILogger = Microsoft.Extensions.Logging.ILogger;
-
 namespace ASC.Api.Core.Log;
 
 internal static partial class HostExtensionLogger
@@ -45,4 +43,8 @@ internal static partial class HostExtensionLogger
 
     [LoggerMessage(LogLevel.Information, "All startup tasks completed in {ElapsedMs:F1} ms")]
     public static partial void InfoAllStartupTasksCompleted(this ILogger logger, double elapsedMs);
+
+    [LoggerMessage(LogLevel.Warning, "{VariableName} is set: running in OpenAPI document generation mode - " +
+        "background services, startup tasks and Redis are disabled. Never set this variable for a real service")]
+    public static partial void WarnDocumentGenerationForced(this ILogger logger, string variableName);
 }

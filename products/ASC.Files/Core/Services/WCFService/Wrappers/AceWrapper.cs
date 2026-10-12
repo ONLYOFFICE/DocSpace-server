@@ -57,11 +57,6 @@ public class AceCollection<T>
     /// A message to send when notifying about the shared file.
     /// </summary>
     public string Message { get; init; }
-
-    /// <summary>
-    /// The information about the advanced settings which allow to share the document with other users.
-    /// </summary>
-    public AceAdvancedSettingsWrapper AdvancedSettings { get; init; }
 }
 
 /// <summary>
@@ -172,46 +167,4 @@ public static partial class RoomInvitationMapper
     public static partial AceWrapper Map(this RoomInvitation source);
     public static partial List<AceWrapper> Map(this List<RoomInvitation> source);
 
-}
-
-/// <summary>
-/// The information about the settings which allow to share the document with other users.
-/// </summary>
-public class AceShortWrapper(string subjectName, string permission, bool isLink)
-{
-    /// <summary>
-    /// The name of the user the document will be shared with.
-    /// </summary>
-    /// <example>John Doe</example>
-    public string User { get; init; } = subjectName;
-
-    /// <summary>
-    /// The access rights for the user with the name above.
-    /// Can be "Full Access", "Read Only", or "Deny Access".
-    /// </summary>
-    /// <example>Full Access</example>
-    /// 
-    public string Permissions { get; init; } = permission;
-
-    /// <summary>
-    /// Specifies whether to change the user icon to the link icon.
-    /// </summary>
-    /// <example>false</example>
-    public bool isLink { get; init; } = isLink;
-}
-
-/// <summary>
-/// The information about the advanced settings which allow to share the document with other users.
-/// </summary>
-public class AceAdvancedSettingsWrapper
-{
-    /// <summary>
-    /// Specifies whether to allow sharing private room or not.
-    /// </summary>
-    public bool AllowSharingPrivateRoom { get; set; }
-
-    /// <summary>
-    /// Specifies whether to allow creating an invitation link or not.
-    /// </summary>
-    public bool InvitationLink { get; init; }
 }

@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM maven:3.9.12-eclipse-temurin-21 AS builder
+FROM maven:3.9.12-eclipse-temurin-25 AS builder
 WORKDIR /app
 
 # Copy the root pom.xml and all necessary module pom.xml files
@@ -49,7 +49,7 @@ ARG MODULE
 RUN mvn clean package -DskipTests -Dfmt.skip=true -T1 -pl ${MODULE} -am -B
 
 # Stage 2: Create custom JRE with jlink
-FROM eclipse-temurin:21-jdk-alpine AS jre-builder
+FROM eclipse-temurin:25-jdk-alpine AS jre-builder
 
 RUN $JAVA_HOME/bin/jlink \
     --add-modules java.base,java.logging,java.sql,java.naming,java.management,jdk.management,java.instrument,java.security.jgss,java.desktop,jdk.unsupported,java.compiler,jdk.crypto.ec \

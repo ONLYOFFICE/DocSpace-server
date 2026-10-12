@@ -1,34 +1,34 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.Core.Thirdparty;
@@ -116,9 +116,9 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     }
 
     public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, IEnumerable<string> excludeParentsIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
-        bool searchInContent)
+        bool searchInContent, MetadataFilter metadataFilter = null)
     {
-        if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
+        if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly || metadataFilter is { IsEmpty: false })
         {
             return AsyncEnumerable.Empty<File<string>>();
         }
@@ -199,7 +199,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false, List<FolderType> folderType = null, MetadataFilter metadataFilter = null)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -355,12 +355,12 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     {
         return Task.FromResult(false);
     }
-    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, bool checkFolder)
+    public async Task<File<string>> SaveFormFileAsync(File<string> file, Stream fileStream, bool checkFolder)
     {
         return await SaveFileAsync(file, fileStream);
     }
 
-    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, Guid chatId = default)
+    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, bool allowQuotaGrace = false)
     {
         ArgumentNullException.ThrowIfNull(file);
         ArgumentNullException.ThrowIfNull(fileStream);
@@ -414,7 +414,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         return await global.GetAvailableTitleAsync(requestTitle, parentFolderId, IsExistAsync, FileEntryType.File);
     }
 
-    public Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream)
+    public Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream, bool allowQuotaGrace = false)
     {
         return SaveFileAsync(file, fileStream);
     }
@@ -563,14 +563,6 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
         await ProviderInfo.CacheResetAsync(Dao.GetId(toFolder));
 
         return Dao.ToFile(newFile);
-    }
-
-    public Task<File<int>> CopyFileAsync(string fileId, int toFolderId, Guid chatId)
-    {
-        return crossDao.PerformCrossDaoFileCopyAsync(
-            fileId, this, daoSelector.ConvertId,
-            toFolderId, fileDao, r => r,
-            false, chatId);
     }
 
     public async Task<string> FileRenameAsync(File<string> file, string newTitle)
@@ -782,7 +774,7 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     }
 
     public Task<int> GetFilesCountAsync(string parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent, bool withSubfolders = false,
-        bool excludeSubject = false, string roomId = null, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, bool applyFormStepFilter = false)
+        bool excludeSubject = false, string roomId = null, FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, bool applyFormStepFilter = false, List<FolderType> folderType = null, MetadataFilter metadataFilter = null)
     {
         throw new NotImplementedException();
     }
@@ -808,15 +800,10 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     }
 
     public IAsyncEnumerable<File<string>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, OrderBy orderBy, int offset, int count)
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count,
+        MetadataFilter metadataFilter = null)
     {
         return AsyncEnumerable.Empty<File<string>>();
-    }
-
-    public Task<int> GetFilesByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId)
-    {
-        return Task.FromResult(0);
     }
 
     public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
@@ -867,6 +854,26 @@ internal abstract class ThirdPartyFileDao<TFile, TFolder, TItem>(
     public Task SetVectorizationStatusAsync(string fileId, VectorizationStatus status, Func<Task> action = null)
     {
         return Task.CompletedTask;
+    }
+
+    public Task<bool> IsVectorizationDeletedAsync(string fileId)
+    {
+        return Task.FromResult(false);
+    }
+
+    public Task DeleteVectorizationIfDeletedAsync(string fileId)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task SetFileKey(string fileId, IEnumerable<FileKeyData> keys)
+    {
+        return Task.CompletedTask;
+    }
+
+    public Task<List<FileKeys>> GetFileKeys(string fileId, Guid userId)
+    {
+        return Task.FromResult<List<FileKeys>>([]);
     }
 }
 

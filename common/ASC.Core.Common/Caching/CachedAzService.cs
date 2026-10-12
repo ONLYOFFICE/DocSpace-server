@@ -61,7 +61,7 @@ internal class CachedAzService(DbAzService service, IFusionCacheProvider cachePr
     public async Task<AzRecord> SaveAceAsync(int tenant, AzRecord r)
     {
         r = await _service.SaveAceAsync(tenant, r);
-        await _cache.RemoveAsync(GetKey(tenant));
+        await _cache.RemoveAndNotifyAsync(GetKey(tenant));
 
         return r;
     }
@@ -69,6 +69,6 @@ internal class CachedAzService(DbAzService service, IFusionCacheProvider cachePr
     public async Task RemoveAceAsync(int tenant, AzRecord r)
     {
         await _service.RemoveAceAsync(tenant, r);
-        await _cache.RemoveAsync(GetKey(tenant));
+        await _cache.RemoveAndNotifyAsync(GetKey(tenant));
     }
 }

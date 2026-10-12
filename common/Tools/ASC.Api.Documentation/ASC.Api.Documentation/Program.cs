@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -42,7 +42,8 @@ var sdkCommands = new[]
     "Php",
     "Swift6",
     "Go",
-    "Ruby"
+    "Ruby",
+    "Markdown"
 };
 
 var app = new CommandApp();
@@ -59,6 +60,7 @@ app.Configure(config =>
     config.AddCommand<GenerateSwift6SdkCommand>("Swift6");
     config.AddCommand<GenerateGoSdkCommand>("Go");
     config.AddCommand<GenerateRubySdkCommand>("Ruby");
+    config.AddCommand<GenerateMarkdownDocsCommand>("Markdown");
 });
 
 var joinExitCode = new CommandApp<OpenapiJoiner>().Run(Array.Empty<string>());
@@ -97,6 +99,28 @@ if (args.Length == 0)
 
         AnsiConsole.MarkupLine("[red]You need to select at least one SDK.[/]");
     }
+}
+
+var requestedSdks = args.TakeWhile(arg => !arg.StartsWith('-')).ToArray();
+
+if (requestedSdks.Length > 1)
+{
+    var unknownSdks = requestedSdks.Where(sdk => !sdkCommands.Contains(sdk, StringComparer.Ordinal)).ToArray();
+    if (unknownSdks.Length > 0)
+    {
+        AnsiConsole.MarkupLine(
+            $"[red]{Markup.Escape($"Unknown SDK: {string.Join(", ", unknownSdks)}. Available (case-sensitive): {string.Join(", ", sdkCommands)}.")}[/]");
+        return 1;
+    }
+
+    if (requestedSdks.Length != args.Length)
+    {
+        AnsiConsole.MarkupLine(
+            $"[red]{Markup.Escape($"Options cannot be combined with several SDKs, because each option belongs to a single SDK. Got: {string.Join(" ", args)}.")}[/]");
+        return 1;
+    }
+
+    return RunCommands(app, requestedSdks);
 }
 
 var buildExitCode = BuildSdkGenerator();

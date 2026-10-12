@@ -1,0 +1,27 @@
+name: Line endings
+
+on:
+  push:
+    branches:
+      - 'master'
+      - 'develop'
+      - 'release/**'
+      - 'hotfix/**'
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Fail on CRLF or mixed line endings in the index
+        run: |
+          # .gitattributes stores all text as LF; only .bat/.cmd may be CRLF.
+          bad=$(git ls-files --eol -- ':!*.bat' ':!*.cmd' | grep -E '^i/(crlf|mixed)' || true)
+          if [ -n "$bad" ]; then
+            echo "::error::Files with CRLF or mixed line endings found. Run 'git add --renormalize .' and commit."
+            echo "$bad"
+            exit 1
+          fi
+          echo "OK: no CRLF or mixed line endings."

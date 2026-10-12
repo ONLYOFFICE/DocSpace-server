@@ -58,9 +58,6 @@ internal static partial class FactoryIndexerLogger
     [LoggerMessage(LogLevel.Error, "FactoryIndexer CheckState")]
     public static partial void ErrorFactoryIndexerCheckState(this ILogger logger, Exception exception);
 
-    [LoggerMessage(LogLevel.Error, "Queue")]
-    public static partial void ErrorQueue(this ILogger logger, Exception exception);
-
     [LoggerMessage(LogLevel.Error, "Ping false")]
     public static partial void ErrorPingFalse(this ILogger logger, Exception exception);
 }

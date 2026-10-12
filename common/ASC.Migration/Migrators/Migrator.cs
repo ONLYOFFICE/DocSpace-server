@@ -101,6 +101,20 @@ public abstract class Migrator(
         MigrationLogger.Log(msg, exception);
     }
 
+    protected static string GetSafeExtractPath(string root, string entryName)
+    {
+        var normalizedRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root));
+        var fullPath = Path.GetFullPath(Path.Combine(normalizedRoot, entryName));
+
+        if (!fullPath.StartsWith(normalizedRoot + Path.DirectorySeparatorChar, StringComparison.Ordinal)
+            && !fullPath.Equals(normalizedRoot, StringComparison.Ordinal))
+        {
+            throw new InvalidDataException($"Archive entry is outside the extraction directory: {entryName}");
+        }
+
+        return fullPath;
+    }
+
     public string GetLogName()
     {
         return MigrationLogger.GetLogName();
@@ -333,7 +347,7 @@ public abstract class Migrator(
         {
             newFolder = storage.Type == FolderType.USER
             ? await FileStorageService.CreateFolderAsync(await GlobalFolderHelper.FolderMyAsync, $"ASC migration files {DateTime.Now:dd.MM.yyyy}")
-                    : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, new List<FileShareParams>(), 0, null, false, null, null, null, null, null);
+                    : await FileStorageService.CreateRoomAsync($"ASC migration common files {DateTime.Now:dd.MM.yyyy}", RoomType.PublicRoom, false, false, 0, null, false, null, null, null, null, null);
             Log(MigrationResource.CreateRootFolder);
         }
         else
@@ -351,7 +365,7 @@ public abstract class Migrator(
             {
                 if (storage.Type == FolderType.BUNCH && parentEntry.Id == -1)
                 {
-                    newFolder = await FileStorageService.CreateRoomAsync(folder.Title, folder.Private ? RoomType.EditingRoom : RoomType.CustomRoom, false, false, null, 0, null, false, null, null, null, null, null);
+                    newFolder = await FileStorageService.CreateRoomAsync(folder.Title, folder.Private ? RoomType.EditingRoom : RoomType.CustomRoom, false, false, 0, null, false, null, null, null, null, null);
 
                     if (MigrationInfo.Users.TryGetValue(folder.Owner, out var owner))
                     {

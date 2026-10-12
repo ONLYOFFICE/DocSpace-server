@@ -268,7 +268,7 @@ public abstract class FileEntry<T> : FileEntry, IEquatable<FileEntry<T>>
     /// </summary>
     public IDictionary<FilesSecurityActions, bool> Security { get; set; }
 
-    public IDictionary<Guid, IDictionary<FilesSecurityActions, bool>> SecurityByUsers { get; set; } = new Dictionary<Guid, IDictionary<FilesSecurityActions, bool>>();
+    public ConcurrentDictionary<Guid, IDictionary<FilesSecurityActions, bool>> SecurityByUsers { get; set; } = new();
 
 
     protected FileEntry() { }

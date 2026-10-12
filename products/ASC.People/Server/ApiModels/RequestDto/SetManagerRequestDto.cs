@@ -39,7 +39,8 @@ namespace ASC.People.ApiModels.RequestDto;
 public class SetManagerRequest
 {
     /// <summary>
-    /// The user ID.
+    /// The account to make the manager. It has to exist, otherwise the operation answers 404, and it is added to the
+    /// group at the same time, so it does not have to be a member beforehand.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid UserId { get; set; }
@@ -51,14 +52,15 @@ public class SetManagerRequest
 public class SetManagerRequestDto
 {
     /// <summary>
-    /// The group ID.
+    /// The ID of the group whose manager is set, taken from the route. It has to be a group that has not been
+    /// deleted, otherwise the operation answers 404.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]
     public required Guid Id { get; set; }
 
     /// <summary>
-    /// The request for setting a group manager.
+    /// The account to make the manager of the group.
     /// </summary>
     /// <example>{"userId":"00000000-0000-0000-0000-000000000000"}</example>
     [FromBody]

@@ -426,9 +426,19 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:change-web-plugin", { webPluginName, enabled });
   }
 
+  function changeAppEnabled({ room, id, enabled } = {}) {
+    logger.info(`changed app enabled in room ${room}, id ${id}, enabled ${enabled}`);
+    filesIO.to(room).emit("s:change-app-enabled", { id, enabled });
+  }
+
   function topUpWallet({ room, auto } = {}) {
     logger.info(`wallet topped up ${room}, auto ${auto}`);
     filesIO.to(room).emit("s:top-up-wallet", { auto });
+  }
+
+  function walletLowBalance({ room } = {}) {
+    logger.info(`wallet low balance ${room}`);
+    filesIO.to(room).emit("s:wallet-low-balance", {});
   }
 
   function updateHistory({ room, id, type } = {}) {
@@ -607,6 +617,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:change-ai-config");
   }
 
+  function changeAiAccessSettings({ room, enabled } = {}) {
+    logger.info(`change ai access settings in room ${room}, enabled: ${enabled}`);
+    filesIO.to(room).emit("s:change-ai-access-settings", { enabled });
+  }
+
   function changeExternalSharingSettings({
     room,
     externalShare,
@@ -631,6 +646,11 @@ module.exports = (io) => {
     filesIO.to(room).emit("s:external-db-settings", { externalDbEnabled });
   }
 
+  function formSuggestedQuestions({ room, attachmentId, questions } = {}) {
+    logger.info(`form suggested questions in room ${room}, attachment: ${attachmentId}`);
+    filesIO.to(room).emit("s:form-suggested-questions", { attachmentId, questions });
+  }
+
   return {
     startEdit,
     stopEdit,
@@ -648,7 +668,9 @@ module.exports = (io) => {
     markAsNewFolders,
     changeInvitationLimitValue,
     changeWebPlugin,
+    changeAppEnabled,
     topUpWallet,
+    walletLowBalance,
     updateHistory,
     logoutSession,
     changeMyType,
@@ -677,7 +699,9 @@ module.exports = (io) => {
     changeAccessRightsForFolder,
     quotaExceeded,
     changeAiConfig,
+    changeAiAccessSettings,
     changeExternalSharingSettings,
-    externalDbSettings
+    externalDbSettings,
+    formSuggestedQuestions
   };
 };

@@ -33,17 +33,18 @@
 
 package com.asc.registration.application.configuration.serialization;
 
+import com.asc.registration.application.transfer.CachedClient;
 import com.asc.registration.core.domain.entity.Client;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.SerializationException;
+import org.springframework.lang.NonNull;
 
 /**
  * Custom serializer that uses a configured ObjectMapper with Client deserializer.
  *
- * <p>This serializer specifically handles {@link Client} objects and uses the custom {@link
- * ClientDeserializer} for deserialization.
+ * <p>This serializer handles {@link CachedClient} entries and uses the custom {@link
+ * ClientDeserializer} for the {@link Client} they wrap.
  */
 public class ClientSerializer implements RedisSerializer<Object> {
   private final ObjectMapper objectMapper;
@@ -52,7 +53,7 @@ public class ClientSerializer implements RedisSerializer<Object> {
     this.objectMapper = objectMapper;
   }
 
-  @NotNull
+  @NonNull
   public byte[] serialize(Object value) throws SerializationException {
     if (value == null) return new byte[0];
 
@@ -67,7 +68,7 @@ public class ClientSerializer implements RedisSerializer<Object> {
     if (bytes == null || bytes.length == 0) return null;
 
     try {
-      return objectMapper.readValue(bytes, Client.class);
+      return objectMapper.readValue(bytes, CachedClient.class);
     } catch (Exception e) {
       throw new SerializationException("Could not deserialize: " + e.getMessage(), e);
     }

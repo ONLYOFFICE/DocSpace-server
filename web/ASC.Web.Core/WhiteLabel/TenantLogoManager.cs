@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.Web.Core.Files;
@@ -43,7 +43,10 @@ public class TenantLogoManager(
     TenantManager tenantManager,
     AuthContext authContext,
     IConfiguration configuration,
-    IFusionCache hybridCache)
+    IFusionCache hybridCache,
+    CommonLinkUtility commonLinkUtility,
+    IHttpClientFactory clientFactory,
+    ILogger<TenantLogoManager> logger)
 {
     public bool WhiteLabelEnabled
     {
@@ -84,6 +87,128 @@ public class TenantLogoManager(
             return await tenantWhiteLabelSettingsHelper.GetAbsoluteLogoPathAsync(tenantWhiteLabelSettings, WhiteLabelLogoType.LightSmall, dark);
         }
         return await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.LightSmall, dark);
+    }
+
+    /// <summary>
+    /// Returns the portal top logo (LogoLightSmall) as an absolute URL.
+    /// </summary>
+    public async Task<string> GetTopLogoAbsoluteUrlAsync(bool dark = false)
+    {
+        var logoPath = await GetTopLogoAsync(dark);
+        return commonLinkUtility.GetFullAbsolutePath(logoPath.Split('?')[0]);
+    }
+
+    /// <summary>
+    /// Whether the portal top logo (LogoLightSmall) is the built-in one rather than an uploaded
+    /// white-label logo. The two are authored at different proportions, so consumers that lay the
+    /// logo out into a box of their own have to tell them apart.
+    /// </summary>
+    public async Task<bool> IsDefaultTopLogoAsync()
+    {
+        if (!WhiteLabelEnabled)
+        {
+            return true;
+        }
+
+        var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+
+        return tenantWhiteLabelSettings.GetIsDefault(WhiteLabelLogoType.LightSmall);
+    }
+
+    /// <summary>
+    /// Returns the portal top logo (LogoLightSmall) as a self-contained base64 data URI
+    /// (e.g. "data:image/svg+xml;base64,..."), for consumers that must embed the image rather than
+    /// reference it by URL. The default logo is the same for every portal, so it is cached under a
+    /// key carrying the version of the file it was built from.
+    /// </summary>
+    public async Task<string> GetTopLogoDataUriAsync(bool dark = false)
+    {
+        const WhiteLabelLogoType logoType = WhiteLabelLogoType.LightSmall;
+
+        if (WhiteLabelEnabled)
+        {
+            var tenantWhiteLabelSettings = await settingsManager.LoadAsync<TenantWhiteLabelSettings>();
+
+            if (!tenantWhiteLabelSettings.GetIsDefault(logoType))
+            {
+                var logo = await tenantWhiteLabelSettingsHelper.GetWhitelabelLogoData(tenantWhiteLabelSettings, logoType);
+                var data = await ReadStreamToByteArrayAsync(logo);
+                if (data != null)
+                {
+                    return ToDataUri(data, tenantWhiteLabelSettings.GetExt(logoType, dark));
+                }
+            }
+        }
+
+        return await GetDefaultTopLogoDataUriAsync(dark);
+    }
+
+    // The default (or partner) logo is portal-independent, so it is fetched once and cached for all
+    // of them. The key is the source path itself, which carries everything the bytes depend on: the
+    // version query (the build number, or the ETag of a partner logo), the theme and the regional
+    // variant of the file (web:logo:custom-cultures). Replacing the file changes that path, so the
+    // new logo is picked up at once and the entry built from the old one simply ages out - keyed by
+    // the theme alone, a replacement stayed invisible until the entry expired.
+    private async Task<string> GetDefaultTopLogoDataUriAsync(bool dark)
+    {
+        try
+        {
+            var logoPath = await tenantWhiteLabelSettingsHelper.GetAbsoluteDefaultLogoPathAsync(WhiteLabelLogoType.LightSmall, dark);
+
+            var queryIndex = logoPath.IndexOf('?');
+            var ext = Path.GetExtension(queryIndex < 0 ? logoPath : logoPath[..queryIndex]).TrimStart('.');
+
+            var cacheKey = $"toplogodatauri_default_{logoPath}";
+
+            var cached = await hybridCache.GetOrDefaultAsync<string>(cacheKey);
+            if (!string.IsNullOrEmpty(cached))
+            {
+                return cached;
+            }
+
+            // The query carries the version of the file - the build number for the built-in logo,
+            // the ETag for a partner one - and is what makes the caches in front of the storage
+            // re-read a replaced file, so the request is made with it rather than without.
+            var logoUrl = commonLinkUtility.GetFullAbsolutePath(logoPath);
+
+#pragma warning disable CA2000
+            var httpClient = clientFactory.CreateClient();
+#pragma warning restore CA2000
+            var data = await httpClient.GetByteArrayAsync(logoUrl);
+
+            var dataUri = ToDataUri(data, ext);
+
+            if (!string.IsNullOrEmpty(dataUri))
+            {
+                await hybridCache.SetAsync(cacheKey, dataUri, TimeSpan.FromDays(1));
+            }
+
+            return dataUri;
+        }
+        catch (Exception ex)
+        {
+            logger.ErrorWithException(ex);
+            return null;
+        }
+    }
+
+    private static string ToDataUri(byte[] data, string ext)
+    {
+        if (data is not { Length: > 0 })
+        {
+            return null;
+        }
+
+        var mime = (ext ?? string.Empty).ToLowerInvariant() switch
+        {
+            "svg" => "image/svg+xml",
+            "jpg" or "jpeg" => "image/jpeg",
+            "ico" => "image/x-icon",
+            "gif" => "image/gif",
+            _ => "image/png"
+        };
+
+        return $"data:{mime};base64,{Convert.ToBase64String(data)}";
     }
 
     public async Task<string> GetLogoDarkAsync(bool dark)

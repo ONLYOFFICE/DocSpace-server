@@ -1,34 +1,34 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.Files.Core;
@@ -53,7 +53,7 @@ public partial class SettingsController(
     IConfiguration configuration,
     StorageFactory storageFactory,
     SetupInfo setupInfo,
-    ExternalResourceSettings externalResourceSettings,
+    ExternalResourcesDtoHelper externalResourcesDtoHelper,
     ExternalResourceSettingsHelper externalResourceSettingsHelper,
     ConsumerFactory consumerFactory,
     CustomNamingPeople customNamingPeople,
@@ -80,7 +80,16 @@ public partial class SettingsController(
     private static partial Regex EmailDomainRegex();
 
     /// <remarks>
-    /// Returns a list of all the available portal settings with the current values for each parameter.
+    /// Returns the current portal's general configuration: branding, culture, feature flags, and DocSpace/Standalone
+    /// mode, everything the client needs to render its shell before or after login. No permission is required, but
+    /// the response shape depends on the caller's identity. An anonymous caller receives only the public subset
+    /// (culture, branding, DocSpace/Standalone flags, deep link data, setup-wizard and join-by-domain hints); once
+    /// authenticated, the response also includes tenant-specific fields such as the owner ID, time zone, invitation
+    /// limit, AI/banner/dev-tools flags, and, for a DocSpace administrator, the tenant wallet's low-balance flag.
+    /// This is a read-only, idempotent call. Pass `withPassword=true` to also receive the parameters (`salt`,
+    /// iteration count, hash size) used to hash the password client-side before it is sent to the authentication
+    /// endpoints; these are only added for an anonymous caller or when explicitly requested, never as part of the
+    /// default authenticated response.
     /// </remarks>
     /// <summary>
     /// Get the portal settings
@@ -88,7 +97,7 @@ public partial class SettingsController(
     /// <path>api/2.0/settings</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Settings", typeof(SettingsDto))]
+    [SwaggerResponse(200, "Current portal settings, tailored to the caller's authentication state", typeof(SettingsDto))]
     [HttpGet("")]
     [AllowNotPayment, AllowSuspended, AllowAnonymous]
     public async Task<SettingsDto> GetPortalSettings(PortalSettingsRequestDto inDto)
@@ -100,6 +109,7 @@ public partial class SettingsController(
 
         var tenant = tenantManager.GetCurrentTenant();
         var quota = await tenantManager.GetCurrentTenantQuotaAsync();
+        var isDocSpaceAdmin = authContext.IsAuthenticated && await userManager.IsDocSpaceAdminAsync(securityContext.CurrentAccount.ID);
 
         var settings = new SettingsDto
         {
@@ -123,7 +133,7 @@ public partial class SettingsController(
                 IosPackageId = configuration["deeplink:iospackageid"] ?? ""
             },
             LogoText = await tenantLogoManager.GetLogoTextAsync(),
-            ExternalResources = externalResourceSettings.GetCultureSpecificExternalResources(whiteLabelSettings: additionalWhiteLabelSettings)
+            ExternalResources = externalResourcesDtoHelper.Get(additionalWhiteLabelSettings, isDocSpaceAdmin)
         };
 
         if (!authContext.IsAuthenticated && await externalShare.GetLinkIdAsync() != Guid.Empty)
@@ -141,7 +151,7 @@ public partial class SettingsController(
             settings.UtcHoursOffset = settings.UtcOffset.TotalHours;
             settings.OwnerId = tenant.OwnerId;
             settings.NameSchemaId = (await customNamingPeople.GetCurrent()).Id;
-            settings.DomainValidator = tenantDomainValidator;
+            settings.DomainValidator = tenantDomainValidator.Map();
             settings.ZendeskKey = setupInfo.ZendeskKey;
             settings.TagManagerId = setupInfo.TagManagerId;
             settings.SocketUrl = configuration["web:hub:url"] ?? "";
@@ -149,6 +159,11 @@ public partial class SettingsController(
             settings.LimitedAccessDevToolsForUsers = (await settingsManager.LoadAsync<TenantDevToolsAccessSettings>()).LimitedAccessForUsers;
             settings.DisplayBanners = coreBaseSettings.Standalone ? !(await settingsManager.LoadAsync<TenantBannerSettings>()).Hidden : true;
             settings.AiEnabled = (await settingsManager.LoadAsync<TenantAiAccessSettings>()).Enabled;
+
+            if (isDocSpaceAdmin)
+            {
+                settings.WalletLowBalance = (await settingsManager.LoadAsync<TenantWalletSettings>()).LowBalanceNotified;
+            }
 
             settings.Firebase = new FirebaseDto
             {
@@ -219,21 +234,32 @@ public partial class SettingsController(
 
         if (!authContext.IsAuthenticated || (inDto.WithPassword.HasValue && inDto.WithPassword.Value))
         {
-            settings.PasswordHash = passwordHasher;
+            settings.PasswordHash = passwordHasher.Map();
         }
 
         return settings;
     }
 
     /// <remarks>
-    /// Saves the mail domain settings specified in the request to the portal.
+    /// Overwrites the portal's trusted mail domain configuration, which controls which email domains are treated as
+    /// already verified when a user is invited or self-registers. Requires Owner or DocSpaceAdmin (the
+    /// EditPortalSettings permission). When the requested mode is a custom domain list, every domain is normalized to
+    /// lowercase and checked against the expected hostname format; a domain that fails the check, or an empty custom
+    /// list, causes the whole call to be rejected without saving anything. For the other modes the domain list in the
+    /// request is ignored. The `inviteUsersAsVisitors` flag controls whether users who join through a trusted domain
+    /// are added as full members or as visitors, and takes effect on the next join rather than retroactively. This is
+    /// a mutating, idempotent call: repeating it with the same body leaves the portal in the same state. On success
+    /// it returns a confirmation message, not the saved settings themselves; read them back from
+    /// `GET api/2.0/settings`.
     /// </remarks>
     /// <summary>
     /// Save the mail domain settings
     /// </summary>
     /// <path>api/2.0/settings/maildomainsettings</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Message about the result of saving the mail domain settings", typeof(string))]
+    [SwaggerResponse(200, "Confirmation message that the trusted mail domain settings were saved", typeof(string))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `type`, `domains` or `inviteUsersAsVisitors`, or the trust type is `Custom` and the domain list is empty or holds an empty or malformed domain")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPost("maildomainsettings")]
     public async Task<string> SaveMailDomainSettings(MailDomainSettingsRequestsDto inDto)
     {
@@ -282,12 +308,12 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/userquotasettings</path>
     [ApiExplorerSettings(IgnoreApi = true)]
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Message about the result of saving the user quota settings", typeof(TenantUserQuotaSettings))]
+    [SwaggerResponse(200, "The default per-user storage quota settings as they were stored", typeof(EntityQuotaSettingsDto))]
     [SwaggerResponse(400, "The entered quota value is invalid or greater than the total storage size")]
     [SwaggerResponse(402, "Your pricing plan does not support this option")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost("userquotasettings")]
-    public async Task<TenantUserQuotaSettings> SaveUserQuotaSettings(QuotaSettingsRequestsDto inDto)
+    public async Task<EntityQuotaSettingsDto> SaveUserQuotaSettings(QuotaSettingsRequestsDto inDto)
     {
         await DemandStatisticPermissionAsync();
 
@@ -337,40 +363,56 @@ public partial class SettingsController(
             messageService.Send(MessageAction.QuotaPerUserDisabled);
         }
 
-        return quotaSettings;
+        return quotaSettings.Map();
     }
 
     /// <remarks>
-    /// Returns the user quota settings.
+    /// Returns the portal's per-user default storage quota: whether it is enabled and, if so, its size in bytes.
+    /// Requires Owner or DocSpaceAdmin (the EditPortalSettings permission); every other authenticated role, and an
+    /// anonymous caller, is refused. This is a read-only, idempotent call. When `enableQuota` is false, the size
+    /// value is not enforced and users get unlimited personal storage regardless of what it holds. The response
+    /// supports conditional requests: send the standard If-Modified-Since header with the previous `lastModified`
+    /// value, and an unchanged response comes back empty instead of resending the settings.
     /// </remarks>
     /// <summary>
     /// Get the user quota settings
     /// </summary>
     /// <path>api/2.0/settings/userquotasettings</path>
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Ok", typeof(TenantUserQuotaSettings))]
+    [SwaggerResponse(200, "Current per-user default storage quota settings", typeof(EntityQuotaSettingsDto))]
+    [SwaggerResponse(304, "The per-user quota settings have not changed since the `Last-Modified` value sent back in `If-Modified-Since`; the body is empty")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("userquotasettings")]
-    public async Task<TenantUserQuotaSettings> GetUserQuotaSettings()
+    public async Task<EntityQuotaSettingsDto> GetUserQuotaSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         var result = await settingsManager.LoadAsync<TenantUserQuotaSettings>(HttpContext.GetIfModifiedSince());
 
-        return HttpContext.TryGetFromCache(result.LastModified) ? null : result;
+        return HttpContext.TryGetFromCache(result.LastModified) ? null : result.Map();
     }
 
     /// <remarks>
-    /// Saves the room quota settings specified in the request to the current portal.
+    /// Sets the portal's default per-room storage quota, applied to newly created rooms as their starting limit.
+    /// Requires Owner or DocSpaceAdmin (the EditPortalSettings permission), and on a paid SaaS tenant the portal's
+    /// plan must include the statistics feature, or the call is rejected as not covered by the plan. The requested
+    /// size cannot exceed the portal's own total storage quota, nor, on a Standalone install with a portal-wide quota
+    /// enabled, that quota's size. Disable enforcement by passing `enableQuota=false`; the size is then ignored for
+    /// new rooms. This is a mutating, idempotent call: sending the same body again leaves the quota unchanged. It
+    /// returns the saved settings, not the individual rooms' current usage.
     /// </remarks>
     /// <summary>
     /// Save the room quota settings
     /// </summary>
     /// <path>api/2.0/settings/roomquotasettings</path>
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Tenant room quota settings", typeof(TenantRoomQuotaSettings))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(200, "Saved default per-room storage quota settings", typeof(EntityQuotaSettingsDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `defaultQuota`")]
+    [SwaggerResponse(402, "The portal's pricing plan does not include the statistics feature required for room quotas")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or `defaultQuota` is not a JSON number")]
+    [SwaggerResponse(500, "The `defaultQuota` is not a whole number within the 64-bit range, or exceeds the portal's total storage quota or, on a Standalone installation with a portal-wide quota enabled, that quota")]
     [HttpPost("roomquotasettings")]
-    public async Task<TenantRoomQuotaSettings> SaveRoomQuotaSettings(QuotaSettingsRequestsDto inDto)
+    public async Task<EntityQuotaSettingsDto> SaveRoomQuotaSettings(QuotaSettingsRequestsDto inDto)
     {
         await DemandStatisticPermissionAsync();
 
@@ -414,21 +456,30 @@ public partial class SettingsController(
             messageService.Send(MessageAction.QuotaPerRoomDisabled);
         }
 
-        return quotaSettings;
+        return quotaSettings.Map();
     }
 
     /// <remarks>
-    /// Saves the AI Agent quota settings specified in the request to the current portal.
+    /// Sets the portal's default storage quota for AI agents, applied as the starting limit for newly created agents.
+    /// Requires Owner or DocSpaceAdmin (the EditPortalSettings permission), and on a paid SaaS tenant the portal's
+    /// plan must include the statistics feature, or the call is rejected as not covered by the plan. The requested
+    /// size cannot exceed the portal's own total storage quota, nor, on a Standalone install with a portal-wide quota
+    /// enabled, that quota's size. Disable enforcement by passing `enableQuota=false`; the size is then ignored for
+    /// new agents. This is a mutating, idempotent call: sending the same body again leaves the quota unchanged. It
+    /// returns the saved settings, not any agent's current usage.
     /// </remarks>
     /// <summary>
     /// Save the AI Agent quota settings
     /// </summary>
     /// <path>api/2.0/settings/aiagentquotasettings</path>
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Tenant AI Agent quota settings", typeof(TenantAiAgentQuotaSettings))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(200, "Saved default AI agent storage quota settings", typeof(EntityQuotaSettingsDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `defaultQuota`")]
+    [SwaggerResponse(402, "The portal's pricing plan does not include the statistics feature required for AI agent quotas")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or `defaultQuota` is not a JSON number")]
+    [SwaggerResponse(500, "The `defaultQuota` is not a whole number within the 64-bit range, or exceeds the portal's total storage quota or, on a Standalone installation with a portal-wide quota enabled, that quota")]
     [HttpPost("aiagentquotasettings")]
-    public async Task<TenantAiAgentQuotaSettings> SaveAiAgentQuotaSettings(QuotaSettingsRequestsDto inDto)
+    public async Task<EntityQuotaSettingsDto> SaveAiAgentQuotaSettings(QuotaSettingsRequestsDto inDto)
     {
         await DemandStatisticPermissionAsync();
 
@@ -470,21 +521,28 @@ public partial class SettingsController(
             messageService.Send(MessageAction.QuotaPerAiAgentDisabled);
         }
 
-        return quotaSettings;
+        return quotaSettings.Map();
     }
 
     /// <remarks>
-    /// Saves the deep link configuration settings for the portal.
+    /// Sets how the portal responds when a client opens a DocSpace link on a mobile device: always in the browser,
+    /// always in the native app, or asking the user to choose each time. Requires Owner or DocSpaceAdmin (the
+    /// EditPortalSettings permission). The handling mode must be one of the documented enum values; anything else is
+    /// rejected without being saved. This is a mutating, idempotent call: sending the same mode again leaves the
+    /// setting unchanged. It returns the saved deep link settings, including the timestamp of the last change; read
+    /// the current value at any time, including anonymously, from `GET api/2.0/settings/deeplink`.
     /// </remarks>
     /// <summary>
     /// Configure the deep link settings
     /// </summary>
     /// <path>api/2.0/settings/deeplink</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Deep link configuration updated", typeof(TenantDeepLinkSettings))]
-    [SwaggerResponse(400, "Invalid deep link configuration")]
+    [SwaggerResponse(200, "Saved deep link handling settings", typeof(TenantDeepLinkSettingsDto))]
+    [SwaggerResponse(400, "The handling mode is not one of the supported deep link handling values")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
+    [SwaggerResponse(500, "The request body has no `deepLinkSettings`")]
     [HttpPost("deeplink")]
-    public async Task<TenantDeepLinkSettings> ConfigureDeepLink(DeepLinkConfigurationRequestsDto inDto)
+    public async Task<TenantDeepLinkSettingsDto> ConfigureDeepLink(DeepLinkConfigurationRequestsDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
         if (!Enum.IsDefined(inDto.DeepLinkSettings.HandlingMode))
@@ -497,11 +555,16 @@ public partial class SettingsController(
         tenantDeepLinkSettings.HandlingMode = inDto.DeepLinkSettings.HandlingMode;
         await settingsManager.SaveAsync(tenantDeepLinkSettings, tenant.Id);
 
-        return tenantDeepLinkSettings;
+        return tenantDeepLinkSettings.Map();
     }
 
     /// <remarks>
-    /// Returns the deep link settings.
+    /// Returns how the portal currently responds when a client opens a DocSpace link on a mobile device: always in
+    /// the browser, always in the native app, or asking the user to choose. No permission is required; anonymous
+    /// callers can read it too. This is a read-only, idempotent call. The response supports conditional requests:
+    /// send the standard If-Modified-Since header with the previous `lastModified` value, and an unchanged response
+    /// comes back empty instead of resending the settings. Change the mode with `POST api/2.0/settings/deeplink`,
+    /// which requires the EditPortalSettings permission.
     /// </remarks>
     /// <summary>
     /// Get the deep link settings
@@ -509,29 +572,37 @@ public partial class SettingsController(
     /// <path>api/2.0/settings/deeplink</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Ok", typeof(TenantDeepLinkSettings))]
+    [SwaggerResponse(200, "Current deep link handling settings", typeof(TenantDeepLinkSettingsDto))]
+    [SwaggerResponse(304, "The deep link settings have not changed since the `Last-Modified` value sent back in `If-Modified-Since`; the body is empty")]
     [HttpGet("deeplink")]
     [AllowAnonymous]
-    public async Task<TenantDeepLinkSettings> GetDeepLinkSettings()
+    public async Task<TenantDeepLinkSettingsDto> GetDeepLinkSettings()
     {
         var result = await settingsManager.LoadAsync<TenantDeepLinkSettings>(HttpContext.GetIfModifiedSince());
 
-        return HttpContext.TryGetFromCache(result.LastModified) ? null : result;
+        return HttpContext.TryGetFromCache(result.LastModified) ? null : result.Map();
     }
 
     /// <remarks>
-    /// Saves the tenant quota settings specified in the request to the current portal.
+    /// Sets or removes the storage quota for a given tenant. Available only on a Standalone (self-hosted)
+    /// installation; on SaaS the call is always refused. Requires a DocSpace administrator, and the portal's plan
+    /// must include the statistics feature or the call is rejected as not covered by the plan. Pass a non-negative
+    /// `quota` in bytes to enable the limit for the tenant identified by `tenantId`, or a negative value to remove
+    /// any limit. This is a mutating, idempotent call: sending the same body again leaves the quota unchanged. It
+    /// returns the saved quota settings for that tenant, not its current usage.
     /// </remarks>
     /// <summary>
     /// Save the tenant quota settings
     /// </summary>
     /// <path>api/2.0/settings/tenantquotasettings</path>
     [Tags("Settings / Quota")]
-    [SwaggerResponse(200, "Tenant quota settings", typeof(TenantQuotaSettings))]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(405, "Not available")]
+    [SwaggerResponse(200, "Saved tenant storage quota settings", typeof(TenantQuotaSettingsDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `tenantId`")]
+    [SwaggerResponse(402, "The portal's pricing plan does not include the statistics feature required for tenant quotas")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
+    [SwaggerResponse(415, "The caller is not a DocSpace administrator, or the portal is not a Standalone installation")]
     [HttpPut("tenantquotasettings")]
-    public async Task<TenantQuotaSettings> SetTenantQuotaSettings(TenantQuotaSettingsRequestsDto inDto)
+    public async Task<TenantQuotaSettingsDto> SetTenantQuotaSettings(TenantQuotaSettingsRequestsDto inDto)
     {
         await DemandStatisticPermissionAsync();
 
@@ -569,18 +640,23 @@ public partial class SettingsController(
             messageService.Send(MessageAction.QuotaPerPortalDisabled);
         }
 
-        return tenantQuotaSetting;
+        return tenantQuotaSetting.Map();
     }
 
     /// <remarks>
-    /// Returns a list of all the available portal languages in the format of a two-letter or four-letter language code (e.g. "de", "en-US", etc.).
+    /// Returns the two- or four-letter language codes of every culture currently enabled on the portal (for example
+    /// `en-US`), used to populate a language picker before or after login. No permission is required; anonymous
+    /// callers can read it too. This is a read-only, idempotent call, and the list is not paginated. The response
+    /// supports conditional requests: an unchanged result is signaled instead of resending the same list. The set of
+    /// enabled cultures is a portal-wide configuration value, not a per-user preference.
     /// </remarks>
     /// <summary>Get supported languages</summary>
     /// <path>api/2.0/settings/cultures</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     /// <collection>list</collection>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "List of all the available portal languages", typeof(IEnumerable<string>))]
+    [SwaggerResponse(200, "Language codes of every culture currently enabled on the portal", typeof(IEnumerable<string>))]
+    [SwaggerResponse(304, "The list of enabled cultures has not changed since the `ETag` sent back in `If-None-Match`; the body is empty")]
     [AllowAnonymous]
     [AllowNotPayment]
     [HttpGet("cultures")]
@@ -591,17 +667,22 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns a list of all the available portal time zones.
+    /// Returns every time zone known to the host machine, each with its IANA identifier and a human-readable display
+    /// name, ordered from the most negative to the most positive UTC offset. This call is not for a normal logged-in
+    /// session: it requires a confirmation link bearing the Wizard or Administrators claim, of the kind generated
+    /// during initial portal setup or issued by an administrator, and the link is consumed as part of authenticating
+    /// the request. This is a read-only, idempotent call, and the list is not paginated. Use the returned `id` values
+    /// wherever the portal expects a time zone identifier; an unrecognized value is rejected there, not here.
     /// </remarks>
     /// <summary>Get time zones</summary>
     /// <path>api/2.0/settings/timezones</path>
     /// <collection>list</collection>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "List of all the available time zones with their IDs and display names", typeof(List<TimezonesRequestsDto>))]
+    [SwaggerResponse(200, "Every time zone known to the host, with its IANA ID and display name", typeof(List<TimezoneDto>))]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard,Administrators")]
     [HttpGet("timezones")]
     [AllowNotPayment]
-    public async Task<List<TimezonesRequestsDto>> GetTimeZones()
+    public async Task<List<TimezoneDto>> GetTimeZones()
     {
         await securityContext.AuthByClaimAsync();
         var timeZones = TimeZoneInfo.GetSystemTimeZones().ToList();
@@ -611,11 +692,11 @@ public partial class SettingsController(
             timeZones.Add(TimeZoneInfo.Utc);
         }
 
-        var listOfTimezones = new List<TimezonesRequestsDto>();
+        var listOfTimezones = new List<TimezoneDto>();
 
         foreach (var tz in timeZones.OrderBy(z => z.BaseUtcOffset))
         {
-            listOfTimezones.Add(new TimezonesRequestsDto
+            listOfTimezones.Add(new TimezoneDto
             {
                 Id = TimeZoneConverter.GetIanaTimeZoneId(tz),
                 DisplayName = TimeZoneConverter.GetTimeZoneDisplayName(tz)
@@ -626,30 +707,41 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns the portal hostname.
+    /// Returns the hostname the current request arrived on, exactly as sent in the HTTP Host header, so a client
+    /// mid-setup can learn the address the portal is actually reachable at. This call is not for a normal logged-in
+    /// session: it requires a confirmation link bearing the Wizard claim, of the kind generated during initial portal
+    /// setup, and the link is consumed as part of authenticating the request. This is a read-only, idempotent call.
+    /// The value reflects whatever the caller connected through, including a reverse proxy's public name, and is not
+    /// necessarily the tenant's configured alias or mapped domain.
     /// </remarks>
-    /// <summary>Get hostname</summary>
+    /// <summary>Get the portal hostname</summary>
     /// <path>api/2.0/settings/machine</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Portal hostname", typeof(object))]
+    [SwaggerResponse(200, "Hostname the current request arrived on", typeof(string))]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
     [HttpGet("machine")]
     [AllowNotPayment]
-    public object GetPortalHostname()
+    public string GetPortalHostname()
     {
         return Request.Host.Value;
     }
 
     /// <remarks>
-    /// Saves the DNS settings specified in the request to the current portal.
+    /// Maps a custom domain name onto the current tenant, or clears the mapping, so the portal becomes reachable
+    /// under the caller's own DNS name instead of only its default alias. Available only on a Standalone
+    /// (self-hosted) installation; on SaaS the call is always refused. Requires Owner or DocSpaceAdmin (the
+    /// EditPortalSettings permission). Disable the mapping by passing `enable=false`, in which case the domain name
+    /// in the request is ignored. A domain that collides with the portal's reserved base domain, or otherwise fails
+    /// validation, is rejected without changing the current mapping. This is a mutating, idempotent call. On success
+    /// the previous domain also stops answering, and any CSP configuration referencing it is updated to the new one.
     /// </remarks>
     /// <summary>Save the DNS settings</summary>
     /// <path>api/2.0/settings/dns</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Message about changing DNS", typeof(string))]
-    [SwaggerResponse(400, "Invalid domain name/incorrect length of doman name")]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
-    [SwaggerResponse(405, "Method not allowed")]
+    [SwaggerResponse(200, "Confirmation that the DNS mapping was updated", typeof(string))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
+    [SwaggerResponse(415, "The portal is not a Standalone installation, so a custom domain cannot be mapped")]
+    [SwaggerResponse(500, "The installation hides the DNS settings section, or the domain name is not a valid host name, lies under the portal's base domain, has a length outside the allowed range, is reserved, or is already the alias or mapped domain of a portal, this one included")]
     [HttpPut("dns")]
     public async Task<string> SaveDnsSettings(DnsSettingsRequestsDto inDto)
     {
@@ -693,14 +785,20 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns the portal logo image URL.
+    /// Returns the absolute URL of the portal's current logo image, already resolved against the active white-label
+    /// branding. Requires an authenticated session; every role, including Guest, can read it. This is a read-only,
+    /// idempotent call. The response supports conditional requests: send the standard If-Modified-Since header with
+    /// the previous `lastModified` value, and an unchanged response comes back empty instead of resending the same
+    /// URL. The URL points at whatever image is currently configured, including the default DocSpace logo when no
+    /// custom branding has been set.
     /// </remarks>
     /// <summary>
     /// Get a portal logo
     /// </summary>
     /// <path>api/2.0/settings/logo</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Portal logo image URL", typeof(string))]
+    [SwaggerResponse(200, "Absolute URL of the portal's current logo image", typeof(string))]
+    [SwaggerResponse(304, "The portal logo has not changed since the `Last-Modified` value sent back in `If-Modified-Since`; the body is empty")]
     [HttpGet("logo")]
     public async Task<string> GetPortalLogo()
     {
@@ -710,24 +808,35 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Completes the Wizard settings.
+    /// Finishes the initial portal setup wizard: sets the owner's password and locale, applies the supplied license
+    /// if one is required, and marks the wizard as completed so it is not shown again. This call is not for a normal
+    /// logged-in session: it requires a confirmation link bearing the Wizard claim, of the kind issued when a new
+    /// portal is created, and the link is consumed as part of authenticating the request; the caller must also hold
+    /// the EditPortalSettings permission. An empty password or a malformed email address is rejected without
+    /// completing the wizard, and so is a missing, invalid, or expired license, or a license whose user quota does
+    /// not cover the portal. This call is meant to run once per portal; running it again is accepted but has no
+    /// further effect once the wizard is already completed. It returns the resulting wizard settings, including the
+    /// completed flag.
     /// </remarks>
     /// <summary>Complete the Wizard settings</summary>
     /// <path>api/2.0/settings/wizard/complete</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Wizard settings", typeof(WizardSettings))]
-    [SwaggerResponse(400, "Incorrect email address/The password is empty")]
-    [SwaggerResponse(402, "You must enter a license key or license key is not correct or license expired or user quota does not match the license")]
+    [SwaggerResponse(200, "Resulting wizard settings, including the completed flag", typeof(WizardSettingsDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `email` or `passwordHash`, the email address is empty or malformed, or the license's start date is in the future")]
+    [SwaggerResponse(403, "The account the confirmation link was issued for has no portal-settings right")]
+    [SwaggerResponse(500, "The wizard is already completed, the AMI instance ID does not match, the email address fails the portal's check, the password is empty, or the license is missing, unreadable, rejected by validation or of the wrong type")]
     [AllowNotPayment]
     [HttpPut("wizard/complete")]
     [Authorize(AuthenticationSchemes = "confirm", Roles = "Wizard")]
-    public async Task<WizardSettings> CompleteWizard(WizardRequestsDto inDto)
+    public async Task<WizardSettingsDto> CompleteWizard(WizardRequestsDto inDto)
     {
         await securityContext.AuthByClaimAsync();
 
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        return await firstTimeTenantSettings.SaveDataAsync(inDto);
+        var settings = await firstTimeTenantSettings.SaveDataAsync(inDto);
+
+        return settings.Map();
     }
 
     /// <remarks>
@@ -755,13 +864,19 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns the portal color theme.
+    /// Returns the portal's color theme configuration: every saved custom theme, which one is currently selected, and
+    /// how many custom themes the plan still allows. No permission is required; anonymous callers can read it too.
+    /// This is a read-only, idempotent call. The response supports conditional requests: send the standard
+    /// If-Modified-Since header with the previous `lastModified` value, and an unchanged response comes back empty
+    /// instead of resending the same settings. A `limit` of `0` means the plan does not cap the number of custom
+    /// themes.
     /// </remarks>
     /// <summary>Get a color theme</summary>
     /// <path>api/2.0/settings/colortheme</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Settings of the portal themes", typeof(CustomColorThemesSettingsDto))]
+    [SwaggerResponse(200, "Current color theme configuration: saved themes, selected theme, and plan limit", typeof(CustomColorThemesSettingsDto))]
+    [SwaggerResponse(304, "The color theme configuration has not changed since the `Last-Modified` value sent back in `If-Modified-Since`; the body is empty")]
     [AllowAnonymous, AllowNotPayment, AllowSuspended]
     [HttpGet("colortheme")]
     public async Task<CustomColorThemesSettingsDto> GetPortalColorTheme()
@@ -772,12 +887,20 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Saves the portal color theme specified in the request.
+    /// Adds or updates a custom color theme, or changes which theme is selected, for the whole portal. Requires Owner
+    /// or DocSpaceAdmin (the EditPortalSettings permission). Pass `theme` to create or edit one: an existing theme is
+    /// matched and updated by its ID, a new one is appended, and an ID that collides with a built-in default theme is
+    /// treated as a request to create a new custom theme instead of overwriting the default. Once the plan's
+    /// custom-theme limit is reached, a new theme is silently not added rather than rejected with an error, so check
+    /// the returned `themes` count against `limit` before assuming it was saved. Pass `selected` to switch the active
+    /// theme; an ID that does not match any existing theme is ignored. This is a mutating call, not strictly
+    /// idempotent once the limit has been reached. It returns the full updated theme configuration.
     /// </remarks>
     /// <summary>Save a color theme</summary>
     /// <path>api/2.0/settings/colortheme</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Portal theme settings", typeof(CustomColorThemesSettingsDto))]
+    [SwaggerResponse(200, "Updated color theme configuration: saved themes, selected theme, and plan limit", typeof(CustomColorThemesSettingsDto))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPut("colortheme")]
     public async Task<CustomColorThemesSettingsDto> SavePortalColorTheme(CustomColorThemesSettingsRequestsDto inDto)
     {
@@ -788,7 +911,7 @@ public partial class SettingsController(
         {
             await using (await distributedLockProvider.TryAcquireFairLockAsync("save_color_theme"))
             {
-                var theme = inDto.Theme;
+                var theme = inDto.Theme.Map();
 
                 if (CustomColorThemesSettingsItem.Default.Exists(r => r.Id == theme.Id))
                 {
@@ -844,12 +967,18 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Deletes the portal color theme with the ID specified in the request.
+    /// Removes a custom color theme from the portal by its ID. Requires Owner or DocSpaceAdmin (the
+    /// EditPortalSettings permission). An ID belonging to one of the built-in default themes is not removable; the
+    /// call succeeds but leaves the theme list unchanged. If the deleted theme was the currently selected one, the
+    /// theme with the lowest remaining ID is selected automatically. This is a mutating, idempotent call: deleting an
+    /// ID that is already gone succeeds without error and again leaves nothing changed. It returns the full updated
+    /// theme configuration, including the (possibly new) selected theme.
     /// </remarks>
     /// <summary>Delete a color theme</summary>
     /// <path>api/2.0/settings/colortheme</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Portal theme settings: custom color theme settings, selected or not, limit", typeof(CustomColorThemesSettingsDto))]
+    [SwaggerResponse(200, "Updated color theme configuration: saved themes, selected theme, and plan limit", typeof(CustomColorThemesSettingsDto))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpDelete("colortheme")]
     public async Task<CustomColorThemesSettingsDto> DeletePortalColorTheme(DeleteColorThemeRequestDto inDto)
     {
@@ -876,13 +1005,16 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Closes the administrator helper notification.
+    /// Dismisses the administrator helper tip for the caller, so it is not shown again on this account. Available
+    /// only to a DocSpace administrator, which includes the portal Owner, on a Standalone (self-hosted) installation
+    /// running outside white-label custom mode; every other caller is refused. This is a mutating, idempotent call
+    /// scoped to the calling account only; it never affects other administrators. It returns no data on success.
     /// </remarks>
     /// <summary>Close the admin helper</summary>
     /// <path>api/2.0/settings/closeadminhelper</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Ok")]
-    [SwaggerResponse(405, "Not available")]
+    [SwaggerResponse(200, "The admin helper tip was dismissed for the caller")]
+    [SwaggerResponse(415, "The caller is not a DocSpace administrator, or the portal is on SaaS, custom mode, or not Standalone")]
     [HttpPut("closeadminhelper")]
     public async Task CloseAdminHelper()
     {
@@ -941,14 +1073,19 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Sets the default folder.
+    /// Sets which folder the current user's account opens into by default, such as My Documents, the rooms list, or
+    /// favorites. Requires an authenticated session; every role may set its own default, and the change never affects
+    /// any other user. Only folder types the client actually offers as a landing page are accepted; picking My
+    /// Documents (`USER`) as a Guest is rejected too, since guests have no personal storage. This is a mutating,
+    /// idempotent call. It returns the saved setting.
     /// </remarks>
     /// <summary>Set the default folder</summary>
     /// <path>api/2.0/settings/defaultFolder</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Message about saving settings successfully", typeof(StudioDefaultPageSettings))]
+    [SwaggerResponse(200, "Saved default folder setting for the current user", typeof(StudioDefaultPageSettingsDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `defaultFolderType`, the folder is not one a start page can be set to, or a guest chooses My documents")]
     [HttpPut("defaultfolder")]
-    public async Task<StudioDefaultPageSettings> SaveDefaultFolder(DefaultProductRequestDto inDto)
+    public async Task<StudioDefaultPageSettingsDto> SaveDefaultFolder(DefaultProductRequestDto inDto)
     {
         List<FolderType> allowedFolderTypes =
         [
@@ -957,15 +1094,13 @@ public partial class SettingsController(
             FolderType.VirtualRooms,
             FolderType.SHARE,
             FolderType.Favorites,
-            FolderType.Recent
+            FolderType.Recent,
+            FolderType.Forms,
+            FolderType.DEFAULT
         ];
 
-        if (!allowedFolderTypes.Contains(inDto.DefaultFolderType))
-        {
-            throw new ArgumentException(nameof(inDto.DefaultFolderType));
-        }
-
-        if (await userManager.IsGuestAsync(authContext.CurrentAccount.ID) && inDto.DefaultFolderType == FolderType.USER)
+        if (!allowedFolderTypes.Contains(inDto.DefaultFolderType) ||
+            await userManager.IsGuestAsync(authContext.CurrentAccount.ID) && inDto.DefaultFolderType == FolderType.USER)
         {
             throw new ArgumentException(nameof(inDto.DefaultFolderType));
         }
@@ -979,31 +1114,44 @@ public partial class SettingsController(
 
         messageService.Send(MessageAction.DefaultStartPageSettingsUpdated);
 
-        return defaultPageSettings;
+        return defaultPageSettings.Map();
     }
 
     /// <remarks>
-    /// Updates the email activation settings.
+    /// Updates the current user's own preference for whether the email confirmation prompt is displayed on their
+    /// account. Requires an authenticated session; every role may change its own setting, and the change never
+    /// affects any other user. This is a mutating, idempotent call. It returns the settings exactly as submitted,
+    /// without validating them against the account's actual email confirmation state, so `show` can be set to `true`
+    /// even after the address is already confirmed.
     /// </remarks>
     /// <summary>Update the email activation settings</summary>
     /// <path>api/2.0/settings/emailactivation</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Updated email activation settings", typeof(EmailActivationSettings))]
+    [SwaggerResponse(200, "Email activation settings exactly as submitted", typeof(EmailActivationSettingsDto))]
     [HttpPut("emailactivation")]
-    public async Task<EmailActivationSettings> UpdateEmailActivationSettings(EmailActivationSettings inDto)
+    public async Task<EmailActivationSettingsDto> UpdateEmailActivationSettings(EmailActivationSettingsRequestDto inDto)
     {
-        await settingsManager.SaveForCurrentUserAsync(inDto);
-        return inDto;
+        var settings = inDto.Map();
+
+        await settingsManager.SaveForCurrentUserAsync(settings);
+
+        return (await settingsManager.LoadForCurrentUserAsync<EmailActivationSettings>()).Map();
     }
 
     /// <remarks>
-    /// Returns the space usage statistics for the module with the ID specified in the request.
+    /// Returns the storage space used by one portal module, broken down per data category the module tracks (for
+    /// example per room type), together with a human-readable size and whether the category is disabled. Requires
+    /// Owner or DocSpaceAdmin (the EditPortalSettings permission). `id` identifies the module by the same GUID the
+    /// portal's module catalog uses; a module that does not exist, or one that does not report space usage at all,
+    /// returns an empty list rather than an error. This is a read-only, idempotent call, and the list is not
+    /// paginated. Sizes are already formatted as display strings (for example `1.5 GB`), not raw byte counts.
     /// </remarks>
     /// <summary>Get the space usage statistics</summary>
     /// <path>api/2.0/settings/statistics/spaceusage/{id}</path>
     /// <collection>list</collection>
     [Tags("Settings / Statistics")]
-    [SwaggerResponse(200, "Module space usage statistics", typeof(List<UsageSpaceStatItemDto>))]
+    [SwaggerResponse(200, "Per-category space usage statistics for the requested module", typeof(List<UsageSpaceStatItemDto>))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("statistics/spaceusage/{id:guid}")]
     public async Task<List<UsageSpaceStatItemDto>> GetSpaceUsageStatistics(IdRequestDto<Guid> inDto)
     {
@@ -1033,14 +1181,18 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns the socket settings.
+    /// Returns the base URL of the portal's real-time notification hub (Socket.IO), which the client connects to for
+    /// live updates such as file changes, presence, or quota alerts. Requires an authenticated session; every role
+    /// can read it. This is a read-only, idempotent call. The value comes from server-side configuration and cannot
+    /// be changed through this API; an empty `url` means the portal has no notification hub configured and the client
+    /// should not attempt to connect.
     /// </remarks>
     /// <summary>Get the socket settings</summary>
     /// <path>api/2.0/settings/socket</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Socket settings: hub URL", typeof(object))]
+    [SwaggerResponse(200, "Base URL of the portal's real-time notification hub", typeof(SocketSettingsDto))]
     [HttpGet("socket")]
-    public object GetSocketSettings()
+    public SocketSettingsDto GetSocketSettings()
     {
         var hubUrl = configuration["web:hub"] ?? string.Empty;
         if (hubUrl.Length != 0)
@@ -1051,19 +1203,25 @@ public partial class SettingsController(
             }
         }
 
-        return new { Url = hubUrl };
+        return new SocketSettingsDto { Url = hubUrl };
     }
 
     /// <remarks>
-    /// Returns the authorization services.
+    /// Returns the catalogue of third-party storage and authorization providers DocSpace can integrate with (for
+    /// example Amazon S3, Dropbox, Google, or Telegram), including whichever keys were last saved for each one that
+    /// currently has any configured. Requires Owner or DocSpaceAdmin (the EditPortalSettings permission). This is a
+    /// read-only, idempotent call, and the list is not paginated; entries are ordered by the provider's configured
+    /// display order. Only providers that expose at least one manageable key are included, so a provider with nothing
+    /// to configure is omitted entirely. Save or change a provider's keys with `POST api/2.0/settings/authservice`.
     /// </remarks>
     /// <summary>Get the authorization services</summary>
     /// <path>api/2.0/settings/authservice</path>
     /// <collection>list</collection>
     [Tags("Settings / Authorization")]
-    [SwaggerResponse(200, "Authorization services", typeof(IEnumerable<AuthServiceRequestsDto>))]
+    [SwaggerResponse(200, "Third-party providers with a manageable key, and their last-saved key values", typeof(IEnumerable<AuthServiceDto>))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpGet("authservice")]
-    public async Task<IEnumerable<AuthServiceRequestsDto>> GetAuthServices()
+    public async Task<IEnumerable<AuthServiceDto>> GetAuthServices()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -1073,21 +1231,30 @@ public partial class SettingsController(
             .Where(consumer => consumer.ManagedKeys.Any())
             .OrderBy(services => services.Order)
             .ToAsyncEnumerable()
-            .Select(async (Consumer r, CancellationToken _) => await AuthServiceRequestsDto.From(r, logoText))
+            .Select(async (Consumer r, CancellationToken _) => await AuthServiceDto.From(r, logoText))
             .ToListAsync();
     }
 
     /// <remarks>
-    /// Saves the authorization keys.
+    /// Saves the authorization keys for one third-party storage or authorization provider, identified by name, or
+    /// clears them when every submitted key is left empty. Requires Owner or DocSpaceAdmin (the EditPortalSettings
+    /// permission); a provider that does not allow its keys to be changed from the API rejects the call outright. A
+    /// provider that is only available on a paid plan additionally requires the portal's tariff to include
+    /// third-party storage, or Standalone licensing, before the call is accepted. Keys that fail the provider's own
+    /// validation are cleared and the call is rejected rather than left partially applied. This is a mutating,
+    /// idempotent call: resaving identical keys succeeds and reports no change. It returns whether the keys actually
+    /// changed, not the keys themselves; connecting Telegram or an external database through this call also triggers
+    /// the matching real-time connection update.
     /// </remarks>
     /// <summary>Save the authorization keys</summary>
     /// <path>api/2.0/settings/authservice</path>
     [Tags("Settings / Authorization")]
-    [SwaggerResponse(200, "Boolean value: true if the authorization keys are changed", typeof(bool))]
-    [SwaggerResponse(400, "Bad keys")]
-    [SwaggerResponse(402, "Your pricing plan does not support this option")]
+    [SwaggerResponse(200, "Whether the provider's keys actually changed", typeof(bool))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `name` or `props`, a key has no `name` or `value` or a `value` longer than 4000 characters, or the submitted keys failed the provider's own validation")]
+    [SwaggerResponse(402, "The provider is a paid option not covered by the portal's current pricing plan")]
+    [SwaggerResponse(403, "The caller has no portal-settings right, or the provider is unknown or its keys cannot be set")]
     [HttpPost("authservice")]
-    public async Task<bool> SaveAuthKeys(AuthServiceRequestsDto inDto)
+    public async Task<bool> SaveAuthKeys(SaveAuthKeysRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -1157,32 +1324,45 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Tests an external database connection with the provided settings without saving them.
+    /// Probes connectivity to an external database using the settings supplied in the request, without saving them or
+    /// affecting the portal's own configuration. Requires Owner or DocSpaceAdmin (the EditPortalSettings permission).
+    /// SQLite is only accepted as a target on a Standalone (self-hosted) installation; requesting it on SaaS is
+    /// reported as a failed connection rather than an error. This is a read-only call, safe to retry. A failed
+    /// connection is not an HTTP error: the response always comes back as a normal success with `success=false` and
+    /// an `error` message describing what went wrong.
     /// </remarks>
     /// <summary>Test external database connection</summary>
     /// <path>api/2.0/settings/authservice/externaldb/test</path>
     [Tags("Settings / Authorization")]
-    [SwaggerResponse(200, "Connection test result with Success flag and optional Error message", typeof(ConnectionTestResult))]
+    [SwaggerResponse(200, "Connection test result: a success flag and, on failure, an error message", typeof(ConnectionTestResultDto))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPost("authservice/externaldb/test")]
-    public async Task<ConnectionTestResult> TestExternalDatabaseConnection(ExternalDatabaseSettings inDto)
+    public async Task<ConnectionTestResultDto> TestExternalDatabaseConnection(ExternalDatabaseConnectionRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
-        if (inDto.DatabaseTypeEnum == ExternalDatabaseType.Sqlite && !coreBaseSettings.Standalone)
+        var settings = inDto.Map();
+
+        if (settings.DatabaseTypeEnum == ExternalDatabaseType.Sqlite && !coreBaseSettings.Standalone)
         {
-            return ConnectionTestResult.Failure(Resource.ConsumersExternalDbSqliteStandaloneOnly);
+            return ConnectionTestResult.Failure(Resource.ConsumersExternalDbSqliteStandaloneOnly).Map();
         }
 
-        return await ExternalDatabaseProvider.TestConnectionAsync(inDto, storageFactory, tenantManager.GetCurrentTenantId());
+        return (await ExternalDatabaseProvider.TestConnectionAsync(settings, storageFactory, tenantManager.GetCurrentTenantId())).Map();
     }
 
     /// <remarks>
-    /// Returns the portal payment settings.
+    /// Returns the portal's payment-related configuration: the sales contact email, the URL to buy or extend a
+    /// subscription, whether the portal is Standalone, the current license's trial status and expiration date, and
+    /// the maximum quota quantity that can be purchased at once. Requires Owner or DocSpaceAdmin (the
+    /// EditPortalSettings permission). This is a read-only, idempotent call. It remains reachable even while the
+    /// portal's own subscription payment is overdue, since this is how the caller finds the link to resolve it.
     /// </remarks>
     /// <summary>Get the payment settings</summary>
     /// <path>api/2.0/settings/payment</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Payment settings: sales email, feedback and support URL, link to pay for a portal, Standalone or not, current license, maximum quota quantity", typeof(PaymentSettingsDto))]
+    [SwaggerResponse(200, "Payment-related settings: sales contact, buy URL, Standalone flag, license, and quota cap", typeof(PaymentSettingsDto))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [AllowNotPayment]
     [HttpGet("payment")]
     public async Task<PaymentSettingsDto> GetPaymentSettings()
@@ -1207,31 +1387,42 @@ public partial class SettingsController(
     }
 
     /// <remarks>
-    /// Returns the Developer Tools access settings for the portal.
+    /// Returns whether the portal currently restricts the `User` role from using the developer tools (API keys, OAuth
+    /// apps, webhooks). Requires an authenticated session; every role can read the restriction, even though it only
+    /// limits what a `User` may do, not what a `RoomAdmin` or `DocSpaceAdmin` may do. This is a read-only, idempotent
+    /// call. Change the restriction with `POST api/2.0/security/devtoolsaccess`, which requires the
+    /// EditPortalSettings permission.
     /// </remarks>
     /// <summary>
     /// Get the Developer Tools access settings
     /// </summary>
     /// <path>api/2.0/settings/devtoolsaccess</path>
     [Tags("Settings / Access to DevTools")]
-    [SwaggerResponse(200, "Developer Tools access settings", typeof(TenantDevToolsAccessSettings))]
+    [SwaggerResponse(200, "Whether the `User` role is currently restricted from using the developer tools", typeof(TenantDevToolsAccessSettingsDto))]
     [HttpGet("devtoolsaccess")]
-    public async Task<TenantDevToolsAccessSettings> GetTenantAccessDevToolsSettings()
+    public async Task<TenantDevToolsAccessSettingsDto> GetTenantAccessDevToolsSettings()
     {
-        return await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
+        var settings = await settingsManager.LoadAsync<TenantDevToolsAccessSettings>();
+
+        return settings.Map();
     }
 
     /// <remarks>
-    /// Sets the Developer Tools access settings for the portal.
+    /// Sets whether the portal restricts the `User` role from using the developer tools (API keys, OAuth apps,
+    /// webhooks); `RoomAdmin` and `DocSpaceAdmin` are never affected by this setting. Requires Owner or DocSpaceAdmin
+    /// (the EditPortalSettings permission). This is a mutating, idempotent, portal-wide call: it applies to every
+    /// `User` on the tenant immediately. It returns the saved setting; read the current value at any time from
+    /// `GET api/2.0/settings/devtoolsaccess`.
     /// </remarks>
     /// <summary>
     /// Set the Developer Tools access settings
     /// </summary>
     /// <path>api/2.0/security/devtoolsaccess</path>
     [Tags("Security / Access to DevTools")]
-    [SwaggerResponse(200, "Developer Tools access settings", typeof(TenantDevToolsAccessSettings))]
+    [SwaggerResponse(200, "Saved developer tools access restriction for the `User` role", typeof(TenantDevToolsAccessSettingsDto))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPost("devtoolsaccess")]
-    public async Task<TenantDevToolsAccessSettings> SetTenantDevToolsAccessSettings(TenantDevToolsAccessSettingsDto inDto)
+    public async Task<TenantDevToolsAccessSettingsDto> SetTenantDevToolsAccessSettings(TenantDevToolsAccessSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -1241,35 +1432,48 @@ public partial class SettingsController(
 
         messageService.Send(MessageAction.DevToolsAccessSettingsChanged);
 
-        return settings;
+        return settings.Map();
     }
 
     /// <remarks>
-    /// Returns the visibility settings of the promotional banners in the portal.
+    /// Returns whether the portal's promotional banners are currently hidden from every user's interface. Requires an
+    /// authenticated session; every role can read it, since the flag affects what they see regardless of their own
+    /// permissions. This is a read-only, idempotent call. The flag only takes effect on a Standalone (self-hosted)
+    /// installation; on SaaS, banners are always shown no matter what is saved here. Change the setting with
+    /// `POST api/2.0/settings/banner`, which additionally requires an Enterprise license.
     /// </remarks>
     /// <summary>
     /// Get the banners visibility
     /// </summary>
     /// <path>api/2.0/settings/banner</path>
     [Tags("Settings / Banners visibility")]
-    [SwaggerResponse(200, "Promotional banners visibility settings", typeof(TenantBannerSettings))]
+    [SwaggerResponse(200, "Whether the portal's promotional banners are currently hidden", typeof(TenantBannerSettingsDto))]
     [HttpGet("banner")]
-    public async Task<TenantBannerSettings> GetTenantBannerSettings()
+    public async Task<TenantBannerSettingsDto> GetTenantBannerSettings()
     {
-        return await settingsManager.LoadAsync<TenantBannerSettings>();
+        var settings = await settingsManager.LoadAsync<TenantBannerSettings>();
+
+        return settings.Map();
     }
 
     /// <remarks>
-    /// Sets the visibility settings of the promotional banners in the portal.
+    /// Sets whether the portal's promotional banners are hidden for every user. Available only on an Enterprise
+    /// license; every other plan is refused regardless of the caller's role. Requires Owner or DocSpaceAdmin (the
+    /// EditPortalSettings permission). The flag only takes effect on a Standalone (self-hosted) installation; on
+    /// SaaS, banners are always shown no matter what is saved here. This is a mutating, idempotent, portal-wide call:
+    /// it applies to every user on the tenant immediately. It returns the saved setting; read the current value at
+    /// any time from `GET api/2.0/settings/banner`.
     /// </remarks>
     /// <summary>
     /// Set the banners visibility
     /// </summary>
     /// <path>api/2.0/settings/banner</path>
     [Tags("Security / Banners visibility")]
-    [SwaggerResponse(200, "Promotional banners visibility settings", typeof(TenantBannerSettings))]
+    [SwaggerResponse(200, "Saved promotional banners visibility setting", typeof(TenantBannerSettingsDto))]
+    [SwaggerResponse(402, "The portal is not an Enterprise installation")]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPost("banner")]
-    public async Task<TenantBannerSettings> SetTenantBannerSettings(TenantBannerSettingsDto inDto)
+    public async Task<TenantBannerSettingsDto> SetTenantBannerSettings(TenantBannerSettingsRequestDto inDto)
     {
         if (!tenantExtra.Enterprise)
         {
@@ -1284,40 +1488,46 @@ public partial class SettingsController(
 
         messageService.Send(MessageAction.BannerSettingsChanged);
 
-        return settings;
+        return settings.Map();
     }
 
-    /// <summary>
-    /// Get the AI access settings for the portal
-    /// </summary>
     /// <remarks>
-    /// Returns the current portal-level AI access settings that control whether all AI functionality
-    /// (chat, agents, vectorization) is available for the portal. AI is enabled by default.
+    /// Returns whether AI functionality (chat, agents, vectorization) is currently available on the portal at all; AI
+    /// is enabled by default. Requires an authenticated session; every role can read it. This is a read-only,
+    /// idempotent call. When the setting is disabled, every AI-specific endpoint and folder is unavailable regardless
+    /// of the caller's own permissions; this call only reports the portal-wide switch, not any per-user entitlement.
     /// </remarks>
+    /// <summary>
+    /// Get the AI access settings
+    /// </summary>
     /// <path>api/2.0/settings/ai-access</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "AI access settings", typeof(TenantAiAccessSettings))]
+    [SwaggerResponse(200, "Whether AI functionality is currently enabled for the portal", typeof(TenantAiAccessSettingsDto))]
     [HttpGet("ai-access")]
-    public async Task<TenantAiAccessSettings> GetTenantAiAccessSettings()
+    public async Task<TenantAiAccessSettingsDto> GetTenantAiAccessSettings()
     {
-        return await settingsManager.LoadAsync<TenantAiAccessSettings>();
+        var settings = await settingsManager.LoadAsync<TenantAiAccessSettings>();
+
+        return settings.Map();
     }
 
-    /// <summary>
-    /// Set the AI access for the portal
-    /// </summary>
     /// <remarks>
-    /// Updates the portal-level AI access settings. When AI is disabled, all AI features are turned off:
-    /// the AI Agents folder is hidden from root folder listings, AI status checks immediately return disabled,
-    /// and AI chat endpoints become inaccessible. Only users with the DocSpaceAdmin role
-    /// (EditPortalSettings permission) can change this setting.
+    /// Turns AI functionality (chat, agents, vectorization) on or off for the whole portal; AI is enabled by default.
+    /// Requires Owner or DocSpaceAdmin (the EditPortalSettings permission); every other caller is refused. Disabling
+    /// it immediately hides the AI Agents folder from root folder listings, makes AI status checks report disabled,
+    /// and makes AI chat endpoints unreachable for every user on the tenant, not only the caller. This is a mutating,
+    /// idempotent, portal-wide call, and the change is pushed to already-connected clients over the real-time
+    /// notification hub rather than waiting for their next request. It returns the saved setting.
     /// </remarks>
+    /// <summary>
+    /// Set the AI access settings
+    /// </summary>
     /// <path>api/2.0/settings/ai-access</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Updated AI access settings", typeof(TenantAiAccessSettings))]
-    [SwaggerResponse(403, "You don't have enough permission to change the AI access settings")]
+    [SwaggerResponse(200, "Saved AI access setting for the portal", typeof(TenantAiAccessSettingsDto))]
+    [SwaggerResponse(403, "The caller is not a DocSpace administrator, so the AI access setting cannot be changed")]
     [HttpPost("ai-access")]
-    public async Task<TenantAiAccessSettings> SetTenantAiAccessSettings(TenantAiAccessSettingsDto inDto)
+    public async Task<TenantAiAccessSettingsDto> SetTenantAiAccessSettings(TenantAiAccessSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
@@ -1325,9 +1535,11 @@ public partial class SettingsController(
 
         await settingsManager.SaveAsync(settings);
 
+        await quotaSocketManager.ChangeAiAccessSettingsAsync(inDto.Enabled);
+
         messageService.Send(inDto.Enabled ? MessageAction.AIAccessEnabled : MessageAction.AIAccessDisabled);
 
-        return settings;
+        return settings.Map();
     }
 
     private async Task DemandStatisticPermissionAsync()
@@ -1343,12 +1555,17 @@ public partial class SettingsController(
 
 
     /// <remarks>
-    /// Returns the portal user invitation settings.
+    /// Returns whether the portal currently allows inviting new members and new guests at all. No permission is
+    /// required; anonymous callers can read it too, since the invitation flow itself may run before the caller has
+    /// signed in. This is a read-only, idempotent call. The response supports conditional requests: send the standard
+    /// If-Modified-Since header with the previous `lastModified` value, and an unchanged response comes back empty
+    /// instead of resending the same settings.
     /// </remarks>
     /// <summary>Get the user invitation settings</summary>
     /// <path>api/2.0/settings/invitationsettings</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "portal user invitation settings", typeof(TenantUserInvitationSettingsDto))]
+    [SwaggerResponse(200, "Whether inviting new members and new guests is currently allowed", typeof(TenantUserInvitationSettingsDto))]
+    [SwaggerResponse(304, "The invitation settings have not changed since the `Last-Modified` value sent back in `If-Modified-Since`; the body is empty")]
     [HttpGet("invitationsettings")]
     [AllowAnonymous]
     public async Task<TenantUserInvitationSettingsDto> GetTenantUserInvitationSettings()
@@ -1362,12 +1579,17 @@ public partial class SettingsController(
 
 
     /// <remarks>
-    /// Updates the portal user invitation settings.
+    /// Sets whether the portal allows inviting new members and new guests. Requires Owner or DocSpaceAdmin (the
+    /// EditPortalSettings permission). Disabling member or guest invitations only blocks creating new invitations
+    /// going forward; it does not revoke links already issued or remove members already invited. This is a mutating,
+    /// idempotent, portal-wide call. It returns the saved setting; read the current value at any time, including
+    /// anonymously, from `GET api/2.0/settings/invitationsettings`.
     /// </remarks>
-    /// <summary>Update user invitation settings</summary>
+    /// <summary>Update the user invitation settings</summary>
     /// <path>api/2.0/settings/invitationsettings</path>
     [Tags("Settings / Common settings")]
-    [SwaggerResponse(200, "Updated user invitation settings", typeof(TenantUserInvitationSettingsDto))]
+    [SwaggerResponse(200, "Saved user invitation settings", typeof(TenantUserInvitationSettingsDto))]
+    [SwaggerResponse(403, "The caller has no portal-settings right")]
     [HttpPut("invitationsettings")]
     public async Task<TenantUserInvitationSettingsDto> UpdateInvitationSettings(TenantUserInvitationSettingsRequestDto inDto)
     {

@@ -33,6 +33,41 @@
 
 namespace ASC.Api.Core.Extensions;
 
+// The four headers every rate-limited response carries. They are written once into
+// components/headers and referenced from the responses, so the names must match on both sides.
+internal static class RateLimitHeaderNames
+{
+    public const string Limit = "X-RateLimit-Limit";
+    public const string Remaining = "X-RateLimit-Remaining";
+    public const string Reset = "X-RateLimit-Reset";
+    public const string RetryAfter = "Retry-After";
+}
+
+public class RateLimitDocumentFilter(
+    IOptions<RateLimiterSettings> rateLimiterOptions,
+    IOptions<RateLimiterOptions> limiterOptions) : IDocumentFilter
+{
+    private readonly RateLimiterSettings _settings = rateLimiterOptions.Value;
+    private readonly bool _hasGlobalLimiter = limiterOptions.Value.GlobalLimiter is not null;
+
+    public void Apply(OpenApiDocument document, DocumentFilterContext context)
+    {
+        if (!_hasGlobalLimiter)
+        {
+            return;
+        }
+
+        var headers = RateLimitOperationFilter.BuildGlobalHeaders(_settings);
+
+        document.Components ??= new OpenApiComponents();
+        document.Components.Headers ??= new Dictionary<string, IOpenApiHeader>();
+        document.Components.Headers[RateLimitHeaderNames.Limit]      = headers.Limit;
+        document.Components.Headers[RateLimitHeaderNames.Remaining]  = headers.Remaining;
+        document.Components.Headers[RateLimitHeaderNames.Reset]      = headers.Reset;
+        document.Components.Headers[RateLimitHeaderNames.RetryAfter] = headers.RetryAfter;
+    }
+}
+
 public class RateLimitOperationFilter(
     IOptions<RateLimiterSettings> rateLimiterOptions,
     IOptions<RateLimiterOptions> limiterOptions) : IOperationFilter
@@ -46,8 +81,7 @@ public class RateLimitOperationFilter(
             .OfType<EnableRateLimitingAttribute>()
             .FirstOrDefault();
 
-        (OpenApiHeader Limit, OpenApiHeader Remaining, OpenApiHeader Reset, OpenApiHeader RetryAfter) headers = default;
-
+        (IOpenApiHeader Limit, IOpenApiHeader Remaining, IOpenApiHeader Reset, IOpenApiHeader RetryAfter) headers = default;
 
         if (rateLimitAttr is not null)
         {
@@ -58,9 +92,14 @@ public class RateLimitOperationFilter(
                 RateLimiterPolicy.EmailInvitationApi => BuildEmailInvitationHeaders(_settings.MaxEmailInvitationsPerDay),
                 _ => default
             };
-        } else if (_hasGlobalLimiter)
+        }
+        else if (_hasGlobalLimiter)
         {
-            headers = BuildGlobalHeaders(_settings);
+            // Every operation that falls back to the global limiter carries the very same four
+            // headers, and RateLimitDocumentFilter already registers them under components/headers.
+            // Reference those instead of repeating the objects in each response: inlining them left
+            // the component entries unreferenced and copied the same text ~500 times per document.
+            headers = _globalHeaderReferences;
         }
 
         if (headers == default)
@@ -76,9 +115,9 @@ public class RateLimitOperationFilter(
         if (operation.Responses.TryGetValue("200", out var okResponse) && okResponse is OpenApiResponse concreteOkResponse)
         {
             concreteOkResponse.Headers ??= new Dictionary<string, IOpenApiHeader>();
-            concreteOkResponse.Headers["X-RateLimit-Limit"]     = headers.Limit;
-            concreteOkResponse.Headers["X-RateLimit-Remaining"] = headers.Remaining;
-            concreteOkResponse.Headers["X-RateLimit-Reset"]     = headers.Reset;
+            concreteOkResponse.Headers[RateLimitHeaderNames.Limit]     = headers.Limit;
+            concreteOkResponse.Headers[RateLimitHeaderNames.Remaining] = headers.Remaining;
+            concreteOkResponse.Headers[RateLimitHeaderNames.Reset]     = headers.Reset;
         }
 
         operation.Responses["429"] = new OpenApiResponse
@@ -86,17 +125,52 @@ public class RateLimitOperationFilter(
             Description = "Too Many Requests.",
             Headers = new Dictionary<string, IOpenApiHeader>
             {
-                ["Retry-After"] = headers.RetryAfter
+                [RateLimitHeaderNames.RetryAfter] = headers.RetryAfter
             }
         };
     }
 
-    private static (OpenApiHeader Limit, OpenApiHeader Remaining, OpenApiHeader Reset, OpenApiHeader RetryAfter) BuildGlobalHeaders(RateLimiterSettings settings) =>
+    // Built once: a header reference carries nothing but its target name and is never mutated
+    // here, so the same four objects can be shared by every operation in every document.
+    private static readonly (IOpenApiHeader Limit, IOpenApiHeader Remaining, IOpenApiHeader Reset, IOpenApiHeader RetryAfter) _globalHeaderReferences =
+    (
+        new OpenApiHeaderReference(RateLimitHeaderNames.Limit),
+        new OpenApiHeaderReference(RateLimitHeaderNames.Remaining),
+        new OpenApiHeaderReference(RateLimitHeaderNames.Reset),
+        new OpenApiHeaderReference(RateLimitHeaderNames.RetryAfter)
+    );
+
+    // A rate-limit header is the only integer this generator emits on its own, so it is also the
+    // only one whose bounds are known here rather than in a DTO. They are the real bounds, not
+    // placeholders put there to satisfy a linter: a remaining-request count cannot exceed the
+    // configured limit, and a retry delay cannot exceed the window it waits out. `X-RateLimit-Reset`
+    // is the exception - a Unix timestamp is non-negative and has no meaningful ceiling, so it
+    // declares none and stays int64.
+    private const int SecondsPerDay = 86400;
+
+    private static OpenApiSchema BoundedCount(int example, int maximum) => new()
+    {
+        Type = JsonSchemaType.Integer,
+        Format = "int32",
+        Minimum = "0",
+        Maximum = maximum.ToString(CultureInfo.InvariantCulture),
+        Examples = [example]
+    };
+
+    private static OpenApiSchema UnixTimestamp(long example) => new()
+    {
+        Type = JsonSchemaType.Integer,
+        Format = "int64",
+        Minimum = "0",
+        Examples = [example]
+    };
+
+    internal static (OpenApiHeader Limit, OpenApiHeader Remaining, OpenApiHeader Reset, OpenApiHeader RetryAfter) BuildGlobalHeaders(RateLimiterSettings settings) =>
     (
         new OpenApiHeader
         {
             Description =  $"Sliding window rate limit: {settings.SlidingWindowLimit} requests per minute per user/IP.",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = settings.SlidingWindowLimit }
+            Schema = BoundedCount(settings.SlidingWindowLimit, settings.SlidingWindowLimit)
         },
         new OpenApiHeader
         {
@@ -104,18 +178,18 @@ public class RateLimitOperationFilter(
                 $"Number of requests remaining in the current sliding window ({settings.SlidingWindowLimit} req/min). " +
                 $"Concurrent limits also apply: {settings.ConcurrentGetLimit} parallel GET requests, " +
                 $"{settings.DefaultConcurrencyWriteRequests} parallel POST/PUT requests.",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 1 }
+            Schema = BoundedCount(1, settings.SlidingWindowLimit)
         },
         new OpenApiHeader
         {
             Description = "Unix timestamp (seconds) when the current sliding window rate limit resets.",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 1750000000 }
+            Schema = UnixTimestamp(1750000000)
         },
         new OpenApiHeader
         {
             Description =  $"Seconds to wait before retrying. " +
                            $"Up to 60s for the sliding window ({settings.SlidingWindowLimit} req/min), up to 86400s for the daily POST/PUT limit ({settings.DailyWriteLimit}/day).",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 30 }
+            Schema = BoundedCount(30, SecondsPerDay)
         }
     );
 
@@ -124,22 +198,22 @@ public class RateLimitOperationFilter(
         new OpenApiHeader
         {
             Description = $"Rate limit: {limitValue} requests per {timeValue} minutes per user/IP.",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = limitValue }
+            Schema = BoundedCount(limitValue, limitValue)
         },
         new OpenApiHeader
         {
             Description = $"Requests remaining in the current {timeValue}-minute window.",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 1 }
+            Schema = BoundedCount(1, limitValue)
         },
         new OpenApiHeader
         {
             Description = $"Unix timestamp (seconds) when the current {timeValue}-minute window resets.",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 1750000000 }
+            Schema = UnixTimestamp(1750000000)
         },
         new OpenApiHeader
         {
             Description = $"Seconds to wait before retrying ({limitValue} req / {timeValue} min limit per user/IP).",
-            Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 30 }
+            Schema = BoundedCount(30, timeValue * 60)
         }
     );
 
@@ -154,22 +228,22 @@ public class RateLimitOperationFilter(
             new OpenApiHeader
             {
                 Description = $"Rate limit: {limitValue.Value} invitations per day per tenant.",
-                Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = limitValue.Value }
+                Schema = BoundedCount(limitValue.Value, limitValue.Value)
             },
             new OpenApiHeader
             {
                 Description = $"Invitations remaining today per tenant.",
-                Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 1 }
+                Schema = BoundedCount(1, limitValue.Value)
             },
             new OpenApiHeader
             {
                 Description = "Unix timestamp (seconds) when the daily invitation limit resets.",
-                Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 1750000000 }
+                Schema = UnixTimestamp(1750000000)
             },
             new OpenApiHeader
             {
                 Description = $"Seconds to wait before retrying ({limitValue.Value} invitations/day limit per tenant).",
-                Schema = new OpenApiSchema { Type = JsonSchemaType.Integer, Example = 30 }
+                Schema = BoundedCount(30, SecondsPerDay)
             }
         );
     }

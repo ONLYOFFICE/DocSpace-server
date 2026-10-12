@@ -127,7 +127,7 @@
     <value>Lisenziya açarını daxil etməlisiniz</value>
   </data>
   <data name="LicenseTypeNotCorrect" xml:space="preserve">
-    <value>Lisenziya Münaqişəsi. {0} DocSpace (Enterprise və ya Developer) düzgün buraxılışını quraşdırdığınızdan əmin olun. Hər hansı bir sualınız varsa, satış menecerinizlə əlaqə saxlayın.</value>
+    <value>Lisenziya Münaqişəsi. {0} Docs (Enterprise və ya Developer) düzgün buraxılışını quraşdırdığınızdan əmin olun. Hər hansı bir sualınız varsa, satış menecerinizlə əlaqə saxlayın.</value>
   </data>
   <data name="NewDocument" xml:space="preserve">
     <value>Yeni sənəd</value>

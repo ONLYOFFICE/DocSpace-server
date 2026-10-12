@@ -34,7 +34,6 @@
 using System.Text.Json.Nodes;
 
 using ASC.Core.Common.Identity;
-using ASC.Core.Security.Authentication;
 
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Caching.Memory;

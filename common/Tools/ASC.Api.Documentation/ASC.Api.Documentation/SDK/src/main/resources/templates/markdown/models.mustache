@@ -1,0 +1,28 @@
+# {{appName}}
+
+Every type the endpoints exchange. Each one is published on a page of its own; this document is
+the source those pages are cut from and is not published itself.
+{{#models}}{{#model}}
+<!--model:{{{vendorExtensions.x-title}}}|{{vendorExtensions.x-anchor}}-->
+### {{{vendorExtensions.x-title}}}
+{{#description}}
+{{{.}}}
+{{/description}}
+{{#vendorExtensions.x-enum-doc}}
+
+Possible values:
+
+{{#values}}
+- `{{enumValue}}`{{#enumLabel}} - {{{.}}}{{/enumLabel}}{{#enumConstant}} (`{{.}}`){{/enumConstant}}
+{{/values}}
+{{/vendorExtensions.x-enum-doc}}
+{{#vendorExtensions.x-has-properties}}
+
+| Name | Type | Description | Notes |
+|------------ | ------------- | ------------- | -------------|
+{{#parent}}{{#parentVars}}| **{{name}}** | {{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{#dataFormat}} ({{dataFormat}}){{/dataFormat}} | {{{description}}} | {{{vendorExtensions.x-notes}}}{{#readOnly}} [readonly]{{/readOnly}} |
+{{/parentVars}}{{/parent}}{{#vars}}| **{{name}}** | {{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{#dataFormat}} ({{dataFormat}}){{/dataFormat}} | {{{description}}} | {{{vendorExtensions.x-notes}}}{{#readOnly}} [readonly]{{/readOnly}} |
+{{/vars}}
+{{/vendorExtensions.x-has-properties}}
+{{/model}}{{/models}}
+<!--/models-->

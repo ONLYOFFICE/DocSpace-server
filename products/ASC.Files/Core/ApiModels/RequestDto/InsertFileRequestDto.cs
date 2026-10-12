@@ -39,27 +39,34 @@ namespace ASC.Files.Core.ApiModels.RequestDto;
 public class InsertFileRequestDto : IModelWithFile, IDisposable
 {
     /// <summary>
-    /// The file to be inserted.
+    /// The content to store, sent as a `multipart/form-data` part. The same content may instead be sent as the raw
+    /// request body, which is what a client that cannot build a form does; when both are present the form part wins.
     /// </summary>
     /// <example>binary file data</example>
     public IFormFile File { get; set; }
 
     /// <summary>
-    /// The file title to be inserted.
+    /// The name to store the file under, extension included. It wins over the name of the uploaded part, which is the
+    /// reason to choose this operation over the plain upload, and it is the only name available when the content
+    /// arrives as a raw body. Characters a title cannot hold are replaced with underscores and the name is cut to 170
+    /// characters before the file is stored.
     /// </summary>
-    /// <example>My Document</example>
+    /// <example>Quarterly report.docx</example>
     public string Title { get; set; }
 
     /// <summary>
-    /// Specifies whether to create a new file if it already exists or not.
+    /// Settles the clash with a file already carrying that title: left out, the content is written as the next
+    /// version of that file; set to true, both survive and the new one gets a numeric suffix in its title.
     /// </summary>
     /// <example>true</example>
     public bool CreateNewIfExist { get; set; }
 
     /// <summary>
-    /// Specifies whether to keep the file converting status or not.
+    /// Decides whether the outcome of the background conversion outlives the conversion itself. True keeps the queue
+    /// record, so `GET api/2.0/files/file/{fileId}/checkconversion` can still report the result or the error; left
+    /// out, the record is cleared the moment the conversion ends and that call finds nothing.
     /// </summary>
-    /// <example>false</example>
+    /// <example>true</example>
     public bool KeepConvertStatus { get; set; }
 
 
@@ -109,7 +116,8 @@ public class InsertFileRequestDto : IModelWithFile, IDisposable
 public class InsertWithFileRequestDto<T>
 {
     /// <summary>
-    /// The folder ID for inserting a file.
+    /// The folder that receives the file; take the id from a listing such as `GET api/2.0/files/@root`. A room or an
+    /// ordinary folder inside one is accepted, a section root is not.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "folderId")]

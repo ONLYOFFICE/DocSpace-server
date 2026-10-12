@@ -34,47 +34,58 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// Default templates settings request parameters.
+/// The document to use as the blank the portal creates for one extension.
 /// </summary>
 public class DefaultTemplateSettingsRequestDto
 {
     /// <summary>
-    /// File id to replace template with
+    /// The document to copy as the blank: a number for a file stored in the portal, a string for one in a connected
+    /// third-party storage. Take the identifier from a folder listing such as `GET api/2.0/files/{folderId}`; the
+    /// caller must be allowed to copy that file, and its extension must be the one named below.
     /// </summary>
     /// <example>1</example>
     public required JsonElement SelectedFile { get; set; }
     /// <summary>
-    /// File extension of a template to replace
+    /// The extension the blank is set for, written in lower case with the leading dot. Only the extensions the
+    /// portal's built-in template set covers are accepted, and `GET api/2.0/files/settings/defaulttemplate` returns
+    /// exactly that list; an extension outside it leaves the settings unchanged instead of failing.
     /// </summary>
     /// <example>.docx</example>
     public required string FileExtension { get; set; }
 }
 
 /// <summary>
-/// Default templates settings reset request parameters.
+/// The extension whose custom blank is dropped in favour of the built-in one.
 /// </summary>
 public class DefaultTemplateSettingsResetRequestDto
 {
     /// <summary>
-    /// File extension of a template to reset
+    /// The extension whose custom blank is dropped, written in lower case with the leading dot. Only the extensions
+    /// the portal's built-in template set covers are accepted, and `GET api/2.0/files/settings/defaulttemplate`
+    /// returns exactly that list; an extension outside it leaves the settings unchanged instead of failing.
     /// </summary>
     /// <example>.docx</example>
     public required string FileExtension { get; set; }
 }
 
 /// <summary>
-/// Default templates settings upload request parameters.
+/// The document uploaded as the blank for one extension, sent as multipart form data.
 /// </summary>
 public class DefaultTemplateSettingsUploadRequestDto
 {
     /// <summary>
-    /// File extension of a template to replace
+    /// The extension the uploaded blank is set for, written in lower case with the leading dot, and travelling in the
+    /// query string rather than in the form. It must match the extension of the uploaded file name. Only the
+    /// extensions the portal's built-in template set covers are accepted, and
+    /// `GET api/2.0/files/settings/defaulttemplate` returns exactly that list; an extension outside it leaves the
+    /// settings unchanged instead of failing.
     /// </summary>
     /// <example>.docx</example>
     public required string FileExtension { get; set; }
 
     /// <summary>
-    /// File to replace template with
+    /// The template document itself. Its file name must end with the extension named above, a PDF must be a fillable
+    /// form, and the body is capped at 100 MB - a larger one is refused while it is still streaming in.
     /// </summary>
     /// <example>binary file data</example>
     public required IFormFile File { get; set; }

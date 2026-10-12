@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._05_Features;
 
-[Collection("Test Collection")]
 [Trait("Category", "Features")]
 public class FileCustomizationTests(
     AspireAppFixture fixture)
@@ -43,12 +42,12 @@ public class FileCustomizationTests(
     public async Task SetCustomFilterTag_InMy_ReturnsError()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
-        var file = await CreateFileInMy("file_for_custom_filter.xlsx",  Initializer.Owner);
+        var file = await CreateFileInMy("file_for_custom_filter.xlsx",  Owner);
         
         // Act
-        var customFilterParams = new CustomFilterParameters(enabled: true);
+        var customFilterParams = new CustomFilterRequest(enabled: true);
         var result = (await _filesApi.SetCustomFilterTagAsync(file.Id, customFilterParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
@@ -61,13 +60,13 @@ public class FileCustomizationTests(
     public async Task SetCustomFilterTag_EnableCustomFilter_ReturnsUpdatedFile()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         var createdRoom = await CreateVirtualRoom("room_for_custom_filter"); 
         var file = await CreateFile("file_for_custom_filter.xlsx", createdRoom.Id);
         
         // Act
-        var customFilterParams = new CustomFilterParameters(enabled: true);
+        var customFilterParams = new CustomFilterRequest(enabled: true);
         var result = (await _filesApi.SetCustomFilterTagAsync(file.Id, customFilterParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
@@ -81,17 +80,17 @@ public class FileCustomizationTests(
     public async Task SetCustomFilterTag_DisableCustomFilter_ReturnsUpdatedFile()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
         
         var createdRoom = await CreateVirtualRoom("room_for_custom_filter"); 
         var file = await CreateFile("file_for_custom_filter_disable.xlsx", createdRoom.Id);
         
         // First enable custom filter
-        var enableParams = new CustomFilterParameters(enabled: true);
+        var enableParams = new CustomFilterRequest(enabled: true);
         await _filesApi.SetCustomFilterTagAsync(file.Id, enableParams, TestContext.Current.CancellationToken);
         
         // Then disable it
-        var disableParams = new CustomFilterParameters(enabled: false);
+        var disableParams = new CustomFilterRequest(enabled: false);
         var result = (await _filesApi.SetCustomFilterTagAsync(file.Id, disableParams, TestContext.Current.CancellationToken)).Response;
         
         // Assert
@@ -104,9 +103,9 @@ public class FileCustomizationTests(
     // public async Task CreateThumbnails_ValidFile_ReturnsSuccess()
     // {
     //     // Arrange
-    //     await _filesClient.Authenticate(Initializer.Owner);
+    //     await _filesClient.Authenticate(Owner);
     //     
-    //     var file = await CreateFile("file_for_thumbnail.docx", FolderType.USER, Initializer.Owner);
+    //     var file = await CreateFile("file_for_thumbnail.docx", FolderType.USER, Owner);
     //     
     //     // Act
     //     var thumbnailRequest = new BaseBatchRequestDto(fileIds: [new(file.Id)]);

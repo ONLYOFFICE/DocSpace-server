@@ -72,6 +72,17 @@ public class AuthorizationEntity {
   @Column(name = "tenant_id", nullable = false)
   private long tenantId;
 
+  /**
+   * The tenant owning the client this authorization was granted to, which is not necessarily {@link
+   * #tenantId}
+   */
+  @Column(name = "owner_tenant_id")
+  private Long ownerTenantId;
+
+  /** The user who created the client this authorization was granted to. */
+  @Column(name = "owner_user_id")
+  private String ownerUserId;
+
   /** The state. */
   @Column(name = "state")
   private String state;
@@ -182,7 +193,8 @@ public class AuthorizationEntity {
    * date and time.
    */
   @PreUpdate
-  private void preUpdate() {
+  @PrePersist
+  private void stampModifiedAt() {
     this.modifiedAt = ZonedDateTime.now();
   }
 

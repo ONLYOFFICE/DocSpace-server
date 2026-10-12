@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -60,6 +60,7 @@ public class TariffService(
     ILogger<TariffService> logger,
     BillingClient billingClient,
     AccountingClient accountingClient,
+    DocsCloudClient docsCloudClient,
     IServiceProvider serviceProvider,
     ResiliencePipelineProvider<string> resiliencePipelineProvider,
     TenantExtraConfig tenantExtraConfig)
@@ -70,6 +71,8 @@ public class TariffService(
     private TimeSpan _cacheExpiration = _defaultCacheExpiration;
 
     private const int DefaultTrialPeriod = 30;
+    private const int MaxTopUpAttempts = 5;
+    private static readonly TimeSpan _subscriptionExtensionTolerance = TimeSpan.FromSeconds(1);
 
     //private readonly int _activeUsersMin;
     //private readonly int _activeUsersMax;
@@ -131,6 +134,7 @@ public class TariffService(
 
                             DateTime? quotaDueDate = null;
                             int? nextQuantity = null;
+                            int? nextQuota = null;
                             if (quota.Wallet)
                             {
                                 quotaDueDate = currentPayment.EndDate;
@@ -138,27 +142,43 @@ public class TariffService(
                                 if (existingQuota != null && existingQuota.DueDate == currentPayment.EndDate && existingQuota.Quantity == currentPayment.Quantity)
                                 {
                                     nextQuantity = existingQuota.NextQuantity;
+                                    nextQuota = existingQuota.NextQuota;
+                                }
+                                if (quota is { Additional: false })
+                                {
+                                    var paymentEndDate = 9999 <= currentPayment.EndDate.Year ? DateTime.MaxValue : currentPayment.EndDate;
+                                    asynctariff.DueDate = DateTime.Compare(asynctariff.DueDate, paymentEndDate) < 0 ? asynctariff.DueDate : paymentEndDate;
                                 }
                             }
                             else
                             {
                                 var paymentEndDate = 9999 <= currentPayment.EndDate.Year ? DateTime.MaxValue : currentPayment.EndDate;
-                                asynctariff.DueDate = DateTime.Compare(asynctariff.DueDate, paymentEndDate) < 0 ? asynctariff.DueDate : paymentEndDate;
+
+                                // track the DocsCloudTrial expiration per-quota so it becomes Overdue after the trial ends,
+                                // instead of being folded into the tariff-level DueDate (which would expire the whole tariff)
+                                if (quota.Additional)
+                                {
+                                    quotaDueDate = paymentEndDate;
+                                }
+                                else
+                                {
+                                    asynctariff.DueDate = DateTime.Compare(asynctariff.DueDate, paymentEndDate) < 0 ? asynctariff.DueDate : paymentEndDate;
+                                }
                             }
 
                             asynctariff.Quotas = asynctariff.Quotas.Where(r => r.Id != quota.TenantId).ToList();
-                            asynctariff.Quotas.Add(new Quota(quota.TenantId, currentPayment.Quantity, quota.Wallet, quotaDueDate, nextQuantity));
+                            asynctariff.Quotas.Add(new Quota(quota.TenantId, currentPayment.Quantity, quota.Additional, quota.Wallet, quotaDueDate, nextQuantity, nextQuota));
                             email = currentPayment.PaymentEmail;
                         }
 
-                        // need sort by wallet
-                        asynctariff.Quotas = asynctariff.Quotas.OrderBy(q => q.Wallet).ToList();
+                        // need sort by additional, then by wallet so the non-wallet base plan is the aggregation base
+                        asynctariff.Quotas = asynctariff.Quotas.OrderBy(q => q.Additional).ThenBy(q => q.Wallet).ToList();
 
-                        if (asynctariff.Quotas.All(q => q.Wallet))
+                        if (asynctariff.Quotas.All(q => q.Additional))
                         {
                             if (tariff.Id != 0 && tariff.State >= TariffState.Paid && !await IsFreeTariffAsync(tariff))
                             {
-                                throw new BillingNotFoundException($"Payment {tariff.Id} not found. Only wallet payments available");
+                                throw new BillingNotFoundException($"Payment {tariff.Id} not found. Only additional payments available");
                             }
 
                             await AddInitialQuotaAsync(asynctariff, tenantId);
@@ -327,7 +347,7 @@ public class TariffService(
         return productIds;
     }
 
-    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName, Dictionary<string, string> metadata = null)
+    public async Task<bool> PaymentChangeAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency, bool checkQuota, string customerParticipantName, Dictionary<string, string> metadata = null, bool throwIfFailure = false)
     {
         if (quantity == null || quantity.Count == 0 || !billingClient.Configured)
         {
@@ -336,25 +356,70 @@ public class TariffService(
 
         var productIds = checkQuota ? await CheckQuotaAndGetProductIds(tenantId, quantity) : await GetProductIds(quantity);
 
+        bool changed;
+
         try
         {
-            var changed = await billingClient.ChangePaymentAsync(await coreSettings.GetKeyAsync(tenantId), productIds, quantity.Values, productQuantityType, currency, customerParticipantName, metadata);
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
 
-            if (!changed)
+            changed = await billingClient.ChangePaymentAsync(portalId, productIds, quantity.Values, productQuantityType, currency, customerParticipantName, metadata);
+
+            if (changed)
             {
-                return false;
-            }
+                await ClearCacheAsync(tenantId);
 
-            await ClearCacheAsync(tenantId);
+                await docsCloudClient.ClearCacheAsync(portalId);
+            }
         }
         catch (Exception error)
         {
+            // a caller that asked for the exception reports it itself, at the level it considers right:
+            // the renewal service treats a timeout as an unknown outcome to re-check, not as an error
+            if (throwIfFailure)
+            {
+                throw;
+            }
+
             logger.ErrorWithException(error);
 
             return false;
         }
 
-        return true;
+        if (!changed && throwIfFailure)
+        {
+            throw new BillingException("Payment change was declined");
+        }
+
+        return changed;
+    }
+
+    /// <summary>
+    /// Asks the billing service itself, bypassing every cache, whether the subscription to <paramref name="productId"/>
+    /// now ends after <paramref name="previousDueDate"/> - i.e. whether a payment change whose response was lost
+    /// has actually been applied. Throws <see cref="BillingException"/> when the billing service gives no answer:
+    /// the outcome is then still unknown.
+    /// </summary>
+    public async Task<bool> IsSubscriptionExtendedAsync(int tenantId, string productId, DateTime previousDueDate)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+        var currentPayments = await billingClient.GetCurrentPaymentsAsync(portalId, true);
+
+        // MySQL datetime keeps no fractional seconds and rounds them, so the stored due date can differ from the
+        // billing end date of an unchanged subscription by up to half a second either way. A renewal moves it by a
+        // whole subscription period, so anything a second or more later is the renewal.
+        var extended = currentPayments.Any(payment =>
+            payment.ProductId.ToString() == productId &&
+            payment.EndDate - previousDueDate >= _subscriptionExtensionTolerance);
+
+        if (extended)
+        {
+            await ClearCacheAsync(tenantId);
+
+            await docsCloudClient.ClearCacheAsync(portalId);
+        }
+
+        return extended;
     }
 
     public async Task<PaymentCalculation> PaymentCalculateAsync(int tenantId, Dictionary<string, int> quantity, ProductQuantityType productQuantityType, string currency)
@@ -377,6 +442,111 @@ public class TariffService(
             logger.ErrorWithException(error);
 
             return null;
+        }
+    }
+
+    public async Task<SubscriptionBalanceInfo> GetSubscriptionBalanceInfoAsync(int tenantId, string productId)
+    {
+        if (!billingClient.Configured)
+        {
+            return null;
+        }
+
+        return await billingClient.GetSubscriptionBalanceInfoAsync(await coreSettings.GetKeyAsync(tenantId), productId);
+    }
+
+    public async Task<SubscriptionToWalletResult> SubscriptionBalanceToWalletAsync(int tenantId, string productId)
+    {
+        if (!billingClient.Configured)
+        {
+            return null;
+        }
+
+        var result = await billingClient.SubscriptionBalanceToWalletAsync(await coreSettings.GetKeyAsync(tenantId), productId);
+
+        // Clear the cache to get up-to-date tariff and balance information.
+        await ClearCacheAsync(tenantId);
+
+        return result;
+    }
+
+    public async Task<bool> SwitchSubscriptionAsync(int tenantId, string fromProductId, string toProductId, int quantity, string customerParticipantName, Dictionary<string, string> metadata = null)
+    {
+        if (!billingClient.Configured)
+        {
+            return false;
+        }
+
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            var switched = await billingClient.SwitchSubscriptionAsync(portalId, fromProductId, toProductId, quantity, customerParticipantName, metadata);
+
+            if (!switched)
+            {
+                return false;
+            }
+
+            await ClearCacheAsync(tenantId);
+
+            await docsCloudClient.ClearCacheAsync(portalId);
+        }
+        catch (Exception error)
+        {
+            logger.ErrorWithException(error);
+
+            return false;
+        }
+
+        return true;
+    }
+
+    public async Task<PaymentCalculation> CalculateSwitchSubscriptionAsync(int tenantId, string fromProductId, string toProductId, int quantity)
+    {
+        if (!billingClient.Configured)
+        {
+            return null;
+        }
+
+        try
+        {
+            var response = await billingClient.CalculateSwitchSubscriptionAsync(await coreSettings.GetKeyAsync(tenantId), fromProductId, toProductId, quantity);
+
+            return response;
+        }
+        catch (Exception error)
+        {
+            logger.ErrorWithException(error);
+
+            return null;
+        }
+    }
+
+    public async Task<bool> GetDocsCloudTrialAsync(int tenantId)
+    {
+        if (!billingClient.Configured)
+        {
+            return false;
+        }
+
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            var result = await billingClient.GetDocsCloudTrialAsync(portalId);
+
+            await ClearCacheAsync(tenantId);
+
+            await docsCloudClient.ClearCacheAsync(portalId);
+
+            return result;
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+
+            return false;
         }
     }
 
@@ -426,11 +596,6 @@ public class TariffService(
     internal static string GetAccountingBalanceCacheKey(int tenantId)
     {
         return $"{tenantId}:accounting:balance";
-    }
-
-    internal static string GetAccountingAiBalanceCacheKey(int tenantId)
-    {
-        return $"{tenantId}:accounting:ai:balance";
     }
 
     private async Task ClearCacheAsync(int tenantId)
@@ -590,7 +755,7 @@ public class TariffService(
         {
             try
             {
-                var key = $"billing-prices-{partnerId}-{string.Join(",", productIds)}";
+                var key = $"billing-prices-{partnerId}-{wallet}-{string.Join(",", productIds)}";
                 var result = cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
                 if (result == null)
                 {
@@ -601,6 +766,7 @@ public class TariffService(
 
                         foreach (var productId in productIds)
                         {
+                            // numeric → billing, non-numeric → accounting
                             if (!int.TryParse(productId, out _))
                             {
                                 accountingServices.Add(productId);
@@ -673,14 +839,16 @@ public class TariffService(
 
         var tariff = await CreateDefaultAsync(true);
         tariff.Id = r.Id;
-        tariff.DueDate = r.Stamp.Year < 9999 ? r.Stamp : DateTime.MaxValue;
+        tariff.DueDate = RestoreMaxValueSentinel(r.Stamp);
         tariff.CustomerId = r.CustomerId;
 
         var quotas = await coreDbContext.QuotasAsync(r.TenantId, r.Id).ToListAsync();
 
         foreach (var q in quotas)
         {
-            if (q.State is QuotaState.Overdue)
+            RestoreMaxValueSentinel(q);
+
+            if (q is { Additional: true, State: QuotaState.Overdue })
             {
                 tariff.OverdueQuotas ??= [];
                 tariff.OverdueQuotas.Add(q);
@@ -691,7 +859,7 @@ public class TariffService(
             }
         }
 
-        if (tariff.Quotas.All(q => q.Wallet))
+        if (tariff.Quotas.All(q => q.Additional))
         {
             await AddInitialQuotaAsync(tariff, tenant.Value);
         }
@@ -709,17 +877,11 @@ public class TariffService(
             {
                 await using var dbContext = await coreDbContextManager.CreateDbContextAsync();
 
-                var stamp = tariffInfo.DueDate;
-                if (stamp.Equals(DateTime.MaxValue))
-                {
-                    stamp = stamp.Date.Add(new TimeSpan(tariffInfo.DueDate.Hour, tariffInfo.DueDate.Minute, tariffInfo.DueDate.Second));
-                }
-
                 var efTariff = new DbTariff
                 {
                     Id = tariffInfo.Id,
                     TenantId = tenant,
-                    Stamp = stamp,
+                    Stamp = TruncateToWholeSeconds(tariffInfo.DueDate),
                     CustomerId = tariffInfo.CustomerId,
                     CreateOn = DateTime.UtcNow
                 };
@@ -740,8 +902,9 @@ public class TariffService(
                         TariffId = efTariff.Id,
                         Quota = q.Id,
                         Quantity = q.Quantity,
-                        DueDate = q.DueDate,
+                        DueDate = q.DueDate.HasValue ? TruncateToWholeSeconds(q.DueDate.Value) : null,
                         NextQuantity = q.NextQuantity,
+                        NextQuota = q.NextQuota,
                         TenantId = tenant
                     });
                 }
@@ -776,7 +939,31 @@ public class TariffService(
         return inserted;
     }
 
-    public async Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int? nextQuantity)
+    // MySQL "datetime" columns have no fractional-second precision; DateTime.MaxValue's sub-second ticks
+    // round up to the next (invalid, year 10000) day and get silently stored as a zero-date otherwise.
+    private static DateTime TruncateToWholeSeconds(DateTime value)
+    {
+        return value.Equals(DateTime.MaxValue)
+            ? value.Date.Add(new TimeSpan(value.Hour, value.Minute, value.Second))
+            : value;
+    }
+
+    // Reverses TruncateToWholeSeconds on read, so a due date persisted as the "no expiration" sentinel
+    // compares equal (via Quota.Equals) to the in-memory DateTime.MaxValue it originated from.
+    private static DateTime RestoreMaxValueSentinel(DateTime value)
+    {
+        return value.Year < 9999 ? value : DateTime.MaxValue;
+    }
+
+    private static void RestoreMaxValueSentinel(Quota q)
+    {
+        if (q.DueDate.HasValue)
+        {
+            q.DueDate = RestoreMaxValueSentinel(q.DueDate.Value);
+        }
+    }
+
+    public async Task<bool> UpdateNextQuantityAsync(int tenant, Tariff tariffInfo, int quotaId, int? nextQuantity, int? nextQuota = null)
     {
         try
         {
@@ -785,26 +972,43 @@ public class TariffService(
                 return false;
             }
 
+            // the only supported scheduled quota switch today is reverting from DocsCloudDevPack back to DocsCloud
+            if (nextQuota is not null && (quotaId != (int)TenantWalletService.DocsCloudDevPack || nextQuota != (int)TenantWalletService.DocsCloud))
+            {
+                return false;
+            }
+
             var currentTariff = await GetBillingInfoAsync(tenant);
 
             await using var dbContext = await coreDbContextManager.CreateDbContextAsync();
+
+            var changed = false;
 
             foreach (var q in tariffInfo.Quotas)
             {
                 if (q.Id == quotaId)
                 {
                     q.NextQuantity = nextQuantity;
+                    q.NextQuota = nextQuota;
 
                     await dbContext.AddOrUpdateAsync(quota => quota.TariffRows, new DbTariffRow
                     {
                         TariffId = tariffInfo.Id,
                         Quota = q.Id,
                         Quantity = q.Quantity,
-                        DueDate = q.DueDate,
+                        DueDate = q.DueDate.HasValue ? TruncateToWholeSeconds(q.DueDate.Value) : null,
                         NextQuantity = nextQuantity,
+                        NextQuota = nextQuota,
                         TenantId = tenant
                     });
+
+                    changed = true;
                 }
+            }
+
+            if (!changed)
+            {
+                return false;
             }
 
             await dbContext.SaveChangesAsync();
@@ -947,6 +1151,7 @@ public class TariffService(
 
         if (toAdd != null)
         {
+            RestoreMaxValueSentinel(toAdd);
             tariff.Quotas.Insert(0, toAdd);
         }
         else
@@ -1127,6 +1332,19 @@ public class TariffService(
 
     public async Task<bool> TopUpDepositAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, Dictionary<string, string> metadata = null, bool waitForChanges = false)
     {
+        var (_, result) = await TopUpDepositInternalAsync(tenantId, amount, currency, customerParticipantName, siteName, metadata, waitForChanges);
+
+        return result;
+    }
+
+    /// <summary>
+    /// Deposits funds and reports whether the outcome could actually be confirmed.
+    /// <see cref="TopUpOutcome.Unknown"/> means the billing response was lost (e.g. a timeout) or the
+    /// balance did not reflect the change in time - the deposit may or may not have been applied on the
+    /// billing side, so callers must not blindly retry with a recomputed amount, or they risk depositing twice.
+    /// </summary>
+    private async Task<(TopUpOutcome Outcome, bool Result)> TopUpDepositInternalAsync(int tenantId, decimal amount, string currency, string customerParticipantName, string siteName, Dictionary<string, string> metadata, bool waitForChanges)
+    {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
 
         decimal? oldBalanceAmount = 0;
@@ -1137,23 +1355,28 @@ public class TariffService(
             oldBalanceAmount = oldBalance?.SubAccounts?.FirstOrDefault(x => x.Currency == currency)?.Amount;
         }
 
+        var cacheKey = GetAccountingBalanceCacheKey(tenantId);
         var result = false;
+        TopUpOutcome outcome;
 
         try
         {
             result = await billingClient.TopUpDepositAsync(portalId, amount, currency, customerParticipantName, siteName, metadata);
+            outcome = result ? TopUpOutcome.Confirmed : TopUpOutcome.Rejected;
         }
         catch (Exception error)
         {
             logger.ErrorWithException(error);
+            outcome = TopUpOutcome.Unknown;
         }
 
         if (!result || !waitForChanges)
         {
-            return result;
+            await hybridCache.RemoveAsync(cacheKey);
+            return (outcome, result);
         }
 
-        var pipeline = resiliencePipelineProvider.GetPipeline<bool>(AccountingClient.BalanceResiliencePipelineName);
+        var pipeline = resiliencePipelineProvider.GetPipeline<bool>(AccountingHttpClientExtension.BalanceResiliencePipelineName);
 
         var updated = await pipeline.ExecuteAsync(async _ =>
         {
@@ -1166,10 +1389,81 @@ public class TariffService(
         if (!updated)
         {
             logger.ErrorBilling(tenantId.ToString(), "Balance value is not updated after replenishment");
-            await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
+            await hybridCache.RemoveAsync(cacheKey);
+
+            // Billing reported success, but we could not confirm it against the balance in time:
+            // treat as unknown rather than confirmed so the caller does not act as if it were final.
+            outcome = TopUpOutcome.Unknown;
         }
 
-        return result;
+        return (outcome, result);
+    }
+
+    public async Task<bool> EnsureWalletBalanceAsync(int tenantId, decimal requiredAmount, string currency, string customerParticipantName, string siteName, bool auto, Dictionary<string, string> metadata = null, bool allowTopUp = true)
+    {
+        var balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency);
+
+        // A delayed payment method accepts the deposit right away, but the money is credited only
+        // once the transfer settles, so the balance cannot reflect it within this call and the loop below would
+        // charge the customer again on every attempt. Such wallets are topped up manually - only report whether
+        // what is already there covers the cost.
+        if (!allowTopUp)
+        {
+            return balanceAmount >= requiredAmount;
+        }
+
+        // The balance may be consumed concurrently, so the top-up is retried several times.
+        for (var attempt = 0; attempt < MaxTopUpAttempts && balanceAmount < requiredAmount; attempt++)
+        {
+            var topUpAmount = Math.Ceiling((requiredAmount - balanceAmount) * 100) / 100;
+
+            // waitForChanges must stay true: TopUpOutcome.Unknown is the only early exit that stops this loop
+            // from firing a second real deposit, and it can only be reported when the balance is polled.
+            var (outcome, toppedUp) = await TopUpDepositInternalAsync(tenantId, topUpAmount, currency, customerParticipantName, siteName, metadata, true);
+            if (toppedUp)
+            {
+                var quotaSocketManager = serviceProvider.GetRequiredService<QuotaSocketManager>();
+                await quotaSocketManager.TopUpWallet(auto);
+            }
+
+            balanceAmount = await GetWalletBalanceAmountAsync(tenantId, currency);
+
+            if (outcome == TopUpOutcome.Unknown)
+            {
+                // Whether this attempt actually succeeded on the billing side is unconfirmed. Retrying would
+                // recompute the shortfall and fire another real deposit, doubling it if the unconfirmed one
+                // did land - so stop here and let the caller treat the balance as still insufficient.
+                logger.ErrorBilling(tenantId.ToString(), "Top-up outcome is unknown, stopping retries to avoid a duplicate deposit");
+
+                break;
+            }
+        }
+
+        return balanceAmount >= requiredAmount;
+    }
+
+    private enum TopUpOutcome
+    {
+        Confirmed,
+        Rejected,
+        Unknown
+    }
+
+    private async Task<decimal> GetWalletBalanceAmountAsync(int tenantId, string currency)
+    {
+        var balance = await GetCustomerBalanceAsync(tenantId, true);
+        if (balance == null)
+        {
+            throw new ItemNotFoundException("Balance could not be found");
+        }
+
+        var subAccount = balance.SubAccounts?.FirstOrDefault(x => x.Currency == currency);
+        if (subAccount == null)
+        {
+            throw new ItemNotFoundException("Subaccount could not be found");
+        }
+
+        return subAccount.Amount;
     }
 
     #region Accounting
@@ -1183,51 +1477,10 @@ public class TariffService(
 
         var cacheKey = GetAccountingBalanceCacheKey(tenantId);
 
-        var balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
-
-        if (balance != null)
+        if (refresh)
         {
-            return balance.IsDefault() ? null : balance;
+            await hybridCache.RemoveAsync(cacheKey);
         }
-
-        await using (await distributedLockProvider.TryAcquireLockAsync($"{cacheKey}_lock"))
-        {
-            balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
-
-            if (balance != null)
-            {
-                return balance.IsDefault() ? null : balance;
-            }
-
-            try
-            {
-                var portalId = await coreSettings.GetKeyAsync(tenantId);
-                balance = await accountingClient.GetCustomerBalanceAsync(portalId, true);
-                await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
-            }
-            catch (AccountingCustomerNotFoundException exception)
-            {
-                logger.InfoAccountingTenant(tenantId.ToString(), exception.Message);
-                await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
-            }
-            catch (Exception error)
-            {
-                LogError(error, tenantId.ToString());
-                await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
-            }
-        }
-
-        return balance;
-    }
-
-    public async Task<Balance> GetCustomerAiBalanceAsync(int tenantId, bool refresh = false)
-    {
-        if (!accountingClient.Configured)
-        {
-            return null;
-        }
-
-        var cacheKey = GetAccountingAiBalanceCacheKey(tenantId);
 
         var balance = refresh ? null : await GetFromCache<Balance>(cacheKey);
 
@@ -1248,12 +1501,11 @@ public class TariffService(
             try
             {
                 var portalId = await coreSettings.GetKeyAsync(tenantId);
-                balance = await accountingClient.GetCustomerAiBalanceAsync(portalId, true);
-                await hybridCache.SetAsync(cacheKey, balance, TimeSpan.FromMinutes(10));
+                balance = await accountingClient.GetCustomerBalanceAsync(portalId);
             }
             catch (AccountingCustomerNotFoundException exception)
             {
-                logger.InfoAccountingTenant(tenantId.ToString(), exception.Message);
+                logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
                 await hybridCache.SetAsync(cacheKey, new Balance(), TimeSpan.FromMinutes(10));
             }
             catch (Exception error)
@@ -1294,33 +1546,17 @@ public class TariffService(
         return true;
     }
 
-    public async Task<ServicePayment> MakeAiCreditAsync(int tenantId, decimal amount, string currency, string customerParticipantName, Dictionary<string, string> metadata = null)
-    {
-        var portalId = await coreSettings.GetKeyAsync(tenantId);
-        var result = await accountingClient.MakeAiCreditAsync(portalId, amount, currency, customerParticipantName, metadata);
-        await hybridCache.RemoveAsync(GetAccountingAiBalanceCacheKey(tenantId));
-        await hybridCache.RemoveAsync(GetAccountingBalanceCacheKey(tenantId));
-        return result;
-    }
-
     public async Task<Report> GetCustomerOperationsAsync(int tenantId, OperationFilter filter)
     {
         try
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
 
-            var isAiService = false;
-            if (!string.IsNullOrEmpty(filter.ServiceName))
-            {
-                var aiQuota = await quotaService.GetTenantQuotaAsync((int)TenantWalletService.AITools);
-                isAiService = aiQuota != null && aiQuota.ServiceName == filter.ServiceName;
-            }
-
-            return await accountingClient.GetCustomerOperationsAsync(portalId, filter, isAiService);
+            return await accountingClient.GetCustomerOperationsAsync(portalId, filter);
         }
         catch (AccountingCustomerNotFoundException exception)
         {
-            logger.InfoAccountingTenant(tenantId.ToString(), exception.Message);
+            logger.DebugAccountingTenant(tenantId.ToString(), exception.Message);
         }
         catch (Exception error)
         {
@@ -1328,6 +1564,36 @@ public class TariffService(
         }
 
         return null;
+    }
+
+    public async Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(int tenantId, MonthlyUsageFilter filter)
+    {
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            return await accountingClient.GetCustomerMonthlyUsageAsync(portalId, filter);
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+            return null;
+        }
+    }
+
+    public async Task<UsageReport> GetCustomerServiceUsageAsync(int tenantId, UsageFilter filter)
+    {
+        try
+        {
+            var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+            return await accountingClient.GetCustomerServiceUsageAsync(portalId, filter);
+        }
+        catch (Exception error)
+        {
+            LogError(error, tenantId.ToString());
+            return null;
+        }
     }
 
     public async Task<List<Currency>> GetAllAccountingCurrenciesAsync()
@@ -1338,6 +1604,11 @@ public class TariffService(
     public List<string> GetSupportedAccountingCurrencies()
     {
         return accountingClient.GetSupportedCurrencies();
+    }
+
+    public async Task<List<ServicePriceInfo>> GetAccountingServicePricesAsync(string serviceName, bool active = false)
+    {
+        return await accountingClient.GetServicePricesAsync(serviceName, active);
     }
 
     #endregion

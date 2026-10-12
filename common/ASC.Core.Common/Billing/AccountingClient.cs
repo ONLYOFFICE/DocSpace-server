@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -31,222 +31,129 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using System.Collections.Specialized;
-
-using ASC.Web.Core.Users;
-
 namespace ASC.Core.Billing;
 
-[Singleton]
-public class AccountingClient
+[Scope]
+public class AccountingClient(IOptions<AccountingConfiguration> configuration, ICache cache, IFusionCache hybridCache, IAccountingApi accountingApi)
 {
-    public readonly bool Configured;
+    private static readonly TimeSpan _servicePricesCacheDuration = TimeSpan.FromDays(1);
 
-    private readonly AccountingConfiguration _configuration;
-    private readonly ICache _cache;
-    private readonly IHttpClientFactory _httpClientFactory;
+    public bool Configured { get => !string.IsNullOrEmpty(configuration.Value.Url); }
 
-    internal const string HttpClientName = "accountingHttpClient";
-    internal const string ResiliencePipelineName = "accountingResiliencePipeline";
-    internal const string BalanceResiliencePipelineName = "balanceResiliencePipeline";
-
-    private readonly JsonSerializerOptions _deserializationOptions = new()
+    public async Task<Balance> GetCustomerBalanceAsync(string portalId)
     {
-        PropertyNameCaseInsensitive = true
-    };
+        EnsureConfigured();
 
-    private readonly JsonSerializerOptions _serializationOptions = new()
-    {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-    };
-
-    public AccountingClient(IConfiguration configuration, ICache cache, IHttpClientFactory httpClientFactory)
-    {
-        _configuration = configuration.GetSection("core:accounting").Get<AccountingConfiguration>() ??
-                         new AccountingConfiguration();
-        _cache = cache;
-        _httpClientFactory = httpClientFactory;
-
-        _configuration.Url = (_configuration.Url ?? "").Trim().TrimEnd('/');
-
-        _configuration.Currencies = _configuration.Currencies == null || _configuration.Currencies.Count == 0
-            ? ["USD"]
-            : _configuration.Currencies;
-
-        if (!string.IsNullOrEmpty(_configuration.Url))
-        {
-            Configured = true;
-        }
-    }
-
-
-    public async Task<Balance> GetCustomerBalanceAsync(string portalId, bool addPolicy = false)
-    {
-        return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/{portalId}/balance", addPolicy: addPolicy);
-    }
-
-    public async Task<Balance> GetCustomerAiBalanceAsync(string portalId, bool addPolicy = false)
-    {
-        return await RequestAsync<Balance>(HttpMethod.Get, $"/customer/{portalId}/balance/ai", addPolicy: addPolicy);
+        return await accountingApi.GetCustomerBalanceAsync(portalId);
     }
 
     public async Task<Session> OpenCustomerSessionAsync(string portalId, string serviceName, string externalRef,
         int quantity, int duration)
     {
-        var data = new SessionOpenOperation(portalId, serviceName, externalRef, quantity, duration);
+        EnsureConfigured();
 
-        var jsonBody = JsonSerializer.Serialize(data, _serializationOptions);
-
-        return await RequestAsync<Session>(HttpMethod.Post, "/session/open", jsonBody: jsonBody);
+        return await accountingApi.OpenCustomerSessionAsync(new SessionOpenOperation(portalId, serviceName, externalRef, quantity, duration));
     }
 
     public async Task CloseCustomerSessionAsync(int sessionId)
     {
-        var queryParams = new NameValueCollection
-        {
-            { "sessionId", sessionId.ToString() }
-        };
+        EnsureConfigured();
 
-        _ = await RequestAsync<string>(HttpMethod.Put, $"/session/close", queryParams);
+        await accountingApi.CloseCustomerSessionAsync(sessionId);
     }
 
     public async Task<Session> ExtendCustomerSessionAsync(int sessionId, int duration)
     {
-        var queryParams = new NameValueCollection
-        {
-            { "sessionId", sessionId.ToString() },
-            { "duration", duration.ToString() }
-        };
+        EnsureConfigured();
 
-        return await RequestAsync<Session>(HttpMethod.Put, $"/session/extend", queryParams);
+        return await accountingApi.ExtendCustomerSessionAsync(sessionId, duration);
     }
 
     public async Task CompleteCustomerSessionAsync(string portalId, string serviceName, int sessionId, int quantity,
         string customerParticipantName, Dictionary<string, string> metadata = null)
     {
-        var data = new SessionCompleteOperation(portalId, serviceName, sessionId, quantity, customerParticipantName,
-            metadata);
+        EnsureConfigured();
 
-        var jsonBody = JsonSerializer.Serialize(data, _serializationOptions);
-
-        _ = await RequestAsync<string>(HttpMethod.Post, "/operation/sessionComplete", jsonBody: jsonBody);
+        await accountingApi.CompleteCustomerSessionAsync(new SessionCompleteOperation(portalId, serviceName, sessionId, quantity,
+            customerParticipantName, metadata));
     }
 
-    public async Task<ServicePayment> MakeAiCreditAsync(string portalId, decimal amount, string currency,
-        string customerParticipantName, Dictionary<string, string> metadata = null)
+    public async Task<Report> GetCustomerOperationsAsync(string portalId, OperationFilter filter)
     {
-        var data = new AiCreditOperation(portalId, (double)amount, currency, customerParticipantName, metadata);
+        EnsureConfigured();
 
-        var jsonBody = JsonSerializer.Serialize(data, _serializationOptions);
-
-        return await RequestAsync<ServicePayment>(HttpMethod.Post, "/operation/AiCredit", jsonBody: jsonBody);
+        return await accountingApi.GetCustomerOperationsAsync(portalId, filter);
     }
 
-    public async Task<Report> GetCustomerOperationsAsync(string portalId, OperationFilter filter, bool isAiService)
+    public async Task<List<CustomerMonthlyUsage>> GetCustomerMonthlyUsageAsync(string portalId, MonthlyUsageFilter filter)
     {
-        var queryParams = FilterToNameValueCollection(filter);
+        EnsureConfigured();
 
-        var path = isAiService
-            ? $"/customer/{portalId}/operations/ai"
-            : $"/customer/{portalId}/operations";
-
-        return await RequestAsync<Report>(HttpMethod.Get, path, queryParams);
+        return await accountingApi.GetCustomerMonthlyUsageAsync(portalId, filter);
     }
 
-    private static NameValueCollection FilterToNameValueCollection(OperationFilter filter)
+    public async Task<UsageReport> GetCustomerServiceUsageAsync(string portalId, UsageFilter filter)
     {
-        var queryParams = new NameValueCollection();
+        EnsureConfigured();
 
-        if (filter.UtcStartDate != null)
-        {
-            queryParams.Add("startDate", filter.UtcStartDate.Value.ToString("o"));
-        }
-
-        if (filter.UtcEndDate != null)
-        {
-            queryParams.Add("endDate", filter.UtcEndDate.Value.ToString("o"));
-        }
-
-        if (!string.IsNullOrEmpty(filter.ParticipantName))
-        {
-            queryParams.Add("participantName", filter.ParticipantName.Trim());
-        }
-
-        if (filter.Credit.HasValue)
-        {
-            queryParams.Add("credit", filter.Credit.Value.ToString().ToLowerInvariant());
-        }
-
-        if (filter.Debit.HasValue)
-        {
-            queryParams.Add("debit", filter.Debit.Value.ToString().ToLowerInvariant());
-        }
-
-        if (filter.Offset.HasValue)
-        {
-            queryParams.Add("offset", filter.Offset.Value.ToString());
-        }
-
-        if (filter.Limit.HasValue)
-        {
-            queryParams.Add("limit", filter.Limit.Value.ToString());
-        }
-
-        if (filter.Type.HasValue)
-        {
-            queryParams.Add("types", filter.Type.Value.ToString());
-        }
-
-        if (filter.Status.HasValue)
-        {
-            queryParams.Add("status", filter.Status.Value.ToString());
-        }
-
-        if (!string.IsNullOrEmpty(filter.OrderBy))
-        {
-            queryParams.Add("orderBy", filter.OrderBy.Trim());
-        }
-
-        if (filter.OrderType.HasValue && filter.OrderType is not OperationOrderType.Descending)
-        {
-            queryParams.Add("orderType", filter.OrderType.Value.ToString());
-        }
-
-        if (!string.IsNullOrEmpty(filter.ServiceName))
-        {
-            queryParams.Add("serviceName", filter.ServiceName);
-        }
-
-        return queryParams;
+        return await accountingApi.GetCustomerServiceUsageAsync(portalId, filter);
     }
 
     public async Task<List<Currency>> GetAllCurrenciesAsync()
     {
         var key = "accounting-currencies";
-        var result = _cache.Get<List<Currency>>(key);
+        var result = cache.Get<List<Currency>>(key);
         if (result == null)
         {
-            result = await RequestAsync<List<Currency>>(HttpMethod.Get, "/currency/all");
-            _cache.Insert(key, result, DateTime.Now.AddDays(1));
+            EnsureConfigured();
+
+            result = await accountingApi.GetAllCurrenciesAsync();
+            cache.Insert(key, result, DateTime.Now.AddDays(1));
         }
         return result;
     }
 
     public List<string> GetSupportedCurrencies()
     {
-        return _configuration.Currencies;
+        return configuration.Value.Currencies;
     }
 
     public async Task<ServiceInfo> GetServiceInfoAsync(string serviceName)
     {
-        return await RequestAsync<ServiceInfo>(HttpMethod.Get, $"/service/{serviceName}/name");
+        EnsureConfigured();
+
+        return await accountingApi.GetServiceInfoAsync(serviceName);
+    }
+
+    /// <summary>
+    /// Returns the prices of the service. The accounting service addresses prices by service ID, so the name is
+    /// resolved first; the result is not tenant-specific and is cached for all portals.
+    /// </summary>
+    public async Task<List<ServicePriceInfo>> GetServicePricesAsync(string serviceName, bool active = false)
+    {
+        EnsureConfigured();
+
+        return await hybridCache.GetOrSetAsync<List<ServicePriceInfo>>(GetServicePricesCacheKey(serviceName, active), async (_, _) =>
+        {
+            var serviceInfo = await accountingApi.GetServiceInfoAsync(serviceName);
+            if (serviceInfo == null)
+            {
+                return [];
+            }
+
+            return await accountingApi.GetServicePricesAsync(serviceInfo.Id, active);
+        }, opt => opt.SetDuration(_servicePricesCacheDuration));
+    }
+
+    private static string GetServicePricesCacheKey(string serviceName, bool active)
+    {
+        return $"accounting-service-prices-{serviceName}-{active}";
     }
 
     public async Task<Dictionary<string, Dictionary<string, decimal>>> GetProductPriceInfoAsync(string partnerId, List<string> serviceNames)
     {
         var key = $"accounting-prices-{partnerId}-{string.Join(",", serviceNames)}";
-        var result = _cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
+        var result = cache.Get<Dictionary<string, Dictionary<string, decimal>>>(key);
 
         if (result != null)
         {
@@ -255,10 +162,12 @@ public class AccountingClient
 
         var currencies = await GetAllCurrenciesAsync();
 
+        var serviceInfos = await Task.WhenAll(serviceNames.Select(GetServiceInfoAsync));
+
         result = [];
-        foreach (var serviceName in serviceNames)
+        for (var i = 0; i < serviceNames.Count; i++)
         {
-            var serviceInfo = await GetServiceInfoAsync(serviceName);
+            var serviceInfo = serviceInfos[i];
             if (serviceInfo == null)
             {
                 continue;
@@ -267,113 +176,23 @@ public class AccountingClient
             var currency = currencies.FirstOrDefault(c => c.Id == serviceInfo.CurrencyId);
             var currencyCode = currency?.Code ?? "USD";
 
-            result.Add(serviceName, new Dictionary<string, decimal>
+            result.Add(serviceNames[i], new Dictionary<string, decimal>
             {
                 { currencyCode, serviceInfo.PriceValue }
             });
         }
 
-        _cache.Insert(key, result, DateTime.Now.AddDays(1));
+        cache.Insert(key, result, DateTime.Now.AddDays(1));
 
         return result;
     }
 
-    private async Task<T> RequestAsync<T>(HttpMethod httpMethod, string path, NameValueCollection queryParams = null, string jsonBody = null, bool addPolicy = false)
+    private void EnsureConfigured()
     {
         if (!Configured)
         {
             throw new AccountingNotConfiguredException();
         }
-
-        var uriBuilder = new UriBuilder(_configuration.Url + path);
-
-        if (queryParams != null)
-        {
-            var query = HttpUtility.ParseQueryString(string.Empty);
-
-            foreach (string key in queryParams)
-            {
-                foreach (var value in queryParams.GetValues(key) ?? [])
-                {
-                    query.Add(key, value);
-                }
-            }
-
-            uriBuilder.Query = query.ToString();
-        }
-
-        using var request = new HttpRequestMessage(httpMethod, uriBuilder.Uri);
-
-        if (!string.IsNullOrEmpty(_configuration.Key))
-        {
-            request.Headers.Add("Authorization", CreateAuthToken(_configuration.Key, _configuration.Secret));
-        }
-
-        var httpClient = _httpClientFactory.CreateClient(addPolicy ? HttpClientName : "");
-        httpClient.Timeout = TimeSpan.FromMilliseconds(60000);
-
-        if (!string.IsNullOrEmpty(jsonBody))
-        {
-            request.Content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
-        }
-
-        try
-        {
-            using var response = await httpClient.SendAsync(request);
-
-            var responseString = await response.Content.ReadAsStringAsync();
-
-            if (!response.IsSuccessStatusCode)
-            {
-                if (response.StatusCode == HttpStatusCode.PaymentRequired)
-                {
-                    throw new AccountingPaymentRequiredException();
-                }
-
-                if (response.StatusCode == HttpStatusCode.BadRequest &&
-                    responseString.Contains("not found", StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new AccountingCustomerNotFoundException();
-                }
-
-                throw new Exception($"Accounting request failed with status code {response.StatusCode} {responseString}");
-            }
-
-            if (typeof(T) == typeof(string))
-            {
-                return (T)(object)responseString;
-            }
-
-            if (string.IsNullOrEmpty(responseString))
-            {
-                throw new Exception("Accounting responseString is null or empty");
-            }
-
-            var result = JsonSerializer.Deserialize<T>(responseString, _deserializationOptions);
-
-            return result;
-        }
-        catch (AccountingPaymentRequiredException)
-        {
-            throw;
-        }
-        catch (AccountingCustomerNotFoundException)
-        {
-            throw;
-        }
-        catch (Exception ex)
-        {
-            throw new AccountingException(ex.Message, ex);
-        }
-    }
-
-    private static string CreateAuthToken(string pkey, string machinekey)
-    {
-        using var hasher = new HMACSHA1(Encoding.UTF8.GetBytes(machinekey));
-        var now = DateTime.UtcNow.ToString("yyyyMMddHHmmss", CultureInfo.InvariantCulture);
-        var hash = WebEncoders.Base64UrlEncode(hasher.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", now, pkey))));
-
-        return $"ASC {pkey}:{now}:{hash}";
     }
 }
 
@@ -465,27 +284,79 @@ public enum OperationStatus
     Canceled
 }
 
+public class DateRangeFilter
+{
+    /// <summary>
+    /// The start date of the period to filter from (inclusive).
+    /// </summary>
+    [AliasAs("startDate")]
+    [Query(Format = "o")]
+    public DateTime? UtcStartDate { get; init; }
+
+    /// <summary>
+    /// The end date of the period to filter until (inclusive).
+    /// </summary>
+    [AliasAs("endDate")]
+    [Query(Format = "o")]
+    public DateTime? UtcEndDate { get; init; }
+}
+
+public class PagedFilter : DateRangeFilter
+{
+    /// <summary>
+    /// The number of items to skip before starting to return results. Used for pagination.
+    /// </summary>
+    /// <remarks>Mutable (set) because it is reassigned per page while paginating, e.g. in CustomerOperationsReportTask.</remarks>
+    public int? Offset { get; set; }
+
+    /// <summary>
+    /// The maximum number of items to return in the response.
+    /// </summary>
+    /// <remarks>Mutable (set) because it is reassigned per page while paginating, e.g. in CustomerOperationsReportTask.</remarks>
+    public int? Limit { get; set; }
+
+    /// <summary>
+    /// The field to order by.
+    /// </summary>
+    public string OrderBy
+    {
+        get;
+        init => field = value?.Trim();
+    }
+
+    /// <summary>
+    /// Order direction: ASC or DESC.
+    /// </summary>
+    /// <remarks>
+    /// Descending is the server-side default, so it is normalized to <c>null</c> here:
+    /// an explicit Descending and an unspecified value produce the same request (no orderType param).
+    /// </remarks>
+    public OperationOrderType? OrderType
+    {
+        get;
+        init => field = value is OperationOrderType.Descending ? null : value;
+    }
+}
+
 /// <summary>
 /// Represents an object for filtering the list of customer operations.
 /// </summary>
-public class OperationFilter
+public class OperationFilter : PagedFilter
 {
     /// <summary>
-    /// The service name.
+    /// The service name list.
     /// </summary>
-    public string ServiceName { get; init; }
-    /// <summary>
-    /// The start date of the period to filter operations from (inclusive).
-    /// </summary>
-    public DateTime? UtcStartDate { get; init; }
-    /// <summary>
-    /// The end date of the period to filter operations until (inclusive).
-    /// </summary>
-    public DateTime? UtcEndDate { get; init; }
+    [Query(CollectionFormat.Multi)]
+    public List<string> ServiceName { get; init; }
+
     /// <summary>
     /// Unique name of customer participant to filter by.
     /// </summary>
-    public string ParticipantName { get; init; }
+    public string ParticipantName
+    {
+        get;
+        init => field = value?.Trim();
+    }
     /// <summary>
     /// Whether to include credit operations.
     /// </summary>
@@ -495,29 +366,50 @@ public class OperationFilter
     /// </summary>
     public bool? Debit { get; init; }
     /// <summary>
-    /// The number of items to skip before starting to return results. Used for pagination.
-    /// </summary>
-    public int? Offset { get; set; }
-    /// <summary>
-    /// The maximum number of items to return in the response.
-    /// </summary>
-    public int? Limit { get; set; }
-    /// <summary>
     /// The operation type to filter by.
     /// </summary>
+    [AliasAs("types")]
     public OperationType? Type { get; init; }
     /// <summary>
     /// The operation status to filter by.
     /// </summary>
     public OperationStatus? Status { get; init; }
+}
+
+/// <summary>
+/// Represents an object for filtering the list of monthly usage statistics.
+/// </summary>
+public class MonthlyUsageFilter : DateRangeFilter
+{
+    public string TimeZome { get; init; }
+}
+
+/// <summary>
+/// The filter for customer service usage statistics.
+/// </summary>
+public class UsageFilter : PagedFilter
+{
     /// <summary>
-    /// The field to order by.
+    /// The service name list.
     /// </summary>
-    public string OrderBy { get; init; }
+    [Query(CollectionFormat.Multi)]
+    public List<string> ServiceName { get; init; }
     /// <summary>
-    /// Order direction: ASC or DESC.
+    /// Unique name of customer participant to filter by.
     /// </summary>
-    public OperationOrderType? OrderType  { get; init; }
+    public string ParticipantName
+    {
+        get;
+        init => field = value?.Trim();
+    }
+    /// <summary>
+    /// The operation status to filter by.
+    /// </summary>
+    public OperationStatus? Status { get; init; }
+    /// <summary>
+    /// Metadata key-value pairs to filter by.
+    /// </summary>
+    public Dictionary<string, string> Metadata { get; init; }
 }
 
 /// <summary>
@@ -534,6 +426,17 @@ public class CustomerInfo
     /// The customer's payment method.
     /// </summary>
     public PaymentMethodStatus PaymentMethodStatus { get; init; }
+
+    /// <summary>
+    /// The payment method type, e.g. "card".
+    /// </summary>
+    public string PaymentMethodType { get; init; }
+
+    /// <summary>
+    /// Indicates whether the payment method is delayed, i.e. a deposit is accepted immediately but the money
+    /// reaches the wallet only once the transfer settles. Such a wallet cannot be topped up automatically.
+    /// </summary>
+    public bool IsDelayedPaymentMethod { get; init; }
 
     /// <summary>
     /// The email address of the customer.
@@ -594,45 +497,55 @@ public class Balance
 }
 
 /// <summary>
+/// The currency an amount is expressed in.
+/// </summary>
+public class CurrencyCode
+{
+    /// <summary>
+    /// The three-character ISO 4217 currency symbol.
+    /// </summary>
+    /// <example>"USD"</example>
+    public string Currency { get; init; }
+}
+
+/// <summary>
+/// An amount of money together with its currency.
+/// </summary>
+public class CurrencyAmount : CurrencyCode
+{
+    /// <summary>
+    /// The amount in the specified currency.
+    /// </summary>
+    /// <example>1500.75</example>
+    public decimal Amount { get; init; }
+}
+
+public class CurrencyTotalAmount : CurrencyCode
+{
+    /// <summary>
+    /// The total amount in the specified currency.
+    /// </summary>
+    /// <example>1500.75</example>
+    public decimal TotalAmount { get; init; }
+}
+
+/// <summary>
 /// Represents information about the transaction applied to an account.
 /// </summary>
-public class TransactionInfo
+public class TransactionInfo : CurrencyAmount
 {
     /// <summary>
     /// The date and time when the credit transaction occurred.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     public DateTime Date { get; init; }
-
-    /// <summary>
-    /// The three-character ISO 4217 currency symbol of the transaction.
-    /// </summary>
-    /// <example>"USD"</example>
-    public string Currency { get; init; }
-
-    /// <summary>
-    /// Amount of the transaction.
-    /// </summary>
-    /// <example>1500.75</example>
-    public decimal Amount { get; init; }
 }
 
 /// <summary>
 /// Represents a sub-account with a specific currency and balance.
 /// </summary>
-public class SubAccount
+public class SubAccount : CurrencyAmount
 {
-    /// <summary>
-    /// The three-character ISO 4217 currency symbol of the sub-account.
-    /// </summary>
-    /// <example>"USD"</example>
-    public string Currency { get; init; }
-
-    /// <summary>
-    /// The balance of the sub-account in the specified currency.
-    /// </summary>
-    /// <example>1500.75</example>
-    public decimal Amount { get; init; }
 }
 
 /// <summary>
@@ -693,40 +606,209 @@ public class ServiceInfo
 }
 
 /// <summary>
-/// Represents a report containing a collection of operations.
+/// The time unit the price is bound to.
 /// </summary>
-public class Report
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum PriceTimeUnit
+{
+    [Description("None")]
+    None,
+    [Description("Hour")]
+    Hour,
+    [Description("Day")]
+    Day,
+    [Description("Week")]
+    Week,
+    [Description("Month")]
+    Month,
+    [Description("Year")]
+    Year,
+    [Description("ThreeYears")]
+    ThreeYears
+}
+
+/// <summary>
+/// The price status.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum PriceStatus
+{
+    [Description("Draft")]
+    Draft,
+    [Description("Approved")]
+    Approved,
+    [Description("Rejected")]
+    Rejected
+}
+
+/// <summary>
+/// Represents a price of the service.
+/// </summary>
+public class ServicePriceInfo
 {
     /// <summary>
-    /// Collection of operations.
+    /// The price unique identifier.
     /// </summary>
-    public List<Operation> Collection { get; set; }
+    /// <example>12345</example>
+    public int Id { get; init; }
+
+    /// <summary>
+    /// The account number.
+    /// </summary>
+    /// <example>1010</example>
+    public int AccountNumber { get; init; }
+
+    /// <summary>
+    /// The service ID.
+    /// </summary>
+    /// <example>12345</example>
+    public int ServiceId { get; init; }
+
+    /// <summary>
+    /// The time unit the price is bound to.
+    /// </summary>
+    /// <example>None</example>
+    public PriceTimeUnit TimeUnit { get; init; }
+
+    /// <summary>
+    /// The cost price.
+    /// </summary>
+    /// <example>1500.75</example>
+    public decimal CostPrice { get; init; }
+
+    /// <summary>
+    /// The extra charge added to the cost price.
+    /// </summary>
+    /// <example>1500.75</example>
+    public decimal ExtraCharge { get; init; }
+
+    /// <summary>
+    /// The resulting service price.
+    /// </summary>
+    /// <example>1500.75</example>
+    public decimal ServicePrice { get; init; }
+
+    /// <summary>
+    /// The quota the price is set for.
+    /// </summary>
+    /// <example>100</example>
+    public double? Quota { get; init; }
+
+    /// <summary>
+    /// The period the price is effective in.
+    /// </summary>
+    public TimeBound TimeBound { get; init; }
+
+    /// <summary>
+    /// The price status.
+    /// </summary>
+    /// <example>Draft</example>
+    public PriceStatus Status { get; init; }
+
+    /// <summary>
+    /// The date and time when the price was created.
+    /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
+    public DateTime Created { get; init; }
+
+    /// <summary>
+    /// The discount category ID.
+    /// </summary>
+    /// <example>12345</example>
+    public int? DiscountCategoryId { get; init; }
+
+    /// <summary>
+    /// The discount category.
+    /// </summary>
+    public DiscountCategory DiscountCategory { get; init; }
+}
+
+/// <summary>
+/// Represents the period the price is effective in.
+/// </summary>
+public class TimeBound
+{
+    /// <summary>
+    /// The date and time when the period starts.
+    /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
+    public DateTime StartDate { get; init; }
+
+    /// <summary>
+    /// The date and time when the period ends.
+    /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
+    public DateTime? EndDate { get; init; }
+}
+
+/// <summary>
+/// Represents a discount category applied to the price.
+/// </summary>
+public class DiscountCategory
+{
+    /// <summary>
+    /// The discount category unique identifier.
+    /// </summary>
+    /// <example>12345</example>
+    public int Id { get; init; }
+
+    /// <summary>
+    /// The discount value.
+    /// </summary>
+    /// <example>10.5</example>
+    public decimal ValueDiscount { get; init; }
+
+    /// <summary>
+    /// The discount category description.
+    /// </summary>
+    /// <example>Annual subscription discount</example>
+    public string Description { get; init; }
+
+    /// <summary>
+    /// The date and time when the discount category was created.
+    /// </summary>
+    /// <example>2024-01-15T10:30:00Z</example>
+    public DateTime Created { get; init; }
+}
+
+public class BaseReport<T>
+{
+    /// <summary>
+    /// Collection of report items.
+    /// </summary>
+    public List<T> Collection { get; init; }
 
     /// <summary>
     /// Offset of the report data.
     /// </summary>
-    public int Offset { get; set; }
+    public int Offset { get; init; }
 
     /// <summary>
     /// Limit of the report data.
     /// </summary>
-    public int Limit { get; set; }
-
-    /// <summary>
-    /// Total quantity of operations in the report.
-    /// </summary>
-    public int TotalQuantity { get; set; }
+    public int Limit { get; init; }
 
     /// <summary>
     /// Total number of pages in the report.
     /// </summary>
-    public int TotalPage { get; set; }
+    public int TotalPage { get; init; }
 
     /// <summary>
     /// Current page number of the report.
     /// </summary>
-    public int CurrentPage { get; set; }
+    public int CurrentPage { get; init; }
 
+    /// <summary>
+    /// Total quantity of records in the report.
+    /// </summary>
+    public long TotalQuantity { get; init; }
+}
+
+/// <summary>
+/// Represents a report containing a collection of operations.
+/// </summary>
+public class Report : BaseReport<Operation>
+{
     public async Task<Dictionary<string, string>> GetParticipantDisplayNamesAsync(DisplayUserSettingsHelper displayUserSettingsHelper, bool withHtmlEncode)
     {
         var participantDisplayNames = new Dictionary<string, string>();
@@ -747,6 +829,60 @@ public class Report
 
         return participantDisplayNames;
     }
+}
+
+/// <summary>
+/// Aggregated customer spending for a single calendar month.
+/// </summary>
+public class CustomerMonthlyUsage : CurrencyTotalAmount
+{
+    /// <summary>
+    /// Calendar year (e.g. 2025).
+    /// </summary>
+    public int Year { get; init; }
+
+    /// <summary>
+    /// Calendar month (1-12).
+    /// </summary>
+    public int Month { get; init; }
+
+    /// <summary>
+    /// Number of individual purchase operations in this month.
+    /// </summary>
+    public int OperationCount { get; init; }
+}
+
+/// <summary>
+/// Aggregated customer usage statistics for a service over a period.
+/// </summary>
+public class CustomerServiceUsage : CurrencyTotalAmount
+{
+    /// <summary>
+    /// Name of the service.
+    /// </summary>
+    public string Service { get; init; }
+
+    /// <summary>
+    /// Unit of measurement for the service (e.g. requests, GB, hours).
+    /// </summary>
+    public string ServiceUnit { get; init; }
+
+    /// <summary>
+    /// Total number of units consumed.
+    /// </summary>
+    public int TotalQuantity { get; init; }
+
+    /// <summary>
+    /// Number of individual purchase operations.
+    /// </summary>
+    public int OperationCount { get; init; }
+}
+
+/// <summary>
+/// Represents a paged report of customer service usage statistics.
+/// </summary>
+public class UsageReport : BaseReport<CustomerServiceUsage>
+{
 }
 
 /// <summary>
@@ -827,22 +963,81 @@ public class Operation
     public string ParticipantDisplayName { get; set; }
 
     /// <summary>
-    /// AI Agent id.
+    /// Id of the entity the AI operation was performed on.
     /// </summary>
     /// <example>123</example>
-    public string AgentId { get; set; }
+    public string SourceId { get; set; }
 
     /// <summary>
-    /// AI Agent name.
+    /// Type of the entity the AI operation was performed on: Agent, File, Folder, Room or Form.
+    /// </summary>
+    /// <example>Agent</example>
+    public string SourceType { get; set; }
+
+    /// <summary>
+    /// Name of the entity the AI operation was performed on.
     /// </summary>
     /// <example>My AI Agent</example>
-    public string AgentTitle { get; set; }
+    public string SourceTitle { get; set; }
+
+    /// <summary>
+    /// Tokens consumed by the AI operation, broken down by kind.
+    /// </summary>
+    public OperationTokenUsage TokenUsage { get; set; }
 
     /// <summary>
     /// Metadata of the operation.
     /// </summary>
     /// <example>{}</example>
     public Dictionary<string, string> Metadata { get; set; }
+}
+
+/// <summary>
+/// Tokens an AI operation consumed, as recorded in the operation metadata. A kind the provider did not report is `0`.
+/// </summary>
+public class OperationTokenUsage
+{
+    /// <summary>
+    /// All tokens of the request: prompt plus completion.
+    /// </summary>
+    /// <example>20747</example>
+    public long TotalTokens { get; set; }
+
+    /// <summary>
+    /// Tokens sent to the model, cached ones included.
+    /// </summary>
+    /// <example>19332</example>
+    public long PromptTokens { get; set; }
+
+    /// <summary>
+    /// Tokens the model generated, reasoning ones included.
+    /// </summary>
+    /// <example>1415</example>
+    public long CompletionTokens { get; set; }
+
+    /// <summary>
+    /// Part of the prompt tokens read from the provider cache.
+    /// </summary>
+    /// <example>19226</example>
+    public long CachedTokens { get; set; }
+
+    /// <summary>
+    /// Part of the prompt tokens written to the provider cache.
+    /// </summary>
+    /// <example>104</example>
+    public long CacheWriteTokens { get; set; }
+
+    /// <summary>
+    /// Part of the completion tokens the model spent on reasoning.
+    /// </summary>
+    /// <example>68</example>
+    public long ReasoningTokens { get; set; }
+
+    /// <summary>
+    /// Tokens spent on images.
+    /// </summary>
+    /// <example>0</example>
+    public long ImageTokens { get; set; }
 }
 
 /// <summary>
@@ -863,56 +1058,14 @@ public class Currency
     public string Code { get; init; }
 }
 
-/// <summary>
-/// Represents service payment information.
-/// </summary>
-public class ServicePayment
-{
-    /// <summary>
-    /// The payment operation ID.
-    /// </summary>
-    /// <example>12345</example>
-    public int OperationId { get; init; }
-    /// <summary>
-    /// The balance of the sub-account in the specified currency.
-    /// </summary>
-    /// <example>1500.75</example>
-    public decimal Amount { get; init; }
-    /// <summary>
-    /// The three-character ISO 4217 currency symbol.
-    /// </summary>
-    /// <example>USD</example>
-    public string Currency { get; init; }
-    /// <summary>
-    /// Total quantity of operations.
-    /// </summary>
-    /// <example>10</example>
-    public int Quantity { get; init; }
-    /// <summary>
-    /// The subscription ID
-    /// </summary>
-    /// <example>12345</example>
-    public int? SubscriptionId { get; init; }
-    /// <summary>
-    /// The subscription start date.
-    /// </summary>
-    /// <example>2024-01-15T10:30:00Z</example>
-    public DateTime? StartDate { get; init; }
-    /// <summary>
-    /// The subscription end date.
-    /// </summary>
-    /// <example>2024-01-15T10:30:00Z</example>
-    public DateTime? EndDate { get; init; }
-}
-
-file record SessionOpenOperation(
+public record SessionOpenOperation(
     string CustomerName,
     string ServiceName,
     string ExternalRef,
     int Quantity,
     int Duration);
 
-file record SessionCompleteOperation(
+public record SessionCompleteOperation(
     string CustomerName,
     string ServiceName,
     int SessionId,
@@ -920,34 +1073,83 @@ file record SessionCompleteOperation(
     string CustomerParticipantName,
     Dictionary<string, string> Metadata);
 
-file record AiCreditOperation(
-    string CustomerName,
-    double Sum,
-    string Currency,
-    string CustomerParticipantName,
-    Dictionary<string, string> Metadata);
-
 public static class AccountingHttpClientExtension
 {
-    public static void AddAccountingHttpClient(this IServiceCollection services)
+    private const string ResiliencePipelineName = "accountingResiliencePipeline";
+    internal const string BalanceResiliencePipelineName = "balanceResiliencePipeline";
+
+    public static void AddAccountingHttpClient(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddHttpClient(AccountingClient.HttpClientName)
+        var accountingSettingsSection = configuration.GetSection("core:accounting");
+        var accountingSettings = accountingSettingsSection.Get<AccountingConfiguration>();
+        services.Configure<AccountingConfiguration>(accountingSettingsSection);
+
+        services.AddTransient<AccountingAuthHandler>();
+
+        var refitSettings = new RefitSettings
+        {
+            ContentSerializer = new SystemTextJsonContentSerializer(new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            }),
+            UrlParameterKeyFormatter = new CamelCaseUrlParameterKeyFormatter(),
+            ExceptionFactory = CreateExceptionAsync,
+            TransportExceptionFactory = CreateTransportException,
+            UrlParameterFormatterMap = {
+                // The accounting service expects lowercase boolean query values ("true"/"false"); Refit's default
+                // formatter renders them as "True"/"False". Everything else keeps the default formatting.
+                [typeof(bool)] = new LowerCaseBooleanFormatter()
+            }
+        };
+
+        services
+            .AddRefitGeneratedClient<IAccountingApi>(refitSettings)
+            .ConfigureHttpClient((sp, client) =>
+            {
+                var url = accountingSettings?.Url;
+
+                if (!string.IsNullOrEmpty(url))
+                {
+                    client.BaseAddress = new Uri(url);
+                }
+
+                client.Timeout = TimeSpan.FromMilliseconds(60000);
+            })
+            .AddHttpMessageHandler<AccountingAuthHandler>()
             .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-            .AddResilienceHandler(AccountingClient.ResiliencePipelineName, builder =>
+            .AddResilienceHandler(ResiliencePipelineName, builder =>
             {
                 builder.AddRetry(new RetryStrategyOptions<HttpResponseMessage>
                 {
                     MaxRetryAttempts = 2,
                     Delay = TimeSpan.FromSeconds(1),
                     BackoffType = DelayBackoffType.Exponential,
-                    ShouldHandle = new PredicateBuilder<HttpResponseMessage>()
-                        .Handle<HttpRequestException>()
-                        .Handle<TaskCanceledException>()
-                        .HandleResult(response => !response.IsSuccessStatusCode)
+                    ShouldHandle = async args =>
+                    {
+                        // Retry only idempotent GET requests on a non-success response. POST/PUT are never retried to
+                        // avoid duplicating accounting operations (payments, sessions); transient errors that require
+                        // stronger retries (e.g. balance refresh after a deposit) are handled by the balance pipeline.
+                        var response = args.Outcome.Result;
+                        if (response is null || response.IsSuccessStatusCode || response.RequestMessage?.Method != HttpMethod.Get)
+                        {
+                            return false;
+                        }
+
+                        // "Customer not found" is a definitive result, not a transient error - retrying won't change it.
+                        if (response.StatusCode == HttpStatusCode.BadRequest)
+                        {
+                            var content = await response.Content.ReadAsStringAsync();
+                            return !IsCustomerNotFound(response.StatusCode, content);
+                        }
+
+                        return true;
+                    }
                 });
             });
 
-        services.AddResiliencePipeline<string, bool>(AccountingClient.BalanceResiliencePipelineName, pipelineBuilder =>
+        services.AddResiliencePipeline<string, bool>(BalanceResiliencePipelineName, pipelineBuilder =>
         {
             pipelineBuilder.AddRetry(new RetryStrategyOptions<bool>
             {
@@ -957,6 +1159,57 @@ public static class AccountingHttpClientExtension
                 ShouldHandle = new PredicateBuilder<bool>().HandleResult(result => !result)
             });
         });
+    }
+
+    // ExceptionFactory only sees HTTP responses. A transport failure (DNS, connect, TLS, timeout) would otherwise
+    // surface as Refit.ApiRequestException and escape the AccountingException hierarchy the callers catch.
+    private static Exception CreateTransportException(HttpRequestMessage request, Exception exception, CancellationToken cancellationToken)
+    {
+        // A caller-requested cancellation is not a service failure - let it propagate unchanged.
+        if (exception is OperationCanceledException && cancellationToken.IsCancellationRequested)
+        {
+            return exception;
+        }
+
+        return new AccountingException($"Accounting request to {request.RequestUri} failed: {exception.Message}", exception);
+    }
+    // Maps non-success responses to the domain exceptions the callers expect (payment required / customer not found),
+    // and wraps any other failure into AccountingException with the status code and response body.
+    private static async ValueTask<Exception> CreateExceptionAsync(HttpResponseMessage response)
+    {
+        if (response.IsSuccessStatusCode)
+        {
+            return null;
+        }
+
+        if (response.StatusCode == HttpStatusCode.PaymentRequired)
+        {
+            return new AccountingPaymentRequiredException();
+        }
+
+        var content = await response.Content.ReadAsStringAsync();
+        if (IsCustomerNotFound(response.StatusCode, content))
+        {
+            return new AccountingCustomerNotFoundException();
+        }
+
+        return new AccountingException($"Accounting request failed with status code {response.StatusCode} {content}");
+    }
+
+    private static bool IsCustomerNotFound(HttpStatusCode status, string content)
+    {
+        return status == HttpStatusCode.BadRequest &&
+               content.Contains("not found", StringComparison.OrdinalIgnoreCase);
+    }
+
+    // Registered in UrlParameterFormatterMap for bool only, so nullable and non-nullable booleans in both
+    // scalar parameters and flattened query objects render as "true"/"false".
+    private sealed class LowerCaseBooleanFormatter : IUrlParameterFormatter
+    {
+        public string Format(object parameterValue, ICustomAttributeProvider attributeProvider, Type type)
+        {
+            return parameterValue is bool boolValue ? (boolValue ? "true" : "false") : parameterValue?.ToString();
+        }
     }
 }
 

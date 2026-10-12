@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Web.Files.Utils;
@@ -56,7 +56,8 @@ public class FileSharingAceHelper(
     IDaoFactory daoFactory,
     ExternalShare externalShare,
     SettingsManager settingsManager,
-    PasswordSettingsManager passwordSettingsManager)
+    PasswordSettingsManager passwordSettingsManager,
+    EncryptionLoginProvider encryptionLoginProvider)
 {
     private const int MaxInvitationLinks = 1;
 
@@ -79,7 +80,11 @@ public class FileSharingAceHelper(
         var file = entry as File<T>;
         var room = folder is { IsRoom: true } ? folder : null;
 
-        if (!aceWrappers.TrueForAll(r => r.Id == authContext.CurrentAccount.ID && r.Access == FileShare.None) &&
+        // TrueForAll is vacuously true on an empty list, which would skip the CanSetAccess guard for
+        // callers whose requested shares were all filtered out upstream (e.g. a guest sharing to users).
+        var selfLeave = aceWrappers.Count > 0 && aceWrappers.TrueForAll(r => r.Id == authContext.CurrentAccount.ID && r.Access == FileShare.None);
+
+        if (!selfLeave &&
             !await aceWrappers.ToAsyncEnumerable().AnyAsync(async (r,_) =>
             {
                 var roomType = room?.FolderType;
@@ -168,7 +173,8 @@ public class FileSharingAceHelper(
 
             if (room != null)
             {
-                if (folder.RootId is int root && root == await globalFolderHelper.FolderRoomTemplatesAsync)
+                // createIfNotExist: false — a missing room-templates root cannot be anyone's root
+                if (folder.RootId is int root && root == await globalFolderHelper.GetFolderRoomTemplatesAsync(false))
                 {
                     if (w.Access != FileShare.Read && w.Access != FileShare.None || w.SubjectType != SubjectType.User && w.SubjectType != SubjectType.Group)
                     {
@@ -253,6 +259,12 @@ public class FileSharingAceHelper(
 
             if (room != null && !w.IsLink && (existedShare == null || (!existedShare.IsLink && existedShare.SubjectType != SubjectType.Group)))
             {
+
+                if (room.SettingsPrivate)
+                {
+                    await encryptionLoginProvider.ThrowIfKeysAreNotSetAsync(currentUser.Id);
+                }
+
                 if (room.FolderType == FolderType.AiRoom &&
                     currentUserType == EmployeeType.Guest &&
                     w.Access is FileShare.RoomManager or FileShare.ContentCreator)
@@ -261,7 +273,7 @@ public class FileSharingAceHelper(
                 }
 
                 if (room.RootId is int root &&
-                    root != await globalFolderHelper.FolderRoomTemplatesAsync &&
+                    root != await globalFolderHelper.GetFolderRoomTemplatesAsync(false) &&
                     (!FileSecurity.AvailableUserAccesses.TryGetValue(currentUserType, out var userAccesses) ||
                      !userAccesses.Contains(w.Access)))
                 {
@@ -898,6 +910,13 @@ public class FileSharing(
 
         foreach (var entry in entries)
         {
+            // The single-entry overload degrades a denied entry to an empty list because background
+            // consumers rely on that; the API batch must report the denial instead of hiding it.
+            if (!await fileSecurity.CanReadAsync(entry))
+            {
+                throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFile);
+            }
+
             IEnumerable<AceWrapper> acesForObject;
             try
             {
@@ -982,7 +1001,7 @@ public class FileSharing(
         return [.. result];
     }
 
-    public async Task<List<AceShortWrapper>> GetSharedInfoShortFileAsync<T>(File<T> file)
+    public async Task<List<AceShortDto>> GetSharedInfoShortFileAsync<T>(File<T> file)
     {
         var aces = await GetSharedInfoAsync([file.Id], []);
         var inRoom = file.RootFolderType is FolderType.VirtualRooms or FolderType.Archive;
@@ -992,7 +1011,7 @@ public class FileSharing(
         [
             ..aces
                 .Where(aceWrapper => aceWrapper.Access != FileShare.Restrict && aceWrapper.SubjectType != SubjectType.InvitationLink)
-                .Select(aceWrapper => new AceShortWrapper(aceWrapper.SubjectName, FileShareExtensions.GetAccessString(aceWrapper.Access, inRoom, inAgent), aceWrapper.IsLink))
+                .Select(aceWrapper => new AceShortDto(aceWrapper.SubjectName, FileShareExtensions.GetAccessString(aceWrapper.Access, inRoom, inAgent), aceWrapper.IsLink))
         ];
     }
 
@@ -1034,11 +1053,16 @@ public class FileSharing(
         return await securityDao.GetGroupMembersWithSecurityCountAsync(entry, groupId, text);
     }
 
+    /// <summary>
+    /// Tells whether the current user may list the shares of <paramref name="entry"/> for the given
+    /// filter. Not being able to read the entry at all is an access violation and throws, while a
+    /// reader who simply may not see the links gets an empty list.
+    /// </summary>
     private async Task<bool> CheckAccessAsync<T>(FileEntry<T> entry, ShareFilterType filterType)
     {
         if (!await fileSecurity.CanReadAsync(entry))
         {
-            return false;
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
         }
 
         switch (filterType)

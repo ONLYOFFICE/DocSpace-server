@@ -138,6 +138,24 @@ public class BackupRepository(IDbContextFactory<BackupsContext> dbContextFactory
         await using var backupContext = await dbContextFactory.CreateDbContextAsync();
         return await Queries.GetBackupsCount(backupContext, tenantId, paid, from, to);
     }
+
+    public async Task<(int Free, int Paid)> GetBackupsCountAsync(int tenantId, DateTime from, DateTime to)
+    {
+        await using var backupContext = await dbContextFactory.CreateDbContextAsync();
+
+        var counts = await Queries.GetBackupsCountByPaid(backupContext, tenantId, from, to).ToListAsync();
+
+        var free = counts.FirstOrDefault(c => !c.Paid)?.Count ?? 0;
+        var paid = counts.FirstOrDefault(c => c.Paid)?.Count ?? 0;
+
+        return (free, paid);
+    }
+}
+
+file class BackupPaidCount
+{
+    public bool Paid { get; init; }
+    public int Count { get; init; }
 }
 
 static file class Queries
@@ -214,4 +232,12 @@ static file class Queries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
             (BackupsContext ctx, int tenantId, bool paid, DateTime from, DateTime to) =>
                 ctx.Backups.Count(b => b.TenantId == tenantId && b.Paid == paid && b.CreatedOn >= from && b.CreatedOn <= to));
+
+    public static readonly Func<BackupsContext, int, DateTime, DateTime, IAsyncEnumerable<BackupPaidCount>> GetBackupsCountByPaid =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
+            (BackupsContext ctx, int tenantId, DateTime from, DateTime to) =>
+                ctx.Backups
+                    .Where(b => b.TenantId == tenantId && b.CreatedOn >= from && b.CreatedOn <= to)
+                    .GroupBy(b => b.Paid)
+                    .Select(g => new BackupPaidCount { Paid = g.Key, Count = g.Count() }));
 }

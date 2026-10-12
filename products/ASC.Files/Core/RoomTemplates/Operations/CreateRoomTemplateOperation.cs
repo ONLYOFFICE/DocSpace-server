@@ -1,34 +1,34 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.RoomTemplates.Operations;
@@ -36,7 +36,6 @@ namespace ASC.Files.Core.RoomTemplates.Operations;
 [Transient]
 public class CreateRoomTemplateOperation : DistributedTaskProgress
 {
-    private Guid _userId;
     private LogoSettings _logo;
     private bool _copyLogo;
     private IEnumerable<string> _tags;
@@ -52,6 +51,12 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
     private int _count;
     private readonly IServiceProvider _serviceProvider;
     public int TenantId { get; set; }
+
+    /// <summary>
+    /// The user who started the operation. Public so it survives the trip through the distributed
+    /// queue: the status endpoint reports an operation only to the caller who started it.
+    /// </summary>
+    public Guid UserId { get; set; }
 
     public int TemplateId { get; set; }
 
@@ -79,7 +84,7 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
         long? quota)
     {
         TenantId = tenantId;
-        _userId = userId;
+        UserId = userId;
         _roomId = roomId;
         _logo = logo;
         _copyLogo = copyLogo;
@@ -108,7 +113,7 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
         try
         {
             await tenantManager.SetCurrentTenantAsync(TenantId);
-            await securityContext.AuthenticateMeWithoutCookieAsync(_userId);
+            await securityContext.AuthenticateMeWithoutCookieAsync(UserId);
 
             LogoRequest dtoLogo = null;
             if (_logo != null && !_copyLogo)
@@ -123,7 +128,7 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
                 };
             }
 
-            var template = await fileStorageService.CreateRoomTemplateAsync(_roomId, _title, new List<FileShareParams>(), _tags, dtoLogo, _cover, _color);
+            var template = await fileStorageService.CreateRoomTemplateAsync(_roomId, _title, _tags, dtoLogo, _cover, _color);
             TemplateId = template.Id;
 
             List<AceWrapper> wrappers = null;
@@ -182,7 +187,16 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
 
             if (_quota.HasValue)
             {
-                await fileStorageService.FolderQuotaChangeAsync(template.Id, _quota.Value);
+                // The quota is the last, optional step: failing it (e.g. the quota feature was
+                // switched off mid-operation) must not destroy the template that was just built.
+                try
+                {
+                    await fileStorageService.FolderQuotaChangeAsync(template.Id, _quota.Value);
+                }
+                catch (Exception ex)
+                {
+                    logger.WarningCanNotApplyQuota(ex);
+                }
             }
 
             Percentage = 100;
@@ -229,7 +243,7 @@ public class CreateRoomTemplateOperation : DistributedTaskProgress
         var subFolders = folderDao.GetFoldersAsync(sourceFolderId);
         if (filterRootFolderType)
         {
-            subFolders = subFolders.Where(f => f.FolderType == FolderType.DEFAULT);
+            subFolders = subFolders.Where(f => f.FolderType is FolderType.DEFAULT or FolderType.Ai);
         }
 
         await foreach (var subFolder in subFolders)

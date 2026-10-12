@@ -135,17 +135,20 @@
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Detaļas</value>
   </data>
+  <data name="AccountingCustomerOperationMonth" xml:space="preserve">
+    <value>Mēnesis</value>
+  </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Daudzums</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Pakalpojums</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>MI funkcijas</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Dublējums</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Diska vieta</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Vektorizācija</value>
@@ -157,7 +160,7 @@
     <value>Mērvienība</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Dublējums</value>
+    <value>Kopijas</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Pilnvaras</value>
@@ -174,8 +177,26 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Darījumu vēsture</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Kopā iztērēts</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Kopsavilkums pēc lietotājiem</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Tips</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportName" xml:space="preserve">
+    <value>Mēneša lietojuma ziņojums ({0}-{1})</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportSheetName" xml:space="preserve">
+    <value>Mēneša lietojums</value>
+  </data>
+  <data name="AccountingServiceUsageReportName" xml:space="preserve">
+    <value>Pakalpojumu lietojuma ziņojums ({0}-{1})</value>
+  </data>
+  <data name="AccountingServiceUsageReportSheetName" xml:space="preserve">
+    <value>Pakalpojumu lietojums</value>
   </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Validācijas koda lauks nedrīkst būt tukšs</value>
@@ -196,7 +217,7 @@
     <value>MI aģenta vietas kvota pārsniegta</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Neizdevās iestatīt kvotu katram MI aģentam. Ievadītā vērtība ir lielāka par kopējo DocSpace krātuves apjomu.</value>
+    <value>Neizdevās iestatīt kvotu katram MI aģentam. Ievadītā vērtība ir lielāka par kopējo krātuves apjomu.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Automātiska atjaunošana</value>
@@ -226,7 +247,7 @@
     <value>Lietojumprogrammas klienta ID</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Iespējojiet lietojumprogrammu, lai pierakstītos portālā, izmantojot Apple ID kontu.</value>
+    <value>Pierakstieties savā darbvietā ar Apple ID kontu</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Iespējojiet šo lietojumprogrammu, lai ļautu lietotājiem pierakstīties {LogoText}, izmantojot Apple ID. {0}Dodieties uz Apple izstrādātāju portālu un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievadiet saņemtos datus:</value>
@@ -265,13 +286,13 @@
     <value>Box</value>
   </data>
   <data name="ConsumersboxClientId" xml:space="preserve">
-    <value>Laatikon tunnus</value>
+    <value>Box ID</value>
   </data>
   <data name="ConsumersboxClientSecret" xml:space="preserve">
     <value>Box atslēga</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Pievienojiet lietotni, lai pārvaldītu Box failus un mapes.</value>
+    <value>Pārvaldiet Box failus un mapes</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Iespējojiet šo lietojumprogrammu, lai savienotu savu Box kontu ar dokumentu moduli. Jūs varēsiet pārvaldīt, rediģēt un koplietot Box failus ar {LogoText} lietotājiem. {0}Pierakstieties savā kontā Box izstrādātāju lapā un izveidojiet jaunu lietojumprogrammu {LogoText} integrācijai. Tālāk ievadiet saņemtos datus:</value>
@@ -310,7 +331,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Pievienojiet lietotni, lai pārvaldītu Dropbox failus un mapes.</value>
+    <value>Pārvaldiet Dropbox failus un mapes</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Iespējojiet šo lietojumprogrammu, lai savienotu savu Box kontu ar dokumentu moduli. Jūs varēsiet pārvaldīt, rediģēt un koplietot Dropbox failus ar {LogoText} lietotājiem. {0}Pierakstieties savā kontā Dropbox izstrādātāju tīmekļa vietnē un izveidojiet jaunu lietojumprogrammu {LogoText} integrācijai. Tālāk ievadiet saņemtos datus:</value>
@@ -346,7 +367,7 @@
     <value>Facebook atslēga</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Pievienojiet lietotni, lai ieietu portālā ar Facebook kontu.</value>
+    <value>Pierakstieties savā darbvietā ar Facebook kontu</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Iespējojiet šo lietotni, lai ļautu saviem lietotājiem pierakstīties {LogoText}, izmantojot Facebook, un saistīt savu klientu Facebook kontus ar CRM moduli. {0}Dodieties uz Facebook izstrādātāju portālu un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievadiet saņemtos datus:</value>
@@ -400,7 +421,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Pievienojiet projektu, lai ieietu portālā ar Google kontu un pārvaldītu Google Drive failus un mapes.</value>
+    <value>Pierakstieties savā darbvietā ar Google kontu un pārvaldiet Google Drive failus un mapes</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Iespējojiet šo lietotni, lai savienotu savu Google Drive kontu ar dokumentu moduli. Jūs varēsiet pārvaldīt, rediģēt un koplietot Google Drive failus ar {LogoText} lietotājiem. {0}Dodieties uz Google API konsoli un izveidojiet jaunu projektu {LogoText} integrācijai. Tālāk ievadiet saņemtos datus:</value>
@@ -409,7 +430,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Pievienojiet lietotni, lai ieietu portālā ar LinkedIn kontu.</value>
+    <value>Pierakstieties savā darbvietā ar LinkedIn kontu</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Iespējojiet šo lietotni, lai ļautu lietotājiem pierakstīties {LogoText}, izmantojot savus LinkedIn kontus. {0}Dodieties uz LinkedIn izstrādātāju tīmekļa vietni un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievadiet saņemtos datus:</value>
@@ -538,7 +559,7 @@
     <value>Klienta noslēpums</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Pievienojiet lietotni, lai pārvaldītu OneDrive failus un mapes.</value>
+    <value>Pārvaldiet OneDrive failus un mapes</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Iespējojiet šo lietotni, lai savienotu savu OneDrive kontu ar dokumentu moduli. Jūs varēsiet pārvaldīt, rediģēt un koplietot OneDrive failus ar {LogoText} lietotājiem. {0}Pierakstieties savā Microsoft Azure kontā un izveidojiet jaunu lietojumprogrammu {LogoText} integrācijai. Tālāk ievadiet saņemtos datus:</value>
@@ -568,7 +589,7 @@
     <value>Bota marķieris</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Pievienojiet Telegram kontu, lai saņemtu portāla paziņojumus, izmantojot Telegram.</value>
+    <value>Saņemiet paziņojumus, izmantojot Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Lai saņemtu portāla paziņojumus, izmantojot Telegram, iespējojiet Telegram botu. Jūs varat izveidot jaunu robotu, izmantojot BotFather programmā Telegram Desktop. Lai izmantotu šo robotu, portāla lietotājiem savā profila lapā ir jāiespējo Telegram paziņojumi. {0}Zemāk esošajos laukos ielīmējiet robota lietotājvārdu un saņemto marķieri.</value>
@@ -601,7 +622,7 @@
     <value>Klienta ID</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Pievienojiet lietotni, lai ieietu portālā ar X kontu.</value>
+    <value>Pierakstieties savā darbvietā ar X kontu</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Iespējojiet šo lietotni, lai ļautu saviem lietotājiem pierakstīties {LogoText}, izmantojot viņu X, un saistīt savu klientu X kontus ar CRM moduli. {0}Dodieties uz X izstrādātāju portālu un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievadiet saņemtos datus:</value>
@@ -640,7 +661,7 @@
     <value>Klienta noslēpums</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Iespējojiet opciju lietojumprogrammai pierakstīties portālā, izmantojot WeChat kontu.</value>
+    <value>Pierakstieties savā darbvietā ar WeChat kontu</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Iespējojiet opciju lietojumprogrammai pierakstīties portālā, izmantojot WeChat kontu.</value>
@@ -700,7 +721,7 @@
     <value>Tālummaiņas klienta noslēpums</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Iespējojiet lietojumprogrammu, lai pierakstītos portālā, izmantojot tālummaiņas kontu.</value>
+    <value>Pierakstieties savā darbvietā ar Zoom kontu</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Iespējojiet šo lietotni, lai jūsu lietotāji varētu pierakstīties pakalpojumā {LogoText}, izmantojot savus tālummaiņas kontus. {0}Dodieties uz Zoom Developers tīmekļa vietni un izveidojiet jaunu lietotnes {LogoText} integrāciju. Tālāk ievietojiet saņemtos datus:</value>
@@ -958,7 +979,7 @@
     <value>Nepareizs grupas filtrs.</value>
   </data>
   <data name="LdapSettingsErrorWrongGroupNameAttribute" xml:space="preserve">
-    <value>Neizdevās iegūt grupas atribūtu vienai vai vairākām grupām.</value>
+    <value>Neizdevās iegūt grupas nosaukuma atribūtu vienai vai vairākām grupām.</value>
   </data>
   <data name="LdapSettingsErrorWrongLoginAttribute" xml:space="preserve">
     <value>Neizdevās iegūt pieslēgšanās atribūtu vienam vai vairākiem lietotājiem.</value>
@@ -1105,7 +1126,7 @@
     <value>Pārsniegta telpas vietas kvota</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Neizdevās iestatīt kvotu katrai istabai. Ievadītā vērtība ir lielāka par kopējo DocSpace krātuves apjomu.</value>
+    <value>Neizdevās iestatīt kvotu katrai istabai. Ievadītā vērtība ir lielāka par kopējo krātuves apjomu.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Singapūra</value>
@@ -1152,11 +1173,11 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>MI aģentu skaits nedrīkst pārsniegt {0}</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>MI meklēšana</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>MI funkcijas</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Iespējojiet MI funkcijas, lai palielinātu produktivitāti.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Izsekošana pieteikšanās un darbības</value>
@@ -1270,7 +1291,7 @@
     <value>Radās neparedzēta kļūda. Lūdzu, mēģiniet vēlreiz.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Telegram ir veiksmīgi pievienots paziņojumu saņemšanai no DocSpace.</value>
+    <value>Telegram ir veiksmīgi pievienots paziņojumu saņemšanai no darbvietas.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Nepareizs kods</value>
@@ -1285,16 +1306,13 @@
     <value>Pārsniegta lietotāja vietas kvota</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Neizdevās iestatīt kvotu katram lietotājam. Ievadītā vērtība ir lielāka par kopējo DocSpace krātuves apjomu.</value>
+    <value>Neizdevās iestatīt kvotu katram lietotājam. Ievadītā vērtība ir lielāka par kopējo krātuves apjomu.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>ASV rietumu reģions (Oregon)</value>
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Kas Jauns</value>
-  </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>Aģents</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>Tērzēšana</value>
@@ -1305,6 +1323,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>Tīmekļa meklēšana</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>MI meklēšana</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>MI kredīti</value>
   </data>
@@ -1312,6 +1333,9 @@
     <value>Avoti</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Rezultāti</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Rezultāti</value>
   </data>
   <data name="ConsumersdatabaseType" xml:space="preserve">
@@ -1339,7 +1363,7 @@
     <value>Savienojums ar datu bāzi</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Saglabājiet veidlapas rezultātus ārējā datu bāzē, piemēram, MySQL vai SQLite.</value>
+    <value>Saglabājiet veidlapas rezultātus ārējā datu bāzē, piemēram, MySQL vai SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Pievienojiet ārējo datu bāzi, lai saglabātu veidlapas rezultātus.</value>
@@ -1363,7 +1387,7 @@
     <value>Klienta noslēpums</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Ļaujiet lietojumprogrammai pieteikties portālā, izmantojot Nextcloud kontu.</value>
+    <value>Pierakstieties savā darbvietā ar Nextcloud kontu</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Ļaujiet lietojumprogrammai pieteikties portālā, izmantojot Nextcloud kontu.</value>
@@ -1382,5 +1406,155 @@
   </data>
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>Lietotāja autentifikācija neizdevās</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Papildu diska vieta</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Business plāns</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Business plāns</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Administratori</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Administratori</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Iegūstiet piekļuvi plašam MI modeļu klāstam, izmantojot OpenRouter integrāciju. Maksājiet tikai par to, ko izmantojat; summa tiek norakstīta no jūsu Maka.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>Izmantojiet MI meklētājprogrammu, lai bagātinātu MI tērzēšanu ar reāllaika informāciju no interneta</value>
+  </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>Lietotāji</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>Lietotāji</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_image" xml:space="preserve">
+    <value>Pilnvaras</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>Docs Connect izstrādātāju pakotne</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
+    <value>Attēls</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>Docs Connect kvotu atskaite ({0})</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>Ieguliet ONLYOFFICE Docs redaktorus savā lietotnē ar mākonī mitinātiem nomniekiem un savām API atslēgām.</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Avota tips</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Avota nosaukums</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>Avota ID</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>MI aģents</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Fails</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Mape</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Telpa</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Veidlapa</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Uzņēmums</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Ģenerēšanas datums</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Periods</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Ziņojums</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Kopā</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Aktīvs</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Piekļuve beidzas</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Lietotāja tips</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>Lietotāja ID</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Redaktori</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Dokumentu redaktori ar pilnām atļaujām</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Atlikušais</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Lietotāja kvota</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Abonementa limits</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Tiešraides skatītājs</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Tikai lasāmo dokumentu skatītāji</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Ārējs</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Iekšējs</value>
+  </data>
+  <data name="AccountingCustomerOperationPromptTokens" xml:space="preserve">
+    <value>Pieprasījums</value>
+  </data>
+  <data name="AccountingCustomerOperationCachedTokens" xml:space="preserve">
+    <value>Kešošana</value>
+  </data>
+  <data name="AccountingCustomerOperationCacheWriteTokens" xml:space="preserve">
+    <value>Ierakstīšana kešatmiņā</value>
+  </data>
+  <data name="AccountingCustomerOperationCompletionTokens" xml:space="preserve">
+    <value>Atbilde</value>
+  </data>
+  <data name="AccountingCustomerOperationReasoningTokens" xml:space="preserve">
+    <value>Spriešana</value>
+  </data>
+  <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
+    <value>Attēls</value>
+  </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>Pakalpojumu sniedzēja izmaksas</value>
   </data>
 </root>

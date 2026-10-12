@@ -39,33 +39,37 @@ namespace ASC.People.ApiModels.ResponseDto;
 public class TaskProgressResponseDto
 {
     /// <summary>
-    /// The task progress ID.
+    /// The ID of the queued job. It identifies this run of the job and changes every time the job is started again.
     /// </summary>
     /// <example>task-123456</example>
     public required string Id { get; set; }
 
     /// <summary>
-    /// The task progress error message.
+    /// The message of the error that stopped the job. It is empty while the job is running and after a job that
+    /// succeeded, and it is the only place where the reason for a failure is reported.
     /// </summary>
     /// <example>An error occurred during processing</example>
     public string Error { get; set; }
 
     /// <summary>
-    /// The percentage of the task progress.
+    /// The share of the job that is already done, from 0 to 100.
     /// </summary>
     /// <example>75</example>
     public required int Percentage { get; set; }
 
     /// <summary>
-    /// Specifies if the task peogress is completed or not.
+    /// Specifies whether the job has stopped running. This is the field to poll: true means the job will not change
+    /// any more, whether it succeeded, failed or was cancelled, and `status` tells which of the three it is.
     /// </summary>
     /// <example>false</example>
     public required bool IsCompleted { get; set; }
 
     /// <summary>
-    /// The status of the distributed task.
+    /// The state of the job: `Created` while it waits in the queue, `Running` while it works, `Completed` once it has
+    /// finished on its own, `Canceled` after a terminate operation, and `Failted` when it stopped on an error, in
+    /// which case `error` carries the reason.
     /// </summary>
-    /// <example>1</example>
+    /// <example>Running</example>
     public required DistributedTaskStatus Status { get; set; }
 
     public static TaskProgressResponseDto Get(DistributedTaskProgress progressItem)

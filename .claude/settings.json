@@ -1,5 +1,31 @@
 {
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build *)",
+      "Bash(dotnet test *)",
+      "Bash(dotnet format *)",
+      "Bash(openspec *)",
+      "mcp__codegraph__*"
+    ],
+    "additionalDirectories": [
+      "../buildtools/config",
+      "../Logs",
+      "../tests"
+    ]
+  },
+  "extraKnownMarketplaces": {
+    "dotnet-agent-skills": {
+      "source": {
+        "source": "github",
+        "repo": "dotnet/skills"
+      }
+    }
+  },
   "enabledPlugins": {
-    "aspire@aspire-skills": true
+    "csharp-lsp@claude-plugins-official": true,
+    "microsoft-docs@claude-plugins-official": true,
+    "context7@claude-plugins-official": true,
+    "dotnet-diag@dotnet-agent-skills": true,
+    "dotnet-msbuild@dotnet-agent-skills": true
   }
 }

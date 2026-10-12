@@ -66,7 +66,7 @@ public class CustomEndpointDataSource : EndpointDataSource
 
                 void AddEndpoints(IReadOnlyDictionary<string, object> defaults = null, RouteValueDictionary policies = null)
                 {
-                    var order = constraintRouteAttr != null ? r.Order : r.Order + 2;
+                    var order = constraintRouteAttr is { AffectsOrder: true } ? r.Order : r.Order + 2;
                     routeEndpoints.Add(new RouteEndpoint(r.RequestDelegate, RoutePatternFactory.Parse(r.RoutePattern.RawText, defaults, policies), order + 1, r.Metadata, r.DisplayName));
                 }
 

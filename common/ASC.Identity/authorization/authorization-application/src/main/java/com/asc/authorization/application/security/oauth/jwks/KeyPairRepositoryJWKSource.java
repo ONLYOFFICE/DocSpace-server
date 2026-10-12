@@ -342,7 +342,12 @@ public class KeyPairRepositoryJWKSource
     log.debug("Using key pair with ID: {}", activeKeyPair.getId());
 
     var principal = context.getPrincipal();
-    var authority = principal.getAuthorities().stream().findFirst().orElse(null);
+    var authority =
+        principal.getAuthorities().stream()
+            .filter(TenantAuthority.class::isInstance)
+            .map(TenantAuthority.class::cast)
+            .findFirst()
+            .orElse(null);
 
     if (context.getRegisteredClient() != null
         && context.getRegisteredClient().getClientId() != null)
@@ -352,12 +357,12 @@ public class KeyPairRepositoryJWKSource
       context.getClaims().claim("cid", context.getAuthorization().getRegisteredClientId());
     if (principal.getPrincipal() != null)
       context.getClaims().subject(principal.getPrincipal().toString());
-    if (authority instanceof TenantAuthority tenantAuthority)
+    if (authority != null)
       context
           .getClaims()
-          .issuer(String.format("%s/oauth2", tenantAuthority.getAuthority()))
-          .claim("tid", tenantAuthority.getTenantId())
-          .audience(Collections.singletonList(tenantAuthority.getAuthority()));
+          .issuer(String.format("%s/oauth2", authority.getAuthority()))
+          .claim("tid", authority.getTenantId())
+          .audience(Collections.singletonList(authority.getAuthority()));
 
     if (tokenRegion != null && !tokenRegion.isBlank() && isSaaS)
       context.getClaims().claim("region", tokenRegion);

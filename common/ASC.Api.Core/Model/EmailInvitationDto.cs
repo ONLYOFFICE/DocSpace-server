@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -41,7 +41,7 @@ public class EmailInvitationsDto
     /// <summary>
     /// The list of email invitations.
     /// </summary>
-    /// <example>[{"email": user1@example.com}, {"email": user2@example.com}]</example>
+    /// <example>[{"email": "user1@example.com"}, {"email": "user2@example.com"}]</example>
     public List<EmailInvitationDto> Invitations { get; set; }
 }
 
@@ -51,9 +51,11 @@ public class EmailInvitationsDto
 public class EmailInvitationDto
 {
     /// <summary>
-    /// The email address.
+    /// The address of somebody who has no portal account yet. An invitation is sent to it and an account is created
+    /// once it is accepted, so this is the field to use instead of an account identifier when the person is new to
+    /// the portal.
     /// </summary>
-    /// <example>user@example.com</example>
+    /// <example>jane.doe@example.com</example>
     [EmailAddress]
     [MaxLength(255)]
     public string Email { get; set; }

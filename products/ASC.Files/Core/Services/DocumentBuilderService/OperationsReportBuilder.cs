@@ -1,0 +1,289 @@
+// Copyright (C) Ascensio System SIA, 2009-2026
+//
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+//
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+//
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+//
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+//
+// No trademark rights are granted under this License.
+//
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+//
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+//
+// SPDX-License-Identifier: AGPL-3.0-only
+
+namespace ASC.Files.Core.Services.DocumentBuilderService;
+
+/// <summary>
+/// Detailed operations (transactions) report - one row per wallet operation.
+/// </summary>
+[Scope]
+public class OperationsReportBuilder(
+    TenantManager tenantManager,
+    UserManager userManager,
+    TenantUtil tenantUtil,
+    TempPath tempPath,
+    ReportHeaderService reportHeaderService,
+    TariffService tariffService,
+    DisplayUserSettingsHelper displayUserSettingsHelper)
+    : CustomerReportBuilderBase(tenantManager, userManager, tenantUtil, tempPath, reportHeaderService)
+{
+    protected override async Task<DocumentBuilderInputData> BuildCoreAsync(RenderContext context, CustomerOperationsReportTaskData taskData)
+    {
+        var tenantWalletService = taskData.ServiceName is { Count: 1 }
+            ? await GetTenantWalletServiceAsync(taskData.ServiceName.First())
+            : null;
+
+        // Both AI services record the source of the operation and the provider's cost in its metadata.
+        var isAiService = tenantWalletService is TenantWalletService.AITools or TenantWalletService.AISearch;
+
+        // AI search is billed by results, not tokens, so only AI tools get the token columns.
+        var tokenColumns = tenantWalletService is TenantWalletService.AITools ? GetTokenColumns() : null;
+
+        var columns = new List<ReportColumn>
+        {
+            new(Resource.AccountingCustomerOperationDate),
+            new(Resource.AccountingCustomerOperationType),
+            new(Resource.AccountingCustomerOperationDetails),
+            new(Resource.AccountingCustomerOperationContact),
+            new(Resource.AccountingCustomerOperationQuantity, ReportColumnAlign.Right)
+        };
+
+        if (tokenColumns != null)
+        {
+            // The breakdown of the quantity, which for AI operations already is the total tokens.
+            columns.AddRange(tokenColumns.Select(x => new ReportColumn(x.Header, ReportColumnAlign.Right)));
+        }
+
+        columns.Add(new ReportColumn(Resource.AccountingCustomerOperationServiceUnit));
+        columns.Add(new ReportColumn(Resource.AccountingCustomerOperationCredit, ReportColumnAlign.Right, Sum: true));
+
+        if (isAiService)
+        {
+            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationProviderCost, ReportColumnAlign.Right, Sum: true));
+        }
+
+        columns.Add(new ReportColumn(Resource.AccountingCustomerOperationDebit, ReportColumnAlign.Right, Sum: true));
+        columns.Add(new ReportColumn(Resource.AccountingCustomerOperationCurrency, Currency: true));
+
+        if (isAiService)
+        {
+            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationSourceType));
+            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationSourceTitle));
+            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationSourceId));
+        }
+
+        var dateFormat = context.Header.LongDateFormat;
+
+        // Second sheet: how much each participant spent in total over the reported period. Only the
+        // debit side is summed - credits are top-ups, not consumption. The currency is a row field
+        // of its own, so each participant is totalled per currency; a pivot always lays its row
+        // fields out ahead of the values, which is why it precedes the total. When every operation
+        // shares one currency the script leaves that field out and names the currency in the total's
+        // caption instead. The biggest spenders come first rather than the participants in
+        // alphabetical order.
+        var pivot = new ReportPivot(
+            Resource.AccountingCustomerOperationsReportSummarySheetName,
+            [Resource.AccountingCustomerOperationContact, Resource.AccountingCustomerOperationCurrency],
+            [
+                new ReportPivotDataField(
+                    Resource.AccountingCustomerOperationDebit,
+                    "Sum",
+                    Resource.AccountingCustomerOperationsReportSummaryDebit,
+                    MoneyFormat)
+            ],
+            new ReportPivotSort(
+                Resource.AccountingCustomerOperationContact,
+                Resource.AccountingCustomerOperationDebit,
+                ReportPivotSortOrder.Descending));
+
+        var definition = new ReportDefinition(
+            Resource.AccountingCustomerOperationsReportSheetName,
+            Resource.AccountingCustomerOperationsReportSheetName,
+            Resource.AccountingCustomerOperationsReportName,
+            columns,
+            async writer =>
+            {
+                var filter = new OperationFilter
+                {
+                    ServiceName = taskData.ServiceName,
+                    UtcStartDate = context.UtcStartDate,
+                    UtcEndDate = context.UtcEndDate,
+                    ParticipantName = taskData.ParticipantName,
+                    Credit = taskData.Credit,
+                    Debit = taskData.Debit,
+                    Type = taskData.Type,
+                    Status = taskData.Status,
+                    OrderBy = taskData.OrderBy,
+                    OrderType = taskData.OrderType
+                };
+
+                await foreach (var records in GetReportDataAsync(context.Tenant.Id, filter))
+                {
+                    if (records is not { Count: > 0 })
+                    {
+                        continue;
+                    }
+
+                    await writer.WriteAsync(SerializeOperations(records, dateFormat, context.Options, isAiService, tokenColumns));
+                }
+            },
+            pivot);
+
+        return await RenderAsync(context, definition);
+    }
+
+    private async Task<TenantWalletService?> GetTenantWalletServiceAsync(string serviceName)
+    {
+        if (string.IsNullOrEmpty(serviceName))
+        {
+            return null;
+        }
+
+        var quotaList = await TenantManager.GetTenantQuotasAsync(all: false, wallet: true);
+
+        var selectedQuota = quotaList.FirstOrDefault(x =>
+            x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));
+
+        if (selectedQuota != null && Enum.IsDefined(typeof(TenantWalletService), selectedQuota.TenantId))
+        {
+            return (TenantWalletService)selectedQuota.TenantId;
+        }
+
+        return null;
+    }
+
+    private async IAsyncEnumerable<List<Operation>> GetReportDataAsync(int tenantId, OperationFilter filter)
+    {
+        var offset = 0;
+        var limit = 1000;
+
+        while (true)
+        {
+            filter.Offset = offset;
+            filter.Limit = limit;
+
+            var report = await tariffService.GetCustomerOperationsAsync(tenantId, filter);
+
+            if (report?.Collection == null)
+            {
+                yield return null;
+                break;
+            }
+
+            var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper, false);
+
+            foreach (var operation in report.Collection)
+            {
+                var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, operation.Metadata);
+                var (sourceId, sourceType, sourceTitle) = WalletServiceDescriptionManager.GetSourceInfo(operation.Metadata);
+
+                operation.Description = description;
+                operation.Details = WalletServiceDescriptionManager.GetServiceDetails(operation.Metadata);
+                operation.ServiceUnit = unitOfMeasurement;
+                operation.Quantity = quantity;
+                operation.Date = TenantUtil.DateTimeFromUtc(operation.Date);
+                operation.ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
+                    ? value
+                    : operation.ParticipantName;
+                operation.SourceId = sourceId;
+                operation.SourceType = sourceType;
+                operation.SourceTitle = sourceTitle;
+                operation.TokenUsage = WalletServiceDescriptionManager.GetTokenUsage(operation.Metadata);
+            }
+
+            yield return report.Collection;
+
+            if (report.CurrentPage >= report.TotalPage)
+            {
+                break;
+            }
+
+            offset += limit;
+        }
+    }
+
+    // The token breakdown, as the header each column carries and the count it reads. Declared once so
+    // that the header row and the data rows cannot fall out of step: a column added, removed or
+    // reordered here moves both at the same time.
+    private static List<(string Header, Func<OperationTokenUsage, long?> Tokens)> GetTokenColumns()
+    {
+        return
+        [
+            (Resource.AccountingCustomerOperationPromptTokens, x => x?.PromptTokens),
+            (Resource.AccountingCustomerOperationCachedTokens, x => x?.CachedTokens),
+            (Resource.AccountingCustomerOperationCacheWriteTokens, x => x?.CacheWriteTokens),
+            (Resource.AccountingCustomerOperationCompletionTokens, x => x?.CompletionTokens),
+            (Resource.AccountingCustomerOperationReasoningTokens, x => x?.ReasoningTokens),
+            (Resource.AccountingCustomerOperationImageTokens, x => x?.ImageTokens)
+        ];
+    }
+
+    private static string SerializeOperations(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions, bool isAiService, List<(string Header, Func<OperationTokenUsage, long?> Tokens)> tokenColumns)
+    {
+        var sb = new StringBuilder();
+
+        foreach (var record in records)
+        {
+            var properties = new List<PropertyValue>
+            {
+                new(record.Date.ConvertNumerals("G"), dateFormat),
+                new(record.Description, "@"),
+                new(record.Details, "@"),
+                new(record.ParticipantDisplayName, "@"),
+                CountValue(record.Quantity)
+            };
+
+            if (tokenColumns != null)
+            {
+                // One value per token column even when the operation carries no token counts at all,
+                // or every column after this block would shift left by six.
+                foreach (var tokenColumn in tokenColumns)
+                {
+                    properties.Add(CountValue(tokenColumn.Tokens(record.TokenUsage)));
+                }
+            }
+
+            properties.Add(new PropertyValue(record.ServiceUnit, "@"));
+            properties.Add(MoneyValue(record.Credit));
+
+            if (isAiService)
+            {
+                properties.Add(MoneyValue(WalletServiceDescriptionManager.GetProviderCost(record.Metadata)));
+            }
+
+            properties.Add(MoneyValue(record.Debit));
+            properties.Add(new PropertyValue(record.Currency, "@"));
+
+            if (isAiService)
+            {
+                properties.Add(new PropertyValue(WalletServiceDescriptionManager.GetSourceTypeTitle(record.SourceType), "@"));
+                properties.Add(new PropertyValue(record.SourceTitle, "@"));
+                properties.Add(new PropertyValue(record.SourceId, "@"));
+            }
+
+            _ = sb.AppendLine(JsonSerializer.Serialize(properties, jsonSerializerOptions) + ",");
+        }
+
+        return sb.ToString();
+    }
+}

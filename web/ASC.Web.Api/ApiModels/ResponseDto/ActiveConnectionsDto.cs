@@ -34,91 +34,105 @@
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The active connections parameters.
+/// The connections the calling user currently has open, and which of them the request itself was made with.
 /// </summary>
 
 public class ActiveConnectionsDto
 {
     /// <summary>
-    /// The login event.
+    /// The `id` of the item in `items` that the current request is authenticated by. It is `0` when the request
+    /// carried a token in the `Authorization` header instead of the portal cookie, and in that case none of the
+    /// items is the current connection.
     /// </summary>
     /// <example>1</example>
     public required int LoginEvent { get; set; }
 
     /// <summary>
-    /// The list of active connection items.
+    /// One item per sign-in of the caller that is still active, ordered newest sign-in first, with the connection
+    /// the request itself uses moved to the front. Sign-ins older than a year are left out, and a caller with no
+    /// stored connection gets a single item describing the current request rather than an empty list.
     /// </summary>
-    /// <example>[{"id": "conn1", "ip": "192.168.1.1"}]</example>
+    /// <example>[{"id": 1234, "ip": "192.0.2.1"}]</example>
     public List<ActiveConnectionsItemDto> Items { get; set; }
 }
 
 /// <summary>
-/// The active connection item parameters.
+/// One open connection of a user: where the sign-in behind it came from, and the ID it can be closed by.
 /// </summary>
 public class ActiveConnectionsItemDto
 {
     /// <summary>
-    /// The active connection ID.
+    /// The ID of the sign-in this connection was opened by. Pass it as `loginEventId` to
+    /// `PUT api/2.0/security/activeconnections/logout/{loginEventId}` to end this one connection; the item whose
+    /// value equals `loginEvent` is the connection the current request uses.
     /// </summary>
     /// <example>1</example>
     public required int Id { get; set; }
 
     /// <summary>
-    /// The tenant ID.
+    /// The portal the sign-in was made on. The operation never crosses portals, so it is the current one on every
+    /// item.
     /// </summary>
     /// <example>1</example>
     public required int TenantId { get; set; }
 
     /// <summary>
-    /// The user ID.
+    /// The user the connection belongs to, which is the calling user on every item - the operation cannot report
+    /// anyone else's connections.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid UserId { get; set; }
 
     /// <summary>
-    /// Specifies if the active connection has a mobile phone or not.
+    /// Whether the sign-in came from a mobile client. No mobile marker is stored with a connection, so the value
+    /// is `false` on every item and tells a caller nothing about the device.
     /// </summary>
     /// <example>true</example>
     public bool Mobile { get; set; }
 
     /// <summary>
-    /// The IP address of the active connection.
+    /// The IP address the sign-in came from, with the port stripped off. On the item that matches `loginEvent` it
+    /// is taken from the address the current request arrives from instead of the one stored at sign-in.
     /// </summary>
     /// <example>192.0.2.1</example>
     public string Ip { get; set; }
 
     /// <summary>
-    /// The active connection country.
+    /// The English name of the country the IP address is located in. It is empty when the address cannot be
+    /// located, which is the normal outcome for private and loopback addresses.
     /// </summary>
     /// <example>United States</example>
     public string Country { get; set; }
 
     /// <summary>
-    /// The active connection city.
+    /// The city the IP address is located in, empty under the same conditions as `country`.
     /// </summary>
     /// <example>New York</example>
     public string City { get; set; }
 
     /// <summary>
-    /// The active connection browser.
+    /// The browser and its version as parsed from the user agent of the sign-in, empty when the client sent no
+    /// recognisable one. It is refreshed from the current request on the item that matches `loginEvent`.
     /// </summary>
     /// <example>Chrome 120.0</example>
     public string Browser { get; set; }
 
     /// <summary>
-    /// The active connection platform.
+    /// The operating system as parsed from the user agent of the sign-in, refreshed and left empty under the same
+    /// conditions as `browser`.
     /// </summary>
     /// <example>Windows</example>
     public string Platform { get; set; }
 
     /// <summary>
-    /// The active connection date.
+    /// When the sign-in happened, in the portal time zone rather than in UTC.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     public ApiDateTime Date { get; set; }
 
     /// <summary>
-    /// The active connection page.
+    /// Where in the portal the sign-in was made from: the referrer of the request that created it, or that
+    /// request's own path when it carried no referrer. Long values are cut off at 512 characters.
     /// </summary>
     /// <example>/rooms/shared</example>
     public string Page { get; set; }

@@ -54,6 +54,7 @@ public class ReassignProgressItem : DistributedTaskProgress
     public Guid ToUser { get; private set; }
 
     private IDictionary<string, StringValues> _httpHeaders;
+    private string _baseUri;
     private int _tenantId;
     private Guid _currentUserId;
     private bool _notify;
@@ -72,9 +73,10 @@ public class ReassignProgressItem : DistributedTaskProgress
         _serviceScopeFactory = serviceScopeFactory;
     }
 
-    public void Init(IDictionary<string, StringValues> httpHeaders, int tenantId, Guid fromUserId, Guid toUserId, Guid currentUserId, bool notify, bool deleteProfile)
+    public void Init(IDictionary<string, StringValues> httpHeaders, string baseUri, int tenantId, Guid fromUserId, Guid toUserId, Guid currentUserId, bool notify, bool deleteProfile)
     {
         _httpHeaders = httpHeaders;
+        _baseUri = baseUri;
         _tenantId = tenantId;
         FromUser = fromUserId;
         ToUser = toUserId;
@@ -95,6 +97,11 @@ public class ReassignProgressItem : DistributedTaskProgress
         var (tenantManager, messageService, fileStorageService, studioNotifyService, securityContext, userManager, userPhotoManager, displayUserSettingsHelper, loggerFactory, socketManager, webhookManager, client, groupFullDtoHelper) = scopeClass;
         var logger = loggerFactory.CreateLogger("ASC.Web");
         await tenantManager.SetCurrentTenantAsync(_tenantId);
+
+        if (!string.IsNullOrEmpty(_baseUri))
+        {
+            scope.ServiceProvider.GetRequiredService<BaseCommonLinkUtility>().ServerUri = _baseUri;
+        }
 
         try
         {
@@ -141,7 +148,7 @@ public class ReassignProgressItem : DistributedTaskProgress
 
             if (_deleteProfile)
             {
-                await client.DeleteClientsAsync(FromUser);
+                await DeleteClientsAsync(client, logger, FromUser);
                 await DeleteUserProfile(userManager, userPhotoManager, messageService, displayUserSettingsHelper, socketManager, webhookManager, groupFullDtoHelper);
             }
 
@@ -172,6 +179,22 @@ public class ReassignProgressItem : DistributedTaskProgress
     public object Clone()
     {
         return MemberwiseClone();
+    }
+
+    /// <summary>
+    /// Removing the user's OAuth clients is cleanup: an unreachable identity service must not leave
+    /// the profile undeleted after the data has already been transferred.
+    /// </summary>
+    internal static async Task DeleteClientsAsync(IdentityClient client, ILogger logger, Guid userId)
+    {
+        try
+        {
+            await client.DeleteClientsAsync(userId);
+        }
+        catch (Exception ex)
+        {
+            logger.WarningDeleteClients(userId, ex);
+        }
     }
 
     private async Task SetPercentageAndCheckCancellationAsync(double percentage, bool publish)

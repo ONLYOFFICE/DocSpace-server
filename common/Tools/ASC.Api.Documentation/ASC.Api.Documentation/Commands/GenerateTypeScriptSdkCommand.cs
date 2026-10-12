@@ -37,7 +37,7 @@ public class GenerateTypeScriptSdkCommand : SdkCommandBase
 {
     protected override string Name => "TypeScript";
 
-    public override ValidationResult Validate(CommandContext context, NoArgumentsCommandSettings settings)
+    protected override ValidationResult Validate(CommandContext context, NoArgumentsCommandSettings settings)
     {
         var baseValidation = base.Validate(context, settings);
         if (!baseValidation.Successful)
@@ -48,7 +48,7 @@ public class GenerateTypeScriptSdkCommand : SdkCommandBase
         return ToolRunner.ValidateAvailable("npm", "--version");
     }
 
-    public override async Task<int> ExecuteAsync(
+    protected override async Task<int> ExecuteAsync(
         CommandContext context,
         NoArgumentsCommandSettings settings,
         CancellationToken cancellationToken)

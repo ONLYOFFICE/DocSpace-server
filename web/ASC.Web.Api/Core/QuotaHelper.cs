@@ -31,8 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.Core.Common.Quota.Features;
-
 namespace ASC.Web.Api.Core;
 
 [Scope]
@@ -44,9 +42,9 @@ public class QuotaHelper(
     UserManager userManager,
     AuthContext authContext)
 {
-    public async IAsyncEnumerable<QuotaDto> GetQuotasAsync(bool all = false, bool wallet = false)
+    public async IAsyncEnumerable<QuotaDto> GetQuotasAsync(bool all = false, bool? additional = null, bool? wallet = null)
     {
-        var quotaList = await tenantManager.GetTenantQuotasAsync(all, wallet);
+        var quotaList = await tenantManager.GetTenantQuotasAsync(all, additional, wallet);
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var enabledWalletServices = coreBaseSettings.Standalone ? null : (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices;
         var currentQuota = await tenantManager.GetCurrentTenantQuotaAsync();
@@ -77,7 +75,7 @@ public class QuotaHelper(
 
     public async Task<IEnumerable<WalletServiceDto>> GetWalletServicesAsync()
     {
-        var quotas = await tenantManager.GetTenantQuotasAsync(all: true, wallet: true);
+        var quotas = await tenantManager.GetTenantQuotasAsync(all: true, additional: true, wallet: true);
 
         var userType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var enabledWalletServices = coreBaseSettings.Standalone ? null : (await settingsManager.LoadAsync<TenantWalletServiceSettings>()).EnabledServices;
@@ -88,7 +86,7 @@ public class QuotaHelper(
 
         foreach (var quota in quotas.OrderByDescending(q => q.Visible))
         {
-            if (quota.AITools && !aiEnabled)
+            if ((quota.AITools || quota.AISearch) && !aiEnabled)
             {
                 continue;
             }
@@ -152,10 +150,10 @@ public class QuotaHelper(
 
             await Task.WhenAll(tenantUserQuotaSettingsTask, tenantRoomQuotaSettingsTask, tenantQuotaSettingsTask, tenantAiAgentQuotaSettingsTask);
 
-            result.UsersQuota = await tenantUserQuotaSettingsTask;
-            result.RoomsQuota = await tenantRoomQuotaSettingsTask;
-            result.AiAgentsQuota = await tenantAiAgentQuotaSettingsTask;
-            result.TenantCustomQuota = await tenantQuotaSettingsTask;
+            result.UsersQuota = (await tenantUserQuotaSettingsTask).MapEntityQuota();
+            result.RoomsQuota = (await tenantRoomQuotaSettingsTask).MapEntityQuota();
+            result.AiAgentsQuota = (await tenantAiAgentQuotaSettingsTask).MapEntityQuota();
+            result.TenantCustomQuota = (await tenantQuotaSettingsTask).Map();
         }
 
         return result;
@@ -178,7 +176,7 @@ public class QuotaHelper(
                                 return false;
                             }
 
-                            if (quota.Wallet && !quota.Features.Contains(r.Name))
+                            if (quota.Additional && !quota.Features.Contains(r.Name))
                             {
                                 return false;
                             }
@@ -187,7 +185,7 @@ public class QuotaHelper(
                         })
                     .OrderBy(r => r.Order))
         {
-            var featureName = $"{feature.Name}{(quota.Wallet ? "_wallet" : "")}";
+            var featureName = $"{feature.Name}{(quota.Wallet && quota.Additional ? "_wallet" : "")}";
 
             var result = new TenantQuotaFeatureDto
             {
@@ -202,6 +200,7 @@ public class QuotaHelper(
             result.Id = feature.Name;
 
             object used = null;
+            var hasStat = false;
             var availableFeature = true;
             var isUsedAvailable = employeeType != EmployeeType.Guest &&
                                   (employeeType != EmployeeType.User ||
@@ -253,11 +252,13 @@ public class QuotaHelper(
 
             if (getUsed)
             {
-                if (used != null)
+                // "used" carries a required value, so it is left out entirely rather than emitted
+                // empty for a caller who is not shown the figure.
+                if (hasStat && isUsedAvailable)
                 {
                     result.Used = new FeatureUsedDto
                     {
-                        Value = isUsedAvailable ? used : null,
+                        Value = used,
                         Title = Resource.ResourceManager.GetString($"TariffsFeature_used_{featureName}")
                     };
                 }
@@ -287,7 +288,18 @@ public class QuotaHelper(
             {
                 var statisticProvider = (ITenantQuotaFeatureStat<T>)serviceProvider.GetService(typeof(ITenantQuotaFeatureStat<,>).MakeGenericType(feature.GetType(), typeof(T)));
 
-                if (statisticProvider != null)
+                if (statisticProvider == null)
+                {
+                    return;
+                }
+
+                hasStat = true;
+
+                // A Guest sees no usage numbers at all and a User sees only the total size, so for
+                // everything else the figure is computed and then thrown away — a portal-wide count
+                // per feature, and one that some providers are not even allowed to run for such a
+                // caller, which used to surface as an unhandled error instead of a quota.
+                if (isUsedAvailable)
                 {
                     used = await statisticProvider.GetValueAsync();
                 }

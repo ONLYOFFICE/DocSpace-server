@@ -39,14 +39,16 @@ namespace ASC.People.ApiModels.RequestDto;
 public class DetailedInformationRequestDto
 {
     /// <summary>
-    /// The group ID.
+    /// The ID of the group to read, taken from the route. It has to be a group that has not been deleted, otherwise
+    /// the operation answers 404.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]
     public required Guid Id { get; set; }
 
     /// <summary>
-    /// Specifies whether to include the group members or not.
+    /// Whether to fill in the member list of the group. It defaults to true, so set it to false when only the name
+    /// and the manager are needed and the group may be large.
     /// </summary>
     /// <example>true</example>
     [FromQuery(Name = "includeMembers")]

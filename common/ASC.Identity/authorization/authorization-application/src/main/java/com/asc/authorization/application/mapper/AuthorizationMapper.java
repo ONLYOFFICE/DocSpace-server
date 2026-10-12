@@ -353,6 +353,11 @@ public class AuthorizationMapper {
   public AuthorizationEntity merge(AuthorizationEntity existing, AuthorizationEntity update) {
     if (update.getTenantId() < 1) update.setTenantId(existing.getTenantId());
 
+    if (update.getOwnerTenantId() == null) {
+      update.setOwnerTenantId(existing.getOwnerTenantId());
+      update.setOwnerUserId(existing.getOwnerUserId());
+    }
+
     return update;
   }
 

@@ -38,6 +38,7 @@ global using ASC.Common;
 global using ASC.Common.Threading;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Core;
+global using ASC.Core.Common;
 global using ASC.Core.Users;
 global using ASC.Data.Reassigns.Log;
 global using ASC.Files.Core;

@@ -8,6 +8,7 @@
   <ItemGroup>
       <PackageReference Include="AspNetCore.HealthChecks.UI" />
       <PackageReference Include="AspNetCore.HealthChecks.UI.InMemory.Storage" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
       <PackageReference Include="Microsoft.Extensions.Hosting.Systemd" />
       <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" />
   </ItemGroup>

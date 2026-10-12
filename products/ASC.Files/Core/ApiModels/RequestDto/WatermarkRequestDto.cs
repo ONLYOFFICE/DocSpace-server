@@ -34,55 +34,61 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for adding watermarks.
+/// The watermark drawn over the documents of a room.
 /// </summary>
 public class WatermarkRequestDto
 {
     /// <summary>
-    /// Specifies whether watermarks are on or off.
+    /// Whether the room draws a watermark at all. Sending the object with this turned off removes the watermark the
+    /// room has, and the rest of the fields are then irrelevant.
     /// </summary>
     /// <example>true</example>
     public bool? Enabled { get; set; }
 
     /// <summary>
-    /// Specifies whether to display the following addditional information or not: username, user email, user IP address, current date and room name.
+    /// Which details of the reader and of the room are stamped into the watermark alongside the text. The values
+    /// combine, so several of them can be added together to stamp more than one.
     /// </summary>
-    /// <example>1</example>
+    /// <example>3</example>
     public WatermarkAdditions Additions { get; set; }
 
     /// <summary>
-    /// The watermark text.
+    /// The fixed line drawn over the document, shown before the details selected alongside it. It is the whole
+    /// watermark when no details are added.
     /// </summary>
     /// <example>Confidential</example>
     [StringLength(255)]
     public string Text { get; set; }
 
     /// <summary>
-    /// The watermark text and image rotate angle.
+    /// How far the watermark is turned, in degrees, with negative values turning it anticlockwise. Zero draws it
+    /// horizontally across the page.
     /// </summary>
     /// <example>-45</example>
     public int Rotate { get; set; }
 
     /// <summary>
-    /// The watermark image scale.
+    /// How large the watermark image is drawn, as a percentage of its own size. It applies to the image form of the
+    /// watermark only.
     /// </summary>
     /// <example>100</example>
     public int ImageScale { get; set; }
 
     /// <summary>
-    /// The path to the temporary image file.
+    /// The picture to use instead of a text watermark, named by the path that `POST api/2.0/files/logos` returned for
+    /// an image uploaded beforehand. The portal copies it into the room when the setting is saved.
     /// </summary>
-    /// <example>/tmp/watermark.png</example>
+    /// <example>/temp/watermark_a1b2c3.png</example>
     public string ImageUrl { get; set; }
 
     /// <summary>
-    /// The watermark image height.
+    /// The height the watermark image is drawn with, in pixels, used together with the width to keep its proportions.
     /// </summary>
     /// <example>100.0</example>
     public double ImageHeight { get; set; }
 
     /// <summary>
-    /// The watermark image width.
+    /// The width the watermark image is drawn with, in pixels, used together with the height to keep its proportions.
     /// </summary>
     /// <example>200.0</example>
     public double ImageWidth { get; set; }

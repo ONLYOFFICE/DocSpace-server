@@ -53,6 +53,17 @@ public class SwaggerSchemaCustomAttribute : SwaggerSchemaAttribute
     public object Example { get; set; }
 }
 
+/// <summary>
+/// Marks a <see cref="JsonElement"/> property that carries an arbitrary JSON document, stored and returned verbatim.
+/// </summary>
+/// <remarks>
+/// Without it a <see cref="JsonElement"/> is documented as "integer or string", since that is what it carries almost
+/// everywhere in this API: an id that is either a number or a third-party string. A property marked with this
+/// attribute is documented by the empty schema instead - any JSON value, objects, arrays and null included.
+/// </remarks>
+[AttributeUsage(AttributeTargets.Property)]
+public class SwaggerAnyJsonValueAttribute : Attribute;
+
 public class SwaggerSchemaCustomFilter : ISchemaFilter
 {
     public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
@@ -71,6 +82,14 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
 
         if (context.MemberInfo is not PropertyInfo propertyInfo)
         {
+            return;
+        }
+
+        if (propertyInfo.GetCustomAttribute<SwaggerAnyJsonValueAttribute>() != null)
+        {
+            // The empty schema: no type at all, so a nullable property does not end up as `type: null`.
+            openApiSchema.Type = null;
+            openApiSchema.OneOf = null;
             return;
         }
 
@@ -112,10 +131,11 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
 
             var arraySchema = UpdateSchema(checkType, new OpenApiSchema());
 
-            if (arraySchema?.Example != null)
+            var arrayExample = arraySchema?.Examples?.FirstOrDefault();
+            if (arrayExample != null)
             {
-                array.Add(arraySchema.Example);
-                result.Example = array;
+                array.Add(arrayExample);
+                result.Examples = [array];
             }
 
             if (arraySchema?.OneOf != null && arraySchema.OneOf?.Count != 0)
@@ -135,12 +155,12 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                 new OpenApiSchema
                 {
                     Type = JsonSchemaType.Integer,
-                    Example = SwaggerSchemaCustomAttribute.DefaultIntExample
+                    Examples = [SwaggerSchemaCustomAttribute.DefaultIntExample]
                 },
                 new OpenApiSchema
                 {
                     Type = JsonSchemaType.String,
-                    Example = SwaggerSchemaCustomAttribute.DefaultStringExample
+                    Examples = [SwaggerSchemaCustomAttribute.DefaultStringExample]
                 }
             };
 
@@ -215,7 +235,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                         Enum = enumDataString,
                         Type = JsonSchemaType.String,
                         Description = $"[{string.Join(", ", enumDescriptionString)}]",
-                        Example = enumDataString[0]
+                        Examples = [enumDataString[0]]
                     }
                 };
 
@@ -226,7 +246,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                         Enum = enumDataInt,
                         Type = JsonSchemaType.Integer,
                         Description = $"[{string.Join(", ", enumDescriptionInt)}]",
-                        Example = enumDataInt[0],
+                        Examples = [enumDataInt[0]],
                         Extensions = new Dictionary<string, IOpenApiExtension>
                         {
                             ["x-enum-varnames"] = new JsonNodeExtension(enumVarNames)
@@ -240,7 +260,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
                         Enum = enumDataLong,
                         Type = JsonSchemaType.Integer,
                         Description = $"[{string.Join(", ", enumDescriptionLong)}]",
-                        Example = enumDescriptionLong[0],
+                        Examples = [enumDescriptionLong[0]],
                         Extensions = new Dictionary<string, IOpenApiExtension>
                         {
                             ["x-enum-varnames"] = new JsonNodeExtension(enumVarNames)
@@ -259,7 +279,7 @@ public class SwaggerSchemaCustomFilter : ISchemaFilter
         else if (checkType == typeof(TimeSpan))
         {
             var timeSpan = TimeSpan.Zero.ToString();
-            result.Example = timeSpan;
+            result.Examples = [timeSpan];
         }
 
         return result;

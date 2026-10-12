@@ -39,9 +39,11 @@ namespace ASC.People.ApiModels.RequestDto;
 public class GetUserPhotoRequestDto
 {
     /// <summary>
-    /// The user ID.
+    /// The profile whose avatar the operation addresses, taken from the route. Either the ID of the account or its
+    /// user name is accepted. Reading a photo works for any account the caller may see, while deleting one only
+    /// works for the calling account itself.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromRoute(Name = "userid")]
+    [FromRoute(Name = "userId")]
     public required string UserId { get; set; }
 }

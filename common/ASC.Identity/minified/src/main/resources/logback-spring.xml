@@ -28,7 +28,7 @@
         </if>
     </springProfile>
 
-    <springProfile name="default,development,dev,d">
+    <springProfile name="default,development,dev,d,minified">
         <condition class="com.asc.common.autoconfigurations.condition.PropertyIsDefinedCondition">
             <key>LOG_FILE_PATH</key>
         </condition>
@@ -246,12 +246,12 @@
         </condition>
         <if>
             <then>
-                <root level="ERROR">
+                <root level="WARN">
                     <appender-ref ref="JSON_FILE"/>
                 </root>
             </then>
             <else>
-                <root level="ERROR">
+                <root level="WARN">
                     <appender-ref ref="JSON_CONSOLE_ASYNC"/>
                 </root>
             </else>

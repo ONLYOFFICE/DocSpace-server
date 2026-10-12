@@ -114,11 +114,21 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/change-app-enabled", (req, res) => {
+    files.changeAppEnabled(req.body);
+    res.end();
+  });
+
   router.post("/top-up-wallet", (req, res) => {
     files.topUpWallet(req.body);
     res.end();
   });
-  
+
+  router.post("/wallet-low-balance", (req, res) => {
+    files.walletLowBalance(req.body);
+    res.end();
+  });
+
   router.post("/update-history", (req, res) => {
     files.updateHistory(req.body);
     res.end();
@@ -259,6 +269,11 @@ module.exports = (files) => {
     res.end();
   });
 
+  router.post("/change-ai-access-settings", (req, res) => {
+    files.changeAiAccessSettings(req.body);
+    res.end();
+  });
+
   router.post("/change-external-sharing-settings", (req, res) => {
     files.changeExternalSharingSettings(req.body);
     res.end();
@@ -266,6 +281,11 @@ module.exports = (files) => {
 
   router.post("/external-db-settings", (req, res) => {
     files.externalDbSettings(req.body);
+    res.end();
+  });
+
+  router.post("/form-suggested-questions", (req, res) => {
+    files.formSuggestedQuestions(req.body);
     res.end();
   });
 

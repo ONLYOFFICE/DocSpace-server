@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -247,7 +247,7 @@
     <value>Abonamentrul clientului a fost actualizat: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Setările serviciilor care au fost activate cu portofelul clientului au fost actualizate</value>
+    <value>Setările serviciilor care au fost activate cu portofelul clientului au fost actualizate: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Portofelul clientului a fost alimentat: {0}</value>
@@ -637,7 +637,7 @@
     <value>Conectarea unică nu a reușit</value>
   </data>
   <data name="LoginFailViaTfaApp" xml:space="preserve">
-    <value>Conectarea unică nu a reușit</value>
+    <value>Conectarea prin aplicația de autentificare nu a reușit</value>
   </data>
   <data name="LoginHistoryReportDownloaded" xml:space="preserve">
     <value>Raport Istoric de Conectări a fost încărcat</value>
@@ -729,12 +729,6 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portalul a fost redenumit</value>
   </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Sala privată a fost dezactivată</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Sala privată a fost activată</value>
-  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Produse [{0}]. Acces deschis</value>
   </data>
@@ -788,6 +782,12 @@
   </data>
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Cheia secretă a clientului {0} a fost regenerată</value>
+  </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Notă</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Raportul afișează cele mai recente {0} din {1} evenimente. Pentru a obține toate evenimentele, descărcați raportul în format CSV.</value>
   </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Setările de vectorizare au fost resetate</value>
@@ -907,7 +907,7 @@
     <value>Trimitere</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Utilizatorul {0} a trimis invitația de asociere la DocSpace către {1}</value>
+    <value>Utilizatorul {0} a trimis o invitație către {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Instrucțiuni de invitare au fost trimise: {0}</value>
@@ -956,6 +956,9 @@
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Pornire migrație portal în altă regiune</value>
+  </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Soldul abonamentului a fost mutat în portofel: {0}</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Cont de sistem</value>
@@ -1205,5 +1208,89 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Conexiunile active ale utilizatorului au fost deconectate: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Configurația Docs Connect a fost actualizată</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Raportul de cotă Docs Connect a fost descărcat</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Setările AI ale utilizatorului au fost actualizate</value>
+  </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Profilul AI a fost atribuit agentului AI pentru acțiunea: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Profilul AI a fost atribuit acțiunii: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Profilul modelului AI a fost creat: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Profilul modelului AI a fost șters: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Profilul AI a fost eliminat din acțiune: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Profilul modelului AI a fost actualizat: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Fișiere [{0}]. Marcate ca citite</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Fișiere [{0}]. Fișierul nu a fost salvat. Cota de stocare a portalului a fost depășită.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Fișiere [{0}]. Salvarea fișierului depășește cota de stocare a portalului.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Dosare [{0}]. Marcate ca citite</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Cheia de criptare a camerei private {0} a fost creată</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Cheia de criptare a camerei private {0} a fost ștearsă</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Cheia de criptare a camerei private {0} a fost actualizată</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Autentificare suspectă detectată: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>Serverul MCP {0} al agentului AI a fost actualizat</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Atribuirea în cascadă a metadatelor a fost inițiată: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Câmpul de metadate a fost creat: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Câmpul de metadate a fost șters: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Câmpul de metadate a fost actualizat: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Șablonul de metadate a fost atribuit: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Șablonul de metadate a fost creat: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Șablonul de metadate a fost șters: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Atribuirea șablonului de metadate a fost anulată: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Șablonul de metadate a fost actualizat: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Valorile metadatelor au fost actualizate: {0}</value>
   </data>
 </root>

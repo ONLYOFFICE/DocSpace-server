@@ -154,11 +154,10 @@ public class DbWorker(IServiceScopeFactory serviceScopeFactory, ConfigureNotifyS
 static file class Queries
 {
     public static readonly Func<NotifyDbContext, Task<int>> ResetStatesAsync =
-        EF.CompileAsyncQuery(
-            (NotifyDbContext ctx) =>
-                ctx.NotifyInfo
-                    .Where(r => r.State == 1)
-                    .ExecuteUpdate(q => q.SetProperty(p => p.State, 0)));
+        (NotifyDbContext ctx) =>
+            ctx.NotifyInfo
+                .Where(r => r.State == 1)
+                .ExecuteUpdateAsync(q => q.SetProperty(p => p.State, 0));
 
     public static readonly Func<NotifyDbContext, int, Task<NotifyInfo>> NotifyInfoAsync =
         EF.CompileAsyncQuery(
@@ -175,12 +174,11 @@ static file class Queries
                     .FirstOrDefault());
 
     public static readonly Func<NotifyDbContext, int, int, Task<int>> UpdateNotifyInfoAsync =
-        EF.CompileAsyncQuery(
-            (NotifyDbContext ctx, int id, int result) =>
-                ctx.NotifyInfo
-                    .Where(r => r.NotifyId == id)
-                    .ExecuteUpdate(q =>
-                        q.SetProperty(p => p.State, result)
-                            .SetProperty(p => p.Attempts, p => p.Attempts + 1)
-                            .SetProperty(p => p.ModifyDate, DateTime.UtcNow)));
+        (NotifyDbContext ctx, int id, int result) =>
+            ctx.NotifyInfo
+                .Where(r => r.NotifyId == id)
+                .ExecuteUpdateAsync(q =>
+                    q.SetProperty(p => p.State, result)
+                        .SetProperty(p => p.Attempts, p => p.Attempts + 1)
+                        .SetProperty(p => p.ModifyDate, DateTime.UtcNow));
 }

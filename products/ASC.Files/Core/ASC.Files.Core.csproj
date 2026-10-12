@@ -11,10 +11,13 @@
     <None Remove="Services\DocumentBuilderService\ScriptTemplates\FormFillingReport.docbuilder" />
 
     <None Remove="Services\DocumentBuilderService\ScriptTemplates\RoomIndexExport.docbuilder" />
+
+    <None Remove="Services\DocumentBuilderService\ScriptTemplates\AuditReport.docbuilder" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AnyAscii" />
     <PackageReference Include="Box.V2.Core" />
+    <PackageReference Include="CsvHelper" />
     <PackageReference Include="DocuSign.eSign.dll" />
     <PackageReference Include="Dropbox.Api" />
     <PackageReference Include="Google.Apis.Drive.v3" />
@@ -23,13 +26,16 @@
     <PackageReference Include="Magick.NET-Q8-AnyCPU" />
     <PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" />
+    <PackageReference Include="Microsoft.ML.Tokenizers.Data.Cl100kBase" />
     <PackageReference Include="Microsoft.OneDriveSDK" />
+    <PackageReference Include="Microsoft.ML.Tokenizers" />
     <PackageReference Include="Microsoft.SemanticKernel.Core" />
     <PackageReference Include="Microsoft.SharePoint.Client" />
     <PackageReference Include="SharpZipLib" />
     <PackageReference Include="WebDav.Client" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\common\ASC.AI.Integration\ASC.AI.Integration.csproj" />
     <ProjectReference Include="..\..\..\common\ASC.Api.Core\ASC.Api.Core.csproj" />
     <ProjectReference Include="..\..\..\common\services\ASC.ElasticSearch\ASC.ElasticSearch.csproj" />
     <ProjectReference Include="..\..\..\web\ASC.Web.Core\ASC.Web.Core.csproj" />
@@ -160,8 +166,11 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\CustomerOperationsReport.docbuilder" />
+    <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\ReportTableStyle.docbuilder" />
+    <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\DocsCloudUserQuotaReport.docbuilder" />
     <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\FormFillingReport.docbuilder" />
     <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\RoomIndexExport.docbuilder" />
+    <EmbeddedResource Include="Services\DocumentBuilderService\ScriptTemplates\AuditReport.docbuilder" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Resources\FilesCommonResource.de.resx">

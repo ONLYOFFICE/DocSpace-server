@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -34,7 +34,11 @@
 namespace ASC.Data.Backup.Contracts;
 
 /// <summary>
-/// The backup storage type.
+/// Where a backup archive is stored. The value decides which keys the storage parameters of an operation
+/// have to carry: `Documents` and `ThridpartyDocuments` need a folder ID, `Local` needs a file path and
+/// works on a standalone installation only, `ThirdPartyConsumer` needs the module of the consumer plus its
+/// settings, and `DataStore` needs none. `CustomCloud` is not implemented and no storage can be built for
+/// it.
 /// </summary>
 public enum BackupStorageType
 {
@@ -67,42 +71,6 @@ public class StartBackupRequest
     public string ServerBaseUri { get; init; }
     public bool Dump { get; init; }
     public IDictionary<string, string> Headers { get; init; }
-}
-
-/// <summary>
-/// The backup history parameters.
-/// </summary>
-public class BackupHistoryRecord
-{
-    /// <summary>
-    /// The backup ID.
-    /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
-    public required Guid Id { get; set; }
-
-    /// <summary>
-    /// The backup file name.
-    /// </summary>
-    /// <example>tenant-backup</example>
-    public required string FileName { get; set; }
-
-    /// <summary>
-    /// The backup storage type.
-    /// </summary>
-    /// <example>Documents</example>
-    public required BackupStorageType StorageType { get; set; }
-
-    /// <summary>
-    /// The backup creation date.
-    /// </summary>
-    /// <example>2026-03-01T02:15:00Z</example>
-    public required DateTime CreatedOn { get; set; }
-
-    /// <summary>
-    /// The backup expiration date.
-    /// </summary>
-    /// <example>2026-03-31T02:15:00Z</example>
-    public required DateTime ExpiresOn { get; set; }
 }
 
 public class StartTransferRequest

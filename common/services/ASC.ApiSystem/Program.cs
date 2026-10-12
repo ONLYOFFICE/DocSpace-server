@@ -72,6 +72,8 @@ try
         builder.Register(context.Configuration);
     });
 
+    builder.Services.SkipBackgroundServicesForDocumentGeneration();
+
     var app = builder.Build();
 
     startup.Configure(app, app.Environment);

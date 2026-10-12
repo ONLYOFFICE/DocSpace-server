@@ -36,49 +36,58 @@ using ASC.Core.Common.EF.Model;
 namespace ASC.Web.Api.ApiModels.ResponseDto;
 
 /// <summary>
-/// The invitation link parameters.
+/// The portal's standing invitation link for one role: what it grants, how long it lasts, how often it was used.
 /// </summary>
 public class InvitationLinkDto
 {
     /// <summary>
-    /// The ID of the invitation link.
+    /// The identifier to address the link by in `PUT api/2.0/portal/users/invitationlink` and
+    /// `DELETE api/2.0/portal/users/invitationlink`. It survives a change of deadline or use limit, so it is
+    /// worth storing rather than re-reading.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// The type of employee role for the invitation link.
+    /// The role an account gets by joining through this link. A portal keeps at most one link per role, and the
+    /// role of an existing link cannot be changed - the link has to be deleted and created again.
     /// </summary>
     /// <example>0</example>
     [JsonConverter(typeof(JsonNumberEnumConverter<EmployeeType>))]
     public required EmployeeType EmployeeType { get; set; }
 
     /// <summary>
-    /// The expiration date of the invitation link.
+    /// When the link stops working, in the portal time zone. It is empty for a link that never expires, which is
+    /// what omitting the deadline on create or update leaves behind.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     public ApiDateTime Expiration { get; set; }
 
     /// <summary>
-    /// Indicates whether the invitation link has expired.
+    /// Whether that deadline has already passed. A link without a deadline always reports `false`, and an expired
+    /// link is still returned rather than treated as gone - it can be revived by moving `expiration`.
     /// </summary>
     /// <example>true</example>
     public bool IsExpired { get; set; }
 
     /// <summary>
-    /// The maximum number of times the invitation link can be used.
+    /// How many accounts may join through the link in total. It is empty for a link with no use limit, and an
+    /// update may not lower it below `currentUseCount`.
     /// </summary>
     /// <example>1</example>
     public int? MaxUseCount { get; set; }
 
     /// <summary>
-    /// The current number of times the invitation link has been used.
+    /// How many accounts have already joined through the link. It only ever grows, and reaching `maxUseCount`
+    /// retires the link as surely as a passed deadline.
     /// </summary>
     /// <example>1</example>
     public int CurrentUseCount { get; set; }
 
     /// <summary>
-    /// The URL of the invitation link.
+    /// The shortened address to hand to the people being invited. It is signed for the account that read it, so
+    /// two administrators are given two different URLs for one and the same link and both of them work; the `id`
+    /// above, not this string, is what identifies the link.
     /// </summary>
     /// <example>https://example.com</example>
     public string Url { get; set; }

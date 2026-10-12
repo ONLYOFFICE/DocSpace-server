@@ -135,17 +135,20 @@
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Details</value>
   </data>
+  <data name="AccountingCustomerOperationMonth" xml:space="preserve">
+    <value>Maand</value>
+  </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Aantal</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Service</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>AI-functies</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Back-up</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Schijfruimte</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Vectorisatie</value>
@@ -157,7 +160,7 @@
     <value>Meeteenheid</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Back-up</value>
+    <value>Kopieën</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Tokens</value>
@@ -174,8 +177,26 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Transactiegeschiedenis</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Totaal uitgegeven</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Samenvatting per gebruiker</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Type</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportName" xml:space="preserve">
+    <value>Verslag van maandelijks gebruik ({0}-{1})</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportSheetName" xml:space="preserve">
+    <value>Maandelijks gebruik</value>
+  </data>
+  <data name="AccountingServiceUsageReportName" xml:space="preserve">
+    <value>Verslag van servicegebruik ({0}-{1})</value>
+  </data>
+  <data name="AccountingServiceUsageReportSheetName" xml:space="preserve">
+    <value>Servicegebruik</value>
   </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Veld met validatiecode mag niet leeg zijn</value>
@@ -196,7 +217,7 @@
     <value>De ruimtequota voor AI-agenten is overschreden</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Fout bij het instellen van quota per AI-agent. De ingevoerde waarde is groter dan de totale DocSpace opslag.</value>
+    <value>Fout bij het instellen van quota per AI-agent. De ingevoerde waarde is groter dan de totale opslag.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Automatische verlenging</value>
@@ -226,7 +247,7 @@
     <value>Applicatie Klant ID</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Activeer dat deze toepassing zich met een Apple ID account aanmeldt bij het portaal.</value>
+    <value>Meld u aan bij uw werkruimte met een Apple ID-account</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Schakel deze app in zodat uw gebruikers zich met Apple ID kunnen aanmelden bij {LogoText}. {0}Ga naar Apple Developers Portal en maak een nieuwe app {LogoText} integration. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -271,7 +292,7 @@
     <value>Boxsleutel</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Verbind de applicatie om bestanden en mappen in Box te beheren.</value>
+    <value>Beheer bestanden en mappen in Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Schakel deze app in om uw Box account met de module Documenten te verbinden. U kunt bestanden uit Box beheren, bewerken en delen met gebruikers van {LogoText}. {0}Meld u aan bij uw account op de Box ontwikkelaars pagina en maak een nieuwe app voor de {LogoText} integratie. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -310,7 +331,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Verbind de applicatie om bestanden en mappen in Dropbox te beheren.</value>
+    <value>Beheer bestanden en mappen in Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Schakel deze app in om uw Dropbox account met de module Documenten te verbinden. U kunt bestanden van Dropbox beheren, bewerken en delen met gebruikers van {LogoText}. {0}Meld u aan bij uw account op de Dropbox Developers-website en maak een nieuwe app voor {LogoText} integratie. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -346,7 +367,7 @@
     <value>Facebook Sleutel</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Verbind de applicatie om in te loggen op het portaal met een Facebook-account.</value>
+    <value>Meld u aan bij uw werkruimte met een Facebook-account</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Schakel deze app in zodat uw gebruikers zich met hun Facebook kunnen aanmelden bij {LogoText} en de Facebook accounts van hun klanten kunnen koppelen aan de CRM module. {0}Ga naar de Facebook Developers Portal en maak een nieuwe app {LogoText} integration. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -400,7 +421,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Verbind het project door in te loggen op het portaal met een Google-account en beheer Google Drive-bestanden en mappen.</value>
+    <value>Meld u aan bij uw werkruimte met een Google-account en beheer Google Drive-bestanden en mappen</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Schakel deze app in om uw Google Drive account met de module Documenten te verbinden. U kunt bestanden van Google Drive beheren, bewerken en delen met gebruikers van {LogoText}. {0}Ga naar de Google APIs console en maak een nieuw project aan voor de {LogoText} integratie. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -409,7 +430,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Verbind de applicatie om in te loggen op het portaal met een LinkedIn-account.</value>
+    <value>Meld u aan bij uw werkruimte met een LinkedIn-account</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Schakel deze app in zodat uw gebruikers zich met hun LinkedIn-accounts kunnen aanmelden bij {LogoText}. {0}Ga naar de LinkedIn Developers website en maak een nieuwe app {LogoText} integratie. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -538,7 +559,7 @@
     <value>Client Geheim</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Verbind de applicatie om bestanden en mappen in OneDrive te beheren.</value>
+    <value>Beheer bestanden en mappen in OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Schakel deze app in om uw OneDrive account met de module Documenten te verbinden. You’ll be able to manage, edit, and share files from OneDrive with {LogoText} users. {0}Sign in to your Microsoft Azure account and create a new app for {LogoText} integration. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -568,7 +589,7 @@
     <value>Bot token</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Verbind Telegram account om portaalmeldingen via Telegram te ontvangen.</value>
+    <value>Ontvang meldingen via Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Schakel Telegram bot in om portaalmeldingen via Telegram te ontvangen. U kunt een nieuwe bot maken met BotFather in Telegram Desktop. Om deze bot te gebruiken, moeten portaalgebruikers Telegram meldingen inschakelen op hun Profielpagina. {0}Plak de gebruikersnaam van de bot en het token dat u hebt ontvangen in de onderstaande velden.</value>
@@ -601,7 +622,7 @@
     <value>Klant ID</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Verbind de applicatie om in te loggen op het portaal met een X-account.</value>
+    <value>Meld u aan bij uw werkruimte met een X-account</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Schakel deze app in zodat uw gebruikers zich met hun X kunnen aanmelden bij {LogoText} en de X accounts van hun klanten kunnen koppelen aan de CRM module. {0}Ga naar de X Developers Portal en maak een nieuwe app {LogoText} integration. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -640,7 +661,7 @@
     <value>Client Geheim</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Activeer dat deze toepassing zich met een WeChat account aanmeldt bij het portaal.</value>
+    <value>Meld u aan bij uw werkruimte met een WeChat-account</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Activeer dat deze toepassing zich met een WeChat account aanmeldt bij het portaal.</value>
@@ -700,7 +721,7 @@
     <value>Zoom client secret</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Activeer dat deze toepassing zich met een Zoom account aanmeldt bij het portaal.</value>
+    <value>Meld u aan bij uw werkruimte met een Zoom-account</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Schakel deze app in zodat uw gebruikers zich met hun Zoom-accounts kunnen aanmelden bij {LogoText}. {0}Ga naar de Zoom Developers website en maak een nieuwe app {LogoText} integratie. Vul hieronder de gegevens in die u hebt ontvangen:</value>
@@ -1063,10 +1084,10 @@
     <value>Succesvol geüpload</value>
   </data>
   <data name="LicenseUploadedOverdue" xml:space="preserve">
-    <value>Succesvol geüpload. {0}Ondersteuning is sinds {2}.{1} niet beschikbaar voor deze licentie</value>
+    <value>Succesvol geüpload. {0}Ondersteuning en updates zijn voor deze licentie niet beschikbaar sinds {2}.{1}</value>
   </data>
   <data name="LicenseUploadedOverdueSupport" xml:space="preserve">
-    <value>Succesvol geüpload. {0}Ondersteuning is sinds {2}.{1} niet beschikbaar voor deze licentie</value>
+    <value>Succesvol geüpload. {0}Ondersteuning is voor deze licentie niet beschikbaar sinds {2}.{1}</value>
   </data>
   <data name="MessageEmailChangeInstuctionsSentOnEmail" xml:space="preserve">
     <value>De e-mailwijzigingsinstructies zijn succesvol verzonden</value>
@@ -1105,7 +1126,7 @@
     <value>Kamer ruimte quota overschreden</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Fout bij het instellen van quota per kamer. De ingevoerde waarde is groter dan de totale DocSpace opslag.</value>
+    <value>Fout bij het instellen van quota per kamer. De ingevoerde waarde is groter dan de totale opslag.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Asia Pacific (Singapore)</value>
@@ -1152,11 +1173,11 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Het aantal AI-agenten mag niet hoger zijn dan {0}</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>AI-zoeken</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>AI-functies</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Activeer AI-functies om de productiviteit te verhogen.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Inloggegevens en acties bijhouden</value>
@@ -1270,7 +1291,7 @@
     <value>Er is een onverwachte fout opgetreden. Probeer het opnieuw.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>U bent nu succesvol verbonden met Telegram om meldingen van uw DocSpace te ontvangen.</value>
+    <value>U bent nu succesvol verbonden met Telegram om meldingen van uw werkruimte te ontvangen.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Onjuiste code</value>
@@ -1285,16 +1306,13 @@
     <value>Gebruikersruimte quota overschreden</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Fout bij het instellen van quota per gebruiker. De ingevoerde waarde is groter dan de totale DocSpace opslag.</value>
+    <value>Fout bij het instellen van quota per gebruiker. De ingevoerde waarde is groter dan de totale opslag.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>VS West (Oregon) Regio</value>
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>What's New</value>
-  </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>Agent</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>Chat</value>
@@ -1305,6 +1323,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>Webzoekopdracht</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>AI-zoeken</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>AI-credits</value>
   </data>
@@ -1312,6 +1333,9 @@
     <value>Bronnen</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Resultaten</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Resultaten</value>
   </data>
   <data name="ConsumersdatabaseType" xml:space="preserve">
@@ -1339,7 +1363,7 @@
     <value>Databaseverbinding</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Sla formulierresultaten op in een externe database zoals MySQL of SQLite.</value>
+    <value>Sla formulierresultaten op in een externe database zoals MySQL of SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Verbind een externe database om formulierresultaten op te slaan.</value>
@@ -1363,7 +1387,7 @@
     <value>Client Geheim</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Sta de toepassing toe in te loggen op het portaal met een Nextcloud-account.</value>
+    <value>Meld u aan bij uw werkruimte met een Nextcloud-account</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Sta de toepassing toe in te loggen op het portaal met een Nextcloud-account.</value>
@@ -1382,5 +1406,155 @@
   </data>
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>Gebruikersauthenticatie mislukt</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Extra schijfopslagruimte</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Business-abonnement</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Business-abonnement</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Beheerders</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Beheerders</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Krijg toegang tot een breed scala aan AI-modellen via de OpenRouter-integratie. Betaal alleen voor wat u gebruikt, afgeschreven van uw Wallet.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>Gebruik een AI-zoekmachine om AI-chats te verrijken met realtime-informatie van internet</value>
+  </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>Gebruikers</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>Gebruikers</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_image" xml:space="preserve">
+    <value>Tokens</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>Docs Connect ontwikkelaarspakket</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
+    <value>Afbeelding</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>Docs Connect-quotumrapport ({0})</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>Integreer ONLYOFFICE Docs-editors in uw app met cloud-gehoste tenants en uw eigen API-sleutels.</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Brontype</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Bronnaam</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>Bron-ID</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>AI-agent</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Bestand</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Map</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Kamer</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Formulier</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Bedrijf</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Datum gegenereerd</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Periode</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Totaal</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Actief</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Toegang verloopt</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Gebruikerstype</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>Gebruikers-ID</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Editors</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Documenteditors met volledige rechten</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Gebruikersquotum</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Live-viewer</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Documentviewers met alleen-lezen toegang</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Extern</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Intern</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Resterend</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Abonnementslimiet</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Rapport</value>
+  </data>
+  <data name="AccountingCustomerOperationPromptTokens" xml:space="preserve">
+    <value>Verzoek</value>
+  </data>
+  <data name="AccountingCustomerOperationCachedTokens" xml:space="preserve">
+    <value>Caching</value>
+  </data>
+  <data name="AccountingCustomerOperationCacheWriteTokens" xml:space="preserve">
+    <value>Schrijven naar cache</value>
+  </data>
+  <data name="AccountingCustomerOperationCompletionTokens" xml:space="preserve">
+    <value>Antwoord</value>
+  </data>
+  <data name="AccountingCustomerOperationReasoningTokens" xml:space="preserve">
+    <value>Redenering</value>
+  </data>
+  <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
+    <value>Afbeelding</value>
+  </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>Kosten van de provider</value>
   </data>
 </root>

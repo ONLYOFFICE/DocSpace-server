@@ -51,7 +51,7 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
     protected internal string Id => _serviceProvider.GetService<IProviderInfo<TFile, TFolder, TItem>>().Selector.Id;
     public Regex Selector => field ??= new Regex(@"^" + Id + @"-(?'id'\d+)(-(?'path'.*)){0,1}$", RegexOptions.Singleline | RegexOptions.Compiled);
 
-    private Dictionary<string, BaseProviderInfo<TFile, TFolder, TItem>> Providers { get; set; } = new();
+    private ConcurrentDictionary<string, BaseProviderInfo<TFile, TFolder, TItem>> Providers { get; } = new();
 
     public virtual string ConvertId(string id)
     {
@@ -148,8 +148,7 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
             PathPrefix = Id + "-" + match.Groups["id"].Value
         };
 
-        Providers.TryAdd(objectId, info);
-        return info;
+        return Providers.GetOrAdd(objectId, info);
     }
 
     public async Task RenameProviderAsync(IProviderInfo<TFile, TFolder, TItem> provider, string newTitle)
@@ -172,10 +171,19 @@ internal class RegexDaoSelectorBase<TFile, TFolder, TItem>(IServiceProvider serv
         var dbDao = daoFactory.ProviderDao;
         try
         {
-            return dbDao.GetProviderInfoAsync(linkId).Result as IProviderInfo<TFile, TFolder, TItem>;
+            // GetAwaiter().GetResult(), not .Result: the latter wraps whatever the task threw in an
+            // AggregateException, so the catch below never matched and the original exception went
+            // out to the caller as a 500.
+            return dbDao.GetProviderInfoAsync(linkId).GetAwaiter().GetResult() as IProviderInfo<TFile, TFolder, TItem>;
         }
-        catch (InvalidOperationException)
+        catch (Exception e) when (e is InvalidOperationException or ItemNotFoundException)
         {
+            // Both types mean the same thing here: the link id names no provider. It used to arrive
+            // only as InvalidOperationException, from Single() on an empty sequence; ProviderAccountDao
+            // now reports the missing row as ItemNotFoundException, which derives from HttpException
+            // and so does not match the older clause. Callers depend on this translation - the backup
+            // cleaner treats ProviderInfoArgumentException as "provider is gone" and drops records
+            // older than six months on the strength of it, and would otherwise keep them forever.
             throw new ProviderInfoArgumentException("Provider id not found or you have no access");
         }
     }

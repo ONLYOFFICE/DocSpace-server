@@ -34,12 +34,14 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The document service URL parameters.
+/// The query parameters of the document service location request.
 /// </summary>
 public class DocServiceUrlRequestDto
 {
     /// <summary>
-    /// Specifies whether to return the editor version or not.
+    /// Whether the running Document Server is asked for its editor version so that `version` can report it. Left off,
+    /// the portal answers from its own settings without contacting the Document Server and `version` comes back
+    /// empty.
     /// </summary>
     /// <example>true</example>
     [FromQuery(Name = "version")]

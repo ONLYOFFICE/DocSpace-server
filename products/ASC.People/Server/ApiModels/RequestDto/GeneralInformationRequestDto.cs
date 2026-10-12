@@ -39,21 +39,22 @@ namespace ASC.People.ApiModels.RequestDto;
 public class GeneralInformationRequestDto
 {
     /// <summary>
-    /// The user ID.
+    /// Keeps only the groups the account with this ID takes part in. Omit it to search every group of the portal.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "userId")]
     public Guid? UserId { get; set; }
 
     /// <summary>
-    /// Specifies if the user is a manager or not.
+    /// Narrows `userId` down to the groups that account manages, instead of every group it belongs to. It has no
+    /// effect on its own and defaults to false.
     /// </summary>
     /// <example>false</example>
     [FromQuery(Name = "manager")]
     public bool? Manager { get; set; }
 
     /// <summary>
-    /// The number of records to retrieve.
+    /// The size of the page. It defaults to 100, which is also the largest value the operation accepts.
     /// </summary>
     /// <example>25</example>
     [FromQuery(Name = "count")]
@@ -61,30 +62,32 @@ public class GeneralInformationRequestDto
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
-    /// The starting index for paginated results.
+    /// The number of matching groups to skip before the page starts. It defaults to 0, and the total number of
+    /// matches is reported in the total count of the response.
     /// </summary>
     /// <example>0</example>
     [FromQuery(Name = "startIndex")]
     public int StartIndex { get; set; }
 
     /// <summary>
-    /// Specifies the property used to sort the query results.
+    /// What to order the groups by: `Title`, `Manager` or `MembersCount`, compared without regard to case. Any other
+    /// value, and omitting the field, orders by title.
     /// </summary>
-    /// <example>displayName</example>
+    /// <example>Title</example>
     [FromQuery(Name = "sortBy")]
     public string SortBy { get; set; }
 
     /// <summary>
-    /// The order in which the results are sorted.
+    /// The direction of the ordering: `Ascending`, which is the default, or `Descending`.
     /// </summary>
-    /// <example>0</example>
+    /// <example>Ascending</example>
     [FromQuery(Name = "sortOrder")]
     public SortOrder SortOrder { get; set; }
 
     /// <summary>
-    /// The text used for filtering or searching group data.
+    /// The text to match against the group name. Omit it to get every group.
     /// </summary>
-    /// <example>John</example>
+    /// <example>Marketing</example>
     [FromQuery(Name = "filterValue")]
     public string Text { get; set; }
 }

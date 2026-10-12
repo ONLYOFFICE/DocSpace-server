@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -153,15 +153,6 @@ internal abstract class SecurityBaseDao<T>(
                     await context.DeleteTagsAsync(tenantId);
                 }
 
-                if (r.EntryType is FileEntryType.Folder &&
-                    r.EntryId is int entryIdInt &&
-                    r.SubjectType is SubjectType.User or SubjectType.Group)
-                {
-                    await context.RemoveUserRoomChatsAsync(tenantId, entryIdInt, r.Subject);
-                    await context.RemoveUserRoomChatsSettingsAsync(tenantId, entryIdInt, r.Subject);
-                    await context.RemoveUserRoomMcpSettingsAsync(tenantId, entryIdInt, r.Subject);
-                }
-
                 await context.SaveChangesAsync();
                 await tr.CommitAsync();
             });
@@ -183,7 +174,7 @@ internal abstract class SecurityBaseDao<T>(
     public async IAsyncEnumerable<FileShareRecord<T>> GetSharesAsync(IEnumerable<Guid> subjects, Guid? ownerId = null)
     {
         var tenantId = _tenantManager.GetCurrentTenantId();
-        var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
+        await using var filesDbContext = await _dbContextFactory.CreateDbContextAsync();
         var q = filesDbContext.SharesAsync(tenantId, subjects, ownerId ?? Guid.Empty);
 
         await foreach (var e in q)

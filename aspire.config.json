@@ -1,0 +1,6 @@
+{
+  "appHostPath": "common/ASC.AppHost/ASC.AppHost.csproj",
+  "appHost": {
+    "path": "common/ASC.AppHost/ASC.AppHost.csproj"
+  }
+}

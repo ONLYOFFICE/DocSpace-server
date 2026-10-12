@@ -33,6 +33,9 @@
 
 namespace ASC.Files.Core;
 
+/// <summary>
+/// The third-party storage provider to filter the entries by.
+/// </summary>
 [EnumExtensions]
 public enum ProviderFilter
 {

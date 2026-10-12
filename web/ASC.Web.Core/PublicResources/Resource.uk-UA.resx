@@ -135,17 +135,20 @@
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Деталі</value>
   </data>
+  <data name="AccountingCustomerOperationMonth" xml:space="preserve">
+    <value>Місяць</value>
+  </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Кількість</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Сервіс</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>Функції AІ</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Резервна копія</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Дисковий простір</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Векторизація</value>
@@ -157,7 +160,7 @@
     <value>Одиниця виміру</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Резервна копія</value>
+    <value>Копій</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Маркери</value>
@@ -174,8 +177,26 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Історія транзакцій</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Усього витрачено</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Зведення за користувачами</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Тип</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportName" xml:space="preserve">
+    <value>Звіт про щомісячне використання ({0}–{1})</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportSheetName" xml:space="preserve">
+    <value>Щомісячне використання</value>
+  </data>
+  <data name="AccountingServiceUsageReportName" xml:space="preserve">
+    <value>Звіт про використання сервісів ({0}–{1})</value>
+  </data>
+  <data name="AccountingServiceUsageReportSheetName" xml:space="preserve">
+    <value>Використання сервісів</value>
   </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Поле коду перевірки не може бути порожнім</value>
@@ -196,7 +217,7 @@
     <value>Перевищено квоту простору для агента AІ</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Не вдалося задати квоту для агента AІ. Введене значення більше загального сховища DocSpace.</value>
+    <value>Не вдалося задати квоту для агента AІ. Введене значення більше загального сховища.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Автоматичне поновлення</value>
@@ -226,7 +247,7 @@
     <value>Ідентифікатор клієнта застосунку</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису Apple ID.</value>
+    <value>Увійдіть до свого робочого простору за допомогою облікового запису Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою Apple ID. {0}Перейдіть на портал Apple Developer і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -271,7 +292,7 @@
     <value>Ключ скриньки</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Підключіть програму для управління файлами та папками пошти.</value>
+    <value>Керуйте файлами та папками Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб під’єднати обліковий запис Box до модуля «Документи». Ви зможете керувати файлами з Box, редагувати їх і ділитися ними з користувачами {LogoText}. {0}Увійдіть до свого облікового запису на сторінці для розробників Box і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -310,7 +331,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Підключіть програму для управління файлами та папками Dropbox.</value>
+    <value>Керуйте файлами та папками Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб під’єднати обліковий запис Dropbox до модуля «Документи». Ви зможете керувати файлами з Dropbox, редагувати їх і ділитися ними з користувачами {LogoText}. {0}Увійдіть до свого облікового запису на вебсайті Dropbox Developers і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -346,7 +367,7 @@
     <value>Ключ Facebook</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Підключіть програму для входу на портал за допомогою облікового запису Facebook.</value>
+    <value>Увійдіть до свого робочого простору за допомогою облікового запису Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою Facebook і під’єднувати облікові записи Facebook своїх клієнтів до модуля CRM. {0}Перейдіть до порталу Facebook Developers і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -400,7 +421,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Підключіть проект до входу на портал за допомогою облікового запису Google і управління файлами та папками Google Диска.</value>
+    <value>Увійдіть до свого робочого простору за допомогою облікового запису Google та керуйте файлами й папками Google Диска</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб під’єднати обліковий запис Google Диск до модуля «Документи». Ви зможете керувати файлами з Google Диск, редагувати їх і ділитися ними з користувачами {LogoText}. {0}Перейдіть до консолі API Google і створіть новий проєкт для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -409,7 +430,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Підключіть програму для входу на портал за допомогою облікового запису LinkedIn.</value>
+    <value>Увійдіть до свого робочого простору за допомогою облікового запису LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою своїх облікових записів LinkedIn. {0}Перейдіть на вебсайт LinkedIn Developer і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -538,7 +559,7 @@
     <value>Секрет клієнта</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Підключіть програму для управління файлами та папками OneDrive.</value>
+    <value>Керуйте файлами та папками OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб під’єднати обліковий запис OneDrive до модуля «Документи». Ви зможете керувати файлами з OneDrive, редагувати їх і ділитися ними з користувачами {LogoText}. {0}Увійдіть до свого облікового запису Microsoft Azure і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -568,7 +589,7 @@
     <value>Маркер бота</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Під’єднайте обліковий запис Telegram, щоб отримувати сповіщення порталу в Telegram.</value>
+    <value>Отримуйте сповіщення через Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Щоб отримувати сповіщення порталу в Telegram, увімкніть Telegram-бота. Ви можете створити нового бота за допомогою BotFather у настільній версії Telegram. Щоб використовувати цього бота, користувачі порталу мають увімкнути сповіщення Telegram на сторінці свого профілю. {0}Вставте ім’я користувача бота та отриманий маркер у поля нижче.</value>
@@ -601,7 +622,7 @@
     <value>Ідентифікатор клієнта</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Підключіть програму для входу на портал за допомогою облікового запису X.</value>
+    <value>Увійдіть до свого робочого простору за допомогою облікового запису X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою X і пов’язувати облікові записи X своїх клієнтів із модулем CRM. {0}Перейдіть до порталу X Developer і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -640,7 +661,7 @@
     <value>Секрет клієнта</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису WeChat.</value>
+    <value>Увійдіть до свого робочого простору за допомогою облікового запису WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису WeChat.</value>
@@ -700,7 +721,7 @@
     <value>Секретний ключ клієнта Zoom</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Увімкніть застосунок, щоб входити до порталу за допомогою облікового запису Zoom.</value>
+    <value>Увійдіть до свого робочого простору за допомогою облікового запису Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Увімкніть цей застосунок, щоб дозволити користувачам входити до {LogoText} за допомогою облікових записів Zoom. {0}Перейдіть на сайт Zoom для розробників і створіть новий застосунок для інтеграції {LogoText}. Вставте отримані дані нижче:</value>
@@ -1105,7 +1126,7 @@
     <value>Перевищено квоту простору кімнати</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Не вдалося задати квоту на кімнату. Введене значення більше загального сховища DocSpace.</value>
+    <value>Не вдалося задати квоту на кімнату. Введене значення більше загального сховища.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Азіатсько-Тихоокеанський регіон (Сінгапур)</value>
@@ -1152,11 +1173,11 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Кількість агентів AІ не повинна перевищувати {0}</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>AI-пошук</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Функції AІ</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Увімкніть функції AІ, щоб збільшити продуктивність.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Відстеження входів та дій</value>
@@ -1270,7 +1291,7 @@
     <value>Сталася неочікувана помилка. Повторіть спробу.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Ви успішно під'єднали Telegram для отримання сповіщень з вашого простору DocSpace.</value>
+    <value>Ви успішно під'єднали Telegram для отримання сповіщень з робочого простору.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Невірний код</value>
@@ -1282,15 +1303,261 @@
     <value>Ви надіслали забагато текстових повідомлень. Спробуйте пізніше.</value>
   </data>
   <data name="UserFreeSpaceException" xml:space="preserve">
-    <value>Перевищено квоту простору кімнати</value>
+    <value>Перевищено квоту простору користувача</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Не вдалося задати квоту на користувача. Введене значення більше загального сховища DocSpace.</value>
+    <value>Не вдалося задати квоту на користувача. Введене значення більше загального сховища.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Регіон Заходу США (Орегон)</value>
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Новеньке</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Додатковий дисковий простір</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Тариф Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Тариф Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Адміністратори</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Адміністратори</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Отримайте доступ до широкого набору моделей AІ завдяки інтеграції з OpenRouter. Платіть лише за те, що використовуєте — кошти списуються з вашого Гаманця.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>Використовуйте пошукову систему на базі AI, щоб доповнювати чати з AI актуальною інформацією з інтернету в реальному часі</value>
+  </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>AI-пошук</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
+    <value>Результати</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>Користувачі</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>Користувачі</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_image" xml:space="preserve">
+    <value>Маркери</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>Пакет розробника Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
+    <value>Зображення</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>Звіт про квоту Docs Connect ({0})</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>Вбудуйте редактори ONLYOFFICE Docs у свій застосунок із хмарними орендарями та власними ключами API.</value>
+  </data>
+  <data name="ConsumersdbUser" xml:space="preserve">
+    <value>Користувач</value>
+  </data>
+  <data name="ConsumersNextcloudClientId" xml:space="preserve">
+    <value>Ідентифікатор клієнта</value>
+  </data>
+  <data name="ConsumersNextcloudClientSecret" xml:space="preserve">
+    <value>Секрет клієнта</value>
+  </data>
+  <data name="ConsumersNextcloud" xml:space="preserve">
+    <value>Nextcloud</value>
+  </data>
+  <data name="ConsumersNextcloudDescription" xml:space="preserve">
+    <value>Увійдіть до свого робочого простору за допомогою облікового запису Nextcloud</value>
+  </data>
+  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
+    <value>Агент</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
+    <value>Чат</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_fetch" xml:space="preserve">
+    <value>Сканування вебу</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
+    <value>Пошук у вебі</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
+    <value>Кредити AI</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_fetch" xml:space="preserve">
+    <value>Джерела</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Результати</value>
+  </data>
+  <data name="ConsumersdatabaseType" xml:space="preserve">
+    <value>Тип бази даних</value>
+  </data>
+  <data name="ConsumersdbHost" xml:space="preserve">
+    <value>Хост</value>
+  </data>
+  <data name="ConsumersdbName" xml:space="preserve">
+    <value>Назва бази даних</value>
+  </data>
+  <data name="ConsumersdbPassword" xml:space="preserve">
+    <value>Пароль</value>
+  </data>
+  <data name="ConsumersdbPort" xml:space="preserve">
+    <value>Порт</value>
+  </data>
+  <data name="ConsumersdbSsl" xml:space="preserve">
+    <value>Використовувати SSL</value>
+  </data>
+  <data name="ConsumersExternalDb" xml:space="preserve">
+    <value>Підключення до бази даних</value>
+  </data>
+  <data name="ConsumersExternalDbDescription" xml:space="preserve">
+    <value>Зберігайте результати форми у зовнішній базі даних, наприклад MySQL або SQLite</value>
+  </data>
+  <data name="ConsumersExternalDbInstruction" xml:space="preserve">
+    <value>Підключіть зовнішню базу даних для зберігання результатів форми.</value>
+  </data>
+  <data name="ConsumersExternalDbSqliteStandaloneOnly" xml:space="preserve">
+    <value>SQLite доступний лише в автономних інсталяціях.</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Тип джерела</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Ім'я джерела</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>Ідентифікатор джерела</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>AI-агент</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Файл</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Папка</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Кімната</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Форма</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Компанія</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Дата створення</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Період</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Звіт</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Разом</value>
+  </data>
+  <data name="ConsumersExternalDbTestConnection" xml:space="preserve">
+    <value>Перевірка з'єднання</value>
+  </data>
+  <data name="ConsumersNextcloudBaseUrl" xml:space="preserve">
+    <value>Введіть URL-адресу екземпляра Nextcloud.</value>
+  </data>
+  <data name="ConsumersNextcloudInstruction" xml:space="preserve">
+    <value>Надайте програмі можливість входити на портал за допомогою облікового запису Nextcloud.</value>
+  </data>
+  <data name="ConsumerssqliteFilePath" xml:space="preserve">
+    <value>Шлях до файлу SQLite</value>
+  </data>
+  <data name="CouldNotRecoverPasswordForAutoGeneratedEmail" xml:space="preserve">
+    <value>Операцію відновлення пароля заборонено для автоматично згенерованої електронної адреси</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Активний</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Доступ закінчується</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Тип користувача</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>ID користувача</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Редактори</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Редактори документів з повними правами</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Залишилось</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Квота користувача</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Ліміт підписки</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Живий перегляд</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Переглядачі документів лише для читання</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Зовнішній</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Внутрішній</value>
+  </data>
+  <data name="TariffsFeature_embedding_wallet" xml:space="preserve">
+    <value>Вбудовування AI</value>
+  </data>
+  <data name="TariffsFeature_embedding_wallet_price_count" xml:space="preserve">
+    <value>Одиниця вимірювання ембедингів, яку можуть обробляти великі мовні моделі (LLM)</value>
+  </data>
+  <data name="UserAuthenticationFailed" xml:space="preserve">
+    <value>Автентифікація користувача не вдалася</value>
+  </data>
+  <data name="AccountingCustomerOperationPromptTokens" xml:space="preserve">
+    <value>Запит</value>
+  </data>
+  <data name="AccountingCustomerOperationCachedTokens" xml:space="preserve">
+    <value>Кешування</value>
+  </data>
+  <data name="AccountingCustomerOperationCacheWriteTokens" xml:space="preserve">
+    <value>Запис у кеш</value>
+  </data>
+  <data name="AccountingCustomerOperationCompletionTokens" xml:space="preserve">
+    <value>Відповідь</value>
+  </data>
+  <data name="AccountingCustomerOperationReasoningTokens" xml:space="preserve">
+    <value>Міркування</value>
+  </data>
+  <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
+    <value>Зображення</value>
+  </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>Ціна провайдера</value>
   </data>
 </root>

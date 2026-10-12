@@ -225,7 +225,7 @@ public class RoomLogoManager(
         return room;
     }
 
-    public async ValueTask<Logo> GetLogoAsync<T>(Folder<T> room)
+    public async ValueTask<LogoDto> GetLogoAsync<T>(Folder<T> room)
     {
         if (!room.SettingsHasLogo)
         {
@@ -236,17 +236,17 @@ public class RoomLogoManager(
                 await SaveRoomAsync(daoFactory.GetFolderDao<T>(), room);
             }
 
-            LogoCover cover = null;
+            LogoCoverDto cover = null;
             if (!string.IsNullOrEmpty(room.SettingsCover) && (await GetCoversAsync()).TryGetValue(room.SettingsCover, out var fromDict))
             {
-                cover = new LogoCover
+                cover = new LogoCoverDto
                 {
                     Id = room.SettingsCover,
                     Data = fromDict
                 };
             }
 
-            return new Logo
+            return new LogoDto
             {
                 Original = string.Empty,
                 Large = string.Empty,
@@ -263,7 +263,7 @@ public class RoomLogoManager(
         var secure = !securityContext.IsAuthenticated;
         var store = await GetLogoStoreAsync();
 
-        return new Logo
+        return new LogoDto
         {
             Original = await GetLogoPathAsync(store, id, SizeName.Original, cacheKey, secure),
             Large = await GetLogoPathAsync(store, id, SizeName.Large, cacheKey, secure),
@@ -285,7 +285,9 @@ public class RoomLogoManager(
         var maxFileSize = setupInfo.MaxImageUploadSize;
         if (roomLogo.Length > maxFileSize)
         {
-            throw new Exception(fileSizeComment.FileImageSizeExceptionString);
+            // An oversized upload is the caller's mistake: ArgumentException makes it a 400 instead
+            // of the 500 a bare Exception would produce.
+            throw new ArgumentException(fileSizeComment.FileImageSizeExceptionString);
         }
 
         byte[] data;
@@ -516,33 +518,41 @@ public class RoomLogoManager(
     {
         imageData = await UserPhotoThumbnailManager.TryParseImage(imageData, maxFileSize, _originalLogoSize.Item2);
 
-        var fileName = GetFileName(id, SizeName.Original);
-
         if (imageData == null || imageData.Length == 0)
         {
             return;
         }
 
-        using (var stream = new MemoryStream(imageData))
-        {
-            await store.SaveAsync(fileName, stream);
-        }
-
-        var sizes = new[] { _mediumLogoSize, _smallLogoSize, _largeLogoSize };
-
-        if (imageData is not { Length: > 0 })
-        {
-            throw new UnknownImageFormatException();
-        }
         if (maxFileSize != -1 && imageData.Length > maxFileSize)
         {
             throw new ImageWeightLimitException();
         }
 
+        var sizes = new[] { _mediumLogoSize, _smallLogoSize, _largeLogoSize };
+
         try
         {
             using var imageStream = new MemoryStream(imageData);
             using var img = new MagickImage(imageStream);
+
+            // A crop rectangle that starts outside the image selects nothing at all: ImageMagick
+            // silently produces an empty or clamped result, so the room ends up with a logo the
+            // caller never asked for. CustomHttpException rather than ArgumentException, because the
+            // catch below turns every ArgumentException into "unknown image format".
+            //
+            // Every reason to refuse the upload is checked before the first write: the original used
+            // to be stored first, so a refused request left the room with a new original and the
+            // previous small/medium/large thumbnails.
+            if (position.X >= img.Width || position.Y >= img.Height)
+            {
+                throw new CustomHttpException(HttpStatusCode.BadRequest, "The crop area lies outside the image");
+            }
+
+            using (var stream = new MemoryStream(imageData))
+            {
+                await store.SaveAsync(GetFileName(id, SizeName.Original), stream);
+            }
+
             foreach (var size in sizes)
             {
                 if (size.Item2.Width != img.Width || size.Item2.Height != img.Height)

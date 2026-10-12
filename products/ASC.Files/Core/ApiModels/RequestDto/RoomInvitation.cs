@@ -34,19 +34,21 @@
 namespace ASC.Files.Core.ApiModels.RequestDto;
 
 /// <summary>
-/// The room invitation parameters.
+/// One membership change in a room: an account or an email address, and the access level it is given.
 /// </summary>
 public class RoomInvitation : EmailInvitationDto
 {
     /// <summary>
-    /// The ID of the user to share a room with.
+    /// The account or the group the entry is about, taken from the portal people and group listings. Leave it out and
+    /// give an email address instead to invite somebody who has no account yet.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
+    /// <example>e9a7b4c1-2d3f-4a56-8b90-1c2d3e4f5a6b</example>
     public Guid Id { get; set; }
 
     /// <summary>
-    /// The room sharing rights.
+    /// What the subject may do in the room. The value 0 removes the subject from the room, and the levels on offer
+    /// depend on the kind of room.
     /// </summary>
-    /// <example>1</example>
+    /// <example>10</example>
     public FileShare Access { get; set; }
 }

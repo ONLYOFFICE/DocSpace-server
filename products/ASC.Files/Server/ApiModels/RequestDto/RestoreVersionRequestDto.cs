@@ -34,28 +34,31 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The file restore version specified in the request.
+/// The request that brings an earlier version of a file back.
 /// </summary>
 public class RestoreVersionRequestDto<T>
 {
     /// <summary>
-    /// The file ID of the restore version.
+    /// The file whose version is restored.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The file version of the restore.
+    /// The version to restore, as reported by `GET api/2.0/files/file/{fileId}/edit/history`. It has to name an
+    /// existing version that is not the current one.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "version")]
     public int Version { get; set; } = 0;
 
     /// <summary>
-    /// The file version URL of the restore.
+    /// The address the content of the new version is fetched from instead of the stored version, which is how the
+    /// document service hands back a document with a set of changes rolled back; left out, the stored version is
+    /// used.
     /// </summary>
-    /// <example>https://example.com</example>
+    /// <example>https://document-server.example.com/cache/files/conv_1_docx/output.docx</example>
     [FromQuery(Name = "url")]
     public string Url { get; set; } = null;
 }

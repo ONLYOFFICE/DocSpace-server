@@ -34,43 +34,52 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The third-party backup request parameters.
+/// The credentials and the title of the third-party storage account the portal writes its backups to.
 /// </summary>
 public class ThirdPartyBackupRequestDto
 {
     /// <summary>
-    /// The connection URL for the sharepoint.
+    /// The address of the storage server to connect to. It is needed by the WebDAV presets whose server is not known
+    /// in advance (`WebDav`, `Nextcloud`, `ownCloud`), where it points at the WebDAV endpoint of that server, and by
+    /// `SharePoint`; the presets with a fixed address and the OAuth services ignore it.
     /// </summary>
-    /// <example>https://sharepoint.example.com</example>
+    /// <example>https://cloud.example.com/remote.php/dav/files/admin/</example>
     public string Url { get; set; }
 
     /// <summary>
-    /// The login.
+    /// The account name at the storage service, used by the services that authenticate by login and password. A login
+    /// sent without a password is rejected as an invalid request.
     /// </summary>
     /// <example>admin</example>
     public string Login { get; set; }
 
     /// <summary>
-    /// The password.
+    /// The password, or the application password, for `login` at the storage service. Either this or `token` has to
+    /// be sent, and the credentials are verified against the service before the account is saved.
     /// </summary>
-    /// <example>P@ssw0rd</example>
+    /// <example>p@ssw0rd!</example>
     public string Password { get; set; }
 
     /// <summary>
-    /// The authentication token.
+    /// The OAuth 2.0 authorization code from the consent screen of `Box`, `DropboxV2`, `GoogleDrive` or `OneDrive` -
+    /// not an access token: the portal exchanges the code for its own token and keeps that. The client ID and
+    /// redirect URL the consent screen URL is built from come from `GET api/2.0/files/thirdparty/capabilities`.
     /// </summary>
-    /// <example>abc123def456</example>
+    /// <example>4/0AY0e-g5Tn8vQrM2kZs7xB1pLd9</example>
     public string Token { get; set; }
 
     /// <summary>
-    /// The customer title.
+    /// The name the backup account is shown under in the portal. Characters that a folder title cannot hold are
+    /// replaced and the value is truncated; on the first connection a title that comes out of that empty is refused.
     /// </summary>
-    /// <example>My Cloud Storage</example>
+    /// <example>Backup storage</example>
     public string CustomerTitle { get; set; }
 
     /// <summary>
-    /// The provider key.
+    /// The storage service to connect, as the `key` of `GET api/2.0/files/thirdparty/providers`; the value is matched
+    /// case-insensitively. `Nextcloud` and `ownCloud` are presets over WebDAV and are stored and reported back as
+    /// `WebDav`.
     /// </summary>
-    /// <example>SharePoint</example>
+    /// <example>Nextcloud</example>
     public string ProviderKey { get; set; }
 }

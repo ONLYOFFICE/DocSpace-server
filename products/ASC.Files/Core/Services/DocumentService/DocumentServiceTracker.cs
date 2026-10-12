@@ -354,7 +354,7 @@ public class DocumentServiceTrackerHelper(
                 }
             }
 
-            var parentFolder = file.IsForm ? await daoFactory.GetFolderDao<T>().GetFolderAsync(file.ParentId) : null;
+            var parentFolder = file.IsPdf ? await daoFactory.GetFolderDao<T>().GetFolderAsync(file.ParentId) : null;
             if (parentFolder is { FolderType: FolderType.FormFillingFolderInProgress })
             {
                 var user = await userManager.GetUsersAsync(userId);

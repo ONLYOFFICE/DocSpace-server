@@ -247,19 +247,19 @@ $Message</value>
     <value>تم تغيير حالة التسجيل</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>اشعار DocSpace. تم ذكرك في مستند</value>
+    <value>إشعار ${LetterLogoText}. تم ذكرك في مستند</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>إشعار DocSpace. تم تعبئة النموذج</value>
+    <value>إشعار ${LetterLogoText}. تم تعبئة النموذج</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>إشعار DocSpace.</value>
+    <value>إشعار ${LetterLogoText}.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>إشعار DocSpace. تم تعبئة النموذج</value>
+    <value>إشعار ${LetterLogoText}. تم تعبئة النموذج</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>إشعار DocSpace.</value>
+    <value>إشعار ${LetterLogoText}.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>المستندات. تم اكتمال ارسال البريد.</value>
@@ -268,7 +268,7 @@ $Message</value>
     <value>تم اكتمال ارسال البريد.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>اشعار DocSpace. تم حذف الغرفة</value>
+    <value>إشعار ${LetterLogoText}. تم حذف الغرفة</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>المستندات. تم منح الوصول للمستند: $DocumentTitle</value>
@@ -292,10 +292,10 @@ $Message</value>
     <value>المستندات. تم منح الوصول للمجلد: [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>إشعار DocSpace.</value>
+    <value>إشعار ${LetterLogoText}.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>إشعار DocSpace.</value>
+    <value>إشعار ${LetterLogoText}.</value>
   </data>
   <data name="pattern_AgentRemoved" xml:space="preserve">
     <value>h1. قام $__AuthorName بحذف وكيل ذكاء اصطناعي
@@ -309,6 +309,6 @@ $Message</value>
     <value>لقد تمت دعوتك إلى وكيل الذكاء الاصطناعي "$RoomTitle"</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>إشعار DocSpace. تم حذف وكيل الذكاء الاصطناعي</value>
+    <value>إشعار ${LetterLogoText}. تم حذف وكيل الذكاء الاصطناعي</value>
   </data>
 </root>

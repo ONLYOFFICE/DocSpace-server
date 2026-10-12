@@ -37,9 +37,10 @@ using Microsoft.Extensions.Configuration;
 
 var builder = DistributedApplication.CreateBuilder(args);
 IResourceBuilder<JavaScriptAppResource>? playwright = null;
-var basePath = Path.GetFullPath(Path.Combine(builder.AppHostDirectory, "..", "..", ".."));
+var basePath = AppPaths.GetBasePath(builder.AppHostDirectory);
 var isDocker = string.Compare(builder.Configuration["Docker"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 var skipClient = string.Compare(builder.Configuration["SKIP_CLIENT"], "true", StringComparison.OrdinalIgnoreCase) == 0;
+var storybook = string.Compare(builder.Configuration["STORYBOOK"], "true", StringComparison.OrdinalIgnoreCase) == 0;
 
 var launchProfile = builder.Configuration["DOTNET_LAUNCH_PROFILE"];
 var otelFileLogging = string.Compare(builder.Configuration["OTEL_FILE_LOGGING"], "true", StringComparison.OrdinalIgnoreCase) == 0;
@@ -54,21 +55,56 @@ if (otelFileLogging)
     connectionManager.AddOpenTelemetryCollector();
 }
 
-var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker);
+var isIntegrationTest = launchProfile is "integration-test" or "notify-test";
+var configurator = new ProjectConfigurator(builder, connectionManager, basePath, isDocker, isIntegrationTest);
+
 switch (launchProfile)
 {
     case "integration-test":
         connectionManager
-            .AddMySql(withDataVolume: false)
-            .AddRabbitMq()
+            .AddMySql(withDataVolume: false, withTmpfs: true)
+            .AddRabbitMq(withManagementPlugin: false)
             .AddRedis()
-            .AddOpensearch(withDashboard: false, fixedPort: false, withDataVolume: false);
+            // no data volume, like MySQL: the tenant and entry ids start over with every run, so documents
+            // kept from a previous run would match the new entries by (TenantId, Id) and leak into the search
+            .AddOpensearch(withDashboard: false, withDataVolume: false, isProxied: false)
+            .AddNextcloud()
+            .AllowPortalRegistration();
 
         configurator
             .AddProject<ASC_Files>(Constants.FilesPort)
             .AddProject<ASC_Files_Worker>(Constants.FilesWorkerPort)
             .AddProject<ASC_People>(Constants.PeoplePort)
-            .AddProject<ASC_Web_Api>(Constants.WebApiPort);
+            .AddProject<ASC_Web_Api>(Constants.WebApiPort)
+            .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort)
+            .AddProject<ASC_AI>(Constants.AiPort)
+            // Audit events reach the bus from every service, but the only subscriber to
+            // EventDataIntegrationEvent is registered in Web.Studio (WebStudioServiceExtensions).
+            // Without it nothing persists them and every history endpoint - GET /files/file/{id}/log
+            // and GET /files/folder/{id}/log - answers with an empty list whatever the test did.
+            .AddProject<ASC_Web_Studio>(Constants.WebstudioPort)
+            .AddSocketIO()
+            .AddIdentity();
+
+        break;
+    case "notify-test":
+        // The letter suite's graph (ASC.Notify.Tests). The letters render in-process out of the
+        // suite's own service host, so of the services only portal registration (ApiSystem) and the
+        // password salt (Web.Api) are needed, plus the MailPit the previews are delivered to. The
+        // containers are the same as integration-test: the two services expect all of them.
+        connectionManager
+            .AddMySql(withDataVolume: false, withTmpfs: true)
+            .AddRabbitMq(withManagementPlugin: false)
+            .AddRedis()
+            // no data volume, like MySQL: the tenant and entry ids start over with every run, so documents
+            // kept from a previous run would match the new entries by (TenantId, Id) and leak into the search
+            .AddOpensearch(withDashboard: false, withDataVolume: false, isProxied: false)
+            .AddMailPit()
+            .AllowPortalRegistration();
+
+        configurator
+            .AddProject<ASC_Web_Api>(Constants.WebApiPort)
+            .AddProject<ASC_ApiSystem>(Constants.ApiSystemPort);
 
         break;
     case "preview":
@@ -104,7 +140,8 @@ switch (launchProfile)
             .AddProject<ASC_AI_Worker>(Constants.AiWorkerPort)
             .AddProject<ASC_TelegramService>(Constants.TelegramPort)
             .AddSocketIO()
-            .AddSsoAuth();
+            .AddSsoAuth()
+            .AddAiChat();
 
         break;
     default:
@@ -140,6 +177,7 @@ switch (launchProfile)
             .AddProject<ASC_TelegramService>(Constants.TelegramPort)
             .AddSocketIO()
             .AddSsoAuth()
+            .AddAiChat()
             .AddWebDav()
             .AddIdentity();
 
@@ -153,19 +191,31 @@ var clientBasePath = Path.Combine(basePath, "client");
 if (!skipClient)
 {
     var certDir = DevCertificateGenerator.EnsureCertificate(basePath);
-    var dnsPatchPath = Path.Combine(builder.AppHostDirectory, "scripts", "docspace-dns-patch.js").Replace('\\', '/');
     var crtPath = Path.Combine(certDir, DevCertificateGenerator.CrtFileName);
 
     startPackages = builder.AddJavaScriptApp("onlyoffice-client", clientBasePath, "start")
         .WithPnpm()
-        .WithEnvironment("NODE_OPTIONS", $"--require={dnsPatchPath}")
+        .WithEnvironment("NODE_OPTIONS", $"--use-system-ca")
         .WithEnvironment("NODE_EXTRA_CA_CERTS", crtPath)
         .WithEnvironment("API_HOST", $"http://localhost:{Constants.AppHostPort.ToString()}");
 }
 
-var isPreview = builder.Configuration["DOTNET_LAUNCH_PROFILE"] == "preview";
-var openresty = NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker, isPreview);
+if (storybook)
+{
+    builder.AddJavaScriptApp("onlyoffice-storybook", Path.Combine(clientBasePath, "libs", "ui-kit"), "storybook")
+        .WithPnpm(false)
+        .WithEnvironment("STORYBOOK_PROXY", "true")
+        .WithEnvironment("BROWSER", "none");
+}
 
-playwright?.WaitFor(openresty);
+// The letter suite never goes through the proxy, and OpenResty binds fixed host ports (8092, 443)
+// and mounts the client packages — which a server-only checkout does not have.
+if (launchProfile != "notify-test")
+{
+    var isPreview = launchProfile == "preview";
+    var openresty = NginxConfiguration.ConfigureOpenResty(builder, basePath, clientBasePath, startPackages, isDocker, isPreview);
+
+    playwright?.WaitFor(openresty);
+}
 
 await builder.Build().RunAsync();

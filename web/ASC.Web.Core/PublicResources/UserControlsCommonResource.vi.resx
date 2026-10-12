@@ -127,7 +127,7 @@
     <value>Bạn phải nhập license key</value>
   </data>
   <data name="LicenseTypeNotCorrect" xml:space="preserve">
-    <value>Xung đột giấy phép. Vui lòng đảm bảo rằng bạn đã cài đặt đúng phiên bản {0} DocSpace (Enterprise hoặc Developer). Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với người quản lý bán hàng của bạn.</value>
+    <value>Xung đột giấy phép. Vui lòng đảm bảo rằng bạn đã cài đặt đúng phiên bản {0} Docs (Enterprise hoặc Developer). Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với người quản lý bán hàng của bạn.</value>
   </data>
   <data name="NewDocument" xml:space="preserve">
     <value>Tài liệu mới</value>

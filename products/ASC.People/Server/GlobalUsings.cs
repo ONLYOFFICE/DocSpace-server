@@ -31,17 +31,17 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
+global using System.Net;
 global using System.Net.Mail;
 global using System.Security;
 global using System.Security.Claims;
 global using System.Text.Json;
 global using System.Web;
 
+global using ASC.AI.Integration.Extensions;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Auth;
-global using ASC.Api.Core.Convention;
 global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Model;

@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -247,7 +247,7 @@
     <value>Naročnina stranke posodobljena: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Nastavitve storitev, omogočenih za denarnico strank, so bile posodobljene</value>
+    <value>Nastavitve storitev, omogočenih za denarnico strank, so bile posodobljene: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Denarnica stranke napolnjena: {0}</value>
@@ -732,12 +732,6 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portal preimenovan</value>
   </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Zasebna soba je onemogočena</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Zasebna soba je omogočena</value>
-  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Izdelki [{0}]. Dostop odprt</value>
   </data>
@@ -775,10 +769,10 @@
     <value>Onemogočena privzeta kvota prostora za shranjevanje</value>
   </data>
   <data name="QuotaPerRoomChanged" xml:space="preserve">
-    <value>Nastavitev privzete kvote prostora za shranjevanje: {0}</value>
+    <value>Nastavitev privzete kvote prostora za shranjevanje za sobe: {0}</value>
   </data>
   <data name="QuotaPerRoomDisabled" xml:space="preserve">
-    <value>Onemogočena privzeta kvota prostora za shranjevanje</value>
+    <value>Onemogočena privzeta kvota prostora za shranjevanje za sobe</value>
   </data>
   <data name="QuotaPerUserChanged" xml:space="preserve">
     <value>Nastavitev privzete kvote prostora za shranjevanje za uporabnike: {0}</value>
@@ -791,6 +785,12 @@
   </data>
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Skrivnost odjemalca {0} ponovno ustvarjena</value>
+  </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Opomba</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Poročilo prikazuje zadnjih {0} od {1} dogodkov. Če želite pridobiti vse dogodke, prenesite poročilo v obliki CSV.</value>
   </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Nastavitve vektorizacije so bile ponastavljene</value>
@@ -910,7 +910,7 @@
     <value>Pošlji</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Uporabnik {0} je poslal povabilo na {1} za pridružitev temu prostoru DocSpace</value>
+    <value>Uporabnik {0} je poslal povabilo na {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Navodila povabila poslana: {0}</value>
@@ -959,6 +959,9 @@
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Začni selitev regije portala</value>
+  </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Stanje naročnine je bilo premaknjeno v denarnico: {0}</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Sistemski račun</value>
@@ -1205,5 +1208,89 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Aktivne povezave uporabnika so bile odjavljene: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Konfiguracija Docs Connect je bila posodobljena</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Poročilo o kvoti Docs Connect je bilo preneseno</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Nastavitve AI uporabnika so bile posodobljene</value>
+  </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Profil AI je bil dodeljen AI agentu za dejanje: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Profil AI je bil dodeljen dejanju: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Profil modela AI je bil ustvarjen: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Profil modela AI je bil izbrisan: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Profil AI je bil odstranjen iz dejanja: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Profil modela AI je bil posodobljen: {0}</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Kaskadno dodeljevanje metapodatkov je začeto: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Polje metapodatkov je bilo ustvarjeno: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Polje metapodatkov je bilo izbrisano: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Polje metapodatkov je bilo posodobljeno: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Predloga metapodatkov je bila dodeljena: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Predloga metapodatkov je bila ustvarjena: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Predloga metapodatkov je bila izbrisana: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Dodelitev predloge metapodatkov je bila preklicana: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Predloga metapodatkov je bila posodobljena: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Vrednosti metapodatkov so bile posodobljene: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Datoteke [{0}]. Označene kot prebrane</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Datoteke [{0}]. Datoteka ni bila shranjena. Kvota za shranjevanje portala je bila prekoračena.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Datoteke [{0}]. Shranjevanje datoteke presega kvoto za shranjevanje portala.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Mape [{0}]. Označene kot prebrane</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Šifrirni ključ zasebne sobe {0} je bil ustvarjen</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Šifrirni ključ zasebne sobe {0} je bil izbrisan</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Šifrirni ključ zasebne sobe {0} je bil posodobljen</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Zaznana je bila sumljiva prijava: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>Strežnik MCP {0} AI agenta je bil posodobljen</value>
   </data>
 </root>

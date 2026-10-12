@@ -15,14 +15,14 @@ ONLYOFFICE DocSpace server — a multi-tenant SaaS platform for document managem
 - **DI Container**: Autofac
 - **Logging**: NLog + OpenTelemetry
 - **API Docs**: Swashbuckle (Swagger) + Scalar UI
-- **Testing**: xUnit v3, FluentAssertions, Testcontainers
+- **Testing**: xUnit v3, FluentAssertions, Aspire.Hosting.Testing
 - **License**: AGPL 3.0
 
 ## Repository Structure
 
 ```
 server/
-├── common/              # Shared core libraries (~31 modules)
+├── common/              # Shared core libraries
 │   ├── ASC.Common       # Utilities, caching, extensions
 │   ├── ASC.Core.Common  # Domain models, auth, user management
 │   ├── ASC.Api.Core     # API conventions, middleware, health checks
@@ -30,12 +30,13 @@ server/
 │   ├── ASC.EventBus*    # Event bus (RabbitMQ, ActiveMQ, Redis)
 │   ├── ASC.FederatedLogin # OAuth/SSO
 │   ├── ASC.Data.Backup* # Backup/restore
-│   ├── services/        # Background services (Notify, AuditTrail, etc.)
-│   └── Tests/           # Core test projects
+│   ├── services/        # Background services (Notify, AuditTrail, etc.) + ASC.Monolith (all-in-one single-process host)
+│   ├── Tools/           # Dev tools: ASC.Migration.Runner (applies DB migrations), ASC.Migration.Creator, ASC.Api.Documentation, etc.
+│   └── Tests/           # ASC.Tests.Common (shared integration-test harness) + ASC.Core.Common.Tests; the other projects here are legacy
 ├── products/            # Feature modules
-│   ├── ASC.Files/       # File management (Server, Core, Service, Tests)
+│   ├── ASC.Files/       # File management (Server, Core, Worker, Tests)
 │   ├── ASC.People/      # User/team management (Server, Tests)
-│   └── ASC.AI/          # AI features (Server, Core, Service)
+│   └── ASC.AI/          # AI features (Server, Core, Worker, Tests)
 ├── web/                 # Web layer
 │   ├── ASC.Web.Api      # REST API controllers
 │   ├── ASC.Web.Core     # Web infrastructure
@@ -44,81 +45,60 @@ server/
 ├── sdk/                 # Multi-language API SDKs (git submodules)
 ├── migrations/          # DB migrations (mysql/, postgre/ × SaaS/Standalone)
 ├── thirdparty/          # Third-party libs (Google.Authenticator, MS Graph, etc.)
-└── .aspire/             # Aspire AppHost configuration
+└── aspire.config.json   # Aspire CLI settings (points at the AppHost in common/ASC.AppHost)
 ```
 
 ## Build & Run
 
 **Solution files:**
-- `ASC.Web.sln` — main solution
-- `ASC.Tests.sln` — test solution
+- `ASC.Web.slnx` — main solution. Use this one
+- `ASC.Web.sln` — **deprecated**, kept for tooling that cannot read `.slnx` yet. As of 2026-09-03 it still mirrors the `.slnx` exactly (the same 48 projects, `Solution Items` and `migrations` folder, the same Debug/Release configurations), but it is no longer the source of truth: add new projects to `ASC.Web.slnx`, and only mirror them into the `.sln` if you actually need it
+- `ASC.Tests.slnx` — test solution (there is NO `ASC.Tests.sln`)
 - `ASC.Migrations.sln` — database migrations
+- `thirdparty.sln` — third-party libraries
 
 **Common commands:**
 ```bash
-dotnet build ASC.Web.sln
-dotnet test ASC.Tests.sln
-dotnet run --project .aspire/AppHost  # Run via Aspire orchestration
+dotnet build ASC.Web.slnx
+dotnet test ASC.Tests.slnx
+dotnet run --project common/ASC.AppHost --launch-profile development  # Run via Aspire orchestration
+cd common/Tools/ASC.Migration.Runner && dotnet run                    # Apply DB migrations
 ```
 
-**Package management:** Centralized in `Directory.Packages.props` (all version pins live there).
+The AppHost has 5 launch profiles: `development`, `test`, `preview`, `integration-test`, `frontend-dev` — always pass `--launch-profile` explicitly.
+
+**Aspire CLI:** works from the repo root — the committed `aspire.config.json` points to the AppHost (`appHostPath`, relative to the repo root), no `--apphost` flag needed. CLI 13.x dropped the older `.aspire/settings.json`; if the config is missing, recreate it with `aspire config set appHostPath "common/ASC.AppHost/ASC.AppHost.csproj"` (the CLI never writes the file on its own). The resource graph is defined in `common/ASC.AppHost/Program.cs` plus `common/ASC.AppHost/Configuration/` (`ProjectConfigurator.cs`, `ConnectionStringManager.cs`, `NginxConfiguration.cs`) — not in a single-file `apphost.cs`.
+
+**Package management:** Centralized in `Directory.Packages.props` — all version pins AND the global `TargetFramework` (net10.0) live there. `Directory.Build.props` only enables OpenAPI doc generation and strips native NuGet .pdb files; most csprojs set no TFM of their own.
+
+**More detail:** `README.md` documents service ports (Web.Api 5000, Studio 5003, People 5004, Files 5007/5009, AI 5157/5154), Aspire dashboard / Scalar / DBGate / Mailpit URLs, prerequisites, and troubleshooting.
+
+## Logs & Configs (Local Dev)
+
+Both live **outside this repo**, as siblings of `server/` in the parent `docspace/` directory:
+
+- **Configs**: `../buildtools/config/` — the effective runtime configuration for all services: `appsettings*.json`, `apisystem.json`, `redis.json`, `rabbitmq.json`, `elastic.json`, `autofac*.json`, `nlog.config`, `nginx/`, etc. Environment variables override values from these files; local `config/` files inside this repo are NOT the source of truth.
+- **Logs**: `../Logs/` — one file per service: `web.api.log`, `files.log`, `files.worker.log`, `backup.log`, `notify.log`, `people.log`, `apisystem.log`, etc. Some are date-suffixed (e.g. `web.login.07-29.log`). Check these first when diagnosing a running service.
 
 ## Coding Conventions
 
-### Naming
-- **Namespaces**: `ASC.<Module>[.<Feature>][.<Layer>]` (e.g., `ASC.Files.Core.ApiModels.RequestDto`)
-- **Controllers**: `*Controller`
-- **DTOs**: `*RequestDto`, `*ResponseDto`
-- **Custom attributes**: `[Singleton]`, `[Scope]`, `[DefaultRoute]`, `[ControllerName]`
-- **Route segments**: camelCase (e.g., `{id}/externalDbSync`, `fromTemplate`) — never snake_case or kebab-case
-
-### Style (enforced via `.editorconfig`)
-- **Indentation**: 4 spaces (no tabs); 2 spaces for XML/JSON/YAML
-- **`var` usage**: preferred everywhere (`csharp_style_var_*` = true:warning)
-- **Namespaces**: file-scoped (`namespace Foo;`) — enforced with warning
-- **Usings**: `ImplicitUsings` enabled; system directives sorted first, separated into groups. **All `using` directives must be placed in `GlobalUsings.cs`** (one per project), never in individual `.cs` files.
-- **Braces**: always required (`csharp_prefer_braces` = true:warning)
-- **`using` statements**: prefer simple form (`using var x = ...`)
-- **Object creation**: prefer target-typed `new()` when type is apparent
-- **Default expressions**: prefer `default` over `default(T)`
-- **Index/Range**: prefer `^1` and `..` operators
-- **Null checks**: prefer `is null` / `is not null` over `ReferenceEquals`
-- **Access modifiers**: explicit modifiers required (warning)
-- **Readonly fields**: enforced with warning
-- **Private fields**: `_camelCase`; public fields / constants / types: `PascalCase`; interfaces: `IName`
-- **XML docs**: `<summary>`, `<remarks>`, `<example>` on API models; `GenerateDocumentationFile=True`
-- **License header**: AGPL 3.0 header required on all source files
-- **Line endings**: CRLF; `insert_final_newline = true`; trailing whitespace trimmed
-
-### Logging
-- **Always use source-generated logging** via `[LoggerMessage]` attribute on `partial` methods in a dedicated `static partial class` (e.g., `*Logger`).
-- Never use string interpolation or `ILogger.LogInformation(...)` directly — always define `LoggerMessage`-attributed extension methods.
-- Example pattern:
-```csharp
-public static partial class FooLogger
-{
-    [LoggerMessage(LogLevel.Information, "Found {count} items")]
-    public static partial void InfoFoundItems(this ILogger<FooService> logger, int count);
-}
-```
-
-### API Patterns
-- API versioning via `Asp.Versioning`
-- Swagger annotations for OpenAPI generation
-- Controllers inherit common base, use `[DefaultRoute]` attribute
-- Request/Response models in `ApiModels/RequestDto` and `ApiModels/ResponseDto` namespaces
-
+C# naming, style, and API conventions live in `.claude/rules/csharp-style.md` (loaded automatically when working with `.cs` files). Logging conventions: `.claude/rules/logging.md`. Caching conventions (FusionCache only — never hand-rolled caches; two cache instances, keys/tags, invalidation): `.claude/rules/caching.md`. HTTP client conventions (IHttpClientFactory only, reuse the standard named clients from BaseStartup): `.claude/rules/http-clients.md`. Database queries (precompiled through `[PreCompileQuery]` context methods, never inline LINQ in a DAO; the `ExecuteUpdate` exception): `.claude/rules/ef-compiled-queries.md`. Code navigation rules (CodeGraph + LSP, never Grep for a C# symbol): `.claude/rules/csharp-lsp.md`.
+Cross-cutting checks a change must not forget: DTO conversion through Riok.Mapperly (`.claude/rules/dto-mapping.md`), backup/restore declarations for every schema change (`.claude/rules/backup-tables.md`), socket events for every change the API exposes, sent ahead of the frontend and landed in the C# notifier and the Node socket service together (`.claude/rules/socket-events.md`), the Files/Rooms/Forms/AI Agents sections and their subsections (`.claude/rules/files-sections.md`), the OpenSearch index and its SQL fallback (`.claude/rules/full-text-search.md`), zero new build and analyzer warnings (`.claude/rules/build-warnings.md`). Commit messages and PRs carry no AI attribution: `.claude/rules/git-commits.md`.
+Endpoint documentation for AI consumers — how `<summary>`/`<remarks>`, DTO property texts and `[SwaggerResponse]` have to read once the OpenAPI documents are used as agent tool definitions: `.claude/rules/openapi-endpoint-docs.md` for the operation (loaded with controllers) and `.claude/rules/openapi-dto-docs.md` for properties and enum members (loaded with DTOs, `ApiModels` and enums). The campaign that works through the backlog of those texts is the `openapi-desc-opt` skill.
+Which types may cross the HTTP boundary — only `ApiModels` DTOs, never settings, EF entities, core or foreign classes; separate request/response classes; Mapperly/`*DtoHelper` mapping; moving an old endpoint without changing its JSON: `.claude/rules/api-models.md` (loaded with controllers and `ApiModels`).
 ## Testing
+
+Conventions for writing integration tests (per-test portal, roles, `ApiException` assertions, access-level matrices, class size vs parallelism): `.claude/rules/tests.md`.
 
 - **Framework**: xUnit v3 with `UseMicrosoftTestingPlatformRunner`
 - **Assertions**: FluentAssertions
-- **Containers**: Testcontainers (MySQL, PostgreSQL, RabbitMQ, Redis, OpenSearch)
+- **Infrastructure**: integration tests do NOT use Testcontainers — they boot the real Aspire AppHost via `Aspire.Hosting.Testing` (`DistributedApplicationTestingBuilder.CreateAsync<Projects.ASC_AppHost>` with the `integration-test` launch profile), which provides MySQL/PostgreSQL/RabbitMQ/Redis/OpenSearch containers. The harness is shared: `common/Tests/ASC.Tests.Common` holds `AspireHostFixture<TClients>`, `PortalClientsBase`, `Initializer` and `RawApiClient`; each suite only derives a thin `AspireAppFixture`/`PortalClients` pair in its own `ApiFactories/` folder
 - **Fake data**: Bogus
 - **DB cleanup**: Respawn
-- **Test locations**: `common/Tests/`, `products/*/Tests/`
+- **Test locations**: `products/*/Tests/`, `web/ASC.Web.Api.Tests/` (Web.Api REST suite) and `common/Tests/` (`ASC.Core.Common.Tests`, `ASC.Notify.Tests` letter suite, `ASC.Data.Backup.Core.Tests`). The remaining projects in `common/Tests/` are legacy (net7/net8), NOT part of `ASC.Tests.slnx`, and are not run by `dotnet test`
 
 ```bash
-dotnet test ASC.Tests.sln
+dotnet test ASC.Tests.slnx
 ```
 
 ## Git Workflow
@@ -126,7 +106,7 @@ dotnet test ASC.Tests.sln
 - **Main branch**: `master`
 - **Integration branch**: `develop`
 - **Branch naming**: `feature/*`, `bugfix/*`
-- **Submodules**: 8 SDK submodules in `sdk/` — use `git submodule update --init` after clone
+- **Submodules**: 9 total — 8 SDK submodules in `sdk/` plus `common/resources/DocStore` (document templates); use `git submodule update --init` after clone
 
 ## Architecture Notes
 

@@ -34,12 +34,16 @@
 namespace ASC.Web.Api.ApiModel.RequestsDto;
 
 /// <summary>
-/// The request parameters for uploading the software license files.
+/// The license file staged for this self-hosted Enterprise installation.
 /// </summary>
 public class UploadLicenseRequestsDto
 {
     /// <summary>
-    /// The list of license files to be uploaded.
+    /// The license file, sent as `multipart/form-data`. Only the first entry is read and the rest are ignored, and a
+    /// request carrying none is refused with 400. A file that cannot be read as a license, that carries no customer
+    /// id or signature, or that was issued for the other edition fails the call; one whose start date has not
+    /// arrived yet is refused, while one already past its due date is still accepted. Staging only stores the file -
+    /// `POST api/2.0/settings/license/accept` puts it in force - and a file staged earlier is overwritten.
     /// </summary>
     /// <example>license.lic</example>
     public required IEnumerable<IFormFile> Files { get; set; }

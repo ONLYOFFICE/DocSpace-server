@@ -1,90 +1,106 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
- /// <summary>
-/// The folder content information.
+/// <summary>
+/// One page of the contents of a folder or of a section: its entries split into files and folders, the folder itself,
+/// and the counters needed to page through the rest.
 /// </summary>
 public class FolderContentDto<T>
 {
     /// <summary>
-    /// The list of files in the folder.
+    /// The file entries of this page. It is empty when the folder holds no files, when the filters matched none of
+    /// them, and in the sections that list rooms only.
     /// </summary>
     /// <example>[{"id": 10, "title": "document.docx"}]</example>
     public List<FileEntryBaseDto> Files { get; set; }
 
     /// <summary>
-    /// The list of folders in the folder.
+    /// The folder entries of this page. In a section of rooms these entries are the rooms themselves, which is where
+    /// their type, tags, logo and quota are read from.
     /// </summary>
     /// <example>[{"id": 20, "title": "My Folder"}]</example>
     public List<FileEntryBaseDto> Folders { get; set; }
 
     /// <summary>
-    /// The current folder information.
+    /// The folder or section the page was read from, with its own title, type and access rights. It describes the
+    /// container, not the entries, and is filled in even when the page is empty.
     /// </summary>
     /// <example>{"id": 10, "title": "My Documents"}</example>
     public FolderDto<T> Current { get; set; }
 
     /// <summary>
-    /// The folder path.
+    /// The breadcrumbs of the current folder, ordered from the root of the section down to it. Each element carries
+    /// the identifier, the title and the folder and room types, and folders the caller cannot read are left out, so
+    /// the chain can be shorter than the real depth.
     /// </summary>
-    /// <example>{key = "Key", path = "//path//to//folder"}</example>
+    /// <example>[{"id": 1, "title": "Rooms", "folderType": 14}]</example>
     public required object PathParts { get; set; }
 
     /// <summary>
-    /// The folder start index.
+    /// The position of the first entry of this page in the whole result, echoing the requested start index. Add the
+    /// number of entries received to it to ask for the next page.
     /// </summary>
     /// <example>0</example>
     public int StartIndex { get; set; }
 
     /// <summary>
-    /// The number of folder elements.
+    /// How many entries this page carries, files and folders together. A page shorter than the requested size means
+    /// the result is exhausted.
     /// </summary>
     /// <example>4</example>
     public int Count { get; set; }
 
     /// <summary>
-    /// The total number of elements in the folder.
+    /// How many entries matched before paging was applied, across the whole folder. Page until the start index plus
+    /// the entries received reaches it.
     /// </summary>
     /// <example>4</example>
     public required int Total { get; set; }
 
     /// <summary>
-    /// The new element index in the folder.
+    /// How many entries of this folder are marked as new for the caller. It is 0 for every listing when the account
+    /// has switched the new-item badges off, so a zero here does not prove that nothing has changed.
     /// </summary>
     /// <example>0</example>
     public int New { get; set; }
+}
+
+[Singleton]
+public class FolderContentDtoHelperSettings(IConfiguration configuration)
+{
+    public int FoldersDtoParallelism { get; } = int.TryParse(configuration["files:folders-dto:parallelism"], out var parallelism) ? parallelism : 5;
 }
 
 [Scope]
@@ -98,13 +114,15 @@ public class FolderContentDtoHelper(
     AuthContext authContext,
     BreadCrumbsManager breadCrumbsManager,
     AiAccessibility accessibility,
-    AiModelSettingsLoader modelSettingsLoader)
+    IDaoFactory daoFactory,
+    FolderContentDtoHelperSettings settings)
 {
-    public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null)
+
+    public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null, List<FolderType> folderType = null, MetadataFilter metadataFilter = null)
     {
         var types = filterType.HasValue ? new[] { filterType.Value } : null;
 
-        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, sharedBy ?? Guid.Empty,types, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, text, extension, searchArea ?? SearchArea.Active, formsItemDto, location, sortByFilter, sortOrder, startIndex, limit);
+        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, sharedBy ?? Guid.Empty,types, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, text, extension, searchArea ?? SearchArea.Active, formsItemDto, location, sortByFilter, sortOrder, startIndex, limit, folderType, metadataFilter);
 
         return folderContentWrapper.NotFoundIfNull();
     }
@@ -131,18 +149,25 @@ public class FolderContentDtoHelper(
             currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
         }
 
-        var aiStatusTask = accessibility.GetStatusAsync();
-        var modelSettingsResultTask = modelSettingsLoader.LoadForEntriesAsync(folderItems.Entries, folderItems.FolderInfo);
+        if (folderItems.FolderInfo is { FolderType: FolderType.AiAgents })
+        {
+            await SetAgentsChatSettingsAsync(folderItems);
+        }
 
-        await Task.WhenAll(aiStatusTask, modelSettingsResultTask);
-
-        var aiStatus = await aiStatusTask;
-        var modelSettingsResult = await modelSettingsResultTask;
+        var aiStatus = await accessibility.GetStatusAsync();
 
         if (folderItems.ParentRoom is { FolderType: FolderType.VirtualDataRoom, SettingsIndexing: true })
         {
             var order = await breadCrumbsManager.GetBreadCrumbsOrderAsync(parentId);
-            var entries = await GetEntriesDto(folderItems.Entries, order, folderItems.FolderInfo).ToListAsync();
+
+            if (currentUsersRecords == null &&
+                folderItems.Entries.Exists(f => f is IFolder { IsRoom: true }) &&
+                await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
+            {
+                currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
+            }
+
+            var entries = (await GetEntriesDto(folderItems.Entries, order, folderItems.FolderInfo)).ToList();
 
             result.Files = entries.Where(r => r.FileEntryType == FileEntryType.File).ToList();
             result.Folders = entries.Where(r => r.FileEntryType == FileEntryType.Folder).ToList();
@@ -165,13 +190,20 @@ public class FolderContentDtoHelper(
                 }
             }
 
-            var foldersTask = GetFoldersDto(folders, contextFolder: folderItems.FolderInfo).ToListAsync().AsTask();
-            var filesTask = GetFilesDto(files, contextFolder: folderItems.FolderInfo).ToListAsync().AsTask();
+            if (currentUsersRecords == null &&
+                folders.Exists(f => f is IFolder { IsRoom: true }) &&
+                await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
+            {
+                currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
+            }
+
+            var foldersTask = GetFoldersDto(folders, contextFolder: folderItems.FolderInfo);
+            var filesTask = GetFilesDto(files, contextFolder: folderItems.FolderInfo);
 
             await Task.WhenAll(foldersTask, filesTask);
 
-            result.Files = filesTask.Result;
-            result.Folders = foldersTask.Result;
+            result.Files = [.. filesTask.Result];
+            result.Folders = [.. foldersTask.Result];
         }
 
 
@@ -191,29 +223,35 @@ public class FolderContentDtoHelper(
             result.Current.RootRoomType = DocSpaceHelper.MapToRoomType(folderItems.ParentRoom.FolderType);
         }
 
+        // one round trip for the whole page, files and folders together
+        await fileWrapperHelper.SetAssignedMetadataTemplatesAsync([.. (result.Files ?? []).OfType<FileEntryDto<int>>(), .. (result.Folders ?? []).OfType<FileEntryDto<int>>()]);
+
         return result;
 
-        async IAsyncEnumerable<FileEntryBaseDto> GetEntriesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder = null, IFolder contextFolder = null)
+        async Task<IEnumerable<FileEntryBaseDto>> GetEntriesDto(List<FileEntry> fileEntries, string entriesOrder = null, IFolder contextFolder = null)
         {
-            foreach (var e in fileEntries)
-            {
-                if (e.FileEntryType == FileEntryType.File)
+            var count = fileEntries.Count;
+            var entryDtos = new FileEntryBaseDto[count];
+            await Parallel.ForEachAsync(Enumerable.Range(0, count),
+                new ParallelOptions { MaxDegreeOfParallelism = settings.FoldersDtoParallelism },
+                async (i, _) =>
                 {
-                    yield return await GetFileDto(e, entriesOrder, contextFolder);
-                }
-                else
-                {
-                    yield return await GetFolderDto(e, entriesOrder, contextFolder);
-                }
-            }
+                    var e = fileEntries[i];
+                    entryDtos[i] = e.FileEntryType == FileEntryType.File
+                        ? await GetFileDto(e, entriesOrder, contextFolder)
+                        : await GetFolderDto(e, entriesOrder, contextFolder);
+                });
+            return entryDtos;
         }
 
-        async IAsyncEnumerable<FileEntryBaseDto> GetFilesDto(IEnumerable<FileEntry> fileEntries, string entriesOrder = null, IFolder contextFolder = null)
+        async Task<IEnumerable<FileEntryBaseDto>> GetFilesDto(List<FileEntry> fileEntries, string entriesOrder = null, IFolder contextFolder = null)
         {
-            foreach (var r in fileEntries)
-            {
-                yield return await GetFileDto(r, entriesOrder, contextFolder);
-            }
+            var count = fileEntries.Count;
+            var fileDtos = new FileEntryBaseDto[count];
+            await Parallel.ForEachAsync(Enumerable.Range(0, count),
+                new ParallelOptions { MaxDegreeOfParallelism = settings.FoldersDtoParallelism },
+                async (i, _) => fileDtos[i] = await GetFileDto(fileEntries[i], entriesOrder, contextFolder));
+            return fileDtos;
         }
 
         async Task<FileEntryBaseDto> GetFileDto(FileEntry fileEntry, string entriesOrder = null, IFolder contextFolder = null)
@@ -226,37 +264,44 @@ public class FolderContentDtoHelper(
             };
         }
 
-        async IAsyncEnumerable<FileEntryBaseDto> GetFoldersDto(IEnumerable<FileEntry> folderEntries, string entriesOrder = null, IFolder contextFolder = null)
+        async Task<IEnumerable<FileEntryBaseDto>> GetFoldersDto(List<FileEntry> folderEntries, string entriesOrder = null, IFolder contextFolder = null)
         {
-            foreach (var r in folderEntries)
-            {
-                yield return await GetFolderDto(r, entriesOrder, contextFolder);
-            }
+            var count = folderEntries.Count;
+            var folderDtos = new FileEntryBaseDto[count];
+            await Parallel.ForEachAsync(Enumerable.Range(0, count),
+                new ParallelOptions { MaxDegreeOfParallelism = settings.FoldersDtoParallelism },
+                async (i, _) => folderDtos[i] = await GetFolderDto(folderEntries[i], entriesOrder, contextFolder));
+            return folderDtos;
         }
 
         async Task<FileEntryBaseDto> GetFolderDto(FileEntry folderEntry, string entriesOrder = null, IFolder contextFolder = null)
         {
-            switch (folderEntry)
+            return folderEntry switch
             {
-                case Folder<int> fol1:
-                    if (currentUsersRecords == null &&
-                        fol1.IsRoom &&
-                        await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
-                    {
-                        currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
-                    }
-                    return await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder, aiStatus, modelSettingsResult);
-                case Folder<string> fol2:
-                    if (currentUsersRecords == null &&
-                        fol2.IsRoom &&
-                        await fileSecurityCommon.IsDocSpaceAdministratorAsync(authContext.CurrentAccount.ID))
-                    {
-                        currentUsersRecords = await fileSecurity.GetUserRecordsAsync().ToListAsync();
-                    }
-                    return await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder, contextFolder, aiStatus, modelSettingsResult);
-            }
+                Folder<int> fol1 => await folderWrapperHelper.GetAsync(fol1, currentUsersRecords, entriesOrder, contextFolder),
+                Folder<string> fol2 => await folderWrapperHelper.GetAsync(fol2, currentUsersRecords, entriesOrder, contextFolder),
+                _ => null,
+            };
+        }
+    }
 
-            return null;
+    private async Task SetAgentsChatSettingsAsync<T>(DataWrapper<T> folderItems)
+    {
+        var agentFolders = folderItems.Entries.OfType<Folder<int>>().Where(f => f.IsAgent).ToList();
+
+        var ids = agentFolders.Where(f => f.ChatSettings == null).Select(f => f.Id).Distinct().ToList();
+        if (ids.Count == 0)
+        {
+            return;
+        }
+
+        var chatSettings = await daoFactory.GetFolderDao<int>().GetChatSettingsAsync(ids);
+        foreach (var folder in agentFolders)
+        {
+            if (folder.ChatSettings == null && chatSettings.TryGetValue(folder.Id, out var settings))
+            {
+                folder.ChatSettings = settings;
+            }
         }
     }
 
@@ -278,7 +323,9 @@ public class FolderContentDtoHelper(
         string sortByFilter,
         SortOrder sortOrder,
         int startIndex,
-        int count)
+        int count,
+        List<FolderType> folderType = null,
+        MetadataFilter metadataFilter = null)
     {
         OrderBy orderBy = null;
         if (SortedByTypeExtensions.TryParse(sortByFilter, true, out var sortBy))
@@ -292,7 +339,7 @@ public class FolderContentDtoHelper(
             count,
             filterTypes,
             filterTypes?.FirstOrDefault() == FilterType.ByUser,
-            userIdOrGroupId.ToString(),
+            userIdOrGroupId,
             sharedBy,
             text,
             extension,
@@ -304,7 +351,9 @@ public class FolderContentDtoHelper(
             applyFilterOption: applyFilterOption,
             searchArea: searchArea,
             formsItemDto: formsItemDto,
-            location: location);
+            location: location,
+            folderType: folderType,
+            metadataFilter: metadataFilter);
 
         return await GetAsync(folderId, items, startIndex);
     }

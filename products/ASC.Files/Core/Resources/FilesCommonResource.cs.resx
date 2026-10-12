@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Požadovaná složka nebyla nalezena</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Neplatné ID složky</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Neplatný poskytovatel</value>
   </data>
@@ -500,7 +503,7 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
     <value>Tvůrce obsahu</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>Správce DocSpace</value>
+    <value>Úplný správce</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Editor</value>
@@ -594,5 +597,29 @@ Je garantována 100% kompatibilita s MS Office formáty.</value>
   </data>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Synchronizace dat formuláře s externí databází se nezdařila.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>Instrukce AI agenta nemůže být delší než {0} znaků</value>
+  </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Formulář byl změněn. Tento koncept je zastaralý a nelze jej odeslat.</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Tato akce je dostupná pouze v soukromé místnosti</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Výstupy chatu</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>Místnost již obsahuje složku .ai</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Úložiště nelze odpojit, dokud ho používá místnost. Místo toho místnost odstraňte</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Hledat v metadatech souboru</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Hledat v metadatech složky</value>
   </data>
 </root>

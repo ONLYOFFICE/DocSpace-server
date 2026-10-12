@@ -35,10 +35,10 @@ namespace ASC.Api.Documentation.Commands;
 
 public class BuildSdkGeneratorCommand : AsyncCommand<NoArgumentsCommandSettings>
 {
-    public override ValidationResult Validate(CommandContext context, NoArgumentsCommandSettings settings) =>
+    protected override ValidationResult Validate(CommandContext context, NoArgumentsCommandSettings settings) =>
         ToolRunner.ValidateAvailable("mvn", "--version");
 
-    public override async Task<int> ExecuteAsync(
+    protected override async Task<int> ExecuteAsync(
         CommandContext context,
         NoArgumentsCommandSettings settings,
         CancellationToken cancellationToken)

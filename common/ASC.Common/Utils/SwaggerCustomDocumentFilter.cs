@@ -49,11 +49,23 @@ public class HideRouteDocumentFilter(string routeToHide) : IDocumentFilter
 
 public class ErrorResponseFilter : IDocumentFilter
 {
+    // The body CustomExceptionHandler writes on every failure it handles: it serializes an
+    // ErrorApiResponse with WriteAsJsonAsync, so an error status carries exactly this shape. Until
+    // it was documented the document declared error statuses with no body at all, which left the
+    // generated SDKs with no error type to deserialize into.
+    private const string ErrorSchemaId = "ErrorApiResponse";
+
+    // 502/503 are excluded on purpose - they come from the reverse proxy, never reach this
+    // handler, and their body may be HTML (their descriptions below say so).
+    private static readonly string[] _handlerStatuses =
+        ["400", "401", "402", "403", "404", "405", "409", "413", "415", "429", "500", "501"];
+
     public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
     {
         swaggerDoc.Components ??= new OpenApiComponents();
         swaggerDoc.Components.Headers ??= new Dictionary<string, IOpenApiHeader>();
-
+        swaggerDoc.Components.Schemas ??= new Dictionary<string, IOpenApiSchema>();
+        swaggerDoc.Components.Schemas[ErrorSchemaId] = BuildErrorSchema();
 
         foreach (var operation in swaggerDoc.Paths.Values.Where(path => path.Operations != null).SelectMany(path => path.Operations.Values))
         {
@@ -62,10 +74,59 @@ public class ErrorResponseFilter : IDocumentFilter
                 continue;
             }
 
+            // Every operation can fail this way: an exception nothing maps ends up a 500 here.
+            operation.Responses.TryAdd("500", new OpenApiResponse { Description = "Internal Server Error." });
+
+            // 400, in contrast, is only reachable where there is something to reject - model binding
+            // and validation run against parameters and a request body. Declaring it on an operation
+            // that takes neither would document a response that cannot happen.
+            if (operation.Parameters is { Count: > 0 } || operation.RequestBody != null)
+            {
+                operation.Responses.TryAdd("400", new OpenApiResponse { Description = "Bad Request." });
+            }
+
             operation.Responses.TryAdd("502", new OpenApiResponse { Description = "Bad Gateway. Returned by the reverse proxy, response body may be HTML and not JSON." });
             operation.Responses.TryAdd("503", new OpenApiResponse { Description = "Service Unavailable. Returned by the reverse proxy, response body may be HTML and not JSON." });
+
+            foreach (var status in _handlerStatuses)
+            {
+                if (operation.Responses.TryGetValue(status, out var response) &&
+                    response is OpenApiResponse { Content: null } concrete)
+                {
+                    concrete.Content = new Dictionary<string, OpenApiMediaType>
+                    {
+                        ["application/json"] = new() { Schema = new OpenApiSchemaReference(ErrorSchemaId) }
+                    };
+                }
+            }
         }
     }
+
+    // Hand-built rather than reflected off ErrorApiResponse: the type lives in ASC.Api.Core, which
+    // this assembly does not reference, and a generated schema would carry no prose anyway - the
+    // ruleset requires a description on the component and on every property.
+    private static OpenApiSchema BuildErrorSchema() => new()
+    {
+        Type = JsonSchemaType.Object,
+        Description = "The error body returned with every failed request.",
+        Properties = new Dictionary<string, IOpenApiSchema>
+        {
+            ["status"] = new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32", Description = "The response status flag. Always 1 on an error, as opposed to 0 on success." },
+            ["statusCode"] = new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32", Description = "The HTTP status code of the response, repeated in the body." },
+            ["error"] = new OpenApiSchema
+            {
+                Type = JsonSchemaType.Object,
+                Description = "What went wrong.",
+                Properties = new Dictionary<string, IOpenApiSchema>
+                {
+                    ["message"] = new OpenApiSchema { Type = JsonSchemaType.String, Description = "The human-readable error message." },
+                    ["type"] = new OpenApiSchema { Type = JsonSchemaType.String, Description = "The .NET type of the underlying exception. Only sent when stack traces are enabled." },
+                    ["stack"] = new OpenApiSchema { Type = JsonSchemaType.String, Description = "The stack trace of the underlying exception. Only sent when stack traces are enabled." },
+                    ["hresult"] = new OpenApiSchema { Type = JsonSchemaType.Integer, Format = "int32", Description = "The HRESULT of the underlying exception. Only sent when stack traces are enabled." }
+                }
+            }
+        }
+    };
 }
 
 public class DerivedSchemaFilter : ISchemaFilter
@@ -86,7 +147,7 @@ public class DerivedSchemaFilter : ISchemaFilter
             var derivedArray = new JsonArray();
             foreach (var type in derivedTypes)
             {
-                var schemaId = CustomSchemaId(type);
+                var schemaId = OpenApiSchemaId.Of(type);
                 derivedArray.Add(schemaId);
             }
 
@@ -94,29 +155,38 @@ public class DerivedSchemaFilter : ISchemaFilter
             {
                 openApiSchema.Extensions["x-derived-types"] = new JsonNodeExtension(derivedArray);
             }
+
+            DescribeUnion(openApiSchema, derivedTypes, context);
         }
     }
 
-    private static string CustomSchemaId(Type type)
+    /// <summary>
+    /// Turns a base that declares nothing of its own into the union it actually is.
+    /// </summary>
+    /// <remarks>
+    /// Such a base - a marker interface, or an abstract class holding only the <c>[JsonDerivedType]</c>
+    /// list - reflects to an empty object, so the response reads as "some object with no fields" and the
+    /// only hint of what can arrive is the extension above, which no generator reads. <c>oneOf</c> states
+    /// it in a keyword every consumer understands, and generating each derived schema is also what puts
+    /// it in the document: referencing one by name alone leaves the reference dangling. A base that does
+    /// carry properties is already described by them, and its derived types point back at it through
+    /// <c>allOf</c>, so it is left alone rather than described twice.
+    /// </remarks>
+    private static void DescribeUnion(OpenApiSchema schema, List<Type> derivedTypes, SchemaFilterContext context)
     {
-        var name = type.Name;
-
-        if (string.IsNullOrEmpty(name))
+        if (schema.Properties is { Count: > 0 } || schema.OneOf is { Count: > 0 } || schema.AllOf is { Count: > 0 })
         {
-            return name;
+            return;
         }
 
-        if (type.IsGenericType)
-        {
-            name = name.Split('`')[0];
+        schema.OneOf = derivedTypes
+            .Select(type => context.SchemaGenerator.GenerateSchema(type, context.SchemaRepository))
+            .ToList();
 
-            var genericArgs = string.Join("", type.GenericTypeArguments.Select(CustomSchemaId));
-            name += genericArgs;
-        }
-        name = name.Replace("+", "_");
-        name = name.Replace("Int32", "Integer");
-        return name;
+        // A union is not an object in its own right, and claiming both would contradict the branches.
+        schema.Type = null;
     }
+
 }
 
 public class LowercaseDocumentFilter : IDocumentFilter
@@ -146,6 +216,20 @@ public class LowercaseDocumentFilter : IDocumentFilter
 
 public class TagDescriptionsDocumentFilter : IDocumentFilter
 {
+    // openapi-tags-alphabetical checks the order of the global tags with javascript's String.localeCompare, i.e.
+    // ICU collation - so the comparison here is culture-aware, not ordinal: ordinal would sort "Settings / SSO"
+    // before "Settings / Security", and the rule would still fire. InvariantCulture
+    // was verified to produce the same order as localeCompare on the tag sets of all four documents.
+    // A sorted set rather than a one-off sort of the sequence, so a tag added to _tagDescriptions later cannot
+    // bring the finding back.
+    private static readonly IComparer<string> _tagNameComparer =
+        Comparer<string>.Create((x, y) => string.Compare(x, y, StringComparison.InvariantCulture));
+
+    // The same rule lifted to the tag object. One comparison for both the global tags and the nested
+    // x-tagGroups lists below, so the two orders cannot drift apart.
+    private static readonly IComparer<OpenApiTag> _tagComparer =
+        Comparer<OpenApiTag>.Create((x, y) => _tagNameComparer.Compare(x.Name, y.Name));
+
     private readonly Dictionary<string, string> _tagDescriptions = new()
     {
         { "People", "Operations for working with people" },
@@ -154,6 +238,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Backup", "Operations for working with backup" },
         { "Files / Files", "Operations for working with files." },
         { "Files / Folders", "Operations for working with folders." },
+        { "Files / Metadata", "Operations for working with metadata templates and the metadata of files and folders." },
         { "Files / Operations", "Operations for performing actions on files and folders." },
         { "Files / Quota", "Operations for working with room quota limit." },
         { "Rooms", "Operations for working with rooms." },
@@ -161,10 +246,12 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Files / Settings", "Operations for working with file settings." },
         { "Files / Third-party integration", "Operations for working with third-party integrations." },
         { "Files / Sharing", "Operations for working with sharing."},
+        { "Rooms / Privacy room", "Operations for working with private rooms and their encryption keys." },
         { "Group", "Operations for working with groups." },
         { "Group / Rooms", "Operations for getting groups with access rights to a room." },
         { "Group / Search", "Operations for searching groups." },
         { "People / Contacts", "Operations for working with user contacts." },
+        { "People / Email", "Operations for working with user email addresses." },
         { "People / Password", "Operations for working with user passwords." },
         { "People / Photos", "Operations for working with user photos." },
         { "People / Profiles", "Operations  for working with user profiles." },
@@ -178,6 +265,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "People / Guests", "Operations for workig with guests" },
         { "Authentication", "Operations for authenticating users." },
         { "Capabilities", "Operations for getting information about portal capabilities." },
+        { "Apps", "Operations for working with portal applications." },
         { "Migration", "Operations for performing migration." },
         { "ThirdParty", "Operations for working with third-party." },
         { "Portal / Quota", "Operations for getting information about portal quota." },
@@ -198,6 +286,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Settings / Common settings", "Operations for working with common settings." },
         { "Settings / Cookies", "Operations for working with cookies settings." },
         { "Settings / Custom Navigation", "Operations for working with custom navigation settings." },
+        { "Settings / DocsCloud", "Operations for working with DocsCloud settings." },
         { "Settings / Encryption", "Operations for working with encryption settings." },
         { "Settings / Greeting settings", "Operations for working with greeting settings." },
         { "Settings / IP restrictions", "Operations for working with IP restriction settings." },
@@ -247,7 +336,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
             }
         }
 
-        swaggerDoc.Tags = customTags
+        swaggerDoc.Tags = new SortedSet<OpenApiTag>(customTags
             .Where(tag => _tagDescriptions.ContainsKey(tag))
             .Select(tag =>
             {
@@ -263,30 +352,141 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
                 openApiTag.Extensions.Add("x-displayName", new JsonNodeExtension(displayName));
 
                 return openApiTag;
-            }).ToHashSet();
+            }), _tagComparer);
 
-        var groupTag = customTags
+        // Both levels ordered with the same _tagNameComparer as the global tags above: the grouping source is a
+        // HashSet, so the nested lists used to come out in path traversal order while tags next to them were sorted.
+        // The group order was alphabetical only by accident of that traversal - sorting it makes it a guarantee.
+        var groups = customTags
             .Where(tag => _tagDescriptions.ContainsKey(tag))
             .GroupBy(tag => tag.Split(" / ")[0])
-            .ToDictionary(group => group.Key, group => group.ToList());
+            .OrderBy(group => group.Key, _tagNameComparer)
+            .Select(group => (Name: group.Key, Tags: group.OrderBy(tag => tag, _tagNameComparer)));
 
         var tagGroups = new JsonArray();
-        foreach (var group in groupTag)
+        foreach (var group in groups)
         {
             var groupObject = new JsonObject();
             var tagsArray = new JsonArray();
 
-            foreach (var tag in group.Value)
+            foreach (var tag in group.Tags)
             {
                 tagsArray.Add(tag);
             }
 
-            groupObject["name"] = group.Key;
+            groupObject["name"] = group.Name;
             groupObject["tags"] = tagsArray;
             tagGroups.Add(groupObject);
         }
 
         swaggerDoc.Extensions ??= new Dictionary<string, IOpenApiExtension>();
         swaggerDoc.Extensions["x-tagGroups"] = new JsonNodeExtension(tagGroups);
+    }
+}
+
+/// <summary>
+/// Turns the <c>example</c> that Swashbuckle fills in from the <c>&lt;example&gt;</c> xml docs into the JSON Schema
+/// <c>examples</c> array, which is what openapi 3.1 expects - <c>example</c> is deprecated there. A document filter
+/// rather than a schema filter on purpose: schema filters only see schemas generated from a type, and would miss the
+/// ones other filters assemble by hand, such as the rate limit response headers.
+/// </summary>
+public class OpenApi31SchemaDocumentFilter : IDocumentFilter
+{
+    public void Apply(OpenApiDocument swaggerDoc, DocumentFilterContext context)
+    {
+        var visited = new HashSet<object>(ReferenceEqualityComparer.Instance);
+
+        foreach (var schema in swaggerDoc.Components?.Schemas?.Values ?? [])
+        {
+            Visit(schema, visited);
+        }
+
+        foreach (var header in swaggerDoc.Components?.Headers?.Values ?? [])
+        {
+            Visit(header.Schema, visited);
+        }
+
+        foreach (var parameter in swaggerDoc.Components?.Parameters?.Values ?? [])
+        {
+            Visit(parameter.Schema, visited);
+        }
+
+        foreach (var path in swaggerDoc.Paths.Values)
+        {
+            foreach (var parameter in path.Parameters ?? [])
+            {
+                Visit(parameter.Schema, visited);
+            }
+
+            foreach (var operation in path.Operations?.Values ?? Enumerable.Empty<OpenApiOperation>())
+            {
+                VisitOperation(operation, visited);
+            }
+        }
+    }
+
+    private static void VisitOperation(OpenApiOperation operation, HashSet<object> visited)
+    {
+        foreach (var parameter in operation.Parameters ?? [])
+        {
+            Visit(parameter.Schema, visited);
+        }
+
+        foreach (var mediaType in operation.RequestBody?.Content?.Values ?? [])
+        {
+            Visit(mediaType.Schema, visited);
+        }
+
+        foreach (var response in operation.Responses?.Values ?? Enumerable.Empty<IOpenApiResponse>())
+        {
+            foreach (var mediaType in response.Content?.Values ?? [])
+            {
+                Visit(mediaType.Schema, visited);
+            }
+
+            foreach (var header in response.Headers?.Values ?? [])
+            {
+                Visit(header.Schema, visited);
+            }
+        }
+    }
+
+    private static void Visit(IOpenApiSchema schema, HashSet<object> visited)
+    {
+        // References are reached through the component they point at, so following them would only risk cycles.
+        if (schema is not OpenApiSchema concrete || !visited.Add(concrete))
+        {
+            return;
+        }
+
+        Rewrite(concrete);
+
+        Visit(concrete.Items, visited);
+        Visit(concrete.Not, visited);
+        Visit(concrete.AdditionalProperties, visited);
+
+        foreach (var child in concrete.Properties?.Values ?? [])
+        {
+            Visit(child, visited);
+        }
+
+        foreach (var child in (concrete.AllOf ?? []).Concat(concrete.AnyOf ?? []).Concat(concrete.OneOf ?? []))
+        {
+            Visit(child, visited);
+        }
+    }
+
+    private static void Rewrite(OpenApiSchema schema)
+    {
+        // Swashbuckle and the OpenAPI reader still populate the singular (obsolete) "example"
+        // keyword; this filter is the place that normalises it to the JSON Schema "examples"
+        // array, so reading and clearing the obsolete member here is intentional.
+#pragma warning disable CS0618 // Type or member is obsolete
+        if (schema.Example != null)
+        {
+            schema.Examples = [schema.Example];
+            schema.Example = null;
+        }
+#pragma warning restore CS0618
     }
 }

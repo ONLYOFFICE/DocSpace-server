@@ -148,7 +148,7 @@ public class ProviderInfoHelper(IFusionCacheProvider cacheProvider)
     {
         if (id == null)
         {
-            await _cache.RemoveByTagAsync(CacheExtention.GetProviderTag(selector, thirdId));
+            await _cache.RemoveByTagAndNotifyAsync(CacheExtention.GetProviderTag(selector, thirdId));
         }
         else
         {
@@ -156,16 +156,16 @@ public class ProviderInfoHelper(IFusionCacheProvider cacheProvider)
             {
                 if (isFile.Value)
                 {
-                    await _cache.RemoveByTagAsync(CacheExtention.GetProviderFileTag(selector, thirdId, id));
+                    await _cache.RemoveByTagAndNotifyAsync(CacheExtention.GetProviderFileTag(selector, thirdId, id));
                 }
                 else
                 {
-                    await _cache.RemoveByTagAsync(CacheExtention.GetProviderFolderTag(selector, thirdId, id));
+                    await _cache.RemoveByTagAndNotifyAsync(CacheExtention.GetProviderFolderTag(selector, thirdId, id));
                 }
             }
             else
             {
-                await _cache.RemoveByTagAsync(CacheExtention.GetProviderFolderItemsTag(selector, thirdId, id));
+                await _cache.RemoveByTagAndNotifyAsync(CacheExtention.GetProviderFolderItemsTag(selector, thirdId, id));
             }
         }
     }
@@ -178,7 +178,7 @@ public class ProviderInfoHelper(IFusionCacheProvider cacheProvider)
             var file = await storage.GetFileAsync(fileId);
 
             return ctx.Modified(file);
-        }, _cacheExpiration,
+        }, SetupOptions,
         [CacheExtention.GetProviderTag(selector, id), CacheExtention.GetProviderFileTag(selector, id, fileId)]);
 
         return file;
@@ -209,7 +209,7 @@ public class ProviderInfoHelper(IFusionCacheProvider cacheProvider)
             var folder = await storage.GetFolderAsync(folderId);
 
             return ctx.Modified(folder);
-        }, _cacheExpiration,
+        }, SetupOptions,
         [CacheExtention.GetProviderTag(selector, id), CacheExtention.GetProviderFolderTag(selector, id, folderId)]);
 
         return folder;
@@ -258,9 +258,17 @@ public class ProviderInfoHelper(IFusionCacheProvider cacheProvider)
 
             ctx.Tags = tags.ToArray();
             return ctx.Modified(items);
-        });
+        }, SetupOptions);
 
         return items;
+    }
+
+    private void SetupOptions(FusionCacheEntryOptions options)
+    {
+        _ = options
+            .SetDuration(_cacheExpiration)
+            .SetFailSafe(true, TimeSpan.FromMinutes(5))
+            .SetFactoryTimeouts(softTimeout: TimeSpan.FromSeconds(5));
     }
 }
 

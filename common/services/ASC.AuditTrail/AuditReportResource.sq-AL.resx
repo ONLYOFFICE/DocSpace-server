@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -241,7 +241,7 @@
     <value>Abonimi i klientit është përditësua: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Shërbimet e aktivizuara për portofolin e klientit</value>
+    <value>Shërbimet e aktivizuara për portofolin e klientit: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Portofoli i klientit u rimbush: {0}</value>
@@ -700,7 +700,7 @@
     <value>Pronari [{0}]. Udhëzime për çaktivizimin e portalit të dërguar</value>
   </data>
   <data name="OwnerSentPortalDeleteInstructions" xml:space="preserve">
-    <value>Pronari [{0}]. Udhëzime për çaktivizimin e portalit të dërguar</value>
+    <value>Pronari [{0}]. Udhëzime për fshirjen e portalit të dërguar</value>
   </data>
   <data name="PageCol" xml:space="preserve">
     <value>Faqe</value>
@@ -722,12 +722,6 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portali u riemërua</value>
-  </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Dhoma private është e çaktivizuar</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Dhoma private është aktivizuar</value>
   </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Produktet [{0}]. Aksesi u hap</value>
@@ -782,6 +776,12 @@
   </data>
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Sekreti {0} i klientit u rigjenerua</value>
+  </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Shënim</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Raporti shfaq {0} ngjarjet më të fundit nga {1}. Për të marrë të gjitha ngjarjet, shkarkoni raportin në formatin CSV.</value>
   </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Cilësimet e vectorizimit janë rivendosur</value>
@@ -892,7 +892,7 @@
     <value>Dërgoni</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Përdoruesi {0} dërgoi një ftesë {1} për të ju bashkuar me këtë DocSpace</value>
+    <value>Përdoruesi {0} dërgoi një ftesë {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Udhëzimet e ftesës u dërguan: {0}</value>
@@ -941,6 +941,9 @@
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Filloni migrimin e rajonit të portalit</value>
+  </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Bilanci i abonimit u transferua në portofol: {0}</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Llogaria e sistemit</value>
@@ -1205,5 +1208,89 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Lidhjet aktive të përdoruesit u çkyçën: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Konfigurimi i Docs Connect u përditësua</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Raporti i kuotës së Docs Connect u shkarkua</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Cilësimet AI të përdoruesit u përditësuan</value>
+  </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Profili i AI caktuar te agjenti i AI për veprim: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Profili i AI caktuar për veprim: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Profili i modelit AI u krijua: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Profili i modelit AI u fshi: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Profili i AI u hoq nga veprimi: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Profili i modelit AI u përditësua: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Skedarët [{0}]. Shënuar si të lexuar</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Skedarët [{0}]. Skedari nuk u ruajt. Kuota e ruajtjes për portalin u tejkalua.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Skedarët [{0}]. Ruajtja e skedarit tejkalon kuotën e ruajtjes së portalit.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Dosjet [{0}]. Shënuar si të lexuara</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Çelësi i enkriptimit të dhomës private {0} u krijua</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Çelësi i enkriptimit të dhomës private {0} u fshi</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Çelësi i enkriptimit të dhomës private {0} u përditësua</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>U zbulua hyrje e dyshimtë: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>Serveri MCP {0} i agjentit AI u përditësua</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Filloi caktimi i meta të dhënave në kaskadë: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Fusha e meta të dhënave u krijua: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Fusha e meta të dhënave u fshi: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Fusha e meta të dhënave u përditësua: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Modeli i meta të dhënave u caktua: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Modeli i meta të dhënave u krijua: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Modeli i meta të dhënave u fshi: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Modeli i meta të dhënave u hoq nga caktimi: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Modeli i meta të dhënave u përditësua: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Vlerat e meta të dhënave u përditësuan: {0}</value>
   </data>
 </root>

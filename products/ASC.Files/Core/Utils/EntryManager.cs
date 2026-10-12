@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -30,8 +30,6 @@
 // Public License v3.
 //
 // SPDX-License-Identifier: AGPL-3.0-only
-
-using System.Security.Authentication;
 
 namespace ASC.Web.Files.Utils;
 
@@ -355,14 +353,17 @@ public class EntryManager(IDaoFactory daoFactory,
         IEnumerable<string> tagNames = null,
         bool excludeSubject = false,
         ProviderFilter provider = ProviderFilter.None,
-        SubjectFilter? subjectFilter = null,
         Guid subjectOwnerId = default,
         ApplyFilterOption applyFilterOption = ApplyFilterOption.All,
         QuotaFilter quotaFilter = QuotaFilter.All,
         StorageFilter storageFilter = StorageFilter.None,
         FormsItemDto formsItemDto = null,
         Location? location = null,
-        int? groupId = null)
+        int? groupId = null,
+        RoomPrivacyFilter privacyFilter = RoomPrivacyFilter.None,
+        List<FolderType> folderType = null,
+        bool withAiFolder = false,
+        MetadataFilter metadataFilter = null)
     {
         int total;
         var withShared = true;
@@ -377,15 +378,12 @@ public class EntryManager(IDaoFactory daoFactory,
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
         }
 
-        if (parent.RootFolderType == FolderType.Privacy && (!PrivacyRoomSettings.IsAvailable() || !await PrivacyRoomSettings.GetEnabledAsync(settingsManager)))
-        {
-            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_ReadFolder);
-        }
-
         var entries = new List<FileEntry>();
         var filterType = filterTypes?.FirstOrDefault() ?? FilterType.None;
 
-        searchInContent = searchInContent && filterType != FilterType.ByExtension && !Equals(parent.Id, await globalFolderHelper.FolderTrashAsync);
+        // Type check instead of comparing with FolderTrashAsync: that getter creates the user's trash root when it is
+        // missing, so the first listing of every new user paid for a folder insert under a distributed lock here.
+        searchInContent = searchInContent && filterType != FilterType.ByExtension && parent.FolderType != FolderType.TRASH;
 
         if (parent.FolderType == FolderType.TRASH)
         {
@@ -401,10 +399,19 @@ public class EntryManager(IDaoFactory daoFactory,
 
         var (filesFilterType, filesSearchText, fileExtension) = applyFilterOption != ApplyFilterOption.Folders ? (filterType, searchText, extension) : (FilterType.None, string.Empty, Array.Empty<string>());
 
+        // these sections gather their entries from tags and shares inside queries that do not know the metadata filter:
+        // the request is refused instead of coming back unfiltered with a 200. The rooms, the trash, the regular folders
+        // and the "Shared with me", "Recent" and "Favorites" sections push the filter into their queries below
+        if (metadataFilter is { IsEmpty: false } &&
+            parent.FolderType is FolderType.Templates or FolderType.DefaultTemplates or FolderType.Privacy)
+        {
+            throw new ArgumentException(@"The metadata filter is not supported for this section", nameof(metadataFilter));
+        }
+
         if (parent.FolderType == FolderType.SHARE)
         {
             //share
-            var shared = await fileSecurity.GetSharesForMeAsync(filterType, subjectGroup, subjectId, sharedBy, searchText, extension, searchInContent, withSubfolders).ToListAsync();
+            var shared = await fileSecurity.GetSharesForMeAsync(filterType, subjectGroup, subjectId, sharedBy, searchText, extension, searchInContent, withSubfolders, metadataFilter).ToListAsync();
 
             entries.AddRange(shared);
 
@@ -414,21 +421,62 @@ public class EntryManager(IDaoFactory daoFactory,
         {
             var fileDao = daoFactory.GetFileDao<T>();
             var userId = authContext.CurrentAccount.ID;
+            var recentOrderBy = new OrderBy(SortedByType.LastOpened, false);
 
-            total = 0;
-            var files = fileDao.GetFilesByTagAsync(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, 0, new OrderBy(SortedByType.LastOpened, false), from, count);
-
-            await foreach (var e in fileSecurity.CanReadAsync(files).Where(r => r.Item2).Select(t => t.Item1))
+            // searchArea was accepted here and then ignored, so Recent answered the same list whatever
+            // section was asked for. The DAO filters by "some ancestor has one of these folder types",
+            // so the two sections are expressed as the room types on either side of the Forms split -
+            // and FolderType.USER keeps the caller's own My Documents files in the Rooms-section view,
+            // which is what Recent has always shown. Built from DocSpaceHelper.RoomTypes rather than
+            // spelled out, so a room type added later lands on the right side by itself.
+            //
+            // Only when the caller named no folderType. An explicit folderType is the more specific
+            // request and wins outright: the client selects the Forms section of Recent with
+            // folderType=FillingFormsRoom and no searchArea at all, and on this endpoint searchArea
+            // is not nullable, so "not sent" arrives as Active and must not be read as "the Rooms
+            // section, therefore not forms".
+            if (folderType is not { Count: > 0 })
             {
-                total++;
-
-                if (total > from && total <= from + count)
+                folderType = searchArea switch
                 {
-                    entries.Add(e);
-                }
+                    SearchArea.Forms => [FolderType.FillingFormsRoom],
+                    SearchArea.Active => [.. DocSpaceHelper.RoomTypes.Where(t => t != FolderType.FillingFormsRoom), FolderType.USER],
+                    _ => folderType
+                };
             }
 
-            await entryStatusManager.SetFileStatusAsync(entries.OfType<File<T>>().ToList());
+            var providerFiles = await GetThirdPartyFilesByTagAsync<T>(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject,
+                location, 0, folderType, recentOrderBy, metadataFilter);
+
+            if (providerFiles.Count == 0)
+            {
+                // The page used to be cut twice: once in SQL by (from, count) and again here by a
+                // counter that doubled as the total. So `total` reported the size of the page rather
+                // than of the selection, and a non-zero `from` produced an empty page, because the
+                // counter restarted at 1 for a result set that had already been offset. Read the
+                // selection and page it in memory, the way the provider branch below already does.
+                var files = fileDao.GetFilesByTagAsync(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, 0,  folderType, recentOrderBy, 0, -1, metadataFilter);
+
+                var readable = await fileSecurity.CanReadAsync(files).Where(r => r.Item2).Select(t => (FileEntry)t.Item1).ToListAsync();
+
+                total = readable.Count;
+                entries.AddRange(Paginate(readable, from, count));
+
+                await entryStatusManager.SetFileStatusAsync(entries.OfType<File<T>>().ToList());
+                return (entries, total);
+            }
+
+            var dbFiles = await fileSecurity.CanReadAsync(fileDao.GetFilesByTagAsync(userId, [TagType.Recent], filterType, subjectGroup, subjectId, searchText, extension, searchInContent,
+                    excludeSubject, location, 0, folderType, recentOrderBy, 0, -1, metadataFilter))
+                .Where(r => r.Item2).Select(t => (FileEntry)t.Item1).ToListAsync();
+
+            var allFiles = dbFiles.Concat(providerFiles).ToList();
+            total = allFiles.Count;
+
+            entries.AddRange(Paginate(await SortEntries<T>(allFiles, recentOrderBy, false), from, count));
+
+            await SetStatusAsync(entries);
+
             return (entries, total);
         }
         else if (parent.FolderType == FolderType.Favorites)
@@ -438,45 +486,35 @@ public class EntryManager(IDaoFactory daoFactory,
             var userId = authContext.CurrentAccount.ID;
 
             var trashId = await globalFolderHelper.FolderTrashAsync;
-            total = 0;
 
-            var allFoldersCountTask = 0;
-            var foldersFromDb = folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, orderBy, from, count);
-            List<Folder<T>> folders = [];
+            var providerFolders = await GetThirdPartyFoldersByTagAsync<T>(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId,
+                folderType, orderBy, metadataFilter);
+            var providerFiles = await GetThirdPartyFilesByTagAsync<T>(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject,
+                location, trashId, folderType, orderBy, metadataFilter);
 
-            await foreach (var e in fileSecurity.CanReadAsync(foldersFromDb).Where(r => r.Item2).Select(t => t.Item1))
-            {
-                total++;
-                allFoldersCountTask++;
+            // No branch for "no third-party entries": the path below already handles that case, and
+            // handles it better. Paging the two DAO queries in SQL means the page and the total have
+            // to be derived separately - two more unpaginated scans and a second full permission pass
+            // per call - and the split offset between folders and files has to be maintained by hand.
+            // Reading the readable selection once and slicing it serves both from one pass.
 
-                if (total > from && total <= from + count)
-                {
-                    folders.Add((Folder<T>)e);
-                    entries.Add(e);
-                }
-            }
+            var dbFolders = await fileSecurity.CanReadAsync(folderDao.GetFoldersByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, excludeSubject,
+                    location, trashId, folderType, orderBy, 0, -1, metadataFilter))
+                .Where(r => r.Item2).Select(t => (FileEntry)t.Item1).ToListAsync();
 
-            var filesCount = count - folders.Count;
-            var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - allFoldersCountTask, 0);
+            var dbFiles = await fileSecurity.CanReadAsync(fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent,
+                    excludeSubject, location, trashId, folderType, orderBy, 0, -1, metadataFilter))
+                .Where(r => r.Item2).Select(t => (FileEntry)t.Item1).ToListAsync();
 
-            var filesFromDb = fileDao.GetFilesByTagAsync(userId, [TagType.Favorite], filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, orderBy, filesOffset, filesCount);
-            List<File<T>> files = [];
+            var sortedFolders = await SortEntries<T>(dbFolders.Concat(providerFolders).ToList(), orderBy, false);
+            var sortedFiles = await SortEntries<T>(dbFiles.Concat(providerFiles).ToList(), orderBy, false);
 
-            await foreach (var e in fileSecurity.CanReadAsync(filesFromDb).Where(r => r.Item2).Select(t => t.Item1))
-            {
-                total++;
+            var favorites = sortedFolders.Concat(sortedFiles).ToList();
+            total = favorites.Count;
 
-                if (total > from && total <= from + count)
-                {
-                    files.Add((File<T>)e);
-                    entries.Add(e);
-                }
-            }
+            entries.AddRange(Paginate(favorites, from, count));
 
-            var setFilesStatus = entryStatusManager.SetFileStatusAsync(files);
-            var setFavorites = entryStatusManager.SetIsFavoriteFoldersAsync(folders);
-
-            await Task.WhenAll(setFilesStatus, setFavorites);
+            await SetStatusAsync(entries);
 
             return (entries, total);
         }
@@ -517,10 +555,10 @@ public class EntryManager(IDaoFactory daoFactory,
 
             CalculateTotal();
         }
-        else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.AiAgents && !parent.ProviderEntry)
+        else if (parent.FolderType is FolderType.VirtualRooms or FolderType.Archive or FolderType.RoomTemplates or FolderType.AiAgents or FolderType.Forms && !parent.ProviderEntry)
         {
             entries = await fileSecurity.GetVirtualRoomsAsync(filterTypes, subjectId, searchText, searchInContent, withSubfolders, searchArea, withoutTags, tagNames, excludeSubject,
-                provider, subjectFilter, subjectOwnerId, quotaFilter, storageFilter, groupId);
+                provider, subjectOwnerId, quotaFilter, storageFilter, groupId, privacyFilter, withAiFolder, metadataFilter);
 
             CalculateTotal();
         }
@@ -544,11 +582,11 @@ public class EntryManager(IDaoFactory daoFactory,
                     parentFolderType = FolderType.Knowledge;
                 }
 
-                allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, roomId, parentFolderType, additionalOption);
-                allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId, formsItemDto, parentFolderType, additionalOption);
+                allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, roomId, parentFolderType, additionalOption, metadataFilter: metadataFilter);
+                allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId, formsItemDto, parentFolderType, additionalOption, metadataFilter: metadataFilter);
 
-                var folders = folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, 0, -1, roomId, parentType: room.FolderType, containingForms: parent.ShareRecord is { Share: FileShare.FillForms });
-                var files = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, 0, -1, roomId, withShared, formsItemDto: formsItemDto, applyFormStepFilter: parent.ShareRecord is { Share: FileShare.FillForms });
+                var folders = folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, 0, -1, roomId, parentType: room.FolderType, containingForms: parent.ShareRecord is { Share: FileShare.FillForms }, metadataFilter: metadataFilter);
+                var files = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, 0, -1, roomId, withShared, formsItemDto: formsItemDto, applyFormStepFilter: parent.ShareRecord is { Share: FileShare.FillForms }, metadataFilter: metadataFilter);
 
                 var temp = files.Concat(folders.Cast<FileEntry>())
                     .OrderBy(r => r.Order)
@@ -577,8 +615,12 @@ public class EntryManager(IDaoFactory daoFactory,
                     filesFilterType = FilterType.FoldersOnly;
                 }
 
+                // The folderType filter is resolved against Origin tags, which only exist on items moved to Trash.
+                // Applying it to any other parent would silently empty the results, so it is ignored outside Trash.
+                var trashFolderType = parent.FolderType == FolderType.TRASH ? folderType : null;
+
                 var foldersTask = folderDao.GetFoldersAsync(parent.Id, orderBy, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders,
-                    excludeSubject, from, count, roomId, containingMyFiles, parent.FolderType);
+                    excludeSubject, from, count, roomId, containingMyFiles, parent.FolderType, folderType: trashFolderType, metadataFilter: metadataFilter);
 
                 var folders = await foldersTask.ToListAsync();
 
@@ -602,18 +644,18 @@ public class EntryManager(IDaoFactory daoFactory,
                 allFilesCountTask = fileDao.GetFilesCountAsync(parent.Id, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders, excludeSubject, roomId, formsItemDto,
                     applyFfrStartedFormsFilter ? FolderType.DEFAULT : containingMyFiles && withSubfolders ? parent.FolderType : FolderType.DEFAULT,
                     filesAdditionalFilter,
-                    applyFormStepFilter: applyFormStepFilter);
+                    applyFormStepFilter: applyFormStepFilter, folderType: trashFolderType, metadataFilter: metadataFilter);
 
                 allFoldersCountTask = folderDao.GetFoldersCountAsync(parent.Id, foldersFilterType, subjectGroup, subjectId, foldersSearchText, withSubfolders, excludeSubject, roomId,
                     containingMyFiles ? parent.FolderType : FolderType.DEFAULT,
-                    containingMyFiles ? AdditionalFilterOption.MyFilesAndFolders : AdditionalFilterOption.All);
+                    containingMyFiles ? AdditionalFilterOption.MyFilesAndFolders : AdditionalFilterOption.All, folderType: trashFolderType, metadataFilter: metadataFilter);
 
                 var filesCount = count - folders.Count;
                 var filesOffset = Math.Max(folders.Count > 0 ? 0 : from - await allFoldersCountTask, 0);
 
                 var filesTask = fileDao.GetFilesAsync(parent.Id, orderBy, filesFilterType, subjectGroup, subjectId, filesSearchText, fileExtension, searchInContent, withSubfolders,
                     excludeSubject, filesOffset, filesCount, roomId, withShared, containingMyFiles && withSubfolders, parent.FolderType, formsItemDto,
-                    applyFormStepFilter: applyFormStepFilter, applyFfrStartedFormsFilter: applyFfrStartedFormsFilter);
+                    applyFormStepFilter: applyFormStepFilter, applyFfrStartedFormsFilter: applyFfrStartedFormsFilter, folderType: trashFolderType, metadataFilter: metadataFilter);
 
                 var files = await filesTask.ToListAsync();
 
@@ -663,6 +705,12 @@ public class EntryManager(IDaoFactory daoFactory,
             total = await allFoldersCountTask + await allFilesCountTask;
 
             return (entries, total);
+        }
+        else if (metadataFilter is { IsEmpty: false })
+        {
+            // a provider based folder: the metadata values are stored for the internal entries only, so nothing inside it
+            // can match the filter. The listing is empty instead of being returned unfiltered (the rule FileSecurity applies
+            // to the provider based rooms), and the provider is not asked at all
         }
         else
         {
@@ -809,6 +857,64 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// Returns the readable third-party files marked with the specified tags. Entries of the rooms with a connected third-party storage
+    /// are not stored in the database, so they have to be requested from the provider separately from the internal ones.
+    /// The third-party entries never carry metadata, so with a metadata filter the providers are not asked at all.
+    /// </summary>
+    private async Task<List<FileEntry>> GetThirdPartyFilesByTagAsync<T>(Guid userId, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText,
+        string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, MetadataFilter metadataFilter)
+    {
+        if (typeof(T) == typeof(string) || metadataFilter is { IsEmpty: false } || !await filesSettingsHelper.GetEnableThirdParty())
+        {
+            return [];
+        }
+
+        var files = daoFactory.GetFileDao<string>()
+            .GetFilesByTagAsync(userId, tagType, filterType, subjectGroup, subjectId, searchText, extension, searchInContent, excludeSubject, location, trashId, folderType, orderBy, 0, -1);
+
+        return await fileSecurity.CanReadAsync(files).Where(r => r.Item2).Select(t => (FileEntry)t.Item1).ToListAsync();
+    }
+
+    /// <summary>
+    /// Returns the readable third-party folders marked with the specified tags; none with a metadata filter, see <see cref="GetThirdPartyFilesByTagAsync{T}"/>.
+    /// </summary>
+    private async Task<List<FileEntry>> GetThirdPartyFoldersByTagAsync<T>(Guid userId, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText,
+        bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, MetadataFilter metadataFilter)
+    {
+        if (typeof(T) == typeof(string) || metadataFilter is { IsEmpty: false } || !await filesSettingsHelper.GetEnableThirdParty())
+        {
+            return [];
+        }
+
+        var folders = daoFactory.GetFolderDao<string>()
+            .GetFoldersByTagAsync(userId, tagType, filterType, subjectGroup, subjectId, searchText, excludeSubject, location, trashId, folderType, orderBy, 0, -1);
+
+        return await fileSecurity.CanReadAsync(folders).Where(r => r.Item2).Select(t => (FileEntry)t.Item1).ToListAsync();
+    }
+
+    /// <summary>
+    /// Sets the status of the entries of a virtual folder, which holds the internal and the third-party entries at the same time.
+    /// </summary>
+    private async Task SetStatusAsync(List<FileEntry> entries)
+    {
+        await Task.WhenAll(
+            entryStatusManager.SetFileStatusAsync([.. entries.OfType<File<int>>()]),
+            entryStatusManager.SetIsFavoriteFoldersAsync([.. entries.OfType<Folder<int>>()]),
+            entryStatusManager.SetFileStatusAsync([.. entries.OfType<File<string>>()]),
+            entryStatusManager.SetIsFavoriteFoldersAsync([.. entries.OfType<Folder<string>>()]));
+    }
+
+    private static IEnumerable<FileEntry> Paginate(IEnumerable<FileEntry> entries, int from, int count)
+    {
+        if (from > 0)
+        {
+            entries = entries.Skip(from);
+        }
+
+        return count > 0 ? entries.Take(count) : entries;
     }
 
     public async IAsyncEnumerable<FileEntry<T>> GetTemplatesAsync<T>(IFolderDao<T> folderDao, IFileDao<T> fileDao, FilterType filter, bool subjectGroup, Guid subjectId, string searchText,
@@ -995,8 +1101,15 @@ public class EntryManager(IDaoFactory daoFactory,
                 var cmp = 0;
                 if (x.FileEntryType == FileEntryType.File && y.FileEntryType == FileEntryType.File)
                 {
-                    cmp = c * ((File<T>)x).ContentLength.CompareTo(((File<T>)y).ContentLength);
+                    cmp = c * GetContentLength(x).CompareTo(GetContentLength(y));
                 }
+
+                return cmp == 0 ? x.Title.EnumerableComparer(y.Title) : cmp;
+            }
+            ,
+            SortedByType.LastOpened => (x, y) =>
+            {
+                var cmp = c * Nullable.Compare(GetLastOpened(x), GetLastOpened(y));
 
                 return cmp == 0 ? x.Title.EnumerableComparer(y.Title) : cmp;
             }
@@ -1049,6 +1162,16 @@ public class EntryManager(IDaoFactory daoFactory,
             _ => (x, y) => c * x.Title.EnumerableComparer(y.Title)
         };
 
+        // The DAOs return rows in unspecified order, so a comparer that rates two entries equal
+        // (e.g. titles differing only by case) would let the database decide the page boundary
+        // and repeated paged reads could return different slices. Ids give a total order.
+        var baseSorter = sorter;
+        sorter = (x, y) =>
+        {
+            var cmp = baseSorter(x, y);
+            return cmp != 0 ? cmp : string.CompareOrdinal(GetEntryIdKey(x), GetEntryIdKey(y));
+        };
+
         var comparer = Comparer<FileEntry>.Create(sorter);
 
         if (orderBy.SortedBy != SortedByType.New)
@@ -1098,6 +1221,36 @@ public class EntryManager(IDaoFactory daoFactory,
         }
 
         return entries.OrderBy(r => r, comparer);
+    }
+
+    private static string GetEntryIdKey(FileEntry entry)
+    {
+        return entry switch
+        {
+            FileEntry<int> internalEntry => internalEntry.Id.ToString(CultureInfo.InvariantCulture),
+            FileEntry<string> thirdPartyEntry => thirdPartyEntry.Id,
+            _ => entry.Title
+        };
+    }
+
+    private static long GetContentLength(FileEntry entry)
+    {
+        return entry switch
+        {
+            File<int> internalFile => internalFile.ContentLength,
+            File<string> thirdPartyFile => thirdPartyFile.ContentLength,
+            _ => 0
+        };
+    }
+
+    private static DateTime? GetLastOpened(FileEntry entry)
+    {
+        return entry switch
+        {
+            File<int> internalFile => internalFile.LastOpened,
+            File<string> thirdPartyFile => thirdPartyFile.LastOpened,
+            _ => null
+        };
     }
 
     public Folder<string> GetFakeThirdpartyFolder(IProviderInfo providerInfo, string parentFolderId = null)
@@ -1498,7 +1651,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 var (roomId, _, _) = await folderDao.GetParentRoomInfoFromFileEntryAsync(file);
 
                 var rootFolder = int.TryParse(roomId?.ToString(), out var curRoomId) && curRoomId != -1 ?
-                    await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T))).NotFoundIfNull() :
+                    (await folderDao.GetFolderAsync((T)Convert.ChangeType(roomId, typeof(T)))).NotFoundIfNull() :
                     await documentServiceHelper.GetRootFolderAsync(file);
 
                 switch (rootFolder.FolderType)
@@ -1510,7 +1663,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 }
             }
 
-            if (file.IsForm && file.IsCompletedForm && file.Forcesave != ForcesaveType.None)
+            if (file.IsPdf && file.IsCompletedForm && file.Forcesave != ForcesaveType.None)
             {
                 await fileDao.UpdateCategoryAsync(file.Id, file.Version, (int)FilterType.PdfForm);
                 return file;
@@ -1518,13 +1671,16 @@ public class EntryManager(IDaoFactory daoFactory,
 
             file.ContentLength = tmpStream.Length;
             file.Comment = string.IsNullOrEmpty(comment) ? null : comment;
+
+            // editor saves may overshoot the portal (tariff) quota within a grace so assembled edits are not
+            // lost; opt in only for this write - uploads/conversions/copies keep the strict limit
             if (replaceVersion)
             {
-                file = await fileDao.ReplaceFileVersionAsync(file, tmpStream);
+                file = await fileDao.ReplaceFileVersionAsync(file, tmpStream, allowQuotaGrace: true);
             }
             else
             {
-                file = await fileDao.SaveFileAsync(file, tmpStream);
+                file = await fileDao.SaveFileAsync(file, tmpStream, allowQuotaGrace: true);
             }
             if (!keepLink
                || (!file.ProviderEntry && file.CreateBy != authContext.CurrentAccount.ID)
@@ -1538,7 +1694,7 @@ public class EntryManager(IDaoFactory daoFactory,
         await fileMarker.MarkAsNewAsync(file);
         await fileMarker.RemoveMarkAsNewAsync(file);
 
-        if (file.IsForm)
+        if (file.IsPdf)
         {
             await OnFormVersionChangedAsync(file);
         }
@@ -1814,6 +1970,14 @@ public class EntryManager(IDaoFactory daoFactory,
                 newFile.IsTemplate = false;
             }
 
+            if (newFile.IsPdf)
+            {
+                // reverting a form is a content change like any editor save: without this the stored
+                // OriginalFormVersion keeps pointing at the pre-restore version and every later draft
+                // is rejected as obsolete on submit
+                await OnFormVersionChangedAsync(newFile);
+            }
+
             return newFile;
         }
         catch (Exception e)
@@ -1954,7 +2118,7 @@ public class EntryManager(IDaoFactory daoFactory,
     {
         if (file.Encrypted)
         {
-            throw new NotSupportedException();
+            return;
         }
 
         linkId ??= await externalShare.GetLinkIdAsync();
@@ -2047,7 +2211,7 @@ public class EntryManager(IDaoFactory daoFactory,
         resultsFile.Title = Global.ReplaceInvalidCharsAndTruncate(sourceTitle + ".xlsx");
         resultsFile.CreateBy = createBy;
 
-        var file = await fileDao.SaveFileAsync(resultsFile, textStream, false);
+        var file = await fileDao.SaveFormFileAsync(resultsFile, textStream, false);
 
         return file.Id;
     }
@@ -2183,7 +2347,7 @@ public class EntryManager(IDaoFactory daoFactory,
             if (tmpStream.CanSeek)
             {
                 pdfFile.ContentLength = tmpStream.Length;
-                result = await fileDao.SaveFileAsync(pdfFile, tmpStream, false);
+                result = await fileDao.SaveFormFileAsync(pdfFile, tmpStream, false);
             }
             else
             {
@@ -2191,7 +2355,7 @@ public class EntryManager(IDaoFactory daoFactory,
                 try
                 {
                     pdfFile.ContentLength = buffered.Length;
-                    result = await fileDao.SaveFileAsync(pdfFile, buffered, false);
+                    result = await fileDao.SaveFormFileAsync(pdfFile, buffered, false);
                 }
                 finally
                 {
@@ -2291,7 +2455,7 @@ public class EntryManager(IDaoFactory daoFactory,
         if (stream.CanSeek)
         {
             pdfFile.ContentLength = stream.Length;
-            result = await fileDao.SaveFileAsync(pdfFile, stream, false);
+            result = await fileDao.SaveFormFileAsync(pdfFile, stream, false);
         }
         else
         {
@@ -2299,7 +2463,7 @@ public class EntryManager(IDaoFactory daoFactory,
             try
             {
                 pdfFile.ContentLength = buffered.Length;
-                result = await fileDao.SaveFileAsync(pdfFile, buffered, false);
+                result = await fileDao.SaveFormFileAsync(pdfFile, buffered, false);
             }
             finally
             {
@@ -2374,7 +2538,7 @@ public class EntryManager(IDaoFactory daoFactory,
                     if (stream.CanSeek)
                     {
                         form.ContentLength = stream.Length;
-                        await fileDao.SaveFileAsync(form, stream, false);
+                        await fileDao.SaveFormFileAsync(form, stream, false);
                     }
                     else
                     {
@@ -2382,7 +2546,7 @@ public class EntryManager(IDaoFactory daoFactory,
                         try
                         {
                             form.ContentLength = buffered.Length;
-                            await fileDao.SaveFileAsync(form, buffered, false);
+                            await fileDao.SaveFormFileAsync(form, buffered, false);
                         }
                         finally
                         {
@@ -2521,7 +2685,7 @@ public class EntryManager(IDaoFactory daoFactory,
             }
 
             fileEntry.OriginId = data.OriginFolder.Id;
-            fileEntry.OriginTitle = data.OriginFolder.FolderType == FolderType.USER ? FilesUCResource.MyFiles : data.OriginFolder.Title;
+            fileEntry.OriginTitle = data.OriginFolder.FolderType == FolderType.USER ? FilesUCResource.Files : data.OriginFolder.Title;
         }
     }
 }

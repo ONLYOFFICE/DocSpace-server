@@ -34,12 +34,14 @@
 namespace ASC.People.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for terminating the reassignment/deletion process.
+/// The request parameters that address the queued job of a single user - a data reassignment, a data deletion or a
+/// user type change.
 /// </summary>
 public class TerminateRequestDto
 {
     /// <summary>
-    /// The user ID whose data is reassigned/removed.
+    /// The ID of the user whose job is addressed. For a terminate operation it has to be the same ID that was passed
+    /// when the job was started.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public required Guid UserId { get; set; }

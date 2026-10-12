@@ -40,7 +40,7 @@ internal class DbQuotaService(IDbContextFactory<CoreDbContext> dbContextManager,
     {
         await using var coreDbContext = await dbContextManager.CreateDbContextAsync();
         var res = await coreDbContext.AllQuotasAsync().ToListAsync();
-        return tenantQuotaMapper.Map(res);
+        return await tenantQuotaMapper.MapDbQuotaToTenantQuota(res);
     }
 
     public async Task<TenantQuota> GetTenantQuotaAsync(int id)

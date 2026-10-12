@@ -40,9 +40,6 @@ internal static partial class StudioPeriodicNotifyLogger
     [LoggerMessage(LogLevel.Error, "SendEnterpriseLetters")]
     public static partial void ErrorSendEnterpriseLetters(this ILogger logger, Exception exception);
 
-    [LoggerMessage(LogLevel.Error, "SendOpensourceLetters")]
-    public static partial void ErrorSendOpensourceLetters(this ILogger logger, Exception exception);
-
     [LoggerMessage(LogLevel.Error, "SendMsgWhatsNew")]
     public static partial void ErrorSendMsgWhatsNew(this ILogger logger, Exception exception);
 
@@ -58,21 +55,15 @@ internal static partial class StudioPeriodicNotifyLogger
     [LoggerMessage(LogLevel.Information, "End SendTariffEnterpriseLetters")]
     public static partial void InformationEndSendTariffEnterpriseLetters(this ILogger logger);
 
-    [LoggerMessage(LogLevel.Information, "Start SendOpensourceTariffLetters")]
-    public static partial void InformationStartSendOpensourceTariffLetters(this ILogger logger);
-
-    [LoggerMessage(LogLevel.Information, "End SendOpensourceTariffLetters")]
-    public static partial void InformationEndSendOpensourceTariffLetters(this ILogger logger);
-
     [LoggerMessage(LogLevel.Information, "Current tenant: {tenantId}")]
     public static partial void InformationCurrentTenant(this ILogger logger, int tenantId);
 
     [LoggerMessage(LogLevel.Information, "Total send count: {sendCount}")]
     public static partial void InformationTotalSendCount(this ILogger logger, int sendCount);
 
-    [LoggerMessage(LogLevel.Information, "Start removing unused free tenant: {tenantId} {tenantDomain}")]
-    public static partial void InformationStartRemovingUnusedFreeTenant(this ILogger logger, int tenantId, string tenantDomain);
+    [LoggerMessage(LogLevel.Information, "Start removing inactive tenant: {tenantId} {tenantDomain}")]
+    public static partial void InformationStartRemovingInactiveTenant(this ILogger logger, int tenantId, string tenantDomain);
 
-    [LoggerMessage(LogLevel.Information, "Start removing unused paid tenant: {tenantId} {tenantDomain}")]
-    public static partial void InformationStartRemovingUnusedPaidTenant(this ILogger logger, int tenantId, string tenantDomain);
+    [LoggerMessage(LogLevel.Information, "Start removing unpaid tenant: {tenantId} {tenantDomain}")]
+    public static partial void InformationStartRemovingUnpaidTenant(this ILogger logger, int tenantId, string tenantDomain);
 }

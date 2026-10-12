@@ -1,0 +1,86 @@
+[
+  {
+    "id": "products/ASC.Files/Server/Api/PrivacyRoomController.cs::GetUserKeys",
+    "code": 403,
+    "reason": "Demand on the caller's own id (authContext.CurrentAccount.ID): role Self always passes Action_EditUser",
+    "fingerprint": "4d0c54a1d29a200e",
+    "date": "2026-10-01"
+  },
+  {
+    "id": "products/ASC.People/Server/Api/UserController.cs::DeleteProfile",
+    "code": 500,
+    "reason": "GetUserInfoAsync already throws ItemNotFoundException (404) for LostUser; UserExists checks the same condition, so the branch is dead",
+    "fingerprint": "d90ac1b6a0b985d3",
+    "date": "2026-10-01"
+  },
+  {
+    "id": "products/ASC.People/Server/Api/UserController.cs::ResendUserInvites",
+    "code": 500,
+    "reason": "Authentication rejects LostUser (InvalidCredentialException in SecurityContext), so an authenticated caller always resolves to an existing user",
+    "fingerprint": "cc7ea3bb9366462f",
+    "date": "2026-10-01"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/OwnerController.cs::UpdatePortalOwner",
+    "code": 403,
+    "reason": "UpdateUserTypeAsync to DocSpaceAdmin with the owner as initiator does not return false for RoomAdmin/User; guests and inactive users are rejected earlier with 500",
+    "fingerprint": "fb7ab279d458fd26",
+    "date": "2026-10-01"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/SsoController.cs::ResetSsoSettingsV2",
+    "code": 500,
+    "reason": "SaveAsync returns false only when DbSettingsManager catches a database write failure: an infrastructure fault, left undocumented as in SaveSsoSettingsV2",
+    "fingerprint": "f9e3c8e744c83633",
+    "date": "2026-10-01"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/TfaappController.cs::GetTfaAppCodes",
+    "code": 403,
+    "reason": "IsOutsiderAsync branch: only the system OutsideUser, which never authenticates",
+    "fingerprint": "af057bb320953d98",
+    "date": "2026-10-01"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/TfaappController.cs::TfaAppGenerateSetupCode",
+    "code": 403,
+    "reason": "IsOutsiderAsync branch: only the system OutsideUser, which never authenticates",
+    "fingerprint": "823197af128d32b7",
+    "date": "2026-10-01"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/TfaappController.cs::UpdateTfaAppCodes",
+    "code": 403,
+    "reason": "IsOutsiderAsync branch: only the system OutsideUser, which never authenticates",
+    "fingerprint": "6550927455e7c6c0",
+    "date": "2026-10-01"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/WhitelabelController.cs::DeleteAdditionalWhiteLabelSettings",
+    "code": 402,
+    "reason": "DemandRebrandingPermissionAsync(false): the white-label tariff check is switched off by the literal argument",
+    "fingerprint": "c878bc895ce00d5b",
+    "date": "2026-10-01"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/WhitelabelController.cs::DeleteCompanyWhiteLabelSettings",
+    "code": 402,
+    "reason": "DemandRebrandingPermissionAsync(false): the white-label tariff check is switched off by the literal argument",
+    "fingerprint": "a4eac28e3f7b0414",
+    "date": "2026-10-01"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/WhitelabelController.cs::RestoreWhiteLabelLogoText",
+    "code": 402,
+    "reason": "DemandRebrandingPermissionAsync(false): the white-label tariff check is switched off by the literal argument",
+    "fingerprint": "3a4a735865d09d79",
+    "date": "2026-10-01"
+  },
+  {
+    "id": "web/ASC.Web.Api/Api/Settings/WhitelabelController.cs::RestoreWhiteLabelLogos",
+    "code": 402,
+    "reason": "DemandRebrandingPermissionAsync(false): the white-label tariff check is switched off by the literal argument",
+    "fingerprint": "e7d3c327393314c0",
+    "date": "2026-10-01"
+  }
+]

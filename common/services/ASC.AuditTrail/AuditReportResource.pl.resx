@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -247,7 +247,7 @@
     <value>Subskrypcja klienta została zaktualizowana: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Zaktualizowano ustawienia usług obsługujących portfel klienta</value>
+    <value>Zaktualizowano ustawienia usług obsługujących portfel klienta: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Portfel klienta został zasilony: {0}</value>
@@ -729,12 +729,6 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Zmieniono nazwę portalu</value>
   </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Prywatny pokój jest wyłączony</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Prywatny pokój jest włączony</value>
-  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Produkty [{0}]. Dostęp otwarty</value>
   </data>
@@ -788,6 +782,12 @@
   </data>
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Wygenerowano ponownie sekret klienta {0}</value>
+  </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Uwaga</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Raport zawiera {0} najnowszych z {1} zdarzeń. Aby uzyskać wszystkie zdarzenia, pobierz raport w formacie CSV.</value>
   </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Ustawienia wektoryzacji zostały zresetowane</value>
@@ -907,7 +907,7 @@
     <value>Wysłać</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Użytkownik {0} zaprosił użytkownika {1}, aby dołączył do tego DocSpace</value>
+    <value>Użytkownik {0} wysłał zaproszenie do użytkownika {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Zaproś instrukcje wysłane: {0}</value>
@@ -956,6 +956,9 @@
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Uruchom migrację regionów portalu</value>
+  </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Saldo subskrypcji przeniesione do portfela: {0}</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Konto systemowe</value>
@@ -1205,5 +1208,89 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Aktywne połączenia użytkownika zostały wylogowane: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Konfiguracja Docs Connect została zaktualizowana</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Raport limitów Docs Connect został pobrany</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Ustawienia AI użytkownika zostały zaktualizowane</value>
+  </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Profil AI przypisany do agenta AI dla akcji: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Profil AI przypisany do akcji: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Profil modelu AI został utworzony: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Profil modelu AI został usunięty: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Profil AI został odłączony od akcji: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Profil modelu AI został zaktualizowany: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Pliki [{0}]. Oznaczono jako przeczytane</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Pliki [{0}]. Plik nie został zapisany. Przekroczono limit pamięci portalu.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Pliki [{0}]. Zapisanie pliku przekracza limit pamięci portalu.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Foldery [{0}]. Oznaczono jako przeczytane</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Klucz szyfrowania prywatnego pokoju {0} został utworzony</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Klucz szyfrowania prywatnego pokoju {0} został usunięty</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Klucz szyfrowania prywatnego pokoju {0} został zaktualizowany</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Wykryto podejrzane logowanie: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>Serwer MCP {0} agenta AI został zaktualizowany</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Kaskadowe przypisywanie metadanych zostało uruchomione: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Pole metadanych zostało utworzone: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Pole metadanych zostało usunięte: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Pole metadanych zostało zaktualizowane: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Szablon metadanych został przypisany: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Szablon metadanych został utworzony: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Szablon metadanych został usunięty: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Przypisanie szablonu metadanych zostało anulowane: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Szablon metadanych został zaktualizowany: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Wartości metadanych zostały zaktualizowane: {0}</value>
   </data>
 </root>

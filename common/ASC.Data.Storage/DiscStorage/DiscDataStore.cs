@@ -173,7 +173,12 @@ public class DiscDataStore(
         return await SaveAsync(domain, path, stream, Guid.Empty, token);
     }
 
-    public override async Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId, CancellationToken token = default)
+    public override Task<Uri> SaveAsync(string domain, string path, Stream stream, Guid ownerId, CancellationToken token = default)
+    {
+        return SaveInternalAsync(domain, path, stream, ownerId, false, token);
+    }
+
+    private async Task<Uri> SaveInternalAsync(string domain, string path, Stream stream, Guid ownerId, bool allowQuotaGrace, CancellationToken token)
     {
         Logger.DebugSavePath(path);
 
@@ -182,7 +187,7 @@ public class DiscDataStore(
         {
             if (EnableQuotaCheck(domain))
             {
-                await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId);
+                await QuotaController.QuotaUsedCheckAsync(buffered.Length, ownerId, allowQuotaGrace);
             }
 
             ArgumentNullException.ThrowIfNull(path);
@@ -215,7 +220,7 @@ public class DiscDataStore(
 
             token.ThrowIfCancellationRequested();
 
-            await QuotaUsedAddAsync(domain, fslen, ownerId);
+            await QuotaUsedAddAsync(domain, fslen, ownerId, allowQuotaGrace: allowQuotaGrace);
 
             await _crypt.EncryptFileAsync(target);
 
@@ -736,9 +741,9 @@ public class DiscDataStore(
             throw new FileNotFoundException("file not found", target);
         }
     }
-    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, CancellationToken token = default)
+    protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Guid ownerId, Stream stream, string attachmentFileName, bool allowQuotaGrace, CancellationToken token = default)
     {
-        return SaveAsync(domain, path, stream, ownerId, token);
+        return SaveInternalAsync(domain, path, stream, ownerId, allowQuotaGrace, token);
     }
     protected override Task<Uri> SaveWithAutoAttachmentAsync(string domain, string path, Stream stream, string attachmentFileName, CancellationToken token = default)
     {

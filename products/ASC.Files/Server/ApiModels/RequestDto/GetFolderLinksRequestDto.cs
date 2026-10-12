@@ -34,12 +34,12 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for getting the folder links.
+/// The request that lists the external links of one folder.
 /// </summary>
 public class GetFolderLinksRequestDto<T>
 {
     /// <summary>
-    /// The folder ID.
+    /// The folder or room whose external links are listed.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "id")]

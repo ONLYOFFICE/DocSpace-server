@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -247,7 +247,7 @@
     <value>Đã cập nhật gói đăng ký của khách hàng: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Đã cập nhật cài đặt dịch vụ hỗ trợ ví của khách hàng</value>
+    <value>Đã cập nhật cài đặt dịch vụ hỗ trợ ví của khách hàng: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Ví của khách hang đã được nạp tiền: {0}</value>
@@ -346,16 +346,16 @@
     <value>File được Chuyển đổi sang Định dạng Nội bộ: {0}</value>
   </data>
   <data name="FileCopied" xml:space="preserve">
-    <value>File [{0}]. Được sao chép từ thư mục "{1}" tới thư mục: "{2}"</value>
+    <value>Tập tin [{0}]. Được sao chép từ thư mục "{1}" tới thư mục: "{2}"</value>
   </data>
   <data name="FileCopiedWithOverwriting" xml:space="preserve">
-    <value>File [{0}]. Được sao chép bằng ghi đè từ thư mục "{1}" tới thư mục: "{2}"</value>
+    <value>Tập tin [{0}]. Được sao chép bằng ghi đè từ thư mục "{1}" tới thư mục: "{2}"</value>
   </data>
   <data name="FileCreated" xml:space="preserve">
     <value>Đã tạo File: {0}</value>
   </data>
   <data name="FileCreatedVersion" xml:space="preserve">
-    <value>File [{0}]. Bản sửa đổi: {1}. Đã tạo phiên bản</value>
+    <value>Tập tin [{0}]. Bản sửa đổi: {1}. Đã tạo phiên bản</value>
   </data>
   <data name="FileCustomFilterDisabled" xml:space="preserve">
     <value>File: {0}. Bộ lọc tùy chỉnh đã bị vô hiệu hóa</value>
@@ -367,13 +367,13 @@
     <value>Đã xóa File: {0}</value>
   </data>
   <data name="FileDeletedVersion" xml:space="preserve">
-    <value>File [{0}]. Bản sửa đổi: {1}. Đã xóa phiên bản</value>
+    <value>Tập tin [{0}]. Bản sửa đổi: {1}. Đã xóa phiên bản</value>
   </data>
   <data name="FileDownloaded" xml:space="preserve">
     <value>Đã tải về File: {0}</value>
   </data>
   <data name="FileDownloadedAs" xml:space="preserve">
-    <value>File [{0}]. Được tải về dưới dạng: {1}</value>
+    <value>Tập tin [{0}]. Được tải về dưới dạng: {1}</value>
   </data>
   <data name="FileExternalLinkCreated" xml:space="preserve">
     <value>Tập tin [{0}]. Đã tạo liên kết bên ngoài: {1}. Vai trò: {2}</value>
@@ -397,13 +397,13 @@
     <value>Tập tin đã được đánh dấu được Yêu thích: {0}</value>
   </data>
   <data name="FileMoved" xml:space="preserve">
-    <value>File [{0}]. Được chuyển từ thư mục "{1}" tới thư mục: "{2}"</value>
+    <value>Tập tin [{0}]. Được chuyển từ thư mục "{1}" tới thư mục: "{2}"</value>
   </data>
   <data name="FileMovedToTrash" xml:space="preserve">
-    <value>File [{0}]. Được chuyển tới thư mục thùng rác</value>
+    <value>Tập tin [{0}]. Được chuyển tới thư mục thùng rác</value>
   </data>
   <data name="FileMovedWithOverwriting" xml:space="preserve">
-    <value>File [{0}]. Được chuyển bằng ghi đè từ thư mục "{1}" tới thư mục: "{2}"</value>
+    <value>Tập tin [{0}]. Được chuyển bằng ghi đè từ thư mục "{1}" tới thư mục: "{2}"</value>
   </data>
   <data name="FileOpenedForChange" xml:space="preserve">
     <value>Tập tin được Mở để Thay đổi: {0}</value>
@@ -418,7 +418,7 @@
     <value>Đã đổi tên File: {0}</value>
   </data>
   <data name="FileRestoreVersion" xml:space="preserve">
-    <value>File [{0}]. Bản sửa đổi: {1}. Đã khôi phục phiên bản</value>
+    <value>Tập tin [{0}]. Bản sửa đổi: {1}. Đã khôi phục phiên bản</value>
   </data>
   <data name="FilesDocumentSigned" xml:space="preserve">
     <value>Tài liệu {1} được ký qua {0}</value>
@@ -430,7 +430,7 @@
     <value>bytes,KB,MB,GB,TB</value>
   </data>
   <data name="FilesModule" xml:space="preserve">
-    <value>File</value>
+    <value>Tập tin</value>
   </data>
   <data name="FilesRequestSign" xml:space="preserve">
     <value>Tài liệu {1} được gửi để ký qua {0}</value>
@@ -442,13 +442,13 @@
     <value>Đã cập nhật file: {0}</value>
   </data>
   <data name="FileUpdatedAccess" xml:space="preserve">
-    <value>File [{0}]. Đã cập nhật truy cập</value>
+    <value>Tập tin [{0}]. Đã cập nhật truy cập</value>
   </data>
   <data name="FileUpdatedAccessFor" xml:space="preserve">
     <value>Tập tin [{0}]. Đã cập nhật quyền truy cập cho {1}. Vai trò: {2}</value>
   </data>
   <data name="FileUpdatedRevisionComment" xml:space="preserve">
-    <value>File [{0}]. Bản sửa đổi {1}. Đã cập nhật bình luận</value>
+    <value>Tập tin [{0}]. Bản sửa đổi {1}. Đã cập nhật bình luận</value>
   </data>
   <data name="FileUploaded" xml:space="preserve">
     <value>Đã cập nhật file: {0}</value>
@@ -709,13 +709,13 @@
     <value>Đã thay đổi người sở hữu: {0}</value>
   </data>
   <data name="OwnerSentChangeOwnerInstructions" xml:space="preserve">
-    <value>Người sở hữu {{0}]. Đã gửi hướng dẫn thay đổi người sở hữu</value>
+    <value>Người sở hữu [{0}]. Đã gửi hướng dẫn thay đổi người sở hữu</value>
   </data>
   <data name="OwnerSentPortalDeactivationInstructions" xml:space="preserve">
-    <value>Người sở hữu {{0}]. Đã gửi Hướng dẫn Ngừng hoạt động Cổng thông tin</value>
+    <value>Người sở hữu [{0}]. Đã gửi Hướng dẫn Ngừng hoạt động Cổng thông tin</value>
   </data>
   <data name="OwnerSentPortalDeleteInstructions" xml:space="preserve">
-    <value>Người sở hữu {{0}]. Đã gửi Hướng dẫn Xóa Công thông tin</value>
+    <value>Người sở hữu [{0}]. Đã gửi Hướng dẫn Xóa Cổng thông tin</value>
   </data>
   <data name="PageCol" xml:space="preserve">
     <value>Trang</value>
@@ -737,12 +737,6 @@
   </data>
   <data name="PortalRenamed" xml:space="preserve">
     <value>Cổng thông tin đã được đổi tên</value>
-  </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Phòng riêng bị vô hiệu hóa</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Đã bật Phòng riêng</value>
   </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Sản phẩm [{0}]. Đã mở truy cập</value>
@@ -797,6 +791,12 @@
   </data>
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Đã tạo lại bí mật của máy khách {0}</value>
+  </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Lưu ý</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Báo cáo hiển thị {0} sự kiện gần đây nhất trong tổng số {1} sự kiện. Để nhận tất cả sự kiện, hãy tải xuống báo cáo ở định dạng CSV.</value>
   </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Cài đặt véc-tơ hóa đã được đặt lại</value>
@@ -916,7 +916,7 @@
     <value>Gửi</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Người dùng {0} đã gửi lời mời đến {1} để tham gia DocSpace này</value>
+    <value>Người dùng {0} đã gửi lời mời đến {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Đã gửi hướng dẫn mời: {0}</value>
@@ -965,6 +965,9 @@
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Bắt đầu di chuyển vùng cổng thông tin</value>
+  </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Số dư đăng ký đã được chuyển vào ví: {0}</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Tài khoản Hệ thống</value>
@@ -1205,5 +1208,89 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Các kết nối đang hoạt động của người dùng đã đăng xuất: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Cấu hình Docs Connect đã được cập nhật</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Báo cáo hạn mức Docs Connect đã được tải xuống</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Cài đặt AI của người dùng đã được cập nhật</value>
+  </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Hồ sơ AI được giao cho tác nhân AI để thực hiện hành động: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Hồ sơ AI được giao cho hành động: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Hồ sơ mô hình AI đã được tạo: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Hồ sơ mô hình AI đã bị xóa: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Hồ sơ AI đã bị hủy giao khỏi hành động: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Hồ sơ mô hình AI đã được cập nhật: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Tệp [{0}]. Đã đánh dấu là đã đọc</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Tệp [{0}]. Tệp chưa được lưu. Hạn mức lưu trữ của cổng thông tin đã vượt quá.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Tệp [{0}]. Lưu tệp vượt quá hạn mức lưu trữ của cổng thông tin.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Thư mục [{0}]. Đã đánh dấu là đã đọc</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Khóa mã hóa phòng riêng tư {0} đã được tạo</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Khóa mã hóa phòng riêng tư {0} đã bị xóa</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Khóa mã hóa phòng riêng tư {0} đã được cập nhật</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Đã phát hiện đăng nhập đáng ngờ: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>Máy chủ MCP {0} của tác nhân AI đã được cập nhật</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Bắt đầu gán siêu dữ liệu theo tầng: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Trường siêu dữ liệu đã được tạo: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Trường siêu dữ liệu đã bị xóa: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Trường siêu dữ liệu đã được cập nhật: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Mẫu siêu dữ liệu đã được gán: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Mẫu siêu dữ liệu đã được tạo: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Mẫu siêu dữ liệu đã bị xóa: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Hủy gán mẫu siêu dữ liệu: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Mẫu siêu dữ liệu đã được cập nhật: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Giá trị siêu dữ liệu đã được cập nhật: {0}</value>
   </data>
 </root>

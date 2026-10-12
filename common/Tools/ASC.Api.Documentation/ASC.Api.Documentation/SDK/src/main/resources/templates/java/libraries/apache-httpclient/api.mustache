@@ -144,7 +144,16 @@ public class {{x-classname}} extends BaseApi {
     }
           {{/isArray}}
           {{^isArray}}
+            {{#isMap}}
+    if ({{paramName}} != null) {
+      for (Map.Entry<String, ?> _{{paramName}}Entry : {{paramName}}.entrySet()) {
+        localVarQueryParams.addAll(apiClient.parameterToPair("{{baseName}}[" + _{{paramName}}Entry.getKey() + "]", _{{paramName}}Entry.getValue()));
+      }
+    }
+            {{/isMap}}
+            {{^isMap}}
     localVarQueryStringJoiner.add({{paramName}}.toUrlQueryString("{{baseName}}"));
+            {{/isMap}}
           {{/isArray}}
         {{/isDeepObject}}
         {{^isDeepObject}}

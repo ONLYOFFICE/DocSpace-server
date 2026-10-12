@@ -33,11 +33,13 @@
 
 package com.asc.registration.data.client.repository;
 
+import com.asc.registration.data.client.entity.ClientCursor;
 import com.asc.registration.data.client.entity.ClientEntity;
 import jakarta.annotation.Nonnull;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -59,7 +61,15 @@ public interface JpaClientRepository extends JpaRepository<ClientEntity, String>
    *     valid, otherwise an empty {@link Optional}
    */
   @Nonnull
-  @Query("SELECT c FROM ClientEntity c WHERE c.clientId = :id AND c.invalidated = false")
+  @Query(
+      """
+      SELECT DISTINCT c FROM ClientEntity c
+      LEFT JOIN FETCH c.authenticationMethods
+      LEFT JOIN FETCH c.redirectUris
+      LEFT JOIN FETCH c.allowedOrigins
+      LEFT JOIN FETCH c.scopes
+      WHERE c.clientId = :id AND c.invalidated = false
+      """)
   Optional<ClientEntity> findById(@Param("id") @Nonnull String id);
 
   /**
@@ -73,7 +83,14 @@ public interface JpaClientRepository extends JpaRepository<ClientEntity, String>
    */
   @Nonnull
   @Query(
-      "SELECT c FROM ClientEntity c WHERE c.clientId = :id AND c.invalidated = false AND c.accessible = :accessible")
+      """
+      SELECT DISTINCT c FROM ClientEntity c
+      LEFT JOIN FETCH c.authenticationMethods
+      LEFT JOIN FETCH c.redirectUris
+      LEFT JOIN FETCH c.allowedOrigins
+      LEFT JOIN FETCH c.scopes
+      WHERE c.clientId = :id AND c.invalidated = false AND c.accessible = :accessible
+      """)
   Optional<ClientEntity> findByIdAndVisibility(
       @Param("id") @Nonnull String id, @Param("accessible") boolean accessible);
 
@@ -85,7 +102,17 @@ public interface JpaClientRepository extends JpaRepository<ClientEntity, String>
    * @return an {@link Optional} containing the matching {@link ClientEntity} if present, otherwise
    *     an empty {@link Optional}
    */
-  Optional<ClientEntity> findByClientIdAndTenantId(String clientId, long tenantId);
+  @Query(
+      """
+      SELECT DISTINCT c FROM ClientEntity c
+      LEFT JOIN FETCH c.authenticationMethods
+      LEFT JOIN FETCH c.redirectUris
+      LEFT JOIN FETCH c.allowedOrigins
+      LEFT JOIN FETCH c.scopes
+      WHERE c.clientId = :clientId AND c.tenantId = :tenantId
+      """)
+  Optional<ClientEntity> findByClientIdAndTenantId(
+      @Param("clientId") String clientId, @Param("tenantId") long tenantId);
 
   /**
    * Retrieves a client entity by its client identifier, tenant identifier, and creator identifier.
@@ -96,8 +123,19 @@ public interface JpaClientRepository extends JpaRepository<ClientEntity, String>
    * @return an {@link Optional} containing the matching {@link ClientEntity} if found, otherwise an
    *     empty {@link Optional}
    */
+  @Query(
+      """
+      SELECT DISTINCT c FROM ClientEntity c
+      LEFT JOIN FETCH c.authenticationMethods
+      LEFT JOIN FETCH c.redirectUris
+      LEFT JOIN FETCH c.allowedOrigins
+      LEFT JOIN FETCH c.scopes
+      WHERE c.clientId = :clientId AND c.tenantId = :tenantId AND c.createdBy = :createdBy
+      """)
   Optional<ClientEntity> findByClientIdAndTenantIdAndCreatedBy(
-      String clientId, long tenantId, String createdBy);
+      @Param("clientId") String clientId,
+      @Param("tenantId") long tenantId,
+      @Param("createdBy") String createdBy);
 
   /**
    * Retrieves a paginated list of both public and private client entities for a specified tenant.
@@ -109,20 +147,19 @@ public interface JpaClientRepository extends JpaRepository<ClientEntity, String>
    * @param lastCreatedOn the cursor timestamp for pagination (may be {@code null} to fetch the most
    *     recent records)
    * @param limit the maximum number of client entities to return
-   * @return a list of matching {@link ClientEntity} objects
+   * @return a list of matching {@link ClientCursor} rows
    */
   @Query(
-      value =
-          """
-                          SELECT * FROM identity_clients
-                          WHERE tenant_id = :tenantId
-                            AND is_invalidated = false
-                            AND (:lastCreatedOn IS NULL OR created_on < :lastCreatedOn)
-                          ORDER BY created_on DESC
-                          LIMIT :limit
-                      """,
-      nativeQuery = true)
-  List<ClientEntity> findAllByTenantIdWithCursor(
+      """
+      SELECT c.clientId AS clientId, c.createdOn AS createdOn
+      FROM ClientEntity c
+      WHERE c.tenantId = :tenantId
+        AND c.invalidated = false
+        AND (:lastCreatedOn IS NULL OR c.createdOn < :lastCreatedOn)
+      ORDER BY c.createdOn DESC
+      LIMIT :limit
+      """)
+  List<ClientCursor> findAllByTenantIdWithCursor(
       @Param("tenantId") long tenantId,
       @Param("lastCreatedOn") ZonedDateTime lastCreatedOn,
       @Param("limit") int limit);
@@ -139,21 +176,20 @@ public interface JpaClientRepository extends JpaRepository<ClientEntity, String>
    * @param lastCreatedOn the cursor timestamp for pagination (may be {@code null} to fetch the most
    *     recent records)
    * @param limit the maximum number of client entities to return
-   * @return a list of matching {@link ClientEntity} objects
+   * @return a list of matching {@link ClientCursor} rows
    */
   @Query(
-      value =
-          """
-                                  SELECT * FROM identity_clients
-                                  WHERE tenant_id = :tenantId
-                                    AND is_invalidated = false
-                                    AND (:lastCreatedOn IS NULL OR created_on < :lastCreatedOn)
-                                    AND created_by = :createdBy
-                                  ORDER BY created_on DESC
-                                  LIMIT :limit
-                              """,
-      nativeQuery = true)
-  List<ClientEntity> findAllByTenantIdAndCreatedByWithCursor(
+      """
+      SELECT c.clientId AS clientId, c.createdOn AS createdOn
+      FROM ClientEntity c
+      WHERE c.tenantId = :tenantId
+        AND c.invalidated = false
+        AND (:lastCreatedOn IS NULL OR c.createdOn < :lastCreatedOn)
+        AND c.createdBy = :createdBy
+      ORDER BY c.createdOn DESC
+      LIMIT :limit
+      """)
+  List<ClientCursor> findAllByTenantIdAndCreatedByWithCursor(
       @Param("tenantId") long tenantId,
       @Param("createdBy") String createdBy,
       @Param("lastCreatedOn") ZonedDateTime lastCreatedOn,
@@ -271,6 +307,9 @@ public interface JpaClientRepository extends JpaRepository<ClientEntity, String>
    * @param clientIds a list of client identifiers to search for
    * @return a list of matching {@link ClientEntity} objects
    */
-  @Query("SELECT c FROM ClientEntity c WHERE c.clientId IN :clientIds AND c.invalidated = false")
+  @EntityGraph(
+      attributePaths = {"authenticationMethods", "redirectUris", "allowedOrigins", "scopes"})
+  @Query(
+      "SELECT DISTINCT c FROM ClientEntity c WHERE c.clientId IN :clientIds AND c.invalidated = false")
   List<ClientEntity> findAllByClientIds(@Param("clientIds") List<String> clientIds);
 }

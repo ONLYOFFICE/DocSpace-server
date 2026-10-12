@@ -44,275 +44,48 @@ public class CustomerOperationsReportTask : DocumentBuilderTask<int, CustomerOpe
     {
     }
 
-    private const string ScriptName = "CustomerOperationsReport.docbuilder";
-
-    protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
+    protected override Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
     {
-        var (scriptFilePath, tempFileName, outputFileName) = await GetCustomerOperationsReportData(serviceProvider, _userId, _data);
+        // Builders are resolved from the per-execution scope rather than injected into this task:
+        // the tenant and user context the report depends on is only established after DoJob has
+        // created that scope.
+        ICustomerReportBuilder builder = _data.ReportType switch
+        {
+            ReportType.Operations => serviceProvider.GetRequiredService<OperationsReportBuilder>(),
+            ReportType.ServiceUsage => serviceProvider.GetRequiredService<ServiceUsageReportBuilder>(),
+            ReportType.MonthlyUsage => serviceProvider.GetRequiredService<MonthlyUsageReportBuilder>(),
+            ReportType.DocsCloudUserQuota => serviceProvider.GetRequiredService<DocsCloudUserQuotaReportBuilder>(),
+            _ => throw new ArgumentOutOfRangeException(nameof(_data.ReportType), _data.ReportType, "Unknown report type")
+        };
 
-        return new DocumentBuilderInputData(scriptFilePath, tempFileName, outputFileName);
+        return builder.BuildAsync(_userId, _data);
     }
 
     protected override async Task<File<int>> ProcessSourceFileAsync(IServiceProvider serviceProvider, Uri fileUri, DocumentBuilderInputData inputData)
     {
-        var daoFactory = serviceProvider.GetService<IDaoFactory>();
-        var clientFactory = serviceProvider.GetService<IHttpClientFactory>();
-        var socketManager = serviceProvider.GetService<SocketManager>();
-        var globalFolder = serviceProvider.GetService<GlobalFolder>();
+        var fileSaver = serviceProvider.GetRequiredService<ReportResultFileSaver>();
+        var messageService = serviceProvider.GetRequiredService<MessageService>();
 
-        var file = serviceProvider.GetService<File<int>>();
-
-        file.CreateBy = _userId;
-        file.ParentId = await globalFolder.GetFolderMyAsync(daoFactory);
-        file.Title = inputData.OutputFileName;
-
-        using var request = new HttpRequestMessage();
-        request.RequestUri = fileUri;
-
-#pragma warning disable CA2000
-        var httpClient = clientFactory.CreateClient();
-#pragma warning restore CA2000
-
-        using var response = await httpClient.SendAsync(request);
-        await using var stream = await response.Content.ReadAsStreamAsync();
-
-        var fileDao = daoFactory.GetFileDao<int>();
-
-        file.ContentLength = stream.Length;
-
-        file = await fileDao.SaveFileAsync(file, stream);
-        await socketManager.CreateFileAsync(file);
-
-        var messageService = serviceProvider.GetService<MessageService>();
+        var file = await fileSaver.SaveToMyDocumentsAsync(_userId, inputData.OutputFileName, fileUri);
 
         var headers = _data.Headers != null
             ? _data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value))
             : [];
 
-        messageService.SendHeadersMessage(MessageAction.CustomerOperationsReportDownloaded, target: null, httpHeaders: headers, null);
+        var messageAction = _data.ReportType == ReportType.DocsCloudUserQuota
+            ? MessageAction.DocsCloudQuotaReportDownloaded
+            : MessageAction.CustomerOperationsReportDownloaded;
 
-        if (System.IO.File.Exists(inputData.Script))
-        {
-            System.IO.File.Delete(inputData.Script);
-        }
+        messageService.SendHeadersMessage(messageAction, target: null, httpHeaders: headers, null);
 
         return file;
     }
-
-    private static async Task<TenantWalletService?> GetTenantWalletService(TenantManager tenantManager, string serviceName)
-    {
-        if (string.IsNullOrEmpty(serviceName))
-        {
-            return null;
-        }
-
-        var quotaList = await tenantManager.GetTenantQuotasAsync(false, true);
-
-        var selectedQuota = quotaList.FirstOrDefault(x =>
-            x.ServiceName.Equals(serviceName, StringComparison.InvariantCultureIgnoreCase));
-
-        if (selectedQuota != null && Enum.IsDefined(typeof(TenantWalletService), selectedQuota.TenantId))
-        {
-            return (TenantWalletService)selectedQuota.TenantId;
-        }
-
-        return null;
-    }
-
-    private static async Task<(string scriptFilePath, string tempFileName, string outputFileName)> GetCustomerOperationsReportData(IServiceProvider serviceProvider, Guid userId, CustomerOperationsReportTaskData taskData)
-    {
-        var tenantManager = serviceProvider.GetService<TenantManager>();
-        var tariffService = serviceProvider.GetService<TariffService>();
-        var userManager = serviceProvider.GetService<UserManager>();
-        var tenantUtil = serviceProvider.GetService<TenantUtil>();
-        var displayUserSettingsHelper = serviceProvider.GetService<DisplayUserSettingsHelper>();
-        var tempPath = serviceProvider.GetService<TempPath>();
-
-        var tenant = tenantManager.GetCurrentTenant();
-
-        var user = await userManager.GetUsersAsync(userId);
-
-        var usertCulture = user.GetCulture();
-        CultureInfo.CurrentCulture = usertCulture;
-        CultureInfo.CurrentUICulture = usertCulture;
-
-        var utcStartDate = tenantUtil.DateTimeToUtc(taskData.StartDate ?? tenant.CreationDateTime);
-        var utcEndDate = tenantUtil.DateTimeToUtc(taskData.EndDate ?? DateTime.UtcNow);
-
-        var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
-
-        var scriptFilePath = tempPath.GetTempFileName(".docbuilder");
-        var tempFileName = DocumentBuilderScriptHelper.GetTempFileName(".xlsx");
-        var outputFileName = string.Format(Resource.AccountingCustomerOperationsReportName + ".xlsx", utcStartDate.ToShortDateString(), utcEndDate.ToShortDateString());
-
-        var keys = new List<string> {
-            Resource.AccountingCustomerOperationDate,
-            Resource.AccountingCustomerOperationType,
-            Resource.AccountingCustomerOperationDetails,
-            Resource.AccountingCustomerOperationContact,
-            Resource.AccountingCustomerOperationQuantity,
-            Resource.AccountingCustomerOperationServiceUnit,
-            Resource.AccountingCustomerOperationCredit,
-            Resource.AccountingCustomerOperationDebit,
-            Resource.AccountingCustomerOperationCurrency
-        };
-
-        var tenantWalletService = await GetTenantWalletService(tenantManager, taskData.ServiceName);
-        var addAgentColumn = tenantWalletService is TenantWalletService.AITools;
-        if (addAgentColumn)
-        {
-            keys.Add(Resource.AccountingCustomerOperationAgent);
-        }
-
-        var options = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
-
-        script = script
-            .Replace("${sheetName}", Resource.AccountingCustomerOperationsReportSheetName)
-            .Replace("${tempFileName}", tempFileName)
-            .Replace("${dataKeys}", JsonSerializer.Serialize(keys));
-
-        var scriptParts = script.Split("${dataValues}");
-
-        var dateFormat = $"{usertCulture.DateTimeFormat.ShortDatePattern} {usertCulture.DateTimeFormat.ShortTimePattern.Replace("tt", "AM/PM")}";
-
-        await using (var writer = new StreamWriter(scriptFilePath))
-        {
-            await writer.WriteAsync(scriptParts[0]);
-
-            var filter = new OperationFilter
-            {
-                ServiceName = taskData.ServiceName,
-                UtcStartDate = utcStartDate,
-                UtcEndDate = utcEndDate,
-                ParticipantName = taskData.ParticipantName,
-                Credit = taskData.Credit,
-                Debit = taskData.Debit,
-                Type = taskData.Type,
-                Status = taskData.Status,
-                OrderBy = taskData.OrderBy,
-                OrderType = taskData.OrderType
-            };
-
-            var partialRecords = GetCustomerOperationsReportDataAsync(
-                tariffService,
-                tenantUtil,
-                displayUserSettingsHelper,
-                tenant.Id,
-                filter);
-
-            if (partialRecords != null)
-            {
-                await foreach (var records in partialRecords)
-                {
-                    if (records is not { Count: > 0 })
-                    {
-                        continue;
-                    }
-
-                    var text = Serialize(records, dateFormat, options, addAgentColumn);
-                    await writer.WriteAsync(text);
-                }
-            }
-
-            await writer.WriteAsync(scriptParts[1]);
-        }
-
-        return (scriptFilePath, tempFileName, outputFileName);
-    }
-
-    private static async IAsyncEnumerable<List<Operation>> GetCustomerOperationsReportDataAsync(
-        TariffService tariffService,
-        TenantUtil tenantUtil,
-        DisplayUserSettingsHelper displayUserSettingsHelper,
-        int tenantId,
-        OperationFilter filter)
-    {
-        var offset = 0;
-        var limit = 1000;
-
-        while (true)
-        {
-            filter.Offset = offset;
-            filter.Limit = limit;
-
-            var report = await tariffService.GetCustomerOperationsAsync(tenantId, filter);
-
-            if (report?.Collection == null)
-            {
-                yield return null;
-                break;
-            }
-
-            var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper, false);
-
-            foreach (var operation in report.Collection)
-            {
-                var (description, unitOfMeasurement, quantity) = WalletServiceDescriptionManager.GetServiceDescriptionAndUom(operation, filter.ServiceName, operation.Metadata);
-                var (agentId, agentTitle) = WalletServiceDescriptionManager.GetAgentInfo(operation.Metadata);
-
-                operation.Description = description;
-                operation.Details = WalletServiceDescriptionManager.GetServiceDetails(operation.Metadata);
-                operation.ServiceUnit = unitOfMeasurement;
-                operation.Quantity = quantity;
-                operation.Date = tenantUtil.DateTimeFromUtc(operation.Date);
-                operation.ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
-                    ? value
-                    : operation.ParticipantName;
-                operation.AgentId = agentId;
-                operation.AgentTitle = agentTitle;
-            }
-
-            yield return report.Collection;
-
-            if (report.CurrentPage >= report.TotalPage)
-            {
-                break;
-            }
-
-            offset += limit;
-        }
-    }
-
-    private static string Serialize(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions, bool addAgentColumn)
-    {
-        var sb = new StringBuilder();
-
-        foreach (var record in records)
-        {
-            var properties = new List<PropertyValue>
-            {
-                new(record.Date.ToString("G", CultureInfo.InvariantCulture), dateFormat),
-                new(record.Description, "@"),
-                new(record.Details, "@"),
-                new(record.ParticipantDisplayName, "@"),
-                new(record.Quantity.ToString(), "General", "right"),
-                new(record.ServiceUnit, "@"),
-                new(record.Credit.ToString(), "0.0000000000", "right"),
-                new(record.Debit.ToString(), "0.0000000000", "right"),
-                new(record.Currency, "@")
-            };
-
-            if (addAgentColumn)
-            {
-                properties.Add(new PropertyValue(record.AgentTitle, "@"));
-            }
-
-            _ = sb.AppendLine(JsonSerializer.Serialize(properties, jsonSerializerOptions) + ",");
-        }
-
-        return sb.ToString();
-    }
-
-    private record PropertyValue(string Value, string Format, string Halign = null);
 }
 
 public record CustomerOperationsReportTaskData(
     IDictionary<string, string> Headers,
-    string ServiceName,
+    ReportType ReportType,
+    List<string> ServiceName,
     DateTime? StartDate,
     DateTime? EndDate,
     string ParticipantName,
@@ -320,6 +93,7 @@ public record CustomerOperationsReportTaskData(
     bool? Debit,
     OperationType? Type,
     OperationStatus? Status,
+    Dictionary<string, string> Metadata,
     string OrderBy,
     OperationOrderType? OrderType
 );

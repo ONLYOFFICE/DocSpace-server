@@ -31,7 +31,6 @@
 //
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using OpenTelemetry;
 using OpenTelemetry.Exporter;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
@@ -83,6 +82,7 @@ public static class OpenTelemetryExtension
                     metrics.AddAspNetCoreInstrumentation()
                         .AddHttpClientInstrumentation()
                         .AddRuntimeInstrumentation()
+                        .AddProcessInstrumentation()
                         .AddFusionCacheInstrumentation();
 
                     if (telemetrySettings?.InfluxDB != null)

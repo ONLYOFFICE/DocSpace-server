@@ -1,4 +1,5 @@
 server:
+  max-http-request-header-size: 32KB
   servlet:
     session:
       tracking-modes: cookie
@@ -59,6 +60,13 @@ management:
       probes:
         enabled: true
       show-details: always
+      group:
+        readiness:
+          include: "*"
+          show-details: never
+        liveness:
+          include: livenessState
+          show-details: never
   endpoints:
     web:
       base-path: null

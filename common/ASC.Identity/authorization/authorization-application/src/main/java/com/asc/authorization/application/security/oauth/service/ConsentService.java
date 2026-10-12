@@ -42,7 +42,9 @@ import org.slf4j.MDC;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsent;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationConsentService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Service for managing OAuth2 Authorization Consents.
@@ -56,7 +58,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service("authorizationConsentService")
 public class ConsentService implements OAuth2AuthorizationConsentService {
   private final JpaConsentRepository jpaConsentRepository;
+  private final PlatformTransactionManager transactionManager;
+
   private final ConsentMapper consentMapper;
+  private final RegisteredClientOwnerService registeredClientOwnerService;
 
   /**
    * Saves the provided OAuth2AuthorizationConsent.
@@ -66,16 +71,26 @@ public class ConsentService implements OAuth2AuthorizationConsentService {
    *
    * @param authorizationConsent the {@link OAuth2AuthorizationConsent} object to save.
    */
-  @Transactional(
-      timeout = 2,
-      rollbackFor = {Exception.class})
   public void save(OAuth2AuthorizationConsent authorizationConsent) {
     try {
       MDC.put("client_id", authorizationConsent.getRegisteredClientId());
       MDC.put("principal_name", authorizationConsent.getPrincipalName());
       log.info("Saving an authorization consent");
 
-      jpaConsentRepository.save(consentMapper.toEntity(authorizationConsent));
+      var entity = consentMapper.toEntity(authorizationConsent);
+      // Resolved before the transaction opens: a client cache miss reaches the registration service
+      // over gRPC, and a remote call must not hold a database connection while it waits.
+      registeredClientOwnerService
+          .findClientOwner(authorizationConsent.getRegisteredClientId())
+          .ifPresent(
+              owner -> {
+                entity.setOwnerTenantId(owner.tenantId());
+                entity.setOwnerUserId(owner.userId());
+              });
+
+      var template = new TransactionTemplate(transactionManager);
+      template.setTimeout(2);
+      template.execute(_ -> jpaConsentRepository.save(entity));
     } catch (Exception e) {
       log.error("Failed to save an authorization consent", e);
     } finally {

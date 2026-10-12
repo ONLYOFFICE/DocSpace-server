@@ -41,7 +41,6 @@ public class WorkContext(IConfiguration configuration,
     DispatchEngine dispatchEngine,
     NotifyEngine notifyEngine,
     NotifyContext notifyContext,
-    JabberSender notifyJabberSender,
     AWSSender awsSender,
     SmtpSender smtpSender,
     NotifyServiceSender notifyServiceSender,
@@ -84,7 +83,6 @@ public class WorkContext(IConfiguration configuration,
                 return;
             }
 
-            INotifySender jabberSender = notifyServiceSender;
             INotifySender emailSender = notifyServiceSender;
             INotifySender telegramSender = notifyTelegramSender;
             INotifySender pushSender = notifyPushSender;
@@ -94,8 +92,6 @@ public class WorkContext(IConfiguration configuration,
 
             if ("ases".Equals(postman, StringComparison.InvariantCultureIgnoreCase) || "smtp".Equals(postman, StringComparison.InvariantCultureIgnoreCase))
             {
-                jabberSender = notifyJabberSender;
-
                 var properties = new Dictionary<string, string>
                 {
                     ["useCoreSettings"] = "true"
@@ -116,7 +112,6 @@ public class WorkContext(IConfiguration configuration,
             }
 
             notifyContext.RegisterSender(dispatchEngine, Constants.NotifyEMailSenderSysName, new EmailSenderSink(emailSender));
-            notifyContext.RegisterSender(dispatchEngine, Constants.NotifyMessengerSenderSysName, new JabberSenderSink(jabberSender));
             notifyContext.RegisterSender(dispatchEngine, Constants.NotifyTelegramSenderSysName, new TelegramSenderSink(telegramSender));
             notifyContext.RegisterSender(dispatchEngine, Constants.NotifyPushSenderSysName, new PushSenderSink(pushSender));
 

@@ -1,134 +1,122 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.EF;
 
 public partial class FilesDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbFolder> FoldersAsync(int tenantId, IEnumerable<int> folderId)
     {
         return AbstractQueries.FoldersAsync(this, tenantId, folderId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, int.MaxValue])]
+    [PreCompileQuery]
     public Task<int> FilesCountAsync(int tenantId, int folderId)
     {
         return AbstractQueries.FilesCountAsync(this, tenantId, folderId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null])]
+    [PreCompileQuery]
     public Task<string> IdAsync(int tenantId, string hashId)
     {
         return AbstractQueries.IdAsync(this, tenantId, hashId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, FileEntryType.File])]
+    [PreCompileQuery]
     public Task<bool> IsIndexingAsync(int tenantId, int parentFolderId, FileEntryType entryType)
     {
         return AbstractQueries.IsIndexingAsync(this, tenantId, parentFolderId, entryType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, FileEntryType.File])]
+    [PreCompileQuery]
     public Task<DbFileOrder> GetFileOrderAsync(int tenantId, int entryId, FileEntryType entryType)
     {
         return AbstractQueries.GetFileOrderAsync(this, tenantId, entryId, entryType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, FileEntryType.File])]
+    [PreCompileQuery]
     public Task ClearFileOrderAsync(int tenantId, int parentFolderId, FileEntryType entryType)
     {
         return AbstractQueries.ClearFileOrderAsync(this, tenantId, parentFolderId, entryType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<int> GetLastFileOrderAsync(int tenantId, int parentFolderId)
     {
         return AbstractQueries.GetLastFileOrderAsync(this, tenantId, parentFolderId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task IncreaseFileOrderAsync(int tenantId, int parentFolderId, int newOrder, int currentOrder)
     {
         return AbstractQueries.IncreaseFileOrderAsync(this, tenantId, parentFolderId, newOrder, currentOrder);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task DecreaseFileOrderAsync(int tenantId, int parentFolderId, int newOrder, int currentOrder)
     {
         return AbstractQueries.DecreaseFileOrderAsync(this, tenantId, parentFolderId, newOrder, currentOrder);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task ChangeFilesCountAsync(int tenantId, int folderId, int counter)
     {
         return AbstractQueries.ChangeFilesCountAsync(this, tenantId, folderId, counter);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task ChangeFoldersCountAsync(int tenantId, int folderId, int counter)
     {
         return AbstractQueries.ChangeFoldersCountAsync(this, tenantId, folderId, counter);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, FileEntryType.File])]
-    public Task<int> DeleteAuditReferencesAsync(int entryId, FileEntryType entryType)
-    {
-        return AbstractQueries.DeleteAuditReferencesAsync(this, entryId, entryType);
-    }
-
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt, FileEntryType.File])]
+    [PreCompileQuery]
     public Task<int> DeleteLinksAsync(int tenantId, int entryId, FileEntryType entryType)
     {
         return AbstractQueries.DeleteLinksAsync(this, tenantId, entryId, entryType);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, FileEntryType.File])]
-    public IAsyncEnumerable<int> GetAuditEventsIdsAsync(int entryId, FileEntryType entryType)
-    {
-        return AbstractQueries.GetAuditEventsIdsAsync(this, entryId, entryType);
-    }
-
-    [PreCompileQuery([PreCompileQuery.DefaultInt, FileEntryType.File])]
+    [PreCompileQuery]
     public Task<int> MarkAuditReferencesAsCorruptedAsync(IEnumerable<int> eventsIds)
     {
         return AbstractQueries.MarkAuditReferencesAsCorruptedAsync(this, eventsIds);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
-    public Task DeleteChatsAsync(int folderId)
+    [PreCompileQuery]
+    public Task DeleteFileKeysAsync(int tenantId, int fileId, IEnumerable<Guid> userIds)
     {
-        return AbstractQueries.DeleteChatsAsync(this, folderId);
+        return AbstractQueries.DeleteFileKeysByUsersAsync(this, tenantId, fileId, userIds);
     }
 }
 
@@ -201,44 +189,32 @@ static file class AbstractQueries
                     .LastOrDefault());
 
     public static readonly Func<FilesDbContext, int, int, int, int, Task> IncreaseFileOrderAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int parentFolderId, int newOrder, int currentOrder) =>
-                ctx.FileOrder
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.ParentFolderId == parentFolderId)
-                    .Where(r => r.Order >= newOrder && r.Order < currentOrder)
-                    .ExecuteUpdate(f => f.SetProperty(p => p.Order, p => p.Order + 1)));
+        (FilesDbContext ctx, int tenantId, int parentFolderId, int newOrder, int currentOrder) =>
+            ctx.FileOrder
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.ParentFolderId == parentFolderId)
+                .Where(r => r.Order >= newOrder && r.Order < currentOrder)
+                .ExecuteUpdateAsync(f => f.SetProperty(p => p.Order, p => p.Order + 1));
 
     public static readonly Func<FilesDbContext, int, int, int, int, Task> DecreaseFileOrderAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int parentFolderId, int newOrder, int currentOrder) =>
-                ctx.FileOrder
-                    .Where(r => r.TenantId == tenantId)
-                    .Where(r => r.ParentFolderId == parentFolderId)
-                    .Where(r => r.Order <= newOrder && r.Order > currentOrder)
-                    .ExecuteUpdate(f => f.SetProperty(p => p.Order, p => p.Order - 1)));
+        (FilesDbContext ctx, int tenantId, int parentFolderId, int newOrder, int currentOrder) =>
+            ctx.FileOrder
+                .Where(r => r.TenantId == tenantId)
+                .Where(r => r.ParentFolderId == parentFolderId)
+                .Where(r => r.Order <= newOrder && r.Order > currentOrder)
+                .ExecuteUpdateAsync(f => f.SetProperty(p => p.Order, p => p.Order - 1));
 
     public static readonly Func<FilesDbContext, int, int, int, Task> ChangeFilesCountAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int folderId, int counter) =>
-                ctx.Folders
-                    .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
-                    .ExecuteUpdate(r => r.SetProperty(a => a.FilesCount, a => a.FilesCount + counter)));
+        (FilesDbContext ctx, int tenantId, int folderId, int counter) =>
+            ctx.Folders
+                .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
+                .ExecuteUpdateAsync(r => r.SetProperty(a => a.FilesCount, a => a.FilesCount + counter));
 
     public static readonly Func<FilesDbContext, int, int, int, Task> ChangeFoldersCountAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int tenantId, int folderId, int counter) =>
-                ctx.Folders
-                    .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
-                    .ExecuteUpdate(r => r.SetProperty(a => a.FoldersCount, a => a.FoldersCount + counter)));
-
-    public static readonly Func<FilesDbContext, int, FileEntryType, Task<int>> DeleteAuditReferencesAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int entryId, FileEntryType entryType) =>
-                ctx.FilesAuditReference
-                    .Where(r => r.EntryId == entryId)
-                    .Where(r => r.EntryType == (byte)entryType)
-                    .ExecuteDelete());
+        (FilesDbContext ctx, int tenantId, int folderId, int counter) =>
+            ctx.Folders
+                .Where(r => r.TenantId == tenantId && ctx.Tree.Any(a => a.FolderId == folderId && a.ParentId == r.Id))
+                .ExecuteUpdateAsync(r => r.SetProperty(a => a.FoldersCount, a => a.FoldersCount + counter));
 
     public static readonly Func<FilesDbContext, int, int, FileEntryType, Task<int>> DeleteLinksAsync =
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
@@ -250,25 +226,18 @@ static file class AbstractQueries
                     .Where(x => x.SubjectType == SubjectType.PrimaryExternalLink || x.SubjectType == SubjectType.ExternalLink)
                     .ExecuteDelete());
 
-    public static readonly Func<FilesDbContext, int, FileEntryType, IAsyncEnumerable<int>> GetAuditEventsIdsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, int entryId, FileEntryType entryType) =>
-                ctx.FilesAuditReference
-                    .Where(r => r.EntryId == entryId)
-                    .Where(r => r.EntryType == (byte)entryType)
-                    .Select(r => r.AuditEventId));
-
     public static readonly Func<FilesDbContext, IEnumerable<int>, Task<int>> MarkAuditReferencesAsCorruptedAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (FilesDbContext ctx, IEnumerable<int> eventsIds) =>
-                ctx.FilesAuditReference.Where(x => eventsIds.Contains(x.AuditEventId))
-                    .ExecuteUpdate(x =>
-                        x.SetProperty(y => y.Corrupted, a => true))
-        );
+        (FilesDbContext ctx, IEnumerable<int> eventsIds) =>
+            ctx.FilesAuditReference.Where(x => eventsIds.Contains(x.AuditEventId))
+                .ExecuteUpdateAsync(x =>
+                    x.SetProperty(y => y.Corrupted, a => true))
+    ;
 
-    public static readonly Func<FilesDbContext, int, Task> DeleteChatsAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int folderId) =>
-            ctx.Chats
-                .Where(x => x.RoomId == folderId)
+    public static readonly Func<FilesDbContext, int, int, IEnumerable<Guid>, Task> DeleteFileKeysByUsersAsync =
+        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((FilesDbContext ctx, int tenantId, int fileId, IEnumerable<Guid> userIds) =>
+            ctx.DbFileKeys
+                .Where(x => x.TenantId == tenantId)
+                .Where(x => x.FileId == fileId)
+                .Where(x => userIds.Contains(x.UserId))
                 .ExecuteDelete());
 }

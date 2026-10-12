@@ -33,33 +33,35 @@
 
 namespace ASC.Files.Core.ApiModels;
 
-/// <summary>
-/// The room data lifetime information.
-/// </summary>
+/// <summary>The rule by which the files of a room are removed once they have been lying in it for too long.</summary>
 public class RoomDataLifetimeDto
 {
     /// <summary>
-    /// Specifies whether to permanently delete the room data or not.
+    /// Decides what happens to a file that has grown too old: it is erased outright, or it is moved to the trash of
+    /// the account that created the room, from where it can still be brought back.
     /// </summary>
-    /// <example>true</example>
+    /// <example>false</example>
     public bool DeletePermanently { get; set; }
 
     /// <summary>
-    /// Specifies the time period type of the room data lifetime.
+    /// The unit the age is counted in. Months and years are counted as calendar ones, so the same number of them
+    /// covers a different number of days depending on when the clean-up runs.
     /// </summary>
-    /// <example>2</example>
+    /// <example>1</example>
     [EnumDataType(typeof(RoomDataLifetimePeriod))]
     public RoomDataLifetimePeriod Period { get; set; }
 
     /// <summary>
-    /// Specifies the time period value of the room data lifetime.
+    /// How many periods a file may stay in the room, counted from the moment it was last changed rather than from the
+    /// moment the rule was set. Files that are already older than this are removed by the next clean-up.
     /// </summary>
-    /// <example>33</example>
+    /// <example>12</example>
     [Range(1, 999)]
     public int? Value { get; set; }
 
     /// <summary>
-    /// Specifies whether the room data lifetime setting is enabled or not.
+    /// Switches the rule on and off. Switching it off erases the rule instead of keeping it aside, so afterwards the
+    /// room reports no rule at all and the other three values have to be sent again to bring it back.
     /// </summary>
     /// <example>true</example>
     public bool? Enabled { get; set; }

@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for querying user login events within the specified time range.
+/// The filters that narrow the portal login history, and the window of the page returned from it.
 /// </summary>
 /// <example>
 /// {
@@ -49,35 +49,39 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 public class LoginEventRequestDto
 {
     /// <summary>
-    /// The ID of the user whose login events are being queried.
+    /// The user whose sign-in attempts are kept, given by portal user ID. Leave it at the empty GUID to keep the
+    /// events of every user.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromQuery(Name = "userId")]
     public Guid UserId { get; set; }
 
     /// <summary>
-    /// The login-related action to filter events by.
+    /// The sign-in action recorded, spelled as `GET api/2.0/security/audit/types` lists it under `actions` - a
+    /// successful login, a failed one, a logout. The default value keeps every action.
     /// </summary>
     /// <example>FileCreated</example>
     [FromQuery(Name = "action")]
     public MessageAction Action { get; set; }
 
     /// <summary>
-    /// The starting date and time for filtering login events.
+    /// The earliest moment an event may have been recorded at, read as a UTC instant. The `date` of the events that
+    /// come back is in the portal time zone instead, so the two do not line up on a portal that is not on UTC.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     [FromQuery(Name = "from")]
     public ApiDateTime From { get; set; }
 
     /// <summary>
-    /// The ending date and time for filtering login events.
+    /// The latest moment an event may have been recorded at, read as a UTC instant in the same way as `from`.
     /// </summary>
     /// <example>2024-01-15T10:30:00Z</example>
     [FromQuery(Name = "to")]
     public ApiDateTime To { get; set; }
 
     /// <summary>
-    /// The number of login events to retrieve in the query.
+    /// How many events one page may hold. The maximum is also the default, so a client that wants shorter pages has
+    /// to ask for them.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "count")]
@@ -85,7 +89,8 @@ public class LoginEventRequestDto
     public int Count { get; set; } = ApiContext.DefaultCount;
 
     /// <summary>
-    /// The starting index for fetching a subset of login events from the query results.
+    /// How many events to skip before the page begins, counting from the newest. It is applied to the log before
+    /// the filters, so a page can hold fewer events than `count` while older matches still exist.
     /// </summary>
     /// <example>1</example>
     [FromQuery(Name = "startIndex")]

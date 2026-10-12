@@ -7,7 +7,7 @@ charset = utf-8
 indent_style = space
 indent_size = 4
 tab_width = 4
-end_of_line = crlf
+end_of_line = lf
 insert_final_newline = true
 trim_trailing_whitespace = true
 
@@ -33,6 +33,10 @@ trim_trailing_whitespace = false
 # Shell scripts
 [*.sh]
 end_of_line = lf
+
+# Windows batch files
+[*.{bat,cmd}]
+end_of_line = crlf
 
 # Solution files
 [*.sln]
@@ -209,6 +213,10 @@ dotnet_naming_rule.private_field_should_be_begin_with_underscore.severity = warn
 dotnet_naming_rule.private_field_should_be_begin_with_underscore.symbols = private_field
 dotnet_naming_rule.private_field_should_be_begin_with_underscore.style = begin_with_underscore
 
+dotnet_naming_rule.parameters_and_locals_should_be_camel_case.severity = warning
+dotnet_naming_rule.parameters_and_locals_should_be_camel_case.symbols = parameters_and_locals
+dotnet_naming_rule.parameters_and_locals_should_be_camel_case.style = camel_case
+
 # Symbol specifications
 
 dotnet_naming_symbols.interface.applicable_kinds = interface
@@ -227,9 +235,14 @@ dotnet_naming_symbols.public_field.applicable_accessibilities = public, internal
 dotnet_naming_symbols.private_field.applicable_kinds = field
 dotnet_naming_symbols.private_field.applicable_accessibilities = private, protected, private_protected
 
+dotnet_naming_symbols.parameters_and_locals.applicable_kinds = parameter, local
+dotnet_naming_symbols.parameters_and_locals.applicable_accessibilities = *
+
 # Naming styles
 
 dotnet_naming_style.pascal_case.capitalization = pascal_case
+
+dotnet_naming_style.camel_case.capitalization = camel_case
 
 dotnet_naming_style.begins_with_i.required_prefix = I
 dotnet_naming_style.begins_with_i.capitalization = pascal_case
@@ -255,8 +268,12 @@ dotnet_diagnostic.CA2000.severity = none
 # IDE0068: Use recommended dispose pattern (detects missing using)
 dotnet_diagnostic.IDE0068.severity = warning
 
-# CS0612: Type or member is obsolete
-dotnet_diagnostic.CS0612.severity = silent
+# AV0014: Add [ApiController] to the controller or assembly.
+# Disabled because the Asp.Versioning analyzer looks for [ApiController] itself and does not walk
+# the attribute inheritance chain. Every DocSpace controller carries [ApiEndpoint], which derives
+# from ApiControllerAttribute, so the behaviour the rule asks for is already in place and the rule
+# fires on all ~100 controllers. Re-enable if the analyzer learns about derived attributes.
+dotnet_diagnostic.AV0014.severity = none
 
 [*.{cs,vb}]
 

@@ -1,43 +1,41 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.AI.Api;
 
 [Scope]
-[DefaultRoute]
-[ApiController]
+[ApiEndpoint("ai", Internal = true)]
 [AiFeature]
-[ControllerName("ai")]
 public class AgentsController(
     FileStorageService fileStorageService,
     FolderDtoHelper folderDtoHelper,
@@ -47,10 +45,6 @@ public class AgentsController(
     FolderContentDtoHelper folderContentDtoHelper,
     FilesMessageService filesMessageService,
     SettingsManager settingsManager,
-    SystemMcpConfig systemMcpConfig,
-    McpService mcpService,
-    AiProviderService aiProviderService,
-    ILogger<AgentsController> logger,
     ApiDateTimeHelper apiDateTimeHelper,
     RootNewItemsDtoHelper rootNewItemsDtoHelper,
     FileSecurity fileSecurity)
@@ -63,6 +57,8 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Agent information", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
+    [SwaggerResponse(500, "`tags` is not a JSON array of strings")]
     [HttpGet("agents")]
     public async Task<FolderContentDto<int>> GetAgents(GetAgentListRequestDto inDto)
     {
@@ -103,7 +99,6 @@ public class AgentsController(
             tagNames,
             inDto.ExcludeSubject ?? false,
             ProviderFilter.None,
-            inDto.SubjectFilter,
             inDto.SubjectOwnerId,
             quotaFilter: inDto.QuotaFilter ?? QuotaFilter.All,
             storageFilter: StorageFilter.None);
@@ -120,11 +115,14 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Agent information", typeof(FolderDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `title`, `title` is blank or longer than 170 characters, `color` is longer than 6 characters, `cover` is longer than 50 characters or not a known cover, an `email` in `share` is malformed or longer than 255 characters, `share` invites more addresses by email than the portal allows at once, `lifetime` has an unknown `period` or a `value` outside 1-999, the `watermark` text is longer than 255 characters, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, or a tag name is empty")]
+    [SwaggerResponse(402, "The portal has reached the AI agent limit of its pricing plan or its payment is overdue, or the logo does not fit into the portal storage quota")]
+    [SwaggerResponse(403, "The caller is a user or a guest, `private` is set while the caller has no encryption keys, `quota` is set while the storage quota for AI agents is turned off or exceeds the portal storage limit, or `logo.tmpFile` is not a picture the caller uploaded")]
+    [SwaggerResponse(404, "`logo.tmpFile` names no uploaded picture, or one already used")]
+    [SwaggerResponse(500, "`logo.width` or `logo.height` is larger than 2147483647")]
     [HttpPost("agents")]
     public async Task<FolderDto<int>> CreateAgent(CreateAgentRequestDto inDto)
     {
-        await ValidateModelIdAsync(inDto.ChatSettings);
-
         var lifetime = inDto.Lifetime.Map();
         lifetime?.StartDate = DateTime.UtcNow;
 
@@ -132,7 +130,6 @@ public class AgentsController(
             inDto.Title,
             inDto.Private,
             inDto.Indexing,
-            inDto.Share,
             inDto.Quota,
             lifetime,
             inDto.DenyDownload,
@@ -142,26 +139,6 @@ public class AgentsController(
             inDto.Tags,
             inDto.Logo,
             inDto.ChatSettings);
-
-        if (!inDto.AttachDefaultTools)
-        {
-            return await folderDtoHelper.GetAsync(room);
-        }
-
-        try
-        {
-            var server = systemMcpConfig.Servers.Values.FirstOrDefault(
-                x => x.Type == ServerType.DocSpace);
-
-            if (server != null)
-            {
-                await mcpService.AddServersToRoomAsync(room, [server.Id]);
-            }
-        }
-        catch (Exception e)
-        {
-            logger.ErrorWithException(e);
-        }
 
         return await folderDtoHelper.GetAsync(room);
     }
@@ -176,7 +153,7 @@ public class AgentsController(
     [HttpGet("agents/{id}")]
     public async Task<FolderDto<int>> GetAgentInfo(RoomIdRequestDto<int> inDto)
     {
-        var folder = await fileStorageService.GetFolderAsync(inDto.Id).NotFoundIfNull("Folder not found");
+        var folder = (await fileStorageService.GetFolderAsync(inDto.Id)).NotFoundIfNull("Folder not found");
 
         return await folderDtoHelper.GetAsync(folder);
     }
@@ -188,11 +165,14 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents/{id}</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Updated agent information", typeof(FolderDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or holds a property the room update does not define, `title` is longer than 170 characters, `color` is not six hexadecimal digits, `cover` is longer than 50 characters or not a known cover, `lifetime` has an unknown `period` or a `value` outside 1-999, `logo` has no `tmpFile`, a position outside 0-1280, a size outside 1-1280 or a position outside the uploaded picture, the `watermark` text is longer than 255 characters, a tag name is empty, or `chatSettings` is sent for a room that is not an AI agent")]
+    [SwaggerResponse(402, "The new logo or watermark image does not fit into the portal storage quota")]
+    [SwaggerResponse(403, "The caller may not edit the agent, the agent does not exist or lies in Trash or in the archive, `quota` exceeds the storage limit of the portal, or `logo.tmpFile` or a relative `watermark.imageUrl` is not an image the caller uploaded")]
+    [SwaggerResponse(404, "The uploaded image named by `logo.tmpFile` or `watermark.imageUrl` no longer exists")]
+    [SwaggerResponse(500, "`logo.width` or `logo.height` is larger than 2147483647")]
     [HttpPut("agents/{id}")]
     public async Task<FolderDto<int>> UpdateAgent(UpdateRoomRequestDto<int> inDto)
     {
-        await ValidateModelIdAsync(inDto.UpdateRoom.ChatSettings);
-
         var room = await fileStorageService.UpdateRoomAsync(inDto.Id, inDto.UpdateRoom);
 
         return await folderDtoHelper.GetAsync(room);
@@ -205,6 +185,8 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents/{id}</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "File operation", typeof(FileOperationDto))]
+    [SwaggerResponse(403, "The caller may not read or delete the agent")]
+    [SwaggerResponse(404, "No AI agent has the specified ID")]
     [HttpDelete("agents/{id}")]
     public async Task<FileOperationDto> DeleteAgent(DeleteRoomRequestDto<int> inDto)
     {
@@ -321,20 +303,5 @@ public class AgentsController(
         }
 
         return result;
-    }
-
-    private async Task ValidateModelIdAsync(ChatSettings? chatSettings)
-    {
-        if (chatSettings is null || string.IsNullOrEmpty(chatSettings.ModelId))
-        {
-            return;
-        }
-
-        var models = await aiProviderService.GetActiveModelsAsync(chatSettings.ProviderId);
-
-        if (!models.Any(m => string.Equals(m.ModelId, chatSettings.ModelId, StringComparison.Ordinal)))
-        {
-            throw new ArgumentException(nameof(chatSettings.ModelId));
-        }
     }
 }

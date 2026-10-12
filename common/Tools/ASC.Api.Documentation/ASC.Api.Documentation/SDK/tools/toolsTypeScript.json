@@ -9,7 +9,7 @@
   "outputDir": "typescript-sdk",
   "additionalProperties": {
     "packageName": "@onlyoffice/docspace-api-sdk",
-    "packageVersion": "3.7.0",
+    "packageVersion": "4.0.0",
     "licenseName": "Apache-2.0",
     "repositoryUrl": "https://github.com/ONLYOFFICE/docspace-api-sdk-typescript",
     "withSeparateModelsAndApi": true,
@@ -17,6 +17,7 @@
     "apiPackage": "api", 
     "axiosVersion": "1.13.5",
     "useSingleRequestParameter": true,
-    "supportsES6": true
+    "supportsES6": true,
+    "example": true
   }
 }

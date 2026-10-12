@@ -41,6 +41,26 @@ public class JoinSettings : CommandSettings
     [CommandOption("-f|--file <FILES>")]
     public IEnumerable<string>? Files { get; set; }
 
+    /// <summary>
+    /// Where the published contract goes - the joined document without the openapi-generator
+    /// workarounds, in the YAML the documentation site consumes. Absent from the configuration
+    /// means the SDK input is the only output.
+    /// </summary>
+    public string? PublishOutput { get; set; }
+
+    /// <summary>
+    /// Host to fill the empty `baseUrl` server variable of the published contract with.
+    /// </summary>
+    public string? ServerUrl { get; set; }
+
+    /// <summary>
+    /// The input document whose `info` the joined document carries. The inputs do not agree on it - the AI Chat
+    /// and OAuth documents describe their own services - so it cannot be left to whichever input comes first.
+    /// Configured as the name of a `join` entry in `infoFrom`.
+    /// </summary>
+    [CommandOption("--info-from <FILE>")]
+    public string? InfoFrom { get; set; }
+
     public override ValidationResult Validate()
     {
         var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
@@ -57,6 +77,14 @@ public class JoinSettings : CommandSettings
                 return ValidationResult.Error("File path not specified. Use -o|--output <OUTPUT> or configure file in appsettings.json");
             }
             Output = Path.GetFullPath(Path.Combine(outputPath));
+        }
+
+        ServerUrl = configuration["serverUrl"];
+
+        var publishPath = configuration.GetSection("publish").Get<string[]>();
+        if (publishPath is { Length: > 0 })
+        {
+            PublishOutput = Path.GetFullPath(Path.Combine(publishPath));
         }
 
         if (Files == null || !Files.Any())
@@ -80,6 +108,21 @@ public class JoinSettings : CommandSettings
         else
         {
             Files = [.. Files.Select(Path.GetFullPath)];
+        }
+
+        if (!string.IsNullOrWhiteSpace(InfoFrom))
+        {
+            InfoFrom = Path.GetFullPath(InfoFrom);
+        }
+        else if (configuration["infoFrom"] is { Length: > 0 } infoFromEntry)
+        {
+            var infoFromPath = configuration.GetSection("join").GetSection(infoFromEntry).Get<string[]>();
+            if (infoFromPath is not { Length: > 0 })
+            {
+                return ValidationResult.Error($"'infoFrom' names '{infoFromEntry}', which is not an entry of 'join' in appsettings.json");
+            }
+
+            InfoFrom = Path.GetFullPath(Path.Combine(infoFromPath));
         }
 
         return ValidationResult.Success();

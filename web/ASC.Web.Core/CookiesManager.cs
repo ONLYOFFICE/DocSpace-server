@@ -57,7 +57,10 @@ public class CookiesManager(
     MessageService messageService,
     IPSecurity.IPSecurity ipSecurity,
     IConfiguration configuration,
-    SettingsManager settingsManager)
+    SettingsManager settingsManager,
+    CookieStorage cookieStorage,
+    IEventBus eventBus,
+    ILogger<CookiesManager> logger)
 {
     public const string AuthCookiesName = "asc_auth_key";
     private const string SocketIOCookiesName = "socketio.sid";
@@ -120,6 +123,14 @@ public class CookiesManager(
                 options.SameSite = SameSiteMode.Strict;
             }
 
+            // CHIPS: when the cookie is used cross-site (SameSite=None over HTTPS, e.g. embedded in an iframe),
+            // mark it Partitioned so modern browsers (Chrome, Firefox, Safari 18.4+) keep it in a
+            // per-top-level-site jar instead of dropping it as a third-party tracking cookie.
+            if (options is { SameSite: SameSiteMode.None, Secure: true })
+            {
+                options.Extensions.Add("Partitioned");
+            }
+
             if (FromCors(httpContext.Request))
             {
                 options.Domain = $".{coreBaseSettings.Basedomain}";
@@ -167,11 +178,63 @@ public class CookiesManager(
             return;
         }
 
+        var httpContext = httpContextAccessor.HttpContext;
         var cookieName = GetFullCookiesName(type, itemId);
 
-        if (httpContextAccessor.HttpContext.Request.Cookies.ContainsKey(cookieName))
+        if (!httpContext.Request.Cookies.ContainsKey(cookieName))
         {
-            httpContextAccessor.HttpContext.Response.Cookies.Delete(cookieName, new CookieOptions { Expires = DateTime.Now.AddDays(-3) });
+            return;
+        }
+
+        var expires = DateTime.Now.AddDays(-3);
+        var isHttps = Uri.UriSchemeHttps.Equals(httpContext.Request.Url().Scheme, StringComparison.OrdinalIgnoreCase);
+
+        var domains = new List<string> { null };
+        if (!string.IsNullOrEmpty(coreBaseSettings.Basedomain))
+        {
+            domains.Add($".{coreBaseSettings.Basedomain}");
+        }
+
+        // The cookie may exist as several distinct browser entries depending on how it was set (SetCookiesAsync):
+        //  - host-only vs Domain-scoped (FromCors / SaaS sub-domains),
+        //  - unpartitioned vs Partitioned (CHIPS, cross-site embedding over HTTPS).
+        // Emit a matching deletion for every combination; non-matching ones are harmless (already-expired) no-ops.
+        // Only the first header uses Delete (it deduplicates by name); the rest use Append so previously
+        // emitted deletion headers are not dropped.
+        var first = true;
+
+        foreach (var domain in domains)
+        {
+            Clear(domain, false);
+
+            if (isHttps)
+            {
+                Clear(domain, true);
+            }
+        }
+
+        return;
+
+        void Clear(string domain, bool partitioned)
+        {
+            var options = new CookieOptions { Expires = expires, Domain = domain };
+
+            if (partitioned)
+            {
+                options.Secure = true;
+                options.SameSite = SameSiteMode.None;
+                options.Extensions.Add("Partitioned");
+            }
+
+            if (first)
+            {
+                httpContext.Response.Cookies.Delete(cookieName, options);
+                first = false;
+            }
+            else
+            {
+                httpContext.Response.Cookies.Append(cookieName, string.Empty, options);
+            }
         }
     }
 
@@ -216,7 +279,7 @@ public class CookiesManager(
             await dbLoginEventsManager.LogOutAllActiveConnectionsForTenantAsync(tenant.Id);
         }
 
-        await AuthenticateMeAndSetCookiesAsync(securityContext.CurrentAccount.ID);
+        await AuthenticateMeAndSetCookiesAsync(securityContext.CurrentAccount.ID, checkSuspiciousLogin: false);
     }
 
     public async Task<TenantCookieSettings> GetLifeTimeAsync()
@@ -237,7 +300,7 @@ public class CookiesManager(
 
         if (keepMeAuthenticated && targetUserId == securityContext.CurrentAccount.ID)
         {
-            await AuthenticateMeAndSetCookiesAsync(targetUserId);
+            await AuthenticateMeAndSetCookiesAsync(targetUserId, checkSuspiciousLogin: false);
         }
     }
 
@@ -257,7 +320,7 @@ public class CookiesManager(
         await dbLoginEventsManager.LogOutAllActiveConnectionsForTenantAsync(tenant.Id);
     }
 
-    public async Task<string> AuthenticateMeAndSetCookiesAsync(Guid userId, MessageAction action = MessageAction.LoginSuccess, bool session = false, string initiator = null, params string[] description)
+    public async Task<string> AuthenticateMeAndSetCookiesAsync(Guid userId, MessageAction action = MessageAction.LoginSuccess, bool session = false, string initiator = null, bool checkSuspiciousLogin = true, params string[] description)
     {
         var isSuccess = true;
         var cookies = string.Empty;
@@ -277,6 +340,24 @@ public class CookiesManager(
             {
                 await SetCookiesAsync(CookiesType.AuthKey, cookies, session);
             }
+        }
+
+        var (loginEventId, _) = cookieStorage.GetLoginEventIdFromCookie(cookies);
+        if (checkSuspiciousLogin && loginEventId != 0)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await eventBus.PublishAsync(new SuspiciousLoginIntegrationEvent(userId, tenantManager.GetCurrentTenantId(), loginEventId));
+
+                    logger.DebugSuspiciousLoginCheckRequested(userId, loginEventId);
+                }
+                catch (Exception ex)
+                {
+                    logger.ErrorSuspiciousLoginCheckRequest(userId, loginEventId, ex);
+                }
+            });
         }
 
         return cookies;

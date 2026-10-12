@@ -35,10 +35,12 @@ package com.asc.registration.application.service;
 
 import com.asc.common.core.domain.value.ClientId;
 import com.asc.common.core.domain.value.TenantId;
+import com.asc.common.utilities.cache.CacheNamespaceRegistry;
+import com.asc.registration.application.transfer.CachedClient;
 import com.asc.registration.core.domain.entity.Client;
 import com.asc.registration.service.ports.output.resilience.ClientCacheService;
 import java.time.Duration;
-import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -52,9 +54,16 @@ import org.springframework.stereotype.Service;
  * <p>The cache is automatically populated and evicted based on domain events processed
  * transactionally, ensuring consistency across multiple application instances.
  *
+ * <p>Entries are keyed by client id alone and carry the namespace version of their tenant, so
+ * evicting a tenant is a single counter increment rather than a search for the keys that belong to
+ * it. Keying by client id keeps one entry per client regardless of how often its tenant is evicted,
+ * and lets {@link #getAnyTenant(ClientId)} read an entry without knowing the tenant up front: the
+ * tenant comes out of the snapshot itself. No operation scans the keyspace.
+ *
  * <p>This service is only loaded when Redis classes are available on the classpath.
  *
  * @see ClientCacheService
+ * @see CacheNamespaceRegistry
  * @see Client
  */
 @Slf4j
@@ -62,249 +71,230 @@ import org.springframework.stereotype.Service;
 @ConditionalOnClass(RedisTemplate.class)
 public class RedisClientCacheService implements ClientCacheService {
   private static final String CACHE_KEY_SEPARATOR = ":";
-  private static final String CACHE_KEY_TENANT_CLIENT_SEPARATOR = "_";
   private static final String CACHE_PREFIX = "identity:registration:client";
 
-  private static final int CACHE_EXPIRE_AFTER_WRITE_MINUTES = 5;
+  private static final int CACHE_EXPIRE_AFTER_WRITE_MINUTES = 3;
 
+  private final CacheNamespaceRegistry versionRegistry;
   private final RedisTemplate<String, Object> redisTemplate;
 
   /**
-   * Constructs a new MultiLevelCacheService with Redis cache.
+   * Constructs a new RedisClientCacheService.
    *
-   * @param redisTemplate The Redis template for cache operations.
+   * @param versionRegistry The registry resolving per-tenant namespace versions.
+   * @param redisTemplate The Redis template for cache entries.
    */
   public RedisClientCacheService(
+      CacheNamespaceRegistry versionRegistry,
       @Qualifier("clientCacheRedisTemplate") RedisTemplate<String, Object> redisTemplate) {
+    this.versionRegistry = versionRegistry;
     this.redisTemplate = redisTemplate;
   }
 
   /**
-   * Builds a cache key from a tenant ID and client ID.
+   * Builds a cache key for a client.
    *
-   * @param tenantId The tenant ID to build the cache key from.
    * @param clientId The client ID to build the cache key from.
-   * @return The cache key string in format: identity:registration:client:{tenantId}::{clientId}
+   * @return The cache key in format: identity:registration:client:{clientId}
    */
-  private String buildCacheKey(TenantId tenantId, ClientId clientId) {
-    return CACHE_PREFIX
-        + CACHE_KEY_SEPARATOR
-        + tenantId.getValue()
-        + CACHE_KEY_TENANT_CLIENT_SEPARATOR
-        + clientId.getValue().toString();
+  private String buildCacheKey(String clientId) {
+    return CACHE_PREFIX + CACHE_KEY_SEPARATOR + clientId;
   }
 
   /**
-   * Builds a cache key pattern for all clients belonging to a tenant.
+   * Returns the ID of the tenant owning a client, or {@code null} when the snapshot carries no
+   * tenant information.
    *
-   * @param tenantId The tenant ID to build the pattern for.
-   * @return The cache key pattern string in format: identity:registration:client:{tenantId}::*
+   * @param client The client to read the tenant ID from.
+   * @return The tenant ID, or {@code null} if absent.
    */
-  private String buildTenantCacheKeyPattern(TenantId tenantId) {
-    return CACHE_PREFIX
-        + CACHE_KEY_SEPARATOR
-        + tenantId.getValue()
-        + CACHE_KEY_TENANT_CLIENT_SEPARATOR
-        + "*";
+  private Long extractTenantId(Client client) {
+    if (client == null || client.getClientTenantInfo() == null) return null;
+
+    var tenantId = client.getClientTenantInfo().tenantId();
+    return tenantId == null ? null : tenantId.getValue();
   }
 
   /**
-   * Stores a client in Redis cache.
+   * Tells whether a cached snapshot may still be served.
    *
-   * <p>This method performs the following operations:
+   * @param cached The snapshot read from Redis.
+   * @param tenantId The tenant owning the cached client.
+   * @param requiredTenantId The tenant the caller asked for, or {@code null} if any tenant will do.
+   * @return {@code true} if the snapshot belongs to the requested tenant and its namespace is still
+   *     current.
+   */
+  private boolean isCurrent(CachedClient cached, long tenantId, Long requiredTenantId) {
+    if (requiredTenantId != null && requiredTenantId != tenantId) return false;
+
+    return Objects.equals(cached.getCacheNamespace(), versionRegistry.namespaceOf(tenantId));
+  }
+
+  /**
+   * Reads a cached client, accepting it only while the namespace it was stamped with is still
+   * current.
    *
-   * <ol>
-   *   <li>Validates that the client and its ID are not null
-   *   <li>Serializes the client to JSON and stores it in Redis cache with TTL
-   * </ol>
+   * <p>If deserialization fails, the corrupted entry is removed from cache and an empty Optional is
+   * returned.
    *
-   * <p>If serialization fails, the error is logged. If the client or its ID is null, the operation
-   * is skipped with a warning.
+   * @param clientId The ID of the client to read.
+   * @param requiredTenantId The tenant the entry must belong to, or {@code null} to accept the
+   *     entry whichever tenant owns it.
+   * @return An Optional containing the client if found and still current, empty otherwise.
+   */
+  private Optional<Client> read(String clientId, Long requiredTenantId) {
+    var key = buildCacheKey(clientId);
+    try {
+      if (redisTemplate.opsForValue().get(key) instanceof CachedClient cached) {
+        var client = cached.getClient();
+        var tenantId = extractTenantId(client);
+        if (tenantId != null && isCurrent(cached, tenantId, requiredTenantId)) {
+          log.info("Cache hit for client ID: {} and tenant ID: {}", clientId, tenantId);
+          return Optional.of(client);
+        }
+      }
+    } catch (Exception e) {
+      log.error("Failed to retrieve client from Redis cache: {}", clientId, e);
+      try {
+        redisTemplate.delete(key);
+      } catch (Exception dex) {
+        log.error("Failed to delete corrupted cache entry for client ID: {}", clientId, dex);
+      }
+    }
+
+    log.info("Cache miss for client ID: {}", clientId);
+    return Optional.empty();
+  }
+
+  /**
+   * Stores a client in Redis cache, stamped with the current namespace of its tenant.
+   *
+   * <p>If serialization fails, the error is logged. If the client, its ID or its tenant information
+   * is null, the operation is skipped with a warning.
    *
    * @param client The client entity to cache. Must not be null and must have a non-null ID.
    */
+  @Override
   public void put(Client client) {
     if (client == null || client.getId() == null) {
       log.warn("Attempted to cache null client or client with null ID");
       return;
     }
 
-    if (client.getClientTenantInfo() == null || client.getClientTenantInfo().tenantId() == null) {
+    var tenantId = extractTenantId(client);
+    if (tenantId == null) {
       log.warn(
           "Attempted to cache client without tenant information: {}", client.getId().getValue());
       return;
     }
 
-    var key = buildCacheKey(client.getClientTenantInfo().tenantId(), client.getId());
+    var clientId = client.getId().getValue().toString();
+    var namespace = versionRegistry.namespaceOf(tenantId);
+    if (namespace == null) {
+      log.warn(
+          "Skipped caching client with ID: {} because its namespace could not be resolved",
+          clientId);
+      return;
+    }
+
+    var key = buildCacheKey(clientId);
     try {
       redisTemplate
           .opsForValue()
-          .set(key, client, Duration.ofMinutes(CACHE_EXPIRE_AFTER_WRITE_MINUTES));
+          .set(
+              key,
+              new CachedClient(namespace, client),
+              Duration.ofMinutes(CACHE_EXPIRE_AFTER_WRITE_MINUTES));
 
-      log.debug("Cached client with ID: {}, Redis key: {}", client.getId().getValue(), key);
+      log.info("Cached client with ID: {}, Redis key: {}", clientId, key);
     } catch (Exception e) {
-      log.error("Failed to cache client in Redis: {}", client.getId().getValue(), e);
+      log.error("Failed to cache client in Redis: {}", clientId, e);
     }
   }
 
   /**
-   * Retrieves a client from the cache by client ID and tenant ID.
-   *
-   * <p>This method performs a direct cache lookup using the composite key (tenant ID + client ID).
-   * The tenant ID is now part of the cache key structure, providing natural tenant isolation and
-   * improved cache eviction performance.
-   *
-   * <p>If deserialization fails, the corrupted entry is removed from cache and an empty Optional is
-   * returned.
+   * Retrieves a client from the cache by client ID, provided it belongs to the given tenant.
    *
    * @param clientId The ID of the client to retrieve. If null, returns empty Optional.
-   * @param tenantId The tenant ID for cache key lookup. If null, returns empty Optional.
+   * @param tenantId The tenant the client must belong to. If null, returns empty Optional.
    * @return An Optional containing the client if found, or empty if not found or parameters are
    *     null.
    */
+  @Override
   public Optional<Client> get(ClientId clientId, TenantId tenantId) {
     if (clientId == null || tenantId == null) return Optional.empty();
 
-    var key = buildCacheKey(tenantId, clientId);
-    try {
-      var cached = redisTemplate.opsForValue().get(key);
-      if (cached instanceof Client client) {
-        log.debug(
-            "Cache hit for client ID: {} and tenant ID: {}",
-            clientId.getValue(),
-            tenantId.getValue());
-        return Optional.of(client);
-      }
-    } catch (Exception e) {
-      log.error("Failed to retrieve client from Redis cache: {}", clientId.getValue(), e);
-      try {
-        redisTemplate.delete(key);
-      } catch (Exception dex) {
-        log.error(
-            "Failed to delete corrupted cache entry for client ID: {}", clientId.getValue(), dex);
-      }
-    }
-
-    log.debug(
-        "Cache miss for client ID: {} and tenant ID: {}", clientId.getValue(), tenantId.getValue());
-    return Optional.empty();
+    return read(clientId.getValue().toString(), tenantId.getValue());
   }
 
   /**
-   * Retrieves a client from the cache by client ID only, searching across all tenants.
+   * Retrieves a client from the cache by client ID only, taking its tenant from the cached
+   * snapshot.
    *
-   * <p>This method performs a pattern-based scan to find a client with the given ID across all
-   * tenant partitions. It's useful when tenant context is not available but cache lookup is still
-   * desired.
+   * <p>Useful when tenant context is not available but cache lookup is still desired.
    *
    * @param clientId The ID of the client to retrieve. If null, returns empty Optional.
-   * @return An Optional containing the first matching client if found, or empty if not found.
+   * @return An Optional containing the matching client if found, or empty if not found.
    */
+  @Override
   public Optional<Client> getAnyTenant(ClientId clientId) {
     if (clientId == null) return Optional.empty();
 
-    try {
-      var pattern =
-          CACHE_PREFIX
-              + CACHE_KEY_SEPARATOR
-              + "*"
-              + CACHE_KEY_TENANT_CLIENT_SEPARATOR
-              + clientId.getValue().toString();
-      var keys = redisTemplate.keys(pattern);
-
-      if (keys != null && !keys.isEmpty()) {
-        for (var key : keys) {
-          try {
-            var cached = redisTemplate.opsForValue().get(key);
-            if (cached instanceof Client client) {
-              log.debug("Cache hit for client ID: {}", clientId.getValue());
-              return Optional.of(client);
-            }
-          } catch (Exception e) {
-            log.warn("Failed to retrieve cached entry for key: {}", key, e);
-          }
-        }
-      }
-    } catch (Exception e) {
-      log.error("Failed to search cache for client ID across tenants: {}", clientId.getValue(), e);
-    }
-
-    log.debug("Cache miss for client ID: {} (any tenant search)", clientId.getValue());
-    return Optional.empty();
+    return read(clientId.getValue().toString(), null);
   }
 
   /**
    * Removes a client from Redis cache.
    *
    * @param clientId The ID of the client to evict from cache. If null, no operation is performed.
-   * @param tenantId The tenant ID for cache key lookup. If null, no operation is performed.
+   * @param tenantId The tenant owning the client. If null, no operation is performed.
    */
+  @Override
   public void evict(ClientId clientId, TenantId tenantId) {
     if (clientId == null || tenantId == null) {
       log.warn("Attempted to evict client with null ID or tenant ID");
       return;
     }
 
-    var key = buildCacheKey(tenantId, clientId);
+    var id = clientId.getValue().toString();
     try {
-      redisTemplate.delete(key);
-      log.debug(
-          "Evicted client from cache with ID: {} for tenant: {}",
-          clientId.getValue(),
-          tenantId.getValue());
+      redisTemplate.unlink(buildCacheKey(id));
+      log.info("Evicted client from cache with ID: {} for tenant: {}", id, tenantId.getValue());
     } catch (Exception e) {
-      log.error("Failed to evict client from cache: {}", clientId, e);
+      log.error("Failed to evict client from cache: {}", id, e);
     }
   }
 
   /**
    * Removes all clients belonging to a specific tenant from Redis cache.
    *
+   * <p>Advances the tenant's namespace version, which detaches every entry cached under the
+   * previous version in constant time. The detached entries stop being served immediately and are
+   * replaced in place by the next write, or reclaimed by their own TTL if no write comes.
+   *
    * @param tenantId The tenant ID whose clients should be evicted. If null, no operation is
    *     performed.
    */
+  @Override
   public void evictAllByTenantId(TenantId tenantId) {
     if (tenantId == null) {
       log.warn("Attempted to evict clients with null tenant ID");
       return;
     }
 
-    try {
-      var pattern = buildTenantCacheKeyPattern(tenantId);
-      var keys = redisTemplate.keys(pattern);
-      if (keys != null && !keys.isEmpty()) {
-        var deletedCount = redisTemplate.delete(keys);
-        log.debug(
-            "Evicted {} client(s) from cache for tenant ID: {} using pattern: {}",
-            deletedCount,
-            tenantId.getValue(),
-            pattern);
-      } else {
-        log.debug("No clients found in cache for tenant ID: {}", tenantId.getValue());
-      }
-    } catch (Exception e) {
-      log.error("Failed to evict clients for tenant ID: {}", tenantId.getValue(), e);
-    }
+    versionRegistry.invalidateTenant(tenantId.getValue());
+    log.info("Evicted all cached clients for tenant ID: {}", tenantId.getValue());
   }
 
   /**
-   * Clears all entries from Redis cache.
+   * Clears the entire client cache.
    *
-   * <p>This method performs a complete cache flush by deleting all client-prefixed keys from Redis.
-   *
-   * <p>If the clear operation fails (e.g., due to Redis connectivity issues), the error is logged.
+   * <p>Advances the global namespace, which detaches every cached entry at once regardless of how
+   * many there are. The detached entries are reclaimed by their own TTL.
    */
+  @Override
   public void clear() {
-    try {
-      var keys = redisTemplate.keys(CACHE_PREFIX + CACHE_KEY_SEPARATOR + "*");
-      if (keys != null && !keys.isEmpty()) {
-        var stringKeys = new HashSet<>(keys);
-        redisTemplate.delete(stringKeys);
-      }
-
-      log.debug("Cleared entire client cache");
-    } catch (Exception e) {
-      log.error("Failed to clear cache", e);
-    }
+    versionRegistry.invalidateAll();
+    log.info("Cleared entire client cache");
   }
 }

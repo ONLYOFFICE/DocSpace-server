@@ -33,7 +33,7 @@
 
 namespace ASC.Web.Api.Controllers.Settings;
 
-[DefaultRoute("tips")]
+[ApiEndpoint(Template = "tips")]
 [ApiExplorerSettings(IgnoreApi = true)]
 public class TipsController(
     ILoggerFactory loggerFactory,

@@ -160,7 +160,7 @@
                 <batchSize>${cwBatchSize}</batchSize>
                 <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                     <includeContext>false</includeContext>
-                    <jsonGeneratorDecorator class="net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator"/>
+                    <decorator class="net.logstash.logback.decorate.PrettyPrintingDecorator"/>
                     <customFields>{"applicationContext":"${applicationContext}", "instanceId":"${HOSTNAME}"}</customFields>
                     <fieldNames>
                         <level>level</level>
@@ -269,7 +269,7 @@
                 <batchSize>${cwBatchSize}</batchSize>
                 <encoder class="net.logstash.logback.encoder.LogstashEncoder">
                     <includeContext>false</includeContext>
-                    <jsonGeneratorDecorator class="net.logstash.logback.decorate.PrettyPrintingJsonGeneratorDecorator"/>
+                    <decorator class="net.logstash.logback.decorate.PrettyPrintingDecorator"/>
                     <customFields>{"applicationContext":"${applicationContext}", "instanceId":"${HOSTNAME}"}</customFields>
                     <fieldNames>
                         <level>level</level>
@@ -352,12 +352,12 @@
             </condition>
             <if>
                 <then>
-                    <root level="ERROR">
+                    <root level="WARN">
                         <appender-ref ref="JSON_FILE"/>
                     </root>
                 </then>
                 <else>
-                    <root level="ERROR">
+                    <root level="WARN">
                         <appender-ref ref="JSON_CONSOLE_ASYNC"/>
                     </root>
                 </else>
@@ -367,7 +367,7 @@
 
     <springProfile name="production,prod,p">
         <springProfile name="saas">
-            <root level="ERROR">
+            <root level="WARN">
                 <appender-ref ref="CLOUDWATCH_ASYNC"/>
             </root>
         </springProfile>

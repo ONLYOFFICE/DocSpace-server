@@ -1,4 +1,4 @@
-﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -49,31 +49,31 @@ public class WebhooksDbContext(DbContextOptions<WebhooksDbContext> options) : Ba
             .AddDbTenant();
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, null, null])]
+    [PreCompileQuery]
     public Task<DbWebhooksConfig> WebhooksConfigByUriAsync(int tenantId, string uri, string name)
     {
         return Queries.WebhooksConfigByUriAsync(this, tenantId, uri, name);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<WebhooksConfigWithStatus> WebhooksConfigWithStatusAsync(int tenantId, Guid? userId)
     {
         return Queries.WebhooksConfigWithStatusAsync(this, tenantId, userId);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbWebhooksConfig> WebhooksConfigsAsync(int tenantId, bool? enabled)
     {
         return Queries.WebhooksConfigsAsync(this, tenantId, enabled);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<DbWebhooksConfig> WebhooksConfigAsync(int tenantId, int id)
     {
         return Queries.WebhooksConfigAsync(this, tenantId, id);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<DbWebhooks> WebhooksLogAsync(int tenantId, int id)
     {
         return Queries.WebhooksLogAsync(this, tenantId, id);

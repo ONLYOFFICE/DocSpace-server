@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -247,7 +247,7 @@
     <value>تم تحديث اشتراك العميل: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>تم تحديث إعدادات الخدمات الممكّنة لمحفظة العملاء</value>
+    <value>تم تحديث إعدادات الخدمات الممكّنة لمحفظة العملاء: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>تم تعبئة محفظة العميل: {0}</value>
@@ -729,12 +729,6 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>تمت إعادة تسمية البوابة</value>
   </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>تم تعطيل الغرفة الخاصة</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>تم تفعيل الغرفة الخاصة</value>
-  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>تم منح الوصول للمنتج [{0}]</value>
   </data>
@@ -788,6 +782,12 @@
   </data>
   <data name="RegenerateSecret" xml:space="preserve">
     <value>تمت إعادة إنشاء سر {0} الخاص بالعميل</value>
+  </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>ملاحظة</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>يعرض التقرير أحدث {0} من أصل {1} حدث. للحصول على جميع الأحداث، قم بتنزيل التقرير بتنسيق CSV.</value>
   </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>تم إعادة تعيين إعدادات التحويل المتجهي (Vectorization)</value>
@@ -907,7 +907,7 @@
     <value>أرسل</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>أرسل المستخدم {0} دعوة إلى {1} للانضمام إلى DocSpace</value>
+    <value>أرسل المستخدم {0} دعوة إلى {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>تم ارسال تعليمات الدعوة: {0}</value>
@@ -956,6 +956,9 @@
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>بدء ترحيل منطقة البوابة</value>
+  </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>تم نقل رصيد الاشتراك إلى المحفظة: {0}</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>حساب النظام</value>
@@ -1205,5 +1208,89 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>تم تسجيل خروج الاتصالات النشطة للمستخدم: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>تم تحديث تكوين Docs Connect</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>تم تنزيل تقرير حصة Docs Connect</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>تم تحديث إعدادات AI للمستخدم</value>
+  </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>ملف تعريف الذكاء الاصطناعي المعين لوكيل الذكاء الاصطناعي للإجراء: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>ملف تعريف الذكاء الاصطناعي المعين للإجراء: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>تم إنشاء ملف تعريف نموذج الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>تم حذف ملف تعريف نموذج الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>تم إلغاء تعيين ملف تعريف الذكاء الاصطناعي من الإجراء: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>تم تحديث ملف تعريف نموذج الذكاء الاصطناعي: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>الملفات [{0}]. تم وضع علامة مقروء</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>الملفات [{0}]. لم يتم حفظ الملف. تجاوزت حصة التخزين للبوابة.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>الملفات [{0}]. حفظ الملف يتجاوز حصة تخزين البوابة.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>المجلدات [{0}]. تم وضع علامة مقروء</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>تم إنشاء مفتاح تشفير الغرفة الخاصة {0}</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>تم حذف مفتاح تشفير الغرفة الخاصة {0}</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>تم تحديث مفتاح تشفير الغرفة الخاصة {0}</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>تم اكتشاف تسجيل دخول مشبوه: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>تم تحديث خادم MCP {0} لوكيل الذكاء الاصطناعي</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>بدأ تعيين البيانات الوصفية بشكل متتالي: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>تم إنشاء حقل البيانات الوصفية: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>تم حذف حقل البيانات الوصفية: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>تم تحديث حقل البيانات الوصفية: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>تم تعيين قالب البيانات الوصفية: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>تم إنشاء قالب البيانات الوصفية: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>تم حذف قالب البيانات الوصفية: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>تم إلغاء تعيين قالب البيانات الوصفية: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>تم تحديث قالب البيانات الوصفية: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>تم تحديث قيم البيانات الوصفية: {0}</value>
   </data>
 </root>

@@ -55,7 +55,10 @@ public class ExternalDbSyncTaskManager(IDistributedTaskQueueFactory queueFactory
         try
         {
             var instanceTasks = await _queue.GetAllTasks(DistributedTaskQueue<ExternalDbSyncTask>.INSTANCE_ID);
-            return _queue.MaxThreadsCount < instanceTasks.Count;
+
+            // finished tasks linger in the queue until the cleaner drops them, so only count
+            // the ones that still occupy a worker
+            return _queue.MaxThreadsCount < instanceTasks.Count(t => t.Status <= DistributedTaskStatus.Running);
         }
         finally
         {

@@ -253,7 +253,7 @@
     <value>Подписка клиента обновлена: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Обновлены настройки сервисов, подключенных через кошелек клиента</value>
+    <value>Обновлены настройки сервисов, подключенных через кошелек клиента: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Кошелек клиента пополнен: {0}</value>
@@ -744,12 +744,6 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Портал переименован</value>
   </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Приватная комната отключена</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Приватная комната включена</value>
-  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Продукты [{0}]. Открыт доступ</value>
   </data>
@@ -803,6 +797,12 @@
   </data>
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Секрет клиента {0} создан повторно</value>
+  </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Примечание</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>В отчете показаны последние {0} из {1} событий. Чтобы получить все события, выгрузите отчет в формате CSV.</value>
   </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Настройки векторизации сброшены</value>
@@ -922,7 +922,7 @@
     <value>Отправка</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Пользователь {0} отправил приглашение {1} в этот DocSpace</value>
+    <value>Пользователь {0} отправил приглашение {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Отправлены пригласительные инструкции: {0}</value>
@@ -971,6 +971,9 @@
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Начат перенос портала в другой регион</value>
+  </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Баланс подписки перенесен в кошелек: {0}</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Системная учетная запись</value>
@@ -1205,5 +1208,89 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Активные сессии завершены для пользователя: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Обновлена конфигурация Docs Connect</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Загружен отчет о квоте Docs Connect</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>ИИ-настройки пользователя обновлены</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Файлы [{0}]. Файл не сохранен. Превышен лимит хранилища для портала.</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Файлы [{0}]. Отмечены как прочитанные</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Файлы [{0}]. Сохранение файла превышает квоту хранилища портала.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Папки [{0}]. Отмечены как прочитанные</value>
+  </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Профиль ИИ назначен ИИ-агенту для действия: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Профиль ИИ назначен для действия: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Профиль ИИ-модели создан: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Профиль ИИ-модели удалён: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Профиль ИИ удалён из действия: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Профиль ИИ-модели обновлён: {0}</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Ключ шифрования приватной комнаты {0} создан</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Ключ шифрования приватной комнаты {0} удалён</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Ключ шифрования приватной комнаты {0} обновлён</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Обнаружен подозрительный вход: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>MCP-сервер {0} ИИ-агента обновлён</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Каскадное назначение метаданных запущено: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Поле метаданных создано: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Поле метаданных удалено: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Поле метаданных обновлено: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Шаблон метаданных назначен: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Шаблон метаданных создан: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Шаблон метаданных удален: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Назначение шаблона метаданных отменено: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Шаблон метаданных обновлен: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Значения метаданных обновлены: {0}</value>
   </data>
 </root>

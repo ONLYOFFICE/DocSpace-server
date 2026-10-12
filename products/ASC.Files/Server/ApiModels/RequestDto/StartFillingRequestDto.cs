@@ -34,12 +34,13 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters to start filling a file.
+/// The parameters of a start-filling request.
 /// </summary>
 public class StartFillingRequestDto<T>
 {
     /// <summary>
-    /// The file ID to start filling.
+    /// The PDF form to open for filling. It has to be the form as it lies in the form-filling room itself, not a copy
+    /// kept elsewhere and not a submitted result.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]

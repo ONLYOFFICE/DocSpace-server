@@ -1,40 +1,40 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.Core.Thirdparty.WebDav;
 
 [Transient(typeof(IThirdPartyStorage<WebDavEntry, WebDavEntry, WebDavEntry>))]
-public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientFactory, SetupInfo setupInfo)
+public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientFactory, SetupInfo setupInfo, ThirdpartyConfigurationData thirdpartyConfiguration)
     : IThirdPartyStorage<WebDavEntry, WebDavEntry, WebDavEntry>, IDisposable
 {
     public bool IsOpened => _client != null;
@@ -43,6 +43,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
     private const string DepthHeader = "Depth";
     private WebDavClient _client;
     private Uri _baseUri;
+    private string _baseUrl;
     private string _absolutePath;
     private AuthData _authData;
 
@@ -57,14 +58,22 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
 
         var uri = new Uri(authData.Url);
         _baseUri = new UriBuilder(uri.Scheme, uri.Host, uri.Port).Uri;
+        _baseUrl = _baseUri.ToString().Trim('/');
         _absolutePath = HttpUtility.UrlDecode(uri.AbsolutePath).Trim('/');
 
-#pragma warning disable CA2000 // HttpClient is owned by WebDavClient
-        var httpClient = httpClientFactory.CreateClient();
+#pragma warning disable CA2000
+        // HttpClient is owned by WebDavClient
+        // The cookie-less client is required, not a preference: the default client's pooled
+        // handler carries one process-wide CookieContainer, so the session cookie a WebDAV
+        // server hands out on a successful login is replayed on every later request to that
+        // host. Servers that accept session auth (Nextcloud does) then authorize a request
+        // whose credentials are wrong, which is bug 83399.
+        var httpClient = httpClientFactory.CreateClient("customHttpClientNoCookie");
 #pragma warning restore CA2000
+        httpClient.Timeout = thirdpartyConfiguration.ThirdPartyRequestTimeout;
 
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
-            Convert.ToBase64String(Encoding.ASCII.GetBytes($"{authData.Login}:{authData.Password}")));
+            Convert.ToBase64String(Encoding.UTF8.GetBytes($"{authData.Login}:{authData.Password}")));
 
         _client = new WebDavClient(httpClient);
         _authData = authData;
@@ -118,6 +127,7 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         var response = await SendAsync(() => _client.GetProcessedFile(resourceUrl));
         if (!response.IsSuccessful)
         {
+            response.Dispose();
             return null;
         }
 
@@ -285,14 +295,6 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
 
     private async Task<WebDavResponse> PutStreamAsync(string url, Stream fileStream)
     {
-        var parentPath = GetParentPath(url);
-        var parentResource = await GetEntryAsync(parentPath);
-
-        if (parentResource is not { IsCollection: true })
-        {
-            return null;
-        }
-
         if (fileStream.CanSeek)
         {
             return await SendAsync(() => _client.PutFile(url, fileStream));
@@ -346,11 +348,10 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
         var entry = new WebDavEntry();
 
         var uri = HttpUtility.UrlDecode(resource.Uri.Trim('/'));
-        var baseUrl = _baseUri.ToString().Trim('/');
 
-        if (uri.StartsWith(baseUrl))
+        if (uri.StartsWith(_baseUrl, StringComparison.Ordinal))
         {
-            uri = uri.Replace(baseUrl, string.Empty);
+            uri = uri[_baseUrl.Length..];
         }
 
         if (!string.IsNullOrEmpty(_absolutePath))
@@ -396,15 +397,24 @@ public class WebDavStorage(TempStream tempStream, IHttpClientFactory httpClientF
             return response;
         }
 
+        if (response is IDisposable disposableResponse)
+        {
+            disposableResponse.Dispose();
+        }
+
         _client?.Dispose();
 
 #pragma warning disable CA2000 // HttpClient and handler are owned by WebDavClient
+        // IHttpClientFactory is not used here
+        // challenge auth requires per-user credentials on the handler,
+        // which must not be shared via the factory's pooled handlers
+        // fixed in 8533e2f079 (bug 69802)
         var handler = new SocketsHttpHandler
         {
             Credentials = new NetworkCredential(_authData.Login, _authData.Password)
         };
         var client = new HttpClient(handler);
-
+        client.Timeout = thirdpartyConfiguration.ThirdPartyRequestTimeout;
         _client = new WebDavClient(client);
 #pragma warning restore CA2000
 

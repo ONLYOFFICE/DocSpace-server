@@ -330,7 +330,14 @@ public sealed class ApiDateTime : IComparable<ApiDateTime>, IComparable
         var localUtcTime = UtcTime;
         if (!UtcTime.Equals(DateTime.MinValue))
         {
-            localUtcTime = UtcTime.Add(TimeZoneOffset);
+            // clamp instead of adding the offset outright: a near-boundary UtcTime (e.g. a "no expiration"
+            // far-future sentinel) plus a non-zero tenant time zone offset can overflow past DateTime.MinValue/MaxValue
+            localUtcTime = TimeZoneOffset.Ticks switch
+            {
+                > 0 when UtcTime.Ticks > DateTime.MaxValue.Ticks - TimeZoneOffset.Ticks => DateTime.MaxValue,
+                < 0 when UtcTime.Ticks < DateTime.MinValue.Ticks - TimeZoneOffset.Ticks => DateTime.MinValue,
+                _ => UtcTime.Add(TimeZoneOffset)
+            };
         }
 
         return ToRoundTripString(localUtcTime, TimeZoneOffset);

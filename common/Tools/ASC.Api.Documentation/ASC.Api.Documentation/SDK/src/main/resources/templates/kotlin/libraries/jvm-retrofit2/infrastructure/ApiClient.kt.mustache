@@ -14,7 +14,9 @@ import {{packageName}}.auth.OAuthFlow
 import {{packageName}}.auth.HttpBasicAuth
 {{/isBasicBasic}}
 {{#isBasicBearer}}
+{{#vendorExtensions.x-first-basic-bearer}}
 import {{packageName}}.auth.HttpBearerAuth
+{{/vendorExtensions.x-first-basic-bearer}}
 {{/isBasicBearer}}
 {{/isBasic}}
 {{#isApiKey}}
@@ -183,6 +185,7 @@ import okhttp3.MediaType.Companion.toMediaType
 
     {{/isBasicBasic}}
     {{#isBasicBearer}}
+    {{#vendorExtensions.x-first-basic-bearer}}
     {{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}constructor(
         baseUrl: String = defaultBasePath,
         okHttpClientBuilder: OkHttpClient.Builder? = null,
@@ -193,6 +196,7 @@ import okhttp3.MediaType.Companion.toMediaType
         setBearerToken(bearerToken)
     }
 
+    {{/vendorExtensions.x-first-basic-bearer}}
     {{/isBasicBearer}}
     {{/isBasic}}
     {{/authMethods}}
@@ -231,7 +235,19 @@ import okhttp3.MediaType.Companion.toMediaType
     }
 
     {{/isBasicBasic}}
-    {{^isBasicBasic}}
+    {{#isBasicBearer}}
+    {{#vendorExtensions.x-first-basic-bearer}}
+    {{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}fun setBearerToken(bearerToken: String): ApiClient {
+        apiAuthorizations.values.runOnFirst<Interceptor, HttpBearerAuth> {
+            this.bearerToken = bearerToken
+        }
+        return this
+    }
+
+    {{/vendorExtensions.x-first-basic-bearer}}
+    {{/isBasicBearer}}
+    {{/isBasic}}
+    {{/authMethods}}
     {{#hasOAuthMethods}}
     {{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}fun setOAuthCredentials(username: String, password: String): ApiClient {
         apiAuthorizations.values.runOnFirst<Interceptor, OAuth> {
@@ -240,18 +256,6 @@ import okhttp3.MediaType.Companion.toMediaType
         return this
     }
     {{/hasOAuthMethods}}
-    {{/isBasicBasic}}
-    {{#isBasicBearer}}
-    {{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}fun setBearerToken(bearerToken: String): ApiClient {
-        apiAuthorizations.values.runOnFirst<Interceptor, HttpBearerAuth> {
-            this.bearerToken = bearerToken
-        }
-        return this
-    }
-
-    {{/isBasicBearer}}
-    {{/isBasic}}
-    {{/authMethods}}
     {{/hasAuthMethods}}
     {{#hasOAuthMethods}}
     /**

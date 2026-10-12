@@ -1,34 +1,34 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.MessagingSystem.Core;
@@ -435,6 +435,9 @@ public enum MessageAction
     [Description("Documents display file extension updated")]
     DocumentsDisplayFileExtensionUpdated = 5101,
 
+    [Description("Documents show quick actions updated")]
+    DocumentsShowQuickActionsUpdated = 5207,
+
     [Description("File converted")]
     FileConverted = 5035,
 
@@ -614,19 +617,19 @@ public enum MessageAction
 
     [Description("Form stopped")]
     FormStopped = 5153,
-    
+
     [Description("AI agent created")]
     AgentCreated = 5154,
 
     [Description("AI agent renamed")]
     AgentRenamed = 5155,
-    
+
     [Description("AI agent deleted")]
     AgentDeleted = 5156,
-    
+
     [Description("MCP server added to AI agent")]
     AddedServerToAgent = 5157,
-    
+
     [Description("MCP server deleted from AI agent")]
     DeletedServerFromAgent = 5158,
 
@@ -635,7 +638,16 @@ public enum MessageAction
 
     [Description("Documents default templates settings updated")]
     DocumentsDefaultTemplatesSettingsUpdated = 5160,
-    
+
+    [Description("Private room encryption key created")]
+    PrivacyRoomKeyCreated = 5161,
+
+    [Description("Private room encryption key updated")]
+    PrivacyRoomKeyUpdated = 5162,
+
+    [Description("Private room encryption key deleted")]
+    PrivacyRoomKeyDeleted = 5163,
+
     [Description("File saved, user quota exceeded")]
     FileSavedButUserQuotaExceeded = 5201,
 
@@ -647,6 +659,12 @@ public enum MessageAction
 
     [Description("File not saved due to room quota exceeded")]
     FileNotSavedDueToRoomQuota = 5204,
+
+    [Description("File saved, tenant quota exceeded")]
+    FileSavedButTenantQuotaExceeded = 5205,
+
+    [Description("File not saved due to tenant quota exceeded")]
+    FileNotSavedDueToTenantQuota = 5206,
 
     #endregion
 
@@ -877,12 +895,6 @@ public enum MessageAction
     [Description("Start storage encryption")]
     StartStorageEncryption = 5050,
 
-    [Description("Privacy room enable")]
-    PrivacyRoomEnable = 5051,
-
-    [Description("Privacy room disable")]
-    PrivacyRoomDisable = 5052,
-
     [Description("Start storage decryption")]
     StartStorageDecryption = 5053,
 
@@ -922,6 +934,7 @@ public enum MessageAction
     [Description("Custom quota per AI agent disabled")]
     CustomQuotaPerAiAgentDisabled = 6072,
 
+    // Legacy AI implementation actions, no longer sent. Kept only to render old audit records.
     [Description("AI provider created")]
     AIProviderCreated = 6073,
 
@@ -933,28 +946,29 @@ public enum MessageAction
 
     [Description("MCP server created")]
     ServerCreated = 6076,
-    
+
     [Description("MCP server updated")]
     ServerUpdated = 6077,
-    
+
+    // Legacy AI implementation actions, no longer sent. Kept only to render old audit records.
     [Description("MCP server enabled")]
     ServerEnabled = 6078,
-    
+
     [Description("MCP server disabled")]
     ServerDisabled = 6079,
-    
+
     [Description("MCP server deleted")]
     ServerDeleted = 6080,
-    
+
     [Description("WebSearch settings configured")]
     SetWebSearchSettings = 6081,
-    
+
     [Description("WebSearch settings reset")]
     ResetWebSearchSettings = 6082,
-    
+
     [Description("Vectorization settings configured")]
     SetVectorizationSettings = 6083,
-    
+
     [Description("Vectorization settings reset")]
     ResetVectorizationSettings = 6084,
 
@@ -990,7 +1004,8 @@ public enum MessageAction
 
     [Description("Login settings updated")]
     LoginSettingsUpdated = 6095,
-    
+
+    // Legacy AI implementation action, no longer sent (replaced by AiProfileAssigned). Kept only to render old audit records.
     [Description("AI default provider set")]
     AIDefaultProviderSet = 6096,
 
@@ -1002,6 +1017,36 @@ public enum MessageAction
 
     [Description("User AI settings updated")]
     UserUpdatedAiSettings = 6099,
+
+    [Description("Subscription balance moved to wallet")]
+    SubscriptionBalanceMovedToWallet = 6100,
+
+    [Description("Docs Cloud config updated")]
+    DocsCloudConfigUpdated = 6101,
+
+    [Description("Docs Cloud quota report downloaded")]
+    DocsCloudQuotaReportDownloaded = 6102,
+
+    [Description("AI model profile created")]
+    AiProfileCreated = 6103,
+
+    [Description("AI model profile updated")]
+    AiProfileUpdated = 6104,
+
+    [Description("AI model profile deleted")]
+    AiProfileDeleted = 6105,
+
+    [Description("AI model profile assigned to action")]
+    AiProfileAssigned = 6106,
+
+    [Description("AI model profile unassigned from action")]
+    AiProfileUnassigned = 6107,
+
+    [Description("AI model profile assigned to AI agent action")]
+    AiAgentProfileAssigned = 6108,
+
+    [Description("MCP server of AI agent updated")]
+    UpdatedServerOfAgent = 6109,
 
     #endregion
 
@@ -1020,6 +1065,9 @@ public enum MessageAction
 
     [Description("Contact sales mail sent")]
     ContactSalesMailSent = 7004,
+
+    [Description("Suspicious login detected")]
+    SuspiciousLoginDetected = 7005,
 
     #endregion
 
@@ -1051,6 +1099,43 @@ public enum MessageAction
 
     [Description("Generate personal access token")]
     GeneratePersonalAccessToken = 9909,
+
+    #endregion
+
+    #region Metadata
+
+    // 5300+: the documents numbering. The block was numbered 9910+ once, inside the OAuth range the audit mapper
+    // formats by the target instead of the description, which put the entry id where the entry title belongs
+
+    [Description("Metadata template created")]
+    MetadataTemplateCreated = 5300,
+
+    [Description("Metadata template updated")]
+    MetadataTemplateUpdated = 5301,
+
+    [Description("Metadata template deleted")]
+    MetadataTemplateDeleted = 5302,
+
+    [Description("Metadata field created")]
+    MetadataFieldCreated = 5303,
+
+    [Description("Metadata field updated")]
+    MetadataFieldUpdated = 5304,
+
+    [Description("Metadata field deleted")]
+    MetadataFieldDeleted = 5305,
+
+    [Description("Metadata template assigned")]
+    MetadataTemplateAssigned = 5306,
+
+    [Description("Metadata template unassigned")]
+    MetadataTemplateUnassigned = 5307,
+
+    [Description("Metadata values updated")]
+    MetadataValuesUpdated = 5308,
+
+    [Description("Metadata cascade assignment started")]
+    MetadataCascadeStarted = 5309,
 
     #endregion
 

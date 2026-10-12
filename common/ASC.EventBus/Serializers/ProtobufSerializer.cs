@@ -59,7 +59,7 @@ public class ProtobufSerializer : IIntegrationEventSerializer
         }
 
         var types = assembly.GetExportedTypes()
-            .Where(t => t.GetCustomAttributes<ProtoContractAttribute>().Any());
+            .Where(t => !t.ContainsGenericParameters && t.GetCustomAttributes<ProtoContractAttribute>().Any());
 
         foreach (var type in types)
         {

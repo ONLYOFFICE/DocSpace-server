@@ -37,20 +37,87 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace ASC.Api.Core.Extensions;
 
+/// <summary>
+/// Prose for a route parameter that no DTO property binds, so nothing else can describe it.
+/// </summary>
+/// <remarks>
+/// ASP.NET synthesizes a path parameter for every `{placeholder}` in a route template it cannot match
+/// to a bound property, and that synthesized parameter reaches the document bare - no description, a
+/// plain `string` schema. XML `&lt;param&gt;` comments do not reach it either: Swashbuckle applies
+/// those by matching the *method's* parameters, so a tag for a name the method does not declare is a
+/// CS1572 warning that changes nothing in the document (measured).
+///
+/// This attribute is the remaining place to put the text. Use it only where the placeholder genuinely
+/// cannot be bound - if a DTO property can carry the value, give it `[FromRoute]` and an XML summary
+/// instead, which documents the parameter and binds it in one move.
+/// </remarks>
+[AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
+public sealed class SwaggerPathParameterAttribute(string name, string description) : Attribute
+{
+    public string Name { get; } = name;
+    public string Description { get; } = description;
+}
+
+/// <summary>
+/// Writes the prose declared by <see cref="SwaggerPathParameterAttribute"/> onto the matching
+/// parameter. Fill-in only: a parameter that already carries a description keeps it, so binding the
+/// value properly later makes the attribute dead rather than conflicting.
+/// </summary>
+public class SwaggerPathParameterFilter : IOperationFilter
+{
+    public void Apply(OpenApiOperation operation, OperationFilterContext context)
+    {
+        if (operation.Parameters == null)
+        {
+            return;
+        }
+
+        var declared = context.MethodInfo.GetCustomAttributes<SwaggerPathParameterAttribute>(true).ToList();
+        if (declared.Count == 0)
+        {
+            return;
+        }
+
+        foreach (var attribute in declared)
+        {
+            var target = operation.Parameters.FirstOrDefault(p =>
+                p.In == ParameterLocation.Path &&
+                string.Equals(p.Name, attribute.Name, StringComparison.Ordinal));
+
+            if (target is OpenApiParameter { Description: null or "" } parameter)
+            {
+                parameter.Description = attribute.Description;
+            }
+        }
+    }
+}
+
 public class SwaggerCustomOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
         foreach (var parameter in operation.Parameters)
         {
-            if (parameter.In == ParameterLocation.Query && parameter.Schema.Type == JsonSchemaType.Array)
+            if (parameter.In == ParameterLocation.Query && parameter.Schema?.Type == JsonSchemaType.Array)
             {
-                (parameter as OpenApiParameter)?.Style = ParameterStyle.DeepObject;
+                // "deepObject" is only valid for arrays of objects. For arrays of primitives/enums
+                // it produces a style that generators can't serialize, so keep the default "form" +
+                // "explode: true" (repeated parameters, e.g. ?folderType=USER&folderType=CustomRoom),
+                // which is what the server's default model binding expects.
+                var isObjectArray = parameter.Schema.Items?.Type == JsonSchemaType.Object;
+
+                (parameter as OpenApiParameter)?.Style = isObjectArray ? ParameterStyle.DeepObject : ParameterStyle.Form;
                 (parameter as OpenApiParameter)?.Explode = true;
             }
 
-        // Remove duplicate example from parameter level if it exists in schema
-        if (parameter is OpenApiParameter { Example: not null, Schema.Example: not null } openApiParameter)
+        // Remove duplicate example from parameter level if it exists in schema.
+        // At this point a schema may still carry the singular (obsolete) "example" that Swashbuckle
+        // fills in - OpenApi31SchemaDocumentFilter only normalises it to "examples" later - so both
+        // forms count as "the schema already has an example".
+#pragma warning disable CS0618 // Type or member is obsolete
+        if (parameter is OpenApiParameter { Example: not null, Schema: { } parameterSchema } openApiParameter
+            && (parameterSchema.Example != null || parameterSchema.Examples is { Count: > 0 }))
+#pragma warning restore CS0618
         {
             openApiParameter.Example = null;
         }

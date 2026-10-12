@@ -65,7 +65,7 @@ public class CreateFolderWithFilesDepthCommand : AsyncCommand<CreateFolderWithFi
         public required string Password { get; set; }
     }
 
-    public override ValidationResult Validate(CommandContext context, Settings settings)
+    protected override ValidationResult Validate(CommandContext context, Settings settings)
     {
         if (string.IsNullOrEmpty(settings.Email))
         {
@@ -80,7 +80,7 @@ public class CreateFolderWithFilesDepthCommand : AsyncCommand<CreateFolderWithFi
         return ValidationResult.Success();
     }
 
-    public override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
+    protected override async Task<int> ExecuteAsync(CommandContext context, Settings settings, CancellationToken cancellationToken)
     {
         var configuration = await ApiHelper.GetConfigurationAsync(settings.Email, settings.Password);
 
@@ -106,7 +106,7 @@ public class CreateFolderWithFilesDepthCommand : AsyncCommand<CreateFolderWithFi
         List<Task> tasks = [];
         for (var i = 0; i < foldersCount; i++)
         {
-            tasks.Add(foldersApi.CreateFolderAsync(folderId, new CreateFolder(system.FileName()), token).ContinueWith(r=> newFolders.Add(r.Result.Response.Id), token));
+            tasks.Add(foldersApi.CreateFolderAsync(folderId, new CreateFolderRequest(system.FileName()), token).ContinueWith(r=> newFolders.Add(r.Result.Response.Id), token));
         }
 
         await Task.WhenAll(tasks);
@@ -116,7 +116,7 @@ public class CreateFolderWithFilesDepthCommand : AsyncCommand<CreateFolderWithFi
         {
             for (var j = 0; j < filesCount; j++)
             {
-                tasks.Add(filesApi.CreateFileAsync(newFolder, new CreateFileJsonElement(system.FileName("docx")), cancellationToken: token));
+                tasks.Add(filesApi.CreateFileAsync(newFolder, new CreateFileRequest(system.FileName("docx")), cancellationToken: token));
                 if (tasks.Count >= 100)
                 {
                     await Task.WhenAny(tasks);

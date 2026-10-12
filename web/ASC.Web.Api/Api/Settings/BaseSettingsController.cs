@@ -38,9 +38,7 @@ namespace ASC.Web.Api.Controllers.Settings;
 ///</summary>
 ///<name>settings</name>
 [Scope]
-[DefaultRoute]
-[ApiController]
-[ControllerName("settings")]
+[ApiEndpoint("settings")]
 public class BaseSettingsController(IFusionCache fusionCache, WebItemManager webItemManager) : ControllerBase
 {
     //private const int ONE_THREAD = 1;

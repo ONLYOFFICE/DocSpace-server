@@ -35,14 +35,20 @@ namespace ASC.Web.Core;
 
 public class WalletServiceDescriptionManager
 {
+    private const string AgentSourceType = "Agent";
+
     private static readonly Dictionary<string, string> _mapping = new()
     {
         { "chat", "total_tokens" },
         { "embedding", "prompt_tokens" },
-        { "search", "num_results" }
+        { "search", "num_results" },
+        { "image", "total_tokens" }
     };
 
-    public static (string, string, int) GetServiceDescriptionAndUom(Operation operation, string filterServiceName, Dictionary<string, string> metadata)
+    // The kinds of AI search operation that have a description and a unit of their own.
+    private static readonly HashSet<string> _aiSearchTypes = ["search", "fetch"];
+
+    public static (string, string, int) GetServiceDescriptionAndUom(Operation operation, Dictionary<string, string> metadata)
     {
         if (operation == null)
         {
@@ -53,9 +59,9 @@ public class WalletServiceDescriptionManager
         var quantity = operation.Quantity;
 
         // for testing purposes
-        if (serviceName != null && serviceName.StartsWith("disk-storage"))
+        if (serviceName != null && serviceName.EndsWith("-1-hour"))
         {
-            serviceName = "disk-storage";
+            serviceName = serviceName.Replace("-1-hour", "");
         }
 
         if (operation.Type == OperationType.AiCredit && operation.Credit > 0)
@@ -64,13 +70,8 @@ public class WalletServiceDescriptionManager
             operation.Type = OperationType.Deposit;
         }
 
-        if (operation.Type == OperationType.AiServicePayment)
+        if (serviceName == "ai-tools")
         {
-            if (string.IsNullOrEmpty(serviceName) && !string.IsNullOrEmpty(filterServiceName))
-            {
-                serviceName = filterServiceName;
-            }
-
             if (metadata != null && metadata.TryGetValue(BillingClient.MetadataType, out var type))
             {
                 serviceName = type;
@@ -82,6 +83,16 @@ public class WalletServiceDescriptionManager
                     quantity = quantityValue;
                 }
             }
+        }
+
+        // AI search bills web searches and page crawls under one service: only the type tells them apart.
+        // An operation without a known type stays plain AI search.
+        if (serviceName == "ai-search" &&
+            metadata != null &&
+            metadata.TryGetValue(BillingClient.MetadataType, out var searchType) &&
+            _aiSearchTypes.Contains(searchType))
+        {
+            serviceName = searchType;
         }
 
         if (string.IsNullOrEmpty(serviceName))
@@ -105,6 +116,23 @@ public class WalletServiceDescriptionManager
         return (description, uom, quantity);
     }
 
+    // culture: a letter resolves the texts for its recipient; null takes the current UI culture
+    public static (string serviceName, string title, string serviceUnit) GetServiceTitleAndUom(string serviceName, Dictionary<string, string> customUom, CultureInfo culture = null)
+    {
+        // for testing purposes
+        if (serviceName != null && serviceName.EndsWith("-1-hour"))
+        {
+            serviceName = serviceName.Replace("-1-hour", "");
+        }
+
+        var unit = customUom?.GetValueOrDefault(serviceName, serviceName) ?? serviceName;
+
+        var title = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceDesc_{serviceName}", culture);
+        var serviceUnit = Resource.ResourceManager.GetString($"AccountingCustomerOperationServiceUOM_{unit}", culture);
+
+        return (serviceName, title, serviceUnit);
+    }
+
     public static string GetServiceDetails(Dictionary<string, string> metadata)
     {
         if (metadata == null)
@@ -120,16 +148,94 @@ public class WalletServiceDescriptionManager
         return metadata.TryGetValue(BillingClient.MetadataModel, out var model) ? model : string.Empty;
     }
 
-    public static (string, string) GetAgentInfo(Dictionary<string, string> metadata)
+    /// <summary>
+    /// Reads the source of an AI operation from its metadata. Supports both the current
+    /// source_id/source_type/source_title triple and the legacy agent_id/agent_title pair,
+    /// which is always reported as the <c>Agent</c> source type.
+    /// </summary>
+    public static (string sourceId, string sourceType, string sourceTitle) GetSourceInfo(Dictionary<string, string> metadata)
     {
         if (metadata == null)
         {
-            return (null, null);
+            return (null, null, null);
+        }
+
+        metadata.TryGetValue(BillingClient.MetadataSourceId, out var sourceId);
+        metadata.TryGetValue(BillingClient.MetadataSourceType, out var sourceType);
+        metadata.TryGetValue(BillingClient.MetadataSourceTitle, out var sourceTitle);
+
+        if (sourceId != null || sourceType != null || sourceTitle != null)
+        {
+            return (sourceId, sourceType, sourceTitle);
         }
 
         metadata.TryGetValue(BillingClient.MetadataAgentId, out var agentId);
         metadata.TryGetValue(BillingClient.MetadataAgentTitle, out var agentTitle);
 
-        return (agentId, agentTitle);
+        return agentId == null && agentTitle == null
+            ? (null, null, null)
+            : (agentId, AgentSourceType, agentTitle);
+    }
+
+    /// <summary>
+    /// Reads the tokens an AI operation consumed from its metadata. Returns <c>null</c> when the metadata
+    /// carries no token counts at all, so a non-AI operation has no usage rather than an all-zero one.
+    /// </summary>
+    public static OperationTokenUsage GetTokenUsage(Dictionary<string, string> metadata)
+    {
+        if (metadata == null)
+        {
+            return null;
+        }
+
+        var found = false;
+
+        var usage = new OperationTokenUsage
+        {
+            TotalTokens = ReadTokens(BillingClient.MetadataTotalTokens),
+            PromptTokens = ReadTokens(BillingClient.MetadataPromptTokens),
+            CompletionTokens = ReadTokens(BillingClient.MetadataCompletionTokens),
+            CachedTokens = ReadTokens(BillingClient.MetadataCachedTokens),
+            CacheWriteTokens = ReadTokens(BillingClient.MetadataCacheWriteTokens),
+            ReasoningTokens = ReadTokens(BillingClient.MetadataReasoningTokens),
+            ImageTokens = ReadTokens(BillingClient.MetadataImageTokens)
+        };
+
+        return found ? usage : null;
+
+        long ReadTokens(string key)
+        {
+            if (!metadata.TryGetValue(key, out var value) ||
+                !long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var tokens))
+            {
+                return 0;
+            }
+
+            found = true;
+            return tokens;
+        }
+    }
+
+    /// <summary>
+    /// Reads what the provider charged for the whole quantity of an AI operation from its metadata.
+    /// Returns <c>null</c> when the metadata carries no cost or one that is not a number.
+    /// </summary>
+    public static decimal? GetProviderCost(Dictionary<string, string> metadata)
+    {
+        return metadata != null &&
+               metadata.TryGetValue(BillingClient.MetadataCost, out var value) &&
+               decimal.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var cost)
+            ? cost
+            : null;
+    }
+
+    /// <summary>
+    /// Returns the localized name of the source type, or the raw value for an unknown one.
+    /// </summary>
+    public static string GetSourceTypeTitle(string sourceType)
+    {
+        return string.IsNullOrEmpty(sourceType)
+            ? string.Empty
+            : Resource.ResourceManager.GetString($"AccountingCustomerOperationSourceType_{sourceType}") ?? sourceType;
     }
 }

@@ -44,7 +44,6 @@ global using System.Reflection;
 global using System.Security.Authentication;
 global using System.Security.Cryptography;
 global using System.Security.Principal;
-global using System.ServiceModel;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;

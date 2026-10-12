@@ -37,7 +37,7 @@ public class GenerateCSharpSdkCommand : SdkCommandBase<CSharpSdkCommandSettings>
 {
     protected override string Name => "CSharp";
 
-    public override ValidationResult Validate(CommandContext context, CSharpSdkCommandSettings settings)
+    protected override ValidationResult Validate(CommandContext context, CSharpSdkCommandSettings settings)
     {
         var baseValidation = base.Validate(context, settings);
         if (!baseValidation.Successful)
@@ -48,7 +48,7 @@ public class GenerateCSharpSdkCommand : SdkCommandBase<CSharpSdkCommandSettings>
         return ToolRunner.ValidateAvailable("dotnet", "--version");
     }
 
-    public override async Task<int> ExecuteAsync(
+    protected override async Task<int> ExecuteAsync(
         CommandContext context,
         CSharpSdkCommandSettings settings,
         CancellationToken cancellationToken)

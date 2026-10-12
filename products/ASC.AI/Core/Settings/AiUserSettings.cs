@@ -33,7 +33,7 @@
 
 namespace ASC.AI.Core.Settings;
 
-public class AiUserSettings : ISettings<AiUserSettings>
+public record AiUserSettings : ISettings<AiUserSettings>
 {
     public static Guid ID { get; } = new("A1F3C2D4-7B8E-4F9A-B6C1-3D5E2A0F1B7C");
 
@@ -42,7 +42,10 @@ public class AiUserSettings : ISettings<AiUserSettings>
     /// </summary>
     public bool ChatRecommendedModelVisible { get; init; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public ToolPermissionMode ToolPermissionMode { get; init; } = ToolPermissionMode.Auto;
+
     public DateTime LastModified { get; set; }
 
-    public AiUserSettings GetDefault() => new() { ChatRecommendedModelVisible = true };
+    public AiUserSettings GetDefault() => new() { ChatRecommendedModelVisible = true, ToolPermissionMode = ToolPermissionMode.Auto };
 }

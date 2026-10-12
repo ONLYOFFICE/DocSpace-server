@@ -33,7 +33,6 @@
 
 namespace ASC.Files.Tests.Tests._06_Operations.Move;
 
-[Collection("Test Collection")]
 [Trait("Category", "Operations")]
 [Trait("Feature", "Files")]
 public class FileMoveTests(
@@ -44,13 +43,13 @@ public class FileMoveTests(
     public async Task MoveFile_ToAnotherFolder_ReturnsSuccess()
     {
         // Arrange
-        await _filesClient.Authenticate(Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
 
         // Create a source file
-        var sourceFile = await CreateFileInMy("file_to_move.docx", Initializer.Owner);
+        var sourceFile = await CreateFileInMy("file_to_move.docx", Owner);
 
         // Create a target folder
-        var targetFolder = await CreateFolder("target_folder", FolderType.USER, Initializer.Owner);
+        var targetFolder = await CreateFolder("target_folder", FolderType.USER, Owner);
 
         // Act
         var moveParams = new BatchRequestDto
@@ -83,10 +82,10 @@ public class FileMoveTests(
     public async Task MoveFile_NoPermission_ReturnsError()
     {
         // Assert
-        await _filesClient.Authenticate(Initializer.Owner);
-        var sourceFile = await CreateFileInMy("source_file.docx", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var sourceFile = await CreateFileInMy("source_file.docx", Owner);
 
-        var user = await Initializer.InviteContact(EmployeeType.User);
+        var user = await InviteContact(EmployeeType.User);
         await _filesClient.Authenticate(user);
         var targetFolder = await CreateFolderInMy("target_folder", user);
 
@@ -110,11 +109,67 @@ public class FileMoveTests(
     }
 
     [Fact]
+    public async Task MoveFile_ToFormsRoot_ReturnsError()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var sourceFile = await CreateFileInMy("source_file.docx", Owner);
+
+        var formsRootId = await GetFolderIdAsync(FolderType.Forms, Owner);
+
+        // Act
+        var moveParams = new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(formsRootId),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(sourceFile.Id)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
+
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesOperationsApi.MoveBatchItemsAsync(
+                moveParams,
+                TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task MoveFile_ToAiAgentsRoot_ReturnsError()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+        var sourceFile = await CreateFileInMy("source_file.docx", Owner);
+
+        var aiAgentsRootId = await GetFolderIdAsync(FolderType.AiAgents, Owner);
+
+        // Act
+        var moveParams = new BatchRequestDto
+        {
+            DestFolderId = new BatchRequestDtoAllOfDestFolderId(aiAgentsRootId),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(sourceFile.Id)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
+
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await _filesOperationsApi.MoveBatchItemsAsync(
+                moveParams,
+                TestContext.Current.CancellationToken));
+
+        // Assert
+        exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
     public async Task MoveFile_FormToFillingFormsRoom_ReturnsError()
     {
         // Assert
-        await _filesClient.Authenticate(Initializer.Owner);
-        var sourseFile = await CreateFileInMy("source_file.docx", Initializer.Owner);
+        await _filesClient.Authenticate(Owner);
+        var sourseFile = await CreateFileInMy("source_file.docx", Owner);
         sourseFile.IsForm = true;
 
         var parentFolder = await CreateFillingFormsRoom("parent_folder");
@@ -138,5 +193,139 @@ public class FileMoveTests(
 
         // Assert
         exception.ErrorCode.Should().Be(403);
+    }
+
+    [Fact]
+    public async Task MoveFile_MultipleFiles_ToCustomRoom_ReturnsSuccess()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        var file1 = await CreateFileInMy("Autotest MoveBatch Multi File1.docx", Owner);
+        var file2 = await CreateFileInMy("Autotest MoveBatch Multi File2.docx", Owner);
+        var destRoom = await CreateCustomRoom("Autotest MoveBatch Multi Dest Room");
+
+        // Act
+        var moveParams = new BatchRequestDto
+        {
+            DestFolderId = new(destRoom.Id),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(file1.Id), new(file2.Id)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
+
+        var results = (await _filesOperationsApi.MoveBatchItemsAsync(moveParams, TestContext.Current.CancellationToken)).Response;
+        if (results.Any(r => !r.Finished))
+        {
+            results = await WaitLongOperation(results.FirstOrDefault()?.Id);
+        }
+
+        // Assert
+        results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
+
+        var movedFile1 = await GetFile(file1.Id);
+        var movedFile2 = await GetFile(file2.Id);
+        movedFile1.FolderId.Should().Be(destRoom.Id);
+        movedFile2.FolderId.Should().Be(destRoom.Id);
+    }
+
+    [Fact]
+    public async Task MoveFile_BetweenTwoCustomRooms_ReturnsSuccess()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        var srcRoom = await CreateCustomRoom("Autotest MoveBatch InterRoom Source");
+        var file = await CreateFile("Autotest MoveBatch InterRoom File.docx", srcRoom.Id);
+        var destRoom = await CreateCustomRoom("Autotest MoveBatch InterRoom Dest");
+
+        // Act
+        var moveParams = new BatchRequestDto
+        {
+            DestFolderId = new(destRoom.Id),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(file.Id)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
+
+        var results = (await _filesOperationsApi.MoveBatchItemsAsync(moveParams, TestContext.Current.CancellationToken)).Response;
+        if (results.Any(r => !r.Finished))
+        {
+            results = await WaitLongOperation(results.FirstOrDefault()?.Id);
+        }
+
+        // Assert
+        results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
+
+        var movedFile = await GetFile(file.Id);
+        movedFile.FolderId.Should().Be(destRoom.Id);
+    }
+
+    [Fact]
+    public async Task MoveFile_FromRoomToMyDocs_ReturnsSuccess()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        var srcRoom = await CreateCustomRoom("Autotest MoveBatch RoomToMyDocs Src");
+        var file = await CreateFile("Autotest MoveBatch RoomToMyDocs File.docx", srcRoom.Id);
+        var myDocsFolderId = await GetUserFolderIdAsync(Owner);
+
+        // Act
+        var moveParams = new BatchRequestDto
+        {
+            DestFolderId = new(myDocsFolderId),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(file.Id)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
+
+        var results = (await _filesOperationsApi.MoveBatchItemsAsync(moveParams, TestContext.Current.CancellationToken)).Response;
+        if (results.Any(r => !r.Finished))
+        {
+            results = await WaitLongOperation(results.FirstOrDefault()?.Id);
+        }
+
+        // Assert
+        results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
+
+        var movedFile = await GetFile(file.Id);
+        movedFile.FolderId.Should().Be(myDocsFolderId);
+    }
+
+    [Fact]
+    public async Task MoveFile_BetweenSubfoldersWithinMyDocs_ReturnsSuccess()
+    {
+        // Arrange
+        await _filesClient.Authenticate(Owner);
+
+        var srcFolder = await CreateFolderInMy("Autotest MoveBatch MyDocsSrc Folder", Owner);
+        var file = await CreateFile("Autotest MoveBatch MyDocs Subfolder File.docx", srcFolder.Id);
+        var destFolder = await CreateFolderInMy("Autotest MoveBatch MyDocsDest Folder", Owner);
+
+        // Act
+        var moveParams = new BatchRequestDto
+        {
+            DestFolderId = new(destFolder.Id),
+            ConflictResolveType = FileConflictResolveType.Skip,
+            FileIds = [new(file.Id)],
+            FolderIds = [],
+            ReturnSingleOperation = true
+        };
+
+        var results = (await _filesOperationsApi.MoveBatchItemsAsync(moveParams, TestContext.Current.CancellationToken)).Response;
+        if (results.Any(r => !r.Finished))
+        {
+            results = await WaitLongOperation(results.FirstOrDefault()?.Id);
+        }
+
+        // Assert
+        results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
+
+        var movedFile = await GetFile(file.Id);
+        movedFile.FolderId.Should().Be(destFolder.Id);
     }
 }

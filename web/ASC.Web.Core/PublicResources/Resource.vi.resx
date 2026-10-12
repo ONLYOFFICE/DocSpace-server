@@ -135,17 +135,20 @@
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Chi tiết</value>
   </data>
+  <data name="AccountingCustomerOperationMonth" xml:space="preserve">
+    <value>Tháng</value>
+  </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Số lượng</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Dịch vụ</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>Tính năng AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Sao lưu</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Dung lượng ổ đĩa</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Véc-tơ hóa</value>
@@ -157,7 +160,7 @@
     <value>Đơn vị đo</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Sao lưu</value>
+    <value>Bản sao</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Token</value>
@@ -174,8 +177,26 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Lịch sử giao dịch</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Tổng đã chi</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Tóm tắt theo người dùng</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Kiểu</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportName" xml:space="preserve">
+    <value>Báo cáo sử dụng hàng tháng ({0}-{1})</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportSheetName" xml:space="preserve">
+    <value>Sử dụng hàng tháng</value>
+  </data>
+  <data name="AccountingServiceUsageReportName" xml:space="preserve">
+    <value>Báo cáo sử dụng dịch vụ ({0}-{1})</value>
+  </data>
+  <data name="AccountingServiceUsageReportSheetName" xml:space="preserve">
+    <value>Sử dụng dịch vụ</value>
   </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Trường mã xác nhận không được để trống</value>
@@ -196,7 +217,7 @@
     <value>Đã vượt quá hạn mức không gian AI agent</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Không thể đặt hạn mức cho mỗi ai agent. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ DocSpace.</value>
+    <value>Không thể đặt hạn mức cho mỗi ai agent. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Tự động gia hạn</value>
@@ -226,7 +247,7 @@
     <value>ID ứng dụng khách</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Apple ID.</value>
+    <value>Đăng nhập vào không gian làm việc của bạn bằng tài khoản Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng Apple ID. {0}Truy cập Cổng thông tin Nhà phát triển Apple và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
@@ -271,7 +292,7 @@
     <value>Box Key</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để quản lý các file và thư mục Box.</value>
+    <value>Quản lý các file và thư mục Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Bật ứng dụng này để kết nối tài khoản Box của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tệp từ Box với người dùng {LogoText}. {0}Đăng nhập vào tài khoản của bạn trên trang Nhà phát triển Box và tạo một ứng dụng mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
@@ -310,7 +331,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để quản lý các file và thư mục Dropbox.</value>
+    <value>Quản lý các file và thư mục Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Bật ứng dụng này để kết nối tài khoản Dropbox của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tập tin từ Dropbox với người dùng {LogoText}. {0}Đăng nhập vào tài khoản của bạn trên trang Nhà phát triển Dropbox và tạo một ứng dụng mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
@@ -346,7 +367,7 @@
     <value>Facebook Key</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản Facebook.</value>
+    <value>Đăng nhập vào không gian làm việc của bạn bằng tài khoản Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng Facebook và liên kết tài khoản Facebook của khách hàng với mô-đun CRM. {0}Truy cập Cổng thông tin Nhà phát triển Facebook và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
@@ -400,7 +421,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Kết nối dự án để đăng nhập vào cổng thông tin bằng tài khoản Google và quản lý file và thư mục Google Drive.</value>
+    <value>Đăng nhập vào không gian làm việc của bạn bằng tài khoản Google và quản lý file và thư mục Google Drive</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Bật ứng dụng này để kết nối tài khoản Google Drive của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tệp từ Google Drive với người dùng {LogoText}. {0}Chuyển đến bảng điều khiển Google APIs và tạo một dự án mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
@@ -409,7 +430,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản LinkedIn.</value>
+    <value>Đăng nhập vào không gian làm việc của bạn bằng tài khoản LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng tài khoản LinkedIn của họ. {0}Truy cập trang web của Nhà phát triển LinkedIn và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
@@ -538,7 +559,7 @@
     <value>Client secret</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để quản lý file và thư mục OneDrive.</value>
+    <value>Quản lý file và thư mục OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Bật ứng dụng này để kết nối tài khoản OneDrive của bạn với mô-đun Tài liệu. Bạn sẽ có thể quản lý, chỉnh sửa và chia sẻ tập tin từ OneDrive với người dùng {LogoText}. {0}Đăng nhập vào tài khoản Microsoft Azure của bạn và tạo một ứng dụng mới để tích hợp {LogoText}. Chèn dữ liệu bạn nhận được bên dưới:</value>
@@ -568,7 +589,7 @@
     <value>Token Bot</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Kết nối tài khoản Telegram để nhận thông báo cổng thông tin qua Telegram.</value>
+    <value>Nhận thông báo qua Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Để nhận thông báo cổng thông tin qua Telegram, hãy bật Telegram bot. Bạn có thể tạo một bot mới bằng cách sử dụng BotFather trong Telegram cho máy tính. Để sử dụng bot này, người dùng cổng thông tin cần bật thông báo Telegram trên Trang hồ sơ của họ. {0}Dán tên người dùng bot và mã token bạn nhận được trong các trường bên dưới.</value>
@@ -601,7 +622,7 @@
     <value>ID Khách hàng</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Kết nối ứng dụng để đăng nhập vào hệ thống bằng tài khoản X.</value>
+    <value>Đăng nhập vào không gian làm việc của bạn bằng tài khoản X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng X và liên kết tài khoản X của khách hàng với mô-đun CRM. {0}Truy cập Cổng thông tin Nhà phát triển X và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
@@ -640,7 +661,7 @@
     <value>Client Secret</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản WeChat.</value>
+    <value>Đăng nhập vào không gian làm việc của bạn bằng tài khoản WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản WeChat.</value>
@@ -700,7 +721,7 @@
     <value>Zoom client secret</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Zoom.</value>
+    <value>Đăng nhập vào không gian làm việc của bạn bằng tài khoản Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Bật ứng dụng này để cho phép người dùng của bạn đăng nhập vào {LogoText} bằng tài khoản Zoom của họ. {0}Truy cập trang web của Nhà phát triển Zoom và tạo tích hợp ứng dụng {LogoText} mới. Chèn dữ liệu bạn nhận được bên dưới:</value>
@@ -1105,7 +1126,7 @@
     <value>Đã vượt quá hạn mức không gian phòng</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Không thể đặt hạn mức cho mỗi phòng. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ DocSpace.</value>
+    <value>Không thể đặt hạn mức cho mỗi phòng. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Châu Á-Thái Bình Dương (Singapore)</value>
@@ -1152,11 +1173,11 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Số lượng AI agent không được vượt quá {0}</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>Tìm kiếm AI</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Tính năng AI</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Bật các tính năng AI để tăng năng suất.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Theo dõi đăng nhập và hành động</value>
@@ -1270,7 +1291,7 @@
     <value>Đã xảy ra lỗi ngoài dự kiến. Xin hãy thử lại.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Bạn đã được kết nối thành công với Telegram để nhận thông báo từ DocSpace của bạn.</value>
+    <value>Bạn đã được kết nối thành công với Telegram để nhận thông báo từ không gian làm việc của bạn.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Mã không chính xác</value>
@@ -1285,16 +1306,13 @@
     <value>Đã vượt quá hạn mức không gian người dùng</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Không thể đặt hạn mức cho mỗi người dùng. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ DocSpace.</value>
+    <value>Không thể đặt hạn mức cho mỗi người dùng. Giá trị đã nhập lớn hơn tổng dung lượng lưu trữ.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Vùng Tây Hoa Kỳ (Oregon)</value>
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Tin tức mới</value>
-  </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>Tác nhân</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>Trò chuyện</value>
@@ -1305,6 +1323,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>Tìm kiếm web</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>Tìm kiếm AI</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Tín dụng AI</value>
   </data>
@@ -1312,6 +1333,9 @@
     <value>Nguồn</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Kết quả</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Kết quả</value>
   </data>
   <data name="ConsumersdatabaseType" xml:space="preserve">
@@ -1339,7 +1363,7 @@
     <value>Kết nối cơ sở dữ liệu</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Lưu trữ kết quả biểu mẫu trong cơ sở dữ liệu bên ngoài như MySQL hoặc SQLite.</value>
+    <value>Lưu trữ kết quả biểu mẫu trong cơ sở dữ liệu bên ngoài như MySQL hoặc SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Kết nối cơ sở dữ liệu bên ngoài để lưu trữ kết quả biểu mẫu.</value>
@@ -1363,7 +1387,7 @@
     <value>Client secret</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Nextcloud.</value>
+    <value>Đăng nhập vào không gian làm việc của bạn bằng tài khoản Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Cho phép ứng dụng đăng nhập vào cổng thông tin bằng tài khoản Nextcloud.</value>
@@ -1382,5 +1406,155 @@
   </data>
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>Xác thực người dùng thất bại</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Lưu trữ đĩa bổ sung</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Gói Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Gói Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Quản trị viên</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Quản trị viên</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Truy cập nhiều mô hình AI thông qua tích hợp OpenRouter. Chỉ trả tiền cho những gì bạn sử dụng, được tính từ Ví của bạn.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>Sử dụng công cụ tìm kiếm AI để nâng cao các cuộc trò chuyện AI với thông tin thời gian thực từ internet</value>
+  </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>Người dùng</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>Người dùng</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_image" xml:space="preserve">
+    <value>Token</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>Gói dành cho nhà phát triển Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
+    <value>Hình ảnh</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>Báo cáo hạn mức Docs Connect ({0})</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>Nhúng các trình soạn thảo ONLYOFFICE Docs vào ứng dụng của bạn với các tenant được lưu trữ trên đám mây và khóa API riêng của bạn.</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Loại nguồn</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Tên nguồn</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>ID nguồn</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>AI agent</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Tập tin</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Thư mục</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Phòng</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Biểu mẫu</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Công ty</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Ngày tạo</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Kỳ</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Báo cáo</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Tổng cộng</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Giới hạn đăng ký</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Còn lại</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Đang hoạt động</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Quyền truy cập hết hạn</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Loại người dùng</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>ID người dùng</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Trình soạn thảo</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Trình soạn thảo tài liệu với đầy đủ quyền</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Hạn mức người dùng</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Người xem trực tiếp</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Người xem tài liệu chỉ đọc</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Bên ngoài</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Nội bộ</value>
+  </data>
+  <data name="AccountingCustomerOperationPromptTokens" xml:space="preserve">
+    <value>Yêu cầu</value>
+  </data>
+  <data name="AccountingCustomerOperationCachedTokens" xml:space="preserve">
+    <value>Bộ nhớ đệm</value>
+  </data>
+  <data name="AccountingCustomerOperationCacheWriteTokens" xml:space="preserve">
+    <value>Ghi vào bộ nhớ đệm</value>
+  </data>
+  <data name="AccountingCustomerOperationCompletionTokens" xml:space="preserve">
+    <value>Phản hồi</value>
+  </data>
+  <data name="AccountingCustomerOperationReasoningTokens" xml:space="preserve">
+    <value>Suy luận</value>
+  </data>
+  <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
+    <value>Hình ảnh</value>
+  </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>Chi phí nhà cung cấp</value>
   </data>
 </root>

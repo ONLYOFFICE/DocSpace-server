@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -247,7 +247,7 @@
     <value>Asiakkaan tilaus päivitetty: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Asiakkaan lompakkoa käyttävien palveluiden asetukset päivitetty</value>
+    <value>Asiakkaan lompakkoa käyttävien palveluiden asetukset päivitetty: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Asiakkaan lompakko ladattu: {0}</value>
@@ -349,7 +349,7 @@
     <value>Asiakirjat [{0}]. Asiakirja kopioitu kansiosta "{1}" kansioon "{2}"</value>
   </data>
   <data name="FileCopiedWithOverwriting" xml:space="preserve">
-    <value>Asiakirjat [{0}]. Asiakirja kopioitu kansiosta "{1}" kansioon "{2}"</value>
+    <value>Asiakirjat [{0}]. Asiakirja kopioitu korvaten kansiosta "{1}" kansioon "{2}"</value>
   </data>
   <data name="FileCreated" xml:space="preserve">
     <value>Asiakirjat. Luotu: {0}</value>
@@ -397,13 +397,13 @@
     <value>Tiedosto merkitty Suosikiksi: {0}</value>
   </data>
   <data name="FileMoved" xml:space="preserve">
-    <value>Asiakirjat [{0}]. Siiretty kansiosta "{1}" kansioon "{2}"</value>
+    <value>Asiakirjat [{0}]. Siirretty kansiosta "{1}" kansioon "{2}"</value>
   </data>
   <data name="FileMovedToTrash" xml:space="preserve">
     <value>Asiakirjat [{0}]. Siirretty roskakoriin</value>
   </data>
   <data name="FileMovedWithOverwriting" xml:space="preserve">
-    <value>Asiakirjat [{0}]. Siiretty kansiosta "{1}" kansioon "{2}"</value>
+    <value>Asiakirjat [{0}]. Siirretty korvaten kansiosta "{1}" kansioon "{2}"</value>
   </data>
   <data name="FileOpenedForChange" xml:space="preserve">
     <value>Kansio avattu muutosta varten: {0}</value>
@@ -493,7 +493,7 @@
     <value>Kansiot [{0}]. Siiretty kansioon: {1}</value>
   </data>
   <data name="FolderMovedToTrash" xml:space="preserve">
-    <value>Kansiot [{0}]. Siiretty roskakoriin</value>
+    <value>Kansiot [{0}]. Siirretty roskakoriin</value>
   </data>
   <data name="FolderMovedWithOverwriting" xml:space="preserve">
     <value>Kansiot [{0}]. Siiretty (ylikirjoitus) kansioon: {1}</value>
@@ -738,12 +738,6 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portaali nimetty uudelleen</value>
   </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Yksityinen huone ei ole käytössä</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Yksityinen huone on käytössä</value>
-  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Tuotteet [{0}]. Pääsy avattu kaikille</value>
   </data>
@@ -797,6 +791,12 @@
   </data>
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Asiakasohjelman {0} salaisuus luotu uudelleen</value>
+  </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Huomautus</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Raportissa näytetään {0} uusinta tapahtumaa {1} tapahtumasta. Saat kaikki tapahtumat lataamalla raportin CSV-muodossa.</value>
   </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Vektorisaatioasetukset on nollattu</value>
@@ -916,7 +916,7 @@
     <value>Lähetä</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Käyttäjä {0} lähetti {1}:lle liittymiskutsun tähän DocSpaceen</value>
+    <value>Käyttäjä {0} lähetti kutsun {1}:lle</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Kutsun ohjeistus lähetetty: {0}</value>
@@ -965,6 +965,9 @@
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Aloita portaalin alueen migraatio</value>
+  </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Tilauksen saldo siirretty lompakkoon: {0}</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Järjestelmän tili</value>
@@ -1205,5 +1208,89 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Käyttäjän aktiiviset yhteydet kirjattu ulos: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Docs Connect-kokoonpano päivitetty</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Docs Connect-kiintiöraportti ladattu</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Käyttäjän AI-asetukset päivitetty</value>
+  </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>AI-profiili on määritetty AI-agentille toimintoa varten: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>AI-profiili on määritetty toimintoa varten: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>AI-malliprofiili on luotu: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>AI-malliprofiili on poistettu: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>AI-profiilin määritys toiminnosta on poistettu: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>AI-malliprofiili on päivitetty: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Tiedostot [{0}]. Merkitty luetuksi</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Tiedostot [{0}]. Tiedostoa ei tallennettu. Portaalin tallennuskiintiö on ylitetty.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Tiedostot [{0}]. Tiedoston tallentaminen ylittää portaalin tallennuskiintiön.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Kansiot [{0}]. Merkitty luetuksi</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Yksityisen huoneen salausavain {0} on luotu</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Yksityisen huoneen salausavain {0} on poistettu</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Yksityisen huoneen salausavain {0} on päivitetty</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Epäilyttävä kirjautuminen havaittu: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>AI-agentin MCP-palvelin {0} on päivitetty</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Metatietojen kaskadimääritys aloitettu: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Metatietokenttä luotu: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Metatietokenttä poistettu: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Metatietokenttä päivitetty: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Metatietomalli määritetty: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Metatietomalli luotu: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Metatietomalli poistettu: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Metatietomallin määritys peruutettu: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Metatietomalli päivitetty: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Metatietoarvot päivitetty: {0}</value>
   </data>
 </root>

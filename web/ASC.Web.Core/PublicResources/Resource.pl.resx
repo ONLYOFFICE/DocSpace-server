@@ -135,17 +135,20 @@
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Szczegóły</value>
   </data>
+  <data name="AccountingCustomerOperationMonth" xml:space="preserve">
+    <value>Miesiąc</value>
+  </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Ilość</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Usługa</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>Funkcje AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Kopia zapasowa</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Miejsce na dysku</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Wektoryzacja</value>
@@ -157,7 +160,7 @@
     <value>Jednostka miary</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Kopia zapasowa</value>
+    <value>Kopii</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Tokeny</value>
@@ -174,8 +177,26 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Historia transakcji</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Łącznie wydano</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Podsumowanie wg użytkowników</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Typ</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportName" xml:space="preserve">
+    <value>Raport miesięcznego wykorzystania ({0}-{1})</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportSheetName" xml:space="preserve">
+    <value>Miesięczne wykorzystanie</value>
+  </data>
+  <data name="AccountingServiceUsageReportName" xml:space="preserve">
+    <value>Raport wykorzystania usług ({0}-{1})</value>
+  </data>
+  <data name="AccountingServiceUsageReportSheetName" xml:space="preserve">
+    <value>Wykorzystanie usług</value>
   </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Pole kodu walidacyjnego nie może być puste</value>
@@ -196,7 +217,7 @@
     <value>Limit pamięci asystenta AI został przekroczony</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Nie udało się skonfigurować limitu na asystenta AI. Wprowadzona wartość jest większa niż całkowita pamięć DocSpace.</value>
+    <value>Nie udało się skonfigurować limitu na asystenta AI. Wprowadzona wartość jest większa niż całkowita pamięć.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Automatyczne odnawianie</value>
@@ -226,7 +247,7 @@
     <value>ID klienta aplikacji</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Włącz aplikację, aby móc logować się w portalu za pośrednictwem konta Apple ID.</value>
+    <value>Zaloguj się do swojej przestrzeni roboczej za pomocą konta Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Włącz tę aplikację, aby umożliwić użytkownikom logowanie w {LogoText} za pośrednictwem Apple ID. {0}Przejdź do Apple Developers Center i utwórz nową aplikację do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
@@ -271,7 +292,7 @@
     <value>Box Klucz</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Podłącz aplikację do zarządzania plikami i folderami.</value>
+    <value>Zarządzaj plikami i folderami Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Włącz tę aplikację, aby połączyć swoje konto Box z modułem Dokumenty. Będziesz w stanie zarządzać plikami z Box, edytować je i udostępniać użytkownikom {LogoText}. {0}Zaloguj się na swoim koncie na stronie dla programistów Box i utwórz nową aplikację do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
@@ -310,7 +331,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Podłącz aplikację do zarządzania plikami i folderami programu Dropbox.</value>
+    <value>Zarządzaj plikami i folderami Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Włącz tę aplikację, aby połączyć swoje konto Dropbox z modułem Dokumenty. Będziesz w stanie zarządzać plikami z Dropbox, edytować je i udostępniać użytkownikom {LogoText}. {0} Zaloguj się na swoje konto na stronie dla programistów Dropbox i utwórz nową aplikację do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
@@ -346,7 +367,7 @@
     <value>Klucz Facebook</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Podłącz aplikację do logowania się do portalu za pomocą konta Facebook.</value>
+    <value>Zaloguj się do swojej przestrzeni roboczej za pomocą konta Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Włącz tę aplikację, aby umożliwić użytkownikom logowanie w {LogoText} za pośrednictwem Facebooka i łączenie kont swoich klientów na Facebooku z modułem CRM. {0}Przejdź na swoje konto Meta for Developers i utwórz nową aplikację do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
@@ -400,7 +421,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Połącz projekt, aby zalogować się do portalu za pomocą konta Google i zarządzać plikami i folderami na Dysku Google.</value>
+    <value>Zaloguj się do swojej przestrzeni roboczej za pomocą konta Google i zarządzaj plikami i folderami na Dysku Google</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Włącz tę aplikację, aby połączyć swój Dysk Google z modułem Dokumenty. Będziesz w stanie zarządzać plikami z Dysku Google, edytować je i udostępniać użytkownikom {LogoText}. {0}Przejdź do konsoli Google APIs i utwórz nowy projekt do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
@@ -409,7 +430,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Podłącz aplikację do logowania się do portalu za pomocą konta LinkedIn.</value>
+    <value>Zaloguj się do swojej przestrzeni roboczej za pomocą konta LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Włącz tę aplikację, aby umożliwić użytkownikom logowanie w {LogoText} za pośrednictwem konta LinkedIn. {0}Przejdź na stronę LinkedIn dla programistów i utwórz nową aplikację do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
@@ -538,7 +559,7 @@
     <value>Sekret klienta</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Podłączanie aplikacji do zarządzania plikami i folderami OneDrive.</value>
+    <value>Zarządzaj plikami i folderami OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Włącz tę aplikację, aby połączyć swoje konto OneDrive z modułem Dokumenty. Będziesz w stanie zarządzać plikami z OneDrive, edytować je i udostępniać użytkownikom {LogoText}. {0}Zaloguj się na swoje konto Microsoft Azure i utwórz nową aplikację do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
@@ -568,7 +589,7 @@
     <value>Token bota</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Podłącz konto na Telegramie, aby otrzymywać powiadomienia z portalu za pośrednictwem Telegrama.</value>
+    <value>Otrzymuj powiadomienia za pośrednictwem Telegrama</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Aby otrzymywać powiadomienia z portalu za pośrednictwem Telegrama, włącz bota na Telegramie. Możesz utworzyć nowego bota za pomocą BotFather w aplikacji Telegram. Aby móc korzystać z tego bota, użytkownicy portalu muszą włączyć powiadomienia Telegram na swojej stronie profilowej. {0}Wklej nazwę bota i otrzymany token w poniższych polach.</value>
@@ -601,7 +622,7 @@
     <value>ID klienta</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Podłącz aplikację do logowania się do portalu za pomocą konta X.</value>
+    <value>Zaloguj się do swojej przestrzeni roboczej za pomocą konta X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Włącz tę aplikację, aby umożliwić użytkownikom logowanie w {LogoText} za pośrednictwem X i łączenie kont swoich klientów na X z modułem CRM. {0}Przejdź do portalu X dla programistów i utwórz nową aplikację do integracji {LogoText}. Wprowadź otrzymane dane poniżej:</value>
@@ -640,7 +661,7 @@
     <value>Sekret klienta</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Włącz aplikację, aby móc logować się w portalu za pośrednictwem konta WeChat.</value>
+    <value>Zaloguj się do swojej przestrzeni roboczej za pomocą konta WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Włącz aplikację, aby móc logować się w portalu za pośrednictwem konta WeChat.</value>
@@ -700,7 +721,7 @@
     <value>Sekret klienta Zoom</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Włącz aplikację, aby móc logować się w portalu za pośrednictwem konta Zoom.</value>
+    <value>Zaloguj się do swojej przestrzeni roboczej za pomocą konta Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Włącz tę aplikację, aby umożliwić użytkownikom logowanie w {LogoText} za pośrednictwem konta Zoom. {0}Przejdź na stronę Zoom dla programistów i utwórz nową aplikację dla integracji z {LogoText}. Wprowadź otrzymane dane poniżej:</value>
@@ -880,7 +901,7 @@
     <value>Zmiany we wtyczkach systemowych są zabronione</value>
   </data>
   <data name="ErrorWebPluginMaxCount" xml:space="preserve">
-    <value>Przekroczono limit wtyczek:</value>
+    <value>Przekroczono limit wtyczek</value>
   </data>
   <data name="ErrorWebPluginName" xml:space="preserve">
     <value>Nieprawidłowa nazwa wtyczki</value>
@@ -1105,7 +1126,7 @@
     <value>Przekroczono limit pamięci pokoju</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Nie udało się skonfigurować limitu na pokój. Wprowadzona wartość jest większa niż całkowita pamięć DocSpace.</value>
+    <value>Nie udało się skonfigurować limitu na pokój. Wprowadzona wartość jest większa niż całkowita pamięć.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Azja Pacyfik (Singapur)</value>
@@ -1152,11 +1173,11 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Liczba asystentów AI nie powinna przekraczać {0}</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>Wyszukiwanie AI</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Funkcje AI</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Włącz funkcje AI, aby zwiększyć produktywność.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Śledzenie logowań i działań</value>
@@ -1270,7 +1291,7 @@
     <value>Wystąpił nieoczekiwany błąd. Spróbuj ponownie.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Aplikacja Telegram została podłączona. Od teraz będziesz otrzymywać powiadomienia z DocSpace.</value>
+    <value>Aplikacja Telegram została podłączona. Od teraz będziesz otrzymywać powiadomienia z przestrzeni roboczej.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Błędny kod</value>
@@ -1285,16 +1306,13 @@
     <value>Przekroczono limit pamięci użytkownika</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Nie udało się skonfigurować limitu na użytkownika. Wprowadzona wartość jest większa niż całkowita pamięć DocSpace.</value>
+    <value>Nie udało się skonfigurować limitu na użytkownika. Wprowadzona wartość jest większa niż całkowita pamięć.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Region Stanów Zjednoczonych (Oregon)</value>
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Co nowego</value>
-  </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>Agent</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>Czat</value>
@@ -1305,6 +1323,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>Wyszukiwanie w sieci</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>Wyszukiwanie AI</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Kredyty AI</value>
   </data>
@@ -1312,6 +1333,9 @@
     <value>Źródła</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Wyniki</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Wyniki</value>
   </data>
   <data name="ConsumersdatabaseType" xml:space="preserve">
@@ -1339,7 +1363,7 @@
     <value>Połączenie z bazą danych</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Przechowuj wyniki formularza w zewnętrznej bazie danych, takiej jak MySQL lub SQLite.</value>
+    <value>Przechowuj wyniki formularza w zewnętrznej bazie danych, takiej jak MySQL lub SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Połącz zewnętrzną bazę danych, aby przechowywać wyniki formularza.</value>
@@ -1363,7 +1387,7 @@
     <value>Sekret klienta</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Zezwól aplikacji na logowanie do portalu za pomocą konta Nextcloud.</value>
+    <value>Zaloguj się do swojej przestrzeni roboczej za pomocą konta Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Zezwól aplikacji na logowanie do portalu za pomocą konta Nextcloud.</value>
@@ -1382,5 +1406,155 @@
   </data>
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>Uwierzytelnianie użytkownika nie powiodło się</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Dodatkowe miejsce na dysku</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Plan Biznes</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Plan Biznes</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Administratorzy</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Administratorzy</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Uzyskaj dostęp do szerokiej gamy modeli AI dzięki integracji z OpenRouter. Płać tylko za to, czego używasz – kwota jest pobierana z Twojego Portfela.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>Korzystaj z wyszukiwarki AI, aby wzbogacać czaty AI o informacje z internetu w czasie rzeczywistym</value>
+  </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Biznes</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>Użytkownicy</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>Użytkownicy</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_image" xml:space="preserve">
+    <value>Tokeny</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>Pakiet deweloperski Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
+    <value>Obraz</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>Raport limitów Docs Connect ({0})</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>Osadź edytory ONLYOFFICE Docs w swojej aplikacji z dzierżawcami hostowanymi w chmurze i własnymi kluczami API.</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Typ źródła</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Nazwa źródła</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>ID źródła</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>Asystent AI</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Plik</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Katalog</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Pokój</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Formularz</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Firma</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Data wygenerowania</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Okres</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Raport</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Łącznie</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Aktywny</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Dostęp wygasa</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Typ użytkownika</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>ID użytkownika</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Edytory</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Edytory dokumentów z pełnymi uprawnieniami</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Limit użytkownika</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Przeglądarka na żywo</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Przeglądarki dokumentów tylko do odczytu</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Zewnętrzny</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Wewnętrzny</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Pozostało</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Limit subskrypcji</value>
+  </data>
+  <data name="AccountingCustomerOperationPromptTokens" xml:space="preserve">
+    <value>Zapytanie</value>
+  </data>
+  <data name="AccountingCustomerOperationCachedTokens" xml:space="preserve">
+    <value>Buforowanie</value>
+  </data>
+  <data name="AccountingCustomerOperationCacheWriteTokens" xml:space="preserve">
+    <value>Zapis do pamięci podręcznej</value>
+  </data>
+  <data name="AccountingCustomerOperationCompletionTokens" xml:space="preserve">
+    <value>Odpowiedź</value>
+  </data>
+  <data name="AccountingCustomerOperationReasoningTokens" xml:space="preserve">
+    <value>Rozumowanie</value>
+  </data>
+  <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
+    <value>Obraz</value>
+  </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>Koszt dostawcy</value>
   </data>
 </root>

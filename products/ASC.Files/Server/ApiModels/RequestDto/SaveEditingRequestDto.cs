@@ -34,66 +34,48 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for saving file edits.
+/// The parameters of a save request: the file in the route, the new content in a multipart body or at a download
+/// address, and the autosave switch.
 /// </summary>
 public class SaveEditingRequestDto<T> : IModelWithFile
 {
     /// <summary>
-    /// The editing file ID from the request.
+    /// The file whose content is replaced. The submitted content is written onto this file, so it has to be the file
+    /// the editing session was opened on rather than a copy of it.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "fileId")]
     public required T FileId { get; set; }
 
     /// <summary>
-    /// The editing file extension from the request.
+    /// The format the submitted content is in, with the leading dot, as in `.docx`. When it differs from the format
+    /// the file is stored in, the portal converts the content before saving it. Left empty, the extension is read off
+    /// the download address, and failing that the stored format is assumed.
     /// </summary>
     /// <example>.txt</example>
     [FromForm(Name = "FileExtension")]
     public string FileExtension { get; set; }
 
     /// <summary>
-    /// The URI to download the editing file.
+    /// An address the document service saved the document at. This operation does not fetch the content from it - the
+    /// content always comes from the request body - and reads it only for the extension, when no file extension is
+    /// given.
     /// </summary>
     /// <example>https://example.com/file.txt</example>
     public string DownloadUri { get; set; }
 
     /// <summary>
-    /// The edited file to be saved, uploaded as part of the multipart/form-data request.
-    /// This property represents the modified file content from the HTTP request form after editing operations.
-    /// The file is accessed via the IFormFile interface which provides access to the file name, content type, length, and stream.
+    /// The edited content, sent as the `File` part of a `multipart/form-data` body. When the part is missing the raw
+    /// request body is saved as the content instead, so an empty body empties the file.
     /// </summary>
-    /// <remarks>
-    /// When making a request, the edited file should be sent as form data with the field name "File" and content type set to multipart/form-data.
-    /// This is typically used in scenarios where a file has been edited (e.g., in an online editor) and needs to be saved back to the server.
-    /// Either this property or DownloadUri should be provided to save the edited file.
-    /// </remarks>
-    /// <example>
-    /// Example of saving an edited file using curl:
-    /// <code>
-    /// curl -X PUT "https://api.example.com/api/2.0/files/file/123/saveediting" \
-    ///   -H "Authorization: Bearer your_token" \
-    ///   -F "File=@/path/to/edited_document.docx" \
-    ///   -F "FileExtension=.docx" \
-    ///   -F "Forcesave=false"
-    /// </code>
-    ///
-    /// Example of saving an edited file using C# HttpClient:
-    /// <code>
-    /// using var content = new MultipartFormDataContent();
-    /// using var fileStream = File.OpenRead("edited_document.docx");
-    /// content.Add(new StreamContent(fileStream), "File", "edited_document.docx");
-    /// content.Add(new StringContent(".docx"), "FileExtension");
-    /// content.Add(new StringContent("false"), "Forcesave");
-    ///
-    /// var response = await httpClient.PutAsync(url, content);
-    /// </code>
-    /// </example>
+    /// <example>binary file data</example>
     [FromForm(Name = "File")]
     public IFormFile File { get; set; }
 
     /// <summary>
-    /// Specifies whether to force save the file or not.
+    /// Records the write as an editor autosave: the file keeps its running editing session and the previous autosave
+    /// revision is overwritten. Left off, the write closes the solo editing session, is refused while somebody else
+    /// has the file open, and adds a version to the history.
     /// </summary>
     /// <example>false</example>
     [FromForm(Name = "Forcesave")]

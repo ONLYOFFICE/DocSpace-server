@@ -34,34 +34,44 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The result of checking whether files can be moved or copied to the specified folder.
+/// The verdict on placing the requested files in the destination folder.
 /// </summary>
 public class CheckDestFolderDto
 {
     /// <summary>
-    /// The result of the validation operation.
+    /// Whether the destination folder accepts all of the requested files, only some of them or none at all.
     /// </summary>
     /// <example>0</example>
     public CheckDestFolderResult Result { get; set; }
 
     /// <summary>
-    /// The list of files in the destination folder.
+    /// The requested files the destination accepts, each with the information it was listed under. The files it
+    /// rejects are absent, so an empty list means that none of them is accepted.
     /// </summary>
-    /// <example>[{"id": 10, "title": "document.docx"}]</example>
+    /// <example>[{"title": "document.docx", "fileEntryType": 2}]</example>
     public List<FileEntryBaseDto> Files { get; set; }
 }
 
 /// <summary>
-/// The result of the validation operation.
+/// Whether the destination folder accepts the requested files.
 /// </summary>
 public enum CheckDestFolderResult
 {
+    /// <summary>
+    /// Every requested file may be placed in the destination folder.
+    /// </summary>
     [Description("All allowed")]
     AllAllowed,
 
+    /// <summary>
+    /// Only some of the requested files may be placed in the destination folder; the rest are absent from the answer.
+    /// </summary>
     [Description("Part allowed")]
     PartAllowed,
 
+    /// <summary>
+    /// None of the requested files may be placed in the destination folder.
+    /// </summary>
     [Description("None allowed")]
     NoneAllowed
 }

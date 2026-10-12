@@ -34,60 +34,68 @@
 namespace ASC.Files.Core.ApiModels.ResponseDto;
 
 /// <summary>
-/// The room template status.
+/// The progress of the job that builds a room template out of an existing room.
 /// </summary>
 public class RoomTemplateStatusDto
 {
     /// <summary>
-    /// The room template ID.
+    /// The template the job is building. It is meaningful once the job has created the template folder, and the
+    /// template can be opened with the room operations only after `isCompleted` turns true.
     /// </summary>
     /// <example>123</example>
     public required int TemplateId { get; set; }
 
     /// <summary>
-    /// The progress of the room template creation process.
+    /// How far the job has got. The value climbs while the contents of the room are being copied and reaches its
+    /// maximum at the very end, so it is an indication of life rather than a reliable estimate of the time left.
     /// </summary>
     /// <example>75.5</example>
     public required double Progress { get; set; }
 
     /// <summary>
-    /// The error message that is sent when the room template is not created successfully.
+    /// Why the job stopped. It is empty while the job runs and after a successful one; when it is filled the
+    /// half-built template has already been removed, so nothing has to be cleaned up by the caller.
     /// </summary>
     /// <example>Template creation failed</example>
     public string Error { get; set; }
 
     /// <summary>
-    /// Specifies whether the process of creating the room template is completed.
+    /// Whether the job has ended. It is set both after a successful build and after a failure, so `error` is what
+    /// tells the two apart, and the record keeps answering with the same values until another job is started.
     /// </summary>
     /// <example>false</example>
     public required bool IsCompleted { get; set; }
 }
 
 /// <summary>
-/// The progress parameters of creating a room from the template.
+/// The progress of the job that creates a room out of a room template.
 /// </summary>
 public class RoomFromTemplateStatusDto
 {
     /// <summary>
-    /// The room ID.
+    /// The room the job is creating. It is meaningful once the room exists, which is guaranteed only after
+    /// `isCompleted` turns true and `error` stays empty; until then it carries no usable id.
     /// </summary>
     /// <example>456</example>
     public required int RoomId { get; set; }
 
     /// <summary>
-    /// The progress of creating a room from the template.
+    /// How far the job has got. The value climbs while the contents of the template are being copied into the new
+    /// room and reaches its maximum at the very end.
     /// </summary>
     /// <example>50.0</example>
     public required double Progress { get; set; }
 
     /// <summary>
-    /// The error message that is sent when a room is not created successfully from the template.
+    /// Why the job stopped. It is empty while the job runs and after a successful one, and a filled value means that
+    /// no room was created, so the request has to be repeated rather than waited out.
     /// </summary>
     /// <example>Room creation failed</example>
     public required string Error { get; set; }
 
     /// <summary>
-    /// Specifies whether the process of creating a room from the template is completed.
+    /// Whether the job has ended. It is set both after a successful creation and after a failure, so it is the flag
+    /// to poll for, while `error` is what separates the two outcomes.
     /// </summary>
     /// <example>false</example>
     public required bool IsCompleted { get; set; }

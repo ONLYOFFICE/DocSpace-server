@@ -135,17 +135,20 @@
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>تفاصيل</value>
   </data>
+  <data name="AccountingCustomerOperationMonth" xml:space="preserve">
+    <value>الشهر</value>
+  </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>كمية</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>الخدمة</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>ميزات الذكاء الاصطناعي</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>دعم</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>مساحة القرص</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>التحويل المتجهي (Vectorization)</value>
@@ -157,7 +160,7 @@
     <value>وحدة القياس</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>دعم</value>
+    <value>نسخ</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>الرموز (Tokens)</value>
@@ -174,8 +177,26 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>تاريخ المعاملات</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>إجمالي الإنفاق</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>ملخص حسب المستخدم</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>نوع</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportName" xml:space="preserve">
+    <value>تقرير الاستخدام الشهري ({0}-{1})</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportSheetName" xml:space="preserve">
+    <value>الاستخدام الشهري</value>
+  </data>
+  <data name="AccountingServiceUsageReportName" xml:space="preserve">
+    <value>تقرير استخدام الخدمات ({0}-{1})</value>
+  </data>
+  <data name="AccountingServiceUsageReportSheetName" xml:space="preserve">
+    <value>استخدام الخدمات</value>
   </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>لا يمكن ترك حقل رمز التحقق فارغ</value>
@@ -196,7 +217,7 @@
     <value>تم تجاوز حصة مساحة وكيل الذكاء الاصطناعي</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>فشل تعيين الحصة لكل وكيل ذكاء اصطناعي. القيمة المدخلة أكبر من إجمالي تخزين DocSpace.</value>
+    <value>فشل تعيين الحصة لكل وكيل ذكاء اصطناعي. القيمة المدخلة أكبر من إجمالي مساحة التخزين.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>التجديد التلقائي</value>
@@ -226,7 +247,7 @@
     <value>معرف طلب العميل</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>قم بتفعيل التطبيق لتسجيل الدخول للبوابة باستخدام حساب معرف Apple.</value>
+    <value>سجّل الدخول إلى مساحة العمل الخاصة بك باستخدام حساب Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>قم بتفعيل هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى {LogoText} بواسطة معرف Apple. {0} إذهب لبوابة مطورين Apple وقم بانشاء تطبيق {LogoText} جديد. وقم بادراج البيانات المستلمة بالأسفل:</value>
@@ -271,7 +292,7 @@
     <value>رمز Box</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>قم بالسماح للتطبيق بالتحكم بملفات ومجلدات Box.</value>
+    <value>إدارة ملفات ومجلدات Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>قم بالسماح لهذا التطبيق بتوصيل حساب BOX الخاص بك بوحدة المستندات. ستتمكن من إدارة الملفات وتعديلها ومشاركتها من Box مع مستخدمين {LogoText}. {0} سجل الدخول إلى حسابك في صفحة مطوري Box وأنشئ تطبيقاً جديداً لتكامل {LogoText}. أدخل البيانات المستلمة في الأسفل:</value>
@@ -310,7 +331,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>قم بالسماح للتطبيق بإدارة ملفات ومجلدات DropBox.</value>
+    <value>إدارة ملفات ومجلدات Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>قم بالسماح لهذا التطبيق بربط حساب DropBox الخاص بك بوحدة المستندات. ستتمكن نم إدارة الملفات وتحريرها ومشاركتها من DropBox مع مستخدمين {LogoText}. {0} سجل الدخول إلى حسابك على موقع Dropbox Developers وأنشئ تطبيقاً جديداً لتكامل {LogoText}. أدخل البيانات التي تلقيتها أدناه:</value>
@@ -346,7 +367,7 @@
     <value>مفتاح فيسبوك</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>قم بتفعيل التطبيق لتسجيل الدخول للبوابة من خلال حساب فيسبوك.</value>
+    <value>سجّل الدخول إلى مساحة العمل الخاصة بك باستخدام حساب Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى {LogoText} باستخدام فيسبوك وربط حسابات زبائن الفيسبوك بوحدة الـ CRM. {0} انتقل إلى بوابة مطورين فيسبوك وأنشئ تكامل تطبيقاً جديداً {LogoText}. أدخل البيانات التي تلقيتها أدناه:</value>
@@ -400,7 +421,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>قم بتوصيل المشروع لتسجيل الدخول إلى البوابة باستخدام حساب جوجل و قم بإدارة ملفات و مجلدات جوجل درايف.</value>
+    <value>سجّل الدخول إلى مساحة العمل الخاصة بك باستخدام حساب Google وإدارة ملفات ومجلدات Google Drive</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>قم بتمكين هذا التطبيق لتوصيل حساب جوجل درايف الخاص بك بوحدة المستندات. ستتمكن من إدارة الملفات وتعديلها ومشاركتها من جوجل درايف مع مستخدمين {LogoText}. {0} انتقل إلى وحدة تحكم Google APIs وأنشئ مشروعاً جديداً لتكامل {LogoText}. أدخل البيانات التي تلقيتها أدناه:</value>
@@ -409,7 +430,7 @@
     <value>لينكدان</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>قم بتفعيل التطبيق لتسجيل الدخول للبوابة من خلال حساب لينكدان.</value>
+    <value>سجّل الدخول إلى مساحة العمل الخاصة بك باستخدام حساب LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى {LogoText} باستخدام حسابات لينكدان. {0} انتقل إلى موقع مطورين لينكدان وأنشئ تطبيق جديد لتكامل {LogoText}. أدخل البيانات التي تلقيتها أدناه:</value>
@@ -538,7 +559,7 @@
     <value>خصوصية العميل</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>تمكين التطبيق لإدارة ملفات ومجلدات OneDrive.</value>
+    <value>إدارة ملفات ومجلدات OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>قم بتمكين هذا التطبيق لتوصيل حساب OneDrive الخاص بك بوحدة المستندات. ستتمكن من إدارة الملفات وتحريرها ومشاركتها من OneDrive مع مستخدمين {LogoText}. {0}قم بتسجيل الدخول إلى حساب Microsoft Azure الخاص بك وإنشاء تطبيق جديد لتكامل {LogoText}. ثم قم بإدراج البيانات التي تلقيتها أدناه:</value>
@@ -568,7 +589,7 @@
     <value>رمز البوت</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>قم بتوصيل حساب تلجرام لتلقي إشعارات البوابة عبر تلجرام.</value>
+    <value>تلقي الإشعارات عبر Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>قم بتمكين Telegram bot لتلقي إشعارات البوابة عبر تلجرام، يمكنك إنشاء روبوت جديد باستخدام BotFather في Telegram Desktop. لاستخدام هذا الروبوت، يحتاج مستخدمو البوابة إلى تمكين إشعارات تلجرام على صفحة الملف الشخصي الخاصة بهم. {0} قم بلصق اسم مستخدم البوت والرمز الذي تلقيته في الحقول أدناه.</value>
@@ -601,7 +622,7 @@
     <value>معرف العميل</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>قم بتمكين التطبيق لتسجيل الدخول إلى البوابة باستخدام حساب تويتر والبحث عن جهات الاتصال.</value>
+    <value>سجّل الدخول إلى مساحة العمل الخاصة بك باستخدام حساب X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بالاتصال بجهات الاتصال الخاصة بهم من وحدة CRM باستخدام Twilio. {0}انتقل إلى Twilio Console ثم ألصق البيانات التالية أدناه:</value>
@@ -640,7 +661,7 @@
     <value>خصوصية العميل</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>تمكين التطبيق من تسجيل الدخول إلى البوابة باستخدام حساب WeChat.</value>
+    <value>سجّل الدخول إلى مساحة العمل الخاصة بك باستخدام حساب WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>تمكين التطبيق من تسجيل الدخول إلى البوابة باستخدام حساب WeChat.</value>
@@ -700,7 +721,7 @@
     <value>الرمز السري لمستخدم الزووم</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>تفعيل التطبيق لتسجيل الدخول للبوابة باستخدام حساب الزووم.</value>
+    <value>سجّل الدخول إلى مساحة العمل الخاصة بك باستخدام حساب Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>قم بتمكين هذا التطبيق للسماح للمستخدمين بتسجيل الدخول إلى {LogoText} باستخدام حسابات الزووم الخاصة بهم.  {0}انتقل إلى موقع ويب Zoom Developers وأنشئ تطبيقًا جديدًا متكاملاً مع {LogoText}. أدخل البيانات التي تلقيتها أدناه:</value>
@@ -754,7 +775,7 @@
     <value>تم تعليق ملفك الشخصي</value>
   </data>
   <data name="ErrorEmailAlreadyExists" xml:space="preserve">
-    <value>{!المستخدم} صاحب هذا البريد الإلكتروني مسجل بالفعل</value>
+    <value>{!User} صاحب هذا البريد الإلكتروني مسجل بالفعل</value>
   </data>
   <data name="ErrorEmailDomainNotAllowed" xml:space="preserve">
     <value>رسائل البريد الإلكتروني من هذا المجال غير مسموح لها التسجيل</value>
@@ -1105,7 +1126,7 @@
     <value>تم تجاوز حصة مساحة الغرفة</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>فشل في تحديد حصة لكل غرفة. القيمة المدخلة تتجاوز السعة الإجمالية لـ DocSpace.</value>
+    <value>فشل في تحديد حصة لكل غرفة. القيمة المدخلة تتجاوز السعة الإجمالية للتخزين.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>آسيا والمحيط الهادئ (سنغافورة)</value>
@@ -1152,11 +1173,11 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>يجب ألا يتجاوز عدد وكلاء الذكاء الاصطناعي {0}</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>بحث الذكاء الاصطناعي</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>ميزات الذكاء الاصطناعي</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>قوموا بتمكين ميزات الذكاء الاصطناعي لتعزيز الإنتاجية.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>تتبع عمليات تسجيل الدخول والإجراءات</value>
@@ -1270,7 +1291,7 @@
     <value>حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>لقد تم توصيل Telegram بنجاح لتلقي الإشعارات من DocSpace الخاص بكم.</value>
+    <value>لقد تم توصيل Telegram بنجاح لتلقي الإشعارات من مساحة العمل.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>رمز غير صحيح</value>
@@ -1285,16 +1306,13 @@
     <value>تم تجاوز حصة مساحة المستخدم</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>فشل في تحديد حصة لكل مستخدم. القيمة المدخلة تتجاوز السعة الإجمالية لـ DocSpace.</value>
+    <value>فشل في تحديد حصة لكل مستخدم. القيمة المدخلة تتجاوز السعة الإجمالية للتخزين.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>منطقة غرب الولايات المتحدة (أوريغون)</value>
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>جديدنا</value>
-  </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>وكيل</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>محادثة</value>
@@ -1305,6 +1323,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>البحث على الويب</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>بحث الذكاء الاصطناعي</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>أرصدة الذكاء الاصطناعي</value>
   </data>
@@ -1312,6 +1333,9 @@
     <value>المصادر</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>النتائج</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>النتائج</value>
   </data>
   <data name="ConsumersNextcloudClientId" xml:space="preserve">
@@ -1345,7 +1369,7 @@
     <value>الاتصال بقاعدة البيانات</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>قم بتخزين نتائج النموذج في قاعدة بيانات خارجية مثل MySQL أو SQLite.</value>
+    <value>تخزين نتائج النموذج في قاعدة بيانات خارجية مثل MySQL أو SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>قم بتوصيل قاعدة بيانات خارجية لتخزين نتائج النموذج.</value>
@@ -1363,7 +1387,7 @@
     <value>أدخل عنوان URL لمثيل Nextcloud.</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>تفعيل تسجيل الدخول إلى البوابة باستخدام حساب Nextcloud.</value>
+    <value>سجّل الدخول إلى مساحة العمل الخاصة بك باستخدام حساب Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>تفعيل تسجيل الدخول إلى البوابة باستخدام حساب Nextcloud.</value>
@@ -1382,5 +1406,155 @@
   </data>
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>فشل مصادقة المستخدم</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>مساحة تخزين إضافية على القرص</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>الخطة التجارية</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>الخطة التجارية</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>المسؤولون</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>المسؤولون</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>احصل على إمكانية الوصول إلى مجموعة واسعة من نماذج الذكاء الاصطناعي عبر تكامل OpenRouter. ادفع فقط مقابل ما تستخدمه، ويُحتسب من محفظتك.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>استخدم محرك بحث بالذكاء الاصطناعي لإثراء محادثات الذكاء الاصطناعي بمعلومات فورية من الإنترنت</value>
+  </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>تجاري</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>مستخدمين</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>مستخدمين</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_image" xml:space="preserve">
+    <value>الرموز (Tokens)</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
+    <value>صورة</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>حزمة Docs Connect للمطورين</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>تقرير حصة Docs Connect ({0})</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>قم بتضمين محرري ONLYOFFICE Docs في تطبيقك مع مستأجرين مستضافين على السحابة ومفاتيح API الخاصة بك.</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>نوع المصدر</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>اسم المصدر</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>معرف المصدر</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>وكيل الذكاء الاصطناعي</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>ملف</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>مجلد</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>غرفة</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>نموذج</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>الشركة</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>تاريخ الإنشاء</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>الفترة</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>المتبقي</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>الإجمالي</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>نشط</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>تنتهي صلاحية الوصول</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>نوع المستخدم</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>معرّف المستخدم</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>المحررون</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>محررو المستندات بصلاحيات كاملة</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>حصة المستخدم</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>مشاهد مباشر</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>مشاهدو المستندات للقراءة فقط</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>خارجي</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>داخلي</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>المتبقي</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>حد الاشتراك</value>
+  </data>
+  <data name="AccountingCustomerOperationPromptTokens" xml:space="preserve">
+    <value>الطلب</value>
+  </data>
+  <data name="AccountingCustomerOperationCachedTokens" xml:space="preserve">
+    <value>التخزين المؤقت</value>
+  </data>
+  <data name="AccountingCustomerOperationCacheWriteTokens" xml:space="preserve">
+    <value>الكتابة في ذاكرة التخزين المؤقت</value>
+  </data>
+  <data name="AccountingCustomerOperationCompletionTokens" xml:space="preserve">
+    <value>الاستجابة</value>
+  </data>
+  <data name="AccountingCustomerOperationReasoningTokens" xml:space="preserve">
+    <value>الاستدلال</value>
+  </data>
+  <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
+    <value>صورة</value>
+  </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>تكلفة المزوّد</value>
   </data>
 </root>

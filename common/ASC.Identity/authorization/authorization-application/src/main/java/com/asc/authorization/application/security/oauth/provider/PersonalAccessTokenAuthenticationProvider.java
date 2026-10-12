@@ -46,6 +46,7 @@ import com.asc.common.service.transfer.message.AuditMessage;
 import com.asc.common.service.transfer.message.LoginRegisteredEvent;
 import com.asc.common.utilities.HttpUtils;
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -56,6 +57,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.authority.FactorGrantedAuthority;
 import org.springframework.security.oauth2.core.*;
 import org.springframework.security.oauth2.server.authorization.OAuth2Authorization;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
@@ -143,7 +145,11 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
                       null,
                       List.of(
                           new TenantAuthority(
-                              patAuthentication.getTenantId(), patAuthentication.getTenantUrl()))))
+                              patAuthentication.getTenantId(), patAuthentication.getTenantUrl()),
+                          FactorGrantedAuthority.withAuthority(
+                                  FactorGrantedAuthority.BEARER_AUTHORITY)
+                              .issuedAt(Instant.now())
+                              .build())))
               .authorizationServerContext(AuthorizationServerContextHolder.getContext())
               .authorizedScopes(patAuthentication.getScopes())
               .tokenType(OAuth2TokenType.ACCESS_TOKEN)
@@ -199,7 +205,7 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
     var clientIP = httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request));
     var browser = httpUtils.getClientBrowser(request);
     var platform = httpUtils.getClientOS(request);
-    var fullUrl = httpUtils.getFullURL(request);
+    var page = httpUtils.truncateQueryParams(httpUtils.getFullURL(request));
 
     authorizationLoginEventRegistrationService.registerLogin(
         LoginRegisteredEvent.builder()
@@ -211,7 +217,7 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
             .date(eventDate)
             .tenantId(patAuthentication.getTenantId())
             .userId(patAuthentication.getUserId())
-            .page(fullUrl)
+            .page(page)
             .action(LOGIN_REGISTERED_ACTION)
             .build(),
         AuditMessage.builder()
@@ -225,7 +231,7 @@ public class PersonalAccessTokenAuthenticationProvider implements Authentication
             .userId(patAuthentication.getUserId())
             .userEmail(patAuthentication.getUserEmail())
             .userName(patAuthentication.getUserName())
-            .page(fullUrl)
+            .page(page)
             .action(AuditCode.GENERATE_PERSONAL_ACCESS_TOKEN.getCode())
             .build());
   }

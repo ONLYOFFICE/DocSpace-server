@@ -62,7 +62,7 @@ public class UploadControllerHelper(
         tenantManager,
         authContext)
 {
-    public async Task<ChunkedUploadSessionResponse<T>> CreateEditSessionAsync<T>(T fileId, long fileSize)
+    public async Task<ChunkedUploadSessionDto<T>> CreateEditSessionAsync<T>(T fileId, long fileSize)
     {
         var file = await _fileUploader.VerifyChunkedUploadForEditing(fileId, fileSize);
 
@@ -70,13 +70,13 @@ public class UploadControllerHelper(
     }
 
 
-    public async Task<ChunkedUploadSessionResponse<T>> CreateUploadSessionAsync<T>(T folderId, string fileName, long fileSize, string relativePath, bool encrypted, ApiDateTime createOn, bool createNewIfExist, bool keepVersion = false)
+    public async Task<ChunkedUploadSessionDto<T>> CreateUploadSessionAsync<T>(T folderId, string fileName, long fileSize, string relativePath, bool encrypted, ApiDateTime createOn, bool createNewIfExist, bool keepVersion = false)
     {
         var file = await _fileUploader.VerifyChunkedUploadAsync(folderId, fileName, fileSize, !createNewIfExist, relativePath);
         return await CreateUploadSessionAsync(file, encrypted, createOn, keepVersion);
     }
 
-    private async Task<ChunkedUploadSessionResponse<T>> CreateUploadSessionAsync<T>(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
+    private async Task<ChunkedUploadSessionDto<T>> CreateUploadSessionAsync<T>(File<T> file, bool encrypted, ApiDateTime createOn, bool keepVersion = false)
     {
         var session = await _fileUploader.InitiateUploadAsync(file.ParentId, file.Id ?? default, file.Title, file.ContentLength, encrypted, keepVersion, createOn);
 
@@ -99,22 +99,4 @@ public class UploadControllerHelper(
             await InsertFileAsync(folderId, uploadModel.File.OpenReadStream(), fileName, uploadModel.CreateNewIfExist, uploadModel.KeepConvertStatus)
         ];
     }
-}
-
-/// <summary>
-/// Represents a wrapper for the response of a chunked upload session operation.
-/// </summary>
-public class ChunkedUploadSessionResponseWrapper<T>
-{
-    /// <summary>
-    /// Gets or sets a value indicating whether the operation was successful.
-    /// </summary>
-    /// <example>true</example>
-    public bool Success { get; set; }
-
-    /// <summary>
-    /// Gets or sets the data of the chunked upload session response.
-    /// </summary>
-    /// <example>{"id": "00000000-0000-0000-0000-000000000000", "location": "https://example.com/upload"}</example>
-    public ChunkedUploadSessionResponse<T> Data { get; set; }
 }

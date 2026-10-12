@@ -44,6 +44,10 @@ public record RedisConfig(string Host, string Port, string? Password = null);
 
 public class ConnectionStringManager(IDistributedApplicationBuilder builder, string basePath)
 {
+    // The pool options production runs with (buildtools/config/appsettings.json), minus the character set: the
+    // test databases are created by the migration runner and keep the server default.
+    private const string MySqlPoolOptions = "Pooling=true;AutoEnlist=false;SSL Mode=none;AllowPublicKeyRetrieval=True;Connection Timeout=30;Maximum Pool Size=300;ConnectionReset=false";
+
     private MySqlConnectionStringBuilder? MySqlConnectionStringBuilder { get; set; }
     public Uri? RabbitMqUri { get; private set; }
     public RedisConfig? Redis { get; private set; }
@@ -65,7 +69,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     public bool HasOtelCollector => OtelCollectorResource != null;
 
 
-    public ConnectionStringManager AddMySql(bool withDbGate = false, bool withDataVolume = true)
+    public ConnectionStringManager AddMySql(bool withDbGate = false, bool withDataVolume = true, bool withTmpfs = false)
     {
         var mysqlRootPassword = builder.AddParameter("mysql-root-password", "root", secret: true);
 
@@ -75,6 +79,14 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         if (withDataVolume)
         {
             mysqlResourceBuilder = mysqlResourceBuilder.WithDataVolume("docspace-mysql-data");
+        }
+        else if (withTmpfs)
+        {
+            // Keep the whole MySQL datadir in RAM: throwaway databases (integration tests) pay a lot
+            // for InnoDB fsync-heavy init and migrations when the datadir sits on the virtualized
+            // Docker Desktop disk. Data disappears with the container, which is fine without a volume.
+            mysqlResourceBuilder = mysqlResourceBuilder.WithContainerRuntimeArgs("--tmpfs", "/var/lib/mysql");
+
         }
 
         if (withDbGate)
@@ -106,11 +118,17 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
-    public ConnectionStringManager AddRabbitMq()
+    public ConnectionStringManager AddRabbitMq(bool withManagementPlugin = true)
     {
         RabbitMqResource = builder
-            .AddRabbitMQ("messaging")
-            .WithManagementPlugin();
+            .AddRabbitMQ("messaging");
+
+        if (withManagementPlugin)
+        {
+            // Enabling the plugin at boot costs a few seconds, and nothing opens the UI during an
+            // integration-test run — so that profile asks for the plain image instead.
+            RabbitMqResource = RabbitMqResource.WithManagementPlugin();
+        }
 
         builder.Eventing.Subscribe(RabbitMqResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
         {
@@ -239,26 +257,19 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
-    public ConnectionStringManager AddOpensearch(bool withDashboard = true, bool fixedPort = true, bool withDataVolume = true)
+    public ConnectionStringManager AddOpensearch(bool withDashboard = true, bool withDataVolume = true, bool? isProxied = null)
     {
+        var dockerfileContext = Path.Combine(builder.AppHostDirectory, "Dockerfiles", "opensearch");
+
         OpensearchResource = builder
-            .AddContainer(Constants.OpensearchContainer, "opensearchproject/opensearch", "2")
+            .AddDockerfile(Constants.OpensearchContainer, dockerfileContext)
+            .WithImage("onlyoffice-opensearch")
+            .WithImageTag(Constants.OpensearchVersion)
+            .WithBuildArg("OPENSEARCH_VERSION", Constants.OpensearchVersion)
+            .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort, name: "http", isProxied: isProxied)
             .WithEnvironment("DISABLE_INSTALL_DEMO_CONFIG", "true")
             .WithEnvironment("plugins.security.disabled", "true")
-            .WithEnvironment("discovery.type", "single-node")
-            .WithEntrypoint("/bin/bash")
-            .WithArgs("-c", "opensearch-plugin install ingest-attachment --batch && /usr/share/opensearch/opensearch-docker-entrypoint.sh");
-
-        if (fixedPort)
-        {
-            OpensearchResource = OpensearchResource
-                .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort, name: "http");
-        }
-        else
-        {
-            OpensearchResource = OpensearchResource
-                .WithHttpEndpoint(targetPort: Constants.OpensearchPort, name: "http");
-        }
+            .WithEnvironment("discovery.type", "single-node");
 
         if (withDataVolume)
         {
@@ -277,10 +288,36 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
+    /// <summary>
+    /// A Nextcloud with one ready account, for the tests that connect a WebDAV storage to a room.
+    /// It installs itself on first start from the environment below, and the mounted config turns
+    /// off the brute-force and rate-limit protection: the credential tests send wrong passwords on
+    /// purpose, and the throttling those trigger would otherwise outlast the portal's third-party
+    /// request timeout.
+    /// </summary>
+    public ConnectionStringManager AddNextcloud()
+    {
+        var configPath = Path.Combine(builder.AppHostDirectory, "Dockerfiles", "nextcloud", "docspace.config.php");
+
+        builder.AddContainer(Constants.NextcloudContainer, "nextcloud", Constants.NextcloudVersion)
+            .WithHttpEndpoint(targetPort: 80, name: "http")
+            .WithEnvironment("NEXTCLOUD_ADMIN_USER", Constants.NextcloudUser)
+            .WithEnvironment("NEXTCLOUD_ADMIN_PASSWORD", Constants.NextcloudPassword)
+            .WithEnvironment("SQLITE_DATABASE", "nextcloud")
+            .WithEnvironment("NEXTCLOUD_TRUSTED_DOMAINS", $"localhost 127.0.0.1 {Constants.HostDockerInternal}")
+            // The image copies /usr/src/nextcloud/config/*.config.php into the live config on install.
+            .WithBindMount(configPath, "/usr/src/nextcloud/config/docspace.config.php", isReadOnly: true)
+            .WithHttpHealthCheck("/status.php");
+
+        return this;
+    }
+
     public ConnectionStringManager AddMailPit()
     {
+        // --max: MailPit keeps 500 messages by default and prunes every minute. A full letter-test
+        // sweep delivers a couple of thousand, so the default would drop letters mid-run.
         MailResource = builder.AddMailPit("mailpit")
-            .WithArgs("--smtp-disable-rdns");
+            .WithArgs("--smtp-disable-rdns", "--max", "10000");
 
         return this;
     }
@@ -299,7 +336,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithNpm()
             .WithEnvironment("MACHINEKEY", coreMachineKey)
             .WithEnvironment("PKEY", "PKEY")
-            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
+            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"127.0.0.1:{Constants.AppHostPort.ToString()}")
             .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
             .WithExplicitStart();
 
@@ -313,7 +350,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             displayName: "Run UI",
             executeCommand: async context =>
             {
-                var commandService = context.ServiceProvider
+                var commandService = context.Services
                     .GetRequiredService<ResourceCommandService>();
 
                 ApiTestResource
@@ -340,10 +377,8 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             displayName: "Run with BUG ID",
             executeCommand: async context =>
             {
-                var interactionService = context.ServiceProvider
-                    .GetRequiredService<IInteractionService>();
-                var commandService = context.ServiceProvider
-                    .GetRequiredService<ResourceCommandService>();
+                var interactionService = context.Services.GetRequiredService<IInteractionService>();
+                var commandService = context.Services.GetRequiredService<ResourceCommandService>();
 
                 var result = await interactionService.PromptInputAsync(
                     title: "Enter BUG ID",
@@ -408,6 +443,20 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         return this;
     }
 
+    public ConnectionStringManager AllowPortalRegistration()
+    {
+        var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
+
+        _parameters ??= new Dictionary<string, string>();
+        _parameters["auth:allowskip:registerportal"] = true.ToString();
+
+        // Treat the test owner address as an autotest email so that ApiSystem skips
+        // registration rate-limiting and recaptcha when every test creates its own portal.
+        _parameters["web:autotest:secret-email"] = docspaceOwnerEmail;
+
+        return this;
+    }
+
     public ConnectionStringManager AddE2ETest()
     {
         var docspaceOwnerEmail = builder.Configuration["OWNER_EMAIL"] ?? "test@example.com";
@@ -420,7 +469,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithNpm()
             .WithEnvironment("MACHINEKEY", coreMachineKey)
             .WithEnvironment("PKEY", "PKEY")
-            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"localhost:{Constants.AppHostPort.ToString()}")
+            .WithEnvironment("LOCAL_PORTAL_DOMAIN", $"127.0.0.1:{Constants.AppHostPort.ToString()}")
             .WithEnvironment("DOCSPACE_OWNER_EMAIL", docspaceOwnerEmail)
             .WithArgs("--", "--ui", "--ui-host", "0.0.0.0", "--ui-port", Constants.E2ETestsUiPort.ToString())
             .WithExplicitStart();
@@ -445,9 +494,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         bool includeMigrate = true,
         bool includeRabbitMq = true,
         bool includeRedis = true,
-        bool includeEditors = true,
+        bool includeEditors = false,
         bool includeOpensearch = true,
-        bool includeMailPit = true
+        bool includeMailPit = false
         )  where T : IResourceWithWaitSupport
     {
         if (includeMigrate && MigrateResource != null)
@@ -499,8 +548,13 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
         if (MySqlDatabaseResource != null)
         {
-            resourceBuilder
-                .WithReference(MySqlDatabaseResource, "default:connectionString");
+            // Aspire hands out the bare container connection string (server, port, user, password, database), so
+            // MySqlConnector ran with its defaults here while production (buildtools/config/appsettings.json) runs
+            // with explicit pool options. The default that matters is ConnectionReset=true: a COM_RESET_CONNECTION
+            // round trip on every pool checkout - measured at 1.7 ms x ~21 queries per Files request (2026-09-11).
+            // Same env var WithReference would set, so the services read it from the same config key.
+            resourceBuilder.WithEnvironment("ConnectionStrings__default:connectionString",
+                ReferenceExpression.Create($"{MySqlDatabaseResource.Resource};{MySqlPoolOptions}"));
         }
 
         if (MailResource != null)
@@ -584,7 +638,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             resourceBuilder.WithEnvironment("REDIS_PASSWORD", () => Redis?.Password ?? string.Empty);
         }
 
-        AddWaitFor(resourceBuilder, includeEditors: false);
+        AddWaitFor(resourceBuilder);
     }
 
     public static string? SubstituteLocalhost(string? host) => host?.Replace(KnownHostNames.Localhost, KnownHostNames.DockerDesktopHostBridge);
@@ -629,7 +683,7 @@ internal static class RedisResourceBuilderExtensions
     private static ResourceCommandState OnUpdateResourceState(
         UpdateCommandStateContext context)
     {
-        var logger = context.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        var logger = context.Services.GetRequiredService<ILogger<Program>>();
         if (logger.IsEnabled(LogLevel.Information))
         {
             logger.LogInformation(

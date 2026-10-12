@@ -51,13 +51,6 @@ namespace ASC.Notify.Textile
             "\"Edit subscription settings\":\"http://sssp.teamlab.com/subscribe.aspx\"";
 
         [Test]
-        public void TestJabberStyler()
-        {
-            var message = new NoticeMessage() { Body = pattern };
-            new JabberStyler().ApplyFormating(message);
-        }
-
-        [Test]
         public void TestTextileStyler()
         {
             var message = new NoticeMessage() { Body = pattern };

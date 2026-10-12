@@ -35,7 +35,14 @@ namespace ASC.Files.Core.Services.WCFService.FileOperations;
 
 [Scope(GenericArguments = [typeof(int)])]
 [Scope(GenericArguments = [typeof(string)])]
-public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folderDao, LockerManager lockerManager, FileTrackerHelper fileTracker, FileSecurity security)
+public class DeletePermissionsCheck<T>(
+    IFileDao<T> fileDao,
+    IFolderDao<T> folderDao,
+    LockerManager lockerManager,
+    FileTrackerHelper fileTracker,
+    FileSecurity security,
+    IDaoFactory daoFactory,
+    AuthContext authContext)
     : IPermissionsChecker<FileDeleteOperationData<T>, T>
 {
     public async Task RunPermissionCheckAsync(FileDeleteOperationData<T> data)
@@ -73,6 +80,101 @@ public class DeletePermissionsCheck<T>(IFileDao<T> fileDao, IFolderDao<T> folder
         {
             var file = await fileDao.GetFileAsync(fileId);
             await CheckFilePermissionsAsync([file], false, true, true);
+        }
+    }
+
+    // Batched analog of CheckFilePermissionsAsync: per-file verdicts with the same error precedence
+    // (delete rights -> lock -> editing), but delete rights and lock tags are resolved for the whole
+    // set at once instead of one query per file. Missing files are the caller's concern.
+    public async Task<Dictionary<T, string>> CheckFilesPermissionsAsync(IReadOnlyCollection<File<T>> files, bool checkPermissions)
+    {
+        var errors = new Dictionary<T, string>();
+
+        if (files.Count == 0)
+        {
+            return errors;
+        }
+
+        HashSet<T> denied = null;
+        HashSet<string> lockedForMe = null;
+
+        if (checkPermissions)
+        {
+            denied = [];
+
+            await foreach (var (entry, allowed) in security.CanDeleteAsync(files.ToAsyncEnumerable()))
+            {
+                if (!allowed)
+                {
+                    denied.Add(entry.Id);
+                }
+            }
+
+            var userId = authContext.CurrentAccount.ID;
+            var tagDao = daoFactory.GetTagDao<T>();
+
+            lockedForMe = await tagDao.GetTagsAsync([TagType.Locked], files)
+                .Where(t => t.EntryType == FileEntryType.File && t.EntryId != null && t.Owner != Guid.Empty && t.Owner != userId)
+                .Select(t => t.EntryId.ToString())
+                .ToHashSetAsync();
+        }
+
+        foreach (var file in files)
+        {
+            if (checkPermissions && denied.Contains(file.Id))
+            {
+                errors[file.Id] = FilesCommonResource.ErrorMessage_SecurityException_DeleteFile;
+                continue;
+            }
+
+            if (checkPermissions && lockedForMe.Contains(file.Id.ToString()))
+            {
+                errors[file.Id] = FilesCommonResource.ErrorMessage_LockedFile;
+                continue;
+            }
+
+            if (await fileTracker.IsEditingAsync(file.Id, false))
+            {
+                errors[file.Id] = FilesCommonResource.ErrorMessage_SecurityException_DeleteEditingFile;
+            }
+        }
+
+        return errors;
+    }
+
+    /// <summary>
+    /// A folder delete is all-or-nothing from the caller's point of view: a single file that is
+    /// open for editing must block the whole subtree instead of leaving it half-deleted. This is
+    /// check-then-delete, not a transaction — a file opened after the check still wins the race.
+    /// </summary>
+    public async Task<string> CheckSubtreeFilesPermissionsAsync(Folder<T> folder, bool checkPermissions)
+    {
+        const int pageSize = 500;
+        var offset = 0;
+
+        while (true)
+        {
+            var page = await fileDao.GetFilesAsync(folder.Id, new OrderBy(SortedByType.AZ, true), FilterType.FilesOnly, false, Guid.Empty, string.Empty, null, false,
+                    withSubfolders: true, offset: offset, count: pageSize)
+                .ToListAsync();
+
+            if (page.Count == 0)
+            {
+                return null;
+            }
+
+            var errors = await CheckFilesPermissionsAsync(page, checkPermissions);
+            if (errors.Count > 0)
+            {
+                return errors.Values.First();
+            }
+
+            if (page.Count < pageSize)
+            {
+                return null;
+            }
+
+            offset += page.Count;
         }
     }
 

@@ -196,6 +196,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to AI profile assigned to AI agent for action: {0}.
+        /// </summary>
+        public static string AiAgentProfileAssigned {
+            get {
+                return ResourceManager.GetString("AiAgentProfileAssigned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Default provider deleted.
         /// </summary>
         public static string AIDefaultProviderDeleted {
@@ -210,6 +219,51 @@ namespace ASC.AuditTrail {
         public static string AIDefaultProviderSet {
             get {
                 return ResourceManager.GetString("AIDefaultProviderSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI profile assigned to action: {0}.
+        /// </summary>
+        public static string AiProfileAssigned {
+            get {
+                return ResourceManager.GetString("AiProfileAssigned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI model profile created: {0}.
+        /// </summary>
+        public static string AiProfileCreated {
+            get {
+                return ResourceManager.GetString("AiProfileCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI model profile deleted: {0}.
+        /// </summary>
+        public static string AiProfileDeleted {
+            get {
+                return ResourceManager.GetString("AiProfileDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI profile unassigned from action: {0}.
+        /// </summary>
+        public static string AiProfileUnassigned {
+            get {
+                return ResourceManager.GetString("AiProfileUnassigned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to AI model profile updated: {0}.
+        /// </summary>
+        public static string AiProfileUpdated {
+            get {
+                return ResourceManager.GetString("AiProfileUpdated", resourceCulture);
             }
         }
         
@@ -493,7 +547,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Customer wallet enabled services settings updated.
+        ///   Looks up a localized string similar to Customer wallet enabled services settings updated: {0}.
         /// </summary>
         public static string CustomerWalletServicesSettingsUpdated {
             get {
@@ -687,6 +741,24 @@ namespace ASC.AuditTrail {
         public static string DnsSettingsUpdated {
             get {
                 return ResourceManager.GetString("DnsSettingsUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Docs Connect config updated.
+        /// </summary>
+        public static string DocsCloudConfigUpdated {
+            get {
+                return ResourceManager.GetString("DocsCloudConfigUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Docs Connect quota report downloaded.
+        /// </summary>
+        public static string DocsCloudQuotaReportDownloaded {
+            get {
+                return ResourceManager.GetString("DocsCloudQuotaReportDownloaded", resourceCulture);
             }
         }
         
@@ -961,6 +1033,15 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Files [{0}]. Marked As Read.
+        /// </summary>
+        public static string FileMarkedAsRead {
+            get {
+                return ResourceManager.GetString("FileMarkedAsRead", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Files [{0}]. Moved From Folder &quot;{1}&quot; To Folder: &quot;{2}&quot;.
         /// </summary>
         public static string FileMoved {
@@ -993,6 +1074,15 @@ namespace ASC.AuditTrail {
         public static string FileNotSavedDueToRoomQuota {
             get {
                 return ResourceManager.GetString("FileNotSavedDueToRoomQuota", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Files [{0}]. File not saved. Storage quota for portal exceeded..
+        /// </summary>
+        public static string FileNotSavedDueToTenantQuota {
+            get {
+                return ResourceManager.GetString("FileNotSavedDueToTenantQuota", resourceCulture);
             }
         }
         
@@ -1056,6 +1146,15 @@ namespace ASC.AuditTrail {
         public static string FileSavedButRoomQuotaExceeded {
             get {
                 return ResourceManager.GetString("FileSavedButRoomQuotaExceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Files [{0}]. Saving file exceeds portal storage quota..
+        /// </summary>
+        public static string FileSavedButTenantQuotaExceeded {
+            get {
+                return ResourceManager.GetString("FileSavedButTenantQuotaExceeded", resourceCulture);
             }
         }
         
@@ -1272,6 +1371,15 @@ namespace ASC.AuditTrail {
         public static string FolderIndexReordered {
             get {
                 return ResourceManager.GetString("FolderIndexReordered", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Folders [{0}]. Marked As Read.
+        /// </summary>
+        public static string FolderMarkedAsRead {
+            get {
+                return ResourceManager.GetString("FolderMarkedAsRead", resourceCulture);
             }
         }
         
@@ -1906,6 +2014,96 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Metadata cascade assignment started: {0}.
+        /// </summary>
+        public static string MetadataCascadeStarted {
+            get {
+                return ResourceManager.GetString("MetadataCascadeStarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Metadata field created: {0}.
+        /// </summary>
+        public static string MetadataFieldCreated {
+            get {
+                return ResourceManager.GetString("MetadataFieldCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Metadata field deleted: {0}.
+        /// </summary>
+        public static string MetadataFieldDeleted {
+            get {
+                return ResourceManager.GetString("MetadataFieldDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Metadata field updated: {0}.
+        /// </summary>
+        public static string MetadataFieldUpdated {
+            get {
+                return ResourceManager.GetString("MetadataFieldUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Metadata template assigned: {0}.
+        /// </summary>
+        public static string MetadataTemplateAssigned {
+            get {
+                return ResourceManager.GetString("MetadataTemplateAssigned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Metadata template created: {0}.
+        /// </summary>
+        public static string MetadataTemplateCreated {
+            get {
+                return ResourceManager.GetString("MetadataTemplateCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Metadata template deleted: {0}.
+        /// </summary>
+        public static string MetadataTemplateDeleted {
+            get {
+                return ResourceManager.GetString("MetadataTemplateDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Metadata template unassigned: {0}.
+        /// </summary>
+        public static string MetadataTemplateUnassigned {
+            get {
+                return ResourceManager.GetString("MetadataTemplateUnassigned", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Metadata template updated: {0}.
+        /// </summary>
+        public static string MetadataTemplateUpdated {
+            get {
+                return ResourceManager.GetString("MetadataTemplateUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Metadata values updated: {0}.
+        /// </summary>
+        public static string MetadataValuesUpdated {
+            get {
+                return ResourceManager.GetString("MetadataValuesUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Module.
         /// </summary>
         public static string ModuleCol {
@@ -2023,20 +2221,29 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Private Room is disabled.
+        ///   Looks up a localized string similar to Private room encryption key {0} created.
         /// </summary>
-        public static string PrivacyRoomDisable {
+        public static string PrivacyRoomKeyCreated {
             get {
-                return ResourceManager.GetString("PrivacyRoomDisable", resourceCulture);
+                return ResourceManager.GetString("PrivacyRoomKeyCreated", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Private Room is enabled.
+        ///   Looks up a localized string similar to Private room encryption key {0} deleted.
         /// </summary>
-        public static string PrivacyRoomEnable {
+        public static string PrivacyRoomKeyDeleted {
             get {
-                return ResourceManager.GetString("PrivacyRoomEnable", resourceCulture);
+                return ResourceManager.GetString("PrivacyRoomKeyDeleted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Private room encryption key {0} updated.
+        /// </summary>
+        public static string PrivacyRoomKeyUpdated {
+            get {
+                return ResourceManager.GetString("PrivacyRoomKeyUpdated", resourceCulture);
             }
         }
         
@@ -2199,6 +2406,24 @@ namespace ASC.AuditTrail {
         public static string RegenerateSecret {
             get {
                 return ResourceManager.GetString("RegenerateSecret", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Note.
+        /// </summary>
+        public static string ReportRowLimitLabel {
+            get {
+                return ResourceManager.GetString("ReportRowLimitLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The report shows the {0} most recent of {1} events. Download it in CSV format to get all of them..
+        /// </summary>
+        public static string ReportRowLimitNote {
+            get {
+                return ResourceManager.GetString("ReportRowLimitNote", resourceCulture);
             }
         }
         
@@ -2581,7 +2806,7 @@ namespace ASC.AuditTrail {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to User {0} sent an invitation to {1} to join this DocSpace.
+        ///   Looks up a localized string similar to User {0} sent an invitation to {1}.
         /// </summary>
         public static string SendJoinInvite {
             get {
@@ -2730,6 +2955,24 @@ namespace ASC.AuditTrail {
         public static string StartTransferSetting {
             get {
                 return ResourceManager.GetString("StartTransferSetting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Subscription balance moved to wallet: {0}.
+        /// </summary>
+        public static string SubscriptionBalanceMovedToWallet {
+            get {
+                return ResourceManager.GetString("SubscriptionBalanceMovedToWallet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Suspicious Login Detected: {0}.
+        /// </summary>
+        public static string SuspiciousLoginDetected {
+            get {
+                return ResourceManager.GetString("SuspiciousLoginDetected", resourceCulture);
             }
         }
         
@@ -2928,6 +3171,15 @@ namespace ASC.AuditTrail {
         public static string UpdateClient {
             get {
                 return ResourceManager.GetString("UpdateClient", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Updated MCP server {0} of AI agent.
+        /// </summary>
+        public static string UpdatedServerOfAgent {
+            get {
+                return ResourceManager.GetString("UpdatedServerOfAgent", resourceCulture);
             }
         }
         

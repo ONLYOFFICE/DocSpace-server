@@ -132,7 +132,7 @@ public class FirstTimeTenantSettings(
                 await SubscribeFromSite(currentUser);
             }
 
-            await cookiesManager.AuthenticateMeAndSetCookiesAsync(currentUser.Id);
+            await cookiesManager.AuthenticateMeAndSetCookiesAsync(currentUser.Id, checkSuspiciousLogin: false);
 
             return settings;
         }

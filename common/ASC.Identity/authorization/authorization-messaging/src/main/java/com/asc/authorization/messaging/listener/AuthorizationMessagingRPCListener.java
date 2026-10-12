@@ -151,6 +151,8 @@ public class AuthorizationMessagingRPCListener {
               .idTokenMetadata(event.getIdTokenMetadata())
               .idTokenIssuedAt(event.getIdTokenIssuedAt())
               .idTokenExpiresAt(event.getIdTokenExpiresAt())
+              .ownerTenantId(event.getOwnerTenantId())
+              .ownerUserId(event.getOwnerUserId())
               .build();
 
       if (result.isPresent()) {
@@ -158,6 +160,13 @@ public class AuthorizationMessagingRPCListener {
         if (event.getTenantId() == null || event.getTenantId() < 1)
           toPersist.setTenantId(entity.getTenantId());
         else toPersist.setTenantId(event.getTenantId());
+
+        // The origin region resolves the owner, so a message that predates the field must not erase
+        // what the stored row already knows.
+        if (toPersist.getOwnerTenantId() == null) {
+          toPersist.setOwnerTenantId(entity.getOwnerTenantId());
+          toPersist.setOwnerUserId(entity.getOwnerUserId());
+        }
       } else if (event.getTenantId() != null) {
         toPersist.setTenantId(event.getTenantId());
       }

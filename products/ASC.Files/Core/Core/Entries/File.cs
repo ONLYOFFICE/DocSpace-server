@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 using ASC.Files.Core.Mapping;
@@ -168,7 +168,7 @@ public class File<T> : FileEntry<T>
                 FileType.Spreadsheet => FilterType.SpreadsheetsOnly,
                 FileType.Archive => FilterType.ArchiveOnly,
                 FileType.Audio or FileType.Video => FilterType.MediaOnly,
-                FileType.Pdf => IsForm ? FilterType.PdfForm : FilterType.Pdf,
+                FileType.Pdf => IsPdfForm ? FilterType.PdfForm : FilterType.Pdf,
                 FileType.Diagram => FilterType.DiagramsOnly,
                 _ => FilterType.None
             };
@@ -208,9 +208,15 @@ public class File<T> : FileEntry<T>
     public string LockedBy { get; set; }
 
     /// <summary>
-    /// Specifies if the file is a form or not.
+    /// Specifies if the file is a PDF document. All PDFs are treated as fillable forms.
     /// </summary>
-    public bool IsForm => (FilterType)Category == FilterType.PdfForm;
+    public bool IsPdf => FileUtility.GetFileTypeByFileName(Title) == FileType.Pdf;
+
+    /// <summary>
+    /// Specifies if the file is an ONLYOFFICE PDF form (created from a form template). It only drives the
+    /// forms filter - what may be filled is decided by <see cref="IsPdf"/>.
+    /// </summary>
+    public bool IsPdfForm => (FilterType)Category == FilterType.PdfForm;
 
     /// <summary>
     /// Specifies if a Custom Filter editing mode is enabled for a file or not.
@@ -315,7 +321,17 @@ public class File<T> : FileEntry<T>
     /// <summary>
     /// The file thumbnail status.
     /// </summary>
-    public Thumbnail ThumbnailStatus { get; set; }
+    public Thumbnail ThumbnailStatus
+    {
+        get
+        {
+            return Encrypted ? Thumbnail.NotRequired : field;
+        }
+        set
+        {
+            field = Encrypted ? Thumbnail.NotRequired : value;
+        }
+    }
 
     /// <summary>
     /// The file force save type.
@@ -361,7 +377,7 @@ public class File<T> : FileEntry<T>
     /// The file form information.
     /// </summary>
     public FormInfo<T> FormInfo { get; set; }
-    
+
     public VectorizationStatus? VectorizationStatus { get; set; }
 }
 

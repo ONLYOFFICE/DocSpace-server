@@ -71,8 +71,13 @@ public static class TagValues
 
     public static ITagValue TrulyYours(StudioNotifyHelper studioNotifyHelper, string text, bool asTableRow = false)
     {
+        return TrulyYours(studioNotifyHelper.SiteLink, text, asTableRow);
+    }
+
+    public static ITagValue TrulyYours(string siteUrl, string text, bool asTableRow = false)
+    {
         var sb = new StringBuilder();
-        var url = studioNotifyHelper.SiteLink;
+        var url = siteUrl;
         var urlText = new Uri(url).Host;
 
         if (asTableRow)

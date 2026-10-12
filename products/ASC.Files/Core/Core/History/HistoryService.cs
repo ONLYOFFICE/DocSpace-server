@@ -38,7 +38,10 @@ namespace ASC.Files.Core.Core.History;
 [Scope]
 public class HistoryService(
     IDbContextFactory<MessagesContext> dbContextFactory,
-    TenantManager tenantManager)
+    TenantManager tenantManager,
+    IDaoFactory daoFactory,
+    UserManager userManager,
+    AuditEventMapper auditEventMapper)
 {
     public static HashSet<MessageAction> TrackedActions => [
         MessageAction.FileCreated,
@@ -146,7 +149,7 @@ public class HistoryService(
         DateTime? fromDate,
         DateTime? toDate)
     {
-        var messageDbContext = await dbContextFactory.CreateDbContextAsync();
+        await using var messageDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenantId = tenantManager.GetCurrentTenantId();
 
         var events = needFiltering
@@ -168,7 +171,7 @@ public class HistoryService(
         DateTime? fromDate,
         DateTime? toDate)
     {
-        var messageDbContext = await dbContextFactory.CreateDbContextAsync();
+        await using var messageDbContext = await dbContextFactory.CreateDbContextAsync();
         var tenantId = tenantManager.GetCurrentTenantId();
 
         if (needFiltering)
@@ -177,5 +180,82 @@ public class HistoryService(
         }
 
         return await messageDbContext.GetAuditEventsByReferencesTotalCount(tenantId, entryId, (byte)entryType, fromDate, toDate);
+    }
+
+    /// <summary>
+    /// Streams the history of a folder, newest first, in batches of at most <paramref name="batchSize"/>. Every
+    /// batch is a short query of its own that resumes below the last event id of the previous one, so events
+    /// recorded while the report is read neither shift a batch nor show up twice, and no query reads the batches
+    /// before it again.
+    /// </summary>
+    public async IAsyncEnumerable<IReadOnlyList<AuditEvent>> GetFolderAuditEventBatchesAsync(
+        int folderId,
+        DateTime? fromDate,
+        DateTime? toDate,
+        int batchSize,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        var entry = await daoFactory.GetFolderDao<int>().GetFolderAsync(folderId)
+            ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+
+        var tenantId = tenantManager.GetCurrentTenantId();
+        var lastId = int.MaxValue;
+
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var batch = new List<AuditEvent>();
+
+            await using (var messageDbContext = await dbContextFactory.CreateDbContextAsync(cancellationToken))
+            {
+                var events = messageDbContext.GetAuditEventsByReferencesBefore(tenantId, entry.Id, (byte)entry.FileEntryType, lastId, batchSize, fromDate, toDate);
+
+                await foreach (var (dbEvent, _) in events.WithCancellation(cancellationToken))
+                {
+                    lastId = dbEvent.Id;
+                    batch.Add(await ToAuditEventAsync(dbEvent));
+                }
+            }
+
+            if (batch.Count == 0)
+            {
+                yield break;
+            }
+
+            yield return batch;
+
+            if (batch.Count < batchSize)
+            {
+                yield break;
+            }
+        }
+    }
+
+    private async Task<AuditEvent> ToAuditEventAsync(DbAuditEvent dbEvent)
+    {
+        var query = new AuditEventQuery
+        {
+            Event = dbEvent,
+            UserData = await GetUserDataAsync(dbEvent.UserId)
+        };
+
+        return auditEventMapper.ToAuditEvent(query);
+    }
+
+    private async Task<UserData> GetUserDataAsync(Guid? userId)
+    {
+        if (!userId.HasValue || userId.Value == Guid.Empty)
+        {
+            return new UserData();
+        }
+
+        var user = await userManager.GetUsersAsync(userId.Value);
+
+        return new UserData
+        {
+            FirstName = user.FirstName,
+            LastName = user.LastName
+        };
     }
 }

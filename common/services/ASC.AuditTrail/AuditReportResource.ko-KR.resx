@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -241,7 +241,7 @@
     <value>고객 구독이 업데이트되었습니다: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>고객 지갑 활성화 서비스 설정이 업데이트되었습니다</value>
+    <value>고객 지갑 활성화 서비스 설정이 업데이트되었습니다: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>고객 지갑이 충전되었습니다: {0}</value>
@@ -732,12 +732,6 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>포털 이름이 변경되었습니다</value>
   </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>포털 룸이 비활성화되었습니다</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>포털 룸이 활성화되었습니다</value>
-  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>프로덕트 [{0}]. 액세스가 열렸습니다</value>
   </data>
@@ -791,6 +785,12 @@
   </data>
   <data name="RegenerateSecret" xml:space="preserve">
     <value>클라이언트의 {0} 시크릿이 재생성되었습니다</value>
+  </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>참고</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>보고서에는 {1}개의 이벤트 중 최근 {0}개가 표시됩니다. 모든 이벤트를 받으려면 보고서를 CSV 형식으로 다운로드하세요.</value>
   </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>벡터화 설정이 재설정되었습니다</value>
@@ -901,7 +901,7 @@
     <value>전송</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>사용자 {0}님이 {1}님에게 이 DocSpace에 참여하라는 초대장을 보냈습니다</value>
+    <value>사용자 {0}님이 {1}님에게 초대장을 보냈습니다</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>초대 지침이 전송되었습니다: {0}</value>
@@ -950,6 +950,9 @@
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>포털 리전 마이그레이션 시작</value>
+  </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>구독 잔액이 지갑으로 이동되었습니다: {0}</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>시스템 계정</value>
@@ -1205,5 +1208,89 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>사용자의 활성 연결들이 로그아웃되었습니다: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Docs Connect 구성이 업데이트되었습니다</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Docs Connect 할당량 보고서가 다운로드되었습</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>사용자 AI 설정이 업데이트되었습니다</value>
+  </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>AI 에이전트에 작업용 AI 프로필이 할당되었습니다: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>작업에 AI 프로필이 할당되었습니다: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>AI 모델 프로필이 생성되었습니다: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>AI 모델 프로필이 삭제되었습니다: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>작업에서 AI 프로필 할당이 해제되었습니다: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>AI 모델 프로필이 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>파일 [{0}]. 읽음으로 표시됨</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>파일 [{0}]. 파일이 저장되지 않았습니다. 포털 저장 용량 한도를 초과했습니다.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>파일 [{0}]. 파일 저장이 포털 저장 용량 한도를 초과합니다.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>폴더 [{0}]. 읽음으로 표시됨</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>비공개 룸 암호화 키 {0}이(가) 생성되었습니다</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>비공개 룸 암호화 키 {0}이(가) 삭제되었습니다</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>비공개 룸 암호화 키 {0}이(가) 업데이트되었습니다</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>의심스러운 로그인이 감지되었습니다: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>AI 에이전트의 MCP 서버 {0}이(가) 업데이트되었습니다</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>메타데이터 계단식 할당이 시작되었습니다: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>메타데이터 필드가 생성되었습니다: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>메타데이터 필드가 삭제되었습니다: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>메타데이터 필드가 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>메타데이터 템플릿이 할당되었습니다: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>메타데이터 템플릿이 생성되었습니다: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>메타데이터 템플릿이 삭제되었습니다: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>메타데이터 템플릿 할당이 해제되었습니다: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>메타데이터 템플릿이 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>메타데이터 값이 업데이트되었습니다: {0}</value>
   </data>
 </root>

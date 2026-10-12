@@ -247,7 +247,7 @@
     <value>客户订阅已更新: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>客户钱包已启用服务的设置已更新</value>
+    <value>客户钱包已启用服务的设置已更新: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>客户钱包已充值: {0}</value>
@@ -511,7 +511,7 @@
     <value>文件夹[{0}]。 访问已更新</value>
   </data>
   <data name="FolderUpdatedAccessFor" xml:space="preserve">
-    <value>文件夹[{0}]。外部链接已更新：{1}。角色：{2}</value>
+    <value>文件夹[{0}]。{1}的访问权限已更新。角色：{2}</value>
   </data>
   <data name="FollowActionType" xml:space="preserve">
     <value>关注</value>
@@ -729,12 +729,6 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>门户已被重命名</value>
   </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>私密房间已禁用</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>私密房间已启用</value>
-  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>产品[{0}]。访问已打开</value>
   </data>
@@ -788,6 +782,12 @@
   </data>
   <data name="RegenerateSecret" xml:space="preserve">
     <value>客户端 {0} 密钥已重新生成</value>
+  </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>注意</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>报告显示了 {1} 个事件中最近的 {0} 个。要获取所有事件，请以 CSV 格式下载报告。</value>
   </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>已重置向量化设置</value>
@@ -907,7 +907,7 @@
     <value>发送</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>用户 {0} 向 {1} 发送邀请加入此协作空间</value>
+    <value>用户 {0} 向 {1} 发送邀请</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>邀请说明已发送：{0}</value>
@@ -956,6 +956,9 @@
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>开始门户地区迁移</value>
+  </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>订阅余额已移至钱包：{0}</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>系统账户</value>
@@ -1205,5 +1208,89 @@
   </data>
   <data name="WhiteLabelSettingsLogoTextUpdated" xml:space="preserve">
     <value>品牌名称已更新</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Docs Connect 配置已更新</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Docs Connect 配额报告已下载</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>用户 AI 设置已更新</value>
+  </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>AI 配置文件已分配给 AI 代理以执行操作：{0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>AI 配置文件已分配给操作：{0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>AI 模型配置文件已创建：{0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>AI 模型配置文件已删除：{0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>AI 配置文件已从操作中取消分配：{0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>AI 模型配置文件已更新：{0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>文件 [{0}]。已标记为已读</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>文件 [{0}]。文件未保存。门户存储配额已超出。</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>文件 [{0}]。保存文件超出门户存储配额。</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>文件夹 [{0}]。已标记为已读</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>私人房间加密密钥 {0} 已创建</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>私人房间加密密钥 {0} 已删除</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>私人房间加密密钥 {0} 已更新</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>检测到可疑登录：{0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>AI 代理的 MCP 服务器 {0} 已更新</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>元数据级联分配已启动：{0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>元数据字段已创建：{0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>元数据字段已删除：{0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>元数据字段已更新：{0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>元数据模板已分配：{0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>元数据模板已创建：{0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>元数据模板已删除：{0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>元数据模板分配已取消：{0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>元数据模板已更新：{0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>元数据值已更新：{0}</value>
   </data>
 </root>

@@ -351,7 +351,8 @@ public static class DocumentService
         string signatureSecret,
         string signatureHeader,
         bool sslVerification,
-       IHttpClientFactory clientFactory)
+       IHttpClientFactory clientFactory,
+        CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrEmpty(docbuilderUrl);
 
@@ -360,7 +361,7 @@ public static class DocumentService
             throw new ArgumentException("requestKey or inputScript is empty");
         }
 
-        return InternalDocbuilderRequestAsync(docbuilderUrl, requestKey, scriptUrl, isAsync, signatureSecret, signatureHeader, sslVerification, clientFactory);
+        return InternalDocbuilderRequestAsync(docbuilderUrl, requestKey, scriptUrl, isAsync, signatureSecret, signatureHeader, sslVerification, clientFactory, cancellationToken);
     }
 
     private static async Task<(string DocBuilderKey, Dictionary<string, string> Urls)> InternalDocbuilderRequestAsync(
@@ -371,7 +372,8 @@ public static class DocumentService
        string signatureSecret,
        string signatureHeader,
        bool sslVerification,
-       IHttpClientFactory clientFactory)
+       IHttpClientFactory clientFactory,
+       CancellationToken cancellationToken)
     {
         docbuilderUrl = FilesLinkUtility.AddQueryString(docbuilderUrl, new Dictionary<string, string> {
             { FilesLinkUtility.ShardKey, requestKey }
@@ -403,9 +405,9 @@ public static class DocumentService
 
         string dataResponse;
 
-        using (var response = await httpClient.SendAsync(request))
+        using (var response = await httpClient.SendAsync(request, cancellationToken))
         {
-            dataResponse = await response.Content.ReadAsStringAsync();
+            dataResponse = await response.Content.ReadAsStringAsync(cancellationToken);
         }
 
         if (string.IsNullOrEmpty(dataResponse))
@@ -925,32 +927,6 @@ public static class DocumentService
         public string Token { get; set; }
     }
 
-    /// <summary>
-    /// The file link properties.
-    /// </summary>
-    public class FileLink
-    {
-        /// <summary>
-        /// The type of the file for the source viewed or edited document.
-        /// </summary>
-        /// <example>docx</example>
-        [JsonPropertyName("filetype")]
-        public required string FileType { get; set; }
-
-        /// <summary>
-        /// The encrypted signature added to the config in the form of a token.
-        /// </summary>
-        /// <example>token</example>
-        public string Token { get; set; }
-
-        /// <summary>
-        /// The absolute URL where the source viewed or edited document is stored.
-        /// </summary>
-        /// <example>https://example.com/file.docx</example>
-        [Url]
-        public required string Url { get; set; }
-    }
-
     public class DocumentServiceException(DocumentServiceException.ErrorCode errorCode, string message)
         : Exception(message)
     {
@@ -1097,7 +1073,7 @@ public static class DocumentServiceHttpClientExtension
         {
             pipelineBuilder.AddRetry(new RetryStrategyOptions<LicenseValidationResult>
             {
-                MaxRetryAttempts = 3,
+                MaxRetryAttempts = 4,
                 Delay = TimeSpan.FromSeconds(1),
                 BackoffType = DelayBackoffType.Exponential,
                 ShouldHandle = new PredicateBuilder<LicenseValidationResult>().HandleResult(result => result == null)

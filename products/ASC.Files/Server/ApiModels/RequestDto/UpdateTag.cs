@@ -34,21 +34,39 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for creating a tag.
+/// The parameters for renaming a custom room tag in the portal catalog.
 /// </summary>
-public class UpdateTagRequestDto
+public class UpdateTagRequestDto : IValidatableObject
 {
     /// <summary>
-    /// The old tag name.
+    /// The name of the tag to rename, matched against the catalog exactly as it is stored rather than searched for.
+    /// Read the stored spelling from `GET api/2.0/files/tags`.
     /// </summary>
-    /// <example>old-tag</example>
-    [StringLength(255)]
+    /// <example>Confidential</example>
+    [StringLength(CreateTagRequestDto.MaxNameLength)]
     public required string OldName { get; set; }
 
     /// <summary>
-    /// The new tag name.
+    /// The name to store instead. It has to be free: names are unique across the portal, so a name another tag
+    /// already carries is refused, and merging two tags this way is not possible.
     /// </summary>
-    /// <example>new-tag</example>
-    [StringLength(255)]
+    /// <example>Restricted</example>
+    [StringLength(CreateTagRequestDto.MaxNameLength)]
     public required string NewName { get; set; }
+
+    /// <summary>
+    /// Neither end of a rename may be blank — the same rule that applies when the tag is created.
+    /// </summary>
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (string.IsNullOrWhiteSpace(OldName))
+        {
+            yield return new ValidationResult("A tag name cannot be empty or consist of whitespace only.", [nameof(OldName)]);
+        }
+
+        if (string.IsNullOrWhiteSpace(NewName))
+        {
+            yield return new ValidationResult("A tag name cannot be empty or consist of whitespace only.", [nameof(NewName)]);
+        }
+    }
 }

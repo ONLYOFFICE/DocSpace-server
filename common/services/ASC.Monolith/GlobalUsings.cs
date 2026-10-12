@@ -33,7 +33,6 @@
 
 global using System.Text;
 
-global using ASC.AI.Core.Chat.Tool;
 global using ASC.AI.Extensions;
 global using ASC.AI.Worker.Extensions;
 global using ASC.Api.Core;

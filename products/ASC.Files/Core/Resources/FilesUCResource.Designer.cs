@@ -97,6 +97,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Files.
+        /// </summary>
+        public static string Files {
+            get {
+                return ResourceManager.GetString("Files", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Files will be compressed into the {0}.tar.gz file{1}.
         /// </summary>
         public static string FilesWillBeCompressedTarGz {
@@ -111,6 +120,15 @@ namespace ASC.Files.Core.Resources {
         public static string FilesWillBeCompressedZip {
             get {
                 return ResourceManager.GetString("FilesWillBeCompressedZip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Forms.
+        /// </summary>
+        public static string Forms {
+            get {
+                return ResourceManager.GetString("Forms", resourceCulture);
             }
         }
         

@@ -1,34 +1,34 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core;
@@ -95,8 +95,10 @@ public interface IFileDao<T>
     /// <param name="searchText"></param>
     /// <param name="extension"></param>
     /// <param name="searchInContent"></param>
+    /// <param name="metadataFilter">the structured metadata filter; the third-party files never carry metadata and are left out when it is set</param>
     /// <returns></returns>
-    IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, IEnumerable<T> excludeParentsIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent);
+    IAsyncEnumerable<File<T>> GetFilesFilteredAsync(IEnumerable<T> fileIds, IEnumerable<T> excludeParentsIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension, bool searchInContent,
+        MetadataFilter metadataFilter = null);
 
     /// <summary>
     ///
@@ -127,12 +129,14 @@ public interface IFileDao<T>
     /// <param name="formsItemDto"></param>
     /// <param name="applyFormStepFilter"></param>
     /// <param name="applyFfrStartedFormsFilter"></param>
+    /// <param name="folderType"></param>
+    /// <param name="metadataFilter">the structured metadata filter</param>
     /// <returns>list of files</returns>
     /// <remarks>
     ///    Return only the latest versions of files of a folder
     /// </remarks>
     IAsyncEnumerable<File<T>> GetFilesAsync(T parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText, string[] extension,
-        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false);
+        bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, T roomId = default, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false, List<FolderType> folderType = null, MetadataFilter metadataFilter = null);
 
     /// <summary>
     /// Get stream of file
@@ -175,7 +179,7 @@ public interface IFileDao<T>
     /// </summary>
     /// <param name="file"></param>
     /// <param name="fileStream"> </param>
-    /// <param name="chatId"></param>
+    /// <param name="allowQuotaGrace">Allow a single overshoot of the portal (tariff) storage quota within a grace (editor saves only)</param>
     /// <returns></returns>
     /// <remarks>
     /// Updates the file if:
@@ -184,11 +188,12 @@ public interface IFileDao<T>
     ///
     /// Save in all other cases
     /// </remarks>
-    Task<File<T>> SaveFileAsync(File<T> file, Stream fileStream, Guid chatId = default);
+    Task<File<T>> SaveFileAsync(File<T> file, Stream fileStream, bool allowQuotaGrace = false);
 
     /// <summary>
     ///  Saves / updates the version of the file
-    ///  and save stream of file
+    ///  and save stream of file, for use in form-filling flows where the
+    ///  destination folder existence check can be skipped
     /// </summary>
     /// <param name="file"></param>
     /// <param name="fileStream"> </param>
@@ -201,15 +206,16 @@ public interface IFileDao<T>
     ///
     /// Save in all other cases
     /// </remarks>
-    Task<File<T>> SaveFileAsync(File<T> file, Stream fileStream, bool checkFolder);
+    Task<File<T>> SaveFormFileAsync(File<T> file, Stream fileStream, bool checkFolder);
 
     /// <summary>
     ///
     /// </summary>
     /// <param name="file"></param>
     /// <param name="fileStream"></param>
+    /// <param name="allowQuotaGrace">Allow a single overshoot of the portal (tariff) storage quota within a grace (editor saves only)</param>
     /// <returns></returns>
-    Task<File<T>> ReplaceFileVersionAsync(File<T> file, Stream fileStream);
+    Task<File<T>> ReplaceFileVersionAsync(File<T> file, Stream fileStream, bool allowQuotaGrace = false);
     /// <summary>
     ///   Deletes a file including all previous versions
     /// </summary>
@@ -223,6 +229,25 @@ public interface IFileDao<T>
     /// <param name="fileId">file id</param>
     /// <param name="ownerId">file owner id</param>
     Task DeleteFileAsync(T fileId, Guid ownerId);
+
+    /// <summary>
+    ///   Deletes a batch of files including all previous versions and returns the ids
+    ///   that were actually deleted (ids already removed by a concurrent flow are excluded)
+    /// </summary>
+    /// <param name="owners">file id to quota owner id pairs</param>
+    async Task<IEnumerable<T>> DeleteFilesAsync(IEnumerable<KeyValuePair<T, Guid>> owners)
+    {
+        var deleted = new List<T>();
+
+        foreach (var (fileId, ownerId) in owners)
+        {
+            await DeleteFileAsync(fileId, ownerId);
+            deleted.Add(fileId);
+        }
+
+        return deleted;
+    }
+
     /// <summary>
     ///     Checks whether or not file
     /// </summary>
@@ -261,6 +286,43 @@ public interface IFileDao<T>
     Task<int> MoveFileAsync(T fileId, int toFolderId, bool deleteLinks = false);
 
     /// <summary>
+    ///   Moves a batch of files into the given folder and returns the ids that were
+    ///   actually moved. Covers only the plain case: no link deletion, no conflict
+    ///   resolution, no quota owner change. Files whose parent no longer matches
+    ///   the given snapshot are left untouched.
+    /// </summary>
+    async Task<IEnumerable<T>> MoveFilesAsync(IEnumerable<T> fileIds, T toFolderId, IEnumerable<T> fromParentIds = null)
+    {
+        var moved = new List<T>();
+
+        foreach (var fileId in fileIds)
+        {
+            await MoveFileAsync(fileId, toFolderId);
+            moved.Add(fileId);
+        }
+
+        return moved;
+    }
+
+    /// <summary>
+    ///   Returns the titles from the given set that already exist in the folder
+    /// </summary>
+    async Task<IEnumerable<string>> GetExistingTitlesAsync(T parentId, IEnumerable<string> titles)
+    {
+        var result = new List<string>();
+
+        foreach (var title in titles.Distinct())
+        {
+            if (await IsExistAsync(title, parentId))
+            {
+                result.Add(title);
+            }
+        }
+
+        return result;
+    }
+
+    /// <summary>
     ///  Copy the files in a folder
     /// </summary>
     /// <param name="fileId">file id</param>
@@ -268,7 +330,6 @@ public interface IFileDao<T>
     Task<File<T>> CopyFileAsync(T fileId, T toFolderId);
     Task<File<TTo>> CopyFileAsync<TTo>(T fileId, TTo toFolderId);
     Task<File<string>> CopyFileAsync(T fileId, string toFolderId);
-    Task<File<int>> CopyFileAsync(T fileId, int toFolderId, Guid chatId);
 
     /// <summary>
     ///   Rename file
@@ -439,23 +500,28 @@ public interface IFileDao<T>
 
     Task<int> GetFilesCountAsync(T parentId, FilterType filterType, bool subjectGroup, Guid subjectId, string searchText, string[] extension, bool searchInContent,
         bool withSubfolders = false, bool excludeSubject = false, T roomId = default,
-        FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, bool applyFormStepFilter = false);
+        FormsItemDto formsItemDto = null, FolderType parentType = FolderType.DEFAULT, AdditionalFilterOption additionalFilterOption = AdditionalFilterOption.All, bool applyFormStepFilter = false, List<FolderType> folderType = null, MetadataFilter metadataFilter = null);
 
     Task<int> SetCustomOrder(T fileId, T parentFolderId, int order);
 
     Task InitCustomOrder(Dictionary<T, int> fileIds, T parentFolderId);
 
     IAsyncEnumerable<File<T>> GetFilesByTagAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, OrderBy orderBy, int offset, int count);
-
-    Task<int> GetFilesByTagCountAsync(Guid tagOwner, IEnumerable<TagType> tagType, FilterType filterType, bool subjectGroup, Guid subjectId,
-        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId);
+        string searchText, string[] extension, bool searchInContent, bool excludeSubject, Location? location, int trashId, List<FolderType> folderType, OrderBy orderBy, int offset, int count,
+        MetadataFilter metadataFilter = null);
 
     Task<int> GetSharedFilesCountAsync(T parentId);
 
     IAsyncEnumerable<File<T>> GetSharedFilesAsync(T parentId, int offset = 0, int count = -1);
 
     Task SetVectorizationStatusAsync(T fileId, VectorizationStatus status, Func<Task> action = null);
+
+    Task<bool> IsVectorizationDeletedAsync(T fileId);
+
+    Task DeleteVectorizationIfDeletedAsync(T fileId);
+
+    Task SetFileKey(T fileId, IEnumerable<FileKeyData> keys);
+    Task<List<FileKeys>> GetFileKeys(T fileId, Guid userId);
 
     #endregion
 }

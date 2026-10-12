@@ -33,10 +33,14 @@
 
 namespace ASC.People.ApiModels.RequestDto;
 
+/// <summary>
+/// The request parameters for deleting an API key.
+/// </summary>
 public class DeleteApiKeyRequestDto
 {
     /// <summary>
-    /// The API key ID.
+    /// The ID of the key to delete, taken from the route. Read it from the `id` of an entry of
+    /// `GET api/2.0/keys` - it is not the secret and not the `keyPostfix`.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "keyId")]

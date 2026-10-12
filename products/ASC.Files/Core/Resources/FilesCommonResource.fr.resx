@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Le dossier requis est introuvable</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>ID de dossier invalide</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Fournisseur non valide</value>
   </data>
@@ -500,7 +503,7 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
     <value>Créateur de contenu</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>Administrateur de DocSpace</value>
+    <value>Administrateur complet</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Éditeur</value>
@@ -594,5 +597,29 @@ Compatibilité maximale avec docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Échec de la synchronisation des données du formulaire avec la base de données externe.</value>
+  </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Le formulaire a été modifié. Ce brouillon est obsolète et ne peut pas être soumis.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>L'instruction d'un agent IA ne peut pas dépasser {0} caractères</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Cette action est uniquement disponible dans une salle privée</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Sorties du chat</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>La salle contient déjà le dossier .ai</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Le stockage ne peut pas être déconnecté tant qu'une salle l'utilise. Supprimez plutôt la salle</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Rechercher dans les métadonnées du fichier</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Rechercher dans les métadonnées du dossier</value>
   </data>
 </root>

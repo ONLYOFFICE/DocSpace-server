@@ -34,55 +34,61 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The external link request parameters.
+/// The settings of an external link to a file.
 /// </summary>
 public class FileLinkRequest
 {
     /// <summary>
-    /// The external link ID.
+    /// The link to rewrite, as reported by `GET api/2.0/files/file/{id}/links`. An identifier that is not yet in use,
+    /// the empty one included, creates a link instead.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid LinkId { get; set; }
 
     /// <summary>
-    /// The link sharing rights.
+    /// The rights the link grants to whoever follows it. The value that denies everything revokes the link.
     /// </summary>
     /// <example>1</example>
     public FileShare Access { get; set; }
 
     /// <summary>
-    /// The link expiration date.
+    /// The moment the link stops working, read in the time zone of the portal. A date more than a few years ahead is
+    /// rejected as an invalid request; left out, the link does not expire on its own.
     /// </summary>
     /// <example>2021-01-01T00:00:00Z</example>
     public ApiDateTime ExpirationDate { get; set; }
 
     /// <summary>
-    /// The link name.
+    /// The name the link carries in the sharing list of the file, for the people who manage it; it is not shown to
+    /// whoever follows the link.
     /// </summary>
     /// <example>My Document</example>
     [StringLength(255)]
     public string Title { get; set; }
 
     /// <summary>
-    /// The link scope, whether it is internal or not.
+    /// Who may follow the link: `true` admits only accounts that are signed in to the portal, `false` admits anybody
+    /// who has the address.
     /// </summary>
     /// <example>false</example>
     public bool Internal { get; set; }
 
     /// <summary>
-    /// Specifies whether the file link is primary or not.
+    /// Whether this link becomes the primary link of the file - the one the "Copy link" action of a client hands out.
+    /// A file has one primary link at a time.
     /// </summary>
     /// <example>true</example>
     public bool Primary { get; set; }
 
     /// <summary>
-    /// Specifies whether to deny downloading the file or not.
+    /// What a visitor may do with the content: `true` leaves them with viewing in the browser, `false` lets them
+    /// download and print it as their rights allow.
     /// </summary>
     /// <example>false</example>
     public bool DenyDownload { get; set; }
 
     /// <summary>
-    /// Password for access via link.
+    /// The secret a visitor has to type before the file opens; left out, the link opens without one.
     /// </summary>
     /// <example>p@ssw0rd</example>
     [StringLength(255)]
@@ -91,20 +97,24 @@ public class FileLinkRequest
 
 
 /// <summary>
-/// The external link generic request parameters.
+/// The request that creates, rewrites or revokes an external link to a file.
 /// </summary>
 public class FileLinkRequestDto<T>
 {
     /// <summary>
-    /// The file ID.
+    /// The file the link points at.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// The file external link parameters.
+    /// The settings of the link. They are applied in full, so a field left out is reset rather than kept.
     /// </summary>
+    /// <example>
+    /// {"linkId": "00000000-0000-0000-0000-000000000000", "access": 2, "title": "Review link",
+    /// "internal": false, "primary": true, "denyDownload": false}
+    /// </example>
     [FromBody]
     public required FileLinkRequest File { get; set; }
 }

@@ -1,0 +1,100 @@
+# {{appName}}
+{{#docsUrl}}
+
+The browsable version of this reference, with a request builder and code samples, is published at
+[{{{.}}}]({{{.}}}).
+{{/docsUrl}}
+
+All URIs are relative to *{{{basePath}}}*, where the host is the address of your DocSpace instance.
+
+{{#apiInfo}}{{#apis}}{{#operations}}
+## {{sectionTitle}}
+
+| Method | HTTP request | Description |
+|------------ | ------------- | -------------|
+{{#operation}}| [**{{operationId}}**](#{{vendorExtensions.x-anchor}}) | **{{httpMethod}}** {{path}} | {{{summary}}}{{^summary}}{{{notes}}}{{/summary}} |
+{{/operation}}
+{{#operation}}
+
+<!--op:{{operationId}}|{{vendorExtensions.x-anchor}}-->
+### {{operationId}}
+
+> {{#returnType}}{{.}} {{/returnType}}{{operationId}}({{#allParams}}{{{paramName}}}{{^-last}}, {{/-last}}{{/allParams}})
+
+`{{httpMethod}} {{path}}`
+
+{{{summary}}}{{#notes}}
+
+{{{.}}}{{/notes}}
+
+#### Parameters
+{{^allParams}}
+This endpoint does not need any parameter.
+{{/allParams}}{{#allParams}}{{#-first}}
+|Name | In | Type | Description | Notes |
+|------------- | ------------- | ------------- | ------------- | -------------|
+{{/-first}}| **{{paramName}}** | {{vendorExtensions.x-param-in}} | {{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{#dataFormat}} ({{dataFormat}}){{/dataFormat}} | {{{description}}} | {{{vendorExtensions.x-notes}}} |
+{{/allParams}}
+
+#### Responses
+
+| Status code | Description | Type | Response headers |
+|------------- | ------------- | ------------- | -------------|
+{{#responses}}| **{{code}}** | {{{message}}} | {{#dataType}}{{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{/dataType}}{{^dataType}}-{{/dataType}} | {{#headers}}`{{baseName}}`{{^-last}}, {{/-last}}{{/headers}}{{^headers}}-{{/headers}} |
+{{/responses}}
+
+#### Return type
+
+{{#returnType}}{{#vendorExtensions.x-return-model-anchor}}[**{{returnType}}**](#{{vendorExtensions.x-return-model-anchor}}){{/vendorExtensions.x-return-model-anchor}}{{^vendorExtensions.x-return-model-anchor}}**{{returnType}}**{{/vendorExtensions.x-return-model-anchor}}{{/returnType}}{{^returnType}}null (empty response body){{/returnType}}
+
+{{#vendorExtensions.x-thirdparty-variant-operation}}
+#### Third-party storage
+
+For a file or folder in a connected third-party storage the identifier is a string such as `sbox-42`, and the call differs in these parts only:
+
+|Name | In | Type | Description | Notes |
+|------------- | ------------- | ------------- | ------------- | -------------|
+{{#allParams}}{{#vendorExtensions.x-thirdparty-changed}}| **{{paramName}}** | {{vendorExtensions.x-param-in}} | {{#vendorExtensions.x-model-anchor}}[**{{dataType}}**](#{{vendorExtensions.x-model-anchor}}){{/vendorExtensions.x-model-anchor}}{{^vendorExtensions.x-model-anchor}}**{{dataType}}**{{/vendorExtensions.x-model-anchor}}{{#dataFormat}} ({{dataFormat}}){{/dataFormat}} | {{description}} | {{{vendorExtensions.x-notes}}} |
+{{/vendorExtensions.x-thirdparty-changed}}{{/allParams}}
+{{#vendorExtensions.x-thirdparty-return-changed}}
+Return type: {{#returnType}}{{#vendorExtensions.x-return-model-anchor}}[**{{returnType}}**](#{{vendorExtensions.x-return-model-anchor}}){{/vendorExtensions.x-return-model-anchor}}{{^vendorExtensions.x-return-model-anchor}}**{{returnType}}**{{/vendorExtensions.x-return-model-anchor}}{{/returnType}}{{^returnType}}null (empty response body){{/returnType}}
+{{/vendorExtensions.x-thirdparty-return-changed}}
+
+{{/vendorExtensions.x-thirdparty-variant-operation}}
+#### Authorization
+
+{{^authMethods}}No authorization required{{/authMethods}}{{#authMethods}}[{{name}}](#{{vendorExtensions.x-anchor}}){{#vendorExtensions.x-scopes}} (scopes: {{vendorExtensions.x-scopes}}){{/vendorExtensions.x-scopes}}{{^-last}}, {{/-last}}{{/authMethods}}
+
+#### HTTP request headers
+
+- **Content-Type**: {{#consumes}}{{{mediaType}}}{{^-last}}, {{/-last}}{{/consumes}}{{^consumes}}Not defined{{/consumes}}
+- **Accept**: {{#produces}}{{{mediaType}}}{{^-last}}, {{/-last}}{{/produces}}{{^produces}}Not defined{{/produces}}
+{{/operation}}
+<!--/ops-->
+{{/operations}}{{/apis}}{{/apiInfo}}
+
+## Authorization
+{{^authMethods}}
+
+All endpoints do not require authorization.
+{{/authMethods}}{{#authMethods}}
+
+### {{name}}
+{{#isApiKey}}
+- **Type**: API key
+- **API key parameter name**: {{keyParamName}}
+- **Location**: {{#isKeyInQuery}}URL query string{{/isKeyInQuery}}{{#isKeyInHeader}}HTTP header{{/isKeyInHeader}}
+{{/isApiKey}}{{#isBasicBasic}}
+- **Type**: HTTP basic authentication
+{{/isBasicBasic}}{{#isBasicBearer}}
+- **Type**: HTTP Bearer Token authentication{{#bearerFormat}} ({{{.}}}){{/bearerFormat}}
+{{/isBasicBearer}}{{#isHttpSignature}}
+- **Type**: HTTP signature authentication
+{{/isHttpSignature}}{{#isOAuth}}
+- **Type**: OAuth
+- **Flow**: {{flow}}
+- **Authorization URL**: {{authorizationUrl}}
+- **Scopes**: {{^scopes}}N/A{{/scopes}}
+{{#scopes}}  - {{scope}}: {{{description}}}
+{{/scopes}}
+{{/isOAuth}}{{/authMethods}}

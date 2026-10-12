@@ -34,14 +34,30 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for creating a tag.
+/// The parameters for adding a custom tag to the portal catalog of room tags.
 /// </summary>
-public class CreateTagRequestDto
+public class CreateTagRequestDto : IValidatableObject
 {
+    /// <summary>The longest a tag name may be, shared by every endpoint that takes one.</summary>
+    public const int MaxNameLength = 255;
+
     /// <summary>
-    /// The tag name.
+    /// The name of the tag to create, which is also its identity: tags are addressed by name everywhere, there is no
+    /// separate identifier. It is stored exactly as sent, spacing and case included, and a name that is already in
+    /// the catalog gives back that tag instead of a second one.
     /// </summary>
     /// <example>Important</example>
-    [StringLength(255)]
+    [StringLength(MaxNameLength)]
     public required string Name { get; set; }
+
+    /// <summary>
+    /// A tag name is never blank: an empty or whitespace-only name is a bad request, not a tag.
+    /// </summary>
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (string.IsNullOrWhiteSpace(Name))
+        {
+            yield return new ValidationResult("A tag name cannot be empty or consist of whitespace only.", [nameof(Name)]);
+        }
+    }
 }

@@ -152,7 +152,7 @@ server/
 │   └── docspace-api-postman-collections/
 ├── thirdparty/                 # Third-party libraries
 ├── ASC.Web.sln                 # Main solution
-├── ASC.Tests.sln               # Test solution
+├── ASC.Tests.slnx              # Test solution
 ├── ASC.Migrations.sln          # Migrations solution
 └── Directory.Packages.props    # Centralized NuGet versions
 ```
@@ -279,7 +279,7 @@ VSCode will detect `ASC.Web.sln` automatically via C# Dev Kit. You can also open
 
 - `ASC.Web.sln` — full solution (all projects)
 - `ASC.Web.slnx` — XML solution format
-- `ASC.Tests.sln` — test projects only
+- `ASC.Tests.slnx` — test projects only
 - `ASC.Migrations.sln` — migration projects only
 
 **3. Run and debug:**
@@ -336,11 +336,11 @@ $c = docker ps -a --format '{{.Names}}' | Where-Object { $_ -match 'mysql|redis|
 
 ## Testing
 
-The test solution (`ASC.Tests.sln`) contains unit and integration tests for backend services.
+The test solution (`ASC.Tests.slnx`) contains unit and integration tests for backend services.
 
 ```bash
 # Run all tests
-dotnet test ASC.Tests.sln
+dotnet test ASC.Tests.slnx
 
 # Run tests for a specific project
 dotnet test products/ASC.Files/Tests/ASC.Files.Tests.csproj

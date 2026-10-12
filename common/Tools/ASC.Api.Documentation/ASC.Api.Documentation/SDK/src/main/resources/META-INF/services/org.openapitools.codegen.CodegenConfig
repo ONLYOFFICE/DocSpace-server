@@ -9,6 +9,7 @@ com.example.codegen.MySwift6ClientCodegen
 com.example.codegen.MyKotlinClientCodegen
 com.example.codegen.MyGoClientCodegen
 com.example.codegen.MyRubyClientCodegen
+com.example.codegen.MyMarkdownDocumentationCodegen
 org.openapitools.codegen.languages.AdaCodegen
 org.openapitools.codegen.languages.AdaServerCodegen
 org.openapitools.codegen.languages.AndroidClientCodegen

@@ -326,6 +326,18 @@ public class HttpUtils {
   }
 
   /**
+   * Truncates the query string from the given URL, keeping only the base URL and path.
+   *
+   * @param url the URL that may contain query parameters
+   * @return the URL without the query string, or the original value if none is present
+   */
+  public String truncateQueryParams(String url) {
+    if (url == null || url.isBlank()) return url;
+    var queryIndex = url.indexOf('?');
+    return queryIndex >= 0 ? url.substring(0, queryIndex) : url;
+  }
+
+  /**
    * Extracts the host from the given URL.
    *
    * @param url The URL to extract the host from

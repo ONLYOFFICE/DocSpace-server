@@ -55,7 +55,8 @@ public class BackupService(
         PermissionContext permissionContext,
         IDaoFactory daoFactory,
         FileSecurity fileSecurity,
-        StorageFactory storageFactory)
+        StorageFactory storageFactory,
+        MessageService messageService)
 {
     private const string BackupTempModule = "backup_temp";
     private const string BackupFileName = "backup";
@@ -198,13 +199,13 @@ public class BackupService(
         }
     }
 
-    public async Task<List<BackupHistoryRecord>> GetBackupHistoryAsync(bool dump)
+    public async Task<List<BackupRecord>> GetBackupHistoryAsync(bool dump)
     {
         await DemandPermissionsBackupAsync();
 
         var tenantId = dump ? -1 : tenantManager.GetCurrentTenantId();
 
-        var backupHistory = new List<BackupHistoryRecord>();
+        var backupHistory = new List<BackupRecord>();
         foreach (var record in await backupRepository.GetBackupRecordsByTenantIdAsync(tenantId))
         {
             var storage = await backupStorageFactory.GetBackupStorageAsync(record);
@@ -215,14 +216,7 @@ public class BackupService(
 
             if (await storage.IsExistsAsync(record.StoragePath))
             {
-                backupHistory.Add(new BackupHistoryRecord
-                {
-                    Id = record.Id,
-                    FileName = record.Name,
-                    StorageType = record.StorageType,
-                    CreatedOn = record.CreatedOn,
-                    ExpiresOn = record.ExpiresOn
-                });
+                backupHistory.Add(record);
             }
             else
             {
@@ -451,39 +445,13 @@ public class BackupService(
         return Path.Combine(folder, $"{tenantId}-{BackupFileName}");
     }
 
-    public async Task<ScheduleDto> GetScheduleAsync(bool? dump)
+    public async Task<ScheduleResponse> GetScheduleAsync(bool? dump)
     {
         await DemandPermissionsBackupAsync();
-        ScheduleResponse response;
-        if (dump.HasValue && dump.Value)
-        {
-            response = await InnerGetScheduleAsync(-1, dump);
-        }
-        else
-        {
-            response = await InnerGetScheduleAsync(tenantManager.GetCurrentTenantId(), dump);
-        }
-        if (response == null)
-        {
-            return null;
-        }
 
-        var schedule = new ScheduleDto
-        {
-            StorageType = response.StorageType,
-            StorageParams = response.StorageParams ?? new Dictionary<string, string>(),
-            CronParams = new CronParams(response.Cron),
-            BackupsStored = response.NumberOfBackupsStored.NullIfDefault(),
-            LastBackupTime = response.LastBackupTime,
-            Dump = response.Dump
-        };
-
-        if (response.StorageType != BackupStorageType.ThirdPartyConsumer)
-        {
-            schedule.StorageParams["folderId"] = response.StorageBasePath;
-        }
-
-        return schedule;
+        return dump.HasValue && dump.Value
+            ? await InnerGetScheduleAsync(-1, dump)
+            : await InnerGetScheduleAsync(tenantManager.GetCurrentTenantId(), dump);
     }
 
     public async Task<Session> OpenCustomerSessionForBackupAsync(int tenantId)
@@ -570,10 +538,35 @@ public class BackupService(
         return await backupRepository.GetBackupsCountAsync(tenantId, paid, from, to);
     }
 
+    public async Task<(int Free, int Paid)> GetBackupsCountAsync(int tenantId, DateTime from, DateTime to)
+    {
+        await DemandPermissionsBackupAsync();
+
+        return await backupRepository.GetBackupsCountAsync(tenantId, from, to);
+    }
+
     public async Task<bool> IsBackupServiceEnabledAsync(int tenantId)
     {
         var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
         return settings.EnabledServices != null && settings.EnabledServices.Contains(TenantWalletService.Backup);
+    }
+
+    public async Task EnsureBackupServiceEnabledAsync(int tenantId)
+    {
+        const TenantWalletService service = TenantWalletService.Backup;
+        var settings = await settingsManager.LoadAsync<TenantWalletServiceSettings>(tenantId);
+        var enabledServices = settings.EnabledServices ?? [];
+
+        if (enabledServices.Contains(service))
+        {
+            return;
+        }
+
+        enabledServices.Add(service);
+        settings.EnabledServices = enabledServices;
+        await settingsManager.SaveAsync(settings);
+
+        messageService.Send(MessageAction.CustomerWalletServicesSettingsUpdated, service.ToStringFast());
     }
 
     private async Task<ScheduleResponse> InnerGetScheduleAsync(int tenantId, bool? dump)
@@ -654,7 +647,7 @@ public class BackupService(
 
     private async Task<string> GetBackupServiceName()
     {
-        var quotaList = await tenantManager.GetTenantQuotasAsync(false, true);
+        var quotaList = await tenantManager.GetTenantQuotasAsync(all: false, wallet: true);
 
         var backupQuota = quotaList.FirstOrDefault(x => x.TenantId == (int)TenantWalletService.Backup);
 
@@ -663,68 +656,27 @@ public class BackupService(
 }
 
 /// <summary>
-/// The backup schedule parameters.
-/// </summary>
-public class ScheduleDto
-{
-    /// <summary>
-    /// The backup storage type.
-    /// </summary>
-    /// <example>0</example>
-    public required BackupStorageType StorageType { get; set; }
-
-    /// <summary>
-    /// The backup storage parameters.
-    /// </summary>
-    /// <example>{}</example>
-    public required Dictionary<string, string> StorageParams { get; set; }
-
-    /// <summary>
-    /// The backup cron parameters.
-    /// </summary>
-    /// <example>{ "period": 0, "hour": 0, "day": 0}</example>
-    public required CronParams CronParams { get; init; }
-
-    /// <summary>
-    /// The maximum number of the stored backup copies.
-    /// </summary>
-    /// <example>5</example>
-    public int? BackupsStored { get; init; }
-
-    /// <summary>
-    /// The date and time when the last backup was reated.
-    /// </summary>
-    /// <example>2026-01-01T00:00:00Z</example>
-    public required DateTime LastBackupTime { get; set; }
-
-    /// <summary>
-    /// Specifies if a dump will be created or not.
-    /// </summary>
-    /// <example>false</example>
-    public required bool Dump { get; set; }
-}
-
-/// <summary>
-/// The backup cron parameters.
+/// The time a scheduled backup runs at.
 /// </summary>
 public class CronParams
 {
     /// <summary>
-    /// The backup period type.
+    /// How often the backup runs: 0 for every day, 1 for every week and 2 for every month.
     /// </summary>
     /// <example>0</example>
     public BackupPeriod Period { get; init; }
 
     /// <summary>
-    /// The time of the day to start the backup process.
+    /// The hour of the day the backup starts at, from 0 to 23.
     /// </summary>
-    /// <example>0</example>
+    /// <example>2</example>
     public int Hour { get; init; }
 
     /// <summary>
-    /// The day of the week to start the backup process.
+    /// The day the backup runs on: the day of the week from 1 to 7, Sunday being 1, for a weekly schedule,
+    /// and the day of the month from 1 to 31 for a monthly one. It is 0 for a daily schedule.
     /// </summary>
-    /// <example>0</example>
+    /// <example>1</example>
     public int Day { get; init; }
 
     public CronParams() { }
@@ -762,7 +714,8 @@ public class CronParams
 }
 
 /// <summary>
-/// The backup period type.
+/// How often a scheduled backup runs. `EveryWeek` and `EveryMonth` also need the day to be given, while
+/// `EveryDay` does not.
 /// </summary>
 public enum BackupPeriod
 {

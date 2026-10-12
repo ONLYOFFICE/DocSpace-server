@@ -8,7 +8,7 @@
       "environmentVariables": {
         "$STORAGE_ROOT": "../../../../Data",
         "log__dir": "../../../../Logs",
-        "log__name": "ai.api",
+        "log__name": "ai",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }

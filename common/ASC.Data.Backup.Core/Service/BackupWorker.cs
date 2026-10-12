@@ -380,13 +380,15 @@ public class BackupWorker(
     {
         var instanceTasks = await _backupProgressQueue.GetAllTasks(DistributedTaskQueue<BackupProgressItem>.INSTANCE_ID);
 
-        return _backupProgressQueue.MaxThreadsCount < instanceTasks.Count;
+        // finished tasks stay in the queue until their client reads the result or the cleaner
+        // drops them, so counting them would report a busy instance while nothing is running
+        return _backupProgressQueue.MaxThreadsCount < instanceTasks.Count(t => t.Status <= DistributedTaskStatus.Running);
     }
 
     public async Task<bool> IsRestoreInstanceTooBusy()
     {
         var instanceTasks = await _restoreProgressQueue.GetAllTasks(DistributedTaskQueue<BackupProgressItem>.INSTANCE_ID);
 
-        return _restoreProgressQueue.MaxThreadsCount < instanceTasks.Count;
+        return _restoreProgressQueue.MaxThreadsCount < instanceTasks.Count(t => t.Status <= DistributedTaskStatus.Running);
     }
 }

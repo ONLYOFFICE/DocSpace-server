@@ -48,6 +48,7 @@ public interface ITenantService
     Tenant GetTenantForStandaloneWithoutAlias(string ip);
     Task<Tenant> GetTenantForStandaloneWithoutAliasAsync(string ip);
     Task<Tenant> SaveTenantAsync(CoreSettings coreSettings, Tenant tenant);
+    Task<Tenant> RegisterTenantAsync(CoreSettings coreSettings, Tenant tenant, UserInfo owner, string ownerPasswordHash);
     Task RemoveTenantAsync(Tenant tenant, bool auto = false);
     Task SetTenantSettingsAsync(int tenant, string key, byte[] data);
     Task PermanentlyRemoveTenantAsync(int id);

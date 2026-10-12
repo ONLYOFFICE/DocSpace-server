@@ -34,12 +34,14 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for adding files to the template list.
+/// The files to put on the personal template list of the calling account.
 /// </summary>
 public class TemplatesRequestDto
 {
     /// <summary>
-    /// The list of file IDs.
+    /// The files to put on the template list, by id, as reported by a folder listing such as
+    /// `GET api/2.0/files/{folderId}`. Only a file stored in the portal itself can become a template, which is why an
+    /// id here is always numeric.
     /// </summary>
     /// <example>[1, 2, 3]</example>
     public IEnumerable<int> FileIds { get; set; }

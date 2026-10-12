@@ -16,9 +16,13 @@
 
 package com.example.codegen;
 
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.servers.*;
 import io.swagger.v3.oas.models.headers.*;
 import io.swagger.v3.oas.models.media.Schema;
+import io.swagger.v3.core.util.Json;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 
 import org.openapitools.codegen.model.*;
 import org.openapitools.codegen.languages.CSharpClientCodegen;
@@ -29,6 +33,9 @@ import org.openapitools.codegen.templating.mustache.ReplaceAllLambda;
 
 import com.google.common.collect.ImmutableMap;
 import com.samskivert.mustache.Mustache;
+import com.samskivert.mustache.Template;
+import java.io.IOException;
+import java.io.Writer;
 
 import java.io.File;
 import java.util.stream.Collectors;
@@ -90,6 +97,10 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
         supportingFiles.add(new SupportingFile(
             "README_nuget.mustache", "docs", "README_nuget.md"
         ));
+
+        supportingFiles.add(new SupportingFile(
+            "GlobalUsings.mustache", sourceFolder + File.separator + packageName, "GlobalUsings.cs"
+        ));
     }
 
     @Override
@@ -144,6 +155,7 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
                 }
 
                 model.getVendorExtensions().put("x-localVars", localVars);
+                model.getVendorExtensions().put("x-has-localVars", !localVars.isEmpty());
             }
         }
         
@@ -151,8 +163,28 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
         return objs;
     }
 
+    // A generic controller action exists twice on the server, on one and the same route: closed over int for
+    // an entry the portal stores itself and over string for an entry on a connected third-party account. The
+    // document carries the string shape as `x-thirdparty-variant`; ThirdPartyVariants turns it into a second
+    // operation under the same name, which the class template renders as one more overload:
+    // `GetFileInfo(int fileId)` returns FileWrapper, `GetFileInfo(string fileId)` returns ThirdPartyFileWrapper.
+    @Override
+    public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List<Server> servers) {
+        CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);
+        ThirdPartyVariants.attach(this, op, path, httpMethod, operation, servers, ThirdPartyVariants.Naming.OVERLOAD);
+        return op;
+    }
+
+    @Override
+    public void postProcess() {
+        super.postProcess();
+        StaleOutput.delete(this);
+        LineEndings.normalize(this);
+    }
+
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
+        ThirdPartyVariants.insert(this, objs);
         super.postProcessOperationsWithModels(objs, allModels);
 
         if (objs != null && objs.getOperations() != null) {
@@ -278,7 +310,24 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
     @Override
     protected ImmutableMap.Builder<String, Mustache.Lambda> addMustacheLambdas() {
         return super.addMustacheLambdas()
-            .put("unescape_param", new ReplaceAllLambda("^@", ""));
+            .put("unescape_param", new ReplaceAllLambda("^@", ""))
+            .put("xml_doc_text", new XmlDocTextLambda());
+    }
+
+    // Makes a free-form value safe to place inside an XML documentation comment: escapes only the
+    // three characters XML requires (so JSON quotes stay readable) and folds line breaks, which
+    // would otherwise spill out of the `///` comment.
+    private static class XmlDocTextLambda implements Mustache.Lambda {
+        @Override
+        public void execute(Template.Fragment fragment, Writer writer) throws IOException {
+            String text = fragment.execute()
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replaceAll("\\R+", " ");
+
+            writer.write(text);
+        }
     }
 
 
@@ -331,7 +380,84 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
                     .replaceAll("([A-Z]+)([A-Z][a-z])", "$1-$2")
                     .toLowerCase();
     }
+
+    // In an openapi 3.1 document the parser hands structured `example` values over as plain Java
+    // collections instead of Jackson nodes, so the default String.valueOf() rendering produces
+    // `[{id=conn1, ip=192.168.1.1}]` instead of JSON. Re-serialize them so the <example> tags stay
+    // copy-pasteable.
+    @Override
+    public CodegenProperty fromProperty(String name, Schema p, boolean required, boolean schemaIsFromAdditionalProperties) {
+        CodegenProperty property = super.fromProperty(name, p, required, schemaIsFromAdditionalProperties);
+
+        if (p != null) {
+            String json = toJsonExample(p.getExample());
+            if (json != null) {
+                property.example = json;
+            }
+        }
+
+        return property;
+    }
+
+    private static String toJsonExample(Object example) {
+        if (!(example instanceof Map) && !(example instanceof List)) {
+            return null;
+        }
+
+        try {
+            return Json.mapper().writeValueAsString(example);
+        } catch (JsonProcessingException e) {
+            return null;
+        }
+    }
     
+    @Override
+    public Map<String, ModelsMap> postProcessAllModels(Map<String, ModelsMap> objs) {
+        Map<String, ModelsMap> processed = super.postProcessAllModels(objs);
+
+        Map<String, CodegenModel> byName = new HashMap<>();
+        for (ModelsMap mm : processed.values()) {
+            for (ModelMap m : mm.getModels()) {
+                if (m.getModel() != null) {
+                    byName.put(m.getModel().classname, m.getModel());
+                }
+            }
+        }
+
+        Map<String, String> parentOf = new HashMap<>();
+        for (CodegenModel model : byName.values()) {
+            Schema<?> schema = model.schemaName == null
+                ? null
+                : openAPI.getComponents().getSchemas().get(model.schemaName);
+            if (schema != null && ModelUtils.isAllOf(schema)) {
+                for (Object obj : schema.getAllOf()) {
+                    if (obj instanceof Schema && ((Schema<?>) obj).get$ref() != null) {
+                        parentOf.put(model.classname,
+                            toModelName(ModelUtils.getSimpleRef(((Schema<?>) obj).get$ref())));
+                        break;
+                    }
+                }
+            }
+        }
+
+        for (CodegenModel model : byName.values()) {
+            if (!model.isAdditionalPropertiesTrue) {
+                continue;
+            }
+            String parent = parentOf.get(model.classname);
+            while (parent != null) {
+                CodegenModel ancestor = byName.get(parent);
+                if (ancestor != null && ancestor.isAdditionalPropertiesTrue) {
+                    model.vendorExtensions.put("x-hides-additional-properties", true);
+                    break;
+                }
+                parent = parentOf.get(parent);
+            }
+        }
+
+        return processed;
+    }
+
     @Override
     public String getName() {
         return "my-csharp";

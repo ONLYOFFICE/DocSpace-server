@@ -33,6 +33,9 @@
 
 namespace ASC.Files.Core.Vectorization.Settings;
 
+/// <summary>
+/// The embedding provider type used for document vectorization.
+/// </summary>
 [EnumExtensions]
 public enum EmbeddingProviderType
 {

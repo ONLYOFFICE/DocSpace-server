@@ -135,17 +135,20 @@
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Detaje</value>
   </data>
+  <data name="AccountingCustomerOperationMonth" xml:space="preserve">
+    <value>Muaji</value>
+  </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Sasia</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Shërbimi</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>Funksionalitetet AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Kopje rezervë</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Hapësira në disk</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Vectorizimi</value>
@@ -157,7 +160,7 @@
     <value>Njësia e matjes</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Kopje rezervë</value>
+    <value>Kopje</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Tokenët</value>
@@ -174,8 +177,26 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Historiku i transaksioneve</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Totali i shpenzuar</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Përmbledhje sipas përdoruesit</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Lloji</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportName" xml:space="preserve">
+    <value>Raporti i përdorimit mujor ({0}-{1})</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportSheetName" xml:space="preserve">
+    <value>Përdorimi mujor</value>
+  </data>
+  <data name="AccountingServiceUsageReportName" xml:space="preserve">
+    <value>Raporti i përdorimit të shërbimeve ({0}-{1})</value>
+  </data>
+  <data name="AccountingServiceUsageReportSheetName" xml:space="preserve">
+    <value>Përdorimi i shërbimeve</value>
   </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Fusha e kodit të verifikimit nuk mund të jetë bosh</value>
@@ -196,7 +217,7 @@
     <value>Kuota e hapësirës së agjentit AI tejkalohet</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Dështoi vendosja e kuotës për agjent AI. Vlera e futur është më e madhe se gjithsej hapësira DocSpace.</value>
+    <value>Dështoi vendosja e kuotës për agjent AI. Vlera e futur është më e madhe se hapësira totale e ruajtjes.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Rinovim automatik</value>
@@ -226,7 +247,7 @@
     <value>ID-ja e klientit të aplikacionit</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari Apple ID.</value>
+    <value>Identifikohuni në hapësirën tuaj të punës me një llogari Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen në {LogoText} duke përdorur Apple ID. {0}Shkoni te portali i zhvilluesve të Apple dhe krijoni një integrim të ri të aplikacionit {LogoText}. Futni të dhënat:</value>
@@ -271,7 +292,7 @@
     <value>Çelësi i Box</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin për të menaxhuar skedarët dhe dosjet e Box.</value>
+    <value>Menaxhoni skedarët dhe dosjet e Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Aktivizoni këtë aplikacion për të lidhur llogarinë tënde Box me modulin Dokumentet. Ju do të jeni në gjendje të menaxhoni, modifikoni dhe ndani skedarë nga Box me përdoruesit e {LogoText}. {0}Identifikohuni në llogarinë tënde në faqen e zhvilluesve të Box dhe krijoni një aplikacion të ri për integrimin e {LogoText}. Futni të dhënat që keni marrë më poshtë:</value>
@@ -310,7 +331,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin për të menaxhuar skedarët dhe dosjet e Dropbox.</value>
+    <value>Menaxhoni skedarët dhe dosjet e Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Aktivizoni këtë aplikacion për të lidhur llogarinë tuaj Dropbox me modulin Documents. Ju do të jeni në gjendje të menaxhoni, modifikoni dhe ndani skedarë nga Dropbox me përdoruesit e {LogoText}. {0}Identifikohu në llogarinë tënde në faqen e internetit të Zhvilluesve të Dropbox dhe krijoni një aplikacion të ri për integrimin e {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
@@ -346,7 +367,7 @@
     <value>Çelësi i Facebook-ut</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari në Facebook.</value>
+    <value>Identifikohuni në hapësirën tuaj të punës me një llogari Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen në {LogoText} duke përdorur Facebook dhe të lidhni llogaritë e klientëve të tyre në Facebook me modulin CRM. {0}Shkoni te portali i zhvilluesve të Facebook dhe krijoni një integrim të ri aplikacioni {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
@@ -400,7 +421,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Lidhni projektin për t’u identifikuar në portal duke përdorur një llogari Google dhe për të menaxhuar skedarët dhe dosjet e Diskut të Google.</value>
+    <value>Identifikohuni në hapësirën tuaj të punës me një llogari Google dhe menaxhoni skedarët dhe dosjet e Google Drive</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Aktivizoni këtë aplikacion për të lidhur llogarinë tënde të Google Drive me modulin e Dokumenteve. Do të mundni të menaxhoni, modifikoni dhe ndani skedarët nga Google Drive me përdoruesit e {LogoText}. {0}Shkoni te tastiera e API-ve të Google dhe krijoni një projekt të ri për integrimin e {LogoText}. Futni të dhënat që keni marrë më poshtë:</value>
@@ -409,7 +430,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari në LinkedIn.</value>
+    <value>Identifikohuni në hapësirën tuaj të punës me një llogari LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen në {LogoText} duke përdorur llogaritë e tyre në LinkedIn {0}Shkoni në faqen e internetit të Zhvilluesve të LinkedIn dhe krijoni një të re. Shtoni të dhënat që keni marrë më poshtë:</value>
@@ -538,7 +559,7 @@
     <value>Sekreti i klientit</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin të menaxhojë skedarët dhe dosjet e OneDrive.</value>
+    <value>Menaxhoni skedarët dhe dosjet e OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Aktivizoni këtë aplikacion për të lidhur llogarinë tuaj OneDrive me modulin e Dokumenteve. Ju do të jeni në gjendje të menaxhoni, modifikoni dhe ndani skedarët nga OneDrive me përdoruesit e {LogoText}. {0}Identifikohu në llogarinë tënde të Microsoft Azure dhe krijoni aplikacionin e ri për integrimin {LogoText}. Futni të dhënat që keni marrë më poshtë:</value>
@@ -568,7 +589,7 @@
     <value>Shtrirja e robotit</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Lidhni llogarinë Telegram për të marrë njoftimet e portalit përmes Telegram-it.</value>
+    <value>Merrni njoftime përmes Telegramit</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Për të marrë njoftimet e portalit përmes Telegramit, aktivizoni Telegram bot. Mund të krijoni një bot të ri duke përdorur BotFatjer në Telegram për Desktop. Për të përdorur këtë bot, përdoruesit e portalit duhet të aktivizojnë njoftimet e Telegramit në faqen e tyre të profilit. {0}Ngjitni emrin e përdoruesit të robotit dhe kodin që keni marrë në fushat me poshtë.</value>
@@ -601,7 +622,7 @@
     <value>ID e klientit</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari X.</value>
+    <value>Identifikohuni në hapësirën tuaj të punës me një llogari X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen ne {LogoText} duke përdorur X-in e tyre dhe të lidhin llogaritë e tyre në X të klientëve të tyre me modulin CRM. {0}Shkoni te portali i zhvilluesve të X dhe krijoni një aplikacion të ri me integrim {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
@@ -640,7 +661,7 @@
     <value>Sekreti i klientit</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin për të hyrë në portal duke përdorur një llogari WeChat.</value>
+    <value>Identifikohuni në hapësirën tuaj të punës me një llogari WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Aktivizoni aplikacionin për të hyrë në portal duke përdorur një llogari WeChat.</value>
@@ -700,7 +721,7 @@
     <value>Sekreti i klientit në Zoom</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Aktivizoni aplikacionin të identifikohet në portal duke përdorur një llogari në Zoom.</value>
+    <value>Identifikohuni në hapësirën tuaj të punës me një llogari Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Aktivizoni këtë aplikacion për të lejuar përdoruesit tuaj të identifikohen në {LogoText} duke përdorur llogaritë e tyre në Zoom.{0}Shkoni te faqja e internetit të zhvilluesve të Zoom-it dhe krijoni një aplikacion të ri me integrim {LogoText}. Shtoni të dhënat që keni marrë më poshtë:</value>
@@ -1105,7 +1126,7 @@
     <value>Kuota e hapësirës së dhomës u tejkalua</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Vendosja e kuotës për dhomë dështoi. Vlera e futur është më e madhe se ruajtja totale e DocSpace.</value>
+    <value>Vendosja e kuotës për dhomë dështoi. Vlera e futur është më e madhe se ruajtja totale.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Azia Paqësori (Singapori)</value>
@@ -1152,11 +1173,11 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Numri i agjentëve AI nuk duhet të tejkalojë {0}</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>Kërkim me AI</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Funksionalitetet AI</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Aktivizoni funksionalitetet AI për të rritur produktivitetin.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Gjurmimi i hyrjeve dhe veprimeve</value>
@@ -1270,7 +1291,7 @@
     <value>Ndodhi një gabim i papritur. Ju lutemi provoni sërish.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Ju jeni lidhur me sukses me Telegram për të marrë njoftime nga DocSpace.</value>
+    <value>Ju jeni lidhur me sukses me Telegram për të marrë njoftime nga hapësira e punës.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Kodi i pasaktë</value>
@@ -1285,16 +1306,13 @@
     <value>Kuota e hapësirës së përdoruesit është tejkaluar</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Vendosja e kuotës për përdorues dështoi. Vlera e futur është me e madhe se ruajtja totale e DocSpace.</value>
+    <value>Vendosja e kuotës për përdorues dështoi. Vlera e futur është më e madhe se ruajtja totale.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Rajoni perëndimor i SHBA-së (Oregon)</value>
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Çfarë ka të re</value>
-  </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>Agjent</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>Bisedë</value>
@@ -1305,6 +1323,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>Kërkim në ueb</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>Kërkim me AI</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Kredite AI</value>
   </data>
@@ -1312,6 +1333,9 @@
     <value>Burime</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Rezultate</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Rezultate</value>
   </data>
   <data name="ConsumersdatabaseType" xml:space="preserve">
@@ -1339,7 +1363,7 @@
     <value>Lidhja me bazën e të dhënave</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Ruani rezultatet e formularit në një bazë të dhënash të jashtme si MySQL ose SQLite.</value>
+    <value>Ruani rezultatet e formularit në një bazë të dhënash të jashtme si MySQL ose SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Lidhni një bazë të dhënash të jashtme për të ruajtur rezultatet e formularit.</value>
@@ -1363,7 +1387,7 @@
     <value>Sekreti i klientit</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Lejoni aplikacionin të hyjë në portal duke përdorur një llogari Nextcloud.</value>
+    <value>Identifikohuni në hapësirën tuaj të punës me një llogari Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Lejoni aplikacionin të hyjë në portal duke përdorur një llogari Nextcloud.</value>
@@ -1382,5 +1406,155 @@
   </data>
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>Autentifikimi i përdoruesit dështoi</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Hapësirë shtesë në disk</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Plani Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Plani Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Administratorë</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Administratorë</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Merrni akses në një gamë të gjerë modelesh AI nëpërmjet integrimit me OpenRouter. Paguani vetëm për atë që përdorni, duke u faturuar nga Portofoli juaj.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>Përdorni një motor kërkimi me AI për të pasuruar bisedat me AI me informacione në kohë reale nga interneti</value>
+  </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>Përdoruesit</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>Përdoruesit</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_image" xml:space="preserve">
+    <value>Tokenët</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
+    <value>Imazh</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>Integroni redaktorët e ONLYOFFICE Docs në aplikacionin tuaj me qiramarrës të pritur në cloud dhe çelësat tuaj të API.</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>Paketa e zhvilluesit Docs Connect</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>Raporti i kuotës Docs Connect ({0})</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Lloji i burimit</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Emri i burimit</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>ID e burimit</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>Agjent AI</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Skedari</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Dosja</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Dhoma</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Formulari</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Kompania</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Data e gjenerimit</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Periudha</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Raport</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Totali</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Aktiv</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Aksesi skadon</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Lloji i përdoruesit</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>ID e përdoruesit</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Redaktorë</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Redaktorë dokumentesh me leje të plota</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Mbetur</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Kuota e përdoruesit</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Kufiri i abonimit</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Shikues live</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Shikues dokumentesh vetëm për lexim</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>I jashtëm</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>I brendshëm</value>
+  </data>
+  <data name="AccountingCustomerOperationPromptTokens" xml:space="preserve">
+    <value>Kërkesa</value>
+  </data>
+  <data name="AccountingCustomerOperationCachedTokens" xml:space="preserve">
+    <value>Memoria e përkohshme</value>
+  </data>
+  <data name="AccountingCustomerOperationCacheWriteTokens" xml:space="preserve">
+    <value>Shkrim në memorien e përkohshme</value>
+  </data>
+  <data name="AccountingCustomerOperationCompletionTokens" xml:space="preserve">
+    <value>Përgjigjja</value>
+  </data>
+  <data name="AccountingCustomerOperationReasoningTokens" xml:space="preserve">
+    <value>Arsyetimi</value>
+  </data>
+  <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
+    <value>Imazh</value>
+  </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>Kostoja e ofruesit</value>
   </data>
 </root>

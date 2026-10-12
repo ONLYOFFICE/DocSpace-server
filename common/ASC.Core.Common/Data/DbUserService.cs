@@ -599,7 +599,7 @@ public class EFUserService(
 
         if (any)
         {
-            throw new ArgumentException($"Duplicate {nameof(user.UserName)}");
+            throw new DuplicateUserNameException();
         }
 
         any = await userDbContext.AnyUsersByEmailAsync(tenant, user.Email, user.Id);

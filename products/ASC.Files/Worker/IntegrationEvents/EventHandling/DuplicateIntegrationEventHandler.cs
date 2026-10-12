@@ -31,8 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using ASC.EventBus.Exceptions;
-
 namespace ASC.Files.Worker.IntegrationEvents.EventHandling;
 
 [Scope]

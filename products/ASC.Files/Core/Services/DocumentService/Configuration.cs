@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Web.Files.Services.DocumentService;
@@ -50,14 +50,15 @@ public enum EditorType
 }
 
 /// <summary>
-/// The config parameter which contains the information about the action in the document that will be scrolled to.
+/// The place inside a document that a link should open at.
 /// </summary>
 public class ActionLinkConfig
 {
     /// <summary>
-    /// The information about the action in the document that will be scrolled to.
+    /// The anchor itself. It is passed on to the editor unchanged, so it has to be the value the editor produced for
+    /// the comment or the mention it points at.
     /// </summary>
-    /// <example>{"data": "section", "type": "scroll"}</example>
+    /// <example>{"data": "section-42", "type": "comment"}</example>
     [JsonPropertyName("action")]
     public ActionConfig Action { get; set; }
 
@@ -67,50 +68,27 @@ public class ActionLinkConfig
     }
 
     /// <summary>
-    /// The information about the action in the document that will be scrolled to.
+    /// An anchor inside a document, as the editor writes it.
     /// </summary>
     public class ActionConfig
     {
         /// <summary>
-        /// The action data that will be scrolled to.
+        /// The anchor value produced by the editor, opaque to the portal: it names the comment, the mention or the
+        /// place the document is scrolled to.
         /// </summary>
-        /// <example>section</example>
+        /// <example>section-42</example>
         [JsonPropertyName("data")]
         [StringLength(256)]
         public string Data { get; set; }
 
         /// <summary>
-        /// The action type.
+        /// What the anchor points at, as the editor names it - a comment thread, for instance.
         /// </summary>
-        /// <example>scroll</example>
+        /// <example>comment</example>
         [JsonPropertyName("type")]
         [StringLength(128)]
         public string Type { get; set; }
     }
-}
-
-/// <summary>
-/// The co-editing configuration parameters.
-/// </summary>
-public class CoEditingConfig
-{
-    /// <summary>
-    /// Specifies if the co-editing mode can be changed in the editor interface or not.
-    /// </summary>
-    /// <example>true</example>
-    public bool Change { get; set; }
-
-    /// <summary>
-    /// Specifies if the co-editing mode is fast.
-    /// </summary>
-    /// <example>false</example>
-    public bool Fast { get; init; }
-
-    /// <summary>
-    /// The co-editing mode (fast or strict).
-    /// </summary>
-    /// <example>Strict</example>
-    public CoEditingConfigMode Mode => Fast ? CoEditingConfigMode.Fast : CoEditingConfigMode.Strict;
 }
 
 /// <summary>
@@ -212,7 +190,7 @@ public class DocumentConfig<T>(
     TenantManager tenantManager)
 {
     private string _fileUri;
-    private FileReferenceData _referenceData;
+    private FileReferenceDataDto _referenceData;
     public string GetFileType(File<T> file) => file.ConvertedExtension.Trim('.');
     public InfoConfig<T> Info { get; } = infoConfig;
     public bool IsLinkedForMe { get; set; }
@@ -223,14 +201,14 @@ public class DocumentConfig<T>(
         get => DocumentServiceConnector.GenerateRevisionId(field);
     } = string.Empty;
 
-    public PermissionsConfig Permissions { get; set; } = new();
+    public PermissionsConfigDto Permissions { get; set; } = new();
 
     public Options Options { get; set; }
     public string SharedLinkParam { get; set; }
     public string SharedLinkKey { get; set; }
-    public FileReferenceData GetReferenceData(File<T> file)
+    public FileReferenceDataDto GetReferenceData(File<T> file)
     {
-        return _referenceData ??= new FileReferenceData
+        return _referenceData ??= new FileReferenceDataDto
         {
             FileKey = file.Id.ToString(),
             InstanceId = tenantManager.GetCurrentTenantId().ToString()
@@ -267,8 +245,8 @@ public class EditorConfiguration<T>(
     FilesLinkUtility filesLinkUtility,
     FileUtility fileUtility,
     BaseCommonLinkUtility baseCommonLinkUtility,
-    PluginsConfig pluginsConfig,
-    EmbeddedConfig embeddedConfig,
+    PluginsConfigDto pluginsConfig,
+    EmbeddedConfigDto embeddedConfig,
     CustomizationConfig<T> customizationConfig,
     FilesSettingsHelper filesSettingsHelper,
     IDaoFactory daoFactory,
@@ -280,9 +258,9 @@ public class EditorConfiguration<T>(
     TariffService tariffService,
     TenantManager tenantManager)
 {
-    public PluginsConfig Plugins { get; } = pluginsConfig;
+    public PluginsConfigDto Plugins { get; } = pluginsConfig;
     public CustomizationConfig<T> Customization { get; } = customizationConfig;
-    public EncryptionKeysConfig EncryptionKeys { get; set; }
+    public List<EncryptionKeyDto> EncryptionKeys { get; set; }
 
     public string Lang => UserInfo.GetCulture().Name;
 
@@ -292,8 +270,8 @@ public class EditorConfiguration<T>(
 
     private UserInfo UserInfo => field ??= userManager.GetUsers(authContext.CurrentAccount.ID);
 
-    private UserConfig _user;
-    public async Task<UserConfig> GetUserAsync()
+    private UserConfigDto _user;
+    public async Task<UserConfigDto> GetUserAsync()
     {
         if (_user != null || UserInfo.Id.Equals(ASC.Core.Configuration.Constants.Guest.ID))
         {
@@ -302,7 +280,7 @@ public class EditorConfiguration<T>(
 
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenantManager.GetCurrentTenantId());
 
-        _user = new UserConfig
+        _user = new UserConfigDto
         {
             Id = UserInfo.Id.ToString(),
             Name = UserInfo.DisplayUserName(false, displayUserSettingsHelper),
@@ -336,10 +314,10 @@ public class EditorConfiguration<T>(
         return externalShare.GetUrlWithShare(callbackUrl, key);
     }
 
-    public async Task<CoEditingConfig> GetCoEditingAsync()
+    public async Task<CoEditingConfigDto> GetCoEditingAsync()
     {
         return !ModeWrite && await GetUserAsync() == null
-            ? new CoEditingConfig
+            ? new CoEditingConfigDto
             {
                 Fast = false,
                 Change = false
@@ -389,12 +367,12 @@ public class EditorConfiguration<T>(
                + "&" + FilesLinkUtility.FileTitle + "=" + HttpUtility.UrlEncode(title);
     }
 
-    public EmbeddedConfig GetEmbedded(EditorType editorType)
+    public EmbeddedConfigDto GetEmbedded(EditorType editorType)
     {
         return editorType == EditorType.Embedded ? embeddedConfig : null;
     }
 
-    public async IAsyncEnumerable<RecentConfig> GetRecent(FileType fileType, T fileId)
+    public async IAsyncEnumerable<RecentConfigDto> GetRecent(FileType fileType, T fileId)
     {
         if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
@@ -422,15 +400,29 @@ public class EditorConfiguration<T>(
 
         var (entries, _) = await entryManager.GetEntriesAsync(recent, null, 0, 10, [filter], false, Guid.Empty, Guid.Empty, string.Empty, null, false, false, new OrderBy(SortedByType.LastOpened, false));
 
-        var files = entries
-            .Cast<File<int>>()
-            .Where(file => file != null && !Equals(fileId, file.Id))
-            .ToList();
+        var files = entries.OfType<File<int>>().Where(file => !Equals(fileId, file.Id)).ToList();
+        var thirdPartyFiles = entries.OfType<File<string>>().Where(file => !Equals(fileId, file.Id)).ToList();
+
+        await foreach (var config in GetRecentConfigsAsync(files, folderDao))
+        {
+            yield return config;
+        }
+
+        await foreach (var config in GetRecentConfigsAsync(thirdPartyFiles, daoFactory.GetFolderDao<string>()))
+        {
+            yield return config;
+        }
+    }
+
+    private async IAsyncEnumerable<RecentConfigDto> GetRecentConfigsAsync<TFile>(List<File<TFile>> files, IFolderDao<TFile> folderDao)
+    {
+        if (files.Count == 0)
+        {
+            yield break;
+        }
 
         var parentIds = files.Select(r => r.ParentId).Distinct().ToList();
         var parentFolders = await folderDao.GetFoldersAsync(parentIds).ToListAsync();
-
-
 
         foreach (var file in files)
         {
@@ -443,16 +435,16 @@ public class EditorConfiguration<T>(
 
             var webUrl = externalShare.GetUrlWithShare(baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.GetFileWebPreviewUrl(fileUtility, file.Title, file.Id, file.Version, externalMediaAccess)), requestToken);
 
-            yield return new RecentConfig
+            yield return new RecentConfigDto
             {
-                Folder = parentFolders.FirstOrDefault(r => file.ParentId == r.Id)?.Title,
+                Folder = parentFolders.FirstOrDefault(r => Equals(file.ParentId, r.Id))?.Title,
                 Title = file.Title,
                 Url = baseCommonLinkUtility.GetFullAbsolutePath(webUrl)
             };
         }
     }
 
-    public async Task<List<TemplatesConfig>> GetTemplates(FileType fileType, string title)
+    public async Task<List<TemplatesConfigDto>> GetTemplates(FileType fileType, string title)
     {
         if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(authContext.CurrentAccount.ID))
         {
@@ -480,7 +472,7 @@ public class EditorConfiguration<T>(
         var files = await entryManager.GetTemplatesAsync(folderDao, fileDao, filter, false, Guid.Empty, string.Empty, null, false).ToListAsync();
         var listTemplates = from file in files
                             select
-                                new TemplatesConfig
+                                new TemplatesConfigDto
                                 {
                                     Image = baseCommonLinkUtility.GetFullAbsolutePath("skins/default/images/filetype/thumb/" + extension + ".png"),
                                     Title = file.Title,
@@ -547,7 +539,7 @@ public class InfoConfig<T>(
 
     public string GetOwner(File<T> file) => file.CreateByString;
 
-    public async Task<List<AceShortWrapper>> GetSharingSettings(File<T> file)
+    public async Task<List<AceShortDto>> GetSharingSettings(File<T> file)
     {
         if (Type == EditorType.Embedded || !await fileSharing.CanSetAccessAsync(file))
         {
@@ -567,73 +559,6 @@ public class InfoConfig<T>(
     public EditorType Type { get; set; } = EditorType.Desktop;
 
     public string GetUploaded(File<T> file) => file.CreateOnString;
-}
-
-/// <summary>
-/// The permissions configuration parameters.
-/// </summary>
-public class PermissionsConfig
-{
-    /// <summary>
-    /// Defines if the document can be commented or not.
-    /// </summary>
-    /// <example>true</example>
-    public bool Comment { get; set; } = true;
-
-    /// <summary>
-    /// Defines if the chat functionality is enabled in the document or not.
-    /// </summary>
-    /// <example>true</example>
-    public bool Chat { get; set; } = true;
-
-    /// <summary>
-    /// Defines if the document can be downloaded or only viewed or edited online.
-    /// </summary>
-    /// <example>true</example>
-    public bool Download { get; set; } = true;
-
-    /// <summary>
-    /// Defines if the document can be edited or only viewed.
-    /// </summary>
-    /// <example>true</example>
-    public bool Edit { get; set; } = true;
-
-    /// <summary>
-    /// Defines if the forms can be filled.
-    /// </summary>
-    /// <example>true</example>
-    public bool FillForms { get; set; } = true;
-
-    /// <summary>
-    /// Defines if the filter can be applied globally (true) affecting all the other users,
-    /// or locally (false), i.e. for the current user only.
-    /// </summary>
-    /// <example>true</example>
-    public bool ModifyFilter { get; set; } = true;
-
-    /// <summary>
-    /// Defines if the "Protection" tab on the toolbar and the "Protect" button in the left menu are displayedor hidden.
-    /// </summary>
-    /// <example>true</example>
-    public bool Protect { get; set; } = true;
-
-    /// <summary>
-    /// Defines if the document can be printed or not.
-    /// </summary>
-    /// <example>true</example>
-    public bool Print { get; set; } = true;
-
-    /// <summary>
-    /// Defines if the document can be reviewed or not.
-    /// </summary>
-    /// <example>true</example>
-    public bool Review { get; set; } = true;
-
-    /// <summary>
-    /// Defines if the content can be copied to the clipboard or not.
-    /// </summary>
-    /// <example>true</example>
-    public bool Copy { get; set; } = true;
 }
 
 /// <summary>
@@ -798,91 +723,6 @@ public class Run(string text, bool usedInHash = true)
     public string FontSize { get; set; } = "26";
 }
 
-/// <summary>
-/// The file reference parameters.
-/// </summary>
-public class FileReference
-{
-    /// <summary>
-    /// An object that is generated by the integrator to uniquely identify a file in its system.
-    /// </summary>
-    /// <example>{"fileKey": "file-key-123", "instanceId": "instance-1"}</example>
-    public FileReferenceData ReferenceData { get; set; }
-
-    /// <summary>
-    /// The error message text.
-    /// </summary>
-    /// <example>Error message</example>
-    public string Error { get; set; }
-
-    /// <summary>
-    /// The file name or relative path for the formula editor.
-    /// </summary>
-    /// <example>/path/file.docx</example>
-    public string Path { get; set; }
-
-    /// <summary>
-    /// The URL address to download the current file.
-    /// </summary>
-    /// <example>https://example.com/file.docx</example>
-    [Url]
-    public string Url { get; set; }
-
-    /// <summary>
-    /// An extension of the document specified with the url parameter.
-    /// </summary>
-    /// <example>docx</example>
-    public string FileType { get; set; }
-
-    /// <summary>
-    /// The unique document identifier used by the service to take the data from the co-editing session.
-    /// </summary>
-    /// <example>doc1</example>
-    public string Key { get; set; }
-
-    /// <summary>
-    /// The file URL.
-    /// </summary>
-    /// <example>https://example.com/file.docx</example>
-    public string Link { get; set; }
-
-    /// <summary>
-    /// The encrypted signature added to the parameter in the form of a token.
-    /// </summary>
-    /// <example>token</example>
-    public string Token { get; set; }
-}
-
-/// <summary>
-/// An object that is generated by the integrator to uniquely identify a file in its system.
-/// </summary>
-public class FileReferenceData
-{
-    /// <summary>
-    /// The unique document identifier used by the service to get a link to the file.
-    /// </summary>
-    /// <example>doc_2026_02_001</example>
-    public string FileKey { get; set; }
-
-    /// <summary>
-    /// The unique system identifier.
-    /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
-    public string InstanceId { get; set; }
-
-    /// <summary>
-    /// Room ID
-    /// </summary>
-    /// <example>1</example>
-    public string RoomId { get; set; }
-
-    /// <summary>
-    /// Specifies if the room can be edited out or not.
-    /// </summary>
-    /// <example>true</example>
-    public bool CanEditRoom { get; set; }
-}
-
 #endregion Nested Classes
 
 /// <summary>
@@ -949,7 +789,7 @@ public class CustomizationConfig<T>(
 
     public CustomerConfig Customer { get; set; } = customerConfig;
 
-    public async Task<FeedbackConfig> GetFeedback()
+    public async Task<FeedbackConfigDto> GetFeedback()
     {
         if (coreBaseSettings.Standalone)
         {
@@ -963,7 +803,7 @@ public class CustomizationConfig<T>(
             return null;
         }
 
-        return new FeedbackConfig
+        return new FeedbackConfigDto
         {
             Url = link
         };
@@ -976,11 +816,11 @@ public class CustomizationConfig<T>(
                && filesSettingsHelper.GetForcesave();
     }
 
-    public async Task<GobackConfig> GetGoBack(EditorType editorType, File<T> file)
+    public async Task<GobackConfigDto> GetGoBack(EditorType editorType, File<T> file)
     {
         if (GobackUrl != null)
         {
-            return new GobackConfig
+            return new GobackConfigDto
             {
                 Url = GobackUrl
             };
@@ -995,7 +835,7 @@ public class CustomizationConfig<T>(
             if (shareRight != FileShare.Restrict && !string.IsNullOrEmpty(key))
             {
                 parent = await folderDao.GetFolderAsync(file.ParentId);
-                return new GobackConfig
+                return new GobackConfigDto
                 {
                     Url = pathProvider.GetFolderUrl(parent, key)
                 };
@@ -1027,7 +867,7 @@ public class CustomizationConfig<T>(
                     url = pathProvider.GetFolderUrl(await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderShareAsync<T>()), key);
                 }
 
-                return new GobackConfig
+                return new GobackConfigDto
                 {
                     Url = url
                 };
@@ -1048,7 +888,7 @@ public class CustomizationConfig<T>(
                 parent = await folderDao.GetFolderAsync(await globalFolderHelper.GetFolderShareAsync<T>());
             }
 
-            return new GobackConfig
+            return new GobackConfigDto
             {
                 Url = pathProvider.GetFolderUrl(parent, key)
             };
@@ -1069,22 +909,31 @@ public class CustomizationConfig<T>(
                && await fileSharing.CanSetAccessAsync(file);
     }
 
-    public ReviewConfig GetReview(bool modeWrite)
+    public ReviewConfigDto GetReview(bool modeWrite)
     {
-        return modeWrite ? null : new ReviewConfig { ReviewDisplayEnum = ReviewDisplayEnum.Markup };
+        return modeWrite ? null : new ReviewConfigDto { ReviewDisplayEnum = ReviewDisplayEnum.Markup };
     }
 
-    public async Task<SubmitForm> GetSubmitForm(File<T> file)
+    public async Task<SubmitFormDto> GetSubmitForm(File<T> file)
     {
-        if (!file.IsForm)
+        if (!file.IsPdf)
         {
             return null;
         }
         var properties = await daoFactory.GetFileDao<T>().GetProperties(file.Id);
-        return new SubmitForm
+        return new SubmitFormDto
         {
             Visible = file.RootFolderType != FolderType.Archive && await fileSecurity.CanFillFormAsync(file, authContext.CurrentAccount.ID) && properties is { FormFilling.StartFilling: true } or { FormFilling.CollectFillForm: true },
             ResultMessage = ""
+        };
+    }
+
+    public async Task<AiConfigDto> GetAIConfigAsync()
+    {
+        var settings = await settingsManager.LoadAsync<TenantAiAccessSettings>();
+        return new AiConfigDto
+        {
+            Disabled = !settings.Enabled
         };
     }
 
@@ -1111,124 +960,6 @@ public class CustomizationConfig<T>(
 
         return (linkRight, key);
     }
-}
-
-/// <summary>
-/// The configuration parameters for the embedded document type.
-/// </summary>
-[Transient]
-public class EmbeddedConfig(BaseCommonLinkUtility baseCommonLinkUtility, FilesLinkUtility filesLinkUtility)
-{
-    /// <summary>
-    /// The absolute URL to the document serving as a source file for the document embedded into the web page.
-    /// </summary>
-    /// <example>https://portal.example.com/files/editor?action=embedded&amp;share=abc123</example>
-    public string EmbedUrl
-    {
-        get => field ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey, StringComparison.Ordinal) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=embedded" + ShareLinkParam) : null);
-        set;
-    }
-
-    /// <summary>
-    /// The absolute URL that will allow the document to be saved onto the user personal computer.
-    /// </summary>
-    /// <example>https://portal.example.com/files/filehandler?action=download&amp;share=abc123</example>
-    public string SaveUrl => baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FileHandlerPath + "?" + FilesLinkUtility.Action + "=download" + ShareLinkParam);
-
-    /// <summary>
-    /// The shared URL parameter.
-    /// </summary>
-    /// <example>&amp;share=abc123</example>
-    public string ShareLinkParam { get; set; }
-
-    /// <summary>
-    /// The absolute URL that will allow other users to share this document.
-    /// </summary>
-    /// <example>https://portal.example.com/files/editor?action=view&amp;share=abc123</example>
-    public string ShareUrl
-    {
-        get => field ?? (ShareLinkParam != null && ShareLinkParam.Contains(FilesLinkUtility.ShareKey) ? baseCommonLinkUtility.GetFullAbsolutePath(filesLinkUtility.FilesBaseAbsolutePath + FilesLinkUtility.EditorPage + "?" + FilesLinkUtility.Action + "=view" + ShareLinkParam) : null);
-        set;
-    }
-
-    /// <summary>
-    /// The place for the embedded viewer toolbar, can be either "top" or "bottom".
-    /// </summary>
-    /// <example>top</example>
-    public string ToolbarDocked => "top";
-}
-
-/// <summary>
-/// The encryption keys of the editor configuration.
-/// </summary>
-public class EncryptionKeysConfig
-{
-    /// <summary>
-    /// The crypto engine ID of the encryption key.
-    /// </summary>
-    /// <example>{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}</example>
-    public string CryptoEngineId => "{FFF0E1EB-13DB-4678-B67D-FF0A41DBBCEF}";
-
-    /// <summary>
-    /// The private key.
-    /// </summary>
-    /// <example>MIIEvQIBADANBgkqhkiG9w0BAQEFAASC...</example>
-    public string PrivateKeyEnc { get; set; }
-
-    /// <summary>
-    /// The public key.
-    /// </summary>
-    /// <example>MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A...</example>
-    public string PublicKey { get; set; }
-}
-
-/// <summary>
-/// The settings for the "Feedback &amp; Support" menu button.
-/// </summary>
-public class FeedbackConfig
-{
-    /// <summary>
-    /// The absolute URL to the website address which will be opened when clicking the "Feedback &amp; Support" menu button.
-    /// </summary>
-    /// <example>https://portal.example.com/support</example>
-    public string Url { get; set; }
-
-    /// <summary>
-    /// Shows or hides the "Feedback &amp; Support" menu button.
-    /// </summary>
-    /// <example>true</example>
-    public bool Visible => true;
-}
-
-/// <summary>
-/// The settings for the "Open file location" menu button and upper right corner button.
-/// </summary>
-public class GobackConfig
-{
-    /// <summary>
-    /// The absolute URL to the website address which will be opened when clicking the "Open file location" menu button.
-    /// </summary>
-    /// <example>https://portal.example.com/files/location</example>
-    public string Url { get; set; }
-}
-
-/// <summary>
-/// Configuration for review display settings.
-/// </summary>
-public class ReviewConfig
-{
-    /// <summary>
-    /// The review display string representation.
-    /// </summary>
-    /// <example>full</example>
-    public string ReviewDisplay { get; private set; }
-
-    /// <summary>
-    /// Sets the review display value using enum representation.
-    /// This property is ignored during JSON serialization.
-    /// </summary>
-    [JsonIgnore]
-    public ReviewDisplayEnum ReviewDisplayEnum { set => ReviewDisplay = value.ToStringLowerFast(); }
 }
 
 [EnumExtensions]
@@ -1285,137 +1016,4 @@ public class LogoConfig(
     {
         return editorType != EditorType.Mobile;
     }
-}
-
-/// <summary>
-/// The configuration settings to connect the special add-ons.
-/// </summary>
-[Transient]
-public class PluginsConfig
-// ConsumerFactory consumerFactory,
-// BaseCommonLinkUtility baseCommonLinkUtility,
-// CoreBaseSettings coreBaseSettings,
-// TenantManager tenantManager)
-{
-    // private readonly BaseCommonLinkUtility _baseCommonLinkUtility = baseCommonLinkUtility;
-    //
-    // private readonly ConsumerFactory _consumerFactory = consumerFactory;
-    //
-    // private readonly CoreBaseSettings _coreBaseSettings = coreBaseSettings;
-    // private readonly TenantManager _tenantManager = tenantManager;
-
-    /// <summary>
-    /// The array of absolute URLs to the plugin configuration files.
-    /// </summary>
-    /// <example>
-    /// [
-    ///   "https://portal.example.com/ThirdParty/plugin/easybib/config.json",
-    ///   "https://portal.example.com/ThirdParty/plugin/wordpress/config.json"
-    /// ]
-    /// </example>
-    public string[] PluginsData =>
-        //var plugins = new List<string>();
-        //if (_coreBaseSettings.Standalone || !_tenantManager.GetCurrentTenantQuota().Free)
-        //{
-        //    var easyBibHelper = _consumerFactory.Get<EasyBibHelper>();
-        //    if (!string.IsNullOrEmpty(easyBibHelper.AppKey))
-        //    {
-        //        plugins.Add(_baseCommonLinkUtility.GetFullAbsolutePath("ThirdParty/plugin/easybib/config.json"));
-        //    }
-        //    var wordpressLoginProvider = _consumerFactory.Get<WordpressLoginProvider>();
-        //    if (!string.IsNullOrEmpty(wordpressLoginProvider.ClientID) &&
-        //        !string.IsNullOrEmpty(wordpressLoginProvider.ClientSecret) &&
-        //        !string.IsNullOrEmpty(wordpressLoginProvider.RedirectUri))
-        //    {
-        //        plugins.Add(_baseCommonLinkUtility.GetFullAbsolutePath("ThirdParty/plugin/wordpress/config.json"));
-        //    }
-        //}
-        //return plugins.ToArray();
-        [];
-}
-
-/// <summary>
-/// The presence or absence of the documents in the "Open Recent..." menu option.
-/// </summary>
-public class RecentConfig
-{
-    /// <summary>
-    /// The folder where the document is stored.
-    /// </summary>
-    /// <example>folder_123</example>
-    public string Folder { get; set; }
-
-    /// <summary>
-    /// The document title that will be displayed in the Open Recent... menu option.
-    /// </summary>
-    /// <example>Report 2026</example>
-    public string Title { get; set; }
-
-    /// <summary>
-    /// The absolute URL to the document where it is stored.
-    /// </summary>
-    /// <example>https://portal.example.com/files/recent/report2026.docx</example>
-    [Url]
-    public string Url { get; set; }
-}
-
-/// <summary>
-/// The presence or absence of the templates in the "Create New..." menu option.
-/// </summary>
-public class TemplatesConfig
-{
-    /// <summary>
-    /// The absolute URL to the image for template.
-    /// </summary>
-    /// <example>https://portal.example.com/templates/template1.png</example>
-    public string Image { get; set; }
-
-    /// <summary>
-    /// The template title that will be displayed in the "Create New..." menu option.
-    /// </summary>
-    /// <example>Blank Document</example>
-    public string Title { get; set; }
-
-    /// <summary>
-    /// The absolute URL to the document where it will be created and available after creation.
-    /// </summary>
-    /// <example>https://portal.example.com/editor/new?template=blank</example>
-    [Url]
-    public string Url { get; set; }
-}
-
-/// <summary>
-/// The configuration parameters of the user currently viewing or editing the document.
-/// </summary>
-public class UserConfig
-{
-    /// <summary>
-    /// The user ID.
-    /// </summary>
-    /// <example>user_0001</example>
-    public string Id { get; set; }
-
-    /// <summary>
-    /// The full name of the user.
-    /// </summary>
-    /// <example>John Doe</example>
-    public string Name { get; set; }
-
-    /// <summary>
-    /// The path to the user's avatar.
-    /// </summary>
-    /// <example>https://portal.example.com/avatar/user_0001.png</example>
-    public string Image { get; set; }
-
-    /// <summary>
-    /// Roles
-    /// </summary>
-    /// <example>["admin","editor"]</example>
-    public List<string> Roles { get; set; }
-
-    /// <summary>
-    /// Customer identifier associated with the user.
-    /// </summary>
-    /// <example>cust_001</example>
-    public string CustomerId { get; set; }
 }

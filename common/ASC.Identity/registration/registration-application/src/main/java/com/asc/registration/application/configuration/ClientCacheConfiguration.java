@@ -33,8 +33,11 @@
 
 package com.asc.registration.application.configuration;
 
+import com.asc.common.utilities.cache.CacheNamespaceCounterStore;
+import com.asc.common.utilities.cache.CacheNamespaceRegistry;
 import com.asc.registration.application.configuration.serialization.ClientDeserializer;
 import com.asc.registration.application.configuration.serialization.ClientSerializer;
+import com.asc.registration.application.service.RedisCacheNamespaceCounterStore;
 import com.asc.registration.core.domain.entity.Client;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -44,7 +47,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import io.lettuce.core.api.StatefulConnection;
+import java.time.Duration;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -52,8 +58,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-import org.springframework.data.redis.connection.lettuce.LettuceClientConfiguration;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
@@ -105,7 +111,19 @@ public class ClientCacheConfiguration {
     if (properties.getPassword() != null && !properties.getPassword().isEmpty())
       config.setPassword(properties.getPassword());
 
-    var clientConfigBuilder = LettuceClientConfiguration.builder();
+    var pool =
+        properties.getPool() != null
+            ? properties.getPool()
+            : new ClientCacheConfigurationProperties.Pool();
+    var poolConfig = new GenericObjectPoolConfig<StatefulConnection<?, ?>>();
+    poolConfig.setMaxTotal(pool.getMaxActive());
+    poolConfig.setMaxIdle(pool.getMaxIdle());
+    poolConfig.setMinIdle(pool.getMinIdle());
+    poolConfig.setMaxWait(pool.getMaxWait() != null ? pool.getMaxWait() : Duration.ofMillis(200));
+
+    var timeout = properties.getTimeout() != null ? properties.getTimeout() : Duration.ofSeconds(2);
+    var clientConfigBuilder =
+        LettucePoolingClientConfiguration.builder().commandTimeout(timeout).poolConfig(poolConfig);
     if (properties.isSsl()) clientConfigBuilder.useSsl();
 
     var factory = new LettuceConnectionFactory(config, clientConfigBuilder.build());
@@ -159,5 +177,53 @@ public class ClientCacheConfiguration {
 
     log.info("clientCacheRedisTemplate created successfully");
     return template;
+  }
+
+  /**
+   * Creates a string-only RedisTemplate for the client cache bookkeeping keys.
+   *
+   * @param clientCacheRedisConnectionFactory The Redis connection factory for client cache.
+   * @return The configured {@link RedisTemplate} for String keys and values.
+   */
+  @Bean
+  public RedisTemplate<String, String> clientCacheStringRedisTemplate(
+      @Qualifier("clientCacheRedisConnectionFactory")
+          RedisConnectionFactory clientCacheRedisConnectionFactory) {
+    var template = new RedisTemplate<String, String>();
+    template.setConnectionFactory(clientCacheRedisConnectionFactory);
+    template.setKeySerializer(new StringRedisSerializer());
+    template.setValueSerializer(new StringRedisSerializer());
+    template.setHashKeySerializer(new StringRedisSerializer());
+    template.setHashValueSerializer(new StringRedisSerializer());
+    template.afterPropertiesSet();
+    return template;
+  }
+
+  /**
+   * Creates the Redis-backed counter store the client cache's namespace registry reads and advances
+   * its version counters through.
+   *
+   * @param stringRedisTemplate the string-only Redis template for namespace version counters
+   * @return a {@link RedisCacheNamespaceCounterStore} wrapping {@code stringRedisTemplate}
+   */
+  @Bean
+  public CacheNamespaceCounterStore clientCacheNamespaceCounterStore(
+      @Qualifier("clientCacheStringRedisTemplate")
+          RedisTemplate<String, String> stringRedisTemplate) {
+    return new RedisCacheNamespaceCounterStore(stringRedisTemplate);
+  }
+
+  /**
+   * Creates the namespace registry {@link
+   * com.asc.registration.application.service.RedisClientCacheService} uses to invalidate cached
+   * clients without scanning the keyspace.
+   *
+   * @param counterStore the counter store backing this registry
+   * @return a {@link CacheNamespaceRegistry} scoped to the client cache's own key prefix
+   */
+  @Bean
+  public CacheNamespaceRegistry clientCacheNamespaceRegistry(
+      CacheNamespaceCounterStore counterStore) {
+    return new CacheNamespaceRegistry(counterStore, "identity:registration:client:ver");
   }
 }

@@ -36,11 +36,30 @@ namespace ASC.Api.Core.Routing;
 [AttributeUsage(AttributeTargets.Class)]
 public class ConstraintRouteAttribute(string constraint) : Attribute
 {
+    /// <summary>
+    /// Whether the constraint also raises the routing precedence of the controller's endpoints.
+    /// Two generic controllers (int and third-party) register exactly the same routes, and the
+    /// precedence bump on the constrained one is what keeps their <em>parameterless</em> actions
+    /// unambiguous. A constraint put on the other side must therefore leave precedence alone, or
+    /// every shared parameterless route ends up matching both controllers.
+    /// </summary>
+    public bool AffectsOrder { get; init; } = true;
+
+    /// <summary>
+    /// The shape of a third-party entry id: a provider selector, a numeric provider id and an
+    /// optional path (<c>sbox-42</c>, <c>drive-42-some/path</c>). Mirrors <c>Selectors.Pattern</c>
+    /// in ASC.Files.Core, which cannot be referenced from here. Without this constraint a
+    /// third-party controller's <c>{id}</c> route swallows every literal sibling route, so a wrong
+    /// verb on such a literal answers 404 instead of 405.
+    /// </summary>
+    private const string ThirdPartyIdPattern = @"^.*-\d+(-.*)?$";
+
     public IRouteConstraint GetRouteConstraint()
     {
         return constraint switch
         {
             "int" => new IntRouteConstraint(),
+            "thirdparty" => new RegexRouteConstraint(ThirdPartyIdPattern),
             _ => null
         };
     }

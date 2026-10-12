@@ -39,7 +39,8 @@ namespace ASC.Files.ApiModels.RequestDto;
 public class UploadRoomLogoRequestDto
 {
     /// <summary>
-    /// The image data.
+    /// The multipart form carrying the image. The first file part of the request is taken as the logo and any other
+    /// part is ignored, so the name of the field does not matter.
     /// </summary>
     /// <example>multipart/form-data</example>
     public IFormCollection FormCollection { get; set; }

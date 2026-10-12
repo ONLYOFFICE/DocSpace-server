@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Dosja e kërkuar nuk u gjet</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>ID e dosjes është e pavlefshme</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Ofruesi i pavlefshëm</value>
   </data>
@@ -500,7 +503,7 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
     <value>Krijuesi i përmbajtjes</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>Administratori i DocSpace</value>
+    <value>Administrator i plotë</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>Redaktor</value>
@@ -594,5 +597,29 @@ Përputhshmëria më e lartë me docx, xlsx, pptx.</value>
   </data>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>Dështoi sinkronizimi i të dhënave të formularit me bazën e të dhënave të jashtme.</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>Udhëzimi i një agjenti AI nuk mund të jetë më i gjatë se {0} karaktere</value>
+  </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>Formulari është ndryshuar. Ky draft është i vjetëruar dhe nuk mund të dorëzohet.</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>Ky veprim është i disponueshëm vetëm në një dhomë private</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Rezultatet e bisedës</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>Dhoma përmban tashmë dosjen .ai</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Ruajtja nuk mund të shkëputet ndërsa një dhomë e përdor atë. Fshini dhomën në vend të kësaj</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Kërko në meta të dhënat e skedarit</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Kërko në meta të dhënat e dosjes</value>
   </data>
 </root>

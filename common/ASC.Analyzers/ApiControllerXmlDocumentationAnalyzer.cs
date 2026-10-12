@@ -31,8 +31,6 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-using System.Text.Json;
-
 namespace ASC.Analyzers;
 
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
@@ -491,7 +489,7 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
             xmlDoc = TryLoadXmlDocFromAssemblyFile(context, propertySymbol);
         }
 
-        if (string.IsNullOrWhiteSpace(xmlDoc))
+        if (xmlDoc is null || string.IsNullOrWhiteSpace(xmlDoc))
         {
             return;
         }
@@ -518,12 +516,12 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
     private static string? TryLoadXmlDocFromAssemblyFile(SyntaxNodeAnalysisContext context, IPropertySymbol propertySymbol)
     {
         if (context.Compilation.GetMetadataReference(propertySymbol.ContainingAssembly) is not PortableExecutableReference peRef ||
-            string.IsNullOrEmpty(peRef.FilePath))
+            peRef.FilePath is not { Length: > 0 } assemblyPath)
         {
             return null;
         }
 
-        foreach (var xmlPath in EnumerateXmlPathCandidates(peRef.FilePath))
+        foreach (var xmlPath in EnumerateXmlPathCandidates(assemblyPath))
         {
             var doc = _xmlDocCache.GetOrAdd(xmlPath, path =>
             {
@@ -547,9 +545,9 @@ public class ApiControllerXmlDocumentationAnalyzer : DiagnosticAnalyzer
                 var name = e.Attribute("name")?.Value;
                 return name == docId ||
                        name == docId.Replace("{`0}", "`1") ||
-                       name == docId.Replace($"{{{typeof(int).FullName!}}}", "`1") ||
-                       name == docId.Replace($"{{{typeof(string).FullName!}}}", "`1") ||
-                       name == docId.Replace($"{{{typeof(JsonElement).FullName!}}}", "`1");
+                       name == docId.Replace("{System.Int32}", "`1") ||
+                       name == docId.Replace("{System.String}", "`1") ||
+                       name == docId.Replace("{System.Text.Json.JsonElement}", "`1");
             });
 
             if (member is not null)

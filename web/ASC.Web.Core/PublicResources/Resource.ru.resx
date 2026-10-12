@@ -135,17 +135,20 @@
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Подробнее</value>
   </data>
+  <data name="AccountingCustomerOperationMonth" xml:space="preserve">
+    <value>Месяц</value>
+  </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Количество</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Сервис</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>Функции ИИ</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Резервное копирование</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Место на диске</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Векторизация</value>
@@ -157,7 +160,7 @@
     <value>Единица измерения</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Резервное копирование</value>
+    <value>Копий</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Токены</value>
@@ -174,8 +177,26 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>История транзакций</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Всего израсходовано</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Сводка по пользователям</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Тип</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportName" xml:space="preserve">
+    <value>Отчет о ежемесячном использовании ({0}-{1})</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportSheetName" xml:space="preserve">
+    <value>Ежемесячное использование</value>
+  </data>
+  <data name="AccountingServiceUsageReportName" xml:space="preserve">
+    <value>Отчет об использовании сервисов ({0}-{1})</value>
+  </data>
+  <data name="AccountingServiceUsageReportSheetName" xml:space="preserve">
+    <value>Использование сервисов</value>
   </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Поле кода подтверждения не может быть пустым</value>
@@ -196,7 +217,7 @@
     <value>Квота пространства для ИИ-агентов превышена</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Не удалось установить квоту на одного ИИ-агента. Введенное значение превышает общий объем хранилища DocSpace.</value>
+    <value>Не удалось установить квоту на одного ИИ-агента. Введенное значение превышает общий объем хранилища.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Автоматическое продление</value>
@@ -226,7 +247,7 @@
     <value>ID клиента приложения</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи Apple ID.</value>
+    <value>Входите в рабочее пространство с помощью учетной записи Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы пользователи могли входить в {LogoText}, используя Apple ID. {0}Перейдите на портал Apple Developers и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
@@ -271,7 +292,7 @@
     <value>Ключ Box</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Подключите приложение для управления файлами и папками Box.</value>
+    <value>Управляйте файлами и папками Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы подключить свой аккаунт Box к модулю "Документы". Вы сможете управлять документами из Box, редактировать их и предоставлять к ним доступ для пользователей {LogoText}. {0}Войдите в свою учетную запись на странице для разработчиков Box и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
@@ -310,7 +331,7 @@
     <value>Dropbox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Подключите приложение для управления файлами и папками Dropbox.</value>
+    <value>Управляйте файлами и папками Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы подключить свой аккаунт Dropbox к модулю "Документы". Вы сможете управлять документами из Dropbox, редактировать их и предоставлять к ним доступ для пользователей {LogoText}. {0}Войдите в свою учетную запись на сайте для разработчиков Dropbox Developers и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
@@ -346,7 +367,7 @@
     <value>Ключ Facebook</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи Facebook.</value>
+    <value>Входите в рабочее пространство с помощью учетной записи Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы пользователи могли входить в {LogoText}, используя Facebook, и привязывать Facebook-аккаунты клиентов в модуле CRM. {0}Перейдите на портал для разработчиков Facebook и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
@@ -400,7 +421,7 @@
     <value>json-файл GoogleCloud</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Подключите проект для входа на портал по учетной записи Google и для управления файлами и папками Google Drive.</value>
+    <value>Входите в рабочее пространство с помощью учетной записи Google и управляйте файлами и папками Google Drive</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы подключить свой аккаунт Google Drive к модулю "Документы". Вы сможете управлять документами из Google Drive, редактировать их и предоставлять к ним доступ для пользователей {LogoText}. {0}Перейдите в консоль API Google и создайте новый проект для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
@@ -409,7 +430,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи LinkedIn.</value>
+    <value>Входите в рабочее пространство с помощью учетной записи LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы пользователи могли входить в {LogoText}, используя свои аккаунты в LinkedIn. {0}Перейдите на сайт Сеть разработчиков LinkedIn и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
@@ -538,7 +559,7 @@
     <value>Секрет клиента</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Подключите приложение для управления файлами и папками OneDrive.</value>
+    <value>Управляйте файлами и папками OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы подключить свой аккаунт OneDrive к модулю "Документы". Вы сможете управлять документами из OneDrive, редактировать их и предоставлять к ним доступ для пользователей {LogoText}. {0}Войдите в свою учетную запись Microsoft Azure и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
@@ -568,7 +589,7 @@
     <value>Токен бота</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Подключите аккаунт Telegram для получения оповещений портала через Telegram.</value>
+    <value>Получайте уведомления через Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Чтобы получать оповещения портала через Telegram, включите бота Telegram. Вы можете создать нового бота, используя BotFather в десктопном приложении Telegram. Чтобы использовать этого бота, пользователи портала должны включить оповещения Telegram на странице своего профиля. {0}Вставьте полученные имя пользователя бота и токен в поля ниже.</value>
@@ -601,7 +622,7 @@
     <value>ID клиента</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи X.</value>
+    <value>Входите в рабочее пространство с помощью учетной записи X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы пользователи могли входить в {LogoText}, используя X, и привязывать X-аккаунты клиентов в модуле CRM. {0}Перейдите на портал для разработчиков X и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
@@ -640,7 +661,7 @@
     <value>Секрет клиента</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи WeChat .</value>
+    <value>Входите в рабочее пространство с помощью учетной записи WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Подключите приложение для входа на портал по учетной записи WeChat .</value>
@@ -700,7 +721,7 @@
     <value>Секрет клиента Zoom</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Подключите приложение для входа на портал по учетной записи Zoom.</value>
+    <value>Входите в рабочее пространство с помощью учетной записи Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Подключите это приложение, чтобы пользователи могли входить в {LogoText}, используя Zoom. {0}Перейдите на сайт Сеть разработчиков Zoom и создайте новое приложение для интеграции {LogoText}. Вставьте полученные данные ниже:</value>
@@ -1105,7 +1126,7 @@
     <value>Превышена квота пространства на комнату</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Не удалось установить квоту на комнату. Введенное значение превышает объем хранилища DocSpace.</value>
+    <value>Не удалось установить квоту на комнату. Введенное значение превышает общий объем хранилища.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>АТР (Сингапур)</value>
@@ -1152,11 +1173,11 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Количество ИИ-агентов не должно превышать {0}</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>ИИ-поиск</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Функции ИИ</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Включите функции ИИ для повышения производительности.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Отслеживание входов и действий</value>
@@ -1276,7 +1297,7 @@
     <value>Произошла непредвиденная ошибка. Попробуйте еще раз.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Вы успешно подключились к Telegram для получения уведомлений от вашего DocSpace.</value>
+    <value>Вы успешно подключились к Telegram для получения уведомлений от рабочего пространства.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Неправильный код</value>
@@ -1291,7 +1312,7 @@
     <value>Превышена квота пространства на пользователя</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Не удалось установить квоту на пользователя. Введенное значение превышает объем хранилища DocSpace.</value>
+    <value>Не удалось установить квоту на пользователя. Введенное значение превышает общий объем хранилища.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Запад США (Орегон)</value>
@@ -1308,6 +1329,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>Веб-поиск</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>ИИ-поиск</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Кредиты ИИ</value>
   </data>
@@ -1315,6 +1339,9 @@
     <value>Источники</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Результаты</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Результаты</value>
   </data>
   <data name="ConsumersdatabaseType" xml:space="preserve">
@@ -1342,13 +1369,10 @@
     <value>Подключение к базе данных</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Сохраняйте результаты заполнения форм во внешней базе данных, такой как MySQL или SQLite.</value>
+    <value>Храните результаты заполнения форм во внешней базе данных, такой как MySQL или SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Подключите внешнюю базу данных для хранения результатов заполнения форм.</value>
-  </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>Агент</value>
   </data>
   <data name="ConsumersExternalDbSqliteStandaloneOnly" xml:space="preserve">
     <value>SQLite доступен только в изолированных установках системы.</value>
@@ -1369,7 +1393,7 @@
     <value>Секрет клиента</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Разрешить приложению входить на портал с использованием учетной записи Nextcloud.</value>
+    <value>Входите в рабочее пространство с помощью учетной записи Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Разрешить приложению входить на портал с использованием учетной записи Nextcloud.</value>
@@ -1382,5 +1406,155 @@
   </data>
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>Ошибка аутентификации пользователя</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Дополнительное дисковое хранилище</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Тариф Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Тариф Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Администраторы</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Администраторы</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Получите доступ к широкому спектру ИИ-моделей благодаря интеграции с OpenRouter. Платите только за то, что используете — списание происходит с вашего кошелька.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>Используйте поисковую систему на базе ИИ, чтобы дополнять чаты с ИИ актуальной информацией из интернета в реальном времени</value>
+  </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>Пользователи</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>Пользователи</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_image" xml:space="preserve">
+    <value>Токены</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>Пакет разработчика Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
+    <value>Изображение</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>Отчет о квоте Docs Connect ({0})</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>Встройте редакторы ONLYOFFICE Docs в свое приложение с облачными арендаторами и собственными API-ключами.</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Срок действия доступа истекает</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Активен</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Компания</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Дата создания</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Редакторы документов с полными правами доступа</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Редакторы</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Внешний</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Внутренний</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Просмотр в прямом эфире</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Период</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Просмотрщики документов только для чтения</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Тип пользователя</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Квота на пользователя</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>ID пользователя</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Итого</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Тип источника</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Имя источника</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>ID источника</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>ИИ-агент</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Файл</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Папка</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Комната</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Форма</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Отчёт</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Осталось</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Лимит подписки</value>
+  </data>
+  <data name="AccountingCustomerOperationPromptTokens" xml:space="preserve">
+    <value>Запрос</value>
+  </data>
+  <data name="AccountingCustomerOperationCachedTokens" xml:space="preserve">
+    <value>Кэширование</value>
+  </data>
+  <data name="AccountingCustomerOperationCacheWriteTokens" xml:space="preserve">
+    <value>Запись в кэш</value>
+  </data>
+  <data name="AccountingCustomerOperationCompletionTokens" xml:space="preserve">
+    <value>Ответ</value>
+  </data>
+  <data name="AccountingCustomerOperationReasoningTokens" xml:space="preserve">
+    <value>Рассуждение</value>
+  </data>
+  <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
+    <value>Изображение</value>
+  </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>Цена провайдера</value>
   </data>
 </root>

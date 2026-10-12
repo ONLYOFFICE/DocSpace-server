@@ -35,7 +35,7 @@ namespace ASC.Core.Common.EF.Context;
 
 public partial class WebstudioDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, PreCompileQuery.DefaultGuid])]
+    [PreCompileQuery]
     public Task<DbWebstudioSettings> WebStudioSettingsAsync(int tenantId, Guid id, Guid userId)
     {
         return Queries.WebStudioSettingsAsync(this, tenantId, id, userId);

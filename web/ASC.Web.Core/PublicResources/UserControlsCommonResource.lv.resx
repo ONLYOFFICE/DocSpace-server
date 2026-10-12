@@ -127,7 +127,7 @@
     <value>Jums ir jāievada licences atslēga</value>
   </data>
   <data name="LicenseTypeNotCorrect" xml:space="preserve">
-    <value>Licences konflikts. Lūdzu, pārliecinieties, ka esat instalējis pareizo {0} DocSpace versiju (Enterprise vai Developer). Ja jums ir kādi jautājumi, sazinieties ar savu pārdošanas menedžeri.</value>
+    <value>Licences konflikts. Lūdzu, pārliecinieties, ka esat instalējis pareizo {0} Docs versiju (Enterprise vai Developer). Ja jums ir kādi jautājumi, sazinieties ar savu pārdošanas menedžeri.</value>
   </data>
   <data name="NewDocument" xml:space="preserve">
     <value>Jauns dokuments</value>

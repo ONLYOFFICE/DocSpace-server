@@ -1,34 +1,34 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.Helpers;
@@ -47,6 +47,7 @@ public class FilesLinkUtility
     private readonly CoreSettings _coreSettings;
     private readonly IConfiguration _configuration;
     private readonly InstanceCrypto _instanceCrypto;
+    private readonly TenantManager _tenantManager;
 
     public FilesLinkUtility(
         CommonLinkUtility commonLinkUtility,
@@ -54,7 +55,8 @@ public class FilesLinkUtility
         CoreBaseSettings coreBaseSettings,
         CoreSettings coreSettings,
         IConfiguration configuration,
-        InstanceCrypto instanceCrypto)
+        InstanceCrypto instanceCrypto,
+        TenantManager tenantManager)
     {
         _commonLinkUtility = commonLinkUtility;
         _baseCommonLinkUtility = baseCommonLinkUtility;
@@ -62,6 +64,7 @@ public class FilesLinkUtility
         _coreSettings = coreSettings;
         _configuration = configuration;
         _instanceCrypto = instanceCrypto;
+        _tenantManager = tenantManager;
         DefaultLinkLifeTime = !TimeSpan.TryParse(configuration["externalLink:defaultLifetime"], out var defaultLifetime) ? TimeSpan.FromDays(7) : defaultLifetime;
     }
 
@@ -87,9 +90,9 @@ public class FilesLinkUtility
     public string FileHandlerPath => FilesBaseAbsolutePath + "filehandler.ashx";
 
 
-    public string GetDocServiceUrl()
+    public string GetDocServiceUrl(bool defaultTenant = false)
     {
-        var url = GetUrlSetting(FilesUrlKeys.Public);
+        var url = GetUrlSetting(FilesUrlKeys.Public, defaultTenant);
         if (!string.IsNullOrEmpty(url) && url != "/")
         {
             url = url.TrimEnd('/') + "/";
@@ -469,14 +472,14 @@ public class FilesLinkUtility
     private string FileUploaderHandlerVirtualPath => "/ChunkedUploader.ashx";
 
 
-    private string GetUrlSetting(FilesUrlKeys key)
+    private int GetCurrentTenantId(bool defaultTenant = false)
     {
-        var value = string.Empty;
+        return _coreBaseSettings.Standalone || defaultTenant ? Tenant.DefaultTenant : _tenantManager.GetCurrentTenantId();
+    }
 
-        if (_coreBaseSettings.Standalone)
-        {
-            value = _coreSettings.GetSetting(GetSettingsKey(key.ToStringLowerFast()));
-        }
+    private string GetUrlSetting(FilesUrlKeys key, bool defaultTenant = false)
+    {
+        var value = _coreSettings.GetSetting(GetSettingsKey(key.ToStringLowerFast()), GetCurrentTenantId(defaultTenant));
 
         if (string.IsNullOrEmpty(value))
         {
@@ -488,12 +491,7 @@ public class FilesLinkUtility
 
     private async Task<string> GetUrlSettingAsync(FilesUrlKeys key)
     {
-        var value = string.Empty;
-
-        if (_coreBaseSettings.Standalone)
-        {
-            value = await _coreSettings.GetSettingAsync(GetSettingsKey(key.ToStringLowerFast()));
-        }
+        var value = await _coreSettings.GetSettingAsync(GetSettingsKey(key.ToStringLowerFast()), GetCurrentTenantId());
 
         if (string.IsNullOrEmpty(value))
         {
@@ -505,12 +503,7 @@ public class FilesLinkUtility
 
     private async Task<bool> IsDefaultUrlSettingAsync(string key)
     {
-        var value = string.Empty;
-
-        if (_coreBaseSettings.Standalone)
-        {
-            value = await _coreSettings.GetSettingAsync(GetSettingsKey(key));
-        }
+        var value = await _coreSettings.GetSettingAsync(GetSettingsKey(key), GetCurrentTenantId());
 
         return string.IsNullOrEmpty(value);
     }
@@ -530,11 +523,6 @@ public class FilesLinkUtility
 
     private async Task SetUrlSettingAsync(FilesUrlKeys key, string value = null)
     {
-        if (!_coreBaseSettings.Standalone)
-        {
-            throw new NotSupportedException("Method for server edition only.");
-        }
-
         value = (value ?? "").Trim();
         if (string.IsNullOrEmpty(value))
         {
@@ -552,18 +540,13 @@ public class FilesLinkUtility
 
         if (await GetUrlSettingAsync(key) != value)
         {
-            await _coreSettings.SaveSettingAsync(GetSettingsKey(key.ToStringLowerFast()), value);
+            await _coreSettings.SaveSettingAsync(GetSettingsKey(key.ToStringLowerFast()), value, GetCurrentTenantId());
         }
     }
 
     private string GetSignatureSetting(string key)
     {
-        var value = string.Empty;
-
-        if (_coreBaseSettings.Standalone)
-        {
-            value = _coreSettings.GetSetting(GetSettingsKey(key));
-        }
+        var value = _coreSettings.GetSetting(GetSettingsKey(key), GetCurrentTenantId());
 
         if (string.IsNullOrEmpty(value))
         {
@@ -575,12 +558,7 @@ public class FilesLinkUtility
 
     private async Task<string> GetSignatureSettingAsync(string key)
     {
-        var value = string.Empty;
-
-        if (_coreBaseSettings.Standalone)
-        {
-            value = await _coreSettings.GetSettingAsync(GetSettingsKey(key));
-        }
+        var value = await _coreSettings.GetSettingAsync(GetSettingsKey(key), GetCurrentTenantId());
 
         if (string.IsNullOrEmpty(value))
         {
@@ -592,12 +570,7 @@ public class FilesLinkUtility
 
     private async Task<bool> IsDefaultSignatureSettingAsync(string key)
     {
-        var value = string.Empty;
-
-        if (_coreBaseSettings.Standalone)
-        {
-            value = await _coreSettings.GetSettingAsync(GetSettingsKey(key));
-        }
+        var value = await _coreSettings.GetSettingAsync(GetSettingsKey(key), GetCurrentTenantId());
 
         return string.IsNullOrEmpty(value);
     }
@@ -609,10 +582,6 @@ public class FilesLinkUtility
 
     private async Task SetSignatureSettingAsync(string key, string value)
     {
-        if (!_coreBaseSettings.Standalone)
-        {
-            throw new NotSupportedException("Method for server edition only.");
-        }
         value = (value ?? "").Trim();
         if (string.IsNullOrEmpty(value))
         {
@@ -630,20 +599,17 @@ public class FilesLinkUtility
 
         if (await GetSignatureSettingAsync(key) != value)
         {
-            await _coreSettings.SaveSettingAsync(GetSettingsKey(key), value);
+            await _coreSettings.SaveSettingAsync(GetSettingsKey(key), value, GetCurrentTenantId());
         }
     }
 
     private async Task<bool> GetSslVerificationSettingAsync()
     {
-        if (_coreBaseSettings.Standalone)
-        {
-            var value = await _coreSettings.GetSettingAsync(GetSettingsKey(SslVerificationKey));
+        var value = await _coreSettings.GetSettingAsync(GetSettingsKey(SslVerificationKey), GetCurrentTenantId());
 
-            if (bool.TryParse(value, out var result))
-            {
-                return result;
-            }
+        if (bool.TryParse(value, out var result))
+        {
+            return result;
         }
 
         return GetDefaultSslVerificationSetting();
@@ -651,16 +617,9 @@ public class FilesLinkUtility
 
     private async Task<bool> IsDefaultSslVerificationAsync()
     {
-        if (_coreBaseSettings.Standalone)
-        {
-            var value = await _coreSettings.GetSettingAsync(GetSettingsKey(SslVerificationKey));
-            if (bool.TryParse(value, out _))
-            {
-                return false;
-            }
-        }
+        var value = await _coreSettings.GetSettingAsync(GetSettingsKey(SslVerificationKey), GetCurrentTenantId());
 
-        return true;
+        return !bool.TryParse(value, out _);
     }
 
     private bool GetDefaultSslVerificationSetting()
@@ -672,14 +631,9 @@ public class FilesLinkUtility
 
     private async Task SetSslVerificationSettingAsync(bool value)
     {
-        if (!_coreBaseSettings.Standalone)
-        {
-            throw new NotSupportedException("Method for server edition only.");
-        }
-
         var def = GetDefaultSslVerificationSetting();
 
-        await _coreSettings.SaveSettingAsync(GetSettingsKey(SslVerificationKey), def == value ? null : value.ToString());
+        await _coreSettings.SaveSettingAsync(GetSettingsKey(SslVerificationKey), def == value ? null : value.ToString(), GetCurrentTenantId());
     }
 
     private string GetSettingsKey(string key)

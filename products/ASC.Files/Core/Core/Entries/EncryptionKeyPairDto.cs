@@ -1,60 +1,67 @@
 // Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Web.Files.Core.Entries;
 
-/// <summary>
-/// The encryption key pair parameters.
-/// </summary>
-public class EncryptionKeyPairDto
+[EnumExtensions]
+[JsonConverter(typeof(EncryptionKeyTypeConverter))]
+public enum EncryptionKeyType
 {
-    /// <summary>
-    /// The encrypted private key.
-    /// </summary>
-    /// <example>MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDQg...</example>
-    public string PrivateKeyEnc { get; set; }
+    Crypt,
+    Sign
+}
 
-    /// <summary>
-    /// The public key.
-    /// </summary>
-    /// <example>-----BEGIN PUBLIC KEY----------END PUBLIC KEY-----</example>
-    public string PublicKey { get; set; }
+public class EncryptionKeyTypeConverter : JsonConverter<EncryptionKeyType>
+{
+    public override EncryptionKeyType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType == JsonTokenType.Number && reader.TryGetInt32(out var result))
+        {
+            return (EncryptionKeyType)result;
+        }
 
-    /// <summary>
-    /// The user ID of the encryption keys.
-    /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
-    public Guid UserId { get; set; }
+        if (reader.TokenType == JsonTokenType.String && EncryptionKeyTypeExtensions.TryParse(reader.GetString(), true, out var share))
+        {
+            return share;
+        }
+
+        return EncryptionKeyType.Sign;
+    }
+
+    public override void Write(Utf8JsonWriter writer, EncryptionKeyType value, JsonSerializerOptions options)
+    {
+        writer.WriteStringValue(value.ToStringFast());
+    }
 }
 
 [Scope]
@@ -66,29 +73,84 @@ public class EncryptionKeyPairDtoHelper(
     FileSharing fileSharing,
     IDaoFactory daoFactory)
 {
-    public async Task SetKeyPairAsync(string publicKey, string privateKeyEnc)
-    {
-        ArgumentException.ThrowIfNullOrEmpty(publicKey);
-        ArgumentException.ThrowIfNullOrEmpty(privateKeyEnc);
 
+    public async Task<List<EncryptionKeyDto>> CreateKeyPairAsync(EncryptionKeyDto keyPair)
+    {
+        var userId = await DemandKeyOwnerAsync();
+        ValidateKeyPair(keyPair);
+
+        var currentKeyPairs = await GetKeyPairAsync() ?? [];
+
+        if (currentKeyPairs.Exists(r => r.Id == keyPair.Id))
+        {
+            throw new CustomHttpException(HttpStatusCode.Conflict, $"The encryption key {keyPair.Id} already exists");
+        }
+
+        keyPair.UserId = userId;
+        currentKeyPairs.Add(keyPair);
+
+        return await Save(currentKeyPairs);
+    }
+
+    public async Task<List<EncryptionKeyDto>> ReplaceKeyPairAsync(EncryptionKeyDto keyPair)
+    {
+        var userId = await DemandKeyOwnerAsync();
+        ValidateKeyPair(keyPair);
+
+        var currentKeyPairs = await GetKeyPairAsync() ?? [];
+
+        var index = currentKeyPairs.FindIndex(r => r.Id == keyPair.Id);
+        if (index < 0)
+        {
+            throw new ItemNotFoundException($"The encryption key {keyPair.Id} is not found");
+        }
+
+        keyPair.UserId = userId;
+        currentKeyPairs[index] = keyPair;
+
+        return await Save(currentKeyPairs);
+    }
+
+    /// <summary>
+    /// Checks that the current account may own encryption keys. Guests never can, which is also why
+    /// they cannot be invited to a private room.
+    /// </summary>
+    private async Task<Guid> DemandKeyOwnerAsync()
+    {
         var userId = authContext.CurrentAccount.ID;
+
         if (!authContext.IsAuthenticated || await userManager.IsGuestAsync(userId))
         {
             throw new SecurityException();
         }
 
-        var keyPair = new EncryptionKeyPairDto
-        {
-            PrivateKeyEnc = privateKeyEnc,
-            PublicKey = publicKey,
-            UserId = userId
-        };
-
-        var keyPairString = JsonSerializer.Serialize(keyPair);
-        await encryptionLoginProvider.SetKeysAsync(userId, keyPairString);
+        return userId;
     }
 
-    public async Task<EncryptionKeyPairDto> GetKeyPairAsync()
+    /// <summary>
+    /// Checks that the submitted key material is usable. Both halves are mandatory: a request that
+    /// omits or blanks one of them would otherwise be stored as is and leave the user with a key
+    /// that can no longer decrypt anything.
+    /// </summary>
+    private static void ValidateKeyPair(EncryptionKeyDto keyPair)
+    {
+        if (keyPair == null)
+        {
+            throw new ArgumentException("The encryption key is not specified");
+        }
+
+        if (string.IsNullOrWhiteSpace(keyPair.PublicKey))
+        {
+            throw new ArgumentException("The public key is not specified");
+        }
+
+        if (string.IsNullOrWhiteSpace(keyPair.PrivateKeyEnc))
+        {
+            throw new ArgumentException("The encrypted private key is not specified");
+        }
+    }
+
+    public async Task<List<EncryptionKeyDto>> GetKeyPairAsync()
     {
         var currentAddressString = await encryptionLoginProvider.GetKeysAsync();
         if (string.IsNullOrEmpty(currentAddressString))
@@ -96,21 +158,40 @@ public class EncryptionKeyPairDtoHelper(
             return null;
         }
 
-        var options = new JsonSerializerOptions
-        {
-            AllowTrailingCommas = true,
-            PropertyNameCaseInsensitive = true
-        };
-        var keyPair = JsonSerializer.Deserialize<EncryptionKeyPairDto>(currentAddressString, options);
-        if (keyPair.UserId != authContext.CurrentAccount.ID)
-        {
-            return null;
-        }
-
-        return keyPair;
+        return ParseKeys(currentAddressString, authContext.CurrentAccount.ID);
     }
 
-    public async Task<IEnumerable<EncryptionKeyPairDto>> GetKeyPairAsync<T>(T fileId)
+    /// <summary>
+    /// Reads a user's stored key set. Before key sets existed a user had exactly one pair, stored as
+    /// a single <c>{PrivateKeyEnc, PublicKey, UserId}</c> object rather than an array; such a pair is
+    /// read as a one-element set with the all-zero identifier and the minimal date, since it was
+    /// stored without either, and ignored when it names another user, as the single-pair code did.
+    /// </summary>
+    private static List<EncryptionKeyDto> ParseKeys(string json, Guid ownerId)
+    {
+        using var document = JsonDocument.Parse(json);
+        var root = document.RootElement;
+
+        switch (root.ValueKind)
+        {
+            case JsonValueKind.Array:
+                return root.Deserialize<List<EncryptionKeyDto>>(JsonSerializerOptions.Web);
+            case JsonValueKind.Object:
+                var legacyKeyPair = root.Deserialize<EncryptionKeyDto>(JsonSerializerOptions.Web);
+                if (legacyKeyPair.UserId != ownerId)
+                {
+                    return [];
+                }
+
+                legacyKeyPair.Id = Guid.Empty;
+                legacyKeyPair.Date = DateTime.MinValue;
+                return [legacyKeyPair];
+            default:
+                return [];
+        }
+    }
+
+    public async Task<List<EncryptionKeyDto>> GetKeyPairAsync<T>(T fileId)
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var folderDao = daoFactory.GetFolderDao<T>();
@@ -123,7 +204,7 @@ public class EncryptionKeyPairDtoHelper(
             throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
         }
 
-        if (!await fileSecurity.CanEditAsync(file))
+        if (!await fileSecurity.CanReadAsync(file))
         {
             throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
         }
@@ -138,7 +219,7 @@ public class EncryptionKeyPairDtoHelper(
 
         var tmpFiles = await fileSharing.GetSharedInfoAsync([fileId], []);
         var fileShares = tmpFiles.ToList();
-        fileShares = fileShares.Where(share => !share.SubjectGroup && share.Access == FileShare.ReadWrite).ToList();
+        fileShares = fileShares.Where(share => !share.SubjectGroup).ToList();
 
         var tasks = fileShares.Select(async share =>
         {
@@ -148,25 +229,113 @@ public class EncryptionKeyPairDtoHelper(
                 return null;
             }
 
-            var options = new JsonSerializerOptions
-            {
-                AllowTrailingCommas = true,
-                PropertyNameCaseInsensitive = true
-            };
-            var fileKeyPair = JsonSerializer.Deserialize<EncryptionKeyPairDto>(fileKeyPairString, options);
-            if (fileKeyPair.UserId != share.Id)
-            {
-                return null;
-            }
-
-            fileKeyPair.PrivateKeyEnc = null;
+            var fileKeyPair = ParseKeys(fileKeyPairString, share.Id)
+                .ToList();
 
             return fileKeyPair;
         });
 
         var fileKeysPair = (await Task.WhenAll(tasks))
-            .Where(keyPair => keyPair != null);
+            .Where(keyPair => keyPair != null)
+            .SelectMany(keyPair => keyPair);
 
-        return fileKeysPair;
+        return SanitizeAccessKeys(fileKeysPair);
+    }
+
+    public async Task<List<EncryptionKeyDto>> GetKeyPairForRoomAsync<T>(T roomId)
+    {
+        var folderDao = daoFactory.GetFolderDao<T>();
+
+        var room = await folderDao.GetFolderAsync(roomId);
+        if (room == null)
+        {
+            throw new FileNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+        }
+
+        if (!await fileSecurity.CanReadAsync(room))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
+        var locatedInPrivateRoom = room.RootFolderType is FolderType.VirtualRooms or FolderType.Archive && DocSpaceHelper.LocatedInPrivateRoom(room);
+
+        if (room.RootFolderType != FolderType.Privacy && !locatedInPrivateRoom)
+        {
+            throw new ArgumentException(FilesCommonResource.ErrorMessage_PrivateRoomOnly);
+        }
+
+        var tmpFiles = await fileSharing.GetSharedInfoAsync(room);
+        var fileShares = tmpFiles.ToList();
+        fileShares = fileShares.Where(share => !share.SubjectGroup).ToList();
+
+        var tasks = fileShares.Select(async share =>
+        {
+            var fileKeyPairString = await encryptionLoginProvider.GetKeysAsync(share.Id);
+            if (string.IsNullOrEmpty(fileKeyPairString))
+            {
+                return null;
+            }
+
+            var fileKeyPair = ParseKeys(fileKeyPairString, share.Id)
+                .ToList();
+
+            return fileKeyPair;
+        });
+
+        var fileKeysPair = (await Task.WhenAll(tasks))
+            .Where(keyPair => keyPair != null)
+            .SelectMany(keyPair => keyPair)
+            .ToList();
+
+        if(fileKeysPair.All(r => r.UserId != authContext.CurrentAccount.ID))
+        {
+            throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
+        }
+
+        return SanitizeAccessKeys(fileKeysPair);
+    }
+
+    /// <summary>
+    /// Prepares somebody else's keys for the current user: an entry without a public key is of no
+    /// use to the caller and must not be reported as access at all, and the encrypted private half
+    /// never leaves its owner — only the caller's own entry keeps it.
+    /// </summary>
+    private List<EncryptionKeyDto> SanitizeAccessKeys(IEnumerable<EncryptionKeyDto> keyPairs)
+    {
+        var userId = authContext.CurrentAccount.ID;
+
+        return keyPairs
+            .Where(r => !string.IsNullOrEmpty(r.PublicKey))
+            .Select(r =>
+            {
+                if (r.UserId != userId)
+                {
+                    r.PrivateKeyEnc = null;
+                }
+
+                return r;
+            })
+            .ToList();
+    }
+
+    public async Task DeleteAsync(Guid id)
+    {
+        await DemandKeyOwnerAsync();
+
+        var currentSettings = await GetKeyPairAsync();
+
+        if (currentSettings == null || currentSettings.RemoveAll(r => r.Id == id) == 0)
+        {
+            throw new ItemNotFoundException($"The encryption key {id} is not found");
+        }
+
+        await Save(currentSettings);
+    }
+
+    private async Task<List<EncryptionKeyDto>> Save(List<EncryptionKeyDto> currentSettings)
+    {
+        var keyPairString = JsonSerializer.Serialize(currentSettings, JsonSerializerOptions.Web);
+        await encryptionLoginProvider.SetKeysAsync(authContext.CurrentAccount.ID, keyPairString);
+        return currentSettings;
     }
 }

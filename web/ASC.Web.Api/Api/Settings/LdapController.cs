@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.Controllers.Settings;
 
 [ApiExplorerSettings(IgnoreApi = true)]
-[DefaultRoute("ldap")]
+[ApiEndpoint(Template = "ldap")]
 public class LdapController(
     WebItemManager webItemManager,
     IFusionCache fusionCache,

@@ -33,7 +33,6 @@
 
 using ASC.AI;
 using ASC.AI.Extensions;
-using ASC.Api.Core.Extensions;
 
 using Autofac;
 
@@ -74,6 +73,8 @@ try
     await startup.ConfigureServices(builder);
     
     builder.Host.ConfigureContainer<ContainerBuilder>(startup.ConfigureContainer);
+
+    builder.Services.SkipBackgroundServicesForDocumentGeneration();
 
     var app = builder.Build();
 

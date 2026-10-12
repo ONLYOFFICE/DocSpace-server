@@ -248,19 +248,19 @@ $Message</value>
     <value>Statusi i shenjës ndryshoi</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>Njoftimi i DocSpace. Përmendur në dokument</value>
+    <value>Njoftimi i ${LetterLogoText}. Përmendur në dokument</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>Njoftimi i DocSpace. Formulari është i plotësuar</value>
+    <value>Njoftimi i ${LetterLogoText}. Formulari është i plotësuar</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>Njoftimi i DocSpace.</value>
+    <value>Njoftimi i ${LetterLogoText}.</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>Njoftimi i DocSpace. Formulari është i plotësuar</value>
+    <value>Njoftimi i ${LetterLogoText}. Formulari është i plotësuar</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>Njoftimi i DocSpace.</value>
+    <value>Njoftimi i ${LetterLogoText}.</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>Dokumentet. Postimi është i plotë.</value>
@@ -269,7 +269,7 @@ $Message</value>
     <value>Dërgimi i postës është i plotë.</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>Njoftimi i DocSpace. Dhoma u fshi</value>
+    <value>Njoftimi i ${LetterLogoText}. Dhoma u fshi</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>Dokumentet. Lejohet aksesi në dokument: $DocumentTitle</value>
@@ -293,10 +293,10 @@ $Message</value>
     <value>Dokumentet. Lejohet aksesi në dokument : [$DocumentTitle]($DocumentURL)</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>Njoftimi i DocSpace.</value>
+    <value>Njoftimi i ${LetterLogoText}.</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>Njoftimi i DocSpace.</value>
+    <value>Njoftimi i ${LetterLogoText}.</value>
   </data>
   <data name="pattern_AgentRemoved" xml:space="preserve">
     <value>h1. $__AuthorName fshi një agjent AI
@@ -310,6 +310,6 @@ $__AuthorName fshi agjentin AI: $RoomTitle</value>
     <value>Jeni ftuar në agjentin AI "$RoomTitle"</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>Njoftim DocSpace. Agjenti AI u fshi</value>
+    <value>Njoftimi i ${LetterLogoText}. Agjenti AI u fshi</value>
   </data>
 </root>

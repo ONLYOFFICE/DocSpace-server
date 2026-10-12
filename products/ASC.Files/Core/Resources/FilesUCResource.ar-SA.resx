@@ -168,4 +168,10 @@
   <data name="VirtualRooms" xml:space="preserve">
     <value>غرف</value>
   </data>
+  <data name="Files" xml:space="preserve">
+    <value>الملفات</value>
+  </data>
+  <data name="Forms" xml:space="preserve">
+    <value>النماذج</value>
+  </data>
 </root>

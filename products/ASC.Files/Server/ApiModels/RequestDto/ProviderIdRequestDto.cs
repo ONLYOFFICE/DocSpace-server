@@ -39,9 +39,9 @@ namespace ASC.Files.ApiModels.RequestDto;
 public class ProviderIdRequestDto
 {
     /// <summary>
-    /// The provider ID.
+    /// The ID of the connected third-party storage account, as `providerId` of `GET api/2.0/files/thirdparty`.
     /// </summary>
-    /// <example>1</example>
+    /// <example>12</example>
     [FromRoute(Name = "providerId")]
     public required int ProviderId { get; set; }
 }
@@ -52,7 +52,8 @@ public class ProviderIdRequestDto
 public class GetProvidersRequestDto
 {
     /// <summary>
-    /// Specifies whether WebDAV resources should be excluded from the result..
+    /// Set to true to leave out the whole WebDAV family, the kDrive and Yandex presets included, and keep only the
+    /// services that authenticate through OAuth 2.0; false lists all of them.
     /// </summary>
     /// <example>false</example>
     [FromQuery(Name = "excludewebdav")]

@@ -35,19 +35,19 @@ namespace ASC.Core.Common.EF;
 
 public partial class CoreDbContext
 {
-    [PreCompileQuery([PreCompileQuery.DefaultInt])]
+    [PreCompileQuery]
     public Task<DbQuota> QuotaAsync(int tenantId)
     {
         return QuotaQueries.QuotaAsync(this, tenantId);
     }
 
-    [PreCompileQuery([])]
+    [PreCompileQuery]
     public IAsyncEnumerable<DbQuota> AllQuotasAsync()
     {
         return QuotaQueries.AllQuotasAsync(this);
     }
 
-    [PreCompileQuery([PreCompileQuery.DefaultInt, PreCompileQuery.DefaultGuid, null, long.MaxValue])]
+    [PreCompileQuery]
     public Task<int> UpdateCounterAsync(int tenantId, Guid userId, string path, long counter)
     {
         return QuotaQueries.UpdateCounterAsync(this, tenantId, userId, path, counter);
@@ -64,11 +64,10 @@ static file class QuotaQueries
         Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery((CoreDbContext ctx) => ctx.Quotas);
 
     public static readonly Func<CoreDbContext, int, Guid, string, long, Task<int>> UpdateCounterAsync =
-        Microsoft.EntityFrameworkCore.EF.CompileAsyncQuery(
-            (CoreDbContext ctx, int tenantId, Guid userId, string path, long counter) =>
-                ctx.QuotaRows
-                    .Where(r => r.Path == path
-                                && r.TenantId == tenantId
-                                && r.UserId == userId)
-                    .ExecuteUpdate(x => x.SetProperty(p => p.Counter, p => p.Counter + counter)));
+        (CoreDbContext ctx, int tenantId, Guid userId, string path, long counter) =>
+            ctx.QuotaRows
+                .Where(r => r.Path == path
+                            && r.TenantId == tenantId
+                            && r.UserId == userId)
+                .ExecuteUpdateAsync(x => x.SetProperty(p => p.Counter, p => p.Counter + counter));
 }

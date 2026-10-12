@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -34,18 +34,28 @@
 using System.Text.Json.Nodes;
 using System.Xml.XPath;
 
-using Microsoft.OpenApi;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 
 using Scalar.AspNetCore;
 
-using Swashbuckle.AspNetCore.SwaggerGen;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace ASC.Api.Core.Extensions;
 
 public static class OpenApiExtension
 {
+    private const string BinaryContentMediaType = "application/octet-stream";
+
     public static IServiceCollection AddOpenApi(this IServiceCollection services, IConfiguration configuration, string docVersion = "2.0")
     {
+        // Drives the documents written at build time, which read SwaggerOptions from DI and never touch the
+        // middleware. Not a duplicate of the version set in UseOpenApi: that one only serves the http endpoint.
+        services.Configure<SwaggerOptions>(o => o.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1);
+
+        // Registered as one more ApiExplorer provider, not a Swashbuckle filter: the third-party twin of a
+        // generic action has to be told apart before Swashbuckle resolves the two identical routes to one.
+        services.TryAddEnumerable(ServiceDescriptor.Transient<IApiDescriptionProvider, ThirdPartyVariantApiDescriptionProvider>());
+
         return services.AddSwaggerGen(c =>
         {
             var entryAssembly = Assembly.GetEntryAssembly();
@@ -64,15 +74,34 @@ public static class OpenApiExtension
 
             c.CustomSchemaIds(CustomSchemaId);
 
+            // Query models bound with [FromQuery] and no explicit Name surfaced their C# property names
+            // (`IsDark`, `ServiceName`, `Userid`). Binding is case-insensitive, so documenting the
+            // camelCase spelling every other parameter uses changes nothing on the wire.
+            c.DescribeAllParametersInCamelCase();
+
             var openApiInfo = new OpenApiInfo
             {
-                Title = "Api",
-                Version = "3.7.0",
+                Title = "ONLYOFFICE DocSpace API",
+                Version = "4.0.0",
+                // One Info object serves every service document (a single AddOpenApi call site in
+                // BaseStartup), so the text has to hold for all of them - do not make it service-specific.
+                Description = "REST API of ONLYOFFICE DocSpace - a multi-tenant platform for document management, " +
+                              "collaboration and file sharing. Requests are authenticated with the portal session " +
+                              "cookie, an API key, Basic credentials, or an OAuth 2.0 / OpenID Connect token; see the " +
+                              "security schemes of this document.",
                 Contact = new OpenApiContact
                 {
                     Name = "API Support",
                     Email = "support@onlyoffice.com",
                     Url = new Uri("https://helpdesk.onlyoffice.com/hc/en-us")
+                },
+                // The whole product is AGPL-3.0-only (see the header of this file). `Url` rather than the
+                // 3.1-only `Identifier`: the two are mutually exclusive and the url is what SDK generators
+                // and the api reference render.
+                License = new OpenApiLicense
+                {
+                    Name = "AGPL-3.0-only",
+                    Url = new Uri("https://www.gnu.org/licenses/agpl-3.0.html")
                 }
             };
 
@@ -110,22 +139,64 @@ public static class OpenApiExtension
             c.DocumentFilter<HideRouteDocumentFilter>("/api/2.0/files/@recent");
             c.DocumentFilter<TagDescriptionsDocumentFilter>();
             c.OperationFilter<SwaggerCustomOperationFilter>();
+            c.OperationFilter<SwaggerPathParameterFilter>();
             c.OperationFilter<ContentTypeOperationFilter>();
             c.OperationFilter<AllowAnonymousFilter>();
+            c.OperationFilter<ApiDateTimeParameterFilter>();
+            c.OperationFilter<FlattenObjectQueryParameterFilter>();
+            c.OperationFilter<AcronymQueryParameterNameFilter>();
+            c.OperationFilter<RequestBodyNameOperationFilter>();
             c.OperationFilter<RateLimitOperationFilter>();
+            c.DocumentFilter<RateLimitDocumentFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
+            // Must stay after every filter that produces content: it rewrites what the filters above have
+            // produced into openapi 3.1 form.
+            c.DocumentFilter<OpenApi31SchemaDocumentFilter>();
+            // Last of all: it only moves the finished third-party operations into the real ones, and has to
+            // see them in their final 3.1 form.
+            c.DocumentFilter<ThirdPartyVariantDocumentFilter>();
+            // In openapi 3.1 `format` no longer affects the encoding - the content type does, so a file part is
+            // described by `contentMediaType` alone, without `type`.
+            c.MapType<IFormFile>(() => new OpenApiSchema
+            {
+                Extensions = new Dictionary<string, IOpenApiExtension>
+                {
+                    ["contentMediaType"] = new JsonNodeExtension(JsonValue.Create(BinaryContentMediaType))
+                }
+            });
+            // Reflecting IFormCollection leaks its dictionary shape into the contract as an array of
+            // KeyValuePair<string, StringValues>, which describes ASP.NET internals rather than the wire.
+            // A multipart body is a set of parts under caller-chosen field names, so document it as that.
+            c.MapType<IFormCollection>(() => new OpenApiSchema
+            {
+                Type = JsonSchemaType.Object,
+                Description = "The multipart form parts sent with the request. The field names are not fixed.",
+                AdditionalProperties = new OpenApiSchema
+                {
+                    Description = "A single form part carrying the file content.",
+                    Extensions = new Dictionary<string, IOpenApiExtension>
+                    {
+                        ["contentMediaType"] = new JsonNodeExtension(JsonValue.Create(BinaryContentMediaType))
+                    }
+                }
+            });
             c.EnableAnnotations();
             c.SchemaFilter<CustomInheritanceSchemaFilter>();
+            c.SchemaFilter<OpenObjectSchemaFilter>();
 
             var serverTemplate = configuration.GetValue<string>("openApi:server") ?? "";
 
             var defaultUrl = configuration.GetValue<string>("openApi:url:default") ?? "";
             var urlDescription = configuration.GetValue<string>("openApi:url:description") ?? "";
 
+            // The description names the environment on purpose (`server-environment-described` in
+            // SDK/.spectral.yaml): `{baseUrl}` resolves to the customer's own portal, so this is the
+            // public production surface, not an internal or staging one, and a reader of the
+            // reference should not have to guess which.
             c.AddServer(new OpenApiServer
             {
                 Url = serverTemplate,
-                Description = "Server configuration",
+                Description = "The production DocSpace portal, at the customer's own domain.",
                 Variables = new Dictionary<string, OpenApiServerVariable>
                 {
                     ["baseUrl"] = new()
@@ -163,7 +234,14 @@ public static class OpenApiExtension
                 In = ParameterLocation.Header,
                 Scheme = "bearer",
                 BearerFormat = "JWT",
-                Description = "Enter 'Bearer {JWT Token}'"
+                // The RFC8725 sentence is not decoration: OWASP API2:2023 reads the description of
+                // every JWT-bearing scheme to check the API states which JWT practices it follows,
+                // and a consumer picking an auth method has nowhere else to learn it.
+                Description =
+                    "Enter 'Bearer {JWT Token}'. Tokens are validated per RFC8725 (JSON Web Token "
+                    + "Best Current Practices): signatures are required and checked against a "
+                    + "server-side algorithm allow-list (ES256, RS256) rather than the token header, "
+                    + "and issuer, audience and expiry are all verified."
             });
 
             // API Key Authentication
@@ -195,7 +273,9 @@ public static class OpenApiExtension
                         }
                     }
                 },
-                Description = "OAuth2 flow with Authorization Code"
+                Description =
+                    "OAuth2 flow with Authorization Code. The access tokens it issues are JWTs, "
+                    + "validated per RFC8725 exactly as the Bearer scheme describes."
             });
 
             var openIdConnectUrl = configuration.GetValue<string>("openApi:openId:openIdConnectUrl");
@@ -207,6 +287,8 @@ public static class OpenApiExtension
                 OpenIdConnectUrl = string.IsNullOrEmpty(openIdConnectUrl) ? new Uri(string.Empty, UriKind.RelativeOrAbsolute) : new Uri(openIdConnectUrl),
                 Description = "OpenID Connect authentication"
             });
+
+            var xmlDocs = new List<XPathDocument>();
 
             string xmlPath = null;
             var assemblyLocation = entryAssembly.Location;
@@ -221,6 +303,7 @@ public static class OpenApiExtension
                         var doc = new XPathDocument(xmlPath);
 
                         c.IncludeXmlComments(() => doc);
+                        xmlDocs.Add(doc);
                     }
                 }
             }
@@ -233,9 +316,15 @@ public static class OpenApiExtension
 
                 if (File.Exists(xmlPathOther) && xmlPathOther != xmlPath)
                 {
-                    c.IncludeXmlComments(xmlPathOther);
+                    var doc = new XPathDocument(xmlPathOther);
+
+                    c.IncludeXmlComments(() => doc);
+                    xmlDocs.Add(doc);
                 }
             }
+
+            // Must stay after every IncludeXmlComments call - see the filter's own remarks.
+            c.SchemaFilter<XmlCommentsMemberDescriptionSchemaFilter>(xmlDocs);
         });
     }
 
@@ -253,7 +342,7 @@ public static class OpenApiExtension
 
             app.UseSwagger(options =>
             {
-                options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_0;
+                options.OpenApiVersion = OpenApiSpecVersion.OpenApi3_1;
                 options.RouteTemplate = $"openapi/{assemblyName.ToLower()}/{{documentName}}.{{extension:regex(^(json|ya?ml)$)}}";
             });
 
@@ -312,24 +401,7 @@ public static class OpenApiExtension
 
     public static string CustomSchemaId(Type type)
     {
-        var name = type.Name;
-
-        if (string.IsNullOrEmpty(name))
-        {
-            return name;
-        }
-
-        if (type.IsGenericType)
-        {
-            name = name.Split('`')[0];
-            var genericArgs = string.Join("", type.GetGenericArguments().Select(CustomSchemaId));
-            name += genericArgs;
-        }
-
-        // Fix for nested classes
-        name = name.Replace("+", "_");
-        name = name.Replace("Int32", "Integer");
-        return name;
+        return OpenApiSchemaId.Of(type);
     }
 
     private class AllowAnonymousFilter : IOperationFilter
@@ -344,42 +416,44 @@ public static class OpenApiExtension
             //    .Union (context.MethodInfo.GetCustomAttributes(true)) .OfType<AuthorizeAttribute>();
 
 
+            operation.Security =
+            [
+                new OpenApiSecurityRequirement
+                {
+                    [ new OpenApiSecuritySchemeReference(CookiesManager.AuthCookiesName, context.Document)] = []
+                },
+                new OpenApiSecurityRequirement
+                {
+                    [ new OpenApiSecuritySchemeReference("Bearer", context.Document)] = []
+                },
+                new OpenApiSecurityRequirement
+                {
+                    [ new OpenApiSecuritySchemeReference("ApiKeyBearer", context.Document)] = []
+                },
+                new OpenApiSecurityRequirement
+                {
+                    [ new OpenApiSecuritySchemeReference("Basic", context.Document)] = []
+                },
+                new OpenApiSecurityRequirement
+                {
+                    [ new OpenApiSecuritySchemeReference("OAuth2", context.Document)] = ["read", "write"]
+                },
+                new OpenApiSecurityRequirement
+                {
+                    [ new OpenApiSecuritySchemeReference("OpenId", context.Document)] = []
+                }
+            ];
+
             if (allowAnonymous.Any())
             {
-                operation.Security?.Clear();
+                // [AllowAnonymous] makes authentication optional, not absent: the server still reads the caller
+                // (a rename, a version restore or a room read of a private entry needs one). The empty requirement
+                // is what says so in OpenAPI - with no security at all the generated clients would never attach
+                // the credentials they were configured with.
+                operation.Security.Add(new OpenApiSecurityRequirement());
             }
             else
             {
-                operation.Security ??= new List<OpenApiSecurityRequirement>();
-
-                operation.Security =
-                [
-                    new OpenApiSecurityRequirement
-                    {
-                        [ new OpenApiSecuritySchemeReference(CookiesManager.AuthCookiesName, context.Document)] =  ["read", "write"]
-                    },
-                    new OpenApiSecurityRequirement
-                    {
-                        [ new OpenApiSecuritySchemeReference("Bearer", context.Document)] = []
-                    },
-                    new OpenApiSecurityRequirement
-                    {
-                        [ new OpenApiSecuritySchemeReference("ApiKeyBearer", context.Document)] =   ["read", "write"]
-                    },
-                    new OpenApiSecurityRequirement
-                    {
-                        [ new OpenApiSecuritySchemeReference("Basic", context.Document)] = []
-                    },
-                    new OpenApiSecurityRequirement
-                    {
-                        [ new OpenApiSecuritySchemeReference("OAuth2", context.Document)] = ["read", "write"]
-                    },
-                    new OpenApiSecurityRequirement
-                    {
-                        [ new OpenApiSecuritySchemeReference("OpenId", context.Document)] = []
-                    }
-                ];
-
                 operation.Responses ??= new OpenApiResponses();
                 operation.Responses.Add("401", new OpenApiResponse { Description = "Unauthorized" });
             }
@@ -413,6 +487,291 @@ public static class OpenApiExtension
     }
 
 
+    /// <summary>
+    /// Puts the summary of a documented property or field back after Swashbuckle's own XML filters have run.
+    /// </summary>
+    /// <remarks>
+    /// For every property `XmlCommentsSchemaFilter` writes the summary of the property's *type* into the
+    /// property schema first and the summary of the property itself second, and one such filter is registered
+    /// per XML file. So when the type is documented in a file included later than the file that documents the
+    /// property, the type's text silently replaces the property's own. Which file comes first depends on
+    /// assembly load order, so the same property can end up described one way in one service document and
+    /// another way in the next - and two documents that disagree about a shared schema cannot be joined into
+    /// the API reference. Registered after every IncludeXmlComments call, this filter restores the member text.
+    /// A property with no summary of its own is left alone: falling back to the type's text is intended.
+    /// </remarks>
+    private class XmlCommentsMemberDescriptionSchemaFilter : ISchemaFilter
+    {
+        private readonly Dictionary<string, string> _memberSummaries = new(StringComparer.Ordinal);
+        private readonly Dictionary<(string Type, string Parameter), string> _recordParameterSummaries = new();
+
+        public XmlCommentsMemberDescriptionSchemaFilter(IReadOnlyList<XPathDocument> xmlDocs)
+        {
+            foreach (var xmlDoc in xmlDocs)
+            {
+                foreach (var member in xmlDoc.CreateNavigator().Select("/doc/members/member").Cast<XPathNavigator>())
+                {
+                    var name = member.GetAttribute("name", string.Empty);
+
+                    if (string.IsNullOrEmpty(name))
+                    {
+                        continue;
+                    }
+
+                    // "P:Ns.Type.Property" and "F:Ns.Type.Field" carry the member summary, "T:Ns.Type" the
+                    // `<param>` tags of a record's primary constructor. Everything else is of no interest here.
+                    if (name[0] is 'P' or 'F')
+                    {
+                        var summary = member.SelectSingleNode("summary");
+
+                        if (summary != null)
+                        {
+                            _memberSummaries[name] = XmlCommentsTextHelper.Humanize(summary.InnerXml);
+                        }
+                    }
+                    else if (name[0] == 'T')
+                    {
+                        foreach (var parameter in member.Select("param").Cast<XPathNavigator>())
+                        {
+                            var parameterName = parameter.GetAttribute("name", string.Empty);
+
+                            if (!string.IsNullOrEmpty(parameterName))
+                            {
+                                _recordParameterSummaries[(name, parameterName)] = XmlCommentsTextHelper.Humanize(parameter.Value);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
+        {
+            if (context.MemberInfo is not { DeclaringType: not null } memberInfo)
+            {
+                return;
+            }
+
+            // Same precedence as Swashbuckle: a record's `<param>` first, the member's own summary on top of it.
+            var declaringType = XmlCommentsNodeNameHelper.GetMemberNameForType(memberInfo.DeclaringType);
+
+            if (_recordParameterSummaries.TryGetValue((declaringType, memberInfo.Name), out var parameterSummary))
+            {
+                schema.Description = parameterSummary;
+            }
+
+            if (_memberSummaries.TryGetValue(XmlCommentsNodeNameHelper.GetMemberNameForFieldOrProperty(memberInfo), out var memberSummary))
+            {
+                schema.Description = memberSummary;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Describes an <see cref="ApiDateTime"/> carried in a query, path or header as the ISO-8601 string it
+    /// actually is. ApiDateTimeTypeConverter binds such a value from a single string, so pointing the parameter
+    /// at the object component would both misdescribe the wire and make the string `example` invalid against
+    /// it. Request and response bodies keep the component: there the json converter round-trips the whole type.
+    /// </summary>
+    private class ApiDateTimeParameterFilter : IOperationFilter
+    {
+        private static readonly string _apiDateTimeSchemaId = CustomSchemaId(typeof(ApiDateTime));
+
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            foreach (var parameter in operation.Parameters ?? [])
+            {
+                if (parameter is OpenApiParameter openApiParameter &&
+                    (openApiParameter.Schema as OpenApiSchemaReference)?.Reference.Id == _apiDateTimeSchemaId)
+                {
+                    openApiParameter.Schema = new OpenApiSchema
+                    {
+                        Type = JsonSchemaType.String,
+                        Format = "date-time"
+                    };
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Spells a whole request model bound from the query string out as one query parameter per property.
+    /// </summary>
+    /// <remarks>
+    /// A model with a custom binder (<c>BatchModelBinder</c> behind <c>GET files/fileops/move</c>) is described
+    /// as a single object parameter named after the C# argument, <c>inDto</c>. Serialized as a form query it
+    /// already sends the flat <c>folderIds=..&amp;destFolderId=..</c> the binder reads, so the wire does not
+    /// change; what does is the SDK method, which no longer takes an argument called <c>inDto</c> and names
+    /// every field an agent has to fill instead.
+    /// </remarks>
+    /// <summary>
+    /// Fixes the camel case of query parameter names that start with an acronym.
+    /// </summary>
+    /// <remarks>
+    /// <c>DescribeAllParametersInCamelCase</c> only lowers the first letter, so <c>AWSRegion</c> is published as
+    /// <c>aWSRegion</c>; this spells it the way System.Text.Json does, <c>awsRegion</c>. Query binding ignores case,
+    /// so the request that reaches the server is the same. The name cannot be fixed with <c>[FromQuery(Name)]</c> on
+    /// the model property instead: the same model is bound from the body elsewhere, and a binding-source attribute on
+    /// one of its properties turns off the body inference of <c>[ApiController]</c>.
+    /// </remarks>
+    private class AcronymQueryParameterNameFilter : IOperationFilter
+    {
+        private static readonly Regex _acronymStart = new("^[a-z][A-Z]{2}", RegexOptions.Compiled);
+
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            foreach (var parameter in operation.Parameters ?? [])
+            {
+                if (parameter is OpenApiParameter { In: ParameterLocation.Query, Name: { } name } concrete && _acronymStart.IsMatch(name))
+                {
+                    concrete.Name = JsonNamingPolicy.CamelCase.ConvertName(char.ToUpperInvariant(name[0]) + name[1..]);
+                }
+            }
+        }
+    }
+
+    private class FlattenObjectQueryParameterFilter : IOperationFilter
+    {
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            if (operation.Parameters is not { Count: > 0 } parameters)
+            {
+                return;
+            }
+
+            for (var i = parameters.Count - 1; i >= 0; i--)
+            {
+                if (parameters[i] is not OpenApiParameter { In: ParameterLocation.Query, Schema: OpenApiSchemaReference reference })
+                {
+                    continue;
+                }
+
+                var properties = new Dictionary<string, IOpenApiSchema>();
+                CollectProperties(reference.Reference.Id, context.SchemaRepository, properties);
+
+                if (properties.Count == 0)
+                {
+                    // An enum or any other schema without members of its own stays a single parameter.
+                    continue;
+                }
+
+                parameters.RemoveAt(i);
+
+                var index = i;
+                foreach (var (name, schema) in properties)
+                {
+                    parameters.Insert(index++, new OpenApiParameter
+                    {
+                        Name = name,
+                        In = ParameterLocation.Query,
+                        Description = schema.Description,
+                        Schema = schema
+                    });
+                }
+            }
+        }
+
+        private static void CollectProperties(string schemaId, SchemaRepository repository, Dictionary<string, IOpenApiSchema> properties)
+        {
+            if (!repository.Schemas.TryGetValue(schemaId, out var schema))
+            {
+                return;
+            }
+
+            foreach (var part in schema.AllOf ?? [])
+            {
+                if (part is OpenApiSchemaReference partReference)
+                {
+                    CollectProperties(partReference.Reference.Id, repository, properties);
+                }
+                else
+                {
+                    AddProperties(part, properties);
+                }
+            }
+
+            AddProperties(schema, properties);
+        }
+
+        private static void AddProperties(IOpenApiSchema schema, Dictionary<string, IOpenApiSchema> properties)
+        {
+            foreach (var (name, property) in schema.Properties ?? new Dictionary<string, IOpenApiSchema>())
+            {
+                properties.TryAdd(name, property);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Names a request body that has no model of its own after the request model that carries it.
+    /// </summary>
+    /// <remarks>
+    /// A request model whose <c>[FromBody]</c> property is a bare array of numbers or enum values
+    /// (<c>DeleteTemplateFilesRequestDto.FileIds</c>) puts an inline array schema on the operation. The SDK
+    /// generators find no model name in it and call the argument <c>request_body</c>, where every other body is
+    /// named after its model. The extension names only that argument: the body on the wire is still the bare
+    /// array. A body that references a model, directly or through its array items, already gets that model's
+    /// name and is left alone, and so is a body bound straight to an action parameter, which has no request
+    /// model to be named after.
+    /// </remarks>
+    private class RequestBodyNameOperationFilter : IOperationFilter
+    {
+        private const string BodyNameExtension = "x-codegen-request-body-name";
+
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            if (operation.RequestBody is not OpenApiRequestBody { Content: { Count: > 0 } content } requestBody ||
+                content.Values.Any(media => media.Schema is null or OpenApiSchemaReference || media.Schema.Items is OpenApiSchemaReference))
+            {
+                return;
+            }
+
+            var body = context.ApiDescription.ParameterDescriptions.FirstOrDefault(p => p.Source == BindingSource.Body);
+            var model = body?.ParameterDescriptor?.ParameterType;
+            if (model == null || model == body.Type)
+            {
+                return;
+            }
+
+            requestBody.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+            requestBody.Extensions[BodyNameExtension] = new JsonNodeExtension(JsonValue.Create(CustomSchemaId(model)));
+        }
+    }
+
+    /// <summary>
+    /// Drops the <c>additionalProperties: false</c> the generator puts on every object schema, keeping it only
+    /// where the type really refuses unmapped members.
+    /// </summary>
+    /// <remarks>
+    /// The keyword does not compose: inside an <c>allOf</c> branch - and <see cref="CustomInheritanceSchemaFilter"/>
+    /// turns every derived type into one - it sees that branch's own <c>properties</c> alone and rejects every
+    /// field the sibling branches contribute, so a closed base or a closed composite documents a model with no
+    /// fields at all. Whether a schema ends up in an <c>allOf</c> depends on which derived types a given service
+    /// happens to generate, so the decision cannot be made there: a base left closed in one document and opened
+    /// in another is the same component described two ways, which the joiner rejects outright. Hence the rule is
+    /// a property of the type and nothing else.
+    /// </remarks>
+    private class OpenObjectSchemaFilter : ISchemaFilter
+    {
+        public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
+        {
+            // A dictionary carries its value schema in `additionalProperties` and leaves the flag alone; only the
+            // `false` written by the object generator is up for removal.
+            if (schema is not OpenApiSchema { AdditionalPropertiesAllowed: false, AdditionalProperties: null } openApiSchema)
+            {
+                return;
+            }
+
+            if (context.Type.GetCustomAttribute<JsonUnmappedMemberHandlingAttribute>()?.UnmappedMemberHandling
+                == JsonUnmappedMemberHandling.Disallow)
+            {
+                return;
+            }
+
+            openApiSchema.AdditionalPropertiesAllowed = true;
+        }
+    }
+
     private class CustomInheritanceSchemaFilter : ISchemaFilter
     {
         public void Apply(IOpenApiSchema schema, SchemaFilterContext context)
@@ -436,15 +795,10 @@ public static class OpenApiExtension
                 return;
             }
 
-            var openApiSchema = schema as OpenApiSchema;
-
-            var baseTypeSchema = context.SchemaGenerator.GenerateSchema(baseType, context.SchemaRepository);
-
-            var schemaId = CustomSchemaId(baseType);
-
-            context.SchemaRepository.Schemas.TryAdd(schemaId, baseTypeSchema);
-
-            var baseSchemaRef = new OpenApiSchemaReference(schemaId);
+            if (schema is not OpenApiSchema openApiSchema)
+            {
+                return;
+            }
 
             var originalProperties = schema.Properties;
             var originalRequired = schema.Required;
@@ -456,7 +810,7 @@ public static class OpenApiExtension
                 Required = new HashSet<string>()
             };
 
-            foreach (var prop in originalProperties)
+            foreach (var prop in originalProperties ?? Enumerable.Empty<KeyValuePair<string, IOpenApiSchema>>())
             {
                 if (!baseProperties.Contains(prop.Key.ToLowerInvariant()))
                 {
@@ -468,9 +822,23 @@ public static class OpenApiExtension
                 }
             }
 
+            if (derivedPropertiesSchema.Properties.Count == 0)
+            {
+                // The derived type adds nothing of its own. Emitting `allOf: [$ref base, {}]` here produces
+                // an empty child schema, and code generators then build a model with no properties and no
+                // parameterized constructor. Keep the flattened schema instead.
+                return;
+            }
+
+            var baseTypeSchema = context.SchemaGenerator.GenerateSchema(baseType, context.SchemaRepository);
+
+            var schemaId = CustomSchemaId(baseType);
+
+            context.SchemaRepository.Schemas.TryAdd(schemaId, baseTypeSchema);
+
             openApiSchema.AllOf = new List<IOpenApiSchema>
             {
-                baseSchemaRef,
+                new OpenApiSchemaReference(schemaId),
                 derivedPropertiesSchema
             };
 

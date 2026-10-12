@@ -34,20 +34,22 @@
 namespace ASC.Files.Core.ApiModels;
 
 /// <summary>
-/// The collection of file sharing parameters.
+/// One sharing entry: an account, a group or an email address, and the access level it is given.
 /// </summary>
 public class FileShareParams : EmailInvitationDto
 {
     /// <summary>
-    /// The ID of the user to whom the file will be shared.
+    /// The account or the group the entry is about, taken from the portal people and group listings. Leave it out and
+    /// give an email address instead to share with somebody who has no account yet.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
+    /// <example>e9a7b4c1-2d3f-4a56-8b90-1c2d3e4f5a6b</example>
     public Guid ShareTo { get; set; }
 
     /// <summary>
-    /// The sharing access rights.
+    /// What the subject may do with the shared item. The value 0 takes the access away again, and which of the other
+    /// levels are accepted depends on what is being shared.
     /// </summary>
-    /// <example>None</example>
+    /// <example>2</example>
     public FileShare Access { get; set; }
 }
 

@@ -34,12 +34,13 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for checking file uploads.
+/// The names to test against the files the folder already holds.
 /// </summary>
 public class CheckUploadRequest
 {
     /// <summary>
-    /// The list of file titles.
+    /// The names to test, extensions included, spelled as they would be sent to the upload. Matching ignores case,
+    /// and a name repeated in the list is answered once.
     /// </summary>
     /// <example>["file1.docx", "file2.pdf", "file3.xlsx"]</example>
     public IReadOnlyList<string> FilesTitle { get; set; }
@@ -51,16 +52,17 @@ public class CheckUploadRequest
 public class CheckUploadRequestDto<T>
 {
     /// <summary>
-    /// The folder ID.
+    /// The folder whose contents the names are tested against; take the id from a listing such as
+    /// `GET api/2.0/files/@root`.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "folderId")]
     public required T FolderId { get; set; }
 
     /// <summary>
-    /// The request parameters for checking file uploads.
+    /// The names to test against the files the folder already holds.
     /// </summary>
-    /// <example>{"filesTitle": ["file1.docx", "file2.pdf", "file3.xlsx"]}</example>
+    /// <example>{"filesTitle": ["file1.docx", "file2.pdf"]}</example>
     [FromBody]
     public required CheckUploadRequest Check { get; set; }
 }

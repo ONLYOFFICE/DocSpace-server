@@ -34,14 +34,15 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The parameters of the form-filling session result.
+/// The query that reads the outcome of one form-filling session.
 /// </summary>
 public class GetFillResultRequestDto
 {
     /// <summary>
-    /// The form-filling session ID.
+    /// The identifier of the finished filling session, the value the document service reports when the filling ends.
+    /// The portal remembers it only for a while afterwards, so an older session is answered as not found.
     /// </summary>
-    /// <example>doc_key_123</example>
+    /// <example>11111111-2222-3333-4444-555555555555</example>
     [FromQuery(Name = "fillingSessionId")]
     public string FillingSessionId { get; set; }
 }

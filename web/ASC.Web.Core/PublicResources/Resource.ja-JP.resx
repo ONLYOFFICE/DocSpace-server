@@ -135,17 +135,20 @@
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>詳細</value>
   </data>
+  <data name="AccountingCustomerOperationMonth" xml:space="preserve">
+    <value>月</value>
+  </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>数量</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>サービス</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>AI機能</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>バックアップ</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>ディスク容量</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>ベクトル化</value>
@@ -157,7 +160,7 @@
     <value>計測単位</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>バックアップ</value>
+    <value>コピー</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>トークン</value>
@@ -174,8 +177,26 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>取引履歴</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>合計支出額</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>ユーザー別サマリー</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>種類</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportName" xml:space="preserve">
+    <value>月間利用レポート({0}-{1})</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportSheetName" xml:space="preserve">
+    <value>月間利用</value>
+  </data>
+  <data name="AccountingServiceUsageReportName" xml:space="preserve">
+    <value>サービス利用レポート({0}-{1})</value>
+  </data>
+  <data name="AccountingServiceUsageReportSheetName" xml:space="preserve">
+    <value>サービス利用</value>
   </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>検証コードフィールドは空にすることはできません</value>
@@ -196,7 +217,7 @@
     <value>AIエージェントのスペースクォータが上限に達しました</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>AIエージェントごとのクォータ設定に失敗しました。入力した値がDocSpace全体のストレージ容量を超えています。</value>
+    <value>AIエージェントごとのクォータ設定に失敗しました。入力した値が合計ストレージ容量を超えています。</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>自動更新</value>
@@ -226,7 +247,7 @@
     <value>アプリケーションクライアント ID</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>アプリケーションがApple IDを使用してポータルにサインインできるようにする。</value>
+    <value>Apple IDアカウントでワークスペースにサインイン</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>このアプリを有効にすると、ユーザーはApple IDを使って{LogoText}にサインインできるようになります。{0}Apple Developersポータルにアクセスし、新規アプリ{LogoText} integrationを作成します。以下、受け取ったデータを挿入してください：</value>
@@ -271,7 +292,7 @@
     <value>Boxキー</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Boxファイルとフォルダを管理するように、アプリを接続します。</value>
+    <value>Boxのファイルとフォルダを管理</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>このアプリを有効にすると、Boxアカウントを文書モジュールに接続して、Boxの文書を管理・編集・別の{LogoText}ユーザと共有できます。{0}Box開発者ページでサインインし、{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
@@ -310,7 +331,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Dropboxファイルとフォルダを管理するように、アプリを接続します。</value>
+    <value>Dropboxのファイルとフォルダを管理</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>このアプリを有効にすると、Dropboxアカウントを文書モジュールに接続して、Dropboxの文書を管理・編集・別の{LogoText}ユーザと共有できます。{0}Dropbox開発者ページでサインインし、{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
@@ -346,7 +367,7 @@
     <value>Facebook キー</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>アプリを{LogoText}に接続すると、Facebookでポータルにサインインし、コンタクトを検索できます。</value>
+    <value>Facebookアカウントでワークスペースにサインイン</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>このアプリを有効にすると、Facebookを使用して{LogoText}にサインイン、またはCRMモジュールで顧客のFacebookアカウントをリンクできます。{0}Facebook開発者ポータルで{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
@@ -400,7 +421,7 @@
     <value>GoogleCloud jsonファイル</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>プロジェクトを接続して、Googleアカウントを介してポータルにサインインしたり、Google Driveファイルとフォルダーを管理したりすることだできます。</value>
+    <value>Googleアカウントでワークスペースにサインインし、Google Driveのファイルとフォルダを管理</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>このアプリを有効にすると、Google Driveアカウントを文書モジュールに接続して、Google Driveの文書を管理・編集・別の{LogoText}ユーザと共有できます。{0} Google Drive APIsコンソールで{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
@@ -409,7 +430,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>アプリを{LogoText}に接続して、LinkedInでポータルにサインインします。</value>
+    <value>LinkedInアカウントでワークスペースにサインイン</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>このアプリを有効にして、ユーザーがLinkedInアカウントを使用して{LogoText}にサインインできるようにします。{0}LinkedIn開発者ウェブサイトにアクセスし、新しいアプリ{LogoText}統合を作成します。受け取ったデータを以下に挿入してください：</value>
@@ -538,7 +559,7 @@
     <value>クライアントのシークレット</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>OneDriveファイルとフォルダを管理するように、アプリを接続します。</value>
+    <value>OneDriveのファイルとフォルダを管理</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>このアプリを有効にすると、OneDriveアカウントを文書モジュールに接続して、OneDriveの文書を管理・編集・別の{LogoText}ユーザと共有できます。{0}Microsoft Azureアカウントにサインインし、{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
@@ -568,7 +589,7 @@
     <value>ボットのトークン</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>ポータル通知を受けるように、Telegramアカウントを接続します。</value>
+    <value>Telegram経由で通知を受け取る</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Telegramを使用してポータル通知を受けるように、Telegram用のボットを有効にしてください。新しいボットを作成するためにTelegramデスクトップでBotFatherを使用してください。そのボットを使用を使用するように、各ユーザがプロフィールのページでTelegram通知を有効にしなければなりません。{0}ボットのユーザ名とトークンを以下のフィールドに入力してください。</value>
@@ -601,7 +622,7 @@
     <value>クライアントID</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Xアカウントを使用してポータルにサインインするアプリケーションを有効にする。</value>
+    <value>Xアカウントでワークスペースにサインイン</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>このアプリを接続すると、Xを使用して{LogoText}にサインイン、またはCRMモジュールでお客様のXアカウントをリンクできます。{0} X開発者ポータルで{LogoText}統合のために新しいアプリを作成してください。その後、データを以下に入力してください：</value>
@@ -640,7 +661,7 @@
     <value>クライアントのシークレット</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>アプリケーションがWeChatアカウントを使用してポータルにサインインできるようにします。</value>
+    <value>WeChatアカウントでワークスペースにサインイン</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>アプリケーションがWeChatアカウントを使用してポータルにサインインできるようにします。</value>
@@ -700,7 +721,7 @@
     <value>Zoomクライアントのシクレット</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Zoomアカウントを使用してポータルにサインインするアプリケーションを有効にします。</value>
+    <value>Zoomアカウントでワークスペースにサインイン</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>ユーザーがZoomアカウントを使って{LogoText}にサインインできるように、このアプリを有効にしてください。{0}Zoom開発者向けウェブサイトにアクセスし、新しいアプリ{LogoText}統合を作成します。以下に受け取ったデータを挿入してください：</value>
@@ -1105,7 +1126,7 @@
     <value>ルームの容量制限を超えています</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>ルームごとの容量制限の設定に失敗しました。入力された値はDocSpaceストレージの合計容量を超えています。</value>
+    <value>ルームごとの容量制限の設定に失敗しました。入力された値は合計ストレージ容量を超えています。</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>アジア太平洋 (シンガポール)</value>
@@ -1152,11 +1173,11 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>AIエージェントの数は {0} を超えることはできません</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>AI検索</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>AI機能</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>AI機能を有効にして生産性を向上させましょう。</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>ログインとアクションの追跡</value>
@@ -1279,7 +1300,7 @@
     <value>ユーザーの容量制限を超えています</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>ユーザーごとの容量制限の設定に失敗しました。入力された値はDocSpaceストレージの合計容量を超えています。</value>
+    <value>ユーザーごとの容量制限の設定に失敗しました。入力された値は合計ストレージ容量を超えています。</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>US西部地域（オレゴン）</value>
@@ -1293,9 +1314,6 @@
   <data name="ConsumersNextcloudClientSecret" xml:space="preserve">
     <value>クライアントのシークレット</value>
   </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>エージェント</value>
-  </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>チャット</value>
   </data>
@@ -1305,6 +1323,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>ウェブ検索</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>AI検索</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>AIクレジット</value>
   </data>
@@ -1312,6 +1333,9 @@
     <value>ソース</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>結果</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>結果</value>
   </data>
   <data name="ConsumersdatabaseType" xml:space="preserve">
@@ -1339,7 +1363,7 @@
     <value>データベース接続</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>MySQLやSQLiteなどの外部データベースにフォーム結果を保存します。</value>
+    <value>フォームの結果をMySQLやSQLiteなどの外部データベースに保存</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>フォーム結果を保存するために外部データベースを接続します。</value>
@@ -1357,7 +1381,7 @@
     <value>NextcloudインスタンスのURLアドレスを入力してください。</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>アプリケーションがNextcloudアカウントを使用してポータルにサインインできるようにします。</value>
+    <value>Nextcloudアカウントでワークスペースにサインイン</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>アプリケーションがNextcloudアカウントを使用してポータルにサインインできるようにします。</value>
@@ -1381,6 +1405,156 @@
     <value>予期しないエラーが発生しました。もう一度お試しください。</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>DocSpaceからの通知を受け取るためにTelegramへの接続が完了しました。</value>
+    <value>ワークスペースからの通知を受け取るためにTelegramへの接続が完了しました。</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>追加ディスクストレージ</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>BUSINESSプラン</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>BUSINESSプラン</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>管理者</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>管理者</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>OpenRouter連携を通じて、幅広いAIモデルにアクセスできます。使用した分だけお支払いいただき、料金はウォレットから請求されます。</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>AI検索エンジンを使用して、インターネットからのリアルタイム情報でAIチャットを強化します</value>
+  </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>BUSINESS</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>ユーザー</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>ユーザー</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_image" xml:space="preserve">
+    <value>トークン</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>Docs Connect 開発者パック</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
+    <value>画像</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>Docs Connect クォータレポート ({0})</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>クラウドホスト型テナントと独自のAPIキーを使用して、ONLYOFFICE Docsエディタをアプリに組み込みます。</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>ソースの種類</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>ソースの名前</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>ソースID</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>AIエージェント</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>ファイル</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>フォルダ</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>ルーム</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>フォーム</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>レポート</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>生成日</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>会社</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>期間</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>合計</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>アクティブ</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>アクセス有効期限</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>ユーザータイプ</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>ユーザーID</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>編集者</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>完全な権限を持つドキュメント編集者</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>ユーザー容量</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>ライブビューアー</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>読み取り専用ドキュメントビューアー</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>外部</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>内部</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>残り</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>サブスクリプション制限</value>
+  </data>
+  <data name="AccountingCustomerOperationPromptTokens" xml:space="preserve">
+    <value>プロンプト</value>
+  </data>
+  <data name="AccountingCustomerOperationCachedTokens" xml:space="preserve">
+    <value>キャッシュ</value>
+  </data>
+  <data name="AccountingCustomerOperationCacheWriteTokens" xml:space="preserve">
+    <value>キャッシュ書き込み</value>
+  </data>
+  <data name="AccountingCustomerOperationCompletionTokens" xml:space="preserve">
+    <value>応答</value>
+  </data>
+  <data name="AccountingCustomerOperationReasoningTokens" xml:space="preserve">
+    <value>推論</value>
+  </data>
+  <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
+    <value>画像</value>
+  </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>プロバイダーのコスト</value>
   </data>
 </root>

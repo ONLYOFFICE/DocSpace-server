@@ -135,17 +135,20 @@
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Détails</value>
   </data>
+  <data name="AccountingCustomerOperationMonth" xml:space="preserve">
+    <value>Mois</value>
+  </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Quantité</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Service</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>Fonctionnalités IA</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Sauvegarde</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Espace disque</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Vectorisation</value>
@@ -157,7 +160,7 @@
     <value>Unité de mesure</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Sauvegarde</value>
+    <value>Copies</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Jetons</value>
@@ -174,8 +177,26 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Historique des transactions</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Total dépensé</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Récapitulatif par utilisateur</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Type</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportName" xml:space="preserve">
+    <value>Rapport sur l'utilisation mensuelle ({0}-{1})</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportSheetName" xml:space="preserve">
+    <value>Utilisation mensuelle</value>
+  </data>
+  <data name="AccountingServiceUsageReportName" xml:space="preserve">
+    <value>Rapport sur l'utilisation des services ({0}-{1})</value>
+  </data>
+  <data name="AccountingServiceUsageReportSheetName" xml:space="preserve">
+    <value>Utilisation des services</value>
   </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Le champ du code de validation ne peut pas être vide</value>
@@ -196,7 +217,7 @@
     <value>Quota d'espace de l'agent IA dépassé</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Échec de la définition du quota par agent IA. La valeur saisie est supérieure au stockage total DocSpace.</value>
+    <value>Échec de la définition du quota par agent IA. La valeur saisie est supérieure au stockage total.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Renouvellement automatique</value>
@@ -226,7 +247,7 @@
     <value>Clé d'application du client</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Autoriser l’application de se connecter au portail avec un compte Apple ID.</value>
+    <value>Connectez-vous à votre espace de travail avec un compte Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Activez cette application pour permettre à vos utilisateurs de se connecter à {LogoText} avec Apple ID. {0}Allez au portail de développeur Apple et créez une nouvelle application d’intégration {LogoText}. Insérer les données que vous avez reçues ci-dessous :</value>
@@ -271,7 +292,7 @@
     <value>clé de Box</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Connecter l'application pour gérer les fichiers et dossiers Box.</value>
+    <value>Gérer les fichiers et dossiers Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Activez cette application pour connecter votre compte Box au module Documents. Vous serez en mesure de gérer, éditer et partager les fichiers stockés sur Box avec les utilisateurs d'{LogoText}. {0}Connectez-vous à votre compte Box, passez à la page pour les développeurs et créez une nouvelle appliction d'intégration pour {LogoText}. Collez ci-dessous les données que vous venez de recevoir :</value>
@@ -310,7 +331,7 @@
     <value>Dropbox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Connecter l'application pour gérer les fichiers et dossiers Dropbox.</value>
+    <value>Gérer les fichiers et dossiers Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Activez cette application pour connecter votre compte Dropbox au module Documents. Vous serez en mesure de gérer, éditer et partager les fichiers stockés sur Dropbox avec les utilisateurs d'{LogoText}. {0}Connectez-vous à votre compte Dropbox, passez à la page pour les développeurs et créez une nouvelle appliction d'intégration pour {LogoText}. Collez ci-dessous les données que vous venez de recevoir :</value>
@@ -346,7 +367,7 @@
     <value>Clé de Facebook</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Connecter l'application pour accèder au portail en utilisant le compte Facebook.</value>
+    <value>Connectez-vous à votre espace de travail avec un compte Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Activez cette application pour permettre aux utilisateurs de se connecter à {LogoText} via Facebook et relier les comptes Facebook des clients au module CRM. {0}Passez au portail des développeurs Facebook et créez une nouvelle application d'intégration {LogoText}. Collez ci-dessous les données que vous venez de recevoir :</value>
@@ -400,7 +421,7 @@
     <value>Code JSON de GoogleCloud</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Se connecter au projet pour accéder au portail en utilisant le compte Google et pour gérer les fichiers et les dossiers Google Drive.</value>
+    <value>Connectez-vous à votre espace de travail avec un compte Google et gérez les fichiers et dossiers Google Drive</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Activez cette application pour connecter votre compte Google Drive au module Documents. Vous serez en mesure de gérer, éditer et partager les fichiers stockés sur Google Drive avec les utilisateurs d'{LogoText}. {0}Passez à la console Google APIs et créez un nouveau projet d'intégration avec {LogoText}. Collez ci-dessous les données que vous venez de recevoir :</value>
@@ -409,7 +430,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Se connecter à l'application pour accéder au portail en utilisant le compte LinkedIn.</value>
+    <value>Connectez-vous à votre espace de travail avec un compte LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Activez cette application pour permettre aux utilisateurs de se connecter à {LogoText} via leurs comptes LinkedIn.  {0}Passez au site web des développeurs LinkedIn et créez une nouvelle application d'intégration {LogoText}. Collez ci-dessous les données que vous venez de recevoir :</value>
@@ -538,7 +559,7 @@
     <value>Clé secrète client</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Connecter l'application pour gérer les fichiers et dossiers OneDrive.</value>
+    <value>Gérer les fichiers et dossiers OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Activez cette application pour connecter votre compte OneDrive au module Documents. Vous serez en mesure de gérer, éditer et partager vos fichiers stockés à OneDrive avec les utilisateurs {LogoText}. {0}Connectez-vous à votre compte Microsoft Azure et créez une nouvelle application d'intégration pour {LogoText}. Collez ci-dessous les données que vous venez de recevoir :</value>
@@ -568,7 +589,7 @@
     <value>Jeton de bot</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Connectez votre compte Telegram pour recevoir les notifications du portail via Telegram.</value>
+    <value>Recevoir les notifications via Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Pour recevoir les notifications du portail via Telegram, activez le bot Telegram. Vous pouvez créer un nouveau bot à l'aide de BotFather dans Telegram Desktop. Pour utiliser ce bot, les utilisateurs du portail doivent activer les notifications Telegram sur leur page de profil. {0}Collez le nom d'utilisateur du bot et le jeton que vous avez reçu dans les champs ci-dessous.</value>
@@ -601,7 +622,7 @@
     <value>ID client</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Se connecter à l'application pour accéder au portail en utilisant le compte X.</value>
+    <value>Connectez-vous à votre espace de travail avec un compte X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Activez cette application pour permettre aux utilisateurs de se connecter à {LogoText} via leur X et reliez les comptes X de vos clients à votre module CRM. {0}Passez au portail des développeurs X et créez une nouvelle application d'intégration {LogoText}. Collez ci-dessous les données que vous venez de recevoir :</value>
@@ -640,7 +661,7 @@
     <value>Clé secrète client</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Activez l'application pour se connecter au portail avec un compte WeChat.</value>
+    <value>Connectez-vous à votre espace de travail avec un compte WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Activez l'application pour se connecter au portail avec un compte WeChat.</value>
@@ -700,7 +721,7 @@
     <value>Secret du client Zoom</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Permettre à l'application de se connecter au portail à l'aide d'un compte Zoom.</value>
+    <value>Connectez-vous à votre espace de travail avec un compte Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Activez cette application pour permettre à vos utilisateurs de se connecter à {LogoText} en utilisant leurs comptes Zoom. {0}Allez sur le site Zoom Developers et créez une nouvelle application d'intégration {LogoText}. Insérez les données que vous avez reçues ci-dessous :</value>
@@ -1105,7 +1126,7 @@
     <value>Le quota de stockage pour la salle est dépassé</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Échec de la définition du quota par salle. La valeur saisie est supérieure à la capacité totale de stockage de DocSpace.</value>
+    <value>Échec de la définition du quota par salle. La valeur saisie est supérieure à la capacité totale de stockage.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Asie-Pacifique (Singapour)</value>
@@ -1152,11 +1173,11 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Le nombre d'agents IA ne doit pas dépasser {0}</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>Recherche IA</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Fonctionnalités IA</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Activez les fonctionnalités IA pour améliorer la productivité.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Suivi des connexions et des actions</value>
@@ -1270,7 +1291,7 @@
     <value>Une erreur inattendue s'est produite. Veuillez réessayer.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Vous avez été connecté avec succès à Telegram pour recevoir les notifications de votre DocSpace.</value>
+    <value>Vous avez été connecté avec succès à Telegram pour recevoir les notifications de votre espace de travail.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Code incorrect</value>
@@ -1285,16 +1306,13 @@
     <value>Le quota de stockage pour l'utilisateur est dépassé</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Échec de la définition du quota par utilisateur. La valeur saisie est supérieure à la capacité totale de stockage de DocSpace.</value>
+    <value>Échec de la définition du quota par utilisateur. La valeur saisie est supérieure à la capacité totale de stockage.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Région US West (Oregon)</value>
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Quoi de neuf</value>
-  </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>Agent</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>Chat</value>
@@ -1305,6 +1323,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>Recherche Web</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>Recherche IA</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>Crédits IA</value>
   </data>
@@ -1312,6 +1333,9 @@
     <value>Sources</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Résultats</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Résultats</value>
   </data>
   <data name="ConsumersdatabaseType" xml:space="preserve">
@@ -1339,7 +1363,7 @@
     <value>Connexion à la base de données</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Stocker les résultats du formulaire dans une base de données externe telle que MySQL ou SQLite.</value>
+    <value>Stocker les résultats du formulaire dans une base de données externe telle que MySQL ou SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Connectez une base de données externe pour stocker les résultats du formulaire.</value>
@@ -1363,7 +1387,7 @@
     <value>Clé secrète client</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Permettre à l'application de se connecter au portail à l'aide d'un compte Nextcloud.</value>
+    <value>Connectez-vous à votre espace de travail avec un compte Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Permettre à l'application de se connecter au portail à l'aide d'un compte Nextcloud.</value>
@@ -1382,5 +1406,155 @@
   </data>
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>Échec de l'authentification de l'utilisateur</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Stockage de disque supplémentaire</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Forfait Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Forfait Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Administrateurs</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Administrateurs</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Accédez à une large gamme de modèles d'IA grâce à l'intégration d'OpenRouter. Payez uniquement ce que vous utilisez, facturé depuis votre Portefeuille.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>Utilisez un moteur de recherche IA pour enrichir les discussions IA avec des informations en temps réel provenant d'Internet</value>
+  </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>Utilisateurs</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>Utilisateurs</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_image" xml:space="preserve">
+    <value>Jetons</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>Pack développeur Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
+    <value>Image</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>Intégrez les éditeurs ONLYOFFICE Docs dans votre application avec des locataires hébergés dans le cloud et vos propres clés API.</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>Rapport de quota Docs Connect ({0})</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>L'accès expire</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Actif</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Société</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Date généré</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Éditeurs de documents disposant de toutes les autorisations</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Éditeurs</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Externe</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Interne</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Visionneuse en direct</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Période</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Visionneuses de documents en lecture seule</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>ID de l'utilisateur</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Le quota utilisateur</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Type d'utilisateur</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Type de source</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Nom de la source</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>Identifiant de la source</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>Agent IA</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Fichier</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Dossier</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Salle</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Formulaire</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Rapport</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Restant</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Limite d'abonnement</value>
+  </data>
+  <data name="AccountingCustomerOperationPromptTokens" xml:space="preserve">
+    <value>Requête</value>
+  </data>
+  <data name="AccountingCustomerOperationCachedTokens" xml:space="preserve">
+    <value>Mise en cache</value>
+  </data>
+  <data name="AccountingCustomerOperationCacheWriteTokens" xml:space="preserve">
+    <value>Écriture en cache</value>
+  </data>
+  <data name="AccountingCustomerOperationCompletionTokens" xml:space="preserve">
+    <value>Réponse</value>
+  </data>
+  <data name="AccountingCustomerOperationReasoningTokens" xml:space="preserve">
+    <value>Raisonnement</value>
+  </data>
+  <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
+    <value>Image</value>
+  </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>Coût du fournisseur</value>
   </data>
 </root>

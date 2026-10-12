@@ -34,37 +34,42 @@
 namespace ASC.Files.ApiModels.RequestDto;
 
 /// <summary>
-/// The request parameters for inviting users to the room.
+/// One batch of membership changes for a room.
 /// </summary>
 public class RoomInvitationRequest
 {
     /// <summary>
-    /// The collection of invitation parameters.
+    /// Who is added, changed or removed, one entry per subject. The same subject named twice keeps the level of the
+    /// last entry, and an empty list is accepted and changes nothing.
     /// </summary>
-    /// <example>[{"id": "00000000-0000-0000-0000-000000000000", "access": 1}]</example>
+    /// <example>[{"id": "e9a7b4c1-2d3f-4a56-8b90-1c2d3e4f5a6b", "access": 10}]</example>
     [MaxEmailInvitations]
     public List<RoomInvitation> Invitations { get; set; }
 
     /// <summary>
-    /// Specifies whether to notify users about the shared room or not.
+    /// Whether the subjects that gained access are told about it by email. With it off the change is silent, which is
+    /// the usual choice when membership is synchronised from another system.
     /// </summary>
     /// <example>true</example>
     public bool Notify { get; set; }
 
     /// <summary>
-    /// The message to send when notifying about the shared room.
+    /// The line added to the invitation email. It is used only while the notification is on, and it reaches nobody
+    /// whose access was removed.
     /// </summary>
-    /// <example>You have been invited to the room</example>
+    /// <example>Please review the contract by Friday</example>
     public string Message { get; set; }
 
     /// <summary>
-    /// The language of the room invitation.
+    /// The language of the invitation email, as a portal culture name such as en-US. Leaving it out sends each
+    /// message in the language of its recipient.
     /// </summary>
     /// <example>en-US</example>
     public string Culture { get; set; }
 
     /// <summary>
-    /// Specifies whether to forcibly delete a user with form roles from the room.
+    /// Whether a member who still holds a role in an unfinished form is removed anyway. With it off such a removal is
+    /// refused and reported through the error of the answer, so the form can be reassigned first.
     /// </summary>
     /// <example>false</example>
     public bool Force { get; set; }
@@ -76,14 +81,14 @@ public class RoomInvitationRequest
 public class RoomInvitationRequestDto<T>
 {
     /// <summary>
-    /// The room ID.
+    /// The room whose membership changes, named by the identifier that `GET api/2.0/files/rooms` reports for it.
     /// </summary>
     /// <example>1</example>
     [FromRoute(Name = "id")]
     public required T Id { get; set; }
 
     /// <summary>
-    /// The room invitation request.
+    /// The membership changes to apply, together with how the people concerned are notified.
     /// </summary>
     [FromBody]
     public required RoomInvitationRequest RoomInvitation { get; set; }

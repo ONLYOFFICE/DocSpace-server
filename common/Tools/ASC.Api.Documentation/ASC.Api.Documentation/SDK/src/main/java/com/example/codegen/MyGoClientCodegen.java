@@ -16,6 +16,7 @@ import org.openapitools.codegen.model.ApiInfoMap;
 import org.openapitools.codegen.model.ModelsMap;
 import org.openapitools.codegen.model.OperationMap;
 import org.openapitools.codegen.model.OperationsMap;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.servers.Server;
 import io.swagger.v3.oas.models.servers.ServerVariable;
 import io.swagger.v3.oas.models.servers.ServerVariables;
@@ -111,9 +112,45 @@ public class MyGoClientCodegen extends GoClientCodegen {
         return apiFileFolder() + File.separator + filename;
     }
 
+    // The third-party twin of a generic action (see ThirdPartyVariants): the string-id shape the document
+    // carries as `x-thirdparty-variant`, exposed as a sibling method with the ThirdParty suffix.
+    @Override
+    public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List<Server> servers) {
+        CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);
+        ThirdPartyVariants.attach(this, op, path, httpMethod, operation, servers, ThirdPartyVariants.Naming.OVERLOAD);
+        return op;
+    }
+
+    @Override
+    public void postProcess() {
+        super.postProcess();
+        // Models and api files live in the output root here, named model-*.go and api-*.go (see the
+        // toModelFilename / toApiFilename overrides below), so only those are swept there.
+        StaleOutput.delete(this, name -> name.startsWith("model-") || name.startsWith("api-"));
+        LineEndings.normalize(this);
+    }
+
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
+        // Go has neither overloads nor unions, so the twin stays attached: an id that differs is taken
+        // as interface{} (int32 or string), a body that differs gets a second setter, and where the
+        // answer differs the request gets ExecuteThirdParty() next to Execute() - the same request,
+        // decoded into the third-party model. The template renders the execute function once per shape.
+        ThirdPartyVariants.addAttachedImports(this, objs);
+
         super.postProcessOperationsWithModels(objs, allModels);
+        for (CodegenOperation op : objs.getOperations().getOperation()) {
+            // Also gives the twin's body parameter the original's name, which the twin's execute function,
+            // rendered against the original's request struct, needs (saveAsPdf, not thirdPartySaveAsPdf).
+            ThirdPartyVariants.markUnions(op, (a, b) -> "interface{}");
+
+            Object attached = op.vendorExtensions.get(ThirdPartyVariants.VARIANT_OPERATION);
+            if (attached instanceof CodegenOperation) {
+                // The base class turns "POST" into "Post" (http.MethodPost) for the listed operations
+                // only; the twin, rendered through the same execute partial, takes it from the original.
+                ((CodegenOperation) attached).httpMethod = op.httpMethod;
+            }
+        }
 
         if (objs != null && objs.getOperations() != null) {
             OperationMap operationMap = objs.getOperations();

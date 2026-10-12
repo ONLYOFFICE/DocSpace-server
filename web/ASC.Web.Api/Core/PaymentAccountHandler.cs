@@ -42,17 +42,14 @@ public class PaymentAccountHandler
     public async Task Invoke
         (HttpContext context,
         ITariffService tariffService,
-        UserManager userManager,
-        SecurityContext securityContext,
         CommonLinkUtility commonLinkUtility,
-        TenantManager tenantManager)
+        TenantManager tenantManager,
+        PaymentHelper paymentHelper)
     {
         var tenant = tenantManager.GetCurrentTenant();
         var customerInfo = await tariffService.GetCustomerInfoAsync(tenant.Id);
-        var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
 
-        if (securityContext.CurrentAccount.ID != payer.Id &&
-            securityContext.CurrentAccount.ID != tenant.OwnerId)
+        if (!await paymentHelper.IsPayerOrOwnerAsync(tenant, customerInfo))
         {
             return;
         }

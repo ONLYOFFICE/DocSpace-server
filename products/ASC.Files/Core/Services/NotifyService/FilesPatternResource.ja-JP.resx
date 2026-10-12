@@ -132,7 +132,7 @@
   <data name="pattern_DocuSignComplete" xml:space="preserve">
     <value>h1. 全ての署名者は $DocumentTitle を完成しました
 
-これは"$DocumentTitle":"$DocumentURL"が完成されたについて知らせるメールです。</value>
+これは "$DocumentTitle":"$DocumentURL" が完成されたについて知らせるメールです。</value>
   </data>
   <data name="pattern_DocuSignStatus" xml:space="preserve">
     <value>h1. $Message: $DocumentTitle
@@ -142,7 +142,7 @@
   <data name="pattern_EditorMentions" xml:space="preserve">
     <value>h1. $__AuthorName さんに文書へのコメントでメンションされました
  
-$__AuthorName さんに"$RoomTitle":"$RoomURL"ルームの"$DocumentTitle":"$DocumentURL"文書へのコメントでメンションされました：
+$__AuthorName さんに "$RoomTitle":"$RoomURL" ルームの "$DocumentTitle":"$DocumentURL" 文書へのコメントでメンションされました：
  
 $Message</value>
   </data>
@@ -171,7 +171,7 @@ $OrangeButton
   <data name="pattern_FormSubmitted" xml:space="preserve">
     <value>h1. 「$Message」フォームが記入されました
 
-あなたは"$RoomTitle":"$RoomURL"ルームで"$DocumentTitle":"$DocumentURL"フォームを記入しました。
+あなたは "$RoomTitle":"$RoomURL" ルームで "$DocumentTitle":"$DocumentURL" フォームを記入しました。
 
 マネージャー："$ToUserName":"$ToUserLink"
 
@@ -195,7 +195,7 @@ $OrangeButton
 
 これは$MailsCount枚のメッセージの要求したメーリング過程が完了されたについて知らせるメールです。$Message
 
-成功に送信されたメールメッセージは”メール”モジュールの"Sent":"$__VirtualRootPath/addons/mail/#sent"フォルダで保存されています。</value>
+成功に送信されたメールメッセージは”メール”モジュールの "Sent":"$__VirtualRootPath/addons/mail/#sent" フォルダで保存されています。</value>
   </data>
   <data name="pattern_RoomMovedArchive_push" xml:space="preserve">
     <value>$FromUserName は "$RoomTitle" のルームをアーカイブに移動しました</value>
@@ -248,19 +248,19 @@ $Message</value>
     <value>署名の状態が変更されました</value>
   </data>
   <data name="subject_EditorMentions" xml:space="preserve">
-    <value>DocSpaceの通知です。ドキュメントにメンションされました</value>
+    <value>${LetterLogoText}の通知。ドキュメントにメンションされました</value>
   </data>
   <data name="subject_FormReceived" xml:space="preserve">
-    <value>DocSpaceからの通知。フォームが記入されました</value>
+    <value>${LetterLogoText}の通知。フォームが記入されました</value>
   </data>
   <data name="subject_FormStartedFilling" xml:space="preserve">
-    <value>DocSpaceの通知。</value>
+    <value>${LetterLogoText}の通知。</value>
   </data>
   <data name="subject_FormSubmitted" xml:space="preserve">
-    <value>DocSpaceからの通知。フォームが記入されました</value>
+    <value>${LetterLogoText}の通知。フォームが記入されました</value>
   </data>
   <data name="subject_FormWasCompletelyFilled" xml:space="preserve">
-    <value>DocSpaceの通知。</value>
+    <value>${LetterLogoText}の通知。</value>
   </data>
   <data name="subject_MailMergeEnd" xml:space="preserve">
     <value>文書。メーリングは完了です。</value>
@@ -269,7 +269,7 @@ $Message</value>
     <value>郵送が完了しました。</value>
   </data>
   <data name="subject_RoomRemoved" xml:space="preserve">
-    <value>DocSpaceの通知です。ルームが削除されました</value>
+    <value>${LetterLogoText}の通知。ルームが削除されました</value>
   </data>
   <data name="subject_ShareDocument" xml:space="preserve">
     <value>ドキュメント。文書に付与されたアクセス：$DocumentTitle</value>
@@ -293,15 +293,15 @@ $Message</value>
     <value>文書。[$DocumentTitle]($DocumentURL)フォルダにアクセスが付与されました</value>
   </data>
   <data name="subject_StoppedFormFilling" xml:space="preserve">
-    <value>DocSpaceの通知。</value>
+    <value>${LetterLogoText}の通知。</value>
   </data>
   <data name="subject_YourTurnFormFilling" xml:space="preserve">
-    <value>DocSpaceの通知。</value>
+    <value>${LetterLogoText}の通知。</value>
   </data>
   <data name="pattern_AgentRemoved" xml:space="preserve">
     <value>h1. $__AuthorName がAIエージェントを削除しました
 
-$__AuthorName がAIエージェントを削除しました： RoomTitle</value>
+$__AuthorName がAIエージェントを削除しました： $RoomTitle</value>
   </data>
   <data name="pattern_AgentUpdateAccessForUser_push" xml:space="preserve">
     <value>AIエージェント "$RoomTitle" におけるあなたの役割が "$RoomRole" に変更されました</value>
@@ -310,6 +310,6 @@ $__AuthorName がAIエージェントを削除しました： RoomTitle</value>
     <value>AIエージェント "$RoomTitle" に招待されました</value>
   </data>
   <data name="subject_AgentRemoved" xml:space="preserve">
-    <value>DocSpace通知。AIエージェントが削除されました</value>
+    <value>${LetterLogoText}の通知。AIエージェントが削除されました</value>
   </data>
 </root>

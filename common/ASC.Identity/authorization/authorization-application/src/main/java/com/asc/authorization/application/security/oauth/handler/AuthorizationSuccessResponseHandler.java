@@ -53,6 +53,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AuthorizationCodeRequestAuthenticationToken;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 /**
  * Handles successful authentication for OAuth2 authorization requests.
@@ -122,7 +123,7 @@ public class AuthorizationSuccessResponseHandler implements AuthenticationSucces
     var clientIP = httpUtils.extractHostFromUrl(httpUtils.getFirstRequestIP(request));
     var browser = httpUtils.getClientBrowser(request);
     var platform = httpUtils.getClientOS(request);
-    var fullUrl = httpUtils.getFullURL(request);
+    var page = httpUtils.truncateQueryParams(httpUtils.getFullURL(request));
 
     authorizationLoginEventRegistrationService.registerLogin(
         LoginRegisteredEvent.builder()
@@ -134,7 +135,7 @@ public class AuthorizationSuccessResponseHandler implements AuthenticationSucces
             .date(eventDate)
             .tenantId(signature.getTenantId())
             .userId(signature.getUserId())
-            .page(fullUrl)
+            .page(page)
             .action(LOGIN_REGISTERED_ACTION)
             .build(),
         AuditMessage.builder()
@@ -148,7 +149,7 @@ public class AuthorizationSuccessResponseHandler implements AuthenticationSucces
             .userId(signature.getUserId())
             .userEmail(signature.getUserEmail())
             .userName(signature.getUserName())
-            .page(fullUrl)
+            .page(page)
             .action(AuditCode.GENERATE_AUTHORIZATION_CODE_TOKEN.getCode())
             .build());
   }
@@ -176,6 +177,12 @@ public class AuthorizationSuccessResponseHandler implements AuthenticationSucces
     var redirectUri = token.getRedirectUri();
     var authorizationCode = token.getAuthorizationCode();
 
+    if (redirectUri == null) {
+      log.error("Redirect uri is null");
+      response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Redirect uri is missing");
+      return;
+    }
+
     if (authorizationCode == null) {
       log.error("Authorization code is null");
       response.sendError(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Authorization code is missing");
@@ -183,10 +190,11 @@ public class AuthorizationSuccessResponseHandler implements AuthenticationSucces
     }
 
     var authorizationCodeValue = authorizationCode.getTokenValue();
-    var redirectUrl =
-        new StringBuilder(String.format("%s?code=%s", redirectUri, authorizationCodeValue));
+    var uriBuilder =
+        UriComponentsBuilder.fromUriString(redirectUri).queryParam("code", authorizationCodeValue);
+    if (state != null && !state.isBlank()) uriBuilder.queryParam("state", state);
 
-    if (state != null && !state.isBlank()) redirectUrl.append(String.format("&state=%s", state));
+    var redirectUrl = uriBuilder.build().encode().toUriString();
 
     if (request.getHeader(filterSecurityConfigurationProperties.getDisableRedirectHeader())
         != null) {
@@ -194,11 +202,10 @@ public class AuthorizationSuccessResponseHandler implements AuthenticationSucces
           "Disabling redirect, setting header {} with redirect URL",
           filterSecurityConfigurationProperties.getRedirectHeader());
       response.setStatus(HttpStatus.OK.value());
-      response.setHeader(
-          filterSecurityConfigurationProperties.getRedirectHeader(), redirectUrl.toString());
+      response.setHeader(filterSecurityConfigurationProperties.getRedirectHeader(), redirectUrl);
     } else {
       log.debug("Redirecting to URL: {}", redirectUrl);
-      response.sendRedirect(redirectUrl.toString());
+      response.sendRedirect(redirectUrl);
     }
   }
 }

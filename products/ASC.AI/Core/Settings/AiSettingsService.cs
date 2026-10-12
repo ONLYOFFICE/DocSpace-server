@@ -1,35 +1,37 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
+
+using ASC.AI.Core.Knowledge;
 
 namespace ASC.AI.Core.Settings;
 
@@ -39,90 +41,24 @@ public class AiSettingsService(
     AuthContext authContext,
     AiSettingsStore aiSettingsStore,
     AiAccessibility accessibility,
-    AiProviderService providerService,
     VectorizationGlobalSettings vectorizationGlobalSettings,
-    SystemMcpConfig systemMcpConfig,
-    ModelClientFactory modelClientFactory,
+    EmbeddingProviderProbe embeddingProviderProbe,
     MessageService messageService,
-    SettingsManager settingsManager)
+    SettingsManager settingsManager,
+    AiGateway gateway)
 {
-    public async Task<WebSearchSettings> SetWebSearchSettingsAsync(bool enabled, EngineType type, string? key)
-    {
-        await ThrowIfNotAccess();
-    
-        var settings = await aiSettingsStore.GetWebSearchSettingsAsync();
-        settings.Enabled = enabled;
-        
-        var typeChanged = settings.Type != type;
-        settings.Type = type;
-
-        var set = false;
-
-        switch (type)
-        {
-            case EngineType.Exa:
-                if (typeChanged || !string.IsNullOrEmpty(key))
-                {
-                    ArgumentException.ThrowIfNullOrEmpty(key);
-                    settings.Config = new ExaConfig
-                    {
-                        ApiKey = key
-                    };
-
-                    set = true;
-                }
-                break;
-            case EngineType.PortalAi:
-                settings.Config = null;
-                set = true;
-                break;
-            case EngineType.None:
-                settings.Config = null;
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(type), type, null);
-        }
-    
-        await aiSettingsStore.SetWebSearchSettingsAsync(settings);
-
-        settings.NeedReset = false;
-
-        if (set)
-        {
-            messageService.Send(MessageAction.SetWebSearchSettings, type.ToStringFast());
-        }
-        else
-        {
-            messageService.Send(MessageAction.ResetWebSearchSettings);
-        }
-    
-        return settings;
-    }
-
-    public async Task<WebSearchSettings> GetWebSearchSettingsAsync()
-    {
-        await ThrowIfNotAccess();
-        
-        return await aiSettingsStore.GetWebSearchSettingsAsync();
-    }
-    
     public async Task<VectorizationSettings> SetVectorizationSettingsAsync(EmbeddingProviderType type, string? key)
     {
         await ThrowIfNotAccess();
 
         var set = false;
         var settings = await aiSettingsStore.GetVectorizationSettingsAsync();
-        
+
         switch (type)
         {
             case EmbeddingProviderType.None:
                 settings.Type = type;
                 settings.Key = null;
-                break;
-            case EmbeddingProviderType.PortalAi:
-                settings.Type = type;
-                settings.Key = null;
-                set = true;
                 break;
             default:
                 {
@@ -135,11 +71,9 @@ public class AiSettingsService(
                         _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
                     };
 
-                    var client = modelClientFactory.Create(type, url, key);
-
                     try
                     {
-                        await client.PingAsync();
+                        await embeddingProviderProbe.PingAsync(type, url, key);
                     }
                     catch (HttpRequestException httpException)
                     {
@@ -174,61 +108,78 @@ public class AiSettingsService(
 
         return settings;
     }
-    
+
     public async Task<VectorizationSettings> GetVectorizationSettingsAsync()
     {
         await ThrowIfNotAccess();
-        
+
         return await aiSettingsStore.GetVectorizationSettingsAsync();
     }
 
     public async Task<AiSettings> GetAiSettingsAsync()
     {
-        var webSearchSettingsTask = aiSettingsStore.GetWebSearchSettingsAsync();
-        var webSearchEnabledTask = aiSettingsStore.IsWebSearchEnabledAsync();
+        var aiStatusTask = accessibility.GetStatusAsync();
+        var toolPermissionModeTask = GetToolPermissionModeAsync();
+
+        await Task.WhenAll(aiStatusTask, toolPermissionModeTask);
+
+        var aiStatus = await aiStatusTask;
+        var toolPermissionMode = await toolPermissionModeTask;
+
+        if (aiStatus.Enabled && aiStatus.GatewayEnabled)
+        {
+            return new AiSettings
+            {
+                VectorizationEnabled = true,
+                AiReady = true,
+                EmbeddingModel = vectorizationGlobalSettings.Model.Id,
+                SystemAiEnabled = true,
+                RecommendedModelForForms = aiSettingsStore.GetRecommendedModelForForms(),
+                ToolPermissionMode = toolPermissionMode
+            };
+        }
 
         var vectorizationSettingsTask = aiSettingsStore.GetVectorizationSettingsAsync();
         var vectorizationEnabledTask = aiSettingsStore.IsVectorizationEnabledAsync();
 
-        var needResetProvidersTask = providerService.NeedResetProvidersAsync();
-        var aiStatusTask = accessibility.GetStatusAsync();
-
-        var docSpaceMcpServer = systemMcpConfig.Servers.Values.FirstOrDefault(
-            x => x.Type == ServerType.DocSpace);
-
-        await Task.WhenAll(
-            webSearchSettingsTask,
-            webSearchEnabledTask,
-            vectorizationSettingsTask,
-            vectorizationEnabledTask,
-            needResetProvidersTask,
-            aiStatusTask
-            );
-
-        var webSearchNeedReset = (await webSearchSettingsTask).NeedReset;
-        var webSearchEnabled = !webSearchNeedReset && (await webSearchEnabledTask);
+        await Task.WhenAll(vectorizationSettingsTask, vectorizationEnabledTask);
 
         var vectorizationNeedReset = (await vectorizationSettingsTask).NeedReset;
         var vectorizationEnabled = !vectorizationNeedReset && (await vectorizationEnabledTask);
 
-        var aiStatus = await aiStatusTask;
-        var needResetProviders = await needResetProvidersTask;
-        var aiReady = (aiStatus.GatewayEnabled || !needResetProviders) && aiStatus.Enabled;
-
         return new AiSettings
         {
-            WebSearchEnabled = webSearchEnabled,
-            WebSearchNeedReset = webSearchNeedReset,
             VectorizationEnabled = vectorizationEnabled,
             VectorizationNeedReset = vectorizationNeedReset,
-            AiReady = aiReady,
-            AiReadyNeedReset = needResetProviders,
+            AiReady = aiStatus.Enabled,
             EmbeddingModel = vectorizationGlobalSettings.Model.Id,
-            ModelAliases = aiSettingsStore.GetModelAliases(),
-            PortalMcpServerId = docSpaceMcpServer?.Id,
             SystemAiEnabled = aiStatus.GatewayEnabled,
             RecommendedModelForForms = aiSettingsStore.GetRecommendedModelForForms(),
+            ToolPermissionMode = toolPermissionMode
         };
+    }
+
+    public async Task<ToolPermissionMode> GetToolPermissionModeAsync()
+    {
+        var settings = await settingsManager.LoadForCurrentUserAsync<AiUserSettings>();
+
+        return settings.ToolPermissionMode;
+    }
+
+    public async Task<ToolPermissionMode> SetToolPermissionModeAsync(ToolPermissionMode mode)
+    {
+        if (!ToolPermissionModeExtensions.IsDefined(mode))
+        {
+            throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+        }
+
+        var current = await settingsManager.LoadForCurrentUserAsync<AiUserSettings>();
+
+        await settingsManager.SaveForCurrentUserAsync(current with { ToolPermissionMode = mode });
+
+        messageService.Send(MessageAction.UserUpdatedAiSettings, mode.ToStringFast());
+
+        return mode;
     }
 
     public async Task<AiUserSettings> GetAiUserSettingsAsync()
@@ -236,11 +187,18 @@ public class AiSettingsService(
         return await settingsManager.LoadForCurrentUserAsync<AiUserSettings>();
     }
 
-    public async Task<AiUserSettings> SetAiUserSettingsAsync(bool chatRecommendedModelVisible)
+    public async Task<AiUserSettings> SetAiUserSettingsAsync(bool? chatRecommendedModelVisible)
     {
-        var settings = new AiUserSettings
+        var current = await settingsManager.LoadForCurrentUserAsync<AiUserSettings>();
+
+        if (chatRecommendedModelVisible is null)
         {
-            ChatRecommendedModelVisible = chatRecommendedModelVisible,
+            return current;
+        }
+
+        var settings = current with
+        {
+            ChatRecommendedModelVisible = chatRecommendedModelVisible.Value
         };
 
         await settingsManager.SaveForCurrentUserAsync(settings);
@@ -252,7 +210,9 @@ public class AiSettingsService(
 
     private async Task ThrowIfNotAccess()
     {
-        if (!await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
+        // Settings are managed externally when the gateway is configured — nobody can edit them.
+        // Otherwise, only DocSpace admins have access.
+        if (gateway.Configured || !await userManager.IsDocSpaceAdminAsync(authContext.CurrentAccount.ID))
         {
             throw new SecurityException(ErrorMessages.AiSettingsAccessDenied);
         }

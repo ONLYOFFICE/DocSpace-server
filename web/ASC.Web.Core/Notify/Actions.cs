@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -30,8 +30,6 @@
 // Public License v3.
 //
 // SPDX-License-Identifier: AGPL-3.0-only
-
-using ASC.AuditTrail.Models;
 
 namespace ASC.Web.Studio.Core.Notify;
 
@@ -266,7 +264,7 @@ public sealed class ReassignsFailedNotifyAction(DisplayUserSettingsHelper displa
             new TagValue(CommonTags.FromUserLink, await GetUserProfileLinkAsync(fromUser.Id)),
             new TagValue(CommonTags.ToUserName, toUser.DisplayUserName(displayUserSettingsHelper)),
             new TagValue(CommonTags.ToUserLink, await GetUserProfileLinkAsync(toUser.Id)),
-            new TagValue(CommonTags.Message, message)
+            new TagValue(CommonTags.Message, message.HtmlEncode())
         ];
     }
 
@@ -362,7 +360,7 @@ public sealed class RemoveUserDataFailedNotifyAction(DisplayUserSettingsHelper d
             new TagValue(CommonTags.UserName, await displayUserSettingsHelper.GetFullUserNameAsync(recipientId)),
             new TagValue(CommonTags.FromUserName, fromUserName.HtmlEncode()),
             new TagValue(CommonTags.FromUserLink, await GetUserProfileLinkAsync(user.Id)),
-            new TagValue(CommonTags.Message, message)
+            new TagValue(CommonTags.Message, message.HtmlEncode())
         ];
     }
 
@@ -475,8 +473,8 @@ public sealed class UserMessageToAdminNotifyAction(TenantManager tenantManager) 
     {
         List<ITagValue> tags =
         [
-            new TagValue(CommonTags.Body, message),
-            new TagValue(CommonTags.UserEmail, email)
+            new TagValue(CommonTags.Body, message.HtmlEncode()),
+            new TagValue(CommonTags.UserEmail, email.HtmlEncode())
         ];
 
         if (!string.IsNullOrEmpty(culture))
@@ -505,9 +503,9 @@ public sealed class UserMessageToSalesNotifyAction(TenantManager tenantManager) 
     {
         Tags = [
 
-            new TagValue(CommonTags.Body, message),
-            new TagValue(CommonTags.UserEmail, email),
-            new TagValue(CommonTags.UserName, userName)
+            new TagValue(CommonTags.Body, message.HtmlEncode()),
+            new TagValue(CommonTags.UserEmail, email.HtmlEncode()),
+            new TagValue(CommonTags.UserName, userName.HtmlEncode())
         ];
     }
 }
@@ -572,10 +570,55 @@ public sealed class PasswordChangedNotifyAction(CommonLinkUtility commonLinkUtil
             new TagValue(CommonTags.UserName, userInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.UserEmail, userInfo.Email),
             new TagValue(CommonTags.Date, auditEvent.Date.ToShortDateString() + " " + auditEvent.Date.ToShortTimeString()),
-            new TagValue(CommonTags.Device, auditEvent.Platform),
-            new TagValue(CommonTags.Location, location),
-            new TagValue(CommonTags.Browser, auditEvent.Browser),
-            new TagValue(CommonTags.IP, auditEvent.IP),
+            new TagValue(CommonTags.Device, auditEvent.Platform.HtmlEncode()),
+            new TagValue(CommonTags.Location, location.HtmlEncode()),
+            new TagValue(CommonTags.Browser, auditEvent.Browser.HtmlEncode()),
+            new TagValue(CommonTags.IP, auditEvent.IP.HtmlEncode()),
+            TagValues.OrangeButton(orangeButtonText, confirmationUrl),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
+            new TagValue(CommonTags.Culture, cultureInfo.Name)
+        ];
+    }
+}
+
+[Scope]
+public sealed class SuspiciousLoginNotifyAction(CommonLinkUtility commonLinkUtility, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
+{
+    public override string ID => "suspicious_login";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_suspicious_login, () => WebstudioNotifyPatternResource.pattern_suspicious_login),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_suspicious_login)
+        ];
+    }
+
+    public void Init(UserInfo userInfo, BaseEvent loginEvent)
+    {
+        var cultureInfo = GetCulture(userInfo);
+
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonChangePassword", cultureInfo);
+        var hash = loginEvent.Date.ToString("s", CultureInfo.InvariantCulture);
+        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
+
+        var location = string.Empty;
+        if (!string.IsNullOrEmpty(loginEvent.Country) || !string.IsNullOrEmpty(loginEvent.City))
+        {
+            location = string.Join(", ", new[] { loginEvent.Country, loginEvent.City }.Where(s => !string.IsNullOrEmpty(s)));
+        }
+
+        Tags =
+        [
+            new TagValue(CommonTags.UserName, userInfo.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.UserEmail, userInfo.Email),
+            new TagValue(CommonTags.Date, loginEvent.Date.ToShortDateString() + " " + loginEvent.Date.ToShortTimeString()),
+            new TagValue(CommonTags.Device, loginEvent.Platform.HtmlEncode()),
+            new TagValue(CommonTags.Location, location.HtmlEncode()),
+            new TagValue(CommonTags.Browser, loginEvent.Browser.HtmlEncode()),
+            new TagValue(CommonTags.IP, loginEvent.IP.HtmlEncode()),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.Culture, cultureInfo.Name)
@@ -687,8 +730,7 @@ public sealed class JoinUsersNotifyAction(CommonLinkUtility commonLinkUtility, I
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_join, () => WebstudioNotifyPatternResource.pattern_join),
-            new JabberPattern(() => WebstudioNotifyPatternResource.pattern_join)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_join, () => WebstudioNotifyPatternResource.pattern_join)
         ];
     }
 
@@ -830,7 +872,7 @@ public sealed class SaasGuestActivationV115NotifyAction(StudioNotifyHelper studi
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_guest_activation_v115, () => WebstudioNotifyPatternResource.pattern_saas_guest_activation_v115)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_user_activation_v1)
         ];
     }
 
@@ -841,12 +883,11 @@ public sealed class SaasGuestActivationV115NotifyAction(StudioNotifyHelper studi
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
-            new TagValue(CommonTags.ActivateUrl, confirmationUrl),
+        Tags =
+        [
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
-            new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Footer, "social")
         ];
     }
@@ -868,7 +909,7 @@ public sealed class EnterpriseGuestActivationV10NotifyAction(StudioNotifyHelper 
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_guest_activation_v10, () => WebstudioNotifyPatternResource.pattern_enterprise_guest_activation_v10)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_user_activation_v1)
         ];
     }
 
@@ -879,12 +920,11 @@ public sealed class EnterpriseGuestActivationV10NotifyAction(StudioNotifyHelper 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
-            new TagValue(CommonTags.ActivateUrl, confirmationUrl),
+        Tags =
+        [
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
-            new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Footer, null)
         ];
     }
@@ -906,7 +946,7 @@ public sealed class EnterpriseWhitelabelGuestActivationV10NotifyAction(StudioNot
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_whitelabel_guest_activation_v10, () => WebstudioNotifyPatternResource.pattern_enterprise_whitelabel_guest_activation_v10)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_user_activation_v1)
         ];
     }
 
@@ -917,12 +957,11 @@ public sealed class EnterpriseWhitelabelGuestActivationV10NotifyAction(StudioNot
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
-            new TagValue(CommonTags.ActivateUrl, confirmationUrl),
+        Tags =
+        [
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
-            new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Footer, null)
         ];
     }
@@ -944,7 +983,7 @@ public sealed class OpensourceGuestActivationV11NotifyAction(StudioNotifyHelper 
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_opensource_guest_activation_v11, () => WebstudioNotifyPatternResource.pattern_opensource_guest_activation_v11)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_user_activation_v1)
         ];
     }
 
@@ -955,12 +994,11 @@ public sealed class OpensourceGuestActivationV11NotifyAction(StudioNotifyHelper 
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
-            new TagValue(CommonTags.ActivateUrl, confirmationUrl),
+        Tags =
+        [
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
-            new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Footer, "opensource")
         ];
     }
@@ -974,7 +1012,7 @@ public sealed class OpensourceGuestActivationV11NotifyAction(StudioNotifyHelper 
 }
 
 [Scope]
-public sealed class SaasGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
+public sealed class SaasGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "saas_guest_welcome_v1";
 
@@ -982,47 +1020,29 @@ public sealed class SaasGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNoti
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_guest_welcome_v1, () => WebstudioNotifyPatternResource.pattern_saas_guest_welcome_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_user_welcome_v1)
         ];
     }
 
     public void Init(UserInfo newUserInfo)
     {
         var culture = GetCulture(newUserInfo);
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccessYouWebOffice", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-
-        var img1 = studioNotifyHelper.GetNotificationImageUrl("users.png");
-        var img2 = studioNotifyHelper.GetNotificationImageUrl("files.png");
-        var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
-        var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
-
-        var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
 
         Tags =
         [
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue("IMG1", img1),
-            new TagValue("IMG2", img2),
-            new TagValue("IMG3", img3),
-            new TagValue("IMG4", img4),
-            new TagValue("URL1", url1),
             new TagValue(CommonTags.Footer, "social")
         ];
-    }
-
-    private string GetMyStaffLink()
-    {
-        return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
     }
 }
 
 [Scope]
-public sealed class EnterpriseGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
+public sealed class EnterpriseGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "enterprise_guest_welcome_v1";
 
@@ -1030,47 +1050,29 @@ public sealed class EnterpriseGuestWelcomeV1NotifyAction(StudioNotifyHelper stud
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_guest_welcome_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_guest_welcome_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_user_welcome_v1)
         ];
     }
 
     public void Init(UserInfo newUserInfo)
     {
         var culture = GetCulture(newUserInfo);
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccessYourPortal", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-
-        var img1 = studioNotifyHelper.GetNotificationImageUrl("users.png");
-        var img2 = studioNotifyHelper.GetNotificationImageUrl("files.png");
-        var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
-        var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
-
-        var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
 
         Tags =
         [
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue("IMG1", img1),
-            new TagValue("IMG2", img2),
-            new TagValue("IMG3", img3),
-            new TagValue("IMG4", img4),
-            new TagValue("URL1", url1),
             new TagValue(CommonTags.Footer, null)
         ];
-    }
-
-    private string GetMyStaffLink()
-    {
-        return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
     }
 }
 
 [Scope]
-public sealed class EnterpriseWhitelabelGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
+public sealed class EnterpriseWhitelabelGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "enterprise_whitelabel_guest_welcome_v1";
 
@@ -1078,47 +1080,29 @@ public sealed class EnterpriseWhitelabelGuestWelcomeV1NotifyAction(StudioNotifyH
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_whitelabel_guest_welcome_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_whitelabel_guest_welcome_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_user_welcome_v1)
         ];
     }
 
     public void Init(UserInfo newUserInfo)
     {
         var culture = GetCulture(newUserInfo);
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccessYourPortal", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-
-        var img1 = studioNotifyHelper.GetNotificationImageUrl("users.png");
-        var img2 = studioNotifyHelper.GetNotificationImageUrl("files.png");
-        var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
-        var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
-
-        var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
 
         Tags =
         [
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue("IMG1", img1),
-            new TagValue("IMG2", img2),
-            new TagValue("IMG3", img3),
-            new TagValue("IMG4", img4),
-            new TagValue("URL1", url1),
             new TagValue(CommonTags.Footer, null)
         ];
-    }
-
-    private string GetMyStaffLink()
-    {
-        return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
     }
 }
 
 [Scope]
-public sealed class OpensourceGuestWelcomeV1NotifyAction (StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
+public sealed class OpensourceGuestWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "opensource_guest_welcome_v1";
 
@@ -1126,42 +1110,24 @@ public sealed class OpensourceGuestWelcomeV1NotifyAction (StudioNotifyHelper stu
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_opensource_guest_welcome_v1, () => WebstudioNotifyPatternResource.pattern_opensource_guest_welcome_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_user_welcome_v1)
         ];
     }
 
     public void Init(UserInfo newUserInfo)
     {
         var culture = GetCulture(newUserInfo);
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccessYouWebOffice", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
-
-        var img1 = studioNotifyHelper.GetNotificationImageUrl("users.png");
-        var img2 = studioNotifyHelper.GetNotificationImageUrl("files.png");
-        var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
-        var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
-
-        var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
 
         Tags =
         [
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue("IMG1", img1),
-            new TagValue("IMG2", img2),
-            new TagValue("IMG3", img3),
-            new TagValue("IMG4", img4),
-            new TagValue("URL1", url1),
             new TagValue(CommonTags.Footer, "opensource")
         ];
-    }
-
-    private string GetMyStaffLink()
-    {
-        return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
     }
 }
 
@@ -1345,7 +1311,7 @@ public sealed class SaasRoomInviteNotifyAction(StudioNotifyHelper studioNotifyHe
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         Tags = [
-            new TagValue(CommonTags.Message, roomTitle),
+            new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
@@ -1375,7 +1341,7 @@ public sealed class SaasAgentInviteNotifyAction(StudioNotifyHelper studioNotifyH
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         Tags = [
-            new TagValue(CommonTags.Message, roomTitle),
+            new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
             new TagValue(CommonTags.InviteLink, confirmationUrl),
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
@@ -1404,7 +1370,7 @@ public sealed class SaasRoomInviteExistingUserNotifyAction(StudioNotifyHelper st
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         Tags = [
-            new TagValue(CommonTags.Message, roomTitle),
+            new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
             new TagValue(CommonTags.InviteLink, roomUrl),
             TagValues.OrangeButton(orangeButtonText, roomUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
@@ -1433,7 +1399,7 @@ public sealed class SaasAgentInviteExistingUserNotifyAction(StudioNotifyHelper s
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
 
         Tags = [
-            new TagValue(CommonTags.Message, roomTitle),
+            new TagValue(CommonTags.Message, roomTitle.HtmlEncode()),
             new TagValue(CommonTags.InviteLink, roomUrl),
             TagValues.OrangeButton(orangeButtonText, roomUrl),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
@@ -1561,7 +1527,7 @@ public sealed class EnterpriseAdminActivationV1NotifyAction(StudioNotifyHelper s
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_activation_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_activation_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_admin_activation_v1, () => WebstudioNotifyPatternResource.pattern_admin_activation_v1)
         ];
     }
 
@@ -1580,18 +1546,21 @@ public sealed class EnterpriseAdminActivationV1NotifyAction(StudioNotifyHelper s
 
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
+        Tags =
+        [
+            new TagValue(CommonTags.UserEmail, u.Email),
             new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
             orangeButton,
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue(CommonTags.Footer, null)
+            new TagValue(CommonTags.Footer, null),
+            new TagValue(CommonTags.Culture, culture.Name)
         ];
     }
 }
 
 [Scope]
-public sealed class EnterpriseWhitelabelAdminActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager)  : NotifyAction(tenantManager)
+public sealed class EnterpriseWhitelabelAdminActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "enterprise_whitelabel_admin_activation_v1";
 
@@ -1599,7 +1568,7 @@ public sealed class EnterpriseWhitelabelAdminActivationV1NotifyAction(StudioNoti
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_whitelabel_admin_activation_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_whitelabel_admin_activation_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_admin_activation_v1, () => WebstudioNotifyPatternResource.pattern_admin_activation_v1)
         ];
     }
 
@@ -1618,18 +1587,21 @@ public sealed class EnterpriseWhitelabelAdminActivationV1NotifyAction(StudioNoti
 
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
+        Tags =
+        [
+            new TagValue(CommonTags.UserEmail, u.Email),
             new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
             orangeButton,
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue(CommonTags.Footer, null)
+            new TagValue(CommonTags.Footer, null),
+            new TagValue(CommonTags.Culture, culture.Name)
         ];
     }
 }
 
 [Scope]
-public sealed class OpensourceAdminActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager)  : NotifyAction(tenantManager)
+public sealed class OpensourceAdminActivationV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "opensource_admin_activation_v1";
 
@@ -1637,7 +1609,7 @@ public sealed class OpensourceAdminActivationV1NotifyAction(StudioNotifyHelper s
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_opensource_admin_activation_v1, () => WebstudioNotifyPatternResource.pattern_opensource_admin_activation_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_admin_activation_v1, () => WebstudioNotifyPatternResource.pattern_admin_activation_v1)
         ];
     }
 
@@ -1656,12 +1628,15 @@ public sealed class OpensourceAdminActivationV1NotifyAction(StudioNotifyHelper s
 
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
+        Tags =
+        [
+            new TagValue(CommonTags.UserEmail, u.Email),
             new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
             orangeButton,
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue(CommonTags.Footer, "opensource")
+            new TagValue(CommonTags.Footer, "opensource"),
+            new TagValue(CommonTags.Culture, culture.Name)
         ];
     }
 }
@@ -1687,143 +1662,144 @@ public sealed class SaasAdminWelcomeV1NotifyAction(CommonLinkUtility commonLinkU
         Tags = [
             new TagValue(CommonTags.Footer, "common"),
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.PricingPage, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments")),
-            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/portal-payments")),
+            new TagValue(CommonTags.PricingPage, commonLinkUtility.GetFullAbsolutePath("~/billing/overview")),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/billing/overview")),
             TagValues.TrulyYours(studioNotifyHelper, WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", GetCulture(newUserInfo)), true),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("discover_business_subscription.gif"))
         ];
     }
 }
 
+
+
+
+/// <summary>Six months after a paid tariff lapsed: the last word before the portal is deleted.</summary>
 [Scope]
-public sealed class EnterpriseAdminWelcomeV1NotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
+public sealed class SaasAdminWarningAfterHalfYearV1NotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    ExternalResourceSettingsHelper externalResources,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
-    public override string ID => "enterprise_admin_welcome_v1";
+    public override string ID => "saas_admin_warning_after_half_year_v1";
 
     public override List<Pattern> Patterns
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_welcome_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_welcome_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_warning_after_half_year_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_warning_after_half_year_v1)
         ];
+    }
+
+    protected override bool ToOwner => true;
+    protected override bool TrulyYoursAsTableRow => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(!context.Quota.Free && context.Tariff.State == TariffState.NotPaid
+            && context.DueDateIsNotMax && context.DueDate.AddMonths(6) == context.NowDate);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonLeaveFeedback", culture), externalResources.Site.GetRegionalFullEntry("registrationcanceled", culture)));
+        tags.Add(new TagValue("URL1", externalResources.Common.GetRegionalFullEntry("legalterms", culture)));
+        tags.Add(new TagValue(CommonTags.TopGif, NotifyHelper.GetNotificationImageUrl("docspace_deleted.gif")));
+
+        return Task.CompletedTask;
     }
 }
 
+/// <summary>Three months after a paid tariff lapsed: the portal is still there, but not for long.</summary>
 [Scope]
-public sealed class EnterpriseWhitelabelAdminWelcomeV1NotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
+public sealed class SaasAdminWarningAfterThreeMonthsV1NotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    ExternalResourceSettingsHelper externalResources,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
-    public override string ID => "enterprise_whitelabel_admin_welcome_v1";
+    public override string ID => "saas_admin_warning_after_three_months_v1";
 
     public override List<Pattern> Patterns
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_whitelabel_admin_welcome_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_whitelabel_admin_welcome_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_warning_after_three_months_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_warning_after_three_months_v1)
         ];
+    }
+
+    protected override bool ToOwner => true;
+    protected override bool TrulyYoursAsTableRow => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(!context.Quota.Free && context.Tariff.State == TariffState.NotPaid
+            && context.DueDateIsNotMax && context.DueDate.AddMonths(3) == context.NowDate);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonLogIn", culture), commonLinkUtility.GetFullAbsolutePath("~/dashboard")));
+        tags.Add(new TagValue("URL1", externalResources.Common.GetRegionalFullEntry("legalterms", culture)));
+        tags.Add(new TagValue(CommonTags.TopGif, NotifyHelper.GetNotificationImageUrl("docspace_deleted.gif")));
+
+        return Task.CompletedTask;
     }
 }
 
+/// <summary>A free portal nobody has touched for six months: the last warning, a week before it is deleted.</summary>
 [Scope]
-public sealed class OpensourceAdminWelcomeV1NotifyAction(TenantManager tenantManager) : NotifyAction(tenantManager)
+public sealed class SaasAdminStartupWarningAfterHalfYearV1NotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    ExternalResourceSettingsHelper externalResources,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
-    public override string ID => "opensource_admin_welcome_v1";
+    public override string ID => "saas_admin_startup_warning_after_half_year_v1";
 
     public override List<Pattern> Patterns
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_opensource_admin_welcome_v1, () => WebstudioNotifyPatternResource.pattern_opensource_admin_welcome_v1)
-        ];
-    }
-}
-
-[Scope]
-public sealed class DocsTipsNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, DisplayUserSettingsHelper displayUserSettingsHelper, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
-{
-    private readonly StudioNotifyHelper _studioNotifyHelper = studioNotifyHelper;
-    public override string ID => "docs_tips";
-
-    public override List<Pattern> Patterns
-    {
-        get =>
-        [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_docs_tips, () => WebstudioNotifyPatternResource.pattern_docs_tips)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_startup_warning_after_half_year_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_startup_warning_after_half_year_v1)
         ];
     }
 
-    public void Init(
-        CultureInfo culture,
-        UserInfo u,
-        Func<CultureInfo, string> orangeButtonText,
-        string orangeButtonUrl,
-        Func<CultureInfo, string> txtTrulyYours,
-        string img1,
-        string img2,
-        string img3,
-        string img4,
-        string img5,
-        Func<CultureInfo, string> url1,
-        Func<CultureInfo, string> url2,
-        Func<CultureInfo, string> url3,
-        Func<CultureInfo, string> url4,
-        Func<CultureInfo, string> url5,
-        Func<CultureInfo, string> url6,
-        string topGif)
+    protected override bool ToOwner => true;
+    protected override bool TrulyYoursAsTableRow => true;
+
+    /// <summary>
+    /// Exactly the portals removed a week from now: every one the removal takes is told first, however long
+    /// it has been idle, and none it spares is told it will go.
+    /// </summary>
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
     {
-        Tags =
-        [
-            new TagValue(CommonTags.Culture, culture.Name),
-            new TagValue(CommonTags.UserName, u.DisplayUserName(displayUserSettingsHelper)),
-            new TagValue(CommonTags.Footer, "opensource"),
-            TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl),
-            TagValues.TrulyYours(_studioNotifyHelper, txtTrulyYours(culture), true),
-            new TagValue("IMG1", img1),
-            new TagValue("IMG2", img2),
-            new TagValue("IMG3", img3),
-            new TagValue("IMG4", img4),
-            new TagValue("IMG5", img5),
-            new TagValue("URL1", url1(culture)),
-            new TagValue("URL2", url2(culture)),
-            new TagValue("URL3", url3(culture)),
-            new TagValue("URL4", url4(culture)),
-            new TagValue("URL5", url5(culture)),
-            new TagValue("URL6", url6(culture)),
-            new TagValue(CommonTags.TopGif, topGif)
-        ];
+        return context.IsUnusedPortalRemovedAsync(daysAhead: 7);
     }
-}
 
-[Scope]
-public sealed class SaasAdminTrialWarningAfterHalfYearV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
-{
-    public override string ID => "saas_admin_trial_warning_after_half_year_v1";
-
-    public override List<Pattern> Patterns
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
     {
-        get =>
-        [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_trial_warning_after_half_year_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_trial_warning_after_half_year_v1)
-        ];
-    }
-}
+        tags.Add(TagValues.OrangeButton(Resource("ButtonLeaveFeedback", culture), externalResources.Site.GetRegionalFullEntry("registrationcanceled", culture)));
+        tags.Add(new TagValue("URL1", externalResources.Common.GetRegionalFullEntry("legalterms", culture)));
+        tags.Add(new TagValue(CommonTags.TopGif, NotifyHelper.GetNotificationImageUrl("docspace_deleted.gif")));
 
-[Scope]
-public sealed class SaasAdminStartupWarningAfterYearV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
-{
-    public override string ID => "saas_admin_startup_warning_after_year_v1";
-
-    public override List<Pattern> Patterns
-    {
-        get =>
-        [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_startup_warning_after_year_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_startup_warning_after_year_v1)
-        ];
+        return Task.CompletedTask;
     }
 }
 
 
 [Scope]
-public sealed class SaasUserWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
+public sealed class SaasUserWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "saas_user_welcome_v1";
 
@@ -1831,46 +1807,29 @@ public sealed class SaasUserWelcomeV1NotifyAction(StudioNotifyHelper studioNotif
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_saas_user_welcome_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_user_welcome_v1)
         ];
     }
 
     public void Init(UserInfo newUserInfo)
     {
         var culture = GetCulture(newUserInfo);
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        var img1 = studioNotifyHelper.GetNotificationImageUrl("users.png");
-        var img2 = studioNotifyHelper.GetNotificationImageUrl("files.png");
-        var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
-        var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
-
-        var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
-
-        Tags = [
+        Tags =
+        [
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue("IMG1", img1),
-            new TagValue("IMG2", img2),
-            new TagValue("IMG3", img3),
-            new TagValue("IMG4", img4),
-            new TagValue("URL1", url1),
             new TagValue(CommonTags.Footer, "social")
         ];
-    }
-
-    private string GetMyStaffLink()
-    {
-        return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
     }
 }
 
 [Scope]
-public sealed class EnterpriseUserWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
+public sealed class EnterpriseUserWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "enterprise_user_welcome_v1";
 
@@ -1878,46 +1837,29 @@ public sealed class EnterpriseUserWelcomeV1NotifyAction(StudioNotifyHelper studi
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_user_welcome_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_user_welcome_v1)
         ];
     }
 
     public void Init(UserInfo newUserInfo)
     {
         var culture = GetCulture(newUserInfo);
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        var img1 = studioNotifyHelper.GetNotificationImageUrl("users.png");
-        var img2 = studioNotifyHelper.GetNotificationImageUrl("files.png");
-        var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
-        var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
-
-        var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
-
-        Tags = [
+        Tags =
+        [
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue("IMG1", img1),
-            new TagValue("IMG2", img2),
-            new TagValue("IMG3", img3),
-            new TagValue("IMG4", img4),
-            new TagValue("URL1", url1),
             new TagValue(CommonTags.Footer, null)
         ];
-    }
-
-    private string GetMyStaffLink()
-    {
-        return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
     }
 }
 
 [Scope]
-public sealed class EnterpriseWhitelabelUserWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
+public sealed class EnterpriseWhitelabelUserWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "enterprise_whitelabel_user_welcome_v1";
 
@@ -1925,46 +1867,29 @@ public sealed class EnterpriseWhitelabelUserWelcomeV1NotifyAction(StudioNotifyHe
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_whitelabel_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_whitelabel_user_welcome_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_user_welcome_v1)
         ];
     }
 
     public void Init(UserInfo newUserInfo)
     {
         var culture = GetCulture(newUserInfo);
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        var img1 = studioNotifyHelper.GetNotificationImageUrl("users.png");
-        var img2 = studioNotifyHelper.GetNotificationImageUrl("files.png");
-        var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
-        var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
-
-        var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
-
-        Tags = [
+        Tags =
+        [
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue("IMG1", img1),
-            new TagValue("IMG2", img2),
-            new TagValue("IMG3", img3),
-            new TagValue("IMG4", img4),
-            new TagValue("URL1", url1),
             new TagValue(CommonTags.Footer, null)
         ];
-    }
-
-    private string GetMyStaffLink()
-    {
-        return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
     }
 }
 
 [Scope]
-public sealed class EnterpriseWhitelabelUserWelcomeCustomModeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
+public sealed class EnterpriseWhitelabelUserWelcomeCustomModeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "enterprise_whitelabel_user_welcome_custom_mode_v1";
 
@@ -1972,46 +1897,29 @@ public sealed class EnterpriseWhitelabelUserWelcomeCustomModeV1NotifyAction(Stud
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_whitelabel_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_saas_user_welcome_v3)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_user_welcome_v1)
         ];
     }
 
     public void Init(UserInfo newUserInfo)
     {
         var culture = GetCulture(newUserInfo);
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        var img1 = studioNotifyHelper.GetNotificationImageUrl("users.png");
-        var img2 = studioNotifyHelper.GetNotificationImageUrl("files.png");
-        var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
-        var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
-
-        var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
-
-        Tags = [
+        Tags =
+        [
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue("IMG1", img1),
-            new TagValue("IMG2", img2),
-            new TagValue("IMG3", img3),
-            new TagValue("IMG4", img4),
-            new TagValue("URL1", url1),
             new TagValue(CommonTags.Footer, null)
         ];
-    }
-
-    private string GetMyStaffLink()
-    {
-        return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
     }
 }
 
 [Scope]
-public sealed class OpensourceUserWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, ExternalResourceSettingsHelper externalResourceSettingsHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
+public sealed class OpensourceUserWelcomeV1NotifyAction(StudioNotifyHelper studioNotifyHelper, CommonLinkUtility commonLinkUtility, TenantManager tenantManager) : NotifyAction(tenantManager)
 {
     public override string ID => "opensource_user_welcome_v1";
 
@@ -2019,42 +1927,24 @@ public sealed class OpensourceUserWelcomeV1NotifyAction(StudioNotifyHelper studi
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_opensource_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_opensource_user_welcome_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_welcome_v1, () => WebstudioNotifyPatternResource.pattern_user_welcome_v1)
         ];
     }
 
     public void Init(UserInfo newUserInfo)
     {
         var culture = GetCulture(newUserInfo);
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonCollaborate", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        var img1 = studioNotifyHelper.GetNotificationImageUrl("users.png");
-        var img2 = studioNotifyHelper.GetNotificationImageUrl("files.png");
-        var img3 = studioNotifyHelper.GetNotificationImageUrl("collaborate.png");
-        var img4 = studioNotifyHelper.GetNotificationImageUrl("chatgpt.png");
-
-        var url1 = externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("userguides", culture);
-
-        Tags = [
+        Tags =
+        [
             new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.MyStaffLink, GetMyStaffLink()),
             TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("welcome.gif")),
-            new TagValue("IMG1", img1),
-            new TagValue("IMG2", img2),
-            new TagValue("IMG3", img3),
-            new TagValue("IMG4", img4),
-            new TagValue("URL1", url1),
             new TagValue(CommonTags.Footer, "opensource")
         ];
-    }
-
-
-    private string GetMyStaffLink()
-    {
-        return commonLinkUtility.GetFullAbsolutePath(commonLinkUtility.GetMyStaff());
     }
 }
 
@@ -2067,7 +1957,7 @@ public sealed class SaasUserActivationV1NotifyAction(StudioNotifyHelper studioNo
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_saas_user_activation_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_user_activation_v1)
         ];
     }
 
@@ -2078,12 +1968,11 @@ public sealed class SaasUserActivationV1NotifyAction(StudioNotifyHelper studioNo
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
-            new TagValue(CommonTags.ActivateUrl, confirmationUrl),
+        Tags =
+        [
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
-            new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Footer, "social")
         ];
     }
@@ -2105,7 +1994,7 @@ public sealed class EnterpriseUserActivationV1NotifyAction(StudioNotifyHelper st
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_user_activation_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_user_activation_v1)
         ];
     }
 
@@ -2116,16 +2005,14 @@ public sealed class EnterpriseUserActivationV1NotifyAction(StudioNotifyHelper st
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
-            new TagValue(CommonTags.ActivateUrl, confirmationUrl),
+        Tags =
+        [
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
-            new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Footer, null)
         ];
     }
-
 
     private async Task<string> GenerateActivationConfirmUrlAsync(UserInfo user)
     {
@@ -2144,7 +2031,7 @@ public sealed class EnterpriseWhitelabelUserActivationV1NotifyAction(StudioNotif
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_whitelabel_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_whitelabel_user_activation_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_user_activation_v1)
         ];
     }
 
@@ -2155,12 +2042,11 @@ public sealed class EnterpriseWhitelabelUserActivationV1NotifyAction(StudioNotif
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
-            new TagValue(CommonTags.ActivateUrl, confirmationUrl),
+        Tags =
+        [
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
-            new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Footer, null)
         ];
     }
@@ -2182,7 +2068,7 @@ public sealed class OpensourceUserActivationV1NotifyAction(StudioNotifyHelper st
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_opensource_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_opensource_user_activation_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_user_activation_v1, () => WebstudioNotifyPatternResource.pattern_user_activation_v1)
         ];
     }
 
@@ -2193,12 +2079,11 @@ public sealed class OpensourceUserActivationV1NotifyAction(StudioNotifyHelper st
         var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonAccept", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
 
-        Tags = [
-            new TagValue(CommonTags.ActivateUrl, confirmationUrl),
+        Tags =
+        [
             TagValues.OrangeButton(orangeButtonText, confirmationUrl),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours, true),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
             new TagValue(CommonTags.TopGif, studioNotifyHelper.GetNotificationImageUrl("join_docspace.gif")),
-            new TagValue(CommonTags.UserName, newUserInfo.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Footer, "opensource")
         ];
     }
@@ -2211,158 +2096,418 @@ public sealed class OpensourceUserActivationV1NotifyAction(StudioNotifyHelper st
     }
 }
 
-public abstract class BasePeriodicNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager manager) : NotifyAction(manager)
+/// <summary>
+/// A letter the daily tariff job may send. Each subclass answers three questions about itself — when it
+/// goes out, to whom, and what it says — and the base owns everything those answers have in common.
+///
+/// Before this, all three lived in one <c>else if</c> chain in <c>StudioPeriodicNotify</c> that filled
+/// forty shared locals and poured them into a thirty-eight parameter <c>Init</c>, so every letter
+/// carried the union of every tag any letter might want.
+/// </summary>
+public abstract class BasePeriodicNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager manager) : NotifyAction(manager)
 {
-    public async Task Init(
-        CultureInfo culture,
-        UserInfo u,
-        TenantQuota rquota,
-        Func<CultureInfo, string> orangeButtonText,
-        Func<CultureInfo, string> orangeButtonText1,
-        Func<CultureInfo, string> orangeButtonText2,
-        Func<CultureInfo, string> orangeButtonText3,
-        Func<CultureInfo, string> orangeButtonText4,
-        Func<CultureInfo, string> orangeButtonText5,
-        Func<CultureInfo, string> orangeButtonUrl,
-        Func<CultureInfo, string> orangeButtonUrl1,
-        Func<CultureInfo, string> orangeButtonUrl2,
-        Func<CultureInfo, string> orangeButtonUrl3,
-        Func<CultureInfo, string> orangeButtonUrl4,
-        Func<CultureInfo, string> orangeButtonUrl5,
-        Func<CultureInfo, string> txtTrulyYours,
-        bool trulyYoursAsTableRow,
-        string img1,
-        string img2,
-        string img3,
-        string img4,
-        string img5,
-        string img6,
-        string img7,
-        Func<CultureInfo, string> url1,
-        Func<CultureInfo, string> url2,
-        Func<CultureInfo, string> url3,
-        Func<CultureInfo, string> url4,
-        Func<CultureInfo, string> url5,
-        Func<CultureInfo, string> url6,
-        Func<CultureInfo, string> url7,
-        Func<CultureInfo, string> url8,
-        Func<CultureInfo, string> url9,
-        Func<CultureInfo, string> url10,
-        Func<CultureInfo, string> url11,
-        Func<CultureInfo, string> url12,
-        Func<CultureInfo, string> url13,
-        Func<CultureInfo, string> url14,
-        string topGif)
+    /// <summary>
+    /// The image helper, for the letters that carry a top picture or app icons. Exposed because it is
+    /// the tenant that decides where notification images live.
+    /// </summary>
+    protected StudioNotifyHelper NotifyHelper { get; } = studioNotifyHelper;
+
+    /// <summary>Billing, for the letters that quote how long the grace period lasts.</summary>
+    protected ITariffService TariffService { get; } = tariffService;
+
+    /// <summary>Is today this letter's day for this portal?</summary>
+    /// <remarks>
+    /// Letters judge themselves independently, so a predicate must carry every condition its old branch
+    /// inherited from the <c>if</c> it was nested in — the tariff state, the free quota, the trial.
+    /// </remarks>
+    public abstract Task<bool> ShouldSendAsync(PeriodicLetterContext context);
+
+    protected virtual bool ToAdmins => false;
+
+    protected virtual bool ToUsers => false;
+
+    protected virtual bool ToGuests => false;
+
+    /// <summary>Whether the portal owner is added to the recipients, on top of the groups above.</summary>
+    protected virtual bool ToOwner => false;
+
+    /// <summary>Whether whoever pays the bills is added, when billing knows of someone.</summary>
+    protected virtual bool ToPayer => false;
+
+    /// <summary>
+    /// Whether the recipient's "Tips and Tricks" subscription is honoured. Payment notices go out
+    /// whatever the recipient has switched off, which is why this is false by default.
+    /// </summary>
+    protected virtual bool RequiresSubscription => false;
+
+    /// <summary>
+    /// The tags this letter needs on top of <see cref="BuildCommonTagsAsync"/> — its buttons, links and
+    /// images. Only the tags its own pattern references: an unused tag is dead weight, and a missing one
+    /// leaves a raw <c>$URL1</c> in front of the reader.
+    /// </summary>
+    protected abstract Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags);
+
+    /// <summary>
+    /// Delivers the letter to everyone who should get it. Shared by every periodic letter: the recipient
+    /// groups, the owner and payer, the subscription filter, the recipient's culture, and the tags.
+    /// </summary>
+    public async Task SendAsync(PeriodicLetterContext context, INotifyClient client, string senderName)
     {
-        Tags =
+        foreach (var user in await GetRecipientsAsync(context))
+        {
+            if (RequiresSubscription && !await NotifyHelper.IsSubscribedToNotifyAsync(user, periodicNotifyAction))
+            {
+                continue;
+            }
+
+            // Carried on the letter as the Culture tag rather than set on the thread. Nothing here
+            // renders: SendNoticeToAsync queues the request, and NotifyEngine re-establishes the culture
+            // from NotifyRequest.GetCulture - which reads that very tag - before it resolves the pattern.
+            // The tags below take their culture as an argument, and so does everything they call.
+            var culture = string.IsNullOrEmpty(user.CultureName) ? context.Tenant.GetCulture() : user.GetCulture();
+
+            Tags = await BuildTagsAsync(context, user, culture);
+
+            await client.SendNoticeToAsync(this, user, senderName);
+        }
+    }
+
+    /// <summary>
+    /// Everything this letter substitutes for one recipient: the tags every periodic letter carries plus
+    /// the ones the subclass adds. Public because it is also the only honest way to ask a letter what it
+    /// would say without sending it - a letter test renders exactly these tags instead of restating them.
+    /// </summary>
+    public async Task<List<ITagValue>> BuildTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture)
+    {
+        var tags = await BuildCommonTagsAsync(context, user, culture);
+
+        await AddTagsAsync(context, user, culture, tags);
+
+        return tags;
+    }
+
+    /// <summary>
+    /// Who gets this letter: the groups the subclass asked for, plus the owner and the payer when it
+    /// wants them. Both extras are appended without duplicates - the owner is usually an admin already.
+    /// </summary>
+    private async Task<IEnumerable<UserInfo>> GetRecipientsAsync(PeriodicLetterContext context)
+    {
+        var users = await NotifyHelper.GetRecipientsAsync(ToAdmins, ToUsers, ToGuests);
+
+        if (ToOwner)
+        {
+            users = users.Append(await userManager.GetUsersAsync(context.Tenant.OwnerId)).DistinctBy(u => u.Id);
+        }
+
+        if (ToPayer)
+        {
+            var customerInfo = await TariffService.GetCustomerInfoAsync(context.Tenant.Id);
+            var payer = await userManager.GetUserByEmailAsync(customerInfo?.Email);
+
+            if (payer.Id != ASC.Core.Users.Constants.LostUser.Id && users.All(u => u.Id != payer.Id))
+            {
+                users = users.Concat([payer]);
+            }
+        }
+
+        return users;
+    }
+
+    /// <summary>
+    /// What every periodic letter carries: the culture, who it greets, the signature and the footer
+    /// flavour. The last two are read by the styler rather than by the pattern text, which is why every
+    /// letter needs them whether or not it mentions them.
+    /// </summary>
+    protected virtual async Task<List<ITagValue>> BuildCommonTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture)
+    {
+        return
         [
             new TagValue(CommonTags.Culture, culture.Name),
-            new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
-            new TagValue(CommonTags.Price, rquota.Price),
-            new TagValue(CommonTags.PricePeriod, rquota.Year ? UserControlsCommonResource.TariffPerYear : UserControlsCommonResource.TariffPerMonth),
-            //new TagValue(CommonTags.DueDate, dueDate.ToLongDateString()),
-            //new TagValue(CommonTags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
-            TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl(culture)),
-            TagValues.OrangeButton(orangeButtonText1(culture), orangeButtonUrl1(culture), "OrangeButton1"),
-            TagValues.OrangeButton(orangeButtonText2(culture), orangeButtonUrl2(culture), "OrangeButton2"),
-            TagValues.OrangeButton(orangeButtonText3(culture), orangeButtonUrl3(culture), "OrangeButton3"),
-            TagValues.OrangeButton(orangeButtonText4(culture), orangeButtonUrl4(culture), "OrangeButton4"),
-            TagValues.OrangeButton(orangeButtonText5(culture), orangeButtonUrl5(culture), "OrangeButton5"),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture), trulyYoursAsTableRow),
-            new TagValue("IMG1", img1),
-            new TagValue("IMG2", img2),
-            new TagValue("IMG3", img3),
-            new TagValue("IMG4", img4),
-            new TagValue("IMG5", img5),
-            new TagValue("IMG6", img6),
-            new TagValue("IMG7", img7),
-            new TagValue("URL1", url1(culture)),
-            new TagValue("URL2", url2(culture)),
-            new TagValue("URL3", url3(culture)),
-            new TagValue("URL4", url4(culture)),
-            new TagValue("URL5", url5(culture)),
-            new TagValue("URL6", url6(culture)),
-            new TagValue("URL7", url7(culture)),
-            new TagValue("URL8", url8(culture)),
-            new TagValue("URL9", url9(culture)),
-            new TagValue("URL10", url10(culture)),
-            new TagValue("URL11", url11(culture)),
-            new TagValue("URL12", url12(culture)),
-            new TagValue("URL13", url13(culture)),
-            new TagValue("URL14", url14(culture)),
-            new TagValue(CommonTags.TopGif, topGif),
-            new TagValue(CommonTags.PaymentDelay, tariffService.GetPaymentDelay()),
-            new TagValue(CommonTags.Footer, await userManager.IsDocSpaceAdminAsync(u) ? "common" : "social")
+            new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
+            TagValues.TrulyYours(NotifyHelper, Resource("TrulyYoursText", culture), TrulyYoursAsTableRow),
+            new TagValue(CommonTags.Footer, await userManager.IsDocSpaceAdminAsync(user) ? "common" : "social")
         ];
     }
 
-    public async Task Init(
-        CultureInfo culture,
-        UserInfo u,
-        TenantQuota rquota,
-        Func<CultureInfo, string> orangeButtonText,
-        Func<CultureInfo, string> orangeButtonUrl,
-        Func<CultureInfo, string> txtTrulyYours,
-        bool trulyYoursAsTableRow,
-        string img1,
-        string img2,
-        string img3,
-        string img4,
-        string img5,
-        Func<CultureInfo, string> url1,
-        Func<CultureInfo, string> url2,
-        Func<CultureInfo, string> url3,
-        Func<CultureInfo, string> url4,
-        Func<CultureInfo, string> url5,
-        Func<CultureInfo, string> url6,
-        string topGif)
+    /// <summary>
+    /// Whether the signature is a table row of its own. True for the HTML letters, false for the plain
+    /// textile ones, where it follows the last paragraph.
+    /// </summary>
+    protected virtual bool TrulyYoursAsTableRow => false;
+
+    /// <summary>A caption or a line of text from the letter resources, in the recipient's culture.</summary>
+    protected static string Resource(string key, CultureInfo culture)
     {
-        Tags =
-        [
-            new TagValue(CommonTags.Culture, culture.Name),
-            new TagValue(CommonTags.UserName, u.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.ActiveUsers, (await userManager.GetUsersAsync()).Length),
-            new TagValue(CommonTags.PaymentDelay, tariffService.GetPaymentDelay()),
-            new TagValue(CommonTags.Price, rquota.Price),
-            new TagValue(CommonTags.PricePeriod, rquota.Year ? UserControlsCommonResource.TariffPerYear : UserControlsCommonResource.TariffPerMonth),
-            //new TagValue(CommonTags.DueDate, dueDate.ToLongDateString()),
-            //new TagValue(CommonTags.DelayDueDate, (delayDueDateIsNotMax ? delayDueDate : dueDate).ToLongDateString()),
-            TagValues.OrangeButton(orangeButtonText(culture), orangeButtonUrl(culture)),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours(culture), trulyYoursAsTableRow),
-            new TagValue("IMG1", img1),
-            new TagValue("IMG2", img2),
-            new TagValue("IMG3", img3),
-            new TagValue("IMG4", img4),
-            new TagValue("IMG5", img5),
-            new TagValue("URL1", url1(culture)),
-            new TagValue("URL2", url2(culture)),
-            new TagValue("URL3", url3(culture)),
-            new TagValue("URL4", url4(culture)),
-            new TagValue("URL5", url5(culture)),
-            new TagValue("URL6", url6(culture)),
-            new TagValue(CommonTags.TopGif, topGif)
-        ];
+        return WebstudioNotifyPatternResource.ResourceManager.GetString(key, culture);
     }
 }
 
-
+/// <summary>Four days after registration: the paid add-ons.</summary>
 [Scope]
-public sealed class SaasAdminModulesV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class SaasAdminAddonsV1NotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
-    public override string ID => "saas_admin_modules_v1";
+    public override string ID => "saas_admin_addons_v1";
 
     public override List<Pattern> Patterns
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_modules_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_modules_v1)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_addons_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_addons_v1)
         ];
+    }
+
+    protected override bool ToAdmins => true;
+    protected override bool ToOwner => true;
+    protected override bool RequiresSubscription => true;
+    protected override bool TrulyYoursAsTableRow => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(context.CreatedDate.AddDays(4) == context.NowDate);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonGetStarted", culture), commonLinkUtility.GetFullAbsolutePath("~/billing/overview")));
+        tags.Add(new TagValue("URL1", commonLinkUtility.GetFullAbsolutePath("~/billing/overview")));
+        tags.Add(new TagValue("URL2", commonLinkUtility.GetFullAbsolutePath("~/billing/wallet")));
+
+        return Task.CompletedTask;
     }
 }
 
+/// <summary>Seven days after registration: the AI agents.</summary>
 [Scope]
-public sealed class SaasAdminUserAppsTipsV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class SaasAdminAiAgentsV1NotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+{
+    public override string ID => "saas_admin_ai_agents_v1";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_ai_agents_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_ai_agents_v1)
+        ];
+    }
+
+    protected override bool ToAdmins => true;
+    protected override bool ToOwner => true;
+    protected override bool RequiresSubscription => true;
+    protected override bool TrulyYoursAsTableRow => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(context.CreatedDate.AddDays(7) == context.NowDate);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonActivateAiFeatures", culture), commonLinkUtility.GetFullAbsolutePath("~/portal-settings/ai-settings/ai-models")));
+
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>Three days after registration: settings worth configuring.</summary>
+[Scope]
+public sealed class SaasAdminConfigureV1NotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    ExternalResourceSettingsHelper externalResources,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+{
+    public override string ID => "saas_admin_configure_v1";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_configure_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_configure_v1)
+        ];
+    }
+
+    protected override bool ToAdmins => true;
+    protected override bool ToOwner => true;
+    protected override bool RequiresSubscription => true;
+    protected override bool TrulyYoursAsTableRow => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(context.CreatedDate.AddDays(3) == context.NowDate);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonConfigureRightNow", culture), commonLinkUtility.GetFullAbsolutePath("~/portal-settings")));
+        tags.Add(new TagValue(CommonTags.TopGif, NotifyHelper.GetNotificationImageUrl("configure_docspace.gif")));
+        tags.Add(new TagValue("URL1", externalResources.Helpcenter.GetRegionalDomain(culture)));
+        tags.Add(new TagValue("URL2", commonLinkUtility.GetFullAbsolutePath("~/billing/tariff-plan")));
+
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>Ten days after registration: the developer tools.</summary>
+[Scope]
+public sealed class SaasAdminDeveloperToolsV1NotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    ExternalResourceSettingsHelper externalResources,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+{
+    public override string ID => "saas_admin_developer_tools_v1";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_developer_tools_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_developer_tools_v1)
+        ];
+    }
+
+    protected override bool ToAdmins => true;
+    protected override bool ToOwner => true;
+    protected override bool RequiresSubscription => true;
+    protected override bool TrulyYoursAsTableRow => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(context.CreatedDate.AddDays(10) == context.NowDate);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonGetStarted", culture), commonLinkUtility.GetFullAbsolutePath("~/developer-tools/overview")));
+        tags.Add(new TagValue("URL1", externalResources.Site.GetRegionalFullEntry("allconnectors", culture)));
+        tags.Add(new TagValue("URL2", externalResources.Api.GetRegionalDomain(culture)));
+
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>Two days after registration: four apps worth knowing about.</summary>
+[Scope]
+public sealed class SaasAdminHandyAppsV1NotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+{
+    public override string ID => "saas_admin_handy_apps_v1";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_handy_apps_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_handy_apps_v1)
+        ];
+    }
+
+    protected override bool ToAdmins => true;
+    protected override bool ToOwner => true;
+    protected override bool RequiresSubscription => true;
+    protected override bool TrulyYoursAsTableRow => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(context.CreatedDate.AddDays(2) == context.NowDate);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonGoToDocSpace", culture), commonLinkUtility.GetFullAbsolutePath("~").TrimEnd('/')));
+
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>A free portal nobody has touched for three months: the first of two warnings before it is
+/// deleted.</summary>
+[Scope]
+public sealed class SaasAdminStartupWarningAfterThreeMonthsV1NotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
+{
+    public override string ID => "saas_admin_startup_warning_after_three_months_v1";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_startup_warning_after_three_months_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_startup_warning_after_three_months_v1)
+        ];
+    }
+
+    protected override bool ToOwner => true;
+    protected override bool TrulyYoursAsTableRow => true;
+
+    public override async Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        if (!context.Quota.Free || context.NowDate < context.UnusedPortalNotifyFrom || !context.IsCreationAnniversary())
+        {
+            return false;
+        }
+
+        var lastActivity = await context.GetLastActivityDateAsync();
+
+        return lastActivity.AddMonths(3) <= context.NowDate && lastActivity.AddMonths(4) > context.NowDate;
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonLogIn", culture), commonLinkUtility.GetFullAbsolutePath("~/dashboard")));
+        tags.Add(new TagValue(CommonTags.TopGif, NotifyHelper.GetNotificationImageUrl("docspace_deleted.gif")));
+
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>Fourteen days after registration: the desktop and mobile apps. Goes to everyone who works
+/// in the portal, not just its administrators.</summary>
+[Scope]
+public sealed class SaasAdminUserAppsTipsV1NotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    ExternalResourceSettingsHelper externalResources,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
     public override string ID => "saas_admin_user_apps_tips_v1";
 
@@ -2373,10 +2518,42 @@ public sealed class SaasAdminUserAppsTipsV1NotifyAction(UserManager userManager,
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_user_apps_tips_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_user_apps_tips_v1)
         ];
     }
+
+    protected override bool ToAdmins => true;
+    protected override bool ToUsers => true;
+    protected override bool RequiresSubscription => true;
+    protected override bool TrulyYoursAsTableRow => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(context.CreatedDate.AddDays(14) == context.NowDate);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(new TagValue(CommonTags.TopGif, NotifyHelper.GetNotificationImageUrl("free_apps.gif")));
+        tags.Add(new TagValue("IMG1", NotifyHelper.GetNotificationImageUrl("windows.png")));
+        tags.Add(new TagValue("IMG2", NotifyHelper.GetNotificationImageUrl("apple.png")));
+        tags.Add(new TagValue("IMG3", NotifyHelper.GetNotificationImageUrl("linux.png")));
+        tags.Add(new TagValue("IMG4", NotifyHelper.GetNotificationImageUrl("android.png")));
+        tags.Add(new TagValue("URL1", externalResources.Site.GetRegionalFullEntry("downloaddesktop", culture)));
+        tags.Add(new TagValue("URL2", externalResources.Site.GetRegionalFullEntry("downloadmobile", culture)));
+
+        return Task.CompletedTask;
+    }
 }
 
+/// <summary>Fourteen days into an Enterprise trial: the desktop and mobile apps. Only on a portal that
+/// still carries our branding — a white-labelled one must not advertise our apps.</summary>
 [Scope]
-public sealed class EnterpriseAdminUserAppsTipsV1NotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class EnterpriseAdminUserAppsTipsV1NotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    ExternalResourceSettingsHelper externalResources,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
     public override string ID => "enterprise_admin_user_apps_tips_v1";
 
@@ -2386,6 +2563,30 @@ public sealed class EnterpriseAdminUserAppsTipsV1NotifyAction(UserManager userMa
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_user_apps_tips_v1, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_user_apps_tips_v1)
         ];
+    }
+
+    protected override bool ToAdmins => true;
+    protected override bool ToUsers => true;
+    protected override bool RequiresSubscription => true;
+    protected override bool TrulyYoursAsTableRow => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(context.Quota.Trial && context.DefaultRebranding
+            && context.CreatedDate.AddDays(14) == context.NowDate);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(new TagValue(CommonTags.TopGif, NotifyHelper.GetNotificationImageUrl("free_apps.gif")));
+        tags.Add(new TagValue("IMG1", NotifyHelper.GetNotificationImageUrl("windows.png")));
+        tags.Add(new TagValue("IMG2", NotifyHelper.GetNotificationImageUrl("apple.png")));
+        tags.Add(new TagValue("IMG3", NotifyHelper.GetNotificationImageUrl("linux.png")));
+        tags.Add(new TagValue("IMG4", NotifyHelper.GetNotificationImageUrl("android.png")));
+        tags.Add(new TagValue("URL1", externalResources.Site.GetRegionalFullEntry("downloaddesktop", culture)));
+        tags.Add(new TagValue("URL2", externalResources.Site.GetRegionalFullEntry("downloadmobile", culture)));
+
+        return Task.CompletedTask;
     }
 }
 
@@ -2451,8 +2652,16 @@ public sealed class SendWhatsNewNotifyAction(TenantManager tenantManager) : Noti
     }
 }
 
+/// <summary>Three days before the paid period ends.</summary>
 [Scope]
-public sealed class SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
     public override string ID => "saas_owner_payment_warning_grace_period_before_activation";
 
@@ -2463,10 +2672,34 @@ public sealed class SaasOwnerPaymentWarningGracePeriodBeforeActivationNotifyActi
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_payment_warning_grace_period_before_activation, () => WebstudioNotifyPatternResource.pattern_saas_owner_payment_warning_grace_period_before_activation)
         ];
     }
+
+    protected override bool ToOwner => true;
+    protected override bool ToPayer => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(!context.Quota.Free && context.Tariff.State >= TariffState.Paid
+            && context.DueDateIsNotMax && context.DueDate.AddDays(-3) == context.NowDate);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(new TagValue("URL1", commonLinkUtility.GetFullAbsolutePath("~/billing/payment-method")));
+
+        return Task.CompletedTask;
+    }
 }
 
+/// <summary>The day after the paid period ended and the grace period began.</summary>
 [Scope]
-public sealed class SaasOwnerPaymentWarningGracePeriodActivationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class SaasOwnerPaymentWarningGracePeriodActivationNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
     public override string ID => "saas_owner_payment_warning_grace_period_activation";
 
@@ -2477,10 +2710,37 @@ public sealed class SaasOwnerPaymentWarningGracePeriodActivationNotifyAction(Use
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_payment_warning_grace_period_activation, () => WebstudioNotifyPatternResource.pattern_saas_owner_payment_warning_grace_period_activation)
         ];
     }
+
+    protected override bool ToOwner => true;
+    protected override bool ToPayer => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(!context.Quota.Free && context.Tariff.State >= TariffState.Paid
+            && context.DueDateIsNotMax && context.DueDate.AddDays(1) == context.NowDate
+            && context.DelayDueDateIsNotMax);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonVisitBillingSection", culture), commonLinkUtility.GetFullAbsolutePath("~/billing/overview")));
+
+        tags.Add(new TagValue(CommonTags.PaymentDelay, TariffService.GetPaymentDelay()));
+
+        return Task.CompletedTask;
+    }
 }
 
+/// <summary>The last day of the grace period.</summary>
 [Scope]
-public sealed class SaasOwnerPaymentWarningGracePeriodLastDayNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class SaasOwnerPaymentWarningGracePeriodLastDayNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
     public override string ID => "saas_owner_payment_warning_grace_period_last_day";
 
@@ -2491,10 +2751,36 @@ public sealed class SaasOwnerPaymentWarningGracePeriodLastDayNotifyAction(UserMa
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_payment_warning_grace_period_last_day, () => WebstudioNotifyPatternResource.pattern_saas_owner_payment_warning_grace_period_last_day)
         ];
     }
+
+    protected override bool ToOwner => true;
+    protected override bool ToPayer => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(!context.Quota.Free && context.Tariff.State == TariffState.Delay
+            && context.DelayDueDateIsNotMax && context.DelayDueDate.AddDays(-1) == context.NowDate);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonVisitBillingSection", culture), commonLinkUtility.GetFullAbsolutePath("~/billing/overview")));
+
+        tags.Add(new TagValue(CommonTags.PaymentDelay, TariffService.GetPaymentDelay()));
+
+        return Task.CompletedTask;
+    }
 }
 
+/// <summary>The day the grace period runs out.</summary>
 [Scope]
-public sealed class SaasOwnerPaymentWarningGracePeriodExpiredNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class SaasOwnerPaymentWarningGracePeriodExpiredNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    CommonLinkUtility commonLinkUtility,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
     public override string ID => "saas_owner_payment_warning_grace_period_expired";
 
@@ -2505,33 +2791,23 @@ public sealed class SaasOwnerPaymentWarningGracePeriodExpiredNotifyAction(UserMa
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_owner_payment_warning_grace_period_expired, () => WebstudioNotifyPatternResource.pattern_saas_owner_payment_warning_grace_period_expired)
         ];
     }
-}
 
-[Scope]
-public sealed class SaasAdminVideoGuidesNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
-{
-    public override string ID => "saas_video_guides_v1";
+    protected override bool ToOwner => true;
+    protected override bool ToPayer => true;
 
-    public override List<Pattern> Patterns
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
     {
-        get =>
-        [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_video_guides_v1, () => WebstudioNotifyPatternResource.pattern_saas_video_guides_v1)
-        ];
+        return Task.FromResult(!context.Quota.Free && context.Tariff.State == TariffState.Delay
+            && context.DelayDueDateIsNotMax && context.DelayDueDate == context.NowDate);
     }
-}
 
-[Scope]
-public sealed class SaasAdminIntegrationsNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
-{
-    public override string ID => "saas_admin_integrations_v1";
-
-    public override List<Pattern> Patterns
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
     {
-        get =>
-        [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_saas_admin_integrations_v1, () => WebstudioNotifyPatternResource.pattern_saas_admin_integrations_v1)
-        ];
+        tags.Add(TagValues.OrangeButton(Resource("ButtonVisitBillingSection", culture), commonLinkUtility.GetFullAbsolutePath("~/billing/overview")));
+
+        tags.Add(new TagValue(CommonTags.PaymentDelay, TariffService.GetPaymentDelay()));
+
+        return Task.CompletedTask;
     }
 }
 
@@ -2563,43 +2839,17 @@ public sealed class ZoomWelcomeNotifyAction(StudioNotifyHelper studioNotifyHelpe
     }
 }
 
+
+/// <summary>A week before an Enterprise licence expires.</summary>
 [Scope]
-public sealed class MigrationPersonalToDocspaceNotifyAction(CommonLinkUtility commonLinkUtility, IUrlShortener urlShortener, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
-{
-    public override string ID => "migration_personal_to_docspace";
-
-    public override List<Pattern> Patterns
-    {
-        get =>
-        [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_migration_personal_to_docspace, () => WebstudioNotifyPatternResource.pattern_migration_personal_to_docspace)
-        ];
-    }
-
-    public async Task Init(UserInfo userInfo, DateTime auditEventDate)
-    {
-        var hash = auditEventDate.ToString("s", CultureInfo.InvariantCulture);
-
-        var confirmationUrl = commonLinkUtility.GetConfirmationEmailUrl(userInfo.Email, ConfirmType.PasswordChange, hash, userInfo.Id);
-
-        var cultureInfo = GetCulture(userInfo);
-
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGetStarted", cultureInfo);
-
-        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", cultureInfo);
-
-        Tags =
-        [
-            TagValues.OrangeButton(orangeButtonText, await urlShortener.GetShortenLinkAsync(confirmationUrl)),
-            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours),
-            new TagValue(CommonTags.Culture, cultureInfo.Name),
-            new TagValue(CommonTags.Footer, "social")
-        ];
-    }
-}
-
-[Scope]
-public sealed class EnterpriseAdminPaymentWarningGracePeriodBeforeActivationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class EnterpriseAdminPaymentWarningGracePeriodBeforeActivationNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    ExternalResourceSettingsHelper externalResources,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
     public override string ID => "enterprise_admin_payment_warning_grace_period_before_activation";
 
@@ -2610,10 +2860,35 @@ public sealed class EnterpriseAdminPaymentWarningGracePeriodBeforeActivationNoti
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_payment_warning_grace_period_before_activation, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_payment_warning_grace_period_before_activation)
         ];
     }
+
+    protected override bool ToAdmins => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(context.Tariff.State == TariffState.Paid && context.DueDate.AddDays(-7) == context.NowDate
+            && !context.Quota.Lifetime && !context.Quota.Customization);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonPurchaseNow", culture),
+            externalResources.Site.GetRegionalFullEntry("docspaceprices", culture)
+            + "?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_expire_7_days"));
+
+        return Task.CompletedTask;
+    }
 }
 
+/// <summary>The day an Enterprise licence expires and the grace period begins.</summary>
 [Scope]
-public sealed class EnterpriseAdminPaymentWarningGracePeriodActivationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class EnterpriseAdminPaymentWarningGracePeriodActivationNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    ExternalResourceSettingsHelper externalResources,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
     public override string ID => "enterprise_admin_payment_warning_grace_period_activation";
 
@@ -2624,10 +2899,37 @@ public sealed class EnterpriseAdminPaymentWarningGracePeriodActivationNotifyActi
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_payment_warning_grace_period_activation, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_payment_warning_grace_period_activation)
         ];
     }
+
+    protected override bool ToAdmins => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(context.Tariff.State == TariffState.Paid && context.DueDate == context.NowDate
+            && !context.Quota.Lifetime && !context.Quota.Customization);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonPurchaseNow", culture),
+            externalResources.Site.GetRegionalFullEntry("docspaceprices", culture)
+            + "?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_grace_period"));
+
+        tags.Add(new TagValue(CommonTags.PaymentDelay, TariffService.GetPaymentDelay()));
+
+        return Task.CompletedTask;
+    }
 }
 
+/// <summary>A week before the grace period of an Enterprise licence runs out.</summary>
 [Scope]
-public sealed class EnterpriseAdminPaymentWarningGracePeriodBeforeExpirationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class EnterpriseAdminPaymentWarningGracePeriodBeforeExpirationNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    ExternalResourceSettingsHelper externalResources,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
     public override string ID => "enterprise_admin_payment_warning_grace_period_before_expiration";
 
@@ -2638,10 +2940,35 @@ public sealed class EnterpriseAdminPaymentWarningGracePeriodBeforeExpirationNoti
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_payment_warning_grace_period_before_expiration, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_payment_warning_grace_period_before_expiration)
         ];
     }
+
+    protected override bool ToAdmins => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(context.Tariff.State == TariffState.Delay && context.DelayDueDate.AddDays(-7) == context.NowDate
+            && !context.Quota.Customization);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonPurchaseNow", culture),
+            externalResources.Site.GetRegionalFullEntry("docspaceprices", culture)
+            + "?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_grace_period_expire_soon"));
+
+        return Task.CompletedTask;
+    }
 }
 
+/// <summary>The day the grace period of an Enterprise licence runs out.</summary>
 [Scope]
-public sealed class EnterpriseAdminPaymentWarningGracePeriodExpirationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class EnterpriseAdminPaymentWarningGracePeriodExpirationNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    ExternalResourceSettingsHelper externalResources,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
     public override string ID => "enterprise_admin_payment_warning_grace_period_expiration";
 
@@ -2652,10 +2979,35 @@ public sealed class EnterpriseAdminPaymentWarningGracePeriodExpirationNotifyActi
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_payment_warning_grace_period_expiration, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_payment_warning_grace_period_expiration)
         ];
     }
+
+    protected override bool ToAdmins => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(context.Tariff.State == TariffState.Delay && context.DelayDueDate == context.NowDate
+            && !context.Quota.Customization);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonPurchaseNow", culture),
+            externalResources.Site.GetRegionalFullEntry("docspaceprices", culture)
+            + "?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_no_available"));
+
+        return Task.CompletedTask;
+    }
 }
 
+/// <summary>A week before a lifetime licence stops being supported.</summary>
 [Scope]
-public sealed class EnterpriseAdminPaymentWarningLifetimeBeforeExpirationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class EnterpriseAdminPaymentWarningLifetimeBeforeExpirationNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    ExternalResourceSettingsHelper externalResources,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
     public override string ID => "enterprise_admin_payment_warning_lifetime_before_expiration";
 
@@ -2666,10 +3018,35 @@ public sealed class EnterpriseAdminPaymentWarningLifetimeBeforeExpirationNotifyA
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_payment_warning_lifetime_before_expiration, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_payment_warning_lifetime_before_expiration)
         ];
     }
+
+    protected override bool ToAdmins => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(context.Tariff.State == TariffState.Paid && context.DueDate.AddDays(-7) == context.NowDate
+            && context.Quota.Lifetime);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonPurchaseNow", culture),
+            externalResources.Site.GetRegionalFullEntry("docspaceprices", culture)
+            + "?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_expire_7_days"));
+
+        return Task.CompletedTask;
+    }
 }
 
+/// <summary>The day support for a lifetime licence ends.</summary>
 [Scope]
-public sealed class EnterpriseAdminPaymentWarningLifetimeExpirationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class EnterpriseAdminPaymentWarningLifetimeExpirationNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    ExternalResourceSettingsHelper externalResources,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
     public override string ID => "enterprise_admin_payment_warning_lifetime_expiration";
 
@@ -2680,10 +3057,35 @@ public sealed class EnterpriseAdminPaymentWarningLifetimeExpirationNotifyAction(
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_enterprise_admin_payment_warning_lifetime_expiration, () => WebstudioNotifyPatternResource.pattern_enterprise_admin_payment_warning_lifetime_expiration)
         ];
     }
+
+    protected override bool ToAdmins => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(context.Tariff.State == TariffState.Paid && context.DueDate == context.NowDate
+            && context.Quota.Lifetime);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonPurchaseNow", culture),
+            externalResources.Site.GetRegionalFullEntry("docspaceprices", culture)
+            + "?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_grace_period"));
+
+        return Task.CompletedTask;
+    }
 }
 
+/// <summary>A week before a Developer licence expires.</summary>
 [Scope]
-public sealed class DeveloperAdminPaymentWarningGracePeriodBeforeActivationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class DeveloperAdminPaymentWarningGracePeriodBeforeActivationNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    ExternalResourceSettingsHelper externalResources,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
     public override string ID => "developer_admin_payment_warning_grace_period_before_activation";
 
@@ -2694,10 +3096,35 @@ public sealed class DeveloperAdminPaymentWarningGracePeriodBeforeActivationNotif
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_developer_admin_payment_warning_grace_period_before_activation, () => WebstudioNotifyPatternResource.pattern_developer_admin_payment_warning_grace_period_before_activation)
         ];
     }
+
+    protected override bool ToAdmins => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(context.Tariff.State == TariffState.Paid && context.DueDate.AddDays(-7) == context.NowDate
+            && !context.Quota.Lifetime && context.Quota.Customization);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonPurchaseNow", culture),
+            externalResources.Site.GetRegionalFullEntry("docspaceprices", culture)
+            + "?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_expire_7_days"));
+
+        return Task.CompletedTask;
+    }
 }
 
+/// <summary>The day a Developer licence expires and the grace period begins.</summary>
 [Scope]
-public sealed class DeveloperAdminPaymentWarningGracePeriodActivationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class DeveloperAdminPaymentWarningGracePeriodActivationNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    ExternalResourceSettingsHelper externalResources,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
     public override string ID => "developer_admin_payment_warning_grace_period_activation";
 
@@ -2708,10 +3135,37 @@ public sealed class DeveloperAdminPaymentWarningGracePeriodActivationNotifyActio
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_developer_admin_payment_warning_grace_period_activation, () => WebstudioNotifyPatternResource.pattern_developer_admin_payment_warning_grace_period_activation)
         ];
     }
+
+    protected override bool ToAdmins => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(context.Tariff.State == TariffState.Paid && context.DueDate == context.NowDate
+            && !context.Quota.Lifetime && context.Quota.Customization);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonPurchaseNow", culture),
+            externalResources.Site.GetRegionalFullEntry("docspaceprices", culture)
+            + "?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_grace_period"));
+
+        tags.Add(new TagValue(CommonTags.PaymentDelay, TariffService.GetPaymentDelay()));
+
+        return Task.CompletedTask;
+    }
 }
 
+/// <summary>A week before the grace period of a Developer licence runs out.</summary>
 [Scope]
-public sealed class DeveloperAdminPaymentWarningGracePeriodBeforeExpirationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class DeveloperAdminPaymentWarningGracePeriodBeforeExpirationNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    ExternalResourceSettingsHelper externalResources,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
     public override string ID => "developer_admin_payment_warning_grace_period_before_expiration";
 
@@ -2722,10 +3176,35 @@ public sealed class DeveloperAdminPaymentWarningGracePeriodBeforeExpirationNotif
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_developer_admin_payment_warning_grace_period_before_expiration, () => WebstudioNotifyPatternResource.pattern_developer_admin_payment_warning_grace_period_before_expiration)
         ];
     }
+
+    protected override bool ToAdmins => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(context.Tariff.State == TariffState.Delay && context.DelayDueDate.AddDays(-7) == context.NowDate
+            && context.Quota.Customization);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonPurchaseNow", culture),
+            externalResources.Site.GetRegionalFullEntry("docspaceprices", culture)
+            + "?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_grace_period_expire_soon"));
+
+        return Task.CompletedTask;
+    }
 }
 
+/// <summary>The day the grace period of a Developer licence runs out.</summary>
 [Scope]
-public sealed class DeveloperAdminPaymentWarningGracePeriodExpirationNotifyAction(UserManager userManager, StudioNotifyHelper studioNotifyHelper, ITariffService tariffService, TenantManager tenantManager) : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, tenantManager)
+public sealed class DeveloperAdminPaymentWarningGracePeriodExpirationNotifyAction(
+    UserManager userManager,
+    StudioNotifyHelper studioNotifyHelper,
+    ITariffService tariffService,
+    ExternalResourceSettingsHelper externalResources,
+    PeriodicNotifyAction periodicNotifyAction,
+    TenantManager tenantManager)
+    : BasePeriodicNotifyAction(userManager, studioNotifyHelper, tariffService, periodicNotifyAction, tenantManager)
 {
     public override string ID => "developer_admin_payment_warning_grace_period_expiration";
 
@@ -2735,6 +3214,23 @@ public sealed class DeveloperAdminPaymentWarningGracePeriodExpirationNotifyActio
         [
             new EmailPattern(() => WebstudioNotifyPatternResource.subject_developer_admin_payment_warning_grace_period_expiration, () => WebstudioNotifyPatternResource.pattern_developer_admin_payment_warning_grace_period_expiration)
         ];
+    }
+
+    protected override bool ToAdmins => true;
+
+    public override Task<bool> ShouldSendAsync(PeriodicLetterContext context)
+    {
+        return Task.FromResult(context.Tariff.State == TariffState.Delay && context.DelayDueDate == context.NowDate
+            && context.Quota.Customization);
+    }
+
+    protected override Task AddTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture, List<ITagValue> tags)
+    {
+        tags.Add(TagValues.OrangeButton(Resource("ButtonPurchaseNow", culture),
+            externalResources.Site.GetRegionalFullEntry("docspaceprices", culture)
+            + "?utm_source=billing&utm_medium=email&utm_campaign=ee_docspace_no_available"));
+
+        return Task.CompletedTask;
     }
 }
 
@@ -2786,7 +3282,7 @@ public sealed class UserRoleChangedNotifyAction(ExternalResourceSettingsHelper e
 
         Tags =
         [
-            new TagValue("RoomTitle", roomTitle),
+            new TagValue("RoomTitle", roomTitle.HtmlEncode()),
             new TagValue("RoomUrl", roomUrl),
             new TagValue("UserRole", userRole),
             new TagValue("HelpCenterUrl", externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("accessrights", culture)),
@@ -2816,7 +3312,7 @@ public sealed class UserAgentRoleChangedNotifyAction(ExternalResourceSettingsHel
 
         Tags =
         [
-            new TagValue("RoomTitle", roomTitle),
+            new TagValue("RoomTitle", roomTitle.HtmlEncode()),
             new TagValue("RoomUrl", roomUrl),
             new TagValue("UserRole", userRole),
             new TagValue("HelpCenterUrl", externalResourceSettingsHelper.Helpcenter.GetRegionalFullEntry("accessrights", culture)),
@@ -2835,7 +3331,8 @@ public sealed class TopUpWalletErrorNotifyAction(CommonLinkUtility commonLinkUti
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_top_up_wallet_error, () => WebstudioNotifyPatternResource.pattern_top_up_wallet_error)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_top_up_wallet_error, () => WebstudioNotifyPatternResource.pattern_top_up_wallet_error),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_top_up_wallet_error)
         ];
     }
 
@@ -2849,7 +3346,98 @@ public sealed class TopUpWalletErrorNotifyAction(CommonLinkUtility commonLinkUti
         [
             new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Culture, culture.Name),
-            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/payments/wallet")),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/billing/wallet")),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours)
+        ];
+    }
+}
+
+[Scope]
+public sealed class WalletAutoTopUpUnavailableNotifyAction(CommonLinkUtility commonLinkUtility, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
+{
+    public override string ID => "wallet_auto_top_up_unavailable";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_wallet_auto_top_up_unavailable, () => WebstudioNotifyPatternResource.pattern_wallet_auto_top_up_unavailable),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_wallet_auto_top_up_unavailable)
+        ];
+    }
+
+    public void Init(UserInfo user)
+    {
+        var culture = GetCulture(user);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGoToWalletSettings", culture);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+        Tags =
+        [
+            new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.Culture, culture.Name),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/billing/wallet")),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours)
+        ];
+    }
+}
+
+[Scope]
+public sealed class LowWalletBalanceNotifyAction(CommonLinkUtility commonLinkUtility, StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
+{
+    public override string ID => "low_wallet_balance";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_low_wallet_balance, () => WebstudioNotifyPatternResource.pattern_low_wallet_balance),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_low_wallet_balance)
+        ];
+    }
+
+    public void Init(UserInfo user)
+    {
+        var culture = GetCulture(user);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGoToWalletSettings", culture);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+        Tags =
+        [
+            new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.Culture, culture.Name),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/billing/wallet")),
+            TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours)
+        ];
+    }
+}
+
+[Scope]
+public sealed class UpcomingSubscriptionPaymentNotifyAction(StudioNotifyHelper studioNotifyHelper, TenantManager tenantManager) : NotifyAction(tenantManager)
+{
+    public override string ID => "upcoming_subscription_payment";
+
+    public override List<Pattern> Patterns
+    {
+        get =>
+        [
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_upcoming_subscription_payment, () => WebstudioNotifyPatternResource.pattern_upcoming_subscription_payment)
+        ];
+    }
+
+    // subscriptionName gives the subscriptions the upcoming payment covers, joined with a comma and
+    // localized for the recipient - e.g. "Additional disk storage, Docs Connect". It lands in the
+    // subject as well, so it must stay plain text.
+    public void Init(UserInfo user, Func<CultureInfo, string> subscriptionName)
+    {
+        var culture = GetCulture(user);
+        var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+        Tags =
+        [
+            new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
+            new TagValue(CommonTags.Culture, culture.Name),
+            new TagValue("SubscriptionName", subscriptionName(culture)),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours)
         ];
     }
@@ -2864,21 +3452,31 @@ public sealed class RenewSubscriptionErrorNotifyAction(CommonLinkUtility commonL
     {
         get =>
         [
-            new EmailPattern(() => WebstudioNotifyPatternResource.subject_renew_subscription_error, () => WebstudioNotifyPatternResource.pattern_renew_subscription_error)
+            new EmailPattern(() => WebstudioNotifyPatternResource.subject_renew_subscription_error, () => WebstudioNotifyPatternResource.pattern_renew_subscription_error),
+            new TelegramPattern(() => WebstudioNotifyPatternResource.pattern_renew_subscription_error)
         ];
     }
 
-    public void Init(UserInfo user)
+    // serviceName is the billing service of the subscription (TenantQuota.ServiceName); the letter names it the
+    // way the customer operations report does - "Business plan", "Admins" - in the recipient's culture. The unit
+    // is a label in front of the number ("Admins: 2"), as the report's column headers read, so it needs no
+    // agreement with the number in any language.
+    public void Init(UserInfo user, string serviceName, int quantity)
     {
         var culture = GetCulture(user);
-        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonGoToServices", culture);
+        var orangeButtonText = WebstudioNotifyPatternResource.ResourceManager.GetString("ButtonVisitBillingSection", culture);
         var txtTrulyYours = WebstudioNotifyPatternResource.ResourceManager.GetString("TrulyYoursText", culture);
+
+        var (normalizedServiceName, title, unit) = WalletServiceDescriptionManager.GetServiceTitleAndUom(serviceName, null, culture);
 
         Tags =
         [
             new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
             new TagValue(CommonTags.Culture, culture.Name),
-            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/portal-settings/services")),
+            new TagValue("ServiceName", title ?? normalizedServiceName),
+            new TagValue("ServiceUnit", unit ?? string.Empty),
+            new TagValue("ServiceQuantity", $"{quantity}"),
+            TagValues.OrangeButton(orangeButtonText, commonLinkUtility.GetFullAbsolutePath("~/billing/overview")),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours)
         ];
     }
@@ -2906,7 +3504,7 @@ public sealed class ApiKeyExpiredNotifyAction(StudioNotifyHelper studioNotifyHel
         Tags =
         [
             new TagValue(CommonTags.UserName, user.FirstName.HtmlEncode()),
-            new TagValue(CommonTags.Message, keyName),
+            new TagValue(CommonTags.Message, keyName.HtmlEncode()),
             new TagValue(CommonTags.Culture, culture.Name),
             TagValues.TrulyYours(studioNotifyHelper, txtTrulyYours)
         ];

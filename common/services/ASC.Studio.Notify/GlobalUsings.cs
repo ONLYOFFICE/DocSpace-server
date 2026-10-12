@@ -31,6 +31,7 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+global using ASC.AI.Integration.Extensions;
 global using ASC.Api.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Common;

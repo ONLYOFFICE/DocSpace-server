@@ -34,7 +34,7 @@
 namespace ASC.EventBus.RabbitMQ;
 
 public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFactory,
-        ILogger<DefaultRabbitMQPersistentConnection> logger, int retryCount = 5)
+        ILogger<DefaultRabbitMQPersistentConnection> logger, int retryCount = 5, CancellationToken applicationStopping = default)
     : IRabbitMQPersistentConnection
 {
     private readonly IConnectionFactory _connectionFactory = connectionFactory ?? throw new ArgumentNullException(nameof(connectionFactory));
@@ -85,7 +85,12 @@ public class DefaultRabbitMQPersistentConnection(IConnectionFactory connectionFa
         {
             while (!IsConnected) // waiting automatic recovery connection
             {
-                await Task.Delay(1000);
+                if (_disposed || applicationStopping.IsCancellationRequested)
+                {
+                    return false;
+                }
+
+                await Task.Delay(100);
             }
 
             _logger.InformationRabbitMQAcquiredPersistentConnection(_connection.Endpoint.HostName);

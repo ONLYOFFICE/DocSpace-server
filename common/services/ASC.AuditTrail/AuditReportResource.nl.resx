@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -247,7 +247,7 @@
     <value>Klantabonnement bijgewerkt: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Instellingen voor ingeschakelde klantportemonnee-services bijgewerkt</value>
+    <value>Instellingen voor ingeschakelde klantwallet-services bijgewerkt: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Klant wallet opgeladen: {0}</value>
@@ -729,12 +729,6 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Portaal hernoemd</value>
   </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Privé kamer is uitgeschakeld</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Privé kamer is ingeschakeld</value>
-  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Producten [{0}]. Toegang Geopend</value>
   </data>
@@ -788,6 +782,12 @@
   </data>
   <data name="RegenerateSecret" xml:space="preserve">
     <value>{0} client secret opnieuw gegenereerd</value>
+  </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Opmerking</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Het rapport toont de {0} meest recente van {1} gebeurtenissen. Download het rapport in CSV-formaat om alle gebeurtenissen te krijgen.</value>
   </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Vectorisatie-instellingen zijn gereset</value>
@@ -907,7 +907,7 @@
     <value>Verzenden</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Gebruiker {0} stuurde een uitnodiging naar {1} om lid te worden van deze DocSpace</value>
+    <value>Gebruiker {0} stuurde een uitnodiging naar {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Uitnodigingsinstructies Verstuurd: {0}</value>
@@ -956,6 +956,9 @@
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Start portaalregio migratie</value>
+  </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Abonnementssaldo verplaatst naar wallet: {0}</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Systeemaccount</value>
@@ -1205,5 +1208,89 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Actieve verbindingen voor gebruiker uitgelogd: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Docs Connect-configuratie bijgewerkt</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Docs Connect-quotumrapport gedownload</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>AI-instellingen van gebruiker bijgewerkt</value>
+  </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>AI-profiel toegewezen aan AI-agent voor actie: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>AI-profiel toegewezen aan actie: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>AI-modelprofiel aangemaakt: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>AI-modelprofiel verwijderd: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>AI-profiel ontkoppeld van actie: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>AI-modelprofiel bijgewerkt: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Bestanden [{0}]. Gemarkeerd als gelezen</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Bestanden [{0}]. Bestand niet opgeslagen. Opslagquotum voor portal overschreden.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Bestanden [{0}]. Opslaan van bestand overschrijdt het opslagquotum van de portal.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Mappen [{0}]. Gemarkeerd als gelezen</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Privékamer-versleutelingssleutel {0} aangemaakt</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Privékamer-versleutelingssleutel {0} verwijderd</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Privékamer-versleutelingssleutel {0} bijgewerkt</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Verdachte aanmelding gedetecteerd: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>MCP-server {0} van AI-agent bijgewerkt</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Metagegevens cascade-toewijzing gestart: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Metagegevensveld aangemaakt: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Metagegevensveld verwijderd: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Metagegevensveld bijgewerkt: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Metagegevenssjabloon toegewezen: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Metagegevenssjabloon aangemaakt: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Metagegevenssjabloon verwijderd: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Toewijzing metagegevenssjabloon opgeheven: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Metagegevenssjabloon bijgewerkt: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Metagegevenswaarden bijgewerkt: {0}</value>
   </data>
 </root>

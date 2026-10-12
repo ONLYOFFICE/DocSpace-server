@@ -39,25 +39,28 @@ namespace ASC.People.ApiModels.RequestDto;
 public class UpdateGroupRequest
 {
     /// <summary>
-    /// The list of user IDs to add to the group.
+    /// The accounts to add to the group. An account that is a guest, is disabled or does not exist is skipped
+    /// without an error, so the answer has to be read to see what was applied.
     /// </summary>
     /// <example>["00000000-0000-0000-0000-000000000000"]</example>
     public IEnumerable<Guid> MembersToAdd { get; set; }
 
     /// <summary>
-    /// The list of user IDs to remove from the group.
+    /// The accounts to remove from the group. Removals are applied after the additions, so an account named in both
+    /// lists ends up removed, and an ID that is not a member is skipped without an error.
     /// </summary>
     /// <example>["11111111-1111-1111-1111-111111111111"]</example>
     public IEnumerable<Guid> MembersToRemove { get; set; }
 
     /// <summary>
-    /// The group manager ID.
+    /// The account to make the manager of the group, which also adds it to the group. Omit it to keep the current
+    /// manager - it cannot be cleared through this operation.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     public Guid GroupManager { get; set; }
 
     /// <summary>
-    /// The group name.
+    /// The new name of the group, up to 128 characters. Omit it to keep the current name.
     /// </summary>
     /// <example>Sales Team</example>
     [StringLength(128)]
@@ -70,14 +73,16 @@ public class UpdateGroupRequest
 public class UpdateGroupRequestDto
 {
     /// <summary>
-    /// The group ID.
+    /// The ID of the group to update, taken from the route. It has to be a group that has not been deleted,
+    /// otherwise the operation answers 404.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
     [FromRoute(Name = "id")]
     public required Guid Id { get; set; }
 
     /// <summary>
-    /// The request for updating a group.
+    /// The fields to change. Every field is optional and the ones that are left out keep their current values, so an
+    /// empty object changes nothing.
     /// </summary>
     /// <example>{"groupName":"Updated Team","groupManager":"00000000-0000-0000-0000-000000000000"}</example>
     [FromBody]

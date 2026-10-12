@@ -59,7 +59,7 @@ import lombok.*;
  *
  * <pre>{@code
  * ChangeClientActivationRequest request = ChangeClientActivationRequest.builder()
- *     .enabled(true)
+ *     .status(true)
  *     .build();
  * }</pre>
  *
@@ -73,8 +73,14 @@ import lombok.*;
 @Schema(description = "Request to change the activation status of a tenant's client")
 public class ChangeClientActivationRequest implements Serializable {
   /** Indicates whether the client's activation status is enabled or disabled. */
-  @NotNull
+  @NotNull(message = "activation status must not be null")
   @JsonProperty("status")
-  @Schema(description = "The activation status of the client", example = "true")
-  private boolean enabled;
+  @Schema(
+      description =
+          "Whether the client may obtain tokens from now on. Sending false leaves the "
+              + "registration and the already issued tokens in place but refuses new authorization "
+              + "requests; sending true allows them again.",
+      example = "true",
+      requiredMode = Schema.RequiredMode.REQUIRED)
+  private Boolean status;
 }

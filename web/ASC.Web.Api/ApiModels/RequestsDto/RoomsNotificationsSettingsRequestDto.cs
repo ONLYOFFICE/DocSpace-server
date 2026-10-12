@@ -34,7 +34,7 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// The request parameters for configuring notification settings for the chat or collaboration rooms.
+/// Which single room the calling user silences, and which way.
 /// </summary>
 /// <example>
 /// {
@@ -45,13 +45,17 @@ namespace ASC.Web.Api.ApiModels.RequestsDto;
 public class RoomsNotificationsSettingsRequestDto
 {
     /// <summary>
-    /// The target room identifier.
+    /// The room to act on. It is kept as an opaque value, so both the numeric identifier of a portal room and the
+    /// string identifier of a room on a connected third-party account are accepted; neither the room existence nor
+    /// the caller access to it is checked, and a mistyped identifier is stored as sent. One call carries one room.
     /// </summary>
     /// <example>{}</example>
     public object RoomsId { get; set; }
 
     /// <summary>
-    /// Specifies whether the notifications will be delivered to the specified room or not.
+    /// Which way the room goes: `true` adds it to the caller silenced list, `false` takes it off again. While a room
+    /// is silenced its activity is left out of the hourly and daily digests, the letters it would send at once are
+    /// not sent, and its new-item counters are hidden.
     /// </summary>
     /// <example>true</example>
     public bool Mute { get; set; }

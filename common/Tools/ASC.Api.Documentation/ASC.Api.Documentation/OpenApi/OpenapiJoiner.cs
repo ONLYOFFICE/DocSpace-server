@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -35,14 +35,21 @@ namespace ASC.Api.Documentation;
 
 public class OpenapiJoiner : AsyncCommand<JoinSettings>
 {
-    public override async Task<int> ExecuteAsync(CommandContext context, JoinSettings settings, CancellationToken cancellationToken)
+    protected override async Task<int> ExecuteAsync(CommandContext context, JoinSettings settings, CancellationToken cancellationToken)
     {
         await AnsiConsole.Progress()
             .StartAsync(async ctx =>
             {
                 var task = ctx.AddTask("Joining [green]openapi files[/]");
 
-                await JoinAsync(settings.Output, [.. settings.Files!], progress: percent => task.Value = percent, cancellationToken);
+                await JoinAsync(
+                    settings.Output,
+                    settings.PublishOutput,
+                    settings.ServerUrl,
+                    settings.InfoFrom,
+                    [.. settings.Files!],
+                    progress: percent => task.Value = percent,
+                    cancellationToken);
 
                 task.Value = 100;
             });
@@ -50,7 +57,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         return 0;
     }
 
-    private static async Task JoinAsync(string outputPath, string[] inputFiles, Action<double>? progress = null, CancellationToken cancellationToken = default)
+    private static async Task JoinAsync(string outputPath, string? publishPath, string? serverUrl, string? infoFromPath, string[] inputFiles, Action<double>? progress = null, CancellationToken cancellationToken = default)
     {
         if (inputFiles == null || inputFiles.Length == 0)
         {
@@ -73,6 +80,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
             }
 
             var openapi = LoadJson(file);
+            PushDownRootSecurity(openapi);
 
             if (result == null)
             {
@@ -93,11 +101,32 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
             throw new Exception("Nothing to merge.");
         }
 
-        SortTagGroups(result);
-        EnumCleaner.Clean(result);
-        FixMultipartFormData(result);
-        RemoveFormCollectionSchema(result);
-        ApplyDeepObjectStyle(result);
+        // The first document is the base of the join, so without this its `info` - whichever service it describes -
+        // would become the `info` of the whole API.
+        if (!string.IsNullOrWhiteSpace(infoFromPath))
+        {
+            result["info"] = LoadJson(infoFromPath)["info"]?.DeepClone()
+                ?? throw new Exception($"No info in the openapi file: {infoFromPath}");
+        }
+
+        // Two documents come out of the one merge, and they are not the same document. The SDK input
+        // carries workarounds for openapi-generator's incomplete openapi 3.1 support, and those
+        // workarounds change what the schemas say: `additionalProperties: false` is dropped and the
+        // examples move to a keyword 3.1 does not define. Publishing that as the API contract would
+        // hand everyone else a description the server does not actually implement. `ApiDateTime` runs
+        // the other way round - the object shape is the one the generator needs and the string is what
+        // the wire carries - so it is collapsed for publishing instead.
+        if (!string.IsNullOrWhiteSpace(publishPath))
+        {
+            var published = result.DeepClone().AsObject();
+            Rewrite(published, applyGeneratorWorkarounds: false);
+            OpenApiServer.ApplyBaseUrlDefault(published, serverUrl);
+
+            Directory.CreateDirectory(Path.GetDirectoryName(publishPath)!);
+            await File.WriteAllTextAsync(publishPath, YamlWriter.Write(published), cancellationToken);
+        }
+
+        Rewrite(result, applyGeneratorWorkarounds: true);
 
         var options = new JsonSerializerOptions
         {
@@ -110,6 +139,31 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         progress?.Invoke(100);
     }
 
+    /// <summary>
+    /// The passes every joined document goes through, with the openapi-generator workarounds applied
+    /// only to the document that openapi-generator reads.
+    /// </summary>
+    private static void Rewrite(JsonObject document, bool applyGeneratorWorkarounds)
+    {
+        SortTagGroups(document);
+
+        // Runs first so that everything below sees the keyword spellings openapi-generator understands.
+        if (applyGeneratorWorkarounds)
+        {
+            NormalizeNullableTypes(document);
+        }
+        else
+        {
+            // Also first: the passes below key off `$ref` targets, and this one leaves none behind.
+            InlineApiDateTime(document);
+        }
+
+        EnumCleaner.Clean(document);
+        FixMultipartFormData(document);
+        RemoveFormCollectionSchema(document);
+        ApplyDeepObjectStyle(document);
+    }
+
     private static JsonObject LoadJson(string path)
     {
         try
@@ -119,6 +173,45 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         catch (Exception ex)
         {
             throw new Exception($"Invalid JSON in file: {path}\n{ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Moves the root <c>security</c> of a document onto each of its operations that declares none, and drops it
+    /// from the root. A root requirement is the default of that one document only: left on the joined root it would
+    /// also become the requirement of every operation of the other documents that declares none - the OAuth token
+    /// endpoint among them - and describe schemes those services never asked for.
+    /// </summary>
+    private static void PushDownRootSecurity(JsonObject document)
+    {
+        if (!document.TryGetPropertyValue("security", out var securityNode))
+        {
+            return;
+        }
+
+        document.Remove("security");
+
+        if (securityNode is not JsonArray security || document["paths"] is not JsonObject paths)
+        {
+            return;
+        }
+
+        foreach (var path in paths)
+        {
+            if (path.Value is not JsonObject methods)
+            {
+                continue;
+            }
+
+            foreach (var method in methods)
+            {
+                if (method.Value is not JsonObject operation || operation.ContainsKey("security"))
+                {
+                    continue;
+                }
+
+                operation["security"] = security.DeepClone();
+            }
         }
     }
 
@@ -394,7 +487,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
 
                 var existing = trgSection[item.Key]!;
 
-                if(!JsonDeepEquals(existing, item.Value))
+                if(!JsonDeepEquals(existing, item.Value!))
                 {
                     throw new Exception($"Component conflict in '{section.Key}/{item.Key}' in {fileName}");
                 }
@@ -553,7 +646,8 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
                 }
 
                 var props = propsNode as JsonObject;
-                if (props == null || !props.ContainsKey("FormCollection"))
+                // the services publish parameter names in camelCase, older documents in PascalCase
+                if (props == null || !props.Any(p => string.Equals(p.Key, "FormCollection", StringComparison.OrdinalIgnoreCase)))
                 {
                     continue;
                 }
@@ -592,6 +686,249 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         schemas.Remove("KeyValuePairStringStringValues");
     }
 
+    /// <summary>
+    /// Replaces every reference to the <c>ApiDateTime</c> component with the ISO-8601 string the wire actually
+    /// carries, and drops the component itself. <c>ApiDateTimeConverter</c> is declared on the type, and it
+    /// writes a single string and reads a single string, so the reflected <c>utcTime</c>/<c>timeZoneOffset</c>
+    /// object never appears in a body. That object shape is kept in the SDK input on purpose - it is what makes
+    /// openapi-generator emit a named <c>ApiDateTime</c> model, which the generated clients then map to and from
+    /// the string with a converter of their own - but publishing it would describe a payload nobody sends.
+    /// Two names because two emitters: the .NET services call it <c>ApiDateTime</c> and the Node service, whose
+    /// components are all prefixed, calls it <c>AiApiDateTime</c>.
+    /// </summary>
+    private static void InlineApiDateTime(JsonObject document)
+    {
+        if (document["components"]?["schemas"] is not JsonObject schemas)
+        {
+            return;
+        }
+
+        var inlined = new Dictionary<string, JsonObject>();
+
+        foreach (var schemaId in (string[])["ApiDateTime", "AiApiDateTime"])
+        {
+            if (schemas[schemaId] is not JsonObject schema)
+            {
+                continue;
+            }
+
+            var replacement = new JsonObject
+            {
+                ["type"] = "string",
+                ["format"] = "date-time"
+            };
+
+            // The example belongs to the property the component reflected, so it stays in step with the DTO
+            // instead of being spelled out here a second time.
+            if (schema["properties"]?["utcTime"]?["examples"] is JsonArray { Count: > 0 } examples)
+            {
+                replacement["examples"] = new JsonArray(examples[0]?.DeepClone());
+            }
+
+            inlined[$"#/components/schemas/{schemaId}"] = replacement;
+        }
+
+        if (inlined.Count == 0)
+        {
+            return;
+        }
+
+        InlineSchemaRefs(document, inlined);
+
+        foreach (var reference in inlined.Keys)
+        {
+            schemas.Remove(reference["#/components/schemas/".Length..]);
+        }
+    }
+
+    /// <summary>
+    /// Swaps each <c>$ref</c> listed in <paramref name="inlined"/> for its replacement schema, keeping whatever
+    /// the reference site said alongside it - a per-property <c>description</c>, most of the time.
+    /// </summary>
+    private static void InlineSchemaRefs(JsonNode? node, Dictionary<string, JsonObject> inlined)
+    {
+        switch (node)
+        {
+            case JsonObject obj:
+                foreach (var property in obj.ToArray())
+                {
+                    if (TryInlineSchemaRef(property.Value, inlined, out var replacement))
+                    {
+                        obj[property.Key] = replacement;
+                        continue;
+                    }
+
+                    InlineSchemaRefs(property.Value, inlined);
+                }
+
+                return;
+
+            case JsonArray array:
+                for (var i = 0; i < array.Count; i++)
+                {
+                    if (TryInlineSchemaRef(array[i], inlined, out var replacement))
+                    {
+                        array[i] = replacement;
+                        continue;
+                    }
+
+                    InlineSchemaRefs(array[i], inlined);
+                }
+
+                return;
+        }
+    }
+
+    private static bool TryInlineSchemaRef(JsonNode? node, Dictionary<string, JsonObject> inlined, out JsonObject? replacement)
+    {
+        replacement = null;
+
+        if (node is not JsonObject schema
+            || schema["$ref"] is not JsonValue reference
+            || !reference.TryGetValue<string>(out var target)
+            || !inlined.TryGetValue(target, out var template))
+        {
+            return false;
+        }
+
+        replacement = template.DeepClone().AsObject();
+
+        // A sibling of `$ref` is an annotation the reference site adds, so it wins over the template.
+        foreach (var property in schema)
+        {
+            if (property.Key != "$ref")
+            {
+                replacement[property.Key] = property.Value?.DeepClone();
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Works around openapi-generator defects in openapi 3.1 documents. The rewrites are applied to the SDK input
+    /// only - the published openapi files stay untouched.
+    /// </summary>
+    private static void NormalizeNullableTypes(JsonNode? node, bool unionMember = false)
+    {
+        switch (node)
+        {
+            case JsonArray array:
+                foreach (var item in array)
+                {
+                    NormalizeNullableTypes(item, unionMember);
+                }
+
+                return;
+
+            case JsonObject obj:
+                NormalizeNullableType(obj, unionMember);
+                RemoveClosedObjectMarker(obj);
+                DowngradeSchemaExamples(obj);
+
+                foreach (var property in obj.ToArray())
+                {
+                    // Under these the keys are property names, so a property called `example` or `default`
+                    // still holds a schema and has to be walked into.
+                    if (property.Key is "properties" or "patternProperties" or "definitions" or "$defs")
+                    {
+                        NormalizeSchemaMap(property.Value);
+                        continue;
+                    }
+
+                    // Sample payloads are data, not schemas - never rewrite them.
+                    if (property.Key is "example" or "examples" or "default")
+                    {
+                        continue;
+                    }
+
+                    NormalizeNullableTypes(property.Value, property.Key is "anyOf" or "oneOf");
+                }
+
+                return;
+        }
+    }
+
+    private static void NormalizeSchemaMap(JsonNode? node)
+    {
+        if (node is not JsonObject map)
+        {
+            return;
+        }
+
+        foreach (var entry in map.ToArray())
+        {
+            NormalizeNullableTypes(entry.Value);
+        }
+    }
+
+    /// <summary>
+    /// In an openapi 3.1 document openapi-generator randomly loses <c>"additionalProperties": false</c> and generates
+    /// a public <c>[JsonExtensionData]</c> bag on the model. Dropping the keyword yields exactly the same - closed -
+    /// models, because the generator disallows undeclared properties when the keyword is absent.
+    /// </summary>
+    private static void RemoveClosedObjectMarker(JsonObject schema)
+    {
+        if (schema["additionalProperties"] is JsonValue value && value.TryGetValue<bool>(out var allowed) && !allowed)
+        {
+            schema.Remove("additionalProperties");
+        }
+    }
+
+    /// <summary>
+    /// Openapi 3.1 keeps the examples of a schema in the JSON Schema <c>examples</c> array, which openapi-generator
+    /// does not read - it still looks for the deprecated singular <c>example</c>, and without it the generated SDKs
+    /// carry no examples at all. The other 3.1 keywords need no help: <c>const</c> becomes an enum and
+    /// <c>contentMediaType</c> becomes a file parameter on their own.
+    /// </summary>
+    private static void DowngradeSchemaExamples(JsonObject schema)
+    {
+        // A schema keeps its examples in an array; on a media type or a parameter `examples` is a map of
+        // Example Objects, which is a different - and still valid - construct.
+        if (schema["examples"] is not JsonArray { Count: > 0 } examples)
+        {
+            return;
+        }
+
+        var first = examples[0]?.DeepClone();
+        schema.Remove("examples");
+        schema["example"] = first;
+    }
+
+    private static void NormalizeNullableType(JsonObject schema, bool unionMember)
+    {
+        if (!schema.TryGetPropertyValue("type", out var typeNode))
+        {
+            return;
+        }
+
+        if (typeNode is JsonValue value)
+        {
+            // Inside `anyOf`/`oneOf`, `"type": "null"` is the null branch of the union and must stay intact.
+            // On a property it means the value has to be null, which is never what the emitter meant - it is what
+            // an untyped `object` turns into - so the keyword is dropped and the property stays untyped.
+            if (!unionMember && value.TryGetValue<string>(out var singleType) && singleType == "null")
+            {
+                schema.Remove("type");
+            }
+
+            return;
+        }
+
+        if (typeNode is not JsonArray types || !SchemaTypeIncludes(types, "null") || !SchemaTypeIncludes(types, "object"))
+        {
+            return;
+        }
+
+        // Only map schemas are affected: inline object schemas with properties are resolved correctly since 7.24.0.
+        if (schema["additionalProperties"] is not JsonObject)
+        {
+            return;
+        }
+
+        schema["type"] = "object";
+    }
+
     private static bool IsObjectSchema(JsonNode schemaNode, JsonObject? components)
     {
         if (schemaNode is not JsonObject schemaObj)
@@ -611,7 +948,7 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
                 if (components.TryGetPropertyValue(name, out var compSchema))
                 {
                     var compObj = compSchema as JsonObject;
-                    if (compObj?["type"]?.ToString() == "object")
+                    if (SchemaTypeIncludes(compObj?["type"], "object"))
                     {
                         return true;
                     }
@@ -620,6 +957,16 @@ public class OpenapiJoiner : AsyncCommand<JoinSettings>
         }
 
         return false;
+    }
+
+    private static bool SchemaTypeIncludes(JsonNode? typeNode, string wanted)
+    {
+        return typeNode switch
+        {
+            JsonValue v => v.TryGetValue<string>(out var s) && s == wanted,
+            JsonArray a => a.Any(n => n is JsonValue nv && nv.TryGetValue<string>(out var s) && s == wanted),
+            _ => false
+        };
     }
 
     private static bool JsonDeepEquals(JsonNode a, JsonNode b)

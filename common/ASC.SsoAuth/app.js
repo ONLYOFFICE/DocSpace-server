@@ -83,7 +83,7 @@ require("./app/routes")(app, config);
 
 const httpServer = http.createServer(app);
 
-httpServer.listen(config.app.port, function () {
+httpServer.listen(config.app.port, config.app.hostname, function () {
   winston.info(
     `Start SSO Service Provider listening on port ${config.app.port} ` +
       `appsettings path='${config.app.appsettings}'`

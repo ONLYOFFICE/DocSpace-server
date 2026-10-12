@@ -107,6 +107,21 @@ public class MessageFactory(
         }
     }
 
+    public EventMessage Create(MessageUserData userData, MessageAction action, string ip, string browser, string platform, params string[] description)
+    {
+        return new EventMessage
+        {
+            Date = DateTime.UtcNow,
+            TenantId = userData?.TenantId ?? tenantManager.GetCurrentTenantId(),
+            UserId = userData?.UserId ?? authContext.CurrentAccount.ID,
+            Action = action,
+            Description = description?.Select(s => s ?? "").ToArray(),
+            Ip = ip,
+            Browser = browser,
+            Platform = platform
+        };
+    }
+
     public EventMessage Create(HttpRequest request, MessageUserData userData, MessageAction action, string initiator, params string[] description)
     {
         try

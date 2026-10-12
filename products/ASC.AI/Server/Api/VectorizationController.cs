@@ -34,23 +34,21 @@
 namespace ASC.AI.Api;
 
 [Scope]
-[DefaultRoute]
-[ApiController]
+[ApiEndpoint("ai", Internal = true)]
 [AiFeature]
-[ControllerName("ai")]
 public class VectorizationController(
     VectorizationTaskPublisher vectorizationTaskPublisher) : ControllerBase
 {
-    /// <summary>
-    /// Start a vectorization task
-    /// </summary>
     /// <remarks>
-    /// Submits the specified files for vectorization. Each file is processed asynchronously by the configured embedding provider
-    /// and indexed for semantic search in AI chat sessions. Only files accessible to the current user can be vectorized.
+    /// Submits the specified files for vectorization processing.
     /// </remarks>
+    /// <summary>Start a vectorization task</summary>
     /// <path>api/2.0/ai/vectorization/tasks</path>
     [Tags("AI / Vectorization")]
-    [SwaggerResponse(200, "The vectorization task was successfully submitted")]
+    [SwaggerResponse(200, "Ok")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `files`, or `files` is empty")]
+    [SwaggerResponse(403, "The caller may not vectorize one of the files: it has never been queued for vectorization, it lies in the knowledge folder of an AI agent while vectorization is switched off, or the caller's access to it does not allow vectorization")]
+    [SwaggerResponse(404, "One of the files does not exist")]
     [HttpPost("vectorization/tasks")]
     public async Task StartTaskAsync(VectorizationStartRequestDto inDto)
     {

@@ -241,7 +241,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to New DocSpace user added: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;.
+        ///   Looks up a localized string similar to New user added: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;.
         /// </summary>
         public static string ActionUserCreated {
             get {
@@ -277,7 +277,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to DocSpace user updated: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;.
+        ///   Looks up a localized string similar to User updated: &lt;b&gt;{0} ({1})&lt;/b&gt; - &lt;b&gt;{2}&lt;/b&gt;.
         /// </summary>
         public static string ActionUserUpdated {
             get {
@@ -331,6 +331,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Activate AI features.
+        /// </summary>
+        public static string ButtonActivateAiFeatures {
+            get {
+                return ResourceManager.GetString("ButtonActivateAiFeatures", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Click here to activate your email address.
         /// </summary>
         public static string ButtonActivateEmail {
@@ -376,7 +385,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Collaborate in DocSpace.
+        ///   Looks up a localized string similar to Collaborate in ${LetterLogoText}.
         /// </summary>
         public static string ButtonCollaborate {
             get {
@@ -403,7 +412,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Confirm DocSpace Invite.
+        ///   Looks up a localized string similar to Confirm ${LetterLogoText} Invite.
         /// </summary>
         public static string ButtonConfirmInvite {
             get {
@@ -457,15 +466,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Get free app.
-        /// </summary>
-        public static string ButtonGetFreeApp {
-            get {
-                return ResourceManager.GetString("ButtonGetFreeApp", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Get started.
         /// </summary>
         public static string ButtonGetStarted {
@@ -475,11 +475,11 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Go to Services.
+        ///   Looks up a localized string similar to Go to your ${LetterLogoText}.
         /// </summary>
-        public static string ButtonGoToServices {
+        public static string ButtonGoToDocSpace {
             get {
-                return ResourceManager.GetString("ButtonGoToServices", resourceCulture);
+                return ResourceManager.GetString("ButtonGoToDocSpace", resourceCulture);
             }
         }
         
@@ -538,7 +538,16 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Open DocSpace.
+        ///   Looks up a localized string similar to Log into ${LetterLogoText}.
+        /// </summary>
+        public static string ButtonLogIn {
+            get {
+                return ResourceManager.GetString("ButtonLogIn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open ${LetterLogoText}.
         /// </summary>
         public static string ButtonOpenDocSpace {
             get {
@@ -637,20 +646,11 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Visit Payments Section.
+        ///   Looks up a localized string similar to Visit Billing section.
         /// </summary>
-        public static string ButtonVisitPaymentsSection {
+        public static string ButtonVisitBillingSection {
             get {
-                return ResourceManager.GetString("ButtonVisitPaymentsSection", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Watch full playlist.
-        /// </summary>
-        public static string ButtonWatchFullPlaylist {
-            get {
-                return ResourceManager.GetString("ButtonWatchFullPlaylist", resourceCulture);
+                return ResourceManager.GetString("ButtonVisitBillingSection", resourceCulture);
             }
         }
         
@@ -668,6 +668,17 @@ namespace ASC.Web.Core.PublicResources {
         public static string pattern_activate_email {
             get {
                 return ResourceManager.GetString("pattern_activate_email", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt;!&lt;/td&gt;&lt;/tr&gt;
+        ///
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_admin_activation_v1 {
+            get {
+                return ResourceManager.GetString("pattern_admin_activation_v1", resourceCulture);
             }
         }
         
@@ -730,7 +741,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName,
         ///
-        ///The backup process for your DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; has failed.
+        ///The backup process for your ${LetterLogoText} &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; has failed.
         ///
         ///If you have any questions or need assistance, please don’t hesitate to contact us via &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;
         ///
@@ -745,7 +756,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName,
         ///
-        ///The backup process for your DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) has failed.
+        ///The backup process for your ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) has failed.
         ///
         ///If you have any questions or need assistance, please don’t hesitate to contact us via [${__SupportLink}](${__SupportLink})
         ///
@@ -849,13 +860,13 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Your license for ${LetterLogoText} DocSpace Developer expires today.
+        ///Your license for ${LetterLogoText} Developer expires today.
         ///
         ///We have activated a grace period of $PaymentDelay days for you. During this time, access to document editing is limited to 20 simultaneous connections (support and updates are no longer provided).
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
-        ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesE [rest of string was truncated]&quot;;.
+        ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;. For solvi [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_developer_admin_payment_warning_grace_period_activation {
             get {
@@ -866,7 +877,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Your license for ${LetterLogoText} DocSpace Developer will expire in 7 days.
+        ///Your license for ${LetterLogoText} Developer will expire in 7 days.
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
@@ -883,7 +894,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///The grace period for your ${LetterLogoText} DocSpace Developer license will expire in 7 days. It means DocSpace will become unavailable.
+        ///The grace period for your ${LetterLogoText} Developer license will expire in 7 days. It means ${LetterLogoText} will become unavailable.
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
@@ -900,7 +911,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///The grace period for your ${LetterLogoText} DocSpace Developer license expires today. It means DocSpace will be no longer available.
+        ///The grace period for your ${LetterLogoText} Developer license expires today. It means ${LetterLogoText} will be no longer available.
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
@@ -915,35 +926,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;&lt;span style=&quot;color: #FF6F3D;&quot;&gt;5 tips&lt;/span&gt; for effective work on your docs&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_docs_tips {
-            get {
-                return ResourceManager.GetString("pattern_docs_tips", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_enterprise_admin_activation_v1 {
-            get {
-                return ResourceManager.GetString("pattern_enterprise_admin_activation_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Your license for ${LetterLogoText} DocSpace Enterprise expires today.
+        ///Your license for ${LetterLogoText} Enterprise expires today.
         ///
-        ///We have activated *a grace period of $PaymentDelay‎ days* for you. During this time, access to DocSpace is provided for 3 named users* (support and updates are no longer provided).
+        ///We have activated *a grace period of $PaymentDelay‎ days* for you. During this time, access to ${LetterLogoText} is provided for 3 named users* (support and updates are no longer provided).
         ///
-        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} DocSpace Enterprise (with 3 years of support and updates  [rest of string was truncated]&quot;;.
+        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} Enterprise (with 3 years of support and updates included):
+        ///
+        ///$Or [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_grace_period_activation {
             get {
@@ -954,15 +945,15 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Your license for ${LetterLogoText} DocSpace Enterprise will expire in 7 days.
+        ///Your license for ${LetterLogoText} Enterprise will expire in 7 days.
         ///
-        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} DocSpace Enterprise (with 3 years of support and updates included).
+        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} Enterprise (with 3 years of support and updates included).
         ///
         ///$OrangeButton
         ///
         ///You are also welcome to contact your dedicated sales manager directly for the license update.
         ///
-        ///For payment questions, contact us at &quot;${__SalesE [rest of string was truncated]&quot;;.
+        ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmai [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_grace_period_before_activation {
             get {
@@ -973,13 +964,15 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///The grace period for your ${LetterLogoText} DocSpace Enterprise license will expire in 7 days. It means DocSpace will become unavailable.
+        ///The grace period for your ${LetterLogoText} Enterprise license will expire in 7 days. It means ${LetterLogoText} will become unavailable.
         ///
-        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} DocSpace Enterprise (with 3 years of support and updates included):
+        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} Enterprise (with 3 years of support and updates included):
         ///
         ///$OrangeButton
         ///
-        ///You are also welcome to contact your dedicated sales manager directly for the license [rest of string was truncated]&quot;;.
+        ///You are also welcome to contact your dedicated sales manager directly for the license update.
+        ///
+        ///For pay [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_grace_period_before_expiration {
             get {
@@ -990,13 +983,15 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///The grace period for your ${LetterLogoText} DocSpace Enterprise license expires today. It means DocSpace will be no longer available.
+        ///The grace period for your ${LetterLogoText} Enterprise license expires today. It means ${LetterLogoText} will be no longer available.
         ///
-        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} DocSpace Enterprise (with 3 years of support and updates included):
+        ///To be able to use all the features available at the moment of the purchase for an *unlimited period of time*, we recommend you *obtain a LIFETIME license* for ${LetterLogoText} Enterprise (with 3 years of support and updates included):
         ///
         ///$OrangeButton
         ///
-        ///You are also welcome to contact your dedicated sales manager directly for the license upd [rest of string was truncated]&quot;;.
+        ///You are also welcome to contact your dedicated sales manager directly for the license update. 
+        ///
+        ///For paymen [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_grace_period_expiration {
             get {
@@ -1007,13 +1002,13 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Your license for ${LetterLogoText} DocSpace Enterprise will expire in 7 days. It means updates and support will be no longer available.*
+        ///Your license for ${LetterLogoText} Enterprise will expire in 7 days. It means updates and support will be no longer available.*
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
         ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
         ///
-        ///*You can use all the features available at [rest of string was truncated]&quot;;.
+        ///*You can use all the features available at the moment of th [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_lifetime_before_expiration {
             get {
@@ -1024,13 +1019,13 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Your license for ${LetterLogoText} DocSpace Enterprise expires today. It means updates and support are no longer available.*
+        ///Your license for ${LetterLogoText} Enterprise expires today. It means updates and support are no longer available.*
         ///
         ///To update the license, please contact your dedicated sales manager directly or reach out to us via &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;.
         ///
         ///For payment questions, contact us at &quot;${__SalesEmail}&quot;:&quot;mailto:${__SalesEmail}&quot;. For solving any technical problems, use &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;.
         ///
-        ///*You can use all the features available at the moment  [rest of string was truncated]&quot;;.
+        ///*You can use all the features available at the moment of the license pu [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_payment_warning_lifetime_expiration {
             get {
@@ -1041,150 +1036,11 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Get &lt;span style=&quot;color: #FF6F3D;&quot;&gt;free&lt;/span&gt; ${LetterLogoText} apps&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-he [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-heig [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_enterprise_admin_user_apps_tips_v1 {
             get {
                 return ResourceManager.GetString("pattern_enterprise_admin_user_apps_tips_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Discover business subscription of &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-se [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_enterprise_admin_welcome_v1 {
-            get {
-                return ResourceManager.GetString("pattern_enterprise_admin_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-        ///
-        ///
-        ///Hello, $UserName!
-        ///
-        ///You are invited to join &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; as a guest user. Accept the invitation by clicking the link:
-        ///
-        ///$OrangeButton
-        ///
-        ///The link is only valid for 7 days.
-        ///
-        ///You will get more tips on how to use your web-office. You can cancel the subscriptions on your Profile page at any moment as well as re-enable them..
-        /// </summary>
-        public static string pattern_enterprise_guest_activation_v10 {
-            get {
-                return ResourceManager.GetString("pattern_enterprise_guest_activation_v10", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_enterprise_guest_welcome_v1 {
-            get {
-                return ResourceManager.GetString("pattern_enterprise_guest_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Join &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-he [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_enterprise_user_activation_v1 {
-            get {
-                return ResourceManager.GetString("pattern_enterprise_user_activation_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_enterprise_user_welcome_v1 {
-            get {
-                return ResourceManager.GetString("pattern_enterprise_user_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_enterprise_whitelabel_admin_activation_v1 {
-            get {
-                return ResourceManager.GetString("pattern_enterprise_whitelabel_admin_activation_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Discover business subscription of &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-se [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_enterprise_whitelabel_admin_welcome_v1 {
-            get {
-                return ResourceManager.GetString("pattern_enterprise_whitelabel_admin_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-        ///
-        ///
-        ///Hello, $UserName!
-        ///
-        ///$__AuthorName has invited you as a guest user to &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Accept the invitation by clicking the link:
-        ///
-        ///$OrangeButton
-        ///
-        ///The link is only valid for 7 days.
-        ///
-        ///You will get more tips on how to use your web-office. You can cancel the subscriptions on your Profile page at any moment as well as re-enable them..
-        /// </summary>
-        public static string pattern_enterprise_whitelabel_guest_activation_v10 {
-            get {
-                return ResourceManager.GetString("pattern_enterprise_whitelabel_guest_activation_v10", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_enterprise_whitelabel_guest_welcome_v1 {
-            get {
-                return ResourceManager.GetString("pattern_enterprise_whitelabel_guest_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Join &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-he [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_enterprise_whitelabel_user_activation_v1 {
-            get {
-                return ResourceManager.GetString("pattern_enterprise_whitelabel_user_activation_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_enterprise_whitelabel_user_welcome_v1 {
-            get {
-                return ResourceManager.GetString("pattern_enterprise_whitelabel_user_welcome_v1", resourceCulture);
             }
         }
         
@@ -1249,6 +1105,23 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///We’re reaching out to let you know that your ${LetterLogoText} Wallet balance is running low.
+        ///
+        ///We kindly ask you to top up your wallet balance to avoid any interruption of paid services.
+        ///
+        ///$OrangeButton
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_low_wallet_balance {
+            get {
+                return ResourceManager.GetString("pattern_low_wallet_balance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Dear $UserName,
         ///
         ///      Administrator has created a new &lt;b&gt;$Address&lt;/b&gt; mailbox for you at the &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; portal.
@@ -1264,7 +1137,8 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///      Outgoing Mail (SMTP): 
         ///      Server: &lt;b&gt;$Server&lt;/b&gt;
-        ///      Port: &lt;b&gt;$SmtpPort&lt;/b&gt;        /// [rest of string was truncated]&quot;;.
+        ///      Port: &lt;b&gt;$SmtpPort&lt;/b&gt;
+        ///      SSL/TLS:  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_mailbox_created {
             get {
@@ -1317,29 +1191,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hello!
-        ///
-        ///The data migration process from ${LetterLogoText} Personal to your new ${LetterLogoText} DocSpace is successfully completed.
-        ///
-        ///To access your DocSpace with the imported data, just click the button below:
-        ///
-        ///$OrangeButton
-        ///
-        ///Your current DocSpace plan is STARTUP. It is absolutely free.
-        ///
-        ///==If necessary, you can change the name of your new DocSpace. Just switch to Settings -&gt; Customization -&gt; DocSpace Renaming.==
-        ///
-        ///Enjoy a new way of document collaboration!
-        ///
-        ///$TrulyYours.
-        /// </summary>
-        public static string pattern_migration_personal_to_docspace {
-            get {
-                return ResourceManager.GetString("pattern_migration_personal_to_docspace", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to h1.Another region portal migration error
         ///
         ///An error has occurred while migrating to another region. Please, try once again later.
@@ -1386,7 +1237,7 @@ namespace ASC.Web.Core.PublicResources {
         ///
         ///*Note*: this link is valid for 7 days only. Please complete the access restore process within that period.
         ///
-        ///If you received this email by mistake, please ignore it or contact your &quot;$PortalUrl&quot;:&quot;$PortalUrl&quot; portal admi [rest of string was truncated]&quot;;.
+        ///If you received this email by mistake, please ignore it or contact your &quot;$PortalUrl&quot;:&quot;$PortalUrl&quot; portal administrator t [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_migration_success_v115 {
             get {
@@ -1395,84 +1246,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_opensource_admin_activation_v1 {
-            get {
-                return ResourceManager.GetString("pattern_opensource_admin_activation_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Discover business subscription of &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-se [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_opensource_admin_welcome_v1 {
-            get {
-                return ResourceManager.GetString("pattern_opensource_admin_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-        ///
-        ///
-        ///Hello!
-        ///
-        ///You are invited to join &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; as a guest user. Accept the invitation by clicking the link:
-        ///
-        ///&quot;$ActivateUrl&quot;:&quot;$ActivateUrl&quot;
-        ///
-        ///The link is only valid for 7 days.
-        ///
-        ///You will get more tips on how to use your web-office. You can cancel the subscriptions on your Profile page at any moment as well as re-enable them..
-        /// </summary>
-        public static string pattern_opensource_guest_activation_v11 {
-            get {
-                return ResourceManager.GetString("pattern_opensource_guest_activation_v11", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_opensource_guest_welcome_v1 {
-            get {
-                return ResourceManager.GetString("pattern_opensource_guest_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Join &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-he [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_opensource_user_activation_v1 {
-            get {
-                return ResourceManager.GetString("pattern_opensource_user_activation_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_opensource_user_welcome_v1 {
-            get {
-                return ResourceManager.GetString("pattern_opensource_user_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to h1.Password changed successfully
         ///
-        ///Your password for the account *$UserName*, *$UserEmail* was successfully changed on *$Date* in DocSpace: &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
+        ///Your password for the account *$UserName*, *$UserEmail* was successfully changed on *$Date* in ${LetterLogoText}: &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
         ///
         ///IP: *$IP*
         ///Device: *$Device*
@@ -1481,9 +1257,7 @@ namespace ASC.Web.Core.PublicResources {
         ///#end
         ///Browser: *$Browser*
         ///
-        ///If this action was made by you — no further steps are required. If this change looks suspicious or was not authorized by you, please reset your password immediately and disable access to DocSpace for this device.
-        ///
-        ///$ [rest of string was truncated]&quot;;.
+        ///If this action was made by you — no further steps are required. If this change looks suspicious or was not authorized by you, please reset your password immediately and disable access to ${LetterLogoText} for this devic [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_password_changed {
             get {
@@ -1503,7 +1277,7 @@ namespace ASC.Web.Core.PublicResources {
         ///*Note*: this link is valid for 7 days only. Please complete the portal deactivation process within that period.
         ///
         ///You can reactivate your portal any time by clicking the following link:
-        ///p=. &quot;Reactivate Portal&quot;:&quot;$ActivateUrl&quot; (this [rest of string was truncated]&quot;;.
+        ///p=. &quot;Reactivate Portal&quot;:&quot;$ActivateUrl&quot; (this link has n [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_portal_deactivate {
             get {
@@ -1523,7 +1297,7 @@ namespace ASC.Web.Core.PublicResources {
         ///_Note_: this link is valid for 7 days only. Please complete the portal deactivation process within that period.
         ///
         ///You can reactivate your portal any time by clicking the following link:
-        ///[Reactivate Portal]($ActivateUrl) (this link has  [rest of string was truncated]&quot;;.
+        ///[Reactivate Portal]($ActivateUrl) (this link has no time lim [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_portal_deactivate_tg {
             get {
@@ -1544,7 +1318,7 @@ namespace ASC.Web.Core.PublicResources {
         ///Before you delete the space, please make sure that automatic billing is turned off. You may check the status of automatic billing in your Stripe account.
         ///#end
         ///
-        /// [rest of string was truncated]&quot;;.
+        ///If you still [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_portal_delete {
             get {
@@ -1553,9 +1327,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;${LetterLogoText} DocSpace has been &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;${LetterLogoText} has been &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 1 [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-h [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_portal_delete_success_v1 {
             get {
@@ -1576,7 +1350,7 @@ namespace ASC.Web.Core.PublicResources {
         ///Before you delete the portal, please make sure that automatic billing is turned off. You may check the status of automatic billing in your Stripe account.
         ///#end
         ///
-        ///I [rest of string was truncated]&quot;;.
+        ///If you still  [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_portal_delete_tg {
             get {
@@ -1585,7 +1359,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ${LetterLogoText} DocSpace has been deleted.
+        ///   Looks up a localized string similar to ${LetterLogoText} has been deleted.
         ///
         ///*Portal:* ${PortalUrl}
         ///*Owner:* ${UserName} ${UserEmail} 
@@ -1617,7 +1391,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to h1.Disabling account on &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;
         ///
-        ///You have requested to disable your account in DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
+        ///You have requested to disable your account in &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
         ///
         ///If you still want to disable your account, please follow the link below to confirm the operation:
         ///
@@ -1729,9 +1503,11 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///We’re reaching out to inform you that the automatic renewal of your purchased service plan couldn’t be completed.
+        ///We’re reaching out to inform you that the automatic renewal of your purchased tariff plan or services couldn’t be completed:
         ///
-        ///We kindly ask you to manually renew your current service plan (or purchase a new one).
+        ///*$ServiceName*, $ServiceUnit: $ServiceQuantity
+        ///
+        ///We kindly ask you to renew it manually.
         ///
         ///$OrangeButton
         ///
@@ -1856,7 +1632,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1.Here is what’s new in your DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; in the last hour
+        ///   Looks up a localized string similar to h1.Here is what’s new in your &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; in the last hour
         ///
         ///#foreach($activity in $Activities)
         ///$activity
@@ -1870,9 +1646,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt;!&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_activation_v1 {
             get {
@@ -1881,53 +1657,86 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;${LetterLogoText} DocSpace: Explore useful &lt;span style=&quot;color: #FF6F3D;&quot;&gt;integrations&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Get more from ${LetterLogoText} with &lt;span style=&quot;color: #FF6F3D; white-space: nowrap;&quot;&gt;useful add&amp;#8209;ons&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvet [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_saas_admin_integrations_v1 {
+        public static string pattern_saas_admin_addons_v1 {
             get {
-                return ResourceManager.GetString("pattern_saas_admin_integrations_v1", resourceCulture);
+                return ResourceManager.GetString("pattern_saas_admin_addons_v1", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Configure your &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Work faster in ${LetterLogoText} with &lt;span style=&quot;color: #FF6F3D; white-space: nowrap;&quot;&gt;AI agents&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, s [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_saas_admin_modules_v1 {
+        public static string pattern_saas_admin_ai_agents_v1 {
             get {
-                return ResourceManager.GetString("pattern_saas_admin_modules_v1", resourceCulture);
+                return ResourceManager.GetString("pattern_saas_admin_ai_agents_v1", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Your ${LetterLogoText} DocSpace will be &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;color: #333333; font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Configure your &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-siz [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_saas_admin_startup_warning_after_year_v1 {
+        public static string pattern_saas_admin_configure_v1 {
             get {
-                return ResourceManager.GetString("pattern_saas_admin_startup_warning_after_year_v1", resourceCulture);
+                return ResourceManager.GetString("pattern_saas_admin_configure_v1", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Your ${LetterLogoText} DocSpace will be &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Connect, integrate, and build with &lt;span style=&quot;color: #FF6F3D; white-space: nowrap;&quot;&gt;${LetterLogoText} Docs&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-siz [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, [rest of string was truncated]&quot;;.
         /// </summary>
-        public static string pattern_saas_admin_trial_warning_after_half_year_v1 {
+        public static string pattern_saas_admin_developer_tools_v1 {
             get {
-                return ResourceManager.GetString("pattern_saas_admin_trial_warning_after_half_year_v1", resourceCulture);
+                return ResourceManager.GetString("pattern_saas_admin_developer_tools_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Discover &lt;span style=&quot;color: #FF6F3D;&quot;&gt;4 handy apps&lt;/span&gt; inside your ${LetterLogoText}&lt;/td&gt;&lt;/tr&gt;
+        ///
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-s [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_saas_admin_handy_apps_v1 {
+            get {
+                return ResourceManager.GetString("pattern_saas_admin_handy_apps_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Your ${LetterLogoText} will be &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+        ///
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; li [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_saas_admin_startup_warning_after_half_year_v1 {
+            get {
+                return ResourceManager.GetString("pattern_saas_admin_startup_warning_after_half_year_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Your ${LetterLogoText} will be &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+        ///
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; li [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_saas_admin_startup_warning_after_three_months_v1 {
+            get {
+                return ResourceManager.GetString("pattern_saas_admin_startup_warning_after_three_months_v1", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Get &lt;span style=&quot;color: #FF6F3D;&quot;&gt;free&lt;/span&gt; ${LetterLogoText} apps&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-he [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-heig [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_user_apps_tips_v1 {
             get {
@@ -1936,9 +1745,31 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Your ${LetterLogoText} will be &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+        ///
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; li [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_saas_admin_warning_after_half_year_v1 {
+            get {
+                return ResourceManager.GetString("pattern_saas_admin_warning_after_half_year_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Your ${LetterLogoText} will be &lt;span style=&quot;color: #FF6F3D;&quot;&gt;deleted&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
+        ///
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; li [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string pattern_saas_admin_warning_after_three_months_v1 {
+            get {
+                return ResourceManager.GetString("pattern_saas_admin_warning_after_three_months_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding: 32px 40px 8px; text-align: center;&quot;&gt;Hello, $UserName!&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; Margin: 0; padding-left: 40px; padding-right: 40px; padding-bottom: 32px; text-align: c [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_admin_welcome_v1 {
             get {
@@ -1949,7 +1780,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello!
         ///
-        ///You are invited to join a DocSpace AI agent at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Accept the invitation by clicking the link:
+        ///You are invited to join an AI agent at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Accept the invitation by clicking the link:
         ///
         ///$OrangeButton
         ///
@@ -1979,9 +1810,9 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Join &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Join &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-he [rest of string was truncated]&quot;;.
+        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-height: 21px; [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_saas_docspace_invite {
             get {
@@ -1990,12 +1821,12 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1. ${LetterLogoText} DocSpace: complete registration
+        ///   Looks up a localized string similar to h1. Complete ${LetterLogoText} registration
         ///
         ///
         ///Hello!
         ///
-        ///You are invited to complete registration for ${LetterLogoText} DocSpace at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Enter your name and set a password by clicking the link:
+        ///You are invited to complete ${LetterLogoText} registration at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Enter your name and set a password by clicking the link:
         ///
         ///$OrangeButton
         ///
@@ -2008,42 +1839,11 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1. Join &lt;span style=&quot;color:#FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace
-        ///
-        ///
-        ///Hello!
-        ///
-        ///You are invited to join &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; as a guest user. Accept the invitation by clicking the link:
-        ///
-        ///$OrangeButton
-        ///
-        ///We will also send you useful tips and latest ${LetterLogoText} news once in a while. You can cancel the subscriptions on your Profile page at any moment as well as re-enable them.
-        ///
-        ///$TrulyYours.
-        /// </summary>
-        public static string pattern_saas_guest_activation_v115 {
-            get {
-                return ResourceManager.GetString("pattern_saas_guest_activation_v115", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_saas_guest_welcome_v1 {
-            get {
-                return ResourceManager.GetString("pattern_saas_guest_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Please take into consideration that the grace period of $PaymentDelay‎ days for your ${LetterLogoText} DocSpace is activated.
+        ///Please take into consideration that the grace period of $PaymentDelay‎ days for your ${LetterLogoText} is activated.
         ///
-        ///Make sure to pay your Business subscription before the grace period is due. Thus, you will be able to further use all the benefits of your ${LetterLogoText} DocSpace.
+        ///Make sure to pay your Business subscription before the grace period is due. Thus, you will be able to further use all the benefits of your ${LetterLogoText}.
         ///
         ///$OrangeButton
         ///
@@ -2058,9 +1858,9 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///We’re reaching out to inform you that your subscription payment will be automatically debited from your account in 3 days.
+        ///We’re reaching out to inform you that your Business subscription payment for the chosen number of admins will be automatically debited in 3 days.
         ///
-        ///To ensure a smooth transaction, please confirm that sufficient funds are available in your payment method.
+        ///To ensure a smooth transaction, please confirm that sufficient funds are available in your &quot;payment method&quot;:&quot;$URL1&quot;.
         ///
         ///If you have any questions or need assistance, feel free to reach out to our &quot;support team&quot;:&quot;${__SupportLink}&quot;.
         ///
@@ -2075,9 +1875,9 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Please take into consideration that the grace period of $PaymentDelay days for your ${LetterLogoText} DocSpace is over.
+        ///Please take into consideration that the grace period of $PaymentDelay days for your ${LetterLogoText} is over.
         ///
-        ///Make sure to pay your Business subscription as soon as possible. Thus, you will be able to use all the benefits of your ${LetterLogoText} DocSpace as before.
+        ///Make sure to pay your Business subscription as soon as possible. Thus, you will be able to use all the benefits of your ${LetterLogoText} as before.
         ///
         ///$OrangeButton
         ///
@@ -2092,9 +1892,9 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///Please take into consideration that the grace period of $PaymentDelay days for your ${LetterLogoText} DocSpace will expire tomorrow.
+        ///Please take into consideration that the grace period of $PaymentDelay days for your ${LetterLogoText} will expire tomorrow.
         ///
-        ///Make sure to pay your Business subscription today. Thus, you will be able to further use all the benefits of your ${LetterLogoText} DocSpace.
+        ///Make sure to pay your Business subscription today. Thus, you will be able to further use all the benefits of your ${LetterLogoText}.
         ///
         ///$OrangeButton
         ///
@@ -2109,11 +1909,11 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello!
         ///
-        ///You are invited to join a DocSpace room at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Accept the invitation by clicking the link:
+        ///You are invited to join the room at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Accept the invitation by clicking the link:
         ///
         ///$OrangeButton
         ///
-        ///After clicking on the invitation link, please set a new password for your account.
+        ///After clicking on the invitation link, please set a new password.
         ///
         ///$TrulyYours.
         /// </summary>
@@ -2139,55 +1939,11 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Join &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace&lt;/td&gt;&lt;/tr&gt;
+        ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px; line-he [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_saas_user_activation_v1 {
-            get {
-                return ResourceManager.GetString("pattern_saas_user_activation_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
+        ///The scheduled backup process for your ${LetterLogoText} &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; has failed.
         ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_saas_user_welcome_v1 {
-            get {
-                return ResourceManager.GetString("pattern_saas_user_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Welcome to &lt;span style=&quot;color: #FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 14px;  [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_saas_user_welcome_v3 {
-            get {
-                return ResourceManager.GetString("pattern_saas_user_welcome_v3", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font-size: 24px; font-weight: 700; line-height: 1.33em; letter-spacing: -0.02em; Margin: 0; padding: 32px 40px 32px; text-align: center;&quot;&gt;Master ${LetterLogoText} DocSpace with &lt;span style=&quot;color: #FF6F3D;&quot;&gt;video guides&lt;/span&gt;&lt;/td&gt;&lt;/tr&gt;
-        ///
-        ///&lt;tr border=&quot;0&quot; cellspacing=&quot;0&quot; cellpadding=&quot;0&quot;&gt;&lt;td class=&quot;fol&quot; style=&quot;font-family: &apos;Open Sans&apos;, Helvetica, Arial, Tahoma, sans-serif; font [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string pattern_saas_video_guides_v1 {
-            get {
-                return ResourceManager.GetString("pattern_saas_video_guides_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Hello, $UserName,
-        ///
-        ///The scheduled backup process for your DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; has failed.
-        ///
-        ///We recommend checking the &quot;Backup&quot;:&quot;${__VirtualRootPath}/portal-settings/backup/data-backup&quot; and &quot;Services&quot;:&quot;${__VirtualRootPath}/portal-settings/services&quot; settings.
+        ///We recommend checking the &quot;Backup&quot;:&quot;${__VirtualRootPath}/portal-settings/backup/data-backup&quot; and &quot;Addons&quot;:&quot;${__VirtualRootPath}/billing/addons&quot; settings.
         ///
         ///If you have any questions or need assistance, please don’t hesitate to contact us via &quot;${__SupportLink}&quot;:&quot;${__SupportLink}&quot;
         ///
@@ -2200,11 +1956,11 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hello, $UserName,
+        ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///The scheduled backup process for your DocSpace [${__VirtualRootPath}](${__VirtualRootPath}) has failed.
+        ///The scheduled backup process for your ${LetterLogoText} [${__VirtualRootPath}](${__VirtualRootPath}) has failed.
         ///
-        ///We recommend checking the [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) and [Services](${__VirtualRootPath}/portal-settings/services) settings.
+        ///We recommend checking the [Backup](${__VirtualRootPath}/portal-settings/backup/data-backup) and [Addons](${__VirtualRootPath}/billing/addons) settings.
         ///
         ///If you have any questions or need assistance, please don’t hesitate to contact us via [${__SupportLink}](${__SupportLink})
         ///
@@ -2244,7 +2000,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1.Here is what’s new in your DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; on $Date
+        ///   Looks up a localized string similar to h1.Here is what’s new in your &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; on $Date
         ///
         ///#foreach($activity in $Activities)
         ///$activity
@@ -2258,7 +2014,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hello! Please set up a password for your ${LetterLogoText} DocSpace account. Just click the button below:
+        ///   Looks up a localized string similar to Hello! Please set up a password for your ${LetterLogoText}. Just click the button below:
         ///
         ///$OrangeButton
         ///
@@ -2363,9 +2119,33 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to h1.Suspicious login detected
+        ///
+        ///We noticed a login to your account *$UserName*, *$UserEmail* on *$Date* in ${LetterLogoText}: &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot; that looks different from your usual activity.
+        ///
+        ///IP: *$IP*
+        ///Device: *$Device*
+        ///#if($Location != &quot;&quot;)
+        ///Location: *$Location*
+        ///#end
+        ///Browser: *$Browser*
+        ///
+        ///If this was you - no further steps are required. If you don&apos;t recognize this login, please change your password immediately.
+        ///
+        ///$OrangeButton
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_suspicious_login {
+            get {
+                return ResourceManager.GetString("pattern_suspicious_login", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hello, $UserName!
         ///
-        ///We’re reaching out to inform you that the automatic top-up of the DocSpace Wallet balance was unsuccessful.
+        ///We’re reaching out to inform you that the automatic top-up of the ${LetterLogoText} Wallet balance was unsuccessful.
         ///
         ///We kindly ask you to manually check and update your wallet balance.
         ///
@@ -2380,9 +2160,45 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///We’re reaching out to inform you that the subscription payment for “$SubscriptionName” will be automatically debited from your &quot;${LetterLogoText} Wallet&quot;:&quot;${__VirtualRootPath}/billing/wallet&quot; in 3 days.
+        ///
+        ///To ensure a smooth transaction, please confirm that sufficient funds are available in your &quot;${LetterLogoText} Wallet&quot;:&quot;${__VirtualRootPath}/billing/wallet&quot;.
+        ///
+        ///If you have any questions or need assistance, feel free to reach out to our &quot;support team&quot;:&quot;${__SupportLink}&quot;.
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_upcoming_subscription_payment {
+            get {
+                return ResourceManager.GetString("pattern_upcoming_subscription_payment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to h1.You are invited to ${LetterLogoText}
+        ///
+        ///Hello!
+        ///
+        ///You are invited to join ${LetterLogoText} at &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Accept the invitation by clicking the link:
+        ///
+        ///$OrangeButton
+        ///
+        ///After clicking on the invitation link, please set a new password.
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_user_activation_v1 {
+            get {
+                return ResourceManager.GetString("pattern_user_activation_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Hello!
         ///
-        ///You are assigned a new role in the DocSpace AI agent &quot;${RoomTitle}&quot;:&quot;${RoomUrl}&quot;: ${UserRole}.
+        ///You are assigned a new role in the ${LetterLogoText} AI agent &quot;${RoomTitle}&quot;:&quot;${RoomUrl}&quot;: ${UserRole}.
         ///
         ///Learn more about room roles and permissions in &quot;Help Center&quot;:&quot;${HelpCenterUrl}&quot;.
         ///
@@ -2438,7 +2254,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello!
         ///
-        ///You are assigned a new role in the DocSpace room &quot;${RoomTitle}&quot;:&quot;${RoomUrl}&quot;: ${UserRole}.
+        ///You are assigned a new role in the ${LetterLogoText} room &quot;${RoomTitle}&quot;:&quot;${RoomUrl}&quot;: ${UserRole}.
         ///
         ///Learn more about room roles and permissions in &quot;Help Center&quot;:&quot;${HelpCenterUrl}&quot;.
         ///
@@ -2453,7 +2269,7 @@ namespace ASC.Web.Core.PublicResources {
         /// <summary>
         ///   Looks up a localized string similar to Hello!
         ///
-        ///You are assigned a new user type in DocSpace &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;: ${UserType}.
+        ///You are assigned a new user type in ${LetterLogoText} &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;: ${UserType}.
         ///
         ///Learn more about user types and permissions in &quot;Help Center&quot;:&quot;${HelpCenterUrl}&quot;.
         ///
@@ -2466,16 +2282,52 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to h1. Welcome to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt; DocSpace!
+        ///   Looks up a localized string similar to h1.Welcome to ${LetterLogoText}!
+        ///
+        ///Hello, $UserName!
+        ///
+        ///Welcome to ${LetterLogoText}! Your profile has been successfully added to &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;. Here, you can easily edit, manage, and collaborate on office files of all popular formats.
+        ///
+        ///$OrangeButton
+        ///
+        ///If you need help, browse our &quot;Help Center&quot;:&quot;${__HelpLink}&quot; or ask our &quot;support team&quot;:&quot;${__SupportLink}&quot;.
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_user_welcome_v1 {
+            get {
+                return ResourceManager.GetString("pattern_user_welcome_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Hello, $UserName!
+        ///
+        ///We’re reaching out to let you know that automatic top-up is not supported for your current payment method: the money reaches the ${LetterLogoText} Wallet only after the bank transfer is settled, so the balance cannot be replenished right away.
+        ///
+        ///Automatic top-up has therefore been turned off. To avoid any interruption of paid services, please top up your wallet balance manually, or switch to a payment method that supports automatic top-up.
+        ///
+        ///$OrangeButton
+        ///
+        ///$TrulyYours.
+        /// </summary>
+        public static string pattern_wallet_auto_top_up_unavailable {
+            get {
+                return ResourceManager.GetString("pattern_wallet_auto_top_up_unavailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to h1. Welcome to &lt;span style=&quot;color:#FF6F3D;&quot;&gt;${LetterLogoText}&lt;/span&gt;!
         ///
         ///
         ///Hello, $UserName!
         ///
-        ///You have just created ${LetterLogoText} DocSpace, a document hub where you can boost collaboration with your team, customers, partners, and more. Its address is &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
+        ///You have just created ${LetterLogoText}, a document hub where you can boost collaboration with your team, customers, partners, and more. Its address is &quot;${__VirtualRootPath}&quot;:&quot;${__VirtualRootPath}&quot;.
         ///
         ///Your current tariff plan is STARTUP. It is absolutely free and includes:
         ///
-        ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; background=&quot;#ffffff&quot; style=&quot;background-color: #ffffff; border: 0 none; border-col [rest of string was truncated]&quot;;.
+        ///&lt;table cellspacing=&quot;0&quot; cellpadding=&quot;0&quot; background=&quot;#ffffff&quot; style=&quot;background-color: #ffffff; border: 0 none; border-collapse: collapse; border-spa [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_zoom_welcome {
             get {
@@ -2493,7 +2345,16 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ${LetterLogoText} DocSpace: Your API key is expired.
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText}!.
+        /// </summary>
+        public static string subject_admin_activation_v1 {
+            get {
+                return ResourceManager.GetString("subject_admin_activation_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ${LetterLogoText}: Your API key is expired.
         /// </summary>
         public static string subject_api_key_expired {
             get {
@@ -2511,7 +2372,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Backup for your DocSpace failed.
+        ///   Looks up a localized string similar to Backup for your ${LetterLogoText} failed.
         /// </summary>
         public static string subject_backup_failed {
             get {
@@ -2574,7 +2435,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace Developer activated.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} Developer activated.
         /// </summary>
         public static string subject_developer_admin_payment_warning_grace_period_activation {
             get {
@@ -2583,7 +2444,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace Developer license will expire soon.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} Developer license will expire soon.
         /// </summary>
         public static string subject_developer_admin_payment_warning_grace_period_before_activation {
             get {
@@ -2592,7 +2453,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace Developer will expire soon.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} Developer will expire soon.
         /// </summary>
         public static string subject_developer_admin_payment_warning_grace_period_before_expiration {
             get {
@@ -2601,7 +2462,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace Developer no longer available.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} Developer no longer available.
         /// </summary>
         public static string subject_developer_admin_payment_warning_grace_period_expiration {
             get {
@@ -2610,25 +2471,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 5 tips for effective work on your docs.
-        /// </summary>
-        public static string subject_docs_tips {
-            get {
-                return ResourceManager.GetString("subject_docs_tips", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
-        /// </summary>
-        public static string subject_enterprise_admin_activation_v1 {
-            get {
-                return ResourceManager.GetString("subject_enterprise_admin_activation_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace Enterprise activated.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} Enterprise activated.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_grace_period_activation {
             get {
@@ -2637,7 +2480,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace Enterprise license will expire soon.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} Enterprise license will expire soon.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_grace_period_before_activation {
             get {
@@ -2646,7 +2489,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace Enterprise will expire soon.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} Enterprise will expire soon.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_grace_period_before_expiration {
             get {
@@ -2655,7 +2498,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace Enterprise no longer available.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} Enterprise no longer available.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_grace_period_expiration {
             get {
@@ -2664,7 +2507,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace Enterprise license will expire soon.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} Enterprise license will expire soon.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_lifetime_before_expiration {
             get {
@@ -2673,7 +2516,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace Enterprise license expires today.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} Enterprise license expires today.
         /// </summary>
         public static string subject_enterprise_admin_payment_warning_lifetime_expiration {
             get {
@@ -2687,105 +2530,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_enterprise_admin_user_apps_tips_v1 {
             get {
                 return ResourceManager.GetString("subject_enterprise_admin_user_apps_tips_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText} DocSpace.
-        /// </summary>
-        public static string subject_enterprise_admin_welcome_v1 {
-            get {
-                return ResourceManager.GetString("subject_enterprise_admin_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Join ${__VirtualRootHost}.
-        /// </summary>
-        public static string subject_enterprise_guest_activation_v10 {
-            get {
-                return ResourceManager.GetString("subject_enterprise_guest_activation_v10", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
-        /// </summary>
-        public static string subject_enterprise_guest_welcome_v1 {
-            get {
-                return ResourceManager.GetString("subject_enterprise_guest_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Join ${LetterLogoText} DocSpace.
-        /// </summary>
-        public static string subject_enterprise_user_activation_v1 {
-            get {
-                return ResourceManager.GetString("subject_enterprise_user_activation_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
-        /// </summary>
-        public static string subject_enterprise_user_welcome_v1 {
-            get {
-                return ResourceManager.GetString("subject_enterprise_user_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
-        /// </summary>
-        public static string subject_enterprise_whitelabel_admin_activation_v1 {
-            get {
-                return ResourceManager.GetString("subject_enterprise_whitelabel_admin_activation_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText} DocSpace.
-        /// </summary>
-        public static string subject_enterprise_whitelabel_admin_welcome_v1 {
-            get {
-                return ResourceManager.GetString("subject_enterprise_whitelabel_admin_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Join ${__VirtualRootHost}.
-        /// </summary>
-        public static string subject_enterprise_whitelabel_guest_activation_v10 {
-            get {
-                return ResourceManager.GetString("subject_enterprise_whitelabel_guest_activation_v10", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
-        /// </summary>
-        public static string subject_enterprise_whitelabel_guest_welcome_v1 {
-            get {
-                return ResourceManager.GetString("subject_enterprise_whitelabel_guest_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Join ${LetterLogoText} DocSpace.
-        /// </summary>
-        public static string subject_enterprise_whitelabel_user_activation_v1 {
-            get {
-                return ResourceManager.GetString("subject_enterprise_whitelabel_user_activation_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
-        /// </summary>
-        public static string subject_enterprise_whitelabel_user_welcome_v1 {
-            get {
-                return ResourceManager.GetString("subject_enterprise_whitelabel_user_welcome_v1", resourceCulture);
             }
         }
         
@@ -2817,6 +2561,15 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Action required: Your ${LetterLogoText} Wallet balance is running low.
+        /// </summary>
+        public static string subject_low_wallet_balance {
+            get {
+                return ResourceManager.GetString("subject_low_wallet_balance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Mailbox creation.
         /// </summary>
         public static string subject_mailbox_created {
@@ -2844,15 +2597,6 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Data migration to ${LetterLogoText} DocSpace successfully completed.
-        /// </summary>
-        public static string subject_migration_personal_to_docspace {
-            get {
-                return ResourceManager.GetString("subject_migration_personal_to_docspace", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to ${LetterLogoText}. Another region portal migration started.
         /// </summary>
         public static string subject_migration_start {
@@ -2867,60 +2611,6 @@ namespace ASC.Web.Core.PublicResources {
         public static string subject_migration_success {
             get {
                 return ResourceManager.GetString("subject_migration_success", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
-        /// </summary>
-        public static string subject_opensource_admin_activation_v1 {
-            get {
-                return ResourceManager.GetString("subject_opensource_admin_activation_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText} DocSpace.
-        /// </summary>
-        public static string subject_opensource_admin_welcome_v1 {
-            get {
-                return ResourceManager.GetString("subject_opensource_admin_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Join ${__VirtualRootHost}.
-        /// </summary>
-        public static string subject_opensource_guest_activation_v11 {
-            get {
-                return ResourceManager.GetString("subject_opensource_guest_activation_v11", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
-        /// </summary>
-        public static string subject_opensource_guest_welcome_v1 {
-            get {
-                return ResourceManager.GetString("subject_opensource_guest_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Join ${LetterLogoText} DocSpace.
-        /// </summary>
-        public static string subject_opensource_user_activation_v1 {
-            get {
-                return ResourceManager.GetString("subject_opensource_user_activation_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
-        /// </summary>
-        public static string subject_opensource_user_welcome_v1 {
-            get {
-                return ResourceManager.GetString("subject_opensource_user_welcome_v1", resourceCulture);
             }
         }
         
@@ -2952,7 +2642,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ${LetterLogoText} DocSpace has been deleted.
+        ///   Looks up a localized string similar to ${LetterLogoText} has been deleted.
         /// </summary>
         public static string subject_portal_delete_success_v1 {
             get {
@@ -2961,7 +2651,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ${LetterLogoText} DocSpace has been deleted.
+        ///   Looks up a localized string similar to ${LetterLogoText} has been deleted.
         /// </summary>
         public static string subject_portal_deleted_to_support {
             get {
@@ -3042,7 +2732,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Action required: Unable to auto-renew the service plan in your ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to Action required: Unable to auto-renew the purchased services in your ${LetterLogoText}.
         /// </summary>
         public static string subject_renew_subscription_error {
             get {
@@ -3096,7 +2786,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText}!.
         /// </summary>
         public static string subject_saas_admin_activation_v1 {
             get {
@@ -3105,38 +2795,65 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Explore useful integrations for ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to Get more from ${LetterLogoText} with useful add-ons.
         /// </summary>
-        public static string subject_saas_admin_integrations_v1 {
+        public static string subject_saas_admin_addons_v1 {
             get {
-                return ResourceManager.GetString("subject_saas_admin_integrations_v1", resourceCulture);
+                return ResourceManager.GetString("subject_saas_admin_addons_v1", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Configure your ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to Work faster in ${LetterLogoText} with AI agents.
         /// </summary>
-        public static string subject_saas_admin_modules_v1 {
+        public static string subject_saas_admin_ai_agents_v1 {
             get {
-                return ResourceManager.GetString("subject_saas_admin_modules_v1", resourceCulture);
+                return ResourceManager.GetString("subject_saas_admin_ai_agents_v1", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace will be deleted.
+        ///   Looks up a localized string similar to Configure your ${LetterLogoText}.
         /// </summary>
-        public static string subject_saas_admin_startup_warning_after_year_v1 {
+        public static string subject_saas_admin_configure_v1 {
             get {
-                return ResourceManager.GetString("subject_saas_admin_startup_warning_after_year_v1", resourceCulture);
+                return ResourceManager.GetString("subject_saas_admin_configure_v1", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your ${LetterLogoText} DocSpace will be deleted.
+        ///   Looks up a localized string similar to Connect, integrate, and build with ${LetterLogoText} Docs.
         /// </summary>
-        public static string subject_saas_admin_trial_warning_after_half_year_v1 {
+        public static string subject_saas_admin_developer_tools_v1 {
             get {
-                return ResourceManager.GetString("subject_saas_admin_trial_warning_after_half_year_v1", resourceCulture);
+                return ResourceManager.GetString("subject_saas_admin_developer_tools_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Discover 4 handy apps inside your ${LetterLogoText}.
+        /// </summary>
+        public static string subject_saas_admin_handy_apps_v1 {
+            get {
+                return ResourceManager.GetString("subject_saas_admin_handy_apps_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your ${LetterLogoText} will be deleted.
+        /// </summary>
+        public static string subject_saas_admin_startup_warning_after_half_year_v1 {
+            get {
+                return ResourceManager.GetString("subject_saas_admin_startup_warning_after_half_year_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your ${LetterLogoText} will be deleted.
+        /// </summary>
+        public static string subject_saas_admin_startup_warning_after_three_months_v1 {
+            get {
+                return ResourceManager.GetString("subject_saas_admin_startup_warning_after_three_months_v1", resourceCulture);
             }
         }
         
@@ -3150,7 +2867,25 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to Your ${LetterLogoText} will be deleted.
+        /// </summary>
+        public static string subject_saas_admin_warning_after_half_year_v1 {
+            get {
+                return ResourceManager.GetString("subject_saas_admin_warning_after_half_year_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your ${LetterLogoText} will be deleted.
+        /// </summary>
+        public static string subject_saas_admin_warning_after_three_months_v1 {
+            get {
+                return ResourceManager.GetString("subject_saas_admin_warning_after_three_months_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Discover business subscription of ${LetterLogoText}.
         /// </summary>
         public static string subject_saas_admin_welcome_v1 {
             get {
@@ -3159,7 +2894,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to Join ${LetterLogoText}.
         /// </summary>
         public static string subject_saas_agent_invite {
             get {
@@ -3168,7 +2903,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You&apos;re invited to the ${LetterLogoText} DocSpace AI agent.
+        ///   Looks up a localized string similar to You&apos;re invited to the ${LetterLogoText} AI agent.
         /// </summary>
         public static string subject_saas_agent_invite_existing_user {
             get {
@@ -3177,7 +2912,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to Join ${LetterLogoText}.
         /// </summary>
         public static string subject_saas_docspace_invite {
             get {
@@ -3186,7 +2921,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ${LetterLogoText} DocSpace: complete registration.
+        ///   Looks up a localized string similar to Complete ${LetterLogoText} registration.
         /// </summary>
         public static string subject_saas_docspace_registration {
             get {
@@ -3195,25 +2930,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ${__VirtualRootHost}.
-        /// </summary>
-        public static string subject_saas_guest_activation_v115 {
-            get {
-                return ResourceManager.GetString("subject_saas_guest_activation_v115", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
-        /// </summary>
-        public static string subject_saas_guest_welcome_v1 {
-            get {
-                return ResourceManager.GetString("subject_saas_guest_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace activated.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} activated.
         /// </summary>
         public static string subject_saas_owner_payment_warning_grace_period_activation {
             get {
@@ -3222,7 +2939,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Upcoming subscription payment for your ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to Upcoming subscription payment for your ${LetterLogoText} tariff plan.
         /// </summary>
         public static string subject_saas_owner_payment_warning_grace_period_before_activation {
             get {
@@ -3231,7 +2948,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace expired.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} expired.
         /// </summary>
         public static string subject_saas_owner_payment_warning_grace_period_expired {
             get {
@@ -3240,7 +2957,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} DocSpace expires tomorrow.
+        ///   Looks up a localized string similar to Grace period for your ${LetterLogoText} expires tomorrow.
         /// </summary>
         public static string subject_saas_owner_payment_warning_grace_period_last_day {
             get {
@@ -3249,7 +2966,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to ${LetterLogoText}: You are invited to the room.
         /// </summary>
         public static string subject_saas_room_invite {
             get {
@@ -3258,7 +2975,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to You&apos;re invited to the ${LetterLogoText} DocSpace room.
+        ///   Looks up a localized string similar to You&apos;re invited to the ${LetterLogoText} room.
         /// </summary>
         public static string subject_saas_room_invite_existing_user {
             get {
@@ -3267,34 +2984,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Join ${LetterLogoText} DocSpace.
-        /// </summary>
-        public static string subject_saas_user_activation_v1 {
-            get {
-                return ResourceManager.GetString("subject_saas_user_activation_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
-        /// </summary>
-        public static string subject_saas_user_welcome_v1 {
-            get {
-                return ResourceManager.GetString("subject_saas_user_welcome_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Master ${LetterLogoText} DocSpace with video guides.
-        /// </summary>
-        public static string subject_saas_video_guides_v1 {
-            get {
-                return ResourceManager.GetString("subject_saas_video_guides_v1", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Auto backup for your DocSpace failed.
+        ///   Looks up a localized string similar to Auto backup for your ${LetterLogoText} failed.
         /// </summary>
         public static string subject_scheduled_backup_failed {
             get {
@@ -3321,7 +3011,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Set up a password for ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to Set up a password for ${LetterLogoText}.
         /// </summary>
         public static string subject_set_password {
             get {
@@ -3393,7 +3083,16 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Action required: Unable to auto top up the Wallet balance in your ${LetterLogoText} DocSpace.
+        ///   Looks up a localized string similar to Suspicious login to your ${LetterLogoText} account.
+        /// </summary>
+        public static string subject_suspicious_login {
+            get {
+                return ResourceManager.GetString("subject_suspicious_login", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Action required: Unable to auto top up the Wallet balance in your ${LetterLogoText}.
         /// </summary>
         public static string subject_top_up_wallet_error {
             get {
@@ -3402,7 +3101,25 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your role in a DocSpace AI agent has changed.
+        ///   Looks up a localized string similar to Upcoming subscription payment for &quot;$SubscriptionName&quot; in your ${LetterLogoText}.
+        /// </summary>
+        public static string subject_upcoming_subscription_payment {
+            get {
+                return ResourceManager.GetString("subject_upcoming_subscription_payment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to You are invited to ${LetterLogoText}.
+        /// </summary>
+        public static string subject_user_activation_v1 {
+            get {
+                return ResourceManager.GetString("subject_user_activation_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to ${LetterLogoText}: Your role in the AI agent has changed.
         /// </summary>
         public static string subject_user_agent_role_changed {
             get {
@@ -3429,7 +3146,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your role in a DocSpace room has changed.
+        ///   Looks up a localized string similar to ${LetterLogoText}: Your role in the room has changed.
         /// </summary>
         public static string subject_user_role_changed {
             get {
@@ -3438,7 +3155,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Your DocSpace user type has changed.
+        ///   Looks up a localized string similar to ${LetterLogoText}: Your user type has changed.
         /// </summary>
         public static string subject_user_type_changed {
             get {
@@ -3447,7 +3164,25 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ${LetterLogoText} DocSpace!.
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText}!.
+        /// </summary>
+        public static string subject_user_welcome_v1 {
+            get {
+                return ResourceManager.GetString("subject_user_welcome_v1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Action required: Automatic top-up is unavailable for your ${LetterLogoText} Wallet.
+        /// </summary>
+        public static string subject_wallet_auto_top_up_unavailable {
+            get {
+                return ResourceManager.GetString("subject_wallet_auto_top_up_unavailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Welcome to ${LetterLogoText}!.
         /// </summary>
         public static string subject_zoom_welcome {
             get {

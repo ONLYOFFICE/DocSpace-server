@@ -1,17 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
+  <!--
+    Microsoft ResX Schema
+
     Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
+
+    The primary goals of this format is to allow a simple XML format
+    that is mostly human readable. The generation and parsing of the
+    various data types are done through the TypeConverter classes
     associated with the data types.
-    
+
     Example:
-    
+
     ... ado.net/XML headers & schema ...
     <resheader name="resmimetype">text/microsoft-resx</resheader>
     <resheader name="version">2.0</resheader>
@@ -26,36 +26,36 @@
         <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
         <comment>This is a comment</comment>
     </data>
-                
-    There are any number of "resheader" rows that contain simple 
+
+    There are any number of "resheader" rows that contain simple
     name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
+
+    Each data row contains a name, and value. The row also contains a
+    type or mimetype. Type corresponds to a .NET class that support
+    text/value conversion through the TypeConverter architecture.
+    Classes that don't support this are serialized and stored with the
     mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
+
+    The mimetype is used for serialized objects, and tells the
+    ResXResourceReader how to depersist the object. This is currently not
     extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
+
+    Note - application/x-microsoft.net.object.binary.base64 is the format
+    that the ResXResourceWriter will generate, however the reader can
     read any of the formats listed below.
-    
+
     mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
-    
+
     mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
+    value   : The object must be serialized with
             : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
             : and then encoded with base64 encoding.
 
     mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
+    value   : The object must be serialized into a byte array
             : using a System.ComponentModel.TypeConverter
             : and then encoded with base64 encoding.
     -->
@@ -241,7 +241,7 @@
     <value>Předplatné zákazníka aktualizováno: {0}</value>
   </data>
   <data name="CustomerWalletServicesSettingsUpdated" xml:space="preserve">
-    <value>Nastavení služeb s povolenou peněženkou zákazníka bylo aktualizováno</value>
+    <value>Nastavení služeb s povolenou peněženkou zákazníka bylo aktualizováno: {0}</value>
   </data>
   <data name="CustomerWalletToppedUp" xml:space="preserve">
     <value>Peněženka zákazníka dobita: {0}</value>
@@ -723,12 +723,6 @@
   <data name="PortalRenamed" xml:space="preserve">
     <value>Přejmenování portálu</value>
   </data>
-  <data name="PrivacyRoomDisable" xml:space="preserve">
-    <value>Soukromá místnost je zakázána</value>
-  </data>
-  <data name="PrivacyRoomEnable" xml:space="preserve">
-    <value>Soukromá místnost je povolena</value>
-  </data>
   <data name="ProductAccessOpened" xml:space="preserve">
     <value>Produkty [{0}]. Přístup otevřen</value>
   </data>
@@ -782,6 +776,12 @@
   </data>
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Regenerace klientova tajemství {0}</value>
+  </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Poznámka</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Hlášení zobrazuje posledních {0} z {1} událostí. Chcete-li získat všechny události, stáhněte hlášení ve formátu CSV.</value>
   </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Nastavení vektorizace bylo resetováno</value>
@@ -892,7 +892,7 @@
     <value>Odeslat</value>
   </data>
   <data name="SendJoinInvite" xml:space="preserve">
-    <value>Uživatel {0} poslal pozvánku {1}, aby se připojil k tomuto prostoru DocSpace</value>
+    <value>Uživatel {0} poslal pozvánku {1}</value>
   </data>
   <data name="SentInviteInstructions" xml:space="preserve">
     <value>Instrukce k pozvánce byly odeslány: {0}</value>
@@ -941,6 +941,9 @@
   </data>
   <data name="StartTransferSetting" xml:space="preserve">
     <value>Začít migraci portálu do jiného regionu</value>
+  </data>
+  <data name="SubscriptionBalanceMovedToWallet" xml:space="preserve">
+    <value>Zůstatek předplatného byl převeden do peněženky: {0}</value>
   </data>
   <data name="SystemAccount" xml:space="preserve">
     <value>Systémový účet</value>
@@ -1205,5 +1208,89 @@
   </data>
   <data name="UserLogoutActiveConnectionsForUser" xml:space="preserve">
     <value>Aktivní připojení pro uživatele byla odhlášena: {0}</value>
+  </data>
+  <data name="DocsCloudConfigUpdated" xml:space="preserve">
+    <value>Konfigurace Docs Connect byla aktualizována</value>
+  </data>
+  <data name="DocsCloudQuotaReportDownloaded" xml:space="preserve">
+    <value>Zpráva o kvótě Docs Connect byla stažena</value>
+  </data>
+  <data name="UserUpdatedAiSettings" xml:space="preserve">
+    <value>Nastavení AI uživatele bylo aktualizováno</value>
+  </data>
+  <data name="AiAgentProfileAssigned" xml:space="preserve">
+    <value>Profil AI přiřazen AI agentovi pro akci: {0}</value>
+  </data>
+  <data name="AiProfileAssigned" xml:space="preserve">
+    <value>Profil AI přiřazen k akci: {0}</value>
+  </data>
+  <data name="AiProfileCreated" xml:space="preserve">
+    <value>Profil AI modelu byl vytvořen: {0}</value>
+  </data>
+  <data name="AiProfileDeleted" xml:space="preserve">
+    <value>Profil AI modelu byl odstraněn: {0}</value>
+  </data>
+  <data name="AiProfileUnassigned" xml:space="preserve">
+    <value>Přiřazení profilu AI k akci bylo zrušeno: {0}</value>
+  </data>
+  <data name="AiProfileUpdated" xml:space="preserve">
+    <value>Profil AI modelu byl aktualizován: {0}</value>
+  </data>
+  <data name="FileMarkedAsRead" xml:space="preserve">
+    <value>Soubory [{0}]. Označeno jako přečtené</value>
+  </data>
+  <data name="FileNotSavedDueToTenantQuota" xml:space="preserve">
+    <value>Soubory [{0}]. Soubor nebyl uložen. Kvóta úložiště portálu byla překročena.</value>
+  </data>
+  <data name="FileSavedButTenantQuotaExceeded" xml:space="preserve">
+    <value>Soubory [{0}]. Uložení souboru překračuje kvótu úložiště portálu.</value>
+  </data>
+  <data name="FolderMarkedAsRead" xml:space="preserve">
+    <value>Složky [{0}]. Označeno jako přečtené</value>
+  </data>
+  <data name="PrivacyRoomKeyCreated" xml:space="preserve">
+    <value>Šifrovací klíč soukromé místnosti {0} byl vytvořen</value>
+  </data>
+  <data name="PrivacyRoomKeyDeleted" xml:space="preserve">
+    <value>Šifrovací klíč soukromé místnosti {0} byl odstraněn</value>
+  </data>
+  <data name="PrivacyRoomKeyUpdated" xml:space="preserve">
+    <value>Šifrovací klíč soukromé místnosti {0} byl aktualizován</value>
+  </data>
+  <data name="SuspiciousLoginDetected" xml:space="preserve">
+    <value>Bylo zjištěno podezřelé přihlášení: {0}</value>
+  </data>
+  <data name="UpdatedServerOfAgent" xml:space="preserve">
+    <value>MCP server {0} AI agenta byl aktualizován</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Bylo spuštěno kaskádové přiřazení metadat: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Pole metadat bylo vytvořeno: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Pole metadat bylo odstraněno: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Pole metadat bylo aktualizováno: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Šablona metadat byla přiřazena: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Šablona metadat byla vytvořena: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Šablona metadat byla odstraněna: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Přiřazení šablony metadat bylo zrušeno: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Šablona metadat byla aktualizována: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Hodnoty metadat byly aktualizovány: {0}</value>
   </data>
 </root>

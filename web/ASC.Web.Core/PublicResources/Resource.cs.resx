@@ -135,17 +135,20 @@
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Podrobnosti</value>
   </data>
+  <data name="AccountingCustomerOperationMonth" xml:space="preserve">
+    <value>Měsíc</value>
+  </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Množství</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Služba</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>Funkce AI</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Záloha</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Místo na disku</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Vektorizace</value>
@@ -157,7 +160,7 @@
     <value>Měrná jednotka</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Záloha</value>
+    <value>Kopií</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Tokeny</value>
@@ -174,8 +177,26 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Transakční historie</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Celkem utraceno</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Souhrn podle uživatelů</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Typ</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportName" xml:space="preserve">
+    <value>Zpráva o měsíčním využití ({0}-{1})</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportSheetName" xml:space="preserve">
+    <value>Měsíční využití</value>
+  </data>
+  <data name="AccountingServiceUsageReportName" xml:space="preserve">
+    <value>Zpráva o využití služeb ({0}-{1})</value>
+  </data>
+  <data name="AccountingServiceUsageReportSheetName" xml:space="preserve">
+    <value>Využití služeb</value>
   </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Pole s validačním kódem nemůže být prázdné</value>
@@ -196,7 +217,7 @@
     <value>Překročen limit prostoru pro agenty AI</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Nastavení limitu pro agenty AI se nezdařilo. Zadaná hodnota je větší než celková velikost úložiště DocSpace.</value>
+    <value>Nastavení limitu pro agenty AI se nezdařilo. Zadaná hodnota je větší než celková velikost úložiště.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Automatické obnovení</value>
@@ -226,7 +247,7 @@
     <value>ID klienta aplikace</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Povolte aplikaci přihlášení k portálu pomocí účtu Apple ID.</value>
+    <value>Přihlaste se do pracovního prostoru pomocí účtu Apple ID</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Povolením této aplikace umožníte uživatelům přihlásit se do {LogoText} pomocí Apple ID. {0}Přejděte na portál Apple Developers Portal a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
@@ -271,7 +292,7 @@
     <value>Box Klíč</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Připojte aplikaci ke správě Box souborů a složek.</value>
+    <value>Spravujte soubory a složky Box</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Povolením této aplikace propojíte svůj účet služby Box s modulem Dokumenty. Budete moci spravovat, upravovat a sdílet soubory ze služby Box s uživateli služby {LogoText}. {0}Přihlaste se ke svému účtu na stránce pro vývojáře aplikace Box a vytvořte novou aplikaci pro integraci s aplikací {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
@@ -310,7 +331,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Připojte aplikaci ke správě Dropbox souborů a složek.</value>
+    <value>Spravujte soubory a složky Dropbox</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Povolením této aplikace propojíte svůj účet Dropbox s modulem Dokumenty. Budete moci spravovat, upravovat a sdílet soubory ze služby Dropbox s uživateli aplikace {LogoText}. {0}Přihlaste se ke svému účtu na webu Dropbox Developers a vytvořte novou aplikaci pro integraci s {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
@@ -346,7 +367,7 @@
     <value>Facebook klíč</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Připojte aplikaci k přihlášení do portálů pomocí Facebookového účtu.</value>
+    <value>Přihlaste se do pracovního prostoru pomocí účtu Facebook</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Zapnutím této aplikace umožníte uživatelům přihlásit se do {LogoText} pomocí Facebooku a propojit účty zákazníků na Facebooku s modulem CRM. {0}Přejděte na portál Facebook Developers Portal a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
@@ -400,7 +421,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Připojit projekt k přihlášení do portálu pomocí Google účtu a spravujte Google Drive soubory a složky.</value>
+    <value>Přihlaste se do pracovního prostoru pomocí účtu Google a spravujte soubory a složky Google Drive</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Povolením této aplikace připojíte svůj účet Disku Google k modulu Dokumenty. Budete moci spravovat, upravovat a sdílet soubory z Disku Google s uživateli aplikace {LogoText}. {0}Přejděte do konzoly Google API a vytvořte nový projekt pro integraci {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
@@ -409,7 +430,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Připojte aplikaci k přihlášení do portálu pomocí LinkedIn účtu.</value>
+    <value>Přihlaste se do pracovního prostoru pomocí účtu LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Povolte tuto aplikaci, aby se vaši uživatelé mohli přihlásit do {LogoText} pomocí svých účtů LinkedIn. {0}Přejděte na webové stránky LinkedIn Developers a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
@@ -538,7 +559,7 @@
     <value>Tajný klíč klienta</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Připojte aplikaci ke správě OneDrive souborů a složek.</value>
+    <value>Spravujte soubory a složky OneDrive</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Povolením této aplikace připojíte svůj účet OneDrive k modulu Dokumenty. Budete moci spravovat, upravovat a sdílet soubory ze služby OneDrive s uživateli služby {LogoText}. {0}Přihlaste se ke svému účtu Microsoft Azure a vytvořte novou aplikaci pro integraci {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
@@ -568,7 +589,7 @@
     <value>Token bota</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Připojte účet Telegram a přijímejte oznámení portálu prostřednictvím Telegramu.</value>
+    <value>Přijímejte oznámení prostřednictvím Telegramu</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Chcete-li dostávat oznámení portálu prostřednictvím služby Telegram, povolte funkci bota Telegramu- Nového bota můžete vytvořit pomocí nástroje BotFather v aplikaci Telegram Desktop. Pro použití tohoto bota musí uživatelé portálu povolit oznámení Telegram na své profilové stránce. {0}Vložení uživatelského jména bota a tokenu, který jste obdrželi, do polí níže.</value>
@@ -601,7 +622,7 @@
     <value>ID klienta</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Připojte aplikaci k přihlášení do portálu pomocí X.</value>
+    <value>Přihlaste se do pracovního prostoru pomocí účtu X</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Zapnutím této aplikace umožníte svým uživatelům přihlásit se do {LogoText} pomocí X a propojit účty X svých zákazníků s modulem CRM. {0}Přejděte na portál X Developers Portal a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
@@ -640,7 +661,7 @@
     <value>Tajný klíč klienta</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Povolte aplikaci přihlášení k portálu pomocí účtu WeChat.</value>
+    <value>Přihlaste se do pracovního prostoru pomocí účtu WeChat</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Povolte aplikaci přihlášení k portálu pomocí účtu WeChat.</value>
@@ -700,7 +721,7 @@
     <value>Tajemství klienta Zoom</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Povolte aplikaci přihlášení k portálu pomocí účtu Zoom.</value>
+    <value>Přihlaste se do pracovního prostoru pomocí účtu Zoom</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Povolením této aplikace umožníte uživatelům přihlásit se do {LogoText} pomocí jejich účtů Zoom. {0}Přejděte na webové stránky Zoom Developers a vytvořte novou integraci aplikace {LogoText}. Vložte údaje, které jste obdrželi níže:</value>
@@ -1105,7 +1126,7 @@
     <value>Překročení kvóty místa v místnosti</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Nepodařilo se nastavit kvótu na místnost. Zadaná hodnota je větší než celkové úložiště DocSpace.</value>
+    <value>Nepodařilo se nastavit kvótu na místnost. Zadaná hodnota je větší než celkové úložiště.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Asie - Pacifik (Singapur)</value>
@@ -1152,11 +1173,11 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Počet AI agentů by neměl překročit {0}</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>Vyhledávání AI</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>Funkce AI</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Povolte AI funkce a zvyšte produktivitu.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Sledování přihlášení a akcí</value>
@@ -1270,7 +1291,7 @@
     <value>Došlo k neočekávané chybě. Zkuste to znovu.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Úspěšně jste se připojili k Telegramu, abyste mohli přijímat oznámení z vašeho DocSpace.</value>
+    <value>Úspěšně jste se připojili k Telegramu, abyste mohli přijímat oznámení z pracovního prostoru.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Nesprávný kód</value>
@@ -1285,16 +1306,13 @@
     <value>Překročení kvóty uživatelského prostoru</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Nepodařilo se nastavit kvótu na uživatele. Zadaná hodnota je větší než celkové úložiště DocSpace.</value>
+    <value>Nepodařilo se nastavit kvótu na uživatele. Zadaná hodnota je větší než celkové úložiště.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Region Západní USA (Oregon)</value>
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Co je nového</value>
-  </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>Agent</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>Chat</value>
@@ -1305,6 +1323,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>Webové vyhledávání</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>Vyhledávání AI</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>AI kredity</value>
   </data>
@@ -1312,6 +1333,9 @@
     <value>Zdroje</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Výsledky</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Výsledky</value>
   </data>
   <data name="ConsumersdatabaseType" xml:space="preserve">
@@ -1339,7 +1363,7 @@
     <value>Připojení k databázi</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Uložte výsledky formuláře do externí databáze, například MySQL nebo SQLite.</value>
+    <value>Uložte výsledky formuláře do externí databáze, například MySQL nebo SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Připojte externí databázi pro ukládání výsledků formuláře.</value>
@@ -1378,9 +1402,159 @@
     <value>Ověření uživatele se nezdařilo</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Povolte aplikaci přihlásit se k portálu pomocí účtu Nextcloud.</value>
+    <value>Přihlaste se do pracovního prostoru pomocí účtu Nextcloud</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Povolte aplikaci přihlásit se k portálu pomocí účtu Nextcloud.</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Další úložiště na disku</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Plán Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Plán Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Správci</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Správci</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Získejte přístup k široké škále modelů AI prostřednictvím integrace OpenRouter. Plaťte jen za to, co využijete; částka se účtuje z vaší Peněženky.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>Použijte vyhledávač s AI k obohacení chatů s AI o informace z internetu v reálném čase</value>
+  </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>Uživatelé</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>Uživatelé</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_image" xml:space="preserve">
+    <value>Tokeny</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
+    <value>Obrázek</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>Vložte editory ONLYOFFICE Docs do své aplikace s cloudovými nájemci a vlastními klíči API.</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>Zpráva o kvótě Docs Connect ({0})</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>Vývojářský balíček Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Typ zdroje</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Název zdroje</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>ID zdroje</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>AI agent</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Soubor</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Složka</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Pokoj</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Formulář</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Společnost</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Datum vygenerování</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Období</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Celkem</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Zpráva</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Aktivní</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Přístup vyprší</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Typ uživatele</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>ID uživatele</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Editory</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Editory dokumentů s plnými oprávněními</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Zbývající</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Limit předplatného</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Kvóta uživatele</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Živý prohlížeč</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Prohlížeče dokumentů pouze pro čtení</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Externí</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Interní</value>
+  </data>
+  <data name="AccountingCustomerOperationPromptTokens" xml:space="preserve">
+    <value>Dotaz</value>
+  </data>
+  <data name="AccountingCustomerOperationCachedTokens" xml:space="preserve">
+    <value>Mezipaměť</value>
+  </data>
+  <data name="AccountingCustomerOperationCacheWriteTokens" xml:space="preserve">
+    <value>Zápis do mezipaměti</value>
+  </data>
+  <data name="AccountingCustomerOperationCompletionTokens" xml:space="preserve">
+    <value>Odpověď</value>
+  </data>
+  <data name="AccountingCustomerOperationReasoningTokens" xml:space="preserve">
+    <value>Uvažování</value>
+  </data>
+  <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
+    <value>Obrázek</value>
+  </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>Cena poskytovatele</value>
   </data>
 </root>

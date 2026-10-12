@@ -34,56 +34,37 @@
 namespace ASC.Files.Core;
 
 /// <summary>
-/// The authentication data.
+/// The credentials of a third-party storage account. The portal takes them when an account is connected and does not
+/// give them back afterwards.
 /// </summary>
 [DebuggerDisplay("{Login} {Password} {RawToken} {Url}")]
 public class AuthData(string url = null, string login = null, string password = null, string token = null, string provider = null)
 {
-    /// <summary>
-    /// The authentication login.
-    /// </summary>
+    /// <summary>The account name at the storage service.</summary>
     /// <example>user@example.com</example>
     public string Login { get; init; } = login ?? string.Empty;
 
-    /// <summary>
-    /// The authentication password.
-    /// </summary>
+    /// <summary>The password of the account at the storage service.</summary>
     /// <example>p@ssw0rd!</example>
     public string Password { get; init; } = password ?? string.Empty;
 
-    /// <summary>
-    /// The authentication raw token.
-    /// </summary>
+    /// <summary>The token of the account, kept as the raw JSON document the storage service issued it in.</summary>
     /// <example>{"access_token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...","expires_in":3600}</example>
     public string RawToken { get; init; } = token ?? string.Empty;
 
-    /// <summary>
-    /// The authentication URL.
-    /// </summary>
-    /// <example>https://auth.example.com</example>
+    /// <summary>The address of the storage server the account lives on.</summary>
+    /// <example>https://cloud.example.com/remote.php/dav/files/admin/</example>
     [Url]
     public string Url { get; set; } = url ?? string.Empty;
 
     /// <summary>
-    /// The authentication provider.
+    /// The storage service the credentials belong to, as the provider key the account was connected with.
     /// </summary>
-    /// <example>OAuth2</example>
+    /// <example>WebDav</example>
     public string Provider { get; init; } = provider ?? string.Empty;
 
-    /// <summary>
-    /// The authentication token.
-    /// </summary>
-    /// <example>
-    /// {
-    ///   "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-    ///   "refresh_token": "def50200a1b2c3d4e5f6...",
-    ///   "expires_in": 3600,
-    ///   "client_id": "my-client-id",
-    ///   "client_secret": "my-client-secret",
-    ///   "redirect_uri": "https://app.example.com/callback",
-    ///   "timestamp": "2026-01-01T00:00:00Z"
-    /// }
-    /// </example>
+    /// <summary>The same token as in `rawToken`, parsed into its OAuth 2.0 fields.</summary>
+    /// <example>{"access_token":"eyJhbGciOiJIUzI1NiJ9...","expires_in":3600}</example>
     public OAuth20Token Token
     {
         get

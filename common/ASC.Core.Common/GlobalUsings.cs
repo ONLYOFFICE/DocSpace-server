@@ -52,7 +52,6 @@ global using System.Security.Authentication;
 global using System.Security.Claims;
 global using System.Security.Cryptography;
 global using System.Security.Principal;
-global using System.ServiceModel;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.Json.Serialization;
@@ -71,7 +70,6 @@ global using ASC.Common;
 global using ASC.Common.Caching;
 global using ASC.Common.Log;
 global using ASC.Common.Logging;
-global using ASC.Common.Module;
 global using ASC.Common.Notify.Engine;
 global using ASC.Common.Notify.Patterns;
 global using ASC.Common.Radicale;
@@ -97,7 +95,6 @@ global using ASC.Core.Common.Log;
 global using ASC.Core.Common.Messaging;
 global using ASC.Core.Common.Notify;
 global using ASC.Core.Common.Notify.IntegrationEvents.Events;
-global using ASC.Core.Common.Notify.Jabber;
 global using ASC.Core.Common.Notify.Push;
 global using ASC.Core.Common.Notify.Stylers.Resources;
 global using ASC.Core.Common.Notify.Telegram;
@@ -110,7 +107,6 @@ global using ASC.Core.Common.WhiteLabel;
 global using ASC.Core.Configuration;
 global using ASC.Core.Data;
 global using ASC.Core.Notify;
-global using ASC.Core.Notify.Jabber;
 global using ASC.Core.Notify.Senders;
 global using ASC.Core.Notify.Socket;
 global using ASC.Core.Security.Authentication;
@@ -135,6 +131,7 @@ global using ASC.Notify.Sinks;
 global using ASC.Security.Cryptography;
 global using ASC.Web.Core.WhiteLabel;
 global using ASC.Web.Core.Files;
+global using ASC.Web.Core.Users;
 global using ASC.Web.Studio.Utility;
 
 global using Autofac;
@@ -154,7 +151,6 @@ global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Hosting;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
-global using Microsoft.Net.Http.Headers;
 
 global using MimeKit;
 
@@ -168,6 +164,8 @@ global using Polly.Registry;
 global using Polly.Retry;
 
 global using ProtoBuf;
+
+global using Refit;
 
 global using Riok.Mapperly.Abstractions;
 

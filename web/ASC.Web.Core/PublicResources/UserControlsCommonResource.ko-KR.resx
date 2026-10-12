@@ -127,7 +127,7 @@
     <value>라이선스 키를 입력해야 합니다</value>
   </data>
   <data name="LicenseTypeNotCorrect" xml:space="preserve">
-    <value>라이선스 충돌이 발생했습니다. {0} DocSpace(Enterprise 또는 Developer)의 올바른 버전을 설치했는지 확인하세요. 문의 사항이 있으시면 영업 관리자에게 문의하세요.</value>
+    <value>라이선스 충돌이 발생했습니다. {0} Docs(Enterprise 또는 Developer)의 올바른 버전을 설치했는지 확인하세요. 문의 사항이 있으시면 영업 관리자에게 문의하세요.</value>
   </data>
   <data name="NewDocument" xml:space="preserve">
     <value>새 문서</value>

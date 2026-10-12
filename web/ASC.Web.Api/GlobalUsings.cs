@@ -47,13 +47,13 @@ global using System.Text.RegularExpressions;
 global using System.Reflection;
 global using System.Web;
 
+global using ASC.AI.Integration.Extensions;
 global using ASC.ActiveDirectory;
 global using ASC.ActiveDirectory.Base;
 global using ASC.ActiveDirectory.Base.Settings;
 global using ASC.ActiveDirectory.ComplexOperations;
 global using ASC.Api.Collections;
 global using ASC.Api.Core;
-global using ASC.Api.Core.Convention;
 global using ASC.Api.Core.Core;
 global using ASC.Api.Core.Extensions;
 global using ASC.Api.Core.Security;
@@ -80,6 +80,7 @@ global using ASC.Common.Web;
 global using ASC.Core;
 global using ASC.Core.Billing;
 global using ASC.Core.Common;
+global using ASC.Core.Common.AI;
 global using ASC.Core.Common.Configuration;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.Notify;
@@ -87,6 +88,7 @@ global using ASC.Core.Common.Notify.Engine;
 global using ASC.Core.Common.Notify.Push;
 global using ASC.Core.Common.Quota;
 global using ASC.Core.Common.Quota.Custom;
+global using ASC.Core.Common.Quota.Features;
 global using ASC.Core.Common.Security;
 global using ASC.Core.Common.Settings;
 global using ASC.Core.Common.WhiteLabel;
@@ -114,6 +116,7 @@ global using ASC.Files.Core.ExternalDatabase;
 global using ASC.Files.Core.Helpers;
 global using ASC.Files.Core.Security;
 global using ASC.Files.Core.Services.OFormService;
+global using ASC.Files.Core.Utils;
 global using ASC.Files.Core.VirtualRooms;
 global using ASC.Geolocation;
 global using ASC.IPSecurity;
@@ -178,13 +181,13 @@ global using Riok.Mapperly.Abstractions;
 
 global using SkiaSharp;
 
-global using Svg.Skia;
-
 global using Swashbuckle.AspNetCore.Annotations;
 
 global using ZiggyCreatures.Caching.Fusion;
 
 global using static ASC.ActiveDirectory.Base.Settings.LdapSettings;
 
+global using AuthenticationException = System.Security.Authentication.AuthenticationException;
+global using DataAnnotationsValidationResult = System.ComponentModel.DataAnnotations.ValidationResult;
 global using SecurityContext = ASC.Core.SecurityContext;
 global using ValidationResult = ASC.Security.Cryptography.EmailValidationKeyProvider.ValidationResult;

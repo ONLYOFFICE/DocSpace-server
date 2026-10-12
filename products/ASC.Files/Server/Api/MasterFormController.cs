@@ -50,14 +50,34 @@ public abstract class MasterFormController<T>(FileStorageService fileStorageServ
     : ApiControllerBase(folderDtoHelper, fileDtoHelper)
 {
     /// <remarks>
-    /// Checks if the current file is a form draft which can be filled out.
+    /// Resolves the editor address the caller must open to fill out the given PDF form, and provisions the personal
+    /// draft that filling needs. The form has to live in a form-filling room and filling has to be started for it
+    /// with `PUT api/2.0/files/file/{fileId}/manageformfilling`; a caller who may edit the form, a form whose filling
+    /// has not started, and a request naming `view` or `embedded` as the action are all sent straight to the form
+    /// itself. Read access to the form is enough to get an address, fill-forms access is what puts the caller into
+    /// the filling flow, and a holder of an external link may call it without signing in, while a caller with neither
+    /// a session nor a link key is rejected. In the filling case the call is not read-only: it copies the form into
+    /// the room's in-progress folder under the caller's name, clears the new-item badge, closes the editing session
+    /// of the original, and answers with the address of that copy. A repeated call reuses that copy, and a call
+    /// naming an existing draft adds a discard notice when that draft is no longer valid. The answer is one URL
+    /// string that may carry a `#message/...` fragment the editor renders as a notice. For the full editor
+    /// configuration use `GET api/2.0/files/file/{fileId}/openedit`. A form the caller cannot open is refused with
+    /// 403, and one that does not exist is answered as missing.
     /// </remarks>
-    /// <summary>Check the form draft filling</summary>
+    /// <summary>
+    /// Open a form draft for filling
+    /// </summary>
     /// <path>api/2.0/files/masterform/{fileId}/checkfillformdraft</path>
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "Link to the form", typeof(string))]
-    [SwaggerResponse(403, "You don't have enough permission to view the file")]
+    [SwaggerResponse(200, "The editor address to open, with an optional notice fragment", typeof(string))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `version`")]
+    [SwaggerResponse(401, "An anonymous caller has no external link")]
+    [SwaggerResponse(402, "The personal draft does not fit into the storage quota of the portal or the room")]
+    [SwaggerResponse(403, "The caller cannot open the form, asked for a past revision without history access, the form is in Trash, or the caller may fill the form but not the folder it lies in")]
+    [SwaggerResponse(404, "The file id, or the requested version of it, resolves to nothing")]
+    [SwaggerResponse(415, "The file is in a format the editors can neither edit nor open for viewing")]
+    [SwaggerResponse(500, "The file lies in a third-party storage that cannot deliver it")]
     [AllowAnonymous]
     [HttpPost("masterform/{fileId}/checkfillformdraft")]
     public async Task<string> CheckFillFormDraft(CheckFillFormDraftRequestDto<T> inDto)

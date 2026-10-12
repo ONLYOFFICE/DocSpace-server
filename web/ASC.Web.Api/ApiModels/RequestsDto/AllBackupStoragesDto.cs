@@ -34,15 +34,15 @@
 namespace ASC.Web.Api.ApiModels.RequestsDto;
 
 /// <summary>
-/// Data Transfer Object representing parameters for querying all backup storages.
+/// Whose backup schedule decides which storage is reported as the current one.
 /// </summary>
 
 public class AllBackupStoragesDto
 {
     /// <summary>
-    /// Indicates whether the operation should perform a dump of backup storage data.
-    /// This property is used as a parameter in backup-related API requests to specify
-    /// if additional details or data dumping is required during the process.
+    /// Whether the schedule of the whole server is read instead of the one of the current portal. It only changes
+    /// which schedule marks an entry as `current`; the list of storages itself is the same either way, and the flag
+    /// makes sense only on a self-hosted installation.
     /// </summary>
     /// <example>true</example>
     [FromQuery]

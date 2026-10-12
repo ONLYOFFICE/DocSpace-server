@@ -207,7 +207,7 @@ public class GosUslugiLoginProvider : BaseLoginProvider<GosUslugiLoginProvider>
         var requestQuery = string.Join("&", requestParams.Select(pair => pair.Key + "=" + HttpUtility.UrlEncode(pair.Value)));//.Replace("+", "%2b");
 
         var redURL = CodeUrl + "?" + requestQuery;
-        context.Response.Redirect(redURL, true);
+        context.Response.Redirect(redURL);
     }
 
     private OAuth20Token GetAccessToken(string state, string code)

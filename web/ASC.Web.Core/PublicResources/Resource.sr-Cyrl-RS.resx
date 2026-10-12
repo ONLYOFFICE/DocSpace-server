@@ -135,17 +135,20 @@
   <data name="AccountingCustomerOperationDetails" xml:space="preserve">
     <value>Детаљи</value>
   </data>
+  <data name="AccountingCustomerOperationMonth" xml:space="preserve">
+    <value>Месец</value>
+  </data>
   <data name="AccountingCustomerOperationQuantity" xml:space="preserve">
     <value>Колицина</value>
+  </data>
+  <data name="AccountingCustomerOperationService" xml:space="preserve">
+    <value>Услуга</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_ai-tools" xml:space="preserve">
     <value>AI функције</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_backup" xml:space="preserve">
     <value>Бекап</value>
-  </data>
-  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
-    <value>Простор на диску</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_embedding" xml:space="preserve">
     <value>Векторизација</value>
@@ -157,7 +160,7 @@
     <value>Јединица мере</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Бекап</value>
+    <value>Копија</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Токени</value>
@@ -174,8 +177,26 @@
   <data name="AccountingCustomerOperationsReportSheetName" xml:space="preserve">
     <value>Историја трансакција</value>
   </data>
+  <data name="AccountingCustomerOperationsReportSummaryDebit" xml:space="preserve">
+    <value>Укупно потрошено</value>
+  </data>
+  <data name="AccountingCustomerOperationsReportSummarySheetName" xml:space="preserve">
+    <value>Преглед по кориснику</value>
+  </data>
   <data name="AccountingCustomerOperationType" xml:space="preserve">
     <value>Тип</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportName" xml:space="preserve">
+    <value>Извештај о месечном коришћењу ({0}-{1})</value>
+  </data>
+  <data name="AccountingMonthlyUsageReportSheetName" xml:space="preserve">
+    <value>Месечно коришћење</value>
+  </data>
+  <data name="AccountingServiceUsageReportName" xml:space="preserve">
+    <value>Извештај о коришћењу услуга ({0}-{1})</value>
+  </data>
+  <data name="AccountingServiceUsageReportSheetName" xml:space="preserve">
+    <value>Коришћење услуга</value>
   </data>
   <data name="ActivateMobilePhoneEmptyCode" xml:space="preserve">
     <value>Поље за валидацију кода не може бити празно</value>
@@ -196,7 +217,7 @@
     <value>Квота простора AI агента је прекорачена</value>
   </data>
   <data name="AiAgentQuotaGreaterPortalError" xml:space="preserve">
-    <value>Неуспешно подешавање квоте по AI агенту. Унета вредност је већа од укупног DocSpace складишта.</value>
+    <value>Неуспешно подешавање квоте по AI агенту. Унета вредност је већа од укупног складишта.</value>
   </data>
   <data name="AutoRenewal" xml:space="preserve">
     <value>Аутоматска обнова</value>
@@ -226,7 +247,7 @@
     <value>ID апликације</value>
   </data>
   <data name="ConsumersAppleIdDescription" xml:space="preserve">
-    <value>Омогућите апликацији да се пријави на портал користећи Apple ID налог.</value>
+    <value>Пријавите се на свој радни простор помоћу Apple ID налога</value>
   </data>
   <data name="ConsumersAppleIdInstruction" xml:space="preserve">
     <value>Омогућите овој апликацији да омогући корисницима да се пријаве на {LogoText} користећи Apple ID. {0}Идите на Apple Developers Portal и креирајте нову апликацију за {LogoText} интеграцију. Унесите податке које сте добили испод:</value>
@@ -271,7 +292,7 @@
     <value>Box кључ</value>
   </data>
   <data name="ConsumersBoxDescription" xml:space="preserve">
-    <value>Омогућите апликацији управљање Box датотекама и фолдерима.</value>
+    <value>Управљајте Box датотекама и фолдерима</value>
   </data>
   <data name="ConsumersBoxInstruction" xml:space="preserve">
     <value>Омогућите овој апликацији да повеже ваш Box налог са модулом Документи. Моћи ћете управљати, уређивати и делити датотеке са Box корисницима {LogoText}-а. {0}Пријавите се на свој налог на Box developers страници и креирајте нову апликацију за {LogoText} интеграцију. Унесите податке које сте добили испод:</value>
@@ -310,7 +331,7 @@
     <value>DropBox</value>
   </data>
   <data name="ConsumersDropBoxDescription" xml:space="preserve">
-    <value>Омогући апликацију да управљаш DropBox датотекама и фолдерима.</value>
+    <value>Управљајте Dropbox датотекама и фолдерима</value>
   </data>
   <data name="ConsumersDropBoxInstruction" xml:space="preserve">
     <value>Омогућите овој апликацији да повеже ваш DropBox налог са модулом Документи. Моћи ћете управљати, уређивати и делити датотеке са DropBox корисницима {LogoText}-а. {0}Пријавите се на свој налог на Dropbox Developers веб сајту и креирајте нову апликацију за {LogoText} интеграцију. Унесите податке које сте добили испод:</value>
@@ -346,7 +367,7 @@
     <value>Facebook кључ</value>
   </data>
   <data name="ConsumersFacebookDescription" xml:space="preserve">
-    <value>Омогућите апликацији да се пријави на портал користећи Facebook налог.</value>
+    <value>Пријавите се на свој радни простор помоћу Facebook налога</value>
   </data>
   <data name="ConsumersFacebookInstruction" xml:space="preserve">
     <value>Омогућите овој апликацији да омогући вашим корисницима да се пријаве на {LogoText} користећи Facebook и повежу своје Facebook налоге купаца са CRM модулом. {0}Идите на Facebook Developers Portal и креирајте нову апликацију за {LogoText} интеграцију. Унесите податке које сте добили испод:</value>
@@ -400,7 +421,7 @@
     <value>GoogleCloud json</value>
   </data>
   <data name="ConsumersGoogleDescription" xml:space="preserve">
-    <value>Повежите пројекат да бисте се пријавили на портал помоц́у Google налога и управљали датотекама и фолдерима Google Drive-а.</value>
+    <value>Пријавите се на свој радни простор помоћу Google налога и управљајте датотекама и фолдерима на Google Drive-у</value>
   </data>
   <data name="ConsumersGoogleInstruction" xml:space="preserve">
     <value>Омогуц́ите ову апликацију да повежете свој налог на Google Drive са модулом Документи. Моц́и ц́ете да управљате, мењате и делите датотеке са Google Drive-а са {LogoText} корисницима. {0}Идите на конзолу Google API-ја и направите нови пројекат за {LogoText} интеграцију. Унесите податке које сте добили испод:</value>
@@ -409,7 +430,7 @@
     <value>LinkedIn</value>
   </data>
   <data name="ConsumersLinkedInDescription" xml:space="preserve">
-    <value>Омогуц́ите апликацији да се пријави на портал помоц́у LinkedIn налога.</value>
+    <value>Пријавите се на свој радни простор помоћу LinkedIn налога</value>
   </data>
   <data name="ConsumersLinkedInInstruction" xml:space="preserve">
     <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на {LogoText} користец́и своје LinkedIn налоге. {0}Идите на веб локацију LinkedIn Developers и направите нову интеграцију апликације {LogoText}. Унесите податке које сте добили испод:</value>
@@ -538,7 +559,7 @@
     <value>Тајна клијента</value>
   </data>
   <data name="ConsumersSkyDriveDescription" xml:space="preserve">
-    <value>Омогуц́ите апликацији да управља OneDrive датотекама и фолдерима.</value>
+    <value>Управљајте OneDrive датотекама и фолдерима</value>
   </data>
   <data name="ConsumersSkyDriveInstruction" xml:space="preserve">
     <value>Омогуц́ите ову апликацију да повежете свој OneDrive налог са модулом Документи. Моц́и ц́ете да управљате, мењате и делите датотеке са OneDrive-а са {LogoText} корисницима. {0}Пријавите се на свој Microsoft Azure налог и направите нову апликацију за {LogoText} интеграцију. Унесите податке које сте добили испод:</value>
@@ -568,7 +589,7 @@
     <value>Бот токен</value>
   </data>
   <data name="ConsumersTelegramDescription" xml:space="preserve">
-    <value>Повежите Telegram налог да бисте примали обавештења портала путем Telegram.</value>
+    <value>Примајте обавештења путем Telegram</value>
   </data>
   <data name="ConsumersTelegramInstruction" xml:space="preserve">
     <value>Да бисте добијали обавештења портала преко Telegram, омогуц́ите Telegram бот. Можете креирати новог бота користец́и BotFather у Telegram Desktop. Да би користили овог бота, корисници портала треба да омогуц́е Telegram обавештења на својој страници профила. {0}Налепите корисничко име бота и токен који сте примили у поља у наставку.</value>
@@ -601,7 +622,7 @@
     <value>ID клијента</value>
   </data>
   <data name="ConsumersTwitterDescription" xml:space="preserve">
-    <value>Омогућите апликацију да бисте се пријавили на портал користећи X налог.</value>
+    <value>Пријавите се на свој радни простор помоћу X налога</value>
   </data>
   <data name="ConsumersTwitterInstruction" xml:space="preserve">
     <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на {LogoText} користец́и свој X и повежу X налоге својих клијената са CRM модулом. {0}Идите на X Developers портал и направите нову интеграцију апликације {LogoText}. Унесите податке које сте примили испод:</value>
@@ -640,7 +661,7 @@
     <value>Тајна клијента</value>
   </data>
   <data name="ConsumersWeixinDescription" xml:space="preserve">
-    <value>Омогући апликацији да се пријави на портал помоћу WeChat налога.</value>
+    <value>Пријавите се на свој радни простор помоћу WeChat налога</value>
   </data>
   <data name="ConsumersWeixinInstruction" xml:space="preserve">
     <value>Омогући апликацији да се пријави на портал помоћу WeChat налога.</value>
@@ -700,7 +721,7 @@
     <value>Тајна Zoom клијента</value>
   </data>
   <data name="ConsumersZoomDescription" xml:space="preserve">
-    <value>Омогућите апликацију да се пријави на портал користећи Zoom налог.</value>
+    <value>Пријавите се на свој радни простор помоћу Zoom налога</value>
   </data>
   <data name="ConsumersZoomInstruction" xml:space="preserve">
     <value>Омогуц́ите ову апликацију да бисте својим корисницима омогуц́или да се пријаве на {LogoText} користец́и своје Zoom налоге. {0}Идите на веб сајт Zoom Developers и направите нову интеграцију апликације {LogoText}. Унесите податке које сте добили испод:</value>
@@ -748,49 +769,49 @@
     <value>Лоши кључеви</value>
   </data>
   <data name="ErrorCannotDeleteLastSpace" xml:space="preserve">
-    <value>Ваш профил је суспендован</value>
+    <value>Последњи пун приступни простор не може бити обрисан</value>
   </data>
   <data name="ErrorDisabledProfile" xml:space="preserve">
-    <value>{!User} са овим емаил-ом је већ регистрован</value>
+    <value>Ваш профил је суспендован</value>
   </data>
   <data name="ErrorEmailAlreadyExists" xml:space="preserve">
-    <value>Емаил-ови са овог домена нису дозвољени за регистрацију</value>
+    <value>{!User} са овим емаил-ом је већ регистрован</value>
   </data>
   <data name="ErrorEmailDomainNotAllowed" xml:space="preserve">
-    <value>Емаил поље је празно</value>
+    <value>Емаил-ови са овог домена нису дозвољени за регистрацију</value>
   </data>
   <data name="ErrorEmailEmpty" xml:space="preserve">
-    <value>Тренутни емаил и нови емаил су исти</value>
+    <value>Емаил поље је празно</value>
   </data>
   <data name="ErrorEmailLinked" xml:space="preserve">
     <value>Ова емаил адреса је повезана са корисником {0} као пружалац услуга треће стране</value>
   </data>
   <data name="ErrorEmailsAreTheSame" xml:space="preserve">
-    <value>Молимо попуните сва поља</value>
+    <value>Тренутни емаил и нови емаил су исти</value>
   </data>
   <data name="ErrorEmptyFields" xml:space="preserve">
-    <value>Текст порука је празна</value>
+    <value>Молимо попуните сва поља</value>
   </data>
   <data name="ErrorEmptyMessage" xml:space="preserve">
-    <value>Отпремљена датотека не може бити пронађена</value>
+    <value>Текст порука је празна</value>
   </data>
   <data name="ErrorEmptyUploadFileSelected" xml:space="preserve">
-    <value>Непознати тип датотеке слике</value>
+    <value>Отпремљена датотека не може бити пронађена</value>
   </data>
   <data name="ErrorFileNotImage" xml:space="preserve">
-    <value>Величина слике превазилази дозвољене параметре</value>
+    <value>Непознати тип датотеке слике</value>
   </data>
   <data name="ErrorGroupNotFound" xml:space="preserve">
     <value>Група није пронађена</value>
   </data>
   <data name="ErrorImageSize" xml:space="preserve">
-    <value>Величина датотеке слике је превелика</value>
+    <value>Величина слике превазилази дозвољене параметре</value>
   </data>
   <data name="ErrorImageWeightLimit" xml:space="preserve">
-    <value>Нетачно име или презиме</value>
+    <value>Величина датотеке слике је превелика</value>
   </data>
   <data name="ErrorIncorrectUserName" xml:space="preserve">
-    <value>Приступ порталу је ограничен</value>
+    <value>Нетачно име или презиме</value>
   </data>
   <data name="ErrorInvitationLimitExceeded" xml:space="preserve">
     <value>Лимит за позивницу је прекорачен</value>
@@ -1105,7 +1126,7 @@
     <value>Квота простора за собу прекорачена</value>
   </data>
   <data name="RoomQuotaGreaterPortalError" xml:space="preserve">
-    <value>Подешавање квоте по соби није успело. Унесена вредност је већа од укупног DocSpace складишта.</value>
+    <value>Подешавање квоте по соби није успело. Унесена вредност је већа од укупног складишта.</value>
   </data>
   <data name="SgServerRegion" xml:space="preserve">
     <value>Азија Пацифик (Сингапур)</value>
@@ -1152,11 +1173,11 @@
   <data name="TariffsFeature_aiagent_exception" xml:space="preserve">
     <value>Број AI агената не сме прећи {0}</value>
   </data>
+  <data name="TariffsFeature_aisearch_wallet" xml:space="preserve">
+    <value>AI претрага</value>
+  </data>
   <data name="TariffsFeature_aitools_wallet" xml:space="preserve">
     <value>AI функције</value>
-  </data>
-  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
-    <value>Омогућите AI функције да бисте повећали продуктивност.</value>
   </data>
   <data name="TariffsFeature_audit" xml:space="preserve">
     <value>Праћење пријава и радњи</value>
@@ -1270,7 +1291,7 @@
     <value>Дошло је до неочекиване грешке. Молимо покушајте поново.</value>
   </data>
   <data name="TelegramOnSuccessfulLink" xml:space="preserve">
-    <value>Успешно сте повезали Telegram да примате обавештења из свог DocSpace-а.</value>
+    <value>Успешно сте повезали Telegram да примате обавештења из свог радног простора.</value>
   </data>
   <data name="TfaAppAuthMessageError" xml:space="preserve">
     <value>Нетачан код</value>
@@ -1285,16 +1306,13 @@
     <value>Корисничка квота простора прекорачена</value>
   </data>
   <data name="UserQuotaGreaterPortalError" xml:space="preserve">
-    <value>Подешавање квоте по соби није успело. Унесена вредност је већа од укупног DocSpace складишта.</value>
+    <value>Подешавање квоте по кориснику није успело. Унесена вредност је већа од укупног складишта.</value>
   </data>
   <data name="UsServerRegion" xml:space="preserve">
     <value>Западна Регија SAD (Орегон)</value>
   </data>
   <data name="WhatsNewSubscriptionName" xml:space="preserve">
     <value>Шта је ново</value>
-  </data>
-  <data name="AccountingCustomerOperationAgent" xml:space="preserve">
-    <value>Агент</value>
   </data>
   <data name="AccountingCustomerOperationServiceDesc_chat" xml:space="preserve">
     <value>Чет</value>
@@ -1305,6 +1323,9 @@
   <data name="AccountingCustomerOperationServiceDesc_search" xml:space="preserve">
     <value>Претрага веба</value>
   </data>
+  <data name="AccountingCustomerOperationServiceDesc_ai-search" xml:space="preserve">
+    <value>AI претрага</value>
+  </data>
   <data name="AccountingCustomerOperationServiceUOM_ai-tools" xml:space="preserve">
     <value>ВИ кредити</value>
   </data>
@@ -1312,6 +1333,9 @@
     <value>Извори</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_search" xml:space="preserve">
+    <value>Резултати</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_ai-search" xml:space="preserve">
     <value>Резултати</value>
   </data>
   <data name="ConsumersdatabaseType" xml:space="preserve">
@@ -1339,7 +1363,7 @@
     <value>Веза са базом података</value>
   </data>
   <data name="ConsumersExternalDbDescription" xml:space="preserve">
-    <value>Чувајте резултате формулара у екстерној бази података као што је MySQL или SQLite.</value>
+    <value>Чувајте резултате формулара у екстерној бази података као што је MySQL или SQLite</value>
   </data>
   <data name="ConsumersExternalDbInstruction" xml:space="preserve">
     <value>Повежите екстерну базу података за чување резултата формулара.</value>
@@ -1363,7 +1387,7 @@
     <value>Унесите URL адресу Nextcloud инстанце.</value>
   </data>
   <data name="ConsumersNextcloudDescription" xml:space="preserve">
-    <value>Омогућите апликацији да се пријави на портал помоћу Nextcloud налога.</value>
+    <value>Пријавите се на свој радни простор помоћу Nextcloud налога</value>
   </data>
   <data name="ConsumersNextcloudInstruction" xml:space="preserve">
     <value>Омогућите апликацији да се пријави на портал помоћу Nextcloud налога.</value>
@@ -1382,5 +1406,155 @@
   </data>
   <data name="UserAuthenticationFailed" xml:space="preserve">
     <value>Аутентификација корисника није успела</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_disk-storage" xml:space="preserve">
+    <value>Додатни простор на диску</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_admin" xml:space="preserve">
+    <value>Business план</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_adminyear" xml:space="preserve">
+    <value>Business план</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_admin" xml:space="preserve">
+    <value>Администратори</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_adminyear" xml:space="preserve">
+    <value>Администратори</value>
+  </data>
+  <data name="TariffsFeature_aitools_wallet_price_count" xml:space="preserve">
+    <value>Добијте приступ широком спектру AI модела путем OpenRouter интеграције. Плаћате само оно што користите, а износ се наплаћује са вашег Новчаника.</value>
+  </data>
+  <data name="TariffsFeature_aisearch_wallet_price_count" xml:space="preserve">
+    <value>Користите AI претраживач да обогатите AI ћаскања информацијама са интернета у реалном времену</value>
+  </data>
+  <data name="Tariffs_adminwallet" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud-devpack" xml:space="preserve">
+    <value>Корисници</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_docscloud" xml:space="preserve">
+    <value>Корисници</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceUOM_image" xml:space="preserve">
+    <value>Токени</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet" xml:space="preserve">
+    <value>Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_docscloud-devpack" xml:space="preserve">
+    <value>Програмерски пакет Docs Connect</value>
+  </data>
+  <data name="AccountingCustomerOperationServiceDesc_image" xml:space="preserve">
+    <value>Слика</value>
+  </data>
+  <data name="DocsCloudQuotaReportName" xml:space="preserve">
+    <value>Извештај о квоти Docs Connect ({0})</value>
+  </data>
+  <data name="TariffsFeature_docscloud_wallet_price_count" xml:space="preserve">
+    <value>Уградите уреднике ONLYOFFICE Docs у вашу апликацију са закупцима хостованим у облаку и вашим сопственим API кључевима.</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType" xml:space="preserve">
+    <value>Тип извора</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceTitle" xml:space="preserve">
+    <value>Име извора</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceId" xml:space="preserve">
+    <value>ID извора</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Agent" xml:space="preserve">
+    <value>AI агент</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_File" xml:space="preserve">
+    <value>Датотека</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Folder" xml:space="preserve">
+    <value>Фолдер</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Room" xml:space="preserve">
+    <value>Соба</value>
+  </data>
+  <data name="AccountingCustomerOperationSourceType_Form" xml:space="preserve">
+    <value>Образац</value>
+  </data>
+  <data name="AccountingReportCompany" xml:space="preserve">
+    <value>Компанија</value>
+  </data>
+  <data name="AccountingReportDateGenerated" xml:space="preserve">
+    <value>Датум генерисања</value>
+  </data>
+  <data name="AccountingReportPeriod" xml:space="preserve">
+    <value>Период</value>
+  </data>
+  <data name="AccountingReportTitle" xml:space="preserve">
+    <value>Извештај</value>
+  </data>
+  <data name="AccountingReportTotal" xml:space="preserve">
+    <value>Укупно</value>
+  </data>
+  <data name="DocsCloudQuotaReportActive" xml:space="preserve">
+    <value>Активан</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnExpire" xml:space="preserve">
+    <value>Приступ истиче</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnType" xml:space="preserve">
+    <value>Тип корисника</value>
+  </data>
+  <data name="DocsCloudQuotaReportColumnUserId" xml:space="preserve">
+    <value>ID корисника</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditors" xml:space="preserve">
+    <value>Уређивачи</value>
+  </data>
+  <data name="DocsCloudQuotaReportEditorsDesc" xml:space="preserve">
+    <value>Уређивачи докумената са пуним овлашћењима</value>
+  </data>
+  <data name="DocsCloudQuotaReportRemaining" xml:space="preserve">
+    <value>Преостало</value>
+  </data>
+  <data name="DocsCloudQuotaReportSheetName" xml:space="preserve">
+    <value>Квота корисника</value>
+  </data>
+  <data name="DocsCloudQuotaReportSubscriptionLimit" xml:space="preserve">
+    <value>Ограничење претплате</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewers" xml:space="preserve">
+    <value>Уживо прегледач</value>
+  </data>
+  <data name="DocsCloudQuotaReportViewersDesc" xml:space="preserve">
+    <value>Прегледачи докумената само за читање</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeExternal" xml:space="preserve">
+    <value>Спољни</value>
+  </data>
+  <data name="DocsCloudQuotaUserTypeInternal" xml:space="preserve">
+    <value>Унутрашњи</value>
+  </data>
+  <data name="AccountingCustomerOperationPromptTokens" xml:space="preserve">
+    <value>Захтев</value>
+  </data>
+  <data name="AccountingCustomerOperationCachedTokens" xml:space="preserve">
+    <value>Кеширање</value>
+  </data>
+  <data name="AccountingCustomerOperationCacheWriteTokens" xml:space="preserve">
+    <value>Упис у кеш</value>
+  </data>
+  <data name="AccountingCustomerOperationCompletionTokens" xml:space="preserve">
+    <value>Одговор</value>
+  </data>
+  <data name="AccountingCustomerOperationReasoningTokens" xml:space="preserve">
+    <value>Резоновање</value>
+  </data>
+  <data name="AccountingCustomerOperationImageTokens" xml:space="preserve">
+    <value>Слика</value>
+  </data>
+  <data name="AccountingCustomerOperationProviderCost" xml:space="preserve">
+    <value>Трошак провајдера</value>
   </data>
 </root>

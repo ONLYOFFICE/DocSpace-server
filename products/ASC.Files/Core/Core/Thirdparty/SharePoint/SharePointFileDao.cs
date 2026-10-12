@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -98,9 +98,9 @@ internal class SharePointFileDao(
     }
 
     public IAsyncEnumerable<File<string>> GetFilesFilteredAsync(IEnumerable<string> fileIds, IEnumerable<string> excludeParentsIds, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent)
+        string[] extension, bool searchInContent, MetadataFilter metadataFilter = null)
     {
-        if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly)
+        if (fileIds == null || !fileIds.Any() || filterType == FilterType.FoldersOnly || metadataFilter is { IsEmpty: false })
         {
             return AsyncEnumerable.Empty<File<string>>();
         }
@@ -181,7 +181,7 @@ internal class SharePointFileDao(
     }
 
     public async IAsyncEnumerable<File<string>> GetFilesAsync(string parentId, OrderBy orderBy, FilterType filterType, bool subjectGroup, Guid subjectID, string searchText,
-        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false)
+        string[] extension, bool searchInContent, bool withSubfolders = false, bool excludeSubject = false, int offset = 0, int count = -1, string roomId = null, bool withShared = false, bool containingMyFiles = false, FolderType parentType = FolderType.DEFAULT, FormsItemDto formsItemDto = null, bool applyFormStepFilter = false, bool applyFfrStartedFormsFilter = false, List<FolderType> folderType = null, MetadataFilter metadataFilter = null)
     {
         if (filterType == FilterType.FoldersOnly)
         {
@@ -314,12 +314,12 @@ internal class SharePointFileDao(
         return Task.FromResult(false);
     }
 
-    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, bool checkFolder)
+    public async Task<File<string>> SaveFormFileAsync(File<string> file, Stream fileStream, bool checkFolder)
     {
         return await SaveFileAsync(file, fileStream);
     }
 
-    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, Guid chatId = default)
+    public async Task<File<string>> SaveFileAsync(File<string> file, Stream fileStream, bool allowQuotaGrace = false)
     {
         ArgumentNullException.ThrowIfNull(fileStream);
 
@@ -353,7 +353,7 @@ internal class SharePointFileDao(
         return null;
     }
 
-    public async Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream)
+    public async Task<File<string>> ReplaceFileVersionAsync(File<string> file, Stream fileStream, bool allowQuotaGrace = false)
     {
         return await SaveFileAsync(file, fileStream);
     }
@@ -437,14 +437,6 @@ internal class SharePointFileDao(
         }
 
         throw new NotImplementedException();
-    }
-
-    public async Task<File<int>> CopyFileAsync(string fileId, int toFolderId, Guid chatId)
-    {
-        return await crossDao.PerformCrossDaoFileCopyAsync(
-            fileId, this, sharePointDaoSelector.ConvertId,
-            toFolderId, fileDao, r => r,
-            false, chatId);
     }
 
     public async Task<File<string>> CopyFileAsync(string fileId, string toFolderId)
@@ -546,6 +538,26 @@ internal class SharePointFileDao(
         return Task.CompletedTask;
     }
 
+    public Task<bool> IsVectorizationDeletedAsync(string fileId)
+    {
+        return Task.FromResult(false);
+    }
+
+    public Task DeleteVectorizationIfDeletedAsync(string fileId)
+    {
+        return Task.CompletedTask;
+    }
+    
+    public Task SetFileKey(string fileId, IEnumerable<FileKeyData> keys)
+    {
+        return Task.CompletedTask;
+    }
+    
+    public Task<List<FileKeys>> GetFileKeys(string fileId, Guid userId)
+    {
+        return Task.FromResult<List<FileKeys>>([]);
+    }
+    
     public Task<long> GetTransferredBytesCountAsync(ChunkedUploadSession<string> uploadSession)
     {
         if (!long.TryParse(uploadSession.GetItemOrDefault<string>(BytesTransferredKey), out var transferred))

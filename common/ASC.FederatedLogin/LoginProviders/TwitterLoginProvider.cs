@@ -117,7 +117,7 @@ public class TwitterLoginProvider : BaseLoginProvider<TwitterLoginProvider>
             var authenticationRequestEncryptedStr = _instanceCrypto.Encrypt(authenticationRequestStr);
             _hybridCache.Set(GetCacheKey(authenticationRequestId), authenticationRequestEncryptedStr, TimeSpan.FromMinutes(5));
 
-            context.Response.Redirect(authenticationRequestToken.AuthorizationURL, true);
+            context.Response.Redirect(authenticationRequestToken.AuthorizationURL);
 
             return null;
         }

@@ -1,0 +1,12 @@
+# Dependencies are installed inside the image; never copy the host's tree over them
+node_modules
+.yarn/install-state.gz
+.yarn/cache
+
+# Not needed at runtime
+Dockerfile
+.dockerignore
+.git
+.gitignore
+*.log
+*.md

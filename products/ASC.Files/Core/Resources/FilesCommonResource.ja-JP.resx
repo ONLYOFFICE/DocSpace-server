@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>必要なフォルダが見つかりませんでした</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>無効なフォルダーID</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>無効なプロバイダ</value>
   </data>
@@ -491,7 +494,7 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
     <value>コンテンツ作成者</value>
   </data>
   <data name="RoleEnum_DocSpaceAdmin" xml:space="preserve">
-    <value>DocSpace 管理者</value>
+    <value>フル管理者</value>
   </data>
   <data name="RoleEnum_Editing" xml:space="preserve">
     <value>編集者</value>
@@ -594,5 +597,29 @@ docx、xlsx、pptxとの100％の互換性が保証されています。</value>
   </data>
   <data name="ErrorMessage_ExternalDbSyncFailed" xml:space="preserve">
     <value>フォームデータを外部データベースに同期できませんでした。</value>
+  </data>
+  <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
+    <value>フォームが変更されました。この下書きは古くなっており、送信できません。</value>
+  </data>
+  <data name="ErrorMessage_PromptTooLong" xml:space="preserve">
+    <value>AIエージェントの指示は{0}文字を超えることはできません</value>
+  </data>
+  <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
+    <value>このアクションはプライベートルームでのみ利用可能です</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>チャットの出力</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>ルームにはすでに .ai フォルダーが含まれています</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>ルームが使用中のため、ストレージを切断できません。代わりにルームを削除してください</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>フォルダーメタデータで検索</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>ファイルメタデータで検索</value>
   </data>
 </root>
