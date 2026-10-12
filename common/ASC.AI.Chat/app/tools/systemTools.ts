@@ -487,7 +487,7 @@ export const systemToolsSource: ToolsAdapter & {
           return `Tool "${toolName}" is not available: its MCP server is not enabled for this agent.`;
         }
       }
-      // Unscoped like the listing above; the options carry the progress listener.
+      // Unscoped like the listing above; the options carry the progress callback.
       const result = options
         ? await source.callTool(toolName, args, undefined, options)
         : await source.callTool(toolName, args);

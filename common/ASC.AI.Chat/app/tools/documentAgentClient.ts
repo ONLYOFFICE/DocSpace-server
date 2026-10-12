@@ -35,9 +35,11 @@
 // (`@a2a-js/sdk/client`): the agent card is read once, the message carries
 // the task text, the input files as bytes and the run settings in
 // `metadata.docagent`, and the stream is drained until the task ends. The
-// agent's status lines (its one-line intent before every tool call) go to
-// the log; what comes back is the final state, the agent's summary and the
-// files it produced.
+// agent's status lines (its one-line intent before every tool call, sent as
+// working-state status updates) go to the log and to the caller as steps; a
+// task that stops for input or auth (A2A's interrupted states) is cancelled,
+// as nobody here can answer it; what comes back is the final state, the
+// agent's summary and the files it produced.
 
 import { randomUUID } from "crypto";
 import { Role, TaskState } from "@a2a-js/sdk";
@@ -67,12 +69,23 @@ export interface DocumentTaskInput {
   files: readonly { name: string; bytes: Uint8Array; mediaType: string }[];
   settings: DocumentAgentSettings;
   signal: AbortSignal;
-  /** The agent's one-line status before every step, as it comes. */
+  /**
+   * The agent's one-line status of each step: the text of a status update in
+   * the working state, from the stream or, once the stream is lost, from the
+   * reads that follow the task. Each distinct step once.
+   */
   onStatus?: (text: string) => void;
 }
 
 export interface DocumentTaskOutput {
-  state: "completed" | "failed" | "rejected" | "canceled" | "unknown";
+  state:
+    | "completed"
+    | "failed"
+    | "rejected"
+    | "canceled"
+    | "input-required"
+    | "auth-required"
+    | "unknown";
   /** The agent's final text: its summary, or the reason it did not finish. */
   text: string;
   artifacts: { name: string; bytes: Uint8Array; mediaType: string }[];
@@ -178,6 +191,10 @@ function stateOf(state: TaskState | undefined): DocumentTaskOutput["state"] {
       return "rejected";
     case TaskState.TASK_STATE_CANCELED:
       return "canceled";
+    case TaskState.TASK_STATE_INPUT_REQUIRED:
+      return "input-required";
+    case TaskState.TASK_STATE_AUTH_REQUIRED:
+      return "auth-required";
     default:
       return "unknown";
   }
@@ -210,8 +227,17 @@ function artifactFiles(artifact: Artifact): DocumentTaskOutput["artifacts"] {
   return out;
 }
 
-function isTerminal(state: TaskState | undefined): boolean {
+// Whether the run is over for this client: a terminal state (completed,
+// failed, rejected, canceled) or an interrupted one (input-required,
+// auth-required), which waits for an answer this tool cannot give.
+function endsRun(state: TaskState | undefined): boolean {
   return stateOf(state) !== "unknown";
+}
+
+function isInterrupted(state: TaskState | undefined): boolean {
+  return (
+    state === TaskState.TASK_STATE_INPUT_REQUIRED || state === TaskState.TASK_STATE_AUTH_REQUIRED
+  );
 }
 
 async function cancel(client: Client, taskId: string): Promise<void> {
@@ -227,13 +253,16 @@ async function cancel(client: Client, taskId: string): Promise<void> {
   }
 }
 
-// Reads the task until it is terminal. On the caller's abort the task is
+// Reads the task until its run ends (see endsRun), handing the status text
+// of every read in the working state to `onWorking`, so the steps keep
+// showing after the stream is lost. On the caller's abort the task is
 // cancelled and the abort reason thrown; undefined when a read failed for
 // good (the task is then unknown, not abandoned: the agent ends it itself).
 async function follow(
   client: Client,
   taskId: string,
   signal: AbortSignal,
+  onWorking: (text: string) => void,
 ): Promise<Task | undefined> {
   let failures = 0;
   for (;;) {
@@ -249,8 +278,11 @@ async function follow(
         { signal: callSignal(signal) },
       );
       failures = 0;
-      if (isTerminal(task.status?.state)) {
+      if (endsRun(task.status?.state)) {
         return task;
+      }
+      if (task.status?.state === TaskState.TASK_STATE_WORKING) {
+        onWorking(messageText(task.status.message));
       }
     } catch (err) {
       if (signal.aborted) {
@@ -292,6 +324,18 @@ export async function runDocumentTask(
   let finalText = "";
   const artifacts: DocumentTaskOutput["artifacts"] = [];
   const started = Date.now();
+  // A step is a status update in the working state with text; a read while
+  // polling repeats the last one until the agent moves on, so a repeat of
+  // the step just reported is not a new one.
+  let lastStep = "";
+  const reportStep = (text: string): void => {
+    if (!text || text === lastStep) {
+      return;
+    }
+    lastStep = text;
+    logger.info(`documentAgent: task ${taskId ?? "?"} ${text}`);
+    input.onStatus?.(text);
+  };
 
   try {
     const stream = client.sendMessageStream(
@@ -309,12 +353,11 @@ export async function runDocumentTask(
         case "statusUpdate": {
           const status = payload.value.status;
           const text = messageText(status?.message);
-          if (isTerminal(status?.state)) {
+          if (endsRun(status?.state)) {
             finalState = status?.state;
             finalText = text;
-          } else if (text) {
-            logger.info(`documentAgent: task ${taskId ?? "?"} ${text}`);
-            input.onStatus?.(text);
+          } else if (status?.state === TaskState.TASK_STATE_WORKING) {
+            reportStep(text);
           }
           break;
         }
@@ -357,7 +400,7 @@ export async function runDocumentTask(
 
   // A stream that ended without a terminal status: follow the task itself.
   if (finalState === undefined && taskId) {
-    const task = await follow(client, taskId, input.signal);
+    const task = await follow(client, taskId, input.signal, reportStep);
     if (task === undefined) {
       throw new DocumentAgentError(`task ${taskId} could not be read back after the stream ended`);
     }
@@ -368,6 +411,12 @@ export async function runDocumentTask(
         artifacts.push(...artifactFiles(artifact));
       }
     }
+  }
+
+  // An interrupted task waits for input it will never get from here; the
+  // agent is told to stop rather than left holding a sandbox.
+  if (isInterrupted(finalState) && taskId) {
+    await cancel(client, taskId);
   }
 
   const state = stateOf(finalState);

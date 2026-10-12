@@ -382,9 +382,9 @@ const engine = new AIEngine({
   // Being wired, the hook also makes the library ignore any `source` a
   // client put in `actionArgs`.
   resolveSource: () => getSourceMeta(),
-  // A tool the engine runs reports its steps (the document agent's own, an
-  // MCP server's `notifications/progress`), and the engine streams them on
-  // the pending tool card until the result arrives.
+  // A tool the engine runs reports MCP-shaped progress (the document agent's
+  // steps, an MCP server's `notifications/progress`), and the engine streams
+  // it on the pending tool card until the result arrives.
   toolProgress: true,
   // System (host-configured MCP) tools and registered custom MCP servers
   // run server-side and pause for UI approval; most DocSpace integration

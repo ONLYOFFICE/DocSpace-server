@@ -44,7 +44,13 @@
 // process, reached over A2A (see documentAgentClient).
 
 import { ActionType } from "@onlyoffice/ai-chat/core";
-import type { Profile, TMCPItem, ToolCallOptions, ToolsAdapter } from "@onlyoffice/ai-chat/core";
+import type {
+  Profile,
+  ProgressCallback,
+  TMCPItem,
+  ToolCallOptions,
+  ToolsAdapter,
+} from "@onlyoffice/ai-chat/core";
 import { DOCUMENT_AGENT_TYPE, getDocumentAgent } from "../../config/index.js";
 import type { DocumentAgentConfig } from "../../config/index.js";
 import { storage } from "../storage/index.js";
@@ -155,7 +161,7 @@ export const documentAgentTools: ToolsAdapter = {
     }
     try {
       return JSON.stringify(
-        await run(config, task, fileIdsOf(args), entityId, options?.onProgress),
+        await run(config, task, fileIdsOf(args), entityId, options?.onprogress),
       );
     } catch (err) {
       // Contract: a failure is a result, never a throw — a throw aborts the chat stream.
@@ -196,7 +202,7 @@ async function run(
   task: string,
   fileIds: string[],
   entityId: string | undefined,
-  onProgress: ((line: string) => void) | undefined,
+  onprogress: ProgressCallback | undefined,
 ): Promise<unknown> {
   const profile = await resolveProfile(entityId);
   if (!profile) {
@@ -226,13 +232,22 @@ async function run(
       `servers=[${Object.keys(mcpServers).join(",")}] target=${targetFolderId}`,
   );
 
-  // The steps shown live are the agent's own, in the language of the request.
+  // The steps shown live are the agent's own, in the language of the request:
+  // each A2A status update of the task becomes an MCP-shaped progress
+  // notification, its text the message and its ordinal the progress, which
+  // MCP requires to increase. The agent gives no total.
+  let step = 0;
   const result = await runDocumentTask(config, {
     task,
     files,
     settings,
     signal: AbortSignal.timeout(config.taskTimeoutSeconds * 1000 + ABORT_MARGIN_MS),
-    onStatus: onProgress,
+    onStatus: onprogress
+      ? (text) => {
+          step += 1;
+          onprogress({ progress: step, message: text });
+        }
+      : undefined,
   });
 
   const saved: { id: string; title: string; url: string }[] = [];
