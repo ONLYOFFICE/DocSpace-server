@@ -52,6 +52,11 @@ public class WebhookManager(
 
     public async Task PublishAsync<T>(WebhookTrigger trigger, IEnumerable<DbWebhooksConfig> webhookConfigs, FileEntry<T> fileEntry)
     {
+        if (!webhookConfigs.Any())
+        {
+            return;
+        }
+
         var payload = await fileEntryWebhookDtoHelper.GetAsync(fileEntry);
 
         await webhookPublisher.PublishAsync(trigger, webhookConfigs, payload, fileEntry.Id);
