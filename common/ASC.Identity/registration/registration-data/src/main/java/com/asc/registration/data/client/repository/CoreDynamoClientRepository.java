@@ -64,7 +64,9 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
 @Repository
 @Profile(value = "saas")
 public class CoreDynamoClientRepository implements DynamoClientRepository {
-  private final int CLIENTS_PER_TENANT_LIMIT = 100;
+  // TODO: Limits will be increased after icons migration to s3 or any other storage and after
+  // dynamodb calls optimizations
+  private final int CLIENTS_PER_TENANT_LIMIT = 30;
   private final int CLIENTS_PER_USER_LIMIT = 10;
 
   private static final SetDynamoAttributeConverter SET_CONVERTER =
@@ -280,10 +282,10 @@ public class CoreDynamoClientRepository implements DynamoClientRepository {
   public void save(ClientDynamoEntity entity) {
     if (entity.getCreatedBy() != null) {
       var counters = getClientCounters(entity.getTenantId(), entity.getCreatedBy());
-      if (counters.getFirst() > CLIENTS_PER_TENANT_LIMIT)
+      if (counters.getFirst() >= CLIENTS_PER_TENANT_LIMIT)
         throw new ExceededClientsPerResourceException(
             "Tenant has reached the maximum allowed number of clients");
-      if (counters.getSecond() > CLIENTS_PER_USER_LIMIT)
+      if (counters.getSecond() >= CLIENTS_PER_USER_LIMIT)
         throw new ExceededClientsPerResourceException(
             "User has reached the maximum allowed number of clients");
 
