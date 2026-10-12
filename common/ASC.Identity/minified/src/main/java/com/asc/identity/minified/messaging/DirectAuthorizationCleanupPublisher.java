@@ -56,6 +56,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Profile("minified")
 public class DirectAuthorizationCleanupPublisher {
+  private static final int REMOVAL_TIMEOUT_SECONDS = 60;
+
   /**
    * Minified-specific publisher that performs immediate cleanup when a single client is removed.
    *
@@ -78,7 +80,7 @@ public class DirectAuthorizationCleanupPublisher {
      * @param message event describing the removed client
      */
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional(isolation = Isolation.READ_COMMITTED, timeout = REMOVAL_TIMEOUT_SECONDS)
     public void publish(ClientRemovedEvent message) {
       log.info("Directly cleaning up authorizations for client: {}", message.getClientId());
       try {
@@ -116,7 +118,7 @@ public class DirectAuthorizationCleanupPublisher {
      * @param message event describing the user whose clients were removed
      */
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional(isolation = Isolation.READ_COMMITTED, timeout = REMOVAL_TIMEOUT_SECONDS)
     public void publish(UserClientsRemovedEvent message) {
       log.info("Directly cleaning up authorizations for user: {}", message.getUserId());
       try {
@@ -152,7 +154,7 @@ public class DirectAuthorizationCleanupPublisher {
      * @param message event describing the tenant whose clients were removed
      */
     @Override
-    @Transactional(isolation = Isolation.READ_COMMITTED)
+    @Transactional(isolation = Isolation.READ_COMMITTED, timeout = REMOVAL_TIMEOUT_SECONDS)
     public void publish(TenantClientsRemovedEvent message) {
       log.info("Directly cleaning up authorizations for tenant: {}", message.getTenantId());
       try {
