@@ -809,7 +809,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
-    <value>${LetterLogoText} has been blocked by the retention policy because it was not used.
+    <value>The portal ${PortalUrl} has been blocked by the retention policy because it was not used.
 
 *Portal:* ${PortalUrl}
 *Owner:* ${UserName} ${UserEmail}
@@ -2141,7 +2141,7 @@ $TrulyYours</value>
     <value>Your password was changed successfully</value>
   </data>
   <data name="subject_portal_retention_blocked_to_support" xml:space="preserve">
-    <value>${LetterLogoText} has been blocked by the retention policy</value>
+    <value>The portal ${PortalUrl} has been blocked by the retention policy</value>
   </data>
   <data name="subject_saas_owner_retention_blocked" xml:space="preserve">
     <value>Your ${LetterLogoText} space is blocked, but your data is safe until $DeleteDateShort</value>

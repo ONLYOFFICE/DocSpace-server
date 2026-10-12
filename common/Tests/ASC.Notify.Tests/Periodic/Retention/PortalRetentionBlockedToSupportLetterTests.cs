@@ -35,7 +35,7 @@ namespace ASC.Notify.Tests.Periodic.Retention;
 
 /// <summary>
 /// The note to support that the retention policy has blocked a portal
-/// (<c>portal_retention_blocked_to_support</c>): who to call, by when, and the link that unblocks it.
+/// (<c>portal_retention_blocked_to_support</c>): which portal, whose, and by when it is deleted.
 /// </summary>
 public class PortalRetentionBlockedToSupportLetterTests : LetterTestBase<PortalRetentionBlockedToSupportNotifyAction>
 {
@@ -61,9 +61,10 @@ public class PortalRetentionBlockedToSupportLetterTests : LetterTestBase<PortalR
 
     protected override void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope)
     {
-        letter.Subject.Should().Be($"{LetterEnvironment.LogoText} has been blocked by the retention policy");
+        letter.Subject.Should().Be($"The portal {Domain} has been blocked by the retention policy", "the portal is named, not the product");
 
-        letter.Body.Should().Contain("Unless it is unblocked, the portal and all its data will be deleted on that date.")
+        letter.Body.Should().Contain($"The portal {Domain} has been blocked by the retention policy")
+            .And.Contain("Unless it is unblocked, the portal and all its data will be deleted on that date.")
             .And.Contain("make the portal active again before that date");
     }
 }

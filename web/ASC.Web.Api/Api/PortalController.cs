@@ -1121,11 +1121,13 @@ public class PortalController(
     /// money on its wallet; the link goes to the owner only and works for the current block. No ordinary
     /// token is accepted. The call is mutating: it makes the portal active, records the unblocking in the audit trail
     /// and refreshes its Content Security Policy, and the retention count starts again from the unblocking.
-    /// Nothing is returned in the body; read the new state from `status` in `GET api/2.0/portal`. A portal whose
-    /// paid tariff lapsed stays unpaid once unblocked, so renewing the subscription is the next step. A free portal
-    /// is not unblocked this way, and a portal deleted at the end of its retention period cannot be brought back.
-    /// To bring back a portal its owner deactivated, use `PUT api/2.0/portal/continue` instead. An invalid link, or
-    /// a portal that is not blocked, a repeated call included, is refused with 401.
+    /// Nothing is returned in the body; whether the portal is blocked is read from `tenantStatus` in
+    /// `GET api/2.0/settings`, which a blocked portal still answers. A portal whose paid tariff lapsed stays unpaid
+    /// once unblocked, so renewing the subscription is the next step. A free portal is not unblocked this way, and
+    /// a portal deleted at the end of its retention period cannot be brought back. To bring back a portal its owner
+    /// deactivated, use `PUT api/2.0/portal/continue` instead. An invalid link, a link of an earlier block or a
+    /// portal that is not blocked, a repeated call included, is refused with 401; an ordinary sign-in token in
+    /// place of the link is refused with 403.
     /// </remarks>
     /// <summary>
     /// Unblock a portal
@@ -1133,6 +1135,8 @@ public class PortalController(
     /// <path>api/2.0/portal/unblock</path>
     [Tags("Portal / Settings")]
     [SwaggerResponse(200, "The portal is active again and its users can sign in; the response carries no content")]
+    [SwaggerResponse(401, "The unblocking link is invalid, was mailed for an earlier block, or the portal is not blocked")]
+    [SwaggerResponse(403, "The call carries an ordinary sign-in token instead of the unblocking link")]
     [AllowBlocked]
     [AllowNotPayment]
     [HttpPut("unblock")]
@@ -1141,9 +1145,11 @@ public class PortalController(
     {
         var tenant = tenantManager.GetCurrentTenant();
 
+        // The link is refused for a portal that is not blocked before it gets here; a call that raced another one
+        // which has just unblocked the portal gets the same answer, not a second unblocking.
         if (tenant.Status != TenantStatus.Blocked)
         {
-            return;
+            throw new AuthenticationException("The portal is not blocked");
         }
 
         // The new status date is also where the retention count starts again.

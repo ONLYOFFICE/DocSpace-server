@@ -1434,7 +1434,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ${LetterLogoText} has been blocked by the retention policy because it was not used. [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to The portal ${PortalUrl} has been blocked by the retention policy because it was not used. [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_portal_retention_blocked_to_support {
             get {
@@ -2734,7 +2734,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ${LetterLogoText} has been blocked by the retention policy.
+        ///   Looks up a localized string similar to The portal ${PortalUrl} has been blocked by the retention policy.
         /// </summary>
         public static string subject_portal_retention_blocked_to_support {
             get {

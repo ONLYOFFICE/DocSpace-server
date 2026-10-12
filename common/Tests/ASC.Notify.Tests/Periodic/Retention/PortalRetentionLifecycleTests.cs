@@ -133,6 +133,35 @@ public class PortalRetentionLifecycleTests
         }
     }
 
+    /// <summary>
+    /// Calls the unblocking with <paramref name="confirm"/> as its link. Raw for now: the pinned DocSpace.API.SDK
+    /// predates PUT api/2.0/portal/unblock; move this to the SDK once it is regenerated.
+    /// </summary>
+    private static async Task<HttpStatusCode> UnblockAsync(LetterPortalClients portal, string? confirm)
+    {
+        using var unblock = new HttpRequestMessage(HttpMethod.Put, "api/2.0/portal/unblock");
+
+        if (confirm is not null)
+        {
+            unblock.Headers.Add("confirm", confirm);
+        }
+
+        using var response = await portal.WebApiHttpClient.SendAsync(unblock, TestContext.Current.CancellationToken);
+
+        return response.StatusCode;
+    }
+
+    /// <summary>The query of the unblocking link the letters carry for the portal as it is now.</summary>
+    private static async Task<string> UnblockLinkAsync(IServiceScope scope, int tenantId, string? keyPostfix = null)
+    {
+        var tenant = await scope.ServiceProvider.GetRequiredService<TenantManager>().GetTenantAsync(tenantId);
+        var owner = await scope.ServiceProvider.GetRequiredService<UserManager>().GetUsersAsync(tenant.OwnerId);
+        var link = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>()
+            .GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalUnblock, keyPostfix ?? CommonLinkUtility.GetPortalUnblockKeyPostfix(tenant));
+
+        return new Uri(link).Query.TrimStart('?');
+    }
+
     [Fact]
     public async Task IdlePortal_IsBlocked_StopsAnswering_AndComesBackWithTheOwnersLink()
     {
@@ -154,10 +183,7 @@ public class PortalRetentionLifecycleTests
                 .Which.Action.Should().BeOfType<SaasOwnerRetentionBlockedNotifyAction>("the owner is told at the moment of the block");
 
             // The link the letters carry for a portal that may be unblocked from them.
-            var owner = await scope.ServiceProvider.GetRequiredService<UserManager>().GetUsersAsync(tenant.OwnerId);
-            var link = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>().GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalUnblock, CommonLinkUtility.GetPortalUnblockKeyPostfix(tenant));
-
-            confirm = new Uri(link).Query.TrimStart('?');
+            confirm = await UnblockLinkAsync(scope, tenant.Id);
         }
 
         var settingsApi = portal.CommonSettingsApi;
@@ -168,16 +194,7 @@ public class PortalRetentionLifecycleTests
         (await PollAsync(async token => await settingsApi.GetPortalColorThemeWithHttpInfoAsync(token), HttpStatusCode.OK))
             .Should().Be(HttpStatusCode.OK, "the blocked page is drawn in the portal's own colors");
 
-        // Raw for now: the pinned DocSpace.API.SDK predates PUT api/2.0/portal/unblock. Move these calls to
-        // the SDK once it is regenerated.
-        using (var unblock = new HttpRequestMessage(HttpMethod.Put, "api/2.0/portal/unblock"))
-        {
-            unblock.Headers.Add("confirm", confirm);
-
-            using var response = await portal.WebApiHttpClient.SendAsync(unblock, cancellationToken);
-
-            response.StatusCode.Should().Be(HttpStatusCode.OK, await response.Content.ReadAsStringAsync(cancellationToken));
-        }
+        (await UnblockAsync(portal, confirm)).Should().Be(HttpStatusCode.OK);
 
         using (var scope = await OpenScopeAsync(stack, portal.TenantId))
         {
@@ -189,6 +206,10 @@ public class PortalRetentionLifecycleTests
 
         (await PollAsync(async token => await settingsApi.GetSupportedCulturesWithHttpInfoAsync(token), HttpStatusCode.OK))
             .Should().Be(HttpStatusCode.OK, "an unblocked portal answers as before");
+
+        // The unblocking moved the status date to today, the day of the block, so the key still matches: only the
+        // status refuses the link now.
+        (await UnblockAsync(portal, confirm)).Should().Be(HttpStatusCode.Unauthorized, "a repeated call finds the portal no longer blocked");
     }
 
     [Fact]
@@ -203,19 +224,11 @@ public class PortalRetentionLifecycleTests
 
         using (var scope = await OpenScopeAsync(stack, portal.TenantId))
         {
-            var owner = await scope.ServiceProvider.GetRequiredService<UserManager>().GetUsersAsync(portal.Owner.Id);
-            var link = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>().GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalUnblock);
-
-            confirm = new Uri(link).Query.TrimStart('?');
+            // The key the link would carry for the portal as it is, so nothing but its status can refuse it.
+            confirm = await UnblockLinkAsync(scope, portal.TenantId);
         }
 
-        // Raw: the pinned SDK predates PUT api/2.0/portal/unblock.
-        using var unblock = new HttpRequestMessage(HttpMethod.Put, "api/2.0/portal/unblock");
-        unblock.Headers.Add("confirm", confirm);
-
-        using var response = await portal.WebApiHttpClient.SendAsync(unblock, cancellationToken);
-
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized, "the link only opens a blocked portal");
+        (await UnblockAsync(portal, confirm)).Should().Be(HttpStatusCode.Unauthorized, "the link only opens a blocked portal");
 
         using var after = await OpenScopeAsync(stack, portal.TenantId);
 
@@ -232,29 +245,29 @@ public class PortalRetentionLifecycleTests
 
         string confirm;
 
+        string current;
+
         using (var scope = await OpenScopeAsync(stack, portal.TenantId))
         {
             var tenant = await BlockAsync(scope, portal.TenantId, new RecordingNotifyClient());
 
             // The link a letter about an earlier block carried: the same owner, the day of that block.
-            var owner = await scope.ServiceProvider.GetRequiredService<UserManager>().GetUsersAsync(tenant.OwnerId);
-            var earlierBlock = tenant.StatusChangeDate.AddDays(-120).ToString("yyyyMMdd", CultureInfo.InvariantCulture);
-            var link = scope.ServiceProvider.GetRequiredService<CommonLinkUtility>().GetConfirmationEmailUrl(owner.Email, ConfirmType.PortalUnblock, earlierBlock);
-
-            confirm = new Uri(link).Query.TrimStart('?');
+            confirm = await UnblockLinkAsync(scope, tenant.Id, tenant.StatusChangeDate.AddDays(-120).ToString("yyyyMMdd", CultureInfo.InvariantCulture));
+            current = await UnblockLinkAsync(scope, tenant.Id);
         }
 
-        // Raw: the pinned SDK predates PUT api/2.0/portal/unblock.
-        using var unblock = new HttpRequestMessage(HttpMethod.Put, "api/2.0/portal/unblock");
-        unblock.Headers.Add("confirm", confirm);
+        // Web.Api must see the block first, or the link would be refused for a portal it still takes for active.
+        (await PollAsync(async token => await portal.CommonSettingsApi.GetSupportedCulturesWithHttpInfoAsync(token), HttpStatusCode.NotFound))
+            .Should().Be(HttpStatusCode.NotFound);
 
-        using var response = await portal.WebApiHttpClient.SendAsync(unblock, cancellationToken);
+        (await UnblockAsync(portal, confirm)).Should().Be(HttpStatusCode.Unauthorized, "a link opens only the block it was mailed for");
 
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized, "a link opens only the block it was mailed for");
+        using (var after = await OpenScopeAsync(stack, portal.TenantId))
+        {
+            (await HasStatusAsync(after, portal.TenantId, TenantStatus.Blocked)).Should().BeTrue();
+        }
 
-        using var after = await OpenScopeAsync(stack, portal.TenantId);
-
-        (await HasStatusAsync(after, portal.TenantId, TenantStatus.Blocked)).Should().BeTrue();
+        (await UnblockAsync(portal, current)).Should().Be(HttpStatusCode.OK, "the link of this block opens it, so the other was refused for its block alone");
     }
 
     [Fact]
@@ -265,10 +278,11 @@ public class PortalRetentionLifecycleTests
 
         using var portal = await stack.CreatePortalAsync(cancellationToken);
 
-        // Raw: the pinned SDK predates PUT api/2.0/portal/unblock.
-        using var response = await portal.WebApiHttpClient.PutAsync("api/2.0/portal/unblock", null, cancellationToken);
+        (await UnblockAsync(portal, null)).Should().Be(HttpStatusCode.Unauthorized, "no link and no sign-in");
 
-        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        await portal.WebApiHttpClient.Authenticate(portal.Owner);
+
+        (await UnblockAsync(portal, null)).Should().Be(HttpStatusCode.Forbidden, "an ordinary sign-in, even the owner's, is not the link");
     }
 
     [Fact]
