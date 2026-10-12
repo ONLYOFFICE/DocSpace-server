@@ -212,6 +212,20 @@ final class SpecExamples {
      * schema in the operation, or else the one stated by the schema it refers to.
      */
     static Object requestBody(OpenAPI openAPI, CodegenOperation operation) {
+        Schema<?> schema = requestBodySchema(openAPI, operation);
+        if (schema == null) {
+            return null;
+        }
+
+        Object example = schemaExample(schema);
+        return example != null ? example : schemaExample(ModelUtils.getReferencedSchema(openAPI, schema));
+    }
+
+    /**
+     * The schema of a JSON request body as the operation writes it, a reference left unresolved, or
+     * null when the operation takes none.
+     */
+    static Schema<?> requestBodySchema(OpenAPI openAPI, CodegenOperation operation) {
         Operation raw = rawOperation(openAPI, operation);
         if (raw == null || raw.getRequestBody() == null) {
             return null;
@@ -225,12 +239,9 @@ final class SpecExamples {
 
         for (Map.Entry<String, MediaType> entry : requestBody.getContent().entrySet()) {
             Schema<?> schema = entry.getValue().getSchema();
-            if (!entry.getKey().toLowerCase(Locale.ROOT).contains("json") || schema == null) {
-                continue;
+            if (entry.getKey().toLowerCase(Locale.ROOT).contains("json") && schema != null) {
+                return schema;
             }
-
-            Object example = schemaExample(schema);
-            return example != null ? example : schemaExample(ModelUtils.getReferencedSchema(openAPI, schema));
         }
 
         return null;

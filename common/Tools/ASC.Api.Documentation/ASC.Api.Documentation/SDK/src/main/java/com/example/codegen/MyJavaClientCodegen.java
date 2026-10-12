@@ -464,7 +464,7 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
                 names.add(parameter.paramName);
 
                 if (parameter.isBodyParam) {
-                    body = body(Shape.of(parameter), CallSnippets.plain(SpecExamples.requestBody(openAPI, operation)), where);
+                    body = body(operation, Shape.of(parameter), CallSnippets.plain(SpecExamples.requestBody(openAPI, operation)), where);
                     bodyType = parameter.dataType;
                     values.add("body");
                     continue;
@@ -589,8 +589,19 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
          * The request body. A model gets its required fields only, whatever the document states for
          * the body as a whole; an array or a scalar takes the example the document states for it.
          */
-        private String body(Shape shape, Object example, String where) {
+        private String body(CodegenOperation operation, Shape shape, Object example, String where) {
             CodegenModel model = shape.isArray ? null : model(shape);
+
+            // A body that is an enum schema reaches the SDK as a string: the value of a member, chosen
+            // as for any other enum.
+            CodegenModel enumBody = model == null && "String".equals(shape.dataType)
+                    ? CallSnippets.enumBody(openAPI, operation, models)
+                    : null;
+            if (enumBody != null) {
+                Map<?, ?> member = member(enumBody.allowableValues, example, where);
+                return CallSnippets.quote(CallSnippets.unquote(String.valueOf(member.get("value"))));
+            }
+
             if (model == null || model.isEnum) {
                 // A body parameter carries no item description, only the Java type.
                 return shape.isArray && shape.items == null
@@ -710,7 +721,13 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
                 }
 
                 if (items.isEmpty()) {
-                    placeholders.add(where);
+                    // A list the document requires items in gets one, standing in for them: an empty
+                    // one would not make a valid request.
+                    if (shape.minItems != null && shape.minItems > 0) {
+                        items.add(value(Shape.of(shape.items, shape.owner), null, name, where, depth + 1));
+                    } else {
+                        placeholders.add(where);
+                    }
                 }
 
                 return collection(shape.dataType, items);
@@ -774,13 +791,19 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
                 return null;
             }
 
+            Map<?, ?> chosen = member(allowableValues, example, where);
+            return type == null ? String.valueOf(chosen.get("value")) : type + "." + chosen.get("name");
+        }
+
+        /** The member of an enum the example names, or else the first one, which the log notes. */
+        private Map<?, ?> member(Map<String, Object> allowableValues, Object example, String where) {
             Map<?, ?> chosen = member(allowableValues, example);
             if (chosen == null) {
                 placeholders.add(where);
-                chosen = (Map<?, ?>) ((List<?>) values).get(0);
+                chosen = (Map<?, ?>) ((List<?>) allowableValues.get("enumVars")).get(0);
             }
 
-            return type == null ? String.valueOf(chosen.get("value")) : type + "." + chosen.get("name");
+            return chosen;
         }
 
         /**
@@ -983,6 +1006,7 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
             boolean isFreeFormObject;
             boolean isModel;
             boolean isFile;
+            Integer minItems;
             Map<String, Object> allowableValues;
             CodegenProperty items;
 
@@ -997,6 +1021,7 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
                 shape.isFreeFormObject = parameter.isFreeFormObject;
                 shape.isModel = parameter.isModel;
                 shape.isFile = parameter.isFile || parameter.isBinary;
+                shape.minItems = parameter.minItems;
                 shape.allowableValues = parameter.allowableValues;
                 shape.items = parameter.items;
                 return shape;
@@ -1014,6 +1039,7 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
                 shape.isFreeFormObject = property.isFreeFormObject;
                 shape.isModel = property.isModel;
                 shape.isFile = property.isFile || property.isBinary;
+                shape.minItems = property.minItems;
                 shape.allowableValues = property.allowableValues;
                 shape.items = property.items;
                 return shape;

@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.UnaryOperator;
+import java.util.regex.Pattern;
 
 import com.samskivert.mustache.Mustache;
 import com.samskivert.mustache.Template;
@@ -552,6 +553,11 @@ public class MyGoClientCodegen extends GoClientCodegen {
 
         private static final String NULLABLE = "Nullable";
 
+        private static final String NIL_UUID = "00000000-0000-0000-0000-000000000000";
+
+        private static final Pattern UUID_TEXT =
+                Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
+
         private static final Set<String> BUILTIN = new HashSet<>(Arrays.asList(
                 "string", "bool", "byte", "rune", "int", "int32", "int64", "float32", "float64", "interface{}", "any"));
 
@@ -632,7 +638,7 @@ public class MyGoClientCodegen extends GoClientCodegen {
                 String where = operation.operationIdOriginal + ": " + parameter.baseName;
 
                 if (parameter.isBodyParam) {
-                    String value = body(Shape.of(parameter), CallSnippets.plain(SpecExamples.requestBody(openAPI, operation)), where);
+                    String value = body(operation, Shape.of(parameter), CallSnippets.plain(SpecExamples.requestBody(openAPI, operation)), where);
 
                     // A model is built by its constructor, which returns a pointer, as the SDK's sample
                     // keeps it; the setter takes the value.
@@ -701,10 +707,18 @@ public class MyGoClientCodegen extends GoClientCodegen {
          * The request body. A model gets its required properties only, whatever the document states
          * for the body as a whole; an array or a scalar takes the example the document states for it.
          */
-        private String body(Shape shape, Object example, String where) {
+        private String body(CodegenOperation operation, Shape shape, Object example, String where) {
             CodegenModel model = shape.isArray ? null : model(shape);
             if (model != null && !model.isEnum) {
                 return CallSnippets.isComposed(model) ? composed(model, null, where, 0) : construct(model, where, 0, true);
+            }
+
+            // A body that is an enum schema reaches the SDK as a string: the value of a member, chosen
+            // as for any other enum.
+            CodegenModel enumBody = "string".equals(shape.dataType) ? CallSnippets.enumBody(openAPI, operation, models) : null;
+            if (enumBody != null) {
+                Map<?, ?> member = member(enumBody.allowableValues, example, where);
+                return CallSnippets.quote(CallSnippets.unquote(String.valueOf(member.get("value"))));
             }
 
             // A body parameter carries no item description, only the Go type.
@@ -898,13 +912,21 @@ public class MyGoClientCodegen extends GoClientCodegen {
                 }
 
                 if (items.isEmpty()) {
-                    placeholders.add(where);
+                    // A list the document requires items in gets one, standing in for them: an empty
+                    // one would not make a valid request.
+                    if (shape.minItems != null && shape.minItems > 0) {
+                        String item = value(Shape.of(shape.items), null, name, where, depth + 1);
+                        items.add(element(shape.items.dataType, item));
+                    } else {
+                        placeholders.add(where);
+                    }
                 }
 
                 return qualify(shape.dataType) + "{" + String.join(", ", items) + "}";
             }
 
-            if (shape.isMap) {
+            // A free-form object is a map in the SDK, as a map itself is.
+            if (shape.isMap || (shape.isFreeFormObject && shape.dataType != null && shape.dataType.startsWith("map["))) {
                 return qualify(shape.dataType) + "{}";
             }
 
@@ -915,6 +937,17 @@ public class MyGoClientCodegen extends GoClientCodegen {
 
             if (shape.isDateTime && "time.Time".equals(shape.dataType)) {
                 return time(example == null ? null : SpecExamples.text(example), where);
+            }
+
+            // The SDK takes a UUID as a string, and a text that is not one is no UUID the server takes,
+            // so an example such as "1" counts as none.
+            if (shape.isUuid && "string".equals(shape.dataType)) {
+                String text = example == null ? null : SpecExamples.text(example);
+                if (text == null || !UUID_TEXT.matcher(text).matches()) {
+                    placeholders.add(where);
+                    return CallSnippets.quote(NIL_UUID);
+                }
+                return CallSnippets.quote(text);
             }
 
             if (example == null) {
@@ -963,11 +996,7 @@ public class MyGoClientCodegen extends GoClientCodegen {
                 return null;
             }
 
-            Map<?, ?> chosen = CallSnippets.member(allowableValues, example);
-            if (chosen == null) {
-                placeholders.add(where);
-                chosen = (Map<?, ?>) ((List<?>) values).get(0);
-            }
+            Map<?, ?> chosen = member(allowableValues, example, where);
 
             if (!schema) {
                 return String.valueOf(chosen.get("value"));
@@ -975,6 +1004,17 @@ public class MyGoClientCodegen extends GoClientCodegen {
 
             String prefix = enumClassPrefix ? model.classname.toUpperCase(Locale.ROOT) + "_" : "";
             return sdk + "." + prefix + chosen.get("name");
+        }
+
+        /** The member of an enum the example names, or else the first one, which the log notes. */
+        private Map<?, ?> member(Map<String, Object> allowableValues, Object example, String where) {
+            Map<?, ?> chosen = CallSnippets.member(allowableValues, example);
+            if (chosen == null) {
+                placeholders.add(where);
+                chosen = (Map<?, ?>) ((List<?>) allowableValues.get("enumVars")).get(0);
+            }
+
+            return chosen;
         }
 
         private CodegenModel model(Shape shape) {
@@ -1112,12 +1152,15 @@ public class MyGoClientCodegen extends GoClientCodegen {
             boolean isNumeric;
             boolean isBoolean;
             boolean isDateTime;
+            boolean isUuid;
             boolean isEnum;
             boolean isArray;
             boolean isMap;
+            boolean isFreeFormObject;
             boolean isModel;
             boolean isFile;
             boolean isNullable;
+            Integer minItems;
             Map<String, Object> allowableValues;
             CodegenProperty items;
 
@@ -1128,12 +1171,15 @@ public class MyGoClientCodegen extends GoClientCodegen {
                 shape.isNumeric = isNumeric;
                 shape.isBoolean = isBoolean;
                 shape.isDateTime = isDateTime;
+                shape.isUuid = isUuid;
                 shape.isEnum = isEnum;
                 shape.isArray = isArray;
                 shape.isMap = isMap;
+                shape.isFreeFormObject = isFreeFormObject;
                 shape.isModel = isModel;
                 shape.isFile = isFile;
                 shape.isNullable = isNullable;
+                shape.minItems = minItems;
                 shape.allowableValues = allowableValues;
                 shape.items = items;
                 return shape;
@@ -1147,12 +1193,15 @@ public class MyGoClientCodegen extends GoClientCodegen {
                         || parameter.isFloat || parameter.isDouble || parameter.isDecimal;
                 shape.isBoolean = parameter.isBoolean;
                 shape.isDateTime = parameter.isDateTime;
+                shape.isUuid = parameter.isUuid;
                 shape.isEnum = parameter.isEnum;
                 shape.isArray = parameter.isArray;
                 shape.isMap = parameter.isMap;
+                shape.isFreeFormObject = parameter.isFreeFormObject;
                 shape.isModel = parameter.isModel;
                 shape.isFile = parameter.isFile || parameter.isBinary;
                 shape.isNullable = parameter.isNullable;
+                shape.minItems = parameter.minItems;
                 shape.allowableValues = parameter.allowableValues;
                 shape.items = parameter.items;
                 return shape;
@@ -1166,12 +1215,15 @@ public class MyGoClientCodegen extends GoClientCodegen {
                         || property.isFloat || property.isDouble || property.isDecimal;
                 shape.isBoolean = property.isBoolean;
                 shape.isDateTime = property.isDateTime;
+                shape.isUuid = property.isUuid;
                 shape.isEnum = property.isEnum;
                 shape.isArray = property.isArray;
                 shape.isMap = property.isMap;
+                shape.isFreeFormObject = property.isFreeFormObject;
                 shape.isModel = property.isModel;
                 shape.isFile = property.isFile || property.isBinary;
                 shape.isNullable = property.isNullable;
+                shape.minItems = property.minItems;
                 shape.allowableValues = property.allowableValues;
                 shape.items = property.items;
                 return shape;

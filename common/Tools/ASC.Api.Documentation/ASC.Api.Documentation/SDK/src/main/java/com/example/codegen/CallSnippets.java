@@ -18,12 +18,15 @@ package com.example.codegen;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import io.swagger.v3.core.util.Json;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.media.Schema;
 import org.openapitools.codegen.CodegenConfig;
 import org.openapitools.codegen.CodegenModel;
 import org.openapitools.codegen.CodegenOperation;
 import org.openapitools.codegen.SupportingFile;
 import org.openapitools.codegen.model.ModelMap;
 import org.openapitools.codegen.model.OperationsMap;
+import org.openapitools.codegen.utils.ModelUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -114,6 +117,27 @@ final class CallSnippets {
         }
 
         return models;
+    }
+
+    /**
+     * The enum schema a JSON request body is, or null. The generator hands such a body to the language
+     * as the enum's underlying type and leaves nothing in the parameter that names the enum, so it is
+     * found through the reference the document writes.
+     */
+    static CodegenModel enumBody(OpenAPI openAPI, CodegenOperation operation, Map<String, CodegenModel> models) {
+        Schema<?> schema = SpecExamples.requestBodySchema(openAPI, operation);
+        if (schema == null || schema.get$ref() == null) {
+            return null;
+        }
+
+        String name = ModelUtils.getSimpleRef(schema.get$ref());
+        for (CodegenModel model : models.values()) {
+            if (model.isEnum && name.equals(model.name)) {
+                return model;
+            }
+        }
+
+        return null;
     }
 
     /**

@@ -40,6 +40,7 @@ import java.io.Writer;
 
 import java.io.File;
 import java.util.function.UnaryOperator;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.Map.Entry;
 import java.util.*;
@@ -595,6 +596,9 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
 
         private static final String FILE = "new FileParameter(\"file.docx\", File.OpenRead(\"file.docx\"))";
 
+        private static final Pattern UUID_TEXT =
+                Pattern.compile("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
+
         private final OpenAPI openAPI;
         private final Map<String, CodegenModel> models;
         private final UnaryOperator<String> constructorParameter;
@@ -624,7 +628,7 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
                 String where = operation.operationIdOriginal + ": " + parameter.baseName;
 
                 if (parameter.isBodyParam) {
-                    body = body(Shape.of(parameter), CallSnippets.plain(SpecExamples.requestBody(openAPI, operation)), where);
+                    body = body(operation, Shape.of(parameter), CallSnippets.plain(SpecExamples.requestBody(openAPI, operation)), where);
                     arguments.add(parameter.paramName + ": body");
                     continue;
                 }
@@ -651,10 +655,18 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
          * The request body. A model gets its required properties only, whatever the document states
          * for the body as a whole; an array or a scalar takes the example the document states for it.
          */
-        private String body(Shape shape, Object example, String where) {
+        private String body(CodegenOperation operation, Shape shape, Object example, String where) {
             CodegenModel model = shape.isArray ? null : model(shape);
             if (model != null && !model.isEnum) {
                 return CallSnippets.isComposed(model) ? composed(model, null, where, 0) : construct(model, where, 0);
+            }
+
+            // A body that is an enum schema reaches the SDK as a string: the value of a member, chosen
+            // as for any other enum.
+            CodegenModel enumBody = isString(shape) ? CallSnippets.enumBody(openAPI, operation, models) : null;
+            if (enumBody != null) {
+                Map<?, ?> member = member(enumBody.allowableValues, example, where);
+                return CallSnippets.quote(CallSnippets.unquote(String.valueOf(member.get("value"))));
             }
 
             String value = value(shape, example, "body", where, 0);
@@ -875,6 +887,13 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
                     return "new " + shape.type() + " { " + String.join(", ", items) + " }";
                 }
 
+                // A list the document requires items in gets one, standing in for them: an empty one
+                // would not make a valid request.
+                if (shape.minItems != null && shape.minItems > 0) {
+                    String item = value(Shape.of(shape.items, shape.owner), null, name, where, depth + 1);
+                    return "new " + shape.type() + " { " + item + " }";
+                }
+
                 placeholders.add(where);
                 if (model(Shape.of(shape.items, shape.owner)) != null) {
                     usesModel = true;
@@ -884,6 +903,12 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
 
             if (shape.isMap) {
                 return "new " + shape.type() + "()";
+            }
+
+            // A free-form object is an Object in the SDK, and a model refuses a required one left null:
+            // an empty dictionary stands in, as an empty map does for a map.
+            if (shape.isFreeFormObject) {
+                return "new Dictionary<string, object>()";
             }
 
             CodegenModel model = model(shape);
@@ -902,6 +927,11 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
                 return text.toLowerCase(Locale.ROOT);
             }
             if (shape.isUuid) {
+                // Guid.Parse throws on a text that is not a UUID, so an example such as "1" counts as none.
+                if (!UUID_TEXT.matcher(text).matches()) {
+                    placeholders.add(where);
+                    return "Guid.Empty";
+                }
                 return "Guid.Parse(" + CallSnippets.quote(text) + ")";
             }
             if (shape.isDateTime || shape.isDate) {
@@ -957,13 +987,18 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
 
             usesModel = true;
 
+            return stripNullable(type) + "." + member(allowableValues, example, where).get("name");
+        }
+
+        /** The member of an enum the example names, or else the first one, which the log notes. */
+        private Map<?, ?> member(Map<String, Object> allowableValues, Object example, String where) {
             Map<?, ?> chosen = CallSnippets.member(allowableValues, example);
             if (chosen == null) {
                 placeholders.add(where);
-                chosen = (Map<?, ?>) ((List<?>) values).get(0);
+                chosen = (Map<?, ?>) ((List<?>) allowableValues.get("enumVars")).get(0);
             }
 
-            return stripNullable(type) + "." + chosen.get("name");
+            return chosen;
         }
 
         private CodegenModel model(Shape shape) {
@@ -987,11 +1022,15 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
             if (shape.isNumeric) {
                 return "0";
             }
-            if (shape.isString || "string".equals(shape.type())) {
+            if (isString(shape)) {
                 return CallSnippets.quote(CallSnippets.placeholderName(name));
             }
 
             return "default";
+        }
+
+        private static boolean isString(Shape shape) {
+            return shape.isString || "string".equals(shape.type());
         }
 
         /**
@@ -1036,8 +1075,10 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
             boolean isInnerEnum;
             boolean isArray;
             boolean isMap;
+            boolean isFreeFormObject;
             boolean isModel;
             boolean isFile;
+            Integer minItems;
             Map<String, Object> allowableValues;
             CodegenProperty items;
 
@@ -1062,8 +1103,10 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
                 shape.isEnum = parameter.isEnum;
                 shape.isArray = parameter.isArray;
                 shape.isMap = parameter.isMap;
+                shape.isFreeFormObject = parameter.isFreeFormObject;
                 shape.isModel = parameter.isModel;
                 shape.isFile = parameter.isFile || parameter.isBinary;
+                shape.minItems = parameter.minItems;
                 shape.allowableValues = parameter.allowableValues;
                 shape.items = parameter.items;
                 return shape;
@@ -1088,8 +1131,10 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
                 shape.isInnerEnum = property.isInnerEnum;
                 shape.isArray = property.isArray;
                 shape.isMap = property.isMap;
+                shape.isFreeFormObject = property.isFreeFormObject;
                 shape.isModel = property.isModel;
                 shape.isFile = property.isFile || property.isBinary;
+                shape.minItems = property.minItems;
                 shape.allowableValues = property.allowableValues;
                 shape.items = property.items;
                 return shape;
