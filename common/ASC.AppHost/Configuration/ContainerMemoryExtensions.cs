@@ -58,9 +58,11 @@ public static class ContainerMemoryExtensions
     public const string OpensearchLimit = "1536m";
 
     /// <summary>
-    /// MySQL with performance_schema off idles at ~210 MiB, but ~14 services with 300-connection pools push it
-    /// to 791-962 MiB under the Files integration suite (2026-10-12, the higher figure on tmpfs includes the
-    /// datadir); a kill with a data volume costs an InnoDB crash recovery on the next start.
+    /// MySQL with performance_schema off idles at ~210 MiB. Measured 2026-10-12 under the full `test` profile
+    /// (all 14 services in containers, the Playwright API suite registering ~2 900 portals in 20 min): cgroup
+    /// peak 506 MiB at 79 connections; the Files integration suite on tmpfs showed 791-962 MiB, but that
+    /// figure includes the datadir. 1g leaves 2x over the measured peak; a kill with a data volume would cost
+    /// an InnoDB crash recovery on the next start.
     /// </summary>
     public const string MySqlLimit = "1g";
 

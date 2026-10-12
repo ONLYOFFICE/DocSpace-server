@@ -88,20 +88,19 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
         if (withDataVolume)
         {
-            mysqlResourceBuilder = mysqlResourceBuilder
-                .WithDataVolume("docspace-mysql-data")
-                .WithMemoryLimit(ContainerMemoryExtensions.MySqlLimit);
+            mysqlResourceBuilder = mysqlResourceBuilder.WithDataVolume("docspace-mysql-data");
         }
         else if (withTmpfs)
         {
             // Keep the whole MySQL datadir in RAM: throwaway databases (integration tests) pay a lot
             // for InnoDB fsync-heavy init and migrations when the datadir sits on the virtualized
             // Docker Desktop disk. Data disappears with the container, which is fine without a volume.
-            // No memory cap here: tmpfs pages are charged to the container's cgroup, so a cap would
-            // count the datadir of every test portal and kill the server mid-run.
             mysqlResourceBuilder = mysqlResourceBuilder.WithContainerRuntimeArgs("--tmpfs", "/var/lib/mysql");
         }
-        else
+
+        // The cap stays off the tmpfs variant: tmpfs pages are charged to the container's cgroup, so a cap
+        // would count the datadir of every test portal and kill the server mid-run.
+        if (!withTmpfs)
         {
             mysqlResourceBuilder = mysqlResourceBuilder.WithMemoryLimit(ContainerMemoryExtensions.MySqlLimit);
         }
