@@ -107,6 +107,28 @@ public class MetadataTemplateManagementTests(AspireAppFixture fixture) : BaseTes
     }
 
     [Fact]
+    public async Task GetTemplates_ReportsTheAuthorsAsUsers()
+    {
+        var api = await ArrangeAsync();
+        var template = await api.CreateTemplateAsync("Authored " + Suffix(), [], TestContext.Current.CancellationToken);
+
+        // the author used to be a bare id, and a templates table resolved every author with a request of its own
+        var listed = (await api.GetTemplatesAsync(TestContext.Current.CancellationToken)).Single(t => t.Id == template.Id);
+
+        listed.CreateBy.Should().NotBeNull("the author comes as a user object");
+        listed.CreateBy!.Id.Should().Be(Owner.Id);
+        listed.CreateBy.DisplayName.Should().NotBeNullOrEmpty("the display name is what the table shows");
+        listed.ModifiedBy.Should().NotBeNull();
+        listed.ModifiedBy!.Id.Should().Be(Owner.Id, "the creator is the last editor until somebody changes the template");
+
+        var updated = await api.UpdateTemplateAsync(template.Id, new { name = "Authored again " + Suffix() }, TestContext.Current.CancellationToken);
+
+        updated.ModifiedBy.Should().NotBeNull();
+        updated.ModifiedBy!.Id.Should().Be(Owner.Id);
+        updated.CreateBy!.Id.Should().Be(Owner.Id);
+    }
+
+    [Fact]
     public async Task UpdateTemplate_ReturnsTheTemplateWithItsFields()
     {
         var api = await ArrangeAsync();

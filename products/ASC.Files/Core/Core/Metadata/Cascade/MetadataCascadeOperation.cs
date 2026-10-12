@@ -125,7 +125,7 @@ public class MetadataCascadeOperation : DistributedTaskProgress
 
             var folder = await folderDao.GetFolderAsync(FolderId) ?? throw new ItemNotFoundException();
 
-            if (!await fileSecurity.CanEditAsync(folder))
+            if (!await fileSecurity.CanEditMetadataAsync(folder))
             {
                 throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
             }
@@ -143,7 +143,7 @@ public class MetadataCascadeOperation : DistributedTaskProgress
                 CancellationToken.ThrowIfCancellationRequested();
 
                 // the wait for the lock can be long: the right to edit is checked again now that the pass is about to write
-                if (!await fileSecurity.CanEditAsync(folder))
+                if (!await fileSecurity.CanEditMetadataAsync(folder))
                 {
                     throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException);
                 }

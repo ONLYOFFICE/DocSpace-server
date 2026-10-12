@@ -57,10 +57,9 @@ public class MetadataTemplateDto
     public bool Visible { get; set; }
 
     /// <summary>
-    /// The user who created the template.
+    /// The user who created the template. A user who has since left the portal comes back as the "lost user" placeholder.
     /// </summary>
-    /// <example>9a7d5f3e-1c2b-4e8a-9f60-3b7c2d1e5a44</example>
-    public Guid CreateBy { get; set; }
+    public EmployeeDto CreateBy { get; set; }
 
     /// <summary>
     /// The template creation date.
@@ -68,10 +67,10 @@ public class MetadataTemplateDto
     public ApiDateTime CreateOn { get; set; }
 
     /// <summary>
-    /// The user who modified the template last.
+    /// The user who changed the template itself last: its name or its visibility. The creator until somebody changes
+    /// it; a change of a field is recorded on the field, not here.
     /// </summary>
-    /// <example>9a7d5f3e-1c2b-4e8a-9f60-3b7c2d1e5a44</example>
-    public Guid ModifiedBy { get; set; }
+    public EmployeeDto ModifiedBy { get; set; }
 
     /// <summary>
     /// The date when the template was modified last.
@@ -200,6 +199,20 @@ public class EntryTemplateDto
     public bool Visible { get; set; }
 
     /// <summary>
+    /// Whether the template cascades from this entry to the folders and files below it. Only a folder or a room can
+    /// cascade; on a file the value is always false.
+    /// </summary>
+    /// <example>true</example>
+    public bool Cascade { get; set; }
+
+    /// <summary>
+    /// How the cascade of this entry treats a value an entry below already holds. Null while the template does not
+    /// cascade from this entry.
+    /// </summary>
+    /// <example>0</example>
+    public MetadataConflictResolveType? ConflictResolveType { get; set; }
+
+    /// <summary>
     /// The template fields with their values on the entry.
     /// </summary>
     /// <example>[{"id": 9, "name": "Customer", "type": 0, "order": 0, "value": {"stringValue": "ACME Corp"}}]</example>
@@ -312,13 +325,32 @@ public class MetadataOperationDto
     /// </summary>
     /// <example>Folder not found.</example>
     public string Error { get; set; }
+
+    /// <summary>
+    /// The IDs of the metadata templates the operation propagates to the subtree. Empty when there is no operation to
+    /// report, so the answer describes nothing in progress.
+    /// </summary>
+    /// <example>[3]</example>
+    public List<int> TemplateIds { get; set; }
 }
 
 [Scope]
 [Mapper(RequiredMappingStrategy = RequiredMappingStrategy.None, PropertyNameMappingStrategy = PropertyNameMappingStrategy.CaseInsensitive)]
-public partial class MetadataDtoMapper(ApiDateTimeHelper apiDateTimeHelper)
+public partial class MetadataDtoMapper(ApiDateTimeHelper apiDateTimeHelper, EmployeeDtoHelper employeeDtoHelper)
 {
-    public partial MetadataTemplateDto Map(MetadataTemplate source);
+    /// <summary>
+    /// The authors come back as users, not as identifiers: a client listing the templates used to resolve every author
+    /// with a request of its own. The helper caches the users within the request, so a list by one author costs one lookup.
+    /// </summary>
+    public async Task<MetadataTemplateDto> MapAsync(MetadataTemplate source)
+    {
+        var result = MapTemplate(source);
+
+        result.CreateBy = await employeeDtoHelper.GetAsync(source.CreateBy);
+        result.ModifiedBy = await employeeDtoHelper.GetAsync(source.ModifiedBy);
+
+        return result;
+    }
 
     public partial MetadataFieldDto Map(MetadataField source);
 
@@ -343,6 +375,9 @@ public partial class MetadataDtoMapper(ApiDateTimeHelper apiDateTimeHelper)
             Id = source.Template.Id,
             Name = source.Template.Name,
             Visible = source.Template.Visible,
+            Cascade = source.Cascade,
+            // the mode is stored for every link, but it means something only while the link cascades
+            ConflictResolveType = source.Cascade ? source.CascadeConflict : null,
             Fields = (source.Template.Fields ?? []).Select(f => Map(f, values.GetValueOrDefault(f.Id))).ToList()
         };
     }
@@ -363,15 +398,20 @@ public partial class MetadataDtoMapper(ApiDateTimeHelper apiDateTimeHelper)
     public MetadataOperationDto Map(MetadataCascadeOperation source)
     {
         return source == null
-            ? new MetadataOperationDto { Progress = 100, IsCompleted = true }
+            ? new MetadataOperationDto { Progress = 100, IsCompleted = true, TemplateIds = [] }
             : new MetadataOperationDto
             {
                 Id = source.Id,
                 Progress = source.Percentage,
                 IsCompleted = source.IsCompleted,
-                Error = source.Exception?.Message
+                Error = source.Exception?.Message,
+                TemplateIds = [.. source.TemplateIds]
             };
     }
+
+    [MapperIgnoreTarget(nameof(MetadataTemplateDto.CreateBy))]
+    [MapperIgnoreTarget(nameof(MetadataTemplateDto.ModifiedBy))]
+    private partial MetadataTemplateDto MapTemplate(MetadataTemplate source);
 
     [MapperIgnoreTarget(nameof(EntryFieldDto.Value))]
     private partial EntryFieldDto MapEntryField(MetadataField source);
