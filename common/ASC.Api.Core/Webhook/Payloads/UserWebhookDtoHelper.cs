@@ -141,7 +141,6 @@ public class UserWebhookDtoHelper(
             Id = userInfo.Id,
             DisplayName = displayUserSettingsHelper.GetFullUserName(userInfo),
             UserName = userInfo.UserName,
-            Email = userInfo.Email,
             Avatar = await userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}"
         };
 

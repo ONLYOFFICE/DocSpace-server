@@ -299,12 +299,6 @@ public class UserSummaryWebhookDto
     public string UserName { get; set; }
 
     /// <summary>
-    /// The user email address.
-    /// </summary>
-    /// <example>mike.zanyatski@example.com</example>
-    public string Email { get; set; }
-
-    /// <summary>
     /// The user avatar.
     /// </summary>
     /// <example>https://example.com/avatar.jpg</example>
