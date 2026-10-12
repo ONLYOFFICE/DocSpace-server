@@ -44,7 +44,7 @@
 // process, reached over A2A (see documentAgentClient).
 
 import { ActionType } from "@onlyoffice/ai-chat/core";
-import type { Profile, TMCPItem, ToolsAdapter } from "@onlyoffice/ai-chat/core";
+import type { Profile, TMCPItem, ToolCallOptions, ToolsAdapter } from "@onlyoffice/ai-chat/core";
 import { DOCUMENT_AGENT_TYPE, getDocumentAgent } from "../../config/index.js";
 import type { DocumentAgentConfig } from "../../config/index.js";
 import { storage } from "../storage/index.js";
@@ -66,7 +66,6 @@ import {
   getForwardedHeaders,
   getRoundAttachmentIds,
   getRoundProfileId,
-  reportToolProgress,
 } from "../requestContext.js";
 import { resolveCustomServers } from "./customTools.js";
 import { agentServerWhitelist, getSystemServerConfig, systemServerHeaders } from "./systemTools.js";
@@ -141,6 +140,7 @@ export const documentAgentTools: ToolsAdapter = {
     toolName: string,
     args: Record<string, unknown>,
     entityId?: string,
+    options?: ToolCallOptions,
   ): Promise<unknown> {
     if (toolName !== DOCUMENT_AGENT_TOOL_NAME) {
       return `Unknown tool "${toolName}"`;
@@ -154,7 +154,9 @@ export const documentAgentTools: ToolsAdapter = {
       return `${DOCUMENT_AGENT_TOOL_NAME} requires a non-empty 'task'.`;
     }
     try {
-      return JSON.stringify(await run(config, task, fileIdsOf(args), entityId));
+      return JSON.stringify(
+        await run(config, task, fileIdsOf(args), entityId, options?.onProgress),
+      );
     } catch (err) {
       // Contract: a failure is a result, never a throw — a throw aborts the chat stream.
       const message = err instanceof Error ? err.message : String(err);
@@ -194,6 +196,7 @@ async function run(
   task: string,
   fileIds: string[],
   entityId: string | undefined,
+  onProgress: ((line: string) => void) | undefined,
 ): Promise<unknown> {
   const profile = await resolveProfile(entityId);
   if (!profile) {
@@ -229,7 +232,7 @@ async function run(
     files,
     settings,
     signal: AbortSignal.timeout(config.taskTimeoutSeconds * 1000 + ABORT_MARGIN_MS),
-    onStatus: reportToolProgress,
+    onStatus: onProgress,
   });
 
   const saved: { id: string; title: string; url: string }[] = [];

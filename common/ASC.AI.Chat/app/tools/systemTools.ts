@@ -464,7 +464,7 @@ export const systemToolsSource: ToolsAdapter & {
     return grouped;
   },
 
-  async callTool(toolName, args, entityId) {
+  async callTool(toolName, args, entityId, options) {
     logger.info(
       `systemTools.callTool name=${toolName} args=[${Object.keys(args).join(
         ",",
@@ -487,7 +487,10 @@ export const systemToolsSource: ToolsAdapter & {
           return `Tool "${toolName}" is not available: its MCP server is not enabled for this agent.`;
         }
       }
-      const result = await source.callTool(toolName, args);
+      // Unscoped like the listing above; the options carry the progress listener.
+      const result = options
+        ? await source.callTool(toolName, args, undefined, options)
+        : await source.callTool(toolName, args);
       const failure = describeToolErrorResult(result);
       if (failure) {
         logger.warn(

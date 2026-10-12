@@ -69,7 +69,6 @@ import {
 import { systemToolsSource } from "../tools/systemTools.js";
 import { formAnalysisSubAgent } from "../tools/formAnalysisSubAgent.js";
 import { documentAgentTools } from "../tools/documentAgent.js";
-import { progressBaseOf, withToolProgress } from "../tools/toolProgress.js";
 import { DOCUMENT_AGENT_TYPE } from "../../config/index.js";
 import { primeSourceMeta, safeGetAgentInstruction } from "../storage/docspaceFilesApi.js";
 
@@ -383,6 +382,10 @@ const engine = new AIEngine({
   // Being wired, the hook also makes the library ignore any `source` a
   // client put in `actionArgs`.
   resolveSource: () => getSourceMeta(),
+  // A tool the engine runs reports its steps (the document agent's own, an
+  // MCP server's `notifications/progress`), and the engine streams them on
+  // the pending tool card until the result arrives.
+  toolProgress: true,
   // System (host-configured MCP) tools and registered custom MCP servers
   // run server-side and pause for UI approval; most DocSpace integration
   // tools run silently. Compose all three — before customToolsSource was
@@ -882,7 +885,7 @@ export const aiController = {
     );
     await streamNdjson(
       res,
-      tapStream("ai/send-with-stream", withToolProgress(engine.sendWithStream(body), undefined)),
+      tapStream("ai/send-with-stream", engine.sendWithStream(body)),
     );
   }),
 
@@ -960,7 +963,7 @@ export const aiController = {
     );
     await streamNdjson(
       res,
-      tapStream("ai/regenerate-stream", withToolProgress(engine.regenerateStream(body), undefined)),
+      tapStream("ai/regenerate-stream", engine.regenerateStream(body)),
     );
   }),
 
@@ -980,15 +983,7 @@ export const aiController = {
     // attachments of the message it answers, resolved from the thread.
     await primeRoundFromThread(req.body.threadId, contextScopeOf(req.body), req.body.profileId);
     const body = await withSourceMetadata(withRequestSignal(res, req.body));
-    // A long tool approved here runs in this request: its progress is drawn on
-    // the assistant message the client sent back with the call.
-    await streamNdjson(
-      res,
-      tapStream(
-        "ai/approve-tool-call",
-        withToolProgress(engine.approveToolCall(body), progressBaseOf(req.body)),
-      ),
-    );
+    await streamNdjson(res, tapStream("ai/approve-tool-call", engine.approveToolCall(body)));
   }),
 
   denyToolCall: asyncHandler<DenyToolCallInput>(async (req, res) => {

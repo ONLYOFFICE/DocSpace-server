@@ -89,9 +89,6 @@ export interface RequestContext {
   // Attachment ref ids of the current user message, captured before the
   // engine runs so an in-round tool call can hand the attached files on.
   roundAttachmentIds?: string[];
-  // Where a long server-side tool reports its progress lines while it runs;
-  // set by the stream wrapper that turns them into events (tools/toolProgress.ts).
-  toolProgressSink?: (line: string) => void;
 }
 
 export interface AppConfig {
