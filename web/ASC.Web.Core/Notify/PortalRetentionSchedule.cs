@@ -186,6 +186,15 @@ public sealed class PortalRetentionOptions
     /// </summary>
     public int BalanceFailuresBeforeStop { get; set; } = 20;
 
+    /// <summary>
+    /// Over how many days the start of the policy is spread, by portal id: a portal's count starts no earlier
+    /// than the day the policy first ran plus its id modulo this many days. The portals already idle on that
+    /// day would otherwise all be warned, asked about and blocked on the same nights; spread, a share of them
+    /// comes due each night. Zero starts them all on the policy's first day. A portal used after that stretch
+    /// is counted from its own activity, untouched.
+    /// </summary>
+    public int FirstWaveDays { get; set; } = 30;
+
     public PortalRetentionScheduleOptions For(PortalRetentionCategory category)
     {
         return category switch
@@ -235,8 +244,9 @@ public static class PortalRetentionSchedule
     /// the last status change for a former paying one.
     /// </param>
     /// <param name="policyStart">
-    /// The day the policy first ran in this installation. No count starts before it, so the first run does
-    /// not block every long-idle portal without the warnings that should have come first.
+    /// The day the policy starts for this portal: the day it first ran in this installation, spread by
+    /// <see cref="PortalRetentionOptions.FirstWaveDays"/>. No count starts before it, so the first run does not
+    /// block every long-idle portal without the warnings that should have come first.
     /// </param>
     /// <param name="today">The day the run is for.</param>
     /// <param name="noticesFrom">

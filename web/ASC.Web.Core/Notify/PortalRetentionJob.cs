@@ -183,10 +183,14 @@ public class PortalRetentionJob(
         var noticesFrom = formerPaying ? context.DueDate.Date.AddDays(tariffService.GetPaymentDelay() + 1) : DateTime.MinValue;
         var lastWarning = kept.LastWarning;
 
+        // The policy starts for this portal on its own day of the first wave, so the portals already idle when
+        // it first ran do not all come due on the same nights.
+        var portalPolicyStart = Options.FirstWaveDays > 0 ? policyStart.AddDays(tenant.Id % Options.FirstWaveDays) : policyStart;
+
         // The count starts no earlier than the last change of status, which is what an unblocked portal starts
         // again from.
         Func<PortalRetentionCategory, PortalRetentionDecision> CountedFrom(DateTime day) => category =>
-            PortalRetentionSchedule.DecideActive(Options.For(category), Later(day, tenant.StatusChangeDate), policyStart, context.NowDate, noticesFrom, lastRunOn, lastWarning);
+            PortalRetentionSchedule.DecideActive(Options.For(category), Later(day, tenant.StatusChangeDate), portalPolicyStart, context.NowDate, noticesFrom, lastRunOn, lastWarning);
 
         DateTime anchor;
 

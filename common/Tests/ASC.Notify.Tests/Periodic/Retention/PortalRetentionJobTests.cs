@@ -479,6 +479,52 @@ public class PortalRetentionJobTests
         logger.Messages.Should().ContainSingle(m => m.Contains("Free: Notify FirstNotice"), "the portal it got an answer for is warned");
     }
 
+    /// <summary>
+    /// An id that falls on the given day of a thirty-day first wave, past any portal the stack has, so nothing
+    /// is kept for it.
+    /// </summary>
+    private static int FirstWaveDay(int day)
+    {
+        // 2147483610 is a multiple of thirty.
+        return 2147483610 + day;
+    }
+
+    [Theory]
+    [InlineData(null, 1)]
+    [InlineData("0", 2)]
+    public async Task LongIdlePortals_EachStartsOnItsOwnDayOfTheFirstWave(string? firstWaveDays, int warned)
+    {
+        using var scope = await OpenScopeAsync();
+        var logger = new RecordingLogger<PortalRetentionJob>();
+
+        // Idle for a year when the policy first ran, thirty days ago; their ids fall on the first and the second
+        // day of the wave. Spread, only the first is a month into its count today; not spread, both are.
+        var policyStart = _today.AddDays(-30);
+        var retention = firstWaveDays is null ? null : new Dictionary<string, string?> { ["firstWaveDays"] = firstWaveDays };
+        var job = CreateJob(scope, logger, retention);
+
+        foreach (var day in new[] { 0, 1 })
+        {
+            await job.ApplyAsync(Free(InMemoryTenant(scope, id: FirstWaveDay(day)), _today.AddYears(-1)), policyStart, new RecordingNotifyClient(), _senderName);
+        }
+
+        logger.Messages.Count(m => m.Contains("Free: Notify FirstNotice")).Should().Be(warned, string.Join(" | ", logger.Messages));
+    }
+
+    [Fact]
+    public async Task RecentlyUsedPortal_IsCountedFromItsActivity_WhateverItsDayOfTheFirstWave()
+    {
+        using var scope = await OpenScopeAsync();
+        var logger = new RecordingLogger<PortalRetentionJob>();
+
+        // The policy started eighty-five days ago, so this portal's day of the wave is sixty days ago and its
+        // block would be due today - but it was used thirty days ago, and its count runs from then.
+        await CreateJob(scope, logger).ApplyAsync(Free(InMemoryTenant(scope, id: FirstWaveDay(25)), _today.AddDays(-30)), _today.AddDays(-85),
+            new RecordingNotifyClient(), _senderName);
+
+        logger.Messages.Should().ContainSingle(m => m.Contains("Free: Notify FirstNotice"), string.Join(" | ", logger.Messages));
+    }
+
     [Fact]
     public async Task PayingPortal_IsLeftAlone()
     {
