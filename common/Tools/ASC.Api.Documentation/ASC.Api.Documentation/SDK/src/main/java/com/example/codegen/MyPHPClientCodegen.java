@@ -610,7 +610,7 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
             }
 
             if (shape.isFreeFormObject) {
-                return EMPTY_OBJECT;
+                return example instanceof Map ? mixed(example) : EMPTY_OBJECT;
             }
 
             CodegenModel model = model(shape);
@@ -641,8 +641,11 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
                     return EMPTY_OBJECT;
                 }
 
-                placeholders.add(where);
+                int logged = placeholders.size();
                 entries.add(quote("YOUR_KEY") + " => " + value(shape.item(), null, name, where, depth + 1));
+                if (placeholders.size() == logged) {
+                    placeholders.add(where);
+                }
             }
 
             return "[" + String.join(", ", entries) + "]";
@@ -748,7 +751,8 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
          * in place in a model, as constants of that model; in a parameter it is only its values.
          */
         private String enumValue(Shape shape, Object example, String where) {
-            if (shape.isArray) {
+            // An array or a map of enum values is built a value at a time.
+            if (shape.isArray || shape.isMap) {
                 return null;
             }
 
@@ -833,6 +837,36 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
             return name.replaceAll("[^A-Za-z0-9]", "").toLowerCase(Locale.ROOT);
         }
 
+        /**
+         * An example of a value of any type, as the PHP literal of what it holds. An empty map is the empty
+         * object, which an empty array would not make.
+         */
+        private static String mixed(Object example) {
+            if (example == null) {
+                return "null";
+            }
+            if (example instanceof String) {
+                return quote((String) example);
+            }
+            if (example instanceof List) {
+                List<String> items = new ArrayList<>();
+                for (Object item : (List<?>) example) {
+                    items.add(mixed(CallSnippets.plain(item)));
+                }
+                return "[" + String.join(", ", items) + "]";
+            }
+            if (example instanceof Map) {
+                List<String> entries = new ArrayList<>();
+                for (Map.Entry<?, ?> entry : ((Map<?, ?>) example).entrySet()) {
+                    entries.add(quote(String.valueOf(entry.getKey())) + " => "
+                            + mixed(CallSnippets.plain(entry.getValue())));
+                }
+                return entries.isEmpty() ? EMPTY_OBJECT : "[" + String.join(", ", entries) + "]";
+            }
+
+            return SpecExamples.text(example);
+        }
+
         /** The value of an enum member as the snippet writes it: a string in double quotes, as all its strings are. */
         private static String literal(String value) {
             return isSingleQuoted(value) ? quote(singleQuoted(value)) : value;
@@ -877,12 +911,10 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
                     return FILE;
                 case "mixed":
                 case "object":
-                    if (example instanceof Boolean || example instanceof Number || example instanceof String) {
-                        return example instanceof String ? quote((String) example) : text;
+                    if (example != null) {
+                        return mixed(example);
                     }
-                    if (example == null) {
-                        placeholders.add(where);
-                    }
+                    placeholders.add(where);
                     return EMPTY_OBJECT;
                 default:
                     break;

@@ -759,6 +759,10 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
                 return quote(CallSnippets.unquote(String.valueOf(member.get("value"))));
             }
 
+            if (model == null && shape.dataType != null && shape.dataType.startsWith(COLLECTIONS + "Map<")) {
+                return map(shape, example, "body", where, 0, true);
+            }
+
             // Nothing around `val body =` gives an empty collection its type, so the type is written out.
             if (model == null && shape.dataType != null && shape.dataType.startsWith(COLLECTIONS)) {
                 return typed(shape.dataType, example, "body", where, 0);
@@ -906,7 +910,10 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
             // A free-form object is a map to Moshi, as is a map itself; typed as Any, it says nothing of
             // the map's types.
             if (shape.isMap || shape.isFreeFormObject) {
-                return shape.dataType != null && shape.dataType.startsWith(COLLECTIONS + "Map<") ? "emptyMap()" : EMPTY_OBJECT;
+                if (shape.dataType != null && shape.dataType.startsWith(COLLECTIONS + "Map<")) {
+                    return map(shape, example, name, where, depth, false);
+                }
+                return example instanceof Map ? literal(example) : EMPTY_OBJECT;
             }
 
             CodegenModel model = model(shape);
@@ -915,6 +922,45 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
             }
 
             return scalar(shape.dataType, example, name, where);
+        }
+
+        /**
+         * A map with the entries of the example; one the document requires entries in and gives no
+         * example for gets one standing in for them, which the log notes. An empty one is written with
+         * its types when nothing around it gives them.
+         */
+        private String map(Shape shape, Object example, String name, String where, int depth, boolean typed) {
+            List<String> entries = new ArrayList<>();
+            if (example instanceof Map) {
+                for (Map.Entry<?, ?> entry : ((Map<?, ?>) example).entrySet()) {
+                    entries.add(quote(String.valueOf(entry.getKey())) + " to "
+                            + entry(shape, CallSnippets.plain(entry.getValue()), name, where, depth));
+                }
+            }
+
+            if (entries.isEmpty() && shape.minProperties != null && shape.minProperties > 0) {
+                int logged = placeholders.size();
+                entries.add(quote("YOUR_KEY") + " to " + entry(shape, null, name, where, depth));
+                if (placeholders.size() == logged) {
+                    placeholders.add(where);
+                }
+            }
+
+            if (entries.isEmpty()) {
+                return typed ? "emptyMap<" + simpleType(typeArguments(shape.dataType)) + ">()" : "emptyMap()";
+            }
+
+            return "mapOf(" + String.join(", ", entries) + ")";
+        }
+
+        /** A value of a map. A body parameter carries no item description, only the Kotlin type. */
+        private String entry(Shape shape, Object example, String name, String where, int depth) {
+            if (shape.items != null) {
+                return value(shape.item(), example, name, where, depth + 1);
+            }
+
+            String types = typeArguments(shape.dataType);
+            return typed(types.substring(types.indexOf(',') + 1).trim(), example, name, where, depth + 1);
         }
 
         /**
@@ -941,7 +987,8 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
          * in any other place it is only its underlying type, so the member is its value.
          */
         private String enumValue(Shape shape, Object example, String where) {
-            if (shape.isArray) {
+            // An array or a map of enum values is built a value at a time.
+            if (shape.isArray || shape.isMap) {
                 return null;
             }
 
@@ -1039,12 +1086,10 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
                 case "UUID":
                     return uuid(text, where);
                 case "Any":
-                    if (example instanceof Boolean || example instanceof Number || example instanceof String) {
+                    if (example != null) {
                         return literal(example);
                     }
-                    if (example == null) {
-                        placeholders.add(where);
-                    }
+                    placeholders.add(where);
                     return EMPTY_OBJECT;
                 default:
                     break;
@@ -1145,9 +1190,34 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
             return "UUID.fromString(" + quote(text) + ")";
         }
 
-        /** An example of a value of any type that is a plain one, as the Kotlin literal of what it holds. */
+        /**
+         * An example of a value of any type, as the Kotlin literal of what it holds; an empty list or map
+         * is written with its types, which nothing around it gives.
+         */
         private static String literal(Object example) {
-            return example instanceof String ? quote((String) example) : SpecExamples.text(example);
+            if (example == null) {
+                return "null";
+            }
+            if (example instanceof String) {
+                return quote((String) example);
+            }
+            if (example instanceof List) {
+                List<String> items = new ArrayList<>();
+                for (Object item : (List<?>) example) {
+                    items.add(literal(CallSnippets.plain(item)));
+                }
+                return items.isEmpty() ? "emptyList<Any>()" : "listOf(" + String.join(", ", items) + ")";
+            }
+            if (example instanceof Map) {
+                List<String> entries = new ArrayList<>();
+                for (Map.Entry<?, ?> entry : ((Map<?, ?>) example).entrySet()) {
+                    entries.add(quote(String.valueOf(entry.getKey())) + " to "
+                            + literal(CallSnippets.plain(entry.getValue())));
+                }
+                return entries.isEmpty() ? EMPTY_OBJECT : "mapOf(" + String.join(", ", entries) + ")";
+            }
+
+            return SpecExamples.text(example);
         }
 
         /** The arguments on one line, or one per line once they get long. */
@@ -1202,6 +1272,7 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
             boolean isFile;
             boolean isFileList;
             Integer minItems;
+            Integer minProperties;
             Map<String, Object> allowableValues;
             CodegenProperty items;
 
@@ -1219,6 +1290,7 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
                 shape.isFileList = (shape.isFile && parameter.isCollectionFormatMulti)
                         || (parameter.isArray && parameter.items != null && (parameter.items.isFile || parameter.items.isBinary));
                 shape.minItems = parameter.minItems;
+                shape.minProperties = parameter.getMinProperties();
                 shape.allowableValues = parameter.allowableValues;
                 shape.items = parameter.items;
                 return shape;
@@ -1238,6 +1310,7 @@ public class MyKotlinClientCodegen extends KotlinClientCodegen {
                 shape.isFile = property.isFile || property.isBinary;
                 shape.isFileList = property.isArray && property.items != null && (property.items.isFile || property.items.isBinary);
                 shape.minItems = property.minItems;
+                shape.minProperties = property.getMinProperties();
                 shape.allowableValues = property.allowableValues;
                 shape.items = property.items;
                 return shape;

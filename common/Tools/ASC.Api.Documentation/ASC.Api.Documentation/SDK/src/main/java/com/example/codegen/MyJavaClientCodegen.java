@@ -405,6 +405,7 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
         static final String ARGUMENTS = "x-snippet-arguments";
         static final String BODY = "x-snippet-body";
         static final String BODY_TYPE = "x-snippet-body-type";
+        static final String BODY_PUTS = "x-snippet-body-puts";
         static final String IMPORTS = "x-snippet-imports";
         static final String BEARER = "x-snippet-bearer";
 
@@ -442,6 +443,9 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
         /** Values the document states no example for, as "operationId: name", for the run's log. */
         private final List<String> placeholders = new ArrayList<>();
 
+        /** The statements that fill a body that is a map, after it is declared; null when there are none. */
+        private String bodyPuts;
+
         Snippets(OpenAPI openAPI, List<ModelMap> allModels, String invokerPackage, String modelPackage) {
             this.openAPI = openAPI;
             this.invokerPackage = invokerPackage;
@@ -458,6 +462,7 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
             List<String> names = new ArrayList<>();
             String body = null;
             String bodyType = null;
+            bodyPuts = null;
 
             for (CodegenParameter parameter : operation.allParams) {
                 String where = operation.operationIdOriginal + ": " + parameter.baseName;
@@ -488,6 +493,9 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
                 operation.vendorExtensions.put(BODY, body);
                 operation.vendorExtensions.put(BODY_TYPE, bodyType);
             }
+            if (bodyPuts != null) {
+                operation.vendorExtensions.put(BODY_PUTS, bodyPuts);
+            }
 
             String bearer = bearer(operation);
             if (bearer != null) {
@@ -495,7 +503,7 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
             }
 
             operation.vendorExtensions.put(IMPORTS,
-                    imports(apiImport, bearer != null, arguments, body, bodyType, operation.returnType));
+                    imports(apiImport, bearer != null, arguments, body, bodyPuts, bodyType, operation.returnType));
         }
 
         /**
@@ -590,6 +598,15 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
          * the body as a whole; an array or a scalar takes the example the document states for it.
          */
         private String body(CodegenOperation operation, Shape shape, Object example, String where) {
+            // A map is declared empty and filled by a put per entry, as Java 8 has no literal for it.
+            if (!shape.isArray && shape.dataType != null && shape.dataType.startsWith("Map<")) {
+                List<String> entries = entries(shape, example, "body", where, 0);
+                if (!entries.isEmpty()) {
+                    bodyPuts = "body.put(" + String.join(");" + STATEMENT + "body.put(", entries) + ");";
+                }
+                return "new HashMap<>()";
+            }
+
             CodegenModel model = shape.isArray ? null : model(shape);
 
             // A body that is an enum schema reaches the SDK as a string: the value of a member, chosen
@@ -648,11 +665,59 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
                 }
 
                 Object example = CallSnippets.plain(SpecExamples.inheritedProperty(openAPI, model.name, property.baseName));
-                setters.add("." + property.name + "(" + value(Shape.of(property, model.classname), example,
+                Shape shape = Shape.of(property, model.classname);
+
+                // A map is filled through the model's own put of an entry, one per entry.
+                List<String> entries = shape.isMap
+                        ? entries(shape, example, property.baseName, where + "." + property.baseName, depth + 1)
+                        : Collections.<String>emptyList();
+                if (!entries.isEmpty()) {
+                    for (String entry : entries) {
+                        setters.add(".put" + property.nameInPascalCase + "Item(" + entry + ")");
+                    }
+                    continue;
+                }
+
+                setters.add("." + property.name + "(" + value(shape, example,
                         property.baseName, where + "." + property.baseName, depth + 1) + ")");
             }
 
             return setters;
+        }
+
+        /**
+         * The entries of a map, as the arguments of its put: those of the example, or, for a map the
+         * document requires entries in and gives no example for, one standing in for them, which the
+         * log notes.
+         */
+        private List<String> entries(Shape shape, Object example, String name, String where, int depth) {
+            List<String> entries = new ArrayList<>();
+            if (example instanceof Map) {
+                for (Map.Entry<?, ?> entry : ((Map<?, ?>) example).entrySet()) {
+                    entries.add(CallSnippets.quote(String.valueOf(entry.getKey())) + ", "
+                            + entry(shape, CallSnippets.plain(entry.getValue()), name, where, depth));
+                }
+            }
+
+            if (entries.isEmpty() && shape.minProperties != null && shape.minProperties > 0) {
+                int logged = placeholders.size();
+                entries.add(CallSnippets.quote("YOUR_KEY") + ", " + entry(shape, null, name, where, depth));
+                if (placeholders.size() == logged) {
+                    placeholders.add(where);
+                }
+            }
+
+            return entries;
+        }
+
+        /** A value of a map. A body parameter carries no item description, only the Java type. */
+        private String entry(Shape shape, Object example, String name, String where, int depth) {
+            if (shape.items != null) {
+                return value(Shape.of(shape.items, shape.owner), example, name, where, depth + 1);
+            }
+
+            String type = shape.dataType.substring(shape.dataType.indexOf(',') + 1, shape.dataType.length() - 1).trim();
+            return typed(type, example, name, where, depth + 1);
         }
 
         /** A value of a type the generator names by its Java spelling only, as the body of an array. */
@@ -733,8 +798,13 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
                 return collection(shape.dataType, items);
             }
 
-            // A free-form object is a map to Jackson, as is a map itself.
+            // A free-form object is a map to Jackson, as is a map itself. Outside a model and the body a map
+            // has no statement to fill it, so the entries it should have are not shown, which the log notes.
             if (shape.isMap || shape.isFreeFormObject) {
+                if ((example instanceof Map && !((Map<?, ?>) example).isEmpty())
+                        || (shape.minProperties != null && shape.minProperties > 0)) {
+                    placeholders.add(where);
+                }
                 return "new HashMap<>()";
             }
 
@@ -763,7 +833,8 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
          * so the member is its value.
          */
         private String enumValue(Shape shape, Object example, String where) {
-            if (shape.isArray) {
+            // An array or a map of enum values is built a value at a time.
+            if (shape.isArray || shape.isMap) {
                 return null;
             }
 
@@ -886,7 +957,7 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
                 case "URI":
                     return "URI.create(" + CallSnippets.quote(text) + ")";
                 case "Object":
-                    return literal(example);
+                    return literal(example, where);
                 default:
                     return "null";
             }
@@ -960,13 +1031,29 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
             return "UUID.fromString(" + CallSnippets.quote(text) + ")";
         }
 
-        /** An example of a value of any type, as the Java literal of what it holds when it is a plain one. */
-        private static String literal(Object example) {
+        /**
+         * An example of a value of any type, as the Java literal of what it holds. Java 8 has no literal of
+         * a map, so a map in it stands empty, which the log notes.
+         */
+        private String literal(Object example, String where) {
             if (example instanceof Boolean || example instanceof Number) {
                 return SpecExamples.text(example);
             }
             if (example instanceof String) {
                 return CallSnippets.quote((String) example);
+            }
+            if (example instanceof List) {
+                List<String> items = new ArrayList<>();
+                for (Object item : (List<?>) example) {
+                    items.add(literal(CallSnippets.plain(item), where));
+                }
+                return items.isEmpty() ? "new ArrayList<>()" : "Arrays.asList(" + String.join(", ", items) + ")";
+            }
+            if (example instanceof Map) {
+                if (!((Map<?, ?>) example).isEmpty()) {
+                    placeholders.add(where);
+                }
+                return "new HashMap<>()";
             }
 
             return "null";
@@ -1007,6 +1094,7 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
             boolean isModel;
             boolean isFile;
             Integer minItems;
+            Integer minProperties;
             Map<String, Object> allowableValues;
             CodegenProperty items;
 
@@ -1022,6 +1110,7 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
                 shape.isModel = parameter.isModel;
                 shape.isFile = parameter.isFile || parameter.isBinary;
                 shape.minItems = parameter.minItems;
+                shape.minProperties = parameter.getMinProperties();
                 shape.allowableValues = parameter.allowableValues;
                 shape.items = parameter.items;
                 return shape;
@@ -1040,6 +1129,7 @@ public class MyJavaClientCodegen extends JavaClientCodegen {
                 shape.isModel = property.isModel;
                 shape.isFile = property.isFile || property.isBinary;
                 shape.minItems = property.minItems;
+                shape.minProperties = property.getMinProperties();
                 shape.allowableValues = property.allowableValues;
                 shape.items = property.items;
                 return shape;

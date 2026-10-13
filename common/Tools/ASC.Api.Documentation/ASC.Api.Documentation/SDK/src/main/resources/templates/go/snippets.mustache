@@ -31,8 +31,14 @@ func main() {
 	}
 	defer file.Close()
 {{/vendorExtensions.x-snippet-opens-file}}
-{{#vendorExtensions.x-snippet-body}}
+{{#vendorExtensions.x-snippet-variables}}
 
+	{{{.}}}
+{{/vendorExtensions.x-snippet-variables}}
+{{#vendorExtensions.x-snippet-body}}
+{{^vendorExtensions.x-snippet-variables}}
+
+{{/vendorExtensions.x-snippet-variables}}
 	body := {{{.}}}
 {{/vendorExtensions.x-snippet-body}}
 

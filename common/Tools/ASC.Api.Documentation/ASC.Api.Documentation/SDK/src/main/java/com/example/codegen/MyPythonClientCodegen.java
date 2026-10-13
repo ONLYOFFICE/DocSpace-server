@@ -875,7 +875,7 @@ public class MyPythonClientCodegen extends PythonClientCodegen {
 
             // A free-form object is a dictionary in Python, as is a map.
             if (shape.isMap || shape.isFreeFormObject || (shape.dataType != null && shape.dataType.startsWith("Dict["))) {
-                return "{}";
+                return map(shape, example, name, where, depth);
             }
 
             CodegenModel model = model(shape);
@@ -914,11 +914,54 @@ public class MyPythonClientCodegen extends PythonClientCodegen {
         }
 
         /**
+         * A dictionary with the entries of the example; one the document requires entries in and gives
+         * no example for gets one standing in for them, which the log notes.
+         */
+        private String map(Shape shape, Object example, String name, String where, int depth) {
+            List<String> entries = new ArrayList<>();
+            if (example instanceof Map) {
+                for (Map.Entry<?, ?> entry : ((Map<?, ?>) example).entrySet()) {
+                    entries.add(CallSnippets.quote(String.valueOf(entry.getKey())) + ": "
+                            + entry(shape, CallSnippets.plain(entry.getValue()), name, where, depth));
+                }
+            }
+
+            if (entries.isEmpty() && shape.minProperties != null && shape.minProperties > 0) {
+                int logged = placeholders.size();
+                entries.add(CallSnippets.quote("YOUR_KEY") + ": " + entry(shape, null, name, where, depth));
+                if (placeholders.size() == logged) {
+                    placeholders.add(where);
+                }
+            }
+
+            return "{" + String.join(", ", entries) + "}";
+        }
+
+        /**
+         * A value of a dictionary: of the type its items state, or of the one the Python type names; a
+         * free-form object states neither, and its values are of any type.
+         */
+        private String entry(Shape shape, Object example, String name, String where, int depth) {
+            if (shape.items != null) {
+                return value(Shape.of(shape.items), example, name, where, depth + 1);
+            }
+
+            String type = shape.dataType != null && shape.dataType.startsWith("Dict[") && shape.dataType.endsWith("]")
+                    ? shape.dataType.substring(shape.dataType.indexOf(',') + 1, shape.dataType.length() - 1).trim()
+                    : null;
+
+            return type == null || "Any".equals(type) || "object".equals(type)
+                    ? literal(example)
+                    : typed(type, example, where, depth + 1);
+        }
+
+        /**
          * An enum member. An enum schema is a class of the SDK with a member per value; an enum declared
          * in place is only its underlying type in Python, so the member is its value.
          */
         private String enumValue(Shape shape, Object example, String where) {
-            if (shape.isArray) {
+            // An array or a map of enum values is built a value at a time.
+            if (shape.isArray || shape.isMap) {
                 return null;
             }
 
@@ -1151,6 +1194,7 @@ public class MyPythonClientCodegen extends PythonClientCodegen {
             boolean isAnyType;
             boolean isFreeFormObject;
             Integer minItems;
+            Integer minProperties;
             String typing;
             Map<String, Object> allowableValues;
             CodegenProperty items;
@@ -1161,6 +1205,7 @@ public class MyPythonClientCodegen extends PythonClientCodegen {
                 shape.complexType = parameter.baseType;
                 shape.isFreeFormObject = parameter.isFreeFormObject;
                 shape.minItems = parameter.minItems;
+                shape.minProperties = parameter.getMinProperties();
                 Object typing = parameter.vendorExtensions.get(PY_TYPING);
                 shape.typing = typing == null ? null : String.valueOf(typing);
                 shape.isString = parameter.isString;
@@ -1187,6 +1232,7 @@ public class MyPythonClientCodegen extends PythonClientCodegen {
                 shape.complexType = property.complexType;
                 shape.isFreeFormObject = property.isFreeFormObject;
                 shape.minItems = property.minItems;
+                shape.minProperties = property.getMinProperties();
                 shape.isString = property.isString;
                 shape.isNumeric = property.isNumeric || property.isInteger || property.isLong || property.isNumber
                         || property.isFloat || property.isDouble || property.isDecimal;

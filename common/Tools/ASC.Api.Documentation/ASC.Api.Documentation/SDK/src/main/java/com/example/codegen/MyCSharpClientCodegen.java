@@ -902,13 +902,13 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
             }
 
             if (shape.isMap) {
-                return "new " + shape.type() + "()";
+                return map(shape, example, name, where, depth);
             }
 
             // A free-form object is an Object in the SDK, and a model refuses a required one left null:
-            // an empty dictionary stands in, as an empty map does for a map.
+            // a dictionary stands in, with the entries of the example, as for a map.
             if (shape.isFreeFormObject) {
-                return "new Dictionary<string, object>()";
+                return example instanceof Map ? literal(example) : "new Dictionary<string, object>()";
             }
 
             CodegenModel model = model(shape);
@@ -951,10 +951,85 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
         }
 
         /**
+         * A dictionary with the entries of the example; one the document requires entries in and gives
+         * no example for gets one standing in for them, which the log notes.
+         */
+        private String map(Shape shape, Object example, String name, String where, int depth) {
+            List<String> entries = new ArrayList<>();
+            if (example instanceof Map) {
+                for (Map.Entry<?, ?> entry : ((Map<?, ?>) example).entrySet()) {
+                    entries.add("[" + CallSnippets.quote(String.valueOf(entry.getKey())) + "] = "
+                            + entry(shape, CallSnippets.plain(entry.getValue()), name, where, depth));
+                }
+            }
+
+            if (entries.isEmpty()) {
+                if (shape.minProperties == null || shape.minProperties == 0) {
+                    return "new " + shape.type() + "()";
+                }
+
+                int logged = placeholders.size();
+                entries.add("[" + CallSnippets.quote("YOUR_KEY") + "] = " + entry(shape, null, name, where, depth));
+                if (placeholders.size() == logged) {
+                    placeholders.add(where);
+                }
+            }
+
+            return "new " + shape.type() + " { " + String.join(", ", entries) + " }";
+        }
+
+        /**
+         * A value of a dictionary. A body parameter carries no item description, only the C# type, and
+         * a value of any type is the literal of what the example holds.
+         */
+        private String entry(Shape shape, Object example, String name, String where, int depth) {
+            String type = shape.type();
+            String valueType = type.substring(type.indexOf(',') + 1, type.length() - 1).trim();
+
+            if ("Object".equalsIgnoreCase(stripNullable(valueType))) {
+                return literal(example);
+            }
+
+            return shape.items != null
+                    ? value(Shape.of(shape.items, shape.owner), example, name, where, depth + 1)
+                    : typed(valueType, example, where, depth + 1);
+        }
+
+        /** An example of a value of any type, as the C# literal of what it holds. */
+        private static String literal(Object example) {
+            if (example instanceof Boolean || example instanceof Number) {
+                return SpecExamples.text(example).toLowerCase(Locale.ROOT);
+            }
+            if (example instanceof String) {
+                return CallSnippets.quote((String) example);
+            }
+            if (example instanceof List) {
+                List<String> items = new ArrayList<>();
+                for (Object item : (List<?>) example) {
+                    items.add(literal(CallSnippets.plain(item)));
+                }
+                return items.isEmpty() ? "new List<object>()" : "new List<object> { " + String.join(", ", items) + " }";
+            }
+            if (example instanceof Map) {
+                List<String> entries = new ArrayList<>();
+                for (Map.Entry<?, ?> entry : ((Map<?, ?>) example).entrySet()) {
+                    entries.add("[" + CallSnippets.quote(String.valueOf(entry.getKey())) + "] = "
+                            + literal(CallSnippets.plain(entry.getValue())));
+                }
+                return entries.isEmpty()
+                        ? "new Dictionary<string, object>()"
+                        : "new Dictionary<string, object> { " + String.join(", ", entries) + " }";
+            }
+
+            return "null";
+        }
+
+        /**
          * An enum member: the one whose value the example states, or the first one when it states none.
          */
         private String enumValue(Shape shape, Object example, String where) {
-            if (shape.isArray) {
+            // An array or a map of enum values is built a value at a time.
+            if (shape.isArray || shape.isMap) {
                 return null;
             }
 
@@ -1079,6 +1154,7 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
             boolean isModel;
             boolean isFile;
             Integer minItems;
+            Integer minProperties;
             Map<String, Object> allowableValues;
             CodegenProperty items;
 
@@ -1107,6 +1183,7 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
                 shape.isModel = parameter.isModel;
                 shape.isFile = parameter.isFile || parameter.isBinary;
                 shape.minItems = parameter.minItems;
+                shape.minProperties = parameter.getMinProperties();
                 shape.allowableValues = parameter.allowableValues;
                 shape.items = parameter.items;
                 return shape;
@@ -1135,6 +1212,7 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
                 shape.isModel = property.isModel;
                 shape.isFile = property.isFile || property.isBinary;
                 shape.minItems = property.minItems;
+                shape.minProperties = property.getMinProperties();
                 shape.allowableValues = property.allowableValues;
                 shape.items = property.items;
                 return shape;

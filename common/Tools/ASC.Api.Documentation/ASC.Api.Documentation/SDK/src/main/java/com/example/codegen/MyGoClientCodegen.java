@@ -542,6 +542,7 @@ public class MyGoClientCodegen extends GoClientCodegen {
         static final String BODY = "x-snippet-body";
         static final String CALL = "x-snippet-call";
         static final String OPENS_FILE = "x-snippet-opens-file";
+        static final String VARIABLES = "x-snippet-variables";
 
         /** Beyond this length the arguments of the body's constructor are put one per line. */
         private static final int LINE_LENGTH = 60;
@@ -594,6 +595,14 @@ public class MyGoClientCodegen extends GoClientCodegen {
             "July", "August", "September", "October", "November", "December"
         };
 
+        /** Names a variable declared before the body cannot take: Go's keywords and the names of the snippet. */
+        private static final Set<String> TAKEN = new HashSet<>(Arrays.asList(
+                "break", "case", "chan", "const", "continue", "default", "defer", "else", "fallthrough", "for",
+                "func", "go", "goto", "if", "import", "interface", "map", "package", "range", "return", "select",
+                "struct", "switch", "type", "var", "nil", "true", "false", "any", "error", "string",
+                "main", "cfg", "client", "ctx", "body", "result", "err", "file",
+                "context", "fmt", "log", "os", "time"));
+
         private final OpenAPI openAPI;
         private final String sdk;
         private final boolean enumClassPrefix;
@@ -607,6 +616,10 @@ public class MyGoClientCodegen extends GoClientCodegen {
 
         private final Set<String> imports = new TreeSet<>();
         private boolean opensFile;
+
+        /** The variables declared before the body, and their names, which the snippet then has. */
+        private final List<String> variables = new ArrayList<>();
+        private final Set<String> names = new HashSet<>();
 
         Snippets(OpenAPI openAPI, List<ModelMap> allModels, String sdk, boolean enumClassPrefix,
                 UnaryOperator<String> fieldName) {
@@ -629,6 +642,9 @@ public class MyGoClientCodegen extends GoClientCodegen {
                 imports.add("fmt");
             }
             opensFile = false;
+            variables.clear();
+            names.clear();
+            names.add(sdk);
 
             Map<String, String> path = new LinkedHashMap<>();
             List<String> setters = new ArrayList<>();
@@ -690,6 +706,9 @@ public class MyGoClientCodegen extends GoClientCodegen {
             operation.vendorExtensions.put(CALL, call);
             if (body != null) {
                 operation.vendorExtensions.put(BODY, body);
+            }
+            if (!variables.isEmpty()) {
+                operation.vendorExtensions.put(VARIABLES, String.join("\n\t", variables));
             }
             operation.vendorExtensions.put(OPENS_FILE, opensFile);
             if (opensFile) {
@@ -927,7 +946,7 @@ public class MyGoClientCodegen extends GoClientCodegen {
 
             // A free-form object is a map in the SDK, as a map itself is.
             if (shape.isMap || (shape.isFreeFormObject && shape.dataType != null && shape.dataType.startsWith("map["))) {
-                return qualify(shape.dataType) + "{}";
+                return map(shape, example, where, depth);
             }
 
             CodegenModel model = model(shape);
@@ -971,11 +990,103 @@ public class MyGoClientCodegen extends GoClientCodegen {
         }
 
         /**
+         * A map with the entries of the example; one the document requires entries in and gives no
+         * example for gets one standing in for them, which the log notes.
+         */
+        private String map(Shape shape, Object example, String where, int depth) {
+            String valueType = shape.dataType.substring(shape.dataType.indexOf(']') + 1);
+
+            List<String> entries = new ArrayList<>();
+            if (example instanceof Map) {
+                for (Map.Entry<?, ?> entry : ((Map<?, ?>) example).entrySet()) {
+                    String key = String.valueOf(entry.getKey());
+                    entries.add(CallSnippets.quote(key) + ": "
+                            + entry(valueType, key, CallSnippets.plain(entry.getValue()), where, depth));
+                }
+            }
+
+            if (entries.isEmpty() && shape.minProperties != null && shape.minProperties > 0) {
+                int logged = placeholders.size();
+                entries.add(CallSnippets.quote("YOUR_KEY") + ": " + entry(valueType, "yourKey", null, where, depth));
+                if (placeholders.size() == logged) {
+                    placeholders.add(where);
+                }
+            }
+
+            return qualify(shape.dataType) + "{" + String.join(", ", entries) + "}";
+        }
+
+        /**
+         * A value of a map. One the map holds by pointer is a pointer to it: through the SDK's helper,
+         * or, for a value of any type, which has none, through a variable declared before the body.
+         */
+        private String entry(String valueType, String key, Object example, String where, int depth) {
+            boolean byPointer = valueType.startsWith("*");
+            String type = byPointer ? valueType.substring(1) : valueType;
+
+            if ("interface{}".equals(type) || "any".equals(type)) {
+                String value = literal(example);
+                return byPointer ? "&" + variable(key, type, value) : value;
+            }
+
+            String value = typed(type, example, where, depth + 1);
+            return byPointer ? pointer(type, value) : value;
+        }
+
+        /** A variable declared before the body, named after the key it stands for, and its name. */
+        private String variable(String key, String type, String value) {
+            StringBuilder name = new StringBuilder();
+            for (String part : key.split("[^A-Za-z0-9]+")) {
+                if (!part.isEmpty()) {
+                    name.append(name.length() == 0
+                            ? part.substring(0, 1).toLowerCase(Locale.ROOT) + part.substring(1)
+                            : part.substring(0, 1).toUpperCase(Locale.ROOT) + part.substring(1));
+                }
+            }
+            if (name.length() == 0 || !Character.isLetter(name.charAt(0))) {
+                name.insert(0, "value");
+            }
+
+            String unique = name.toString();
+            for (int i = 2; TAKEN.contains(unique) || !names.add(unique); i++) {
+                unique = name.toString() + i;
+            }
+
+            variables.add("var " + unique + " " + type + " = " + value);
+            return unique;
+        }
+
+        /** An example of a value of any type, as the Go literal of what it holds. */
+        private static String literal(Object example) {
+            if (example == null) {
+                return "nil";
+            }
+            if (example instanceof List) {
+                List<String> items = new ArrayList<>();
+                for (Object item : (List<?>) example) {
+                    items.add(literal(CallSnippets.plain(item)));
+                }
+                return "[]interface{}{" + String.join(", ", items) + "}";
+            }
+            if (example instanceof Map) {
+                List<String> entries = new ArrayList<>();
+                for (Map.Entry<?, ?> entry : ((Map<?, ?>) example).entrySet()) {
+                    entries.add(CallSnippets.quote(String.valueOf(entry.getKey())) + ": "
+                            + literal(CallSnippets.plain(entry.getValue())));
+                }
+                return "map[string]interface{}{" + String.join(", ", entries) + "}";
+            }
+
+            return literal(example, SpecExamples.text(example));
+        }
+
+        /**
          * An enum member. An enum schema is a type of the SDK with a constant per member; an enum
          * declared in place is only its underlying type in Go, so the member is its value.
          */
         private String enumValue(Shape shape, Object example, String where) {
-            if (shape.isArray) {
+            // An array or a map of enum values is built a value at a time.
+            if (shape.isArray || shape.isMap) {
                 return null;
             }
 
@@ -1161,6 +1272,7 @@ public class MyGoClientCodegen extends GoClientCodegen {
             boolean isFile;
             boolean isNullable;
             Integer minItems;
+            Integer minProperties;
             Map<String, Object> allowableValues;
             CodegenProperty items;
 
@@ -1180,6 +1292,7 @@ public class MyGoClientCodegen extends GoClientCodegen {
                 shape.isFile = isFile;
                 shape.isNullable = isNullable;
                 shape.minItems = minItems;
+                shape.minProperties = minProperties;
                 shape.allowableValues = allowableValues;
                 shape.items = items;
                 return shape;
@@ -1202,6 +1315,7 @@ public class MyGoClientCodegen extends GoClientCodegen {
                 shape.isFile = parameter.isFile || parameter.isBinary;
                 shape.isNullable = parameter.isNullable;
                 shape.minItems = parameter.minItems;
+                shape.minProperties = parameter.getMinProperties();
                 shape.allowableValues = parameter.allowableValues;
                 shape.items = parameter.items;
                 return shape;
@@ -1224,6 +1338,7 @@ public class MyGoClientCodegen extends GoClientCodegen {
                 shape.isFile = property.isFile || property.isBinary;
                 shape.isNullable = property.isNullable;
                 shape.minItems = property.minItems;
+                shape.minProperties = property.getMinProperties();
                 shape.allowableValues = property.allowableValues;
                 shape.items = property.items;
                 return shape;

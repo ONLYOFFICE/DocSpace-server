@@ -21,6 +21,9 @@ public class Example {
 {{#vendorExtensions.x-snippet-body}}
 
         {{{vendorExtensions.x-snippet-body-type}}} body = {{{.}}};
+{{#vendorExtensions.x-snippet-body-puts}}
+        {{{.}}}
+{{/vendorExtensions.x-snippet-body-puts}}
 {{/vendorExtensions.x-snippet-body}}
 
         {{#returnType}}{{{returnType}}} result = {{/returnType}}api.{{operationId}}({{{vendorExtensions.x-snippet-arguments}}});
