@@ -662,11 +662,6 @@ public class FileSecurity(
             : VectorizationAvailability.AccessDenied;
     }
 
-    public async Task<bool> CanUseChatAsync<T>(FileEntry<T> entry)
-    {
-        return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.UseChat);
-    }
-
     public async Task<bool> CanUseAiAsync<T>(FileEntry<T> entry)
     {
         return await CanAsync(entry, authContext.CurrentAccount.ID, FilesSecurityActions.CanUseAi);
