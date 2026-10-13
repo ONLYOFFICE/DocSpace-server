@@ -1,0 +1,38 @@
+{{#apiInfo}}
+{{#apis}}
+{{#operations}}
+{{#operation}}
+{{^vendorExtensions.x-is-thirdparty-variant}}
+<!--snippet:{{{operationIdOriginal}}}-->
+```swift
+{{#vendorExtensions.x-snippet-foundation}}
+import Foundation
+{{/vendorExtensions.x-snippet-foundation}}
+import {{projectName}}
+
+{{#vendorExtensions.x-snippet-bearer}}
+let config = {{projectName}}APIConfiguration(
+    basePath: "{{{snippetsServerUrl}}}",
+    customHeaders: ["Authorization": "Bearer YOUR_API_KEY"]
+)
+{{/vendorExtensions.x-snippet-bearer}}
+{{^vendorExtensions.x-snippet-bearer}}
+let config = {{projectName}}APIConfiguration(basePath: "{{{snippetsServerUrl}}}")
+{{/vendorExtensions.x-snippet-bearer}}
+{{#vendorExtensions.x-snippet-body}}
+
+let body{{#vendorExtensions.x-snippet-body-type}}: {{{.}}}{{/vendorExtensions.x-snippet-body-type}} = {{{.}}}
+{{/vendorExtensions.x-snippet-body}}
+
+{{#returnType}}let result = {{/returnType}}try await {{x-classname}}.{{operationId}}({{{vendorExtensions.x-snippet-arguments}}})
+{{#returnType}}
+print(result)
+{{/returnType}}
+```
+
+{{/vendorExtensions.x-is-thirdparty-variant}}
+{{/operation}}
+{{/operations}}
+{{/apis}}
+{{/apiInfo}}
+<!--/snippets-->
