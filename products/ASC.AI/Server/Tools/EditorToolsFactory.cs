@@ -192,6 +192,11 @@ public class EditorToolsFactory(
     {
         var extension = fileUtility.InternalExtension[fileType];
         var title = (fileName ?? string.Empty).Trim();
+        if (string.IsNullOrEmpty(title.TrimEnd('.')))
+        {
+            title = GetDefaultTitle(fileType);
+        }
+
         var currentExtension = FileUtility.GetFileExtension(title);
 
         if (currentExtension.Equals(extension, StringComparison.OrdinalIgnoreCase))
@@ -205,6 +210,16 @@ public class EditorToolsFactory(
         }
 
         return title.TrimEnd('.') + extension;
+    }
+
+    private static string GetDefaultTitle(FileType fileType)
+    {
+        return fileType switch
+        {
+            FileType.Presentation => FilesJSResource.TitleNewFilePresentation,
+            FileType.Pdf => FilesJSResource.TitleNewFilePdfFormText,
+            _ => FilesJSResource.TitleNewFileText
+        };
     }
 
     private async Task<ToolResponse<GeneratedFileResult>> CreateFileAsync<T>(
