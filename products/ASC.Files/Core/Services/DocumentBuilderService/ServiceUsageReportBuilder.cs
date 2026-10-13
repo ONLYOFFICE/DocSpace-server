@@ -101,30 +101,11 @@ public class ServiceUsageReportBuilder(
 
     private async IAsyncEnumerable<List<CustomerServiceUsage>> GetReportDataAsync(int tenantId, UsageFilter filter)
     {
-        var offset = 0;
-        var limit = 1000;
+        filter.Limit = 1000;
 
-        while (true)
+        await foreach (var report in tariffService.GetCustomerServiceUsagePagesAsync(tenantId, filter))
         {
-            filter.Offset = offset;
-            filter.Limit = limit;
-
-            var report = await tariffService.GetCustomerServiceUsageAsync(tenantId, filter);
-
-            if (report?.Collection == null)
-            {
-                yield return null;
-                break;
-            }
-
-            yield return report.Collection;
-
-            if (report.CurrentPage >= report.TotalPage)
-            {
-                break;
-            }
-
-            offset += limit;
+            yield return report?.Collection;
         }
     }
 

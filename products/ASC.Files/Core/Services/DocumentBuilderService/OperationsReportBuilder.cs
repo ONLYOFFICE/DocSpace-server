@@ -174,20 +174,13 @@ public class OperationsReportBuilder(
 
     private async IAsyncEnumerable<List<Operation>> GetReportDataAsync(int tenantId, OperationFilter filter)
     {
-        var offset = 0;
-        var limit = 1000;
+        filter.Limit = 1000;
 
-        while (true)
+        await foreach (var report in tariffService.GetCustomerOperationPagesAsync(tenantId, filter))
         {
-            filter.Offset = offset;
-            filter.Limit = limit;
-
-            var report = await tariffService.GetCustomerOperationsAsync(tenantId, filter);
-
             if (report?.Collection == null)
             {
-                yield return null;
-                break;
+                continue;
             }
 
             var participantDisplayNames = await report.GetParticipantDisplayNamesAsync(displayUserSettingsHelper, false);
@@ -212,13 +205,6 @@ public class OperationsReportBuilder(
             }
 
             yield return report.Collection;
-
-            if (report.CurrentPage >= report.TotalPage)
-            {
-                break;
-            }
-
-            offset += limit;
         }
     }
 

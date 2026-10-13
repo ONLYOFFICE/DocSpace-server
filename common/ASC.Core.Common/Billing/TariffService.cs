@@ -1596,6 +1596,34 @@ public class TariffService(
         }
     }
 
+    /// <summary>
+    /// Every page of operations in turn, <see cref="PagedFilter.Limit"/> per page; the requests are sent while the
+    /// result is enumerated. Failures are not caught: the caller decides, and a report task fails instead of
+    /// producing a silently truncated document.
+    /// </summary>
+    public async IAsyncEnumerable<Report> GetCustomerOperationPagesAsync(int tenantId, OperationFilter filter)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+        await foreach (var page in accountingClient.GetCustomerOperationPages(portalId, filter).AsPages())
+        {
+            yield return page;
+        }
+    }
+
+    /// <summary>
+    /// Every page of service usage records in turn, as in <see cref="GetCustomerOperationPagesAsync"/>.
+    /// </summary>
+    public async IAsyncEnumerable<UsageReport> GetCustomerServiceUsagePagesAsync(int tenantId, UsageFilter filter)
+    {
+        var portalId = await coreSettings.GetKeyAsync(tenantId);
+
+        await foreach (var page in accountingClient.GetCustomerServiceUsagePages(portalId, filter).AsPages())
+        {
+            yield return page;
+        }
+    }
+
     public async Task<List<Currency>> GetAllAccountingCurrenciesAsync()
     {
         return await accountingClient.GetAllCurrenciesAsync();
