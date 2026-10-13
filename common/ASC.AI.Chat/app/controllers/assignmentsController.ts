@@ -34,19 +34,10 @@
 import { AssignmentsEngine, ActionType } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
-import { asString, isObject } from "../narrow.js";
+import { asActionType, asString, isObject } from "../narrow.js";
 import { assertEntityAccessible } from "../storage/docspaceFilesApi.js";
 
 const engine = new AssignmentsEngine({ storage });
-
-const ACTION_TYPES = new Set<string>(Object.values(ActionType));
-
-function asActionType(value: unknown): ActionType | undefined {
-  if (typeof value !== "string" || !ACTION_TYPES.has(value)) {
-    return undefined;
-  }
-  return value as ActionType;
-}
 
 interface AssignBody {
   actionType?: string;
@@ -73,7 +64,20 @@ export const assignmentsController = {
       return;
     }
     const entityId = asString(req.query["entityId"]);
-    const result = await engine.resolveForAction(actionType, entityId);
+    // A nonexistent room used to fold to the portal-wide lookup and answer
+    // its profile with 200; get-all-assignments already 404s it (Bug 82832),
+    // and so do both resolve operations now (Bug 84279). An accessible
+    // non-agent room still degrades to the portal scope by design.
+    await assertEntityAccessible(entityId);
+    // The engine's throwing variant reports "nothing configured" with a
+    // plain Error, which read as a 500 (Bugs 84278, 84450); the lenient
+    // variant answers null for the same states, and that is a 404 here —
+    // the status threads/create gives the same condition.
+    const result = await engine.tryResolveForAction(actionType, entityId);
+    if (result === null) {
+      res.status(404).json({ error: `no AI profile is available for ActionType.${actionType}` });
+      return;
+    }
     res.json(result);
   }),
 
@@ -84,6 +88,7 @@ export const assignmentsController = {
       return;
     }
     const entityId = asString(req.query["entityId"]);
+    await assertEntityAccessible(entityId);
     const result = await engine.tryResolveForAction(actionType, entityId);
     res.json(result);
   }),

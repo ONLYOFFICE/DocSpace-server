@@ -147,7 +147,7 @@
         ],
         "operationId": "aiSend",
         "summary": "Run an AI action",
-        "description": "Runs one AI action and returns the whole answer as a single JSON document. The model is the profile bound to `actionType`, falling back to the `Default` assignment slot, so this operation accepts no `profileId` of its own. Nothing is persisted - no thread is opened, no message is stored and no title is generated - which makes it the one to use for a stand-alone completion rather than for a conversation. `entityId` and `contextEntityId` set the scope of the round, which decides the workspace context and the custom MCP servers it may reach. For a conversation that keeps its history, use `POST api/2.0/ai/ai/send-with-stream` instead.",
+        "description": "Runs one AI action and returns the whole answer as a single JSON document. The model is the profile bound to `actionType`, falling back to the `Default` assignment slot, so this operation accepts no `profileId` of its own. `actionType` has to be a known action and `userMessage` has to carry text or an attachment, or the call answers 400 before anything runs. Nothing is persisted - no thread is opened, no message is stored and no title is generated - which makes it the one to use for a stand-alone completion rather than for a conversation. `entityId` and `contextEntityId` set the scope of the round, which decides the workspace context and the custom MCP servers it may reach. For a conversation that keeps its history, use `POST api/2.0/ai/ai/send-with-stream` instead.",
         "responses": {
           "200": {
             "description": "The assistant's reply as one message. Nothing was persisted.",
@@ -155,6 +155,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiThreadMessageLike"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`actionType` is missing or unknown, or `userMessage` carries neither text nor an attachment.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -219,7 +229,7 @@
         ],
         "operationId": "aiSendCustom",
         "summary": "Send custom",
-        "description": "Runs a free-form one-turn call against a system prompt supplied in the request, with no thread, no history and nothing persisted. The model is the explicit `profileId` when it resolves, otherwise the `Default` assignment slot. The shape of the answer depends on the body rather than on the route: with `isStream` set it arrives as a newline-delimited stream of chat events, and without it as a single JSON document, so a client has to handle both. Use `POST api/2.0/ai/ai/send` when the prompt should come from the portal's own action configuration instead of from the caller.",
+        "description": "Runs a free-form one-turn call against a system prompt supplied in the request, with no thread, no history and nothing persisted. The model is the explicit `profileId` when it resolves, otherwise the `Default` assignment slot. `systemPrompt` is required and `userMessage` has to carry text or an attachment, or the call answers 400 before anything runs. The shape of the answer depends on the body rather than on the route: with `isStream: true` it arrives as a newline-delimited stream of chat events, and without it as a single JSON document, so a client has to handle both; `isStream` has to be a real boolean when sent, a string is refused. Use `POST api/2.0/ai/ai/send` when the prompt should come from the portal's own action configuration instead of from the caller.",
         "responses": {
           "200": {
             "description": "The assistant's reply as one message, or a newline-delimited stream of chat events when `isStream` was set. Nothing was persisted.",
@@ -228,6 +238,16 @@
                 "schema": {
                   "$ref": "#/components/schemas/AiThreadMessageLike",
                   "description": "One-shot mode (`isStream: false`) returns the assistant message shown here; streaming mode instead emits a newline-delimited `ChatEvent` stream."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`systemPrompt` is missing or empty, `userMessage` carries neither text nor an attachment, or `isStream` is not a boolean.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -705,7 +725,7 @@
         ],
         "operationId": "aiAssignmentsResolveForAction",
         "summary": "Resolve for action",
-        "description": "Returns the profile that will serve one AI action, falling back to the `Default` slot when the action has no profile of its own. `actionType` is required and has to be one of the known actions - an unknown or misspelled value is rejected rather than resolved to the default. `entityId` narrows the lookup to a room, and a room with no assignment of its own degrades to the portal-wide one. This fails when neither slot is set or the bound profile is gone, so use `GET api/2.0/ai/assignments/try-resolve-for-action` when an unconfigured portal should answer empty instead.",
+        "description": "Returns the profile that will serve one AI action, falling back to the `Default` slot when the action has no profile of its own. `actionType` is required and has to be one of the known actions - an unknown or misspelled value is rejected rather than resolved to the default. `entityId` narrows the lookup to a room and has to name one the caller can open - an unknown room answers 404 rather than quietly resolving portal-wide - while an accessible room with no assignment of its own degrades to the portal-wide one. When neither slot is set, or the `Default` profile cannot serve the action, the call answers 404, so use `GET api/2.0/ai/assignments/try-resolve-for-action` when an unconfigured portal should answer empty instead.",
         "responses": {
           "200": {
             "description": "The profile that will serve the action.",
@@ -718,7 +738,7 @@
             }
           },
           "400": {
-            "description": "`actionType` is missing.",
+            "description": "`actionType` is missing or unknown.",
             "content": {
               "application/json": {
                 "schema": {
@@ -739,6 +759,16 @@
           },
           "403": {
             "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No profile can serve the action, or `entityId` names a room that does not exist.",
             "content": {
               "application/json": {
                 "schema": {
@@ -793,7 +823,7 @@
         ],
         "operationId": "aiAssignmentsTryResolveForAction",
         "summary": "Try resolve for action",
-        "description": "Returns the profile that will serve one AI action, exactly as `GET api/2.0/ai/assignments/resolve-for-action` does, but answers with an empty result rather than failing when nothing is configured. `actionType` is required and is validated the same way, and `entityId` narrows the lookup to a room. This is the operation to call when the absence of a profile is a normal state to render - a settings screen, or a feature that hides itself. Both operations are read-only.",
+        "description": "Returns the profile that will serve one AI action, exactly as `GET api/2.0/ai/assignments/resolve-for-action` does, but answers with an empty result rather than failing when nothing is configured. `actionType` is required and is validated the same way, and `entityId` narrows the lookup to a room the caller can open - an unknown one answers 404 here as well. This is the operation to call when the absence of a profile is a normal state to render - a settings screen, or a feature that hides itself. Both operations are read-only.",
         "responses": {
           "200": {
             "description": "The profile that will serve the action, or an empty result when none is configured.",
@@ -813,7 +843,7 @@
             }
           },
           "400": {
-            "description": "`actionType` is missing.",
+            "description": "`actionType` is missing or unknown.",
             "content": {
               "application/json": {
                 "schema": {
@@ -834,6 +864,16 @@
           },
           "403": {
             "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`entityId` names a room that does not exist.",
             "content": {
               "application/json": {
                 "schema": {
