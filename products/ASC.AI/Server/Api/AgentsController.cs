@@ -150,12 +150,17 @@ public class AgentsController(
     /// <path>api/2.0/ai/agents/{id}</path>
     [Tags("AI / Agents")]
     [SwaggerResponse(200, "Agent information", typeof(FolderDto<int>))]
+    [SwaggerResponse(404, "The AI agent is not found")]
     [HttpGet("agents/{id}")]
     public async Task<FolderDto<int>> GetAgentInfo(RoomIdRequestDto<int> inDto)
     {
-        var folder = (await fileStorageService.GetFolderAsync(inDto.Id)).NotFoundIfNull("Folder not found");
+        var agent = await fileStorageService.GetFolderAsync(inDto.Id);
+        if (agent is not { FolderType: FolderType.AiRoom })
+        {
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
+        }
 
-        return await folderDtoHelper.GetAsync(folder);
+        return await folderDtoHelper.GetAsync(agent);
     }
 
     /// <remarks>
