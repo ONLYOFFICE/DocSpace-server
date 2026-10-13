@@ -64,6 +64,23 @@ public interface IAccountingApi
     [Get("/customer/{portalId}/usage")]
     Task<UsageReport> GetCustomerServiceUsageAsync(string portalId, UsageFilter filter);
 
+    /// <summary>
+    /// All operations matching the filter, page by page. Refit generates the loop: every page is a request with
+    /// the next <paramref name="offset"/>, which advances by the items received and stops at
+    /// <see cref="BaseReport{T}.TotalQuantity"/> or on an empty page. Leave <see cref="PagedFilter.Offset"/> unset -
+    /// the offset travels in its own query parameter.
+    /// </summary>
+    [Get("/customer/{portalId}/operations")]
+    [Paged(Items = nameof(Report.Collection), Total = nameof(Report.TotalQuantity))]
+    PagedEnumerable<Report, Operation> GetCustomerOperationPages(string portalId, [Query] OperationFilter filter, [PageToken, AliasAs("offset")] int offset = 0);
+
+    /// <summary>
+    /// All service usage records matching the filter, page by page; paging as in <see cref="GetCustomerOperationPages"/>.
+    /// </summary>
+    [Get("/customer/{portalId}/usage")]
+    [Paged(Items = nameof(UsageReport.Collection), Total = nameof(UsageReport.TotalQuantity))]
+    PagedEnumerable<UsageReport, CustomerServiceUsage> GetCustomerServiceUsagePages(string portalId, UsageFilter filter, [PageToken, AliasAs("offset")] int offset = 0);
+
     [Get("/currency/all")]
     Task<List<Currency>> GetAllCurrenciesAsync();
 
