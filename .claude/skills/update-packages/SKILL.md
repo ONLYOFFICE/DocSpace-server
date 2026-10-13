@@ -20,14 +20,15 @@ Everything is verified against our code; a changelog line is a claim, not a find
 **Stable package knowledge lives in `references/packages.md`** — per family: where the real release notes
 are, package-specific verification, traps of our setup, and blockers an earlier assessment found. Read only
 the sections of the packages at hand. It is not a run log: change it only when a run learned something new
-and non-obvious (steps 1.7 / 2.7).
+and non-obvious. Phase 1 only proposes such notes in its report (1.7); they are written once the user has
+answered, or in phase 2 (2.7).
 
 All pins live in `Directory.Packages.props`; the one exception is `Aspire.AppHost.Sdk`, pinned in the
 `Sdk="..."` attribute of `common/ASC.AppHost/ASC.AppHost.csproj`.
 
 ## Ground rules
 
-- **Never commit.** The user commits himself, often mid-session — check `git log`/`git status` before
+- **Never commit.** The user commits on their own, often mid-session — check `git log`/`git status` before
   assuming your edits are still uncommitted, and before reverting anything.
 - The working tree may already hold the user's own changes. Touch only what you were asked about; never
   "normalise" the rest of a file (it may lack a trailing newline on purpose). The same holds for
@@ -39,6 +40,9 @@ All pins live in `Directory.Packages.props`; the one exception is `Aspire.AppHos
 - `rm -f $VAR/*.json` is refused by the safety check (an unset var could become `/`); use a literal path.
 - C# navigation follows `.claude/rules/csharp-lsp.md`: LSP / codegraph for symbols. Grep is fine for
   package ids in `.csproj`, `using` lines, config keys and string literals.
+- **Asking the user.** Wherever this skill says AskUserQuestion: if that tool is unavailable (e.g. the
+  skill runs inside a subagent), ask the same question as plain text, with the same options, and stop
+  there — do not pick an answer yourself.
 
 # Phase 1 — assessment (read-only)
 
@@ -49,9 +53,13 @@ python -I .claude/skills/update-packages/outdated.py                          # 
 python -I .claude/skills/update-packages/outdated.py "Family*" Other --json <scratchpad>/plan.json
 ```
 
-It prints current → target with the bump kind (MAJOR/minor/patch/revision). A stable pin targets the
-newest stable; a prerelease pin targets the newest release of any kind, so it does not strand on an old
-beta. `--json` writes the plan the next steps read. If the user did not name packages, show the table
+It prints current → target with the bump kind (MAJOR/minor/patch/revision). Versions come from the NuGet
+registration API, so unlisted versions are never a target. A stable pin targets the newest stable; a
+prerelease pin targets the newest release of any kind, so it does not strand on an old beta. The Note
+column carries the deprecation (reason, alternate package) and the known vulnerabilities (severity,
+advisory) of the current and the target version — a vulnerable current version is a reason to update, a
+deprecated target needs the alternate package assessed instead. `--json` writes the plan the next steps
+read. If the user did not name packages, show the table
 and ask which to assess (AskUserQuestion, multiSelect, families as options). Read the XML comment above
 a pin before planning it — some pins are deliberate. Assess a family together (a package and the
 siblings released with it).
@@ -75,12 +83,18 @@ Judge licenses against **AGPL-3.0-only**:
 
 | Verdict | Licenses |
 |---|---|
-| OK | MIT, Apache-2.0, BSD-2/3-Clause, ISC, Zlib, PostgreSQL, MPL-2.0, LGPL-2.1+/3.0, GPL-3.0(-or-later), AGPL-3.0 |
+| OK | MIT, Apache-2.0, BSD-2/3-Clause, ISC, Zlib, PostgreSQL, MPL-2.0, LGPL-2.1+/3.0, GPL-3.0(-or-later), AGPL-3.0, `GPL-2.0-only WITH Universal-FOSS-exception-1.0` (MySql.Data: the FOSS exception allows linking from AGPL code) |
 | Read before accepting | `type=file` or a bare `licenseUrl` (read the text), "custom"/EULA, MS-PL and EPL (not GPL-compatible), CC-BY-SA |
-| Blocker | GPL-2.0-only, SSPL, BUSL/Business Source, Commons Clause, any non-commercial or proprietary license, a license that changed to one of these between versions |
+| Blocker | GPL-2.0-only without an exception, SSPL, BUSL/Business Source, Commons Clause, any non-commercial or proprietary license, a license that changed to one of these between versions |
 
-Dependencies are collected over every target-framework group of a nuspec, so a .NET Framework-only group
-shows up although net10 never resolves it — say so instead of flagging it. A package with native code
+A license that moves from an open-source license to a commercial or dual license between versions is a
+blocker-class change even when the nuspec only says `type=file` — report it as a blocker (FluentAssertions
+8 moved from Apache-2.0 to a commercial Xceed license; see `references/packages.md`).
+
+Dependencies are read from the one target-framework group NuGet picks for net10.0 (exact net10.0, else
+the highest lower netX.Y, else netstandard2.1/2.0, else the group without a framework); the chosen group
+is printed as `[tfm]`. A nuspec the script cannot fetch or parse is listed under ERRORS — pins that are
+not on nuget.org (local or legacy feeds) show up there too; check the rest by hand. A package with native code
 bundles its own third-party libraries; check its release notes for a newly bundled one. The .NET server
 has no third-party notices file (only `common/ASC.Identity/3rd-Party.license`, Java).
 
@@ -94,7 +108,13 @@ The repo is read from the nuspec. Monorepos tag per component (`--tag-prefix`) o
 package (`--changelog`); some projects publish the real notes elsewhere. `references/packages.md` records
 the layouts that are not the nuspec repo's GitHub releases — check it first.
 
-Unauthenticated GitHub API: 60 requests/hour, `gh` is not installed. For a MAJOR read everything from the
+GitHub API: 60 requests/hour unauthenticated. `release_notes.py` sends `GITHUB_TOKEN` from the
+environment as a Bearer token when it is set (5000 requests/hour); if `gh` is installed and logged in,
+`GITHUB_TOKEN=$(gh auth token)` provides one. Without a token keep the number of calls small. The script
+reads at most `--max-pages` pages of 100 releases (default 20) and prints a WARNING when that stopped it
+before FROM was reached — the notes are then incomplete; raise the limit or use `--changelog`. Dependency
+bump / CI lines are dropped unless they mention breaking / drop / remove / obsolete / minimum / security
+/ CVE (`--keep-noise` keeps all). For a MAJOR read everything from the
 old version up, breaking sections first, plus the project's migration page if there is one. For minors
 skim for "breaking", "behavior", "removed", "obsolete" and security advisories.
 
@@ -156,20 +176,26 @@ Per package or family, most important first:
 7. **Recommendation** — take now / take with the listed changes / wait, and the decisions the user has
    to make.
 
-Then ask which packages to update and which decisions to take (AskUserQuestion). Do not bump anything
-in this turn.
+8. **Proposed notes for `references/packages.md`** — only if the run found something that qualifies
+   under 1.7, as the exact text to add or change. Do not write it yet.
 
-### 1.7 Record what was learned
+Then ask which packages to update, which decisions to take and whether to record the proposed notes
+(AskUserQuestion). Do not bump anything and do not edit any file in this turn.
 
-Change `references/packages.md` only when the run found something new and non-obvious — the one file
-phase 1 may change:
+### 1.7 What qualifies as a note — proposed in phase 1, written after the answer
+
+Phase 1 changes nothing, `references/packages.md` included: the report proposes the notes (1.6, item 8),
+and they are written once the user has answered — on its own if the user takes no update, or in 2.7.
+A note qualifies only when the run found something new and non-obvious:
 - a release-notes location that is not the nuspec repo's GitHub releases;
 - a package-specific verification step or test mapping that was needed;
 - a trap of our setup (config outside the repo, deliberate pin, a code path the library skips for us);
 - a **blocker** for an update the user did not take: what must change first, undated, without test results.
 
-Never add logs ("assessed X → Y", "taken, tests green", dates) or lists of classes using the package. A run
-where everything was found the usual way leaves the file untouched.
+The file keeps stable knowledge only: never add logs ("assessed X → Y", "taken, tests green", dates),
+time-bound claims ("no newer version yet", "latest is X") — state the constraint and how to recheck it
+instead — or lists of classes using the package. A run where everything was found the usual way proposes
+nothing.
 
 # Phase 2 — update (after the user chose)
 
@@ -229,7 +255,8 @@ but not applied.
 
 ### 2.7 Record what was learned
 
-As in 1.7, plus: once an update is taken, delete the family's **Blockers** entry for it, and anything the
+Write the notes proposed in phase 1 that the user accepted, and any new ones by the rules of 1.7, plus:
+once an update is taken, delete the family's **Blockers** entry for it, and anything the
 new version made obsolete.
 
 ### Rolling back

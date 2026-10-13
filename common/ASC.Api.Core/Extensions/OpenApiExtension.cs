@@ -365,12 +365,6 @@ public static class OpenApiExtension
                     options.EnabledTargets = [ScalarTarget.Node, ScalarTarget.CSharp, ScalarTarget.Python];
                     options.EnabledClients = [ScalarClient.Axios, ScalarClient.Fetch, ScalarClient.Python3, ScalarClient.HttpClient];
                     options.WithDefaultHttpClient(ScalarTarget.Node, ScalarClient.Axios);
-                    // The languages we ship an SDK for (see x-scalar-sdk-installation) come first.
-                    options.WithFeaturedClients(
-                        new(ScalarTarget.Node, ScalarClient.Axios),
-                        new(ScalarTarget.Node, ScalarClient.Fetch),
-                        new(ScalarTarget.Python, ScalarClient.Python3),
-                        new(ScalarTarget.CSharp, ScalarClient.HttpClient));
                     // The concrete types behind a polymorphic schema. x-thirdparty-variant stays hidden: Scalar renders
                     // it as a raw tree of the whole twin operation; the other x- keys are for the SDK generator only.
                     options.WithShowExtensions("x-derived-types");

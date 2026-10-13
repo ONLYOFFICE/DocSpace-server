@@ -1601,11 +1601,11 @@ public class TariffService(
     /// result is enumerated. Failures are not caught: the caller decides, and a report task fails instead of
     /// producing a silently truncated document.
     /// </summary>
-    public async IAsyncEnumerable<Report> GetCustomerOperationPagesAsync(int tenantId, OperationFilter filter)
+    public async IAsyncEnumerable<Report> GetCustomerOperationPagesAsync(int tenantId, OperationFilter filter, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
 
-        await foreach (var page in accountingClient.GetCustomerOperationPages(portalId, filter).AsPages())
+        await foreach (var page in accountingClient.GetCustomerOperationPages(portalId, filter).AsPages().WithCancellation(cancellationToken))
         {
             yield return page;
         }
@@ -1614,11 +1614,11 @@ public class TariffService(
     /// <summary>
     /// Every page of service usage records in turn, as in <see cref="GetCustomerOperationPagesAsync"/>.
     /// </summary>
-    public async IAsyncEnumerable<UsageReport> GetCustomerServiceUsagePagesAsync(int tenantId, UsageFilter filter)
+    public async IAsyncEnumerable<UsageReport> GetCustomerServiceUsagePagesAsync(int tenantId, UsageFilter filter, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         var portalId = await coreSettings.GetKeyAsync(tenantId);
 
-        await foreach (var page in accountingClient.GetCustomerServiceUsagePages(portalId, filter).AsPages())
+        await foreach (var page in accountingClient.GetCustomerServiceUsagePages(portalId, filter).AsPages().WithCancellation(cancellationToken))
         {
             yield return page;
         }

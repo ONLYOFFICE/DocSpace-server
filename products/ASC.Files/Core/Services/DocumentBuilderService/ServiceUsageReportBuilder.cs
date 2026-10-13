@@ -85,7 +85,7 @@ public class ServiceUsageReportBuilder(
                     OrderType = taskData.OrderType
                 };
 
-                await foreach (var records in GetReportDataAsync(context.Tenant.Id, filter))
+                await foreach (var records in GetReportDataAsync(context.Tenant.Id, filter, context.CancellationToken))
                 {
                     if (records is not { Count: > 0 })
                     {
@@ -99,11 +99,11 @@ public class ServiceUsageReportBuilder(
         return RenderAsync(context, definition);
     }
 
-    private async IAsyncEnumerable<List<CustomerServiceUsage>> GetReportDataAsync(int tenantId, UsageFilter filter)
+    private async IAsyncEnumerable<List<CustomerServiceUsage>> GetReportDataAsync(int tenantId, UsageFilter filter, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         filter.Limit = 1000;
 
-        await foreach (var report in tariffService.GetCustomerServiceUsagePagesAsync(tenantId, filter))
+        await foreach (var report in tariffService.GetCustomerServiceUsagePagesAsync(tenantId, filter, cancellationToken))
         {
             yield return report?.Collection;
         }

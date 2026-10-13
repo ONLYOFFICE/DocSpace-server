@@ -100,9 +100,13 @@ skill re-checks usage through LSP on every run anyway.
   DistributedLock.Redis, RedisRateLimiting, Caching.StackExchangeRedis, HealthChecks.Redis, OTel instrumentation).
 - **Traps:** `../buildtools/config/redis.json` sets `SyncTimeout` explicitly, so default-timeout changes do not reach us.
 - **Blockers for the next attempt (SE.Redis 3):** `Execute("FLUSHALL")` in the AppHost "Clear Cache" dev command
-  (`ConnectionStringManager`) needs `AllowAdmin`; RESP3 by default and a separate pub/sub connection (3.4) —
-  check the production Redis version and connection limits; new analyzers SER305–SER308 may add warnings;
-  the seven dependent pins are built for 2.x and none has a newer version yet — smoke them.
+  (`ConnectionStringManager`) needs `AllowAdmin`; RESP3 by default, and a separate pub/sub connection in
+  the later 3.x line — check the production Redis version and connection limits; new analyzers
+  SER305–SER308 may add warnings. The dependent pins (FusionCache backplane, DistributedLock.Redis,
+  RedisRateLimiting, Caching.StackExchangeRedis, HealthChecks.Redis, OTel instrumentation, Redis.Extensions)
+  are built against SE.Redis 2.x: `licenses.py --plan` lists the ones still on 2.x under OTHER PINS BUILT
+  AGAINST AN OLDER MAJOR; check each for a release built against 3.x, and smoke the rest before taking 3.
+  Read release notes only of listed versions — `outdated.py` skips unlisted ones, a changelog does not.
 
 ## AWS SDK (`AWSSDK.*`)
 
@@ -118,6 +122,15 @@ skill re-checks usage through LSP on every run anyway.
 - **Verification:** `ASC.Tests.slnx` build (compare its pre-existing warnings by id) and one integration assembly.
 - **Traps:** keep `Aspire.Hosting.Testing` on the same version as the AppHost SDK and `Aspire.Hosting.*`.
   Moq is used only by legacy projects outside `ASC.Tests.slnx`.
+
+## FluentAssertions
+
+- **Traps:** FluentAssertions 8 moved from Apache-2.0 to a commercial Xceed license (the nuspec says only
+  `type=file`), so staying on the 7.x line is deliberate — 8.x is a license blocker, not a code question.
+  `outdated.py` still proposes the newest 8.x as the target; take only 7.x minors/patches (Apache-2.0).
+  Every test suite of `ASC.Tests.slnx` uses it (seven projects, all but the `ASC.Tests.Common` harness;
+  `grep -l FluentAssertions` over `*.csproj` rechecks), so a replacement (AwesomeAssertions, Shouldly,
+  plain xUnit asserts) is a migration of the whole test code base, decided separately.
 
 ## Google.Cloud.Storage.V1 (+ `Google.Apis.*`, `Google.Api.Gax*`)
 

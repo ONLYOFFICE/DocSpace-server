@@ -8,6 +8,8 @@ Use it to prove that an updated OpenTelemetry / FusionCache / instrumentation pa
 the scope list carries the instrumentation library version (`ZiggyCreatures.Caching.Fusion 2.9.0`,
 `OpenTelemetry.Instrumentation.EntityFrameworkCore 1.19.1-beta.1`), the resource carries
 `telemetry.sdk.version`. One line per span/metric batch; files of several hundred MB take a minute.
+Lines that are not valid JSON (an empty line, or a last line the collector is still writing) are
+skipped and counted.
 """
 
 import collections
@@ -28,16 +30,36 @@ def summarise(path, kind):
     scopes = collections.Counter()
     root, inner, items = ("resourceSpans", "scopeSpans", "spans") if kind == "traces" else \
                          ("resourceMetrics", "scopeMetrics", "metrics")
-    with open(path, encoding="utf-8") as f:
+    lines = skipped = 0
+    try:
+        f = open(path, encoding="utf-8", errors="replace")
+    except OSError as e:
+        print(f"== {kind}: {path}\n  cannot open: {e}")
+        return
+    with f:
         for line in f:
-            for rs in json.loads(line).get(root, []):
-                attrs = {a["key"]: value(a["value"]) for a in rs["resource"].get("attributes", [])}
+            if not line.strip():
+                continue
+            lines += 1
+            try:
+                batch = json.loads(line)
+            except json.JSONDecodeError:
+                skipped += 1
+                continue
+            for rs in batch.get(root, []):
+                attrs = {a["key"]: value(a["value"]) for a in rs.get("resource", {}).get("attributes", [])}
                 service = attrs.get("service.name")
                 resources[service].add(tuple((k, str(attrs.get(k))) for k in RESOURCE_KEYS if k in attrs))
                 for ss in rs.get(inner, []):
-                    scope = ss["scope"]
+                    scope = ss.get("scope", {})
                     scopes[(scope.get("name"), scope.get("version"))] += len(ss.get(items, []))
     print(f"== {kind}: {path}")
+    if skipped:
+        print(f"  note: {skipped} of {lines} non-empty lines were not valid JSON and were skipped "
+              "(a half-written last line is normal while the collector runs)")
+    if not resources:
+        print("  no telemetry in this file")
+        return
     print("  services (resource attributes; more than one row per service = several instances):")
     for service, rows in sorted(resources.items(), key=lambda x: str(x[0])):
         for row in sorted(rows):

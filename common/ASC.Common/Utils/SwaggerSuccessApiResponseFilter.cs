@@ -294,7 +294,12 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
             Properties: null or { Count: 0 },
             OneOf: null or { Count: 0 },
             AnyOf: null or { Count: 0 },
-            AllOf: null or { Count: 0 }
+            AllOf: null or { Count: 0 },
+            Enum: null or { Count: 0 },
+            Not: null,
+            Const: null,
+            Format: null,
+            Discriminator: null
         };
     }
 

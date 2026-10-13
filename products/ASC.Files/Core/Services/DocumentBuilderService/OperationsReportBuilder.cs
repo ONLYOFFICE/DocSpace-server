@@ -137,7 +137,7 @@ public class OperationsReportBuilder(
                     OrderType = taskData.OrderType
                 };
 
-                await foreach (var records in GetReportDataAsync(context.Tenant.Id, filter))
+                await foreach (var records in GetReportDataAsync(context.Tenant.Id, filter, context.CancellationToken))
                 {
                     if (records is not { Count: > 0 })
                     {
@@ -172,11 +172,11 @@ public class OperationsReportBuilder(
         return null;
     }
 
-    private async IAsyncEnumerable<List<Operation>> GetReportDataAsync(int tenantId, OperationFilter filter)
+    private async IAsyncEnumerable<List<Operation>> GetReportDataAsync(int tenantId, OperationFilter filter, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
         filter.Limit = 1000;
 
-        await foreach (var report in tariffService.GetCustomerOperationPagesAsync(tenantId, filter))
+        await foreach (var report in tariffService.GetCustomerOperationPagesAsync(tenantId, filter, cancellationToken))
         {
             if (report?.Collection == null)
             {
