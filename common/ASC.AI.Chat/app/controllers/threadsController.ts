@@ -41,7 +41,12 @@ import type {
 } from "@onlyoffice/ai-chat/core";
 import type { ThreadMessageLike } from "@assistant-ui/react";
 import { storage } from "../storage/index.js";
-import { asyncHandler, unpackPositional, attachmentLimitError } from "./_helpers.js";
+import {
+  asyncHandler,
+  unpackPositional,
+  attachmentLimitError,
+  invalidMessageError,
+} from "./_helpers.js";
 import { asString, parseInt10, isObject, getString } from "../narrow.js";
 import { assertEntityAccessible, primeSourceMeta } from "../storage/docspaceFilesApi.js";
 import { getSourceMeta } from "../requestContext.js";
@@ -217,16 +222,34 @@ export const threadsController = {
 
   appendUserMessage: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["threadId", "message", "profileId"] as const);
+    if (typeof args.threadId !== "string" || args.threadId.length === 0) {
+      res.status(400).json({ error: "threadId required" });
+      return;
+    }
+    // The storage keeps the message verbatim, so an empty text or a foreign
+    // role used to be stored and served back as a user message (Bugs 84409,
+    // 84410). The route stores user messages only: the engine appends the
+    // other roles in-process, nothing sends them here.
+    const shapeError = invalidMessageError(args.message);
+    if (shapeError) {
+      res.status(400).json({ error: shapeError });
+      return;
+    }
+    const message = args.message as ThreadMessageInput;
+    if (message.role !== "user") {
+      res.status(400).json({ error: "append-user-message stores user messages only" });
+      return;
+    }
     // Enforce the composer's per-kind attachment cap server-side — the UI
     // cannot exceed it, so only a direct API call can (Bug 82894).
-    const limitError = attachmentLimitError(args.message);
+    const limitError = attachmentLimitError(message);
     if (limitError) {
       res.status(400).json({ error: limitError });
       return;
     }
     const messageId = await engine.appendUserMessage(
-      args.threadId as string,
-      args.message as ThreadMessageInput,
+      args.threadId,
+      message,
       args.profileId as string | undefined,
     );
     res.json({ messageId });
@@ -326,8 +349,10 @@ export const threadsController = {
 
   readMessages: asyncHandler(async (req, res) => {
     const threadId = asString(req.query["threadId"]);
+    // Used to answer 200 with an empty list, which hid a forgotten ID
+    // behind "no messages yet" (Bug 84408).
     if (!threadId) {
-      res.json([]);
+      res.status(400).json({ error: "threadId required" });
       return;
     }
     const count = parseInt10(req.query["count"]);
@@ -360,12 +385,41 @@ export const threadsController = {
       return;
     }
     const message = await engine.getMessageById(messageId);
+    // Storage folds the AI service's 404 into null; without this guard an
+    // unknown or deleted ID answered 200 with a null body (Bug 84411).
+    if (message === null) {
+      res.status(404).json({ error: "message not found" });
+      return;
+    }
     res.json(message);
   }),
 
   updateMessage: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["messageId", "message"] as const);
-    await engine.updateMessage(args.messageId as string, args.message as ThreadMessageInput);
+    if (typeof args.messageId !== "string" || args.messageId.length === 0) {
+      res.status(400).json({ error: "messageId required" });
+      return;
+    }
+    // The replacement is stored verbatim, so an empty one used to wipe the
+    // message (Bug 84412). The role is pinned to the stored one rather than
+    // to `user`: the widget rewrites assistant messages through this route
+    // when it cancels a client-side tool call (Bug 84413).
+    const shapeError = invalidMessageError(args.message);
+    if (shapeError) {
+      res.status(400).json({ error: shapeError });
+      return;
+    }
+    const message = args.message as ThreadMessageInput;
+    const stored = await storage.messages.readById(args.messageId);
+    if (stored === null) {
+      res.status(404).json({ error: "message not found" });
+      return;
+    }
+    if (message.role !== stored.role) {
+      res.status(400).json({ error: "the role of a stored message cannot be changed" });
+      return;
+    }
+    await engine.updateMessage(args.messageId, message);
     res.json({ success: true });
   }),
 

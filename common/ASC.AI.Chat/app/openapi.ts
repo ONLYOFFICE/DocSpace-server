@@ -448,7 +448,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiThreadsOpenOrCreate:
     "Opens a chat thread and returns it with its history, or creates one whose title is generated from the first message supplied in the request. That first message is not persisted: follow up with `POST api/2.0/ai/threads/append-user-message` to store it, or start the round directly with `POST api/2.0/ai/ai/send-with-stream`. Unlike `create` this takes a whole resolved `profile` object rather than an ID, and a request without one answers 404 because no model could be bound. A supplied `entityId` has to be a room the caller can open; anything that is not an agent room folds to the global scope instead of being rejected.",
   aiThreadsAppendUserMessage:
-    "Stores a user message in a thread and bumps its last-edit date so the thread resurfaces at the top of the list. The per-kind attachment cap of the composer is enforced here as well, so a direct API call cannot exceed what the UI allows. Passing `profileId` rebinds the thread to another model, which is how a mid-conversation model switch is recorded. The answer carries the new message's ID; the message is stored as sent and no reply is generated - run a round with `POST api/2.0/ai/ai/send-with-stream` for that.",
+    "Stores a user message in a thread and bumps its last-edit date so the thread resurfaces at the top of the list. `threadId` is required, the message has to carry `role: user` and a content that is a non-blank string or a part list with at least one real part - text, a file or image attachment - so an empty or role-less body is rejected rather than stored. The per-kind attachment cap of the composer is enforced here as well, so a direct API call cannot exceed what the UI allows. Passing `profileId` rebinds the thread to another model, which is how a mid-conversation model switch is recorded. The answer carries the new message's ID; the message is stored as sent and no reply is generated - run a round with `POST api/2.0/ai/ai/send-with-stream` for that.",
   aiThreadsTouch:
     "Bumps a thread's last-edit date without adding a message, which resurfaces it in the list. Passing `profileId` also rebinds the thread to another model, so this is the operation to call when a model switch alone should count as activity. Nothing else about the thread changes and the answer only confirms the write. It is idempotent: repeating it simply moves the date forward again.",
   aiThreadsRename:
@@ -462,13 +462,13 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiThreadsList:
     'Lists the threads of a scope, most recently edited first, and searches their titles case-insensitively when `query` is given. Every parameter is optional: omitting `entityId` lists the global scope, and omitting `count` lets the engine apply its own page size. Pagination is by cursor, and the cursor is a JSON object passed as a string in the query - `{"id": <last thread id>, "lastEditDate": <its date>}` - taken from the last entry of the previous page. A cursor that is not valid JSON, or that lacks an `id`, is ignored rather than rejected, and the read silently starts from the first page again.',
   aiThreadsReadMessages:
-    "Reads the messages of one thread, oldest first, with the same string-encoded JSON cursor as the thread list. `direction` turns the read around, and only the exact value `desc` does so - anything else, including a misspelling, reads forward. Omitting `threadId` is not an error: the call answers 200 with an empty list, so an empty result does not distinguish a thread with no messages from a request that forgot the ID. A malformed cursor is ignored and the read starts from the beginning.",
+    "Reads the messages of one thread, oldest first, with the same string-encoded JSON cursor as the thread list. `direction` turns the read around, and only the exact value `desc` does so - anything else, including a misspelling, reads forward. `threadId` is required and a missing one answers 400, so an empty list always means a thread with no messages. A malformed cursor is ignored and the read starts from the beginning.",
   aiThreadsGetById:
     "Returns one thread by its ID, without its messages - read those with `GET api/2.0/ai/threads/read-messages`. `threadId` is required and an unknown one answers 404, so the result is never an empty body. The answer carries the thread's title, its model binding and its last-edit date. This is a read-only operation and does not bump that date.",
   aiThreadsGetMessageById:
-    'Returns one message by its ID, wherever it sits, without needing the thread it belongs to. `messageId` is required. Unlike `GET api/2.0/ai/threads/get-by-id` an unknown ID is not reported as 404: the answer is an empty body with status 200, so a client has to treat a missing payload as "no such message". Message IDs come from the thread history or from the answer of `POST api/2.0/ai/threads/append-user-message`.',
+    'Returns one message by its ID, wherever it sits, without needing the thread it belongs to. `messageId` is required and, as with `GET api/2.0/ai/threads/get-by-id`, an unknown or deleted ID answers 404, so the result is never an empty body. Message IDs come from the thread history or from the answer of `POST api/2.0/ai/threads/append-user-message`.',
   aiThreadsUpdateMessage:
-    "Replaces the content of one stored message, which is how the edit and regenerate flows change a message outside the streaming lifecycle. The whole message is overwritten by the one supplied rather than merged, so send a complete object. Neither the ID nor the payload is validated here, so a malformed request surfaces as an error relayed from storage rather than as a 400. The answer only confirms the write.",
+    "Replaces the content of one stored message, which is how the edit and regenerate flows change a message outside the streaming lifecycle. The whole message is overwritten by the one supplied rather than merged, so send a complete object with a known `role` and a content that is a non-blank string or a part list with at least one real part - a tool-call-only assistant message counts, an empty list does not. The role has to match the stored message's: a user message cannot be turned into an assistant one. An unknown `messageId` answers 404. The answer only confirms the write.",
   aiThreadsDeleteMessage:
     "Deletes one message and leaves the rest of the thread untouched. `messageId` is required and may be sent either in the body or as a query parameter. An unknown ID is not reported: the call answers success without having deleted anything, so verify with `GET api/2.0/ai/threads/read-messages` when it matters. The deletion is permanent.",
 
@@ -743,7 +743,11 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "404":
       "The `entityId` names a room the caller cannot open, or no live AI profile is bound to it.",
   },
-  aiThreadsAppendUserMessage: { "400": "The message is longer than the limit allows." },
+  aiThreadsAppendUserMessage: {
+    "400":
+      "`threadId` is missing, the message is empty or does not carry `role: user`, or it carries more attachments than the limit allows.",
+  },
+  aiThreadsReadMessages: { "400": "`threadId` is missing." },
   aiThreadsRename: { "400": "`threadId` or the new title is missing." },
   aiThreadsDelete: {
     "400": "`threadId` is missing.",
@@ -755,7 +759,14 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "400": "`threadId` is missing.",
     "404": "No thread has this ID.",
   },
-  aiThreadsGetMessageById: { "400": "`messageId` is missing." },
+  aiThreadsGetMessageById: {
+    "400": "`messageId` is missing.",
+    "404": "No message has this ID.",
+  },
+  aiThreadsUpdateMessage: {
+    "400": "`messageId` is missing, the message is empty or has an unknown role, or its role differs from the stored message's.",
+    "404": "No message has this ID.",
+  },
   aiThreadsDeleteMessage: { "400": "`messageId` is missing." },
 
   // Tools - every operation that names a custom server validates the name,
@@ -1266,10 +1277,9 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiThreadsRegenerateTitle: "The newly generated title, already stored on the thread.",
   aiThreadsList: "The threads of the scope, most recently edited first.",
   aiThreadsReadMessages:
-    "The thread's messages, oldest first unless `direction` reversed them. An empty list also " +
-    "means the request carried no thread ID.",
+    "The thread's messages, oldest first unless `direction` reversed them.",
   aiThreadsGetById: "The thread, without its messages.",
-  aiThreadsGetMessageById: "The message, or an empty body when no message has that ID.",
+  aiThreadsGetMessageById: "The message.",
   aiThreadsUpdateMessage: "Confirms the replacement was stored.",
   aiThreadsDeleteMessage:
     "Confirms the request was accepted, whether or not a message was deleted.",
