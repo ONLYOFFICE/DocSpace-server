@@ -119,19 +119,31 @@ public class VirtualRoomsInternalController(
     /// Returns one page of the contents of the .ai folder that lies in the root of a room, in the same shape as
     /// `GET api/2.0/files/{folderId}` returns for any other folder. The rooms that hold such a folder are listed with
     /// `GET api/2.0/files/rooms?withAiFolder=true`. Any member who can read the room may call it; somebody who cannot
-    /// is refused, and a room that does not exist or holds no .ai folder is answered as not found.
+    /// is refused, and a room that does not exist is answered as not found. A room that holds no .ai folder is
+    /// answered with an empty page: no files and folders, a zero `total`, no `current` folder and empty `pathParts`.
     /// </remarks>
     /// <summary>Get the .ai folder of a room</summary>
     /// <path>api/2.0/files/rooms/{id}/ai</path>
     [Tags("Rooms")]
-    [SwaggerResponse(200, "One page of the .ai folder contents, with the folder itself and the chain of its parents", typeof(FolderContentDto<int>))]
+    [SwaggerResponse(200, "One page of the .ai folder contents, with the folder itself and the chain of its parents, or an empty page without `current` when the room holds no .ai folder", typeof(FolderContentDto<int>))]
     [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or the `startIndex` is negative")]
     [SwaggerResponse(403, "The caller may not read this room")]
-    [SwaggerResponse(404, "The room does not exist or holds no .ai folder")]
+    [SwaggerResponse(404, "The room does not exist")]
     [HttpGet("{id}/ai")]
     public async Task<FolderContentDto<int>> GetRoomAiFolder(GetRoomAiFolderRequestDto inDto)
     {
         var aiFolder = await _fileStorageService.GetRoomAiFolderAsync(inDto.Id);
+        if (aiFolder is null)
+        {
+            return new FolderContentDto<int>
+            {
+                Files = [],
+                Folders = [],
+                PathParts = new List<object>(),
+                StartIndex = inDto.StartIndex,
+                Total = 0
+            };
+        }
 
         return await folderContentDtoHelper.GetAsync(aiFolder.Id, null, null, inDto.FilterType, default, true, true, null, null, null, inDto.SortBy, inDto.SortOrder, inDto.StartIndex, inDto.Count, inDto.Text);
     }
