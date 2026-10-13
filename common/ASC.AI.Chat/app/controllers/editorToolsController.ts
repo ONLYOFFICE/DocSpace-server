@@ -40,6 +40,7 @@ import {
 } from "../tools/httpToolsAdapter.js";
 import { systemToolsSource } from "../tools/systemTools.js";
 import { asyncHandler } from "./_helpers.js";
+import { assertAiAccess } from "./aiAccess.js";
 
 // DocSpace tools for the document editor's AI plugin.
 //
@@ -123,6 +124,10 @@ export const editorToolsController = {
       res.status(400).json({ error: "Unknown tool name" });
       return;
     }
+    // The system tools run against the MCP server with the caller's own
+    // credentials and never pass through the AI service, so with AI switched
+    // off a folder still got created and a file deleted (Bugs 84390, 84391).
+    await assertAiAccess(entityId);
 
     // The adapter returns whatever the tool produced; the plugin relays it
     // to the model as a string. Tool failures come back as `{ error }`

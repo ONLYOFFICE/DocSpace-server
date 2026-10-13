@@ -344,7 +344,7 @@ export const toolsController = {
       DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE,
       WEB_SEARCH_TYPE,
       IMAGE_GENERATION_TYPE,
-      ...Object.keys(await resolveCustomServers(entityId)),
+      ...Object.keys(await resolveCustomServers(entityId, { strict: true })),
     ]);
     if (typeof serverType !== "string" || !validTypes.has(serverType)) {
       res.status(400).json({

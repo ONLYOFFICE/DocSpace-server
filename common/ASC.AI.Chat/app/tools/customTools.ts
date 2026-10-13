@@ -34,6 +34,7 @@
 import { SystemToolsSource } from "@onlyoffice/ai-chat/core";
 import type { McpHttpServerConfig } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
+import { AiServiceHttpError } from "../storage/httpClient.js";
 import { getSystemServerConfig } from "./systemTools.js";
 import { PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
 import { setCustomServerNames } from "../requestContext.js";
@@ -61,25 +62,30 @@ import logger from "../log.js";
  */
 export async function resolveCustomServers(
   entityId?: string,
+  options?: { strict?: boolean },
 ): Promise<Record<string, McpHttpServerConfig>> {
+  // A failed read is tolerated so a round still runs with whatever servers
+  // could be resolved. A settings write must not: with `strict`, the AI
+  // service's 401/403 (Guest, AI disabled) is rethrown instead of leaving the
+  // registered names out of the valid set, which turned the refusal into a
+  // 400 "unknown serverType" (Bugs 84400, 84401).
+  const tolerate = (what: string) => (err: unknown) => {
+    if (
+      options?.strict
+      && err instanceof AiServiceHttpError
+      && (err.status === 401 || err.status === 403)
+    ) {
+      throw err;
+    }
+    logger.warn(
+      `customTools: ${what} read failed: ${err instanceof Error ? err.message : String(err)}`,
+    );
+    return {};
+  };
   const [portal, scoped] = await Promise.all([
-    storage.mcpServers.readAll(undefined).catch((err: unknown) => {
-      logger.warn(
-        `customTools: portal-wide server map read failed: ${
-          err instanceof Error ? err.message : String(err)
-        }`,
-      );
-      return {};
-    }),
+    storage.mcpServers.readAll(undefined).catch(tolerate("portal-wide server map")),
     entityId
-      ? storage.mcpServers.readAll(entityId).catch((err: unknown) => {
-          logger.warn(
-            `customTools: scoped server map read failed for ${entityId}: ${
-              err instanceof Error ? err.message : String(err)
-            }`,
-          );
-          return {};
-        })
+      ? storage.mcpServers.readAll(entityId).catch(tolerate(`scoped server map for ${entityId}`))
       : Promise.resolve({}),
   ]);
   const merged = { ...portal, ...scoped };

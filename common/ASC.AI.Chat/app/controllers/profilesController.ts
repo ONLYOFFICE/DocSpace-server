@@ -37,6 +37,7 @@ import { storage } from "../storage/index.js";
 import { listOnlyofficeGatewayModels } from "../storage/profilesStorage.js";
 import { aiService, AiServiceHttpError } from "../storage/httpClient.js";
 import { asyncHandler, unpackPositional } from "./_helpers.js";
+import { assertAiAccess } from "./aiAccess.js";
 import { asString, isObject } from "../narrow.js";
 import { assertSafeBaseUrl } from "../security.js";
 import logger from "../log.js";
@@ -188,6 +189,11 @@ export const profilesController = {
   }),
 
   listProviderModels: asyncHandler<ListProviderModelsBody>(async (req, res) => {
+    // Nothing below touches the AI service — the listing goes straight to
+    // the provider named in the body — so a Guest used to get an outbound
+    // request made on the portal's behalf instead of the 403 every other
+    // profiles route answers (Bug 82824).
+    await assertAiAccess();
     const { providerType, baseUrl, apiKey } = req.body ?? {};
     // One error per actually-missing field, so the client knows which
     // input to highlight (Bug 83116).
