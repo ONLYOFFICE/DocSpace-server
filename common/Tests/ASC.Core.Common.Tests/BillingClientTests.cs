@@ -111,6 +111,29 @@ public class BillingClientTests
     }
 
     [Fact]
+    public async Task GetDocsCloudTrial_SendsCustomerDetailsAndOmitsEmptyOnes()
+    {
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "\"ok\""));
+
+        var customer = new DocsCloudTrialCustomer(
+            "admin@example.com", "https://portal.example.com", "John Smith", null, "en", "");
+        var result = await client.GetDocsCloudTrialAsync("portal-1", customer);
+
+        result.Should().BeTrue();
+        handler.LastUri!.AbsolutePath.Should().Be("/billing/getwdocstrial");
+
+        var body = JsonDocument.Parse(handler.LastRequestBody!).RootElement;
+        body.GetProperty("PortalId")[0].GetString().Should().Be("portal-1");
+        body.GetProperty("Email")[0].GetString().Should().Be("admin@example.com");
+        body.GetProperty("PortalLink")[0].GetString().Should().Be("https://portal.example.com");
+        body.GetProperty("Name")[0].GetString().Should().Be("John Smith");
+        body.GetProperty("LanguageCode")[0].GetString().Should().Be("en");
+        // Absent optional details must not be sent at all.
+        body.TryGetProperty("Phone", out _).Should().BeFalse();
+        body.TryGetProperty("AffiliateId", out _).Should().BeFalse();
+    }
+
+    [Fact]
     public async Task TopUpDeposit_SendsInvariantAmountAndMetadataAsJsonString()
     {
         var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "\"ok\""));
@@ -195,7 +218,7 @@ public class BillingClientTests
     {
         var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "\"ok\""));
 
-        await client.GetDocsCloudTrialAsync("portal-1");
+        await client.GetDocsCloudTrialAsync("portal-1", null);
 
         handler.LastAuthorization.Should().NotBeNull();
 
