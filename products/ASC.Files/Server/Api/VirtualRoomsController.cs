@@ -506,7 +506,7 @@ public abstract class VirtualRoomsController<T>(
     [Tags("Files / Quota")]
     [SwaggerResponse(200, "The rooms as they are after the new limit was applied", typeof(IAsyncEnumerable<FolderDto<int>>))]
     [SwaggerResponse(403, "The storage quota for rooms (for an AI agent, for agents) is turned off, `quota` exceeds the storage limit of the portal, or the caller may not edit a listed room or it lies in Trash or in the archive")]
-    [SwaggerResponse(500, "A listed room does not exist, or an id is a number that is not a 32-bit integer")]
+    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPut("roomquota")]
     public async IAsyncEnumerable<FolderDto<int>> UpdateRoomsQuota(UpdateRoomsQuotaRequestDto<T> inDto)
     {
@@ -517,8 +517,18 @@ public abstract class VirtualRoomsController<T>(
         foreach (var roomId in folderIntIds)
         {
             var room = await _fileStorageService.FolderQuotaChangeAsync(roomId, inDto.Quota);
+            if (room is null)
+            {
+                continue;
+            }
+
             folderTitles.Add(room.Title);
             yield return await _folderDtoHelper.GetAsync(room);
+        }
+
+        if (folderTitles.Count == 0)
+        {
+            yield break;
         }
 
         if (inDto.Quota >= 0)
@@ -547,7 +557,7 @@ public abstract class VirtualRoomsController<T>(
     [Tags("Files / Quota")]
     [SwaggerResponse(200, "The rooms as they are after the default limit was restored", typeof(IAsyncEnumerable<FolderDto<int>>))]
     [SwaggerResponse(403, "The storage quota for rooms (for an AI agent, for agents) is turned off, or the caller may not edit a listed room or it lies in Trash or in the archive")]
-    [SwaggerResponse(500, "A listed room does not exist, or an id is a number that is not a 32-bit integer")]
+    [SwaggerResponse(500, "An id is a number that is not a 32-bit integer")]
     [HttpPut("resetquota")]
     public async IAsyncEnumerable<FolderDto<int>> ResetRoomQuota(UpdateRoomsRoomIdsRequestDto<T> inDto)
     {
@@ -558,9 +568,19 @@ public abstract class VirtualRoomsController<T>(
         foreach (var roomId in folderIntIds)
         {
             var room = await _fileStorageService.FolderQuotaChangeAsync(roomId, -2);
+            if (room is null)
+            {
+                continue;
+            }
+
             folderTitles.Add(room.Title);
 
             yield return await _folderDtoHelper.GetAsync(room);
+        }
+
+        if (folderTitles.Count == 0)
+        {
+            yield break;
         }
 
         filesMessageService.Send(MessageAction.CustomQuotaPerRoomDefault, quotaRoomSettings.DefaultQuota.ToString(), folderTitles.ToArray());
