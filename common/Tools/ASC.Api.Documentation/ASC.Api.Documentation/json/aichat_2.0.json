@@ -1440,7 +1440,7 @@
             }
           },
           "400": {
-            "description": "The attachment payload is malformed.",
+            "description": "The attachment payload is malformed, or `input.path` is missing or empty.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6544,7 +6544,7 @@
         ],
         "operationId": "aiToolsListSystemTools",
         "summary": "List system tools",
-        "description": "Lists every tool the scope can offer the model, as a map of server type to tool group. The answer merges two sources - the host-configured system servers and the live tools of the scope's registered custom MCP servers - and names the system ones separately in `system`, so a client can tell the two apart. `errors` carries the reason a registered server delivered no tools, which is the text to show on a permission card, because the browser cannot reach a server-executed MCP server to find out for itself. The connections are opened server-side, so one request is enough and the client never speaks MCP itself; the portal's own built-in server is left out because it is always enabled.",
+        "description": "Lists every tool the scope can offer the model, as a map of server type to tool group. The answer merges two sources - the host-configured system servers and the live tools of the scope's registered custom MCP servers; for an agent room those are the servers enabled for that agent alone, never the portal-wide registry - and names the system ones separately in `system`, so a client can tell the two apart. `errors` carries the reason a registered server delivered no tools, which is the text to show on a permission card, because the browser cannot reach a server-executed MCP server to find out for itself. The connections are opened server-side, so one request is enough and the client never speaks MCP itself; the portal's own built-in server is left out because it is always enabled.",
         "responses": {
           "200": {
             "description": "The scope's tools grouped by server type, the system group keys named in `system`, and the reason a registered server delivered none in `errors`.",
@@ -10066,7 +10066,7 @@
         ],
         "operationId": "aiEditorToolsCall",
         "summary": "Call an editor tool",
-        "description": "Executes one DocSpace tool on behalf of the document editor's AI plugin, server-side and under the caller's own credentials, so the browser never holds the transport. `name` has to be one of the tools `GET api/2.0/ai/editor-tools/list` reports; anything else, including a tool the editor is not allowed to reach, is refused. The result is always returned as a string - a structured result is serialised - because the plugin relays it to the model verbatim. A tool that fails does so inside that string as an error payload rather than as an HTTP status, so check the content before trusting it.",
+        "description": "Executes one DocSpace tool on behalf of the document editor's AI plugin, server-side and under the caller's own credentials, so the browser never holds the transport. `name` has to be exactly one of the tools `GET api/2.0/ai/editor-tools/list` reports (surrounding whitespace is ignored, letter case is not); anything else, including a tool the editor is not allowed to reach, is refused with 400 before anything runs. The result is always returned as a string - a structured result is serialised - because the plugin relays it to the model verbatim. A tool that fails does so inside that string as an error payload rather than as an HTTP status, so check the content before trusting it.",
         "responses": {
           "200": {
             "description": "The tool's output as a string. A tool that failed reports it inside that string.",
@@ -10089,7 +10089,7 @@
             }
           },
           "400": {
-            "description": "The tool name is not one this portal exposes.",
+            "description": "The tool name is missing or not one `GET api/2.0/ai/editor-tools/list` reports.",
             "content": {
               "application/json": {
                 "schema": {

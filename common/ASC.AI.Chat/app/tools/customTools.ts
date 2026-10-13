@@ -35,6 +35,7 @@ import { SystemToolsSource } from "@onlyoffice/ai-chat/core";
 import type { McpHttpServerConfig } from "@onlyoffice/ai-chat/core";
 import { storage } from "../storage/index.js";
 import { AiServiceHttpError } from "../storage/httpClient.js";
+import { resolveAgentEntityId } from "../storage/docspaceFilesApi.js";
 import { getSystemServerConfig } from "./systemTools.js";
 import { PORTAL_MCP_SERVER_NAME } from "../../config/index.js";
 import { setCustomServerNames } from "../requestContext.js";
@@ -43,9 +44,10 @@ import logger from "../log.js";
 
 /**
  * Custom MCP servers registered through the `tools/*` routes, resolved per
- * round: the portal-wide map plus the agent-scoped map when the round runs
- * in an agent room (agent entries win on a name collision). Until now the
- * registry was pure configuration — nothing connected it to the chat round,
+ * round: the agent's own map when the round runs in an agent room, the
+ * portal-wide map everywhere else (Bug 84383: the two used to be merged, so
+ * every agent reached every portal server). Until the registry was wired
+ * here it was pure configuration — nothing connected it to the chat round,
  * so a registered server's tools never reached the model
  * (Bugs 82989 / 82990).
  *
@@ -82,13 +84,15 @@ export async function resolveCustomServers(
     );
     return {};
   };
-  const [portal, scoped] = await Promise.all([
-    storage.mcpServers.readAll(undefined).catch(tolerate("portal-wide server map")),
-    entityId
-      ? storage.mcpServers.readAll(entityId).catch(tolerate(`scoped server map for ${entityId}`))
-      : Promise.resolve({}),
-  ]);
-  const merged = { ...portal, ...scoped };
+  // An agent reaches only the servers registered in its own map — the agent
+  // dialog copies the portal entry into that map when a server is enabled
+  // for the agent, so the map is the whitelist. Merging the portal map on
+  // top handed every agent every portal server (Bug 84383). Any other scope
+  // folds to the portal map in the storage already, so one read is enough.
+  const agentId = await resolveAgentEntityId(entityId);
+  const merged = agentId
+    ? await storage.mcpServers.readAll(agentId).catch(tolerate(`agent server map for ${agentId}`))
+    : await storage.mcpServers.readAll(undefined).catch(tolerate("portal-wide server map"));
   const out: Record<string, McpHttpServerConfig> = {};
   for (const [name, config] of Object.entries(merged)) {
     if (name === PORTAL_MCP_SERVER_NAME) continue;

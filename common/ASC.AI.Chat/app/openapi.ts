@@ -349,7 +349,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiEditorToolsList:
     "Returns the catalogue of DocSpace tools the document editor's AI plugin may offer the model - the same composed set the DocSpace chat sees, minus the two web-search tools the editor already reaches through its own passthrough. `entityId` scopes the catalogue to a room, which decides the room-specific tools it contains. Each entry carries exactly four fields: the tool name, its description, its input schema, and whether calling it requires an approval dialog; nothing else is exposed, because the raw listings of system servers carry transport details that must not reach a browser. The approval flag follows the same policy the chat engine applies, and a read-only tool comes back needing none - execute a tool with `POST api/2.0/ai/editor-tools/call`, which accepts only the names this catalogue reports.",
   aiEditorToolsCall:
-    "Executes one DocSpace tool on behalf of the document editor's AI plugin, server-side and under the caller's own credentials, so the browser never holds the transport. `name` has to be one of the tools `GET api/2.0/ai/editor-tools/list` reports; anything else, including a tool the editor is not allowed to reach, is refused. The result is always returned as a string - a structured result is serialised - because the plugin relays it to the model verbatim. A tool that fails does so inside that string as an error payload rather than as an HTTP status, so check the content before trusting it.",
+    "Executes one DocSpace tool on behalf of the document editor's AI plugin, server-side and under the caller's own credentials, so the browser never holds the transport. `name` has to be exactly one of the tools `GET api/2.0/ai/editor-tools/list` reports (surrounding whitespace is ignored, letter case is not); anything else, including a tool the editor is not allowed to reach, is refused with 400 before anything runs. The result is always returned as a string - a structured result is serialised - because the plugin relays it to the model verbatim. A tool that fails does so inside that string as an error payload rather than as an HTTP status, so check the content before trusting it.",
 
   // Export.
   aiExportTextToDocx:
@@ -486,7 +486,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiToolsReplaceAllCustomServers:
     'Replaces the whole custom MCP server registry of the scope with the supplied map in one write, which makes it the operation a settings screen saves with. `map` is required: without it the registry would be emptied, so a missing or non-object value is rejected rather than treated as "none". Every name in the map is validated as a routable path segment and every configuration is resolved before anything is written, so a map with one bad entry changes nothing. `entityId` has to name a room the caller can open - this is the operation where an unreachable one would otherwise have wiped the portal-wide registry.',
   aiToolsListSystemTools:
-    "Lists every tool the scope can offer the model, as a map of server type to tool group. The answer merges two sources - the host-configured system servers and the live tools of the scope's registered custom MCP servers - and names the system ones separately in `system`, so a client can tell the two apart. `errors` carries the reason a registered server delivered no tools, which is the text to show on a permission card, because the browser cannot reach a server-executed MCP server to find out for itself. The connections are opened server-side, so one request is enough and the client never speaks MCP itself; the portal's own built-in server is left out because it is always enabled.",
+    "Lists every tool the scope can offer the model, as a map of server type to tool group. The answer merges two sources - the host-configured system servers and the live tools of the scope's registered custom MCP servers; for an agent room those are the servers enabled for that agent alone, never the portal-wide registry - and names the system ones separately in `system`, so a client can tell the two apart. `errors` carries the reason a registered server delivered no tools, which is the text to show on a permission card, because the browser cannot reach a server-executed MCP server to find out for itself. The connections are opened server-side, so one request is enough and the client never speaks MCP itself; the portal's own built-in server is left out because it is always enabled.",
   aiToolsSetDisabled:
     "Switches off the listed tools of one server type in the scope, so the model is no longer offered them. `serverType` has to be a key the round's tool filter actually matches - a host-configured system server, one of the two DocSpace integration groups, web search, image generation, or one of the scope's registered custom servers - and an unknown value is rejected with the list of valid ones in the message, rather than stored and silently ignored. `toolNames` is required and replaces the previous selection for that server type, so send the full list and pass an empty one to switch everything back on; a missing or non-array value is rejected rather than read as a request to clear, and so is one with anything but non-empty tool names in it. `entityId` has to name a room the caller can open. `scope` picks the list the write lands in: omitted or `user`, the caller's own; `tenant`, the list an administrator keeps for everyone, which every user's reads fold in - the portal settings page writes that one, the composer's own toggles the first.",
   aiToolsGetDisabled:
@@ -664,7 +664,7 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   aiAssignmentsCascadeProfileDelete: { "400": "`profileId` is missing." },
 
   // Attachments - `linkToMessage` is the only one that resolves a message.
-  aiAttachmentsSaveFile: { "400": "The attachment payload is malformed." },
+  aiAttachmentsSaveFile: { "400": "The attachment payload is malformed, or `input.path` is missing or empty." },
   aiAttachmentsSaveFilesMany: {
     "400": "`inputs` is not an array, or one of its entries is malformed.",
   },
@@ -676,7 +676,7 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   },
 
   // Editor tools.
-  aiEditorToolsCall: { "400": "The tool name is not one this portal exposes." },
+  aiEditorToolsCall: { "400": "The tool name is missing or not one `GET api/2.0/ai/editor-tools/list` reports." },
 
   // Export - asynchronous, so the success code is 202 rather than 200.
   aiExportTextToDocx: {
