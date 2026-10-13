@@ -94,6 +94,17 @@ function describeProviderError(err: unknown): { status: number; message: string 
   if (err instanceof Error && err.message.startsWith("Unknown provider type")) {
     return { status: 400, message: err.message };
   }
+  // The library's profile lookup throws a plain Error for an unknown id;
+  // the routes check existence up front, this is the belt (Bug 84426).
+  if (err instanceof Error && err.message.startsWith("Profile not found")) {
+    return { status: 404, message: "Profile not found" };
+  }
+  // A key the SDK cannot put into an HTTP header (non-ASCII, a BOM) fails
+  // inside fetch with a bare TypeError before any request leaves; the
+  // routes reject such a key up front, this is the belt (Bug 84428).
+  if (err instanceof TypeError && /ByteString|invalid header|ERR_INVALID_CHAR/i.test(err.message)) {
+    return { status: 400, message: HEADER_UNSAFE_KEY_MESSAGE };
+  }
   // OpenAI-SDK HTTP errors expose a numeric `status`.
   const httpStatus =
     typeof (err as { status?: unknown })?.status === "number"
@@ -156,6 +167,33 @@ interface ListProviderModelsBody {
   apiKey?: string;
 }
 
+const HEADER_UNSAFE_KEY_MESSAGE =
+  "the API key contains characters that cannot be sent in an HTTP header";
+
+// An API key travels as a Bearer header, and header values are ByteStrings:
+// printable ASCII (plus tab) only. Anything else makes the SDK throw a bare
+// TypeError from inside fetch, which read as a provider failure (502)
+// instead of the input error it is (Bug 84428). Every provider puts a
+// non-empty key into the header, Ollama included, so the rule is uniform.
+function headerSafeKeyError(value: unknown): string | undefined {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+  if (typeof value !== "string" || !/^[\t\x20-\x7E]*$/.test(value)) {
+    return HEADER_UNSAFE_KEY_MESSAGE;
+  }
+  return undefined;
+}
+
+// 404 for a profile the caller cannot see, before the engine is involved:
+// the library's lookup throws a plain Error for a missing profile, which
+// collapsed into 502 "Failed to list provider models" on list-models and
+// into a generic 500 on test-connection (Bugs 84426, 84427). The raw read
+// carries no key and applies no provider override, it only has to exist.
+async function profileExists(id: string): Promise<boolean> {
+  return (await storage.profiles.readByIdRaw(id)) !== undefined;
+}
+
 export const profilesController = {
   create: asyncHandler<CreateProfileInput>(async (req, res) => {
     await assertProfilesWritable();
@@ -163,6 +201,11 @@ export const profilesController = {
       return;
     }
     await assertSafeBaseUrl(req.body?.baseUrl);
+    const keyError = headerSafeKeyError(req.body?.key);
+    if (keyError) {
+      res.status(400).json({ error: keyError, field: "key" });
+      return;
+    }
     const result = await engine.create(req.body);
     res.json(result);
   }),
@@ -173,6 +216,11 @@ export const profilesController = {
       return;
     }
     await assertSafeBaseUrl(req.body?.baseUrl);
+    const keyError = headerSafeKeyError(req.body?.key);
+    if (keyError) {
+      res.status(400).json({ error: keyError, field: "key" });
+      return;
+    }
     const result = await engine.update(req.body);
     res.json(result);
   }),
@@ -205,6 +253,11 @@ export const profilesController = {
     }
     if (!baseUrl) {
       res.status(400).json({ error: "baseUrl required", field: "baseUrl" });
+      return;
+    }
+    const keyError = headerSafeKeyError(apiKey);
+    if (keyError) {
+      res.status(400).json({ error: keyError, field: "apiKey" });
       return;
     }
     await assertSafeBaseUrl(baseUrl);
@@ -253,6 +306,10 @@ export const profilesController = {
       res.status(400).json({ error: "profileId required" });
       return;
     }
+    if (!(await profileExists(profileId))) {
+      res.status(404).json({ error: "Profile not found" });
+      return;
+    }
     try {
       const models = await engine.listModels(profileId);
       res.json(models);
@@ -281,6 +338,10 @@ export const profilesController = {
     const idStr = typeof profileId === "string" ? profileId : asString(req.query["profileId"]);
     if (!idStr) {
       res.status(400).json({ error: "profileId required" });
+      return;
+    }
+    if (!(await profileExists(idStr))) {
+      res.status(404).json({ error: "Profile not found" });
       return;
     }
     const result = await engine.testConnection(idStr);

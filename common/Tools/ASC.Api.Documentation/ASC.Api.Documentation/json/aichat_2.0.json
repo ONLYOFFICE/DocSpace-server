@@ -2883,7 +2883,7 @@
             }
           },
           "400": {
-            "description": "The provider URL is missing, malformed, or points at a private network address.",
+            "description": "The provider URL is missing, malformed, or points at a private network address, or the key holds characters that cannot travel in an HTTP header.",
             "content": {
               "application/json": {
                 "schema": {
@@ -2966,7 +2966,7 @@
             }
           },
           "400": {
-            "description": "The provider URL is missing, malformed, or points at a private network address.",
+            "description": "The provider URL is missing, malformed, or points at a private network address, or the key holds characters that cannot travel in an HTTP header.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3123,7 +3123,7 @@
         ],
         "operationId": "aiProfilesListModels",
         "summary": "List models",
-        "description": "Lists the models a stored profile's provider currently offers, asking the provider itself rather than reading a cached list. `profileId` is required and is read from the query. A failure is reported with the provider's own verdict: an unusable key comes back as 400 and a provider that is unreachable or broken as 502, while a missing profile or a caller without access keeps the status the portal gave it. Use `POST api/2.0/ai/profiles/list-provider-models` to probe an endpoint that has no profile yet.",
+        "description": "Lists the models a stored profile's provider currently offers, asking the provider itself rather than reading a cached list. `profileId` is required and is read from the query. A failure is reported with the provider's own verdict: an unusable key comes back as 400 and a provider that is unreachable or broken as 502, while a profile the caller cannot see answers 404 before the provider is asked and a caller without access keeps the 403 the portal gave it. Use `POST api/2.0/ai/profiles/list-provider-models` to probe an endpoint that has no profile yet.",
         "responses": {
           "200": {
             "description": "The models the profile's provider currently offers.",
@@ -3160,6 +3160,16 @@
           },
           "403": {
             "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No profile with this identifier exists for the caller.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3212,7 +3222,7 @@
         ],
         "operationId": "aiProfilesListProviderModels",
         "summary": "List provider models",
-        "description": "Lists the models an endpoint offers for credentials supplied in the request, before any profile exists - this is what a provider-setup form calls to fill its model picker. `providerType` and `baseUrl` are both required, and a 400 for either names the offending input in a `field` member so the form can highlight it; a `baseUrl` pointing at a private network address is refused as well. For `providerType: \"onlyoffice\"` the answer comes from the portal gateway's catalogue, which carries richer capability data than the provider's own listing and matches what `GET api/2.0/ai/profiles/list` reports; a portal without that gateway falls back to asking the provider. A provider that is unreachable or broken is reported as 502, and one that rejects the key as 400.",
+        "description": "Lists the models an endpoint offers for credentials supplied in the request, before any profile exists - this is what a provider-setup form calls to fill its model picker. `providerType` and `baseUrl` are both required, and a 400 for either names the offending input in a `field` member so the form can highlight it; a `baseUrl` pointing at a private network address is refused as well, and so is an `apiKey` with characters that cannot travel in an HTTP header (anything outside printable ASCII), since no provider could ever accept it. For `providerType: \"onlyoffice\"` the answer comes from the portal gateway's catalogue, which carries richer capability data than the provider's own listing and matches what `GET api/2.0/ai/profiles/list` reports; a portal without that gateway falls back to asking the provider. A provider that is unreachable or broken is reported as 502, and one that rejects the key as 400.",
         "responses": {
           "200": {
             "description": "The models the endpoint offers for the supplied credentials.",
@@ -3228,7 +3238,7 @@
             }
           },
           "400": {
-            "description": "`baseUrl` is missing, points at a private network address, or the provider rejected the supplied API key.",
+            "description": "`baseUrl` is missing, points at a private network address, `apiKey` holds characters that cannot travel in an HTTP header, or the provider rejected the supplied API key.",
             "content": {
               "application/json": {
                 "schema": {
@@ -3335,7 +3345,7 @@
         ],
         "operationId": "aiProfilesTestConnection",
         "summary": "Test a profile's provider",
-        "description": "Probes a stored profile's credentials against its provider and reports the outcome in the answer, writing nothing - this is what a Test button calls so that a failure does not commit anything. `profileId` is required and may be sent in the body or as a query parameter. The result is carried in the body rather than in the status, so a failed probe still answers 200 and the caller has to read the payload. To validate credentials that are not stored yet, use `POST api/2.0/ai/profiles/list-provider-models`.",
+        "description": "Probes a stored profile's credentials against its provider and reports the outcome in the answer, writing nothing - this is what a Test button calls so that a failure does not commit anything. `profileId` is required and may be sent in the body or as a query parameter, and a profile the caller cannot see answers 404 before anything is probed. The result of the probe itself is carried in the body rather than in the status, so a failed probe still answers 200 and the caller has to read the payload. To validate credentials that are not stored yet, use `POST api/2.0/ai/profiles/list-provider-models`.",
         "responses": {
           "200": {
             "description": "The outcome of the probe. A failed probe is reported here, not as a status.",
@@ -3383,6 +3393,16 @@
           },
           "403": {
             "description": "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No profile with this identifier exists for the caller.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9124,10 +9144,10 @@
         ],
         "operationId": "aiOpenaiChatCompletions",
         "summary": "OpenAI chat completions passthrough",
-        "description": "OpenAI-compatible chat completions for the document editor's AI plugin. The profile is resolved server-side, its credentials are attached, and the body is forwarded to the provider verbatim - the payload is owned by the plugin's SDK on one end and the provider on the other. A client disconnect cancels the provider call.",
+        "description": "OpenAI-compatible chat completions for the document editor's AI plugin. The profile is resolved server-side, its credentials are attached, and the body is forwarded to the provider as sent - the payload is owned by the plugin's SDK on one end and the provider on the other - except that a JSON body which names no `model` gets the profile's model filled in; a `model` the body carries wins. The provider's 4xx answers are relayed with their status and body, so a 429 and the provider's own error envelope surface as they stand; a 5xx from the provider or from the hop in front of it is not relayed - its detail stays in the server log and the call answers a fixed 502 envelope. A client disconnect cancels the provider call.",
         "responses": {
           "200": {
-            "description": "The provider's own response, relayed verbatim with its status and content type.",
+            "description": "The provider's own response, relayed with its status and content type (a 5xx excepted).",
             "content": {
               "application/json": {
                 "schema": {
@@ -9404,7 +9424,7 @@
             }
           },
           "502": {
-            "description": "The AI provider could not be reached, or answered with a failure of its own.",
+            "description": "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9471,7 +9491,7 @@
         ],
         "requestBody": {
           "required": true,
-          "description": "An OpenAI Chat Completions request, forwarded to the provider byte for byte. The shape is the provider's, not this API's, so consult the provider's own reference; the model and the credentials come from the profile in the path and must not be sent here.",
+          "description": "An OpenAI Chat Completions request, forwarded to the provider as sent. The shape is the provider's, not this API's, so consult the provider's own reference. The credentials come from the profile in the path and must not be sent here; the profile's model is used when the body names none, and a `model` in the body takes precedence.",
           "content": {
             "application/json": {
               "schema": {
@@ -9491,16 +9511,67 @@
         ],
         "operationId": "aiOpenaiImagesGenerations",
         "summary": "OpenAI image generation passthrough",
-        "description": "OpenAI-compatible image generation for the document editor's AI plugin, working exactly as the chat-completions passthrough does: the profile named by `profileId` is resolved server-side, its credentials are attached, and the body reaches the provider unchanged. The provider's status and body are relayed verbatim, so its 429 and its own error envelope surface as they stand. A body larger than this route accepts is refused before it is forwarded. A client disconnect aborts the provider call.",
+        "description": "OpenAI-compatible image generation for the document editor's AI plugin, working as the chat-completions passthrough does: the profile named by `profileId` is resolved server-side, its credentials are attached, and the body reaches the provider as sent. The documented OpenAI fields are checked first - `prompt` has to be a non-empty string, `n` a positive integer, `model`, `size`, `quality`, `style` and `response_format` strings when present - and a body failing that answers 400 instead of whatever the provider would have made of it; fields outside that set are passed on untouched. The provider's 4xx status and body are relayed, so its 429 and its own error envelope surface as they stand; a 5xx is replaced by a fixed 502 envelope with the detail kept in the server log. A body larger than this route accepts is refused before it is forwarded. A client disconnect aborts the provider call.",
         "responses": {
           "200": {
-            "description": "The provider's own response, relayed verbatim with its status and content type.",
+            "description": "The provider's own response, relayed with its status and content type (a 5xx excepted).",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "description": "Relayed from the provider unchanged. The shape is the provider's, not this service's, and it varies by provider and model.",
                   "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`prompt` is missing or empty, `n` is not a positive integer, or a documented string field has another type.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "object",
+                      "properties": {
+                        "message": {
+                          "type": "string",
+                          "description": "Human-readable description of the failure."
+                        },
+                        "type": {
+                          "type": "string",
+                          "description": "OpenAI error class, for example `invalid_request_error`.",
+                          "examples": [
+                            "invalid_request_error"
+                          ]
+                        },
+                        "code": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "Machine-readable code, when the provider supplies one."
+                        },
+                        "param": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "description": "The request parameter at fault, when the failure names one."
+                        }
+                      },
+                      "required": [
+                        "message",
+                        "type"
+                      ],
+                      "additionalProperties": true
+                    }
+                  },
+                  "required": [
+                    "error"
+                  ],
+                  "additionalProperties": false
                 }
               }
             }
@@ -9771,7 +9842,7 @@
             }
           },
           "502": {
-            "description": "The AI provider could not be reached, or answered with a failure of its own.",
+            "description": "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9838,7 +9909,7 @@
         ],
         "requestBody": {
           "required": true,
-          "description": "An OpenAI image-generation request, forwarded to the provider byte for byte. The shape is the provider's, not this API's, and the credentials come from the profile in the path.",
+          "description": "An OpenAI image-generation request, forwarded to the provider as sent once its documented fields pass a type check. The shape is the provider's, not this API's, and the credentials come from the profile in the path.",
           "content": {
             "application/json": {
               "schema": {
@@ -10048,7 +10119,7 @@
         ],
         "operationId": "aiWebSearchPassthroughSearch",
         "summary": "Web search passthrough",
-        "description": "Runs a web search on behalf of the document editor's AI plugin, which holds only a placeholder configuration - the portal's active provider and its key are resolved here, so neither ever reaches the browser. The portal-wide configuration is used, and a portal without one answers 404. The `entityId` and `entityKind` query parameters name the document the search is billed to; with the ONLYOFFICE provider the entry is resolved under the caller's credentials and sent to the gateway as the request `metadata` (`source_id` / `source_type` / `source_title`), and an entry the caller cannot open sends none. The provider's own status, body and content type are relayed as they stand, so a provider that rate-limits answers 429 and one that is unreachable answers 502. Closing the connection aborts the upstream request.",
+        "description": "Runs a web search on behalf of the document editor's AI plugin, which holds only a placeholder configuration - the portal's active provider and its key are resolved here, so neither ever reaches the browser. The portal-wide configuration is used, and a portal without one answers 404. The `entityId` and `entityKind` query parameters name the document the search is billed to; with the ONLYOFFICE provider the entry is resolved under the caller's credentials and sent to the gateway as the request `metadata` (`source_id` / `source_type` / `source_title`), and an entry the caller cannot open sends none. `query` has to be a non-empty string and `numResults`, when sent, a positive integer; a body failing that answers 400 naming the field, before anything is sent on. The provider's own 4xx status, body and content type are relayed as they stand, so a provider that rate-limits answers 429; a 5xx from the provider or from the hop in front of it is not relayed, its detail stays in the server log and the call answers a fixed 502, which is also what an unreachable provider answers. Closing the connection aborts the upstream request.",
         "responses": {
           "200": {
             "description": "The provider's own response, relayed verbatim with its status and content type.",
@@ -10058,6 +10129,16 @@
                   "type": "object",
                   "description": "Relayed from the provider unchanged. The shape is the provider's, not this service's, and it varies by provider and model.",
                   "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`query` is missing or empty, or `numResults` is not a positive integer; `field` names the input.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -10123,7 +10204,7 @@
             }
           },
           "502": {
-            "description": "The AI provider could not be reached, or answered with a failure of its own.",
+            "description": "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10135,7 +10216,7 @@
         },
         "requestBody": {
           "required": true,
-          "description": "A search request in the shape the portal's active web-search provider expects, forwarded to it unchanged. The endpoint and the key come from the stored configuration and must not be sent here.",
+          "description": "A search request in the shape the portal's active web-search provider expects, forwarded to it once `query` and `numResults` pass a type check. The endpoint and the key come from the stored configuration and must not be sent here.",
           "content": {
             "application/json": {
               "schema": {
@@ -10155,7 +10236,7 @@
         ],
         "operationId": "aiWebSearchPassthroughContents",
         "summary": "Web page contents passthrough",
-        "description": "Fetches the contents of web pages on behalf of the document editor's AI plugin, against the portal's active web-search provider, exactly as the search passthrough does — including the `entityId` / `entityKind` billing attribution. The portal-wide configuration is used and a portal without one answers 404. The provider's status, body and content type are relayed verbatim, so its 429 and its failures surface unchanged. This is the follow-up to `POST api/2.0/ai/websearch/v1/search`, which returns the results whose contents this operation retrieves.",
+        "description": "Fetches the contents of web pages on behalf of the document editor's AI plugin, against the portal's active web-search provider, exactly as the search passthrough does — including the `entityId` / `entityKind` billing attribution. The portal-wide configuration is used and a portal without one answers 404. `urls` has to be a non-empty array of strings, or the call answers 400 naming the field. The provider's 4xx status, body and content type are relayed, so its 429 surfaces unchanged, while a 5xx is replaced by a fixed 502 with the detail kept in the server log. This is the follow-up to `POST api/2.0/ai/websearch/v1/search`, which returns the results whose contents this operation retrieves.",
         "responses": {
           "200": {
             "description": "The provider's own response, relayed verbatim with its status and content type.",
@@ -10165,6 +10246,16 @@
                   "type": "object",
                   "description": "Relayed from the provider unchanged. The shape is the provider's, not this service's, and it varies by provider and model.",
                   "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`urls` is missing or not a non-empty array of strings; `field` names the input.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -10230,7 +10321,7 @@
             }
           },
           "502": {
-            "description": "The AI provider could not be reached, or answered with a failure of its own.",
+            "description": "The provider, or the hop in front of it, failed or answered a 5xx; the detail is in the server log.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10242,7 +10333,7 @@
         },
         "requestBody": {
           "required": true,
-          "description": "A page-contents request in the shape the portal's active web-search provider expects, forwarded to it unchanged. The endpoint and the key come from the stored configuration.",
+          "description": "A page-contents request in the shape the portal's active web-search provider expects, forwarded to it once `urls` passes a type check. The endpoint and the key come from the stored configuration.",
           "content": {
             "application/json": {
               "schema": {
