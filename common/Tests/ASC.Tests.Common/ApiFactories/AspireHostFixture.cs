@@ -151,6 +151,11 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
             _baseAddresses[resource] = ResolveBaseAddress(resource);
         }
 
+        if (resources.Contains(ResourceNames.Nextcloud))
+        {
+            PublishNextcloudSettings();
+        }
+
         // A single ApiSystem client is enough: portal registration is tenant-agnostic and only
         // issues stateless POSTs, so it is safe to share across parallel tests.
         _apiSystemClient = CreateRawClient(_baseAddresses[ResourceNames.ApiSystem], origin: null);
@@ -345,6 +350,28 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     }
 
     /// <summary>
+    /// An open connection to the stack's database, for a test that has to plant a row no API call
+    /// writes any more — data left behind by an older release that the current code must still read.
+    /// </summary>
+    public async Task<MySqlConnection> OpenDatabaseAsync(CancellationToken cancellationToken = default)
+    {
+        var connection = new MySqlConnection(await GetConnectionStringAsync(ResourceNames.Database, cancellationToken));
+        await connection.OpenAsync(cancellationToken);
+
+        return connection;
+    }
+
+    /// <summary>
+    /// A value of the AppHost configuration. The services read the same <c>buildtools/config</c>
+    /// files, so a setting such as <c>core:machinekey</c> read here is the one they work with.
+    /// </summary>
+    public string GetAppHostSetting(string key)
+    {
+        return _app.Services.GetRequiredService<IConfiguration>()[key]
+            ?? throw new InvalidOperationException($"The AppHost configuration has no '{key}'.");
+    }
+
+    /// <summary>
     /// One of a resource's named endpoints, as the host can reach it. Needed for anything that is not
     /// the default HTTP endpoint — MailPit, for instance, publishes both <c>smtp</c> and <c>http</c>,
     /// and Aspire gives each of them a random host port.
@@ -358,6 +385,27 @@ public abstract class AspireHostFixture<TClients> : IAsyncLifetime where TClient
     protected HttpClient CreateHttpClient(string resourceName, string endpointName)
     {
         return _app.CreateHttpClient(resourceName, endpointName);
+    }
+
+    /// <summary>
+    /// Hands the started Nextcloud to the tests the way the TypeScript suite is configured: through
+    /// <c>NEXTCLOUD_URL</c> (the WebDAV root of the account), <c>NEXTCLOUD_LOGIN</c> and
+    /// <c>NEXTCLOUD_PASSWORD</c>. Values already present in the environment win, so a run can still be
+    /// pointed at a real Nextcloud from outside.
+    /// </summary>
+    private void PublishNextcloudSettings()
+    {
+        if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("NEXTCLOUD_URL")))
+        {
+            return;
+        }
+
+        var origin = _baseAddresses[ResourceNames.Nextcloud].ToString().TrimEnd('/');
+        var user = ASC.AppHost.Configuration.Constants.NextcloudUser;
+
+        Environment.SetEnvironmentVariable("NEXTCLOUD_URL", $"{origin}/remote.php/dav/files/{user}/");
+        Environment.SetEnvironmentVariable("NEXTCLOUD_LOGIN", user);
+        Environment.SetEnvironmentVariable("NEXTCLOUD_PASSWORD", ASC.AppHost.Configuration.Constants.NextcloudPassword);
     }
 
     private Uri ResolveBaseAddress(string resourceName)

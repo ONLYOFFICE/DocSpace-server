@@ -5,7 +5,7 @@ from __future__ import annotations
 {{/operations.x-supportsFields}}
 import warnings
 from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, overload
 from typing_extensions import Annotated
 
 {{#imports}}
@@ -53,8 +53,19 @@ class {{x-classname}}:
 {{#operation}}
 
 
+{{#vendorExtensions.x-thirdparty-overload}}
+    @overload
+    {{#async}}async {{/async}}def {{operationId}}{{>partial_api_args_portal}} -> {{{returnType}}}: ...
+
+    @overload
+    {{#async}}async {{/async}}def {{operationId}}{{>partial_api_args_thirdparty}} -> {{{vendorExtensions.x-thirdparty-return-type-variant}}}: ...
+
+    @overload
+    {{#async}}async {{/async}}def {{operationId}}{{>partial_api_args}} -> {{{vendorExtensions.x-thirdparty-return-type-union}}}: ...
+
+{{/vendorExtensions.x-thirdparty-overload}}
     @validate_call
-    {{#async}}async {{/async}}def {{operationId}}{{>partial_api_args}} -> {{{returnType}}}{{^returnType}}None{{/returnType}}:
+    {{#async}}async {{/async}}def {{operationId}}{{>partial_api_args}} -> {{>partial_return}}:
 {{>partial_api}}
 
         response_data = {{#async}}await {{/async}}self.api_client.call_api(
@@ -68,8 +79,19 @@ class {{x-classname}}:
         ).data
 
 
+{{#vendorExtensions.x-thirdparty-overload}}
+    @overload
+    {{#async}}async {{/async}}def {{operationId}}_with_http_info{{>partial_api_args_portal}} -> ApiResponse[{{{returnType}}}]: ...
+
+    @overload
+    {{#async}}async {{/async}}def {{operationId}}_with_http_info{{>partial_api_args_thirdparty}} -> ApiResponse[{{{vendorExtensions.x-thirdparty-return-type-variant}}}]: ...
+
+    @overload
+    {{#async}}async {{/async}}def {{operationId}}_with_http_info{{>partial_api_args}} -> ApiResponse[{{{vendorExtensions.x-thirdparty-return-type-union}}}]: ...
+
+{{/vendorExtensions.x-thirdparty-overload}}
     @validate_call
-    {{#async}}async {{/async}}def {{operationId}}_with_http_info{{>partial_api_args}} -> ApiResponse[{{{returnType}}}{{^returnType}}None{{/returnType}}]:
+    {{#async}}async {{/async}}def {{operationId}}_with_http_info{{>partial_api_args}} -> ApiResponse[{{>partial_return}}]:
 {{>partial_api}}
 
         response_data = {{#async}}await {{/async}}self.api_client.call_api(

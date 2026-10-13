@@ -53,7 +53,7 @@ public class FilesBulkOrderTests(
         var room = await CreateVirtualRoom("Autotest BulkOrder Single File Room");
         var file = await CreateFile("Autotest BulkOrder Single File", room.Id);
 
-        var request = new OrdersRequestDtoInteger([new OrdersItemRequestDtoInteger(file.Id, FileEntryType.File, 5)]);
+        var request = new OrdersRequestDto([new OrdersItemRequestDto(file.Id, FileEntryType.File, 5)]);
 
         // Act
         var result = await _filesApi.SetFilesOrderAsync(request, TestContext.Current.CancellationToken);
@@ -73,7 +73,7 @@ public class FilesBulkOrderTests(
         var room = await CreateVirtualRoom("Autotest BulkOrder Single Folder Room");
         var folder = await CreateFolder("Autotest BulkOrder Single Folder", room.Id);
 
-        var request = new OrdersRequestDtoInteger([new OrdersItemRequestDtoInteger(folder.Id, FileEntryType.Folder, 3)]);
+        var request = new OrdersRequestDto([new OrdersItemRequestDto(folder.Id, FileEntryType.Folder, 3)]);
 
         // Act
         var result = await _filesApi.SetFilesOrderAsync(request, TestContext.Current.CancellationToken);
@@ -97,9 +97,9 @@ public class FilesBulkOrderTests(
         var file1 = await CreateFile("Autotest BulkOrder Multi File 1", room.Id);
         var file2 = await CreateFile("Autotest BulkOrder Multi File 2", room.Id);
 
-        var request = new OrdersRequestDtoInteger([
-            new OrdersItemRequestDtoInteger(file1.Id, FileEntryType.File, 2),
-            new OrdersItemRequestDtoInteger(file2.Id, FileEntryType.File, 1)
+        var request = new OrdersRequestDto([
+            new OrdersItemRequestDto(file1.Id, FileEntryType.File, 2),
+            new OrdersItemRequestDto(file2.Id, FileEntryType.File, 1)
         ]);
 
         // Act
@@ -127,9 +127,9 @@ public class FilesBulkOrderTests(
         var file = await CreateFile("Autotest BulkOrder Mix File", room.Id);
         var folder = await CreateFolder("Autotest BulkOrder Mix Folder", room.Id);
 
-        var request = new OrdersRequestDtoInteger([
-            new OrdersItemRequestDtoInteger(file.Id, FileEntryType.File, 1),
-            new OrdersItemRequestDtoInteger(folder.Id, FileEntryType.Folder, 2)
+        var request = new OrdersRequestDto([
+            new OrdersItemRequestDto(file.Id, FileEntryType.File, 1),
+            new OrdersItemRequestDto(folder.Id, FileEntryType.Folder, 2)
         ]);
 
         // Act
@@ -156,12 +156,12 @@ public class FilesBulkOrderTests(
         var file = await CreateFile("Autotest BulkOrder Update File", room.Id);
 
         await _filesApi.SetFilesOrderAsync(
-            new OrdersRequestDtoInteger([new OrdersItemRequestDtoInteger(file.Id, FileEntryType.File, 3)]),
+            new OrdersRequestDto([new OrdersItemRequestDto(file.Id, FileEntryType.File, 3)]),
             TestContext.Current.CancellationToken);
 
         // Act
         var result = await _filesApi.SetFilesOrderAsync(
-            new OrdersRequestDtoInteger([new OrdersItemRequestDtoInteger(file.Id, FileEntryType.File, 7)]),
+            new OrdersRequestDto([new OrdersItemRequestDto(file.Id, FileEntryType.File, 7)]),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -175,7 +175,7 @@ public class FilesBulkOrderTests(
         await _filesClient.Authenticate(Owner);
 
         // Act
-        var result = await _filesApi.SetFilesOrderAsync(new OrdersRequestDtoInteger([]), TestContext.Current.CancellationToken);
+        var result = await _filesApi.SetFilesOrderAsync(new OrdersRequestDto([]), TestContext.Current.CancellationToken);
 
         // Assert
         result.Response.Should().NotBeNull().And.BeEmpty();
@@ -198,7 +198,7 @@ public class FilesBulkOrderTests(
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.SetFilesOrderAsync(
-            new OrdersRequestDtoInteger([new OrdersItemRequestDtoInteger(file.Id, FileEntryType.File, 0)]),
+            new OrdersRequestDto([new OrdersItemRequestDto(file.Id, FileEntryType.File, 0)]),
             TestContext.Current.CancellationToken));
 
         // Assert
@@ -215,7 +215,7 @@ public class FilesBulkOrderTests(
 
         // Act
         var result = await _filesApi.SetFilesOrderAsync(
-            new OrdersRequestDtoInteger([new OrdersItemRequestDtoInteger(file.Id, FileEntryType.File, 1)]),
+            new OrdersRequestDto([new OrdersItemRequestDto(file.Id, FileEntryType.File, 1)]),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -232,7 +232,7 @@ public class FilesBulkOrderTests(
 
         // Act
         var result = await _filesApi.SetFilesOrderAsync(
-            new OrdersRequestDtoInteger([new OrdersItemRequestDtoInteger(file.Id, FileEntryType.File, int.MaxValue)]),
+            new OrdersRequestDto([new OrdersItemRequestDto(file.Id, FileEntryType.File, int.MaxValue)]),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -248,9 +248,9 @@ public class FilesBulkOrderTests(
         var file1 = await CreateFile("Autotest BulkOrder Dup Order 1", room.Id);
         var file2 = await CreateFile("Autotest BulkOrder Dup Order 2", room.Id);
 
-        var request = new OrdersRequestDtoInteger([
-            new OrdersItemRequestDtoInteger(file1.Id, FileEntryType.File, 5),
-            new OrdersItemRequestDtoInteger(file2.Id, FileEntryType.File, 5)
+        var request = new OrdersRequestDto([
+            new OrdersItemRequestDto(file1.Id, FileEntryType.File, 5),
+            new OrdersItemRequestDto(file2.Id, FileEntryType.File, 5)
         ]);
 
         // Act
@@ -266,7 +266,7 @@ public class FilesBulkOrderTests(
         // Arrange
         await _filesClient.Authenticate(Owner);
 
-        var request = new OrdersRequestDtoInteger([new OrdersItemRequestDtoInteger(999999999, FileEntryType.File, 1)]);
+        var request = new OrdersRequestDto([new OrdersItemRequestDto(999999999, FileEntryType.File, 1)]);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -284,7 +284,7 @@ public class FilesBulkOrderTests(
         var room = await CreateVirtualRoom("Autotest BulkOrder Wrong Type Room");
         var file = await CreateFile("Autotest BulkOrder Wrong Type File", room.Id);
 
-        var request = new OrdersRequestDtoInteger([new OrdersItemRequestDtoInteger(file.Id, FileEntryType.Folder, 1)]);
+        var request = new OrdersRequestDto([new OrdersItemRequestDto(file.Id, FileEntryType.Folder, 1)]);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -302,7 +302,7 @@ public class FilesBulkOrderTests(
         var room = await CreateVirtualRoom("Autotest BulkOrder Structure Room");
         var file = await CreateFile("Autotest BulkOrder Structure File", room.Id);
 
-        var request = new OrdersRequestDtoInteger([new OrdersItemRequestDtoInteger(file.Id, FileEntryType.File, 4)]);
+        var request = new OrdersRequestDto([new OrdersItemRequestDto(file.Id, FileEntryType.File, 4)]);
 
         // Act
         var result = await _filesApi.SetFilesOrderAsync(request, TestContext.Current.CancellationToken);

@@ -439,6 +439,15 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The room already contains the .ai folder.
+        /// </summary>
+        public static string ErrorMessage_AppsFolderExists {
+            get {
+                return ResourceManager.GetString("ErrorMessage_AppsFolderExists", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bad request..
         /// </summary>
         public static string ErrorMessage_BadRequest {
@@ -714,6 +723,15 @@ namespace ASC.Files.Core.Resources {
         public static string ErrorMessage_ProviderAlreadyConnect {
             get {
                 return ResourceManager.GetString("ErrorMessage_ProviderAlreadyConnect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The storage cannot be disconnected while a room uses it. Delete the room instead.
+        /// </summary>
+        public static string ErrorMessage_ProviderUsedByRoom {
+            get {
+                return ResourceManager.GetString("ErrorMessage_ProviderUsedByRoom", resourceCulture);
             }
         }
         
@@ -1123,6 +1141,24 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Search in file metadata.
+        /// </summary>
+        public static string IndexTitleFileMetadata {
+            get {
+                return ResourceManager.GetString("IndexTitleFileMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search in folder metadata.
+        /// </summary>
+        public static string IndexTitleFolderMetadata {
+            get {
+                return ResourceManager.GetString("IndexTitleFolderMetadata", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Knowledge.
         /// </summary>
         public static string KnowledgeFolder {
@@ -1204,7 +1240,7 @@ namespace ASC.Files.Core.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Edit, share and collaborate on office documents in real-time. Create and manage common docs for the whole team to access. 
+        ///   Looks up a localized string similar to Edit, share and collaborate on office documents in real-time. Create and manage common docs for the whole team to access.
         ///Highest compatibility with docx, xlsx, pptx..
         /// </summary>
         public static string ProductDescriptionEx {

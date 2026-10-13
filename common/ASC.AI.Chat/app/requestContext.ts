@@ -134,6 +134,34 @@ export function getResolvedFormId(): number | undefined {
   return als.getStore()?.resolvedFormId;
 }
 
+// The attachment id resolvedFormId came from — passed to the tool context to key
+// the per-attachment analyze intent.
+export function setResolvedAttachmentId(attachmentId: string): void {
+  const store = als.getStore();
+  if (store) {
+    store.resolvedAttachmentId = attachmentId;
+  }
+}
+
+export function getResolvedAttachmentId(): string | undefined {
+  return als.getStore()?.resolvedAttachmentId;
+}
+
+// Entry ids of the forms the current save-files-many attaches for analysis (the
+// client's per-file `analyzeOnly`). Stashed here because the engine's fixed
+// `createMany(entryIds)` signature can't carry them, and createMany runs in the
+// same request.
+export function setAnalyzeEntryIds(entryIds: string[]): void {
+  const store = als.getStore();
+  if (store) {
+    store.analyzeEntryIds = entryIds;
+  }
+}
+
+export function getAnalyzeEntryIds(): string[] {
+  return als.getStore()?.analyzeEntryIds ?? [];
+}
+
 // Names of the custom MCP servers resolved for the current round's scope.
 // Set by the custom-tools resolver (app/tools/customTools.ts) whenever it
 // runs; read by the engine's `systemServerTypes` callback, which is

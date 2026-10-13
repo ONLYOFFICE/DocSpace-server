@@ -54,7 +54,7 @@ public class RoomQuotaInfoTests(
         var room = await CreateCustomRoom("Autotest Quota Exhausted Room " + Guid.NewGuid().ToString()[..8]);
 
         await _quotaApi.UpdateRoomsQuotaAsync(
-            new UpdateRoomsQuotaRequestDtoInteger([new(room.Id)], 1),
+            new UpdateRoomsQuotaRequestDto([new(room.Id)], 1),
             TestContext.Current.CancellationToken);
 
         await Assert.ThrowsAsync<ApiException>(async () =>
@@ -71,7 +71,7 @@ public class RoomQuotaInfoTests(
         var room = await CreateCustomRoom("Autotest Quota Info Room " + Guid.NewGuid().ToString()[..8]);
 
         await _quotaApi.UpdateRoomsQuotaAsync(
-            new UpdateRoomsQuotaRequestDtoInteger([new(room.Id)], QuotaMinimalBytes),
+            new UpdateRoomsQuotaRequestDto([new(room.Id)], QuotaMinimalBytes),
             TestContext.Current.CancellationToken);
 
         await CreateFile("Autotest Quota Info File.docx", room.Id);
@@ -93,7 +93,7 @@ public class RoomQuotaInfoTests(
         var room = await CreateCustomRoom("Autotest Quota Used Space Room " + Guid.NewGuid().ToString()[..8]);
 
         await _quotaApi.UpdateRoomsQuotaAsync(
-            new UpdateRoomsQuotaRequestDtoInteger([new(room.Id)], QuotaMinimalBytes),
+            new UpdateRoomsQuotaRequestDto([new(room.Id)], QuotaMinimalBytes),
             TestContext.Current.CancellationToken);
 
         await CreateFile("Autotest Quota Track File.docx", room.Id);
@@ -106,7 +106,7 @@ public class RoomQuotaInfoTests(
         info.UsedSpace!.Value.Should().BeLessThanOrEqualTo(info.QuotaLimit!.Value);
     }
 
-    private async Task<FolderDtoInteger> WaitForRoomInfo(int roomId, Func<FolderDtoInteger, bool> until)
+    private async Task<FolderDto> WaitForRoomInfo(int roomId, Func<FolderDto, bool> until)
     {
         var deadline = DateTime.UtcNow.AddSeconds(10);
 

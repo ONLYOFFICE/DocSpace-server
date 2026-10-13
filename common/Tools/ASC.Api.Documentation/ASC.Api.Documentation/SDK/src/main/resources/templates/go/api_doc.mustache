@@ -45,6 +45,11 @@ func main() {
 	configuration := {{goImportAlias}}.NewConfiguration()
 	apiClient := {{goImportAlias}}.NewAPIClient(configuration)
 	{{#returnType}}resp, {{/returnType}}r, err := apiClient.{{classname}}.{{operationId}}(context.Background(){{#pathParams}}, {{paramName}}{{/pathParams}}){{#allParams}}{{^isPathParam}}.{{vendorExtensions.x-export-param-name}}({{paramName}}){{/isPathParam}}{{/allParams}}.Execute()
+{{#vendorExtensions.x-thirdparty-overload}}
+	// for an entry in a connected third-party storage (a string id such as "sbox-42"):
+	// {{#pathParams}}{{paramName}} := "sbox-42"{{/pathParams}}
+	// thirdPartyResp, r, err := apiClient.{{classname}}.{{operationId}}(context.Background(){{#pathParams}}, {{paramName}}{{/pathParams}}).ExecuteThirdParty()
+{{/vendorExtensions.x-thirdparty-overload}}
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `{{classname}}.{{operationId}}``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)

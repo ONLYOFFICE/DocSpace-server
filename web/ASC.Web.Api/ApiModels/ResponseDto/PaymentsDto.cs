@@ -72,7 +72,7 @@ public class ReportDto
     /// How many movements match the filters in total, across every page.
     /// </summary>
     /// <example>137</example>
-    public long TotalQuantity { get; set; }
+    public int TotalQuantity { get; set; }
     /// <summary>
     /// How many pages those movements come to at the current `limit`.
     /// </summary>
@@ -165,6 +165,13 @@ public class OperationDto
     /// <example>99.99</example>
     public decimal Debit { get; set; }
     /// <summary>
+    /// What the AI provider charged for the whole `quantity` of an AI tools or AI search charge, as the billing
+    /// service recorded it - the provider's side of the same operation `debit` bills the portal for. It is `null`
+    /// on any other movement, and on an AI charge recorded without a provider cost.
+    /// </summary>
+    /// <example>0.007</example>
+    public decimal? Cost { get; set; }
+    /// <summary>
     /// Who caused the movement, as the billing service records them - an internal name, which is what the
     /// `participantName` filter matches on. Show `participantDisplayName` instead.
     /// </summary>
@@ -195,6 +202,12 @@ public class OperationDto
     /// <example>123</example>
     public string SourceId { get; set; }
     /// <summary>
+    /// The tokens an AI operation consumed, broken down by kind - prompt, completion, cache reads and writes,
+    /// reasoning, images. It is `null` on any movement that is not an AI charge, and on an AI charge the billing
+    /// service recorded without token counts.
+    /// </summary>
+    public OperationTokenUsageDto TokenUsage { get; set; }
+    /// <summary>
     /// What kind of movement this is - a payment, a charge, a refund, a correction. It is what the `type` filter
     /// matches on, and `Unknown` covers a movement the billing service reported under a kind this build does not
     /// recognise.
@@ -216,6 +229,7 @@ public class OperationDto
         Currency = operation.Currency;
         Credit = operation.Credit;
         Debit = operation.Debit;
+        Cost = WalletServiceDescriptionManager.GetProviderCost(operation.Metadata);
         ParticipantName = operation.ParticipantName;
         ParticipantDisplayName = operation.ParticipantName != null && participantDisplayNames.TryGetValue(operation.ParticipantName, out var value)
             ? value
@@ -223,6 +237,7 @@ public class OperationDto
         SourceType = sourceType;
         SourceTitle = sourceTitle;
         SourceId = sourceId;
+        TokenUsage = WalletServiceDescriptionManager.GetTokenUsage(operation.Metadata)?.Map();
         Type = operation.Type;
     }
 }
@@ -422,7 +437,7 @@ public class CustomerServiceUsageReportDto
     /// How many services match the filters in total, across every page - services, not charges.
     /// </summary>
     /// <example>1</example>
-    public long TotalQuantity { get; set; }
+    public int TotalQuantity { get; set; }
 
     /// <summary>
     /// How many pages those entries come to at the current `limit`.

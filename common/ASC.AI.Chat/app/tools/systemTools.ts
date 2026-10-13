@@ -334,16 +334,18 @@ function filterByWhitelist<T>(
   return filtered;
 }
 
-// Read-only (GET) MCP operations run without an approval dialog.
+// Read-only (GET) MCP operations are flagged `requireApproval: false`.
 //
 // docspace-mcp marks its read-only operations with the MCP-standard
 // `annotations.readOnlyHint: true`; the raw descriptor survives the
-// `tools/list` cast, so the hint is readable here. System servers are
-// host-configured and trusted, so the hint is honored for all of them:
-// `requireApproval: false` auto-allows the call in every consumer of this
-// catalog — the DocSpace chat engine (autoAllow on tool-call-pending),
-// agents, and the editor plugin (via editor-tools/list). Mutating tools
-// keep prompting through the systemServerTypes approval flow.
+// `tools/list` cast, so the hint is readable here. Since ai-chat 0.6.21 the
+// chat engine reads the annotations itself: under the user's "auto"
+// permission mode a read-only or non-destructive tool runs without the
+// dialog, under "ask" every tool prompts bar the always-allow pins (the
+// flag set here does not bypass that), under "allow" nothing prompts. The
+// flag is kept for the catalog's other consumer, `editor-tools/list`, whose
+// clients read `requireApproval` rather than the annotations. Mutating
+// tools keep prompting through the systemServerTypes approval flow.
 function withReadOnlyAutoAllow(
   grouped: Record<string, TMCPItem[]>,
 ): Record<string, TMCPItem[]> {

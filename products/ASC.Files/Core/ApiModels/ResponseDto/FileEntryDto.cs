@@ -345,6 +345,12 @@ public abstract class FileEntryDto<T> : FileEntryBaseDto
     /// <example>false</example>
     public bool? IsLinkExpired { get; set; }
 
+    /// <summary>
+    /// The IDs of the metadata templates assigned to the file entry.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<int> AssignedMetadataTemplates { get; set; }
+
     protected FileEntryDto(FileEntry<T> entry)
         : base(entry)
     {
@@ -369,7 +375,12 @@ public class FileEntryDtoHelper(
     IDaoFactory daoFactory,
     ExternalShare externalShare,
     FileSharing fileSharing,
-    IUrlShortener urlShortener)
+    IUrlShortener urlShortener,
+    ExternalDatabaseClient externalDatabaseClient,
+    IFusionCache fusionCache,
+    TenantManager tenantManager,
+    MetadataTemplatesCache metadataTemplatesCache,
+    ILogger<FileEntryDtoHelper> logger)
 {
     protected readonly FileSecurity _fileSecurity = fileSecurity;
     protected readonly GlobalFolderHelper _globalFolderHelper = globalFolderHelper;
@@ -377,6 +388,81 @@ public class FileEntryDtoHelper(
     protected readonly ExternalShare _externalShare = externalShare;
     protected readonly IUrlShortener _urlShortener = urlShortener;
     protected readonly ApiDateTimeHelper _apiDateTimeHelper = apiDateTimeHelper;
+    private static readonly TimeSpan _formTableCacheDuration = TimeSpan.FromMinutes(1);
+
+    // Live check that a form's submissions table really exists in the external database: FormFilling.ExternalDbTableName
+    // is stored on export but never cleared, so it can outlive a reset/dropped/disabled external DB. A transient
+    // failure must not break the entry DTO — hide the action instead.
+    /// <summary>
+    /// Fills the assigned metadata templates of one entry. For the info endpoints: a client re-reads a single row by them
+    /// after a socket event, and a row without its templates would drop them from the listing. The listing fills a whole
+    /// page at once with the other overload instead of paying a query per entry.
+    /// </summary>
+    public async Task SetAssignedMetadataTemplatesAsync<T>(FileEntryDto<T> dto)
+    {
+        if (dto is FileEntryDto<int> entry)
+        {
+            await SetAssignedMetadataTemplatesAsync([entry]);
+        }
+    }
+
+    /// <summary>
+    /// Fills the assigned metadata templates of the entries in one round trip. A tenant without templates has no links
+    /// either, so the query is spared for it: the listing is the hottest read path.
+    /// </summary>
+    public async Task SetAssignedMetadataTemplatesAsync(IReadOnlyCollection<FileEntryDto<int>> dtos)
+    {
+        if (dtos.Count == 0 || !await metadataTemplatesCache.HasTemplatesAsync())
+        {
+            return;
+        }
+
+        var links = await _daoFactory.GetMetadataDao<int>()
+            .GetLinksAsync(
+                dtos.Where(d => d.FileEntryType == FileEntryType.File).Select(d => d.Id),
+                dtos.Where(d => d.FileEntryType == FileEntryType.Folder).Select(d => d.Id))
+            .ToListAsync();
+
+        if (links.Count == 0)
+        {
+            return;
+        }
+
+        var byEntry = links.ToLookup(l => (l.EntryType, (int)l.EntryId), l => l.TemplateId);
+
+        foreach (var dto in dtos)
+        {
+            var key = (dto.FileEntryType, dto.Id);
+
+            if (byEntry.Contains(key))
+            {
+                dto.AssignedMetadataTemplates = byEntry[key].Distinct().ToList();
+            }
+        }
+    }
+
+    protected async Task<bool> FormHasExternalDbTableAsync(string tableName)
+    {
+        if (string.IsNullOrEmpty(tableName) || !externalDatabaseClient.IsEnabled())
+        {
+            return false;
+        }
+
+        try
+        {
+            var cacheKey = $"files:form:table:{tenantManager.GetCurrentTenantId()}:{tableName}";
+
+            return await fusionCache.GetOrSetAsync(
+                cacheKey,
+                async _ => await externalDatabaseClient.TableExistsAsync(tableName),
+                opt => opt.SetDuration(_formTableCacheDuration));
+        }
+        catch (Exception e)
+        {
+            logger.WarnFormTableCheckFailed(e, tableName);
+            return false;
+        }
+    }
 
     protected async Task<T> GetAsync<T, TId>(FileEntry<TId> entry) where T : FileEntryDto<TId>, new()
     {
@@ -549,4 +635,10 @@ public class FileEntryDtoHelper(
 
         return default;
     }
+}
+
+internal static partial class FileEntryDtoHelperLogger
+{
+    [LoggerMessage(LogLevel.Warning, "Failed to check the form submission table {tableName} in the external database")]
+    public static partial void WarnFormTableCheckFailed(this ILogger<FileEntryDtoHelper> logger, Exception exception, string tableName);
 }

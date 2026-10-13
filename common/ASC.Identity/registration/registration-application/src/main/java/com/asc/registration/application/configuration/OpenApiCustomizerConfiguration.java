@@ -275,7 +275,7 @@ public class OpenApiCustomizerConfiguration {
    * this service's tags under the shared "OAuth 2.0" group without a manual post-pass.
    */
   @Bean
-  public OpenApiCustomizer oauthTagGroupsCustomizer() {
+  public OpenApiCustomizer registrationTagGroupsCustomizer() {
     return openApi -> {
       if (openApi.getTags() != null) {
         for (Tag tag : openApi.getTags()) {

@@ -73,7 +73,30 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
             new("files_room_settings", "tenant_id"),
             new("files_group", "tenant_id", "id") { UserIDColumns = ["user_id"] },
             new("files_roomgroup", "tenant_id", "id"),
-            new("files_order", "tenant_id")
+            new("files_order", "tenant_id"),
+
+            // metadata templates: the template and field ids are autoincrement and get remapped, the link and
+            // value rows carry composite keys only and follow the remapped template, field and entry ids
+            new("files_metadata_template", "tenant_id", "id")
+            {
+                UserIDColumns = ["create_by", "modified_by"],
+                DateColumns = new Dictionary<string, bool> {{"create_on", false}, {"modified_on", false}}
+            },
+            new("files_metadata_field", "tenant_id", "id")
+            {
+                UserIDColumns = ["create_by", "modified_by"],
+                DateColumns = new Dictionary<string, bool> {{"create_on", false}, {"modified_on", false}}
+            },
+            new("files_metadata_link", "tenant_id")
+            {
+                UserIDColumns = ["create_by"],
+                DateColumns = new Dictionary<string, bool> {{"create_on", false}}
+            },
+            new("files_metadata_value", "tenant_id")
+            {
+                UserIDColumns = ["create_by", "modified_by"],
+                DateColumns = new Dictionary<string, bool> {{"create_on", false}, {"modified_on", false}}
+            }
     ];
 
     private readonly RelationInfo[] _tableRelations =
@@ -123,7 +146,19 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
             // variant to guard against — only the entry type tells a file from a folder.
             new("files_file", "id", "files_order", "entry_id", x => Convert.ToInt32(x["entry_type"]) == 2),
             new("files_folder", "id", "files_order", "entry_id", x => Convert.ToInt32(x["entry_type"]) == 1),
-            new("files_folder", "id", "files_order", "parent_folder_id")
+            new("files_folder", "id", "files_order", "parent_folder_id"),
+
+            // metadata entry_id columns are int and are stored for the internal entries only, so like
+            // files_order the entry type alone tells a file from a folder
+            new("files_metadata_template", "id", "files_metadata_field", "template_id"),
+            new("files_metadata_template", "id", "files_metadata_link", "template_id"),
+            new("files_file", "id", "files_metadata_link", "entry_id", x => Convert.ToInt32(x["entry_type"]) == 2),
+            new("files_folder", "id", "files_metadata_link", "entry_id", x => Convert.ToInt32(x["entry_type"]) == 1),
+            // source_folder_id is filled for the inherited (cascade) links only and stays NULL otherwise
+            new("files_folder", "id", "files_metadata_link", "source_folder_id", HasSourceFolder),
+            new("files_metadata_field", "id", "files_metadata_value", "field_id"),
+            new("files_file", "id", "files_metadata_value", "entry_id", x => Convert.ToInt32(x["entry_type"]) == 2),
+            new("files_folder", "id", "files_metadata_value", "entry_id", x => Convert.ToInt32(x["entry_type"]) == 1)
     ];
 
     private static readonly Regex _regexThirdPartyProviderId = new(
@@ -141,6 +176,13 @@ public class FilesModuleSpecifics(ILogger<ModuleProvider> logger, Helpers helper
     private static bool HasThirdPartyRoom(DataRowInfo row)
     {
         return !string.IsNullOrEmpty(Convert.ToString(row["thirdparty_room_id"]));
+    }
+
+    private static bool HasSourceFolder(DataRowInfo row)
+    {
+        var value = Convert.ToString(row["source_folder_id"]);
+
+        return !string.IsNullOrEmpty(value) && value != "0";
     }
 
     /// <summary>

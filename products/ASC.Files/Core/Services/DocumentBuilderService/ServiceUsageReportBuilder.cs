@@ -52,9 +52,9 @@ public class ServiceUsageReportBuilder(
         var columns = new List<ReportColumn>
         {
             new(Resource.AccountingCustomerOperationService),
-            new(Resource.AccountingCustomerOperationQuantity, "right"),
+            new(Resource.AccountingCustomerOperationQuantity, ReportColumnAlign.Right),
             new(Resource.AccountingCustomerOperationServiceUnit),
-            new(Resource.AccountingCustomerOperationDebit, "right", Sum: true),
+            new(Resource.AccountingCustomerOperationDebit, ReportColumnAlign.Right, Sum: true),
             new(Resource.AccountingCustomerOperationCurrency, Currency: true)
         };
 
@@ -139,9 +139,9 @@ public class ServiceUsageReportBuilder(
             var properties = new List<PropertyValue>
             {
                 new(title, "@"),
-                new(record.TotalQuantity.ToString(CultureInfo.InvariantCulture), CountFormat, "right"),
+                CountValue(record.TotalQuantity),
                 new(serviceUnit, "@"),
-                new(record.TotalAmount.ToString(CultureInfo.InvariantCulture), MoneyFormat, "right"),
+                MoneyValue(record.TotalAmount),
                 new(record.Currency, "@")
             };
 

@@ -47,6 +47,14 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
 
     private const string ScriptName = "FormFillingReport.docbuilder";
 
+    // The data is written into the script, which the document server refuses past its download limit: escaped
+    // to \uXXXX, every non-Latin letter would take six bytes of it instead of two. Quotes, backslashes and control
+    // characters are still escaped. Property names are left as declared, which is what the script reads.
+    private static readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
+
     protected override async Task<DocumentBuilderInputData> GetDocumentBuilderInputDataAsync(IServiceProvider serviceProvider)
     {
         var script = await DocumentBuilderScriptHelper.ReadTemplateFromEmbeddedResource(ScriptName) ?? throw new Exception("Template not found");
@@ -59,7 +67,7 @@ public class FormFillingReportTask : DocumentBuilderTask<int, FormFillingReportT
 
         script = script
             .Replace("${tempFileName}", tempFileName)
-            .Replace("${inputData}", JsonSerializer.Serialize(data));
+            .Replace("${inputData}", JsonSerializer.Serialize(data, _jsonOptions));
 
         return new DocumentBuilderInputData(script, tempFileName, "");
     }

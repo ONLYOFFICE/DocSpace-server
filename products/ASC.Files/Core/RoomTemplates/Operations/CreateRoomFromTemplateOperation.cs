@@ -221,7 +221,7 @@ public class CreateRoomFromTemplateOperation : DistributedTaskProgress
         var subFolders = folderDao.GetFoldersAsync(sourceFolderId);
         if (filterRootFolderType)
         {
-            subFolders = subFolders.Where(f => f.FolderType == FolderType.DEFAULT);
+            subFolders = subFolders.Where(f => f.FolderType is FolderType.DEFAULT or FolderType.Ai);
         }
 
         await foreach (var subFolder in subFolders)

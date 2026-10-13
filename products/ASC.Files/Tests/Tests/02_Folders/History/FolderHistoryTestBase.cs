@@ -114,6 +114,37 @@ public abstract class FolderHistoryTestBase(
         return entry!;
     }
 
+    /// <summary>
+    /// Gives up the history report the current caller started on <paramref name="folderId"/>, once the worker has
+    /// picked it up. The worker builds reports one at a time, and a spreadsheet report holds it until the document
+    /// server answers - here, until the request to the missing one times out - so a report left running delays the
+    /// reports of every test after it. A report still waiting in the queue is run even when given up, hence the wait
+    /// for it to start; the status answer stays empty until the worker has registered the report.
+    /// </summary>
+    protected async Task CancelReportAsync(int folderId)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(30);
+
+        while (true)
+        {
+            var report = (await _foldersApi.GetReportFolderHistoryAsync(folderId, TestContext.Current.CancellationToken)).Response;
+
+            if (report?.IsCompleted == true)
+            {
+                return;
+            }
+
+            if (report?.Status == DistributedTaskStatus.Running || DateTime.UtcNow >= deadline)
+            {
+                break;
+            }
+
+            await Task.Delay(500, TestContext.Current.CancellationToken);
+        }
+
+        await _foldersApi.TerminateReportFolderHistoryAsync(folderId, TestContext.Current.CancellationToken);
+    }
+
     /// <summary>Reads a room's current history action ids, for "does not contain yet" assertions.</summary>
     protected async Task<List<MessageAction?>> GetHistoryActionIdsAsync(int roomId)
     {

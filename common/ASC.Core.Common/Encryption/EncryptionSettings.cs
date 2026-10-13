@@ -45,7 +45,7 @@ public class EncryptionSettings
     public EncryptionSettings()
     {
         Password = string.Empty;
-        Status = EncryprtionStatus.Decrypted;
+        Status = EncryptionStatus.Decrypted;
         NotifyUsers = true;
     }
 
@@ -64,7 +64,7 @@ public class EncryptionSettings
     /// </summary>
     /// <example>0</example>
     [ProtoMember(2)]
-    public EncryprtionStatus Status { get; set; }
+    public EncryptionStatus Status { get; set; }
 
     /// <summary>
     /// Specifies if the users will be notified about the encryption operation or not.
@@ -120,7 +120,7 @@ public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, Insta
         return new EncryptionSettings
         {
             Password = password,
-            Status = (EncryprtionStatus)status,
+            Status = (EncryptionStatus)status,
             NotifyUsers = notifyUsers
         };
     }
@@ -141,7 +141,7 @@ public class EncryptionSettingsHelper(CoreConfiguration coreConfiguration, Insta
         return new EncryptionSettings
         {
             Password = password,
-            Status = (EncryprtionStatus)status,
+            Status = (EncryptionStatus)status,
             NotifyUsers = notifyUsers
         };
     }

@@ -79,12 +79,14 @@ global using ASC.Common;
 global using ASC.Common.Log;
 global using ASC.Common.Threading.DistributedLock.Abstractions;
 global using ASC.Common.Web;
+global using ASC.Core.Billing;
 global using ASC.Core.Common;
 global using ASC.Core.Common.EF;
 global using ASC.Core.Common.EF.Model;
 global using ASC.Core.Common.EF.Model.Ai;
 global using ASC.Core.Common.EF.Model.Ai.Legacy;
 global using ASC.Core.Common.Settings;
+global using ASC.Core.Notify.Socket;
 global using ASC.Core.Tenants;
 global using ASC.Core.Users;
 global using ASC.Files.Core;
@@ -118,8 +120,11 @@ global using Microsoft.AspNetCore.Mvc.ModelBinding;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.Extensions.AI;
 
+global using System.Collections.Frozen;
 global using System.ComponentModel;
 global using System.ComponentModel.DataAnnotations;
+global using System.Diagnostics;
+global using System.Globalization;
 global using System.Net;
 global using System.Net.Http.Headers;
 global using System.Text;
@@ -132,3 +137,5 @@ global using System.Security.Cryptography;
 global using Swashbuckle.AspNetCore.Annotations;
 
 global using Riok.Mapperly.Abstractions;
+
+global using ZiggyCreatures.Caching.Fusion;

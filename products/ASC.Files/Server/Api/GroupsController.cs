@@ -61,10 +61,15 @@ public class GroupsController(
     /// <path>api/2.0/files/group</path>
     [Tags("Rooms / Groups")]
     [SwaggerResponse(200, "The created room group with the rooms that were linked to it", typeof(RoomGroupDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `name`, `icon` or `rooms`, the name is blank or longer than 128 characters, the icon is not a built-in cover, `searchArea` names a section other than `Active` and `Forms`, a room identifier is neither a positive number nor a non-numeric string, a third-party room identifier refers to a storage account that is not connected, or none of the listed rooms can be added and the existing ones all belong to the other section than `searchArea`")]
+    [SwaggerResponse(403, "The `rooms` list is empty, the listed rooms exist but none of them is a room the caller can read, or only some of them could be added - the group is then created with those")]
+    [SwaggerResponse(404, "None of the listed rooms exists, or a string room identifier does not name a third-party storage")]
+    [SwaggerResponse(500, "A third-party room identifier carries a storage account number beyond the 32-bit range")]
     [HttpPost("")]
     public async Task<RoomGroupDto> AddRoomGroup(RoomGroupRequestDto inDto)
     {
         var name = ValidateGroupName(inDto.Name);
+        var searchArea = ValidateSearchArea(inDto.SearchArea);
         var (roomIntIds, roomStringIds) = ParseRoomIds(inDto.Rooms);
 
         if (roomIntIds.Count == 0 && roomStringIds.Count == 0)
@@ -75,13 +80,14 @@ public class GroupsController(
         await RoomLogoManager.ValidateRoomCover(inDto.Icon);
 
         // resolved before the group row is written, so a request that resolves nothing leaves nothing behind
-        var (intIds, stringIds, anyRejected) = await fileStorageService.ResolveGroupRoomsAsync(roomIntIds, roomStringIds);
+        var (intIds, stringIds, anyRejected) = await fileStorageService.ResolveGroupRoomsAsync(roomIntIds, roomStringIds, searchArea);
 
         var group = await fileStorageService.SaveRoomGroupAsync(new RoomGroup
         {
             Name = name,
             UserID = authContext.CurrentAccount.ID,
-            Icon = inDto.Icon
+            Icon = inDto.Icon,
+            FolderType = searchArea.ToFolderType()
         });
 
         await AddRoomsToGroupAsync(intIds, stringIds, group);
@@ -111,6 +117,7 @@ public class GroupsController(
     /// <path>api/2.0/files/group/{id}</path>
     [Tags("Rooms / Groups")]
     [SwaggerResponse(200, "The room group with the rooms it gathers", typeof(RoomGroupDto))]
+    [SwaggerResponse(404, "The group does not exist or belongs to another account")]
     [HttpGet("{id:int}")]
     public async Task<RoomGroupDto> GetRoomGroupInfo(RoomGroupIdRequestDto inDto)
     {
@@ -136,6 +143,10 @@ public class GroupsController(
     /// <path>api/2.0/files/group/{id}</path>
     [Tags("Rooms / Groups")]
     [SwaggerResponse(200, "The room group as stored after the change", typeof(RoomGroupDto))]
+    [SwaggerResponse(400, "The request body cannot be read or names its members with every one of them null, the new name is blank or longer than 128 characters, a room identifier is neither a positive number nor a non-numeric string, a third-party room identifier refers to a storage account that is not connected, or none of the rooms of `roomsToAdd` can be added and the existing ones all belong to the other section than the group")]
+    [SwaggerResponse(403, "The rooms of `roomsToAdd`, or the rooms of `roomsToRemove` that are not in the group, exist but none of them is a room the caller can read, or only some of the rooms could be applied - the earlier steps stay applied")]
+    [SwaggerResponse(404, "The group does not exist or belongs to another account, none of the rooms of `roomsToAdd` or of the rooms of `roomsToRemove` that are not in the group exists, or a string room identifier does not name a third-party storage")]
+    [SwaggerResponse(500, "A third-party room identifier carries a storage account number beyond the 32-bit range")]
     [HttpPut("{id:int}")]
     public async Task<RoomGroupDto> UpdateRoomGroup(UpdateRoomGroupRequestDto inDto)
     {
@@ -159,7 +170,7 @@ public class GroupsController(
         if (update.RoomsToAdd is { Count: > 0 })
         {
             var (addInt, addString) = ParseRoomIds(update.RoomsToAdd);
-            var (intIds, stringIds, anyRejected) = await fileStorageService.ResolveGroupRoomsAsync(addInt, addString);
+            var (intIds, stringIds, anyRejected) = await fileStorageService.ResolveGroupRoomsAsync(addInt, addString, group.FolderType.ToSearchArea());
 
             await AddRoomsToGroupAsync(intIds, stringIds, group);
             rejected |= anyRejected;
@@ -199,6 +210,8 @@ public class GroupsController(
     /// <path>api/2.0/files/group/{id}/icon</path>
     [Tags("Rooms / Groups")]
     [SwaggerResponse(200, "The room group with the new icon", typeof(RoomGroupDto))]
+    [SwaggerResponse(400, "The request body cannot be read, or the icon is neither a built-in cover nor an empty string")]
+    [SwaggerResponse(404, "The group does not exist or belongs to another account")]
     [HttpPost("{id:int}/icon")]
     public async Task<RoomGroupDto> ChangeRoomGroupIcon(RoomGroupIconRequestDto inDto)
     {
@@ -224,10 +237,13 @@ public class GroupsController(
     /// <collection>list</collection>
     [Tags("Rooms / Groups")]
     [SwaggerResponse(200, "The room groups of the calling account", typeof(IAsyncEnumerable<RoomGroupDto>))]
+    [SwaggerResponse(400, "The `searchArea` names a section other than `Active` and `Forms`")]
     [HttpGet("")]
     public async IAsyncEnumerable<RoomGroupDto> GetRoomGroups(RoomGroupsRequestDto inDto)
     {
-        await foreach (var group in fileStorageService.GetGroupsAsync())
+        var searchArea = ValidateSearchArea(inDto.SearchArea);
+
+        await foreach (var group in fileStorageService.GetGroupsAsync(searchArea))
         {
             yield return await roomGroupDtoHelper.GetAsync(group, inDto.IncludeMembers);
         }
@@ -250,6 +266,9 @@ public class GroupsController(
     /// </summary>
     /// <path>api/2.0/files/group/{id}</path>
     [Tags("Rooms / Groups")]
+    [SwaggerResponse(200, "The room group no longer exists; the body is empty and the rooms it gathered are left as they were")]
+    [SwaggerResponse(403, "The group belongs to another account")]
+    [SwaggerResponse(404, "The group does not exist")]
     [HttpDelete("{id:int}")]
     public async Task DeleteRoomGroup(RoomGroupIdRequestDto inDto)
     {
@@ -282,6 +301,21 @@ public class GroupsController(
         {
             await fileStorageService.RemoveRoomFromGroupAsync(id, group.Id);
         }
+    }
+
+    /// <summary>
+    /// A group lives either in the Rooms section or in the Forms one, so only those two areas are
+    /// accepted; any other value of the shared <see cref="SearchArea"/> dictionary is a bad request.
+    /// A missing value means Active, which is what a client that predates the split sends.
+    /// </summary>
+    private static SearchArea ValidateSearchArea(SearchArea? searchArea)
+    {
+        return searchArea switch
+        {
+            null or SearchArea.Active => SearchArea.Active,
+            SearchArea.Forms => SearchArea.Forms,
+            _ => throw new ArgumentException($"'{searchArea}' is not a valid room group area.", nameof(searchArea))
+        };
     }
 
     private static string ValidateGroupName(string name)

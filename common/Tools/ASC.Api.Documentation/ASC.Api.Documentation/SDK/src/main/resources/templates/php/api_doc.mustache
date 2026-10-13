@@ -41,7 +41,7 @@ Note: the input parameter is an associative array with the keys listed as the pa
 {{/vendorExtensions.x-group-parameters}}
 {{^allParams}}This endpoint does not need any parameter.{{/allParams}}{{#allParams}}{{#-last}}| Name | Type | Description  | Notes |
 | ------------- | ------------- | ------------- | ------------- |{{/-last}}{{/allParams}}
-{{#allParams}}| **{{paramName}}** | {{#isFile}}**{{{dataType}}}**{{/isFile}}{{#isPrimitiveType}}**{{{dataType}}}**{{/isPrimitiveType}}{{^isPrimitiveType}}{{^isFile}}[**{{{dataType}}}**](../Model/{{baseType}}.md){{/isFile}}{{/isPrimitiveType}}| {{{description}}} |{{^required}} [optional]{{/required}}{{#defaultValue}} [default to {{.}}]{{/defaultValue}} |
+{{#allParams}}| **{{paramName}}** | {{#isFile}}**{{{dataType}}}**{{/isFile}}{{#isPrimitiveType}}**{{#vendorExtensions.x-thirdparty-union-type}}{{{vendorExtensions.x-thirdparty-union-type}}}{{/vendorExtensions.x-thirdparty-union-type}}{{^vendorExtensions.x-thirdparty-union-type}}{{{dataType}}}{{/vendorExtensions.x-thirdparty-union-type}}**{{/isPrimitiveType}}{{^isPrimitiveType}}{{^isFile}}[**{{{dataType}}}**](../Model/{{baseType}}.md){{/isFile}}{{/isPrimitiveType}}| {{{description}}} |{{^required}} [optional]{{/required}}{{#defaultValue}} [default to {{.}}]{{/defaultValue}} |
 {{/allParams}}{{#servers}}{{#-first}}| hostIndex | null|int | Host index. Defaults to null. If null, then the library will use $this->hostIndex instead | [optional] |
 | variables | array | Associative array of variables to pass to the host. Defaults to empty array. | [optional] |{{/-first}}
 {{/servers}}
@@ -49,6 +49,12 @@ Note: the input parameter is an associative array with the keys listed as the pa
 ### Return type
 
 {{#returnType}}{{#returnTypeIsPrimitive}}**{{{returnType}}}**{{/returnTypeIsPrimitive}}{{^returnTypeIsPrimitive}}[**{{{returnType}}}**](../Model/{{returnBaseType}}.md){{/returnTypeIsPrimitive}}{{/returnType}}{{^returnType}}void (empty response body){{/returnType}}
+{{#vendorExtensions.x-thirdparty-variant-operation}}
+
+### Third-party storage
+
+The same method serves an entry in a connected third-party storage, whose identifier is a string such as `sbox-42`: pass{{#allParams}}{{#vendorExtensions.x-thirdparty-changed}} `${{paramName}}` as `{{{dataType}}}`{{/vendorExtensions.x-thirdparty-changed}}{{/allParams}}{{#vendorExtensions.x-thirdparty-return-changed}} and the answer is [**{{{returnType}}}**](../Model/{{returnBaseType}}.md){{/vendorExtensions.x-thirdparty-return-changed}}.
+{{/vendorExtensions.x-thirdparty-variant-operation}}
 
 ### Authorization
 

@@ -136,7 +136,25 @@ public class FolderCreateTests(
 
         exception.ErrorCode.Should().Be(403);
     }
-    
+
+    [Fact]
+    public async Task CreateFolder_InAiRoomKnowledge_Owner_Returns403()
+    {
+        await _filesClient.Authenticate(Owner);
+
+        var aiRoom = await CreateAiRoom("Autotest AI Room For Knowledge Subfolder");
+        var knowledgeId = await GetKnowledgeFolderIdAsync(aiRoom.Id);
+
+        var exception = await Assert.ThrowsAsync<ApiException>(
+            async () => await CreateFolder("Autotest Knowledge Subfolder", knowledgeId));
+
+        exception.ErrorCode.Should().Be(403);
+
+        var content = (await _foldersApi.GetFolderByFolderIdAsync(knowledgeId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+
+        content.Folders.Should().BeEmpty();
+    }
+
     [Fact]
     public async Task CreateFolder_NameLongerThan165Chars_Returns400()
     {

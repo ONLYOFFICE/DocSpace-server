@@ -62,7 +62,7 @@ public class LoginLockoutTests(
         {
             var attempt = await Assert.ThrowsAsync<ApiException>(
                 async () => await _authenticationApi.AuthenticateMeAsync(
-                    new AuthRequestsDto(userName: user.Email, password: "definitely-wrong-password"),
+                    new AuthRequestDto(userName: user.Email, password: "definitely-wrong-password"),
                     TestContext.Current.CancellationToken));
 
             attempt.ErrorCode.Should().Be(401);
@@ -71,7 +71,7 @@ public class LoginLockoutTests(
         // Assert — even the correct password is now rejected as locked out
         var lockedOut = await Assert.ThrowsAsync<ApiException>(
             async () => await _authenticationApi.AuthenticateMeAsync(
-                new AuthRequestsDto(userName: user.Email, password: user.Password),
+                new AuthRequestDto(userName: user.Email, password: user.Password),
                 TestContext.Current.CancellationToken));
 
         lockedOut.ErrorCode.Should().Be(403);
@@ -79,7 +79,7 @@ public class LoginLockoutTests(
 
         // An unrelated account on the same portal can still log in normally
         var ownerLogin = await _authenticationApi.AuthenticateMeAsync(
-            new AuthRequestsDto(userName: Owner.Email, password: Owner.Password),
+            new AuthRequestDto(userName: Owner.Email, password: Owner.Password),
             TestContext.Current.CancellationToken);
         ownerLogin.Response.Token.Should().NotBeNullOrEmpty();
 

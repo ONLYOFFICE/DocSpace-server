@@ -59,7 +59,7 @@ public class AccessToDevToolsAffectsApiKeyCreationTests(
     {
         await _webApiClient.Authenticate(Owner);
         await _securityAccessToDevToolsApi.SetTenantDevToolsAccessSettingsAsync(
-            new TenantDevToolsAccessSettingsDto(limitedAccessForUsers), TestContext.Current.CancellationToken);
+            new TenantDevToolsAccessSettingsRequestDto(limitedAccessForUsers), TestContext.Current.CancellationToken);
     }
 
     [Fact]

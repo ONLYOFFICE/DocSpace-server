@@ -77,6 +77,7 @@ public class CsvFileHelper(ILogger<CsvFileHelper> logger)
         IAsyncEnumerable<IEnumerable<T>> partialRecords,
         ClassMap<T> mapper,
         CsvConfiguration config = null,
+        Encoding encoding = null,
         CancellationToken cancellationToken = default)
     {
         try
@@ -89,7 +90,7 @@ public class CsvFileHelper(ILogger<CsvFileHelper> logger)
             // CA2000: StreamWriter and CsvWriter write to caller-provided tempStream
             // The tempStream is owned by caller and will be disposed by them
 #pragma warning disable CA2000
-            var writer = new StreamWriter(tempStream, leaveOpen: true);
+            var writer = new StreamWriter(tempStream, encoding, leaveOpen: true);
             var csv = new CsvWriter(writer, config);
 #pragma warning restore CA2000
 

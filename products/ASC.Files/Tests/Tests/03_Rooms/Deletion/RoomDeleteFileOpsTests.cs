@@ -124,7 +124,7 @@ public class RoomDeleteFileOpsTests(
         // Assert
         results.Should().OnlyContain(r => r.Finished && r.Error == "");
 
-        // The room list is read raw: FolderContentDtoInteger.Folders is typed List<FileEntryBaseDto>,
+        // The room list is read raw: FolderContentDto.Folders is typed List<FileEntryBaseDto>,
         // which carries Title but not Id, so the duplicate cannot be addressed through the SDK model.
         var duplicateId = await FindRoomId("Autotest Admin Room With File For Owner Duplicate", room.Id);
         duplicateId.Should().NotBeNull();

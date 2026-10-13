@@ -23,6 +23,7 @@ import io.swagger.v3.oas.models.*;
 import io.swagger.v3.oas.models.media.*;
 import io.swagger.v3.oas.models.parameters.*;
 import io.swagger.v3.oas.models.security.*;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.servers.*;
 import io.swagger.v3.oas.models.tags.*;
 
@@ -311,6 +312,16 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
             return null;
         }
 
+        // The third-party twin shares the path and the method of its operation, so the lookup below would
+        // hand it the portal parameter's example ("1" for an id that is "sbox-42" there). What the twin
+        // changes is stated in the extension, and that is where its examples are.
+        if (operation.vendorExtensions.containsKey(ThirdPartyVariants.IS_VARIANT)) {
+            String variantExample = variantExample(raw, parameterName, location);
+            if (variantExample != null) {
+                return variantExample;
+            }
+        }
+
         for (Parameter parameter : raw.getParameters()) {
             if (!parameterName.equals(parameter.getName())) {
                 continue;
@@ -326,6 +337,56 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
             Object schemaExample = schemaExample(parameter.getSchema());
             if (schemaExample != null) {
                 return exampleText(schemaExample);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * The example the third-party twin of an operation states for a parameter it changes, read from the
+     * {@code x-thirdparty-variant} extension; null when the twin leaves that parameter as it is.
+     */
+    private static String variantExample(Operation raw, String parameterName, String location) {
+        Object extension = raw.getExtensions() == null ? null : raw.getExtensions().get(ThirdPartyVariants.EXTENSION);
+        if (!(extension instanceof Map)) {
+            return null;
+        }
+
+        Object parameters = ((Map<?, ?>) extension).get("parameters");
+        if (!(parameters instanceof List)) {
+            return null;
+        }
+
+        for (Object item : (List<?>) parameters) {
+            if (!(item instanceof Map)) {
+                continue;
+            }
+
+            Map<?, ?> parameter = (Map<?, ?>) item;
+            if (!parameterName.equals(parameter.get("name"))) {
+                continue;
+            }
+            if (location != null && !location.isEmpty() && !location.equals(parameter.get("in"))) {
+                continue;
+            }
+
+            if (parameter.get("example") != null) {
+                return exampleText(parameter.get("example"));
+            }
+
+            if (parameter.get("schema") instanceof Map) {
+                Map<?, ?> schema = (Map<?, ?>) parameter.get("schema");
+                if (schema.get("example") != null) {
+                    return exampleText(schema.get("example"));
+                }
+                if (schema.get("examples") instanceof List) {
+                    for (Object example : (List<?>) schema.get("examples")) {
+                        if (example != null) {
+                            return exampleText(example);
+                        }
+                    }
+                }
             }
         }
 
@@ -519,64 +580,85 @@ public class MyMarkdownDocumentationCodegen extends MarkdownDocumentationCodegen
 
         for (CodegenOperation operation : results.getOperations().getOperation()) {
             operation.vendorExtensions.put(ANCHOR, slug(operation.operationId));
+            markOperation(operation);
 
-            if (operation.allParams != null) {
-                for (CodegenParameter parameter : operation.allParams) {
-                    String location = parameterLocation(parameter);
-                    parameter.description = tableText(parameter.description);
-                    parameter.vendorExtensions.put(PARAM_IN, location);
-                    parameter.vendorExtensions.put(NOTES, notes(
-                            parameter.required,
-                            statedExample(operation, parameter.baseName, location),
-                            parameter.defaultValue,
-                            parameter.allowableValues,
-                            parameter.minimum,
-                            parameter.maximum,
-                            parameter.minLength,
-                            parameter.maxLength,
-                            parameter.pattern,
-                            parameter.isNullable));
-
-                    if (isDocumented(parameter.baseType)) {
-                        parameter.vendorExtensions.put(MODEL_DOC, parameter.baseType);
-                        parameter.vendorExtensions.put(MODEL_ANCHOR, documentedModels.get(parameter.baseType));
-                    }
-                }
-            }
-
-            if (operation.responses != null) {
-                for (CodegenResponse response : operation.responses) {
-                    response.message = tableText(response.message);
-
-                    if (isDocumented(response.baseType)) {
-                        response.vendorExtensions.put(MODEL_ANCHOR, documentedModels.get(response.baseType));
-                    }
-                }
-            }
-
-            if (operation.authMethods != null) {
-                for (CodegenSecurity security : operation.authMethods) {
-                    security.vendorExtensions.put(ANCHOR, slug(security.name));
-
-                    // Absent rather than empty: the template engine treats "" as present and
-                    // would render a bare "(scopes: )" for schemes that require none.
-                    String scopes = scopeList(security);
-                    if (!scopes.isEmpty()) {
-                        security.vendorExtensions.put(SCOPES, scopes);
-                    } else {
-                        security.vendorExtensions.remove(SCOPES);
-                    }
-                }
-            }
-
-            if (isDocumented(operation.returnBaseType)) {
-                operation.vendorExtensions.put(RETURN_MODEL_DOC, operation.returnBaseType);
-                operation.vendorExtensions.put(RETURN_MODEL_ANCHOR, documentedModels.get(operation.returnBaseType));
+            // The third-party twin is rendered inside the operation's own section, from the same marks.
+            Object variant = operation.vendorExtensions.get(ThirdPartyVariants.VARIANT_OPERATION);
+            if (variant instanceof CodegenOperation) {
+                markOperation((CodegenOperation) variant);
             }
 
         }
 
         return results;
+    }
+
+    // The string-id twin of a generic action (see ThirdPartyVariants) stays attached to its operation: the
+    // page shows it as a subsection of the operation rather than as an operation of its own.
+    @Override
+    public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List<Server> servers) {
+        CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);
+        ThirdPartyVariants.attach(this, op, path, httpMethod, operation, servers, ThirdPartyVariants.Naming.OVERLOAD);
+        return op;
+    }
+
+    /**
+     * Links and notes for the parameters, responses, authorization and return type of one operation.
+     */
+    private void markOperation(CodegenOperation operation) {
+        if (operation.allParams != null) {
+            for (CodegenParameter parameter : operation.allParams) {
+                String location = parameterLocation(parameter);
+                parameter.description = tableText(parameter.description);
+                parameter.vendorExtensions.put(PARAM_IN, location);
+                parameter.vendorExtensions.put(NOTES, notes(
+                        parameter.required,
+                        statedExample(operation, parameter.baseName, location),
+                        parameter.defaultValue,
+                        parameter.allowableValues,
+                        parameter.minimum,
+                        parameter.maximum,
+                        parameter.minLength,
+                        parameter.maxLength,
+                        parameter.pattern,
+                        parameter.isNullable));
+
+                if (isDocumented(parameter.baseType)) {
+                    parameter.vendorExtensions.put(MODEL_DOC, parameter.baseType);
+                    parameter.vendorExtensions.put(MODEL_ANCHOR, documentedModels.get(parameter.baseType));
+                }
+            }
+        }
+
+        if (operation.responses != null) {
+            for (CodegenResponse response : operation.responses) {
+                response.message = tableText(response.message);
+
+                if (isDocumented(response.baseType)) {
+                    response.vendorExtensions.put(MODEL_ANCHOR, documentedModels.get(response.baseType));
+                }
+            }
+        }
+
+        if (operation.authMethods != null) {
+            for (CodegenSecurity security : operation.authMethods) {
+                security.vendorExtensions.put(ANCHOR, slug(security.name));
+
+                // Absent rather than empty: the template engine treats "" as present and
+                // would render a bare "(scopes: )" for schemes that require none.
+                String scopes = scopeList(security);
+                if (!scopes.isEmpty()) {
+                    security.vendorExtensions.put(SCOPES, scopes);
+                } else {
+                    security.vendorExtensions.remove(SCOPES);
+                }
+            }
+        }
+
+        if (isDocumented(operation.returnBaseType)) {
+            operation.vendorExtensions.put(RETURN_MODEL_DOC, operation.returnBaseType);
+            operation.vendorExtensions.put(RETURN_MODEL_ANCHOR, documentedModels.get(operation.returnBaseType));
+        }
     }
 
     @Override

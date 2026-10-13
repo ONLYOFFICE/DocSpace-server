@@ -73,6 +73,7 @@ import okhttp3.MultipartBody
 {{/x-kotlin-multipart-import}}
 {{#nonPublicApi}}internal {{/nonPublicApi}}{{^nonPublicApi}}{{#explicitApi}}public {{/explicitApi}}{{/nonPublicApi}}interface {{x-classname}} {
     {{#operation}}
+    {{^vendorExtensions.x-is-thirdparty-variant}}
     {{#allParams}}
     {{#isEnum}}
 
@@ -132,6 +133,7 @@ import okhttp3.MultipartBody
 
     {{/isEnum}}
     {{/allParams}}
+    {{/vendorExtensions.x-is-thirdparty-variant}}
     /**
      * {{{httpMethod}}} {{#sanitizePathComment}}{{{path}}}{{/sanitizePathComment}}
      * {{{summary}}}

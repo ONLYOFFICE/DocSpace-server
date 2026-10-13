@@ -34,7 +34,7 @@
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject } from "../narrow.js";
-import type { PreferencesStorage } from "@onlyoffice/ai-chat/core";
+import type { PreferencesStorage, ToolPermissionMode } from "@onlyoffice/ai-chat/core";
 import {
   chatContextScope,
   invalidateChatContext,
@@ -47,8 +47,10 @@ import {
   levelToDepth,
   type ReasoningLevel,
 } from "./reasoningDepth.js";
+import { csharpToToolPermissionMode, toolPermissionModeToCsharp } from "./toolPermissionMode.js";
 
 const PATH = "/preferences";
+const TOOL_MODE_PATH = "/config/tool-mode";
 
 function entityIdQuery(entityId: string | undefined): Record<string, QueryValue> | undefined {
   return entityId ? { entityId } : undefined;
@@ -69,7 +71,7 @@ async function scopedEntityId(
 
 // The C# storage keeps ONE value per scope: `depth`, its `ReasoningDepth`
 // enum (`none | low | medium | high | xhigh | max`, see `reasoningDepth.ts`).
-// The library's two preferences are both views of it:
+// The library's two thinking preferences are both views of it:
 //
 // - the reasoning level IS the depth (`none` ↔ `off`);
 // - deep mode is "the depth is above `none`". Writing `false` stores `none`;
@@ -82,6 +84,51 @@ async function scopedEntityId(
 //
 // `null` from a read means "nothing persisted in scope" for both views.
 export class HttpPreferencesStorage implements PreferencesStorage {
+  // -- tool permission mode ------------------------------------------------
+  //
+  // Not a row of the preferences table: the C# side keeps the mode in the
+  // user's AI settings (`AiUserSettings.ToolPermissionMode`, served and
+  // stored by `GET/PUT internal/ai/config/tool-mode`). It is one value per
+  // user — "applies to every chat of the user in the portal" — so the
+  // `entityId` the library passes is accepted and ignored. The user settings
+  // always carry a mode (the C# default is `Auto`), so a read never answers
+  // `null` from a live service; the engine's own default only ever applies
+  // to a failed read. There is no delete on the C# side: clearing resets to
+  // the C# default by writing it.
+
+  async createToolPermissionMode(value: ToolPermissionMode): Promise<void> {
+    await this.writeMode(value);
+  }
+
+  async readToolPermissionMode(): Promise<ToolPermissionMode | null> {
+    const snapshot = readChatContext("preferences");
+    if (snapshot) {
+      return snapshot.toolPermissionMode;
+    }
+    reportChatContextMiss("preferences.readToolPermissionMode");
+    try {
+      const raw = await aiService.get(TOOL_MODE_PATH);
+      return isObject(raw) ? csharpToToolPermissionMode(raw["mode"]) : null;
+    } catch (err) {
+      if (err instanceof AiServiceHttpError && err.status === 404) {
+        return null;
+      }
+      throw err;
+    }
+  }
+
+  async updateToolPermissionMode(value: ToolPermissionMode): Promise<void> {
+    await this.writeMode(value);
+  }
+
+  async upsertToolPermissionMode(value: ToolPermissionMode): Promise<void> {
+    await this.writeMode(value);
+  }
+
+  async deleteToolPermissionMode(): Promise<void> {
+    await this.writeMode("auto");
+  }
+
   // -- reasoning level -----------------------------------------------------
 
   async createReasoningLevel(value: ReasoningLevel, entityId?: string): Promise<void> {
@@ -164,6 +211,13 @@ export class HttpPreferencesStorage implements PreferencesStorage {
       depth: levelToDepth(level),
       entityId: await scopedEntityId(entityId),
     });
+    invalidateChatContext("preferences");
+  }
+
+  // The mode shares the `preferences` snapshot slice with the depth, so a
+  // write here makes the next same-request read of either go to the service.
+  private async writeMode(mode: ToolPermissionMode): Promise<void> {
+    await aiService.put(TOOL_MODE_PATH, { mode: toolPermissionModeToCsharp(mode) });
     invalidateChatContext("preferences");
   }
 

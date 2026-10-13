@@ -31,10 +31,11 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import type { StorageAdapter } from "@onlyoffice/ai-chat/core";
+import type { ContextFolder, RoomSkill, StorageAdapter } from "@onlyoffice/ai-chat/core";
 
 import { HttpAttachmentsStorage } from "./attachmentsStorage.js";
 import { HttpAssignmentsStorage } from "./assignmentsStorage.js";
+import { HttpFormAnalysisStorage } from "./formAnalysisStorage.js";
 import { HttpMcpServersStorage } from "./mcpServersStorage.js";
 import { HttpMessagesStorage } from "./messagesStorage.js";
 import { HttpPreferencesStorage } from "./preferencesStorage.js";
@@ -44,6 +45,7 @@ import { HttpPromptsStorage } from "./promptsStorage.js";
 import { HttpThreadsStorage } from "./threadsStorage.js";
 import { HttpToolPrefsStorage } from "./toolPrefsStorage.js";
 import { HttpWebSearchStorage } from "./webSearchStorage.js";
+import { getContextFolders, getRoomSkill, getRoomSkills } from "./roomSkills.js";
 
 export class HttpStorageAdapter implements StorageAdapter {
   public threads = new HttpThreadsStorage();
@@ -57,6 +59,22 @@ export class HttpStorageAdapter implements StorageAdapter {
   public toolPrefs = new HttpToolPrefsStorage();
   public webSearch = new HttpWebSearchStorage();
   public attachments = new HttpAttachmentsStorage();
+  public formAnalysis = new HttpFormAnalysisStorage();
+
+  // Rooms and skills for the chat's context: the rooms with a `.ai` folder
+  // the caller can read (one cloud entry — DocSpace is a single cloud, so
+  // `cloud` is not consulted) and the Markdown files of a room's folder.
+  async getContextFolders(): Promise<ContextFolder[]> {
+    return getContextFolders();
+  }
+
+  async getRoomSkills(_cloud: string, roomId: string): Promise<RoomSkill[]> {
+    return getRoomSkills(roomId);
+  }
+
+  async getRoomSkill(_cloud: string, roomId: string, skillId: string): Promise<string> {
+    return getRoomSkill(roomId, skillId);
+  }
 
   async init(): Promise<void> {
     // No-op: every storage is HTTP-backed; nothing to initialize locally.

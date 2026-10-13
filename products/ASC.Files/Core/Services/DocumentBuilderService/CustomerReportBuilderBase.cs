@@ -51,17 +51,37 @@ public sealed record RenderContext(
     JsonSerializerOptions Options,
     ReportHeader Header);
 
+/// Horizontal alignment of a report cell. The document builder expects these as the lowercase
+/// strings it passes to SetAlignHorizontal, which is what the camel-case enum converter on
+/// <see cref="CustomerReportBuilderBase"/>'s serializer options writes.
+public enum ReportColumnAlign
+{
+    Left,
+    Right
+}
+
 /// A single report column: its localized header, horizontal alignment, and whether it participates
 /// in the total row (summed, or the currency echoed next to the sums).
-public sealed record ReportColumn(string Header, string Align = "left", bool Sum = false, bool Currency = false);
+public sealed record ReportColumn(string Header, ReportColumnAlign Align = ReportColumnAlign.Left, bool Sum = false, bool Currency = false);
 
 /// One value column of the summary pivot: the source column, the aggregate function applied to it,
 /// the caption shown above it and the number format of the aggregated value.
 public sealed record ReportPivotDataField(string Field, string Aggregation, string Caption, string Format);
 
+/// Direction of a pivot sort. Reaches the script by its lowercase name, like <see cref="ReportColumnAlign"/>.
+public enum ReportPivotSortOrder
+{
+    Ascending,
+    Descending
+}
+
+/// Orders the items of a pivot row field. By is either the source column of one of the data fields,
+/// to order the items by their aggregated values, or the row field itself, to order them by caption.
+public sealed record ReportPivotSort(string RowField, string By, ReportPivotSortOrder Order);
+
 /// An optional second sheet summarizing the detail table as a pivot. Fields are addressed by their
 /// localized column header, because that is what the pivot reads from the source range's header row.
-public sealed record ReportPivot(string SheetName, List<string> RowFields, List<ReportPivotDataField> DataFields);
+public sealed record ReportPivot(string SheetName, List<string> RowFields, List<ReportPivotDataField> DataFields, ReportPivotSort Sort = null);
 
 /// The report-specific pieces, resolved after the user's culture is applied so that
 /// the sheet name, report title, file name and column headers are localized correctly.
@@ -102,7 +122,14 @@ public abstract class CustomerReportBuilderBase(
     private static readonly JsonSerializerOptions _jsonOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+        // The script reads the alignments as the lowercase strings it hands to SetAlignHorizontal,
+        // so ReportColumnAlign has to reach it by name rather than by its numeric value.
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+        // The data is written into the script, which the document server refuses past its download
+        // limit: escaped to \uXXXX, every non-Latin letter would take six bytes of it instead of two.
+        // Quotes, backslashes and control characters are still escaped.
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
     public async Task<DocumentBuilderInputData> BuildAsync(Guid userId, CustomerOperationsReportTaskData data)
@@ -244,5 +271,18 @@ public abstract class CustomerReportBuilderBase(
         return new DocumentBuilderInputData(scriptFilePath, tempFileName, outputFileName);
     }
 
-    protected sealed record PropertyValue(string Value, string Format, string Halign = null);
+    protected sealed record PropertyValue(string Value, string Format, ReportColumnAlign? Halign = null);
+
+    // A money cell: the amount at full precision. Every number in the report is right-aligned.
+    protected static PropertyValue MoneyValue(decimal? amount)
+    {
+        return new PropertyValue(amount?.ToString(CultureInfo.InvariantCulture), MoneyFormat, ReportColumnAlign.Right);
+    }
+
+    // A whole-number cell: quantities and token counts. A count that was never recorded leaves the
+    // cell empty rather than showing 0.
+    protected static PropertyValue CountValue(long? count)
+    {
+        return new PropertyValue(count?.ToString(CultureInfo.InvariantCulture), CountFormat, ReportColumnAlign.Right);
+    }
 }

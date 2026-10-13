@@ -60,7 +60,7 @@ public class FolderDeleteTests(
         var folder = await CreateFolder("Autotest Folder To Delete Immediately", myId);
 
         // Act
-        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
+        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
 
         if (results.Count == 0 || results.Any(r => !r.Finished))
         {
@@ -84,7 +84,7 @@ public class FolderDeleteTests(
         var folder = await CreateFolder(folderTitle, myId);
 
         // Act
-        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { DeleteAfter = true, Immediately = false }, TestContext.Current.CancellationToken)).Response;
+        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest { DeleteAfter = true, Immediately = false }, TestContext.Current.CancellationToken)).Response;
 
         if (results.Count == 0 || results.Any(r => !r.Finished))
         {
@@ -116,7 +116,7 @@ public class FolderDeleteTests(
 
         // Act
         await _filesClient.Authenticate(Owner);
-        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
+        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
 
         if (results.Count == 0 || results.Any(r => !r.Finished))
         {
@@ -139,7 +139,7 @@ public class FolderDeleteTests(
         var folder = await CreateFolder("Autotest Folder In Room", room.Id);
 
         // Act
-        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
+        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
 
         if (results.Count == 0 || results.Any(r => !r.Finished))
         {
@@ -163,7 +163,7 @@ public class FolderDeleteTests(
         var child = await CreateFolder("Autotest Child Folder", parent.Id);
 
         // Act
-        var results = (await _foldersApi.DeleteFolderAsync(parent.Id, new DeleteFolder { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
+        var results = (await _foldersApi.DeleteFolderAsync(parent.Id, new DeleteFolderRequest { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
 
         if (results.Count == 0 || results.Any(r => !r.Finished))
         {
@@ -189,7 +189,7 @@ public class FolderDeleteTests(
         await CreateFile("Autotest File Inside Folder.docx", folder.Id);
 
         // Act
-        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
+        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
 
         if (results.Count == 0 || results.Any(r => !r.Finished))
         {
@@ -212,7 +212,7 @@ public class FolderDeleteTests(
         var myId = await GetUserFolderIdAsync(Owner);
         var folder = await CreateFolder("Autotest Folder For Double Delete", myId);
 
-        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
+        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
 
         if (results.Any(r => !r.Finished))
         {
@@ -226,7 +226,7 @@ public class FolderDeleteTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _foldersApi.DeleteFolderAsync(
                 folder.Id,
-                new DeleteFolder(true, true),
+                new DeleteFolderRequest(true, true),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(404);
@@ -244,7 +244,7 @@ public class FolderDeleteTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _foldersApi.DeleteFolderAsync(
                 nonExistingFolderId,
-                new DeleteFolder(false, true),
+                new DeleteFolderRequest(false, true),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(404);
@@ -265,7 +265,7 @@ public class FolderDeleteTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _foldersApi.DeleteFolderAsync(
                 folder.Id,
-                new DeleteFolder(false, true),
+                new DeleteFolderRequest(false, true),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
@@ -416,7 +416,7 @@ public class FolderDeleteTests(
     /// operation reports finished before the listing reflects it, and under a full-suite run that
     /// lag regularly outlives a bare read.
     /// </summary>
-    private async Task<FolderContentDtoInteger> GetTrashAsync(List<FolderType>? folderType = null, int expectedFolders = 1)
+    private async Task<FolderContentDto> GetTrashAsync(List<FolderType>? folderType = null, int expectedFolders = 1)
     {
         var trashId = await GetTrashFolderIdAsync(Owner);
         var deadline = DateTime.UtcNow.AddSeconds(30);
@@ -434,7 +434,7 @@ public class FolderDeleteTests(
         }
     }
 
-    private async Task MoveFoldersToTrash(params FolderDtoInteger[] folders)
+    private async Task MoveFoldersToTrash(params FolderDto[] folders)
     {
         foreach (var folder in folders)
         {
@@ -442,9 +442,9 @@ public class FolderDeleteTests(
         }
     }
 
-    private async Task DeleteFolderAndWaitForCompletion(FolderDtoInteger folder)
+    private async Task DeleteFolderAndWaitForCompletion(FolderDto folder)
     {
-        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { Immediately = false }, TestContext.Current.CancellationToken)).Response;
+        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest { Immediately = false }, TestContext.Current.CancellationToken)).Response;
         var operationId = results.FirstOrDefault()?.Id;
 
         if (results.Any(r => !r.Finished))
@@ -455,7 +455,7 @@ public class FolderDeleteTests(
         results.Should().NotContain(x => !string.IsNullOrEmpty(x.Error));
     }
 
-    private async Task<FolderDtoInteger> CreateRoom(RoomType roomType, string title) => roomType switch
+    private async Task<FolderDto> CreateRoom(RoomType roomType, string title) => roomType switch
     {
         RoomType.CustomRoom => await CreateCustomRoom(title),
         RoomType.PublicRoom => await CreatePublicRoom(title),

@@ -408,7 +408,7 @@ public class QuotaUsedSpaceTests(
 
         const int rootsCount = 4;
 
-        var roots = new List<FolderDtoInteger>(rootsCount);
+        var roots = new List<FolderDto>(rootsCount);
         for (var i = 0; i < rootsCount; i++)
         {
             roots.Add(await CreateFolderInMy($"quota_concurrent_{i}", Owner));
@@ -438,7 +438,7 @@ public class QuotaUsedSpaceTests(
 
         // Act - start every delete operation at once so their counter updates overlap
         var started = await Task.WhenAll(roots.Select(r =>
-            _foldersApi.DeleteFolderAsync(r.Id, new DeleteFolder { Immediately = true }, TestContext.Current.CancellationToken)));
+            _foldersApi.DeleteFolderAsync(r.Id, new DeleteFolderRequest { Immediately = true }, TestContext.Current.CancellationToken)));
 
         foreach (var operation in started)
         {

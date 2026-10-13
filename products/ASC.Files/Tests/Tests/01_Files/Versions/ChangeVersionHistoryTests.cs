@@ -50,7 +50,7 @@ public class ChangeVersionHistoryTests(
         // Act
         var response = (await _filesApi.ChangeVersionHistoryWithHttpInfoAsync(
             file.Id,
-            new ChangeHistory(2, false),
+            new ChangeHistoryRequest(2, false),
             TestContext.Current.CancellationToken)).Data.Response;
 
         // Assert
@@ -73,7 +73,7 @@ public class ChangeVersionHistoryTests(
         // Act
         var response = (await _filesApi.ChangeVersionHistoryWithHttpInfoAsync(
             file.Id,
-            new ChangeHistory(2, true),
+            new ChangeHistoryRequest(2, true),
             TestContext.Current.CancellationToken)).Data.Response;
 
         // Assert
@@ -92,7 +92,7 @@ public class ChangeVersionHistoryTests(
         // Act
         var result = (await _filesApi.ChangeVersionHistoryWithHttpInfoAsync(
             file.Id,
-            new ChangeHistory(2, false),
+            new ChangeHistoryRequest(2, false),
             TestContext.Current.CancellationToken)).Data;
 
         // Assert
@@ -116,7 +116,7 @@ public class ChangeVersionHistoryTests(
         var groupsBefore = before.Select(e => e.VersionGroup).ToHashSet();
 
         // Act
-        await _filesApi.ChangeVersionHistoryAsync(file.Id, new ChangeHistory(2, false), TestContext.Current.CancellationToken);
+        await _filesApi.ChangeVersionHistoryAsync(file.Id, new ChangeHistoryRequest(2, false), TestContext.Current.CancellationToken);
 
         var after = (await _filesApi.GetEditHistoryWithHttpInfoAsync(file.Id, TestContext.Current.CancellationToken)).Data.Response;
         var groupsAfter = after.Select(e => e.VersionGroup).ToHashSet();
@@ -138,13 +138,13 @@ public class ChangeVersionHistoryTests(
         await _filesClient.Authenticate(Owner);
         var file = await CreateFileWithSecondVersion("Autotest Version History Merge Groups");
 
-        await _filesApi.ChangeVersionHistoryAsync(file.Id, new ChangeHistory(2, false), TestContext.Current.CancellationToken);
+        await _filesApi.ChangeVersionHistoryAsync(file.Id, new ChangeHistoryRequest(2, false), TestContext.Current.CancellationToken);
 
         var before = (await _filesApi.GetEditHistoryWithHttpInfoAsync(file.Id, TestContext.Current.CancellationToken)).Data.Response;
         var groupsBefore = before.Select(e => e.VersionGroup).ToHashSet();
 
         // Act
-        await _filesApi.ChangeVersionHistoryAsync(file.Id, new ChangeHistory(2, true), TestContext.Current.CancellationToken);
+        await _filesApi.ChangeVersionHistoryAsync(file.Id, new ChangeHistoryRequest(2, true), TestContext.Current.CancellationToken);
 
         var after = (await _filesApi.GetEditHistoryWithHttpInfoAsync(file.Id, TestContext.Current.CancellationToken)).Data.Response;
         var groupsAfter = after.Select(e => e.VersionGroup).ToHashSet();
@@ -163,7 +163,7 @@ public class ChangeVersionHistoryTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.ChangeVersionHistoryAsync(
                 999999999,
-                new ChangeHistory(1, false),
+                new ChangeHistoryRequest(1, false),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(404);
@@ -179,7 +179,7 @@ public class ChangeVersionHistoryTests(
         // Act
         var response = (await _filesApi.ChangeVersionHistoryWithHttpInfoAsync(
             file.Id,
-            new ChangeHistory(2, false),
+            new ChangeHistoryRequest(2, false),
             TestContext.Current.CancellationToken)).Data.Response;
 
         // Assert
@@ -199,7 +199,7 @@ public class ChangeVersionHistoryTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.ChangeVersionHistoryAsync(
                 file.Id,
-                new ChangeHistory(2, false),
+                new ChangeHistoryRequest(2, false),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);

@@ -350,7 +350,7 @@ public class FavoritesTests(
             { RoomType.VirtualDataRoom, FolderType.VirtualDataRoom }
         };
 
-    private async Task<FolderContentDtoInteger> GetFavoritesAsync(User user, List<FolderType>? folderType = null)
+    private async Task<FolderContentDto> GetFavoritesAsync(User user, List<FolderType>? folderType = null)
     {
         var favoritesId = await GetFolderIdAsync(FolderType.Favorites, user);
 
@@ -371,7 +371,7 @@ public class FavoritesTests(
         await _filesOperationsApi.AddFavoritesAsync(request, cancellationToken: TestContext.Current.CancellationToken);
     }
 
-    private async Task<FolderDtoInteger> CreateRoom(RoomType roomType, string title) => roomType switch
+    private async Task<FolderDto> CreateRoom(RoomType roomType, string title) => roomType switch
     {
         RoomType.CustomRoom => await CreateCustomRoom(title),
         RoomType.PublicRoom => await CreatePublicRoom(title),

@@ -54,7 +54,7 @@ public class StartReassignRequestDto
 
     /// <summary>
     /// Specifies whether to delete the source profile once the transfer succeeds. When false, which is the default,
-    /// the emptied profile is kept and can be deleted later through `DELETE api/2.0/people/{userid}`.
+    /// the emptied profile is kept and can be deleted later through `DELETE api/2.0/people/{userId}`.
     /// </summary>
     /// <example>false</example>
     public bool DeleteProfile { get; set; }

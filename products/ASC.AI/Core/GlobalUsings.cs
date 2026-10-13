@@ -97,6 +97,8 @@ global using Microsoft.Extensions.AI;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.Logging;
 
+global using NetEscapades.EnumGenerators;
+
 global using ProtoBuf;
 
 global using System.Buffers;

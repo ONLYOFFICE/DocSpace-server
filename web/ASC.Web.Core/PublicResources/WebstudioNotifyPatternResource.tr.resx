@@ -930,7 +930,11 @@ Kişisel verilerin silinmesi $DocsSpace’te yer açılmasını sağlar</value>
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Merhaba, $UserName!
 
-Satın aldığınız tarife planının veya hizmetlerin otomatik yenileme işleminin tamamlanamadığını bildirmek için sizinle iletişime geçiyoruz. Manuel olarak yenilemenizi rica ediyoruz.
+Satın aldığınız tarife planının veya hizmetlerin otomatik yenileme işleminin tamamlanamadığını bildirmek için sizinle iletişime geçiyoruz:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Manuel olarak yenilemenizi rica ediyoruz.
 
 $OrangeButton
 
@@ -1879,5 +1883,19 @@ Bu siz idiyseniz — başka herhangi bir adım atmanız gerekmez. Bu girişi tan
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Merhaba, $UserName!
+
+Mevcut ödeme yönteminiz için otomatik yüklemenin desteklenmediğini bildirmek amacıyla sizinle iletişime geçiyoruz: para, banka havalesi tamamlandıktan sonra ${LetterLogoText} Wallet'a ulaşır, bu nedenle bakiye hemen yenilenemez.
+
+Bu nedenle otomatik yükleme devre dışı bırakıldı. Ücretli hizmetlerin kesintiye uğramaması için lütfen cüzdan bakiyenizi manuel olarak yükleyin veya otomatik yüklemeyi destekleyen bir ödeme yöntemine geçin.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Eylem gerekli: ${LetterLogoText} Wallet'ınız için otomatik yükleme kullanılamıyor</value>
   </data>
 </root>

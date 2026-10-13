@@ -49,6 +49,9 @@ public class BaseTest(
     // so the owner Id is always the one belonging to this test's own portal — never shared.
     protected User Owner => _clients.Owner;
 
+    /// <summary>The assembly's Aspire host, for the rare test that has to reach past the API.</summary>
+    protected AspireAppFixture Fixture => fixture;
+
     protected HttpClient _filesClient = null!;
     protected HttpClient _peopleClient = null!;
     protected HttpClient _webApiClient = null!;
@@ -57,6 +60,7 @@ public class BaseTest(
     protected FilesApi _filesApi = null!;
     protected OperationsApi _filesOperationsApi = null!;
     protected RoomsApi _roomsApi = null!;
+    protected DocSpace.API.SDK.Api.Security.AuditTrailDataApi _auditTrailDataApi = null!;
     protected GroupsApi _roomGroupsApi = null!;
     protected SettingsApi _filesSettingsApi = null!;
     protected QuotaApi _quotaApi = null!;
@@ -115,6 +119,7 @@ public class BaseTest(
         _filesApi = _clients.FilesApi;
         _filesOperationsApi = _clients.OperationsApi;
         _roomsApi = _clients.RoomsApi;
+        _auditTrailDataApi = _clients.AuditTrailDataApi;
         _roomGroupsApi = _clients.RoomGroupsApi;
         _filesSettingsApi = _clients.SettingsApi;
         _quotaApi = _clients.QuotaApi;
@@ -139,7 +144,7 @@ public class BaseTest(
         Timing.Write("setup.total", setupSw.ElapsedMilliseconds);
     }
 
-    public ValueTask DisposeAsync()
+    public virtual ValueTask DisposeAsync()
     {
         // Each test owns its portal and clients; nothing is shared, so just dispose the clients.
         _clients.Dispose();
@@ -159,7 +164,15 @@ public class BaseTest(
         return Invitations.InviteGuestAsync(_peopleClient, user ?? Owner, TestContext.Current.CancellationToken);
     }
 
-    protected async Task<FileDtoInteger> GetFile(int fileId)
+    protected async Task<FileDto> GetFile(int fileId)
+    {
+        return (await _filesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
+    }
+
+    /// <summary>
+    /// Reads a file that lives in a connected third-party storage, whose identifier is a string such as <c>sbox-42</c>.
+    /// </summary>
+    protected async Task<ThirdPartyFileDto> GetFile(string fileId)
     {
         return (await _filesApi.GetFileInfoAsync(fileId, cancellationToken: TestContext.Current.CancellationToken)).Response;
     }
@@ -179,7 +192,7 @@ public class BaseTest(
         return await GetFolderIdAsync(FolderType.USER, user);
     }
 
-    protected async Task<FileDtoInteger> CreateFile(string fileName, FolderType folderType, User user)
+    protected async Task<FileDto> CreateFile(string fileName, FolderType folderType, User user)
     {
         await _filesClient.Authenticate(user);
 
@@ -188,36 +201,43 @@ public class BaseTest(
         return await CreateFile(fileName, folderId);
     }
 
-    protected async Task<FileDtoInteger> CreateFileInMy(string fileName, User user)
+    protected async Task<FileDto> CreateFileInMy(string fileName, User user)
     {
         var folderId = await GetUserFolderIdAsync(user);
 
         return await CreateFile(fileName, folderId);
     }
 
-    protected async Task<FileDtoInteger> CreateFile(string fileName, int folderId)
+    protected async Task<FileDto> CreateFile(string fileName, int folderId)
     {
         var sw = Stopwatch.StartNew();
-        var result = (await _filesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
+        var result = (await _filesApi.CreateFileAsync(folderId, new CreateFileRequest(fileName))).Response;
+        Timing.Write($"createFile({fileName})", sw.ElapsedMilliseconds);
+        return result;
+    }
+    protected async Task<ThirdPartyFileDto> CreateFile(string fileName, string folderId)
+    {
+        var sw = Stopwatch.StartNew();
+        var result = (await _filesApi.CreateFileAsync(folderId, new CreateFileRequest(fileName))).Response;
         Timing.Write($"createFile({fileName})", sw.ElapsedMilliseconds);
         return result;
     }
 
-    protected async Task<FolderDtoInteger> CreateFolder(string folderName, FolderType folderType, User user)
+    protected async Task<FolderDto> CreateFolder(string folderName, FolderType folderType, User user)
     {
         var folderId = await GetFolderIdAsync(folderType, user);
 
         return await CreateFolder(folderName, folderId);
     }
 
-    protected async Task<FolderDtoInteger> CreateFolderInMy(string folderName, User user)
+    protected async Task<FolderDto> CreateFolderInMy(string folderName, User user)
     {
         var folderId = await GetUserFolderIdAsync(user);
 
         return await CreateFolder(folderName, folderId);
     }
 
-    protected async Task<FolderDtoInteger> CreateFolder(string folderName, int folderId)
+    protected async Task<FolderDto> CreateFolder(string folderName, int folderId)
     {
         var sw = Stopwatch.StartNew();
         var result = (await _foldersApi.CreateFolderAsync(folderId, new CreateFolder(folderName), TestContext.Current.CancellationToken)).Response;
@@ -225,41 +245,57 @@ public class BaseTest(
         return result;
     }
 
-    protected async Task<FolderDtoInteger> CreateVirtualRoom(string roomTitle, bool indexing = true)
+    protected async Task<FolderDto> CreateVirtualRoom(string roomTitle, bool indexing = true)
     {
         return await CreateRoom(new CreateRoomRequestDto(roomTitle, indexing: indexing, roomType: RoomType.VirtualDataRoom));
     }
 
-    protected async Task<FolderDtoInteger> CreateCustomRoom(string roomTitle)
+    protected async Task<FolderDto> CreateCustomRoom(string roomTitle)
     {
         return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.CustomRoom));
     }
 
-    protected async Task<FolderDtoInteger> CreateCollaborationRoom(string roomTitle)
+    protected async Task<FolderDto> CreateCollaborationRoom(string roomTitle)
     {
         return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.EditingRoom));
     }
 
-    protected async Task<FolderDtoInteger> CreateFillingFormsRoom(string roomTitle)
+    protected async Task<FolderDto> CreateFillingFormsRoom(string roomTitle)
     {
         return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.FillingFormsRoom));
     }
 
-    protected async Task<FolderDtoInteger> CreatePublicRoom(string roomTitle)
+    protected async Task<FolderDto> CreatePublicRoom(string roomTitle)
     {
         return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.PublicRoom));
     }
 
-    protected async Task<FolderDtoInteger> CreateAiRoom(string roomTitle)
+    protected async Task<FolderDto> CreateAiRoom(string roomTitle)
     {
         return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.AiRoom));
+    }
+
+    /// <summary>
+    /// Reads the raw JSON because <c>FileEntryBaseDto</c> in the generated listing model carries
+    /// neither <c>id</c> nor <c>type</c>.
+    /// </summary>
+    protected async Task<int> GetKnowledgeFolderIdAsync(int aiRoomId)
+    {
+        var response = await _foldersApi.GetFoldersWithHttpInfoAsync(aiRoomId, TestContext.Current.CancellationToken);
+
+        using var payload = JsonDocument.Parse(response.RawContent);
+
+        return payload.RootElement.GetProperty("response").EnumerateArray()
+            .Where(f => f.GetProperty("type").GetInt32() == (int)FolderType.Knowledge)
+            .Select(f => f.GetProperty("id").GetInt32())
+            .First();
     }
 
     /// <summary>
     /// The single place every room is created through, so that room creation - one of the slowest
     /// calls in the suite - is measured the same way whatever type the caller asked for.
     /// </summary>
-    protected async Task<FolderDtoInteger> CreateRoom(CreateRoomRequestDto request)
+    protected async Task<FolderDto> CreateRoom(CreateRoomRequestDto request)
     {
         var sw = Stopwatch.StartNew();
         var result = (await _roomsApi.CreateRoomAsync(request, TestContext.Current.CancellationToken)).Response;
@@ -278,7 +314,7 @@ public class BaseTest(
         return covers[0].Id;
     }
 
-    protected async Task<FolderDtoInteger> CreateVDRRoom(string roomTitle)
+    protected async Task<FolderDto> CreateVDRRoom(string roomTitle)
     {
         return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.VirtualDataRoom));
     }
@@ -306,7 +342,7 @@ public class BaseTest(
     /// <summary>
     /// Creates a private (encrypted) room, setting up the caller's encryption keys first.
     /// </summary>
-    protected async Task<FolderDtoInteger> CreatePrivateRoom(string title, RoomType roomType)
+    protected async Task<FolderDto> CreatePrivateRoom(string title, RoomType roomType)
     {
         await EnsureEncryptionKeys();
 
@@ -405,7 +441,7 @@ public class BaseTest(
         return (initialLink.SharedLink.RequestToken, file.Id);
     }
 
-    protected async Task<FileDtoInteger> TryOpenEditAsync(string share, int fileId, User? user = null, bool throwException = false)
+    protected async Task<FileDto> TryOpenEditAsync(string share, int fileId, User? user = null, bool throwException = false)
     {
         if (user != null)
         {
@@ -508,7 +544,7 @@ public class BaseTest(
     /// all marked <c>[ApiExplorerSettings(IgnoreApi = true)]</c>, so they never made it into Swagger and
     /// therefore not into the client either.
     /// </summary>
-    private async Task<int> GetSectionRootIdAsync(string path)
+    protected async Task<int> GetSectionRootIdAsync(string path)
     {
         using var response = await _filesClient.GetAsync(path, TestContext.Current.CancellationToken);
 

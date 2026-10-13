@@ -141,7 +141,7 @@ public class WebItemSecurityReadTests(
         var target = await InviteMember(EmployeeType.User);
 
         await _securityApi.SetWebItemSecurityAsync(
-            new WebItemSecurityRequestsDto(id, true, [target.Id]), TestContext.Current.CancellationToken);
+            new WebItemSecurityRequestDto(id, true, [target.Id]), TestContext.Current.CancellationToken);
 
         var guest = await InviteGuest();
         await _webApiClient.Authenticate(guest);
@@ -167,7 +167,7 @@ public class WebItemSecurityReadTests(
         var target = await InviteMember(EmployeeType.User);
 
         await _securityApi.SetWebItemSecurityAsync(
-            new WebItemSecurityRequestsDto(id, true, [target.Id]), TestContext.Current.CancellationToken);
+            new WebItemSecurityRequestDto(id, true, [target.Id]), TestContext.Current.CancellationToken);
 
         var user = await InviteMember(EmployeeType.User);
         await _webApiClient.Authenticate(user);

@@ -1,0 +1,84 @@
+// The report's look, declared once as a workbook table style rather than painted onto the cells:
+// the blue header, the alternating row fill and the white cell borders. A table and a pivot both
+// reference it by name, so the look survives a row inserted into the table or a refreshed pivot -
+// neither of which the editor would repaint if the colors sat on the cells.
+//
+// Shared by several report scripts, so it reads the theme straight from inputData and declares its
+// own colors: the scripts that use it keep theirs in different scopes.
+var REPORT_TABLE_STYLE_NAME = "ReportTableStyle";
+
+// Declaring a table style needs a 10.0 builder. An older document server still produces the report,
+// dressed in the editor's own default table look instead of the portal's colors.
+// A builder older than 9.1 has no workbook object to ask in the first place.
+var reportTableStyleSupported = typeof Api.GetActiveWorkbook === "function"
+    && typeof Api.GetActiveWorkbook().GetTableStyles === "function";
+
+// The style to dress a table in, or nothing where it could not be declared: handing a table the name
+// of a style the workbook does not hold would leave it pointing at something that is not there.
+function getReportTableStyleName() {
+    return reportTableStyleSupported ? REPORT_TABLE_STYLE_NAME : undefined;
+}
+
+// Turns the range into a table in the report's style and returns it. A builder older than 9.4.1 has
+// no AddListObject at all, only FormatAsTable, which gives the editor's default look and hands back
+// no table object - the caller gets null there and has nothing further to switch on.
+function addReportTable(worksheet, range) {
+    if (typeof worksheet.AddListObject !== "function") {
+        worksheet.FormatAsTable(range);
+        return null;
+    }
+
+    return worksheet.AddListObject("xlSrcRange", range, undefined, "xlYes", undefined, getReportTableStyleName());
+}
+
+// firstColumnFill is optional: the fill of a first column that a report's table switches on with
+// SetShowTableStyleFirstColumn. Only the room index shows one, so the other reports leave it out.
+function createReportTableStyle(firstColumnFill) {
+    if (!reportTableStyleSupported) {
+        return;
+    }
+
+    var themeColors = inputData.themeColors;
+
+    var headerFontColor = Api.CreateColorFromRGB(themeColors.mainFontColor[0], themeColors.mainFontColor[1], themeColors.mainFontColor[2]);
+    var headerFillColor = Api.CreateColorFromRGB(themeColors.mainBgColor[0], themeColors.mainBgColor[1], themeColors.mainBgColor[2]);
+    var stripeFillColor = Api.CreateColorFromRGB(themeColors.lightBgColor[0], themeColors.lightBgColor[1], themeColors.lightBgColor[2]);
+    var fontColor = Api.CreateColorFromRGB(0, 0, 0);
+    var borderColor = Api.CreateColorFromRGB(255, 255, 255);
+
+    // Add throws on a name the workbook already has, so an existing style is reused and redefined.
+    var styles = Api.GetActiveWorkbook().GetTableStyles();
+    var style = styles.GetItem(REPORT_TABLE_STYLE_NAME) || styles.Add(REPORT_TABLE_STYLE_NAME);
+
+    // The style is used by a table and by a pivot, so it has to offer itself to both galleries.
+    style.SetShowAsAvailableTableStyle(true);
+    style.SetShowAsAvailablePivotTableStyle(true);
+
+    var elements = style.GetTableStyleElements();
+
+    var wholeTable = elements.GetItem("xlWholeTable");
+    wholeTable.GetFont().SetColor(fontColor);
+    wholeTable.SetBorders("Top", "Medium", borderColor);
+    wholeTable.SetBorders("Bottom", "Medium", borderColor);
+    wholeTable.SetBorders("Left", "Medium", borderColor);
+    wholeTable.SetBorders("Right", "Medium", borderColor);
+    wholeTable.SetBorders("InsideHorizontal", "Medium", borderColor);
+    wholeTable.SetBorders("InsideVertical", "Medium", borderColor);
+
+    var headerRow = elements.GetItem("xlHeaderRow");
+    var headerFont = headerRow.GetFont();
+    headerFont.SetBold(true);
+    headerFont.SetColor(headerFontColor);
+    headerRow.SetFillColor(headerFillColor);
+
+    // Only the second stripe is filled, so the first data row stays clear and the banding starts the
+    // way the hand-painted table started.
+    elements.GetItem("xlRowStripe2").SetFillColor(stripeFillColor);
+
+    if (firstColumnFill) {
+        elements.GetItem("xlFirstColumn").SetFillColor(firstColumnFill);
+    }
+
+    // The pivot's grand total row, closing the summary the way the total row closes the detail sheet.
+    elements.GetItem("xlTotalRow").GetFont().SetBold(true);
+}

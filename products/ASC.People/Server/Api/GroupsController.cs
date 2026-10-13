@@ -63,7 +63,7 @@ public class GroupController(
     /// belongs to, and with `manager` set to true to keep only the groups it manages; order it with `sortBy` and
     /// `sortOrder`, and an unknown `sortBy` falls back to sorting by title.
     /// The entries carry no members - read `GET api/2.0/group/{id}` with `includeMembers` for one group, or
-    /// `GET api/2.0/group/user/{userid}` to find the groups of a single account.
+    /// `GET api/2.0/group/user/{userId}` to find the groups of a single account.
     /// </remarks>
     /// <summary>
     /// Get groups
@@ -72,6 +72,7 @@ public class GroupController(
     /// <collection>list</collection>
     [Tags("Group")]
     [SwaggerResponse(200, "The matching groups, with their summary information", typeof(IAsyncEnumerable<GroupDto>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpGet]
     public async IAsyncEnumerable<GroupDto> GetGroups(GeneralInformationRequestDto inDto)
@@ -136,12 +137,12 @@ public class GroupController(
     /// <summary>
     /// Get user groups
     /// </summary>
-    /// <path>api/2.0/group/user/{userid}</path>
+    /// <path>api/2.0/group/user/{userId}</path>
     /// <collection>list</collection>
     [Tags("Group")]
     [SwaggerResponse(200, "The groups the account belongs to, as ID and name pairs", typeof(IEnumerable<GroupSummaryDto>))]
     [SwaggerResponse(403, "No permissions to perform this action")]
-    [HttpGet("user/{userid:guid}")]
+    [HttpGet("user/{userId:guid}")]
     public async Task<IEnumerable<GroupSummaryDto>> GetGroupByUserId(GetGroupByUserIdRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(Constants.Action_ReadGroups);
@@ -173,7 +174,7 @@ public class GroupController(
     /// <path>api/2.0/group</path>
     [Tags("Group")]
     [SwaggerResponse(200, "The new group, with its members", typeof(GroupDto))]
-    [SwaggerResponse(400, "The group name is empty, or one of the listed accounts is a guest, is disabled or does not exist")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `groupName`, the group name is `null`, blank or longer than 128 characters, or one of the listed members or the manager is a guest, is disabled or does not exist")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [HttpPost]
     public async Task<GroupDto> AddGroup(GroupRequestDto inDto)
@@ -241,6 +242,7 @@ public class GroupController(
     /// <path>api/2.0/group/{id}</path>
     [Tags("Group")]
     [SwaggerResponse(200, "The group as it is after the update", typeof(GroupDto))]
+    [SwaggerResponse(400, "The request body cannot be read, or `groupName` is longer than 128 characters")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "No group has the specified ID")]
     [HttpPut("{id:guid}")]
@@ -388,7 +390,7 @@ public class GroupController(
     /// <path>api/2.0/group/{id}/members</path>
     [Tags("Group")]
     [SwaggerResponse(200, "The group with the members it ends up with", typeof(GroupDto))]
-    [SwaggerResponse(400, "None of the listed accounts can be a group member")]
+    [SwaggerResponse(400, "The request body cannot be read or has no `members` list, or none of the listed accounts can be a group member")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "No group has the specified ID")]
     [HttpPost("{id:guid}/members")]
@@ -480,6 +482,7 @@ public class GroupController(
     /// <path>api/2.0/group/{id}/manager</path>
     [Tags("Group")]
     [SwaggerResponse(200, "The group with its new manager", typeof(GroupDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `userId`")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "No group has the specified ID, or no account has the specified userId")]
     [HttpPut("{id:guid}/manager")]
@@ -631,6 +634,7 @@ public class GroupControllerAdditional<T>(
     /// <collection>list</collection>
     [Tags("Group / Search")]
     [SwaggerResponse(200, "The matching groups, each with its access state for the room", typeof(IAsyncEnumerable<GroupDto>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "No room has the specified ID")]
     [HttpGet("room/{id}")]
@@ -663,6 +667,7 @@ public class GroupControllerAdditional<T>(
     /// <collection>list</collection>
     [Tags("Group / Search")]
     [SwaggerResponse(200, "The matching groups, each with its access state for the folder", typeof(IAsyncEnumerable<GroupDto>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "No folder has the specified ID")]
     [HttpGet("folder/{id}")]
@@ -694,6 +699,7 @@ public class GroupControllerAdditional<T>(
     /// <collection>list</collection>
     [Tags("Group / Search")]
     [SwaggerResponse(200, "The matching groups, each with its access state for the file", typeof(IAsyncEnumerable<GroupDto>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the `count` is outside its allowed range")]
     [SwaggerResponse(403, "No permissions to perform this action")]
     [SwaggerResponse(404, "No file has the specified ID")]
     [HttpGet("file/{id}")]

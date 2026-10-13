@@ -31,6 +31,8 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
+global using System.Diagnostics;
+
 global using Aspire.Hosting;
 global using Aspire.Hosting.ApplicationModel;
 

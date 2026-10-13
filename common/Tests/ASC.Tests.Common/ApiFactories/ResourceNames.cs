@@ -68,4 +68,12 @@ public static class ResourceNames
 
     /// <summary>The mail server the letter tests deliver to. Endpoints: <c>smtp</c> and <c>http</c>.</summary>
     public const string MailPit = "mailpit";
+
+    /// <summary>
+    /// The Nextcloud the third-party storage tests connect to. A suite that lists it gets
+    /// <c>NEXTCLOUD_URL</c>, <c>NEXTCLOUD_LOGIN</c> and <c>NEXTCLOUD_PASSWORD</c> in its process
+    /// environment once the container is up — unless they were set already, which keeps a real
+    /// account configured from outside in charge.
+    /// </summary>
+    public const string Nextcloud = "nextcloud";
 }

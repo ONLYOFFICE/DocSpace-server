@@ -48,7 +48,7 @@ public class IpRestrictionsSavePermissionsTests(
     {
         // Arrange
         await _webApiClient.Authenticate(null);
-        var dto = new IpRestrictionsDto([new IpRestrictionBase("192.168.1.1", false)], false);
+        var dto = new IpRestrictionsDto([new IpRestrictionEntryDto("192.168.1.1", false)], false);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
@@ -67,7 +67,7 @@ public class IpRestrictionsSavePermissionsTests(
         // Arrange
         var member = await InviteMember(employeeType);
         await _webApiClient.Authenticate(member);
-        var dto = new IpRestrictionsDto([new IpRestrictionBase("192.168.1.1", false)], false);
+        var dto = new IpRestrictionsDto([new IpRestrictionEntryDto("192.168.1.1", false)], false);
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(

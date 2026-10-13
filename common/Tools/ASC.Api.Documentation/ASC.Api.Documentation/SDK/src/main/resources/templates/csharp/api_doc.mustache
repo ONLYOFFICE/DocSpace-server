@@ -7,16 +7,20 @@ All URIs are relative to *https://your-docspace.onlyoffice.com*
 |--------|--------------|-------------|
 {{#operations}}
 {{#operation}}
-| [**{{operationId}}**](#{{operationIdLowerCase}}) | **{{httpMethod}}** {{path}} | {{{summary}}} |
+| [**{{operationId}}**](#{{operationIdLowerCase}}{{#vendorExtensions.x-is-thirdparty-variant}}-thirdparty{{/vendorExtensions.x-is-thirdparty-variant}}) | **{{httpMethod}}** {{path}} | {{{summary}}} |
 {{/operation}}
 {{/operations}}
 
 {{#operations}}
 {{#operation}}
-<a id="{{{operationIdLowerCase}}}"></a>
-# **{{{operationId}}}**
+<a id="{{{operationIdLowerCase}}}{{#vendorExtensions.x-is-thirdparty-variant}}-thirdparty{{/vendorExtensions.x-is-thirdparty-variant}}"></a>
+# **{{{operationId}}}**{{#vendorExtensions.x-is-thirdparty-variant}} (third-party storage){{/vendorExtensions.x-is-thirdparty-variant}}
 > {{returnType}}{{^returnType}}void{{/returnType}} {{operationId}} ({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = null{{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}})
 
+{{#vendorExtensions.x-is-thirdparty-variant}}
+The overload for an entry in a connected third-party storage: the identifier is a string such as `sbox-42`, and the answer carries string identifiers as well.
+
+{{/vendorExtensions.x-is-thirdparty-variant}}
 {{#notes}}{{{.}}}{{/notes}}
 
 For more information, see [api.onlyoffice.com]({{vendorExtensions.x-seealsoUrl}}).

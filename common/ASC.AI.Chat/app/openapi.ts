@@ -33,6 +33,7 @@
 
 import type { RouteSpec } from "@onlyoffice/ai-chat/core";
 import { EXAMPLE_AT_MS, EXAMPLE_IDS } from "./exampleIds.js";
+import { isObject } from "./narrow.js";
 
 // OpenAPI document generation for the AI service.
 //
@@ -181,7 +182,7 @@ const INTEGER_QUERY_PARAMS = new Set(["limit", "startIndex", "count"]);
 // parameter belongs in one of these two tables.
 const PARAM_DOCS: Readonly<Record<string, string>> = {
   actionType:
-    'The AI action the request applies to - one of "Default", "Chat", "Code", "Summarization", "Translation", "TextAnalyze", "ImageGeneration", "OCR", "Vision".',
+    'The AI action the request applies to - one of "Default", "Chat", "Code", "Summarization", "Translation", "TextAnalyze", "ImageGeneration", "OCR", "Vision", "FormAnalysis".',
   count: "The maximum number of items to return in one page.",
   cursor:
     "The keyset pagination cursor: the JSON-encoded sort key of the last item already received. Omit for the first page.",
@@ -277,19 +278,19 @@ function paramExample(operationId: string, name: string): Json {
 // engine method or custom route belongs here.
 const OPERATION_DOCS: Readonly<Record<string, string>> = {
   // AI - chat rounds and tool-call resumption.
-  aiAiSend:
+  aiSend:
     "Runs one AI action and returns the whole answer as a single JSON document. The model is the profile bound to `actionType`, falling back to the `Default` assignment slot, so this operation accepts no `profileId` of its own. Nothing is persisted - no thread is opened, no message is stored and no title is generated - which makes it the one to use for a stand-alone completion rather than for a conversation. `entityId` and `contextEntityId` set the scope of the round, which decides the workspace context and the custom MCP servers it may reach. For a conversation that keeps its history, use `POST api/2.0/ai/ai/send-with-stream` instead.",
-  aiAiSendCustom:
+  aiSendCustom:
     "Runs a free-form one-turn call against a system prompt supplied in the request, with no thread, no history and nothing persisted. The model is the explicit `profileId` when it resolves, otherwise the `Default` assignment slot. The shape of the answer depends on the body rather than on the route: with `isStream` set it arrives as a newline-delimited stream of chat events, and without it as a single JSON document, so a client has to handle both. Use `POST api/2.0/ai/ai/send` when the prompt should come from the portal's own action configuration instead of from the caller.",
-  aiAiSendWithStream:
+  aiSendWithStream:
     "Runs one chat round and streams it back as newline-delimited `ChatEvent` objects. Omitting `threadId` opens a new thread, which requires that `entityId` names a room the caller can open and that a profile resolves for it; the user message and the reply are persisted either way, and a new thread also gets a generated title. The model is settled in a fixed order - an agent's assignment in scope overrides everything, then the explicit `profileId`, then the one stored on the thread, then the `Chat` assignment - and the effective profile is checked before the stream opens, so an unknown one fails with 400 rather than as an error buried in a 200. A tool call pauses the round and ends the stream; resume it with `POST api/2.0/ai/ai/approve-tool-call` or `POST api/2.0/ai/ai/deny-tool-call`.",
-  aiAiSendWithStreamOpenAI:
+  aiSendWithStreamOpenAI:
     'The same chat round as `send-with-stream`, re-encoded as a server-sent-events stream of OpenAI `chat.completion.chunk` objects terminated by a `[DONE]` sentinel. Thread handling, persistence, title generation and the profile pre-flight are identical, and a tool call ends the stream with `finish_reason: "tool_calls"` instead of a pause event - resume it through the same approve and deny operations. Unlike `send-with-stream` it does not reject an empty user message and does not enforce the per-kind attachment cap, so validate both before calling. Choose this route only for a client that already speaks the OpenAI wire format; `POST api/2.0/ai/ai/send-with-stream` is the native one.',
-  aiAiRegenerateStream:
+  aiRegenerateStream:
     "Re-rolls the last assistant reply of an existing thread: every message after the last user message - the previous reply and any tool-call hops - is dropped, and a fresh reply is streamed as newline-delimited `ChatEvent` objects against the unchanged prompt. The thread has to exist already, `threadId` is required, and no title is generated. The dropped messages are gone for good, so this is a destructive operation on the thread's tail rather than a retry that keeps both answers. Unlike `send-with-stream` the profile is not verified before the stream opens, so an unusable model surfaces as an error frame inside the 200 rather than as a 4xx.",
-  aiAiApproveToolCall:
+  aiApproveToolCall:
     "Resumes a chat round that a tool call has paused, and streams the continuation as newline-delimited `ChatEvent` objects. The result supplied in the request is persisted onto the assistant message that issued the call, so the tool is not executed here - the caller runs it and reports the outcome. The round continues against the augmented history and may pause again on a further tool call. Call `POST api/2.0/ai/ai/deny-tool-call` instead to refuse the call and let the model answer without it.",
-  aiAiDenyToolCall:
+  aiDenyToolCall:
     'Refuses the tool call a chat round is paused on and resumes it immediately, streaming the continuation as newline-delimited `ChatEvent` objects. The literal `"User deny tool call"` is persisted in place of the tool result, so the model sees an explicit refusal rather than a missing answer and may reply without the tool or ask for something else. Nothing is executed and no result is accepted from the caller. Use `POST api/2.0/ai/ai/approve-tool-call` to supply a result instead.',
 
   // Agents - delegated to the .NET AI service, with the profile binding kept here.
@@ -374,6 +375,10 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
     "Returns the effective extended-thinking depth of the scope: `off` while deep mode is off, otherwise the persisted depth (`low`, `medium`, `high`, `max`), falling back to the default depth (`medium`) when none has been stored. `entityId` picks a room and omitting it reads the portal-wide preference. Providers clamp the depth to what the model accepts.",
   aiPreferencesSetReasoningLevel:
     "Persists the extended-thinking depth of the scope as its single stored value: a depth turns deep mode on at that depth, `off` turns it off and replaces the stored depth (a later deep-mode `true` without a depth lands on `medium`). `entityId` picks a room and omitting it writes the portal-wide preference. Idempotent.",
+  aiPreferencesGetToolPermissionMode:
+    "Returns how a tool call the model makes is approved for the calling user, in the chat library's spelling: `ask` prompts for every call bar the tools pinned as always allowed, `auto` also runs a tool that opted out of approval itself or is annotated read-only / non-destructive, `allow` runs everything without asking. The mode is one value per user, stored in the user's AI settings (the same value `GET api/2.0/ai/config/tool-mode` reports as the AI service's enum); `entityId` is accepted for symmetry with the depth routes and ignored. The AI service's default is `auto`.",
+  aiPreferencesSetToolPermissionMode:
+    "Persists the tool permission mode of the calling user. `value` has to be one of `ask`, `auto`, `allow`: anything else is rejected rather than coerced, so an absent or mistyped value can never overwrite the stored mode. `entityId` is validated like on the other writes and otherwise ignored - the mode applies to every chat of the user. Idempotent.",
 
   // Profiles - AI provider credentials and model discovery.
   aiProfilesCreate:
@@ -432,6 +437,10 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
     "Returns the AI settings of the calling user, as opposed to the portal-wide ones. It takes no parameters - the user is the authenticated caller, and there is no way to read somebody else's settings - and is proxied unchanged to the DocSpace AI service. Use `GET api/2.0/ai/config` for the portal-wide configuration. This is a read-only operation.",
   aiSettingsSetUser:
     "Replaces the AI settings of the calling user and returns the stored result. The body is proxied unchanged to the DocSpace AI service, which validates it, so a rejected value comes back with that service's verdict. Only the caller's own settings can be written. Portal-wide configuration is not touched by this operation.",
+  aiSettingsGetToolMode:
+    "Returns the calling user's tool permission mode as the DocSpace AI service spells it - `{ mode }` with the service's `ToolPermissionMode` enum (`Ask`, `Auto`, `Allow`), proxied unchanged. The chat reads the same value in its own spelling through `GET api/2.0/ai/preferences/get-tool-permission-mode`. This is a read-only operation.",
+  aiSettingsSetToolMode:
+    "Stores the calling user's tool permission mode and returns the stored result. The body (`{ mode }`) is proxied unchanged to the DocSpace AI service, which rejects a value outside its `ToolPermissionMode` enum. The mode applies to every chat of the user in the portal.",
 
   // Threads - chat threads and their messages.
   aiThreadsCreate:
@@ -558,19 +567,22 @@ const UNAUTHORIZED_RESPONSE: Json = jsonResponse(
 // direction, so do not "fill them in for symmetry":
 //   - 429 is never produced here. The service has no rate limiter; the status
 //     only appears when a passthrough operation relays a provider's answer.
-//   - 403 is almost never raised locally. For anything resolving an agent
-//     entity, a 403 from the Files API is deliberately turned into a 404
-//     (`storage/docspaceFilesApi.ts`, "don't reveal it"), so those operations
-//     declare 404 and say that it covers both cases.
+//   - 403 is rarely raised locally; the one local case is a room named by
+//     `entityId` that the caller cannot open, which the Files API answers
+//     with 403 and every operation relays as such (`assertEntityAccessible`,
+//     `resolveAgentEntityId`). 404 is reserved for an id that resolves to
+//     nothing.
 const ERROR_DESCRIPTIONS: Readonly<Record<string, string>> = {
   "400": "The request body or query is malformed, or a required value is missing.",
   "402":
-    "The portal has no paid AI quota left, so the profile bound to this action cannot be dispatched.",
+    "The portal has no paid AI quota left, so the profile bound to this action cannot be dispatched. " +
+    "`error` carries the portal's explanation in the caller's language.",
   "403":
-    "AI is disabled for this portal, or the caller is a guest. Relayed from the DocSpace AI service.",
+    "AI is disabled for this portal, the caller is a guest, or the room named by `entityId` is one " +
+    "the caller cannot open. Relayed from the DocSpace AI service or the Files API.",
   "404":
-    "The referenced object does not exist, or the caller cannot access it - the two are " +
-    "deliberately indistinguishable, so a room the caller may not open answers 404 rather than 403.",
+    "The referenced object does not exist: an unknown or deleted room named by `entityId`, or an " +
+    "object the caller cannot read - for those the two cases are deliberately indistinguishable.",
   "413": "The request body is larger than 100 KB, the JSON parser's limit on this route.",
   "429": "Relayed verbatim from the AI provider, which is rate-limiting this portal's key.",
   "500": "Unhandled failure. The reason is logged server-side and never echoed back.",
@@ -595,14 +607,14 @@ const ALWAYS_ERRORS: readonly string[] = ["403", "500"];
 const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   // AI - chat rounds. Only the two streaming entry points validate and bill
   // before the stream opens; `send`/`sendCustom` dispatch straight away.
-  aiAiSendWithStream: {
+  aiSendWithStream: {
     "400":
       "The prompt is empty, more attachments were sent than the limit allows, or no AI " +
       "profile could be resolved for the requested action.",
     "402": true,
     "404": "The `entityId` names a room the caller cannot open, or no live profile is bound to it.",
   },
-  aiAiSendWithStreamOpenAI: {
+  aiSendWithStreamOpenAI: {
     "400": "The prompt is empty, or no AI profile could be resolved for the requested action.",
     "402": true,
   },
@@ -674,7 +686,16 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   },
 
   // Preferences.
-  aiPreferencesSetDeepMode: { "400": "`value` is missing or is not a boolean." },
+  aiPreferencesSetDeepMode: {
+    "400": "`value` is missing or is not a boolean, or `entityId` is not a room ID.",
+  },
+  aiPreferencesClearDeepMode: { "400": "`entityId` is not a room ID." },
+  aiPreferencesSetReasoningLevel: {
+    "400": "`value` is not one of the depths, or `entityId` is not a room ID.",
+  },
+  aiPreferencesSetToolPermissionMode: {
+    "400": "`value` is not one of `ask`, `auto`, `allow`, or `entityId` is not a room ID.",
+  },
 
   // Profiles - creating and updating are refused outright while the portal
   // runs on the AI gateway, and both validate the provider URL.
@@ -770,8 +791,9 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
   },
   aiWebSearchConfigure: {
     "400":
-      "The configuration is missing or malformed, or the provider URL points at a private "
-      + "network address.",
+      "The configuration is missing or malformed, the provider URL points at a private "
+      + "network address, or the provider refused the configuration - the body then carries "
+      + "`success: false` and an `error` naming the field. Nothing is stored in any of these cases.",
     "404": true,
   },
   aiWebSearchSetActiveConfig: {
@@ -839,8 +861,8 @@ function capitalize(name: string): string {
 // its derived title. There is no lint signal for this - the `operation-summary`
 // rule only checks that a summary is truthy, which `humanize` always satisfies.
 const ENGINE_SUMMARIES: Readonly<Record<string, string>> = {
-  aiAiSend: "Run an AI action",
-  aiAiSendWithStreamOpenAI: "Stream a chat in OpenAI format",
+  aiSend: "Run an AI action",
+  aiSendWithStreamOpenAI: "Stream a chat in OpenAI format",
 
   aiAssignmentsAssign: "Bind a profile to an action",
   aiAssignmentsUnassign: "Clear an action's profile",
@@ -1034,6 +1056,12 @@ const REQUEST_BODY_DOCS: Readonly<Record<string, RequestBodyDoc>> = {
       "validates the shape. Read the current one with `GET api/2.0/ai/config/user` and send " +
       "it back changed.",
   },
+  aiSettingsSetToolMode: {
+    description:
+      "`{ mode }` with the AI service's `ToolPermissionMode` enum, proxied unchanged; the " +
+      "service rejects anything outside the enum.",
+    example: { mode: 1 },
+  },
   aiSettingsSetVectorization: {
     description:
       "The portal's vectorization settings, proxied unchanged to the DocSpace AI service, which " +
@@ -1085,23 +1113,23 @@ type OperationSchemaLookup = Readonly<Record<string, OperationSchemas>>;
 // reflects the framing (newline-delimited JSON vs. SSE). Applied by
 // `responseFor` when building the success response.
 const STREAMING_RESPONSES: Readonly<Record<string, { mediaType: string; description: string }>> = {
-  aiAiSendWithStream: {
+  aiSendWithStream: {
     mediaType: "application/x-ndjson",
     description: "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
   },
-  aiAiRegenerateStream: {
+  aiRegenerateStream: {
     mediaType: "application/x-ndjson",
     description: "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
   },
-  aiAiApproveToolCall: {
+  aiApproveToolCall: {
     mediaType: "application/x-ndjson",
     description: "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
   },
-  aiAiDenyToolCall: {
+  aiDenyToolCall: {
     mediaType: "application/x-ndjson",
     description: "Newline-delimited stream of chat events — one JSON `ChatEvent` object per line.",
   },
-  aiAiSendWithStreamOpenAI: {
+  aiSendWithStreamOpenAI: {
     mediaType: "text/event-stream",
     description:
       "Server-sent events stream of OpenAI `chat.completion.chunk` objects, terminated by a `[DONE]` sentinel.",
@@ -1117,8 +1145,8 @@ const STREAMING_RESPONSES: Readonly<Record<string, { mediaType: string; descript
 // framing instead. An operation missing from both falls back to "Success.",
 // which should never be what a reader sees.
 const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
-  aiAiSend: "The assistant's reply as one message. Nothing was persisted.",
-  aiAiSendCustom:
+  aiSend: "The assistant's reply as one message. Nothing was persisted.",
+  aiSendCustom:
     "The assistant's reply as one message, or a newline-delimited stream of chat events when " +
     "`isStream` was set. Nothing was persisted.",
 
@@ -1178,6 +1206,10 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
     "Confirms the scope has no preference of its own and now inherits the default.",
   aiPreferencesIsDeepModeSet:
     "Whether the scope has a preference of its own, whichever way that preference is set.",
+  aiPreferencesGetToolPermissionMode:
+    "The mode in force for the scope, as a bare JSON string, falling back to `ask` when none " +
+    "is stored.",
+  aiPreferencesSetToolPermissionMode: "Confirms the preference was stored.",
 
   aiProfilesCreate:
     "Whether the profile was created, with it in `profile`. A refusal is reported in `error` " +
@@ -1212,6 +1244,8 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiSettingsSetVectorization: "The stored vectorization settings.",
   aiSettingsGetUser: "The calling user's AI settings.",
   aiSettingsSetUser: "The calling user's stored AI settings.",
+  aiSettingsGetToolMode: "The calling user's tool permission mode, as `{ mode }`.",
+  aiSettingsSetToolMode: "The calling user's stored tool permission mode, as `{ mode }`.",
 
   aiThreadsCreate: "The created thread.",
   aiThreadsOpenOrCreate:
@@ -1267,7 +1301,7 @@ const SUCCESS_DESCRIPTIONS: Readonly<Record<string, string>> = {
   aiWebSearchIsConfigured: "Whether a web-search provider is stored for the scope.",
   aiWebSearchTestConnection:
     "The outcome of the probe. A failed probe is reported here, not as a status.",
-  aiWebSearchConfigure: "Whether the configuration was stored, after the provider answered.",
+  aiWebSearchConfigure: "The stored configuration, after the provider accepted it.",
   aiWebSearchSetActiveConfig: "Confirms the configuration was stored, unverified.",
   aiWebSearchClear: "Confirms the portal has no web-search configuration any more.",
   aiWebSearchPassthroughSearch:
@@ -1332,7 +1366,7 @@ const OPERATION_RESPONSE_SCHEMAS: Readonly<Record<string, Json>> = {
           "the custom MCP servers registered for this scope.",
         additionalProperties: {
           type: "array",
-          items: { $ref: "#/components/schemas/AiTMCPItem" },
+          items: { $ref: "#/components/schemas/AiMCPItem" },
         },
       },
       errors: {
@@ -1416,7 +1450,7 @@ const OPERATION_RESPONSE_SCHEMAS: Readonly<Record<string, Json>> = {
   // or the lookup failed, so it is documented as an addition, not a promise.
   aiAgentsGet: {
     allOf: [
-      { $ref: "#/components/schemas/AiFolderIntegerWrapper" },
+      { $ref: "#/components/schemas/AiFolderWrapper" },
       {
         type: "object",
         properties: {
@@ -1651,11 +1685,52 @@ const OPERATION_REQUEST_SCHEMAS: Readonly<Record<string, Json>> = {
   },
 };
 
-function requestBodyFor(operations: OperationSchemaLookup, operationId: string): Json {
-  const schema = OPERATION_REQUEST_SCHEMAS[operationId] ?? operations[operationId]?.request;
-  return schema === undefined
-    ? jsonBody(JSON_OBJECT_SCHEMA, operationId)
-    : jsonBody(schema as Json, operationId);
+// Request-body schemas promoted to named components, keyed by component name.
+type RequestComponents = Record<string, Json>;
+
+// A body with declared fields is published as the `<OperationId>Request`
+// component, so the reference and the SDKs name it the way the .NET services
+// name theirs (`CreateApiKeyRequestDto`) instead of the generator's
+// `aiSend_request`. A bare string, array or free-form object stays inline -
+// a component for it would be an empty model class - and only gets the same
+// name for its parameter, in place of the generator's `body`/`request_body`.
+// A body that already is a `$ref` keeps the referenced type's name, spelled
+// out for the parameter too: the generator names it `body` when the type is
+// an enum (`AiActionType`), which it treats as a primitive.
+function requestBodyFor(
+  operations: OperationSchemaLookup,
+  operationId: string,
+  requestComponents: RequestComponents,
+): Json {
+  const schema = (OPERATION_REQUEST_SCHEMAS[operationId] ??
+    operations[operationId]?.request ??
+    JSON_OBJECT_SCHEMA) as Json;
+  const body = jsonBody(schema, operationId);
+  if (!isObject(schema) || !isObject(body)) {
+    return body;
+  }
+  const ref = schema["$ref"];
+  if (typeof ref === "string") {
+    return { ...body, "x-codegen-request-body-name": ref.slice(ref.lastIndexOf("/") + 1) };
+  }
+
+  const name = `${capitalize(operationId)}Request`;
+  const properties = schema["properties"];
+  if (!isObject(properties) || Object.keys(properties).length === 0) {
+    return { ...body, "x-codegen-request-body-name": name };
+  }
+
+  const content = body["content"];
+  const media = isObject(content) ? content["application/json"] : undefined;
+  const bodySchema = isObject(media) ? media["schema"] : undefined;
+  if (bodySchema === undefined) {
+    return body;
+  }
+  requestComponents[name] = bodySchema;
+  return {
+    ...body,
+    content: { "application/json": { schema: { $ref: `#/components/schemas/${name}` } } },
+  };
 }
 
 // Build the operation object for one engine route. GET routes expose their
@@ -1667,11 +1742,14 @@ function engineOperation(
   methodName: string,
   spec: RouteSpec,
   operations: OperationSchemaLookup,
+  requestComponents: RequestComponents,
 ): Json {
   const isGet = spec.method === "GET";
   // lowerCamelCase, `ai`-scoped so it stays unique across engines and
-  // does not clash with the .NET services' ids once merged.
-  const operationId = `ai${capitalize(engine.name)}${capitalize(methodName)}`;
+  // does not clash with the .NET services' ids once merged. The `ai` engine
+  // already carries the scope, so its ids are `aiSend`, not `aiAiSend`.
+  const scope = engine.name === "ai" ? "ai" : `ai${capitalize(engine.name)}`;
+  const operationId = `${scope}${capitalize(methodName)}`;
   const operation: Record<string, Json> = {
     tags: [tag(engine.tag)],
     operationId,
@@ -1687,7 +1765,7 @@ function engineOperation(
     operation["parameters"] = queryParameters(spec.params, operationId);
   }
   if (!isGet) {
-    operation["requestBody"] = requestBodyFor(operations, operationId);
+    operation["requestBody"] = requestBodyFor(operations, operationId, requestComponents);
   }
   return operation;
 }
@@ -1781,7 +1859,11 @@ const OPERATION_QUERY_PARAMS: Readonly<Record<string, readonly Json[]>> = {
   ],
 };
 
-function customOperation(route: CustomRouteDoc, operations: OperationSchemaLookup): Json {
+function customOperation(
+  route: CustomRouteDoc,
+  operations: OperationSchemaLookup,
+  requestComponents: RequestComponents,
+): Json {
   const operation: Record<string, Json> = {
     tags: [tag(route.tag)],
     operationId: route.operationId,
@@ -1808,7 +1890,7 @@ function customOperation(route: CustomRouteDoc, operations: OperationSchemaLooku
     operation["parameters"] = params;
   }
   if (route.hasBody) {
-    operation["requestBody"] = requestBodyFor(operations, route.operationId);
+    operation["requestBody"] = requestBodyFor(operations, route.operationId, requestComponents);
   }
   return operation;
 }
@@ -1837,6 +1919,7 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
   const key = (relative: string): string => `${apiPrefix}${relative}`;
 
   const paths: Record<string, Json> = {};
+  const requestComponents: RequestComponents = {};
 
   for (const engine of engines) {
     for (const [methodName, spec] of Object.entries(engine.routes)) {
@@ -1845,13 +1928,26 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
         paths,
         key(`/${spec.path}`),
         spec.method,
-        engineOperation(engine, methodName, spec, operations),
+        engineOperation(engine, methodName, spec, operations, requestComponents),
       );
     }
   }
 
   for (const route of customRoutes) {
-    addOperation(paths, key(route.path), route.method, customOperation(route, operations));
+    addOperation(
+      paths,
+      key(route.path),
+      route.method,
+      customOperation(route, operations, requestComponents),
+    );
+  }
+
+  // A promoted request body must not shadow a generated type of the same name.
+  const sharedSchemas = schemas?.components ?? {};
+  for (const name of Object.keys(requestComponents)) {
+    if (name in sharedSchemas) {
+      throw new Error(`Request body component "${name}" collides with a generated schema.`);
+    }
   }
 
   // The `/health` and `/isLife` probes are intentionally left out of the
@@ -1952,9 +2048,9 @@ export function buildOpenApiDocument(options: OpenApiOptions): OpenApiDocument {
           description: "Bearer token or API key for programmatic callers.",
         },
       },
-      // Shared named types referenced by the inlined operation schemas;
-      // empty when no schema bundle is supplied.
-      schemas: { ...(schemas?.components ?? {}) } as Json,
+      // Shared named types referenced by the inlined operation schemas, plus
+      // the request bodies promoted to `<OperationId>Request`.
+      schemas: { ...sharedSchemas, ...requestComponents } as Json,
     },
   };
 }

@@ -209,7 +209,7 @@ public class FileMoveConflictTests(
 
     /// <summary>
     /// Reads the ids of the files directly in a folder from the raw response body.
-    /// <c>FolderContentDtoInteger.Files</c> is typed <c>List&lt;FileEntryBaseDto&gt;</c>, which
+    /// <c>FolderContentDto.Files</c> is typed <c>List&lt;FileEntryBaseDto&gt;</c>, which
     /// carries <c>Title</c> but not <c>Id</c> - an SDK model gap - so identity checks (same entry
     /// vs. a new one with the same title) have to go through the raw JSON.
     /// </summary>

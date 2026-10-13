@@ -60,7 +60,7 @@ public class ReferenceDataPermissionsTests(
         // Act
         await _filesClient.Authenticate(admin);
         var result = await _filesApi.GetReferenceDataAsync(
-            new GetReferenceDataDtoInteger(fileKey, instanceId),
+            new GetReferenceDataDto(fileKey, instanceId),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -85,7 +85,7 @@ public class ReferenceDataPermissionsTests(
         // Act
         await _filesClient.Authenticate(roomAdmin);
         var result = await _filesApi.GetReferenceDataAsync(
-            new GetReferenceDataDtoInteger(fileKey, instanceId),
+            new GetReferenceDataDto(fileKey, instanceId),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -105,7 +105,7 @@ public class ReferenceDataPermissionsTests(
         await _filesClient.Authenticate(null);
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.GetReferenceDataAsync(
-                new GetReferenceDataDtoInteger(fileKey, instanceId),
+                new GetReferenceDataDto(fileKey, instanceId),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(401);
@@ -130,7 +130,7 @@ public class ReferenceDataPermissionsTests(
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.GetReferenceDataAsync(
-                new GetReferenceDataDtoInteger(fileKey, instanceId),
+                new GetReferenceDataDto(fileKey, instanceId),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
@@ -151,7 +151,7 @@ public class ReferenceDataPermissionsTests(
         // Act
         await _filesClient.Authenticate(guest);
         var result = await _filesApi.GetReferenceDataAsync(
-            new GetReferenceDataDtoInteger(fileKey, instanceId),
+            new GetReferenceDataDto(fileKey, instanceId),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -177,7 +177,7 @@ public class ReferenceDataPermissionsTests(
         await _filesClient.Authenticate(guest);
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.GetReferenceDataAsync(
-                new GetReferenceDataDtoInteger(fileKey, instanceId),
+                new GetReferenceDataDto(fileKey, instanceId),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);

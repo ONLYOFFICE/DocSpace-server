@@ -1,34 +1,34 @@
 ﻿// Copyright (C) Ascensio System SIA, 2009-2026
-// 
+//
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
 // version 3 as published by the Free Software Foundation, together with the
 // additional terms provided in the LICENSE file.
-// 
+//
 // This program is distributed WITHOUT ANY WARRANTY, without even the implied
 // warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
 // details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
-// 
+//
 // You can contact Ascensio System SIA by email at info@onlyoffice.com
 // or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
 // LV-1050, Latvia, European Union.
-// 
+//
 // The interactive user interfaces in modified versions of the Program
 // are required to display Appropriate Legal Notices in accordance with
 // Section 5 of the GNU AGPL version 3.
-// 
+//
 // No trademark rights are granted under this License.
-// 
+//
 // All non-code elements of the Product, including illustrations,
 // icon sets, and technical writing content, are licensed under the
 // Creative Commons Attribution-ShareAlike 4.0 International License:
 // https://creativecommons.org/licenses/by-sa/4.0/legalcode
-// 
+//
 // This license applies only to such non-code elements and does not
 // modify or replace the licensing terms applicable to the Program's
 // source code, which remains licensed under the GNU Affero General
 // Public License v3.
-// 
+//
 // SPDX-License-Identifier: AGPL-3.0-only
 
 namespace ASC.Files.Core.ApiModels.ResponseDto;
@@ -59,7 +59,7 @@ public class RoomGroupDto
     /// by setting it to an empty value.
     /// </summary>
     /// <example>{"id": "star", "data": {"default": "svg markup", "small": "svg markup"}}</example>
-    public MultiSizeLogoCover Icon { get; set; }
+    public MultiSizeLogoCoverDto Icon { get; set; }
 
     /// <summary>
     /// The account that created the group and the only one able to read, change or delete it; for any other member of
@@ -67,6 +67,16 @@ public class RoomGroupDto
     /// </summary>
     /// <example>9a1b2c3d-4e5f-6071-8293-a4b5c6d7e8f9</example>
     public Guid UserId { get; set; }
+
+    /// <summary>
+    /// The section the group belongs to, which categorizes it within the application's structure. This property determines
+    /// which area of the interface the group is associated with and affects how its rooms are filtered and displayed.
+    /// Common values include Active for standard rooms, Forms for form-based rooms, Archive for archived content, and
+    /// Templates for template rooms. The search area ensures that when retrieving a group, only rooms that belong to
+    /// the specified section are included in the results, maintaining proper organizational boundaries within the system.
+    /// </summary>
+    /// <example>Active</example>
+    public SearchArea SearchArea { get; set; }
 
     /// <summary>
     /// The rooms the group gathers, those stored in the portal first and those on connected third-party accounts
@@ -88,15 +98,13 @@ public class RoomGroupDto
 [Scope]
 public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory daoFactory)
 {
+    /// <summary>
+    /// Builds the response for one group. The section comes from the group itself, and the rooms are
+    /// limited to it: a room of the other section is invisible here even if it is still referenced,
+    /// which can only happen to a group that predates the split.
+    /// </summary>
     public async Task<RoomGroupDto> GetAsync(RoomGroup group, bool includeMembers)
     {
-        var result = new RoomGroupDto
-        {
-            Id = group.Id,
-            Name = group.Name,
-            UserId = group.UserID
-        };
-
         var roomGroupDao = daoFactory.GetRoomGroupDao<int>();
         var roomGroupRefs = await roomGroupDao.GetRoomsByGroupAsync(group.Id).ToListAsync();
 
@@ -105,18 +113,28 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
 
         foreach (var r in roomGroupRefs)
         {
-            if (r.InternalRoomId.HasValue) 
+            if (r.InternalRoomId.HasValue)
             {
                 fInt.Add(r.InternalRoomId.Value);
-            } 
-            else 
+            }
+            else
             {
                 fString.Add(r.ThirdpartyRoomId);
             }
         }
 
-        var internalRoomsTask = GetFoldersAsync(fInt).ToListAsync().AsTask();
-        var thirdPartyRoomsTask = GetFoldersAsync(fString).ToListAsync().AsTask();
+        var area = group.FolderType.ToSearchArea();
+
+        var result = new RoomGroupDto
+        {
+            Id = group.Id,
+            Name = group.Name,
+            UserId = group.UserID,
+            SearchArea = area
+        };
+
+        var internalRoomsTask = GetRoomsAsync(fInt, area).ToListAsync().AsTask();
+        var thirdPartyRoomsTask = GetRoomsAsync(fString, area).ToListAsync().AsTask();
 
         await Task.WhenAll(internalRoomsTask, thirdPartyRoomsTask);
 
@@ -127,11 +145,11 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
             internalRooms.Count +
             thirdPartyRooms.Count;
 
-        MultiSizeLogoCover cover = null;
+        MultiSizeLogoCoverDto cover = null;
         if (!string.IsNullOrEmpty(group.Icon) &&
             (await RoomLogoManager.GetCoversBySizeAsync()).TryGetValue(group.Icon, out var fromDict))
         {
-            cover = new MultiSizeLogoCover
+            cover = new MultiSizeLogoCoverDto
             {
                 Id = group.Icon,
                 Data = fromDict
@@ -150,14 +168,21 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
 
         return result;
 
-        async IAsyncEnumerable<FileEntryBaseDto> GetFoldersAsync<T>(IEnumerable<T> folders)
+        async IAsyncEnumerable<FileEntryBaseDto> GetRoomsAsync<T>(IEnumerable<T> roomIds, SearchArea roomArea)
         {
             var folderDao = daoFactory.GetFolderDao<T>();
 
-            await foreach (var folder in folderDao.GetFoldersAsync(folders))
+            await foreach (var folder in folderDao.GetFoldersAsync(roomIds))
             {
                 // an archived room leaves its groups; the reference is kept so that unarchiving restores the membership
                 if (folder.RootFolderType == FolderType.Archive)
+                {
+                    continue;
+                }
+
+                // a room of the other section is invisible in this group's listing, so it must not be
+                // counted either - otherwise the group shows a room count it never lists
+                if (!roomArea.MatchesRoomType(folder.FolderType))
                 {
                     continue;
                 }

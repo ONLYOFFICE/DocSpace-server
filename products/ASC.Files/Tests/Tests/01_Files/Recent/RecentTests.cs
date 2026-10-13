@@ -225,7 +225,7 @@ public class RecentTests(
             { RoomType.VirtualDataRoom, FolderType.VirtualDataRoom }
         };
 
-    private async Task<FolderContentDtoInteger> GetRecentAsync(User user, List<FolderType>? folderType = null)
+    private async Task<FolderContentDto> GetRecentAsync(User user, List<FolderType>? folderType = null)
     {
         var recentId = await GetFolderIdAsync(FolderType.Recent, user);
 
@@ -240,7 +240,7 @@ public class RecentTests(
         }
     }
 
-    private async Task<FolderDtoInteger> CreateRoom(RoomType roomType, string title) => roomType switch
+    private async Task<FolderDto> CreateRoom(RoomType roomType, string title) => roomType switch
     {
         RoomType.CustomRoom => await CreateCustomRoom(title),
         RoomType.PublicRoom => await CreatePublicRoom(title),

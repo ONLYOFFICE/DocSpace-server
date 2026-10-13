@@ -116,64 +116,83 @@ public interface JpaAuthorizationRepository
       @Param("registeredClientId") String registeredClientId);
 
   /**
-   * Deletes all authorizations associated with a specific registered client.
+   * Deletes up to {@code limit} authorizations associated with a specific registered client.
+   *
+   * <p>Bulk removals call this repeatedly until it returns fewer rows than {@code limit}, each call
+   * in its own short transaction, so that no single transaction grows with the number of rows.
    *
    * @param clientId the ID of the registered client whose authorizations are to be deleted.
-   */
-  @Modifying
-  @Query(
-      value = "DELETE FROM identity_authorizations WHERE registered_client_id = :clientId",
-      nativeQuery = true)
-  void deleteAllAuthorizationsByClientId(@Param("clientId") String clientId);
-
-  /**
-   * Deletes all authorizations associated with a specific principal (user).
-   *
-   * @param principalId the ID of the principal (user) whose authorizations are to be deleted.
-   */
-  @Modifying
-  @Query(
-      value = "DELETE FROM identity_authorizations WHERE principal_id = :principalId",
-      nativeQuery = true)
-  void deleteAllAuthorizationsByPrincipalId(@Param("principalId") String principalId);
-
-  /**
-   * Deletes all authorizations associated with a specific tenant.
-   *
-   * @param tenantId the ID of the tenant whose authorizations are to be deleted.
-   */
-  @Modifying
-  @Query(
-      value = "DELETE FROM identity_authorizations WHERE tenant_id = :tenantId",
-      nativeQuery = true)
-  void deleteAllAuthorizationsByTenantId(@Param("tenantId") long tenantId);
-
-  /**
-   * Deletes every authorization granted to a client owned by a specific tenant, whichever tenant
-   * the authorizing user belonged to.
-   *
-   * @param ownerTenantId the ID of the tenant owning the clients.
-   */
-  @Modifying
-  @Query(
-      value = "DELETE FROM identity_authorizations WHERE owner_tenant_id = :ownerTenantId",
-      nativeQuery = true)
-  void deleteAllAuthorizationsByOwnerTenantId(@Param("ownerTenantId") long ownerTenantId);
-
-  /**
-   * Deletes every authorization granted to a client created by a specific user, whichever tenant
-   * the authorizing user belonged to.
-   *
-   * @param ownerTenantId the ID of the tenant owning the clients.
-   * @param ownerUserId the ID of the user who created the clients.
+   * @param limit the maximum number of rows to delete.
+   * @return the number of rows deleted.
    */
   @Modifying
   @Query(
       value =
-          "DELETE FROM identity_authorizations WHERE owner_tenant_id = :ownerTenantId AND owner_user_id = :ownerUserId",
+          "DELETE FROM identity_authorizations WHERE registered_client_id = :clientId LIMIT :limit",
       nativeQuery = true)
-  void deleteAllAuthorizationsByOwner(
-      @Param("ownerTenantId") long ownerTenantId, @Param("ownerUserId") String ownerUserId);
+  int deleteAuthorizationsByClientId(@Param("clientId") String clientId, @Param("limit") int limit);
+
+  /**
+   * Deletes up to {@code limit} authorizations associated with a specific principal (user).
+   *
+   * @param principalId the ID of the principal (user) whose authorizations are to be deleted.
+   * @param limit the maximum number of rows to delete.
+   * @return the number of rows deleted.
+   */
+  @Modifying
+  @Query(
+      value = "DELETE FROM identity_authorizations WHERE principal_id = :principalId LIMIT :limit",
+      nativeQuery = true)
+  int deleteAuthorizationsByPrincipalId(
+      @Param("principalId") String principalId, @Param("limit") int limit);
+
+  /**
+   * Deletes up to {@code limit} authorizations associated with a specific tenant.
+   *
+   * @param tenantId the ID of the tenant whose authorizations are to be deleted.
+   * @param limit the maximum number of rows to delete.
+   * @return the number of rows deleted.
+   */
+  @Modifying
+  @Query(
+      value = "DELETE FROM identity_authorizations WHERE tenant_id = :tenantId LIMIT :limit",
+      nativeQuery = true)
+  int deleteAuthorizationsByTenantId(@Param("tenantId") long tenantId, @Param("limit") int limit);
+
+  /**
+   * Deletes up to {@code limit} authorizations granted to a client owned by a specific tenant,
+   * whichever tenant the authorizing user belonged to.
+   *
+   * @param ownerTenantId the ID of the tenant owning the clients.
+   * @param limit the maximum number of rows to delete.
+   * @return the number of rows deleted.
+   */
+  @Modifying
+  @Query(
+      value =
+          "DELETE FROM identity_authorizations WHERE owner_tenant_id = :ownerTenantId LIMIT :limit",
+      nativeQuery = true)
+  int deleteAuthorizationsByOwnerTenantId(
+      @Param("ownerTenantId") long ownerTenantId, @Param("limit") int limit);
+
+  /**
+   * Deletes up to {@code limit} authorizations granted to a client created by a specific user,
+   * whichever tenant the authorizing user belonged to.
+   *
+   * @param ownerTenantId the ID of the tenant owning the clients.
+   * @param ownerUserId the ID of the user who created the clients.
+   * @param limit the maximum number of rows to delete.
+   * @return the number of rows deleted.
+   */
+  @Modifying
+  @Query(
+      value =
+          "DELETE FROM identity_authorizations WHERE owner_tenant_id = :ownerTenantId AND owner_user_id = :ownerUserId LIMIT :limit",
+      nativeQuery = true)
+  int deleteAuthorizationsByOwner(
+      @Param("ownerTenantId") long ownerTenantId,
+      @Param("ownerUserId") String ownerUserId,
+      @Param("limit") int limit);
 
   /**
    * Retrieves a list of authorizations for a specific principal, optionally filtered by a last

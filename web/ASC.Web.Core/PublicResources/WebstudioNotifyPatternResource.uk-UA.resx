@@ -937,7 +937,11 @@ h1.Шановний $UserName
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Вітаємо, $UserName!
 
-Повідомляємо вас про те, що не вдалося виконати автоматичне поновлення придбаного вами тарифного плану або послуг. Просимо вас поновити його вручну.
+Повідомляємо вас про те, що не вдалося виконати автоматичне поновлення придбаного вами тарифного плану або послуг:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Просимо вас поновити його вручну.
 
 $OrangeButton
 
@@ -1886,5 +1890,19 @@ IP: *$IP*
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Вітаємо, $UserName!
+
+Ми зв'язуємося з вами, щоб повідомити, що автоматичне поповнення не підтримується для вашого поточного способу оплати: кошти надходять у ${LetterLogoText} Wallet лише після завершення банківського переказу, тому баланс не може бути поповнений відразу.
+
+Тому автоматичне поповнення було вимкнено. Щоб уникнути перебоїв у роботі платних сервісів, будь ласка, поповніть баланс гаманця вручну або перейдіть на спосіб оплати, що підтримує автоматичне поповнення.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Потрібна дія: Автоматичне поповнення недоступне для вашого ${LetterLogoText} Wallet</value>
   </data>
 </root>

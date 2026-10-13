@@ -55,7 +55,7 @@ public class RoomQuotaChangeTests(
         var room = await CreateCustomRoom("Autotest Quota Room " + Guid.NewGuid().ToString()[..8]);
 
         var result = (await _quotaApi.UpdateRoomsQuotaAsync(
-            new UpdateRoomsQuotaRequestDtoInteger([new(room.Id)], QuotaMinimalBytes),
+            new UpdateRoomsQuotaRequestDto([new(room.Id)], QuotaMinimalBytes),
             TestContext.Current.CancellationToken)).Response;
 
         result.Should().ContainSingle();
@@ -72,7 +72,7 @@ public class RoomQuotaChangeTests(
         await EnableRoomQuota();
 
         var result = (await _quotaApi.UpdateRoomsQuotaAsync(
-            new UpdateRoomsQuotaRequestDtoInteger([], QuotaMinimalBytes),
+            new UpdateRoomsQuotaRequestDto([], QuotaMinimalBytes),
             TestContext.Current.CancellationToken)).Response;
 
         result.Should().BeEmpty();
@@ -92,7 +92,7 @@ public class RoomQuotaChangeTests(
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () =>
             await _quotaApi.UpdateRoomsQuotaAsync(
-                new UpdateRoomsQuotaRequestDtoInteger([new(room.Id)], QuotaMinimalBytes),
+                new UpdateRoomsQuotaRequestDto([new(room.Id)], QuotaMinimalBytes),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
@@ -114,7 +114,7 @@ public class RoomQuotaChangeTests(
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () =>
             await _quotaApi.UpdateRoomsQuotaAsync(
-                new UpdateRoomsQuotaRequestDtoInteger([new(room.Id)], QuotaMinimalBytes),
+                new UpdateRoomsQuotaRequestDto([new(room.Id)], QuotaMinimalBytes),
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
@@ -133,7 +133,7 @@ public class RoomQuotaChangeTests(
         var room = await CreateRoomOfType(roomType, "Autotest Quota Room Type " + Guid.NewGuid().ToString()[..8]);
 
         var result = (await _quotaApi.UpdateRoomsQuotaAsync(
-            new UpdateRoomsQuotaRequestDtoInteger([new(room.Id)], QuotaMinimalBytes),
+            new UpdateRoomsQuotaRequestDto([new(room.Id)], QuotaMinimalBytes),
             TestContext.Current.CancellationToken)).Response;
 
         result.Should().ContainSingle();

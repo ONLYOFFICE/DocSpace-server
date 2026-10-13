@@ -108,23 +108,22 @@ public class DocumentServiceLicense(ICache cache,
                 return new LicenseValidationResult(false, commandResponse.ErrorString);
             }
 
-            if (commandResponse.License != null)
+            // A response without the resource key is not a match: Document Server re-reads the license file
+            // with a delay, so right after the file is written it may still answer as if there were no license
+            if (!string.IsNullOrEmpty(license.ResourceKey) &&
+                commandResponse.License?.ResourceKey != license.ResourceKey)
             {
-                if (!string.IsNullOrEmpty(commandResponse.License.ResourceKey) &&
-                    !string.IsNullOrEmpty(license.ResourceKey) &&
-                    commandResponse.License.ResourceKey != license.ResourceKey)
-                {
-                    errorMsg = $"Resource key mismatch: expected {license.ResourceKey}, got {commandResponse.License.ResourceKey}";
-                    return null; // Resource key mismatch. Possibly cached result
-                }
+                errorMsg = $"Resource key mismatch: expected {license.ResourceKey}, got {commandResponse.License?.ResourceKey ?? "none"}";
+                return null; // Document Server has not re-read the license file yet
+            }
 
-                if (!string.IsNullOrEmpty(commandResponse.License.CustomerId) &&
-                    !string.IsNullOrEmpty(license.CustomerId) &&
-                    commandResponse.License.CustomerId != license.CustomerId)
-                {
-                    errorMsg = $"Customer id mismatch: expected {license.CustomerId}, got {commandResponse.License.CustomerId}";
-                    return null; // Customer id mismatch. Possibly cached result
-                }
+            if (commandResponse.License != null &&
+                !string.IsNullOrEmpty(commandResponse.License.CustomerId) &&
+                !string.IsNullOrEmpty(license.CustomerId) &&
+                commandResponse.License.CustomerId != license.CustomerId)
+            {
+                errorMsg = $"Customer id mismatch: expected {license.CustomerId}, got {commandResponse.License.CustomerId}";
+                return null; // Customer id mismatch. Possibly cached result
             }
 
             if (commandResponse.Server == null)

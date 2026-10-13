@@ -41,8 +41,9 @@ import {
   getMyDocumentsFolderId,
   canTakeUpload,
 } from "./docspaceFilesApi.js";
-import { getForwardedHeaders } from "../requestContext.js";
+import { getForwardedHeaders, getAnalyzeEntryIds } from "../requestContext.js";
 import { getBoolean, getNumber, getString, isObject } from "../narrow.js";
+import type { JsonObject } from "../narrow.js";
 import { getOnlyofficeFileType } from "./onlyofficeFileType.js";
 import logger from "../log.js";
 import type { AttachmentsStorage, Attachment } from "@onlyoffice/ai-chat/core";
@@ -401,10 +402,12 @@ export class HttpAttachmentsStorage implements AttachmentsStorage {
       });
     }
 
-    const raw = await aiService.post(PATH, { entryIds });
+    // From the request context (the engine's createMany signature can't carry them).
+    const analyzeEntryIds = getAnalyzeEntryIds();
+    const raw = await aiService.post(PATH, { entryIds, analyzeEntryIds });
     logger.debug(
       `HttpAttachmentsStorage.createMany: POST ${PATH} entryIds=${JSON.stringify(entryIds)} ` +
-        `raw response=${JSON.stringify(raw)}`,
+        `analyzeEntryIds=${JSON.stringify(analyzeEntryIds)} raw response=${JSON.stringify(raw)}`,
     );
     if (!Array.isArray(raw)) {
       logger.error(

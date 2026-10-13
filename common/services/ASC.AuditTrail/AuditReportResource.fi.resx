@@ -792,6 +792,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>Asiakasohjelman {0} salaisuus luotu uudelleen</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>Huomautus</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>Raportissa näytetään {0} uusinta tapahtumaa {1} tapahtumasta. Saat kaikki tapahtumat lataamalla raportin CSV-muodossa.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>Vektorisaatioasetukset on nollattu</value>
   </data>
@@ -1256,5 +1262,35 @@
   </data>
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>AI-agentin MCP-palvelin {0} on päivitetty</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Metatietojen kaskadimääritys aloitettu: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Metatietokenttä luotu: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Metatietokenttä poistettu: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Metatietokenttä päivitetty: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Metatietomalli määritetty: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Metatietomalli luotu: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Metatietomalli poistettu: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Metatietomallin määritys peruutettu: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Metatietomalli päivitetty: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Metatietoarvot päivitetty: {0}</value>
   </data>
 </root>

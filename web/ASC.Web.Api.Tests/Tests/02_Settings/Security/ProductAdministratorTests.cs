@@ -69,7 +69,7 @@ public class ProductAdministratorTests(
         var promoted = await InviteMember(EmployeeType.DocSpaceAdmin);
 
         await _securityApi.SetProductAdministratorAsync(
-            new SecurityRequestsDto(_productIdAll, promoted.Id, true), TestContext.Current.CancellationToken);
+            new SecurityRequestDto(_productIdAll, promoted.Id, true), TestContext.Current.CancellationToken);
 
         // Act
         var admins = await _securityApi.GetProductAdministratorsAsync(_productIdAll, TestContext.Current.CancellationToken);
@@ -137,7 +137,7 @@ public class ProductAdministratorTests(
         var promoted = await InviteMember(EmployeeType.DocSpaceAdmin);
 
         await _securityApi.SetProductAdministratorAsync(
-            new SecurityRequestsDto(_productIdAll, promoted.Id, true), TestContext.Current.CancellationToken);
+            new SecurityRequestDto(_productIdAll, promoted.Id, true), TestContext.Current.CancellationToken);
 
         // Act
         var result = await _securityApi.GetIsProductAdministratorAsync(
@@ -183,7 +183,7 @@ public class ProductAdministratorTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _securityApi.SetProductAdministratorAsync(
-                new SecurityRequestsDto(_productIdAll, otherAdmin.Id, false), TestContext.Current.CancellationToken));
+                new SecurityRequestDto(_productIdAll, otherAdmin.Id, false), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);
@@ -203,7 +203,7 @@ public class ProductAdministratorTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _securityApi.SetProductAdministratorAsync(
-                new SecurityRequestsDto(_productIdAll, roomAdmin.Id, true), TestContext.Current.CancellationToken));
+                new SecurityRequestDto(_productIdAll, roomAdmin.Id, true), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);

@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 // 
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -36,7 +36,7 @@ namespace ASC.Files.Core;
 public interface IRoomGroupDao<T>
 {
     Task<RoomGroup> SaveRoomGroupAsync(RoomGroup group);
-    IAsyncEnumerable<RoomGroup> GetGroupsAsync();
+    IAsyncEnumerable<RoomGroup> GetGroupsAsync(FolderType folderType);
     Task<RoomGroup> GetGroupInfoAsync(int groupId);
     Task DeleteGroup(int groupId);
     Task AddRoomToGroupAsync(T roomId, int groupId);

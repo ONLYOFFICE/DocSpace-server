@@ -916,7 +916,11 @@ Məlumatın "$FromUserName":"$FromUserLink" istifadəçisindən "$ToUserName":"$
   <data name="pattern_renew_subscription_error" xml:space="preserve">
     <value>Salam $UserName!
 
-Aldığınız tarif planının və ya xidmətlərin avtomatik yenilənmədiyini bildirmək üçün sizinlə əlaqə saxlayırıq. Sizdən onu əl ilə yeniləmənizi xahiş edirik.
+Aldığınız tarif planının və ya xidmətlərin avtomatik yenilənmədiyini bildirmək üçün sizinlə əlaqə saxlayırıq:
+
+*$ServiceName*, $ServiceUnit: $ServiceQuantity
+
+Sizdən onu əl ilə yeniləmənizi xahiş edirik.
 
 $OrangeButton
 
@@ -1884,5 +1888,19 @@ Bu siz idinizsə — əlavə addımlar tələb olunmur. Bu girişi tanımırsın
 $OrangeButton
 
 $TrulyYours</value>
+  </data>
+  <data name="pattern_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Salam, $UserName!
+
+Cari ödəniş metodunuz üçün avtomatik əlavə doldurmanın dəstəklənmədiyini bildirmək üçün sizinlə əlaqə saxlayırıq: vəsait ${LetterLogoText} Wallet-ə yalnız bank köçürməsi tamamlandıqdan sonra daxil olur, buna görə balans dərhal artırıla bilmir.
+
+Buna görə avtomatik əlavə doldurma söndürülmüşdür. Ödənişli xidmətlərin kəsilməsinin qarşısını almaq üçün cüzdan balansınızı əl ilə doldurun və ya avtomatik əlavə doldurmanı dəstəkləyən ödəniş metoduna keçin.
+
+$OrangeButton
+
+$TrulyYours</value>
+  </data>
+  <data name="subject_wallet_auto_top_up_unavailable" xml:space="preserve">
+    <value>Tələb olunan əməliyyat: ${LetterLogoText} Cüzdanınız üçün avtomatik əlavə doldurma mövcud deyil</value>
   </data>
 </root>

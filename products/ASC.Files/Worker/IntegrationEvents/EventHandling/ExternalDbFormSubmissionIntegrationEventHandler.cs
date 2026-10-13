@@ -52,13 +52,17 @@ public class ExternalDbFormSubmissionIntegrationEventHandler(
             {
                 await tenantManager.SetCurrentTenantAsync(@event.TenantId);
 
-                await formFillingReportCreator.ExportToExternalDbAsync(
-                    @event.FileId,
-                    @event.OriginalFormId,
-                    @event.OriginalFormVersion,
-                    @event.RoomId,
-                    @event.ResultFormNumber,
-                    @event.FormsDataUrl);
+                // No new submission when sent by the sync button — only the gap sync below runs.
+                if (!string.IsNullOrEmpty(@event.FormsDataUrl))
+                {
+                    await formFillingReportCreator.ExportToExternalDbAsync(
+                        @event.FileId,
+                        @event.OriginalFormId,
+                        @event.OriginalFormVersion,
+                        @event.RoomId,
+                        @event.ResultFormNumber,
+                        @event.FormsDataUrl);
+                }
 
                 await formFillingReportCreator.ExportMissingFromOpenSearchAsync(
                     @event.OriginalFormId,

@@ -76,6 +76,18 @@ public partial class AiIntegrationContext
     {
         return ToolPrefsQueriesContainer.DeleteToolPrefsByServerTypeAndEntryAsync(this, tenantId, serverType, entryId);
     }
+
+    [PreCompileQuery]
+    public Task<int> DeleteToolPrefsOfMcpServersExceptAsync(int tenantId, IEnumerable<string> keptServerTypes)
+    {
+        return ToolPrefsQueriesContainer.DeleteToolPrefsOfMcpServersExceptAsync(this, tenantId, keptServerTypes);
+    }
+
+    [PreCompileQuery]
+    public Task<int> DeleteToolPrefsOfMcpServersExceptByEntryAsync(int tenantId, int entryId, IEnumerable<string> keptServerTypes)
+    {
+        return ToolPrefsQueriesContainer.DeleteToolPrefsOfMcpServersExceptByEntryAsync(this, tenantId, entryId, keptServerTypes);
+    }
 }
 
 static file class ToolPrefsQueriesContainer
@@ -128,5 +140,23 @@ static file class ToolPrefsQueriesContainer
             (AiIntegrationContext ctx, int tenantId, string serverType, int entryId) =>
                 ctx.ToolPrefs
                     .Where(x => x.TenantId == tenantId && x.ServerType == serverType && x.EntryId == entryId)
+                    .ExecuteDelete());
+
+    public static readonly Func<AiIntegrationContext, int, IEnumerable<string>, Task<int>> DeleteToolPrefsOfMcpServersExceptAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, IEnumerable<string> keptServerTypes) =>
+                ctx.ToolPrefs
+                    .Where(x => x.TenantId == tenantId && x.EntryId == null &&
+                                !keptServerTypes.Contains(x.ServerType) &&
+                                ctx.McpServers.Any(s => s.TenantId == tenantId && s.EntryId == null && s.Name == x.ServerType))
+                    .ExecuteDelete());
+
+    public static readonly Func<AiIntegrationContext, int, int, IEnumerable<string>, Task<int>> DeleteToolPrefsOfMcpServersExceptByEntryAsync =
+        EF.CompileAsyncQuery(
+            (AiIntegrationContext ctx, int tenantId, int entryId, IEnumerable<string> keptServerTypes) =>
+                ctx.ToolPrefs
+                    .Where(x => x.TenantId == tenantId && x.EntryId == entryId &&
+                                !keptServerTypes.Contains(x.ServerType) &&
+                                ctx.McpServers.Any(s => s.TenantId == tenantId && s.EntryId == entryId && s.Name == x.ServerType))
                     .ExecuteDelete());
 }

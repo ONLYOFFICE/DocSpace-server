@@ -109,4 +109,36 @@ public class SettingsController(AiSettingsService aiSettingsService) : Controlle
         var settings = await aiSettingsService.SetAiUserSettingsAsync(inDto.ChatRecommendedModelVisible);
         return settings.MapToDto();
     }
+
+    /// <remarks>
+    /// Returns how tool calls made by the model are approved for the current user. The stored mode applies to every
+    /// chat of the user in the portal; while nothing is stored, the default mode is returned.
+    /// </remarks>
+    /// <summary>Get the tool permission mode</summary>
+    /// <path>api/2.0/ai/config/tool-mode</path>
+    [Tags("AI / Settings")]
+    [SwaggerResponse(200, "Tool permission mode", typeof(ToolPermissionModeDto))]
+    [HttpGet("config/tool-mode")]
+    public async Task<ToolPermissionModeDto> GetToolPermissionModeAsync()
+    {
+        var mode = await aiSettingsService.GetToolPermissionModeAsync();
+        return new ToolPermissionModeDto { Mode = mode };
+    }
+
+    /// <remarks>
+    /// Stores how tool calls made by the model are approved for the current user. The mode applies to every chat of the
+    /// user in the portal and replaces the one stored before. A value outside the declared members is rejected rather
+    /// than coerced.
+    /// </remarks>
+    /// <summary>Set the tool permission mode</summary>
+    /// <path>api/2.0/ai/config/tool-mode</path>
+    [Tags("AI / Settings")]
+    [SwaggerResponse(200, "Tool permission mode", typeof(ToolPermissionModeDto))]
+    [SwaggerResponse(400, "The mode is not one of the declared members")]
+    [HttpPut("config/tool-mode")]
+    public async Task<ToolPermissionModeDto> SetToolPermissionModeAsync(SetToolPermissionModeRequestDto inDto)
+    {
+        var mode = await aiSettingsService.SetToolPermissionModeAsync(inDto.Body.Mode);
+        return new ToolPermissionModeDto { Mode = mode };
+    }
 }

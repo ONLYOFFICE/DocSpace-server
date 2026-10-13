@@ -80,7 +80,7 @@ public abstract class FavoritesOperationsTestBase(
         return result.Response;
     }
 
-    protected async Task<FolderContentDtoInteger> GetFavorites()
+    protected async Task<FolderContentDto> GetFavorites()
     {
         var wrapper = await _foldersApi.GetFavoritesFolderAsync(cancellationToken: TestContext.Current.CancellationToken);
         return wrapper.Response;
@@ -92,7 +92,7 @@ public abstract class FavoritesOperationsTestBase(
     /// index write does not turn into an intermittent failure, and returns the last observed state so
     /// a failing assertion still shows what was actually there.
     /// </summary>
-    protected async Task<FolderContentDtoInteger> PollFavorites(Func<FolderContentDtoInteger, bool> until, int timeoutSeconds = 10)
+    protected async Task<FolderContentDto> PollFavorites(Func<FolderContentDto, bool> until, int timeoutSeconds = 10)
     {
         var deadline = DateTime.UtcNow.AddSeconds(timeoutSeconds);
 
@@ -112,11 +112,11 @@ public abstract class FavoritesOperationsTestBase(
     /// <summary>Moves a file to trash and waits for the asynchronous delete operation to finish.</summary>
     protected async Task DeleteFileToTrash(int fileId)
     {
-        await _filesApi.DeleteFileAsync(fileId, new Delete(false, false), false, TestContext.Current.CancellationToken);
+        await _filesApi.DeleteFileAsync(fileId, new DeleteFileRequest(false, false), false, TestContext.Current.CancellationToken);
         await WaitLongOperation();
     }
 
-    protected async Task<FolderDtoInteger> CreateRoom(RoomType roomType, string title) => roomType switch
+    protected async Task<FolderDto> CreateRoom(RoomType roomType, string title) => roomType switch
     {
         RoomType.CustomRoom => await CreateCustomRoom(title),
         RoomType.PublicRoom => await CreatePublicRoom(title),

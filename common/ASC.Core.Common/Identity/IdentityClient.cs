@@ -48,6 +48,12 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
     IHttpClientFactory httpClientFactory,
     IConfiguration configuration)
 {
+    /// <summary>
+    /// Bounds a call to the identity service well below the 60 s after which the distributed task
+    /// queue unregisters a silent task: an unreachable address must fail the call, not hang it.
+    /// </summary>
+    private static readonly TimeSpan _requestTimeout = TimeSpan.FromSeconds(15);
+
     private string Url
     {
         get
@@ -134,7 +140,8 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
             using var request = new HttpRequestMessage(HttpMethod.Delete, Url + "clients");
 
             request.Headers.Add("x-signature", jwt);
-            using var response = await httpClient.SendAsync(request);
+            using var cts = new CancellationTokenSource(_requestTimeout);
+            using var response = await httpClient.SendAsync(request, cts.Token);
 
             // Deleting the clients of a user who has none is idempotent: a 404 must not abort
             // the user-deletion flow this cleanup is part of.
@@ -156,7 +163,8 @@ public class IdentityClient(MachinePseudoKeys machinePseudoKeys,
 
             using var request = new HttpRequestMessage(HttpMethod.Delete, (Url + "clients/tenant"));
             request.Headers.Add("x-signature", jwt);
-            using var response = await httpClient.SendAsync(request);
+            using var cts = new CancellationTokenSource(_requestTimeout);
+            using var response = await httpClient.SendAsync(request, cts.Token);
 
             if (!response.IsSuccessStatusCode && throwIfNotSuccess)
             {

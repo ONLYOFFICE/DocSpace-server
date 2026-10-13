@@ -44,7 +44,7 @@ public class GetGroupByUserIdRequestDto
     /// empty list rather than 404.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromRoute(Name = "userid")]
+    [FromRoute(Name = "userId")]
     public required Guid UserId { get; set; }
 }
 

@@ -62,7 +62,7 @@ public class FileDeletePermissionsTests(
 
         // Act
         await _filesClient.Authenticate(admin);
-        var results = (await _filesApi.DeleteFileAsync(file.Id, new Delete { Immediately = true }, true, TestContext.Current.CancellationToken)).Response;
+        var results = (await _filesApi.DeleteFileAsync(file.Id, new DeleteFileRequest { Immediately = true }, true, TestContext.Current.CancellationToken)).Response;
 
         if (results.Any(r => !r.Finished))
         {
@@ -93,7 +93,7 @@ public class FileDeletePermissionsTests(
 
         // Act
         await _filesClient.Authenticate(roomManager);
-        var results = (await _filesApi.DeleteFileAsync(file.Id, new Delete { Immediately = true }, true, TestContext.Current.CancellationToken)).Response;
+        var results = (await _filesApi.DeleteFileAsync(file.Id, new DeleteFileRequest { Immediately = true }, true, TestContext.Current.CancellationToken)).Response;
 
         if (results.Any(r => !r.Finished))
         {
@@ -124,7 +124,7 @@ public class FileDeletePermissionsTests(
         var file = await CreateFile("Autotest User Own Delete File.docx", room.Id);
 
         // Act
-        var results = (await _filesApi.DeleteFileAsync(file.Id, new Delete { Immediately = true }, true, TestContext.Current.CancellationToken)).Response;
+        var results = (await _filesApi.DeleteFileAsync(file.Id, new DeleteFileRequest { Immediately = true }, true, TestContext.Current.CancellationToken)).Response;
 
         if (results.Any(r => !r.Finished))
         {
@@ -159,7 +159,7 @@ public class FileDeletePermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.DeleteFileAsync(file.Id, new Delete { Immediately = true }, true, TestContext.Current.CancellationToken));
+            async () => await _filesApi.DeleteFileAsync(file.Id, new DeleteFileRequest { Immediately = true }, true, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
@@ -182,7 +182,7 @@ public class FileDeletePermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.DeleteFileAsync(file.Id, new Delete { Immediately = true }, true, TestContext.Current.CancellationToken));
+            async () => await _filesApi.DeleteFileAsync(file.Id, new DeleteFileRequest { Immediately = true }, true, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
@@ -201,7 +201,7 @@ public class FileDeletePermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.DeleteFileAsync(file.Id, new Delete { Immediately = true }, true, TestContext.Current.CancellationToken));
+            async () => await _filesApi.DeleteFileAsync(file.Id, new DeleteFileRequest { Immediately = true }, true, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
@@ -224,7 +224,7 @@ public class FileDeletePermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(guest);
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.DeleteFileAsync(file.Id, new Delete { Immediately = true }, true, TestContext.Current.CancellationToken));
+            async () => await _filesApi.DeleteFileAsync(file.Id, new DeleteFileRequest { Immediately = true }, true, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
@@ -241,7 +241,7 @@ public class FileDeletePermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(null);
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.DeleteFileAsync(file.Id, new Delete { Immediately = true }, true, TestContext.Current.CancellationToken));
+            async () => await _filesApi.DeleteFileAsync(file.Id, new DeleteFileRequest { Immediately = true }, true, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(401);
     }

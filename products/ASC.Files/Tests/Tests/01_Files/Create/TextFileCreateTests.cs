@@ -49,7 +49,7 @@ public class TextFileCreateTests(
         await _filesClient.Authenticate(Owner);
 
         var result = (await _filesApi.CreateTextFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest Text My Docs File", "Hello world", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest Text My Docs File", "Hello world", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         result.Title.Should().Be("Autotest Text My Docs File.txt");
@@ -65,7 +65,7 @@ public class TextFileCreateTests(
         await _filesClient.Authenticate(Owner);
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.CreateTextFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest Text My Docs No Content"), TestContext.Current.CancellationToken));
+            new CreateTextOrHtmlFileRequest("Autotest Text My Docs No Content"), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(400);
     }
@@ -77,11 +77,11 @@ public class TextFileCreateTests(
         await _filesClient.Authenticate(Owner);
 
         var first = (await _filesApi.CreateTextFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest Text My Docs Dedup", "First", createNewIfExist: false),
+            new CreateTextOrHtmlFileRequest("Autotest Text My Docs Dedup", "First", createNewIfExist: false),
             TestContext.Current.CancellationToken)).Response;
 
         var second = (await _filesApi.CreateTextFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest Text My Docs Dedup", "Second", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest Text My Docs Dedup", "Second", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         second.Id.Should().Be(first.Id);
@@ -93,11 +93,11 @@ public class TextFileCreateTests(
         await _filesClient.Authenticate(Owner);
 
         var first = (await _filesApi.CreateTextFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest Text My Docs Suffix", "First", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest Text My Docs Suffix", "First", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         var second = (await _filesApi.CreateTextFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest Text My Docs Suffix", "Second", createNewIfExist: false),
+            new CreateTextOrHtmlFileRequest("Autotest Text My Docs Suffix", "Second", createNewIfExist: false),
             TestContext.Current.CancellationToken)).Response;
 
         second.Id.Should().NotBe(first.Id);
@@ -109,10 +109,10 @@ public class TextFileCreateTests(
         await _filesClient.Authenticate(Owner);
 
         var first = (await _filesApi.CreateTextFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest Text My Docs Default", "First"), TestContext.Current.CancellationToken)).Response;
+            new CreateTextOrHtmlFileRequest("Autotest Text My Docs Default", "First"), TestContext.Current.CancellationToken)).Response;
 
         var second = (await _filesApi.CreateTextFileInMyDocumentsAsync(
-            new CreateTextOrHtmlFile("Autotest Text My Docs Default", "Second"), TestContext.Current.CancellationToken)).Response;
+            new CreateTextOrHtmlFileRequest("Autotest Text My Docs Default", "Second"), TestContext.Current.CancellationToken)).Response;
 
         second.Id.Should().NotBe(first.Id);
     }
@@ -126,7 +126,7 @@ public class TextFileCreateTests(
 
         var result = (await _filesApi.CreateTextFileAsync(
             room.Id,
-            new CreateTextOrHtmlFile("Autotest Text File", "some text", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest Text File", "some text", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         result.Title.Should().Be("Autotest Text File.txt");
@@ -144,12 +144,12 @@ public class TextFileCreateTests(
 
         var first = (await _filesApi.CreateTextFileAsync(
             room.Id,
-            new CreateTextOrHtmlFile("Autotest Text Dedup", "some text", createNewIfExist: false),
+            new CreateTextOrHtmlFileRequest("Autotest Text Dedup", "some text", createNewIfExist: false),
             TestContext.Current.CancellationToken)).Response;
 
         var second = (await _filesApi.CreateTextFileAsync(
             room.Id,
-            new CreateTextOrHtmlFile("Autotest Text Dedup", "some text", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest Text Dedup", "some text", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         second.Id.Should().Be(first.Id);
@@ -164,12 +164,12 @@ public class TextFileCreateTests(
 
         var first = (await _filesApi.CreateTextFileAsync(
             room.Id,
-            new CreateTextOrHtmlFile("Autotest Text Suffix", "First", createNewIfExist: true),
+            new CreateTextOrHtmlFileRequest("Autotest Text Suffix", "First", createNewIfExist: true),
             TestContext.Current.CancellationToken)).Response;
 
         var second = (await _filesApi.CreateTextFileAsync(
             room.Id,
-            new CreateTextOrHtmlFile("Autotest Text Suffix", "Second", createNewIfExist: false),
+            new CreateTextOrHtmlFileRequest("Autotest Text Suffix", "Second", createNewIfExist: false),
             TestContext.Current.CancellationToken)).Response;
 
         second.Id.Should().NotBe(first.Id);
@@ -183,7 +183,7 @@ public class TextFileCreateTests(
         var room = await CreateCustomRoom("Autotest Room For Text No Content " + Guid.NewGuid().ToString()[..8]);
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.CreateTextFileAsync(
-            room.Id, new CreateTextOrHtmlFile("Autotest Text No Content"), TestContext.Current.CancellationToken));
+            room.Id, new CreateTextOrHtmlFileRequest("Autotest Text No Content"), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(400);
     }
@@ -194,7 +194,7 @@ public class TextFileCreateTests(
         await _filesClient.Authenticate(Owner);
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.CreateTextFileAsync(
-            999999999, new CreateTextOrHtmlFile("Autotest Text Bad Folder", "some text"), TestContext.Current.CancellationToken));
+            999999999, new CreateTextOrHtmlFileRequest("Autotest Text Bad Folder", "some text"), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(404);
     }
@@ -207,10 +207,10 @@ public class TextFileCreateTests(
         var room = await CreateCustomRoom("Autotest Room For Text Default " + Guid.NewGuid().ToString()[..8]);
 
         var first = (await _filesApi.CreateTextFileAsync(
-            room.Id, new CreateTextOrHtmlFile("Autotest Text Default", "First"), TestContext.Current.CancellationToken)).Response;
+            room.Id, new CreateTextOrHtmlFileRequest("Autotest Text Default", "First"), TestContext.Current.CancellationToken)).Response;
 
         var second = (await _filesApi.CreateTextFileAsync(
-            room.Id, new CreateTextOrHtmlFile("Autotest Text Default", "Second"), TestContext.Current.CancellationToken)).Response;
+            room.Id, new CreateTextOrHtmlFileRequest("Autotest Text Default", "Second"), TestContext.Current.CancellationToken)).Response;
 
         second.Id.Should().NotBe(first.Id);
     }
@@ -224,7 +224,7 @@ public class TextFileCreateTests(
         var room = await CreateCustomRoom("Autotest Room For Text Empty Title " + Guid.NewGuid().ToString()[..8]);
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.CreateTextFileAsync(
-            room.Id, new CreateTextOrHtmlFile("", "some text"), TestContext.Current.CancellationToken));
+            room.Id, new CreateTextOrHtmlFileRequest("", "some text"), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(400);
     }
@@ -238,7 +238,7 @@ public class TextFileCreateTests(
         const string title = "Ünïcödé Café résumé naïve";
 
         var result = (await _filesApi.CreateTextFileAsync(
-            room.Id, new CreateTextOrHtmlFile(title, "some text", createNewIfExist: true), TestContext.Current.CancellationToken)).Response;
+            room.Id, new CreateTextOrHtmlFileRequest(title, "some text", createNewIfExist: true), TestContext.Current.CancellationToken)).Response;
 
         result.Title.Should().Be(title + ".txt");
         result.Id.Should().BeGreaterThan(0);
@@ -253,7 +253,7 @@ public class TextFileCreateTests(
         var title = new string('A', 300);
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesApi.CreateTextFileAsync(
-            room.Id, new CreateTextOrHtmlFile(title, "some text"), TestContext.Current.CancellationToken));
+            room.Id, new CreateTextOrHtmlFileRequest(title, "some text"), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(400);
     }

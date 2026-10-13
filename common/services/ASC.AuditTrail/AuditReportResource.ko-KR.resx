@@ -786,6 +786,12 @@
   <data name="RegenerateSecret" xml:space="preserve">
     <value>클라이언트의 {0} 시크릿이 재생성되었습니다</value>
   </data>
+  <data name="ReportRowLimitLabel" xml:space="preserve">
+    <value>참고</value>
+  </data>
+  <data name="ReportRowLimitNote" xml:space="preserve">
+    <value>보고서에는 {1}개의 이벤트 중 최근 {0}개가 표시됩니다. 모든 이벤트를 받으려면 보고서를 CSV 형식으로 다운로드하세요.</value>
+  </data>
   <data name="ResetVectorizationSettings" xml:space="preserve">
     <value>벡터화 설정이 재설정되었습니다</value>
   </data>
@@ -1256,5 +1262,35 @@
   </data>
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>AI 에이전트의 MCP 서버 {0}이(가) 업데이트되었습니다</value>
+  </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>메타데이터 계단식 할당이 시작되었습니다: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>메타데이터 필드가 생성되었습니다: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>메타데이터 필드가 삭제되었습니다: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>메타데이터 필드가 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>메타데이터 템플릿이 할당되었습니다: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>메타데이터 템플릿이 생성되었습니다: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>메타데이터 템플릿이 삭제되었습니다: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>메타데이터 템플릿 할당이 해제되었습니다: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>메타데이터 템플릿이 업데이트되었습니다: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>메타데이터 값이 업데이트되었습니다: {0}</value>
   </data>
 </root>

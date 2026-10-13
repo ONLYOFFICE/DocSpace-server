@@ -1,0 +1,234 @@
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
+// 
+// This program is a free software product. You can redistribute it and/or
+// modify it under the terms of the GNU Affero General Public License (AGPL)
+// version 3 as published by the Free Software Foundation, together with the
+// additional terms provided in the LICENSE file.
+// 
+// This program is distributed WITHOUT ANY WARRANTY, without even the implied
+// warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. For
+// details, see the GNU AGPL at: https://www.gnu.org/licenses/agpl-3.0.html
+// 
+// You can contact Ascensio System SIA by email at info@onlyoffice.com
+// or by postal mail at 20A-6 Ernesta Birznieka-Upisha Street, Riga,
+// LV-1050, Latvia, European Union.
+// 
+// The interactive user interfaces in modified versions of the Program
+// are required to display Appropriate Legal Notices in accordance with
+// Section 5 of the GNU AGPL version 3.
+// 
+// No trademark rights are granted under this License.
+// 
+// All non-code elements of the Product, including illustrations,
+// icon sets, and technical writing content, are licensed under the
+// Creative Commons Attribution-ShareAlike 4.0 International License:
+// https://creativecommons.org/licenses/by-sa/4.0/legalcode
+// 
+// This license applies only to such non-code elements and does not
+// modify or replace the licensing terms applicable to the Program's
+// source code, which remains licensed under the GNU Affero General
+// Public License v3.
+// 
+// SPDX-License-Identifier: AGPL-3.0-only
+
+namespace ASC.Web.Api.Models;
+
+/// <summary>
+/// A portal account in the format the portal stores it. Returned where the API has always handed out the
+/// stored record; new endpoints return <see cref="EmployeeDto"/> instead.
+/// </summary>
+public class PortalUserDto
+{
+    /// <summary>
+    /// The user ID.
+    /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
+    public Guid Id { get; init; }
+
+    /// <summary>
+    /// The user's first name.
+    /// </summary>
+    /// <example>John</example>
+    public string FirstName { get; init; }
+
+    /// <summary>
+    /// The user's last name.
+    /// </summary>
+    /// <example>Doe</example>
+    public string LastName { get; init; }
+
+    /// <summary>
+    /// The user username.
+    /// </summary>
+    /// <example>johndoe</example>
+    public string UserName { get; init; }
+
+    /// <summary>
+    /// The user birthday.
+    /// </summary>
+    /// <example>1990-01-01T00:00:00Z</example>
+    public DateTime? BirthDate { get; init; }
+
+    /// <summary>
+    /// The user sex (male or female).
+    /// </summary>
+    /// <example>true</example>
+    public bool? Sex { get; init; }
+
+    /// <summary>
+    /// The user status.
+    /// </summary>
+    /// <example>1</example>
+    public EmployeeStatus Status { get; init; }
+
+    /// <summary>
+    /// The user activation status.
+    /// </summary>
+    /// <example>0</example>
+    public EmployeeActivationStatus ActivationStatus { get; init; }
+
+    /// <summary>
+    /// The date and time when the user account was terminated.
+    /// </summary>
+    /// <example>2025-12-31T23:59:59Z</example>
+    public DateTime? TerminatedDate { get; init; }
+
+    /// <summary>
+    /// The user title.
+    /// </summary>
+    /// <example>Manager</example>
+    public string Title { get; init; }
+
+    /// <summary>
+    /// The user registration date.
+    /// </summary>
+    /// <example>2020-01-15T00:00:00Z</example>
+    public DateTime? WorkFromDate { get; init; }
+
+    /// <summary>
+    /// The user email address.
+    /// </summary>
+    /// <example>john.doe@example.com</example>
+    [EmailAddress]
+    public string Email { get; init; }
+
+    /// <summary>
+    /// The list of user contacts in the string format.
+    /// </summary>
+    /// <example>skype:johndoe|telegram:@johndoe</example>
+    public string Contacts { get; init; }
+
+    /// <summary>
+    /// The list of user contacts.
+    /// </summary>
+    /// <example>["skype:johndoe", "telegram:@johndoe"]</example>
+    public List<string> ContactsList { get; init; }
+
+    /// <summary>
+    /// The user location.
+    /// </summary>
+    /// <example>New York, USA</example>
+    public string Location { get; init; }
+
+    /// <summary>
+    /// The user notes.
+    /// </summary>
+    /// <example>Additional information about the user</example>
+    public string Notes { get; init; }
+
+    /// <summary>
+    /// Specifies if the user account was removed or not.
+    /// </summary>
+    /// <example>false</example>
+    public bool Removed { get; init; }
+
+    /// <summary>
+    /// The date and time when the user account was last modified.
+    /// </summary>
+    /// <example>2025-02-08T10:30:00Z</example>
+    public DateTime LastModified { get; init; }
+
+    /// <summary>
+    /// The tenant ID.
+    /// </summary>
+    /// <example>1</example>
+    public int TenantId { get; init; }
+
+    /// <summary>
+    /// Specifies if the user is active or not.
+    /// </summary>
+    /// <example>true</example>
+    public bool IsActive { get; init; }
+
+    /// <summary>
+    /// The user culture code.
+    /// </summary>
+    /// <example>en-US</example>
+    public string CultureName { get; init; }
+
+    /// <summary>
+    /// The user mobile phone.
+    /// </summary>
+    /// <example>+1234567890</example>
+    public string MobilePhone { get; init; }
+
+    /// <summary>
+    /// The user mobile phone activation status.
+    /// </summary>
+    /// <example>0</example>
+    public MobilePhoneActivationStatus MobilePhoneActivationStatus { get; init; }
+
+    /// <summary>
+    /// The LDAP user identifier.
+    /// </summary>
+    /// <example>S-1-5-21-3623811015-3361044348-30300820-1013</example>
+    public string Sid { get; init; }
+
+    /// <summary>
+    /// The LDAP user quota attribute.
+    /// </summary>
+    /// <example>1073741824</example>
+    public long LdapQouta { get; init; }
+
+    /// <summary>
+    /// The SSO SAML user identifier.
+    /// </summary>
+    /// <example>johndoe@example.com</example>
+    public string SsoNameId { get; init; }
+
+    /// <summary>
+    /// The SSO SAML user session identifier.
+    /// </summary>
+    /// <example>_1a2b3c4d5e6f7g8h9i0j</example>
+    public string SsoSessionId { get; init; }
+
+    /// <summary>
+    /// The date and time when the user account was created.
+    /// </summary>
+    /// <example>2020-01-15T00:00:00Z</example>
+    public DateTime CreateDate { get; init; }
+
+    /// <summary>
+    /// The ID of the user who created the current user account.
+    /// </summary>
+    /// <example>00000000-0000-0000-0000-000000000000</example>
+    public Guid? CreatedBy { get; init; }
+
+    /// <summary>
+    /// Specifies if tips, updates and offers are allowed to be sent to the user or not.
+    /// </summary>
+    /// <example>false</example>
+    public bool? Spam { get; init; }
+
+    /// <summary>
+    /// Specifies whether the account still has to be activated: the opposite of `isActive`.
+    /// </summary>
+    /// <example>false</example>
+    public bool CheckActivation { get; init; }
+}
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public static partial class PortalUserDtoMapper
+{
+    public static partial PortalUserDto ToPortalUserDto(this UserInfo source);
+}

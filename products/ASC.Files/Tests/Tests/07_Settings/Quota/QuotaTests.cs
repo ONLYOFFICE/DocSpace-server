@@ -65,7 +65,7 @@ public class QuotaTests(
         var quotaLimit = 2147483648; // 2 GB
         
         // Set up request to update quota for the room
-        var updateRequest = new UpdateRoomsQuotaRequestDtoInteger
+        var updateRequest = new UpdateRoomsQuotaRequestDto
         {           
             RoomIds = [new(room.Id)],
             Quota = quotaLimit
@@ -74,7 +74,7 @@ public class QuotaTests(
        await _quotaApi.UpdateRoomsQuotaAsync(updateRequest, TestContext.Current.CancellationToken);
         
         // Set up request to reset quota for the room
-        var resetRequest = new UpdateRoomsRoomIdsRequestDtoInteger
+        var resetRequest = new UpdateRoomsRoomIdsRequestDto
         {
             RoomIds = [new(room.Id)]
         };
@@ -107,7 +107,7 @@ public class QuotaTests(
         var room2 = await CreateVirtualRoom(roomTitle2);
         
         // Set up request to reset quota for multiple rooms
-        var resetRequest = new UpdateRoomsRoomIdsRequestDtoInteger
+        var resetRequest = new UpdateRoomsRoomIdsRequestDto
         {
             RoomIds = [new(room1.Id), new(room2.Id)]
         };
@@ -116,7 +116,7 @@ public class QuotaTests(
         var quotaLimit = 2147483648; // 2 GB
         
         // Set up request to update quota for the room
-        var updateRequest = new UpdateRoomsQuotaRequestDtoInteger
+        var updateRequest = new UpdateRoomsQuotaRequestDto
         {           
             RoomIds =  [new(room1.Id), new(room2.Id)],
             Quota = quotaLimit
@@ -154,7 +154,7 @@ public class QuotaTests(
         var quotaLimit = 2147483648; // 2 GB
         
         // Set up request to update quota for the room
-        var updateRequest = new UpdateRoomsQuotaRequestDtoInteger
+        var updateRequest = new UpdateRoomsQuotaRequestDto
         {           
             RoomIds = [new(room.Id)],
             Quota = quotaLimit
@@ -191,7 +191,7 @@ public class QuotaTests(
         var quotaLimit = 2147483648; // 2 GB
         
         // Set up request to update quota for multiple rooms
-        var updateRequest = new UpdateRoomsQuotaRequestDtoInteger
+        var updateRequest = new UpdateRoomsQuotaRequestDto
         {           
             RoomIds = [new(room1.Id), new(room2.Id)],
             Quota = quotaLimit
@@ -224,7 +224,7 @@ public class QuotaTests(
         var room = await CreateVirtualRoom(roomTitle);
         
         // Set up a request with zero quotas (should be the same as reset)
-        var updateRequest = new UpdateRoomsQuotaRequestDtoInteger
+        var updateRequest = new UpdateRoomsQuotaRequestDto
         {
             RoomIds = [new(room.Id)],
             Quota = 0
@@ -256,7 +256,7 @@ public class QuotaTests(
         
         // Step 1: Set a quota
         var quotaLimit = 5368709120; // 5 GB
-        var updateRequest = new UpdateRoomsQuotaRequestDtoInteger
+        var updateRequest = new UpdateRoomsQuotaRequestDto
         {
             RoomIds = [new(room.Id)],
             Quota = quotaLimit
@@ -267,7 +267,7 @@ public class QuotaTests(
         updateResult[0].QuotaLimit.Should().Be(quotaLimit);
         
         // Step 2: Reset the quota
-        var resetRequest = new UpdateRoomsRoomIdsRequestDtoInteger
+        var resetRequest = new UpdateRoomsRoomIdsRequestDto
         {
             RoomIds = [new(room.Id)],
         };

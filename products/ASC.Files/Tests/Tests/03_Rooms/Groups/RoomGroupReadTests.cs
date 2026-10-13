@@ -1,4 +1,4 @@
-// Copyright (C) Ascensio System SIA, 2009-2026
+﻿// Copyright (C) Ascensio System SIA, 2009-2026
 //
 // This program is a free software product. You can redistribute it and/or
 // modify it under the terms of the GNU Affero General Public License (AGPL)
@@ -250,17 +250,24 @@ public class RoomGroupReadTests(
         list.Single(x => x.Id == created.Id).TotalRooms.Should().Be(2);
     }
 
-    // `id` is a required parameter on the typed method (GetRoomGroupsAsync(int id, ...)), so there
-    // is no way to omit it through the SDK — this stays raw to exercise the server accepting the
-    // query string without it at all.
+    /// <summary>
+    /// The listing with no query string at all: both of its parameters have to fall back to their
+    /// server-side defaults - members included, and the Rooms section rather than Forms.
+    /// </summary>
     [Fact]
-    public async Task GetList_RawRequestWithoutIdParameter_StillReturns200()
+    public async Task GetList_NoQueryParameters_UsesTheServerDefaults()
     {
+        // Arrange
+        var roomId = await CreateGroupRoomId("Defaults Room");
+        var created = await CreateRoomGroup("Defaults Group", [roomId]);
+
         // Act
-        using var response = await RoomGroupRaw(HttpMethod.Get);
+        var list = (await _roomGroupsApi.GetRoomGroupsAsync(cancellationToken: TestContext.Current.CancellationToken)).Response;
 
         // Assert
-        response.StatusCode.Should().Be((HttpStatusCode)200);
+        var group = list.Single(x => x.Id == created.Id);
+        group.SearchArea.Should().Be(SearchArea.Active);
+        group.Rooms.Select(r => r.Title).Should().Contain("Defaults Room");
     }
 
     #endregion

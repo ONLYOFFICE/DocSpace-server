@@ -33,61 +33,25 @@
 
 namespace ASC.Files.Core.Core.History.Interpreters;
 
-public record FolderIndexChangedData : EntryData
-{
-    public int OldIndex { get; }
-    public int NewIndex { get; }
-    private readonly string _context;
-
-    public FolderIndexChangedData(
-        int oldIndex,
-        int newIndex,
-        string id,
-        string title,
-        int? parentId = null,
-        string parentTitle = null,
-        int? parentType = null,
-        string context = null) : base(id,
-        title,
-        parentId,
-        parentTitle,
-        parentType)
-    {
-        NewIndex = newIndex;
-        OldIndex = oldIndex;
-        _context = context;
-    }
-
-    public override int GetId()
-    {
-        if (!string.IsNullOrEmpty(_context))
-        {
-            return _context.GetHashCode();
-        }
-
-        return ParentId.HasValue ? ParentId.GetHashCode() : 0;
-    }
-}
-
 public class FolderCreatedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryDataDto> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var desc = GetAdditionalDescription(description);
 
-        return new ValueTask<HistoryData>(new EntryData(target, description[0], desc.ParentId, desc.ParentTitle, desc.ParentType, desc.Type));
+        return new ValueTask<HistoryDataDto>(new EntryHistoryDataDto(target, description[0], desc.ParentId, desc.ParentTitle, desc.ParentType, desc.Type));
     }
 }
 
 public class FolderMovedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryDataDto> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var splitTarget = target.Split(',');
         var desc = GetAdditionalDescription(description);
 
-        return new ValueTask<HistoryData>(
-            new EntryOperationData(
+        return new ValueTask<HistoryDataDto>(
+            new EntryOperationHistoryDataDto(
                 splitTarget[0],
                 description[0],
                 splitTarget[1],
@@ -101,24 +65,24 @@ public class FolderMovedInterpreter : ActionInterpreter
 
 public class FolderRenamedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryDataDto> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var desc = GetAdditionalDescription(description);
 
-        return new ValueTask<HistoryData>(new RenameEntryData(target, description[1], description[0], desc.ParentId,
+        return new ValueTask<HistoryDataDto>(new RenameEntryHistoryDataDto(target, description[1], description[0], desc.ParentId,
             desc.ParentTitle, desc.ParentType));
     }
 }
 
 public class FolderCopiedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryDataDto> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var splitTarget = target.Split(',');
         var desc = GetAdditionalDescription(description);
 
-        return new ValueTask<HistoryData>(
-            new EntryOperationData(
+        return new ValueTask<HistoryDataDto>(
+            new EntryOperationHistoryDataDto(
                 splitTarget[0],
                 description[0],
                 splitTarget[1],
@@ -132,15 +96,15 @@ public class FolderCopiedInterpreter : ActionInterpreter
 
 public class FolderDeletedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryDataDto> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
-        return new ValueTask<HistoryData>(new EntryData(target, description[0]));
+        return new ValueTask<HistoryDataDto>(new EntryHistoryDataDto(target, description[0]));
     }
 }
 
 public class FolderIndexReorderedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryDataDto> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var desc = GetAdditionalDescription(description);
         var title = description[0];
@@ -150,13 +114,13 @@ public class FolderIndexReorderedInterpreter : ActionInterpreter
         var parentTitle = isRoom ? title : desc.ParentTitle;
         var parentType = isRoom ? (int)FolderType.VirtualDataRoom : desc.ParentType;
 
-        return new ValueTask<HistoryData>(new EntryData(target, title, parentId, parentTitle, parentType));
+        return new ValueTask<HistoryDataDto>(new EntryHistoryDataDto(target, title, parentId, parentTitle, parentType));
     }
 }
 
 public class FolderIndexChangedInterpreter : ActionInterpreter
 {
-    protected override ValueTask<HistoryData> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
+    protected override ValueTask<HistoryDataDto> GetDataAsync(IServiceProvider serviceProvider, string target, List<string> description)
     {
         var oldIndex = int.Parse(description[1]);
         var newIndex = int.Parse(description[2]);
@@ -169,7 +133,7 @@ public class FolderIndexChangedInterpreter : ActionInterpreter
 
         var desc = GetAdditionalDescription(description);
 
-        return new ValueTask<HistoryData>(new FolderIndexChangedData(
+        return new ValueTask<HistoryDataDto>(new FolderIndexChangedHistoryDataDto(
             oldIndex,
             newIndex,
             target,

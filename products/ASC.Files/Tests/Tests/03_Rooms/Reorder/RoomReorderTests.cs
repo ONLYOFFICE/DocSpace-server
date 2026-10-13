@@ -57,7 +57,7 @@ public class RoomReorderTests(
     private async Task<(int Id, string Title)> CreateFile(int roomId, string title)
     {
         var response = (await _filesApi.CreateFileAsync(
-            roomId, new CreateFileJsonElement(title), TestContext.Current.CancellationToken)).Response;
+            roomId, new CreateFileRequest(title), TestContext.Current.CancellationToken)).Response;
 
         return (response.Id, response.Title);
     }
@@ -67,7 +67,7 @@ public class RoomReorderTests(
         await _filesApi.SetFileOrderAsync(fileId, new OrderRequestDto(order), TestContext.Current.CancellationToken);
     }
 
-    private async Task<FolderContentDtoInteger> GetContent(int folderId)
+    private async Task<FolderContentDto> GetContent(int folderId)
     {
         return (await _foldersApi.GetFolderByFolderIdAsync(folderId, cancellationToken: TestContext.Current.CancellationToken)).Response;
     }

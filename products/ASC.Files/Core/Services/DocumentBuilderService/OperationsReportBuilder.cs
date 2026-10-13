@@ -49,25 +49,43 @@ public class OperationsReportBuilder(
 {
     protected override async Task<DocumentBuilderInputData> BuildCoreAsync(RenderContext context, CustomerOperationsReportTaskData taskData)
     {
+        var tenantWalletService = taskData.ServiceName is { Count: 1 }
+            ? await GetTenantWalletServiceAsync(taskData.ServiceName.First())
+            : null;
+
+        // Both AI services record the source of the operation and the provider's cost in its metadata.
+        var isAiService = tenantWalletService is TenantWalletService.AITools or TenantWalletService.AISearch;
+
+        // AI search is billed by results, not tokens, so only AI tools get the token columns.
+        var tokenColumns = tenantWalletService is TenantWalletService.AITools ? GetTokenColumns() : null;
+
         var columns = new List<ReportColumn>
         {
             new(Resource.AccountingCustomerOperationDate),
             new(Resource.AccountingCustomerOperationType),
             new(Resource.AccountingCustomerOperationDetails),
             new(Resource.AccountingCustomerOperationContact),
-            new(Resource.AccountingCustomerOperationQuantity, "right"),
-            new(Resource.AccountingCustomerOperationServiceUnit),
-            new(Resource.AccountingCustomerOperationCredit, "right", Sum: true),
-            new(Resource.AccountingCustomerOperationDebit, "right", Sum: true),
-            new(Resource.AccountingCustomerOperationCurrency, Currency: true)
+            new(Resource.AccountingCustomerOperationQuantity, ReportColumnAlign.Right)
         };
 
-        var tenantWalletService = taskData.ServiceName is { Count: 1 }
-            ? await GetTenantWalletServiceAsync(taskData.ServiceName.First())
-            : null;
+        if (tokenColumns != null)
+        {
+            // The breakdown of the quantity, which for AI operations already is the total tokens.
+            columns.AddRange(tokenColumns.Select(x => new ReportColumn(x.Header, ReportColumnAlign.Right)));
+        }
 
-        var addSourceColumns = tenantWalletService is TenantWalletService.AITools or TenantWalletService.AISearch;
-        if (addSourceColumns)
+        columns.Add(new ReportColumn(Resource.AccountingCustomerOperationServiceUnit));
+        columns.Add(new ReportColumn(Resource.AccountingCustomerOperationCredit, ReportColumnAlign.Right, Sum: true));
+
+        if (isAiService)
+        {
+            columns.Add(new ReportColumn(Resource.AccountingCustomerOperationProviderCost, ReportColumnAlign.Right, Sum: true));
+        }
+
+        columns.Add(new ReportColumn(Resource.AccountingCustomerOperationDebit, ReportColumnAlign.Right, Sum: true));
+        columns.Add(new ReportColumn(Resource.AccountingCustomerOperationCurrency, Currency: true));
+
+        if (isAiService)
         {
             columns.Add(new ReportColumn(Resource.AccountingCustomerOperationSourceType));
             columns.Add(new ReportColumn(Resource.AccountingCustomerOperationSourceTitle));
@@ -79,7 +97,10 @@ public class OperationsReportBuilder(
         // Second sheet: how much each participant spent in total over the reported period. Only the
         // debit side is summed - credits are top-ups, not consumption. The currency is a row field
         // of its own, so each participant is totalled per currency; a pivot always lays its row
-        // fields out ahead of the values, which is why it precedes the total.
+        // fields out ahead of the values, which is why it precedes the total. When every operation
+        // shares one currency the script leaves that field out and names the currency in the total's
+        // caption instead. The biggest spenders come first rather than the participants in
+        // alphabetical order.
         var pivot = new ReportPivot(
             Resource.AccountingCustomerOperationsReportSummarySheetName,
             [Resource.AccountingCustomerOperationContact, Resource.AccountingCustomerOperationCurrency],
@@ -89,7 +110,11 @@ public class OperationsReportBuilder(
                     "Sum",
                     Resource.AccountingCustomerOperationsReportSummaryDebit,
                     MoneyFormat)
-            ]);
+            ],
+            new ReportPivotSort(
+                Resource.AccountingCustomerOperationContact,
+                Resource.AccountingCustomerOperationDebit,
+                ReportPivotSortOrder.Descending));
 
         var definition = new ReportDefinition(
             Resource.AccountingCustomerOperationsReportSheetName,
@@ -119,7 +144,7 @@ public class OperationsReportBuilder(
                         continue;
                     }
 
-                    await writer.WriteAsync(SerializeOperations(records, dateFormat, context.Options, addSourceColumns));
+                    await writer.WriteAsync(SerializeOperations(records, dateFormat, context.Options, isAiService, tokenColumns));
                 }
             },
             pivot);
@@ -183,6 +208,7 @@ public class OperationsReportBuilder(
                 operation.SourceId = sourceId;
                 operation.SourceType = sourceType;
                 operation.SourceTitle = sourceTitle;
+                operation.TokenUsage = WalletServiceDescriptionManager.GetTokenUsage(operation.Metadata);
             }
 
             yield return report.Collection;
@@ -196,7 +222,23 @@ public class OperationsReportBuilder(
         }
     }
 
-    private static string SerializeOperations(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions, bool addSourceColumns)
+    // The token breakdown, as the header each column carries and the count it reads. Declared once so
+    // that the header row and the data rows cannot fall out of step: a column added, removed or
+    // reordered here moves both at the same time.
+    private static List<(string Header, Func<OperationTokenUsage, long?> Tokens)> GetTokenColumns()
+    {
+        return
+        [
+            (Resource.AccountingCustomerOperationPromptTokens, x => x?.PromptTokens),
+            (Resource.AccountingCustomerOperationCachedTokens, x => x?.CachedTokens),
+            (Resource.AccountingCustomerOperationCacheWriteTokens, x => x?.CacheWriteTokens),
+            (Resource.AccountingCustomerOperationCompletionTokens, x => x?.CompletionTokens),
+            (Resource.AccountingCustomerOperationReasoningTokens, x => x?.ReasoningTokens),
+            (Resource.AccountingCustomerOperationImageTokens, x => x?.ImageTokens)
+        ];
+    }
+
+    private static string SerializeOperations(List<Operation> records, string dateFormat, JsonSerializerOptions jsonSerializerOptions, bool isAiService, List<(string Header, Func<OperationTokenUsage, long?> Tokens)> tokenColumns)
     {
         var sb = new StringBuilder();
 
@@ -208,14 +250,31 @@ public class OperationsReportBuilder(
                 new(record.Description, "@"),
                 new(record.Details, "@"),
                 new(record.ParticipantDisplayName, "@"),
-                new(record.Quantity.ToString(CultureInfo.InvariantCulture), CountFormat, "right"),
-                new(record.ServiceUnit, "@"),
-                new(record.Credit.ToString(CultureInfo.InvariantCulture), MoneyFormat, "right"),
-                new(record.Debit.ToString(CultureInfo.InvariantCulture), MoneyFormat, "right"),
-                new(record.Currency, "@")
+                CountValue(record.Quantity)
             };
 
-            if (addSourceColumns)
+            if (tokenColumns != null)
+            {
+                // One value per token column even when the operation carries no token counts at all,
+                // or every column after this block would shift left by six.
+                foreach (var tokenColumn in tokenColumns)
+                {
+                    properties.Add(CountValue(tokenColumn.Tokens(record.TokenUsage)));
+                }
+            }
+
+            properties.Add(new PropertyValue(record.ServiceUnit, "@"));
+            properties.Add(MoneyValue(record.Credit));
+
+            if (isAiService)
+            {
+                properties.Add(MoneyValue(WalletServiceDescriptionManager.GetProviderCost(record.Metadata)));
+            }
+
+            properties.Add(MoneyValue(record.Debit));
+            properties.Add(new PropertyValue(record.Currency, "@"));
+
+            if (isAiService)
             {
                 properties.Add(new PropertyValue(WalletServiceDescriptionManager.GetSourceTypeTitle(record.SourceType), "@"));
                 properties.Add(new PropertyValue(record.SourceTitle, "@"));

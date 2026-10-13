@@ -97,9 +97,11 @@ public class IndexEventProcessingService(
         if (@event.Action == FileIndexAction.Delete)
         {
             var factoryIndexerFormData = serviceProvider.GetRequiredService<FactoryIndexerForm>();
+            var factoryIndexerFileMetadata = serviceProvider.GetRequiredService<FactoryIndexerFileMetadata>();
 
             await factoryIndexer.DeleteAsync(r => r.Where(a => a.Id, @event.FileId));
             await factoryIndexerFormData.DeleteAsync(r => r.Where(a => a.Id, @event.FileId));
+            await factoryIndexerFileMetadata.DeleteAsync(r => r.Where(a => a.Id, @event.FileId));
 
             return;
         }
@@ -141,7 +143,10 @@ public class IndexEventProcessingService(
         {
             if (@event.FolderIds is { Count: > 0 })
             {
+                var factoryIndexerFolderMetadata = serviceProvider.GetRequiredService<FactoryIndexerFolderMetadata>();
+
                 await factoryIndexer.DeleteAsync(r => r.In(a => a.Id, @event.FolderIds.ToArray()));
+                await factoryIndexerFolderMetadata.DeleteAsync(r => r.In(a => a.Id, @event.FolderIds.ToArray()));
             }
 
             return;

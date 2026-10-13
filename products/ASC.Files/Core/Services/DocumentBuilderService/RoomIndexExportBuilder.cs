@@ -53,6 +53,14 @@ public class RoomIndexExportBuilder(
 {
     private const string ScriptName = "RoomIndexExport.docbuilder";
 
+    // The data is written into the script, which the document server refuses past its download limit: escaped
+    // to \uXXXX, every non-Latin letter would take six bytes of it instead of two. Quotes, backslashes and control
+    // characters are still escaped. Property names are left as declared, which is what the script reads.
+    private static readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+    };
+
     public async Task<(string ScriptFilePath, string TempFileName, string OutputFileName)> BuildAsync<T>(Guid userId, T roomId)
     {
         var user = await userManager.GetUsersAsync(userId);
@@ -114,7 +122,7 @@ public class RoomIndexExportBuilder(
 
         script = script
             .Replace("${tempFileName}", tempFileName)
-            .Replace("${inputData}", JsonSerializer.Serialize(data));
+            .Replace("${inputData}", JsonSerializer.Serialize(data, _jsonOptions));
 
         var scriptParts = script.Split("${inputDataItems}");
 
@@ -207,7 +215,7 @@ public class RoomIndexExportBuilder(
 
             if (items.Count > 0)
             {
-                var jsonArray = JsonSerializer.Serialize(items);
+                var jsonArray = JsonSerializer.Serialize(items, _jsonOptions);
 
                 var text = separator + jsonArray.TrimStart('[').TrimEnd(']');
 

@@ -65,7 +65,10 @@ switch (launchProfile)
             .AddMySql(withDataVolume: false, withTmpfs: true)
             .AddRabbitMq(withManagementPlugin: false)
             .AddRedis()
-            .AddOpensearch(withDashboard: false, isProxied: false)
+            // no data volume, like MySQL: the tenant and entry ids start over with every run, so documents
+            // kept from a previous run would match the new entries by (TenantId, Id) and leak into the search
+            .AddOpensearch(withDashboard: false, withDataVolume: false, isProxied: false)
+            .AddNextcloud()
             .AllowPortalRegistration();
 
         configurator
@@ -93,7 +96,9 @@ switch (launchProfile)
             .AddMySql(withDataVolume: false, withTmpfs: true)
             .AddRabbitMq(withManagementPlugin: false)
             .AddRedis()
-            .AddOpensearch(withDashboard: false, isProxied: false)
+            // no data volume, like MySQL: the tenant and entry ids start over with every run, so documents
+            // kept from a previous run would match the new entries by (TenantId, Id) and leak into the search
+            .AddOpensearch(withDashboard: false, withDataVolume: false, isProxied: false)
             .AddMailPit()
             .AllowPortalRegistration();
 

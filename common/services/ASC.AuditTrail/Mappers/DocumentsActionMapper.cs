@@ -42,6 +42,7 @@ internal class DocumentsActionMapper : IProductActionMapper
         new RoomsActionMapper(),
         new SettingsActionMapper(),
         new AgentsActionMapper(),
+        new MetadataActionMapper(),
         new PrivacyRoomActionMapper()
     ];
 
@@ -266,6 +267,33 @@ internal class SettingsActionMapper : ILocationActionMapper
                     MessageAction.DocumentsForcesave, MessageAction.DocumentsStoreForcesave, MessageAction.DocumentsUploadingFormatsSettingsUpdated,
                     MessageAction.DocumentsExternalShareSettingsUpdated, MessageAction.DocumentsDefaultTemplatesSettingsUpdated
                 ]
+            }
+        };
+    }
+}
+
+internal class MetadataActionMapper : ILocationActionMapper
+{
+    public LocationType Location { get; }
+    public IDictionary<MessageAction, MessageMaps> Actions { get; }
+
+    public MetadataActionMapper()
+    {
+        Location = LocationType.DocumentsSettings;
+        Actions = new MessageMapsDictionary(ProductType.Documents, Location)
+        {
+            {
+                ActionType.Create, [MessageAction.MetadataTemplateCreated, MessageAction.MetadataFieldCreated]
+            },
+            {
+                ActionType.Update, [
+                    MessageAction.MetadataTemplateUpdated, MessageAction.MetadataFieldUpdated,
+                    MessageAction.MetadataTemplateAssigned, MessageAction.MetadataTemplateUnassigned,
+                    MessageAction.MetadataValuesUpdated, MessageAction.MetadataCascadeStarted
+                ]
+            },
+            {
+                ActionType.Delete, [MessageAction.MetadataTemplateDeleted, MessageAction.MetadataFieldDeleted]
             }
         };
     }

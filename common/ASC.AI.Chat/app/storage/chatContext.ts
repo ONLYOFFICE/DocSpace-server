@@ -42,6 +42,7 @@ import { parseWebSearchConfig } from "./webSearchStorage.js";
 import type { DocspaceFolderInfo } from "./docspaceFilesApi.js";
 import type { ChatContextScope, ChatContextSnapshot } from "./chatContextSnapshot.js";
 import { depthToLevel } from "./reasoningDepth.js";
+import { csharpToToolPermissionMode } from "./toolPermissionMode.js";
 import {
   getChatContextMisses,
   getFilesApiReadCount,
@@ -219,6 +220,8 @@ export function parseChatContext(
       contextEntityId: request.contextEntityId,
     },
     aiReady: config ? getBoolean(config, "aiReady") : undefined,
+    aiNotReadyMessage: config ? getString(config, "aiNotReadyMessage") : undefined,
+    toolPermissionMode: config ? csharpToToolPermissionMode(config["toolPermissionMode"]) : null,
     profiles: parseProfiles(getArray(raw, "profiles")),
     global,
     entity,

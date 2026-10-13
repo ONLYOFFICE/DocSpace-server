@@ -42,7 +42,7 @@ public abstract class HistoryTestBase(
     : BaseTest(fixture)
 {
     /// <summary>Creates a custom room with a file inside it, both owned by the caller.</summary>
-    protected async Task<(FolderDtoInteger Room, FileDtoInteger File)> CreateRoomWithFile(string roomTitle, string fileTitle)
+    protected async Task<(FolderDto Room, FileDto File)> CreateRoomWithFile(string roomTitle, string fileTitle)
     {
         var room = await CreateCustomRoom(roomTitle);
         var file = await CreateFile(fileTitle, room.Id);
@@ -53,6 +53,6 @@ public abstract class HistoryTestBase(
     /// <summary>Bumps a file to a second version, which several history assertions need.</summary>
     protected async Task BumpToSecondVersion(int fileId)
     {
-        await _filesApi.UpdateFileAsync(fileId, new UpdateFile { LastVersion = 2 }, TestContext.Current.CancellationToken);
+        await _filesApi.UpdateFileAsync(fileId, new UpdateFileRequest { LastVersion = 2 }, TestContext.Current.CancellationToken);
     }
 }

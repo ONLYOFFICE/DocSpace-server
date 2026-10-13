@@ -63,9 +63,8 @@ public class RoomIndexExportTask : DocumentBuilderTask<int, RoomIndexExportTaskD
 
         var folderDao = daoFactory.GetFolderDao<int>();
 
-        var parentId = await folderDao.GetFolderIDUserAsync(false, _userId);
-
-        var file = await fileSaver.SaveAsync(_userId, parentId, inputData.OutputFileName, fileUri);
+        // "My documents" is created lazily, so a user who has only ever worked through the API may not have it yet.
+        var file = await fileSaver.SaveToMyDocumentsAsync(_userId, inputData.OutputFileName, fileUri);
 
         var headers = _data.Headers != null
             ? _data.Headers.ToDictionary(x => x.Key, x => new StringValues(x.Value))

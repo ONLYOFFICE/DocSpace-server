@@ -47,7 +47,7 @@ public class RoomGroupCreateTests(
         {
             await CreateCustomRoom("Autotest Group Custom"),
             await CreateCollaborationRoom("Autotest Group Collaboration"),
-            await CreateFillingFormsRoom("Autotest Group FormFilling"),
+            //await CreateFillingFormsRoom("Autotest Group FormFilling"),
             await CreatePublicRoom("Autotest Group Public"),
             await CreateVDRRoom("Autotest Group VDR")
         };

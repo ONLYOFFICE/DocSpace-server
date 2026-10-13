@@ -16,6 +16,7 @@
 
 package com.example.codegen;
 
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.servers.*;
 import io.swagger.v3.oas.models.headers.*;
 import io.swagger.v3.oas.models.media.Schema;
@@ -162,8 +163,28 @@ public class MyCSharpClientCodegen extends CSharpClientCodegen {
         return objs;
     }
 
+    // A generic controller action exists twice on the server, on one and the same route: closed over int for
+    // an entry the portal stores itself and over string for an entry on a connected third-party account. The
+    // document carries the string shape as `x-thirdparty-variant`; ThirdPartyVariants turns it into a second
+    // operation under the same name, which the class template renders as one more overload:
+    // `GetFileInfo(int fileId)` returns FileWrapper, `GetFileInfo(string fileId)` returns ThirdPartyFileWrapper.
+    @Override
+    public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List<Server> servers) {
+        CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);
+        ThirdPartyVariants.attach(this, op, path, httpMethod, operation, servers, ThirdPartyVariants.Naming.OVERLOAD);
+        return op;
+    }
+
+    @Override
+    public void postProcess() {
+        super.postProcess();
+        StaleOutput.delete(this);
+        LineEndings.normalize(this);
+    }
+
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
+        ThirdPartyVariants.insert(this, objs);
         super.postProcessOperationsWithModels(objs, allModels);
 
         if (objs != null && objs.getOperations() != null) {

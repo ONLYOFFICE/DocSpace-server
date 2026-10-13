@@ -35,6 +35,7 @@ import {
   DEFAULT_AI_ROUTES,
   DEFAULT_ASSIGNMENTS_ROUTES,
   DEFAULT_ATTACHMENTS_ROUTES,
+  DEFAULT_CONTEXT_ROUTES,
   DEFAULT_PREFERENCES_ROUTES,
   DEFAULT_PROFILES_ROUTES,
   DEFAULT_PROMPTS_ROUTES,
@@ -42,6 +43,7 @@ import {
   DEFAULT_TOOLS_ROUTES,
   DEFAULT_WEB_SEARCH_ROUTES,
 } from "@onlyoffice/ai-chat/core";
+import type { RouteSpec } from "@onlyoffice/ai-chat/core";
 import type { EngineDoc, CustomRouteDoc } from "./openapi.js";
 
 // Declarative catalog of the service's HTTP surface, decoupled from the
@@ -62,8 +64,17 @@ import type { EngineDoc, CustomRouteDoc } from "./openapi.js";
 const {
   saveImage: _saveImage,
   saveImagesMany: _saveImagesMany,
-  ...ATTACHMENTS_ROUTES
+  ...BASE_ATTACHMENTS_ROUTES
 } = DEFAULT_ATTACHMENTS_ROUTES;
+
+// NewAi-only long-poll for an attached form's starter questions (the questions
+// are no longer inlined in save-files-many). Added to the attachments group so
+// it registers via `bindEngine` and documents exactly like the engine's own
+// routes — id in the body, like `get`/`save-files-many`.
+const ATTACHMENTS_ROUTES: Readonly<Record<string, RouteSpec>> = {
+  ...BASE_ATTACHMENTS_ROUTES,
+  getSuggestedQuestions: { method: "POST", path: "attachments/suggested-questions" },
+};
 
 // Engine groups backed by an `@onlyoffice/ai-chat` service. `name` is the
 // controller key used in `routes.ts`; `tag`/`description` drive the docs.
@@ -87,10 +98,16 @@ export const ENGINE_DOCS: ReadonlyArray<EngineDoc> = [
     routes: ATTACHMENTS_ROUTES,
   },
   {
+    name: "context",
+    tag: "Context",
+    description: "Rooms connected to the chat as context and the skills of their .ai folder.",
+    routes: DEFAULT_CONTEXT_ROUTES,
+  },
+  {
     name: "preferences",
     tag: "Preferences",
     description:
-      "Per-entity chat preferences: the extended-thinking depth and its deep-mode toggle.",
+      "Chat preferences: the per-entity extended-thinking depth with its deep-mode toggle, and the per-user tool permission mode.",
     routes: DEFAULT_PREFERENCES_ROUTES,
   },
   {
@@ -237,6 +254,21 @@ export const CUSTOM_ROUTE_DOCS: ReadonlyArray<CustomRouteDoc> = [
     tag: "Settings",
     operationId: "aiSettingsSetUser",
     summary: "Update user AI settings",
+    hasBody: true,
+  },
+  {
+    method: "GET",
+    path: "/config/tool-mode",
+    tag: "Settings",
+    operationId: "aiSettingsGetToolMode",
+    summary: "Get the tool permission mode",
+  },
+  {
+    method: "PUT",
+    path: "/config/tool-mode",
+    tag: "Settings",
+    operationId: "aiSettingsSetToolMode",
+    summary: "Set the tool permission mode",
     hasBody: true,
   },
   {

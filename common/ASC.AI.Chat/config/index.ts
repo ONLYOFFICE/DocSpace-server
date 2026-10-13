@@ -86,6 +86,20 @@ export function mcpPortalBaseUrl(): string | undefined {
     return process.env["AI__MCP_PORTAL_BASE_URL"] || undefined;
 }
 
+// `core:cors` from the shared appsettings, as `BaseStartup` reads it for the
+// .NET services. Those also take it from the environment as `core__cors`;
+// nconf is not given a `__` separator here -- see mcpEndpointOverride for
+// why -- so that form is read straight from the environment and wins over
+// the file, as it does for .NET.
+export function coreCors(): string | undefined {
+    const fromEnv = process.env["core__cors"];
+    if (fromEnv !== undefined) {
+        return fromEnv;
+    }
+    const fromFile: unknown = nconf.get("core:cors");
+    return typeof fromFile === "string" ? fromFile : undefined;
+}
+
 // SSRF egress policy for user-supplied provider / web-search `baseUrl`s.
 // By default loopback and RFC1918 private ranges are rejected before any
 // outbound call (see `assertSafeBaseUrl` in app/security.ts), mirroring the
@@ -123,6 +137,10 @@ export const DOCSPACE_INTEGRATION_APPROVAL_SERVER_TYPE =
 // @onlyoffice/ai-chat core). Used to validate tool-pref serverTypes.
 export const WEB_SEARCH_TYPE = "web-search";
 export const IMAGE_GENERATION_TYPE = "image-generation";
+
+// Group key for the form-analysis sub-agent's single delegating tool
+// (`analyze_form`). Kept out of `systemServerTypes` so the tool runs silently.
+export const FORM_ANALYSIS_TYPE = "form-analysis";
 
 // Host-preconfigured MCP servers from the shared `appsettings.json`
 // (`ai.mcp`), with the Aspire endpoint override applied per entry.

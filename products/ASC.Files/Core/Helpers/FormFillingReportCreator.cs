@@ -39,12 +39,14 @@ public class FormFillingReportCreator(
     ExportToXLSX exportToXLSX,
     ExternalDatabaseClient externalDatabaseClient,
     IDaoFactory daoFactory,
+    SocketManager socketManager,
     IHttpClientFactory clientFactory,
     TenantManager tenantManager,
     AuthContext authContext,
     IEventBus eventBus,
     FactoryIndexerForm factoryIndexerForm,
-    FactoryIndexerFormMetadata factoryIndexerFormMetadata)
+    FactoryIndexerFormMetadata factoryIndexerFormMetadata,
+    CoreBaseSettings coreBaseSettings)
 {
     private static readonly HashSet<string> _checkboxOffStates =
         new(StringComparer.OrdinalIgnoreCase) { "off", "false", "0", "no", "n", "unchecked" };
@@ -55,21 +57,31 @@ public class FormFillingReportCreator(
 
         await MigrateFormVersionAsync(roomId, originalFormId, originalFormVersion);
 
-        if (sendFormToExternalDB && externalDatabaseClient.IsEnabled())
-        {
-            var fileId = formsDataFile.Id is int id ? id : 0;
-            var userId = authContext.CurrentAccount.ID;
-            var tenantId = tenantManager.GetCurrentTenantId();
-
-            await eventBus.PublishAsync(new ExternalDbFormSubmissionIntegrationEvent(
-                userId, tenantId, originalFormId, originalFormVersion,
-                roomId, fileId, resultFormNumber, formsDataUrl));
-        }
+        var fileId = formsDataFile.Id is int id ? id : 0;
+        await PublishExternalDbSubmissionAsync(sendFormToExternalDB, originalFormId, originalFormVersion, roomId, fileId, resultFormNumber, formsDataUrl);
 
         if (settingsSaveFormAsXLSX)
         {
             await exportToXLSX.UpdateXlsxReport(roomId, originalFormId, originalFormVersion, isNewFile: false);
         }
+    }
+
+    public Task SyncExternalDbAsync(Folder<int> room, int originalFormId, int originalFormVersion)
+    {
+        return PublishExternalDbSubmissionAsync(room.SettingsSendFormToExternalDB, originalFormId, originalFormVersion,
+            room.Id, fileId: 0, resultFormNumber: 0, formsDataUrl: null);
+    }
+
+    private async Task PublishExternalDbSubmissionAsync(bool sendFormToExternalDB, int originalFormId, int originalFormVersion, int roomId, int fileId, int resultFormNumber, string formsDataUrl)
+    {
+        if (!sendFormToExternalDB || !externalDatabaseClient.IsEnabled())
+        {
+            return;
+        }
+
+        await eventBus.PublishAsync(new ExternalDbFormSubmissionIntegrationEvent(
+            authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId(), originalFormId, originalFormVersion,
+            roomId, fileId, resultFormNumber, formsDataUrl));
     }
 
     public async Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl)
@@ -96,16 +108,29 @@ public class FormFillingReportCreator(
         var normalizedMeta = NormalizeMetadata(parsed.MetaData).ToList();
         var columnDefinitions = BuildColumnDefinitions(normalizedMeta).ToList();
         var culture = tenantManager.GetCurrentTenant().GetCulture();
-        var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId, culture);
+        var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId, culture, coreBaseSettings.EnabledCultures);
 
         await externalDatabaseClient.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
 
+        await SetExternalDbTableNameAsync(originalFormId, tableName);
+    }
+
+    private async Task SetExternalDbTableNameAsync(int originalFormId, string tableName)
+    {
         var fileDao = daoFactory.GetFileDao<int>();
         var properties = await fileDao.GetProperties(originalFormId);
-        if (properties?.FormFilling != null && properties.FormFilling.ExternalDbTableName != tableName)
+        if (properties?.FormFilling == null || properties.FormFilling.ExternalDbTableName == tableName)
         {
-            properties.FormFilling.ExternalDbTableName = tableName;
-            await fileDao.SaveProperties(originalFormId, properties);
+            return;
+        }
+
+        properties.FormFilling.ExternalDbTableName = tableName;
+        await fileDao.SaveProperties(originalFormId, properties);
+
+        var originalForm = await fileDao.GetFileAsync(originalFormId);
+        if (originalForm != null)
+        {
+            await socketManager.UpdateFileAsync(originalForm);
         }
     }
 
@@ -186,6 +211,7 @@ public class FormFillingReportCreator(
 
         var culture = tenantManager.GetCurrentTenant().GetCulture();
         var hadFailure = false;
+        var exported = false;
 
         foreach (var item in missing)
         {
@@ -202,18 +228,25 @@ public class FormFillingReportCreator(
                     .ToList()
             };
 
-            var rowData = BuildRowData(filteredData, normalizedMeta, item.Id, culture, item.CreateOn);
+            var rowData = BuildRowData(filteredData, normalizedMeta, item.Id, culture, coreBaseSettings.EnabledCultures, item.CreateOn);
 
             try
             {
                 await externalDatabaseClient.CreateTableAndUpsertAsync(
                     tableName, columnDefinitions, rowData, keyColumn: "form_id");
+                exported = true;
             }
             catch (Exception ex)
             {
                 logger.ErrorGapSyncUpsertFailed(ex, item.Id, tableName);
                 hadFailure = true;
             }
+        }
+
+        // The gap sync can be the first to create the table (e.g. from the sync button), so record it here too.
+        if (exported)
+        {
+            await SetExternalDbTableNameAsync(originalFormId, tableName);
         }
 
         return !hadFailure;
@@ -565,7 +598,7 @@ public class FormFillingReportCreator(
     private static bool HasTimeComponent(string format) =>
         !string.IsNullOrEmpty(format) && (format.Contains('H') || format.Contains('h'));
 
-    private static Dictionary<string, object> BuildRowData(SubmitFormsData data, IEnumerable<FormMetadata> metaData, int formId, CultureInfo culture, DateTime? createdOn = null)
+    private static Dictionary<string, object> BuildRowData(SubmitFormsData data, IEnumerable<FormMetadata> metaData, int formId, CultureInfo culture, IReadOnlyList<CultureInfo> enabledCultures, DateTime? createdOn = null)
     {
         var result = new Dictionary<string, object>
         {
@@ -582,7 +615,7 @@ public class FormFillingReportCreator(
             {
                 continue;
             }
-            result[column] = ConvertFieldValue(item.Value, meta, culture) ?? DBNull.Value;
+            result[column] = ConvertFieldValue(item.Value, meta, culture, enabledCultures) ?? DBNull.Value;
         }
 
         return result;
@@ -621,7 +654,7 @@ public class FormFillingReportCreator(
         return name.ToLower();
     }
 
-    private static object ConvertFieldValue(string value, FormMetadata meta, CultureInfo culture)
+    private static object ConvertFieldValue(string value, FormMetadata meta, CultureInfo culture, IReadOnlyList<CultureInfo> enabledCultures)
     {
         if (string.IsNullOrEmpty(value))
         {
@@ -631,7 +664,7 @@ public class FormFillingReportCreator(
         return meta.Type switch
         {
             "checkBox" => ParseCheckbox(value),
-            "dateTime" => ParseDate(value, meta.Format, culture),
+            "dateTime" => ParseDate(value, meta.Format, culture, enabledCultures),
             "comboBox" or "dropDownList" or "radio" => NormalizeEnumValue(value, meta.PossibleValues),
             _ => value
         };
@@ -649,30 +682,48 @@ public class FormFillingReportCreator(
         return options.FirstOrDefault(o => string.Equals(o, value, StringComparison.OrdinalIgnoreCase)) ?? value;
     }
 
-    private static DateTime? ParseDate(string value, string format, CultureInfo culture)
+    private static DateTime? ParseDate(string value, string format, CultureInfo culture, IReadOnlyList<CultureInfo> enabledCultures)
     {
-        if (string.IsNullOrWhiteSpace(format))
+        if (string.IsNullOrWhiteSpace(value))
         {
-            return DateTime.TryParse(value, culture, DateTimeStyles.None, out var d)
-                || DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out d)
-                ? d : null;
+            return null;
         }
 
-        var dotNetFormat = format
-            .Replace("DD", "dd")
-            .Replace("YYYY", "yyyy")
-            .Replace("YY", "yy")
-            .Replace("mm", "MM");
-
-        if (DateTime.TryParseExact(value, dotNetFormat, culture, DateTimeStyles.None, out var dt)
-            || DateTime.TryParseExact(value, dotNetFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+        if (!string.IsNullOrWhiteSpace(format))
         {
-            return dt;
+            var dotNetFormat = format
+                .Replace("DD", "dd")
+                .Replace("YYYY", "yyyy")
+                .Replace("YY", "yy");
+
+            if (DateTime.TryParseExact(value, dotNetFormat, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out var dt)
+                || DateTime.TryParseExact(value, dotNetFormat, culture, DateTimeStyles.AllowWhiteSpaces, out dt))
+            {
+                return dt;
+            }
         }
 
-        return DateTime.TryParse(value, culture, DateTimeStyles.None, out var fallback)
-            || DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out fallback)
-            ? fallback : null;
+        // Numeric dates stop at portal culture and invariant to avoid a day/month swap.
+        if (DateTime.TryParse(value, culture, DateTimeStyles.AllowWhiteSpaces, out var parsed)
+            || DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out parsed))
+        {
+            return parsed;
+        }
+
+        // A localized month name is in the filler's language, not the portal's: retry against the
+        // portal's enabled languages. Month spellings differ, so no cross-language mix-up.
+        if (value.Any(char.IsLetter))
+        {
+            foreach (var enabled in enabledCultures)
+            {
+                if (DateTime.TryParse(value, enabled, DateTimeStyles.AllowWhiteSpaces, out var localized))
+                {
+                    return localized;
+                }
+            }
+        }
+
+        return null;
     }
 
     public class BoolToStringConverter : JsonConverter<string>

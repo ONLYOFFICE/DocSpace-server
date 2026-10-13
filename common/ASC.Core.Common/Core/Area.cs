@@ -36,6 +36,7 @@ namespace ASC.Core.Common.Core;
 /// <summary>
 /// The area of the account entries.
 /// </summary>
+[OpenApiSchemaName("AccountSearchArea")]
 public enum Area
 {
     [Description("All")]

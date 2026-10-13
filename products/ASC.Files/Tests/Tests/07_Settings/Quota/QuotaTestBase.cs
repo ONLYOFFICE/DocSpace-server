@@ -53,11 +53,11 @@ public abstract class QuotaTestBase(
     protected async Task EnableRoomQuota(int quotaBytes = DefaultQuotaRoomBytes)
     {
         await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(
-            new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(quotaBytes)),
+            new QuotaSettingsRequestDto(true, new QuotaSettingsRequestDtoDefaultQuota(quotaBytes)),
             TestContext.Current.CancellationToken);
     }
 
-    protected async Task<FolderDtoInteger> CreateRoomOfType(RoomType roomType, string title)
+    protected async Task<FolderDto> CreateRoomOfType(RoomType roomType, string title)
     {
         return roomType switch
         {

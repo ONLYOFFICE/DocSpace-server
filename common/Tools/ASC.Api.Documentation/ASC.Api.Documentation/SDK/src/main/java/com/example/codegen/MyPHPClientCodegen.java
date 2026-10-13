@@ -17,6 +17,7 @@
 package com.example.codegen;
 
 import org.openapitools.codegen.languages.PhpClientCodegen;
+import io.swagger.v3.oas.models.Operation;
 import io.swagger.v3.oas.models.servers.*;
 import io.swagger.v3.oas.models.headers.*;
 import static org.openapitools.codegen.utils.StringUtils.camelize;
@@ -77,9 +78,33 @@ public class MyPHPClientCodegen extends PhpClientCodegen {
         supportingFiles.add(new SupportingFile("sample.mustache", "samples", "main.php"));
     }
 
+    // The third-party twin of a generic action (see ThirdPartyVariants): the string-id shape the document
+    // carries as `x-thirdparty-variant`, exposed as a sibling method with the ThirdParty suffix.
+    @Override
+    public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, List<Server> servers) {
+        CodegenOperation op = super.fromOperation(path, httpMethod, operation, servers);
+        ThirdPartyVariants.attach(this, op, path, httpMethod, operation, servers, ThirdPartyVariants.Naming.OVERLOAD);
+        return op;
+    }
+
+    @Override
+    public void postProcess() {
+        super.postProcess();
+        StaleOutput.delete(this);
+        LineEndings.normalize(this);
+    }
+
     @Override
     public OperationsMap postProcessOperationsWithModels(OperationsMap objs, List<ModelMap> allModels) {
+        // PHP has neither overloads nor generics, so the twin stays attached: the docblocks carry
+        // int|string and the union of the answers, and the response model is picked at run time
+        // by the id's type (see ThirdPartyVariants.markUnions).
+        ThirdPartyVariants.addAttachedImports(this, objs);
+
         super.postProcessOperationsWithModels(objs, allModels);
+        for (CodegenOperation op : objs.getOperations().getOperation()) {
+            ThirdPartyVariants.markUnions(op, (a, b) -> a + "|" + b);
+        }
 
         if (objs != null && objs.getOperations() != null) {
             OperationMap operationMap = objs.getOperations();

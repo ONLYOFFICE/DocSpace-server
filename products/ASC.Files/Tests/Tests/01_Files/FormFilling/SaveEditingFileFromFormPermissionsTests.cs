@@ -42,7 +42,7 @@ public class SaveEditingFileFromFormPermissionsTests(
     AspireAppFixture fixture)
     : FormFillingTestBase(fixture)
 {
-    private async Task<(int RoomId, FileDtoInteger Form)> SetupForm()
+    private async Task<(int RoomId, FileDto Form)> SetupForm()
     {
         await _filesClient.Authenticate(Owner);
         var room = await CreateFillingFormsRoom("Autotest SaveEditingFromForm Perm Room " + Guid.NewGuid().ToString()[..8]);

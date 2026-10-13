@@ -56,7 +56,7 @@ public abstract class TfaTestBase(
     {
         await _webApiClient.Authenticate(actor ?? Owner);
         await _tfaSettingsApi.UpdateTfaSettingsAsync(
-            new TfaRequestsDto(TfaRequestsDtoType.App, trustedIps: trustedIps!, mandatoryUsers: mandatoryUsers!, mandatoryGroups: mandatoryGroups!),
+            new TfaRequestDto(TfaType.App, trustedIps: trustedIps!, mandatoryUsers: mandatoryUsers!, mandatoryGroups: mandatoryGroups!),
             TestContext.Current.CancellationToken);
     }
 
@@ -72,7 +72,7 @@ public abstract class TfaTestBase(
     {
         await _webApiClient.Authenticate(null);
         var login = await _authenticationApi.AuthenticateMeAsync(
-            new AuthRequestsDto(userName: user.Email, password: user.Password), TestContext.Current.CancellationToken);
+            new AuthRequestDto(userName: user.Email, password: user.Password), TestContext.Current.CancellationToken);
 
         var secret = login.Response.TfaKey;
         secret.Should().NotBeNullOrEmpty("TFA App must already be required on the portal before linking");
@@ -80,7 +80,7 @@ public abstract class TfaTestBase(
         var code = ASC.Web.Api.Tests.Tests._03_Authentication.TotpGenerator.GenerateCurrent(secret);
         var result = await _authenticationApi.AuthenticateMeFromBodyWithCodeAsync(
             code,
-            new AuthWithCodeRequestsDto { UserName = user.Email, Password = user.Password, Code = code },
+            new AuthWithCodeRequestDto { UserName = user.Email, Password = user.Password, Code = code },
             TestContext.Current.CancellationToken);
 
         user.Token = result.Response.Token;

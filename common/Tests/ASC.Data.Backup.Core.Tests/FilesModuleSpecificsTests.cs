@@ -275,6 +275,99 @@ public class FilesModuleSpecificsTests
         Convert.ToInt32(preparedRow["order"]).Should().Be(3);
     }
 
+    [Theory]
+    [InlineData(1, true)]
+    [InlineData(2, true)]
+    [InlineData(1, false)]
+    [InlineData(2, false)]
+    public async Task TryPrepareRow_FilesMetadataLink_RemapsTemplateEntryAndSourceFolder(int entryType, bool inherited)
+    {
+        // Arrange — a template assigned to an entry, either directly or inherited from a cascading folder
+        const int oldTemplateId = 11;
+        const int newTemplateId = 44;
+        const int oldSourceFolderId = 300;
+        const int newSourceFolderId = 900;
+
+        var specifics = CreateSpecifics();
+        var columnMapper = CreateColumnMapper();
+        columnMapper.SetMapping(entryType == 1 ? "files_folder" : "files_file", "id", OldFolderId, NewFolderId);
+        columnMapper.SetMapping("files_metadata_template", "id", oldTemplateId, newTemplateId);
+        columnMapper.SetMapping("files_folder", "id", oldSourceFolderId, newSourceFolderId);
+        columnMapper.Commit();
+
+        var row = new DataRowInfo("files_metadata_link");
+        row.SetValue("tenant_id", OldTenantId);
+        row.SetValue("template_id", oldTemplateId);
+        row.SetValue("entry_id", OldFolderId);
+        row.SetValue("entry_type", entryType);
+        row.SetValue("is_cascade", 0);
+        row.SetValue("cascade_conflict", 0);
+        row.SetValue("source_folder_id", inherited ? oldSourceFolderId : null);
+        row.SetValue("create_by", _oldOwner);
+        row.SetValue("create_on", DateTime.UtcNow);
+
+        // Act
+        var (prepared, preparedRow) = await specifics.PrepareRowAsync(columnMapper, DeclaredTable(specifics, "files_metadata_link"), row);
+
+        // Assert — the template, the entry and the cascading source all live in the new tenant under new ids
+        prepared.Should().BeTrue();
+        preparedRow.Should().NotBeNull();
+        Convert.ToInt32(preparedRow!["tenant_id"]).Should().Be(NewTenantId);
+        Convert.ToInt32(preparedRow["template_id"]).Should().Be(newTemplateId);
+        Convert.ToInt32(preparedRow["entry_id"]).Should().Be(NewFolderId);
+        preparedRow["create_by"].Should().Be(_newOwner);
+
+        if (inherited)
+        {
+            Convert.ToInt32(preparedRow["source_folder_id"]).Should().Be(newSourceFolderId);
+        }
+        else
+        {
+            preparedRow["source_folder_id"].Should().BeNull("a direct assignment has no source folder to remap");
+        }
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    public async Task TryPrepareRow_FilesMetadataValue_RemapsFieldAndEntry(int entryType)
+    {
+        // Arrange — a value of a template field stored on an entry
+        const int oldFieldId = 21;
+        const int newFieldId = 84;
+
+        var specifics = CreateSpecifics();
+        var columnMapper = CreateColumnMapper();
+        columnMapper.SetMapping(entryType == 1 ? "files_folder" : "files_file", "id", OldFolderId, NewFolderId);
+        columnMapper.SetMapping("files_metadata_field", "id", oldFieldId, newFieldId);
+        columnMapper.Commit();
+
+        var row = new DataRowInfo("files_metadata_value");
+        row.SetValue("tenant_id", OldTenantId);
+        row.SetValue("entry_id", OldFolderId);
+        row.SetValue("entry_type", entryType);
+        row.SetValue("field_id", oldFieldId);
+        row.SetValue("option_id", "");
+        row.SetValue("value_string", "ACME");
+        row.SetValue("value_number", null);
+        row.SetValue("value_date", null);
+        row.SetValue("create_by", _oldOwner);
+        row.SetValue("create_on", DateTime.UtcNow);
+        row.SetValue("modified_by", _oldOwner);
+        row.SetValue("modified_on", DateTime.UtcNow);
+
+        // Act
+        var (prepared, preparedRow) = await specifics.PrepareRowAsync(columnMapper, DeclaredTable(specifics, "files_metadata_value"), row);
+
+        // Assert — the value follows both its field and its entry to their new ids, the payload is untouched
+        prepared.Should().BeTrue();
+        preparedRow.Should().NotBeNull();
+        Convert.ToInt32(preparedRow!["field_id"]).Should().Be(newFieldId);
+        Convert.ToInt32(preparedRow["entry_id"]).Should().Be(NewFolderId);
+        preparedRow["value_string"].Should().Be("ACME");
+        preparedRow["modified_by"].Should().Be(_newOwner);
+    }
+
     /// <summary>
     /// Takes the table definition from the module instead of restating it, so these tests also fail when
     /// the declaration itself is missing rather than only when the id relations are.

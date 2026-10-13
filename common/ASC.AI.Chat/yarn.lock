@@ -507,9 +507,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.5.121.tgz::locator=asc-ai-chat%40workspace%3A.":
-  version: 0.5.121
-  resolution: "@onlyoffice/ai-chat@file:onlyoffice-ai-chat-0.5.121.tgz#onlyoffice-ai-chat-0.5.121.tgz::hash=073d57&locator=asc-ai-chat%40workspace%3A."
+"@onlyoffice/ai-chat@npm:1.0.1":
+  version: 1.0.1
+  resolution: "@onlyoffice/ai-chat@npm:1.0.1"
   dependencies:
     lodash.clonedeep: "npm:^4.5.0"
   peerDependencies:
@@ -526,6 +526,7 @@ __metadata:
     "@radix-ui/react-slot": ^1.2.3
     "@radix-ui/react-switch": ^1.2.6
     "@radix-ui/react-tabs": ^1.1.13
+    "@radix-ui/react-toast": ^1.2.15
     "@radix-ui/react-tooltip": ^1.2.8
     assistant-stream: ^0.2.47
     class-variance-authority: ^0.7.1
@@ -570,6 +571,8 @@ __metadata:
       optional: true
     "@radix-ui/react-tabs":
       optional: true
+    "@radix-ui/react-toast":
+      optional: true
     "@radix-ui/react-tooltip":
       optional: true
     class-variance-authority:
@@ -602,7 +605,7 @@ __metadata:
       optional: true
     zustand:
       optional: true
-  checksum: 10/8a271ed39b6701076820ee5e4f440623ac7c10edf2c9fa0c6a8e1fe55f86871b5f2d0786a26cd076bf581d34a54f2132094bc971921618478bba97c001181886
+  checksum: 10/3e7511dbe94284d41781a878062b411f88e6297c14eb19c05ffd93204e396e1e3c0015d4ca22672a5982d080d1812dcce3c95197adea335664d150cb36ceb70b
   languageName: node
   linkType: hard
 
@@ -1403,7 +1406,7 @@ __metadata:
     "@aws-sdk/client-cloudwatch-logs": "npm:^3.199.0"
     "@google/genai": "npm:^1.30.0"
     "@mistralai/mistralai": "npm:^1.11.0"
-    "@onlyoffice/ai-chat": "file:onlyoffice-ai-chat-0.5.121.tgz"
+    "@onlyoffice/ai-chat": "npm:1.0.1"
     "@opentelemetry/api": "npm:^1.9.1"
     "@opentelemetry/exporter-metrics-otlp-grpc": "npm:^0.222.0"
     "@opentelemetry/exporter-metrics-otlp-proto": "npm:^0.222.0"

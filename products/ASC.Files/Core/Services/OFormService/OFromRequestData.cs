@@ -39,7 +39,8 @@ namespace ASC.Files.Core.Services.OFormService;
 public class OFromRequestData
 {
     /// <summary>
-    /// The form data.
+    /// The form data. The forms are requested by a filter, so the CMS answers
+    /// with a collection of at most one form.
     /// </summary>
-    public OFromData Data { get; set; }
+    public IEnumerable<OFromData> Data { get; set; }
 }

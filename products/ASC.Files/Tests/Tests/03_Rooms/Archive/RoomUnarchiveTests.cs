@@ -403,7 +403,7 @@ public class RoomUnarchiveTests(
 
     #endregion
 
-    private async Task<FolderDtoInteger> CreateArchivedCustomRoom(string title)
+    private async Task<FolderDto> CreateArchivedCustomRoom(string title)
     {
         var room = await CreateCustomRoom(title);
         await ArchiveRoom(room.Id);

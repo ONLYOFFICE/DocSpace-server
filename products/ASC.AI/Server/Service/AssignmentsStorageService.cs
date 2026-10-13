@@ -177,8 +177,8 @@ public class AssignmentsStorageService(
         var stored = await storage.ReadByScopesAsync(tenantManager.GetCurrentTenantId(), firstEntryId, secondEntryId);
 
         return new ScopedValues<Dictionary<ActionType, Guid>>(
-            AssignmentsResolver.Resolve(stored.Global, applyDefaults: true, models),
-            stored.ByEntry.ToDictionary(x => x.Key, x => AssignmentsResolver.Resolve(x.Value, applyDefaults: false, models)));
+            resolver.Resolve(stored.Global, applyDefaults: true, models),
+            stored.ByEntry.ToDictionary(x => x.Key, x => resolver.Resolve(x.Value, applyDefaults: false, models)));
     }
 
     private async Task SendAssignedAsync(ActionType actionType, Guid profileId, Folder<int>? folder)

@@ -118,11 +118,11 @@ public class FolderContentDtoHelper(
     FolderContentDtoHelperSettings settings)
 {
 
-    public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null, List<FolderType> folderType = null)
+    public async Task<FolderContentDto<T>> GetAsync<T>(T folderId, Guid? userIdOrGroupId, Guid? sharedBy, FilterType? filterType, T roomId, bool? searchInContent, bool? withSubFolders, bool? excludeSubject, ApplyFilterOption? applyFilterOption, SearchArea? searchArea, string sortByFilter, SortOrder sortOrder, int startIndex, int limit, string text, string[] extension = null, FormsItemDto formsItemDto = null, Location? location = null, List<FolderType> folderType = null, MetadataFilter metadataFilter = null)
     {
         var types = filterType.HasValue ? new[] { filterType.Value } : null;
 
-        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, sharedBy ?? Guid.Empty,types, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, text, extension, searchArea ?? SearchArea.Active, formsItemDto, location, sortByFilter, sortOrder, startIndex, limit, folderType);
+        var folderContentWrapper = await ToFolderContentWrapperAsync(folderId, userIdOrGroupId ?? Guid.Empty, sharedBy ?? Guid.Empty,types, roomId, searchInContent ?? false, withSubFolders ?? false, excludeSubject ?? false, applyFilterOption ?? ApplyFilterOption.All, text, extension, searchArea ?? SearchArea.Active, formsItemDto, location, sortByFilter, sortOrder, startIndex, limit, folderType, metadataFilter);
 
         return folderContentWrapper.NotFoundIfNull();
     }
@@ -223,6 +223,9 @@ public class FolderContentDtoHelper(
             result.Current.RootRoomType = DocSpaceHelper.MapToRoomType(folderItems.ParentRoom.FolderType);
         }
 
+        // one round trip for the whole page, files and folders together
+        await fileWrapperHelper.SetAssignedMetadataTemplatesAsync([.. (result.Files ?? []).OfType<FileEntryDto<int>>(), .. (result.Folders ?? []).OfType<FileEntryDto<int>>()]);
+
         return result;
 
         async Task<IEnumerable<FileEntryBaseDto>> GetEntriesDto(List<FileEntry> fileEntries, string entriesOrder = null, IFolder contextFolder = null)
@@ -321,7 +324,8 @@ public class FolderContentDtoHelper(
         SortOrder sortOrder,
         int startIndex,
         int count,
-        List<FolderType> folderType = null)
+        List<FolderType> folderType = null,
+        MetadataFilter metadataFilter = null)
     {
         OrderBy orderBy = null;
         if (SortedByTypeExtensions.TryParse(sortByFilter, true, out var sortBy))
@@ -348,7 +352,8 @@ public class FolderContentDtoHelper(
             searchArea: searchArea,
             formsItemDto: formsItemDto,
             location: location,
-            folderType: folderType);
+            folderType: folderType,
+            metadataFilter: metadataFilter);
 
         return await GetAsync(folderId, items, startIndex);
     }

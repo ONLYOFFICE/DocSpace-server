@@ -50,7 +50,7 @@ public abstract class FormFillingTestBase(AspireAppFixture fixture) : RoomsPermi
     /// that check - so a file created this way is a genuine form (<c>IsForm == true</c>) without
     /// needing a live document server to convert one.
     /// </summary>
-    protected async Task<FileDtoInteger> CreateFormInRoom(int roomId, string title = "Autotest Form.pdf")
+    protected async Task<FileDto> CreateFormInRoom(int roomId, string title = "Autotest Form.pdf")
     {
         return await CreateFile(title, roomId);
     }
@@ -60,7 +60,7 @@ public abstract class FormFillingTestBase(AspireAppFixture fixture) : RoomsPermi
     {
         await _filesApi.ManageFormFillingAsync(
             formId.ToString(),
-            new ManageFormFillingDtoInteger(formId, FormFillingManageAction.Start),
+            new ManageFormFillingDto(formId, FormFillingManageAction.Start),
             TestContext.Current.CancellationToken);
     }
 
@@ -69,7 +69,7 @@ public abstract class FormFillingTestBase(AspireAppFixture fixture) : RoomsPermi
     {
         await _filesApi.ManageFormFillingAsync(
             formId.ToString(),
-            new ManageFormFillingDtoInteger(formId, FormFillingManageAction.Stop),
+            new ManageFormFillingDto(formId, FormFillingManageAction.Stop),
             TestContext.Current.CancellationToken);
     }
 

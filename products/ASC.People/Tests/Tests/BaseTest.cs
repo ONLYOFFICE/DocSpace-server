@@ -150,12 +150,12 @@ public class BaseTest(
             : InviteContact(employeeType, inviter);
     }
 
-    protected async Task<FolderDtoInteger> CreatePublicRoom(string roomTitle)
+    protected async Task<FolderDto> CreatePublicRoom(string roomTitle)
     {
         return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.PublicRoom));
     }
 
-    protected async Task<FolderDtoInteger> CreateCustomRoom(string roomTitle)
+    protected async Task<FolderDto> CreateCustomRoom(string roomTitle)
     {
         return await CreateRoom(new CreateRoomRequestDto(roomTitle, roomType: RoomType.CustomRoom));
     }
@@ -164,7 +164,7 @@ public class BaseTest(
     /// The single place every room is created through, so that room creation - one of the slowest
     /// calls in the suite - is measured the same way whatever type the caller asked for.
     /// </summary>
-    protected async Task<FolderDtoInteger> CreateRoom(CreateRoomRequestDto request)
+    protected async Task<FolderDto> CreateRoom(CreateRoomRequestDto request)
     {
         var sw = Stopwatch.StartNew();
         var result = (await _roomsApi.CreateRoomAsync(request, TestContext.Current.CancellationToken)).Response;

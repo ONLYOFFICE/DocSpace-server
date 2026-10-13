@@ -171,6 +171,11 @@ public class FileUploader(
 
             if (!string.IsNullOrEmpty(subFolderTitle))
             {
+                if (folder.FolderType is FolderType.Knowledge)
+                {
+                    throw new SecurityException(FilesCommonResource.ErrorMessage_SecurityException_Create);
+                }
+
                 folder = await folderDao.GetFolderAsync(subFolderTitle, folder.Id);
 
                 if (folder == null)
