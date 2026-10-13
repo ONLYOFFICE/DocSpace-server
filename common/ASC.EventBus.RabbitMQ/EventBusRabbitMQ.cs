@@ -55,6 +55,9 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
     private EventBusConsumer _consumer;
     private string _queueName;
     private readonly string _deadLetterQueueName;
+    // the routing keys bound to the queues, kept to bind them again on a queue the broker had dropped;
+    // the subscriptions manager has no way to list its events
+    private readonly ConcurrentDictionary<string, byte> _boundEvents = new();
 
     private readonly Task _initializeTask;
     private readonly SemaphoreSlim _consumeSemaphore = new(1, 1);
@@ -148,6 +151,8 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
 
     private async Task SubsManager_OnEventRemovedAsync(object sender, string eventName)
     {
+        _boundEvents.TryRemove(eventName, out _);
+
         if (!_persistentConnection.IsConnected)
         {
             await _persistentConnection.TryConnectAsync();
@@ -312,6 +317,8 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
             await _consumerChannel.QueueBindAsync(queue: _queueName,
                                 exchange: EXCHANGE_NAME,
                                 routingKey: eventName);
+
+            _boundEvents.TryAdd(eventName, 0);
         }
     }
 
@@ -446,7 +453,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
                 return;
             }
 
-            var consumer = new EventBusConsumer(_consumerChannel);
+            var consumer = new EventBusConsumer(_consumerChannel, Consumer_CancelledByBroker);
 
             consumer.ReceivedAsync += Consumer_Received;
             consumer.ShutdownAsync += Consumer_Shutdown;
@@ -487,6 +494,20 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
         _ = Task.Run(() => RecreateConsumerAsync(channel));
 
         return Task.CompletedTask;
+    }
+
+    private void Consumer_CancelledByBroker(IChannel channel, string consumerTag)
+    {
+        if (_disposing)
+        {
+            return;
+        }
+
+        // the queue was deleted (or otherwise taken away) under the consumer, while its channel stays open,
+        // so nothing else would ever start a new consumer; like a channel close, not awaited in the handler
+        _logger.WarningConsumerCancelledByBroker(consumerTag);
+
+        _ = Task.Run(() => RecreateConsumerAsync(channel, cancelledByBroker: true));
     }
 
     // AMQP soft errors: the broker closes the channel and keeps the connection
@@ -673,6 +694,19 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
                                     exclusive: false,
                                     autoDelete: false,
                                     arguments: arguments);
+
+            // a queue declared above in place of one the broker had dropped comes without bindings and would
+            // never get a message; binding again an existing binding is a no-op, so do it on every recreation
+            foreach (var eventName in _boundEvents.Keys)
+            {
+                await channel.QueueBindAsync(queue: _deadLetterQueueName,
+                                    exchange: DEAD_LETTER_EXCHANGE_NAME,
+                                    routingKey: eventName);
+
+                await channel.QueueBindAsync(queue: _queueName,
+                                    exchange: EXCHANGE_NAME,
+                                    routingKey: eventName);
+            }
         }
         catch
         {
@@ -699,15 +733,15 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
         return Task.CompletedTask;
     }
 
-    private async Task RecreateConsumerAsync(IChannel closedChannel)
+    private async Task RecreateConsumerAsync(IChannel lostChannel, bool cancelledByBroker = false)
     {
         await _recreateSemaphore.WaitAsync();
 
         try
         {
-            // already replaced by an earlier call, reopened by automatic recovery,
-            // or no subscriptions left to consume for
-            if (_disposing || !ReferenceEquals(closedChannel, _consumerChannel) || closedChannel.IsOpen || string.IsNullOrEmpty(_queueName))
+            // already replaced by an earlier call, reopened by automatic recovery, or no subscriptions
+            // left to consume for; a consumer cancelled by the broker leaves its channel open
+            if (_disposing || !ReferenceEquals(lostChannel, _consumerChannel) || (lostChannel.IsOpen && !cancelledByBroker) || string.IsNullOrEmpty(_queueName))
             {
                 return;
             }
@@ -717,7 +751,7 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
             // a channel closed by the broker stays registered for automatic recovery until it is
             // closed locally (Dispose alone skips that), and the next connection recovery would
             // revive it together with its consumer
-            await CloseChannelAsync(closedChannel);
+            await CloseChannelAsync(lostChannel);
 
             _consumerTag = string.Empty;
 
@@ -841,18 +875,20 @@ public class EventBusRabbitMQ : IEventBus, IDisposable, IAsyncDisposable
         }
     }
 
-    private sealed class EventBusConsumer(IChannel channel) : AsyncEventingBasicConsumer(channel)
+    private sealed class EventBusConsumer(IChannel channel, Action<IChannel, string> cancelledByBroker) : AsyncEventingBasicConsumer(channel)
     {
         private volatile bool _cancelledByBroker;
 
         // basic.cancel and consume-ok arrive on the consumer's own channel, so they cannot overtake each other
         public bool CancelledByBroker => _cancelledByBroker;
 
-        public override Task HandleBasicCancelAsync(string consumerTag, CancellationToken cancellationToken = default)
+        public override async Task HandleBasicCancelAsync(string consumerTag, CancellationToken cancellationToken = default)
         {
             _cancelledByBroker = true;
 
-            return base.HandleBasicCancelAsync(consumerTag, cancellationToken);
+            await base.HandleBasicCancelAsync(consumerTag, cancellationToken);
+
+            cancelledByBroker(Channel, consumerTag);
         }
 
         public override Task HandleBasicConsumeOkAsync(string consumerTag, CancellationToken cancellationToken = default)

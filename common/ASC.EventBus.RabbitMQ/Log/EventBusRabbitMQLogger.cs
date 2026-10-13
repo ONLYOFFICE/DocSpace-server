@@ -108,4 +108,7 @@ internal static partial class EventBusRabbitMQLogger
 
     [LoggerMessage(LogLevel.Error, "RabbitMQ: could not deserialize event {eventName}, rejected")]
     public static partial void ErrorDeserializingEvent(this ILogger<EventBusRabbitMQ> logger, string eventName, Exception exception);
+
+    [LoggerMessage(LogLevel.Warning, "RabbitMQ: consumer {consumerTag} was cancelled by the broker, its queue is declared and bound again")]
+    public static partial void WarningConsumerCancelledByBroker(this ILogger<EventBusRabbitMQ> logger, string consumerTag);
 }
