@@ -10,7 +10,8 @@ pinned there and not in the props file.
 
 Versions come from the NuGet registration API (the RegistrationsBaseUrl of the service index), not
 from the flat container: the flat container also lists UNLISTED versions, which a restore never picks
-and which must not become a target. Unlisted versions are dropped.
+and which must not become a target. Unlisted versions never become a target, but the current pin is
+looked up among all versions: an unlisted pin still carries its deprecation.
 
 The target version follows the line the pin is on: a stable pin moves to the newest stable release,
 a prerelease pin (the OpenTelemetry beta/rc instrumentations, InfluxDB alpha) moves to the newest
@@ -101,7 +102,8 @@ def registrations_base():
 
 
 def versions(base, package, current):
-    """{version: catalogEntry} of the LISTED versions >= current, or the exception that stopped it."""
+    """{version: catalogEntry} of every version >= current, unlisted ones included (the current pin may be
+    unlisted and still carry its deprecation), or the exception that stopped it."""
     try:
         index = get_json(f"{base.rstrip('/')}/{package.lower()}/index.json")
         floor = parse_version(current)
@@ -115,11 +117,15 @@ def versions(base, package, current):
             for leaf in leaves:
                 entry = leaf.get("catalogEntry", {})
                 version = entry.get("version")
-                if version and entry.get("listed", True) is not False:
+                if version:
                     found[version] = entry
         return found
     except Exception as e:  # noqa: BLE001 - a missing package must not stop the scan
         return e
+
+
+def is_listed(entry):
+    return entry.get("listed", True) is not False
 
 
 def find_entry(entries, version):
@@ -170,7 +176,8 @@ def main(argv):
         if isinstance(entries, Exception):
             errors.append(f"{package}: {entries}")
             continue
-        newer = [v for v in entries if parse_version(v) > parse_version(current)]
+        # Only listed versions can become a target; the current one is looked up among all of them.
+        newer = [v for v, e in entries.items() if is_listed(e) and parse_version(v) > parse_version(current)]
         stable = [v for v in newer if not is_pre(v)]
         candidates = newer if is_pre(current) else stable
         target = max(candidates, key=parse_version) if candidates else None
@@ -181,7 +188,9 @@ def main(argv):
                 notes.append(f"prerelease {max(pre_newer, key=parse_version)} exists")
         current_entry = find_entry(entries, current)
         if current_entry is None:
-            notes.append("current version is unlisted or missing")
+            notes.append("current version is missing")
+        elif not is_listed(current_entry):
+            notes.append("current version is unlisted")
         notes += health(current_entry, "current")
         if target:
             notes += health(entries[target], "target")
