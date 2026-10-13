@@ -227,8 +227,18 @@ public class AgentsController(
         foreach (var agentId in agentIntIds)
         {
             var agent = await fileStorageService.FolderQuotaChangeAsync(agentId, inDto.Quota);
+            if (agent is null)
+            {
+                continue;
+            }
+
             agentNames.Add(agent.Title);
             yield return await folderDtoHelper.GetAsync(agent);
+        }
+
+        if (agentNames.Count == 0)
+        {
+            yield break;
         }
 
         if (inDto.Quota >= 0)
@@ -261,9 +271,19 @@ public class AgentsController(
         foreach (var agentId in agentIntIds)
         {
             var agent = await fileStorageService.FolderQuotaChangeAsync(agentId, -2);
+            if (agent is null)
+            {
+                continue;
+            }
+
             agentTitles.Add(agent.Title);
 
             yield return await folderDtoHelper.GetAsync(agent);
+        }
+
+        if (agentTitles.Count == 0)
+        {
+            yield break;
         }
 
         filesMessageService.Send(MessageAction.CustomQuotaPerAiAgentDefault, quotaAiAgentSettings.DefaultQuota.ToString(), agentTitles.ToArray());
