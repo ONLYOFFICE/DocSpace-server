@@ -118,3 +118,14 @@ skill re-checks usage through LSP on every run anyway.
 - **Verification:** `ASC.Tests.slnx` build (compare its pre-existing warnings by id) and one integration assembly.
 - **Traps:** keep `Aspire.Hosting.Testing` on the same version as the AppHost SDK and `Aspire.Hosting.*`.
   Moq is used only by legacy projects outside `ASC.Tests.slnx`.
+
+## Google.Cloud.Storage.V1 (+ `Google.Apis.*`, `Google.Api.Gax*`)
+
+- **Release notes:** `https://raw.githubusercontent.com/googleapis/google-cloud-dotnet/main/apis/Google.Cloud.Storage.V1/docs/history.md`
+  (`## Version X, released ...`); entries are one line — open the PR they cite for the actual change.
+- **Verification:** no tests use GCS (integration tests run on local storage); a real bucket is needed to
+  prove uploads and signed URLs. The build proves the API surface (removed members fail compilation).
+- **Traps:** `GoogleCloudStorage` uses the library upload only in `UploadObjectAsync`; chunked uploads call
+  `CreateObjectUploader(...).InitiateSessionAsync()` for the session URI and then PUT the chunks with our own
+  HTTP requests, so library-side upload changes (validation, hashing) do not reach them. We set no
+  `UploadValidationMode` and catch neither `UploadValidationException` nor `GoogleApiException`.
