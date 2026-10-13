@@ -152,6 +152,25 @@ function invalidScopeMessage(value: unknown): string {
   return `unknown scope "${String(value)}"; valid values: tenant, user`;
 }
 
+// Body narrowing for the two prefs writes. The library coerces instead of
+// checking: a string `toolNames` spreads into one entry per character, an
+// absent one reads as "clear the list" and `Boolean("false")` is true
+// (Bugs 84402, 84403, 84404, 84405). Each answers 400 with the field named,
+// before anything is read or written.
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function toolNamesError(value: unknown): string | undefined {
+  if (!Array.isArray(value)) {
+    return "toolNames is required and must be an array of tool names";
+  }
+  if (!value.every(isNonEmptyString)) {
+    return "toolNames must contain non-empty strings only";
+  }
+  return undefined;
+}
+
 export const toolsController = {
   addCustomServer: asyncHandler(async (req, res) => {
     const args = unpackPositional(req.body, ["name", "config", "entityId"] as const);
@@ -304,6 +323,13 @@ export const toolsController = {
       res.status(400).json({ error: invalidScopeMessage(args.scope) });
       return;
     }
+    // An explicit empty list stays legal: it is the documented "switch
+    // everything back on" and what the settings page sends for it.
+    const toolNamesProblem = toolNamesError(args.toolNames);
+    if (toolNamesProblem !== undefined) {
+      res.status(400).json({ error: toolNamesProblem });
+      return;
+    }
     // The serverType must be a group key the round's tool filter actually
     // matches — an arbitrary string used to be stored verbatim and read back
     // "successfully" while never disabling anything (Bug 83013). Valid keys:
@@ -328,12 +354,7 @@ export const toolsController = {
       });
       return;
     }
-    await engine.setDisabled(
-      args.serverType as string,
-      (args.toolNames as string[]) ?? [],
-      args.entityId as string | undefined,
-      scope,
-    );
+    await engine.setDisabled(serverType, args.toolNames as string[], entityId, scope);
     res.json({ success: true });
   }),
 
@@ -367,10 +388,22 @@ export const toolsController = {
     );
     // Same accessibility gate as the server writes above (Bug 82975).
     await assertEntityAccessible(args.entityId as string | undefined);
+    if (!isNonEmptyString(args.serverType)) {
+      res.status(400).json({ error: "serverType is required and must be a non-empty string" });
+      return;
+    }
+    if (!isNonEmptyString(args.toolName)) {
+      res.status(400).json({ error: "toolName is required and must be a non-empty string" });
+      return;
+    }
+    if (typeof args.value !== "boolean") {
+      res.status(400).json({ error: "value is required and must be a boolean" });
+      return;
+    }
     await engine.setAllowAlways(
-      args.serverType as string,
-      args.toolName as string,
-      Boolean(args.value),
+      args.serverType,
+      args.toolName,
+      args.value,
       args.entityId as string | undefined,
     );
     res.json({ success: true });
