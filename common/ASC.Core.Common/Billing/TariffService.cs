@@ -523,7 +523,7 @@ public class TariffService(
         }
     }
 
-    public async Task<bool> GetDocsCloudTrialAsync(int tenantId)
+    public async Task<bool> GetDocsCloudTrialAsync(int tenantId, DocsCloudTrialCustomer customer)
     {
         if (!billingClient.Configured)
         {
@@ -534,7 +534,7 @@ public class TariffService(
         {
             var portalId = await coreSettings.GetKeyAsync(tenantId);
 
-            var result = await billingClient.GetDocsCloudTrialAsync(portalId);
+            var result = await billingClient.GetDocsCloudTrialAsync(portalId, customer);
 
             await ClearCacheAsync(tenantId);
 

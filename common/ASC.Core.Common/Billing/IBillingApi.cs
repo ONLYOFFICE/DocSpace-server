@@ -90,5 +90,5 @@ public interface IBillingApi
 
     /// <remarks>Returns the raw response body; the billing service answers with the JSON string <c>"ok"</c> on success.</remarks>
     [Post("/billing/getwdocstrial")]
-    Task<string> GetDocsCloudTrialAsync([Body] BillingPortalRequestDto requestDto);
+    Task<string> GetDocsCloudTrialAsync([Body] GetDocsCloudTrialRequestDto requestDto);
 }

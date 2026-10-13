@@ -111,6 +111,29 @@ public class BillingClientTests
     }
 
     [Fact]
+    public async Task GetDocsCloudTrial_SendsCustomerDetailsAndOmitsEmptyOnes()
+    {
+        var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "\"ok\""));
+
+        var customer = new DocsCloudTrialCustomer(
+            "admin@example.com", "https://portal.example.com", "John Smith", null, "en", "");
+        var result = await client.GetDocsCloudTrialAsync("portal-1", customer);
+
+        result.Should().BeTrue();
+        handler.LastUri!.AbsolutePath.Should().Be("/billing/getwdocstrial");
+
+        var body = JsonDocument.Parse(handler.LastRequestBody!).RootElement;
+        body.GetProperty("PortalId")[0].GetString().Should().Be("portal-1");
+        body.GetProperty("Email")[0].GetString().Should().Be("admin@example.com");
+        body.GetProperty("PortalLink")[0].GetString().Should().Be("https://portal.example.com");
+        body.GetProperty("Name")[0].GetString().Should().Be("John Smith");
+        body.GetProperty("LanguageCode")[0].GetString().Should().Be("en");
+        // Absent optional details must not be sent at all.
+        body.TryGetProperty("Phone", out _).Should().BeFalse();
+        body.TryGetProperty("AffiliateId", out _).Should().BeFalse();
+    }
+
+    [Fact]
     public async Task TopUpDeposit_SendsInvariantAmountAndMetadataAsJsonString()
     {
         var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "\"ok\""));
@@ -195,7 +218,7 @@ public class BillingClientTests
     {
         var (client, handler) = CreateClient(_ => Json(HttpStatusCode.OK, "\"ok\""));
 
-        await client.GetDocsCloudTrialAsync("portal-1");
+        await client.GetDocsCloudTrialAsync("portal-1", null);
 
         handler.LastAuthorization.Should().NotBeNull();
 
@@ -250,16 +273,17 @@ public class BillingClientTests
     }
 
     [Fact]
-    public async Task TransportFailure_IsMappedToBillingException()
+    public async Task TransportFailure_IsMappedToBillingTransportException()
     {
         // A transport failure never reaches ExceptionFactory, which only sees HTTP responses; the
         // TransportExceptionFactory keeps it inside the BillingException hierarchy instead of leaking
-        // Refit.ApiRequestException to the callers.
+        // Refit.ApiRequestException to the callers. It gets its own type because no answer is not a
+        // rejection: a timed-out request may still have been applied on the billing side.
         var (client, _) = CreateClient(_ => throw new HttpRequestException("connection refused"));
 
         var act = async () => await client.GetPaymentsAsync("portal-1");
 
-        (await act.Should().ThrowExactlyAsync<BillingException>())
+        (await act.Should().ThrowExactlyAsync<BillingTransportException>())
             .WithInnerException<HttpRequestException>();
     }
     [Fact]

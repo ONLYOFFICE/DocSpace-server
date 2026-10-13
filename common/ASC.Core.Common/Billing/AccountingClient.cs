@@ -801,7 +801,7 @@ public class BaseReport<T>
     /// <summary>
     /// Total quantity of records in the report.
     /// </summary>
-    public long TotalQuantity { get; init; }
+    public int TotalQuantity { get; init; }
 }
 
 /// <summary>
