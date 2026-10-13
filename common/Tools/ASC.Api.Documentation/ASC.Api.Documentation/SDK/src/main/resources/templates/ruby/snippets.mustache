@@ -1,0 +1,38 @@
+{{#apiInfo}}
+{{#apis}}
+{{#operations}}
+{{#operation}}
+{{^vendorExtensions.x-is-thirdparty-variant}}
+<!--snippet:{{{operationIdOriginal}}}-->
+```ruby
+require 'docspace-api-sdk'
+
+{{moduleName}}.configure do |config|
+  config.scheme = '{{{snippetsScheme}}}'
+  config.host = '{{{snippetsHost}}}'
+{{#snippetsBasePath}}
+  config.base_path = '{{{.}}}'
+{{/snippetsBasePath}}
+{{#vendorExtensions.x-snippet-bearer}}
+  config.access_token = 'YOUR_API_KEY'
+{{/vendorExtensions.x-snippet-bearer}}
+end
+
+api = {{moduleName}}::{{x-folder}}::{{x-classname}}.new
+{{#vendorExtensions.x-snippet-body}}
+
+body = {{{.}}}
+{{/vendorExtensions.x-snippet-body}}
+
+{{#returnType}}result = {{/returnType}}api.{{operationId}}{{{vendorExtensions.x-snippet-arguments}}}
+{{#returnType}}
+p result
+{{/returnType}}
+```
+
+{{/vendorExtensions.x-is-thirdparty-variant}}
+{{/operation}}
+{{/operations}}
+{{/apis}}
+{{/apiInfo}}
+<!--/snippets-->
