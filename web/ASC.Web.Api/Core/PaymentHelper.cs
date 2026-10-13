@@ -382,9 +382,9 @@ public class PaymentHelper(
         return result;
     }
 
-    public async Task<bool> GetDocsCloudTrialAsync(int tenantId, string quotaName)
+    public async Task<bool> GetDocsCloudTrialAsync(int tenantId, string quotaName, DocsCloudTrialCustomer customer)
     {
-        var result = await tariffService.GetDocsCloudTrialAsync(tenantId);
+        var result = await tariffService.GetDocsCloudTrialAsync(tenantId, customer);
 
         if (result)
         {
