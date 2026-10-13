@@ -17,9 +17,10 @@ Two phases, and **phase 1 never changes the repository**:
 
 Everything is verified against our code; a changelog line is a claim, not a finding.
 
-**Package knowledge lives in `references/packages.md`** — per family: where the release notes are, where
-we use the package, which tests cover it, what earlier runs found. Read only the sections of the packages
-at hand, and update them at the end of every run (step 2.7 / 1.7).
+**Stable package knowledge lives in `references/packages.md`** — per family: where the real release notes
+are, package-specific verification, traps of our setup, and blockers an earlier assessment found. Read only
+the sections of the packages at hand. It is not a run log: change it only when a run learned something new
+and non-obvious (steps 1.7 / 2.7).
 
 All pins live in `Directory.Packages.props`; the one exception is `Aspire.AppHost.Sdk`, pinned in the
 `Sdk="..."` attribute of `common/ASC.AppHost/ASC.AppHost.csproj`.
@@ -91,7 +92,7 @@ python -I .claude/skills/update-packages/release_notes.py PACKAGE FROM TO [--rep
 
 The repo is read from the nuspec. Monorepos tag per component (`--tag-prefix`) or keep one CHANGELOG per
 package (`--changelog`); some projects publish the real notes elsewhere. `references/packages.md` records
-the layout of every family met so far — check it first, and add a new family's layout once found.
+the layouts that are not the nuspec repo's GitHub releases — check it first.
 
 Unauthenticated GitHub API: 60 requests/hour, `gh` is not installed. For a MAJOR read everything from the
 old version up, breaking sections first, plus the project's migration page if there is one. For minors
@@ -99,8 +100,8 @@ skim for "breaking", "behavior", "removed", "obsolete" and security advisories.
 
 ### 1.4 Check every claim against our code
 
-Start from the family's "Where we use it" in `references/packages.md`, then confirm it is still true. For
-each breaking or behavioural item: do we use it? (LSP `workspaceSymbol`/`findReferences`, codegraph for
+Read the family's "Traps" and "Blockers" in `references/packages.md` first — they name what a search will
+not find (configs outside the repo, deliberate pins). Then, for each breaking or behavioural item: do we use it? (LSP `workspaceSymbol`/`findReferences`, codegraph for
 call paths, grep for `using X` and `PackageReference`.) Write "used at file:line" or "not used".
 
 - **Enums reordered / members renamed** — harmless unless the numeric value is persisted (DB, cache, JSON).
@@ -160,8 +161,15 @@ in this turn.
 
 ### 1.7 Record what was learned
 
-Update `references/packages.md` for every assessed family — release-notes layout, where we use it,
-dated findings ("assessed X → Y, NOT taken: ..."). This is the one file phase 1 may change.
+Change `references/packages.md` only when the run found something new and non-obvious — the one file
+phase 1 may change:
+- a release-notes location that is not the nuspec repo's GitHub releases;
+- a package-specific verification step or test mapping that was needed;
+- a trap of our setup (config outside the repo, deliberate pin, a code path the library skips for us);
+- a **blocker** for an update the user did not take: what must change first, undated, without test results.
+
+Never add logs ("assessed X → Y", "taken, tests green", dates) or lists of classes using the package. A run
+where everything was found the usual way leaves the file untouched.
 
 # Phase 2 — update (after the user chose)
 
@@ -190,7 +198,8 @@ build flags, ...). Report which version each unpinned transitive dependency actu
 
 ### 2.4 Tests
 
-Run the family's "Tests" from `references/packages.md` (run-tests skill for syntax). Rebuild the services
+Run the tests that cover the package — the family's "Verification" in `references/packages.md` names them
+where it is not obvious (run-tests skill for syntax). Rebuild the services
 first — a test-only build runs the Aspire services on stale product code. A package every service loads
 at start-up (logging, DI, telemetry, caching, OpenAPI) is proven by any integration run plus the runtime
 checks in 2.5. Several `--filter-namespace` options are OR-ed; `--filter-namespace` together with
@@ -220,7 +229,8 @@ but not applied.
 
 ### 2.7 Record what was learned
 
-Update the families' sections in `references/packages.md`, as in 1.7.
+As in 1.7, plus: once an update is taken, delete the family's **Blockers** entry for it, and anything the
+new version made obsolete.
 
 ### Rolling back
 
