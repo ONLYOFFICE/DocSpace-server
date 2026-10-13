@@ -39,6 +39,7 @@
     "nconf": "^0.10.0",
     "openai": "^5.22.0",
     "tsx": "^4.19.0",
+    "undici": "^8.7.0",
     "winston": "^3.8.2",
     "winston-cloudwatch": "^6.1.1",
     "winston-daily-rotate-file": "^4.5.5",

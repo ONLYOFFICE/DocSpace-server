@@ -34,8 +34,10 @@ In the Docker install the two required values come from `DOCUMENT_AGENT_URL` and
 
 A task runs on the chat's own model profile and sees the custom MCP servers of the current
 scope. A profile of the portal's own provider is reached through `/api/2.0/ai/gateway` under
-`portalUrl`, with the user's session; the default is the AI service's own address, which an agent
-on the same network reaches, while an agent elsewhere needs the public portal address there.
+`portalUrl`, with the user's session and the round's source (the entry the chat bills to), so
+the agent's model requests are billed like the chat's own; the default is the AI service's own
+address, which an agent on the same network reaches, while an agent elsewhere needs the public
+portal address there.
 With `shareSystemServers` the host-configured servers of `ai.mcp` (the portal's own
 `docspace` server among them) are handed over too, with the user's session, so the agent can
 read and write the workspace itself; their endpoints must then be reachable from the agent's

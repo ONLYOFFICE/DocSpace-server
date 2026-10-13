@@ -39,13 +39,15 @@
 // working-state status updates) go to the log and to the caller as steps; a
 // task that stops for input or auth (A2A's interrupted states) is cancelled,
 // as nobody here can answer it; what comes back is the final state, the
-// agent's summary and the files it produced.
+// agent's summary and the files it produced. A stream that breaks under a
+// running task is re-attached with the protocol's own `SubscribeToTask`.
 
 import { randomUUID } from "crypto";
 import { Role, TaskState } from "@a2a-js/sdk";
-import type { Artifact, Message, Part, Task } from "@a2a-js/sdk";
+import type { Artifact, Message, Part, StreamResponse, Task } from "@a2a-js/sdk";
 import { ClientFactory, JsonRpcTransportFactory } from "@a2a-js/sdk/client";
 import type { Client } from "@a2a-js/sdk/client";
+import { Agent, fetch as undiciFetch } from "undici";
 import type { DocumentAgentConfig } from "../../config/index.js";
 import logger from "../log.js";
 
@@ -59,6 +61,8 @@ export interface DocumentAgentSettings {
     modelId: string;
     reasoning?: "off" | "low" | "medium" | "high" | "max";
     responsesApi?: boolean;
+    /** The entry the task is billed to (the library's `SourceMeta`); sent by the `onlyoffice` provider only. */
+    source?: { id: string; type?: string; title?: string };
   };
   mcpServers?: Record<string, { url: string; headers?: Record<string, string> }>;
   limits?: { maxToolCalls?: number; taskTimeoutSeconds?: number; maxFileBytes?: number };
@@ -102,8 +106,16 @@ let cached: { url: string; token: string; client: Promise<Client> } | undefined;
 
 // A request that is not the task stream: a cancel, a task read.
 const CALL_TIMEOUT_MS = 30_000;
-// Between task reads while the stream is gone and the task still runs.
-const POLL_INTERVAL_MS = 5_000;
+// Re-attachments to a task whose stream broke, and the pause between them.
+const RESUME_ATTEMPTS = 3;
+const RESUME_PAUSE_MS = 5_000;
+
+// The task stream is silent for the whole of a model turn: the agent speaks
+// only before a tool call. The default dispatcher gives a body five minutes
+// between chunks (undici's `bodyTimeout`) and then drops it, so the stream
+// goes through a dispatcher with no such limit; the headers keep theirs, a
+// request that does not even answer is still a failure.
+const dispatcher = new Agent({ bodyTimeout: 0 });
 
 function callSignal(outer: AbortSignal): AbortSignal {
   return AbortSignal.any([outer, AbortSignal.timeout(CALL_TIMEOUT_MS)]);
@@ -130,12 +142,19 @@ function clientFor(config: DocumentAgentConfig): Promise<Client> {
   if (cached && cached.url === config.url && cached.token === config.token) {
     return cached.client;
   }
-  const authedFetch: typeof fetch = (input, init) => {
+  const authedFetch: typeof fetch = async (input, init) => {
     // The SDK passes its own headers (content type, accept) in whatever
     // shape; a Headers copy keeps them all, with the token on top.
     const headers = new Headers(init?.headers);
     headers.set("authorization", `Bearer ${config.token}`);
-    return fetch(input, { ...init, headers });
+    // undici's own fetch, the one the dispatcher belongs to; its Response is
+    // the same shape the SDK reads.
+    return (await undiciFetch(input as Parameters<typeof undiciFetch>[0], {
+      ...(init as Parameters<typeof undiciFetch>[1]),
+      // A plain record: the two undici builds (Node's and the package's) type `Headers` apart.
+      headers: Object.fromEntries(headers),
+      dispatcher,
+    })) as unknown as Response;
   };
   const client = new ClientFactory({
     transports: [new JsonRpcTransportFactory({ fetchImpl: authedFetch })],
@@ -253,53 +272,69 @@ async function cancel(client: Client, taskId: string): Promise<void> {
   }
 }
 
-// Reads the task until its run ends (see endsRun), handing the status text
-// of every read in the working state to `onWorking`, so the steps keep
-// showing after the stream is lost. On the caller's abort the task is
-// cancelled and the abort reason thrown; undefined when a read failed for
-// good (the task is then unknown, not abandoned: the agent ends it itself).
-async function follow(
+function abortError(signal: AbortSignal): Error {
+  return signal.reason instanceof Error
+    ? signal.reason
+    : new DocumentAgentError("document task aborted");
+}
+
+// Follows a task whose stream broke until its run ends (see endsRun): a
+// `SubscribeToTask` re-attaches to the task's own stream, which starts with
+// the task as it stands and goes on with its events; a task that ended in
+// the meantime refuses the subscription and is read once instead. A few
+// attempts with a pause between them cover a short outage of the agent. On
+// the caller's abort the task is cancelled and the abort reason thrown.
+async function resume(
   client: Client,
   taskId: string,
   signal: AbortSignal,
-  onWorking: (text: string) => void,
-): Promise<Task | undefined> {
-  let failures = 0;
-  for (;;) {
+  consume: (event: StreamResponse) => void,
+  ended: () => boolean,
+): Promise<void> {
+  for (let attempt = 1; attempt <= RESUME_ATTEMPTS; attempt++) {
     if (signal.aborted) {
       await cancel(client, taskId);
-      throw signal.reason instanceof Error
-        ? signal.reason
-        : new DocumentAgentError("document task aborted");
+      throw abortError(signal);
+    }
+    try {
+      for await (const event of client.resubscribeTask({ tenant: "", id: taskId }, { signal })) {
+        consume(event);
+      }
+    } catch (err) {
+      if (signal.aborted) {
+        continue;
+      }
+      logger.warn(
+        `documentAgent: task ${taskId} resubscribe failed (${attempt}): ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+    }
+    if (ended()) {
+      return;
     }
     try {
       const task = await client.getTask(
         { tenant: "", id: taskId, historyLength: undefined },
         { signal: callSignal(signal) },
       );
-      failures = 0;
-      if (endsRun(task.status?.state)) {
-        return task;
-      }
-      if (task.status?.state === TaskState.TASK_STATE_WORKING) {
-        onWorking(messageText(task.status.message));
-      }
+      consume({ payload: { $case: "task", value: task } });
     } catch (err) {
       if (signal.aborted) {
         continue;
       }
-      failures += 1;
       logger.warn(
-        `documentAgent: task ${taskId} read failed (${failures}): ${
+        `documentAgent: task ${taskId} read failed (${attempt}): ${
           err instanceof Error ? err.message : String(err)
         }`,
       );
-      if (failures >= 3) {
-        return undefined;
-      }
     }
-    await sleep(POLL_INTERVAL_MS, signal);
+    if (ended()) {
+      return;
+    }
+    await sleep(RESUME_PAUSE_MS, signal);
   }
+  throw new DocumentAgentError(`task ${taskId} could not be followed to its end`);
 }
 
 /**
@@ -324,9 +359,9 @@ export async function runDocumentTask(
   let finalText = "";
   const artifacts: DocumentTaskOutput["artifacts"] = [];
   const started = Date.now();
-  // A step is a status update in the working state with text; a read while
-  // polling repeats the last one until the agent moves on, so a repeat of
-  // the step just reported is not a new one.
+  // A step is a status update in the working state with text; a task read
+  // back repeats the last one until the agent moves on, so a repeat of the
+  // step just reported is not a new one.
   let lastStep = "";
   const reportStep = (text: string): void => {
     if (!text || text === lastStep) {
@@ -336,6 +371,56 @@ export async function runDocumentTask(
     logger.info(`documentAgent: task ${taskId ?? "?"} ${text}`);
     input.onStatus?.(text);
   };
+  const ended = (): boolean => finalState !== undefined;
+
+  // One event of the task, from the first stream, a re-attached one or a
+  // read of the task itself (which comes as the `task` payload: its status
+  // is the latest, its artifacts stand in for the updates missed).
+  const consume = (event: StreamResponse): void => {
+    const payload = event.payload;
+    switch (payload?.$case) {
+      case "task": {
+        const task = payload.value;
+        if (taskId === undefined) {
+          taskId = task.id;
+          logger.info(`documentAgent: task ${taskId} submitted (${input.files.length} file(s))`);
+        }
+        const status = task.status;
+        if (endsRun(status?.state)) {
+          finalState = status?.state;
+          finalText = messageText(status?.message);
+          if (artifacts.length === 0) {
+            for (const artifact of task.artifacts) {
+              artifacts.push(...artifactFiles(artifact));
+            }
+          }
+        } else if (status?.state === TaskState.TASK_STATE_WORKING) {
+          reportStep(messageText(status.message));
+        }
+        break;
+      }
+      case "statusUpdate": {
+        const status = payload.value.status;
+        const text = messageText(status?.message);
+        if (endsRun(status?.state)) {
+          finalState = status?.state;
+          finalText = text;
+        } else if (status?.state === TaskState.TASK_STATE_WORKING) {
+          reportStep(text);
+        }
+        break;
+      }
+      case "artifactUpdate": {
+        const artifact = payload.value.artifact;
+        if (artifact) {
+          artifacts.push(...artifactFiles(artifact));
+        }
+        break;
+      }
+      default:
+        break;
+    }
+  };
 
   try {
     const stream = client.sendMessageStream(
@@ -343,43 +428,14 @@ export async function runDocumentTask(
       { signal: input.signal },
     );
     for await (const event of stream) {
-      const payload = event.payload;
-      switch (payload?.$case) {
-        case "task": {
-          taskId = payload.value.id;
-          logger.info(`documentAgent: task ${taskId} submitted (${input.files.length} file(s))`);
-          break;
-        }
-        case "statusUpdate": {
-          const status = payload.value.status;
-          const text = messageText(status?.message);
-          if (endsRun(status?.state)) {
-            finalState = status?.state;
-            finalText = text;
-          } else if (status?.state === TaskState.TASK_STATE_WORKING) {
-            reportStep(text);
-          }
-          break;
-        }
-        case "artifactUpdate": {
-          const artifact = payload.value.artifact;
-          if (artifact) {
-            artifacts.push(...artifactFiles(artifact));
-          }
-          break;
-        }
-        default:
-          break;
-      }
+      consume(event);
     }
   } catch (err) {
     if (input.signal.aborted) {
       if (taskId) {
         await cancel(client, taskId);
       }
-      throw input.signal.reason instanceof Error
-        ? input.signal.reason
-        : new DocumentAgentError("document task aborted");
+      throw abortError(input.signal);
     }
     if (taskId === undefined) {
       throw new DocumentAgentError(
@@ -387,30 +443,17 @@ export async function runDocumentTask(
         { cause: err },
       );
     }
-    // The task was accepted and the stream broke under it. Node's fetch gives a
-    // body five minutes of silence, and the agent speaks only before a tool
-    // call, so a long model turn ends the stream while the task goes on: the
-    // task is followed by reads until it ends, or the caller's deadline does.
+    // The task was accepted and the stream broke under it: re-attached below.
     logger.warn(
       `documentAgent: task ${taskId} stream lost (${
         err instanceof Error ? err.message : String(err)
-      }), following the task by polling`,
+      }), re-attaching`,
     );
   }
 
-  // A stream that ended without a terminal status: follow the task itself.
-  if (finalState === undefined && taskId) {
-    const task = await follow(client, taskId, input.signal, reportStep);
-    if (task === undefined) {
-      throw new DocumentAgentError(`task ${taskId} could not be read back after the stream ended`);
-    }
-    finalState = task.status?.state;
-    finalText = messageText(task.status?.message);
-    if (artifacts.length === 0) {
-      for (const artifact of task.artifacts) {
-        artifacts.push(...artifactFiles(artifact));
-      }
-    }
+  // A stream that ended without a terminal status: the task goes on, follow it.
+  if (!ended() && taskId) {
+    await resume(client, taskId, input.signal, consume, ended);
   }
 
   // An interrupted task waits for input it will never get from here; the

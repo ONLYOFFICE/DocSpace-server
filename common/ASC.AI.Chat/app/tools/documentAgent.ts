@@ -72,6 +72,7 @@ import {
   getForwardedHeaders,
   getRoundAttachmentIds,
   getRoundProfileId,
+  getSourceMeta,
 } from "../requestContext.js";
 import { resolveCustomServers } from "./customTools.js";
 import { agentServerWhitelist, getSystemServerConfig, systemServerHeaders } from "./systemTools.js";
@@ -322,7 +323,8 @@ const ONLYOFFICE_GATEWAY_PATH = "/api/2.0/ai/gateway";
 // placeholder and the session is what authenticates: the caller's cookie
 // goes along (the portal API reads the session from it, the key stays a
 // harmless bearer), or, for a caller that sent a header instead, that
-// header in place of the key.
+// header in place of the key. The round's source goes along too, so the
+// agent's requests are billed to the same entry as the chat's own.
 function modelSettings(
   profile: Profile,
   config: DocumentAgentConfig,
@@ -344,6 +346,10 @@ function modelSettings(
   }
   if (profile.providerType === ONLYOFFICE_PROVIDER) {
     model.baseUrl = `${config.portalUrl ?? aiServiceBaseUrl}${ONLYOFFICE_GATEWAY_PATH}`;
+    const source = getSourceMeta();
+    if (source) {
+      model.source = source;
+    }
     const forwarded = getForwardedHeaders();
     const cookie = forwarded["cookie"];
     const authorization = forwarded["authorization"];
