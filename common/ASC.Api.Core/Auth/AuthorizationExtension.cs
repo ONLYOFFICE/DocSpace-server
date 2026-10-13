@@ -49,6 +49,8 @@ public static class AuthorizationExtension
         { "GET api/[^/]+/group", [ "accounts:read" ] },
         { "(POST|PUT|DELETE|UPDATE) api/[^/]+/group", [ "accounts:write" ] },
         { "(GET|POST) api/[^/]+/ai/gateway/", [ "files:write" ] },
+        { "GET internal/ai/", [ "files:read", "files:write" ] },
+        { "(POST|PUT|PATCH|DELETE) internal/ai/", [ "files:write" ] },
         { "GET api/[^/]+/keys/@self?", [ "*" ] }
     };
 
