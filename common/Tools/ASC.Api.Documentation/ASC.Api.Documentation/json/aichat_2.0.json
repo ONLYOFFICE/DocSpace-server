@@ -2313,7 +2313,7 @@
         ],
         "operationId": "aiPreferencesGetDeepMode",
         "summary": "Get deep mode",
-        "description": "Returns the deep-mode toggle of a scope, as a bare boolean: whether the stored extended-thinking depth is above `off`. `entityId` picks a room and omitting it reads the portal-wide preference. A scope that has never had a value stored falls back to the configured default, so the answer never distinguishes \"off\" from \"unset\" - ask `GET api/2.0/ai/preferences/is-deep-mode-set` for that. This is a read-only operation.",
+        "description": "Returns the deep-mode toggle of a scope, as a bare boolean: whether the stored extended-thinking depth is above `off`. `entityId` picks a room and omitting it reads the portal-wide preference; a value that is not a room ID is refused with 400, as it is on the write. A scope that has never had a value stored falls back to the configured default, so the answer never distinguishes \"off\" from \"unset\" - ask `GET api/2.0/ai/preferences/is-deep-mode-set` for that. This is a read-only operation.",
         "responses": {
           "200": {
             "description": "Whether deep mode is on, falling back to the configured default when the scope has no value of its own.",
@@ -2321,6 +2321,16 @@
               "application/json": {
                 "schema": {
                   "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`entityId` is not a room ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -2548,7 +2558,7 @@
         ],
         "operationId": "aiPreferencesIsDeepModeSet",
         "summary": "Is deep mode set",
-        "description": "Tells whether a scope has an explicitly persisted extended-thinking setting of its own, as opposed to inheriting the configured default. `entityId` picks a room and omitting it asks about the portal-wide preference. A true answer means a value was stored, whether that value is on or off - read the value itself with `GET api/2.0/ai/preferences/get-deep-mode`. This is the check a settings screen uses to show an explicit override rather than an inherited state.",
+        "description": "Tells whether a scope has an explicitly persisted extended-thinking setting of its own, as opposed to inheriting the configured default. `entityId` picks a room and omitting it asks about the portal-wide preference; a value that is not a room ID is refused with 400. A true answer means a value was stored, whether that value is on or off - read the value itself with `GET api/2.0/ai/preferences/get-deep-mode`. This is the check a settings screen uses to show an explicit override rather than an inherited state.",
         "responses": {
           "200": {
             "description": "Whether the scope has a preference of its own, whichever way that preference is set.",
@@ -2556,6 +2566,16 @@
               "application/json": {
                 "schema": {
                   "type": "boolean"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`entityId` is not a room ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -2614,7 +2634,7 @@
         ],
         "operationId": "aiPreferencesGetReasoningLevel",
         "summary": "Get reasoning level",
-        "description": "Returns the effective extended-thinking depth of the scope: `off` while deep mode is off, otherwise the persisted depth (`low`, `medium`, `high`, `max`), falling back to the default depth (`medium`) when none has been stored. `entityId` picks a room and omitting it reads the portal-wide preference. Providers clamp the depth to what the model accepts.",
+        "description": "Returns the effective extended-thinking depth of the scope: `off` while deep mode is off, otherwise the persisted depth (`low`, `medium`, `high`, `max`), falling back to the default depth (`medium`) when none has been stored. `entityId` picks a room and omitting it reads the portal-wide preference; a value that is not a room ID is refused with 400. Providers clamp the depth to what the model accepts.",
         "responses": {
           "200": {
             "description": "Success.",
@@ -2622,6 +2642,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiReasoningLevel"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`entityId` is not a room ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -2762,7 +2792,7 @@
         ],
         "operationId": "aiPreferencesGetToolPermissionMode",
         "summary": "Get tool permission mode",
-        "description": "Returns how a tool call the model makes is approved for the calling user, in the chat library's spelling: `ask` prompts for every call bar the tools pinned as always allowed, `auto` also runs a tool that opted out of approval itself or is annotated read-only / non-destructive, `allow` runs everything without asking. The mode is one value per user, stored in the user's AI settings (the same value `GET api/2.0/ai/config/tool-mode` reports as the AI service's enum); `entityId` is accepted for symmetry with the depth routes and ignored. The AI service's default is `auto`.",
+        "description": "Returns how a tool call the model makes is approved for the calling user, in the chat library's spelling: `ask` prompts for every call bar the tools pinned as always allowed, `auto` also runs a tool that opted out of approval itself or is annotated read-only / non-destructive, `allow` runs everything without asking. The mode is one value per user, stored in the user's AI settings (the same value `GET api/2.0/ai/config/tool-mode` reports as the AI service's enum); `entityId` is accepted for symmetry with the depth routes and ignored, though a value that is not a room ID is still refused with 400. The AI service's default is `auto`.",
         "responses": {
           "200": {
             "description": "The mode in force for the scope, as a bare JSON string, falling back to `ask` when none is stored.",
@@ -2770,6 +2800,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiChatToolPermissionMode"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`entityId` is not a room ID.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -8877,7 +8917,7 @@
         ],
         "operationId": "aiSettingsSetUser",
         "summary": "Update user AI settings",
-        "description": "Replaces the AI settings of the calling user and returns the stored result. The body is proxied unchanged to the DocSpace AI service, which validates it, so a rejected value comes back with that service's verdict. Only the caller's own settings can be written. Portal-wide configuration is not touched by this operation.",
+        "description": "Replaces the AI settings of the calling user and returns the stored result. `chatRecommendedModelVisible` is required and has to be a real boolean - a body the JSON parser cannot read, such as one sent as text/plain, used to arrive empty and answer 200 having stored nothing. The body is then proxied to the DocSpace AI service, which validates the rest, so a rejected value comes back with that service's verdict. Only the caller's own settings can be written. Portal-wide configuration is not touched by this operation.",
         "responses": {
           "200": {
             "description": "The calling user's stored AI settings.",
@@ -8885,6 +8925,16 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AiUserSettingsWrapper"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`chatRecommendedModelVisible` is missing or not a boolean.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -8932,7 +8982,7 @@
         },
         "requestBody": {
           "required": true,
-          "description": "The user's AI settings, proxied unchanged to the DocSpace AI service, which owns and validates the shape. Read the current one with `GET api/2.0/ai/config/user` and send it back changed.",
+          "description": "The user's AI settings: `chatRecommendedModelVisible` as a boolean, required. Read the current one with `GET api/2.0/ai/config/user` and send it back changed.",
           "content": {
             "application/json": {
               "schema": {

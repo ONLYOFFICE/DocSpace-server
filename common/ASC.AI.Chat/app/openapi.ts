@@ -364,19 +364,19 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   // Preferences - per-scope extended-thinking settings. One value is stored
   // per scope (the depth); deep mode is its on/off view.
   aiPreferencesGetDeepMode:
-    'Returns the deep-mode toggle of a scope, as a bare boolean: whether the stored extended-thinking depth is above `off`. `entityId` picks a room and omitting it reads the portal-wide preference. A scope that has never had a value stored falls back to the configured default, so the answer never distinguishes "off" from "unset" - ask `GET api/2.0/ai/preferences/is-deep-mode-set` for that. This is a read-only operation.',
+    'Returns the deep-mode toggle of a scope, as a bare boolean: whether the stored extended-thinking depth is above `off`. `entityId` picks a room and omitting it reads the portal-wide preference; a value that is not a room ID is refused with 400, as it is on the write. A scope that has never had a value stored falls back to the configured default, so the answer never distinguishes "off" from "unset" - ask `GET api/2.0/ai/preferences/is-deep-mode-set` for that. This is a read-only operation.',
   aiPreferencesSetDeepMode:
     'Stores the deep-mode toggle of a scope. `false` stores the `off` depth; `true` keeps the depth already stored and falls back to the default depth (`medium`) when none is. `value` has to be a real boolean: a string, a number or an absent value is rejected rather than coerced, so the string "false" cannot silently switch the setting on and an empty request cannot silently switch it off. `entityId` picks a room and omitting it writes the portal-wide preference. It is idempotent, so there is no need to read the current value first.',
   aiPreferencesClearDeepMode:
     "Removes the stored extended-thinking setting of a scope (the depth and, with it, the deep-mode toggle), after which reads fall back to the configured default rather than to false. `entityId` picks a room and omitting it clears the portal-wide preference. Clearing a scope that has no stored value is not an error. This differs from storing false, which is an explicit choice a later read reports as set.",
   aiPreferencesIsDeepModeSet:
-    "Tells whether a scope has an explicitly persisted extended-thinking setting of its own, as opposed to inheriting the configured default. `entityId` picks a room and omitting it asks about the portal-wide preference. A true answer means a value was stored, whether that value is on or off - read the value itself with `GET api/2.0/ai/preferences/get-deep-mode`. This is the check a settings screen uses to show an explicit override rather than an inherited state.",
+    "Tells whether a scope has an explicitly persisted extended-thinking setting of its own, as opposed to inheriting the configured default. `entityId` picks a room and omitting it asks about the portal-wide preference; a value that is not a room ID is refused with 400. A true answer means a value was stored, whether that value is on or off - read the value itself with `GET api/2.0/ai/preferences/get-deep-mode`. This is the check a settings screen uses to show an explicit override rather than an inherited state.",
   aiPreferencesGetReasoningLevel:
-    "Returns the effective extended-thinking depth of the scope: `off` while deep mode is off, otherwise the persisted depth (`low`, `medium`, `high`, `max`), falling back to the default depth (`medium`) when none has been stored. `entityId` picks a room and omitting it reads the portal-wide preference. Providers clamp the depth to what the model accepts.",
+    "Returns the effective extended-thinking depth of the scope: `off` while deep mode is off, otherwise the persisted depth (`low`, `medium`, `high`, `max`), falling back to the default depth (`medium`) when none has been stored. `entityId` picks a room and omitting it reads the portal-wide preference; a value that is not a room ID is refused with 400. Providers clamp the depth to what the model accepts.",
   aiPreferencesSetReasoningLevel:
     "Persists the extended-thinking depth of the scope as its single stored value: a depth turns deep mode on at that depth, `off` turns it off and replaces the stored depth (a later deep-mode `true` without a depth lands on `medium`). `entityId` picks a room and omitting it writes the portal-wide preference. Idempotent.",
   aiPreferencesGetToolPermissionMode:
-    "Returns how a tool call the model makes is approved for the calling user, in the chat library's spelling: `ask` prompts for every call bar the tools pinned as always allowed, `auto` also runs a tool that opted out of approval itself or is annotated read-only / non-destructive, `allow` runs everything without asking. The mode is one value per user, stored in the user's AI settings (the same value `GET api/2.0/ai/config/tool-mode` reports as the AI service's enum); `entityId` is accepted for symmetry with the depth routes and ignored. The AI service's default is `auto`.",
+    "Returns how a tool call the model makes is approved for the calling user, in the chat library's spelling: `ask` prompts for every call bar the tools pinned as always allowed, `auto` also runs a tool that opted out of approval itself or is annotated read-only / non-destructive, `allow` runs everything without asking. The mode is one value per user, stored in the user's AI settings (the same value `GET api/2.0/ai/config/tool-mode` reports as the AI service's enum); `entityId` is accepted for symmetry with the depth routes and ignored, though a value that is not a room ID is still refused with 400. The AI service's default is `auto`.",
   aiPreferencesSetToolPermissionMode:
     "Persists the tool permission mode of the calling user. `value` has to be one of `ask`, `auto`, `allow`: anything else is rejected rather than coerced, so an absent or mistyped value can never overwrite the stored mode. `entityId` is validated like on the other writes and otherwise ignored - the mode applies to every chat of the user. Idempotent.",
 
@@ -436,7 +436,7 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiSettingsGetUser:
     "Returns the AI settings of the calling user, as opposed to the portal-wide ones. It takes no parameters - the user is the authenticated caller, and there is no way to read somebody else's settings - and is proxied unchanged to the DocSpace AI service. Use `GET api/2.0/ai/config` for the portal-wide configuration. This is a read-only operation.",
   aiSettingsSetUser:
-    "Replaces the AI settings of the calling user and returns the stored result. The body is proxied unchanged to the DocSpace AI service, which validates it, so a rejected value comes back with that service's verdict. Only the caller's own settings can be written. Portal-wide configuration is not touched by this operation.",
+    "Replaces the AI settings of the calling user and returns the stored result. `chatRecommendedModelVisible` is required and has to be a real boolean - a body the JSON parser cannot read, such as one sent as text/plain, used to arrive empty and answer 200 having stored nothing. The body is then proxied to the DocSpace AI service, which validates the rest, so a rejected value comes back with that service's verdict. Only the caller's own settings can be written. Portal-wide configuration is not touched by this operation.",
   aiSettingsGetToolMode:
     "Returns the calling user's tool permission mode as the DocSpace AI service spells it - `{ mode }` with the service's `ToolPermissionMode` enum (`Ask`, `Auto`, `Allow`), proxied unchanged. The chat reads the same value in its own spelling through `GET api/2.0/ai/preferences/get-tool-permission-mode`. This is a read-only operation.",
   aiSettingsSetToolMode:
@@ -705,6 +705,11 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "400": "`value` is missing or is not a boolean, or `entityId` is not a room ID.",
   },
   aiPreferencesClearDeepMode: { "400": "`entityId` is not a room ID." },
+  aiPreferencesGetDeepMode: { "400": "`entityId` is not a room ID." },
+  aiPreferencesIsDeepModeSet: { "400": "`entityId` is not a room ID." },
+  aiPreferencesGetReasoningLevel: { "400": "`entityId` is not a room ID." },
+  aiPreferencesGetToolPermissionMode: { "400": "`entityId` is not a room ID." },
+  aiSettingsSetUser: { "400": "`chatRecommendedModelVisible` is missing or not a boolean." },
   aiPreferencesSetReasoningLevel: {
     "400": "`value` is not one of the depths, or `entityId` is not a room ID.",
   },
@@ -1125,9 +1130,8 @@ const REQUEST_BODY_DOCS: Readonly<Record<string, RequestBodyDoc>> = {
   },
   aiSettingsSetUser: {
     description:
-      "The user's AI settings, proxied unchanged to the DocSpace AI service, which owns and " +
-      "validates the shape. Read the current one with `GET api/2.0/ai/config/user` and send " +
-      "it back changed.",
+      "The user's AI settings: `chatRecommendedModelVisible` as a boolean, required. Read the " +
+      "current one with `GET api/2.0/ai/config/user` and send it back changed.",
   },
   aiSettingsSetToolMode: {
     description:

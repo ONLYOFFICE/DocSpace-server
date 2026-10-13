@@ -50,8 +50,11 @@ const engine = new PreferencesEngine({ storage });
 // fold to the portal-wide preference and answer `{ success: true }` for a
 // write that changed nothing the caller could observe (Bug 84026); it is
 // refused with 400 instead. An absent value is the portal-wide scope. Reads
-// stay lenient: an unknown scope reads as the portal-wide fallback.
-function writeScope(value: unknown): string | undefined {
+// used to stay lenient and serve the portal-wide value for any junk id,
+// which hid a wrong id behind a plausible answer; they are held to the same
+// rule now (Bug 84417). A well-formed id of a non-agent room still folds to
+// the portal-wide scope downstream, by design.
+function scopeOf(value: unknown): string | undefined {
   if (value === undefined || value === null || value === "") {
     return undefined;
   }
@@ -69,7 +72,7 @@ function writeScope(value: unknown): string | undefined {
 
 export const preferencesController = {
   getDeepMode: asyncHandler(async (req, res) => {
-    const entityId = asString(req.query["entityId"]);
+    const entityId = scopeOf(req.query["entityId"]);
     const value = await engine.getDeepMode(entityId);
     res.json(value);
   }),
@@ -84,19 +87,19 @@ export const preferencesController = {
       res.status(400).json({ error: "value is required and must be a boolean" });
       return;
     }
-    const entityId = writeScope(args.entityId);
+    const entityId = scopeOf(args.entityId);
     await engine.setDeepMode(args.value, entityId);
     res.json({ success: true });
   }),
 
   clearDeepMode: asyncHandler(async (req, res) => {
     const { entityId } = unpackPositional(req.body, ["entityId"] as const);
-    await engine.clearDeepMode(writeScope(entityId));
+    await engine.clearDeepMode(scopeOf(entityId));
     res.json({ success: true });
   }),
 
   isDeepModeSet: asyncHandler(async (req, res) => {
-    const entityId = asString(req.query["entityId"]);
+    const entityId = scopeOf(req.query["entityId"]);
     const value = await engine.isDeepModeSet(entityId);
     res.json(value);
   }),
@@ -111,7 +114,7 @@ export const preferencesController = {
   // the storage answers both in one call with identical semantics: a
   // missing row is `off` (the configured deep-mode default is off).
   getReasoningLevel: asyncHandler(async (req, res) => {
-    const entityId = asString(req.query["entityId"]);
+    const entityId = scopeOf(req.query["entityId"]);
     const value = (await storage.preferences.readReasoningLevel?.(entityId)) ?? "off";
     res.json(value);
   }),
@@ -126,7 +129,7 @@ export const preferencesController = {
       });
       return;
     }
-    const entityId = writeScope(args.entityId);
+    const entityId = scopeOf(args.entityId);
     await storage.preferences.upsertReasoningLevel?.(args.value, entityId);
     res.json({ success: true });
   }),
@@ -138,7 +141,7 @@ export const preferencesController = {
   // own (`DEFAULT_TOOL_PERMISSION_MODE`), so a failed read and a fresh user
   // look alike to the composer.
   getToolPermissionMode: asyncHandler(async (req, res) => {
-    const entityId = asString(req.query["entityId"]);
+    const entityId = scopeOf(req.query["entityId"]);
     const value = await engine.getToolPermissionMode(entityId);
     res.json(value);
   }),
@@ -154,7 +157,7 @@ export const preferencesController = {
       return;
     }
     // Validated like every other write, then dropped: the mode is per user.
-    const entityId = writeScope(args.entityId);
+    const entityId = scopeOf(args.entityId);
     await engine.setToolPermissionMode(args.value, entityId);
     res.json({ success: true });
   }),
