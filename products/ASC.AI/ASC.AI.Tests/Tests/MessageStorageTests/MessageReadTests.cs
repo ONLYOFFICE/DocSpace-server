@@ -191,6 +191,56 @@ public class MessageReadTests(AspireAppFixture fixture) : BaseTest(fixture)
         walked.Should().Equal(created);
     }
 
+    /// <summary>
+    /// A cursor built from the last message of a page — its millisecond <c>timestamp</c> and <c>id</c>, the way the
+    /// public API client builds it — used to return that message again on a forward read, because the stored
+    /// timestamp kept microseconds; the last message of the thread came back on every request and the walk never
+    /// ended. Messages are now stored with millisecond precision and the cursor is compared at that precision.
+    /// </summary>
+    [Theory]
+    [InlineData(null)]
+    [InlineData("desc")]
+    [Trait("Bug", "84407")]
+    public async Task ReadByThread_CursorFromLastMessage_ReturnsEveryMessageOnceAndEndsWithEmptyPage(string? direction)
+    {
+        const int pageSize = 3;
+        const int maxPages = 10;
+
+        var thread = await CreateThreadAsync();
+        var created = new List<Guid>();
+        for (var i = 0; i < 7; i++)
+        {
+            var message = await CreateMessageAsync(thread.Id, BuildMessageContents($"m{i}"));
+            created.Add(message.Id);
+        }
+        if (direction == "desc")
+        {
+            created.Reverse();
+        }
+
+        var pages = new List<List<Guid>>();
+        DateTimeOffset? cursorCreatedAt = null;
+        Guid? cursorId = null;
+
+        for (var i = 0; i < maxPages; i++)
+        {
+            var page = await ReadMessagesPageAsync(thread.Id, pageSize, cursorCreatedAt, cursorId, direction);
+            pages.Add([.. page.Items.Select(m => m.Id)]);
+
+            if (page.Items.Count == 0)
+            {
+                break;
+            }
+
+            var last = page.Items[^1];
+            cursorCreatedAt = DateTimeOffset.FromUnixTimeMilliseconds(last.Timestamp);
+            cursorId = last.Id;
+        }
+
+        List<List<Guid>> expected = [.. created.Chunk(pageSize).Select(chunk => chunk.ToList()), []];
+        pages.Should().BeEquivalentTo(expected, options => options.WithStrictOrdering());
+    }
+
     [Fact]
     public async Task ReadByThread_DoesNotReturnMessagesFromOtherThread()
     {

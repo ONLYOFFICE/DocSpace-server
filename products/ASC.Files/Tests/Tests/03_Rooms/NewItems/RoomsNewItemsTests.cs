@@ -200,7 +200,7 @@ public class RoomsNewItemsTests(
         await _filesClient.Authenticate(Owner);
         await _filesApi.DeleteFileAsync(
             file.Id,
-            new Delete(false, true),
+            new DeleteFileRequest(false, true),
             false,
             TestContext.Current.CancellationToken);
         await WaitLongOperation();

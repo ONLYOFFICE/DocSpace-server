@@ -1263,4 +1263,34 @@
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>AI agentinin MCP serveri {0} yeniləndi</value>
   </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Metadata kaskad təyini başladı: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Metadata sahəsi yaradıldı: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Metadata sahəsi silindi: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Metadata sahəsi yeniləndi: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Metadata şablonu təyin edildi: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Metadata şablonu yaradıldı: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Metadata şablonu silindi: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Metadata şablonunun təyini ləğv edildi: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Metadata şablonu yeniləndi: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Metadata dəyərləri yeniləndi: {0}</value>
+  </data>
 </root>

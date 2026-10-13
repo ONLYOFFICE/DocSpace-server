@@ -78,7 +78,7 @@ public class MetadataMoveSearchTests(AspireAppFixture fixture) : BaseTest(fixtur
         var before = await data.PollAsync(myDocumentsId, [myFile.Id]);
         before.FileIds().Should().Equal(myFile.Id);
 
-        var results = (await _filesApi.DeleteFileAsync(myFile.Id, new Delete { Immediately = false }, true, TestContext.Current.CancellationToken)).Response;
+        var results = (await _filesApi.DeleteFileAsync(myFile.Id, new DeleteFileRequest { Immediately = false }, true, TestContext.Current.CancellationToken)).Response;
 
         if (results.Any(r => !r.Finished))
         {

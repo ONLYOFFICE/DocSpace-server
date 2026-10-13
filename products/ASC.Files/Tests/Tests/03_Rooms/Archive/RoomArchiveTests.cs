@@ -140,7 +140,7 @@ public class RoomArchiveTests(
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _filesApi.CreateFileAsync(room.Id, new CreateFileJsonElement("Autotest File In Archive"), TestContext.Current.CancellationToken));
+            async () => await _filesApi.CreateFileAsync(room.Id, new CreateFileRequest("Autotest File In Archive"), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);

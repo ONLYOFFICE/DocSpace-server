@@ -225,7 +225,7 @@ public class RoomLogoManager(
         return room;
     }
 
-    public async ValueTask<Logo> GetLogoAsync<T>(Folder<T> room)
+    public async ValueTask<LogoDto> GetLogoAsync<T>(Folder<T> room)
     {
         if (!room.SettingsHasLogo)
         {
@@ -236,17 +236,17 @@ public class RoomLogoManager(
                 await SaveRoomAsync(daoFactory.GetFolderDao<T>(), room);
             }
 
-            LogoCover cover = null;
+            LogoCoverDto cover = null;
             if (!string.IsNullOrEmpty(room.SettingsCover) && (await GetCoversAsync()).TryGetValue(room.SettingsCover, out var fromDict))
             {
-                cover = new LogoCover
+                cover = new LogoCoverDto
                 {
                     Id = room.SettingsCover,
                     Data = fromDict
                 };
             }
 
-            return new Logo
+            return new LogoDto
             {
                 Original = string.Empty,
                 Large = string.Empty,
@@ -263,7 +263,7 @@ public class RoomLogoManager(
         var secure = !securityContext.IsAuthenticated;
         var store = await GetLogoStoreAsync();
 
-        return new Logo
+        return new LogoDto
         {
             Original = await GetLogoPathAsync(store, id, SizeName.Original, cacheKey, secure),
             Large = await GetLogoPathAsync(store, id, SizeName.Large, cacheKey, secure),

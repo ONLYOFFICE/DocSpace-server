@@ -53,7 +53,7 @@ public class CommentTests(
 
         // Act
         var comment = (await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: 1, comment: "Initial comment"), TestContext.Current.CancellationToken)).Response;
+            file.Id, new UpdateCommentRequest(version: 1, comment: "Initial comment"), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         comment.Should().Be("Initial comment");
@@ -68,7 +68,7 @@ public class CommentTests(
 
         // Act
         var comment = (await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: 1, comment: ""), TestContext.Current.CancellationToken)).Response;
+            file.Id, new UpdateCommentRequest(version: 1, comment: ""), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         comment.Should().BeEmpty();
@@ -83,7 +83,7 @@ public class CommentTests(
 
         // Act
         var comment = (await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: 1, comment: null), TestContext.Current.CancellationToken)).Response;
+            file.Id, new UpdateCommentRequest(version: 1, comment: null), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         comment.Should().BeEmpty();
@@ -97,11 +97,11 @@ public class CommentTests(
         var file = await CreateFileInMy("Autotest UpdateComment Overwrite.docx", Owner);
 
         await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: 1, comment: "First comment"), TestContext.Current.CancellationToken);
+            file.Id, new UpdateCommentRequest(version: 1, comment: "First comment"), TestContext.Current.CancellationToken);
 
         // Act
         var comment = (await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: 1, comment: "Updated comment"), TestContext.Current.CancellationToken)).Response;
+            file.Id, new UpdateCommentRequest(version: 1, comment: "Updated comment"), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         comment.Should().Be("Updated comment");
@@ -117,7 +117,7 @@ public class CommentTests(
 
         // Act
         var comment = (await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: 1, comment: text), TestContext.Current.CancellationToken)).Response;
+            file.Id, new UpdateCommentRequest(version: 1, comment: text), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         comment.Should().Be(text);
@@ -133,7 +133,7 @@ public class CommentTests(
 
         // Act
         var comment = (await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: 1, comment: text), TestContext.Current.CancellationToken)).Response;
+            file.Id, new UpdateCommentRequest(version: 1, comment: text), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         comment.Should().Be(text);
@@ -154,7 +154,7 @@ public class CommentTests(
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: 1, comment: comment), TestContext.Current.CancellationToken));
+            file.Id, new UpdateCommentRequest(version: 1, comment: comment), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(400);
@@ -174,7 +174,7 @@ public class CommentTests(
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.UpdateFileCommentAsync(
-            999999999, new UpdateComment(version: 1, comment: "test"), TestContext.Current.CancellationToken));
+            999999999, new UpdateCommentRequest(version: 1, comment: "test"), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(404);
@@ -194,7 +194,7 @@ public class CommentTests(
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: 999, comment: "test"), TestContext.Current.CancellationToken));
+            file.Id, new UpdateCommentRequest(version: 999, comment: "test"), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(400);
@@ -214,7 +214,7 @@ public class CommentTests(
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: 0, comment: "test"), TestContext.Current.CancellationToken));
+            file.Id, new UpdateCommentRequest(version: 0, comment: "test"), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(400);
@@ -234,7 +234,7 @@ public class CommentTests(
 
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: -1, comment: "test"), TestContext.Current.CancellationToken));
+            file.Id, new UpdateCommentRequest(version: -1, comment: "test"), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(400);

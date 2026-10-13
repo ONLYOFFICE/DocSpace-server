@@ -52,7 +52,7 @@ public class CspConfigureTests(
 
         // Act
         var response = await _cspApi.ConfigureCspWithHttpInfoAsync(
-            new CspRequestsDto([domain]), TestContext.Current.CancellationToken);
+            new CspRequestDto([domain]), TestContext.Current.CancellationToken);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -71,7 +71,7 @@ public class CspConfigureTests(
 
         // Act
         var response = await _cspApi.ConfigureCspWithHttpInfoAsync(
-            new CspRequestsDto([domain]), TestContext.Current.CancellationToken);
+            new CspRequestDto([domain]), TestContext.Current.CancellationToken);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -89,7 +89,7 @@ public class CspConfigureTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _cspApi.ConfigureCspAsync(
-                new CspRequestsDto([$"https://{Guid.NewGuid():N}.example.com"]), TestContext.Current.CancellationToken));
+                new CspRequestDto([$"https://{Guid.NewGuid():N}.example.com"]), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(401);
@@ -108,7 +108,7 @@ public class CspConfigureTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _cspApi.ConfigureCspAsync(
-                new CspRequestsDto([$"https://{Guid.NewGuid():N}.example.com"]), TestContext.Current.CancellationToken));
+                new CspRequestDto([$"https://{Guid.NewGuid():N}.example.com"]), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);

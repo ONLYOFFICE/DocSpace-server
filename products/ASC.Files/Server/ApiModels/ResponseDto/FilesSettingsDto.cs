@@ -347,7 +347,7 @@ public class FilesSettingsDto
     /// caller asked a listing for, so it changes on its own as the account is used.
     /// </summary>
     /// <example>{"sortedBy": "DateAndTime", "isAsc": false}</example>
-    public OrderBy DefaultOrder { get; set; }
+    public OrderByDto DefaultOrder { get; set; }
 
     /// <summary>
     /// Whether the editor writes a document back to storage while the session is still open. It is on for every
@@ -391,7 +391,7 @@ public class FilesSettingsDto
     /// The trash auto-clearing setting of the caller, the same pair `GET api/2.0/files/settings/autocleanup` returns.
     /// </summary>
     /// <example>{"isAutoCleanUp": true, "gap": 3}</example>
-    public AutoCleanUpData AutomaticallyCleanUp { get; set; }
+    public AutoCleanUpDataDto AutomaticallyCleanUp { get; set; }
 
     /// <summary>
     /// Whether documents in this portal can be searched by what is inside them and not only by title. It depends on
@@ -533,14 +533,14 @@ public class FilesSettingsDtoConverter(
             HideConfirmConvertSave = await filesSettingsHelper.GetHideConfirmConvertSave(),
             HideConfirmConvertOpen = await filesSettingsHelper.GetHideConfirmConvertOpen(),
             HideConfirmRoomLifetime = await filesSettingsHelper.GetHideConfirmRoomLifetime(),
-            DefaultOrder = await filesSettingsHelper.GetDefaultOrder(),
+            DefaultOrder = (await filesSettingsHelper.GetDefaultOrder())?.Map(),
             Forcesave = filesSettingsHelper.GetForcesave(),
             StoreForcesave = filesSettingsHelper.GetStoreForcesave(),
             RecentSection = await filesSettingsHelper.GetRecentSection(),
             FavoritesSection = await filesSettingsHelper.GetFavoritesSection(),
             TemplatesSection = await filesSettingsHelper.GetTemplatesSection(),
             DownloadTarGz = await filesSettingsHelper.GetDownloadTarGz(),
-            AutomaticallyCleanUp = await filesSettingsHelper.GetAutomaticallyCleanUp(),
+            AutomaticallyCleanUp = (await filesSettingsHelper.GetAutomaticallyCleanUp())?.Map(),
             CanSearchByContent = await searchSettingsHelper.CanSearchByContentAsync<DbFile>(),
             DefaultSharingAccessRights = await filesSettingsHelper.GetDefaultSharingAccessRights(),
             MaxUploadThreadCount = setupInfo.MaxUploadThreadCount,

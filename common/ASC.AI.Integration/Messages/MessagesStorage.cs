@@ -48,7 +48,7 @@ public class MessagesStorage(IDbContextFactory<AiIntegrationContext> dbContextFa
             TenantId = tenantId,
             ThreadId = threadId,
             Contents = contents,
-            Timestamp = DateTime.UtcNow
+            Timestamp = TruncateToMilliseconds(DateTime.UtcNow)
         };
 
         context.Messages.Add(entity);
@@ -69,12 +69,15 @@ public class MessagesStorage(IDbContextFactory<AiIntegrationContext> dbContextFa
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
+        var timestampFrom = cursor == null ? default : TruncateToMilliseconds(cursor.Timestamp);
+        var timestampTo = timestampFrom.AddMilliseconds(1);
+
         var messages = (cursor, direction) switch
         {
             (null, MessagesDirection.Asc) => context.GetMessagesByThreadAsync(tenantId, threadId, count),
             (null, _) => context.GetMessagesByThreadDescAsync(tenantId, threadId, count),
-            (not null, MessagesDirection.Asc) => context.GetMessagesByThreadFromCursorAsync(tenantId, threadId, cursor.Timestamp, cursor.Id, count),
-            (not null, _) => context.GetMessagesByThreadFromCursorDescAsync(tenantId, threadId, cursor.Timestamp, cursor.Id, count)
+            (not null, MessagesDirection.Asc) => context.GetMessagesByThreadFromCursorAsync(tenantId, threadId, timestampFrom, timestampTo, cursor.Id, count),
+            (not null, _) => context.GetMessagesByThreadFromCursorDescAsync(tenantId, threadId, timestampFrom, timestampTo, cursor.Id, count)
         };
 
         return await messages
@@ -101,6 +104,11 @@ public class MessagesStorage(IDbContextFactory<AiIntegrationContext> dbContextFa
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
         await context.DeleteMessagesByThreadAsync(tenantId, threadId);
+    }
+
+    private static DateTime TruncateToMilliseconds(DateTime value)
+    {
+        return new DateTime(value.Ticks - value.Ticks % TimeSpan.TicksPerMillisecond, value.Kind);
     }
 
     private static Message ToDomainEntity(DbMessage entity)

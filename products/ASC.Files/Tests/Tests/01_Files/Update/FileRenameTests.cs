@@ -52,7 +52,7 @@ public class FileRenameTests(
 
         // Act
         var updated = (await _filesApi.UpdateFileAsync(
-            file.Id, new UpdateFile { Title = "Autotest No Ext Renamed" }, TestContext.Current.CancellationToken)).Response;
+            file.Id, new UpdateFileRequest { Title = "Autotest No Ext Renamed" }, TestContext.Current.CancellationToken)).Response;
 
         // Assert
         updated.Title.Should().Be("Autotest No Ext Renamed.docx");
@@ -68,7 +68,7 @@ public class FileRenameTests(
 
         // Act
         var updated = (await _filesApi.UpdateFileAsync(
-            file.Id, new UpdateFile { Title = "Autotest With Ext Renamed.docx" }, TestContext.Current.CancellationToken)).Response;
+            file.Id, new UpdateFileRequest { Title = "Autotest With Ext Renamed.docx" }, TestContext.Current.CancellationToken)).Response;
 
         // Assert
         updated.Title.Should().Be("Autotest With Ext Renamed.docx");
@@ -89,7 +89,7 @@ public class FileRenameTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.UpdateFileAsync(
-                999999999, new UpdateFile { Title = "Autotest Non-existent" }, TestContext.Current.CancellationToken));
+                999999999, new UpdateFileRequest { Title = "Autotest Non-existent" }, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(404);
         exception.ErrorContent?.ToString().Should().Contain("The required file was not found");
@@ -108,7 +108,7 @@ public class FileRenameTests(
 
         // Act
         var updated = (await _filesApi.UpdateFileAsync(
-            file.Id, new UpdateFile { Title = "Autotest Change Ext Renamed.txt" }, TestContext.Current.CancellationToken)).Response;
+            file.Id, new UpdateFileRequest { Title = "Autotest Change Ext Renamed.txt" }, TestContext.Current.CancellationToken)).Response;
 
         // Assert
         updated.Title.Should().Be("Autotest Change Ext Renamed.txt.docx");
@@ -124,7 +124,7 @@ public class FileRenameTests(
 
         // Act
         var updated = (await _filesApi.UpdateFileAsync(
-            file.Id, new UpdateFile { Title = "" }, TestContext.Current.CancellationToken)).Response;
+            file.Id, new UpdateFileRequest { Title = "" }, TestContext.Current.CancellationToken)).Response;
 
         // Assert
         updated.Should().NotBeNull();
@@ -140,7 +140,7 @@ public class FileRenameTests(
 
         // Act
         var updated = (await _filesApi.UpdateFileAsync(
-            file.Id, new UpdateFile { Title = "   " }, TestContext.Current.CancellationToken)).Response;
+            file.Id, new UpdateFileRequest { Title = "   " }, TestContext.Current.CancellationToken)).Response;
 
         // Assert
         updated.Should().NotBeNull();
@@ -163,7 +163,7 @@ public class FileRenameTests(
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.UpdateFileAsync(
                 file.Id,
-                new UpdateFile { Title = "Autotest LastVersion Renamed", LastVersion = file.Version },
+                new UpdateFileRequest { Title = "Autotest LastVersion Renamed", LastVersion = file.Version },
                 TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(400);
@@ -179,7 +179,7 @@ public class FileRenameTests(
 
         // Act
         var updated = (await _filesApi.UpdateFileAsync(
-            file.Id, new UpdateFile { Title = "Autotest A & B" }, TestContext.Current.CancellationToken)).Response;
+            file.Id, new UpdateFileRequest { Title = "Autotest A & B" }, TestContext.Current.CancellationToken)).Response;
 
         // Assert
         updated.Title.Should().Be("Autotest A & B.docx");
@@ -198,7 +198,7 @@ public class FileRenameTests(
 
         // Act
         var updated = (await _filesApi.UpdateFileAsync(
-            file.Id, new UpdateFile { Title = "Autotest A/B" }, TestContext.Current.CancellationToken)).Response;
+            file.Id, new UpdateFileRequest { Title = "Autotest A/B" }, TestContext.Current.CancellationToken)).Response;
 
         // Assert
         updated.Title.Should().Be("Autotest A_B.docx");

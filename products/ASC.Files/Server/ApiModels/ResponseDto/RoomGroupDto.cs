@@ -59,7 +59,7 @@ public class RoomGroupDto
     /// by setting it to an empty value.
     /// </summary>
     /// <example>{"id": "star", "data": {"default": "svg markup", "small": "svg markup"}}</example>
-    public MultiSizeLogoCover Icon { get; set; }
+    public MultiSizeLogoCoverDto Icon { get; set; }
 
     /// <summary>
     /// The account that created the group and the only one able to read, change or delete it; for any other member of
@@ -145,11 +145,11 @@ public class RoomGroupDtoHelper(FolderDtoHelper folderWrapperHelper, IDaoFactory
             internalRooms.Count +
             thirdPartyRooms.Count;
 
-        MultiSizeLogoCover cover = null;
+        MultiSizeLogoCoverDto cover = null;
         if (!string.IsNullOrEmpty(group.Icon) &&
             (await RoomLogoManager.GetCoversBySizeAsync()).TryGetValue(group.Icon, out var fromDict))
         {
-            cover = new MultiSizeLogoCover
+            cover = new MultiSizeLogoCoverDto
             {
                 Id = group.Icon,
                 Data = fromDict

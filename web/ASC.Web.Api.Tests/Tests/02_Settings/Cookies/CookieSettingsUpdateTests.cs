@@ -52,7 +52,7 @@ public class CookieSettingsUpdateTests(
 
         // Act
         var updated = await _cookiesApi.UpdateCookieSettingsAsync(
-            new CookieSettingsRequestsDto(lifeTime: 720, enabled: true), TestContext.Current.CancellationToken);
+            new CookieSettingsRequestDto(lifeTime: 720, enabled: true), TestContext.Current.CancellationToken);
 
         // Assert
         updated.StatusCode.Should().Be(200);
@@ -71,7 +71,7 @@ public class CookieSettingsUpdateTests(
 
         // Act
         var updated = await _cookiesApi.UpdateCookieSettingsAsync(
-            new CookieSettingsRequestsDto(lifeTime: 720, enabled: true), TestContext.Current.CancellationToken);
+            new CookieSettingsRequestDto(lifeTime: 720, enabled: true), TestContext.Current.CancellationToken);
 
         // Assert
         updated.StatusCode.Should().Be(200);
@@ -90,7 +90,7 @@ public class CookieSettingsUpdateTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _cookiesApi.UpdateCookieSettingsAsync(
-                new CookieSettingsRequestsDto(lifeTime: 720, enabled: true), TestContext.Current.CancellationToken));
+                new CookieSettingsRequestDto(lifeTime: 720, enabled: true), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(401);
@@ -109,7 +109,7 @@ public class CookieSettingsUpdateTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _cookiesApi.UpdateCookieSettingsAsync(
-                new CookieSettingsRequestsDto(lifeTime: 720, enabled: true), TestContext.Current.CancellationToken));
+                new CookieSettingsRequestDto(lifeTime: 720, enabled: true), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);
@@ -126,7 +126,7 @@ public class CookieSettingsUpdateTests(
 
         // Act
         var updated = await _cookiesApi.UpdateCookieSettingsAsync(
-            new CookieSettingsRequestsDto(lifeTime: 100000, enabled: true), TestContext.Current.CancellationToken);
+            new CookieSettingsRequestDto(lifeTime: 100000, enabled: true), TestContext.Current.CancellationToken);
 
         // Assert
         updated.StatusCode.Should().Be(200);

@@ -160,7 +160,7 @@
     <value>Мерна единица</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Резервно копие</value>
+    <value>Копия</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Токени</value>

@@ -167,7 +167,7 @@ public class ConnectionsController(
     /// the link any earlier call returned, and the caller's own client is handed a fresh cookie in the response and
     /// stays signed in through a new connection. The password itself is not changed here, and the link is handed back
     /// to the caller rather than mailed to the user: the URL carries a time-limited `PasswordChange` key, which the
-    /// confirmation page it opens - or `PUT api/2.0/people/{userid}/password` - needs to accept the new password. A
+    /// confirmation page it opens - or `PUT api/2.0/people/{userId}/password` - needs to accept the new password. A
     /// failure is swallowed instead of reported, so an empty body with status 200 means nothing was done and the call
     /// has to be repeated.
     /// </remarks>

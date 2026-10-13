@@ -44,10 +44,10 @@ public class SendEditorNotifyTests(
     AspireAppFixture fixture)
     : SharingTestBase(fixture)
 {
-    private static MentionMessageWrapper BuildRequest(IEnumerable<string> emails, string message, string actionData = "test-action")
+    private static MentionMessageRequest BuildRequest(IEnumerable<string> emails, string message, string actionData = "test-action")
     {
-        return new MentionMessageWrapper(
-            actionLink: new ActionLinkConfig(new ActionConfig(actionData, "comment")),
+        return new MentionMessageRequest(
+            actionLink: new ActionLinkRequest(new ActionLinkActionRequest(actionData, "comment")),
             emails: emails.ToList(),
             message: message);
     }
@@ -134,7 +134,7 @@ public class SendEditorNotifyTests(
         var file = await CreateFile("Autotest Notify File Trash.docx", room.Id);
         var user = await InviteContact(EmployeeType.User);
 
-        await _filesApi.DeleteFileAsync(file.Id, new Delete { Immediately = false }, true, TestContext.Current.CancellationToken);
+        await _filesApi.DeleteFileAsync(file.Id, new DeleteFileRequest { Immediately = false }, true, TestContext.Current.CancellationToken);
         await WaitLongOperation();
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () =>
@@ -151,7 +151,7 @@ public class SendEditorNotifyTests(
         var file = await CreateFile("Autotest Notify File Perm.docx", room.Id);
         var user = await InviteContact(EmployeeType.User);
 
-        await _filesApi.DeleteFileAsync(file.Id, new Delete { Immediately = true }, true, TestContext.Current.CancellationToken);
+        await _filesApi.DeleteFileAsync(file.Id, new DeleteFileRequest { Immediately = true }, true, TestContext.Current.CancellationToken);
         await WaitLongOperation();
 
         var exception = await Assert.ThrowsAsync<ApiException>(async () =>

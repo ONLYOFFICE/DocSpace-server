@@ -95,7 +95,7 @@ public class FormFilterTests(AspireAppFixture fixture) : BaseTest(fixture)
         var myFolderId = await GetUserFolderIdAsync(Owner);
         var folder = await CreateFolder("Autotest Folder For Filter After Delete", myFolderId);
 
-        await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder(deleteAfter: true, immediately: true), TestContext.Current.CancellationToken);
+        await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest(deleteAfter: true, immediately: true), TestContext.Current.CancellationToken);
         await WaitLongOperation();
         await WaitForFolderDeletedAsync(folder.Id);
 

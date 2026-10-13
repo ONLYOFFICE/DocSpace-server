@@ -63,7 +63,7 @@ public class FolderDeletePermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(null);
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken));
+            async () => await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(401);
     }
@@ -82,7 +82,7 @@ public class FolderDeletePermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(roomAdmin);
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken));
+            async () => await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
@@ -102,7 +102,7 @@ public class FolderDeletePermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken));
+            async () => await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
@@ -124,7 +124,7 @@ public class FolderDeletePermissionsTests(
 
         // Act
         await _filesClient.Authenticate(admin);
-        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
+        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
 
         if (results.Any(r => !r.Finished))
         {
@@ -152,7 +152,7 @@ public class FolderDeletePermissionsTests(
         var folder = await CreateFolder("Autotest Folder By ContentCreator", room.Id);
 
         // Act
-        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
+        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
 
         if (results.Any(r => !r.Finished))
         {
@@ -181,7 +181,7 @@ public class FolderDeletePermissionsTests(
         var folder = await CreateFolder("Autotest Folder By RoomAdmin", room.Id);
 
         // Act
-        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
+        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
 
         if (results.Any(r => !r.Finished))
         {
@@ -210,7 +210,7 @@ public class FolderDeletePermissionsTests(
 
         // Act
         await _filesClient.Authenticate(Owner);
-        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
+        var results = (await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken)).Response;
 
         if (results.Any(r => !r.Finished))
         {
@@ -239,7 +239,7 @@ public class FolderDeletePermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken));
+            async () => await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
@@ -263,7 +263,7 @@ public class FolderDeletePermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken));
+            async () => await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");
@@ -283,7 +283,7 @@ public class FolderDeletePermissionsTests(
         // Act & Assert
         await _filesClient.Authenticate(guest);
         var exception = await Assert.ThrowsAsync<ApiException>(
-            async () => await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolder { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken));
+            async () => await _foldersApi.DeleteFolderAsync(folder.Id, new DeleteFolderRequest { DeleteAfter = true, Immediately = true }, TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
         exception.ErrorContent?.ToString().Should().Contain("Access denied");

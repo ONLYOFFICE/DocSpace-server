@@ -329,7 +329,7 @@ public class DocumentServiceHelper(IDaoFactory daoFactory,
 
         var configuration = serviceProvider.GetService<Configuration<T>>();
         configuration.Document.Key = docKey;
-        configuration.Document.Permissions = new PermissionsConfig
+        configuration.Document.Permissions = new PermissionsConfigDto
         {
             Edit = rightToEdit && lastVersion,
             Review = rightToReview && lastVersion,

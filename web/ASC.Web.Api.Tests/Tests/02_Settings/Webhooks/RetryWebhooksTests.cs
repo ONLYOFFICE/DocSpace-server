@@ -46,7 +46,7 @@ public class RetryWebhooksTests(
     {
         // Arrange
         await _webApiClient.Authenticate(Owner);
-        var request = new WebhookRetryRequestsDto([]);
+        var request = new WebhookRetryRequestDto([]);
 
         // Act
         var result = await _webhooksApi.RetryWebhooksAsync(request, TestContext.Current.CancellationToken);

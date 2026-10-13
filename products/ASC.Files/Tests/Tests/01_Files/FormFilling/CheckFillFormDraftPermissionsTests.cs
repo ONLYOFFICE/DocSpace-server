@@ -69,7 +69,7 @@ public class CheckFillFormDraftPermissionsTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.CheckFillFormDraftAsync(
-                formId, new CheckFillFormDraft(version: 1), TestContext.Current.CancellationToken));
+                formId, new CheckFillFormDraftRequest(version: 1), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(401);
     }
@@ -85,7 +85,7 @@ public class CheckFillFormDraftPermissionsTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.CheckFillFormDraftAsync(
-                formId, new CheckFillFormDraft(version: 1), TestContext.Current.CancellationToken));
+                formId, new CheckFillFormDraftRequest(version: 1), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
     }
@@ -101,7 +101,7 @@ public class CheckFillFormDraftPermissionsTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.CheckFillFormDraftAsync(
-                formId, new CheckFillFormDraft(version: 1), TestContext.Current.CancellationToken));
+                formId, new CheckFillFormDraftRequest(version: 1), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(403);
     }

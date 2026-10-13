@@ -139,7 +139,7 @@ public class ExternalShareAccessTests(AspireAppFixture fixture) : BaseTest(fixtu
         await SetExternalSharingAsync(externalShare: true);
 
         // Assert
-        result.Status.Should().Be(Status.ExternalAccessDenied);
+        result.Status.Should().Be(ExternalShareStatus.ExternalAccessDenied);
     }
 
     [Fact]
@@ -164,7 +164,7 @@ public class ExternalShareAccessTests(AspireAppFixture fixture) : BaseTest(fixtu
         await SetExternalSharingAsync(externalShare: true);
 
         // Assert
-        result.Status.Should().Be(Status.ExternalAccessDenied);
+        result.Status.Should().Be(ExternalShareStatus.ExternalAccessDenied);
     }
 
     [Fact]
@@ -186,7 +186,7 @@ public class ExternalShareAccessTests(AspireAppFixture fixture) : BaseTest(fixtu
         await SetExternalSharingAsync(externalShare: true);
 
         // Assert — existing link still works when block is disabled
-        result.Status.Should().Be(Status.Ok);
+        result.Status.Should().Be(ExternalShareStatus.Ok);
     }
 
     [Fact]
@@ -208,7 +208,7 @@ public class ExternalShareAccessTests(AspireAppFixture fixture) : BaseTest(fixtu
         await SetExternalSharingAsync(externalShare: true);
 
         // Assert — authenticated users bypass the global block
-        result.Status.Should().Be(Status.Ok);
+        result.Status.Should().Be(ExternalShareStatus.Ok);
     }
 
     [Fact]

@@ -73,26 +73,57 @@ public class MonthlyUsageReportBuilder(
 
                 if (records is { Count: > 0 })
                 {
-                    await writer.WriteAsync(SerializeMonthly(records, context.Culture, context.Options));
+                    var months = GetPeriodMonths(
+                        TenantUtil.DateTimeFromUtc(context.UtcStartDate),
+                        TenantUtil.DateTimeFromUtc(context.UtcEndDate),
+                        TenantUtil.DateTimeNow());
+
+                    await writer.WriteAsync(SerializeMonthly(months, records, context.Culture, context.Options));
                 }
             });
 
         return RenderAsync(context, definition);
     }
 
-    private static string SerializeMonthly(List<CustomerMonthlyUsage> records, CultureInfo culture, JsonSerializerOptions jsonSerializerOptions)
+    // The rows the client shows for the period: every month of it in the portal's time zone, never
+    // past the current one, the newest first. Billing returns only the months with spending.
+    private static List<DateTime> GetPeriodMonths(DateTime localStartDate, DateTime localEndDate, DateTime localNow)
+    {
+        var firstMonth = new DateTime(localStartDate.Year, localStartDate.Month, 1);
+        var endMonth = new DateTime(localEndDate.Year, localEndDate.Month, 1);
+        var currentMonth = new DateTime(localNow.Year, localNow.Month, 1);
+        var lastMonth = endMonth < currentMonth ? endMonth : currentMonth;
+
+        var months = new List<DateTime>();
+
+        for (var month = lastMonth; month >= firstMonth; month = month.AddMonths(-1))
+        {
+            months.Add(month);
+        }
+
+        return months;
+    }
+
+    private static string SerializeMonthly(List<DateTime> months, List<CustomerMonthlyUsage> records, CultureInfo culture, JsonSerializerOptions jsonSerializerOptions)
     {
         var sb = new StringBuilder();
 
-        foreach (var record in records)
+        var recordsByMonth = records
+            .GroupBy(r => (r.Year, r.Month))
+            .ToDictionary(g => g.Key, g => g.Last());
+
+        // A month without spending is a zero row in the currency of the first record, as on the client.
+        var fallbackCurrency = records[0].Currency;
+
+        foreach (var month in months)
         {
-            var month = new DateTime(record.Year, record.Month, 1).ToString("MMMM yyyy", culture);
+            var record = recordsByMonth.GetValueOrDefault((month.Year, month.Month));
 
             var properties = new List<PropertyValue>
             {
-                new(month, "@"),
-                MoneyValue(record.TotalAmount),
-                new(record.Currency, "@")
+                new(month.ToString("MMMM yyyy", culture), "@"),
+                MoneyValue(record?.TotalAmount ?? 0),
+                new(record?.Currency ?? fallbackCurrency, "@")
             };
 
             _ = sb.AppendLine(JsonSerializer.Serialize(properties, jsonSerializerOptions) + ",");

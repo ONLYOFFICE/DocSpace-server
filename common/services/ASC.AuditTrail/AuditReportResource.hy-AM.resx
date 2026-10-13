@@ -1263,4 +1263,34 @@
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>ԱԲ գործակալի MCP սերվերը {0} թարմացված է</value>
   </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Մետատվյալների կասկադ նշանակումը մեկնարկեց՝ {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Մետատվյալների դաշտ ստեղծվեց՝ {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Մետատվյալների դաշտ ջնջվեց՝ {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Մետատվյալների դաշտ թարմացվեց՝ {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Մետատվյալների ձևանմուշ նշանակվեց՝ {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Մետատվյալների ձևանմուշ ստեղծվեց՝ {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Մետատվյալների ձևանմուշ ջնջվեց՝ {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Մետատվյալների ձևանմուշի նշանակումը հանվեց՝ {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Մետատվյալների ձևանմուշ թարմացվեց՝ {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Մետատվյալների արժեքները թարմացվեցին՝ {0}</value>
+  </data>
 </root>

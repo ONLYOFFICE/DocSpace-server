@@ -74,6 +74,11 @@ public static class OpenApiExtension
 
             c.CustomSchemaIds(CustomSchemaId);
 
+            // Query models bound with [FromQuery] and no explicit Name surfaced their C# property names
+            // (`IsDark`, `ServiceName`, `Userid`). Binding is case-insensitive, so documenting the
+            // camelCase spelling every other parameter uses changes nothing on the wire.
+            c.DescribeAllParametersInCamelCase();
+
             var openApiInfo = new OpenApiInfo
             {
                 Title = "ONLYOFFICE DocSpace API",
@@ -138,6 +143,9 @@ public static class OpenApiExtension
             c.OperationFilter<ContentTypeOperationFilter>();
             c.OperationFilter<AllowAnonymousFilter>();
             c.OperationFilter<ApiDateTimeParameterFilter>();
+            c.OperationFilter<FlattenObjectQueryParameterFilter>();
+            c.OperationFilter<AcronymQueryParameterNameFilter>();
+            c.OperationFilter<RequestBodyNameOperationFilter>();
             c.OperationFilter<RateLimitOperationFilter>();
             c.DocumentFilter<RateLimitDocumentFilter>();
             c.DocumentFilter<SwaggerSuccessApiResponseFilter>();
@@ -583,6 +591,150 @@ public static class OpenApiExtension
                     };
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// Spells a whole request model bound from the query string out as one query parameter per property.
+    /// </summary>
+    /// <remarks>
+    /// A model with a custom binder (<c>BatchModelBinder</c> behind <c>GET files/fileops/move</c>) is described
+    /// as a single object parameter named after the C# argument, <c>inDto</c>. Serialized as a form query it
+    /// already sends the flat <c>folderIds=..&amp;destFolderId=..</c> the binder reads, so the wire does not
+    /// change; what does is the SDK method, which no longer takes an argument called <c>inDto</c> and names
+    /// every field an agent has to fill instead.
+    /// </remarks>
+    /// <summary>
+    /// Fixes the camel case of query parameter names that start with an acronym.
+    /// </summary>
+    /// <remarks>
+    /// <c>DescribeAllParametersInCamelCase</c> only lowers the first letter, so <c>AWSRegion</c> is published as
+    /// <c>aWSRegion</c>; this spells it the way System.Text.Json does, <c>awsRegion</c>. Query binding ignores case,
+    /// so the request that reaches the server is the same. The name cannot be fixed with <c>[FromQuery(Name)]</c> on
+    /// the model property instead: the same model is bound from the body elsewhere, and a binding-source attribute on
+    /// one of its properties turns off the body inference of <c>[ApiController]</c>.
+    /// </remarks>
+    private class AcronymQueryParameterNameFilter : IOperationFilter
+    {
+        private static readonly Regex _acronymStart = new("^[a-z][A-Z]{2}", RegexOptions.Compiled);
+
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            foreach (var parameter in operation.Parameters ?? [])
+            {
+                if (parameter is OpenApiParameter { In: ParameterLocation.Query, Name: { } name } concrete && _acronymStart.IsMatch(name))
+                {
+                    concrete.Name = JsonNamingPolicy.CamelCase.ConvertName(char.ToUpperInvariant(name[0]) + name[1..]);
+                }
+            }
+        }
+    }
+
+    private class FlattenObjectQueryParameterFilter : IOperationFilter
+    {
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            if (operation.Parameters is not { Count: > 0 } parameters)
+            {
+                return;
+            }
+
+            for (var i = parameters.Count - 1; i >= 0; i--)
+            {
+                if (parameters[i] is not OpenApiParameter { In: ParameterLocation.Query, Schema: OpenApiSchemaReference reference })
+                {
+                    continue;
+                }
+
+                var properties = new Dictionary<string, IOpenApiSchema>();
+                CollectProperties(reference.Reference.Id, context.SchemaRepository, properties);
+
+                if (properties.Count == 0)
+                {
+                    // An enum or any other schema without members of its own stays a single parameter.
+                    continue;
+                }
+
+                parameters.RemoveAt(i);
+
+                var index = i;
+                foreach (var (name, schema) in properties)
+                {
+                    parameters.Insert(index++, new OpenApiParameter
+                    {
+                        Name = name,
+                        In = ParameterLocation.Query,
+                        Description = schema.Description,
+                        Schema = schema
+                    });
+                }
+            }
+        }
+
+        private static void CollectProperties(string schemaId, SchemaRepository repository, Dictionary<string, IOpenApiSchema> properties)
+        {
+            if (!repository.Schemas.TryGetValue(schemaId, out var schema))
+            {
+                return;
+            }
+
+            foreach (var part in schema.AllOf ?? [])
+            {
+                if (part is OpenApiSchemaReference partReference)
+                {
+                    CollectProperties(partReference.Reference.Id, repository, properties);
+                }
+                else
+                {
+                    AddProperties(part, properties);
+                }
+            }
+
+            AddProperties(schema, properties);
+        }
+
+        private static void AddProperties(IOpenApiSchema schema, Dictionary<string, IOpenApiSchema> properties)
+        {
+            foreach (var (name, property) in schema.Properties ?? new Dictionary<string, IOpenApiSchema>())
+            {
+                properties.TryAdd(name, property);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Names a request body that has no model of its own after the request model that carries it.
+    /// </summary>
+    /// <remarks>
+    /// A request model whose <c>[FromBody]</c> property is a bare array of numbers or enum values
+    /// (<c>DeleteTemplateFilesRequestDto.FileIds</c>) puts an inline array schema on the operation. The SDK
+    /// generators find no model name in it and call the argument <c>request_body</c>, where every other body is
+    /// named after its model. The extension names only that argument: the body on the wire is still the bare
+    /// array. A body that references a model, directly or through its array items, already gets that model's
+    /// name and is left alone, and so is a body bound straight to an action parameter, which has no request
+    /// model to be named after.
+    /// </remarks>
+    private class RequestBodyNameOperationFilter : IOperationFilter
+    {
+        private const string BodyNameExtension = "x-codegen-request-body-name";
+
+        public void Apply(OpenApiOperation operation, OperationFilterContext context)
+        {
+            if (operation.RequestBody is not OpenApiRequestBody { Content: { Count: > 0 } content } requestBody ||
+                content.Values.Any(media => media.Schema is null or OpenApiSchemaReference || media.Schema.Items is OpenApiSchemaReference))
+            {
+                return;
+            }
+
+            var body = context.ApiDescription.ParameterDescriptions.FirstOrDefault(p => p.Source == BindingSource.Body);
+            var model = body?.ParameterDescriptor?.ParameterType;
+            if (model == null || model == body.Type)
+            {
+                return;
+            }
+
+            requestBody.Extensions ??= new Dictionary<string, IOpenApiExtension>();
+            requestBody.Extensions[BodyNameExtension] = new JsonNodeExtension(JsonValue.Create(CustomSchemaId(model)));
         }
     }
 

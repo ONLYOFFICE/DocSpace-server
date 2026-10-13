@@ -73,7 +73,7 @@ public class Crypt(IConfiguration configuration, TempPath tempPath) : ICrypt
 
     public async ValueTask DecryptFileAsync(string filePath)
     {
-        if (Settings.Status == EncryprtionStatus.Decrypted)
+        if (Settings.Status == EncryptionStatus.Decrypted)
         {
             return;
         }
@@ -83,7 +83,7 @@ public class Crypt(IConfiguration configuration, TempPath tempPath) : ICrypt
 
     public async Task<Stream> GetReadStreamAsync(string filePath)
     {
-        if (Settings.Status == EncryprtionStatus.Decrypted)
+        if (Settings.Status == EncryptionStatus.Decrypted)
         {
             return File.OpenRead(filePath);
         }
@@ -93,7 +93,7 @@ public class Crypt(IConfiguration configuration, TempPath tempPath) : ICrypt
 
     public async Task<long> GetFileSizeAsync(string filePath)
     {
-        if (Settings.Status == EncryprtionStatus.Decrypted)
+        if (Settings.Status == EncryptionStatus.Decrypted)
         {
             return new FileInfo(filePath).Length;
         }

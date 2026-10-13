@@ -125,6 +125,22 @@ that is true of all of them. A sentence that fits the operation you happened to 
 false for the others, and §3.3's rule about operation-level facts is what keeps it from becoming
 one.
 
+### 3.6 The schema name
+
+The component name is the SDK model name and the first thing an agent reads, so it has to say what
+the payload is. It comes from `OpenApiSchemaId.Of` (`common/ASC.Common/Utils/OpenApiSchemaId.cs`):
+the class name, unless the type carries `[OpenApiSchemaName("...")]`. Conventions (full version in
+`.claude/rules/api-models.md` §4): the bound model is `<Action><Entity>RequestDto`, the JSON body nested in
+it `<Action><Entity>Request`, a returned object `<Entity>Dto`; never `Requests` (the generator already
+publishes `…RequestsDto` in the singular), and never `Wrapper` for a body — that suffix belongs to the
+response envelope, and a clash makes the envelope filter invent `…ResponseWrapper`/`…WrapperWrapper`.
+
+For an API model, name the class right. A core class on the contract (`PasswordHasher`, a `*Wrapper`
+that is really a request body) is not fixed by renaming its schema: it gets its own DTO,
+`.claude/rules/api-models.md`. The attribute is for generic types and for such old classes until they
+are moved. It changes the schema name only, never the JSON, so it is safe for clients; it does rename
+the model in every SDK.
+
 ## Definition of done
 
 - [ ] Every property and enum member answers §3.1 — meaning, origin or format, behavioural

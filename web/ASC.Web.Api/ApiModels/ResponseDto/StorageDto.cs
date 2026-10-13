@@ -68,7 +68,7 @@ public class StorageDto
     /// an empty value rather than being left out.
     /// </summary>
     /// <example>[{"name": "acesskey", "value": "AKIAIOSFODNN7EXAMPLE", "title": "Access key"}]</example>
-    public List<AuthKey> Properties { get; set; }
+    public List<AuthKeyDto> Properties { get; set; }
 
     /// <summary>
     /// Whether the portal is using this provider right now. At most one entry of a listing has it set.
@@ -100,7 +100,7 @@ public class StorageDto
                 .ToDictionaryAsync((s, _) => ValueTask.FromResult(s), async (a, _) => await consumer.GetAsync(a));
 
         result.Properties = props.Select(
-            r => new AuthKey
+            r => new AuthKeyDto
             {
                 Name = r.Key,
                 Value = r.Value,

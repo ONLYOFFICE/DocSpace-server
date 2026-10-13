@@ -54,7 +54,7 @@ public abstract class DeleteVersionTestBase(
         var owner = user ?? Owner;
         var file = await CreateFileInMy(title, owner);
 
-        await _filesApi.UpdateFileAsync(file.Id, new UpdateFile { LastVersion = 2 }, TestContext.Current.CancellationToken);
+        await _filesApi.UpdateFileAsync(file.Id, new UpdateFileRequest { LastVersion = 2 }, TestContext.Current.CancellationToken);
 
         return file;
     }

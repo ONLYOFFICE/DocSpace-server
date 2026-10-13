@@ -279,6 +279,9 @@
   <data name="ErrorMessage_FolderNotFound" xml:space="preserve">
     <value>Պահանջվող թղթապանակը չի գտնվել</value>
   </data>
+  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
+    <value>Թղթապանակի ID-ն անվավեր է</value>
+  </data>
   <data name="ErrorMessage_InvalidProvider" xml:space="preserve">
     <value>Անվավեր մատակարար</value>
   </data>
@@ -445,7 +448,7 @@
     <value>Անանուն</value>
   </data>
   <data name="IndexTitle" xml:space="preserve">
-    <value>Որոնել փաստաթղթերի բովանդակության մեջ</value>
+    <value>Որոնել փաստաթղթերի բովանդակությունում</value>
   </data>
   <data name="KnowledgeFolder" xml:space="preserve">
     <value>Գիտելիքների</value>
@@ -601,10 +604,22 @@
   <data name="ErrorMessage_FillFormDraftObsolete" xml:space="preserve">
     <value>Ձևը փոփոխվել է: Այս սևագիրն հնացած է և չի կարող ներկայացվել:</value>
   </data>
-  <data name="ErrorMessage_InvalidFolderId" xml:space="preserve">
-    <value>Թղթապանակի ID-ն անվավեր է</value>
-  </data>
   <data name="ErrorMessage_PrivateRoomOnly" xml:space="preserve">
     <value>Այս գործողությունը հասանելի է միայն մասնավոր սենյակում</value>
+  </data>
+  <data name="ChatOutputsFolder" xml:space="preserve">
+    <value>Չատի արդյունքներ</value>
+  </data>
+  <data name="ErrorMessage_AppsFolderExists" xml:space="preserve">
+    <value>Սենյակն արդեն պարունակում է .ai թղթապանակ</value>
+  </data>
+  <data name="ErrorMessage_ProviderUsedByRoom" xml:space="preserve">
+    <value>Պահոցը չի կարող անջատվել, մինչ սենյակն օգտագործում է այն։ Փոխարենը ջնջեք սենյակը</value>
+  </data>
+  <data name="IndexTitleFileMetadata" xml:space="preserve">
+    <value>Որոնել ֆայլի մետատվյալներում</value>
+  </data>
+  <data name="IndexTitleFolderMetadata" xml:space="preserve">
+    <value>Որոնել թղթապանակի մետատվյալներում</value>
   </data>
 </root>

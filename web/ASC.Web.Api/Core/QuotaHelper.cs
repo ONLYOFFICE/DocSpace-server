@@ -150,10 +150,10 @@ public class QuotaHelper(
 
             await Task.WhenAll(tenantUserQuotaSettingsTask, tenantRoomQuotaSettingsTask, tenantQuotaSettingsTask, tenantAiAgentQuotaSettingsTask);
 
-            result.UsersQuota = await tenantUserQuotaSettingsTask;
-            result.RoomsQuota = await tenantRoomQuotaSettingsTask;
-            result.AiAgentsQuota = await tenantAiAgentQuotaSettingsTask;
-            result.TenantCustomQuota = await tenantQuotaSettingsTask;
+            result.UsersQuota = (await tenantUserQuotaSettingsTask).MapEntityQuota();
+            result.RoomsQuota = (await tenantRoomQuotaSettingsTask).MapEntityQuota();
+            result.AiAgentsQuota = (await tenantAiAgentQuotaSettingsTask).MapEntityQuota();
+            result.TenantCustomQuota = (await tenantQuotaSettingsTask).Map();
         }
 
         return result;

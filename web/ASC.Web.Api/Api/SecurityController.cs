@@ -162,6 +162,7 @@ public class SecurityController(
     /// <collection>list</collection>
     [Tags("Security / Login history")]
     [SwaggerResponse(200, "Login events matching the filters, newest first, or the twenty most recent events when the portal has no audit option", typeof(IEnumerable<LoginEventDto>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or `from` or `to` is not a date and time ending in `Z` or a UTC offset")]
     [SwaggerResponse(402, "The login history and audit trail section is not enabled for this portal")]
     [SwaggerResponse(403, "The caller does not have the portal-settings right of a DocSpace administrator")]
     [HttpGet("audit/login/filter")]
@@ -204,6 +205,7 @@ public class SecurityController(
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "Audit events matching the filters, newest first, or the twenty most recent events when the portal has no audit option", typeof(IEnumerable<AuditEventDto>))]
+    [SwaggerResponse(400, "A parameter has the wrong type, the `count` is outside its allowed range, or `from` or `to` is not a date and time ending in `Z` or a UTC offset")]
     [SwaggerResponse(402, "The login history and audit trail section is not enabled for this portal")]
     [SwaggerResponse(403, "The caller does not have the portal-settings right of a DocSpace administrator")]
     [HttpGet("audit/events/filter")]
@@ -276,24 +278,24 @@ public class SecurityController(
     /// <path>api/2.0/security/audit/mappers</path>
     /// <collection>list</collection>
     [Tags("Security / Audit trail data")]
-    [SwaggerResponse(200, "The products with their modules and the actions each module can record", typeof(IEnumerable<AuditTrailProductMapperDto>))]
+    [SwaggerResponse(200, "The products with their modules and the actions each module can record", typeof(IEnumerable<AuditTrailProductDto>))]
     [SwaggerResponse(403, "The caller does not have the portal-settings right of a DocSpace administrator")]
     [HttpGet("audit/mappers")]
-    public async Task<IEnumerable<AuditTrailProductMapperDto>> GetAuditTrailMappers(AuditTrailTypesRequestDto inDto)
+    public async Task<IEnumerable<AuditTrailProductDto>> GetAuditTrailMappers(AuditTrailTypesRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         return auditActionMapper.Mappers
             .Where(r => !inDto.ProductType.HasValue || r.Product == inDto.ProductType.Value)
-            .Select(r => new AuditTrailProductMapperDto
+            .Select(r => new AuditTrailProductDto
             {
                 ProductType = r.Product.ToStringFast(),
                 Modules = r.Mappers
                 .Where(m => !inDto.LocationType.HasValue || m.Location == inDto.LocationType.Value)
-                .Select(x => new AuditTrailModuleMapperDto
+                .Select(x => new AuditTrailModuleDto
                 {
                     ModuleType = x.Location.ToStringFast(),
-                    Actions = x.Actions.Select(a => new AuditTrailActionMapperDto
+                    Actions = x.Actions.Select(a => new AuditTrailActionDto
                     {
                         MessageAction = a.Key.ToString(),
                         ActionType = a.Value.ActionType.ToStringFast(),
@@ -326,7 +328,7 @@ public class SecurityController(
     /// <path>api/2.0/security/audit/login/report</path>
     [Tags("Security / Login history")]
     [SwaggerResponse(200, "The state of the queued job that builds the login history report", typeof(DocumentBuilderTaskDto))]
-    [SwaggerResponse(400, "The requested period ends before it starts, or lies entirely outside the login history lifetime")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the requested period ends before it starts or lies entirely outside the login history lifetime")]
     [SwaggerResponse(402, "The portal's pricing plan has no audit option, or the login history and audit trail section is not enabled")]
     [SwaggerResponse(403, "The caller does not have the portal-settings right of a DocSpace administrator")]
     [HttpPost("audit/login/report")]
@@ -428,7 +430,7 @@ public class SecurityController(
     /// <path>api/2.0/security/audit/events/report</path>
     [Tags("Security / Audit trail data")]
     [SwaggerResponse(200, "The state of the queued job that builds the audit trail report", typeof(DocumentBuilderTaskDto))]
-    [SwaggerResponse(400, "The requested period ends before it starts, or lies entirely outside the audit trail lifetime")]
+    [SwaggerResponse(400, "A parameter has the wrong type, or the requested period ends before it starts or lies entirely outside the audit trail lifetime")]
     [SwaggerResponse(402, "The portal's pricing plan has no audit option, or the login history and audit trail section is not enabled")]
     [SwaggerResponse(403, "The caller does not have the portal-settings right of a DocSpace administrator")]
     [HttpPost("audit/events/report")]
@@ -582,17 +584,19 @@ public class SecurityController(
     /// </summary>
     /// <path>api/2.0/security/audit/settings/lifetime</path>
     [Tags("Security / Audit trail data")]
-    [SwaggerResponse(200, "The login history and audit trail lifetimes of the portal, in days", typeof(TenantAuditSettings))]
+    [SwaggerResponse(200, "The login history and audit trail lifetimes of the portal, in days", typeof(TenantAuditSettingsDto))]
     [SwaggerResponse(402, "The login history and audit trail section is not enabled for this portal")]
     [SwaggerResponse(403, "The caller does not have the portal-settings right of a DocSpace administrator")]
     [HttpGet("audit/settings/lifetime")]
-    public async Task<TenantAuditSettings> GetAuditSettings()
+    public async Task<TenantAuditSettingsDto> GetAuditSettings()
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         DemandBaseAuditPermission();
 
-        return await settingsManager.LoadAsync<TenantAuditSettings>(tenantManager.GetCurrentTenantId());
+        var settings = await settingsManager.LoadAsync<TenantAuditSettings>(tenantManager.GetCurrentTenantId());
+
+        return settings.Map();
     }
 
     /// <remarks>
@@ -611,18 +615,18 @@ public class SecurityController(
     /// </summary>
     /// <path>api/2.0/security/audit/settings/lifetime</path>
     [Tags("Security / Audit trail data")]
-    [SwaggerResponse(200, "The login history and audit trail lifetimes as they were stored", typeof(TenantAuditSettings))]
-    [SwaggerResponse(400, "A lifetime is outside the allowed range of 1 to 180 days")]
+    [SwaggerResponse(200, "The login history and audit trail lifetimes as they were stored", typeof(TenantAuditSettingsDto))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `settings`, or a lifetime is outside the allowed range of 1 to 180 days")]
     [SwaggerResponse(402, "The portal's pricing plan has no audit option, or the login history and audit trail section is not enabled")]
     [SwaggerResponse(403, "The caller does not have the portal-settings right of a DocSpace administrator")]
     [HttpPost("audit/settings/lifetime")]
-    public async Task<TenantAuditSettings> SetAuditSettings(TenantAuditSettingsWrapper inDto)
+    public async Task<TenantAuditSettingsDto> SetAuditSettings(TenantAuditSettingsRequestDto inDto)
     {
         await permissionContext.DemandPermissionsAsync(SecurityConstants.EditPortalSettings);
 
         await DemandAuditPermissionAsync();
 
-        if (inDto.Settings.LoginHistoryLifeTime is <= 0 or > TenantAuditSettings.MaxLifeTime)
+        if (inDto?.Settings?.LoginHistoryLifeTime is not (> 0 and <= TenantAuditSettings.MaxLifeTime))
         {
             throw new ArgumentException("LoginHistoryLifeTime");
         }
@@ -632,10 +636,16 @@ public class SecurityController(
             throw new ArgumentException("AuditTrailLifeTime");
         }
 
-        await settingsManager.SaveAsync(inDto.Settings, tenantManager.GetCurrentTenantId());
+        var settings = new TenantAuditSettings
+        {
+            LoginHistoryLifeTime = inDto.Settings.LoginHistoryLifeTime,
+            AuditTrailLifeTime = inDto.Settings.AuditTrailLifeTime
+        };
+
+        await settingsManager.SaveAsync(settings, tenantManager.GetCurrentTenantId());
         messageService.Send(MessageAction.AuditSettingsUpdated);
 
-        return inDto.Settings;
+        return (await settingsManager.LoadAsync<TenantAuditSettings>(tenantManager.GetCurrentTenantId())).Map();
     }
 
     /// <remarks>
@@ -656,8 +666,9 @@ public class SecurityController(
     /// <path>api/2.0/security/csp</path>
     [Tags("Security / CSP")]
     [SwaggerResponse(200, "The stored domains and the policy header the portal now serves", typeof(CspDto))]
-    [SwaggerResponse(400, "An entry of `domains` is not a valid address or holds non-ASCII characters")]
+    [SwaggerResponse(400, "The request body cannot be read, or an entry of `domains` is not a valid address or holds non-ASCII characters")]
     [SwaggerResponse(403, "The caller does not have the portal-settings right of a DocSpace administrator, or the built policy header exceeds the size allowed for the installation")]
+    [SwaggerResponse(500, "An entry of `domains` is `null`")]
     [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName)]
     [HttpPost("csp")]
     public async Task<CspDto> ConfigureCsp(CspRequestsDto request)
@@ -712,6 +723,7 @@ public class SecurityController(
     /// <requiresAuthorization>false</requiresAuthorization>
     [Tags("Security / CSP")]
     [SwaggerResponse(200, "The allowed domains and the full policy header the portal serves", typeof(CspDto))]
+    [SwaggerResponse(304, "The CSP settings have not changed since the `Last-Modified` value sent back in `If-Modified-Since`; the body is empty")]
     [AllowAnonymous]
     [EnableCors(PolicyName = CorsPoliciesEnums.AllowAllCorsPolicyName)]
     [HttpGet("csp")]

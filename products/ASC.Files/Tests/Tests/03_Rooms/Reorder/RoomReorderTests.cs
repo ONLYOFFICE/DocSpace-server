@@ -57,7 +57,7 @@ public class RoomReorderTests(
     private async Task<(int Id, string Title)> CreateFile(int roomId, string title)
     {
         var response = (await _filesApi.CreateFileAsync(
-            roomId, new CreateFileJsonElement(title), TestContext.Current.CancellationToken)).Response;
+            roomId, new CreateFileRequest(title), TestContext.Current.CancellationToken)).Response;
 
         return (response.Id, response.Title);
     }

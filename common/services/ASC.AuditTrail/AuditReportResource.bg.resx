@@ -1263,4 +1263,34 @@
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>MCP сървърът {0} на AI агента е актуализиран</value>
   </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Стартирано каскадно присвояване на метаданни: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Поле за метаданни е създадено: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Поле за метаданни е изтрито: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Поле за метаданни е актуализирано: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Шаблон за метаданни е присвоен: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Шаблон за метаданни е създаден: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Шаблон за метаданни е изтрит: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Присвояването на шаблон за метаданни е премахнато: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Шаблон за метаданни е актуализиран: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Стойностите на метаданните са актуализирани: {0}</value>
+  </data>
 </root>

@@ -49,6 +49,9 @@ public class BaseTest(
     // so the owner Id is always the one belonging to this test's own portal — never shared.
     protected User Owner => _clients.Owner;
 
+    /// <summary>The assembly's Aspire host, for the rare test that has to reach past the API.</summary>
+    protected AspireAppFixture Fixture => fixture;
+
     protected HttpClient _filesClient = null!;
     protected HttpClient _peopleClient = null!;
     protected HttpClient _webApiClient = null!;
@@ -208,14 +211,14 @@ public class BaseTest(
     protected async Task<FileDto> CreateFile(string fileName, int folderId)
     {
         var sw = Stopwatch.StartNew();
-        var result = (await _filesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
+        var result = (await _filesApi.CreateFileAsync(folderId, new CreateFileRequest(fileName))).Response;
         Timing.Write($"createFile({fileName})", sw.ElapsedMilliseconds);
         return result;
     }
     protected async Task<ThirdPartyFileDto> CreateFile(string fileName, string folderId)
     {
         var sw = Stopwatch.StartNew();
-        var result = (await _filesApi.CreateFileAsync(folderId, new CreateFileJsonElement(fileName))).Response;
+        var result = (await _filesApi.CreateFileAsync(folderId, new CreateFileRequest(fileName))).Response;
         Timing.Write($"createFile({fileName})", sw.ElapsedMilliseconds);
         return result;
     }

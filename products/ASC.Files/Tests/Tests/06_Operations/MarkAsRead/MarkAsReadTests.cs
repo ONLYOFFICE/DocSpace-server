@@ -244,7 +244,7 @@ public class MarkAsReadTests(
         await _filesClient.Authenticate(member);
 
         var filesTitle = "Autotest MarkAsRead Cross Files Edited " + Guid.NewGuid().ToString("N")[..8] + ".docx";
-        await _filesApi.UpdateFileAsync(sharedFile.Id, new UpdateFile(filesTitle), TestContext.Current.CancellationToken);
+        await _filesApi.UpdateFileAsync(sharedFile.Id, new UpdateFileRequest(filesTitle), TestContext.Current.CancellationToken);
 
         var roomsTitle = "Autotest MarkAsRead Cross Rooms " + Guid.NewGuid().ToString("N")[..8] + ".docx";
         await CreateFile(roomsTitle, room.Id);

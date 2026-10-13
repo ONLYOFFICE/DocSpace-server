@@ -63,7 +63,7 @@ public class CheckFillFormDraftTests(
 
         // Act
         var result = (await _filesApi.CheckFillFormDraftAsync(
-            formId, new CheckFillFormDraft(version: 1), TestContext.Current.CancellationToken)).Response;
+            formId, new CheckFillFormDraftRequest(version: 1), TestContext.Current.CancellationToken)).Response;
 
         // Assert
         result.Should().NotBeNullOrEmpty();
@@ -109,7 +109,7 @@ public class CheckFillFormDraftTests(
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _filesApi.CheckFillFormDraftAsync(
-                999999999, new CheckFillFormDraft(version: 1), TestContext.Current.CancellationToken));
+                999999999, new CheckFillFormDraftRequest(version: 1), TestContext.Current.CancellationToken));
 
         exception.ErrorCode.Should().Be(404);
     }

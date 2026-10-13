@@ -1970,6 +1970,14 @@ public class EntryManager(IDaoFactory daoFactory,
                 newFile.IsTemplate = false;
             }
 
+            if (newFile.IsPdf)
+            {
+                // reverting a form is a content change like any editor save: without this the stored
+                // OriginalFormVersion keeps pointing at the pre-restore version and every later draft
+                // is rejected as obsolete on submit
+                await OnFormVersionChangedAsync(newFile);
+            }
+
             return newFile;
         }
         catch (Exception e)

@@ -68,33 +68,57 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
     public bool HasOtelCollector => OtelCollectorResource != null;
 
+    /// <summary>
+    /// DbGate, RedisInsight, the OpenSearch dashboard and the RabbitMQ management UI together cost
+    /// ~450 MiB of the Docker VM and nothing in the graph depends on them. They are on by default;
+    /// DEV_TOOLS=false leaves them out when the memory matters more than the UIs.
+    /// </summary>
+    private bool DevTools => string.Compare(builder.Configuration["DEV_TOOLS"], "false", StringComparison.OrdinalIgnoreCase) != 0;
+
 
     public ConnectionStringManager AddMySql(bool withDbGate = false, bool withDataVolume = true, bool withTmpfs = false)
     {
         var mysqlRootPassword = builder.AddParameter("mysql-root-password", "root", secret: true);
 
         var mysqlResourceBuilder = builder.AddMySql("mysql", password: mysqlRootPassword)
-            .WithEndpoint("tcp", endpoint => endpoint.Port = 33306);
+            .WithEndpoint("tcp", endpoint => endpoint.Port = 33306)
+            // performance_schema alone holds ~220 MiB of a fresh mysql:9 (433 -> 211 MiB measured); the
+            // buffer pool is pinned at the server default so the figure does not drift with the image.
+            .WithArgs("--performance-schema=OFF", "--innodb-buffer-pool-size=128M");
+
+        // The datadir lives in exactly one place: a data volume when asked for, otherwise tmpfs when asked
+        // for, otherwise the container's writable layer. The same flag drives the cap below, so a caller
+        // passing both withDataVolume and withTmpfs gets the volume and keeps the cap.
+        var datadirOnTmpfs = !withDataVolume && withTmpfs;
 
         if (withDataVolume)
         {
             mysqlResourceBuilder = mysqlResourceBuilder.WithDataVolume("docspace-mysql-data");
         }
-        else if (withTmpfs)
+        else if (datadirOnTmpfs)
         {
             // Keep the whole MySQL datadir in RAM: throwaway databases (integration tests) pay a lot
             // for InnoDB fsync-heavy init and migrations when the datadir sits on the virtualized
             // Docker Desktop disk. Data disappears with the container, which is fine without a volume.
             mysqlResourceBuilder = mysqlResourceBuilder.WithContainerRuntimeArgs("--tmpfs", "/var/lib/mysql");
-
         }
 
-        if (withDbGate)
+        // The cap stays off the tmpfs variant: tmpfs pages are charged to the container's cgroup, so a cap
+        // would count the datadir of every test portal and kill the server mid-run.
+        if (!datadirOnTmpfs)
+        {
+            mysqlResourceBuilder = mysqlResourceBuilder.WithMemoryLimit(ContainerMemoryExtensions.MySqlLimit);
+        }
+
+        if (withDbGate && DevTools)
         {
             mysqlResourceBuilder = mysqlResourceBuilder.WithDbGate();
         }
 
         MySqlDatabaseResource = mysqlResourceBuilder.AddDatabase("docspace");
+
+        // The editors keep their own schema in this server instead of a bundled PostgreSQL (AddEditors).
+        EditorResource?.WaitFor(mysqlResourceBuilder);
 
         builder.Eventing.Subscribe(MySqlDatabaseResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
         {
@@ -123,12 +147,14 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         RabbitMqResource = builder
             .AddRabbitMQ("messaging");
 
-        if (withManagementPlugin)
+        if (withManagementPlugin && DevTools)
         {
-            // Enabling the plugin at boot costs a few seconds, and nothing opens the UI during an
-            // integration-test run — so that profile asks for the plain image instead.
+            // Enabling the plugin at boot costs a few seconds and memory, and nothing opens the UI
+            // during an integration-test run — so that profile asks for the plain image instead.
             RabbitMqResource = RabbitMqResource.WithManagementPlugin();
         }
+
+        EditorResource?.WaitFor(RabbitMqResource);
 
         builder.Eventing.Subscribe(RabbitMqResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
         {
@@ -152,10 +178,12 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithoutHttpsCertificate();
 #pragma warning restore ASPIRECERTIFICATES001
 
-        if (withRedisInsight)
+        if (withRedisInsight && DevTools)
         {
             RedisResource = RedisResource.WithRedisInsight();
         }
+
+        EditorResource?.WaitFor(RedisResource);
 
         builder.Eventing.Subscribe(RedisResource.Resource, async (ConnectionStringAvailableEvent _, CancellationToken ct) =>
         {
@@ -245,14 +273,71 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
         var tag = builder.Configuration["APP_EDITOR_VERSION"] ?? "latest";
 
+        // Password of the editors' Admin Panel (/ds-vpath/admin). Generated once, kept in the AppHost user secrets
+        // and shown under Parameters in the dashboard. The panel's own rules: 8+ chars, a digit, an uppercase letter
+        // and a special character.
+        var adminPanelPassword = builder.AddParameter("editors-admin-password",
+            new GenerateParameterDefault { MinLength = 16, MinLower = 1, MinUpper = 1, MinNumeric = 1, MinSpecial = 1 },
+            secret: true, persist: true);
+
+        // No font-generation shortcut here on purpose: the image regenerates AllFonts.js and the font
+        // thumbnails on every start (~30-100 s depending on the version). Caching them needs knowledge of the
+        // image's internals (output paths, start-script behaviour per version), which is not worth carrying.
         EditorResource = builder
             .AddContainer(Constants.EditorsContainer, image, tag)
             //TODO:get from config or set for the rest projects
             .WithEnvironment("JWT_ENABLED", "true")
             .WithEnvironment("JWT_SECRET", "secret")
             .WithEnvironment("JWT_HEADER", "AuthorizationJwt")
-            .WithBindMount(Path.Combine(basePath, "Data"), "/var/www/onlyoffice/Data");
+            .WithEnvironment("ADMINPANEL_PASSWORD", adminPanelPassword)
+            .WithBindMount(Path.Combine(basePath, "Data"), "/var/www/onlyoffice/Data")
+            // The Admin Panel has no first administrator until `documentserver-admin` creates one, and the CLI needs
+            // the configuration the image's entrypoint writes at startup - so it runs in the background once
+            // supervisor reports the panel running. reset-admin-password on later starts keeps the parameter the
+            // source of truth (the hash lives in the bind-mounted Data/runtime.json). Editions without the panel
+            // (community image) skip it.
+            .WithEntrypoint("/bin/bash")
+            .WithArgs("-c",
+                "( command -v documentserver-admin >/dev/null || exit 0; " +
+                "for i in $(seq 150); do supervisorctl status ds:adminpanel 2>/dev/null | grep -q RUNNING && break; sleep 2; done; " +
+                "f=$(mktemp) && chmod 644 \"$f\" && printf '%s' \"$ADMINPANEL_PASSWORD\" > \"$f\"; " +
+                "if grep -q passwordHash /var/www/onlyoffice/Data/runtime.json 2>/dev/null; then cmd=reset-admin-password; else cmd=create-admin; fi; " +
+                "documentserver-admin $cmd --password-file \"$f\" </dev/null; rm -f \"$f\" ) & " +
+                "exec /app/ds/run-document-server.sh")
+            .WithResetAdminPasswordCommand(adminPanelPassword, builder.Configuration["ASPIRE_CONTAINER_RUNTIME"] ?? "docker")
+            // Editing state has two halves that must survive a restart together: the task_result/doc_changes
+            // rows (in the AppHost MySQL since the external-DB change above, so they persist) and the cached
+            // document files under /var/lib/onlyoffice (an anonymous volume on the image, so a new container
+            // starts without them). Rows without files made every document that was open at shutdown fail
+            // to reopen and get re-saved damaged (2026-10-09). Production mounts the same path as ds_state
+            // (buildtools/install/docker/ds.yml); the name carries no tag because the data is not version-bound.
+            .WithVolume("docspace-editors-state", "/var/lib/onlyoffice")
+            // Give the document service time to finish the saves in flight before the container is killed -
+            // the production compose uses the same 60 s stop_grace_period.
+            .WithContainerRuntimeArgs("--stop-timeout", "60")
+            .WithMemoryLimit(ContainerMemoryExtensions.EditorsLimit);
 
+        // The image bundles its own PostgreSQL, RabbitMQ and Redis and starts each one only when the matching
+        // host still says "localhost" after the environment is read. Pointing them at the AppHost's own
+        // containers drops the bundled broker (~120 MiB) and database (~80 MiB) from the editors container.
+        // The values resolve at start time: AddEditors runs before AddMySql/AddRabbitMq/AddRedis (see
+        // Program.cs), so the resources do not exist yet here, and a profile without one of them (preview has
+        // no RabbitMQ or Redis) sends an empty value, which the script treats as unset and falls back to the
+        // bundled service. The editors container reaches the others the way Identity does: through the
+        // published host port, with localhost swapped for host.docker.internal.
+        // The schema is the image's own business: with DB_TYPE=mysql it runs CREATE DATABASE IF NOT EXISTS
+        // and its createdb.sql as DB_USER, hence root. Those resources add a WaitFor on the editors in turn.
+        EditorResource
+            .WithEnvironment("DB_TYPE", () => MySqlConnectionStringBuilder != null ? "mysql" : string.Empty)
+            .WithEnvironment("DB_HOST", () => MySqlConnectionStringBuilder != null ? SubstituteLocalhost(MySqlConnectionStringBuilder.Server) ?? string.Empty : string.Empty)
+            .WithEnvironment("DB_PORT", () => MySqlConnectionStringBuilder?.Port.ToString() ?? string.Empty)
+            .WithEnvironment("DB_NAME", () => MySqlConnectionStringBuilder != null ? "onlyoffice" : string.Empty)
+            .WithEnvironment("DB_USER", () => MySqlConnectionStringBuilder?.UserID ?? string.Empty)
+            .WithEnvironment("DB_PWD", () => MySqlConnectionStringBuilder?.Password ?? string.Empty)
+            .WithEnvironment("AMQP_URI", () => RabbitMqUri != null ? SubstituteLocalhost(RabbitMqUri.ToString()) ?? string.Empty : string.Empty)
+            .WithEnvironment("REDIS_SERVER_HOST", () => SubstituteLocalhost(Redis?.Host) ?? string.Empty)
+            .WithEnvironment("REDIS_SERVER_PORT", () => Redis?.Port ?? string.Empty)
+            .WithEnvironment("REDIS_SERVER_PASS", () => Redis?.Password ?? string.Empty);
 
         return this;
     }
@@ -269,7 +354,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
             .WithHttpEndpoint(port: Constants.OpensearchPort, targetPort: Constants.OpensearchPort, name: "http", isProxied: isProxied)
             .WithEnvironment("DISABLE_INSTALL_DEMO_CONFIG", "true")
             .WithEnvironment("plugins.security.disabled", "true")
-            .WithEnvironment("discovery.type", "single-node");
+            .WithEnvironment("discovery.type", "single-node")
+            .WithEnvironment("OPENSEARCH_JAVA_OPTS", ContainerMemoryExtensions.OpensearchJavaOptions)
+            .WithMemoryLimit(ContainerMemoryExtensions.OpensearchLimit);
 
         if (withDataVolume)
         {
@@ -277,7 +364,7 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 .WithVolume("docspace-opensearch-data", "/usr/share/opensearch/data");
         }
 
-        if (withDashboard)
+        if (withDashboard && DevTools)
         {
             builder.AddContainer("opensearch-dashboard", "opensearchproject/opensearch-dashboards", "2")
                 .WithHttpEndpoint(targetPort: 5601)
@@ -544,7 +631,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
         resourceBuilder
             .WithEnvironment("openTelemetry:enable", "true")
             .WithEnvironment("files:docservice:url:portal", SubstituteLocalhost("http://localhost") + ":" + Constants.AppHostPort)
-            .WithEnvironment("files:docservice:url:public", $"http://localhost:{Constants.AppHostPort.ToString()}/ds-vpath");
+            .WithEnvironment("files:docservice:url:public", $"http://localhost:{Constants.AppHostPort.ToString()}/ds-vpath")
+            // The editors' admin panel is served by the editors container at /admin, reachable only through the proxy.
+            .WithEnvironment("externalresources:adminpanel:default:domain", $"http://localhost:{Constants.AppHostPort.ToString()}/ds-vpath/admin");
 
         if (MySqlDatabaseResource != null)
         {
@@ -605,7 +694,9 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
                 .WithEnvironment("elastic:Scheme", () => "http")
                 .WithEnvironment("elastic:Host", () => (isDocker ? Constants.OpensearchContainer : "localhost"))
                 .WithEnvironment("elastic:Port", () => Constants.OpensearchPort.ToString())
-                .WithEnvironment("elastic:Threads", () => "1");
+                .WithEnvironment("elastic:Threads", () => "1")
+                // Goes with the 512 MiB OpenSearch heap - see ContainerMemoryExtensions.
+                .WithEnvironment("elastic:MaxContentLength", ContainerMemoryExtensions.IndexerMaxContentLength.ToString());
         }
 
         if (_parameters != null)
@@ -619,6 +710,10 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
 
     public void AddIdentityEnv(IResourceBuilder<ContainerResource>  resourceBuilder)
     {
+        resourceBuilder
+            .WithEnvironment("JAVA_TOOL_OPTIONS", ContainerMemoryExtensions.IdentityJavaOptions)
+            .WithMemoryLimit(ContainerMemoryExtensions.IdentityLimit);
+
         resourceBuilder
             .WithEnvironment("JDBC_URL", () => MySqlConnectionStringBuilder != null ? $"{SubstituteLocalhost(MySqlConnectionStringBuilder.Server)}:{MySqlConnectionStringBuilder.Port}" : string.Empty)
             .WithEnvironment("JDBC_DATABASE", () => MySqlConnectionStringBuilder?.Database ?? string.Empty)
@@ -642,6 +737,94 @@ public class ConnectionStringManager(IDistributedApplicationBuilder builder, str
     }
 
     public static string? SubstituteLocalhost(string? host) => host?.Replace(KnownHostNames.Localhost, KnownHostNames.DockerDesktopHostBridge);
+}
+
+internal static class EditorsResourceBuilderExtensions
+{
+    // Snapshot property DCP fills with the runtime's container id (the dashboard's KnownProperties.Container.Id,
+    // which the hosting package does not expose).
+    private const string ContainerIdProperty = "container.id";
+
+    // The container's env var is fixed at creation, so a value set through the dashboard's "Set parameter" reaches
+    // the Admin Panel only through this command (or a restart of the container).
+    public static IResourceBuilder<ContainerResource> WithResetAdminPasswordCommand(
+        this IResourceBuilder<ContainerResource> builder,
+        IResourceBuilder<ParameterResource> password,
+        string containerRuntime)
+    {
+        builder.WithCommand(
+            name: "reset-admin-password",
+            displayName: "Reset admin password",
+            executeCommand: context => OnResetAdminPasswordAsync(password.Resource, containerRuntime, context),
+            commandOptions: new CommandOptions
+            {
+                UpdateState = context => context.ResourceSnapshot.State?.Text == KnownResourceStates.Running
+                    ? ResourceCommandState.Enabled
+                    : ResourceCommandState.Disabled,
+                Description = "Apply the current editors-admin-password parameter to the editors' Admin Panel",
+                ConfirmationMessage = "Set the Admin Panel password to the current value of editors-admin-password?",
+                IconName = "Key",
+                IconVariant = IconVariant.Regular
+            });
+
+        return builder;
+    }
+
+    private static async Task<ExecuteCommandResult> OnResetAdminPasswordAsync(
+        ParameterResource password,
+        string containerRuntime,
+        ExecuteCommandContext context)
+    {
+        var notifications = context.Services.GetRequiredService<ResourceNotificationService>();
+        if (!notifications.TryGetCurrentState(context.ResourceName, out var resourceEvent) ||
+            resourceEvent.Snapshot.Properties.FirstOrDefault(p => p.Name == ContainerIdProperty)?.Value is not string containerId)
+        {
+            return CommandResults.Failure($"The container of '{context.ResourceName}' is not running.");
+        }
+
+        var value = await password.GetValueAsync(context.CancellationToken);
+        if (string.IsNullOrEmpty(value))
+        {
+            return CommandResults.Failure($"The '{password.Name}' parameter has no value.");
+        }
+
+        // The password goes in through stdin, never through the command line, and the CLI reads it from a file
+        // only the container sees for the duration of the call.
+        var psi = new ProcessStartInfo
+        {
+            FileName = containerRuntime,
+            UseShellExecute = false,
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true
+        };
+        foreach (var arg in new[]
+                 {
+                     "exec", "-i", containerId, "bash", "-c",
+                     "f=$(mktemp) && chmod 644 \"$f\" && cat > \"$f\" && " +
+                     "documentserver-admin reset-admin-password --password-file \"$f\" </dev/null; rc=$?; rm -f \"$f\"; exit $rc"
+                 })
+        {
+            psi.ArgumentList.Add(arg);
+        }
+
+        using var process = Process.Start(psi);
+        if (process is null)
+        {
+            return CommandResults.Failure($"Could not start '{containerRuntime}'.");
+        }
+
+        await process.StandardInput.WriteAsync(value);
+        process.StandardInput.Close();
+
+        var stdout = process.StandardOutput.ReadToEndAsync(context.CancellationToken);
+        var stderr = process.StandardError.ReadToEndAsync(context.CancellationToken);
+        await process.WaitForExitAsync(context.CancellationToken);
+
+        return process.ExitCode == 0
+            ? CommandResults.Success()
+            : CommandResults.Failure(((await stderr).Trim() + Environment.NewLine + (await stdout).Trim()).Trim());
+    }
 }
 
 internal static class RedisResourceBuilderExtensions

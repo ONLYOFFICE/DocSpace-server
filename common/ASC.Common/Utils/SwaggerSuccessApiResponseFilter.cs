@@ -157,7 +157,7 @@ public class SwaggerSuccessApiResponseFilter : IDocumentFilter
             else
             {
                 responseSchemaKey = originalSchemaRef == null
-                    ? $"{schema.Items.Type.ToString().ToUpper()}ArrayWrapper"
+                    ? $"{schema.Items.Type}ArrayWrapper"
                     : WrapperKey(originalSchemaRef, "ArrayWrapper", schemas, generated);
                 arrayResponseProperty = new OpenApiSchema
                 {

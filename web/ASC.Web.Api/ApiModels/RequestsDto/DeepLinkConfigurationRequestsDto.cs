@@ -49,5 +49,23 @@ public class DeepLinkConfigurationRequestsDto
     /// refused with 400 before anything is stored.
     /// </summary>
     /// <example>{ "handlingMode": "ProvideChoice" }</example>
-    public TenantDeepLinkSettings DeepLinkSettings { get; set; }
+    public DeepLinkSettingsRequestDto DeepLinkSettings { get; set; }
+}
+
+/// <summary>
+/// The deep link handling the portal applies on mobile devices.
+/// </summary>
+public class DeepLinkSettingsRequestDto
+{
+    /// <summary>
+    /// Whether a link always opens in the browser, always in the native application, or asks the user each time.
+    /// </summary>
+    /// <example>ProvideChoice</example>
+    public DeepLinkHandlingMode HandlingMode { get; set; }
+
+    /// <summary>
+    /// Accepted for compatibility with earlier clients and not read: the server keeps its own value.
+    /// </summary>
+    /// <example>2026-01-01T10:00:00</example>
+    public DateTime LastModified { get; set; }
 }

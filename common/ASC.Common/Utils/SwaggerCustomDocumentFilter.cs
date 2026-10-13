@@ -238,6 +238,7 @@ public class TagDescriptionsDocumentFilter : IDocumentFilter
         { "Backup", "Operations for working with backup" },
         { "Files / Files", "Operations for working with files." },
         { "Files / Folders", "Operations for working with folders." },
+        { "Files / Metadata", "Operations for working with metadata templates and the metadata of files and folders." },
         { "Files / Operations", "Operations for performing actions on files and folders." },
         { "Files / Quota", "Operations for working with room quota limit." },
         { "Rooms", "Operations for working with rooms." },

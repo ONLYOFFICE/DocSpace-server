@@ -86,6 +86,8 @@ public class PortalController(
     /// <path>apisystem/portal/register</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [SwaggerResponse(400, "The request body cannot be read, a field is longer than its limit or `email` is malformed, the password does not meet the password policy, the first and last name are both empty or not a valid user name, no free portal address could be generated, too many registrations came from this network address, or the reCAPTCHA response is invalid")]
+    [SwaggerResponse(500, "The portal could not be registered, as when `email` is empty or the `portalName` requested on a server installation is already taken")]
     [HttpPost("register")]
     //[AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal,auth:portal,auth:portalbasic")]
@@ -120,6 +122,8 @@ public class PortalController(
     /// <path>apisystem/portal/registerbyemail</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [SwaggerResponse(400, "The request body cannot be read, a field is longer than its limit or `email` is malformed, `email` is empty and no third-party profile supplied one, `password` does not meet the password policy, no free portal address could be generated, or too many registrations came from this network address")]
+    [SwaggerResponse(500, "The portal could not be registered")]
     [HttpPost("registerbyemail")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default")]
     public async ValueTask<IActionResult> RegisterByEmailAsync(TenantModel model)
@@ -153,6 +157,8 @@ public class PortalController(
     /// <path>apisystem/portal/registerbyoauth</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [SwaggerResponse(400, "The request body cannot be read, a field is longer than its limit or `email` is malformed, `provider` is empty, `accessToken` and `codeOAuth` are both empty, the provider returned no profile or no email address, `password` does not meet the password policy, no free portal address could be generated, or too many registrations came from this network address")]
+    [SwaggerResponse(500, "The portal could not be registered")]
     [HttpPost("registerbyoauth")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal")]
     public async ValueTask<IActionResult> RegisterByOAuthAsync(TenantModel model)
@@ -211,6 +217,8 @@ public class PortalController(
     /// <path>apisystem/portal/provision</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [SwaggerResponse(400, "The request body cannot be read, a field is longer than its limit or `email` is malformed, `provisionProvider` or its `name`, `clientId` or `clientSecret` is missing, `email` is empty, the provider is not a known sign-in provider, no free portal address could be generated, too many registrations came from this network address, the reCAPTCHA response is invalid, or `password` does not meet the password policy")]
+    [SwaggerResponse(500, "The portal could not be registered")]
     [HttpPost("provision")]
     [Authorize(AuthenticationSchemes = "auth:allowskip:registerportal")]
     [Obsolete("Candidate for deletion. Used in integrations.")]
@@ -244,6 +252,8 @@ public class PortalController(
     /// <path>apisystem/portal/remove</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [SwaggerResponse(400, "A query value is longer than its limit or `email` is malformed, neither `portalName` nor `tenantId` is given, no portal matches them, or the portal is the last one with full space access")]
+    [SwaggerResponse(403, "The method is available on a server installation only")]
     [HttpDelete("remove")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
@@ -331,6 +341,8 @@ public class PortalController(
     /// <path>apisystem/portal/status</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [SwaggerResponse(400, "The request body cannot be read, a field is longer than its limit or `email` is malformed, neither `portalName` nor `tenantId` is given, or no portal matches them")]
+    [SwaggerResponse(403, "The method is available on a server installation only")]
     [HttpPut("status")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
@@ -394,6 +406,7 @@ public class PortalController(
     /// <path>apisystem/portal/validateportalname</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [SwaggerResponse(400, "The request body cannot be read, a field is longer than its limit or `email` is malformed, or `portalName` is empty, already taken, too short or holds characters a portal address may not have, or could not be checked")]
     [HttpPost("validateportalname")]
     [AllowCrossSiteJson]
     [AllowAnonymous]
@@ -430,6 +443,9 @@ public class PortalController(
     /// <path>apisystem/portal/get</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [SwaggerResponse(400, "A query value is longer than its limit or `email` is malformed")]
+    [SwaggerResponse(403, "The method is available on a server installation only")]
+    [SwaggerResponse(500, "The portals or their statistics could not be read")]
     [HttpGet("get")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
@@ -504,6 +520,10 @@ public class PortalController(
     /// <path>apisystem/portal/signin</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [SwaggerResponse(400, "The request body cannot be read, a field is longer than its limit or `email` is malformed, or no third-party profile was resolved and `email` or `passwordHash` is empty")]
+    [SwaggerResponse(401, "Too many attempts came from this network address and the reCAPTCHA response is invalid")]
+    [SwaggerResponse(403, "Too many attempts came from this network address and no reCAPTCHA response was sent")]
+    [SwaggerResponse(500, "No portal has an account with this email address and password hash, or the lookup failed")]
     [HttpPost("signin")]
     [AllowCrossSiteJson]
     [AllowAnonymous]
@@ -643,6 +663,7 @@ public class PortalController(
     /// <path>apisystem/portal/licensequota</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "Ok", typeof(IActionResult))]
+    [SwaggerResponse(403, "The method is available on a server installation only")]
     [HttpGet("licensequota")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]
@@ -686,6 +707,7 @@ public class PortalController(
     /// <path>apisystem/portal/licensequota/report</path>
     [Tags("Portal")]
     [SwaggerResponse(200, "URL to the xlsx report file", typeof(IActionResult))]
+    [SwaggerResponse(403, "The method is available on a server installation only")]
     [HttpPost("licensequota/report")]
     [AllowCrossSiteJson]
     [Authorize(AuthenticationSchemes = "auth:allowskip:default,auth:portal,auth:portalbasic")]

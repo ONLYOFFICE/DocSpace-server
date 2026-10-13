@@ -1263,4 +1263,34 @@
   <data name="UpdatedServerOfAgent" xml:space="preserve">
     <value>MCP server {0} AI agenta byl aktualizován</value>
   </data>
+  <data name="MetadataCascadeStarted" xml:space="preserve">
+    <value>Bylo spuštěno kaskádové přiřazení metadat: {0}</value>
+  </data>
+  <data name="MetadataFieldCreated" xml:space="preserve">
+    <value>Pole metadat bylo vytvořeno: {0}</value>
+  </data>
+  <data name="MetadataFieldDeleted" xml:space="preserve">
+    <value>Pole metadat bylo odstraněno: {0}</value>
+  </data>
+  <data name="MetadataFieldUpdated" xml:space="preserve">
+    <value>Pole metadat bylo aktualizováno: {0}</value>
+  </data>
+  <data name="MetadataTemplateAssigned" xml:space="preserve">
+    <value>Šablona metadat byla přiřazena: {0}</value>
+  </data>
+  <data name="MetadataTemplateCreated" xml:space="preserve">
+    <value>Šablona metadat byla vytvořena: {0}</value>
+  </data>
+  <data name="MetadataTemplateDeleted" xml:space="preserve">
+    <value>Šablona metadat byla odstraněna: {0}</value>
+  </data>
+  <data name="MetadataTemplateUnassigned" xml:space="preserve">
+    <value>Přiřazení šablony metadat bylo zrušeno: {0}</value>
+  </data>
+  <data name="MetadataTemplateUpdated" xml:space="preserve">
+    <value>Šablona metadat byla aktualizována: {0}</value>
+  </data>
+  <data name="MetadataValuesUpdated" xml:space="preserve">
+    <value>Hodnoty metadat byly aktualizovány: {0}</value>
+  </data>
 </root>

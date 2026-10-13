@@ -102,14 +102,18 @@ public abstract class UploadController<T>(
     /// <path>api/2.0/files/{folderId}/upload/create_session</path>
     [Obsolete]
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "The created session, wrapped in the success envelope", typeof(ChunkedUploadSessionResponseWrapper<int>))]
-    [SwaggerResponse(403, "The caller cannot add content to the target folder")]
+    [SwaggerResponse(200, "The created session, wrapped in the success envelope", typeof(ChunkedUploadSessionResultDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `fileName`")]
+    [SwaggerResponse(402, "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder")]
+    [SwaggerResponse(403, "The caller cannot add content to the target folder, the folder is a section root, or a knowledge folder does not accept this format")]
+    [SwaggerResponse(404, "No folder with the specified ID")]
+    [SwaggerResponse(415, "The installation restricts uploadable formats and the file extension is not among them")]
     [HttpPost("{folderId}/upload/create_session")]
-    public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateUploadSession(SessionRequestDto<T> inDto)
+    public async Task<ChunkedUploadSessionResultDto<T>> CreateUploadSession(SessionRequestDto<T> inDto)
     {
         var data =  await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.Session.FileName, inDto.Session.FileSize, inDto.Session.RelativePath, inDto.Session.Encrypted, inDto.Session.CreateOn, inDto.Session.CreateNewIfExist);
 
-        return new ChunkedUploadSessionResponseWrapper<T>
+        return new ChunkedUploadSessionResultDto<T>
         {
             Success = true,
             Data = data
@@ -133,9 +137,14 @@ public abstract class UploadController<T>(
     /// <summary>Create an upload session</summary>
     /// <path>api/2.0/files/{folderId}/session</path>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "The created upload session", typeof(ChunkedUploadSessionResponse<int>))]
+    [SwaggerResponse(200, "The created upload session", typeof(ChunkedUploadSessionDto<int>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `fileName`")]
+    [SwaggerResponse(402, "The declared `fileSize` exceeds the portal limit for chunked uploads or the size allowed in a knowledge folder")]
+    [SwaggerResponse(403, "The caller cannot add content to the target folder, the folder is a section root, or a knowledge folder does not accept this format")]
+    [SwaggerResponse(404, "No folder with the specified ID")]
+    [SwaggerResponse(415, "The installation restricts uploadable formats and the file extension is not among them")]
     [HttpPost("{folderId}/session")]
-    public async Task<ChunkedUploadSessionResponse<T>> CreateUploadSessionInFolder(SessionRequestDto<T> inDto)
+    public async Task<ChunkedUploadSessionDto<T>> CreateUploadSessionInFolder(SessionRequestDto<T> inDto)
     {
         return await filesControllerHelper.CreateUploadSessionAsync(inDto.FolderId, inDto.Session.FileName, inDto.Session.FileSize, inDto.Session.RelativePath, inDto.Session.Encrypted, inDto.Session.CreateOn, inDto.Session.CreateNewIfExist);
     }
@@ -155,6 +164,8 @@ public abstract class UploadController<T>(
     /// <path>api/2.0/files/{folderId}/session/{sessionId}</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The session and the parts received so far have been discarded")]
+    [SwaggerResponse(403, "The session was opened by another account")]
+    [SwaggerResponse(404, "No open session with the specified ID: it never existed, was finalized or aborted, or has expired")]
     [HttpDelete("{folderId}/session/{sessionId}")]
     public async Task AbortUploadSession(AbortSessionRequestDto<T> inDto)
     {
@@ -166,7 +177,7 @@ public abstract class UploadController<T>(
     // [SwaggerResponse(200, "Information about created session")]
     // [SwaggerResponse(403, "You don't have enough permission to create")]
     // [HttpPut("{folderId}/session/initiate")]
-    // public async Task<ChunkedUploadSessionResponse<T>> InitiateUploadSession(InitiateSessionRequestDto<T> inDto)
+    // public async Task<ChunkedUploadSessionDto<T>> InitiateUploadSession(InitiateSessionRequestDto<T> inDto)
     // {
     //     var createdSession =  await fileUploader.InitiateUploadAsync(inDto.FolderId, inDto.FileId, inDto.FileName, inDto.FileSize, inDto.Encrypted);
     //     return await chunkedUploadSessionHelper.ToResponseObjectAsync(createdSession, true);
@@ -188,6 +199,9 @@ public abstract class UploadController<T>(
     /// <path>api/2.0/files/{folderId}/session/{sessionId}</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The progress of the session, or the stored file once the last part has arrived", typeof(UploadSessionResponseDto<int>))]
+    [SwaggerResponse(402, "The part is larger than `chunkUploadSize`, or storing the file would exceed a storage quota or size limit")]
+    [SwaggerResponse(404, "No open session with the specified ID: it never existed, was finalized or aborted, or has expired")]
+    [SwaggerResponse(500, "The request has no `File` part, or a file that is not a PDF is stored in a form-filling room")]
     [HttpPost("{folderId}/session/{sessionId}")]
     public async Task<UploadSessionResponseDto<T>> UploadSession(UploadSessionRequestDto<T> inDto)
     {
@@ -270,9 +284,12 @@ public abstract class UploadController<T>(
     /// <summary>Upload a numbered chunk</summary>
     /// <path>api/2.0/files/{folderId}/session/{sessionId}/upload</path>
     [Tags("Files / Operations")]
-    [SwaggerResponse(200, "The session with its progress after the part was stored", typeof(ChunkedUploadSessionResponse<int>))]
+    [SwaggerResponse(200, "The session with its progress after the part was stored", typeof(ChunkedUploadSessionDto<int>))]
+    [SwaggerResponse(402, "The part is larger than `chunkUploadSize`, or a session below that size would exceed a storage quota or size limit when storing the file")]
+    [SwaggerResponse(404, "No open session with the specified ID: it never existed, was finalized or aborted, or has expired")]
+    [SwaggerResponse(500, "The request has no `File` part, or a session below `chunkUploadSize` stores a file that is not a PDF in a form-filling room")]
     [HttpPost("{folderId}/session/{sessionId}/upload")]
-    public async Task<ChunkedUploadSessionResponse<T>> UploadAsyncSession(UploadSessionAsyncRequestDto<T> inDto)
+    public async Task<ChunkedUploadSessionDto<T>> UploadAsyncSession(UploadSessionAsyncRequestDto<T> inDto)
     {
         var resumedSession = await fileUploader.UploadChunkAsync<T>(inDto.SessionId, inDto.File.OpenReadStream(), inDto.File.Length, inDto.ChunkNumber);
         await chunkedUploadSessionHolder.StoreSessionAsync(resumedSession);
@@ -295,6 +312,10 @@ public abstract class UploadController<T>(
     /// <path>api/2.0/files/{folderId}/session/{sessionId}/finalize</path>
     [Tags("Files / Operations")]
     [SwaggerResponse(200, "The assembled file and the identifiers of the closed session", typeof(UploadSessionResponseDto<int>))]
+    [SwaggerResponse(400, "The parts received so far do not add up to the size the session was opened for")]
+    [SwaggerResponse(402, "Storing the file would exceed a storage quota or size limit")]
+    [SwaggerResponse(404, "No open session with the specified ID: it never existed, was finalized or aborted, or has expired")]
+    [SwaggerResponse(500, "A file that is not a PDF is stored in a form-filling room")]
     [HttpPut("{folderId}/session/{sessionId}/finalize")]
     public async Task<UploadSessionResponseDto<T>> FinalizeSession(FinalizeSessionDto<T> inDto)
     {
@@ -363,13 +384,15 @@ public abstract class UploadController<T>(
     /// <summary>Create the editing session</summary>
     /// <path>api/2.0/files/file/{fileId}/edit_session</path>
     [Tags("Files / Files")]
-    [SwaggerResponse(200, "The created editing session, wrapped in the success envelope", typeof(ChunkedUploadSessionResponseWrapper<int>))]
-    [SwaggerResponse(403, "The caller cannot edit this file")]
+    [SwaggerResponse(200, "The created editing session, wrapped in the success envelope", typeof(ChunkedUploadSessionResultDto<int>))]
+    [SwaggerResponse(402, "The declared `fileSize` exceeds the portal limit for chunked uploads")]
+    [SwaggerResponse(403, "The caller cannot edit this file, or the file is locked, open in the editor, in the trash or encrypted")]
+    [SwaggerResponse(404, "No file with the specified ID")]
     [HttpPost("file/{fileId}/edit_session")]
-    public async Task<ChunkedUploadSessionResponseWrapper<T>> CreateEditSession(CreateEditSessionRequestDto<T> inDto)
+    public async Task<ChunkedUploadSessionResultDto<T>> CreateEditSession(CreateEditSessionRequestDto<T> inDto)
     {
         var data = await filesControllerHelper.CreateEditSessionAsync(inDto.FileId, inDto.FileSize);
-        return new ChunkedUploadSessionResponseWrapper<T>
+        return new ChunkedUploadSessionResultDto<T>
         {
             Success = true,
             Data = data
@@ -392,6 +415,9 @@ public abstract class UploadController<T>(
     /// <collection>list</collection>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The submitted titles that already belong to a file in the folder", typeof(HashSet<string>))]
+    [SwaggerResponse(400, "The request body cannot be read or has no `filesTitle`")]
+    [SwaggerResponse(403, "The caller cannot add content to the folder, or a title that is not a PDF is checked against a form-filling room template")]
+    [SwaggerResponse(404, "No folder with the specified ID")]
     [HttpPost("{folderId}/upload/check")]
     public async Task<HashSet<string>> CheckUploadAsync(CheckUploadRequestDto<T> model)
     {
@@ -453,8 +479,11 @@ public abstract class UploadController<T>(
     /// <path>api/2.0/files/{folderId}/insert</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The stored file with its id and the title it was actually saved under; a `version` above 1 means the content was added to a file that already carried this name instead of creating a new one", typeof(FileDto<int>))]
+    [SwaggerResponse(402, "The file exceeds the single-request upload limit, or storing it would exceed a storage quota or size limit")]
     [SwaggerResponse(403, "The caller cannot add content to this folder")]
     [SwaggerResponse(404, "No folder with the specified ID")]
+    [SwaggerResponse(415, "The installation restricts uploadable formats and the file extension is not among them")]
+    [SwaggerResponse(500, "A file that is not a PDF is stored in a form-filling room")]
     [HttpPost("{folderId}/insert", Order = 1)]
     public async Task<FileDto<T>> InsertFile(InsertWithFileRequestDto<T> inDto)
     {
@@ -477,8 +506,12 @@ public abstract class UploadController<T>(
     /// <path>api/2.0/files/{folderId}/upload</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The stored file, as a list with one element", typeof(List<FileDto<int>>))]
+    [SwaggerResponse(400, "The request has no file part")]
+    [SwaggerResponse(402, "The file exceeds the single-request upload limit, or storing it would exceed a storage quota or size limit")]
     [SwaggerResponse(403, "The caller cannot add content to this folder")]
     [SwaggerResponse(404, "No folder with the specified ID")]
+    [SwaggerResponse(415, "The installation restricts uploadable formats and the file extension is not among them")]
+    [SwaggerResponse(500, "A file that is not a PDF is stored in a form-filling room")]
     [HttpPost("{folderId}/upload", Order = 1)]
     public async Task<List<FileDto<T>>> UploadFile(UploadWithFolderRequestDto<T> inDto)
     {
@@ -527,8 +560,10 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <path>api/2.0/files/@my/insert</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "The stored file, with the identifier, version and title it was saved under", typeof(FileDto<int>))]
+    [SwaggerResponse(402, "The file exceeds the single-request upload limit, or storing it would exceed a storage quota or size limit")]
     [SwaggerResponse(403, "Creating a file in the personal section is not allowed for this account")]
     [SwaggerResponse(404, "The caller has no personal section, so there is nothing to store the file in")]
+    [SwaggerResponse(415, "The installation restricts uploadable formats and the file extension is not among them")]
     [HttpPost("@my/insert")]
     public async Task<FileDto<int>> InsertFileToMyFromBody([FromForm][ModelBinder(BinderType = typeof(InsertFileModelBinder))] InsertFileRequestDto inDto)
     {
@@ -578,8 +613,11 @@ public class UploadControllerCommon(GlobalFolderHelper globalFolderHelper,
     /// <path>api/2.0/files/@my/upload</path>
     [Tags("Files / Folders")]
     [SwaggerResponse(200, "An array holding the single uploaded file", typeof(List<FileDto<int>>))]
+    [SwaggerResponse(400, "The request has no file part")]
+    [SwaggerResponse(402, "The file exceeds the single-request upload limit, or storing it would exceed a storage quota or size limit")]
     [SwaggerResponse(403, "Uploading a file to the personal section is not allowed for this account")]
     [SwaggerResponse(404, "The caller has no personal section, so there is nothing to store the file in")]
+    [SwaggerResponse(415, "The installation restricts uploadable formats and the file extension is not among them")]
     [HttpPost("@my/upload")]
     public async Task<List<FileDto<int>>> UploadFileToMy(UploadRequestDto inDto)
     {

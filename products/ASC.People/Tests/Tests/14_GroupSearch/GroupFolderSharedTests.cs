@@ -261,7 +261,7 @@ public class GroupFolderSharedTests(AspireAppFixture fixture) : GroupSearchTestB
     public async Task GetGroupsWithFoldersShared_Returns404_ForDeletedFolderId()
     {
         var folderId = await CreateFolderInMyDocumentsAsync();
-        await _foldersApi.DeleteFolderAsync(folderId, new DeleteFolder(deleteAfter: true, immediately: true), TestContext.Current.CancellationToken);
+        await _foldersApi.DeleteFolderAsync(folderId, new DeleteFolderRequest(deleteAfter: true, immediately: true), TestContext.Current.CancellationToken);
 
         var deadline = DateTime.UtcNow.AddSeconds(30);
         while (DateTime.UtcNow < deadline)

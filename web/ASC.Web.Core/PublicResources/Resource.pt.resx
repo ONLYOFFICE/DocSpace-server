@@ -160,7 +160,7 @@
     <value>Unidade de Medida</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_backup" xml:space="preserve">
-    <value>Cópia de segurança</value>
+    <value>Cópias</value>
   </data>
   <data name="AccountingCustomerOperationServiceUOM_chat" xml:space="preserve">
     <value>Tokens</value>

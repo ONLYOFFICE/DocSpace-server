@@ -64,7 +64,7 @@ public class SendJoinInviteMailTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _messagesApi.SendJoinInviteMailAsync(
-                new AdminMessageBaseSettingsRequestsDto(email), TestContext.Current.CancellationToken));
+                new AdminMessageBaseSettingsRequestDto(email), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(405);
@@ -105,7 +105,7 @@ public class SendJoinInviteMailTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _messagesApi.SendJoinInviteMailAsync(
-                new AdminMessageBaseSettingsRequestsDto(email), TestContext.Current.CancellationToken));
+                new AdminMessageBaseSettingsRequestDto(email), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(405);

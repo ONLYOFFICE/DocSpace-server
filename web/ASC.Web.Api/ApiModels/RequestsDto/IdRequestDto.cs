@@ -87,7 +87,7 @@ public class UserIDRequestDto
     /// no account of this portal and an ID of an internal system account are both answered as not found.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromRoute(Name = "userID")]
+    [FromRoute(Name = "userId")]
     public required Guid Id { get; set; }
 }
 
@@ -102,7 +102,7 @@ public class ProductIdRequestDto
     /// failure.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromRoute(Name = "productid")]
+    [FromRoute(Name = "productId")]
     public required Guid ProductId { get; set; }
 }
 
@@ -116,7 +116,7 @@ public class UserProductIdsRequestDto
     /// single module.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromQuery(Name = "productid")]
+    [FromQuery(Name = "productId")]
     public required Guid ProductId { get; set; }
 
     /// <summary>
@@ -124,7 +124,7 @@ public class UserProductIdsRequestDto
     /// rather than a failure, so a negative answer does not prove the account exists.
     /// </summary>
     /// <example>00000000-0000-0000-0000-000000000000</example>
-    [FromQuery(Name = "userid")]
+    [FromQuery(Name = "userId")]
     public required Guid UserId { get; set; }
 }
 

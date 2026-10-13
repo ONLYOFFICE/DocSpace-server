@@ -209,6 +209,8 @@ export default function registerRoutes(app: Application): void {
   router.put("/config/vectorization", settingsController.setVectorizationSettings);
   router.get("/config/user", settingsController.getUserSettings);
   router.put("/config/user", settingsController.setUserSettings);
+  router.get("/config/tool-mode", settingsController.getToolMode);
+  router.put("/config/tool-mode", settingsController.setToolMode);
 
   router.post("/vectorization/tasks", vectorizationController.startTask);
 

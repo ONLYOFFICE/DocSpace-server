@@ -54,7 +54,7 @@ public class CommentPermissionsTests(
 
         // Act & Assert
         await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: 1, comment: "Owner comment"), TestContext.Current.CancellationToken);
+            file.Id, new UpdateCommentRequest(version: 1, comment: "Owner comment"), TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -69,7 +69,7 @@ public class CommentPermissionsTests(
 
         // Act & Assert
         await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: 1, comment: "Admin comment"), TestContext.Current.CancellationToken);
+            file.Id, new UpdateCommentRequest(version: 1, comment: "Admin comment"), TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -84,7 +84,7 @@ public class CommentPermissionsTests(
 
         // Act & Assert
         await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: 1, comment: "User comment"), TestContext.Current.CancellationToken);
+            file.Id, new UpdateCommentRequest(version: 1, comment: "User comment"), TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -101,7 +101,7 @@ public class CommentPermissionsTests(
         // Act
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: 1, comment: "Editor comment"), TestContext.Current.CancellationToken));
+            file.Id, new UpdateCommentRequest(version: 1, comment: "Editor comment"), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);
@@ -121,7 +121,7 @@ public class CommentPermissionsTests(
         // Act
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: 1, comment: "Reader comment"), TestContext.Current.CancellationToken));
+            file.Id, new UpdateCommentRequest(version: 1, comment: "Reader comment"), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);
@@ -141,7 +141,7 @@ public class CommentPermissionsTests(
         // Act
         await _filesClient.Authenticate(guest);
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: 1, comment: "Guest comment"), TestContext.Current.CancellationToken));
+            file.Id, new UpdateCommentRequest(version: 1, comment: "Guest comment"), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);
@@ -159,7 +159,7 @@ public class CommentPermissionsTests(
         // Act
         await _filesClient.Authenticate(user);
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: 1, comment: "Unauthorized"), TestContext.Current.CancellationToken));
+            file.Id, new UpdateCommentRequest(version: 1, comment: "Unauthorized"), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(403);
@@ -175,7 +175,7 @@ public class CommentPermissionsTests(
         // Act
         await _filesClient.Authenticate(null);
         var exception = await Assert.ThrowsAsync<ApiException>(async () => await _filesOperationsApi.UpdateFileCommentAsync(
-            file.Id, new UpdateComment(version: 1, comment: "Anon"), TestContext.Current.CancellationToken));
+            file.Id, new UpdateCommentRequest(version: 1, comment: "Anon"), TestContext.Current.CancellationToken));
 
         // Assert
         exception.ErrorCode.Should().Be(401);

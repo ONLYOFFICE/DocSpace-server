@@ -53,7 +53,7 @@ public class RoomQuotaSettingsTests(
 
         // Act
         var settings = await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(
-            new QuotaSettingsRequestsDto(false, new QuotaSettingsRequestsDtoDefaultQuota(-1)),
+            new QuotaSettingsRequestDto(false, new QuotaSettingsRequestDtoDefaultQuota(-1)),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -69,7 +69,7 @@ public class RoomQuotaSettingsTests(
 
         // Act
         var settings = await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(
-            new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(DefaultQuota)),
+            new QuotaSettingsRequestDto(true, new QuotaSettingsRequestDtoDefaultQuota(DefaultQuota)),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -87,7 +87,7 @@ public class RoomQuotaSettingsTests(
 
         // Act
         var settings = await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(
-            new QuotaSettingsRequestsDto(false, new QuotaSettingsRequestsDtoDefaultQuota(-1)),
+            new QuotaSettingsRequestDto(false, new QuotaSettingsRequestDtoDefaultQuota(-1)),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -104,7 +104,7 @@ public class RoomQuotaSettingsTests(
 
         // Act
         var settings = await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(
-            new QuotaSettingsRequestsDto(true, new QuotaSettingsRequestsDtoDefaultQuota(DefaultQuota)),
+            new QuotaSettingsRequestDto(true, new QuotaSettingsRequestDtoDefaultQuota(DefaultQuota)),
             TestContext.Current.CancellationToken);
 
         // Assert
@@ -122,7 +122,7 @@ public class RoomQuotaSettingsTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(
-                new QuotaSettingsRequestsDto(false, new QuotaSettingsRequestsDtoDefaultQuota(-1)),
+                new QuotaSettingsRequestDto(false, new QuotaSettingsRequestDtoDefaultQuota(-1)),
                 TestContext.Current.CancellationToken));
 
         // Assert
@@ -142,7 +142,7 @@ public class RoomQuotaSettingsTests(
         // Act
         var exception = await Assert.ThrowsAsync<ApiException>(
             async () => await _settingsQuotaApi.SaveRoomQuotaSettingsAsync(
-                new QuotaSettingsRequestsDto(false, new QuotaSettingsRequestsDtoDefaultQuota(-1)),
+                new QuotaSettingsRequestDto(false, new QuotaSettingsRequestDtoDefaultQuota(-1)),
                 TestContext.Current.CancellationToken));
 
         // Assert

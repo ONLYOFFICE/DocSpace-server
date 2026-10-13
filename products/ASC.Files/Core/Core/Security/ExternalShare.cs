@@ -547,6 +547,7 @@ public class ExternalSessionSnapshot
 /// <summary>
 /// The external data status.
 /// </summary>
+[OpenApiSchemaName("ExternalShareStatus")]
 public enum Status
 {
     [Description("Ok")]
