@@ -105,10 +105,12 @@ public static class CustomHealthCheck
         public IHealthChecksBuilder AddEventBusConsumer(IConfiguration configuration)
         {
             // reads the consumer state only, unlike AddMessageQueue below,
-            // whose probe waits inside TryConnectAsync while the connection recovers
+            // whose probe waits inside TryConnectAsync while the connection recovers.
+            // Not tagged "services": a pod without its consumer still serves requests, so taking it out of
+            // the load balancer (readiness) helps nothing, only a restart does; the signal is on /health only
             if (ServiceCollectionExtension.IsRabbitMqEnabled(configuration))
             {
-                hcBuilder.AddCheck<EventBusConsumerHealthCheck>("rabbitMQConsumer", tags: ["rabbitMQ", "services"]);
+                hcBuilder.AddCheck<EventBusConsumerHealthCheck>("rabbitMQConsumer", tags: ["rabbitMQ"]);
             }
 
             return hcBuilder;
