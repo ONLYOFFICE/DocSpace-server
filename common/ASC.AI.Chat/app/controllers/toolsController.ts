@@ -31,8 +31,8 @@
 // 
 // SPDX-License-Identifier: AGPL-3.0-only
 
-import { ToolsEngine } from "@onlyoffice/ai-chat/core";
-import type { McpServerConfig } from "@onlyoffice/ai-chat/core";
+import { ToolsEngine, isToolPrefsScope } from "@onlyoffice/ai-chat/core";
+import type { McpServerConfig, ToolPrefsScope } from "@onlyoffice/ai-chat/core";
 import {
   PORTAL_MCP_SERVER_NAME,
   DOCSPACE_INTEGRATION_SERVER_TYPE,
@@ -129,6 +129,27 @@ function redactSystemServer(
   config: McpServerConfig,
 ): McpServerConfig {
   return getSystemServerConfig(name) ? {} : config;
+}
+
+const INVALID_SCOPE = Symbol("invalid tool-prefs scope");
+
+// The optional `scope` of a disabled-list read or write (Bug 84381):
+// `"user"` (the caller's own list, what an absent value means) or
+// `"tenant"` (the list an administrator keeps for everyone, which the AI
+// service folds into every user's list on read). Anything else is a 400
+// rather than a silent fall-back to the user list, so a settings screen
+// cannot believe it switched a tool off for everyone when it did not.
+function parseToolPrefsScope(
+  value: unknown,
+): ToolPrefsScope | undefined | typeof INVALID_SCOPE {
+  if (value === undefined || value === null || value === "") {
+    return undefined;
+  }
+  return isToolPrefsScope(value) ? value : INVALID_SCOPE;
+}
+
+function invalidScopeMessage(value: unknown): string {
+  return `unknown scope "${String(value)}"; valid values: tenant, user`;
 }
 
 export const toolsController = {
@@ -269,10 +290,20 @@ export const toolsController = {
   }),
 
   setDisabled: asyncHandler(async (req, res) => {
-    const args = unpackPositional(req.body, ["serverType", "toolNames", "entityId"] as const);
+    const args = unpackPositional(req.body, [
+      "serverType",
+      "toolNames",
+      "entityId",
+      "scope",
+    ] as const);
     // Same accessibility gate as the server writes above (Bug 82975): a
     // bogus entityId must not silently write prefs into the global scope.
     await assertEntityAccessible(args.entityId as string | undefined);
+    const scope = parseToolPrefsScope(args.scope);
+    if (scope === INVALID_SCOPE) {
+      res.status(400).json({ error: invalidScopeMessage(args.scope) });
+      return;
+    }
     // The serverType must be a group key the round's tool filter actually
     // matches — an arbitrary string used to be stored verbatim and read back
     // "successfully" while never disabling anything (Bug 83013). Valid keys:
@@ -301,13 +332,19 @@ export const toolsController = {
       args.serverType as string,
       (args.toolNames as string[]) ?? [],
       args.entityId as string | undefined,
+      scope,
     );
     res.json({ success: true });
   }),
 
   getDisabled: asyncHandler(async (req, res) => {
     const entityId = asString(req.query["entityId"]);
-    const map = await engine.getDisabled(entityId);
+    const scope = parseToolPrefsScope(req.query["scope"]);
+    if (scope === INVALID_SCOPE) {
+      res.status(400).json({ error: invalidScopeMessage(req.query["scope"]) });
+      return;
+    }
+    const map = await engine.getDisabled(entityId, scope);
     res.json(map);
   }),
 

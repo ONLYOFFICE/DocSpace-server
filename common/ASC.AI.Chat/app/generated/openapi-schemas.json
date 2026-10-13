@@ -54,6 +54,14 @@
       ],
       "description": "How a tool call the model makes is approved: ask every time, auto-approve opted-out tools, or allow all."
     },
+    "AiChatToolPrefsScope": {
+      "type": "string",
+      "enum": [
+        "user",
+        "tenant"
+      ],
+      "description": "Which disabled tool list a read or write addresses: the caller's own (`user`, what an absent value means) or the one an administrator keeps for everyone (`tenant`), which every user's reads fold in."
+    },
     "AiActionArgs": {
       "type": "object",
       "properties": {
@@ -935,7 +943,8 @@
           "enum": [
             "key",
             "url",
-            "name"
+            "name",
+            "text"
           ],
           "description": "The rejected field."
         },
@@ -5472,6 +5481,10 @@
           },
           "entityId": {
             "type": "string"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/AiChatToolPrefsScope",
+            "description": "The list the write lands in; omitted means the caller's own."
           }
         },
         "required": [

@@ -6474,7 +6474,7 @@
         ],
         "operationId": "aiToolsSetDisabled",
         "summary": "Set disabled",
-        "description": "Switches off the listed tools of one server type in the scope, so the model is no longer offered them. `serverType` has to be a key the round's tool filter actually matches - a host-configured system server, one of the two DocSpace integration groups, web search, image generation, or one of the scope's registered custom servers - and an unknown value is rejected with the list of valid ones in the message, rather than stored and silently ignored. `toolNames` replaces the previous selection for that server type, so send the full list and pass an empty one to switch everything back on. `entityId` has to name a room the caller can open.",
+        "description": "Switches off the listed tools of one server type in the scope, so the model is no longer offered them. `serverType` has to be a key the round's tool filter actually matches - a host-configured system server, one of the two DocSpace integration groups, web search, image generation, or one of the scope's registered custom servers - and an unknown value is rejected with the list of valid ones in the message, rather than stored and silently ignored. `toolNames` replaces the previous selection for that server type, so send the full list and pass an empty one to switch everything back on. `entityId` has to name a room the caller can open. `scope` picks the list the write lands in: omitted or `user`, the caller's own; `tenant`, the list an administrator keeps for everyone, which every user's reads fold in - the portal settings page writes that one, the composer's own toggles the first.",
         "responses": {
           "200": {
             "description": "Confirms the new disable list was stored for that server type.",
@@ -6487,7 +6487,7 @@
             }
           },
           "400": {
-            "description": "The list of tools to disable is malformed.",
+            "description": "The list of tools to disable is malformed, or `scope` is not `user` or `tenant`.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6566,7 +6566,7 @@
         ],
         "operationId": "aiToolsGetDisabled",
         "summary": "Get disabled",
-        "description": "Returns the tools switched off in the scope, as a map of server type to tool names. `entityId` picks the scope and omitting it reads the portal-wide setting. An absent server type means nothing is switched off for it, so an empty answer means every tool is on offer. Use `GET api/2.0/ai/tools/is-tool-disabled` to ask about one tool instead of reading the whole map.",
+        "description": "Returns the tools switched off in the scope, as a map of server type to tool names. `entityId` picks the scope and omitting it reads the portal-wide setting. Without `scope` the answer is the caller's effective list, with the tools an administrator switched off for everyone folded in; `scope=tenant` reads that administrator list alone, which is what the settings page shows. An absent server type means nothing is switched off for it, so an empty answer means every tool is on offer. Use `GET api/2.0/ai/tools/is-tool-disabled` to ask about one tool instead of reading the whole map.",
         "responses": {
           "200": {
             "description": "The switched-off tools as a map of server type to tool names. An absent type means nothing is switched off for it.",
@@ -6580,6 +6580,16 @@
                       "type": "string"
                     }
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`scope` is not `user` or `tenant`.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiErrorResponse"
                 }
               }
             }
@@ -6626,6 +6636,14 @@
               "examples": [
                 "1234"
               ]
+            }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           }
         ]
@@ -10097,6 +10115,14 @@
         ],
         "description": "How a tool call the model makes is approved: ask every time, auto-approve opted-out tools, or allow all."
       },
+      "AiChatToolPrefsScope": {
+        "type": "string",
+        "enum": [
+          "user",
+          "tenant"
+        ],
+        "description": "Which disabled tool list a read or write addresses: the caller's own (`user`, what an absent value means) or the one an administrator keeps for everyone (`tenant`), which every user's reads fold in."
+      },
       "AiActionArgs": {
         "type": "object",
         "properties": {
@@ -10978,7 +11004,8 @@
             "enum": [
               "key",
               "url",
-              "name"
+              "name",
+              "text"
             ],
             "description": "The rejected field."
           },
@@ -14892,6 +14919,10 @@
           },
           "entityId": {
             "type": "string"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/AiChatToolPrefsScope",
+            "description": "The list the write lands in; omitted means the caller's own."
           }
         },
         "required": [

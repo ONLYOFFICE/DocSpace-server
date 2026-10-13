@@ -39,7 +39,7 @@ import {
 import { aiService, AiServiceHttpError, type QueryValue } from "./httpClient.js";
 import { resolveAgentEntityId } from "./docspaceFilesApi.js";
 import { isObject } from "../narrow.js";
-import type { ToolPrefsStorage } from "@onlyoffice/ai-chat/core";
+import type { ToolPrefsScope, ToolPrefsStorage } from "@onlyoffice/ai-chat/core";
 import {
   chatContextScope,
   invalidateChatContext,
@@ -55,6 +55,23 @@ function entityIdQuery(entityId: string | undefined): Record<string, QueryValue>
   return entityId ? { entityId } : undefined;
 }
 
+// The `scope` the AI service is asked for. Only the tenant list is named on
+// the wire: a request without a scope is the user's effective list, which
+// is what every reader expected before scopes existed, so an AI service that
+// predates them keeps answering exactly as it did.
+function scopeQuery(
+  entityId: string | undefined,
+  scope: ToolPrefsScope | undefined,
+): Record<string, QueryValue> | undefined {
+  const query = { ...(entityIdQuery(entityId) ?? {}) };
+  if (scope === TENANT_SCOPE) {
+    query["scope"] = scope;
+  }
+  return Object.keys(query).length > 0 ? query : undefined;
+}
+
+const TENANT_SCOPE: ToolPrefsScope = "tenant";
+
 // The round snapshot's raw `serverType -> { disabled, allowAlways }` map for
 // the scope `entityId` folds to, or `undefined` when the read must go to the
 // AI service (no snapshot, stale after a write, or an id the snapshot does
@@ -65,29 +82,42 @@ function snapshotToolPrefs(entityId: string | undefined): unknown {
   return scope?.toolPrefs;
 }
 
-// `scopedEntityId` must already be gated via `resolveAgentEntityId`.
-async function fetchToolPrefs(scopedEntityId: string | undefined): Promise<unknown> {
-  const fromSnapshot = snapshotToolPrefs(scopedEntityId);
+// `scopedEntityId` must already be gated via `resolveAgentEntityId`. The
+// round snapshot carries the effective (user) list only, so a tenant-scoped
+// read always goes to the AI service.
+async function fetchToolPrefs(
+  scopedEntityId: string | undefined,
+  scope?: ToolPrefsScope,
+): Promise<unknown> {
+  const fromSnapshot = scope === TENANT_SCOPE ? undefined : snapshotToolPrefs(scopedEntityId);
   if (fromSnapshot !== undefined) {
     return fromSnapshot;
   }
-  reportChatContextMiss(`toolPrefs.read(${scopedEntityId ?? "-"})`);
-  const query = entityIdQuery(scopedEntityId);
+  if (scope !== TENANT_SCOPE) {
+    reportChatContextMiss(`toolPrefs.read(${scopedEntityId ?? "-"})`);
+  }
+  const query = scopeQuery(scopedEntityId, scope);
   return aiService.get(BASE_PATH, query ? { query } : undefined);
 }
 
-async function readToolPrefsRaw(entityId: string | undefined): Promise<unknown> {
-  const fromSnapshot = snapshotToolPrefs(entityId);
+async function readToolPrefsRaw(
+  entityId: string | undefined,
+  scope?: ToolPrefsScope,
+): Promise<unknown> {
+  const fromSnapshot = scope === TENANT_SCOPE ? undefined : snapshotToolPrefs(entityId);
   if (fromSnapshot !== undefined) {
     return fromSnapshot;
   }
-  return fetchToolPrefs(await resolveAgentEntityId(entityId));
+  return fetchToolPrefs(await resolveAgentEntityId(entityId), scope);
 }
 
 // Same fetch, but a missing prefs row (404) reads as "nothing stored".
-async function fetchToolPrefsSafe(scopedEntityId: string | undefined): Promise<unknown> {
+async function fetchToolPrefsSafe(
+  scopedEntityId: string | undefined,
+  scope?: ToolPrefsScope,
+): Promise<unknown> {
   try {
-    return await fetchToolPrefs(scopedEntityId);
+    return await fetchToolPrefs(scopedEntityId, scope);
   } catch (err) {
     if (err instanceof AiServiceHttpError && err.status === 404) {
       return {};
@@ -229,15 +259,22 @@ function aliasIntegrationGroups(
   };
 }
 
+// `scope` names the list the write lands in. The tenant scope travels on
+// the wire as `scope: "tenant"`; an AI service that predates the field
+// ignores it and stores the caller's own list, as it always did. The
+// cleared-keys pass reads the same list, so a tenant write never re-adds the
+// caller's personal server types to the tenant list.
 async function putDisabled(
   disabled: Record<string, string[]>,
   entityId: string | undefined,
+  scope?: ToolPrefsScope,
 ): Promise<void> {
   const scopedEntityId = await resolveAgentEntityId(entityId);
-  const stored = parseDisabled(await fetchToolPrefsSafe(scopedEntityId));
+  const stored = parseDisabled(await fetchToolPrefsSafe(scopedEntityId, scope));
   await aiService.put(DISABLED_PATH, {
     disabled: withoutPortalServer(withClearedKeys(disabled, stored)),
     entityId: scopedEntityId,
+    ...(scope === TENANT_SCOPE ? { scope } : {}),
   });
   invalidateChatContext("toolPrefs");
 }
@@ -259,13 +296,17 @@ export class HttpToolPrefsStorage implements ToolPrefsStorage {
   async createDisabled(
     disabled: Record<string, string[]>,
     entityId?: string,
+    scope?: ToolPrefsScope,
   ): Promise<void> {
-    await putDisabled(disabled, entityId);
+    await putDisabled(disabled, entityId, scope);
   }
 
-  async readDisabled(entityId?: string): Promise<Record<string, string[]>> {
+  async readDisabled(
+    entityId?: string,
+    scope?: ToolPrefsScope,
+  ): Promise<Record<string, string[]>> {
     try {
-      const raw = await readToolPrefsRaw(entityId);
+      const raw = await readToolPrefsRaw(entityId, scope);
       return aliasIntegrationGroups(withoutPortalServer(parseDisabled(raw)));
     } catch (err) {
       if (err instanceof AiServiceHttpError && err.status === 404) {
@@ -278,21 +319,23 @@ export class HttpToolPrefsStorage implements ToolPrefsStorage {
   async updateDisabled(
     disabled: Record<string, string[]>,
     entityId?: string,
+    scope?: ToolPrefsScope,
   ): Promise<void> {
-    await putDisabled(disabled, entityId);
+    await putDisabled(disabled, entityId, scope);
   }
 
   async upsertDisabled(
     disabled: Record<string, string[]>,
     entityId?: string,
+    scope?: ToolPrefsScope,
   ): Promise<void> {
-    await putDisabled(disabled, entityId);
+    await putDisabled(disabled, entityId, scope);
   }
 
-  async deleteDisabled(entityId?: string): Promise<void> {
+  async deleteDisabled(entityId?: string, scope?: ToolPrefsScope): Promise<void> {
     // No DELETE endpoint on the C# side; clear by upserting an empty map
     // (`putDisabled` re-adds every stored key with an empty list).
-    await putDisabled({}, entityId);
+    await putDisabled({}, entityId, scope);
   }
 
   async createAllowAlways(tokens: string[], entityId?: string): Promise<void> {

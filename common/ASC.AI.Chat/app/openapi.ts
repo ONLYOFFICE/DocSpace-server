@@ -488,9 +488,9 @@ const OPERATION_DOCS: Readonly<Record<string, string>> = {
   aiToolsListSystemTools:
     "Lists every tool the scope can offer the model, as a map of server type to tool group. The answer merges two sources - the host-configured system servers and the live tools of the scope's registered custom MCP servers - and names the system ones separately in `system`, so a client can tell the two apart. `errors` carries the reason a registered server delivered no tools, which is the text to show on a permission card, because the browser cannot reach a server-executed MCP server to find out for itself. The connections are opened server-side, so one request is enough and the client never speaks MCP itself; the portal's own built-in server is left out because it is always enabled.",
   aiToolsSetDisabled:
-    "Switches off the listed tools of one server type in the scope, so the model is no longer offered them. `serverType` has to be a key the round's tool filter actually matches - a host-configured system server, one of the two DocSpace integration groups, web search, image generation, or one of the scope's registered custom servers - and an unknown value is rejected with the list of valid ones in the message, rather than stored and silently ignored. `toolNames` replaces the previous selection for that server type, so send the full list and pass an empty one to switch everything back on. `entityId` has to name a room the caller can open.",
+    "Switches off the listed tools of one server type in the scope, so the model is no longer offered them. `serverType` has to be a key the round's tool filter actually matches - a host-configured system server, one of the two DocSpace integration groups, web search, image generation, or one of the scope's registered custom servers - and an unknown value is rejected with the list of valid ones in the message, rather than stored and silently ignored. `toolNames` replaces the previous selection for that server type, so send the full list and pass an empty one to switch everything back on. `entityId` has to name a room the caller can open. `scope` picks the list the write lands in: omitted or `user`, the caller's own; `tenant`, the list an administrator keeps for everyone, which every user's reads fold in - the portal settings page writes that one, the composer's own toggles the first.",
   aiToolsGetDisabled:
-    "Returns the tools switched off in the scope, as a map of server type to tool names. `entityId` picks the scope and omitting it reads the portal-wide setting. An absent server type means nothing is switched off for it, so an empty answer means every tool is on offer. Use `GET api/2.0/ai/tools/is-tool-disabled` to ask about one tool instead of reading the whole map.",
+    "Returns the tools switched off in the scope, as a map of server type to tool names. `entityId` picks the scope and omitting it reads the portal-wide setting. Without `scope` the answer is the caller's effective list, with the tools an administrator switched off for everyone folded in; `scope=tenant` reads that administrator list alone, which is what the settings page shows. An absent server type means nothing is switched off for it, so an empty answer means every tool is on offer. Use `GET api/2.0/ai/tools/is-tool-disabled` to ask about one tool instead of reading the whole map.",
   aiToolsIsToolDisabled:
     "Tells whether one named tool of one server type is switched off in the scope. Both `serverType` and `toolName` are required and are read from the query; `entityId` picks the scope. The answer is a bare boolean. It reflects only the disable list - a tool that is on offer may still require approval, which `GET api/2.0/ai/tools/is-allow-always` reports.",
   aiToolsSetAllowAlways:
@@ -774,7 +774,11 @@ const OPERATION_ERRORS: Readonly<Record<string, ErrorSpec>> = {
     "400": "The body is not a map of server name to configuration, or a name is not routable.",
     "404": true,
   },
-  aiToolsSetDisabled: { "400": "The list of tools to disable is malformed.", "404": true },
+  aiToolsSetDisabled: {
+    "400": "The list of tools to disable is malformed, or `scope` is not `user` or `tenant`.",
+    "404": true,
+  },
+  aiToolsGetDisabled: { "400": "`scope` is not `user` or `tenant`." },
   aiToolsIsToolDisabled: { "400": "`serverType` or `toolName` is missing." },
   aiToolsSetAllowAlways: { "404": true },
   aiToolsIsAllowAlways: { "400": "`serverType` or `toolName` is missing." },
