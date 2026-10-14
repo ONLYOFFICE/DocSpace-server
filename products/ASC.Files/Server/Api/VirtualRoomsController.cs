@@ -382,7 +382,9 @@ public class VirtualRoomsThirdPartyController(
     /// The caller needs the right to create rooms, which a portal user and a guest do not have; a public room is
     /// refused while the administrator restricts external access, and reaching the room limit of the tariff is
     /// refused too. With `createAsNewFolder` the room is a new subfolder named after `title`, otherwise the folder
-    /// from the path becomes the room itself and `indexing`, `denyDownload`, `tags` and `logo` are then dropped. The
+    /// from the path becomes the room itself and `tags` and `logo` are then dropped. A third-party room keeps neither
+    /// `indexing` nor `denyDownload` in either mode: both are accepted and ignored, and the room reads back with them
+    /// off. The
     /// answer is the new room, whose identifiers are strings; a public or a form-filling room already has its primary
     /// link, readable with `GET api/2.0/files/rooms/{id}/link`.
     /// </remarks>
