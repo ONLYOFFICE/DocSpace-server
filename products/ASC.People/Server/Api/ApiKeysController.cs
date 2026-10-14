@@ -293,6 +293,7 @@ public class ApiKeysController(
     /// deleted key cannot be restored and a new one has to be issued through `POST api/2.0/keys`.
     /// To stop a key temporarily instead, set `isActive` to false through `PUT api/2.0/keys/{keyId}`.
     /// The answer is a plain boolean reporting whether the key was removed.
+    /// An ID that matches no key of the portal, including a key that has already been deleted, is rejected with 404.
     /// </remarks>
     /// <summary>
     /// Delete an API key
@@ -301,14 +302,14 @@ public class ApiKeysController(
     [Tags("Api keys")]
     [SwaggerResponse(200, "True if the key was removed", typeof(bool))]
     [SwaggerResponse(403, "The key belongs to another member and the caller is not a DocSpace admin")]
-    [SwaggerResponse(500, "The portal has no key with this ID")]
+    [SwaggerResponse(404, "The portal has no key with this ID")]
     [HttpDelete("{keyId:guid}")]
     public async Task<bool> DeleteApiKey(DeleteApiKeyRequestDto requestDto)
     {
         var keyId = requestDto.KeyId;
         var currentType = await userManager.GetUserTypeAsync(authContext.CurrentAccount.ID);
         var isAdmin = currentType is EmployeeType.DocSpaceAdmin;
-        var apiKey = await apiKeyManager.GetApiKeyAsync(keyId);
+        var apiKey = await apiKeyManager.GetApiKeyAsync(keyId) ?? throw new ItemNotFoundException("API key not found");
 
         if (!isAdmin && apiKey.CreateBy != authContext.CurrentAccount.ID)
         {
