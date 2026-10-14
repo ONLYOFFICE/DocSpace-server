@@ -36,9 +36,9 @@ namespace ASC.Web.Studio.Core.Notify;
 /// <summary>
 /// What the retention policy keeps about a portal, with the portal's settings. While the portal is active:
 /// the last warning it was sent - the block keeps to the day that warning named, whatever schedule the
-/// portal falls under afterwards - and the latest activity the policy has seen, which outlives the login
-/// history the portal's audit settings purge. Once it is blocked: the category it was blocked under - the
-/// letter about the block names the deletion date of that category, so the portal keeps it until it is
+/// portal falls under afterwards - the latest activity the policy has seen, which outlives the login
+/// history the portal's audit settings purge, and the day it last read it. Once it is blocked: the category
+/// it was blocked under - the letter about the block names the deletion date of that category, so the portal keeps it until it is
 /// deleted or unblocked, whatever its wallet shows in the meantime - and the days the reminders before the
 /// deletion went out, so that a run covering their days again does not send them twice.
 /// </summary>
@@ -65,9 +65,16 @@ public record PortalRetentionSettings : ISettings<PortalRetentionSettings>
     /// <summary>
     /// The latest sign of life of the active portal the policy has seen - an audit event or a sign-in. The
     /// count never starts earlier than it, so a sign-in the login history purges later still counts, and the
-    /// activity is read again only on a day the schedule counted from it may act on.
+    /// activity is read again on a day the schedule counted from it may act on.
     /// </summary>
     public DateTime? LastActivityOn { get; init; }
+
+    /// <summary>
+    /// The day the policy last read the activity of the active portal. It is read again no later than a first
+    /// warning's number of days after it, so a sign-in that starts a new count is seen before that count's
+    /// first warning is due.
+    /// </summary>
+    public DateTime? LastActivityReadOn { get; init; }
 
     /// <summary>The last warning before the block the active portal was sent, or null while none has.</summary>
     public PortalRetentionWarning? LastWarning { get; init; }

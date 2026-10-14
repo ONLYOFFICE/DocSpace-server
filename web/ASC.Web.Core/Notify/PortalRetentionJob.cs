@@ -37,8 +37,8 @@ namespace ASC.Web.Studio.Core.Notify;
 /// Applies the retention policy to one portal on the daily run: works out its category, asks
 /// <see cref="PortalRetentionSchedule"/> what today brings, and tells the owner, blocks the portal or
 /// removes it when that is the answer. Stored per portal (<see cref="PortalRetentionSettings"/>) is
-/// only what the schedule cannot read anywhere else: while it is active, its last warning and its last
-/// sign-in; once it is blocked, the category it was blocked under and the days of its reminders.
+/// only what the schedule cannot read anywhere else: while it is active, its last warning, its last
+/// sign-in and the day its activity was last read; once it is blocked, the category it was blocked under and the days of its reminders.
 /// </summary>
 [Scope]
 public class PortalRetentionJob(
@@ -248,18 +248,22 @@ public class PortalRetentionJob(
         else
         {
             // Activity only moves the count forward, so the latest activity already seen bounds it from below:
-            // with nothing due counted from there, nothing is due counted from the real one either. The
-            // database is asked only on a day the schedule may act on - about once a month for a portal in use.
+            // with nothing due counted from there, no block and no letter of that count is due counted from the
+            // real one either. A sign-in since the last read starts a new count, though, whose first warning
+            // may fall on a day the old count leaves empty - after its first warning a portal with money on its
+            // wallet hears nothing for months. So the database is asked on a day the schedule may act on, and
+            // in any case once the first warning's number of days has passed since it was last asked: a
+            // sign-in is then seen before the warning it starts is due. About once a month for a portal.
             var seen = kept.LastActivityOn ?? DateTime.MinValue;
 
-            if (!_activityReadDaily.Contains(tenant.Id) && NothingDue(formerPaying, CountedFrom(seen)))
+            if (!_activityReadDaily.Contains(tenant.Id) && !ActivityReadDue(kept, context.NowDate) && NothingDue(formerPaying, CountedFrom(seen)))
             {
                 return false;
             }
 
             var activity = await context.GetLastActivityAsync();
 
-            kept = await KeepLastActivityAsync(tenant.Id, activity.LastOn, kept);
+            kept = await KeepLastActivityAsync(tenant.Id, activity.LastOn, context.NowDate, kept);
             anchor = kept.LastActivityOn ?? activity.LastOn;
         }
 
@@ -341,6 +345,29 @@ public class PortalRetentionJob(
         return formerPaying
             ? (PortalRetentionCategory.FormerPaying, PortalRetentionCategory.FormerPayingWithBalance)
             : (PortalRetentionCategory.Free, PortalRetentionCategory.FreeWithBalance);
+    }
+
+    /// <summary>
+    /// Whether the activity of a free portal is read today whatever its schedule says: the shorter first warning
+    /// of the two schedules the wallet may choose has passed since the last read, so a sign-in since then is seen
+    /// before the first warning of the count it starts is due. A portal never read yet is read on the first day
+    /// its schedule may act on, as the policy's first wave spreads them.
+    /// </summary>
+    private bool ActivityReadDue(PortalRetentionSettings kept, DateTime today)
+    {
+        if (kept.LastActivityReadOn is not { } readOn)
+        {
+            return false;
+        }
+
+        var (plain, withBalance) = Categories(formerPaying: false);
+        var first = Options.For(plain).FirstNoticeDays;
+        var second = Options.For(withBalance).FirstNoticeDays;
+
+        // A schedule without a first warning has none to miss.
+        var readEvery = first <= 0 ? second : second <= 0 ? first : Math.Min(first, second);
+
+        return readEvery > 0 && today.Date >= readOn.Date.AddDays(readEvery);
     }
 
     /// <summary>Whether neither schedule the wallet may choose has anything for the portal today.</summary>
@@ -495,19 +522,26 @@ public class PortalRetentionJob(
     }
 
     /// <summary>
-    /// Keeps the latest activity with the portal when it is later than the one kept. It is the lower bound the
-    /// next runs count from without asking the database, and it outlives the login history: the portal's audit
-    /// settings purge that, down to a day, and a count started from what is left would jump back and bring the
-    /// block at once.
+    /// Keeps the latest activity with the portal when it is later than the one kept, and the day it was read.
+    /// The activity is the lower bound the next runs count from without asking the database, and it outlives
+    /// the login history: the portal's audit settings purge that, down to a day, and a count started from what
+    /// is left would jump back and bring the block at once. The day of the read decides when the database is
+    /// asked again in any case.
     /// </summary>
-    private async Task<PortalRetentionSettings> KeepLastActivityAsync(int tenantId, DateTime lastActivityOn, PortalRetentionSettings kept)
+    private async Task<PortalRetentionSettings> KeepLastActivityAsync(int tenantId, DateTime lastActivityOn, DateTime today, PortalRetentionSettings kept)
     {
-        if (lastActivityOn <= kept.LastActivityOn)
+        var readOn = today.Date;
+
+        if (lastActivityOn <= kept.LastActivityOn && readOn == kept.LastActivityReadOn)
         {
             return kept;
         }
 
-        kept = kept with { LastActivityOn = lastActivityOn };
+        kept = kept with
+        {
+            LastActivityOn = kept.LastActivityOn is { } keptOn && keptOn >= lastActivityOn ? keptOn : lastActivityOn,
+            LastActivityReadOn = readOn
+        };
 
         await settingsManager.SaveAsync(kept, tenantId);
 

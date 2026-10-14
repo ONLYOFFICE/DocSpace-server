@@ -570,6 +570,53 @@ public class PortalRetentionJobTests
     }
 
     [Fact]
+    public async Task FreePortal_SignedInAfterItsWarning_IsWarnedOnTheNewCountsDay()
+    {
+        using var portal = await CreatePortalAsync();
+        using var scope = await OpenScopeAsync();
+        var settingsManager = scope.Services.GetRequiredService<SettingsManager>();
+        var tenant = InMemoryTenant(scope, id: portal.TenantId);
+
+        // Idle since seventy days ago, warned forty days ago - with money on its wallet then - of a block a year
+        // after the start of its count, and its activity last read on that day. Counted from there, nothing
+        // is due for months. The owner signed in thirty days ago, which starts a new count: its first warning
+        // is due today.
+        (await settingsManager.SaveAsync(new PortalRetentionSettings
+        {
+            LastActivityOn = _today.AddDays(-70),
+            LastActivityReadOn = _today.AddDays(-40),
+            LastWarning = new PortalRetentionWarning(_today.AddDays(-40), _today.AddDays(295))
+        }, tenant.Id)).Should().BeTrue();
+
+        var signedIn = PeriodicLetterContexts.Activity(_today.AddDays(-70), _today.AddDays(-30));
+
+        // Ten days ago a first warning's thirty days had passed since the last read: the activity is read, and
+        // the sign-in is kept.
+        var tenDaysAgo = Free(tenant, _today.AddDays(-70)) with { NowDate = _today.AddDays(-10), LastActivity = signedIn };
+        var logger = new RecordingLogger<PortalRetentionJob>();
+
+        await CreateJob(scope, logger).ApplyAsync(tenDaysAgo, _policyStart, new RecordingNotifyClient(), _senderName);
+
+        tenDaysAgo.LastActivity.IsValueCreated.Should().BeTrue("the activity is read once a first warning's days have passed since the last read");
+        logger.Messages.Should().BeEmpty("the new count has nothing due yet");
+
+        var kept = await settingsManager.LoadAsync<PortalRetentionSettings>(tenant.Id);
+
+        kept.LastActivityOn.Should().Be(_today.AddDays(-30));
+        kept.LastActivityReadOn.Should().Be(_today.AddDays(-10));
+
+        // Today the new count's first warning is due, counted from the kept sign-in.
+        var client = new RecordingNotifyClient();
+
+        logger = new RecordingLogger<PortalRetentionJob>();
+
+        await CreateJob(scope, logger).ApplyAsync(Free(tenant, _today.AddDays(-70)) with { LastActivity = signedIn }, _policyStart, client, _senderName);
+
+        logger.Messages.Should().ContainSingle(m => m.Contains("Free: Notify FirstNotice"), string.Join(" | ", logger.Messages));
+        client.Sent.Should().ContainSingle();
+    }
+
+    [Fact]
     public async Task FreePortal_WithAShortLoginHistory_HasItsActivityReadEveryRun()
     {
         using var portal = await CreatePortalAsync();
