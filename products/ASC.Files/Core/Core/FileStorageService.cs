@@ -1436,9 +1436,12 @@ public class FileStorageService //: IFileStorageService
         var folderDao = daoFactory.GetFolderDao<T>();
 
         var folder = await folderDao.GetFolderAsync(folderId);
+
+        // Missing room, same as in SetPinnedStatusAsync: 404, not the 403 the mapping of
+        // InvalidOperationException produced.
         if (folder == null)
         {
-            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_FolderNotFound);
+            throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FolderNotFound);
         }
 
         var isRoom = folder.IsRoom;

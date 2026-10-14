@@ -155,13 +155,13 @@ public abstract class ThirdPartyTestBase(AspireAppFixture fixture) : BaseTest(fi
     /// itself is what the test acts on.
     /// </remarks>
     protected async Task<(int ProviderId, string FolderId, string RoomId)> CreateNextcloudRoom(
-        string title, RoomType roomType = RoomType.CustomRoom, bool createAsNewFolder = false)
+        string title, RoomType roomType = RoomType.CustomRoom, bool createAsNewFolder = false, bool denyDownload = false)
     {
         var connection = await ConnectNextcloud($"{title} (storage)");
 
         var room = await _roomsApi.CreateRoomThirdPartyAsync(
             connection.Id,
-            new CreateThirdPartyRoomRequest(title: title, roomType: roomType, createAsNewFolder: createAsNewFolder),
+            new CreateThirdPartyRoomRequest(title: title, roomType: roomType, createAsNewFolder: createAsNewFolder, denyDownload: denyDownload),
             TestContext.Current.CancellationToken);
 
         if (createAsNewFolder)
