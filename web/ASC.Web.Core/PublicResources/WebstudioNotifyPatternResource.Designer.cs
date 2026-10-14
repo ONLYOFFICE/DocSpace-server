@@ -1434,7 +1434,7 @@ namespace ASC.Web.Core.PublicResources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The portal ${PortalUrl} has been blocked by the retention policy because it was not used. [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to The portal ${PortalUrl} has been blocked by the retention policy: it was not used, or its subscription was not renewed - the category below tells which. [rest of string was truncated]&quot;;.
         /// </summary>
         public static string pattern_portal_retention_blocked_to_support {
             get {

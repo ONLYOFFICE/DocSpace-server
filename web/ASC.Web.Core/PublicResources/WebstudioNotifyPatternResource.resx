@@ -809,7 +809,7 @@ $OrangeButton
 $TrulyYours</value>
   </data>
   <data name="pattern_portal_retention_blocked_to_support" xml:space="preserve">
-    <value>The portal ${PortalUrl} has been blocked by the retention policy because it was not used.
+    <value>The portal ${PortalUrl} has been blocked by the retention policy: it was not used, or its subscription was not renewed - the category below tells which.
 
 *Portal:* ${PortalUrl}
 *Owner:* ${UserName} ${UserEmail}
