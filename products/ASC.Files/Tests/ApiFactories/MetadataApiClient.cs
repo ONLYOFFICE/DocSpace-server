@@ -870,4 +870,16 @@ public class RoomEntryResponse
     public int Id { get; init; }
     public string Title { get; init; } = "";
     public List<int>? AssignedMetadataTemplates { get; init; }
+    public List<MetadataMatchResponse>? MetadataMatches { get; init; }
+}
+
+/// <summary>
+/// Where the text search met the metadata of an entry: the field and the whole stored value.
+/// </summary>
+public class MetadataMatchResponse
+{
+    public int? TemplateId { get; init; }
+    public int? FieldId { get; init; }
+    public string FieldName { get; init; } = "";
+    public string Value { get; init; } = "";
 }

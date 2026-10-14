@@ -103,7 +103,7 @@ public class AgentsController(
             quotaFilter: inDto.QuotaFilter ?? QuotaFilter.All,
             storageFilter: StorageFilter.None);
 
-        var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex);
+        var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex, filterValue);
 
         return dto.NotFoundIfNull();
     }

@@ -35,9 +35,9 @@
 namespace ASC.Files.Core;
 
 /// <summary>
-/// Whether the tenant has any metadata templates at all, and whether it has the system template holding the custom
-/// fields. Both questions are asked on the hottest read paths (every listing page, every text search) by tenants
-/// that mostly have no metadata, so the answer is cached; the DAO drops it when a template is created or deleted.
+/// Whether the tenant has any metadata template at all. The question is asked on the hottest read paths (every listing
+/// page, every text search) by tenants that mostly have no metadata, so the answer is cached; the DAO drops it on
+/// every node when a template is created or deleted.
 /// </summary>
 [Scope]
 public class MetadataTemplatesCache(
@@ -59,43 +59,28 @@ public class MetadataTemplatesCache(
     }
 
     /// <summary>
-    /// Whether the tenant has any template. Without one there are no links and no values either, so a listing
-    /// can skip its metadata queries.
+    /// Whether the tenant has any template, the hidden system template of the custom fields included. Without one
+    /// there are no links and no values either, so a listing can skip its metadata queries and a text search its
+    /// metadata part.
     /// </summary>
     public async Task<bool> HasTemplatesAsync()
     {
-        return (await GetStateAsync()).HasTemplates;
-    }
-
-    /// <summary>
-    /// Whether the tenant has the system template: its string values are the only metadata the general text search looks at.
-    /// </summary>
-    public async Task<bool> HasSystemTemplateAsync()
-    {
-        return (await GetStateAsync()).HasSystemTemplate;
-    }
-
-    public async Task InvalidateAsync(int tenantId)
-    {
-        await _cache.RemoveByTagAsync(CacheExtention.GetMetadataTemplatesTag(tenantId));
-    }
-
-    private async Task<MetadataTemplatesState> GetStateAsync()
-    {
         var tenantId = tenantManager.GetCurrentTenantId();
 
-        return await _cache.GetOrSetAsync<MetadataTemplatesState>(GetCacheKey(tenantId), async (_, token) =>
+        return await _cache.GetOrSetAsync<bool>(GetCacheKey(tenantId), async (_, token) =>
         {
             await using var filesDbContext = await dbContextFactory.CreateDbContextAsync(token);
 
-            var systemFlags = await filesDbContext.MetadataTemplates
-                .Where(t => t.TenantId == tenantId)
-                .Select(t => t.IsSystem)
-                .ToListAsync(token);
-
-            return new MetadataTemplatesState(systemFlags.Count > 0, systemFlags.Contains(true));
+            return await filesDbContext.MetadataTemplatesExistAsync(tenantId);
         }, _expiration, [CacheExtention.GetMetadataTemplatesTag(tenantId)]);
     }
 
-    private sealed record MetadataTemplatesState(bool HasTemplates, bool HasSystemTemplate);
+    /// <summary>
+    /// Drops the answer on every node: the cache is the L1-only one, and a bare removal would leave the other services
+    /// skipping the metadata of the first template until the entry expired.
+    /// </summary>
+    public async Task InvalidateAsync(int tenantId)
+    {
+        await _cache.RemoveByTagAndNotifyAsync(CacheExtention.GetMetadataTemplatesTag(tenantId));
+    }
 }

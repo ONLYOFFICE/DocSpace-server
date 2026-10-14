@@ -1450,7 +1450,7 @@ public class VirtualRoomsCommonController(
             withAiFolder: withAiFolder,
             metadataFilter: metadataFilter);
 
-        var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex);
+        var dto = await folderContentDtoHelper.GetAsync(parentId, content, startIndex, filterValue);
 
         return dto.NotFoundIfNull();
     }
