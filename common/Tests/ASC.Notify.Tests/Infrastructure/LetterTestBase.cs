@@ -87,6 +87,12 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
     protected virtual void AssertDefaultCultureText(RenderedLetter letter, LetterScope scope) { }
 
     /// <summary>
+    /// What the footer of every letter of a kind must or must not carry, checked in every culture - for a
+    /// family of letters whose base class decides it, so no letter of the family can forget the check.
+    /// </summary>
+    protected virtual void AssertFooter(RenderedLetter letter) { }
+
+    /// <summary>
     /// The smallest share of mail clients that must fully render this letter's markup, as MailPit's
     /// html-check scores it against the caniemail support matrix. The rest is nearly all *partial*
     /// support — the CSS that every table-based email leans on — and under 3% is unsupported outright.
@@ -127,6 +133,7 @@ public abstract class LetterTestBase<TAction> where TAction : NotifyAction
         letter.ShouldHaveSignature(tags);
         letter.ShouldRenderMarkupTags(tags);
 
+        AssertFooter(letter);
         AssertContent(letter, scope);
 
         if (cultureName == LetterCultures.DefaultCultureName)

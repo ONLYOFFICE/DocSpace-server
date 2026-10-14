@@ -78,6 +78,15 @@ public abstract class PortalRetentionLetterTestBase<TAction> : LetterTestBase<TA
     }
 
     /// <summary>
+    /// No way out of these letters is offered: they go out whatever the notification settings say, and the
+    /// settings page is out of reach once the portal is blocked or gone.
+    /// </summary>
+    protected sealed override void AssertFooter(RenderedLetter letter)
+    {
+        letter.Body.Should().NotContain("/profile/notifications", "the footer offers no link to the notification settings");
+    }
+
+    /// <summary>
     /// A day as the letter writes it, in the culture under test - with the numerals the letters use for it,
     /// which in Arabic are the Eastern ones on the Gregorian calendar.
     /// </summary>

@@ -1719,6 +1719,12 @@ public abstract class PortalRetentionNotifyAction(
     protected override bool ToPayer => FormerPaying;
 
     /// <summary>
+    /// The block and the deletion are announced whatever the recipient's notification settings say, and the
+    /// settings page is out of reach anyway once the portal is blocked or gone.
+    /// </summary>
+    protected sealed override bool OffersUnsubscribe => false;
+
+    /// <summary>
     /// Whether the portal's paid tariff lapsed. Such a portal is counted from the end of its subscription,
     /// not from its last activity, and comes back unpaid, so its letters speak of the subscription.
     /// </summary>
@@ -2483,6 +2489,12 @@ public abstract class BasePeriodicNotifyAction(
     protected virtual bool RequiresSubscription => false;
 
     /// <summary>
+    /// Whether the footer offers the link to the recipient's notification settings. A letter no setting
+    /// there can stop leaves it out, rather than offer a way out that does nothing.
+    /// </summary>
+    protected virtual bool OffersUnsubscribe => true;
+
+    /// <summary>
     /// The tags this letter needs on top of <see cref="BuildCommonTagsAsync"/> — its buttons, links and
     /// images. Only the tags its own pattern references: an unused tag is dead weight, and a missing one
     /// leaves a raw <c>$URL1</c> in front of the reader.
@@ -2522,6 +2534,11 @@ public abstract class BasePeriodicNotifyAction(
     public async Task<List<ITagValue>> BuildTagsAsync(PeriodicLetterContext context, UserInfo user, CultureInfo culture)
     {
         var tags = await BuildCommonTagsAsync(context, user, culture);
+
+        if (!OffersUnsubscribe)
+        {
+            tags.Add(TagValues.WithoutUnsubscribe());
+        }
 
         await AddTagsAsync(context, user, culture, tags);
 
