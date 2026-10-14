@@ -57,9 +57,9 @@ public class GroupWebhookDto
     public string Name { get; set; }
 
     /// <summary>
-    /// The parent group ID.
+    /// The parent group ID; null for a top-level group.
     /// </summary>
-    /// <example>00000000-0000-0000-0000-000000000000</example>
+    /// <example>3f5c2a1e-8b7d-4e6f-9a0b-1c2d3e4f5a6b</example>
     public Guid? Parent { get; set; }
 
     /// <summary>
@@ -137,7 +137,7 @@ public static partial class GroupWebhookDtoMapper
     [MapperIgnoreTarget(nameof(GroupWebhookDto.MembersCount))]
     public static partial GroupWebhookDto MapToWebhookDto(this ASC.Core.Users.GroupInfo source);
 
-    private static Guid? GetParentId(ASC.Core.Users.GroupInfo parent) => parent?.ID ?? Guid.Empty;
+    private static Guid? GetParentId(ASC.Core.Users.GroupInfo parent) => parent?.ID;
 
     private static bool GetIsLDAP(string sid) => !string.IsNullOrEmpty(sid);
 }

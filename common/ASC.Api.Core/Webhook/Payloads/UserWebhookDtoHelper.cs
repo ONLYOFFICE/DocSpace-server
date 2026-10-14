@@ -141,7 +141,7 @@ public class UserWebhookDtoHelper(
             Id = userInfo.Id,
             DisplayName = displayUserSettingsHelper.GetFullUserName(userInfo),
             UserName = userInfo.UserName,
-            Avatar = await userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}"
+            Avatar = GetAvatarUrl(await userPhotoManager.GetBigPhotoURL(userInfo.Id), cacheKey)
         };
 
         if (userInfo.Id != Guid.Empty)
@@ -172,7 +172,7 @@ public class UserWebhookDtoHelper(
         if (groups.Count > 0)
         {
             result.Groups = groups;
-            result.Department = string.Join(", ", groups.Select(d => d.Name.HtmlEncode()));
+            result.Department = string.Join(", ", groups.Select(d => d.Name));
         }
         else
         {
@@ -185,16 +185,21 @@ public class UserWebhookDtoHelper(
         var cacheKey = Math.Abs(userInfo.LastModified.GetHashCode());
 
         result.HasAvatar = await userPhotoManager.UserHasAvatar(userInfo.Id);
-        result.Avatar = await userPhotoManager.GetBigPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        result.AvatarOriginal = await userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id) + $"?hash={cacheKey}";
-        result.AvatarMax = await userPhotoManager.GetMaxPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        result.AvatarMedium = await userPhotoManager.GetMediumPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
-        result.AvatarSmall = await userPhotoManager.GetSmallPhotoURL(userInfo.Id) + $"?hash={cacheKey}";
+        result.Avatar = GetAvatarUrl(await userPhotoManager.GetBigPhotoURL(userInfo.Id), cacheKey);
+        result.AvatarOriginal = GetAvatarUrl(await userPhotoManager.GetPhotoAbsoluteWebPath(userInfo.Id), cacheKey);
+        result.AvatarMax = GetAvatarUrl(await userPhotoManager.GetMaxPhotoURL(userInfo.Id), cacheKey);
+        result.AvatarMedium = GetAvatarUrl(await userPhotoManager.GetMediumPhotoURL(userInfo.Id), cacheKey);
+        result.AvatarSmall = GetAvatarUrl(await userPhotoManager.GetSmallPhotoURL(userInfo.Id), cacheKey);
 
         if (userInfo.Id != Guid.Empty)
         {
             result.ProfileUrl = commonLinkUtility.GetFullAbsolutePath(await commonLinkUtility.GetUserProfileAsync(userInfo.Id));
         }
+    }
+
+    private string GetAvatarUrl(string path, int cacheKey)
+    {
+        return commonLinkUtility.GetFullAbsolutePath(path) + $"?hash={cacheKey}";
     }
 
     private async Task FillQuotaAsync(UserWebhookDto result, UserInfo userInfo, Tenant tenant)
