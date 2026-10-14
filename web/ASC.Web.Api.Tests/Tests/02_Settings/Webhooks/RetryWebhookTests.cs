@@ -70,8 +70,9 @@ public class RetryWebhookTests(
         var record = await WaitForAttemptAsync(delivery.Id);
 
         record.Should().NotBeNull();
-        record!.Status.Should().NotBe(0);
-        record.Delivery.Should().NotBeNull();
+        record!.Id.Should().Be(delivery.Id);
+        record.Status.Should().NotBe(0);
+        record.ResponsePayload.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
