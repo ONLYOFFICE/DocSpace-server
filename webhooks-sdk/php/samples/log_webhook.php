@@ -10,9 +10,9 @@
 
 declare(strict_types=1);
 
-// Map only the classes this sample touches. Composer would work too, but the
-// generated composer.json requires guzzle for the HTTP client -- and a webhook
-// receiver never makes a request, so none of that needs to be installed.
+// Map only the classes this sample touches, so it runs straight from the
+// generated tree without `composer install`. A real receiver requires
+// onlyoffice/docspace-webhooks-sdk and uses Composer's autoloader instead.
 spl_autoload_register(static function (string $class): void {
     $prefix = 'OnlyOffice\\DocSpace\\Webhooks\\Sdk\\';
     if (!str_starts_with($class, $prefix)) {

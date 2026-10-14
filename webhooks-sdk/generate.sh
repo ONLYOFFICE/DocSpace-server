@@ -64,13 +64,23 @@ default_props="models,modelTests=false,modelDocs=true"
 #
 # swift needs supportingFiles for JSONValue.swift, the type of the untyped
 # envelope payload.
+#
+# Packaging metadata. go emits go.mod/go.sum into generated/, which is the
+# module root: --git-user-id/--git-repo-id make the module path the one the
+# README tells users to `go get` (this generator ignores them as additional
+# properties). python emits pyproject.toml, py.typed and the package
+# __init__.py; templates/python overrides the first and the last, because the
+# stock ones describe and import the HTTP client a models-only package does not
+# have. php's composer.json comes from templates/php for the same reason, and
+# because the stock one has no name unless gitUserId/gitRepoId are set. The
+# other languages keep their package files outside generated/, edited by hand.
 targets=(
   "csharp|csharp|models,modelTests=false,modelDocs=true,supportingFiles=README.md:RECEIVING.md|packageName=DocSpace.Webhooks.SDK,library=httpclient,targetFramework=net8.0|templates/csharp|"
-  "go|go|models,modelTests=false,modelDocs=true,supportingFiles=README.md|packageName=docspace_webhooks_sdk|templates/go|--name-mappings hasAvatar=HasAvatarFlag"
+  "go|go|models,modelTests=false,modelDocs=true,supportingFiles=README.md:go.mod:go.sum|packageName=docspace_webhooks_sdk|templates/go|--name-mappings hasAvatar=HasAvatarFlag --git-user-id ONLYOFFICE --git-repo-id docspace-webhooks-sdk-go"
   "java|java|models,modelTests=false,modelDocs=true,supportingFiles=README.md|modelPackage=com.onlyoffice.docspace.webhooks.sdk.model,invokerPackage=com.onlyoffice.docspace.webhooks.sdk,groupId=com.onlyoffice,artifactId=docspace-webhooks-sdk,hideGenerationTimestamp=true,disallowAdditionalPropertiesIfNotPresent=false|templates/java|"
   "kotlin|kotlin|models,modelTests=false,modelDocs=true,supportingFiles=README.md|packageName=onlyoffice.docspace.webhooks.sdk|templates/kotlin|--schema-mappings EntryId=onlyoffice.docspace.webhooks.sdk.EntryId"
-  "php|php|models,supportingFiles,modelTests=false,modelDocs=true|invokerPackage=OnlyOffice\DocSpace\Webhooks\Sdk,packageName=onlyoffice/docspace-webhooks-sdk|templates/php|--schema-mappings EntryId=mixed --type-mappings EntryId=mixed"
-  "python|python|models,modelTests=false,modelDocs=true,supportingFiles=README.md|packageName=docspace_webhooks_sdk|templates/python|"
+  "php|php|models,supportingFiles,modelTests=false,modelDocs=true|invokerPackage=OnlyOffice\DocSpace\Webhooks\Sdk,packageName=onlyoffice/docspace-webhooks-sdk,artifactVersion=1.0.0|templates/php|--schema-mappings EntryId=mixed --type-mappings EntryId=mixed"
+  "python|python|models,modelTests=false,modelDocs=true,supportingFiles=README.md:pyproject.toml:__init__.py:py.typed|packageName=docspace_webhooks_sdk|templates/python|"
   "ruby|ruby|models,modelTests=false,modelDocs=true,supportingFiles=README.md:api_model_base.rb:version.rb:docspace-webhooks-sdk.rb:docspace-webhooks-sdk.gemspec|gemName=docspace-webhooks-sdk,moduleName=DocspaceWebhooksSdk|templates/ruby|"
   "swift|swift6|models,modelTests=false,modelDocs=true,supportingFiles=README.md:JSONValue.swift|projectName=DocSpaceWebhooksSDK|templates/swift|"
   "typescript|typescript-fetch|models,supportingFiles,modelTests=false,modelDocs=true||templates/typescript|"
@@ -226,7 +236,7 @@ run_sample() {
   body="$(native "$2")"; sig="$(cat "$3")"; secret="$(cat "$here/samples/SECRET")"
   case "$1" in
     csharp)     (cd "$here/csharp/samples/WebhookLogger" && dotnet run --no-build -- --file "$body" --secret "$secret" --signature "$sig") ;;
-    go)         (cd "$here/go" && go run ./samples "$body" "$secret" "$sig") ;;
+    go)         (cd "$here/go/samples" && go run . "$body" "$secret" "$sig") ;;
     java)       (cd "$here/java" && mvn -q exec:java -Dexec.args="$body $secret $sig") ;;
     kotlin)     (cd "$here/kotlin" && mvn -q exec:java -Dexec.args="$body $secret $sig") ;;
     php)        (cd "$here/php/samples" && php log_webhook.php "$body" "$secret" "$sig") ;;
@@ -240,7 +250,7 @@ run_sample() {
 build() {
   case "$1" in
     csharp)     need dotnet && (cd "$here/csharp/samples/WebhookLogger" && dotnet build -nologo -v q) ;;
-    go)         need go && (cd "$here/go" && go vet ./...) ;;
+    go)         need go && (cd "$here/go/generated" && go vet ./...) && (cd "$here/go/samples" && go vet ./...) ;;
     java)       need mvn && (cd "$here/java" && mvn -q compile) ;;
     kotlin)     need mvn && (cd "$here/kotlin" && mvn -q compile) ;;
     php)        need php && find "$here/php/generated/lib" -name '*.php' -print0 | xargs -0 -n1 php -l > /dev/null ;;
