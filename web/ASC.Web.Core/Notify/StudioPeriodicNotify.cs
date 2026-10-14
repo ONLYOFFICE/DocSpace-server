@@ -115,6 +115,8 @@ public class StudioPeriodicNotify(
 
         foreach (var listed in tenants)
         {
+            var retentionApplied = false;
+
             try
             {
                 // The portal as it is now, not as the list found it: the run takes hours, and a portal unblocked,
@@ -130,7 +132,11 @@ public class StudioPeriodicNotify(
                 var client = workContext.RegisterClient(serviceProvider, studioNotifyHelper.NotifySource);
 
                 // Before any letter: a portal blocked or removed here must not be written to afterwards.
-                if (await portalRetentionJob.ApplyAsync(context, retentionStart, client, senderName, retentionLastRunOn))
+                var leaveAlone = await portalRetentionJob.ApplyAsync(context, retentionStart, client, senderName, retentionLastRunOn);
+
+                retentionApplied = true;
+
+                if (leaveAlone)
                 {
                     continue;
                 }
@@ -144,6 +150,13 @@ public class StudioPeriodicNotify(
             catch (Exception err)
             {
                 _log.ErrorSendSaasLettersAsync(listed.Id, err);
+
+                // Failed before the policy got to the portal: what it owed the portal today is still owed. A failure
+                // in the ordinary letters after it leaves the policy's days alone.
+                if (!retentionApplied)
+                {
+                    portalRetentionJob.MarkIncomplete();
+                }
             }
         }
 

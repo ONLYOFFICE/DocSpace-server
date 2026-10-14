@@ -332,6 +332,46 @@ public class PortalRetentionJobTests
     }
 
     [Fact]
+    public async Task Run_ThatFailedOnAPortalBeforeThePolicy_LeavesItsDaysToTheNext()
+    {
+        using var scope = await OpenScopeAsync();
+        var settingsManager = scope.Services.GetRequiredService<SettingsManager>();
+        var logger = new RecordingLogger<PortalRetentionJob>();
+        var job = CreateJob(scope, logger);
+
+        var saved = await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>();
+
+        try
+        {
+            await settingsManager.SaveForDefaultTenantAsync(new PortalRetentionPolicyStartSettings { StartedOn = _policyStart, LastRunOn = _today.AddDays(-1) });
+
+            await job.BeginRunAsync(_today);
+
+            // What the daily loop does when a portal fails before the policy is applied to it - its tariff or its
+            // status could not be read.
+            job.MarkIncomplete();
+
+            await job.EndRunAsync(_today);
+
+            (await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>()).LastRunOn
+                .Should().Be(_today.AddDays(-1), "the next run covers today again");
+
+            logger.Messages.Should().Contain(m => m.Contains("did not get through every portal"));
+
+            // The mark is the run's own: the next run starts clean and, getting through, moves it on.
+            await job.BeginRunAsync(_today);
+            await job.EndRunAsync(_today);
+
+            (await settingsManager.LoadForDefaultTenantAsync<PortalRetentionPolicyStartSettings>()).LastRunOn
+                .Should().Be(_today, "a run that gets through every portal moves the mark");
+        }
+        finally
+        {
+            await settingsManager.SaveForDefaultTenantAsync(saved);
+        }
+    }
+
+    [Fact]
     public async Task Warning_SentByARunThatDidNotGetThrough_IsNotSentAgain()
     {
         using var portal = await CreatePortalAsync();

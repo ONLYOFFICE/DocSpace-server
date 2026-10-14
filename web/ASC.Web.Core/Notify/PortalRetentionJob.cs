@@ -140,6 +140,15 @@ public class PortalRetentionJob(
     }
 
     /// <summary>
+    /// Keeps the run from counting as got through, so the next one covers its days again: a portal failed
+    /// before the policy could be applied to it, and what was due to it today is still owed.
+    /// </summary>
+    public void MarkIncomplete()
+    {
+        _incomplete = true;
+    }
+
+    /// <summary>
     /// Applies the policy to the portal of <paramref name="context"/>, sending its letters through
     /// <paramref name="client"/>. Returns true when the caller must leave the portal alone for the rest of
     /// the run: it is blocked, it was just blocked, or it is gone. The letters of the days after
@@ -154,7 +163,7 @@ public class PortalRetentionJob(
         catch
         {
             // The caller logs it and goes on to the next portal; the days of this run stay to be covered again.
-            _incomplete = true;
+            MarkIncomplete();
 
             throw;
         }
