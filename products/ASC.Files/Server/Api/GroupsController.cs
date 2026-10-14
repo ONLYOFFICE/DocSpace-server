@@ -108,7 +108,8 @@ public class GroupsController(
     /// group without the `rooms` array, which is the cheaper form when only the name, the icon and the number of
     /// rooms are needed; `totalRooms` is filled either way. A room moved to the archive is left out of both `rooms`
     /// and `totalRooms` while its membership survives, so taking the room out of the archive brings it back into the
-    /// group. Rooms stored in the portal are listed before rooms on connected third-party accounts. The call is
+    /// group. A room the caller can no longer open is left out the same way, and comes back if access to it is
+    /// granted again. Rooms stored in the portal are listed before rooms on connected third-party accounts. The call is
     /// read-only and changes nothing about the group or the rooms it refers to.
     /// </remarks>
     /// <summary>
@@ -225,7 +226,8 @@ public class GroupsController(
     /// empty array back. Set `includeMembers` to false to leave the `rooms` array out of every entry and keep the
     /// name, the icon and `totalRooms` alone, which is the cheaper form when the list is only being shown as a menu.
     /// Archived rooms are skipped in both the `rooms` array and the `totalRooms` count, and reappear once the room is
-    /// taken out of the archive. The listing is neither paged nor filtered - it always carries the whole set - and
+    /// taken out of the archive; rooms the caller can no longer open are skipped the same way until access to them
+    /// is granted again. The listing is neither paged nor filtered - it always carries the whole set - and
     /// the order of the entries is not contractual, so sort them on the client when the order matters. The call is
     /// read-only. Use `GET api/2.0/files/group/{id}` when the identifier of a single group is already known, and
     /// `POST api/2.0/files/group` to add one.

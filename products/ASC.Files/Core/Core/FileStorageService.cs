@@ -1350,6 +1350,11 @@ public class FileStorageService //: IFileStorageService
 
         var folderDao = daoFactory.GetFolderDao<T>();
         var folder = await folderDao.GetFolderAsync(folderId);
+        if (folder is null)
+        {
+            return null;
+        }
+
         var isRoom = folder.IsRoom;
 
         // The per-entity quota is a portal feature: refuse to set or reset one while it is off.

@@ -39,7 +39,7 @@ namespace ASC.Files.Core.Services.DocumentBuilderService;
 /// </summary>
 public interface ICustomerReportBuilder
 {
-    Task<DocumentBuilderInputData> BuildAsync(Guid userId, CustomerOperationsReportTaskData data);
+    Task<DocumentBuilderInputData> BuildAsync(Guid userId, CustomerOperationsReportTaskData data, CancellationToken cancellationToken);
 }
 
 /// Carries the data shared by every report flavour, computed once before the report is built.
@@ -49,7 +49,8 @@ public sealed record RenderContext(
     DateTime UtcStartDate,
     DateTime UtcEndDate,
     JsonSerializerOptions Options,
-    ReportHeader Header);
+    ReportHeader Header,
+    CancellationToken CancellationToken);
 
 /// Horizontal alignment of a report cell. The document builder expects these as the lowercase
 /// strings it passes to SetAlignHorizontal, which is what the camel-case enum converter on
@@ -132,7 +133,7 @@ public abstract class CustomerReportBuilderBase(
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
     };
 
-    public async Task<DocumentBuilderInputData> BuildAsync(Guid userId, CustomerOperationsReportTaskData data)
+    public async Task<DocumentBuilderInputData> BuildAsync(Guid userId, CustomerOperationsReportTaskData data, CancellationToken cancellationToken)
     {
         var tenant = TenantManager.GetCurrentTenant();
 
@@ -146,7 +147,7 @@ public abstract class CustomerReportBuilderBase(
         CultureInfo.CurrentCulture = userCulture;
         CultureInfo.CurrentUICulture = userCulture;
 
-        var context = await CreateRenderContextAsync(tenant, userCulture, data);
+        var context = await CreateRenderContextAsync(tenant, userCulture, data, cancellationToken);
 
         return await BuildCoreAsync(context, data);
     }
@@ -156,14 +157,14 @@ public abstract class CustomerReportBuilderBase(
 
     // Builds the shared date range and the header block. The header is built here, once, so that
     // every flavour shares one instance.
-    private async Task<RenderContext> CreateRenderContextAsync(Tenant tenant, CultureInfo userCulture, CustomerOperationsReportTaskData taskData)
+    private async Task<RenderContext> CreateRenderContextAsync(Tenant tenant, CultureInfo userCulture, CustomerOperationsReportTaskData taskData, CancellationToken cancellationToken)
     {
         var utcStartDate = TenantUtil.DateTimeToUtc(taskData.StartDate ?? tenant.CreationDateTime);
         var utcEndDate = TenantUtil.DateTimeToUtc(taskData.EndDate ?? DateTime.UtcNow);
 
         var header = await reportHeaderService.BuildAsync(userCulture);
 
-        return new RenderContext(tenant, userCulture, utcStartDate, utcEndDate, _jsonOptions, header);
+        return new RenderContext(tenant, userCulture, utcStartDate, utcEndDate, _jsonOptions, header, cancellationToken);
     }
 
     // Scaffolding for the single-table report flavours: assembles the shared header block (logo,
