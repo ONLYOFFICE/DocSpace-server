@@ -69,16 +69,63 @@ function sendMutation(res: Response, result: PromptMutationResult | FolderMutati
   res.status(result.success ? 200 : refusalStatus(result.error)).json(result);
 }
 
-// An import answers 409 when every refusal is a name conflict and 400 for
-// anything else (a bad version, a dangling folder reference, an empty
-// entry), so a client can offer "merge anyway" only where it applies.
-function sendImport(res: Response, result: ImportResult): void {
+// An import answers 409 only when every refusal is a clash with the
+// caller's library, and 400 for anything else (a bad version, a dangling
+// folder reference, an empty entry), so a client offers "merge anyway" only
+// where it applies. A library clash exists in `merge` mode alone: `replace`
+// wipes the library first, so any refusal there is the bundle's own fault.
+// Twins inside the bundle are caught before the engine (`bundleTwinErrors`),
+// since the engine reports them with the same `conflict` code.
+function sendImport(res: Response, result: ImportResult, mode: ImportMode | undefined): void {
   if (result.success) {
     res.json(result);
     return;
   }
   const statuses = result.errors.map((e) => refusalStatus(e.error));
-  res.status(statuses.every((s) => s === 409) ? 409 : 400).json(result);
+  const libraryClash =
+    mode !== "replace" && statuses.length > 0 && statuses.every((s) => s === 409);
+  res.status(libraryClash ? 409 : 400).json(result);
+}
+
+// Two folders, or two prompts of one folder, sharing a name - compared the
+// way the engine compares them (case-insensitively, the folder scope by the
+// bundle's own ids). The second twin is the one reported, as in the engine.
+// Blank names are left to the engine, which refuses them as `required`.
+function bundleTwinErrors(bundle: PromptBundle): ImportError[] {
+  const errors: ImportError[] = [];
+  const folderNames = new Set<string>();
+  for (const folder of bundle.folders) {
+    if (!folder.name.trim()) continue;
+    const key = folder.name.toLowerCase();
+    if (folderNames.has(key)) {
+      errors.push({
+        kind: "folder",
+        ref: folder.name.trim(),
+        error: { field: "name", message: "The bundle holds two folders of this name", code: "invalid" },
+      });
+      continue;
+    }
+    folderNames.add(key);
+  }
+  const promptNames = new Set<string>();
+  for (const prompt of bundle.prompts) {
+    if (!prompt.name.trim()) continue;
+    const key = `${prompt.folderId ?? ""}\u0000${prompt.name.toLowerCase()}`;
+    if (promptNames.has(key)) {
+      errors.push({
+        kind: "prompt",
+        ref: prompt.name.trim(),
+        error: {
+          field: "name",
+          message: "The bundle holds two prompts of this name in one folder",
+          code: "invalid",
+        },
+      });
+      continue;
+    }
+    promptNames.add(key);
+  }
+  return errors;
 }
 
 // Shape refusals raised here, before the engine: the same `{ success:
@@ -347,7 +394,16 @@ export const promptsController = {
       }
       mode = rawMode as ImportMode | undefined;
     }
-    sendImport(res, await engine.importBundle(bundle, mode === undefined ? undefined : { mode }));
+    const twinErrors = bundleTwinErrors(bundle);
+    if (twinErrors.length > 0) {
+      res.status(400).json({ success: false, errors: twinErrors });
+      return;
+    }
+    sendImport(
+      res,
+      await engine.importBundle(bundle, mode === undefined ? undefined : { mode }),
+      mode,
+    );
   }),
 
   getById: asyncHandler(async (req, res) => {
