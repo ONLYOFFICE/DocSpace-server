@@ -7,7 +7,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **Guid** |  | [optional] 
 **Name** | **string** |  | [optional] 
-**Parent** | **Guid** |  | [optional] 
+**Parent** | **Guid** | ID of the parent group; absent for a top-level group. | [optional] 
 **Category** | **Guid** |  | [optional] 
 **IsLDAP** | **bool** |  | [optional] 
 **IsSystem** | **bool** |  | [optional] 

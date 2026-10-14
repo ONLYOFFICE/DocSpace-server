@@ -21,6 +21,7 @@ var _ MappedNullable = &GroupPayload{}
 type GroupPayload struct {
 	Id *string `json:"id,omitempty"`
 	Name *string `json:"name,omitempty"`
+	// ID of the parent group; absent for a top-level group.
 	Parent *string `json:"parent,omitempty"`
 	Category *string `json:"category,omitempty"`
 	IsLDAP *bool `json:"isLDAP,omitempty"`

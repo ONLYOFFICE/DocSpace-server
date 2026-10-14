@@ -33,8 +33,7 @@ import com.squareup.moshi.JsonClass
  * @param id 
  * @param displayName 
  * @param userName 
- * @param email 
- * @param avatar 
+ * @param avatar Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
  * @param profileUrl 
  */
 
@@ -50,9 +49,7 @@ data class UserSummaryPayload (
     @Json(name = "userName")
     val userName: kotlin.String? = null,
 
-    @Json(name = "email")
-    val email: kotlin.String? = null,
-
+    /* Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does. */
     @Json(name = "avatar")
     val avatar: kotlin.String? = null,
 

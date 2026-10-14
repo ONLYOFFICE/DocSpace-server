@@ -32,11 +32,7 @@ export interface UserSummaryPayload {
      */
     userName?: string;
     /**
-     * 
-     */
-    email?: string;
-    /**
-     * 
+     * Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
      */
     avatar?: string;
     /**
@@ -65,7 +61,6 @@ export function UserSummaryPayloadFromJSONTyped(json: any, ignoreDiscriminator: 
         'id': json['id'] == null ? undefined : json['id'],
         'displayName': json['displayName'] == null ? undefined : json['displayName'],
         'userName': json['userName'] == null ? undefined : json['userName'],
-        'email': json['email'] == null ? undefined : json['email'],
         'avatar': json['avatar'] == null ? undefined : json['avatar'],
         'profileUrl': json['profileUrl'] == null ? undefined : json['profileUrl'],
     };
@@ -85,7 +80,6 @@ export function UserSummaryPayloadToJSONTyped(value?: UserSummaryPayload | null,
         'id': value['id'],
         'displayName': value['displayName'],
         'userName': value['userName'],
-        'email': value['email'],
         'avatar': value['avatar'],
         'profileUrl': value['profileUrl'],
     };

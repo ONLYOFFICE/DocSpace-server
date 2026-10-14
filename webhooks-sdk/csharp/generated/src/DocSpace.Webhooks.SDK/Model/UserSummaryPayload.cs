@@ -38,15 +38,13 @@ namespace DocSpace.Webhooks.SDK.Model
         /// <param name="id">id.</param>
         /// <param name="displayName">displayName.</param>
         /// <param name="userName">userName.</param>
-        /// <param name="email">email.</param>
-        /// <param name="avatar">avatar.</param>
+        /// <param name="avatar">Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does..</param>
         /// <param name="profileUrl">profileUrl.</param>
-        public UserSummaryPayload(Guid id = default, string displayName = default, string userName = default, string email = default, string avatar = default, string profileUrl = default)
+        public UserSummaryPayload(Guid id = default, string displayName = default, string userName = default, string avatar = default, string profileUrl = default)
         {
             this.Id = id;
             this.DisplayName = displayName;
             this.UserName = userName;
-            this.Email = email;
             this.Avatar = avatar;
             this.ProfileUrl = profileUrl;
         }
@@ -70,14 +68,9 @@ namespace DocSpace.Webhooks.SDK.Model
         public string UserName { get; set; }
 
         /// <summary>
-        /// Gets or Sets Email
+        /// Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
         /// </summary>
-        [DataMember(Name = "email", EmitDefaultValue = false)]
-        public string Email { get; set; }
-
-        /// <summary>
-        /// Gets or Sets Avatar
-        /// </summary>
+        /// <value>Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.</value>
         [DataMember(Name = "avatar", EmitDefaultValue = false)]
         public string Avatar { get; set; }
 
@@ -98,7 +91,6 @@ namespace DocSpace.Webhooks.SDK.Model
             sb.Append("  Id: ").Append(Id).Append("\n");
             sb.Append("  DisplayName: ").Append(DisplayName).Append("\n");
             sb.Append("  UserName: ").Append(UserName).Append("\n");
-            sb.Append("  Email: ").Append(Email).Append("\n");
             sb.Append("  Avatar: ").Append(Avatar).Append("\n");
             sb.Append("  ProfileUrl: ").Append(ProfileUrl).Append("\n");
             sb.Append("}\n");

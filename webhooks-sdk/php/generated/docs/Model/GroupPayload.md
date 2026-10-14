@@ -6,7 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **id** | **string** |  | [optional]
 **name** | **string** |  | [optional]
-**parent** | **string** |  | [optional]
+**parent** | **string** | ID of the parent group; absent for a top-level group. | [optional]
 **category** | **string** |  | [optional]
 **is_ldap** | **bool** |  | [optional]
 **is_system** | **bool** |  | [optional]

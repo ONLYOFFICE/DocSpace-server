@@ -11,8 +11,7 @@ A user referenced from another payload.
 |**id** | **UUID** |  |  [optional] |
 |**displayName** | **String** |  |  [optional] |
 |**userName** | **String** |  |  [optional] |
-|**email** | **String** |  |  [optional] |
-|**avatar** | **String** |  |  [optional] |
+|**avatar** | **String** | Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does. |  [optional] |
 |**profileUrl** | **String** |  |  [optional] |
 
 

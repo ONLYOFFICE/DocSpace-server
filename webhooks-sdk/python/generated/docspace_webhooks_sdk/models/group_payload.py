@@ -31,7 +31,7 @@ class GroupPayload(BaseModel):
     """ # noqa: E501
     id: Optional[UUID] = None
     name: Optional[StrictStr] = None
-    parent: Optional[UUID] = None
+    parent: Optional[UUID] = Field(default=None, description="ID of the parent group; absent for a top-level group.")
     category: Optional[UUID] = None
     is_ldap: Optional[StrictBool] = Field(default=None, alias="isLDAP")
     is_system: Optional[StrictBool] = Field(default=None, alias="isSystem")

@@ -10,7 +10,6 @@ Name | Type
 `id` | string
 `displayName` | string
 `userName` | string
-`email` | string
 `avatar` | string
 `profileUrl` | string
 
@@ -24,7 +23,6 @@ const example = {
   "id": null,
   "displayName": null,
   "userName": null,
-  "email": null,
   "avatar": null,
   "profileUrl": null,
 } satisfies UserSummaryPayload

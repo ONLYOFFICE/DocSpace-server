@@ -31,10 +31,9 @@ class UserSummaryPayload(BaseModel):
     id: Optional[UUID] = None
     display_name: Optional[StrictStr] = Field(default=None, alias="displayName")
     user_name: Optional[StrictStr] = Field(default=None, alias="userName")
-    email: Optional[StrictStr] = None
-    avatar: Optional[StrictStr] = None
+    avatar: Optional[StrictStr] = Field(default=None, description="Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.")
     profile_url: Optional[StrictStr] = Field(default=None, alias="profileUrl")
-    __properties: ClassVar[List[str]] = ["id", "displayName", "userName", "email", "avatar", "profileUrl"]
+    __properties: ClassVar[List[str]] = ["id", "displayName", "userName", "avatar", "profileUrl"]
 
     model_config = ConfigDict(
         validate_by_name=True,
@@ -90,7 +89,6 @@ class UserSummaryPayload(BaseModel):
             "id": obj.get("id"),
             "displayName": obj.get("displayName"),
             "userName": obj.get("userName"),
-            "email": obj.get("email"),
             "avatar": obj.get("avatar"),
             "profileUrl": obj.get("profileUrl")
         })

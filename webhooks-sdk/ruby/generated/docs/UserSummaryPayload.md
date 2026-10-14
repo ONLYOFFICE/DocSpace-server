@@ -7,8 +7,7 @@
 | **id** | **String** |  | [optional] |
 | **display_name** | **String** |  | [optional] |
 | **user_name** | **String** |  | [optional] |
-| **email** | **String** |  | [optional] |
-| **avatar** | **String** |  | [optional] |
+| **avatar** | **String** | Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does. | [optional] |
 | **profile_url** | **String** |  | [optional] |
 
 ## Example
@@ -20,7 +19,6 @@ instance = DocspaceWebhooksSdk::UserSummaryPayload.new(
   id: null,
   display_name: null,
   user_name: null,
-  email: null,
   avatar: null,
   profile_url: null
 )

@@ -10,7 +10,7 @@ ASC.Api.Core/Webhook/Payloads/GroupWebhookDto.cs. A copy of the REST GroupDto.  
 |------------ | ------------- | ------------- | -------------|
 |**id** | **UUID** |  |  [optional] |
 |**name** | **String** |  |  [optional] |
-|**parent** | **UUID** |  |  [optional] |
+|**parent** | **UUID** | ID of the parent group; absent for a top-level group. |  [optional] |
 |**category** | **UUID** |  |  [optional] |
 |**isLDAP** | **Boolean** |  |  [optional] |
 |**isSystem** | **Boolean** |  |  [optional] |

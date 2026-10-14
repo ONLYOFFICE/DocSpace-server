@@ -12,6 +12,7 @@ public struct GroupPayload: Sendable, Codable, Hashable {
 
     public var id: UUID?
     public var name: String?
+    /** ID of the parent group; absent for a top-level group. */
     public var parent: UUID?
     public var category: UUID?
     public var isLDAP: Bool?

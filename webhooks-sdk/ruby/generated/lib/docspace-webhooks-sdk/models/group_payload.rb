@@ -20,6 +20,7 @@ module DocspaceWebhooksSdk
 
     attr_accessor :name
 
+    # ID of the parent group; absent for a top-level group.
     attr_accessor :parent
 
     attr_accessor :category

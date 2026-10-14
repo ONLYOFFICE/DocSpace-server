@@ -42,7 +42,7 @@ export interface GroupPayload {
      */
     name?: string;
     /**
-     * 
+     * ID of the parent group; absent for a top-level group.
      */
     parent?: string;
     /**

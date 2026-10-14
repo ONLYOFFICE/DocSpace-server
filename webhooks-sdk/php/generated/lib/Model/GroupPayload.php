@@ -406,7 +406,7 @@ class GroupPayload implements ModelInterface, ArrayAccess, \JsonSerializable
     /**
      * Sets parent
      *
-     * @param string|null $parent parent
+     * @param string|null $parent ID of the parent group; absent for a top-level group.
      *
      * @return self
      */

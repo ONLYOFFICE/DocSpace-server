@@ -33,7 +33,7 @@ import com.squareup.moshi.JsonClass
  *
  * @param id 
  * @param name 
- * @param parent 
+ * @param parent ID of the parent group; absent for a top-level group.
  * @param category 
  * @param isLDAP 
  * @param isSystem 
@@ -50,6 +50,7 @@ data class GroupPayload (
     @Json(name = "name")
     val name: kotlin.String? = null,
 
+    /* ID of the parent group; absent for a top-level group. */
     @Json(name = "parent")
     val parent: java.util.UUID? = null,
 

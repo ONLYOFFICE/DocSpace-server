@@ -22,8 +22,7 @@ module DocspaceWebhooksSdk
 
     attr_accessor :user_name
 
-    attr_accessor :email
-
+    # Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
     attr_accessor :avatar
 
     attr_accessor :profile_url
@@ -34,7 +33,6 @@ module DocspaceWebhooksSdk
         :'id' => :'id',
         :'display_name' => :'displayName',
         :'user_name' => :'userName',
-        :'email' => :'email',
         :'avatar' => :'avatar',
         :'profile_url' => :'profileUrl'
       }
@@ -56,7 +54,6 @@ module DocspaceWebhooksSdk
         :'id' => :'String',
         :'display_name' => :'String',
         :'user_name' => :'String',
-        :'email' => :'String',
         :'avatar' => :'String',
         :'profile_url' => :'String'
       }
@@ -96,10 +93,6 @@ module DocspaceWebhooksSdk
         self.user_name = attributes[:'user_name']
       end
 
-      if attributes.key?(:'email')
-        self.email = attributes[:'email']
-      end
-
       if attributes.key?(:'avatar')
         self.avatar = attributes[:'avatar']
       end
@@ -132,7 +125,6 @@ module DocspaceWebhooksSdk
           id == o.id &&
           display_name == o.display_name &&
           user_name == o.user_name &&
-          email == o.email &&
           avatar == o.avatar &&
           profile_url == o.profile_url
     end
@@ -146,7 +138,7 @@ module DocspaceWebhooksSdk
     # Calculates hash code according to all attributes.
     # @return [Integer] Hash code
     def hash
-      [id, display_name, user_name, email, avatar, profile_url].hash
+      [id, display_name, user_name, avatar, profile_url].hash
     end
 
     # Builds the object from hash

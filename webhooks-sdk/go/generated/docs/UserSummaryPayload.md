@@ -7,8 +7,7 @@ Name | Type | Description | Notes
 **Id** | Pointer to **string** |  | [optional] 
 **DisplayName** | Pointer to **string** |  | [optional] 
 **UserName** | Pointer to **string** |  | [optional] 
-**Email** | Pointer to **string** |  | [optional] 
-**Avatar** | Pointer to **string** |  | [optional] 
+**Avatar** | Pointer to **string** | Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does. | [optional] 
 **ProfileUrl** | Pointer to **string** |  | [optional] 
 
 ## Methods
@@ -104,31 +103,6 @@ SetUserName sets UserName field to given value.
 `func (o *UserSummaryPayload) HasUserName() bool`
 
 HasUserName returns a boolean if a field has been set.
-
-### GetEmail
-
-`func (o *UserSummaryPayload) GetEmail() string`
-
-GetEmail returns the Email field if non-nil, zero value otherwise.
-
-### GetEmailOk
-
-`func (o *UserSummaryPayload) GetEmailOk() (*string, bool)`
-
-GetEmailOk returns a tuple with the Email field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetEmail
-
-`func (o *UserSummaryPayload) SetEmail(v string)`
-
-SetEmail sets Email field to given value.
-
-### HasEmail
-
-`func (o *UserSummaryPayload) HasEmail() bool`
-
-HasEmail returns a boolean if a field has been set.
 
 ### GetAvatar
 

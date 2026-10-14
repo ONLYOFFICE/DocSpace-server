@@ -61,7 +61,6 @@ class UserSummaryPayload implements ModelInterface, ArrayAccess, \JsonSerializab
         'id' => 'string',
         'display_name' => 'string',
         'user_name' => 'string',
-        'email' => 'string',
         'avatar' => 'string',
         'profile_url' => 'string'
     ];
@@ -77,7 +76,6 @@ class UserSummaryPayload implements ModelInterface, ArrayAccess, \JsonSerializab
         'id' => 'uuid',
         'display_name' => null,
         'user_name' => null,
-        'email' => 'email',
         'avatar' => null,
         'profile_url' => null
     ];
@@ -91,7 +89,6 @@ class UserSummaryPayload implements ModelInterface, ArrayAccess, \JsonSerializab
         'id' => false,
         'display_name' => false,
         'user_name' => false,
-        'email' => false,
         'avatar' => false,
         'profile_url' => false
     ];
@@ -185,7 +182,6 @@ class UserSummaryPayload implements ModelInterface, ArrayAccess, \JsonSerializab
         'id' => 'id',
         'display_name' => 'displayName',
         'user_name' => 'userName',
-        'email' => 'email',
         'avatar' => 'avatar',
         'profile_url' => 'profileUrl'
     ];
@@ -199,7 +195,6 @@ class UserSummaryPayload implements ModelInterface, ArrayAccess, \JsonSerializab
         'id' => 'setId',
         'display_name' => 'setDisplayName',
         'user_name' => 'setUserName',
-        'email' => 'setEmail',
         'avatar' => 'setAvatar',
         'profile_url' => 'setProfileUrl'
     ];
@@ -213,7 +208,6 @@ class UserSummaryPayload implements ModelInterface, ArrayAccess, \JsonSerializab
         'id' => 'getId',
         'display_name' => 'getDisplayName',
         'user_name' => 'getUserName',
-        'email' => 'getEmail',
         'avatar' => 'getAvatar',
         'profile_url' => 'getProfileUrl'
     ];
@@ -278,7 +272,6 @@ class UserSummaryPayload implements ModelInterface, ArrayAccess, \JsonSerializab
         $this->setIfExists('id', $data ?? [], null);
         $this->setIfExists('display_name', $data ?? [], null);
         $this->setIfExists('user_name', $data ?? [], null);
-        $this->setIfExists('email', $data ?? [], null);
         $this->setIfExists('avatar', $data ?? [], null);
         $this->setIfExists('profile_url', $data ?? [], null);
     }
@@ -407,33 +400,6 @@ class UserSummaryPayload implements ModelInterface, ArrayAccess, \JsonSerializab
     }
 
     /**
-     * Gets email
-     *
-     * @return string|null
-     */
-    public function getEmail()
-    {
-        return $this->container['email'];
-    }
-
-    /**
-     * Sets email
-     *
-     * @param string|null $email email
-     *
-     * @return self
-     */
-    public function setEmail($email)
-    {
-        if (is_null($email)) {
-            throw new \InvalidArgumentException('non-nullable email cannot be null');
-        }
-        $this->container['email'] = $email;
-
-        return $this;
-    }
-
-    /**
      * Gets avatar
      *
      * @return string|null
@@ -446,7 +412,7 @@ class UserSummaryPayload implements ModelInterface, ArrayAccess, \JsonSerializab
     /**
      * Sets avatar
      *
-     * @param string|null $avatar avatar
+     * @param string|null $avatar Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
      *
      * @return self
      */

@@ -90,7 +90,7 @@ export interface UserPayload {
      */
     terminated?: Date;
     /**
-     * Comma-separated group names, HTML-encoded.
+     * Comma-separated names of the groups the user belongs to, as plain text (not HTML-encoded).
      */
     department?: string;
     /**
@@ -174,23 +174,23 @@ export interface UserPayload {
      */
     hasAvatar?: boolean;
     /**
-     * 
+     * Absolute URL of the 82x82 avatar, with a hash query parameter that changes when the profile does.
      */
     avatar?: string;
     /**
-     * 
+     * Absolute URL of the original avatar, with the same hash parameter.
      */
     avatarOriginal?: string;
     /**
-     * 
+     * Absolute URL of the 200x200 avatar, with the same hash parameter.
      */
     avatarMax?: string;
     /**
-     * 
+     * Absolute URL of the 48x48 avatar, with the same hash parameter.
      */
     avatarMedium?: string;
     /**
-     * 
+     * Absolute URL of the 32x32 avatar, with the same hash parameter.
      */
     avatarSmall?: string;
     /**
