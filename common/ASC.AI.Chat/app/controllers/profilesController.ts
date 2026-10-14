@@ -381,8 +381,13 @@ export const profilesController = {
     res.json(publicProfile);
   }),
 
+  // `readAllForClient`, not `engine.list()`: the engine reads the full
+  // profiles its provider calls need, while this answer reaches the browser
+  // - the chat model picker and the editor read it as any user - so the AI
+  // service drops `key` and `headers` for everyone but an administrator,
+  // whose settings cards edit them.
   list: asyncHandler(async (_req, res) => {
-    const profiles = await engine.list();
+    const profiles = await storage.profiles.readAllForClient();
     res.json(profiles);
   }),
 };
