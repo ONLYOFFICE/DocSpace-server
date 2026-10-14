@@ -5827,13 +5827,74 @@ public class FileStorageService //: IFileStorageService
                 throw new InvalidOperationException();
         }
 
-        await fileDao.SaveProperties(formId, properties);
+        await formFillingReportCreator.SaveFormPropertiesAsync(formId, properties);
         await socketManager.CreateFileAsync(form);
+
+        if (action == FormFillingManageAction.Start && room.FolderType == FolderType.FillingFormsRoom
+            && form is File<int> startedForm && properties is EntryProperties<int> startedProperties)
+        {
+            await formFillingReportCreator.RequestBuiltinDbVersionCheckAsync(startedForm, startedProperties.FormFilling);
+        }
 
         if (formFillersLosingTheForm is { Count: > 0 })
         {
             await socketManager.DeleteFileAsync(form, users: formFillersLosingTheForm);
         }
+    }
+
+    public async Task<FormFieldRenamesDto> ConfirmFormFieldRenamesAsync(int formId, int version, bool confirm)
+    {
+        var (form, _) = await GetFormForFieldRenamesAsync(formId);
+
+        await formFillingReportCreator.AnswerBuiltinDbFieldRenamesAsync(form.Id, version, confirm);
+
+        return ToFormFieldRenamesDto((await daoFactory.GetFileDao<int>().GetProperties(form.Id)).FormFilling);
+    }
+
+    public async Task<FormFieldRenamesDto> GetFormFieldRenamesAsync(int formId)
+    {
+        var (_, formFilling) = await GetFormForFieldRenamesAsync(formId);
+
+        return ToFormFieldRenamesDto(formFilling);
+    }
+
+    private static FormFieldRenamesDto ToFormFieldRenamesDto(FormFillingProperties<int> formFilling)
+    {
+        return new FormFieldRenamesDto
+        {
+            Versions = FormFillingReportCreator.GetOpenQuestions(formFilling).Select(q => q.Map()).ToList()
+        };
+    }
+
+    // The original PDF form of a form-filling room whose filling the caller may start.
+    private async Task<(File<int> Form, FormFillingProperties<int> FormFilling)> GetFormForFieldRenamesAsync(int formId)
+    {
+        var fileDao = daoFactory.GetFileDao<int>();
+        var form = await fileDao.GetFileAsync(formId) ?? throw new ItemNotFoundException(FilesCommonResource.ErrorMessage_FileNotFound);
+
+        if (!form.IsPdf)
+        {
+            throw new InvalidOperationException();
+        }
+
+        if (!await fileSecurity.CanStartFillingAsync(form, authContext.CurrentAccount.ID))
+        {
+            throw new InvalidOperationException(FilesCommonResource.ErrorMessage_SecurityException_EditFile);
+        }
+
+        var room = await DocSpaceHelper.GetParentRoom(form, daoFactory.GetFolderDao<int>());
+        if (room is not { FolderType: FolderType.FillingFormsRoom })
+        {
+            throw new InvalidOperationException();
+        }
+
+        var formFilling = (await fileDao.GetProperties(form.Id))?.FormFilling;
+        if (formFilling == null || formFilling.OriginalFormId != form.Id)
+        {
+            throw new InvalidOperationException();
+        }
+
+        return (form, formFilling);
     }
 
     private async Task<List<Guid>> GetFormFillersAsync<T>(Folder<T> room)

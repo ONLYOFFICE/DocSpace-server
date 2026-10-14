@@ -162,6 +162,8 @@ public static class FilesWorkerServiceExtensions
                 ExternalDbFormSubmissionIntegrationEventHandler>(),
             eventBus.SubscribeAsync<BuiltinDbFormSubmissionIntegrationEvent,
                 BuiltinDbFormSubmissionIntegrationEventHandler>(),
+            eventBus.SubscribeAsync<BuiltinDbFormVersionIntegrationEvent,
+                BuiltinDbFormVersionIntegrationEventHandler>(),
             eventBus.SubscribeAsync<ExternalDbRoomSyncIntegrationEvent,
                 ExternalDbRoomSyncIntegrationEventHandler>(),
             eventBus.SubscribeAsync<RoomNotifyIntegrationEvent,

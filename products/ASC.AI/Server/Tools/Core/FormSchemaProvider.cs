@@ -122,9 +122,7 @@ public class FormSchemaProvider(
             return null;
         }
 
-        return await formFillingReportCreator.EnsureBuiltinDbTableAsync(file.Id, file.Version, formFilling.RoomId)
-            ? FormFillingReportCreator.GetTableName(file.Id, file.Version)
-            : null;
+        return await formFillingReportCreator.EnsureBuiltinDbTableAsync(file.Id, file.Version, formFilling.RoomId);
     }
 
     private async Task<FormFillingProperties<int>?> GetStartedFormFillingAsync(File<int> file)

@@ -1179,6 +1179,57 @@ public abstract class FilesController<T>(
     }
 
     /// <remarks>
+    /// Reports the versions of a PDF form in a form-filling room whose field keys look changed since the version before
+    /// them while the fields stayed in place, so that the user can say whether they keep their meaning. A confirmed
+    /// version keeps its submissions together with the earlier ones for the analysis of responses; until the answer its
+    /// submissions are kept in a table of their own, nothing is lost either way. Each pair is described by the field
+    /// type, its options and the tip the author set, never by entered values. The answer goes to
+    /// `PUT api/2.0/files/file/{fileId}/fieldrenames`. The comparison runs in the background once the filling is started
+    /// and after each save of a started form, or with the first submission of a version at the latest; when it opens a
+    /// question, the form is updated through the socket and lists `fieldRenamesPending` as the cue to call this. A form
+    /// that is not started has nothing to ask yet. The caller needs the right to start the filling, which the room admin
+    /// and a member with content-creator rights have. The call is read-only.
+    /// </remarks>
+    /// <summary>
+    /// Get renamed form fields
+    /// </summary>
+    /// <path>api/2.0/files/file/{fileId}/fieldrenames</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "The form versions whose renamed fields wait for an answer", typeof(FormFieldRenamesDto))]
+    [SwaggerResponse(403, "The file is not a PDF form of a form-filling room, is a copy of a form, or the caller may not start its filling")]
+    [SwaggerResponse(404, "No file with this identifier exists")]
+    [HttpGet("file/{fileId}/fieldrenames")]
+    public Task<FormFieldRenamesDto> GetFormFieldRenames(FileIdRequestDto<int> inDto)
+    {
+        return fileStorageService.GetFormFieldRenamesAsync(inDto.FileId);
+    }
+
+    /// <remarks>
+    /// Answers whether the renamed fields of one form version, as `GET api/2.0/files/file/{fileId}/fieldrenames`
+    /// reported them, keep their meaning. True keeps the submissions of the version together with the earlier ones for
+    /// the analysis of responses: the columns of the shared table are renamed, and submissions the version already has
+    /// are moved there in the background, so the analysis may show them apart for a short while. When the move is not
+    /// possible at the moment, as while the search index is unavailable, it is retried with the next submission of the
+    /// version or the next start or save of the form; the answer is kept and not asked again. False leaves the version a table of its own. The answer is accepted
+    /// at any time while the question is open, also after the filling started and responses arrived; a `version`
+    /// without an open question changes nothing, so a repeated answer is harmless. The caller needs the right to start
+    /// the filling. The call is mutating and answers with the questions left open.
+    /// </remarks>
+    /// <summary>
+    /// Answer renamed form fields
+    /// </summary>
+    /// <path>api/2.0/files/file/{fileId}/fieldrenames</path>
+    [Tags("Files / Files")]
+    [SwaggerResponse(200, "The form versions whose renamed fields still wait for an answer", typeof(FormFieldRenamesDto))]
+    [SwaggerResponse(403, "The file is not a PDF form of a form-filling room, is a copy of a form, or the caller may not start its filling")]
+    [SwaggerResponse(404, "No file with this identifier exists")]
+    [HttpPut("file/{fileId}/fieldrenames")]
+    public Task<FormFieldRenamesDto> ConfirmFormFieldRenames(ConfirmFormFieldRenamesRequestDto inDto)
+    {
+        return fileStorageService.ConfirmFormFieldRenamesAsync(inDto.FileId, inDto.Answer.Version, inDto.Answer.Confirm);
+    }
+
+    /// <remarks>
     /// Returns everything that has been submitted against one PDF form: `metadata` describes the fields of the form,
     /// in the order they are laid out, and `submissions` carries one record per completed copy, each of them holding
     /// the values that were entered. It is the data behind the results table a client shows for a form, and the same

@@ -286,6 +286,7 @@ global using EnumMemberAttribute = System.Runtime.Serialization.EnumMemberAttrib
 global using FilesDbContext = ASC.Files.Core.EF.FilesDbContext;
 global using FileShare = ASC.Files.Core.Security.FileShare;
 global using FileType = ASC.Web.Core.Files.FileType;
+global using FormFieldsExtractor = ASC.Files.Core.Services.DocumentBuilderService.FormFieldsExtractor;
 global using FormFillingReportTask = ASC.Files.Core.Services.DocumentBuilderService.FormFillingReportTask;
 global using HttpException = ASC.Common.Web.HttpException;
 global using JsonConverterAttribute = System.Text.Json.Serialization.JsonConverterAttribute;

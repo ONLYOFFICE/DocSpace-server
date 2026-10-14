@@ -50,4 +50,32 @@ internal static partial class FormFillingReportCreatorLogger
     [LoggerMessage(LogLevel.Warning, "Built-in forms DB: failed to record the use of table {TableName}")]
     public static partial void WarnBuiltinDbTouchFailed(
         this ILogger<FormFillingReportCreator> logger, Exception exception, string tableName);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: failed to compare the fields of form {FormId} version {Version} with the previous version")]
+    public static partial void WarnBuiltinDbVersionCheckFailed(
+        this ILogger<FormFillingReportCreator> logger, Exception exception, int formId, int version);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: version {Version} keeps a table of its own, failed to continue table {TableName}")]
+    public static partial void WarnBuiltinDbVersionLinkFailed(
+        this ILogger<FormFillingReportCreator> logger, Exception exception, string tableName, int version);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: version {Version} keeps a table of its own, its columns conflict with table {TableName}")]
+    public static partial void WarnBuiltinDbColumnConflict(
+        this ILogger<FormFillingReportCreator> logger, string tableName, int version);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: table {SourceTable} is not merged into {TargetTable} yet, one of them cannot be restored")]
+    public static partial void WarnBuiltinDbMergeDeferred(
+        this ILogger<FormFillingReportCreator> logger, string sourceTable, string targetTable);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: failed to merge table {SourceTable} into {TargetTable}")]
+    public static partial void WarnBuiltinDbMergeFailed(
+        this ILogger<FormFillingReportCreator> logger, Exception exception, string sourceTable, string targetTable);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: table {SourceTable} merged into {TargetTable} is kept, not all of its rows are there")]
+    public static partial void WarnBuiltinDbMergedTableKept(
+        this ILogger<FormFillingReportCreator> logger, string sourceTable, string targetTable);
+
+    [LoggerMessage(LogLevel.Warning, "Built-in forms DB: submission {FileId} of form {FormId} version {Version} is left to the index, its table kept moving")]
+    public static partial void WarnBuiltinDbSubmissionSkipped(
+        this ILogger<FormFillingReportCreator> logger, int fileId, int formId, int version);
 }

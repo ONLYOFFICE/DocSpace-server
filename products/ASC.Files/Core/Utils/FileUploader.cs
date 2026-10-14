@@ -434,7 +434,7 @@ public class FileUploader(
         {
             properties.FormFilling.StartFilling = false;
             properties.FormFilling.IsVersionChanged = true;
-            await dao.SaveProperties(fileId, properties);
+            await serviceProvider.GetRequiredService<FormFillingReportCreator>().SaveFormPropertiesAsync(fileId, properties);
         }
     }
 

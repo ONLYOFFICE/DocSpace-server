@@ -308,7 +308,7 @@ public class ExternalDatabaseClient(ConsumerFactory consumerFactory, ILogger<Ext
         return $"CREATE TABLE IF NOT EXISTS \"{tableName}\" ({string.Join(", ", colDefs)});";
     }
 
-    private static string MapPgType(DbColumnDefinition col) => col.Type switch
+    protected static string MapPgType(DbColumnDefinition col) => col.Type switch
     {
         DbColumnType.Integer => "INTEGER",
         DbColumnType.Boolean => "BOOLEAN",

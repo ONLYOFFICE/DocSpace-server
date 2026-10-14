@@ -154,6 +154,84 @@ public class FormFillingProperties<T>
     /// </summary>
     public string ExternalDbTableName { get; set; }
 
+    /// <summary>
+    /// The last form version whose fields were compared with the previous version for the built-in database.
+    /// </summary>
+    public int BuiltinDbCheckedVersion { get; set; }
+
+    /// <summary>
+    /// The modification time, in ticks, of the checked version when it was compared; a version overwritten since is
+    /// compared again.
+    /// </summary>
+    public long BuiltinDbCheckedStamp { get; set; }
+
+    /// <summary>
+    /// The form versions that keep their submissions in the built-in table of an earlier version.
+    /// </summary>
+    public List<FormVersionLink> BuiltinDbVersionLinks { get; set; }
+
+    /// <summary>
+    /// The links the form versions may take, applied with the first submission of the version or, when it already has
+    /// submissions, with the answer about its renamed fields.
+    /// </summary>
+    public List<FormVersionLink> BuiltinDbPendingLinks { get; set; }
+}
+
+/// <summary>
+/// A form version that continues the built-in table of an earlier version.
+/// </summary>
+public class FormVersionLink
+{
+    /// <summary>
+    /// The form version.
+    /// </summary>
+    public int Version { get; set; }
+
+    /// <summary>
+    /// The version the table is named after.
+    /// </summary>
+    public int TableVersion { get; set; }
+
+    /// <summary>
+    /// The fields renamed since the previous version.
+    /// </summary>
+    public List<FormFieldRename> Renames { get; set; }
+
+    /// <summary>
+    /// The answer about the renamed fields of a pending link; null while nobody answered.
+    /// </summary>
+    public bool? Confirmed { get; set; }
+}
+
+/// <summary>
+/// A form field whose key changed between two versions.
+/// </summary>
+public class FormFieldRename
+{
+    /// <summary>
+    /// The key in the previous version.
+    /// </summary>
+    public string OldKey { get; set; }
+
+    /// <summary>
+    /// The key in the new version.
+    /// </summary>
+    public string NewKey { get; set; }
+
+    /// <summary>
+    /// The field type in the new version.
+    /// </summary>
+    public string Type { get; set; }
+
+    /// <summary>
+    /// The values the field offers in the new version.
+    /// </summary>
+    public List<string> Options { get; set; }
+
+    /// <summary>
+    /// The tip the form author set for the field in the new version.
+    /// </summary>
+    public string Tip { get; set; }
 }
 
 /// <summary>

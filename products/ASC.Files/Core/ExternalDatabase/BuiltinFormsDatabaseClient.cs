@@ -52,6 +52,7 @@ public class BuiltinFormsDatabaseClient(
 
     private static readonly TimeSpan _touchInterval = TimeSpan.FromHours(1);
     private static readonly Regex _formTableRegex = new(FormTablePattern, RegexOptions.Compiled);
+    private static readonly Regex _columnNameRegex = new("^[a-z0-9_]+$", RegexOptions.Compiled);
 
     private readonly IFusionCache _cache = cacheProvider.GetMemoryCache();
 
@@ -152,6 +153,221 @@ public class BuiltinFormsDatabaseClient(
         return true;
     }
 
+    /// <summary>
+    /// Renames the columns of a form table and adds the missing ones in one transaction. Changes nothing when a column
+    /// would take the name of another one or keep its name under another type: the data of two fields would mix.
+    /// </summary>
+    public async Task<FormTableChange> AlterTableAsync(string tableName, IReadOnlyCollection<(string OldName, string NewName)> renames, IEnumerable<DbColumnDefinition> columns)
+    {
+        ValidateFormTableName(tableName);
+
+        await using var connection = await CreateConnectionAsync(DatabaseType);
+        await connection.OpenAsync();
+        await using var tx = await connection.BeginTransactionAsync();
+
+        var existing = await GetColumnTypesAsync(connection, tx, tableName);
+        if (existing.Count == 0)
+        {
+            return FormTableChange.Missing;
+        }
+
+        var statements = new List<string>();
+        if (!TryRename(tableName, existing, renames, statements))
+        {
+            return FormTableChange.Conflict;
+        }
+
+        foreach (var column in columns)
+        {
+            var type = GetDataType(column.Type);
+            if (existing.TryGetValue(ValidateColumnName(column.Name), out var existingType))
+            {
+                if (existingType != type)
+                {
+                    return FormTableChange.Conflict;
+                }
+
+                continue;
+            }
+
+            existing[column.Name] = type;
+            statements.Add($"ALTER TABLE \"{tableName}\" ADD COLUMN \"{column.Name}\" {MapPgType(column)}");
+        }
+
+        await ExecuteAsync(connection, tx, statements);
+        await tx.CommitAsync();
+
+        return FormTableChange.Changed;
+    }
+
+    /// <summary>
+    /// Renames the columns of the target table, adds the columns of the source one and copies its rows, in one
+    /// transaction. A row whose form_id the target already holds is kept as it is there. Changes nothing on the same
+    /// conflicts as <see cref="AlterTableAsync"/>.
+    /// </summary>
+    public async Task<FormTableChange> MergeTableAsync(string targetTable, string sourceTable, IReadOnlyCollection<(string OldName, string NewName)> renames)
+    {
+        ValidateFormTableName(targetTable);
+        ValidateFormTableName(sourceTable);
+
+        await using var connection = await CreateConnectionAsync(DatabaseType);
+        await connection.OpenAsync();
+        await using var tx = await connection.BeginTransactionAsync();
+
+        var target = await GetColumnTypesAsync(connection, tx, targetTable);
+        var source = await GetColumnTypesAsync(connection, tx, sourceTable);
+        if (target.Count == 0 || source.Count == 0)
+        {
+            return FormTableChange.Missing;
+        }
+
+        var statements = new List<string>();
+        if (!TryRename(targetTable, target, renames, statements))
+        {
+            return FormTableChange.Conflict;
+        }
+
+        foreach (var (name, type) in source)
+        {
+            if (target.TryGetValue(ValidateColumnName(name), out var targetType))
+            {
+                if (targetType != type)
+                {
+                    return FormTableChange.Conflict;
+                }
+
+                continue;
+            }
+
+            statements.Add($"ALTER TABLE \"{targetTable}\" ADD COLUMN \"{name}\" {type}");
+        }
+
+        var columnList = string.Join(", ", source.Keys.Select(c => $"\"{c}\""));
+        statements.Add($"INSERT INTO \"{targetTable}\" ({columnList}) SELECT {columnList} FROM \"{sourceTable}\" ON CONFLICT (\"form_id\") DO NOTHING");
+
+        await ExecuteAsync(connection, tx, statements);
+        await tx.CommitAsync();
+
+        return FormTableChange.Changed;
+    }
+
+    /// <summary>
+    /// Drops a table merged into another one, only when every row of it is in the target. Returns whether it was dropped.
+    /// </summary>
+    public async Task<bool> DropMergedTableAsync(string sourceTable, string targetTable)
+    {
+        ValidateFormTableName(targetTable);
+        ValidateFormTableName(sourceTable);
+
+        await using var connection = await CreateConnectionAsync(DatabaseType);
+        await connection.OpenAsync();
+        await using var tx = await connection.BeginTransactionAsync();
+
+        await using (var checkCmd = connection.CreateCommand())
+        {
+            checkCmd.Transaction = tx;
+            checkCmd.CommandText =
+                $"SELECT EXISTS (SELECT 1 FROM \"{sourceTable}\" s WHERE NOT EXISTS " +
+                $"(SELECT 1 FROM \"{targetTable}\" t WHERE t.\"form_id\" = s.\"form_id\"))";
+            if (await checkCmd.ExecuteScalarAsync() is true)
+            {
+                return false;
+            }
+        }
+
+        await using (var dropCmd = connection.CreateCommand())
+        {
+            dropCmd.Transaction = tx;
+            dropCmd.CommandText =
+                $"DROP TABLE \"{sourceTable}\"; " +
+                $"CREATE TABLE IF NOT EXISTS \"{ActivityTable}\" (\"table_name\" TEXT PRIMARY KEY, \"last_access\" TIMESTAMP NOT NULL); " +
+                $"DELETE FROM \"{ActivityTable}\" WHERE \"table_name\" = @tableName";
+            dropCmd.Parameters.Add(new NpgsqlParameter("@tableName", sourceTable));
+            await dropCmd.ExecuteNonQueryAsync();
+        }
+
+        await tx.CommitAsync();
+        await _cache.RemoveAndNotifyAsync(GetActivityCacheKey(tenantManager.GetCurrentTenantId(), sourceTable));
+
+        return true;
+    }
+
+    private static void ValidateFormTableName(string tableName)
+    {
+        if (!_formTableRegex.IsMatch(tableName))
+        {
+            throw new ArgumentException($"Invalid table name: {tableName}", nameof(tableName));
+        }
+    }
+
+    // Column name to its information_schema data type; empty when the table does not exist.
+    private static async Task<Dictionary<string, string>> GetColumnTypesAsync(DbConnection connection, DbTransaction tx, string tableName)
+    {
+        await using var cmd = connection.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText =
+            "SELECT column_name, data_type FROM information_schema.columns " +
+            "WHERE table_schema = current_schema() AND table_name = @tableName ORDER BY ordinal_position";
+        cmd.Parameters.Add(new NpgsqlParameter("@tableName", tableName));
+
+        var columns = new Dictionary<string, string>();
+        await using var reader = await cmd.ExecuteReaderAsync();
+        while (await reader.ReadAsync())
+        {
+            columns[reader.GetString(0)] = reader.GetString(1);
+        }
+
+        return columns;
+    }
+
+    // Renames in order; false when a new name is taken by another column.
+    private static bool TryRename(string tableName, Dictionary<string, string> columns, IEnumerable<(string OldName, string NewName)> renames, List<string> statements)
+    {
+        foreach (var rename in renames)
+        {
+            var oldName = ValidateColumnName(rename.OldName);
+            var newName = ValidateColumnName(rename.NewName);
+            if (oldName == newName || !columns.Remove(oldName, out var type))
+            {
+                continue;
+            }
+
+            if (!columns.TryAdd(newName, type))
+            {
+                return false;
+            }
+
+            statements.Add($"ALTER TABLE \"{tableName}\" RENAME COLUMN \"{oldName}\" TO \"{newName}\"");
+        }
+
+        return true;
+    }
+
+    private static string GetDataType(DbColumnType type) => type switch
+    {
+        DbColumnType.Integer => "integer",
+        DbColumnType.Boolean => "boolean",
+        DbColumnType.Date => "date",
+        DbColumnType.DateTime => "timestamp without time zone",
+        _ => "text"
+    };
+
+    private static async Task ExecuteAsync(DbConnection connection, DbTransaction tx, IEnumerable<string> statements)
+    {
+        foreach (var statement in statements)
+        {
+            await using var cmd = connection.CreateCommand();
+            cmd.Transaction = tx;
+            cmd.CommandText = statement;
+            await cmd.ExecuteNonQueryAsync();
+        }
+    }
+
+    private static string ValidateColumnName(string name)
+    {
+        return _columnNameRegex.IsMatch(name) ? name : throw new ArgumentException($"Invalid column name: {name}", nameof(name));
+    }
+
     private async Task ExecuteAsync(string sql, params (string Name, object Value)[] parameters)
     {
         await using var connection = await CreateConnectionAsync(DatabaseType);
@@ -166,4 +382,11 @@ public class BuiltinFormsDatabaseClient(
 
         await cmd.ExecuteNonQueryAsync();
     }
+}
+
+public enum FormTableChange
+{
+    Changed,
+    Missing,
+    Conflict
 }

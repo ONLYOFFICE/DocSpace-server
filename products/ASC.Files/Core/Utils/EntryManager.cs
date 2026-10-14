@@ -1706,18 +1706,24 @@ public class EntryManager(IDaoFactory daoFactory,
     {
         var fileDao = daoFactory.GetFileDao<T>();
         var properties = await fileDao.GetProperties(file.Id);
-        if (properties?.FormFilling == null
-            || properties.FormFilling.OriginalFormVersion == 0
-            || properties.FormFilling.OriginalFormVersion == file.Version
-            || !Equals(properties.FormFilling.OriginalFormId, file.Id))
+        if (properties?.FormFilling == null || !Equals(properties.FormFilling.OriginalFormId, file.Id))
         {
             return;
         }
 
-        await daoFactory.GetLinkDao<T>().DeleteAllLinkAsync(file.Id);
-        properties.FormFilling.OriginalFormVersion = file.Version;
-        properties.FormFilling.IsVersionChanged = true;
-        await fileDao.SaveProperties(file.Id, properties);
+        if (properties.FormFilling.OriginalFormVersion != 0 && properties.FormFilling.OriginalFormVersion != file.Version)
+        {
+            await daoFactory.GetLinkDao<T>().DeleteAllLinkAsync(file.Id);
+            properties.FormFilling.OriginalFormVersion = file.Version;
+            properties.FormFilling.IsVersionChanged = true;
+            await formFillingReportCreator.SaveFormPropertiesAsync(file.Id, properties);
+        }
+
+        // Also for a save that overwrites the version.
+        if (file is File<int> form && properties is EntryProperties<int> formProperties)
+        {
+            await formFillingReportCreator.RequestBuiltinDbVersionCheckAsync(form, formProperties.FormFilling);
+        }
     }
 
     public async Task<File<T>> TrackEditingAsync<T>(T fileId, Guid tabId, Guid userId, Tenant tenant, bool editingAlone = false, string fillingSessionId = null)

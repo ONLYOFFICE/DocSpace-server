@@ -48,8 +48,12 @@ public class FormFillingReportCreator(
     FactoryIndexerForm factoryIndexerForm,
     FactoryIndexerFormMetadata factoryIndexerFormMetadata,
     CoreBaseSettings coreBaseSettings,
-    IDistributedLockProvider distributedLockProvider)
+    IDistributedLockProvider distributedLockProvider,
+    FormFieldsExtractor formFieldsExtractor,
+    CommonLinkUtility commonLinkUtility)
 {
+    private static readonly TimeSpan _fieldsReadTimeout = TimeSpan.FromSeconds(10);
+
     private static readonly HashSet<string> _checkboxOffStates =
         new(StringComparer.OrdinalIgnoreCase) { "off", "false", "0", "no", "n", "unchecked" };
 
@@ -110,31 +114,101 @@ public class FormFillingReportCreator(
         }
     }
 
-    public Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl)
-        => ExportToDbAsync(externalDatabaseClient, fileId, originalFormId, originalFormVersion, formsDataUrl);
+    public async Task ExportToExternalDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, int resultFormNumber, string formsDataUrl)
+    {
+        var (row, columns) = await ReadSubmissionAsync(fileId, formsDataUrl);
+        var tableName = GetTableName(originalFormId, originalFormVersion);
+
+        await externalDatabaseClient.CreateTableAndUpsertAsync(tableName, columns, row, keyColumn: "form_id");
+        await SetExternalDbTableNameAsync(originalFormId, tableName);
+    }
 
     public async Task ExportToBuiltinDbAsync(int fileId, int originalFormId, int originalFormVersion, int roomId, string formsDataUrl)
     {
-        // A new table is filled from the search index, which already holds this submission; without the index it is
-        // left uncreated rather than created incomplete.
-        if (!await EnsureBuiltinDbTableAsync(originalFormId, originalFormVersion, roomId))
+        var formFilling = await DecideBuiltinDbVersionAsync(originalFormId, originalFormVersion);
+
+        // A confirmed rename can move the version to another table meanwhile, so the table is resolved again inside its lock.
+        for (var attempt = 0; attempt < 3; attempt++)
         {
-            return;
+            var tableVersion = GetBuiltinTableVersion(formFilling, originalFormVersion);
+            var tableName = GetTableName(originalFormId, tableVersion);
+
+            await using (await AcquireBuiltinDbTableLockAsync(tableName))
+            {
+                formFilling = await GetFormFillingAsync(originalFormId);
+                if (GetBuiltinTableVersion(formFilling, originalFormVersion) != tableVersion)
+                {
+                    continue;
+                }
+
+                // A new table is filled from the search index, which already holds this submission; without the index it
+                // is left uncreated rather than created incomplete.
+                if (!await EnsureBuiltinDbTableLockedAsync(tableName, originalFormId, tableVersion, roomId, formFilling))
+                {
+                    return;
+                }
+
+                var (row, columns) = await ReadSubmissionAsync(fileId, formsDataUrl);
+
+                await builtinFormsDatabaseClient.CreateTableAndUpsertAsync(
+                    tableName,
+                    columns.Select(c => c with { Name = MapToTableColumn(formFilling, originalFormVersion, c.Name) }).ToList(),
+                    MapToTableColumns(formFilling, originalFormVersion, row),
+                    keyColumn: "form_id");
+
+                return;
+            }
         }
 
-        await ExportToDbAsync(builtinFormsDatabaseClient, fileId, originalFormId, originalFormVersion, formsDataUrl);
+        logger.WarnBuiltinDbSubmissionSkipped(fileId, originalFormId, originalFormVersion);
     }
 
     /// <summary>
-    /// Makes sure the form version has its built-in table, restoring it from the search index when it was dropped as
-    /// idle or never created. Returns false when there is nothing to restore.
+    /// The built-in table of the form version, restored from the search index when it was dropped as idle or never
+    /// created. Null when there is nothing to restore.
     /// </summary>
-    public async Task<bool> EnsureBuiltinDbTableAsync(int originalFormId, int originalFormVersion, int roomId)
+    public async Task<string> EnsureBuiltinDbTableAsync(int originalFormId, int originalFormVersion, int roomId)
     {
-        var tableName = GetTableName(originalFormId, originalFormVersion);
+        var formFilling = await GetFormFillingAsync(originalFormId);
 
-        // Marked as used before the check, so the idle-table cleanup cannot drop it in between. Best effort: a failed
-        // mark must not fail the submission or the analysis.
+        for (var attempt = 0; attempt < 3; attempt++)
+        {
+            var tableVersion = GetBuiltinTableVersion(formFilling, originalFormVersion);
+            var tableName = GetTableName(originalFormId, tableVersion);
+
+            await TouchBuiltinDbTableAsync(tableName);
+            if (await builtinFormsDatabaseClient.TableExistsAsync(tableName))
+            {
+                return tableName;
+            }
+
+            await using (await AcquireBuiltinDbTableLockAsync(tableName))
+            {
+                formFilling = await GetFormFillingAsync(originalFormId);
+                if (GetBuiltinTableVersion(formFilling, originalFormVersion) != tableVersion)
+                {
+                    continue;
+                }
+
+                return await EnsureBuiltinDbTableLockedAsync(tableName, originalFormId, tableVersion, roomId, formFilling) ? tableName : null;
+            }
+        }
+
+        return null;
+    }
+
+    // Under the table lock. Marked as used before the existence check, so the idle-table cleanup cannot drop it in between.
+    private async Task<bool> EnsureBuiltinDbTableLockedAsync(string tableName, int originalFormId, int tableVersion, int roomId, FormFillingProperties<int> formFilling)
+    {
+        await TouchBuiltinDbTableAsync(tableName);
+
+        return await builtinFormsDatabaseClient.TableExistsAsync(tableName)
+            || await RestoreBuiltinDbTableAsync(tableName, originalFormId, tableVersion, roomId, formFilling);
+    }
+
+    // Best effort: a failed mark must not fail the submission or the analysis.
+    private async Task TouchBuiltinDbTableAsync(string tableName)
+    {
         try
         {
             await builtinFormsDatabaseClient.TouchTableAsync(tableName);
@@ -143,27 +217,18 @@ public class FormFillingReportCreator(
         {
             logger.WarnBuiltinDbTouchFailed(e, tableName);
         }
-
-        if (await builtinFormsDatabaseClient.TableExistsAsync(tableName))
-        {
-            return true;
-        }
-
-        await using (await AcquireBuiltinDbTableLockAsync(tableName))
-        {
-            return await builtinFormsDatabaseClient.TableExistsAsync(tableName)
-                || await RestoreBuiltinDbTableAsync(tableName, originalFormId, originalFormVersion, roomId);
-        }
     }
 
-    // The table is created and filled in one transaction, so it is never seen incomplete.
-    private async Task<bool> RestoreBuiltinDbTableAsync(string tableName, int originalFormId, int originalFormVersion, int roomId)
+    // Created and filled in one transaction; holds every version linked to the table, under the latest column names.
+    private async Task<bool> RestoreBuiltinDbTableAsync(string tableName, int originalFormId, int tableVersion, int roomId, FormFillingProperties<int> formFilling)
     {
+        var versions = GetBuiltinTableVersions(formFilling, tableVersion);
+
         await factoryIndexerForm.RefreshAsync();
         var (countSuccess, count) = await factoryIndexerForm.TryCountAsync(r =>
             r.Where(s => s.RoomId, roomId)
              .Where(s => s.OriginalFormId, originalFormId)
-             .Where(s => s.OriginalFormVersion, originalFormVersion));
+             .In(s => s.OriginalFormVersion, versions));
 
         if (!countSuccess || count == 0)
         {
@@ -179,7 +244,7 @@ public class FormFillingReportCreator(
         var (success, submissions) = await factoryIndexerForm.TrySelectAsync(r =>
             r.Where(s => s.RoomId, roomId)
              .Where(s => s.OriginalFormId, originalFormId)
-             .Where(s => s.OriginalFormVersion, originalFormVersion)
+             .In(s => s.OriginalFormVersion, versions)
              .Limit(0, BaseIndexer<DbFormsItemDataSearch>.QueryLimit));
 
         if (!success || submissions.Count == 0)
@@ -187,19 +252,34 @@ public class FormFillingReportCreator(
             return false;
         }
 
-        var normalizedMeta = await GetExportMetadataAsync(originalFormId, originalFormVersion, submissions);
-        if (normalizedMeta.Count == 0)
+        var culture = tenantManager.GetCurrentTenant().GetCulture();
+        var columns = new Dictionary<string, DbColumnDefinition>();
+        var rows = new List<Dictionary<string, object>>();
+
+        // Each version is converted by its own metadata: a date keeps the format it was submitted in.
+        foreach (var version in versions.OrderBy(v => v))
+        {
+            var versionSubmissions = submissions.Where(s => s.OriginalFormVersion == version).ToList();
+            var normalizedMeta = await GetExportMetadataAsync(originalFormId, version, versionSubmissions);
+
+            foreach (var column in BuildColumnDefinitions(normalizedMeta))
+            {
+                var tableColumn = column with { Name = MapToTableColumn(formFilling, version, column.Name) };
+                columns[tableColumn.Name] = tableColumn;
+            }
+
+            rows.AddRange(versionSubmissions
+                .Select(item => BuildIndexedRowData(item, normalizedMeta, culture, tableName))
+                .OfType<Dictionary<string, object>>()
+                .Select(row => MapToTableColumns(formFilling, version, row)));
+        }
+
+        if (rows.Count == 0)
         {
             return false;
         }
 
-        var culture = tenantManager.GetCurrentTenant().GetCulture();
-        var rows = submissions
-            .Select(item => BuildIndexedRowData(item, normalizedMeta, culture, tableName))
-            .OfType<Dictionary<string, object>>()
-            .ToList();
-
-        await builtinFormsDatabaseClient.CreateTableAndUpsertAsync(tableName, BuildColumnDefinitions(normalizedMeta).ToList(), rows, keyColumn: "form_id");
+        await builtinFormsDatabaseClient.CreateTableAndUpsertAsync(tableName, columns.Values.ToList(), rows, keyColumn: "form_id");
 
         return true;
     }
@@ -209,7 +289,284 @@ public class FormFillingReportCreator(
         return distributedLockProvider.TryAcquireFairLockAsync($"forms_db_table_{tenantManager.GetCurrentTenantId()}_{tableName}");
     }
 
-    private async Task ExportToDbAsync(ExternalDatabaseClient client, int fileId, int originalFormId, int originalFormVersion, string formsDataUrl)
+    // The first submission of a version decides at the latest: it can come before the background check or without a start.
+    private async Task<FormFillingProperties<int>> DecideBuiltinDbVersionAsync(int originalFormId, int originalFormVersion)
+    {
+        var formFilling = await GetFormFillingAsync(originalFormId);
+        if (formFilling == null
+            || !HasDecisionToApply(formFilling, originalFormVersion)
+               && (originalFormVersion < formFilling.BuiltinDbCheckedVersion
+                   || !NeedsCheck(formFilling, await daoFactory.GetFileDao<int>().GetFileAsync(originalFormId, originalFormVersion))))
+        {
+            return formFilling;
+        }
+
+        return await UpdateBuiltinDbStateAsync(originalFormId, originalFormVersion, async (form, state) =>
+        {
+            var changed = NeedsCheck(state, form) && await CheckVersionAsync(form, state);
+            return await ApplyOnFirstSubmissionAsync(form, state) || changed;
+        });
+    }
+
+    /// <summary>
+    /// Asks the background check of the current version of a started original form when it was not compared yet; a form
+    /// being edited is not started, so its saves read no fields.
+    /// </summary>
+    public async Task RequestBuiltinDbVersionCheckAsync(File<int> form, FormFillingProperties<int> formFilling)
+    {
+        if (formFilling is not { StartFilling: true } || formFilling.OriginalFormId != form.Id || !NeedsCheck(formFilling, form)
+            || externalDatabaseClient.IsEnabled() || !builtinFormsDatabaseClient.IsEnabled())
+        {
+            return;
+        }
+
+        await PublishBuiltinDbVersionCheckAsync(form.Id);
+    }
+
+    private Task PublishBuiltinDbVersionCheckAsync(int originalFormId)
+    {
+        return eventBus.PublishAsync(new BuiltinDbFormVersionIntegrationEvent(
+            authContext.CurrentAccount.ID, tenantManager.GetCurrentTenantId(), originalFormId, commonLinkUtility.ServerRootPath));
+    }
+
+    /// <summary>
+    /// Compares the fields of the current version of an original form in a form-filling room with the last version that
+    /// has data and keeps the question about renamed fields for the room; moves the confirmed versions that have
+    /// submissions into the shared table.
+    /// </summary>
+    public async Task CheckBuiltinDbVersionAsync(int originalFormId)
+    {
+        if (externalDatabaseClient.IsEnabled() || !builtinFormsDatabaseClient.IsEnabled())
+        {
+            return;
+        }
+
+        var form = await daoFactory.GetFileDao<int>().GetFileAsync(originalFormId);
+        if (form is not { IsPdf: true }
+            || await DocSpaceHelper.GetParentRoom(form, daoFactory.GetFolderDao<int>()) is not { FolderType: FolderType.FillingFormsRoom })
+        {
+            return;
+        }
+
+        await UpdateBuiltinDbStateAsync(originalFormId, null, async (current, state) =>
+        {
+            if (state.OriginalFormId != current.Id)
+            {
+                return false;
+            }
+
+            var changed = NeedsCheck(state, current) && await CheckVersionAsync(current, state);
+            foreach (var link in state.BuiltinDbPendingLinks?.Where(p => p.Confirmed == true).ToList() ?? [])
+            {
+                if (await HasDataAsync(originalFormId, link.Version, state.RoomId))
+                {
+                    await MergeBuiltinDbVersionAsync(originalFormId, state, link);
+                    changed = true;
+                }
+            }
+
+            return changed;
+        });
+    }
+
+    /// <summary>
+    /// Records the answer about the renamed fields of a form version. A confirmed version is moved into the shared table
+    /// with its first submission, or in the background when it has submissions already. Only an open question takes an
+    /// answer.
+    /// </summary>
+    public async Task AnswerBuiltinDbFieldRenamesAsync(int originalFormId, int version, bool confirm)
+    {
+        await UpdateBuiltinDbStateAsync(originalFormId, null, async (_, state) =>
+        {
+            var link = state.BuiltinDbPendingLinks?.Find(p => p.Version == version && IsOpenQuestion(p));
+            if (link == null)
+            {
+                return false;
+            }
+
+            if (!confirm)
+            {
+                state.BuiltinDbPendingLinks.Remove(link);
+                return true;
+            }
+
+            link.Confirmed = true;
+            if (await HasDataAsync(originalFormId, version, state.RoomId))
+            {
+                await PublishBuiltinDbVersionCheckAsync(originalFormId);
+            }
+
+            return true;
+        });
+    }
+
+    // Every change of the state is made from properties read under the version lock; the clients learn of changed questions.
+    private async Task<FormFillingProperties<int>> UpdateBuiltinDbStateAsync(int originalFormId, int? version, Func<File<int>, FormFillingProperties<int>, Task<bool>> change)
+    {
+        await using (await AcquireBuiltinDbVersionLockAsync(originalFormId))
+        {
+            var fileDao = daoFactory.GetFileDao<int>();
+            var state = await GetFormFillingAsync(originalFormId);
+            var form = version.HasValue ? await fileDao.GetFileAsync(originalFormId, version.Value) : await fileDao.GetFileAsync(originalFormId);
+            if (form == null || state == null)
+            {
+                return state;
+            }
+
+            var questions = GetOpenQuestionVersions(state);
+            if (!await change(form, state))
+            {
+                return state;
+            }
+
+            await SaveBuiltinDbStateAsync(originalFormId, state);
+
+            if (!questions.SequenceEqual(GetOpenQuestionVersions(state)))
+            {
+                await socketManager.UpdateFileAsync(form);
+            }
+
+            return state;
+        }
+    }
+
+    public static bool HasOpenQuestions(FormFillingProperties<int> formFilling)
+    {
+        return formFilling?.BuiltinDbPendingLinks?.Any(IsOpenQuestion) == true;
+    }
+
+    /// <summary>
+    /// The versions whose renamed fields wait for an answer, oldest first.
+    /// </summary>
+    public static List<FormVersionLink> GetOpenQuestions(FormFillingProperties<int> formFilling)
+    {
+        return (formFilling?.BuiltinDbPendingLinks ?? [])
+            .Where(IsOpenQuestion)
+            .OrderBy(p => p.Version)
+            .ToList();
+    }
+
+    private static bool IsOpenQuestion(FormVersionLink link) => link.Renames?.Count > 0 && link.Confirmed == null;
+
+    private static List<int> GetOpenQuestionVersions(FormFillingProperties<int> formFilling)
+    {
+        return GetOpenQuestions(formFilling).Select(p => p.Version).ToList();
+    }
+
+    // A version compared already is compared again only when it was overwritten (a save that replaces the version).
+    private static bool NeedsCheck(FormFillingProperties<int> formFilling, File<int> form)
+    {
+        return formFilling != null && form != null
+            && (form.Version > formFilling.BuiltinDbCheckedVersion
+                || form.Version == formFilling.BuiltinDbCheckedVersion && form.ModifiedOn.Ticks != formFilling.BuiltinDbCheckedStamp);
+    }
+
+    private static bool HasDecisionToApply(FormFillingProperties<int> formFilling, int version)
+    {
+        return formFilling.BuiltinDbPendingLinks?.Any(p => p.Version == version && !IsOpenQuestion(p)) == true;
+    }
+
+    private Task<IDistributedLockHandle> AcquireBuiltinDbVersionLockAsync(int originalFormId)
+    {
+        return distributedLockProvider.TryAcquireFairLockAsync($"forms_db_version_{tenantManager.GetCurrentTenantId()}_{originalFormId}");
+    }
+
+    // Under the version lock, so the state replaces the saved one; the lock of the submissions keeps the other properties.
+    private async Task SaveBuiltinDbStateAsync(int originalFormId, FormFillingProperties<int> state)
+    {
+        await using (await distributedLockProvider.TryAcquireFairLockAsync($"fillform_{state.RoomId}_{originalFormId}"))
+        {
+            var fileDao = daoFactory.GetFileDao<int>();
+            var current = await fileDao.GetProperties(originalFormId);
+            if (current?.FormFilling == null)
+            {
+                return;
+            }
+
+            CopyBuiltinDbState(state, current.FormFilling);
+            await fileDao.SaveProperties(originalFormId, current);
+        }
+    }
+
+    /// <summary>
+    /// Saves form properties read earlier without losing the built-in database state saved meanwhile in the background.
+    /// </summary>
+    public async Task SaveFormPropertiesAsync<T>(T formId, EntryProperties<T> properties)
+    {
+        var fileDao = daoFactory.GetFileDao<T>();
+        if (properties?.FormFilling == null)
+        {
+            await fileDao.SaveProperties(formId, properties);
+            return;
+        }
+
+        await using (await distributedLockProvider.TryAcquireFairLockAsync($"fillform_{properties.FormFilling.RoomId}_{formId}"))
+        {
+            var current = (await fileDao.GetProperties(formId))?.FormFilling;
+            if (current != null)
+            {
+                CopyBuiltinDbState(current, properties.FormFilling);
+            }
+
+            await fileDao.SaveProperties(formId, properties);
+        }
+    }
+
+    private static void CopyBuiltinDbState<T>(FormFillingProperties<T> from, FormFillingProperties<T> to)
+    {
+        to.BuiltinDbCheckedVersion = from.BuiltinDbCheckedVersion;
+        to.BuiltinDbCheckedStamp = from.BuiltinDbCheckedStamp;
+        to.BuiltinDbVersionLinks = from.BuiltinDbVersionLinks;
+        to.BuiltinDbPendingLinks = from.BuiltinDbPendingLinks;
+    }
+
+    private async Task<FormFillingProperties<int>> GetFormFillingAsync(int originalFormId)
+    {
+        return (await daoFactory.GetFileDao<int>().GetProperties(originalFormId))?.FormFilling;
+    }
+
+    // The version whose table the form version writes to: the version it continues, or its own.
+    private static int GetBuiltinTableVersion(FormFillingProperties<int> formFilling, int version)
+    {
+        return formFilling?.BuiltinDbVersionLinks?.FirstOrDefault(l => l.Version == version)?.TableVersion ?? version;
+    }
+
+    private static int[] GetBuiltinTableVersions(FormFillingProperties<int> formFilling, int tableVersion)
+    {
+        return (formFilling?.BuiltinDbVersionLinks ?? [])
+            .Where(l => l.TableVersion == tableVersion)
+            .Select(l => l.Version)
+            .Prepend(tableVersion)
+            .ToArray();
+    }
+
+    // A column of the version under its name in the table: the renames of the later versions linked to the same table
+    // are applied in order.
+    private static string MapToTableColumn(FormFillingProperties<int> formFilling, int version, string column)
+    {
+        var tableVersion = GetBuiltinTableVersion(formFilling, version);
+        var laterLinks = (formFilling?.BuiltinDbVersionLinks ?? [])
+            .Where(l => l.TableVersion == tableVersion && l.Version > version)
+            .OrderBy(l => l.Version);
+
+        foreach (var link in laterLinks)
+        {
+            var rename = link.Renames?.FirstOrDefault(r => NormalizeColumnName(r.OldKey) == column);
+            if (rename != null)
+            {
+                column = NormalizeColumnName(rename.NewKey);
+            }
+        }
+
+        return column;
+    }
+
+    private static Dictionary<string, object> MapToTableColumns(FormFillingProperties<int> formFilling, int version, Dictionary<string, object> row)
+    {
+        return row.ToDictionary(kv => MapToTableColumn(formFilling, version, kv.Key), kv => kv.Value);
+    }
+
+    private async Task<(Dictionary<string, object> Row, List<DbColumnDefinition> Columns)> ReadSubmissionAsync(int fileId, string formsDataUrl)
     {
 #pragma warning disable CA2000 // HttpClient is short-lived and disposed by runtime
         var httpClient = clientFactory.CreateClient();
@@ -229,18 +586,392 @@ public class FormFillingReportCreator(
             .Where(IsExportableField)
             .ToList();
 
-        var tableName = GetTableName(originalFormId, originalFormVersion);
         var normalizedMeta = NormalizeMetadata(parsed.MetaData).ToList();
-        var columnDefinitions = BuildColumnDefinitions(normalizedMeta).ToList();
         var culture = tenantManager.GetCurrentTenant().GetCulture();
-        var rowData = BuildRowData(parsed.Data, normalizedMeta, fileId, culture, coreBaseSettings.EnabledCultures);
 
-        await client.CreateTableAndUpsertAsync(tableName, columnDefinitions, rowData, keyColumn: "form_id");
+        return (BuildRowData(parsed.Data, normalizedMeta, fileId, culture, coreBaseSettings.EnabledCultures), BuildColumnDefinitions(normalizedMeta).ToList());
+    }
 
-        if (client is not BuiltinFormsDatabaseClient)
+    // Records the link the version may take. False when the index could not be read, so the version is checked again later.
+    private async Task<bool> CheckVersionAsync(File<int> form, FormFillingProperties<int> state)
+    {
+        try
         {
-            await SetExternalDbTableNameAsync(originalFormId, tableName);
+            // A version linked or with a table of its own keeps its decision and its open question.
+            if (state.BuiltinDbVersionLinks?.Any(l => l.Version == form.Version) == true
+                || await builtinFormsDatabaseClient.TableExistsAsync(GetTableName(form.Id, form.Version)))
+            {
+                MarkChecked(state, form);
+                return true;
+            }
+
+            var link = await CompareWithPreviousVersionAsync(form, state);
+            if (link == null)
+            {
+                return false;
+            }
+
+            var pending = state.BuiltinDbPendingLinks ??= [];
+
+            // An earlier version left without submissions has nothing to decide: this one was compared past it.
+            foreach (var stale in pending.Where(p => p.Version < form.Version).ToList())
+            {
+                if (!await HasDataAsync(form.Id, stale.Version, state.RoomId))
+                {
+                    pending.Remove(stale);
+                }
+            }
+
+            var previous = pending.Find(p => p.Version == form.Version);
+            pending.RemoveAll(p => p.Version == form.Version);
+
+            if (link.Version > 0)
+            {
+                // An answer survives an overwrite of the version that renamed the same fields.
+                if (previous?.Confirmed != null && SameRenames(previous, link))
+                {
+                    link.Confirmed = previous.Confirmed;
+                }
+
+                pending.Add(link);
+            }
+
+            MarkChecked(state, form);
+            return true;
         }
+        catch (Exception e)
+        {
+            logger.WarnBuiltinDbVersionCheckFailed(e, form.Id, form.Version);
+            return false;
+        }
+    }
+
+    private static void MarkChecked(FormFillingProperties<int> state, File<int> form)
+    {
+        state.BuiltinDbCheckedVersion = form.Version;
+        state.BuiltinDbCheckedStamp = form.ModifiedOn.Ticks;
+    }
+
+    private static bool SameRenames(FormVersionLink a, FormVersionLink b)
+    {
+        return a.TableVersion == b.TableVersion
+            && a.Renames.Select(r => (r.OldKey, r.NewKey)).SequenceEqual(b.Renames.Select(r => (r.OldKey, r.NewKey)));
+    }
+
+    // Data of the version: its own table, or submissions in the index. An unreadable index counts as data.
+    private async Task<bool> HasDataAsync(int originalFormId, int version, int roomId)
+    {
+        if (await builtinFormsDatabaseClient.TableExistsAsync(GetTableName(originalFormId, version)))
+        {
+            return true;
+        }
+
+        var (success, count) = await CountSubmissionsAsync(originalFormId, version, roomId);
+
+        return !success || count > 0;
+    }
+
+    private Task<(bool Success, long Count)> CountSubmissionsAsync(int originalFormId, int version, int roomId)
+    {
+        return factoryIndexerForm.TryCountAsync(r =>
+            r.Where(s => s.RoomId, roomId)
+             .Where(s => s.OriginalFormId, originalFormId)
+             .Where(s => s.OriginalFormVersion, version));
+    }
+
+    // The link the version may take; one with no version when it takes none. Null when the index could not be read.
+    private async Task<FormVersionLink> CompareWithPreviousVersionAsync(File<int> form, FormFillingProperties<int> formFilling)
+    {
+        var none = new FormVersionLink();
+        var roomId = formFilling.RoomId;
+
+        await factoryIndexerFormMetadata.RefreshAsync();
+        var (metaSuccess, metaResult) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
+            r.Where(s => s.OriginalFormId, form.Id)
+             .Where(s => s.RoomId, roomId));
+        if (!metaSuccess)
+        {
+            return null;
+        }
+
+        // Compared with the last version whose data is in a table: submitted or linked. A version saved in between and
+        // never filled is skipped, so its key changes are asked about together with the later ones.
+        DbFormsMetadataSearch previous = null;
+        foreach (var candidate in metaResult.Where(m => m.OriginalFormVersion < form.Version && m.Metadata?.Any() == true).OrderByDescending(m => m.OriginalFormVersion))
+        {
+            if (formFilling.BuiltinDbVersionLinks?.Any(l => l.Version == candidate.OriginalFormVersion) == true)
+            {
+                previous = candidate;
+                break;
+            }
+
+            var (submittedSuccess, submitted) = await CountSubmissionsAsync(form.Id, candidate.OriginalFormVersion, roomId);
+            if (!submittedSuccess)
+            {
+                return null;
+            }
+
+            if (submitted > 0)
+            {
+                previous = candidate;
+                break;
+            }
+        }
+
+        if (previous == null)
+        {
+            return none;
+        }
+
+        var (currentSuccess, currentSubmitted) = await CountSubmissionsAsync(form.Id, form.Version, roomId);
+        if (!currentSuccess)
+        {
+            return null;
+        }
+
+        // A submitted version is described in the index by its submissions; an unfilled one is read from its file, which
+        // may have been overwritten since it was last read.
+        List<FormMetadata> metadata;
+        Dictionary<string, string> tips = [];
+        if (currentSubmitted > 0)
+        {
+            metadata = (await GetVersionMetadataAsync(form.Id, form.Version)).ToList();
+        }
+        else
+        {
+            using var cts = new CancellationTokenSource(_fieldsReadTimeout);
+            var json = await formFieldsExtractor.ExtractFieldsJsonAsync(form, cts.Token);
+            metadata = ParseSubmitAndMetadata(json).MetaData;
+            tips = ParseTips(json);
+
+            // Indexed now, so that the next version is compared with this one even if this one is never filled.
+            if (metadata.Count > 0)
+            {
+                await factoryIndexerFormMetadata.IndexAsync(new DbFormsMetadataSearch
+                {
+                    Id = DbFormsMetadataSearch.ComputeId(form.Id, form.Version),
+                    TenantId = tenantManager.GetCurrentTenantId(),
+                    OriginalFormId = form.Id,
+                    OriginalFormVersion = form.Version,
+                    RoomId = roomId,
+                    Metadata = metadata
+                });
+            }
+        }
+
+        // Empty for a file that is not an ONLYOFFICE form and for a form without fields.
+        if (metadata.Count == 0)
+        {
+            return none;
+        }
+
+        var renames = FormFieldMatcher.Match(NormalizeMetadata(previous.Metadata), NormalizeMetadata(metadata));
+        if (renames == null)
+        {
+            return none;
+        }
+
+        foreach (var rename in renames)
+        {
+            var field = metadata.Find(m => m.Key == rename.NewKey);
+            rename.Type = field?.Type;
+            rename.Options = field?.PossibleValues is { Count: > 0 } options ? options : null;
+            rename.Tip = tips.GetValueOrDefault(rename.NewKey);
+        }
+
+        return new FormVersionLink
+        {
+            Version = form.Version,
+            TableVersion = GetBuiltinTableVersion(formFilling, previous.OriginalFormVersion),
+            Renames = renames
+        };
+    }
+
+    // The tips the form author set, by field key; empty when the script could not read them.
+    private static Dictionary<string, string> ParseTips(string json)
+    {
+        using var document = JsonDocument.Parse(json);
+        if (!document.RootElement.TryGetProperty("tips", out var tips) || tips.ValueKind != JsonValueKind.Object)
+        {
+            return [];
+        }
+
+        return tips.EnumerateObject()
+            .Where(t => t.Value.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(t.Value.GetString()))
+            .ToDictionary(t => t.Name, t => t.Value.GetString());
+    }
+
+    // The pending decision of the version, taken with its first submission. Returns whether the state changed.
+    private async Task<bool> ApplyOnFirstSubmissionAsync(File<int> form, FormFillingProperties<int> state)
+    {
+        var link = state.BuiltinDbPendingLinks?.Find(p => p.Version == form.Version);
+        if (link == null || IsOpenQuestion(link))
+        {
+            return false;
+        }
+
+        if (externalDatabaseClient.IsEnabled() || !builtinFormsDatabaseClient.IsEnabled())
+        {
+            state.BuiltinDbPendingLinks.Remove(link);
+        }
+        else if (await builtinFormsDatabaseClient.TableExistsAsync(GetTableName(form.Id, form.Version)))
+        {
+            // Confirmed after its first submissions, before the background move ran.
+            await MergeBuiltinDbVersionAsync(form.Id, state, link);
+        }
+        else
+        {
+            state.BuiltinDbPendingLinks.Remove(link);
+            await LinkBuiltinDbVersionAsync(form, state, link);
+        }
+
+        return true;
+    }
+
+    // Under the table lock and saved inside it, so a submission exported meanwhile maps to the columns it finds.
+    private async Task LinkBuiltinDbVersionAsync(File<int> form, FormFillingProperties<int> state, FormVersionLink link)
+    {
+        // Without the description of the version its added columns are unknown, so it keeps a table of its own.
+        var current = NormalizeMetadata(await GetVersionMetadataAsync(form.Id, form.Version)).ToList();
+        if (current.Count == 0)
+        {
+            return;
+        }
+
+        var tableVersion = GetBuiltinTableVersion(state, link.TableVersion);
+        var tableName = GetTableName(form.Id, tableVersion);
+
+        try
+        {
+            await using (await AcquireBuiltinDbTableLockAsync(tableName))
+            {
+                // Its submissions would stay apart from the shared table.
+                if (await builtinFormsDatabaseClient.TableExistsAsync(GetTableName(form.Id, form.Version)))
+                {
+                    return;
+                }
+
+                var change = await builtinFormsDatabaseClient.AlterTableAsync(tableName, GetColumnRenames([link]), BuildColumnDefinitions(current));
+                if (change == FormTableChange.Conflict)
+                {
+                    logger.WarnBuiltinDbColumnConflict(tableName, form.Version);
+                    return;
+                }
+
+                link.TableVersion = tableVersion;
+                link.Confirmed = null;
+                AddLink(state, link);
+
+                await SaveBuiltinDbStateAsync(form.Id, state);
+            }
+        }
+        catch (Exception e)
+        {
+            logger.WarnBuiltinDbVersionLinkFailed(e, tableName, form.Version);
+            state.BuiltinDbVersionLinks?.RemoveAll(l => l.Version == link.Version);
+        }
+    }
+
+    // Under the version lock. The table of the version and of the versions continuing it are moved into the shared table:
+    // rows are copied first, the links saved next, and the table dropped last, only with all its rows in the target.
+    private async Task MergeBuiltinDbVersionAsync(int originalFormId, FormFillingProperties<int> state, FormVersionLink link)
+    {
+        var version = link.Version;
+        var tableVersion = GetBuiltinTableVersion(state, link.TableVersion);
+        var targetTable = GetTableName(originalFormId, tableVersion);
+        var sourceTable = GetTableName(originalFormId, version);
+
+        // The renames of a later version linked to the target are relative to keys this version never had.
+        if (state.BuiltinDbVersionLinks?.Any(l => l.TableVersion == tableVersion && l.Version > version) == true)
+        {
+            logger.WarnBuiltinDbColumnConflict(targetTable, version);
+            state.BuiltinDbPendingLinks.Remove(link);
+            await SaveBuiltinDbStateAsync(originalFormId, state);
+            return;
+        }
+
+        var continuing = (state.BuiltinDbVersionLinks ?? []).Where(l => l.TableVersion == version).OrderBy(l => l.Version).ToList();
+
+        try
+        {
+            await using (await AcquireBuiltinDbTableLockAsync(targetTable))
+            await using (await AcquireBuiltinDbTableLockAsync(sourceTable))
+            {
+                // A table dropped as idle is restored from the index first; without the index the question stays open.
+                if (!await EnsureBuiltinDbTableLockedAsync(targetTable, originalFormId, tableVersion, state.RoomId, state)
+                    || !await EnsureBuiltinDbTableLockedAsync(sourceTable, originalFormId, version, state.RoomId, state))
+                {
+                    logger.WarnBuiltinDbMergeDeferred(sourceTable, targetTable);
+                    return;
+                }
+
+                var change = await builtinFormsDatabaseClient.MergeTableAsync(targetTable, sourceTable, GetColumnRenames(continuing.Prepend(link)));
+                if (change == FormTableChange.Missing)
+                {
+                    logger.WarnBuiltinDbMergeDeferred(sourceTable, targetTable);
+                    return;
+                }
+
+                state.BuiltinDbPendingLinks.Remove(link);
+
+                if (change == FormTableChange.Conflict)
+                {
+                    logger.WarnBuiltinDbColumnConflict(targetTable, version);
+                    await SaveBuiltinDbStateAsync(originalFormId, state);
+                    return;
+                }
+
+                link.TableVersion = tableVersion;
+                link.Confirmed = null;
+                foreach (var continued in continuing)
+                {
+                    continued.TableVersion = tableVersion;
+                }
+
+                AddLink(state, link);
+                await SaveBuiltinDbStateAsync(originalFormId, state);
+
+                if (!await builtinFormsDatabaseClient.DropMergedTableAsync(sourceTable, targetTable))
+                {
+                    logger.WarnBuiltinDbMergedTableKept(sourceTable, targetTable);
+                }
+            }
+        }
+        catch (PostgresException e) when (e.SqlState == PostgresErrorCodes.CheckViolation)
+        {
+            // A value of the version is not among the options of the shared column: the version keeps its table.
+            logger.WarnBuiltinDbMergeFailed(e, sourceTable, targetTable);
+            state.BuiltinDbPendingLinks.Remove(link);
+            await SaveBuiltinDbStateAsync(originalFormId, state);
+        }
+        catch (Exception e)
+        {
+            logger.WarnBuiltinDbMergeFailed(e, sourceTable, targetTable);
+        }
+    }
+
+    // The field descriptions only serve the question, so an applied link keeps the keys alone.
+    private static void AddLink(FormFillingProperties<int> state, FormVersionLink link)
+    {
+        foreach (var rename in link.Renames ?? [])
+        {
+            rename.Type = null;
+            rename.Options = null;
+            rename.Tip = null;
+        }
+
+        var links = state.BuiltinDbVersionLinks ??= [];
+        links.RemoveAll(l => l.Version == link.Version);
+        links.Add(link);
+    }
+
+    // The renames of the links in order, as column names.
+    private static List<(string OldName, string NewName)> GetColumnRenames(IEnumerable<FormVersionLink> links)
+    {
+        return links
+            .SelectMany(l => l.Renames ?? [])
+            .Select(r => (NormalizeColumnName(r.OldKey), NormalizeColumnName(r.NewKey)))
+            .ToList();
     }
 
     private async Task SetExternalDbTableNameAsync(int originalFormId, string tableName)
@@ -531,23 +1262,22 @@ public class FormFillingReportCreator(
 
     public async Task<IEnumerable<DbColumnDefinition>> GetColumnDefinitionsAsync(int originalFormId, int originalFormVersion)
     {
-        await factoryIndexerFormMetadata.RefreshAsync();
-        var (metaSuccess, metaResult) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
-            r.Where(s => s.OriginalFormId, originalFormId)
-             .Where(s => s.OriginalFormVersion, originalFormVersion));
-
-        var metadata = metaSuccess ? metaResult.FirstOrDefault()?.Metadata ?? [] : [];
-        return BuildColumnDefinitions(NormalizeMetadata(metadata));
+        return BuildColumnDefinitions(NormalizeMetadata(await GetVersionMetadataAsync(originalFormId, originalFormVersion)));
     }
 
-    public async Task<(IEnumerable<FormMetadata> Metadata, IEnumerable<SubmitFormsData> Submissions)> GetFormSnapshotAsync(int roomId, int originalFormId, int originalFormVersion)
+    private async Task<IEnumerable<FormMetadata>> GetVersionMetadataAsync(int originalFormId, int originalFormVersion)
     {
         await factoryIndexerFormMetadata.RefreshAsync();
         var (metaSuccess, metaResult) = await factoryIndexerFormMetadata.TrySelectAsync(r =>
             r.Where(s => s.OriginalFormId, originalFormId)
              .Where(s => s.OriginalFormVersion, originalFormVersion));
 
-        var metadata = metaSuccess ? metaResult.FirstOrDefault()?.Metadata ?? [] : [];
+        return metaSuccess ? metaResult.FirstOrDefault()?.Metadata ?? [] : [];
+    }
+
+    public async Task<(IEnumerable<FormMetadata> Metadata, IEnumerable<SubmitFormsData> Submissions)> GetFormSnapshotAsync(int roomId, int originalFormId, int originalFormVersion)
+    {
+        var metadata = await GetVersionMetadataAsync(originalFormId, originalFormVersion);
         var submissions = await GetFormFillingResults(roomId, originalFormId, originalFormVersion);
 
         return (metadata, submissions);
@@ -723,17 +1453,21 @@ public class FormFillingReportCreator(
 
         foreach (var field in metaData)
         {
-            var name = NormalizeColumnName(field.Key);
-            var (type, enumValues) = field.Type switch
-            {
-                "checkBox" => (DbColumnType.Boolean, (IReadOnlyList<string>)null),
-                "dateTime" => (HasTimeComponent(field.Format) ? DbColumnType.DateTime : DbColumnType.Date, null),
-                "comboBox" or "dropDownList" or "radio" => (DbColumnType.Enum, (IReadOnlyList<string>)field.PossibleValues),
-                _ => (DbColumnType.Text, null)
-            };
-            var label = string.IsNullOrEmpty(field.Key) ? null : field.Key;
-            yield return new DbColumnDefinition(name, type, enumValues, Label: label);
+            yield return BuildColumnDefinition(field);
         }
+    }
+
+    internal static DbColumnDefinition BuildColumnDefinition(FormMetadata field)
+    {
+        var (type, enumValues) = field.Type switch
+        {
+            "checkBox" => (DbColumnType.Boolean, (IReadOnlyList<string>)null),
+            "dateTime" => (HasTimeComponent(field.Format) ? DbColumnType.DateTime : DbColumnType.Date, null),
+            "comboBox" or "dropDownList" or "radio" => (DbColumnType.Enum, (IReadOnlyList<string>)field.PossibleValues),
+            _ => (DbColumnType.Text, null)
+        };
+        var label = string.IsNullOrEmpty(field.Key) ? null : field.Key;
+        return new DbColumnDefinition(NormalizeColumnName(field.Key), type, enumValues, Label: label);
     }
 
     private static bool IsExportableField(FormsItemData f) => f.Type != "picture" && f.Type != "signature";

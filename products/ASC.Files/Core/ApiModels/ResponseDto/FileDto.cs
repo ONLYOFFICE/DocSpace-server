@@ -216,6 +216,15 @@ public class FileDto<T> : FileEntryDto<T>
     public bool? StartFilling { get; set; }
 
     /// <summary>
+    /// For the original form of a room for filling, true when the fields of one of its versions look renamed and wait
+    /// for the answer whether they keep their meaning; read the details with
+    /// `GET api/2.0/files/file/{fileId}/fieldrenames`. Null when the caller may not start the filling of the form, or for
+    /// a file this does not apply to.
+    /// </summary>
+    /// <example>false</example>
+    public bool? FieldRenamesPending { get; set; }
+
+    /// <summary>
     /// True during the short window in which a released form is still being written out by the editor. Neither
     /// filling nor editing is accepted while it lasts, so a client should wait and read the file again.
     /// </summary>
@@ -566,6 +575,13 @@ public class FileDtoHelper(
                 && properties is { FormFilling: not null }
                 && currentFolder.FolderType is not (FolderType.FormFillingFolderInProgress or FolderType.FormFillingFolderDone))
             {
+                if (properties is EntryProperties<int> { FormFilling: var intFormFilling }
+                    && Equals(file.Id, intFormFilling.OriginalFormId)
+                    && result.Security.TryGetValue(FileSecurity.FilesSecurityActions.StartFilling, out var canStartFilling) && canStartFilling)
+                {
+                    result.FieldRenamesPending = FormFillingReportCreator.HasOpenQuestions(intFormFilling);
+                }
+
                 if (properties.FormFilling.StartFilling)
                 {
                     var isPreparing = await fileTracker.IsEditingAsync(file.Id);
