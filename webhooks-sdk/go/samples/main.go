@@ -1,7 +1,9 @@
 // Logs a DocSpace webhook delivery to the console.
 //
-//	go run ./samples                          # replay the shared fixture
-//	go run ./samples <body> <secret> <sig>
+// Run from go/samples (its own module, pointing at ../generated):
+//
+//	go run .                          # replay the shared fixture
+//	go run . <body> <secret> <sig>
 //
 // Go has no runtime package yet, so signature checking lives here.
 package main
@@ -17,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	openapi "docspacewebhooks/generated"
+	openapi "github.com/ONLYOFFICE/docspace-webhooks-sdk-go"
 )
 
 const signatureHeader = "x-docspace-signature-256"
@@ -69,7 +71,7 @@ func deref[T any](p *T, zero T) T {
 func time0() time.Time { return time.Time{} }
 
 func main() {
-	fixtures := filepath.Join("..", "samples")
+	fixtures := filepath.Join("..", "..", "samples")
 	bodyPath := filepath.Join(fixtures, "file.created.json")
 	secretPath := filepath.Join(fixtures, "SECRET")
 	sigPath := filepath.Join(fixtures, "file.created.sig")

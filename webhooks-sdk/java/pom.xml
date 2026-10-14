@@ -4,9 +4,36 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.onlyoffice.docspace</groupId>
-  <artifactId>docspace-webhooks</artifactId>
-  <version>0.1.0</version>
+  <groupId>com.onlyoffice</groupId>
+  <artifactId>docspace-webhooks-sdk</artifactId>
+  <version>1.0.0</version>
+  <packaging>jar</packaging>
+
+  <name>com.onlyoffice:docspace-webhooks-sdk</name>
+  <description>A simple Java SDK for receiving ONLYOFFICE DocSpace webhooks</description>
+  <url>https://github.com/ONLYOFFICE/docspace-webhooks-sdk-java</url>
+
+  <licenses>
+    <license>
+      <name>Apache-2.0</name>
+      <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <email>integration@onlyoffice.com</email>
+      <organization>Ascensio System SIA</organization>
+      <organizationUrl>https://www.onlyoffice.com/</organizationUrl>
+    </developer>
+  </developers>
+
+  <scm>
+    <connection>scm:git:git@github.com:ONLYOFFICE/docspace-webhooks-sdk-java.git</connection>
+    <developerConnection>scm:git:git@github.com:ONLYOFFICE/docspace-webhooks-sdk-java.git</developerConnection>
+    <url>https://github.com/ONLYOFFICE/docspace-webhooks-sdk-java</url>
+  </scm>
+
 
   <properties>
     <maven.compiler.release>17</maven.compiler.release>
@@ -62,6 +89,18 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <!-- The sample is compiled with the SDK so that exec:java can run it,
+             but it is not part of the published artifact. -->
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>3.4.2</version>
+        <configuration>
+          <excludes>
+            <exclude>com/onlyoffice/docspace/webhooks/samples/**</exclude>
+          </excludes>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>

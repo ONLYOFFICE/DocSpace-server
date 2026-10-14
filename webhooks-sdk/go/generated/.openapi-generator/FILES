@@ -14,6 +14,8 @@ docs/WebhookConfigInfo.md
 docs/WebhookEnvelope.md
 docs/WebhookEventInfo.md
 docs/WebhookTargetInfo.md
+go.mod
+go.sum
 model_contact_payload.go
 model_entry_id.go
 model_file_entry_payload.go

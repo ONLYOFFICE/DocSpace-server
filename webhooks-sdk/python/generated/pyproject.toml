@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "docspace_webhooks_sdk"
+version = "1.0.0"
+description = "A simple Python SDK for receiving ONLYOFFICE DocSpace webhooks"
+authors = ["Ascensio System SIA <integration@onlyoffice.com>"]
+homepage = "https://www.onlyoffice.com"
+license = "Apache-2.0"
+readme = "README.md"
+repository = "https://github.com/ONLYOFFICE/docspace-webhooks-sdk-python"
+keywords = ["onlyoffice", "docspace", "sdk", "webhooks"]
+include = ["docspace_webhooks_sdk/py.typed"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+
+pydantic = ">= 2"
+typing-extensions = ">= 4.7.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -7,6 +7,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>DocSpace.Webhooks.SDK</RootNamespace>
     <AssemblyName>DocSpace.Webhooks.SDK</AssemblyName>
+    <PackageId>DocSpace.Webhooks.SDK</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Ascensio System SIA &lt;integration@onlyoffice.com&gt; (https://www.onlyoffice.com)</Authors>
+    <Company>Ascensio System SIA &lt;integration@onlyoffice.com&gt; (https://www.onlyoffice.com)</Company>
+    <AssemblyTitle>DocSpace.Webhooks.SDK</AssemblyTitle>
+    <Description>A simple C# SDK for receiving ONLYOFFICE DocSpace webhooks</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/ONLYOFFICE/docspace-webhooks-sdk-csharp</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!-- The generated models are not our code to tidy. -->
     <NoWarn>$(NoWarn);CS1591;CS0472;CS8600;CS8602;CS8603;CS8604;CS8618;CS8625;CS8765</NoWarn>

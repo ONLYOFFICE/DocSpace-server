@@ -246,7 +246,7 @@ real production `file.created` delivery — and print identical output.
 | C# | `csharp/samples/WebhookLogger` | `dotnet run -- --file ../../../samples/file.created.json` | tested |
 | TypeScript | `typescript` | `npm run sample` | tested |
 | Python | `python/samples` | `python log_webhook.py` | tested |
-| Go | `go` | `go run ./samples` | tested |
+| Go | `go/samples` | `go run .` | tested |
 | PHP | `php/samples` | `php log_webhook.php` | tested |
 | Java | `java` | `mvn -q compile exec:java` | tested |
 | Kotlin | `kotlin` | `mvn -q compile exec:java` | tested |
