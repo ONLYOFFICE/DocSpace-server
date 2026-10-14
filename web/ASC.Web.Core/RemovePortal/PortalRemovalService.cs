@@ -40,6 +40,7 @@ namespace ASC.Web.Core.RemovePortal;
 /// </summary>
 [Scope]
 public class PortalRemovalService(
+    ILogger<PortalRemovalService> logger,
     TenantManager tenantManager,
     IdentityClient identityClient,
     ApiSystemHelper apiSystemHelper,
@@ -57,7 +58,8 @@ public class PortalRemovalService(
     /// <param name="auto">Whether the policy removes it, which only changes the suffix the alias gets.</param>
     /// <param name="beforePurgeAsync">
     /// What has to happen while the portal's rows still exist, the letters above all: the notify queue
-    /// goes with the tenant, so a letter queued after the purge started may never be sent.
+    /// goes with the tenant, so a letter queued after the purge started may never be sent. A failure in it
+    /// is logged and does not stop the removal.
     /// </param>
     public async Task RemoveAsync(Tenant tenant, Guid initiatorId, bool auto, Func<Task> beforePurgeAsync = null)
     {
@@ -68,19 +70,39 @@ public class PortalRemovalService(
         await identityClient.DeleteTenantClientsAsync(throwIfNotSuccess: !auto);
         await tenantManager.RemoveTenantAsync(tenant, auto);
 
-        if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
+        // From here on the portal is down, and nothing comes back to a portal waiting for its purge: whatever
+        // fails before the purge is started must not keep it from starting, or the portal stays down with
+        // all its data. A letter lost to such a failure is the lesser harm. The caches and the letters are
+        // apart, so a failure in one does not cost the other.
+        await BeforePurgeAsync(tenant.Id, tenantDomain, async () =>
         {
-            await apiSystemHelper.RemoveTenantFromCacheAsync(tenantDomain);
-        }
+            if (!coreBaseSettings.Standalone && apiSystemHelper.ApiCacheEnable)
+            {
+                await apiSystemHelper.RemoveTenantFromCacheAsync(tenantDomain);
+            }
 
-        await hybridCache.RemoveAsync(GetCspKey(tenantDomain));
+            await hybridCache.RemoveAsync(GetCspKey(tenantDomain));
+        });
 
         if (beforePurgeAsync != null)
         {
-            await beforePurgeAsync();
+            await BeforePurgeAsync(tenant.Id, tenantDomain, beforePurgeAsync);
         }
 
         await eventBus.PublishAsync(new RemovePortalIntegrationEvent(initiatorId, tenant.Id));
+    }
+
+    /// <summary>Runs a step that comes before the purge, logging its failure instead of stopping the removal.</summary>
+    private async Task BeforePurgeAsync(int tenantId, string tenantDomain, Func<Task> step)
+    {
+        try
+        {
+            await step();
+        }
+        catch (Exception error)
+        {
+            logger.ErrorBeforePurge(tenantId, tenantDomain, error);
+        }
     }
 
     private static string GetCspKey(string domain) => $"csp:{domain}";
